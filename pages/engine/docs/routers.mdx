@@ -1,0 +1,200 @@
+---
+title: 'LLM Routers'
+description: 'Ensure your models are always available'
+---
+# Routers
+
+Routers are fundamental in the Arcade Engine. Each router manages its own set of models and determines which model will handle the current request based on factors like model latency, health, and previous request handling.
+
+There are four routing strategies:
+- Priority
+- Least Latency
+- Round-Robin
+- Weighted Round-Robin
+
+## Routing Strategies
+
+### Priority
+
+Priority routing (also called failover routing) selects the first healthy model in the order they are listed in the Engine configuration.
+
+This is the default strategy.
+
+Example of a priority router:
+
+```yaml
+routers:
+  language:
+    - id: default
+      strategy: priority
+      models:
+        - id: openai
+          openai:
+            api_key: "${env:OPENAI_API_KEY}"
+        - id: anthropic
+          anthropic:
+            api_key: "${env:ANTHROPIC_API_KEY}"
+```
+
+The router will always try to use the `openai` model first. If it's unavailable, it will switch to the `anthropic` model. Once `openai` is healthy again, the router will revert to it.
+
+### Least Latency
+
+The least latency strategy picks the model with the lowest average latency. If that model becomes unhealthy, it will choose the next best option.
+
+Since model latencies are dynamic, we estimate and update them over time.
+
+The estimation process has two stages:
+- **Warmup**: The Engine selects each model in a round-robin manner and collects latency samples until all models are warmed up.
+- **Serving**: After warmup, the Engine serves requests with the least latency model and periodically updates their latencies.
+
+Configuration example:
+
+```yaml
+routers:
+  language:
+    - id: default
+      strategy: least_latency
+      models:
+        - id: openai
+          latency:
+            decay: 0.06
+            warmup_samples: 3
+            update_interval: 30s
+          openai:
+            api_key: "${env:OPENAI_API_KEY}"
+        - id: anthropic
+          latency:
+            decay: 0.06
+            warmup_samples: 3
+            update_interval: 30s
+          anthropic:
+            api_key: "${env:ANTHROPIC_API_KEY}"
+```
+
+Latency configuration:
+- `routers.language[].models[].latency.decay` (default: 0.06) - decay rate of the exponential moving average of model latency.
+- `routers.language[].models[].latency.warmup_samples` (default: 3) - number of samples to collect before serving the least latency model.
+- `routers.language[].models[].latency.update_interval` (default: 30s) - interval to update model latency.
+
+### Round-Robin
+
+Round-robin routing sends API traffic to each model in a circular order.
+
+Example configuration:
+
+```yaml
+routers:
+  language:
+    - id: default
+      strategy: round_robin
+      models:
+        - id: openai
+          openai:
+            api_key: "${env:OPENAI_API_KEY}"
+        - id: anthropic
+          anthropic:
+            api_key: "${env:ANTHROPIC_API_KEY}"
+```
+
+If both models are healthy, requests will be processed as follows:
+- 1st request: `openai`
+- 2nd request: `anthropic`
+- 3rd request: `openai`
+- 4th request: `anthropic`
+- etc.
+
+### Weighted Round-Robin
+
+Weighted round-robin routing sends requests based on the weights assigned to models.
+
+Example configuration:
+
+```yaml
+routers:
+  language:
+    - id: default
+      strategy: weighted_round_robin
+      models:
+        - id: openai
+          weight: 0.8 # 80% of traffic
+          openai:
+            api_key: "${env:OPENAI_API_KEY}"
+        - id: ollama
+          weight: 0.2 # 20% of traffic
+          ollama:
+            api_key: "${env:OLLAMA_API_KEY}"
+```
+
+If all models are healthy:
+- 80% of traffic goes to `openai`.
+- 20% of traffic goes to `ollama`.
+
+If `openai` becomes unavailable, all traffic will be routed to `ollama`.
+
+------
+
+# Fallback Stategies
+
+Engine handles fallbacks and provider health tracking seamlessly. It also offers configurations to control resiliency.
+
+## Health (Failures)
+
+Engine tracks model failures and uses this information to decide which model to use next. If a model fails below a certain threshold (error budget), it is considered unhealthy and won't be used until its error budget recovers.
+
+Failures include:
+- Error response (e.g., 5xx HTTP status code).
+- Rate limiting (e.g., 429 HTTP status code).
+- Request timeout.
+- Authentication error (e.g., 401 HTTP status code).
+- No response (e.g., empty `choices` array in OpenAI).
+
+Health Tracking configuration:
+
+```yaml
+routers:
+  language:
+    - id: default
+      models:
+        - id: openai
+          error_budget: "10/m" # tolerate up to 10 failures per minute
+          client:
+            timeout: "10s" # wait up to 10 seconds for a response
+          openai:
+            api_key: "${env:OPENAI_API_KEY}"
+```
+
+## Fallbacks
+
+Fallbacks are part of every routing strategy.
+
+<Important>
+    To use automatic fallbacks, configure a router with more than one model. This can be different providers or the same provider in different regions (e.g., AWS and Azure).
+</Important>
+
+Fallback decisions are based on:
+- Health of each model.
+- Routing strategy.
+
+Engine falls back immediately on the first model error to minimize latency.
+
+### Retries
+
+If all models are unhealthy, Engine retries with exponential backoff, trying to serve the request.
+
+Retry configuration:
+
+```yaml
+routers:
+  language:
+    - id: default
+      models:
+        - id: openai
+          retry:
+            max_retries: 3
+            base_multiplier: 2
+            min_delay: "2s"
+            max_delay: "5s"
+          openai:
+            api_key: "${env:OPENAI_API_KEY}"
+```
