@@ -1,4 +1,4 @@
-const {tempRedirects} = require("./redirects");
+const { tempRedirects } = require("./redirects");
 
 const withNextra = require('nextra')({
   theme: 'nextra-theme-docs',
