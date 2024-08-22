@@ -2,9 +2,6 @@
 
 Documentation for Arcade AI
 
-## Quick Start
-
-Click the button to clone this repository and deploy it on Vercel:
 
 ## Local Development
 
