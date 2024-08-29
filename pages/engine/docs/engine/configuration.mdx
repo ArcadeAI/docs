@@ -109,3 +109,40 @@ Arcade Engine automatically loads environment variables from `.env` files in the
 ```bash
 engine --env .env.dev --config config.yaml
 ```
+
+## Full Configuration Example
+
+```yaml
+telemetry:
+  logging:
+    level: info  # debug, info, warning, error, fatal
+    encoding: json # console, json
+
+routers:
+  language:
+    - id: simplerouter
+      strategy: priority
+      models:
+        - id: openai-boring
+          openai:
+            model: gpt-3.5-turbo
+            api_key: "sk-"
+            default_params:
+              temperature: 0
+
+director:
+  directors:
+    - id: default
+      enabled: true
+      actors:
+        - id: "localactor"
+          enabled: true
+          http:
+            uri: "http://localhost:8000"
+            timeout: 30
+            retry: 3
+storage:
+  token_cache:
+    in_memory:
+    max_size: 1000
+```
