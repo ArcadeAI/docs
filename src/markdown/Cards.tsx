@@ -1,6 +1,6 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faDocker } from '@fortawesome/free-brands-svg-icons'
-import { faWandMagicSparkles, faScaleBalanced, faBolt, faPuzzlePiece, faPlug, faPeopleGroup, faCloud, faTerminal } from '@fortawesome/free-solid-svg-icons'
+import { faDocker } from '@fortawesome/free-brands-svg-icons';
+import { faBolt, faCloud, faPeopleGroup, faPlug, faPuzzlePiece, faScaleBalanced, faTerminal, faWandMagicSparkles } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Link from "next/link";
 
 type Props = {
@@ -23,7 +23,7 @@ const allowedIcons = {
     "terminal": faTerminal,
 }
 
-export const Card = ({ title, children, footer, icon, color, href}) => {
+export const Card = ({ title, children, footer, icon, color, href }) => {
     const borderColorVariations = {
         "grey": "hover:nx-bg-slate-50 nx-border-gray-200 hover:nx-border-gray-300 dark:hover:nx-border-neutral-700",
         "green": "dark:hover:nx-bg-slate-50 hover:nx-border-primary-500 dark:hover:nx-border-primary-500 dark:nx-border-primary-500 dark:nx-border-primary-500"
@@ -31,8 +31,8 @@ export const Card = ({ title, children, footer, icon, color, href}) => {
 
     const cardContent = (
         <>
-            {icon && <div className={"h-6 w-6 nx-text-primary-800"} style={{color: color ?? ""}}><FontAwesomeIcon
-                className={"h-6 w-6 nx-text-primary dark:nx-text-primary-light"} icon={allowedIcons[icon]}/></div>}
+            {icon && <div className={"h-6 w-6 nx-text-primary-800"} style={{ color: color ?? "" }}><FontAwesomeIcon
+                className={"h-6 w-6 nx-text-primary dark:nx-text-primary-light"} icon={allowedIcons[icon]} /></div>}
             {title && <div className="font-bold text-xl mb-2 mt-2">{title}</div>}
             <div>{children}</div>
             {footer && <div className="mt-4">{footer}</div>}
@@ -52,7 +52,7 @@ export const Card = ({ title, children, footer, icon, color, href}) => {
     );
 }
 
-export const Cards = ({children, columns = 1}) => {
+export const Cards = ({ children, columns = 1 }) => {
     const columnVariants = {
         1: 'md:grid-cols-1',
         2: 'md:grid-cols-2',
