@@ -60,7 +60,7 @@ export const Cards = ({ children, columns = 1 }) => {
     }
 
     return (
-        <div className={`grid not-prose grid-cols-1 ${columnVariants[columns]} gap-x-2 gap-5 not-prose nx-mt-6`}>
+        <div className={`grid not-prose grid-cols-1 ${columnVariants[columns]} gap-x-2.6 gap-6.5 not-prose nx-mt-7.8`}>
             {...children}
         </div>
     )
