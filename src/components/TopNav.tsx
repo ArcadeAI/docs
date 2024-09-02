@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import styles from "./TopNav.module.css";
 
-import engineTopNav from "@pages/engine/_topnav.json";
+import docsTopNav from "@pages/docs/_topnav.json";
 
 
 interface TopNavItem {
@@ -20,7 +20,7 @@ interface TopNavMap {
 }
 
 const topNavs: TopNavMap = {
-    "engine": engineTopNav,
+    "docs": docsTopNav,
     // add other project docs here
 }
 

@@ -1,13 +1,8 @@
-import SplashPage from '@components/SplashPage';
 import { useRouter } from 'next/router';
 import React from 'react';
 
 const CustomLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { asPath } = useRouter();
-
-    if (asPath === '/') {
-        return <SplashPage />;
-    }
 
     return (
         <div className="custom-layout">
