@@ -14,7 +14,7 @@ const config: DocsThemeConfig = {
   primarySaturation: { dark: 85, light: 85 },
   logo: <Logo />,
   search: {
-    placeholder: "Search...",
+    placeholder: 'Search...',
   },
   chat: {
     link: 'https://discord.gg/',

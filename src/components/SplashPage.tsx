@@ -1,11 +1,19 @@
 import { faBook, faCloud, faCode, faLightbulb, faPuzzlePiece, faRocket } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { initArcadeBackground } from '@utils/arcadeBackground';
 import Link from 'next/link';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 const SplashPage: React.FC = () => {
+    useEffect(() => {
+        initArcadeBackground();
+    }, []);
+
     return (
         <div className="splash-page">
+            <div className="arcade-background">
+                <div id="pixel-container"></div>
+            </div>
             <div className="hero">
                 <h1>Welcome to Arcade AI Documentation</h1>
                 <p>Explore our comprehensive guides and API references</p>
@@ -52,4 +60,5 @@ const SplashPage: React.FC = () => {
 };
 
 export default SplashPage;
+
 

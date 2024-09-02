@@ -26,13 +26,21 @@ const allowedIcons = {
 export const Card = ({ title, children, footer, icon, color, href }) => {
     const borderColorVariations = {
         "grey": "hover:nx-bg-slate-50 nx-border-gray-200 hover:nx-border-gray-300 dark:hover:nx-border-neutral-700",
-        "green": "dark:hover:nx-bg-slate-50 hover:nx-border-primary-500 dark:hover:nx-border-primary-500 dark:nx-border-primary-500 dark:nx-border-primary-500"
+        "accent": "hover:nx-border-[var(--brand-accent)] dark:hover:nx-border-[var(--brand-accent)] nx-border-[var(--brand-accent)] dark:nx-border-[var(--brand-accent)]"
     }
+
+    const iconStyle = color ? { color } : { color: 'var(--brand-accent)' };
 
     const cardContent = (
         <>
-            {icon && <div className={"h-6 w-6 nx-text-primary-800"} style={{ color: color ?? "" }}><FontAwesomeIcon
-                className={"h-6 w-6 nx-text-primary dark:nx-text-primary-light"} icon={allowedIcons[icon]} /></div>}
+            {icon && (
+                <div className="h-6 w-6" style={iconStyle}>
+                    <FontAwesomeIcon
+                        className="h-6 w-6"
+                        icon={allowedIcons[icon]}
+                    />
+                </div>
+            )}
             {title && <div className="font-bold text-xl mb-2 mt-2">{title}</div>}
             <div>{children}</div>
             {footer && <div className="mt-4">{footer}</div>}
@@ -42,7 +50,7 @@ export const Card = ({ title, children, footer, icon, color, href }) => {
     const wrapperClasses: string = "block nx-border dark:nx-border-neutral-800 nx-rounded-lg nx-text-current nx-no-underline dark:nx-shadow-none hover:nx-shadow-gray-100 dark:hover:nx-shadow-none nx-shadow-gray-100 active:nx-shadow-sm active:nx-shadow-gray-200 nx-transition-all nx-duration-200 nx-bg-transparent nx-shadow-sm hover:nx-shadow-md dark:hover:nx-bg-neutral-900 p-5"
 
     return href ? (
-        <Link className={`${wrapperClasses} ${borderColorVariations["green"]} cursor-pointer`} href={href} passHref>
+        <Link className={`${wrapperClasses} ${borderColorVariations["accent"]} cursor-pointer hover:nx-bg-[var(--brand-accent-hover)]`} href={href} passHref>
             {cardContent}
         </Link>
     ) : (
