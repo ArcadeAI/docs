@@ -31,6 +31,7 @@ const config: DocsThemeConfig = {
   sidebar: {
     toggleButton: true,
     titleComponent: titleRenderer,
+    defaultMenuCollapseLevel: 1
   },
   footer: {
     text: <Footer />,

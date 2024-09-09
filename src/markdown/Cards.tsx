@@ -1,5 +1,5 @@
 import { faDocker } from '@fortawesome/free-brands-svg-icons';
-import { faBolt, faCloud, faPeopleGroup, faPlug, faPuzzlePiece, faScaleBalanced, faTerminal, faWandMagicSparkles } from '@fortawesome/free-solid-svg-icons';
+import { faBolt, faCloud, faCode, faCodeBranch, faList, faPeopleGroup, faPlug, faPuzzlePiece, faRocket, faScaleBalanced, faTerminal, faWandMagicSparkles } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Link from "next/link";
 
@@ -21,6 +21,10 @@ const allowedIcons = {
     "docker": faDocker,
     "cloud": faCloud,
     "terminal": faTerminal,
+    "rocket": faRocket,
+    "code": faCode,
+    "list": faList,
+    "git": faCodeBranch,
 }
 
 export const Card = ({ title, children, footer, icon, color, href }) => {
@@ -47,7 +51,7 @@ export const Card = ({ title, children, footer, icon, color, href }) => {
         </>
     )
 
-    const wrapperClasses: string = "block nx-border dark:nx-border-neutral-800 nx-rounded-lg nx-text-current nx-no-underline dark:nx-shadow-none hover:nx-shadow-gray-100 dark:hover:nx-shadow-none nx-shadow-gray-100 active:nx-shadow-sm active:nx-shadow-gray-200 nx-transition-all nx-duration-200 nx-bg-transparent nx-shadow-sm hover:nx-shadow-md dark:hover:nx-bg-neutral-900 p-5"
+    const wrapperClasses: string = "block nx-border dark:nx-border-neutral-800 nx-rounded-lg nx-text-current nx-no-underline dark:nx-shadow-none hover:nx-shadow-gray-100 dark:hover:nx-shadow-none nx-shadow-gray-100 active:nx-shadow-sm active:nx-shadow-gray-200 nx-transition-all nx-duration-200 nx-bg-transparent nx-shadow-sm hover:nx-shadow-md dark:hover:nx-bg-neutral-900 p-4" // Reduced padding from p-5 to p-4
 
     return href ? (
         <Link className={`${wrapperClasses} ${borderColorVariations["accent"]} cursor-pointer hover:nx-bg-[var(--brand-accent-hover)]`} href={href} passHref>
@@ -63,8 +67,8 @@ export const Card = ({ title, children, footer, icon, color, href }) => {
 export const Cards = ({ children, columns = 1 }) => {
     const columnVariants = {
         1: 'md:grid-cols-1',
-        2: 'md:grid-cols-2',
-        3: 'md:grid-cols-3',
+        2: 'md:grid-cols-2 gap-4', // Added gap-4 for spacing between cards
+        3: 'md:grid-cols-3 gap-4', // Added gap-4 for spacing between cards
     }
 
     return (
