@@ -1,3 +1,4 @@
+import CustomLayout from "@components/CustomLayout";
 import { Footer } from "@components/Footer";
 import { Logo } from "@components/Logo";
 import { SEO } from "@components/SEO";
@@ -8,13 +9,12 @@ import { Card, Cards } from "@markdown/Cards";
 import { DarkOnly, LightOnly } from "@markdown/ThemeContent";
 import { DocsThemeConfig, Card as NavCard, Cards as NavCards, Steps } from 'nextra-theme-docs';
 
-
 const config: DocsThemeConfig = {
-  primaryHue: 325, // More pinkish hue
-  primarySaturation: { dark: 100, light: 85 },
+  primaryHue: { dark: 340, light: 340 }, // Hue for #ED155D
+  primarySaturation: { dark: 85, light: 85 },
   logo: <Logo />,
   search: {
-    placeholder: "Search...",
+    placeholder: 'Search...',
   },
   chat: {
     link: 'https://discord.gg/',
@@ -31,6 +31,7 @@ const config: DocsThemeConfig = {
   sidebar: {
     toggleButton: true,
     titleComponent: titleRenderer,
+    defaultMenuCollapseLevel: 1
   },
   footer: {
     text: <Footer />,
@@ -54,6 +55,7 @@ const config: DocsThemeConfig = {
     Check,
   },
   useNextSeoProps: SEO,
+  main: ({ children }) => <CustomLayout>{children}</CustomLayout>,
 };
 
 export default config;
