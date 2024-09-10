@@ -3,30 +3,85 @@ title: 'Quickstart'
 description: 'Arcade Quickstart'
 ---
 
-# Quickstart
- (Talk to sam and nate about what a quickstart should look like)
+## Quickstart
 
-
-## Requirements
-
+**Requirements**
 - Python 3.10+
 
-## Install Arcade AI
+### Install Arcade AI
 
 ```bash
-pip install arcade-ai[arithmetic]
+pip install arcade-ai
 ```
 
-## Export OPENAI_API_KEY
-```bash
-export OPENAI_API_KEY="sk-..."
-```
-
-
-## Run the Actor
+### Login to Arcade AI
 
 ```bash
-arcade run -t arcade_math "What is 2 + 2?"
+arcade login
 ```
 
+### Check your login status
+
+```bash
+arcade config
+```
+
+This will show the API key in your terminal that is saved to `~/.arcade/arcade.toml`.
+
+### Use Arcade Client
+
+The Arcade client provides a simple interface to interact with various tools and services offered by Arcade AI. Here's an example of how to use the client to run the `GoogleSearch` tool.
+
+```python
+from arcade.client import Arcade
+
+# Initialize the client
+client = Arcade(base_url="http://localhost:9099", api_key="your_api_key")
+
+# Run the GoogleSearch tool
+search_response = client.tool.run(
+    tool_name="GoogleSearch",
+    inputs={"query": "Python programming language"},
+)
+print(search_response)
+```
+
+
+### Calling Authenticated Tools
+
+The following example shows how to run an authenticated tool, in this case the `GetEmails` tool.
+
+```python
+
+# as the developer using the client, you pass in the users id
+# or however you refer to them in your system
+MY_USER_ID = "user123"
+
+# Use the GetEmails tool (requires authentication)
+auth_response = client.auth.authorize(
+    provider="oauth2",
+    scopes=["https://googleapis.com/auth/gmail.readonly"],
+    user_id=MY_USER_ID,
+)
+```
+
+This will return a URL that you need to direct the user to. Something like:
+
+```
+https://accounts.google.com/o/oauth2/auth?client_id=1234567890&redirect_uri=http://localhost:9099/oauth2/callback&scope=https://www.googleapis.com/auth/gmail.readonly&response_type=code
+```
+
+The user can then login and approve the action requested by your application, or as we'll show later, by an LLM or agent.
+
+
+Once the user has approved the action, you can run the tool.
+
+```python
+emails_response = client.tool.run(
+    tool_name="GetEmails",
+    user_id="user123",
+    inputs={"domain": "example.com"},
+)
+print(emails_response)
+```
 
