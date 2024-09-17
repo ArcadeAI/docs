@@ -13,16 +13,16 @@ module.exports = {
         '10xl': '110rem',
       },
       fontSize: {
-        'xs': '0.8125rem',    // Increased from 0.75rem
-        'sm': '0.9375rem',    // Increased from 0.875rem
-        'base': '1rem',       // Increased from 0.9375rem
-        'lg': '1.0625rem',    // Increased from 1rem
-        'xl': '1.1875rem',    // Increased from 1.125rem
-        '2xl': '1.3125rem',   // Increased from 1.25rem
-        '3xl': '1.5625rem',   // Increased from 1.5rem
-        '4xl': '1.9375rem',   // Increased from 1.875rem
-        '5xl': '2.3125rem',   // Increased from 2.25rem
-        '6xl': '3.0625rem',   // Increased from 3rem
+        'xs': '0.875rem',     // Increased from 0.8125rem
+        'sm': '1rem',         // Increased from 0.9375rem
+        'base': '1.125rem',   // Increased from 1rem
+        'lg': '1.25rem',      // Increased from 1.0625rem
+        'xl': '1.375rem',     // Increased from 1.1875rem
+        '2xl': '1.5rem',      // Increased from 1.3125rem
+        '3xl': '1.75rem',     // Increased from 1.5625rem
+        '4xl': '2.125rem',    // Increased from 1.9375rem
+        '5xl': '2.5rem',      // Increased from 2.3125rem
+        '6xl': '3.25rem',     // Increased from 3.0625rem
       },
       colors: {
         primary: {
@@ -37,6 +37,10 @@ module.exports = {
           800: '#930a38',
           900: '#7b0a30',
         },
+        'brand-primary': 'var(--brand-primary)',
+        'brand-accent': 'var(--brand-accent)',
+        'brand-accent-hover': 'var(--brand-accent-hover)',
+        // Add other custom colors if needed
       },
     },
   },
