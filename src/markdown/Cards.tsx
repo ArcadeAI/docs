@@ -1,5 +1,5 @@
 import { faDocker } from '@fortawesome/free-brands-svg-icons';
-import { faBolt, faCloud, faCode, faCodeBranch, faList, faPeopleGroup, faPlug, faPuzzlePiece, faRocket, faScaleBalanced, faTerminal, faWandMagicSparkles } from '@fortawesome/free-solid-svg-icons';
+import { faBolt, faCloud, faCode, faCodeBranch, faList, faPeopleGroup, faPlug, faPuzzlePiece, faRocket, faScaleBalanced, faTerminal, faToolbox, faWandMagicSparkles } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Link from "next/link";
 
@@ -25,6 +25,7 @@ const allowedIcons = {
     "code": faCode,
     "list": faList,
     "git": faCodeBranch,
+    "tool": faToolbox
 }
 
 export const Card = ({ title, children, footer, icon, color, href }) => {

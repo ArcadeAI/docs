@@ -5,6 +5,7 @@ const withNextra = require('nextra')({
   themeConfig: './theme.config.tsx',
   defaultShowCopyCode: true,
   codeHighlight: true,
+  showLineNumbers: true,
   css: './styles/globals.css',
 })
 
