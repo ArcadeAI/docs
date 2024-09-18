@@ -1,5 +1,7 @@
 import CustomLayout from "@components/CustomLayout";
 import { Footer } from "@components/Footer";
+import { Hero } from "@components/Hero";
+import Discord from '@components/icons/discord';
 import { Logo } from "@components/Logo";
 import { SEO } from "@components/SEO";
 import { titleRenderer } from "@components/TopNav";
@@ -10,15 +12,15 @@ import { DarkOnly, LightOnly } from "@markdown/ThemeContent";
 import { DocsThemeConfig, Card as NavCard, Cards as NavCards, Steps } from 'nextra-theme-docs';
 
 const config: DocsThemeConfig = {
-  primaryHue: { dark: 340, light: 340 }, // Hue for #ED155D
-  primarySaturation: { dark: 85, light: 85 },
+  primaryHue: { dark: 330, light: 330 }, // Hue for #ED155D
+  primarySaturation: { dark: 100, light: 100 },
   logo: <Logo />,
   search: {
     placeholder: 'Search...',
   },
   chat: {
-    link: 'https://discord.gg/',
-    icon: '', // Placeholder for chat icon
+    link: 'https://discord.gg/6WjJz3gQ',
+    icon: <Discord />,
   },
   docsRepositoryBase: "https://github.com/ArcadeAI/docs",
   editLink: {
@@ -31,7 +33,8 @@ const config: DocsThemeConfig = {
   sidebar: {
     toggleButton: true,
     titleComponent: titleRenderer,
-    defaultMenuCollapseLevel: 1
+    defaultMenuCollapseLevel: 1,
+    autoCollapse: true,
   },
   footer: {
     text: <Footer />,
@@ -40,6 +43,7 @@ const config: DocsThemeConfig = {
     backToTop: true,
   },
   components: {
+    Hero,
     Card,
     Cards,
     NavCard,
