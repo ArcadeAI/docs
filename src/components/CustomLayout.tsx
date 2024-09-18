@@ -5,13 +5,9 @@ const CustomLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     const { asPath } = useRouter();
 
     return (
-        <div className="custom-layout">
-            <main className="custom-main">
-                <div className="nx-container">
-                    {children}
-                </div>
-            </main>
-        </div>
+        <main className="custom-main">
+            {children}
+        </main>
     );
 };
 

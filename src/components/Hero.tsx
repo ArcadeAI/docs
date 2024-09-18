@@ -21,9 +21,12 @@ export const Hero = () => {
                     className="mb-1 w-1/2"
                 />
                 <p className="text-xl mb-8 text-white">
-                    Connecting Language Models to the World
+                    Empower Agents to Act for your Users
                 </p>
-                <Button href="/docs/home/quickstart">Get Started</Button>
+                <div className="flex space-x-4">
+                    <Button href="/docs/guides">Get Started</Button>
+                    <Button href="/docs/home">Learn More</Button>
+                </div>
             </div>
         </section>
     );
