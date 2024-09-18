@@ -110,10 +110,33 @@ Arcade Engine automatically loads environment variables from `.env` files in the
 engine --env .env.dev --config config.yaml
 ```
 
+## Telemetry
+Arcade supports logs, metrics, and traces with [OpenTelemetry](https://opentelemetry.io/).
+
+### Configuration
+If you are using the engine locally, you can set the `environment` field to `local`. This will only output logs to the console.
+
+To connect to Open Telemetry compatible collectors, set necessary [Open Telemetry Environment Variables](https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/) in the .env file.
+
+
+`environment` and `version` are fields that are added to the telemetry attributes, which can be filtered on later.
+
+```yaml
+telemetry:
+  environment: local
+  version: ${env:VERSION}
+  logging:
+    level: debug # debug, info, warn, error, fatal
+    encoding: console
+```
+
+
 ## Full Configuration Example
 
 ```yaml
 telemetry:
+  environment: local
+  version: ${env:VERSION}
   logging:
     level: info  # debug, info, warning, error, fatal
     encoding: json # console, json
