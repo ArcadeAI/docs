@@ -1,6 +1,7 @@
 import CustomLayout from "@components/CustomLayout";
 import { Footer } from "@components/Footer";
 import { Hero } from "@components/Hero";
+import Discord from '@components/icons/discord';
 import { Logo } from "@components/Logo";
 import { SEO } from "@components/SEO";
 import { titleRenderer } from "@components/TopNav";
@@ -18,8 +19,8 @@ const config: DocsThemeConfig = {
     placeholder: 'Search...',
   },
   chat: {
-    link: 'https://discord.gg/',
-    icon: '', // Placeholder for chat icon
+    link: 'https://discord.gg/6WjJz3gQ',
+    icon: <Discord />,
   },
   docsRepositoryBase: "https://github.com/ArcadeAI/docs",
   editLink: {
