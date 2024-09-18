@@ -53,13 +53,15 @@ The following example shows how to run an authenticated tool, in this case the `
 
 ```python
 
+from arcade.client import AuthProvider
+
 # as the developer using the client, you pass in the users id
 # or however you refer to them in your system
 MY_USER_ID = "user123"
 
 # Use the GetEmails tool (requires authentication)
 auth_response = client.auth.authorize(
-    provider="oauth2",
+    provider=AuthProvider.Google,
     scopes=["https://googleapis.com/auth/gmail.readonly"],
     user_id=MY_USER_ID,
 )
@@ -78,9 +80,8 @@ Once the user has approved the action, you can run the tool.
 
 ```python
 emails_response = client.tool.run(
-    tool_name="GetEmails",
-    user_id="user123",
-    inputs={"domain": "example.com"},
+    tool_name="Google.GetEmails",
+    user_id=MY_USER_ID,
 )
 print(emails_response)
 ```

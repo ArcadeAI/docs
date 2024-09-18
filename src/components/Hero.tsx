@@ -5,7 +5,7 @@ import { Button } from '@/components/Button';
  */
 export const Hero = () => {
     return (
-        <section className="relative w-full h-[30vh] overflow-hidden">
+        <section className="relative w-full h-[40vh] overflow-hidden">
             <div className="absolute inset-0">
                 <img
                     src="/images/arcade-hero-1.png"
@@ -21,7 +21,7 @@ export const Hero = () => {
                     className="mb-1 w-1/2"
                 />
                 <p className="text-xl mb-8 text-white">
-                    Connect Language Models to Anything
+                    Connecting Language Models to the World
                 </p>
                 <Button href="/docs/home/quickstart">Get Started</Button>
             </div>
