@@ -1,8 +1,102 @@
 ---
-title: "Calling a Tool"
-description: "Learn how to call tools using Arcade AI"
+title: "Call tools in code"
+description: "Learn how to call tools programmatically using Arcade AI"
 ---
 
-# Calling a Tool
+# Call tools in code
 
-In this guide, we'll cover how to invoke tools using Arcade AI.
+In this guide, you'll learn how to call tools programmatically using Arcade AI.
+
+To do this, you'll write code that uses Arcade AI to call both public and authorized tools.
+
+### Prerequisites
+
+-   [Set up Arcade AI](/docs/guides/quickstart)
+
+### Initialize the client
+
+Import the Arcade AI client in a Python script. The client automatically finds API keys set by `arcade login`.
+
+```python
+from arcade.client import Arcade
+
+client = Arcade()
+```
+
+### Call a tool
+
+Let's use the `Search` tool from the Google toolkit to search the web.
+
+```python
+# Run the Google.Search tool
+search_response = client.tool.run(
+    tool_name="Google.Search",
+    inputs={"query": "Python programming language"},
+)
+print(search_response)
+```
+
+### Authorize a tool
+
+Many tools require authorization. For example, the `Google.GetEmails` tool requires authorization with Google.
+
+This authorization must be approved by the user. By approving, the user allows your agent or app to access only the data they've approved.
+
+```python
+from arcade.client import AuthProvider
+
+# As the developer, you must identify the user you're authorizing
+# and pass a unique identifier for them (e.g. an email or user ID) to Arcade:
+THE_USER_ID = "you@example.com"
+
+# Request access to the user's Gmail account
+auth_response = client.auth.authorize(
+    provider=AuthProvider.Google,
+    scopes=["https://googleapis.com/auth/gmail.readonly"],
+    user_id=THE_USER_ID,
+)
+
+print(f"Click this link to authorize: {auth_response.auth_url}")
+```
+
+This will print a URL that the user must visit to approve the authorization.
+
+### Check for authorization status
+
+It may take a few minutes for the user to approve the authorization.
+
+Check for the authorization status by polling the `auth_id` from the authorization response:
+
+```python
+auth_status = client.auth.status(auth_response)
+print(f"Authorization status: {auth_status}")
+```
+
+### Call the tool with authorization
+
+Once the user has approved the action, you can run the tool.
+You only need to pass the `user_id`:
+
+```python
+emails_response = client.tool.run(
+    tool_name="Google.GetEmails",
+    user_id=MY_USER_ID,
+)
+print(emails_response)
+```
+
+### How it works
+
+When you call a tool with `client.tool.run()`, Arcade AI:
+
+1. Checks for authorization.
+2. Routes the request to the tool's provider.
+3. Returns the tool's response.
+
+With `client.auth.authorize()`, you can also authorize tools for later use.
+
+These APIs give you programmatic control over tool calling. If you just want to integrate tools into an LLM workflow, see [Call tools with LLMs](/docs/guides/llmtoolcalling).
+
+### Next steps
+
+Once you've mastered tool calling, see how you can [build your own tools](/docs/guides/customtools) to integrate any custom functionality or API to your AI workflows.

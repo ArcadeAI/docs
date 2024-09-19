@@ -24,10 +24,10 @@ const config: DocsThemeConfig = {
   },
   docsRepositoryBase: "https://github.com/ArcadeAI/docs",
   editLink: {
-    text: "Edit this page on GitHub",
+    component: () => null, // Provide a no-op component to disable the edit link
   },
   project: {
-    link: 'https://github.com/ArcadeAI/',
+    link: 'https://github.com/ArcadeAI/arcade-ai',
     icon: <GitHub />,
   },
   sidebar: {

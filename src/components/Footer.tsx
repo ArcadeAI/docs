@@ -112,11 +112,6 @@ const Footer: React.FC = () => {
             title: "Join Discord",
             external: true,
         },
-        {
-            url: "/engine/new-issue",
-            title: "Report an issue",
-            external: true,
-        },
     ]
 
     return (
@@ -139,7 +134,7 @@ const Footer: React.FC = () => {
             </div>
             <div className={styles.copyrightContent}>
                 <div className={styles.copyright}>
-                    <p>© 2023–Present, Arcade AI.
+                    <p>&copy; 2023 &mdash; present Arcade AI.
                     </p>
                 </div>
             </div>
