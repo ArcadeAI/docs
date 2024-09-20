@@ -1,6 +1,6 @@
 export const SEO = () => {
     return {
-        titleTemplate: "%s - Engine | Arcade AI",
+        titleTemplate: "%s - Arcade AI",
         // canonical, TODO: set canonicals
     }
 }
