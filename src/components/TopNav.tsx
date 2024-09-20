@@ -42,9 +42,9 @@ const TopNavIcon = ({ icon }) => {
 
 const TopNav = ({ path }) => {
     const projectId = Object.keys(topNavs).find(projectId => path.startsWith(`/${projectId}`))
-
+    console.log(projectId)
     if (projectId === undefined) {
-        return <span>{`TopNav is not for ${path}. Set that up via _topnav.json file`}</span>
+        return null;
     }
 
     const topNavLinks = topNavs[projectId];

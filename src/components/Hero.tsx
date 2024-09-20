@@ -5,7 +5,7 @@ import { Button } from '@/components/Button';
  */
 export const Hero = () => {
     return (
-        <section className="relative w-full h-[40vh] overflow-hidden">
+        <section className="relative w-full h-[50vh] sm:h-[40vh] overflow-hidden">
             <div className="absolute inset-0">
                 <img
                     src="/images/arcade-hero-1.png"
@@ -18,12 +18,12 @@ export const Hero = () => {
                 <img
                     src="/images/logo/arcadeai-title-dark.png"
                     alt="Arcade AI Logo"
-                    className="mb-1 w-1/2"
+                    className="mb-1 w-3/4 sm:w-1/2"
                 />
-                <p className="text-xl mb-8 text-white">
+                <p className="text-lg sm:text-xl mb-4 sm:mb-8 text-white">
                     Empower Agents to Act for your Users
                 </p>
-                <div className="flex space-x-4">
+                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
                     <Button href="/docs/guides/quickstart">Get Started</Button>
                     <Button href="/docs/home">Learn More</Button>
                 </div>

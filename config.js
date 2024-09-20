@@ -2,8 +2,8 @@
 
 exports.config = {
     company: {
-        url: "https://www.arcade-ai.com/",
-        email: "sam@arcade-ai.com",
+        url: "https://arcade-ai.com/",
+        email: "contact@arcade-ai.com",
         linkedIn: "https://www.linkedin.com/company/arcade-ai/",
         github: "https://github.com/ArcadeAI",
         discord: "https://discord.gg/6WjJz3gQ",
