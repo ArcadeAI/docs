@@ -19,23 +19,10 @@ export const ExternalLink = ({
     )
 }
 
-export const Button = ({
-    children,
-    href,
-    external,
-}: {
-    children: React.ReactNode
-    href?: string
-    external?: boolean
-}) => {
-    if (href && external) {
-        return (
-            <ExternalLink href={href} target="_blank">
-                {children}
-            </ExternalLink>
-        )
-    }
-
-    const buttonContent = <button className="button">{children}</button>
-    return href ? <Link href={href}>{buttonContent}</Link> : buttonContent
-}
+export const Button = ({ children, href, external }) => (
+    <Link href={href}>
+        <button className="button px-4 py-2 text-sm sm:text-base">
+            {children}
+        </button>
+    </Link>
+);

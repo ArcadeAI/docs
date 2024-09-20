@@ -67,14 +67,14 @@ export const Card = ({ title, children, footer, icon, color, href }) => {
 
 export const Cards = ({ children, columns = 1 }) => {
     const columnVariants = {
-        1: 'md:grid-cols-1',
-        2: 'md:grid-cols-2 gap-4', // Added gap-4 for spacing between cards
-        3: 'md:grid-cols-3 gap-4', // Added gap-4 for spacing between cards
-    }
+        1: 'grid-cols-1',
+        2: 'sm:grid-cols-2 gap-4',
+        3: 'sm:grid-cols-2 lg:grid-cols-3 gap-4',
+    };
 
     return (
-        <div className={`grid not-prose grid-cols-1 ${columnVariants[columns]} gap-x-2.6 gap-6.5 not-prose nx-mt-7.8`}>
-            {...children}
+        <div className={`grid ${columnVariants[columns]} gap-6 mt-8`}>
+            {children}
         </div>
-    )
+    );
 }
