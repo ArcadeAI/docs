@@ -19,7 +19,7 @@ export const ExternalLink = ({
     )
 }
 
-export const Button = ({ children, href, external }) => (
+export const Button = ({ children, href }) => (
     <Link href={href}>
         <button className="button px-4 py-2 text-sm sm:text-base">
             {children}
