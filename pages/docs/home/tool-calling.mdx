@@ -1,0 +1,43 @@
+# Tool Calling
+
+Tool calling enables AI models to determine when and how to use specific tools to fulfill user requests. It's like giving AI agents a toolbox and the intelligence to pick the right tool at the right time.
+
+For example, if a user asks, "What's the weather today in New York?", the AI can:
+
+1. Recognize the need for current weather data.
+2. Select a weather API tool.
+3. Retrieve real-time weather information.
+4. Formulate a response using accurate data.
+
+With Arcade AI, implementing tool calling is straightforward. Here's how you can enable an AI model to use tools:
+
+```python
+from arcade.client import Arcade
+
+client = Arcade(api_key="your_api_key")
+user_id = "user@example.com"
+
+# Generate a response with tool support
+response = client.chat.completions.create(
+    messages=[
+        {"role": "user", "content": "What's the weather today in New York?"},
+    ],
+    model="gpt-4o",
+    max_tokens=500,
+    user=user_id,
+
+    # Make specific tools available to the AI model
+    tools=[
+        "Weather.GetCurrent",
+    ],
+
+    # Allow the model to choose and use tools
+    tool_choice="generate",
+)
+
+print(response.choices[0].message.content)
+```
+
+Arcade AI simplifies tool calling by providing a standardized interface and pre-built integrations. You can also create custom tools to fit your unique needs.
+
+Let's try implementing tool calling in your AI application to make it more interactive and useful.
