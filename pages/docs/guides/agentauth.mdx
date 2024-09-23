@@ -3,6 +3,100 @@ title: "Authorizing Agents"
 description: "Guide on how to authorize agents in Arcade AI"
 ---
 
-# Authorizing Agents
+import { Steps } from "nextra/components";
 
-This guide explains how to authorize agents within the Arcade AI platform.
+# Authorizing Agents with Arcade
+
+In this guide, you'll learn how to use Arcade AI to obtain user authorization for accessing third-party services, without using Arcade for tool execution or definition.
+
+This can be useful when you need to manage authorization flows in your application.
+
+<Steps>
+
+### Prerequisites
+
+- [Set up Arcade AI](/docs/guides/quickstart)
+- Install the Arcade Client:
+
+```bash
+pip install arcade-ai google-api-python-client google-auth-httplib2 google-auth-oauthlib
+```
+
+### Initialize the Arcade client
+
+Create an instance of the Arcade client:
+
+```python
+from arcade.client import Arcade
+
+client = Arcade(api_key="your_api_key")
+```
+
+### Initiate an authorization request
+
+Use `client.auth.authorize` to initiate the authorization process:
+
+```python
+from arcade.client.schema import AuthProvider
+
+user_id = "user@example.com"
+
+# Start the authorization process
+auth_response = client.auth.authorize(
+    provider=AuthProvider.Google,
+    scopes=["https://www.googleapis.com/auth/gmail.readonly"],
+    user_id=user_id,
+)
+```
+
+### Guide the user through authorization
+
+If authorization is not completed, prompt the user to visit the authorization URL:
+
+```python
+if auth_response.status != "completed":
+    print("Please complete the authorization challenge in your browser:")
+    print(auth_response.auth_url)
+```
+
+### Poll for authorization status
+
+Wait for the user to complete authorization and poll for the status:
+
+```python
+import time
+
+while auth_response.status != "completed":
+    time.sleep(5)
+    auth_response = client.auth.status(auth_response)
+```
+
+### Use the obtained token
+
+Once authorization is complete, you can use the obtained token to access the third-party service:
+
+```python
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
+
+# Use the token from the authorization response
+creds = Credentials(auth_response.context.token)
+service = build('gmail', 'v1', credentials=creds)
+
+# Now you can use the Google API
+results = service.users().labels().list(userId='me').execute()
+labels = results.get('labels', [])
+print('Labels:', labels)
+```
+
+</Steps>
+
+### How it works
+
+By using `client.auth.authorize` and `client.auth.status`, you leverage Arcade AI to manage the OAuth flow for user authorization.
+
+Arcade AI handles the authorization challenges and tokens, simplifying the process for you.
+
+### Next steps
+
+Integrate this authorization flow into your application, and explore how you can manage different providers and scopes.
