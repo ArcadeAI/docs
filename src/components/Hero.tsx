@@ -24,8 +24,8 @@ export const Hero = () => {
                     Empower Agents to Act for your Users
                 </p>
                 <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
-                    <Button href="/docs/guides/quickstart">Get Started</Button>
                     <Button href="/docs/home">Learn More</Button>
+                    <Button href="/docs/guides/quickstart">Get Started</Button>
                 </div>
             </div>
         </section>

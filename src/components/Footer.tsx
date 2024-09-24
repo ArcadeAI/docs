@@ -13,7 +13,7 @@ const ArcadeLogo = () => {
             <img
                 className={"dark:hidden"}
                 loading="lazy"
-                src={"/images/logo/arcadeai-title-light.png"}
+                src={"/images/logo/arcade-ai-logo.png"}
                 alt="Arcade AI Logo"
             />
             <img

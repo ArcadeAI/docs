@@ -12,8 +12,7 @@ import { DarkOnly, LightOnly } from "@markdown/ThemeContent";
 import { DocsThemeConfig, Card as NavCard, Cards as NavCards, Steps } from 'nextra-theme-docs';
 
 const config: DocsThemeConfig = {
-  primaryHue: { dark: 330, light: 330 }, // Hue for #ED155D
-  primarySaturation: { dark: 100, light: 100 },
+  primaryHue: { dark: 335, light: 335 }, // Hue for #ED155D
   logo: <Logo />,
   search: {
     placeholder: 'Search...',
