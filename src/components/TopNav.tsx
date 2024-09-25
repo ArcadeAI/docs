@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
 
-import { faCode, faCodeBranch, faList, faMap, faToolbox } from "@fortawesome/free-solid-svg-icons";
+import { faCloud, faCode, faCodeBranch, faList, faMap, faPuzzlePiece, faToolbox } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import styles from "./TopNav.module.css";
@@ -28,9 +28,11 @@ const TopNavIcon = ({ icon }) => {
     const iconByNames = {
         "git": faCodeBranch,
         "code": faCode,
+        "cloud": faCloud,
         "map": faMap,
         "list": faList,
         "tool": faToolbox,
+        "puzzle-piece": faPuzzlePiece
     }
 
     return (
