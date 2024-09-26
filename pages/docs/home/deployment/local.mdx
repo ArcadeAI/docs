@@ -1,0 +1,105 @@
+---
+title: Local Installation
+description: Developer setup for Arcade AI
+---
+
+# Local Deployment
+
+## Requirements
+
+-   Python 3.10+
+
+## Actor
+
+First run the actor with the following commands:
+
+```bash
+pip install arcade-ai
+arcade dev
+```
+
+## Engine
+
+The engine binary can be downloaded from [here]
+
+To run the engine locally, you can use the following command:
+
+```bash
+./arcade-engine -c ./config.yaml
+```
+
+An example configuration file can be found
+[here](/engine/docs/engine/configuration#full-configuration-example).
+
+
+### Install Arcade AI Engine Binary
+
+If you're on a ARM (M-series) Mac, run
+
+```bash
+cd arcade-alpha
+export PATH=$PATH:$(pwd)/engine/darwin/arm64 # or $(pwd)/engine/darwin/x64 if you're on an Intel/AMD chip
+
+# start arcade
+arcade up -c engine-config.dev.yaml
+```
+
+Assuming you didn't install any toolkits yet, you'll see a few messages like
+
+```
+Actor> ERROR    | No toolkits found in Python environment. Exiting...
+retrying...
+```
+
+**This is expected!**
+
+The `arcade up` command launches a HTTP server called an Actor and the Arcade Engine (`arcade-engine` binary) locally. The Actor finds toolkits to serve by looking for all the Python packages in your current environment that are prefixed with `arcade_`, or manually specified by you.
+
+When developing custom tools, you can use the `arcade up` command to restart the
+actor and engine to serve your new tools. Hot-reload is going to be supported
+soon.
+
+Now, let's install some example toolkits. If you're not interested in the example toolkits, you can skip this section and go to the next section to learn how to build your own toolkits from scratch.
+
+### Install Example Toolkits
+
+Included in the `arcade-alpha` folder is a directory named `example_toolkits`.
+
+This directory contains several example toolkits that are made using the Tool SDK.
+Included are:
+
+- `arcade_search` - a toolkit for search engines
+- `arcade_google` - a toolkit using Google Suite (only gmail included here)
+- `arcade_math` - a toolkit for simple math functions
+- `arcade_slack` - a toolkit for using slack
+- `arcade_x` - a toolkit for using X (formally Twitter) API
+
+Each toolkit is a separate python package that can be installed using pip.
+
+To install, run
+
+```bash
+python -m pip install ./example_toolkits/arcade*.whl
+```
+
+You should see output like
+
+```
+Successfully installed arcade-google-0.1.0 arcade-math-0.1.0 arcade-search-0.1.0 arcade-slack-0.1.0 arcade-x-0.1.0
+```
+
+You should now see the new tools in the list of available tools
+
+```bash
+arcade show -t search # remove the -t search to see all available toolkits
+┏━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━┓
+┃ Name         ┃ Description                       ┃ Toolkit ┃ Version ┃
+┡━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━┩
+│ SearchGoogle │ Search Google using SerpAPI and   │ search  │ 0.1.0   │
+│              │ return organic search results.    │         │         │
+└──────────────┴───────────────────────────────────┴─────────┴─────────┘
+```
+
+Congrats! You've just installed your first toolkits and can now use them in Arcade Engine.
+
+Let's try them out!
