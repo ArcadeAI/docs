@@ -16,7 +16,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import styles from "./TopNav.module.css";
 
-import docsTopNav from "@pages/docs/_topnav.json";
+import docsTopNav from "@pages/_topnav.json";
 
 
 interface TopNavItem {
@@ -30,7 +30,7 @@ interface TopNavMap {
 }
 
 const topNavs: TopNavMap = {
-    "docs": docsTopNav,
+    "home": docsTopNav,
 }
 
 const TopNavIcon = ({ icon }) => {
