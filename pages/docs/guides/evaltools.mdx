@@ -1,14 +1,13 @@
 ---
-title: "Evaluate Tools"
-description: "Learn how to evaluate tools using Arcade AI"
+title: "Evaluate tools"
+description: "Learn how to evaluate your tools using Arcade AI"
 ---
 
-# Evaluate Tools
+# Evaluate tools
 
-In this guide, you'll learn how to evaluate your custom tools to ensure they are
-functioning correctly with the AI assistant.
+In this guide, you'll learn how to evaluate your custom tools to ensure they function correctly with the AI assistant.
 
-You'll create evaluation cases to test your tools and measure their performance.
+We'll create evaluation cases to test our `hello` tool and measure its performance.
 
 import { Steps } from "nextra/components";
 
@@ -16,111 +15,181 @@ import { Steps } from "nextra/components";
 
 ### Prerequisites
 
--   [Set up Arcade AI](/docs/guides/quickstart)
--   Install the Arcade SDK:
+- [Build a custom tool](/docs/guides/customtools)
+- Install the evaluation dependencies:
 
 ```bash
-pip install arcade-ai
+pip install arcade-ai[evals]
 ```
 
 ### Create an evaluation suite
 
-Create a new Python file, e.g., `tool_evaluation.py`, and import the necessary
-modules:
+Navigate to your toolkit's `evals` directory:
 
-```python
-from arcade.core.catalog import ToolCatalog
+```bash
+cd arcade_my_new_toolkit/evals
+```
+
+Create a new Python file for your evaluations, e.g., `eval_hello.py`.
+
+### Define your evaluation cases
+
+Open `eval_hello.py` and add the following code:
+
+```python:arcade_my_new_toolkit/evals/eval_hello.py
 from arcade.sdk.eval import (
     EvalSuite,
     EvalRubric,
     ExpectedToolCall,
-    SimilarityCritic,
     BinaryCritic,
     tool_eval,
 )
-from slack_tools import send_dm_to_user, send_message_to_channel  # Import your tools
-```
+from arcade.core.catalog import ToolCatalog
+from arcade_my_new_toolkit.tools.hello import hello
 
-### Define your tools and catalog
-
-Ensure your tools are registered in a `ToolCatalog`:
-
-```python
+# Create a catalog of tools to include in the evaluation
 catalog = ToolCatalog()
-catalog.add_tool(send_dm_to_user)
-catalog.add_tool(send_message_to_channel)
-```
+catalog.add_tool(hello)
 
-### Set up the evaluation rubric
-
-Define the evaluation criteria:
-
-```python
+# Define the evaluation rubric
 rubric = EvalRubric(
     fail_threshold=0.8,
     warn_threshold=0.9,
 )
-```
 
-### Create evaluation cases
-
-Create an evaluation suite and add test cases:
-
-```python
 @tool_eval()
-def slack_eval_suite() -> EvalSuite:
-    """Create an evaluation suite for Slack messaging tools."""
+def hello_eval_suite() -> EvalSuite:
+    """Create an evaluation suite for the hello tool."""
     suite = EvalSuite(
-        name="Slack Messaging Tools Evaluation",
-        system_message="You are an AI assistant that can send messages in Slack using the provided tools.",
+        name="Hello Tool Evaluation",
+        system_message="You are a helpful assistant.",
         catalog=catalog,
         rubric=rubric,
     )
 
     # Example evaluation case
     suite.add_case(
-        name="Send DM to user with clear username",
-        user_message="Send a direct message to johndoe saying 'Hello, can we meet at 3 PM?'",
+        name="Simple Greeting",
+        user_message="Say hello to Alice",
         expected_tool_calls=[
             ExpectedToolCall(
-                name="SendDmToUser",
+                name="Hello",
                 args={
-                    "user_name": "johndoe",
-                    "message": "Hello, can we meet at 3 PM?",
+                    "name": "Alice",
                 },
             )
         ],
         critics=[
-            BinaryCritic(critic_field="user_name", weight=0.5),
-            SimilarityCritic(critic_field="message", weight=0.5),
+            BinaryCritic(critic_field="name", weight=1.0),
         ],
     )
-
-    # Add more cases as needed
 
     return suite
 ```
 
 ### Run the evaluation
 
-Now you can run the evaluation suite:
+From the `evals` directory, run:
 
 ```bash
-cd my_evals_folder
 arcade evals .
 ```
 
-</Steps>
+This command executes your evaluation suite and provides a report.
 
 ### How it works
 
-The evaluation framework in Arcade allows you to define test cases (EvalCase)
-with expected tool calls and use critics to assess the AI's performance.
+The evaluation framework in Arcade AI allows you to define test cases (`EvalCase`) with expected tool calls and use critics to assess the AI's performance.
 
-By running the evaluation suite, you can measure how well the AI assistant is
-using your tools.
+By running the evaluation suite, you can measure how well the AI assistant is using your tools.
 
 ### Next steps
 
-Explore different types of critics and evaluation criteria to thoroughly test
-your tools.
+Explore different types of critics and evaluation criteria to thoroughly test your tools.
+
+[Learn more about Critic classes](#critic-classes)
+
+</Steps>
+
+## Critic classes
+
+Arcade AI provides several critic classes to evaluate different aspects of tool usage.
+
+### BinaryCritic
+
+Checks if a parameter value matches exactly.
+
+```python
+BinaryCritic(critic_field="name", weight=1.0)
+```
+
+### SimilarityCritic
+
+Evaluates the similarity between expected and actual values.
+
+```python
+from arcade.sdk.eval import SimilarityCritic
+
+SimilarityCritic(critic_field="message", weight=1.0)
+```
+
+### NumericCritic
+
+Assesses numeric values within a specified tolerance.
+
+```python
+from arcade.sdk.eval import NumericCritic
+
+NumericCritic(critic_field="score", tolerance=0.1, weight=1.0)
+```
+
+## Advanced evaluation cases
+
+You can add more evaluation cases to test different scenarios.
+
+### Example: Greeting with emotion
+
+Modify your `hello` tool to accept an `emotion` parameter:
+
+```python:arcade_my_new_toolkit/tools/hello.py
+from arcade.sdk import tool
+from typing import Annotated
+
+@tool
+def hello(
+    name: Annotated[str, "The name of the person to greet"] = "there",
+    emotion: Annotated[str, "The emotion to convey"] = "happy"
+) -> Annotated[str, "A greeting to the user"]:
+    """
+    Say hello to the user with a specific emotion.
+    """
+    return f"Hello {name}! I'm feeling {emotion} today."
+```
+
+Add an evaluation case for this new parameter:
+
+```python:arcade_my_new_toolkit/evals/eval_hello.py
+suite.add_case(
+    name="Greeting with Emotion",
+    user_message="Say hello to Bob sadly",
+    expected_tool_calls=[
+        ExpectedToolCall(
+            name="Hello",
+            args={
+                "name": "Bob",
+                "emotion": "sad",
+            },
+        )
+    ],
+    critics=[
+        BinaryCritic(critic_field="name", weight=0.5),
+        SimilarityCritic(critic_field="emotion", weight=0.5),
+    ],
+)
+```
+
+---
+
+This guide shows how to evaluate your tools using Arcade AI's evaluation framework, including defining evaluation cases and using different critics.
+
+Note: Ensure that your `hello` tool and evaluation cases are updated accordingly and that you rerun `arcade evals .` to test your changes.

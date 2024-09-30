@@ -6,6 +6,7 @@ interface ToolCardProps {
     image: string;
     summary: string;
     link: string;
+    category: string;
 }
 
 export const ToolCard: React.FC<ToolCardProps> = ({
@@ -13,6 +14,7 @@ export const ToolCard: React.FC<ToolCardProps> = ({
     image,
     summary,
     link,
+    category,
 }) => {
     return (
         <a className={styles.card} href={link}>
@@ -28,7 +30,7 @@ export const ToolCard: React.FC<ToolCardProps> = ({
                 </div>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginTop: '-0.8rem' }}>
-                <h4 style={{ fontSize: '0.80rem', color: 'gray' }}>Toolkit</h4>
+                <h4 style={{ fontSize: '0.80rem', color: 'gray' }}>{category}</h4>
                 <p style={{ fontSize: '0.70rem', textAlign: 'left' }}>
                     {summary}
                 </p>

@@ -8,6 +8,7 @@ import {
     faHome,
     faList,
     faMap,
+    faPlug,
     faPuzzlePiece,
     faToolbox
 } from "@fortawesome/free-solid-svg-icons";
@@ -30,7 +31,6 @@ interface TopNavMap {
 
 const topNavs: TopNavMap = {
     "docs": docsTopNav,
-    // add other project docs here
 }
 
 const TopNavIcon = ({ icon }) => {
@@ -42,6 +42,7 @@ const TopNavIcon = ({ icon }) => {
         "home": faHome,
         "list": faList,
         "tool": faToolbox,
+        "plug": faPlug,
         "puzzle-piece": faPuzzlePiece
     }
 

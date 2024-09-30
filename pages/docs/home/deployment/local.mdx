@@ -1,105 +1,134 @@
 ---
-title: Local Installation
-description: Developer setup for Arcade AI
+title: "Local deployment"
+description: "Run Arcade AI locally"
 ---
 
-# Local Deployment
+# Local deployment
 
-## Requirements
+Learn how to run the Arcade AI engine locally to develop and test your custom tools.
 
--   Python 3.10+
+import { Steps } from "nextra/components";
 
-## Actor
+<Steps>
 
-First run the actor with the following commands:
+### Prerequisites
 
-```bash
-pip install arcade-ai
-arcade dev
-```
+- [Install Arcade AI](/docs/home/installation)
+- [Build a custom tool](/docs/guides/customtools)
+- Set up environment variables for any required API keys (e.g., `OPENAI_API_KEY`)
 
-## Engine
+### Start the Arcade AI engine locally
 
-The engine binary can be downloaded from [here]
+To run your custom tools, start the Arcade AI engine locally.
 
-To run the engine locally, you can use the following command:
-
-```bash
-./arcade-engine -c ./config.yaml
-```
-
-An example configuration file can be found
-[here](/engine/docs/engine/configuration#full-configuration-example).
-
-
-### Install Arcade AI Engine Binary
-
-If you're on a ARM (M-series) Mac, run
+In your terminal, run:
 
 ```bash
-cd arcade-alpha
-export PATH=$PATH:$(pwd)/engine/darwin/arm64 # or $(pwd)/engine/darwin/x64 if you're on an Intel/AMD chip
-
-# start arcade
-arcade up -c engine-config.dev.yaml
+arcade up
 ```
 
-Assuming you didn't install any toolkits yet, you'll see a few messages like
+This command starts the Arcade AI engine and serves your tools.
+
+You should see output similar to:
 
 ```
-Actor> ERROR    | No toolkits found in Python environment. Exiting...
-retrying...
+Starting actor server...
+Actor> INFO | Serving the following toolkits:
+Actor> INFO |   - my_new_toolkit (arcade_my_new_toolkit): 1 tool
+Actor> INFO | Starting FastAPI server...
+Actor> INFO | Uvicorn running on http://127.0.0.1:8002 (Press CTRL+C to quit)
+
+Starting engine...
+Engine> INFO | Arcade Engine is starting...
+Engine> INFO | Getting tool definitions from actor
+Engine> INFO | Server running on http://0.0.0.0:9099
 ```
 
-**This is expected!**
+### Configure the Arcade AI CLI to use the local engine
 
-The `arcade up` command launches a HTTP server called an Actor and the Arcade Engine (`arcade-engine` binary) locally. The Actor finds toolkits to serve by looking for all the Python packages in your current environment that are prefixed with `arcade_`, or manually specified by you.
+By default, the Arcade AI CLI is configured to use the cloud engine.
 
-When developing custom tools, you can use the `arcade up` command to restart the
-actor and engine to serve your new tools. Hot-reload is going to be supported
-soon.
-
-Now, let's install some example toolkits. If you're not interested in the example toolkits, you can skip this section and go to the next section to learn how to build your own toolkits from scratch.
-
-### Install Example Toolkits
-
-Included in the `arcade-alpha` folder is a directory named `example_toolkits`.
-
-This directory contains several example toolkits that are made using the Tool SDK.
-Included are:
-
-- `arcade_search` - a toolkit for search engines
-- `arcade_google` - a toolkit using Google Suite (only gmail included here)
-- `arcade_math` - a toolkit for simple math functions
-- `arcade_slack` - a toolkit for using slack
-- `arcade_x` - a toolkit for using X (formally Twitter) API
-
-Each toolkit is a separate python package that can be installed using pip.
-
-To install, run
+To use your local engine, update your configuration:
 
 ```bash
-python -m pip install ./example_toolkits/arcade*.whl
+arcade config edit --key engine.host --val 0.0.0.0
+arcade config edit --key engine.port --val 9099
+arcade config edit --key engine.tls --val False
 ```
 
-You should see output like
-
-```
-Successfully installed arcade-google-0.1.0 arcade-math-0.1.0 arcade-search-0.1.0 arcade-slack-0.1.0 arcade-x-0.1.0
-```
-
-You should now see the new tools in the list of available tools
+Verify your configuration:
 
 ```bash
-arcade show -t search # remove the -t search to see all available toolkits
-┏━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━┓
-┃ Name         ┃ Description                       ┃ Toolkit ┃ Version ┃
-┡━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━┩
-│ SearchGoogle │ Search Google using SerpAPI and   │ search  │ 0.1.0   │
-│              │ return organic search results.    │         │         │
-└──────────────┴───────────────────────────────────┴─────────┴─────────┘
+arcade config
 ```
 
-Congrats! You've just installed your first toolkits and can now use them in Arcade Engine.
+You should see:
 
-Let's try them out!
+```
+┏━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Section ┃ Name    ┃ Value                         ┃
+┡━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ api     │ key     │ arc_XXXXXXXXXXXXXXXXXXXXXXXX │
+│         │ version │ v1                            │
+│         │         │                               │
+│ user    │ email   │ you@example.com               │
+│         │         │                               │
+│ engine  │ host    │ 0.0.0.0                       │
+│         │ port    │ 9099                          │
+│         │ tls     │ False                         │
+└─────────┴─────────┴───────────────────────────────┘
+```
+
+### Test your local setup
+
+Start a chat session to test your local engine:
+
+```bash
+arcade chat
+```
+
+You should see:
+
+```
+=== Arcade AI Chat ===
+
+Chatting with Arcade Engine at http://0.0.0.0:9099/v1
+
+User (you@example.com):
+```
+
+Try using your custom tool:
+
+```
+User: Say hello to Alice
+```
+
+You should receive:
+
+```
+Assistant: Hello Alice!
+```
+
+### Next steps
+
+- Develop more tools and test them locally.
+- Learn how to evaluate your tools in the [Evaluate Tools guide](/docs/guides/evaltools).
+
+</Steps>
+
+### Troubleshooting
+
+#### Engine not starting
+
+If `arcade up` does not start the engine, ensure that:
+
+- Your custom tools are installed in your Python environment.
+- You are in the correct directory.
+
+#### Missing API keys
+
+If you encounter errors related to missing API keys, set the required environment variables, such as:
+
+```bash
+export OPENAI_API_KEY=your-openai-api-key
+```
