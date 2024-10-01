@@ -1,12 +1,22 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
 
-import { faCloud, faCode, faCodeBranch, faList, faMap, faPuzzlePiece, faToolbox } from "@fortawesome/free-solid-svg-icons";
+import {
+    faCloud,
+    faCode,
+    faCodeBranch,
+    faHome,
+    faList,
+    faMap,
+    faPlug,
+    faPuzzlePiece,
+    faToolbox
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import styles from "./TopNav.module.css";
 
-import docsTopNav from "@pages/docs/_topnav.json";
+import docsTopNav from "@pages/_topnav.json";
 
 
 interface TopNavItem {
@@ -20,8 +30,9 @@ interface TopNavMap {
 }
 
 const topNavs: TopNavMap = {
-    "docs": docsTopNav,
-    // add other project docs here
+    "home": docsTopNav,
+    "guides": docsTopNav,
+    "integrations": docsTopNav,
 }
 
 const TopNavIcon = ({ icon }) => {
@@ -30,8 +41,10 @@ const TopNavIcon = ({ icon }) => {
         "code": faCode,
         "cloud": faCloud,
         "map": faMap,
+        "home": faHome,
         "list": faList,
         "tool": faToolbox,
+        "plug": faPlug,
         "puzzle-piece": faPuzzlePiece
     }
 
@@ -44,7 +57,6 @@ const TopNavIcon = ({ icon }) => {
 
 const TopNav = ({ path }) => {
     const projectId = Object.keys(topNavs).find(projectId => path.startsWith(`/${projectId}`))
-    console.log(projectId)
     if (projectId === undefined) {
         return null;
     }

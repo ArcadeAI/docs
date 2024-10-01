@@ -4,13 +4,13 @@ const { config } = require("./config");
 // NextJS redirects don't work in Netlify for some reason
 
 exports.tempRedirects = [
-    ["/docs", "/docs/concepts/"],
-    ["/docs/", "/docs/concepts/"],
+    ["/docs", "/home/"],
+    ["/", "/home/"],
     ["/discord", config.company.discord],
-    ["/docs/github", config.engine.github],
-    ["/docs/dockerhub", config.engine.dockerhub],
-    ["/docs/releases", config.engine.releases],
-    ["/docs/contributing", config.engine.contributing],
-    ["/docs/examples", config.engine.examples],
-    ["/docs/new-issue", config.engine.newIssue],
+    ["/github", config.engine.github],
+    ["/dockerhub", config.engine.dockerhub],
+    ["/releases", config.engine.releases],
+    ["/contributing", config.engine.contributing],
+    ["/examples", config.engine.examples],
+    ["/new-issue", config.engine.newIssue],
 ]
