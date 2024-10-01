@@ -31,6 +31,8 @@ interface TopNavMap {
 
 const topNavs: TopNavMap = {
     "home": docsTopNav,
+    "guides": docsTopNav,
+    "integrations": docsTopNav,
 }
 
 const TopNavIcon = ({ icon }) => {
@@ -55,7 +57,6 @@ const TopNavIcon = ({ icon }) => {
 
 const TopNav = ({ path }) => {
     const projectId = Object.keys(topNavs).find(projectId => path.startsWith(`/${projectId}`))
-    console.log(projectId)
     if (projectId === undefined) {
         return null;
     }
