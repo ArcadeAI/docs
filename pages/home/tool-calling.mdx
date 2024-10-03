@@ -50,5 +50,115 @@ Arcade AI simplifies tool calling by providing a standardized interface and
 pre-built integrations. You can also create custom tools to fit your unique
 needs.
 
-Let's try implementing tool calling in your AI application to make it more
-interactive and useful.
+
+## Tool Choice
+
+By default, language models used through Arcade AI will autonomously decide which tools to use, guided by the `tool_choice: "auto"` setting. However, you have the flexibility to customize this behavior to better suit your application's requirements.
+
+Here are ways to control the model's tool selection:
+
+- **Always Use Tools**: To ensure the model always calls one or more tools, set `tool_choice: "required"`. This forces the model to select and use at least one tool, which is helpful when you need the model to perform specific actions or choose between multiple options.
+
+- **Specify a Tool**: If you want the model to use a particular tool, set `tool_choice: {"type": "function", "function": {"name": "my_function"}}`. Replace `"my_function"` with the name of the tool you want the model to call.
+
+- **Disable Tool Calling**: To prevent the model from using any tools and focus solely on generating a user-facing message, either don't provide any tools or set `tool_choice: "none"`.
+
+### Tool Calling Patterns in Arcade AI
+
+Arcade AI enhances large language model (LLM) tool calling with two additional options when using the OpenAI client API and our LLM API:
+
+- **execute**: The model runs the tool and returns the results directly.
+- **generate**: The model runs the tool and generates a response based on the tool's output.
+
+#### `tool_choice: execute`
+
+The `execute` option allows the LLM to run tools as if it were executing them directly. This simplifies client code and enhances performance by reducing network traffic. Arcade AI handles the tool execution behind the scenes and returns the results seamlessly.
+
+**Flow Overview**:
+
+1. **Client Request**: The client calls the OpenAI model via the Arcade Engine.
+2. **Tool Definition**: The Engine adds tool definitions to the request.
+3. **Model Prediction**: The LLM predicts which tool to use and its arguments.
+4. **Tool Execution**: The Engine sends the arguments to the appropriate Actor.
+5. **Result Return**: The Actor executes the tool and returns results to the Engine.
+6. **Client Response**: The Engine sends the results back to the client.
+
+**Example**: Sending a Slack Message
+
+Imagine a user wants to send a Slack message:
+
+- **User Input**: "Send a Slack message to John saying 'Meeting at 3 PM'"
+- **LLM Prediction**: Use the `send_slack_message` tool with arguments:
+  - `recipient`: "John"
+  - `message`: "Meeting at 3 PM"
+- **Tool Execution**: The Engine forwards these arguments to the Slack Actor, which sends the message.
+- **Response**: The client receives confirmation: "Message sent to John: 'Meeting at 3 PM'"
+
+This process happens seamlessly, with the client only seeing the initial request and final response.
+
+#### `tool_choice: generate`
+
+The `generate` option works like `execute` but adds a step where the Engine asks the LLM to create a response based on the tool's results. This provides more refined output that incorporates the tool's data.
+
+**Flow Overview**:
+
+1. **Client Request**: The client calls the OpenAI model via the Arcade Engine.
+2. **Tool Definition**: The Engine adds tool definitions to the request.
+3. **Model Prediction**: The LLM predicts which tool to use and its arguments.
+4. **Tool Execution**: The Engine sends the arguments to the appropriate Actor.
+5. **Intermediate Results**: The Actor executes the tool and returns results to the Engine.
+6. **Response Generation**: The Engine sends a second request to the LLM with the tool's results.
+7. **Final Response**: The LLM generates a response incorporating the tool's output, and the Engine returns it to the client.
+
+**Example**: Checking Calendar Availability
+
+Suppose a user wants to know their availability for the next day:
+
+- **User Input**: "What's my availability for tomorrow?"
+- **LLM Prediction**: Use the `check_calendar` tool for the specified date.
+- **Tool Execution**: The Engine requests the Calendar Actor to retrieve events for tomorrow.
+- **Results**: The Actor returns calendar data (e.g., three meetings scheduled).
+- **LLM Response Generation**: The Engine provides the calendar data to the LLM.
+- **Response**: The LLM generates: "You have 3 meetings tomorrow. You're free from 9-10 AM, 12-2 PM, and after 4 PM."
+- **Client Receives**: The summarized availability information.
+
+By leveraging `generate`, you receive responses that are both informative and contextually rich.
+
+### Implementing Tool Choice in Code
+
+Here's how you can specify the `tool_choice` parameter in your code:
+
+```python
+from openai import OpenAI
+
+# Initialize the OpenAI client, pointing to Arcade AI
+client = OpenAI(
+    base_url="https://api.arcade-ai.com",
+    api_key=os.environ.get("ARCADE_API_KEY")
+)
+
+USER_ID = "user@example.com"
+
+# Generate a response with a specified tool choice
+response = client.chat.completions.create(
+    messages=[
+        {"role": "user", "content": "What's my availability for tomorrow?"},
+    ],
+    model="gpt-4o",
+    max_tokens=500,
+    user=USER_ID,
+
+    # Make specific tools available to the AI model
+    tools=[
+        "Calendar.Check",
+    ],
+
+    # Set the tool choice to 'generate' for a refined response
+    tool_choice="generate",
+)
+
+print(response.choices[0].message.content)
+```
+
+In this example, we've set `tool_choice` to `"generate"` to instruct the model to execute the tool and then generate a response based on the results.
+
