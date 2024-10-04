@@ -1,0 +1,511 @@
+# GitHub
+
+<br />
+
+import ToolInfo from '@/components/ToolInfo';
+import Badges from '@/components/Badges';
+
+
+<ToolInfo
+  description="Enable agents to interact with GitHub repositories, issues, and pull requests."
+  author="Arcade AI"
+  codeLink="https://github.com/arcadeai/arcade-ai"
+  authType="OAuth2"
+  versions={["0.1.0"]}
+/>
+
+<Badges repo="arcadeai/arcade_github" />
+
+
+## Install
+
+```bash
+pip install arcade_github
+```
+
+
+## Auth
+
+**Toolkit Permissions**
+
+- Varies per tool. Common scopes include:
+
+  - "Starring" user permissions (write)
+  - "Metadata" repository permissions (read)
+  - "Issues" repository permissions (write)
+  - "Pull requests" repository permissions (write)
+  - "Pull requests" repository permissions (read)
+  - "Contents" repository permissions (read)
+
+**Global Environment Variables:**
+
+- None
+
+
+## Available Tools
+
+| Tool Name                                   | Description                                                    |
+|---------------------------------------------|----------------------------------------------------------------|
+| [SetStarred](#setstarred)                   | Star or unstar a GitHub repository.                            |
+| [CreateIssue](#createissue)                 | Create an issue in a GitHub repository.                        |
+| [CreateIssueComment](#createissuecomment)   | Create a comment on an issue in a GitHub repository.           |
+| [ListPullRequests](#listpullrequests)       | List pull requests in a GitHub repository.                     |
+| [GetPullRequest](#getpullrequest)           | Get details of a pull request in a GitHub repository.          |
+| [UpdatePullRequest](#updatepullrequest)     | Update a pull request in a GitHub repository.                  |
+| [ListPullRequestCommits](#listpullrequestcommits) | List commits on a pull request in a GitHub repository. |
+| [CreateReplyForReviewComment](#createreplyforreviewcomment) | Create a reply to a review comment on a pull request.         |
+| [ListReviewCommentsOnPullRequest](#listreviewcommentsonpullrequest) | List review comments on a pull request. |
+| [CreateReviewComment](#createreviewcomment) | Create a review comment on a pull request.                     |
+| [CountStargazers](#countstargazers)         | Count the number of stargazers for a GitHub repository.        |
+| [ListOrgRepositories](#listorgrepositories) | List repositories of a GitHub organization.                    |
+| [GetRepository](#getrepository)             | Get details of a GitHub repository.                            |
+| [ListRepositoryActivities](#listrepositoryactivities) | List activities of a GitHub repository.            |
+| [ListReviewCommentsInARepository](#listreviewcommentsinarepository) | List review comments in a repository. |
+
+---
+
+## SetStarred
+
+Star or unstar a GitHub repository.
+
+**Auth:**
+
+- **Permissions Required:**
+  - "Starring" user permissions (write)
+  - "Metadata" repository permissions (read)
+
+**Environment Variables:**
+
+- None
+
+**Parameters**
+
+- **`owner`** _(string, Required)_ The owner of the repository.
+- **`name`** _(string, Required)_ The name of the repository.
+- **`starred`** _(boolean, Required)_ Whether to star (`true`) or unstar (`false`) the repository.
+
+**Returns:**
+
+- _(str)_ A message indicating whether the repository was successfully starred or unstarred
+
+---
+
+## CreateIssue
+
+Create an issue in a GitHub repository.
+
+**Auth:**
+
+- **One of the Following Permissions Is Required:**
+  - "Issues" repository permissions (write)
+
+**Environment Variables:**
+
+- None
+
+**Parameters**
+
+- **`owner`** _(string, Required)_ The account owner of the repository. The name is not case sensitive.
+- **`repo`** _(string, Required)_ The name of the repository without the .git extension. The name is not case sensitive.
+- **`title`** _(string, Required)_ The title of the issue.
+- **`body`** _(string, Optional)_ The contents of the issue.
+- **`assignees`** _(array of strings, Optional)_ Logins for Users to assign to this issue.
+- **`milestone`** _(integer, Optional)_ The number of the milestone to associate this issue with.
+- **`labels`** _(array of strings, Optional)_ Labels to associate with this issue.
+- **`include_extra_data`** _(boolean, Optional, Defaults to `false`)_ If true, return all the data available about the issue. This is a large payload and may impact performance - use with caution.
+
+**Returns**
+
+- _(string)_ A JSON string containing the created issue's details, including id, url, title, body, state, html_url, creation and update timestamps, user, assignees, and labels. If `include_extra_data` is `true`, returns all available data about the issue.
+
+---
+
+## CreateIssueComment
+
+Create a comment on an issue in a GitHub repository.
+
+**Auth:**
+
+- **One of the Following Permissions Is Required:**
+    - "Issues" repository permissions (write)
+    - "Pull requests" repository permissions (write)
+
+**Environment Variables:**
+
+- None
+
+**Parameters**
+
+- **`owner`** _(string, Required)_ The account owner of the repository. The name is not case sensitive.
+- **`repo`** _(string, Required)_ The name of the repository without the .git extension. The name is not case sensitive.
+- **`issue_number`** _(integer, Required)_ The number that identifies the issue.
+- **`body`** _(string, Required)_ The contents of the comment.
+- **`include_extra_data`** _(boolean, Optional, Defaults to `false`)_ If true, return all the data available about the comment. This is a large payload and may impact performance - use with caution.
+
+**Returns**
+
+- _(string)_ A JSON string containing the created comment's details, including id, url, body, user, and creation and update timestamps. If `include_extra_data` is `true`, returns all available data about the comment.
+
+---
+
+## ListPullRequests
+
+List pull requests in a GitHub repository.
+
+**Auth:**
+
+- **One of the Following Permissions Is Required:**
+  - "Pull requests" repository permissions (read)
+
+**Environment Variables:**
+
+- None
+
+**Parameters**
+
+- **`owner`** _(string, Required)_ The account owner of the repository. The name is not case sensitive.
+- **`repo`** _(string, Required)_ The name of the repository without the .git extension. The name is not case sensitive.
+- **`state`** _(enum ([PRState](/integrations/toolkits/Github/common#prstate)), Optional, Defaults to `PRState.OPEN`)_ The state of the pull requests to return.
+- **`head`** _(string, Optional)_ Filter pulls by head user or head organization and branch name in the format of user:ref-name or organization:ref-name.
+- **`base`** _(string, Optional, Defaults to `'main'`)_ Filter pulls by base branch name.
+- **`sort`** _(enum ([PRSortProperty](/integrations/toolkits/Github/common#prsortproperty)), Optional, Defaults to `PRSortProperty.CREATED`)_ The property to sort the results by.
+- **`direction`** _(enum ([SortDirection](/integrations/toolkits/Github/common#sortdirection)), Optional)_ The direction of the sort.
+- **`per_page`** _(integer, Optional, Defaults to `30`)_ The number of results per page (max 100).
+- **`page`** _(integer, Optional, Defaults to `1`)_ The page number of the results to fetch.
+- **`include_extra_data`** _(boolean, Optional, Defaults to `false`)_ If true, return all the data available about the pull requests. This is a large payload and may impact performance - use with caution.
+
+**Returns**
+
+- _(string)_ A JSON string containing a list of pull requests with their details. Each pull request includes information such as id, number, title, state, created_at, updated_at, closed_at, merged_at, user, base, head, and more. If `include_extra_data` is `true`, returns all available data about the pull requests.
+
+---
+
+
+## GetPullRequest
+
+Get details of a pull request in a GitHub repository.
+
+**Auth:**
+
+- **One of the Following Permissions Is Required:**
+  - "Pull requests" repository permissions (read)
+  - "Contents" repository permissions (read)
+
+**Environment Variables:**
+
+- None
+
+**Parameters**
+
+- **`owner`** _(string, Required)_ The account owner of the repository. The name is not case sensitive.
+- **`repo`** _(string, Required)_ The name of the repository without the .git extension. The name is not case sensitive.
+- **`pull_number`** _(integer, Required)_ The number that identifies the pull request.
+- **`include_diff_content`** _(boolean, Optional, Defaults to `false`)_ If true, return the diff content of the pull request.
+- **`include_extra_data`** _(boolean, Optional, Defaults to `false`)_ If true, return all the data available about the pull requests. This is a large payload and may impact performance - use with caution.
+
+**Returns**
+
+- _(string)_ A JSON string containing details of the specified pull request. The response includes information such as id, number, title, state, created_at, updated_at, closed_at, merged_at, user, base, head, and more. If `include_diff_content` is `true`, the response will also include the diff content. If `include_extra_data` is `true`, it returns all available data about the pull request.
+
+---
+
+## UpdatePullRequest
+
+Update a pull request in a GitHub repository.
+
+**Auth:**
+
+- **One of the Following Permissions Is Required:**
+  - "Pull requests" repository permissions (write)
+
+**Environment Variables:**
+
+- None
+
+**Parameters**
+
+- **`owner`** _(string, Required)_ The account owner of the repository. The name is not case sensitive.
+- **`repo`** _(string, Required)_ The name of the repository without the .git extension. The name is not case sensitive.
+- **`pull_number`** _(integer, Required)_ The number that identifies the pull request.
+- **`title`** _(string, Optional)_ The title of the pull request.
+- **`body`** _(string, Optional)_ The contents of the pull request.
+- **`state`** _(enum ([PRState](/integrations/toolkits/Github/common#prstate)), Optional)_ State of this Pull Request. Either open or closed.
+- **`base`** _(string, Optional)_ The name of the branch you want your changes pulled into.
+- **`maintainer_can_modify`** _(boolean, Optional)_ Indicates whether maintainers can modify the pull request.
+
+**Returns**
+
+- _(string)_ A JSON string containing updated information about the pull request.
+
+**Example Usage**
+
+---
+
+## ListPullRequestCommits
+
+List commits (from oldest to newest) on a pull request in a GitHub repository.
+
+**Auth:**
+
+- **One of the Following Permissions Is Required:**
+  - "Pull requests" repository permissions (read)
+
+**Environment Variables:**
+
+- None
+
+**Parameters**
+
+- **`owner`** _(string, Required)_ The account owner of the repository. The name is not case sensitive.
+- **`repo`** _(string, Required)_ The name of the repository without the .git extension. The name is not case sensitive.
+- **`pull_number`** _(integer, Required)_ The number that identifies the pull request.
+- **`per_page`** _(integer, Optional, Defaults to `30`)_ The number of results per page (max 100).
+- **`page`** _(integer, Optional, Defaults to `1`)_ The page number of the results to fetch.
+- **`include_extra_data`** _(boolean, Optional, Defaults to `false`)_ If true, return all the data available about the pull requests. This is a large payload and may impact performance - use with caution.
+
+**Returns**
+
+- _(string)_ A JSON string containing a list of commits for the specified pull request. Each commit object includes information such as sha, node_id, commit details, url, html_url, comments_url, author, committer, parents, and more.
+
+---
+
+## CreateReplyForReviewComment
+
+Create a reply to a review comment for a pull request in a GitHub repository.
+
+**Auth:**
+
+- **One of the Following Permissions Is Required:**
+  - "Pull requests" repository permissions (write)
+
+**Environment Variables:**
+
+- None
+
+**Parameters**
+
+- **`owner`** _(string, Required)_ The account owner of the repository. The name is not case sensitive.
+- **`repo`** _(string, Required)_ The name of the repository without the .git extension. The name is not case sensitive.
+- **`pull_number`** _(integer, Required)_ The number that identifies the pull request.
+- **`comment_id`** _(integer, Required)_ The unique identifier of the comment to reply to.
+- **`body`** _(string, Required)_ The text of the reply comment.
+
+**Returns**
+
+- _(string)_ A JSON string containing details of the created reply comment.
+
+---
+
+## ListReviewCommentsOnPullRequest
+
+List review comments on a pull request in a GitHub repository.
+
+**Auth:**
+
+- **One of the Following Permissions Is Required:**
+  - "Pull requests" repository permissions (read)
+
+**Environment Variables:**
+
+- None
+
+**Parameters**
+
+- **`owner`** _(string, Required)_ The account owner of the repository. The name is not case sensitive.
+- **`repo`** _(string, Required)_ The name of the repository without the .git extension. The name is not case sensitive.
+- **`pull_number`** _(integer, Required)_ The number that identifies the pull request.
+- **`sort`** _(enum ([ReviewCommentSortProperty](/integrations/toolkits/Github/common#reviewcommentsortproperty)), Optional, Defaults to `'created'`)_ The property to sort the results by. Can be one of: `created`, `updated`.
+- **`direction`** _(enum ([SortDirection](/integrations/toolkits/Github/common#sortdirection)), Optional, Defaults to `'desc'`)_ The direction to sort results. Can be one of: `asc`, `desc`.
+- **`since`** _(string, Optional)_ Only show results that were last updated after the given time. This is a timestamp in ISO 8601 format: YYYY-MM-DDTHH:MM:SSZ.
+- **`per_page`** _(integer, Optional, Defaults to `30`)_ The number of results per page (max 100).
+- **`page`** _(integer, Optional, Defaults to `1`)_ The page number of the results to fetch.
+- **`include_extra_data`** _(boolean, Optional, Defaults to `false`)_ If true, return all the data available about the pull requests. This is a large payload and may impact performance - use with caution.
+
+**Returns**
+
+- _(string)_ A JSON string containing a list of review comments for the specified pull request.
+
+---
+
+## CreateReviewComment
+
+Create a review comment for a pull request in a GitHub repository.
+
+If the subject_type is not 'file', then the start_line and end_line parameters are required.
+If the subject_type is 'file', then the start_line and end_line parameters are ignored.
+If the commit_id is not provided, the latest commit SHA of the PR's base branch will be used.
+
+**Auth:**
+
+- **One of the Following Permissions Is Required:**
+  - "Pull requests" repository permissions (write)
+
+**Environment Variables:**
+
+- None
+
+**Parameters**
+
+- **`owner`** _(string, Required)_ The account owner of the repository. The name is not case sensitive.
+- **`repo`** _(string, Required)_ The name of the repository without the .git extension. The name is not case sensitive.
+- **`pull_number`** _(integer, Required)_ The number that identifies the pull request.
+- **`body`** _(string, Required)_ The text of the review comment.
+- **`path`** _(string, Required)_ The relative path to the file that necessitates a comment.
+- **`commit_id`** _(string, Optional)_ The SHA of the commit needing a comment. If not provided, the latest commit SHA of the PR's base branch will be used.
+- **`start_line`** _(integer, Optional)_ The start line of the range of lines in the pull request diff that the comment applies to. Required unless 'subject_type' is 'file'.
+- **`end_line`** _(integer, Optional)_ The end line of the range of lines in the pull request diff that the comment applies to. Required unless 'subject_type' is 'file'.
+- **`side`** _(enum ([DiffSide](/integrations/toolkits/Github/common#diffside)), Optional, Defaults to `'RIGHT'`)_ The side of the diff that the pull request's changes appear on. Use LEFT for deletions that appear in red. Use RIGHT for additions that appear in green or unchanged lines that appear in white and are shown for context.
+- **`start_side`** _(string, Optional)_ The starting side of the diff that the comment applies to.
+- **`subject_type`** _(enum ([ReviewCommentSubjectType](/integrations/toolkits/Github/common#reviewcommentsubjecttype)), Optional, Defaults to `'FILE'`)_ The type of subject that the comment applies to. Can be one of: file, hunk, or line.
+- **`include_extra_data`** _(boolean, Optional, Defaults to `false`)_ If true, return all the data available about the review comment. This is a large payload and may impact performance - use with caution.
+
+**Returns**
+
+- _(string)_ A JSON string containing details of the created review comment.
+
+---
+
+
+## CountStargazers
+
+Count the number of stargazers (stars) for a GitHub repository.
+
+**Auth:**
+
+- **One of the Following Permissions Is Required:**
+  - "Metadata" repository permissions (read)
+
+**Environment Variables:**
+
+- None
+
+**Parameters**
+
+- **`owner`** _(string, Required)_ The owner of the repository.
+- **`name`** _(string, Required)_ The name of the repository.
+
+**Returns**
+
+- _(int)_ The number of stargazers (stars) for the specified repository
+
+---
+
+
+## ListOrgRepositories
+
+List repositories for the specified GitHub organization.
+
+**Auth:**
+
+- **One of the Following Permissions Is Required:**
+  - "Metadata" repository permissions (read)
+
+**Environment Variables:**
+
+- None
+
+**Parameters**
+
+- **`org`** _(string, Required)_ The organization name. The name is not case sensitive.
+- **`repo_type`** _(enum ([RepoType](/integrations/toolkits/Github/common#repotype)), Optional, Defaults to `'ALL'`)_ The types of repositories to return.
+- **`sort`** _(enum ([RepoSortProperty](/integrations/toolkits/Github/common#reposortproperty)), Optional, Defaults to `'CREATED'`)_ The property to sort the results by.
+- **`sort_direction`** _(enum ([SortDirection](/integrations/toolkits/Github/common#sortdirection)), Optional, Defaults to `'ASC'`)_ The order to sort by.
+- **`per_page`** _(integer, Optional, Defaults to `30`)_ The number of results per page.
+- **`page`** _(integer, Optional, Defaults to `1`)_ The page number of the results to fetch.
+- **`include_extra_data`** _(boolean, Optional, Defaults to `false`)_ If true, return all the data available about the repositories. This is a large payload and may impact performance - use with caution.
+
+**Returns**
+
+- _(dict)_ A dictionary with key 'repositories' containing a list of repositories, each with details such as name, full_name, html_url, description, clone_url, private status, creation/update/push timestamps, and star/watcher/fork counts.
+
+---
+
+
+## GetRepository
+
+Get detailed information about a GitHub repository.
+
+**Auth:**
+
+- **One of the Following Permissions Is Required:**
+  - "Metadata" repository permissions (read)
+
+**Environment Variables:**
+
+- None
+
+**Parameters**
+
+- **`owner`** _(string, Required)_ The account owner of the repository. The name is not case sensitive.
+- **`repo`** _(string, Required)_ The name of the repository without the .git extension. The name is not case sensitive.
+- **`include_extra_data`** _(boolean, Optional, Defaults to `false`)_ If true, return all the data available about the repository. This is a large payload and may impact performance - use with caution.
+
+**Returns**
+
+- _(dict)_ A dictionary containing repository details such as name, full_name, html_url, description, clone_url, private status, creation/update/push timestamps, and star/watcher/fork counts.
+
+---
+
+
+## ListRepositoryActivities
+
+List repository activities such as pushes, merges, force pushes, and branch changes. Retrieves a detailed history of changes to a repository, such as pushes, merges, force pushes, and branch changes,
+    and associates these changes with commits and users.
+
+**Auth:**
+
+- **One of the Following Permissions Is Required:**
+  - "Contents" repository permissions (read)
+
+**Environment Variables:**
+
+- None
+
+**Parameters**
+
+- **`owner`** _(string, Required)_ The account owner of the repository. The name is not case sensitive.
+- **`repo`** _(string, Required)_ The name of the repository without the .git extension. The name is not case sensitive.
+- **`direction`** _(enum ([SortDirection](/integrations/toolkits/Github/common#sortdirection)), Optional, Defaults to `'DESC'`)_ The direction to sort the results by.
+- **`per_page`** _(integer, Optional, Defaults to `30`)_ The number of results per page (max 100).
+- **`before`** _(string, Optional)_ A cursor (unique identifier, e.g., a SHA of a commit) to search for results before this cursor.
+- **`after`** _(string, Optional)_ A cursor (unique identifier, e.g., a SHA of a commit) to search for results after this cursor.
+- **`ref`** _(string, Optional)_ The Git reference for the activities you want to list. Can be formatted as `refs/heads/BRANCH_NAME` or just `BRANCH_NAME`.
+- **`actor`** _(string, Optional)_ The GitHub username to filter by the actor who performed the activity.
+- **`time_period`** _(enum ([RepoTimePeriod](/integrations/toolkits/Github/common#repotimeperiod)), Optional)_ The time period to filter by.
+- **`activity_type`** _(enum ([ActivityType](/integrations/toolkits/Github/common#activitytype)), Optional)_ The activity type to filter by.
+- **`include_extra_data`** _(boolean, Optional, Defaults to `false`)_ If true, return all the data available about the activities. This is a large payload and may impact performance - use with caution.
+
+**Returns**
+
+- _(string)_ A JSON string containing a dictionary with key 'activities', which is a list of repository activities. Each activity includes id, node_id, before and after states, ref, timestamp, activity_type, and actor information.
+
+---
+
+
+## ListReviewCommentsInARepository
+
+List review comments in a GitHub repository.
+
+**Auth:**
+
+- **One of the Following Permissions Is Required:**
+  - "Pull requests" repository permissions (read)
+
+**Environment Variables:**
+
+- None
+
+**Parameters**
+
+- **`owner`** _(string, Required)_ The account owner of the repository. The name is not case sensitive.
+- **`repo`** _(string, Required)_ The name of the repository without the .git extension. The name is not case sensitive.
+- **`sort`** _(enum ([ReviewCommentSortProperty](/integrations/toolkits/Github/common#reviewcommentsortproperty)), Optional, Defaults to `'created'`)_ The property to sort the results by. Can be one of: created, updated.
+- **`direction`** _(enum ([SortDirection](/integrations/toolkits/Github/common#sortdirection)), Optional, Defaults to `'DESC'`)_ The direction to sort results. Ignored without sort parameter. Can be one of: asc, desc.
+- **`since`** _(string, Optional)_ Only show results that were last updated after the given time. This is a timestamp in ISO 8601 format: YYYY-MM-DDTHH:MM:SSZ.
+- **`per_page`** _(integer, Optional, Defaults to `30`)_ The number of results per page (max 100).
+- **`page`** _(integer, Optional, Defaults to `1`)_ The page number of the results to fetch.
+- **`include_extra_data`** _(boolean, Optional, Defaults to `false`)_ If true, return all the data available about the pull requests. This is a large payload and may impact performance - use with caution.
+
+**Returns**
+
+- _(string)_ A JSON string containing a dictionary with key 'review_comments', which is a list of review comments. Each comment includes id, url, diff_hunk, path, position details, commit information, user, body, timestamps, and related URLs.
