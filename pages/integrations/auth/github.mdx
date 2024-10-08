@@ -79,12 +79,8 @@ GITHUB_CLIENT_SECRET="<your client secret>"
 Edit the `engine.yaml` file and set the following values in the `auth.providers`
 section:
 
-```yaml
-auth:
-  providers:
-    - id: github
-      client_id: "${env:GITHUB_CLIENT_ID}"
-      client_secret: "${env:GITHUB_CLIENT_SECRET}"
+```yaml file=<rootDir>/examples/code/integrations/github/engine.example.yaml
+
 ```
 
 </Steps>
@@ -101,26 +97,9 @@ Use the `GitHub()` auth class to specify that a tool requires authorization with
 GitHub. The `context.authorization.token` field will be automatically populated
 with the user's GitHub token:
 
-````python {2,4,17}
-from arcade.sdk import tool
-from arcade.sdk.auth import GitHub
+```python file=<rootDir>/examples/code/integrations/github/custom_tool.py {2,5,13}
 
-@tool(requires_auth=GitHub())
-async def count_stargazers(
-    context: ToolContext,
-    owner: Annotated[str, "The owner of the repository"],
-    name: Annotated[str, "The name of the repository"],
-) -> Annotated[int, "The number of stargazers (stars) for the specified repository"]:
-    """Count the number of stargazers (stars) for a GitHub repository.
-    For example, to count the number of stars for microsoft/vscode, you would use:
-    ```
-    count_stargazers(owner="microsoft", name="vscode")
-    ```
-    """
-
-    token = context.authorization.token
-    # TODO: Call the GitHub API with this token!
-````
+```
 
 ## Using GitHub auth in agents and custom workflows
 
@@ -129,14 +108,6 @@ without defining tools, if that better fits your codebase. See
 [authorizing agents with Arcade](/guides/agentauth) for more context on how this
 works.
 
-```python {1,7}
-from arcade.client.schema import AuthProvider
+```python file=<rootDir>/examples/code/integrations/github/custom_auth.py {1,7}
 
-user_id = "user@example.com"
-
-# Start the authorization process
-auth_response = client.auth.authorize(
-    provider=AuthProvider.github,
-    user_id=user_id,
-)
 ```
