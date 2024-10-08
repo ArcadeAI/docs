@@ -1,0 +1,142 @@
+# GitHub auth provider
+
+The GitHub auth provider enables tools and agents to call GitHub APIs on behalf
+of a user. This lets your agents and AI apps:
+
+- Call the
+  [GitHub API](https://docs.github.com/en/rest/overview/resources-in-the-rest-api)
+  on behalf of the user
+- Access private repositories (with the user's permission)
+
+The GitHub auth provider seamlessly manages GitHub OAuth 2.0 authorization for
+your users.
+
+This page describes how to use and configure the GitHub auth provider with
+Arcade AI. This auth provider is used by:
+
+- The [Arcade GitHub toolkit](/integrations/toolkits/github), which provides
+  pre-built tools for interacting with GitHub
+- Your [custom tools](#using-github-auth-in-custom-tools) that need to call the
+  GitHub API
+- Your
+  [agents and custom workflows](#using-github-auth-in-agents-and-custom-workflows)
+  that need to call the GitHub API
+
+<Tip>
+  Want to quickly get started with GitHub in your AI apps or agents? The
+  pre-built [Arcade GitHub toolkit](/integrations/toolkits/github) is what you
+  want!
+</Tip>
+
+## Configuring GitHub auth
+
+With the [hosted Arcade Engine](/home/hosted-engine), there's nothing to
+configure. Your users will see `Arcade AI (demo)` as the name of the application
+that's requesting permission.
+
+<Warning type="warning" emoji="⚠️">
+  The hosted Arcade Engine is intended for demo and testing purposes only, not
+  for production use. To use Arcade AI and GitHub in production, you must use a
+  self-hosted instance of the Arcade Engine.
+</Warning>
+
+With a [self-hosted installation](/guides/installation) of Arcade AI, you need
+to configure the GitHub auth provider with your own GitHub app credentials.
+
+<Steps>
+
+### Create a GitHub app
+
+- Follow GitHub's guide to
+  [registering a GitHub app](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app)
+- Choose the permissions you need for your app
+- Set the redirect URL to: `https://cloud.arcade-ai.com/api/v1/oauth/callback`
+- Copy the client ID and client secret
+
+### Set environment variables
+
+Set the following environment variables:
+
+```bash
+export GITHUB_CLIENT_ID="<your client ID>"
+export GITHUB_CLIENT_SECRET="<your client secret>"
+```
+
+Or, you can set these values in a `.env` file:
+
+```bash
+GITHUB_CLIENT_ID="<your client ID>"
+GITHUB_CLIENT_SECRET="<your client secret>"
+```
+
+<Tip>
+  See [configuration](/guides/configuration) for more information on how to set
+  environment variables and configure the Arcade Engine.
+</Tip>
+
+### Configure Arcade Engine
+
+Edit the `engine.yaml` file and set the following values in the `auth.providers`
+section:
+
+```yaml
+auth:
+  providers:
+    - id: github
+      client_id: "${env:GITHUB_CLIENT_ID}"
+      client_secret: "${env:GITHUB_CLIENT_SECRET}"
+```
+
+</Steps>
+
+## Using GitHub auth in custom tools
+
+If the tools available in the
+[Arcade GitHub toolkit](/integrations/toolkits/github) don't meet your needs,
+you can author your own [custom tools](/guides/custom-tools) that call the
+GitHub API. The GitHub auth provider works with any custom tool that needs to
+call the GitHub API.
+
+Use the `GitHub()` auth class to specify that a tool requires authorization with
+GitHub. The `context.authorization.token` field will be automatically populated
+with the user's GitHub token:
+
+````python {2,4,17}
+from arcade.sdk import tool
+from arcade.sdk.auth import GitHub
+
+@tool(requires_auth=GitHub())
+async def count_stargazers(
+    context: ToolContext,
+    owner: Annotated[str, "The owner of the repository"],
+    name: Annotated[str, "The name of the repository"],
+) -> Annotated[int, "The number of stargazers (stars) for the specified repository"]:
+    """Count the number of stargazers (stars) for a GitHub repository.
+    For example, to count the number of stars for microsoft/vscode, you would use:
+    ```
+    count_stargazers(owner="microsoft", name="vscode")
+    ```
+    """
+
+    token = context.authorization.token
+    # TODO: Call the GitHub API with this token!
+````
+
+## Using GitHub auth in agents and custom workflows
+
+You can use the GitHub auth provider in your own agents and custom workflows
+without defining tools, if that better fits your codebase. See
+[authorizing agents with Arcade](/guides/agentauth) for more context on how this
+works.
+
+```python {1,7}
+from arcade.client.schema import AuthProvider
+
+user_id = "user@example.com"
+
+# Start the authorization process
+auth_response = client.auth.authorize(
+    provider=AuthProvider.github,
+    user_id=user_id,
+)
+```
