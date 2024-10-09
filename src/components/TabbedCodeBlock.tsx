@@ -15,13 +15,13 @@ interface CodeTabSwitcherProps {
 }
 
 const CodeTabSwitcher = ({ tabs }: CodeTabSwitcherProps) => {
+    const [isExpanded, setIsExpanded] = useState(false);
     const [activeTab, setActiveTab] = useState(0);
     const [selectedLanguage, setSelectedLanguage] = useState('Python');
     const [selectedExample, setSelectedExample] = useState(0);
     const [theme, setTheme] = useState<'light' | 'dark'>('light');
     const [fileContent, setFileContent] = useState('');
 
-    // Watch for changes between light and dark mode and update the code block theme accordingly
     useEffect(() => {
         const updateTheme = () => {
             const htmlElement = document.documentElement;
@@ -31,7 +31,6 @@ const CodeTabSwitcher = ({ tabs }: CodeTabSwitcherProps) => {
 
         updateTheme();
 
-        // Create a MutationObserver to watch for changes
         const observer = new MutationObserver(updateTheme);
         observer.observe(document.documentElement, {
             attributes: true,
@@ -41,9 +40,9 @@ const CodeTabSwitcher = ({ tabs }: CodeTabSwitcherProps) => {
         return () => observer.disconnect();
     }, []);
 
-    // Fetch the file content for the selected tab and example
     useEffect(() => {
         const fetchFileContent = async () => {
+            if (!isExpanded) return;
             const filePath = tabs[activeTab].content[selectedLanguage][selectedExample];
             try {
                 const response = await fetch(filePath);
@@ -59,7 +58,15 @@ const CodeTabSwitcher = ({ tabs }: CodeTabSwitcherProps) => {
         };
 
         fetchFileContent();
-    }, [activeTab, selectedLanguage, selectedExample, tabs]);
+    }, [isExpanded, activeTab, selectedLanguage, selectedExample, tabs]);
+
+    if (!isExpanded) {
+        return (
+            <button className={styles.button} onClick={() => setIsExpanded(true)}>
+                See Example &gt;
+            </button>
+        );
+    }
 
     return (
       <div>
@@ -76,6 +83,10 @@ const CodeTabSwitcher = ({ tabs }: CodeTabSwitcherProps) => {
               </option>
             ))}
           </select>
+          <div style={{ flexGrow: 1 }}></div> {/* This is to push the collapse button to the right */}
+          <button className={styles.button} onClick={() => setIsExpanded(false)}>
+            X {/* TODO: Make this look prettier than just an X */}
+          </button>
         </div>
 
         <div className={styles.tabContent}>
