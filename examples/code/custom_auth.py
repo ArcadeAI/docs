@@ -1,11 +1,15 @@
-from arcade.client.errors import APITimeoutError
+from arcade.client import Arcade
 from arcade.client.schema import AuthProvider
+from arcade.client.errors import APITimeoutError
+
+client = Arcade(api_key="your_api_key")
 
 user_id = "user@example.com"
 
 # Start the authorization process
 auth_response = client.auth.authorize(
-    provider=AuthProvider.github,
+    provider=AuthProvider.google,
+    scopes=["https://www.googleapis.com/auth/gmail.readonly"],
     user_id=user_id,
 )
 
