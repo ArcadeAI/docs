@@ -1,50 +1,33 @@
 # GitHub auth provider
 
-The GitHub auth provider enables tools and agents to call GitHub APIs on behalf
-of a user. This lets your agents and AI apps:
-
-- Call the
-  [GitHub API](https://docs.github.com/en/rest/overview/resources-in-the-rest-api)
-  on behalf of the user
-- Access private repositories (with the user's permission)
-
-Behind the scenes, the Arcade Engine and the GitHub auth provider seamlessly
-manage GitHub OAuth 2.0 authorization for your users.
+The GitHub auth provider enables tools and agents to call [GitHub APIs](https://docs.github.com/en/rest/overview/resources-in-the-rest-api) on behalf of a user. Behind the scenes, the Arcade Engine and the GitHub auth provider seamlessly manage GitHub OAuth 2.0 authorization for your users.
 
 <Tip>
   Want to quickly get started with GitHub in your agent or AI app? The pre-built
   [Arcade GitHub toolkit](/integrations/toolkits/github) is what you want!
 </Tip>
 
-### What's here
+### What's documented here
 
-This page describes how to use and configure the GitHub auth provider with
-Arcade AI. This auth provider is used by:
+This page describes how to use and configure GitHub auth with Arcade AI.
 
-- The [Arcade GitHub toolkit](/integrations/toolkits/github), which provides
-  pre-built tools for interacting with GitHub
-- Your [app code](#using-github-auth-in-your-app-code) that needs to call the
-  GitHub API
-- Or, your [custom tools](#using-github-auth-in-customtools) that need to call
-  the GitHub API
+This auth provider is used by:
+
+- The [Arcade GitHub toolkit](/integrations/toolkits/github), which provides pre-built tools for interacting with GitHub
+- Your [app code](#using-github-auth-in-your-app-code) that needs to call the GitHub API
+- Or, your [custom tools](#using-github-auth-in-customtools) that need to call the GitHub API
 
 ## Configuring GitHub auth
 
-Where you configure the GitHub auth provider depends on whether you use the
-Arcade [Cloud Engine](/home/cloud-engine) or a
-[self-hosted Engine](/guides/installation).
+Where you configure the GitHub auth provider depends on whether you use the Arcade [Cloud Engine](/home/cloud-engine) or a [self-hosted Engine](/guides/installation).
 
-With the Arcade Cloud Engine, you can build and test GitHub auth without any
-configuration. Your users will see `Arcade AI (demo)` as the name of the
-application that's requesting permission.
+With the Arcade Cloud Engine, you can start building and testing GitHub auth without any configuration. Your users will see `Arcade AI (demo)` as the name of the application that's requesting permission.
 
-When you are ready to go to production, you can configure the GitHub auth
-provider with your own GitHub app credentials.
+When you are ready to go to production, you'll want to configure the GitHub auth provider with your own GitHub app credentials, so users see your app name when they authorize access.
 
 ### Create a GitHub app
 
-- Follow GitHub's guide to
-  [registering a GitHub app](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app)
+- Follow GitHub's guide to [registering a GitHub app](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app)
 - Choose the permissions you need for your app
 - Set the redirect URL to: `https://cloud.arcade-ai.com/api/v1/oauth/callback`
 - Copy the client ID and client secret
@@ -56,7 +39,7 @@ provider with your own GitHub app credentials.
   configuring auth providers.
 </Warning>
 
-### Configuring GitHub auth with a self-hosted Engine
+### Configuring GitHub auth with a self-hosted Arcade Engine
 
 <Steps>
 
@@ -81,10 +64,9 @@ GITHUB_CLIENT_SECRET="<your client secret>"
   environment variables and configure the Arcade Engine.
 </Tip>
 
-### Configure Arcade Engine
+### Edit the Engine configuration
 
-Edit the `engine.yaml` file and add a `github` item to the `auth.providers`
-section:
+Edit the `engine.yaml` file and add a `github` item to the `auth.providers` section:
 
 ```yaml file=<rootDir>/examples/code/integrations/github/engine.example.yaml {3-5}
 
@@ -94,27 +76,21 @@ section:
 
 ## Using GitHub auth in app code
 
-Use the GitHub auth provider in your own agents and AI apps to get a user token
-for the GitHub API. See [authorizing agents with Arcade](/guides/agentauth) to
-understand more about how this works.
+Use the GitHub auth provider in your own agents and AI apps to get a user token for the GitHub API. See [authorizing agents with Arcade](/guides/agentauth) to understand how this works.
 
-```python file=<rootDir>/examples/code/integrations/github/custom_auth.py {1,7}
+Use `client.auth.authorize()` to get a user token for the GitHub API:
+
+```python file=<rootDir>/examples/code/integrations/github/custom_auth.py {7-10}
 
 ```
 
 ## Using GitHub auth in custom tools
 
-The Arcade [LLM API](/guides/llmtoolcalling) provides a a convenient way to call
-LLMs and automatically invoke tools.
+The Arcade [LLM API](/guides/llmtoolcalling) is a convenient way to call LLMs and automatically invoke tools. You can use the pre-built [Arcade GitHub toolkit](/integrations/toolkits/github) to quickly build agents and AI apps that interact with GitHub.
 
-If the tools available in the
-[Arcade GitHub toolkit](/integrations/toolkits/github) don't meet your needs,
-you can author your own [custom tools](/guides/customtools) that interact with
-the GitHub API.
+If the pre-built tools in the GitHub toolkit don't meet your needs, you can author your own [custom tools](/guides/customtools) that interact with the GitHub API.
 
-Use the `GitHub()` auth class to specify that a tool requires authorization with
-GitHub. The `context.authorization.token` field will be automatically populated
-with the user's GitHub token:
+Use the `GitHub()` auth class to specify that a tool requires authorization with GitHub. The `context.authorization.token` field will be automatically populated with the user's GitHub token:
 
 ```python file=<rootDir>/examples/code/integrations/github/custom_tool.py {2,5,13}
 
