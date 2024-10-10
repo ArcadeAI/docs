@@ -1,24 +1,29 @@
 import CustomLayout from "@components/CustomLayout";
 import { Footer } from "@components/Footer";
 import { Hero } from "@components/Hero";
-import Discord from '@components/icons/discord';
+import Discord from "@components/icons/discord";
 import { Logo } from "@components/Logo";
 import { SEO } from "@components/SEO";
 import { titleRenderer } from "@components/TopNav";
-import GitHub from '@geist-ui/react-icons/github';
+import GitHub from "@geist-ui/react-icons/github";
 import { Check, Important, Info, Note, Tip, Warning } from "@markdown/Callouts";
 import { Card, Cards } from "@markdown/Cards";
 import { DarkOnly, LightOnly } from "@markdown/ThemeContent";
-import { DocsThemeConfig, Card as NavCard, Cards as NavCards, Steps } from 'nextra-theme-docs';
+import {
+  DocsThemeConfig,
+  Card as NavCard,
+  Cards as NavCards,
+  Steps,
+} from "nextra-theme-docs";
 
 const config: DocsThemeConfig = {
   primaryHue: { dark: 335, light: 335 }, // Hue for #ED155D
   logo: <Logo />,
   search: {
-    placeholder: 'Search...',
+    placeholder: "Search...",
   },
   chat: {
-    link: 'https://discord.gg/6WjJz3gQ',
+    link: "https://discord.gg/6WjJz3gQ",
     icon: <Discord />,
   },
   docsRepositoryBase: "https://github.com/ArcadeAI/docs",
@@ -26,7 +31,7 @@ const config: DocsThemeConfig = {
     component: () => null, // Provide a no-op component to disable the edit link
   },
   project: {
-    link: 'https://github.com/ArcadeAI/arcade-ai',
+    link: "https://github.com/ArcadeAI/arcade-ai",
     icon: <GitHub />,
   },
   sidebar: {

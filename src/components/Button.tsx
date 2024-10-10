@@ -1,28 +1,26 @@
-import Link from 'next/link'
-import React from 'react'
-
-
+import Link from "next/link";
+import React from "react";
 
 export const ExternalLink = ({
-    children,
-    href,
-    ...rest
+  children,
+  href,
+  ...rest
 }: {
-    children: React.ReactNode
-    href: string
-    [key: string]: any
+  children: React.ReactNode;
+  href: string;
+  [key: string]: any;
 }) => {
-    return (
-        <a href={href} {...rest} target="_blank" className="button">
-            {children}
-        </a>
-    )
-}
+  return (
+    <a href={href} {...rest} target="_blank" className="button">
+      {children}
+    </a>
+  );
+};
 
 export const Button = ({ children, href }) => (
-    <Link href={href}>
-        <button className="button px-4 py-2 text-sm sm:text-base">
-            {children}
-        </button>
-    </Link>
+  <Link href={href}>
+    <button className="button px-4 py-2 text-sm sm:text-base">
+      {children}
+    </button>
+  </Link>
 );
