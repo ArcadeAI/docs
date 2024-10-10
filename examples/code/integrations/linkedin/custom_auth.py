@@ -1,5 +1,7 @@
 from arcade.client.errors import APITimeoutError
-from arcade.client.schema import AuthProvider
+from arcade.client import Arcade, AuthProvider
+
+client = Arcade()
 
 user_id = "user@example.com"
 

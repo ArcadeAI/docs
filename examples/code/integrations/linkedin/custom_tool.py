@@ -47,8 +47,7 @@ async def create_text_post(
     }
 
     async with httpx.AsyncClient() as client:
-        response = await client.request(
-            method="POST",
+        response = await client.post(
             url=f"https://api.linkedin.com/v2/{endpoint}",
             headers=headers,
             json=payload,
