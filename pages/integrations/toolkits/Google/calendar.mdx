@@ -1,9 +1,8 @@
 # Calendar
 
-<br />
-
 import ToolInfo from '@/components/ToolInfo';
 import Badges from '@/components/Badges';
+import TabbedCodeBlock from '@/components/TabbedCodeBlock';
 
 <ToolInfo
   description="Enable agents to interact with Google Calendar events."
@@ -15,6 +14,10 @@ import Badges from '@/components/Badges';
 
 <Badges repo="arcadeai/arcade_google" />
 
+The Arcade AI Calendar toolkit provides a pre-built set of tools for interacting with
+Google Calendar. These tools make it easy to build agents and AI apps that can:
+
+- Create, update, list, and delete events
 
 ## Install
 
@@ -23,20 +26,33 @@ pip install arcade_google
 ```
 ## Auth
 
-**Toolkit Scopes:**
+The Arcade AI Calendar toolkit uses the
+[Google auth provider](/integrations/auth/google) to connect to users' Google
+accounts.
 
-- `https://www.googleapis.com/auth/calendar.readonly`
-- `https://www.googleapis.com/auth/calendar.events`
-- `https://www.googleapis.com/auth/calendar`
+With the hosted Arcade AI Engine, there's nothing to configure. Your users will see
+`Arcade AI (demo)` as the name of the application that's requesting permission.
 
-**Global Environment Variables:**
+<Warning type="warning" emoji="⚠️">
+  The hosted Arcade Engine is intended for demo and testing purposes only, not
+  for production use. To use Arcade AI and Google Calendar in production, you must
+  use a self-hosted instance of the Arcade Engine.
+</Warning>
 
-- None
-
-
-
+With a self-hosted installation of Arcade AI, you need to
+[configure the Google auth provider](/integrations/auth/google#configuring-google-auth)
+with your own Google app credentials.
 
 ## Available Tools
+
+These tools are currently available in the Arcade AI GitHub toolkit.
+
+<Tip>
+  If you need to perform an action that's not listed here, you can [get in touch
+  with us](mailto:contact@arcade-ai.com) to request a new tool, or [create your
+  own tools](/guides/customtools) with the [GitHub auth
+  provider](/integrations/auth/github#using-github-auth-in-customtools).
+</Tip>
 
 | Tool Name      | Description                                   |
 |----------------|-----------------------------------------------|
@@ -48,26 +64,33 @@ pip install arcade_google
 ---
 
 ## CreateEvent
+<br />
+<TabbedCodeBlock tabs={[
+  {
+    label: 'Example: Calling LLM that executes the tool',
+    content: {
+      Python: ['/examples/integrations/toolkits/google/calendar/create_event_example_1.py'],
+      JavaScript: ['Coming Soon'],
+    },
+  },
+  {
+    label: 'Example: Calling the Tool with User Authorization',
+    content: {
+      Python: ['/examples/integrations/toolkits/google/calendar/create_event_example_2.py'],
+      JavaScript: ['Coming Soon'],
+    },
+  },
+]} />
 
 Create a new event in the specified calendar.
-
-**Auth:**
-
-- **Scopes Required:**
-  - `https://www.googleapis.com/auth/calendar.events`
-  - `https://www.googleapis.com/auth/calendar`
-
-**Environment Variables:**
-
-- None
 
 **Parameters**
 
 - **`summary`** _(string, Required)_ The title of the event.
-- **`start_date`** _(string, Required)_ The day the event starts.
-- **`start_time`** _(string, Required)_ The time the event starts.
-- **`end_date`** _(string, Required)_ The day the event ends.
-- **`end_time`** _(string, Required)_ The time the event ends.
+- **`start_date`** _(enum ([DateRange](/integrations/toolkits/Google/common#daterange)), Required)_ The day the event starts.
+- **`start_time`** _(enum ([TimeSlot](/integrations/toolkits/Google/common#timeslot)), Required)_ The time the event starts.
+- **`end_date`** _(enum ([DateRange](/integrations/toolkits/Google/common#daterange)), Required)_ The day the event ends.
+- **`end_time`** _(enum ([TimeSlot](/integrations/toolkits/Google/common#timeslot)), Required)_ The time the event ends.
 - **`calendar_id`** _(string, Optional, Defaults to `'primary'`)_ The ID of the calendar.
 - **`description`** _(string, Optional)_ The description of the event.
 - **`location`** _(string, Optional)_ The location of the event.
@@ -77,50 +100,65 @@ Create a new event in the specified calendar.
 ---
 
 ## ListEvents
+<br />
+<TabbedCodeBlock tabs={[
+  {
+    label: 'Example: Calling LLM that executes the tool',
+    content: {
+      Python: ['/examples/integrations/toolkits/google/calendar/list_events_example_1.py'],
+      JavaScript: ['Coming Soon'],
+    },
+  },
+  {
+    label: 'Example: Calling the Tool with User Authorization',
+    content: {
+      Python: ['/examples/integrations/toolkits/google/calendar/list_events_example_2.py'],
+      JavaScript: ['Coming Soon'],
+    },
+  },
+]} />
 
 List events from the specified calendar within the given date range.
 
-**Auth:**
-
-- **Scopes Required:**
-  - `https://www.googleapis.com/auth/calendar.readonly`
-
-**Environment Variables:**
-
-- None
-
 **Parameters**
 
-- **`min_day`** _(string, Required)_ Events ending on or after this day.
-- **`min_time_slot`** _(string, Required)_ Events ending after this time.
-- **`max_day`** _(string, Required)_ Events starting on or before this day.
-- **`max_time_slot`** _(string, Required)_ Events starting before this time.
+- **`min_day`** _(enum ([Day](/integrations/toolkits/Google/common#day)), Required)_ Events ending on or after this day.
+- **`min_time_slot`** _(enum ([TimeSlot](/integrations/toolkits/Google/common#timeslot)), Required)_ Events ending after this time.
+- **`max_day`** _(enum ([Day](/integrations/toolkits/Google/common#day)), Required)_ Events starting on or before this day.
+- **`max_time_slot`** _(enum ([TimeSlot](/integrations/toolkits/Google/common#timeslot)), Required)_ Events starting before this time.
 - **`calendar_id`** _(string, Optional, Defaults to `'primary'`)_ The ID of the calendar.
 - **`max_results`** _(integer, Optional, Defaults to `10`)_ Maximum number of events to return.
 
 ---
 
 ## UpdateEvent
+<br />
+<TabbedCodeBlock tabs={[
+  {
+    label: 'Example: Calling LLM that executes the tool',
+    content: {
+      Python: ['/examples/integrations/toolkits/google/calendar/update_event_example_1.py'],
+      JavaScript: ['Coming Soon'],
+    },
+  },
+  {
+    label: 'Example: Calling the Tool with User Authorization',
+    content: {
+      Python: ['/examples/integrations/toolkits/google/calendar/update_event_example_2.py'],
+      JavaScript: ['Coming Soon'],
+    },
+  },
+]} />
 
 Update an existing event with provided details.
-
-**Auth:**
-
-- **Scopes Required:**
-  - `https://www.googleapis.com/auth/calendar.events`
-  - `https://www.googleapis.com/auth/calendar`
-
-**Environment Variables:**
-
-- None
 
 **Parameters**
 
 - **`event_id`** _(string, Required)_ The ID of the event to update.
-- **`updated_start_day`** _(string, Optional)_ Updated start day.
-- **`updated_start_time`** _(string, Optional)_ Updated start time.
-- **`updated_end_day`** _(string, Optional)_ Updated end day.
-- **`updated_end_time`** _(string, Optional)_ Updated end time.
+- **`updated_start_day`** _(enum ([Day](/integrations/toolkits/Google/common#day)), Optional)_ Updated start day.
+- **`updated_start_time`** _(enum ([TimeSlot](/integrations/toolkits/Google/common#timeslot)), Optional)_ Updated start time.
+- **`updated_end_day`** _(enum ([Day](/integrations/toolkits/Google/common#day)), Optional)_ Updated end day.
+- **`updated_end_time`** _(enum ([TimeSlot](/integrations/toolkits/Google/common#timeslot)), Optional)_ Updated end time.
 - **`updated_calendar_id`** _(string, Optional)_ Updated calendar ID.
 - **`updated_summary`** _(string, Optional)_ Updated event title.
 - **`updated_description`** _(string, Optional)_ Updated description.
@@ -128,25 +166,33 @@ Update an existing event with provided details.
 - **`updated_visibility`** _(string, Optional)_ Updated visibility.
 - **`attendee_emails_to_add`** _(array of strings, Optional)_ Attendee emails to add.
 - **`attendee_emails_to_remove`** _(array of strings, Optional)_ Attendee emails to remove.
-- **`send_updates`** _(string, Optional, Defaults to `'all'`)_ Who to notify about the update (`'all'`, `'externalOnly'`, `'none'`).
+- **`send_updates`** _(enum ([SendUpdatesOptions](/integrations/toolkits/Google/common#sendupdatesoptions)), Optional, Defaults to `'all'`)_ Who to notify about the update.
 
 ---
 
 ## DeleteEvent
+<br />
+<TabbedCodeBlock tabs={[
+  {
+    label: 'Example: Calling LLM that executes the tool',
+    content: {
+      Python: ['/examples/integrations/toolkits/google/calendar/delete_event_example_1.py'],
+      JavaScript: ['Coming Soon'],
+    },
+  },
+  {
+    label: 'Example: Calling the Tool with User Authorization',
+    content: {
+      Python: ['/examples/integrations/toolkits/google/calendar/delete_event_example_2.py'],
+      JavaScript: ['Coming Soon'],
+    },
+  },
+]} />
 
 Delete an event from Google Calendar.
-
-**Auth:**
-
-- **Scopes Required:**
-  - `https://www.googleapis.com/auth/calendar.events`
-
-**Environment Variables:**
-
-- None
 
 **Parameters**
 
 - **`event_id`** _(string, Required)_ The ID of the event to delete.
 - **`calendar_id`** _(string, Optional, Defaults to `'primary'`)_ The ID of the calendar.
-- **`send_updates`** _(string, Optional, Defaults to `'all'`)_ Who to notify about the deletion (`'all'`, `'externalOnly'`, `'none'`).
+- **`send_updates`** _(enum ([SendUpdatesOptions](/integrations/toolkits/Google/common#sendupdatesoptions)), Optional, Defaults to `'all'`)_ Who to notify about the deletion.
