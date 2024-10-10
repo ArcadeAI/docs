@@ -1,11 +1,8 @@
 # Evaluation Framework
 
-In deploying language models (LLMs) that can interact with tools in production environments, it's crucial to ensure
-that these models can not only efficiently utilize the available tools (traditional testing) but also understand user
-intents and predict the correct tools to use to fulfill those intents (evaluation).
+In deploying language models (LLMs) that can interact with tools in production environments, it's crucial to ensure that these models can not only efficiently utilize the available tools (traditional testing) but also understand user intents and predict the correct tools to use to fulfill those intents (evaluation).
 
-The Arcade AI Evaluation Framework provides a structured approach to evaluate and validate the tool-calling capabilities
- of LLMs, ensuring they perform as expected.
+The Arcade AI Evaluation Framework provides a structured approach to evaluate and validate the tool-calling capabilities of LLMs, ensuring they perform as expected.
 
 ## Why Evaluate Tool Calling by Task?
 
@@ -29,9 +26,9 @@ The evaluation result includes:
 
 - **Score**: A normalized value between 0.0 and 1.0.
 - **Result**:
-    - *Passed*: Score is above the fail threshold.
-    - *Failed*: Score is below the fail threshold.
-    - *Warned*: Score is between the warning and fail thresholds.
+  - _Passed_: Score is above the fail threshold.
+  - _Failed_: Score is below the fail threshold.
+  - _Warned_: Score is between the warning and fail thresholds.
 
 ## Critics: Types and Usage
 
@@ -39,22 +36,21 @@ Critics are essential for evaluating the correctness of tool call arguments. Dif
 
 ### BinaryCritic
 
-``BinaryCritic``s  check for exact matches between expected and actual values after casting.
+`BinaryCritic`s check for exact matches between expected and actual values after casting.
 
 - **Use Case**: When exact values are required (e.g., specific numeric parameters).
 - **Example**: Ensuring the model provides the exact user ID in a function call.
 
 ### NumericCritic
 
-
-``NumericCritic`` evaluates numeric values within a specified range, allowing for acceptable deviations.
+`NumericCritic` evaluates numeric values within a specified range, allowing for acceptable deviations.
 
 - **Use Case**: When values can be approximate but should be within a certain threshold.
 - **Example**: Accepting approximate results in mathematical computations due to floating-point precision.
 
 ### SimilarityCritic
 
-``SimilarityCritic`` measures the similarity between expected and actual string values using metrics like cosine similarity.
+`SimilarityCritic` measures the similarity between expected and actual string values using metrics like cosine similarity.
 
 - **Use Case**: When the exact wording isn't critical, but the content should be similar.
 - **Example**: Evaluating if the message content in a communication tool is similar to the expected message.
@@ -62,7 +58,6 @@ Critics are essential for evaluating the correctness of tool call arguments. Dif
 #### Supported metrics
 
 - **Cosine Similarity**: Measures the angle between two vectors in a multi-dimensional space.
-
 
 ### Choosing the Right Critic
 
@@ -103,7 +98,6 @@ rubric = EvalRubric(
     tool_selection_weight=1.0,
 )
 ```
-
 
 ## Building an Evaluation Suite
 
@@ -146,4 +140,3 @@ An evaluation suite for Slack messaging tools might include cases such as:
   - **Critics**:
     - `BinaryCritic` for `channel_name`
     - `SimilarityCritic` for `message`
-

@@ -1,64 +1,51 @@
 # Purpose
 
-Arcade AI bridges the gap between LLM applications and the real world by
-providing authenticated tool-calling for developers. Traditional AI systems are
-powerful yet isolated, lacking the means to interact with external data and
-services securely. Arcade AI solves this by offering a platform where AI can
-perform real-world actions on behalf of users, access user-specific data, and
-integrate with a wide range of services.
+Arcade AI bridges the gap between LLM applications and the real world by providing authenticated tool-calling for developers. Traditional AI systems are powerful yet isolated, lacking the means to interact with external data and services securely. Arcade AI solves this by offering a platform where AI can perform real-world actions on behalf of users, access user-specific data, and integrate with a wide range of services.
 
-Consider the difference between accessing public information and private user
-data:
+Consider the difference between accessing public information and private user data:
 
--   **Tools that don't require authorization**: Some tools, like
-    `search.GoogleSearch`, allow AI agents to retrieve information from the web
-    without needing user-specific authorization.
+- **Tools that don't require authorization**: Some tools, like `search.GoogleSearch`, allow AI agents to retrieve information from the web without needing user-specific authorization.
 
-    ```python
-    from arcade.client import Arcade
+  ```python
+  from arcade.client import Arcade
 
-    client = Arcade()
+  client = Arcade()
 
-    # Use the search.GoogleSearch tool to perform a web search
-    search_response = client.tool.run(
-        tool_name="search.GoogleSearch",
-        inputs={"query": "Latest AI advancements"},
-    )
-    print(search_response)
-    ```
+  # Use the search.GoogleSearch tool to perform a web search
+  search_response = client.tool.run(
+      tool_name="search.GoogleSearch",
+      inputs={"query": "Latest AI advancements"},
+  )
+  print(search_response)
+  ```
 
--   **Tools that require authorization**: Other tools, like `Google.ListEmails`,
-    require user authorization to access private data such as emails.
+- **Tools that require authorization**: Other tools, like `Google.ListEmails`, require user authorization to access private data such as emails.
 
-    ```python
-    from arcade.client import Arcade
+  ```python
+  from arcade.client import Arcade
 
-    client = Arcade()
+  client = Arcade()
 
-    # Unique identifier for the end user
-    user_id = "user@example.com"
+  # Unique identifier for the end user
+  user_id = "user@example.com"
 
-    # Request access to the user's Gmail account
-    auth_response = client.tools.authorize(
-        tool_name="Google.ListEmails",
-        user_id=user_id,
-    )
+  # Request access to the user's Gmail account
+  auth_response = client.tools.authorize(
+      tool_name="Google.ListEmails",
+      user_id=user_id,
+  )
 
-    print(f"Please authorize access by visiting: {auth_response.auth_url}")
+  print(f"Please authorize access by visiting: {auth_response.auth_url}")
 
-    # Wait for the user to authorize and then run the tool
-    # (Assume authorization is completed)
-    emails_response = client.tools.run(
-        tool_name="Google.ListEmails",
-        user_id=user_id,
-    )
-    print(emails_response)
-    ```
+  # Wait for the user to authorize and then run the tool
+  # (Assume authorization is completed)
+  emails_response = client.tools.run(
+      tool_name="Google.ListEmails",
+      user_id=user_id,
+  )
+  print(emails_response)
+  ```
 
-By managing authorization seamlessly, Arcade AI enables your AI applications to
-securely access user-specific data and perform actions on behalf of users. This
-removes authorization roadblocks and simplifies complex integrations, allowing
-you to build AI solutions that are both conversational and actionable.
+By managing authorization seamlessly, Arcade AI enables your AI applications to securely access user-specific data and perform actions on behalf of users. This removes authorization roadblocks and simplifies complex integrations, allowing you to build AI solutions that are both conversational and actionable.
 
-Let's explore how Arcade AI is redefining what's possible with AI through
-authenticated tool-calling.
+Let's explore how Arcade AI is redefining what's possible with AI through authenticated tool-calling.
