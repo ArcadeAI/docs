@@ -1,8 +1,11 @@
 # Evaluation Framework
 
-In deploying language models (LLMs) that can interact with tools in production environments, it's crucial to ensure that these models can not only efficiently utilize the available tools (traditional testing) but also understand user intents and predict the correct tools to use to fulfill those intents (evaluation).
+When deploying language models (LLMs) with tool-calling capabilities in production environments, it's essential to ensure their effectiveness and reliability. This evaluation process goes beyond traditional testing and focuses on two key aspects:
 
-The Arcade AI Evaluation Framework provides a structured approach to evaluate and validate the tool-calling capabilities of LLMs, ensuring they perform as expected.
+1. **Tool Utilization**: Assessing how efficiently the LLM uses the available tools.
+2. **Intent Understanding**: Evaluating the LLM's ability to comprehend user intents and select the appropriate tools to fulfill those intents.
+
+Arcade AI's Evaluation Framework provides a comprehensive approach to assess and validate the tool-calling capabilities of LLMs, ensuring they meet the high standards required for real-world applications.
 
 ## Why Evaluate Tool Calling by Task?
 
@@ -55,6 +58,16 @@ Critics are essential for evaluating the correctness of tool call arguments. Dif
 - **Use Case**: When the exact wording isn't critical, but the content should be similar.
 - **Example**: Evaluating if the message content in a communication tool is similar to the expected message.
 
+### DatetimeCritic
+
+`DatetimeCritic` evaluates the closeness of datetime values within a specified tolerance.
+
+- **Use Case**: When datetime values should be within a certain range of the expected time.
+- **Example**: Verifying if a scheduled event time is close enough to the intended time.
+
+#### Example Usage
+
+
 #### Supported metrics
 
 - **Cosine Similarity**: Measures the angle between two vectors in a multi-dimensional space.
@@ -64,6 +77,7 @@ Critics are essential for evaluating the correctness of tool call arguments. Dif
 - **Exact Matches Needed**: Use **BinaryCritic** for strict equality.
 - **Numeric Ranges**: Use **NumericCritic** when a tolerance is acceptable.
 - **Textual Similarity**: Use **SimilarityCritic** for comparing messages or descriptions.
+- **Datetime Tolerance**: Use **DatetimeCritic** when a tolerance is acceptable for datetime comparisons.
 
 Critics are defined with fields such as `critic_field`, `weight`, and parameters specific to their types (e.g., `similarity_threshold` for `SimilarityCritic`).
 
