@@ -18,8 +18,8 @@ application.
 
 ### Prerequisites
 
--   [Set up Arcade AI](/guides/quickstart)
--   Install the Arcade Client:
+- [Set up Arcade AI](/guides/quickstart)
+- Install the Arcade Client:
 
 ```bash
 pip install arcade-ai google-api-python-client google-auth-httplib2 google-auth-oauthlib
@@ -29,27 +29,16 @@ pip install arcade-ai google-api-python-client google-auth-httplib2 google-auth-
 
 Create an instance of the Arcade client:
 
-```python
-from arcade.client import Arcade
+```python file=<rootDir>/examples/code/guides/agentauth/auth_with_google.py#L1-L5 {5}
 
-client = Arcade(api_key="your_api_key")
 ```
 
 ### Initiate an authorization request
 
 Use `client.auth.authorize` to initiate the authorization process:
 
-```python
-from arcade.client.schema import AuthProvider
+```python file=<rootDir>/examples/code/guides/agentauth/auth_with_google.py#L7-L14 {4-8}
 
-user_id = "user@example.com"
-
-# Start the authorization process
-auth_response = client.auth.authorize(
-    provider=AuthProvider.Google,
-    scopes=["https://www.googleapis.com/auth/gmail.readonly"],
-    user_id=user_id,
-)
 ```
 
 ### Guide the user through authorization
@@ -57,22 +46,16 @@ auth_response = client.auth.authorize(
 If authorization is not completed, prompt the user to visit the authorization
 URL:
 
-```python
-if auth_response.status != "completed":
-    print("Please complete the authorization challenge in your browser:")
-    print(auth_response.auth_url)
+```python file=<rootDir>/examples/code/guides/agentauth/auth_with_google.py#L16-L18
+
 ```
 
 ### Poll for authorization status
 
 Wait for the user to complete authorization and poll for the status:
 
-```python
-import time
+```python file=<rootDir>/examples/code/guides/agentauth/auth_with_google.py#L20-L24
 
-while auth_response.status != "completed":
-    time.sleep(5)
-    auth_response = client.auth.status(auth_response)
 ```
 
 ### Use the obtained token
@@ -80,18 +63,8 @@ while auth_response.status != "completed":
 Once authorization is complete, you can use the obtained token to access the
 third-party service:
 
-```python
-from google.oauth2.credentials import Credentials
-from googleapiclient.discovery import build
+```python file=<rootDir>/examples/code/guides/agentauth/use_token_with_google.py {5}
 
-# Use the token from the authorization response
-creds = Credentials(auth_response.context.token)
-service = build('gmail', 'v1', credentials=creds)
-
-# Now you can use the Google API
-results = service.users().labels().list(userId='me').execute()
-labels = results.get('labels', [])
-print('Labels:', labels)
 ```
 
 </Steps>
