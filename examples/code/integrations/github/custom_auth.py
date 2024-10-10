@@ -20,3 +20,6 @@ while auth_response.status != "completed":
         auth_response = client.auth.status(auth_response, wait=60)
     except APITimeoutError:
         continue
+
+token = auth_response.context.token
+# Do something interesting with the token...
