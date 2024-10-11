@@ -93,21 +93,36 @@ const CodeTabSwitcher = ({ tabs }: CodeTabSwitcherProps) => {
             </option>
           ))}
         </select>
-        <div style={{ flexGrow: 1 }}></div>{" "}
-        {/* This is to push the collapse button to the right */}
-        <button className={styles.button} onClick={() => setIsExpanded(false)}>
-          X {/* TODO: Make this look prettier than just an X */}
-        </button>
+        {/* Collapse button */}
+        {/* <div style={{ flexGrow: 1 }}></div>{" "} */}
+        {/* <button className={styles.button} onClick={() => setIsExpanded(false)}> */}
+          {/* X */}
+        {/* </button> */}
       </div>
 
       <div className={styles.tabContent}>
-        <SyntaxHighlighter
-          language={selectedLanguage.toLowerCase()}
-          style={theme === "dark" ? atomDark : atomLight}
-          wrapLines={true}
-        >
-          {fileContent}
-        </SyntaxHighlighter>
+        <div style={{ position: 'relative' }}>
+          <button
+            className={styles.copyButton}
+            onClick={() => {
+              navigator.clipboard.writeText(fileContent);
+              const button = event.target as HTMLButtonElement;
+              button.textContent = 'Copied!';
+              setTimeout(() => {
+                button.textContent = 'Copy';
+              }, 2000);
+            }}
+          >
+            Copy
+          </button>
+          <SyntaxHighlighter
+            language={selectedLanguage.toLowerCase()}
+            style={theme === "dark" ? atomDark : atomLight}
+            wrapLines={true}
+          >
+            {fileContent}
+          </SyntaxHighlighter>
+        </div>
       </div>
     </div>
   );
