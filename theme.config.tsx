@@ -1,3 +1,4 @@
+import ToggleContent from "@/components/ToggleContent";
 import CustomLayout from "@components/CustomLayout";
 import { Footer } from "@components/Footer";
 import { Hero } from "@components/Hero";
@@ -61,6 +62,7 @@ const config: DocsThemeConfig = {
     Tip,
     Important,
     Check,
+    ToggleContent,
   },
   useNextSeoProps: SEO,
   main: ({ children }) => <CustomLayout>{children}</CustomLayout>,
