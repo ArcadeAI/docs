@@ -1,0 +1,53 @@
+---
+title: "Tool Errors"
+description: "Documentation for the different types of tool errors in the Arcade AI Tool SDK"
+---
+
+# Tool errors in Arcade AI
+
+When working with Arcade AI's Tool SDK, you may encounter various types of errors. This guide will help you understand and handle these errors effectively.
+
+## Types of tool errors
+
+Arcade AI defines several error types to handle different scenarios:
+
+1. RetryableToolError
+2. ToolExecutionError
+3. ToolSerializationError
+4. ToolInputError
+5. ToolOutputError
+6. ToolRuntimeError
+
+## Handling errors in your tools
+
+In most cases, you don't need to raise errors explicitly in your tools. The `@tool` decorator takes care of proper error propagation and handling. When an unexpected error occurs during tool execution, Arcade AI's `ToolExecutor` and `@tool` decorator will raise a `ToolExecutionError` with the necessary context and traceback information.
+
+## Common error scenarios
+
+Let's explore some common error scenarios you might encounter:
+
+### 1. Output type mismatch
+
+```json
+{
+  "name": "tool_call_error",
+  "message": "tool call failed - Github.ListOrgRepositories failed: Failed to
+  serialize tool output"
+}
+```
+
+### 2. Unexpected HTTP error during tool execution
+
+```json
+{
+  "name": "tool_call_error",
+  "message": "tool call failed - Github.ListOrgRepositories failed: Error accessing 'https://api.github.com/orgs/a-private-org/repos': Failed to process request. Status code: 401"
+}
+```
+
+### 3. Input parameter of a tool is of the wrong type
+
+```
+Type error encountered while adding tool list_org_repositories from
+arcade_github.tools.repositories. Reason: issubclass() arg 1 must be a class
+```
