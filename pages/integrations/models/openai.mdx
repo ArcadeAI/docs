@@ -1,0 +1,38 @@
+# OpenAI
+
+## Connecting
+
+The default client for connecting to Arcade is the OpenAI Client. To send a chat message to OpenAI through Arcade, you can use the OpenAI
+Client as normal, while swapping out the base URL and API Key with Arcades URL and API Key.
+
+```python
+import os
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://api.arcade-ai.com/v1",
+    api_key=os.environ.get("ARCADE_API_KEY"))
+
+
+response = client.chat.completions.create(
+    model = "gpt-3.5-turbo",
+    user = "user@arcade-ai.com",
+    messages = [
+        {"role": "user", "content": "Tell me a story"}
+    ]
+)
+```
+
+## Configuration
+
+This is a simple example on enabling OpenAI in the Arcade Engine
+
+```yaml
+llm:
+  models:
+    - id: openai
+      openai:
+        api_key: <OPENAI API KEY>
+```
+
+For more advanced configuration, see the [model docs](/home/configuration/models#openai)
