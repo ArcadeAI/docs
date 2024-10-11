@@ -40,36 +40,52 @@ api:
 
 Arcade Engine's configuration is a [YAML file](https://yaml.org/) with the following sections:
 
-- `routers` - Defines routers per model type (e.g., `routers.language`, `routers.speech`). See [router types](/essentials/routers) for more details.
+- `llm/models` - Defines a collection of models to be configured for use.
 - `api` - Configures the server for specific protocols. See [API Configuration](#api-configuration) above.
 - `telemetry` - Configures observability. See [Telemetry](#telemetry) below.
 
 ## Basic Configuration
 
-A simple setup includes a single router and two models. This example shows a failover router using OpenAI and Azure OpenAI. For OpenAI, Cohere, and OctoML, only an API key is needed. For Azure OpenAI, specify a model and base_url.
+This example shows configuration for connecting to OpenAI and Azure OpenAI. For OpenAI, Cohere, and OctoML, only an API key is needed. For Azure OpenAI, specify a model and base_url.
 
-- `language` - Language API endpoint supporting `/chat` from model providers
-- `id` - Unique router ID
-- `strategy` - Router type: round-robin, weighted-round-robin, least-latency, priority
-- `models/id` - Unique model configuration ID
+- `models/id` - Unique model configuration ID.
 
 ```yaml
-routers:
-  language:
-    - id: my-chat-router
-      strategy: priority
-      models:
-        - id: primary
-          openai:
-            api_key: "${env:OPENAI_API_KEY}"
-        - id: secondary
-          azureopenai:
-            api_key: "${env:AZURE_OPENAI_API_KEY}"
-            model: "engine-GPT-35"
-            base_url: "https://mydeployment.openai.azure.com/"
+llm:
+  models:
+    - id: primary
+      openai:
+        api_key: "${env:OPENAI_API_KEY}"
+    - id: secondary
+      azureopenai:
+        api_key: "${env:AZURE_OPENAI_API_KEY}"
+        model: "engine-GPT-35"
+        base_url: "https://mydeployment.openai.azure.com/"
 ```
 
-See [advanced configuration](/essentials/configuration#advanced-configuration) for more details.
+### Routing
+When specifying a model through the API, Arcade will attempt to choose which language provider to use based off of known supported models.
+In the case that two language providers may have the same models or a custom model is used, the provider can be explicitly selected using its `id`.
+
+```python
+## Implicit model selection
+response = client.chat.completions.create(
+    messages=[
+        {"role": "user", "content": "Who is the CEO of Apple?"},
+    ],
+    model="gpt-4o"
+)
+
+## Explicit model selection
+response = client.chat.completions.create(
+    messages=[
+        {"role": "user", "content": "Who is the CEO of Apple?"},
+    ],
+    model="primary/gpt-4o"
+)
+```
+
+See [advanced configuration](/home/configuration/models) for more details.
 
 ## Secrets
 
@@ -128,7 +144,7 @@ telemetry:
     encoding: console
 ```
 
-### Notes:
+### Notes
 
 - The engine service name is set to `arcade_engine`
 - Traces currently cover the `/v1/health` and `/v1/chat/completions` endpoints as well as authentication attempts
@@ -143,17 +159,14 @@ telemetry:
     level: info # debug, info, warning, error, fatal
     encoding: json # console, json
 
-routers:
-  language:
-    - id: simplerouter
-      strategy: priority
-      models:
-        - id: openai-boring
-          openai:
-            model: gpt-3.5-turbo
-            api_key: "sk-"
-            default_params:
-              temperature: 0
+llm:
+  models:
+    - id: openai-boring
+      openai:
+        model: gpt-3.5-turbo
+        api_key: "sk-"
+        default_params:
+          temperature: 0
 
 director:
   directors:
