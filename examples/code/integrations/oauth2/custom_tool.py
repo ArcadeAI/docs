@@ -17,5 +17,8 @@ async def reticulate_splines(
 ):
     """Reticulate the specified number of splines."""
 
+    # Get an access token to call an API
     token = context.authorization.token
-    # Do something interesting with the token...
+
+    # Get user info (if configured and supported by the OAuth 2.0 server):
+    user_id = context.authorization.user_info.get("sub")
