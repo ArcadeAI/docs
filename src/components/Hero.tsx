@@ -10,7 +10,7 @@ export const Hero = () => {
         <img
           src="/images/arcade-hero-1.png"
           alt="Arcade AI Hero"
-          className="w-full h-full object-cover filter blur-sm"
+          className="w-full h-full object-cover filter blur-sm rounded-xl"
         />
         <div className="absolute inset-0 bg-black opacity-50"></div>
       </div>

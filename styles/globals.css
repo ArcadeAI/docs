@@ -8,17 +8,17 @@
   --brand-accent-hover: #f15086;
   --brand-secondary-low: #463ecf;
   --brand-secondary: #ac9cff;
-  --brand-secondary-opacity: #ac9cff80;
+  --brand-secondary-opacity: rgba(172, 156, 255, 0.5);
 
-  --neutral-dark: #151515;
-  --neutral-dark-medium: #252525;
-  --neutral-dark-high: #343434;
-  --neutral-dark-opacity: #ffffff16;
+  --neutral-dark: #1a1a1a;
+  --neutral-dark-medium: #2e2e2e;
+  --neutral-dark-high: #3d3d3d;
+  --neutral-dark-opacity: rgba(255, 255, 255, 0.1);
 
-  --neutral-light: #999999;
-  --neutral-light-medium: #c2c2c2;
-  --neutral-light-high: #f5f5f5;
-  --neutral-light-opacity: #00000016;
+  --neutral-light: #f7f7f7;
+  --neutral-light-medium: #eaeaea;
+  --neutral-light-high: #ffffff;
+  --neutral-light-opacity: rgba(0, 0, 0, 0.1);
 
   --color-highlight: var(--brand-primary);
   --color-accent: var(--brand-accent);
@@ -39,6 +39,60 @@ button:focus-visible {
   box-shadow: none !important;
   outline: 2px solid var(--color-highlight);
   outline-offset: -2px;
+}
+
+/* html[class~=dark] body {
+  background: linear-gradient(180deg, transparent 0, #111 300px), fixed 0 0 / 20px 20px radial-gradient(#313131 1px, transparent 0), fixed 10px 10px / 20px 20px radial-gradient(#313131 1px, transparent 0);
+}
+
+body {
+  background: linear-gradient(180deg, hsla(0, 0%, 100%, 0) 0, #fff 300px), fixed 0 0 / 20px 20px radial-gradient(#d1d1d1 1px, transparent 0), fixed 10px 10px / 20px 20px radial-gradient(#d1d1d1 1px, transparent 0);
+}
+ */
+html[class~=dark] body {
+  background-color: #000000;
+}
+
+html[class~=dark] body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at top left, rgba(237, 21, 93, 0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+body {
+  background-color: #FFFFFF;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at bottom right, rgba(237, 21, 93, 0.1) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+
+
+body .nextra-steps h3:before {
+  color: inherit;
+  font-size: 0.8rem;
+  font-weight: 800;
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  border-radius: .5rem;
+}
+
+.callout a {
+  color: inherit;
 }
 
 /* Layout */
@@ -100,6 +154,8 @@ html[class~="dark"] {
   --shiki-token-link: #6c71c4;
 }
 
+
+
 /* Light Mode Specific */
 html[class~="light"] {
   --text-color: var(--neutral-dark-high);
@@ -152,21 +208,37 @@ html.light .nx-bg-primary-700\/5 {
   text-decoration-color: var(--color-accent);
 }
 
+
+
 /* Navigation */
 .nextra-nav-container {
-  border-top: 4px solid var(--color-highlight);
+  background: transparent !important;
+  box-shadow: none;
+  backdrop-filter: none;
+
 }
 
-.nextra-nav-container .nextra-nav-container-blur {
-  border: none;
+.nextra-nav-container-blur {
+  background: transparent !important;
   box-shadow: none !important;
+}
+
+/* Override background color and box-shadow for the blur container when sticky */
+.nx-sticky > .nextra-nav-container-blur {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.nx-sticky > .nextra-nav-container-blur.nx-bg-white,
+.nx-sticky > .nextra-nav-container-blur.dark\:nx-bg-dark {
+  background-color: transparent !important;
 }
 
 /* Sidebar */
 .nextra-sidebar-container-menu,
 .nextra-toc-meta {
   border: none;
-  box-shadow: none !important;
+  box-shadow: none;
 }
 
 .nextra-sidebar-container > div {
@@ -199,7 +271,11 @@ html.light .nx-bg-primary-700\/5 {
 }
 
 .nextra-sidebar-container ul li.nx-flex {
-  margin-bottom: -0.4rem;
+  margin-bottom: -0.3rem;
+}
+
+.nextra-sidebar-container ul li button {
+  margin-bottom: -0.3rem;
 }
 
 /* Content */
@@ -222,9 +298,10 @@ main div.mt-12 {
   display: flex;
   align-items: flex-start;
   color: var(--text-color) !important;
-  background-color: var(--bg-color) !important;
+
   border: none !important;
 }
+
 
 .nextra-callout .pr-2 {
   padding-right: 1rem;
@@ -284,7 +361,7 @@ main div.mt-12 {
 
 /* Code Snippet */
 article pre {
-  background-color: var(--bg-color) !important;
+
   border: none;
 }
 

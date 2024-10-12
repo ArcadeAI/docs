@@ -20,6 +20,9 @@ import {
 const config: DocsThemeConfig = {
   primaryHue: { dark: 335, light: 335 }, // Hue for #ED155D
   logo: <Logo />,
+  themeSwitch: {
+    component: () => null,
+  },
   search: {
     placeholder: "Search...",
   },
