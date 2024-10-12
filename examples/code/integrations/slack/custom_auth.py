@@ -7,7 +7,13 @@ user_id = "user@example.com"
 
 # Start the authorization process
 auth_response = client.auth.authorize(
-    provider=AuthProvider.github,
+    provider=AuthProvider.slack,
+    scopes=[
+        "chat:write",
+        "im:write",
+        "users.profile:read",
+        "users:read",
+    ],
     user_id=user_id,
 )
 

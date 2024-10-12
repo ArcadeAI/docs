@@ -7,7 +7,8 @@ user_id = "user@example.com"
 
 # Start the authorization process
 auth_response = client.auth.authorize(
-    provider=AuthProvider.github,
+    provider=AuthProvider.zoom,
+    scopes=["meeting:read:list_upcoming_meetings"],
     user_id=user_id,
 )
 

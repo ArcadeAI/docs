@@ -1,3 +1,6 @@
+from typing import Annotated
+
+from arcade.core.schema import ToolContext
 from arcade.sdk import tool
 from arcade.sdk.auth import GitHub
 

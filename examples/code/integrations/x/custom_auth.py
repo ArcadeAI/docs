@@ -7,7 +7,8 @@ user_id = "user@example.com"
 
 # Start the authorization process
 auth_response = client.auth.authorize(
-    provider=AuthProvider.github,
+    provider=AuthProvider.x,
+    scopes=["tweet.read", "tweet.write", "users.read"],
     user_id=user_id,
 )
 

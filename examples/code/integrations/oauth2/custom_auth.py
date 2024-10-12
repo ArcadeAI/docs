@@ -1,5 +1,5 @@
 from arcade.client.errors import APITimeoutError
-from arcade.client import Arcade, AuthProvider
+from arcade.client import Arcade
 
 client = Arcade()
 
@@ -7,7 +7,8 @@ user_id = "user@example.com"
 
 # Start the authorization process
 auth_response = client.auth.authorize(
-    provider=AuthProvider.github,
+    provider="hooli",
+    scopes=["scope1", "scope2"],
     user_id=user_id,
 )
 
