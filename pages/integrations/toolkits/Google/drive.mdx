@@ -3,6 +3,7 @@
 import ToolInfo from "@/components/ToolInfo";
 import Badges from "@/components/Badges";
 import TabbedCodeBlock from "@/components/TabbedCodeBlock";
+import TableOfContents from "@/components/TableOfContents";
 
 <ToolInfo
   description="Enable agents to interact with Google Drive."
@@ -24,23 +25,14 @@ The Arcade AI Drive toolkit provides a pre-built set of tools for interacting wi
 pip install arcade_google
 ```
 
-## Auth
-
-The Arcade AI Drive toolkit uses the [Google auth provider](/integrations/auth/google) to connect to users' Google accounts.
-
-With the hosted Arcade Engine, there's nothing to configure. Your users will see `Arcade AI (demo)` as the name of the application that's requesting permission.
-
-<Warning type="warning" emoji="⚠️">
-  The hosted Arcade Engine is intended for demo and testing purposes only, not
-  for production use. To use Arcade AI and Google Drive in production, you must
-  use a self-hosted instance of the Arcade Engine.
-</Warning>
-
-With a self-hosted installation of Arcade AI, you need to [configure the Google auth provider](/integrations/auth/google#configuring-google-auth) with your own Google app credentials.
-
 ## Available Tools
 
-These tools are currently available in the Arcade AI GitHub toolkit.
+<TableOfContents
+  headers={["Tool Name", "Description"]}
+  data={[
+    ["ListDocuments", "List documents in the user's Google Drive."],
+  ]}
+/>
 
 <Tip>
   If you need to perform an action that's not listed here, you can [get in touch
@@ -49,19 +41,13 @@ These tools are currently available in the Arcade AI GitHub toolkit.
   provider](/integrations/auth/github#using-github-auth-in-customtools).
 </Tip>
 
-| Tool Name                       | Description                                |
-| ------------------------------- | ------------------------------------------ |
-| [ListDocuments](#listdocuments) | List documents in the user's Google Drive. |
-
----
-
 ## ListDocuments
 
 <br />
 <TabbedCodeBlock
   tabs={[
     {
-      label: "Example: Calling LLM that executes the tool",
+      label: "Execute the Tool with OpenAI",
       content: {
         Python: [
           "/examples/integrations/toolkits/google/drive/list_documents_example_1.py",
@@ -70,7 +56,7 @@ These tools are currently available in the Arcade AI GitHub toolkit.
       },
     },
     {
-      label: "Example: Calling the Tool with User Authorization",
+      label: "Call the Tool with User Authorization",
       content: {
         Python: [
           "/examples/integrations/toolkits/google/drive/list_documents_example_2.py",
@@ -85,8 +71,22 @@ List documents in the user's Google Drive. Excludes documents that are in the tr
 
 **Parameters**
 
-- **`corpora`** _(enum ([Corpora](/integrations/toolkits/Google/common#corpora)), Optional)_ The source of files to list. Defaults to `Corpora.USER`.
-- **`title_keywords`** _(list[str], Optional)_ Keywords or phrases that must be in the document title. Defaults to `None`.
-- **`order_by`** _(enum ([OrderBy](/integrations/toolkits/Google/common#orderby)), Optional)_ Sort order. Defaults to `OrderBy.MODIFIED_TIME_DESC`.
-- **`supports_all_drives`** _(bool, Optional)_ Whether the requesting application supports both My Drives and shared drives. Defaults to `False`.
-- **`limit`** _(int, Optional)_ The number of documents to list. Defaults to `50`.
+- **`corpora`** _(enum ([Corpora](/integrations/toolkits/Google/reference#corpora)), optional)_ The source of files to list. Defaults to `Corpora.USER`.
+- **`title_keywords`** _(list[str], optional)_ Keywords or phrases that must be in the document title. Defaults to `None`.
+- **`order_by`** _(enum ([OrderBy](/integrations/toolkits/Google/reference#orderby)), optional)_ Sort order. Defaults to `OrderBy.MODIFIED_TIME_DESC`.
+- **`supports_all_drives`** _(bool, optional)_ Whether the requesting application supports both My Drives and shared drives. Defaults to `False`.
+- **`limit`** _(int, optional)_ The number of documents to list. Defaults to `50`.
+
+## Auth
+
+The Arcade AI Drive toolkit uses the [Google auth provider](/integrations/auth/google) to connect to users' Google accounts.
+
+With the hosted Arcade Engine, there's nothing to configure. Your users will see `Arcade AI (demo)` as the name of the application that's requesting permission.
+
+<Warning type="warning" emoji="⚠️">
+  The hosted Arcade Engine is intended for demo and testing purposes only, not
+  for production use. To use Arcade AI and Google Drive in production, you must
+  use a self-hosted instance of the Arcade Engine.
+</Warning>
+
+With a self-hosted installation of Arcade AI, you need to [configure the Google auth provider](/integrations/auth/google#configuring-google-auth) with your own Google app credentials.
