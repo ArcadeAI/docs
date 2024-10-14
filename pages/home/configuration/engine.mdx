@@ -143,6 +143,46 @@ telemetry:
 - The engine service name is set to `arcade_engine`
 - Traces currently cover the `/v1/health` and `/v1/chat/completions` endpoints as well as authentication attempts
 
+## Auth configuration
+
+Arcade Engine manages auth for [tools](/guides/authtoolcalling) and [agents](/guides/agentauth). The configuration file controls what providers are available, and how tokens are stored.
+
+### Token store
+
+When users authorize with an external provider, their tokens are stored securely in the token store. Tokens are later retrieved from the store when AI models need to perform authorized actions.
+
+Arcade Engine supports in-memory and Redis-based token stores.
+
+#### In-memory
+
+The in-memory token store is not persistent and is erased when the Engine process shuts down. It is useful for local development and testing.
+
+```yaml file=<rootDir>/examples/code/home/configuration/engine/auth_tokenstore.inmemory.example.yaml
+
+```
+
+#### Redis
+
+The Redis-based token store is persistent and can be used in production environments.
+
+```yaml file=<rootDir>/examples/code/home/configuration/engine/auth_tokenstore.redis.example.yaml
+
+```
+
+### Auth providers
+
+The `auth.providers` section defines the providers that users can authorize with. Arcade Engine supports many built-in [auth providers](/integrations#auth), and can also connect to any [OAuth 2.0](/integrations/auth/oauth2)-compatible authorization server.
+
+The `providers` array contains provider definitions, each with an `id` and provider-specific configuration:
+
+```yaml file=<rootDir>/examples/code/home/configuration/engine/auth_providers.example.yaml
+
+```
+
+The `id` of the provider is used to reference the provider in code, and must be unique.
+
+The [auth providers](/integrations#auth) page includes configuration details for each supported provider.
+
 ## Full Configuration Example
 
 ```yaml
