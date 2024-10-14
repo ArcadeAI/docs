@@ -1,0 +1,44 @@
+api:
+  development: true
+  host: localhost
+  port: 9099
+
+llm:
+  models:
+    - id: openai-boring
+      openai:
+        model: gpt-3.5-turbo
+        api_key: ${env:OPENAI_API_KEY}
+        default_params:
+          temperature: 0
+
+tools:
+  directors:
+    - id: default
+      enabled: true
+      actors:
+        - id: "localactor"
+          enabled: true
+          http:
+            uri: "http://localhost:8002"
+            timeout: 30
+            retry: 3
+            secret: ${env:ARCADE_ACTOR_SECRET}
+
+auth:
+  token_store:
+    in_memory:
+      max_size: 10000
+
+  providers:
+    - id: github
+      enabled: true
+      client_id: ${env:GITHUB_CLIENT_ID}
+      client_secret: ${env:GITHUB_CLIENT_SECRET}
+
+telemetry:
+  environment: local
+  version: ${env:VERSION}
+  logging:
+    level: info
+    encoding: console

@@ -3,9 +3,16 @@ title: "Configuration"
 description: "Arcade Engine Configuration"
 ---
 
-# Configuration
+# Arcade Engine configuration
 
-This guide explains how to configure the Arcade Engine.
+Arcade Engine's configuration is a [YAML file](https://yaml.org/) with the following sections:
+
+- [`api`](#api-configuration) - Configures the server for specific protocols
+- [`llm/models`](#llm-model-configuration) - Defines a collection of AI models available for routing
+- [`auth`](#auth-configuration) - Configures user authorization providers and token storage
+- [`telemetry`](#telemetry) - Configures telemetry and observability
+
+### Specify a config file
 
 To start the Arcade Engine, pass a config file:
 
@@ -13,87 +20,13 @@ To start the Arcade Engine, pass a config file:
 engine --config /path/to/config.yaml
 ```
 
-## API Configuration
-
-HTTP is the only supported protocol for Arcade Engine's API. The following configurations are available:
-
-- `api.http.host` (default: localhost) - Address to which Arcade Engine binds its server (e.g., `localhost` or `0.0.0.0`)
-- `api.http.read_timeout` (default: 3m) - Timeout for reading data from clients
-- `api.http.write_timeout` (default: 3m) - Timeout for writing data to clients
-- `api.http.idle_timeout` (default: 1m) - Timeout for idle connections
-- `api.http.max_request_body_size` (default: 4Mb) - Maximum request body size
-
-Sample configuration:
-
-```yaml
-api:
-  http:
-    host: 0.0.0.0
-    port: 9099
-    read_timeout: 3s
-    write_timeout: 3s
-    idle_timeout: 1s
-    max_request_body_size: 2Mi
-```
-
-## Components
-
-Arcade Engine's configuration is a [YAML file](https://yaml.org/) with the following sections:
-
-- `llm/models` - Defines a collection of models to be configured for use.
-- `api` - Configures the server for specific protocols. See [API Configuration](#api-configuration) above.
-- `telemetry` - Configures observability. See [Telemetry](#telemetry) below.
-
-## Basic Configuration
-
-This example shows configuration for connecting to OpenAI and Azure OpenAI. For OpenAI, Cohere, and OctoML, only an API key is needed. For Azure OpenAI, specify a model and base_url.
-
-- `models/id` - Unique model configuration ID.
-
-```yaml
-llm:
-  models:
-    - id: primary
-      openai:
-        api_key: ${env:OPENAI_API_KEY}
-    - id: secondary
-      azureopenai:
-        api_key: ${env:AZURE_OPENAI_API_KEY}
-        model: "engine-GPT-35"
-        base_url: "https://mydeployment.openai.azure.com/"
-```
-
-### Routing
-When specifying a model through the API, Arcade will attempt to choose which language provider to use based off of known supported models.
-In the case that two language providers may have the same models or a custom model is used, the provider can be explicitly selected using its `id`.
-
-```python
-## Implicit model selection
-response = client.chat.completions.create(
-    messages=[
-        {"role": "user", "content": "Who is the CEO of Apple?"},
-    ],
-    model="gpt-4o"
-)
-
-## Explicit model selection
-response = client.chat.completions.create(
-    messages=[
-        {"role": "user", "content": "Who is the CEO of Apple?"},
-    ],
-    model="primary/gpt-4o"
-)
-```
-
-See [advanced configuration](/home/configuration/models) for more details.
-
 ## Secrets
 
 Arcade Engine supports two methods for passing sensitive information like API keys:
 
-- Environment variables:
+Environment variables:
 
-```yaml
+```yaml {5}
 llm:
   models:
     - id: primary
@@ -101,9 +34,9 @@ llm:
         api_key: ${env:OPENAI_API_KEY}
 ```
 
-- Separate files (useful in cloud setups):
+Separate files (useful in cloud setups):
 
-```yaml
+```yaml {5}
 llm:
   models:
     - id: primary
@@ -111,7 +44,7 @@ llm:
         api_key: ${file:/path/to/secret}
 ```
 
-### Dotenv Files
+### Dotenv files
 
 Arcade Engine automatically loads environment variables from `.env` files in the directory where it was called. Use the `--env` flag to specify a path:
 
@@ -119,29 +52,54 @@ Arcade Engine automatically loads environment variables from `.env` files in the
 engine --env .env.dev --config config.yaml
 ```
 
-## Telemetry
+## API configuration
 
-Arcade supports logs, metrics, and traces with [OpenTelemetry](https://opentelemetry.io/).
+HTTP is the only supported protocol for Arcade Engine's API. The following configuration options are available:
 
-If you are using the engine locally, you can set the `environment` field to `local`. This will only output logs to the console.
+- `api.development` _(default: `false`)_ - Enable development mode, with more logging
+- `api.http.host` _(default: `localhost`)_ - Address to which Arcade Engine binds its server (e.g., `localhost` or `0.0.0.0`)
+- `api.http.read_timeout` _(default: `30s`)_ - Timeout for reading data from clients
+- `api.http.write_timeout` _(default: `1m`)_ - Timeout for writing data to clients
+- `api.http.idle_timeout` _(default: `30s`)_ - Timeout for idle connections
+- `api.http.max_request_body_size` _(default: `4Mb`)_ - Maximum request body size
 
-To connect to Open Telemetry compatible collectors, set necessary [Open Telemetry Environment Variables](https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/) in the .env file.
+Sample configuration:
 
-`environment` and `version` are fields that are added to the telemetry attributes, which can be filtered on later.
+```yaml file=<rootDir>/examples/code/home/configuration/engine/api.yaml
 
-```yaml
-telemetry:
-  environment: local
-  version: ${env:VERSION}
-  logging:
-    level: debug # debug, info, warn, error, fatal
-    encoding: console
 ```
 
-### Notes
+## LLM (model) configuration
 
-- The engine service name is set to `arcade_engine`
-- Traces currently cover the `/v1/health` and `/v1/chat/completions` endpoints as well as authentication attempts
+The `llm.models` section defines the models that the engine can route to, and the parameters for each model. Each item in the `models` array must have a unique `id` and a provider-specific configuration.
+
+This example shows configuration for connecting to OpenAI and Azure OpenAI:
+
+```yaml file=<rootDir>/examples/code/home/configuration/engine/llm_models.yaml
+
+```
+
+For OpenAI, Cohere, and OctoML, only an API key is needed. For Azure OpenAI, specify a model name and base URL.
+
+For more details on model configuration and provider-specific parameters, see [model configuration](/home/configuration/models).
+
+### Routing
+
+When client code calls the Arcade [LLM API](/guides/llmtoolcalling), it specifies a model by name. Arcade Engine matches the model name to a model in the configuration and routes the request to the appropriate provider.
+
+```python file=<rootDir>/examples/code/home/configuration/engine/model_selection.implicit.py {9}
+
+```
+
+If more than one LLM provider is configured, Arcade Engine will attempt to route to the correct provider using known model names.
+
+In the case that two language providers may have the same models or a custom model is used, the provider can be explicitly selected using its `id`.
+
+For example, given the above `llm.models` configuration with one provider named `primary`, this request will be routed to `primary` with the model `gpt-4o`:
+
+```python file=<rootDir>/examples/code/home/configuration/engine/model_selection.explicit.py#L5- {5}
+
+```
 
 ## Auth configuration
 
@@ -157,7 +115,7 @@ Arcade Engine supports in-memory and Redis-based token stores.
 
 The in-memory token store is not persistent and is erased when the Engine process shuts down. It is useful for local development and testing.
 
-```yaml file=<rootDir>/examples/code/home/configuration/engine/auth_tokenstore.inmemory.example.yaml
+```yaml file=<rootDir>/examples/code/home/configuration/engine/auth_tokenstore.inmemory.yaml
 
 ```
 
@@ -165,7 +123,7 @@ The in-memory token store is not persistent and is erased when the Engine proces
 
 The Redis-based token store is persistent and can be used in production environments.
 
-```yaml file=<rootDir>/examples/code/home/configuration/engine/auth_tokenstore.redis.example.yaml
+```yaml file=<rootDir>/examples/code/home/configuration/engine/auth_tokenstore.redis.yaml
 
 ```
 
@@ -175,7 +133,7 @@ The `auth.providers` section defines the providers that users can authorize with
 
 The `providers` array contains provider definitions, each with an `id` and provider-specific configuration:
 
-```yaml file=<rootDir>/examples/code/home/configuration/engine/auth_providers.example.yaml
+```yaml file=<rootDir>/examples/code/home/configuration/engine/auth_providers.yaml
 
 ```
 
@@ -183,38 +141,32 @@ The `id` of the provider is used to reference the provider in code, and must be 
 
 The [auth providers](/integrations#auth) page includes configuration details for each supported provider.
 
-## Full Configuration Example
+## Telemetry configuration
+
+Arcade supports logs, metrics, and traces with [OpenTelemetry](https://opentelemetry.io/).
+
+If you are using the Arcade Engine locally, you can set the `environment` field to `local`. This will only output logs to the console.
+
+To connect to OpenTelemetry compatible collectors, set the necessary [OpenTelemetry environment variables](https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/) in the .env file.
+
+`environment` and `version` are fields that are added to the telemetry attributes, which can be filtered on later.
 
 ```yaml
 telemetry:
   environment: local
   version: ${env:VERSION}
   logging:
-    level: info # debug, info, warning, error, fatal
-    encoding: json # console, json
+    level: debug # debug, info, warn, error, fatal
+    encoding: console
+```
 
-llm:
-  models:
-    - id: openai-boring
-      openai:
-        model: gpt-3.5-turbo
-        api_key: "sk-"
-        default_params:
-          temperature: 0
+### Notes
 
-director:
-  directors:
-    - id: default
-      enabled: true
-      actors:
-        - id: "localactor"
-          enabled: true
-          http:
-            uri: "http://localhost:8000"
-            timeout: 30
-            retry: 3
-storage:
-  token_cache:
-    in_memory:
-    max_size: 1000
+- The Engine service name is set to `arcade_engine`
+- Traces currently cover the `/v1/health` and `/v1/chat/completions` endpoints as well as authentication attempts
+
+## Sample configuration
+
+```yaml file=<rootDir>/examples/code/home/configuration/engine/full_config.yaml
+
 ```
