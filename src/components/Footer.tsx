@@ -78,22 +78,17 @@ type ResourceColProps = {
 
 const ResourceCol: React.FC<ResourceColProps> = ({ title, resources }) => {
   return (
-    <div>
-      <h3 className="text-sm font-semibold leading-6 text-black dark:text-white">
-        {title}
-      </h3>
-      <ul role="list" className="mt-6 space-y-4">
+    <div className={styles.resourceCol}>
+      <h3 className={styles.resourceTitle}>{title}</h3>
+      <ul role="list" className={styles.resourceLinks}>
         {resources &&
           resources.map((resource) => (
-            <li
-              className="px-2 py-1 text-sm font-medium transition duration-150 ease-in-out rounded-md outline-none text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300 !p-0"
-              key={resource.url}
-            >
+            <li className={styles.resourceLink} key={resource.url}>
               <a
-                target={resource.external ? "_blank" : "_parent"}
+                target={resource.external ? "_blank" : "_self"}
                 href={resource.url}
               >
-                {resource.title} {resource.external ? "↗" : ""}
+                {resource.title} {resource.external ? "" : ""}
               </a>
             </li>
           ))}
@@ -119,7 +114,7 @@ const Footer: React.FC = () => {
   const resources: Resource[] = [
     {
       url: "/",
-      title: "Get Started",
+      title: "Documentation",
       external: false,
     },
     {
@@ -137,7 +132,7 @@ const Footer: React.FC = () => {
   const feedbackResources: Resource[] = [
     {
       url: "/discord",
-      title: "Join Discord",
+      title: "Discord",
       external: true,
     },
   ];
@@ -152,17 +147,15 @@ const Footer: React.FC = () => {
           </a>
           <Socials />
         </div>
-        <div className={"grid grid-cols-1 gap-8 mt-16 xl:col-span-2 xl:mt-0"}>
-          <div className={"md:grid md:grid-cols-3 md:gap-8"}>
-            <ResourceCol title={"Project"} resources={projectResources} />
-            <ResourceCol title={"Resources"} resources={resources} />
-            <ResourceCol title={"Feedback"} resources={feedbackResources} />
-          </div>
+        <div className={styles.resources}>
+          <ResourceCol title={"Project"} resources={projectResources} />
+          <ResourceCol title={"Resources"} resources={resources} />
+          <ResourceCol title={"Feedback"} resources={feedbackResources} />
         </div>
       </div>
       <div className={styles.copyrightContent}>
         <div className={styles.copyright}>
-          <p>&copy; 2023 &mdash; present Arcade AI.</p>
+          <p>&copy; 2024 &mdash; present Arcade AI.</p>
         </div>
       </div>
     </div>
