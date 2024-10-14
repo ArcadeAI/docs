@@ -1,5 +1,5 @@
 api:
-  development: true
+  development: false
   host: localhost
   port: 9099
 
@@ -27,14 +27,23 @@ tools:
 
 auth:
   token_store:
-    in_memory:
-      max_size: 10000
+    redis:
+      addr: "redis:6379"
+      password: ${env:REDIS_PASSWORD}
 
   providers:
     - id: github
       enabled: true
       client_id: ${env:GITHUB_CLIENT_ID}
       client_secret: ${env:GITHUB_CLIENT_SECRET}
+
+    - id: hooli
+      enabled: true
+      type: oauth2
+      client_id: ${env:HOOLI_CLIENT_ID}
+      client_secret: ${env:HOOLI_CLIENT_SECRET}
+      oauth2:
+        # Connection details here...
 
 telemetry:
   environment: local

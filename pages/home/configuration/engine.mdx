@@ -9,6 +9,7 @@ Arcade Engine's configuration is a [YAML file](https://yaml.org/) with the follo
 
 - [`api`](#api-configuration) - Configures the server for specific protocols
 - [`llm/models`](#llm-model-configuration) - Defines a collection of AI models available for routing
+- [`tools`](#tools-configuration) - Configures tools for AI models to use
 - [`auth`](#auth-configuration) - Configures user authorization providers and token storage
 - [`telemetry`](#telemetry) - Configures telemetry and observability
 
@@ -56,12 +57,12 @@ engine --env .env.dev --config config.yaml
 
 HTTP is the only supported protocol for Arcade Engine's API. The following configuration options are available:
 
-- `api.development` _(default: `false`)_ - Enable development mode, with more logging
+- `api.development` _(optional, default: `false`)_ - Enable development mode, with more logging and simple [actor authentication](/home/configuration/engine#http-actor-configuration)
 - `api.http.host` _(default: `localhost`)_ - Address to which Arcade Engine binds its server (e.g., `localhost` or `0.0.0.0`)
-- `api.http.read_timeout` _(default: `30s`)_ - Timeout for reading data from clients
-- `api.http.write_timeout` _(default: `1m`)_ - Timeout for writing data to clients
-- `api.http.idle_timeout` _(default: `30s`)_ - Timeout for idle connections
-- `api.http.max_request_body_size` _(default: `4Mb`)_ - Maximum request body size
+- `api.http.read_timeout` _(optional, default: `30s`)_ - Timeout for reading data from clients
+- `api.http.write_timeout` _(optional, default: `1m`)_ - Timeout for writing data to clients
+- `api.http.idle_timeout` _(optional, default: `30s`)_ - Timeout for idle connections
+- `api.http.max_request_body_size` _(optional, default: `4Mb`)_ - Maximum request body size
 
 Sample configuration:
 
@@ -93,13 +94,43 @@ When client code calls the Arcade [LLM API](/guides/llmtoolcalling), it specifie
 
 If more than one LLM provider is configured, Arcade Engine will attempt to route to the correct provider using known model names.
 
-In the case that two language providers may have the same models or a custom model is used, the provider can be explicitly selected using its `id`.
+If two language providers have the same models or a custom model is used, the provider can be explicitly specified using its `id`.
 
 For example, given the above `llm.models` configuration with one provider named `primary`, this request will be routed to `primary` with the model `gpt-4o`:
 
 ```python file=<rootDir>/examples/code/home/configuration/engine/model_selection.explicit.py#L5- {5}
 
 ```
+
+## Tools configuration
+
+Arcade Engine orchestrates [tools](/home/llm-tools) that AI models can use. Tools are executed by distributed workers called **actors**, which are grouped into **directors**.
+
+The `tools.directors` section configures what actors are available to service tool calls:
+
+```yaml file=<rootDir>/examples/code/home/configuration/engine/full_config.yaml#L15-L26
+
+```
+
+When an actor is added to an enabled director, all of the tools hosted by that actor will be available to the LLM and in the Arcade API.
+
+### HTTP actor configuration
+
+The `http` sub-section configures the HTTP client used to call the actor's tools:
+
+- `uri` _(required)_ - The base URL of the actor's tools
+- `secret` _(required)_ - Secret used to authenticate with the actor
+- `timeout` _(default: `30s`)_ - Timeout for calling the actor's tools
+- `retry` _(default: `3`)_ - Number of retries to attempt
+
+<Note>
+  Actors must be configured with a `secret` that is used to authenticate with
+  the actor. This ensures that actors are not exposed to the public internet
+  without security.
+
+If `api.development = true`, the secret will default to `"dev"` for local development **only**. In production, the secret must be set to a non-default, random value.
+
+</Note>
 
 ## Auth configuration
 
@@ -123,7 +154,7 @@ The in-memory token store is not persistent and is erased when the Engine proces
 
 The Redis-based token store is persistent and can be used in production environments.
 
-```yaml file=<rootDir>/examples/code/home/configuration/engine/auth_tokenstore.redis.yaml
+```yaml file=<rootDir>/examples/code/home/configuration/engine/full_config.yaml#L28-L32 {3-5}
 
 ```
 
@@ -133,7 +164,7 @@ The `auth.providers` section defines the providers that users can authorize with
 
 The `providers` array contains provider definitions, each with an `id` and provider-specific configuration:
 
-```yaml file=<rootDir>/examples/code/home/configuration/engine/auth_providers.yaml
+```yaml file=<rootDir>/examples/code/home/configuration/engine/full_config.yaml#L28-L46 {7-20}
 
 ```
 
