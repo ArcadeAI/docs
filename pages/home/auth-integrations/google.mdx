@@ -1,0 +1,98 @@
+# Google auth provider
+
+The Google auth provider enables tools and agents to call Google/Google Workspace APIs on behalf of a user. Behind the scenes, the Arcade Engine and the Google auth provider seamlessly manage Google OAuth 2.0 authorization for your users.
+
+<Tip>
+  Want to quickly get started with Google services in your agent or AI app? The
+  pre-built [Arcade Google toolkit](/integrations/toolkits/Google/gmail) is what
+  you want!
+</Tip>
+
+### What's documented here
+
+This page describes how to use and configure Google auth with Arcade AI.
+
+This auth provider is used by:
+
+- The [Arcade Google toolkit](/integrations/toolkits/Google/gmail), which provides pre-built tools for interacting with Google services
+- Your [app code](#using-google-auth-in-your-app-code) that needs to call Google APIs
+- Or, your [custom tools](#using-google-auth-in-customtools) that need to call Google APIs
+
+## Configuring Google auth
+
+How you configure the Google auth provider depends on whether you use the Arcade [Cloud Engine](/home/cloud-engine) or a [self-hosted Engine](/guides/installation).
+
+With the Arcade Cloud Engine, you can start building and testing Google auth without any configuration. Your users will see `Arcade AI (demo)` as the name of the application that's requesting permission.
+
+When you are ready to go to production, you'll want to configure the Google auth provider with your own Google app credentials, so users see your app name when they authorize access.
+
+### Create a Google app
+
+- Follow Google's guide to [setting up OAuth credentials](https://support.google.com/cloud/answer/6158849?hl=en)
+- Choose the [scopes](https://developers.google.com/identity/protocols/oauth2/scopes) (permissions) you need for your app
+- Set the redirect URL to: `https://cloud.arcade-ai.com/api/v1/oauth/callback`
+- Copy the client ID and client secret
+
+### Configuring Google auth with the Arcade Cloud Engine
+
+<Warning type="warning" emoji="⚠️">
+  Coming soon! In 0.1.0-preview, the Arcade Cloud Engine does not yet support
+  configuring auth providers.
+</Warning>
+
+### Configuring Google auth with a self-hosted Arcade Engine
+
+<Steps>
+
+### Set environment variables
+
+Set the following environment variables:
+
+```bash
+export GOOGLE_CLIENT_ID="<your client ID>"
+export GOOGLE_CLIENT_SECRET="<your client secret>"
+```
+
+Or, you can set these values in a `.env` file:
+
+```bash
+GOOGLE_CLIENT_ID="<your client ID>"
+GOOGLE_CLIENT_SECRET="<your client secret>"
+```
+
+<Tip>
+  See [Engine configuration](/home/configuration/engine) for more information on
+  how to set environment variables and configure the Arcade Engine.
+</Tip>
+
+### Edit the Engine configuration
+
+Edit the `engine.yaml` file and add a `google` item to the `auth.providers` section:
+
+```yaml file=<rootDir>/examples/code/integrations/google/config_provider.engine.yaml {3-5}
+
+```
+
+</Steps>
+
+## Using Google auth in app code
+
+Use the Google auth provider in your own agents and AI apps to get a user token for Google APIs. See [authorizing agents with Arcade](/guides/agentauth) to understand how this works.
+
+Use `client.auth.authorize()` to get a user token for Google APIs:
+
+```python file=<rootDir>/examples/code/integrations/google/custom_auth.py {9-13}
+
+```
+
+## Using Google auth in custom tools
+
+The Arcade [LLM API](/guides/llmtoolcalling) is a convenient way to call LLMs and automatically invoke tools. You can use the pre-built [Arcade Google toolkit](/integrations/toolkits/Google/gmail) to quickly build agents and AI apps that interact with Google services like Gmail, Calendar, Drive, and more.
+
+If the pre-built tools in the Google toolkit don't meet your needs, you can author your own [custom tools](/guides/customtools) that interact with Google APIs.
+
+Use the `Google()` auth class to specify that a tool requires authorization with Google. The `context.authorization.token` field will be automatically populated with the user's Google token:
+
+```python file=<rootDir>/examples/code/integrations/google/custom_tool.py {2,5-9,21}
+
+```
