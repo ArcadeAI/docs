@@ -3,56 +3,26 @@ title: "Local Install"
 description: "How to install Arcade AI"
 ---
 
-## Installing Arcade AI Locally
+import { Steps } from "nextra/components";
+
+
+
+# Installing Arcade AI Locally
 
 This guide will help you install Arcade AI and set up your development environment.
 
-### Prerequisites
+## Prerequisites
 
 Before you begin, make sure you have the following:
 
 - **Python 3.10 or higher**
 - **pip**: The Python package installer should be available. It's typically included with Python.
 - **Arcade AI Account**: Sign up for an [Arcade AI account](https://arcade-ai.com/signup) if you haven't already.
+- **[Download and configure](/home/quickstart) the Arcade AI Client**
 
-Verify your Python version by running `python --version` or `python3 --version` in your terminal.
+## Installation
 
-## <br />
-
-<br />
-
-### Install `arcade-ai`
-
-Install the Arcade AI SDK and CLI using `pip`. Open your terminal and run:
-
-```bash
-pip install arcade-ai[fastapi,evals]
-```
-
-This command installs the Arcade AI library along with optional dependencies for FastAPI and the evaluation framework.
-
-#### Verify the Installation
-
-After installation, check that the `arcade` CLI is available by running:
-
-```bash
-arcade
-```
-
-You should see the help text for the Arcade AI CLI, confirming that the installation was successful.
-
-#### Log In
-Login to Arcade to fetch your API Key.
-
-```bash
-arcade login
-```
-
-Your browser should open to the sign-on portal. Once you sign in you can close the browser and return to the CLI.
-
-## <br />
-
-<br />
+<Steps>
 
 ### Install the Arcade AI Engine
 
@@ -76,15 +46,15 @@ sudo apt update
 sudo apt install arcade-engine
 ```
 
-### Other Operating Systems
+#### Other Operating Systems
 
 For other operating systems, download the appropriate binary from the [Arcade AI Releases](https://arcade-ai.com/releases) page and add it to your system's `PATH`.
 
-## <br />
+<br />
 
 <br />
 
-### Running Arcade Locally
+### Run Arcade Locally
 
 When developing tools and toolkits for Arcade AI, you need to be able to run your own instance of Arcade AI locally.
 
@@ -94,39 +64,11 @@ To run Arcade AI locally, you need to
 2. Start an Actor serving that tool or toolkit (in the same python env)
 3. Start the Arcade AI Engine configured with the Actor HTTP address
 
-the `arcade dev` command is provided that provides a single command for steps 2 and 3.
+The `arcade dev` command is provided that provides a single command for steps 2 and 3.
 
 #### Install a tool or toolkit
 
-All the Arcade AI-built tools and toolkits are available on PyPI. To install a tool or toolkit, run:
-
-```bash
-pip install arcade-[toolkit_name]
-```
-
-For example, to install the web search tools, run:
-
-```bash
-pip install arcade-search
-```
-
-To verify the installation, run:
-
-```bash
-arcade show
-```
-
-which should return output similar to:
-
-```
-┏━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━┓
-┃ Name         ┃ Description                  ┃ Toolkit ┃ Version ┃
-┡━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━┩
-│ SearchGoogle │ Search Google using SerpAPI  │ search  │ 0.1.0   │
-│              │ and return organic search    │         │         │
-│              │ results.                     │         │         │
-└──────────────┴──────────────────────────────┴─────────┴─────────┘
-```
+See the [tool kit installation guide](/home/deployment/tools) for more information on installing tools.
 
 #### Start Arcade AI for local development
 
@@ -147,8 +89,10 @@ export PATH=$PATH:/path/to/arcade-engine
 With the engine installed, you can start it using the `arcade dev` command:
 
 ```bash
-arcade dev -c engine-config.yaml -e .env
+arcade dev -c engine-config.yaml -e arcade.env
 ```
+
+<Note>If you don't have your own config and env file, you can start with the [Minimal Required Config](/home/configuration/engine#minimal-required-configuration)</Note>
 
 This command starts the Arcade AI engine and an Actor which will serve the toolkits installed in the current python environment.
 
@@ -167,40 +111,9 @@ Engine> INFO | Getting tool definitions from actor
 Engine> INFO | Server running on http://0.0.0.0:9099
 ```
 
-<Note>
-  The `arcade dev` command is a convenience command that starts the engine and
-  actor and should not be used in production.
-</Note>
-
+<Warning>The `arcade dev` command is a convenience command that starts the engine and actor and should not be used in production.</Warning>
+<br/>
 ### Use `arcade chat` to test your setup
-
-With the engine running, you can test your setup by starting a chat session:
-
-```bash
-arcade chat
-```
-
-If you're configured correctly and running the local engine, you should see:
-
-```
-> arcade chat
-
-=== Arcade AI Chat ===
-
-Chatting with Arcade Engine at http://0.0.0.0:9099/v1
-```
-
-If you're using the cloud engine, you should see:
-
-```
-> arcade chat
-
-=== Arcade AI Chat ===
-
-Chatting with Arcade Engine at https://api.arcade-ai.com/v1
-```
-
-To use your local engine, you need to configure the Arcade AI CLI to point to the local engine or wherever it's hosted.
 
 #### Configure for local engine
 
@@ -235,9 +148,27 @@ You should see output similar to:
 └─────────┴─────────┴───────────────────────────────┘
 ```
 
-<br />
+#### Validate
 
-### Next Steps
+With the engine running, you can test your setup by starting a chat session:
+
+```bash
+arcade chat
+```
+
+If you're configured correctly and running the local engine, you should see:
+
+```
+> arcade chat
+
+=== Arcade AI Chat ===
+
+Chatting with Arcade Engine at http://0.0.0.0:9099/v1
+```
+
+</Steps>
+
+## Next Steps
 
 - **Build Custom Tools**: Learn how to create your own tools in the [Build Custom Tools guide](/guides/customtools).
 - **Evaluate Your Tools**: Discover how to test and improve your tools in the [Evaluate Tools guide](/guides/evaltools).
