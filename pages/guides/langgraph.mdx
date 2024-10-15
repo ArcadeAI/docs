@@ -56,6 +56,8 @@ if auth_response.status != "completed":
 
 #### Step 3: Obtain credentials
 
+Get the gmail credentials with the token obtained from Arcade AI.
+
 ```python
 from google.oauth2.credentials import Credentials
 from langchain_google_community.gmail.utils import build_resource_service
@@ -90,7 +92,11 @@ for event in events:
     event["messages"][-1].pretty_print()
 ```
 
-### Using Arcade with Tool Execution in Langgraph
+</Steps>
+
+### Using Arcade tools in Langgraph
+
+<Steps>
 
 #### Step 1: Define the workflow
 
@@ -111,7 +117,7 @@ def step_1(state: State, config) -> State:
     # Authorization
     user_id = config["user_id"]
     auth_response = client.tool.authorize(
-        tool_name="ListEmails",
+        tool_name="Google.ListEmails",
         user_id=user_id,
     )
     if auth_response.status != "completed":
@@ -121,7 +127,7 @@ def step_1(state: State, config) -> State:
 
     # Tool execution
     result = client.tool.run(
-        tool_name="ListEmails",
+        tool_name="Google.ListEmails",
         user_id=user_id,
         inputs={"n_emails": 5},
     )
