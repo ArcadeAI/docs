@@ -4,7 +4,7 @@ These are the guidelines for writing documentation for Arcade AI, to help keep t
 
 ## Writing style
 
-- **Clarity and simplicity**: Write in short, concise sentences. Focus on simple language and avoid unnecessary jargon. The topic is complex enough; keep the language simple wherever possible!
+- **Clarity and simplicity**: Write in short, concise sentences. Focus on simple language and avoid unnecessary jargon.
 - **Action-oriented**: Use verbs that guide the reader through tasks step by step, such as "Install," "Run," "Initialize," or "Authorize."
 - **Sentence case**: Use sentence case for titles and headings.
 

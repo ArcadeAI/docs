@@ -1,0 +1,50 @@
+# What are "LLM tools"?
+
+AI language models excel at text generation but often struggle with tasks like calculations, data retrieval, or interacting with external systems. That's where LLM tools come in—they extend the capabilities of AI models, allowing them to perform specific functions beyond text processing.
+
+With Arcade AI's extensive tool catalog, you can integrate tools that:
+
+- Interact with APIs
+- Access databases
+- Execute code
+- Perform calculations
+- Retrieve real-time data
+
+For example, you can create custom tools to perform complex calculations:
+
+```python
+from typing import Annotated
+from arcade.sdk import tool
+
+@tool
+def square_root(
+    number: Annotated[float, "The number to find the square root of"]
+) -> Annotated[float, "The square root of the number"]:
+    """
+    Calculate the square root of a number.
+    """
+    import math
+    return math.sqrt(number)
+```
+
+Once registered, you can use this tool within your AI application:
+
+```python
+from arcade.client import Arcade
+from catalog import catalog  # Your ToolCatalog containing the square_root tool
+
+client = Arcade()
+
+response = client.chat.completions.create(
+    messages=[{"role": "user", "content": "What is the square root of 144?"}],
+    model="gpt-4o",
+    tools=list(catalog.tools.keys()),
+    tool_choice="auto",
+)
+
+print(response.choices[0].message.content)
+```
+
+By providing AI models with these tools, you empower them to deliver accurate and actionable responses.
+
+Explore how LLM tools can enhance your AI applications with Arcade AI.
