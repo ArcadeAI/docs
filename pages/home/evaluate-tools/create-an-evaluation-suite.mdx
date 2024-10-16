@@ -1,0 +1,280 @@
+---
+title: "Create an evaluation suite"
+description: "Learn how to evaluate your tools using Arcade AI"
+---
+
+# Evaluate tools
+
+In this guide, you'll learn how to evaluate your custom tools to ensure they function correctly with the AI assistant, including defining evaluation cases and using different critics.
+
+We'll create evaluation cases to test our `hello` tool and measure its performance.
+
+import { Steps } from "nextra/components";
+
+<Steps>
+
+### Prerequisites
+
+- [Build a custom tool](/home/build-tools/create-a-toolkit)
+- Install the evaluation dependencies:
+
+```bash
+pip install arcade-ai[evals]
+```
+
+### Create an evaluation suite
+
+Navigate to your toolkit's `evals` directory:
+
+```bash
+cd arcade_my_new_toolkit/evals
+```
+
+Create a new Python file for your evaluations, e.g., `eval_hello.py`.
+
+### Define your evaluation cases
+
+Open `eval_hello.py` and add the following code:
+
+```python
+from arcade.sdk.eval import (
+    EvalSuite,
+    EvalRubric,
+    ExpectedToolCall,
+    BinaryCritic,
+    tool_eval,
+)
+from arcade.core.catalog import ToolCatalog
+from arcade_my_new_toolkit.tools.hello import hello
+
+# Create a catalog of tools to include in the evaluation
+catalog = ToolCatalog()
+catalog.add_tool(hello)
+
+# Define the evaluation rubric
+rubric = EvalRubric(
+    fail_threshold=0.8,
+    warn_threshold=0.9,
+)
+
+@tool_eval()
+def hello_eval_suite() -> EvalSuite:
+    """Create an evaluation suite for the hello tool."""
+    suite = EvalSuite(
+        name="Hello Tool Evaluation",
+        system_message="You are a helpful assistant.",
+        catalog=catalog,
+        rubric=rubric,
+    )
+
+    # Example evaluation case
+    suite.add_case(
+        name="Simple Greeting",
+        user_message="Say hello to Alice",
+        expected_tool_calls=[
+            ExpectedToolCall(
+                name="Hello",
+                args={
+                    "name": "Alice",
+                },
+            )
+        ],
+        critics=[
+            BinaryCritic(critic_field="name", weight=1.0),
+        ],
+    )
+
+    return suite
+```
+
+### Run the evaluation
+
+From the `evals` directory, run:
+
+```bash
+arcade evals .
+```
+
+This command executes your evaluation suite and provides a report.
+
+### How it works
+
+The evaluation framework in Arcade AI allows you to define test cases (`EvalCase`) with expected tool calls and use critics to assess the AI's performance.
+
+By running the evaluation suite, you can measure how well the AI assistant is using your tools.
+
+### Next steps
+
+Explore different types of critics and evaluation criteria to thoroughly test your tools.
+
+[Learn more about Critic classes](#critic-classes)
+
+</Steps>
+
+## Critic classes
+
+Arcade AI provides several critic classes to evaluate different aspects of tool usage.
+
+### BinaryCritic
+
+Checks if a parameter value matches exactly.
+
+```python
+BinaryCritic(critic_field="name", weight=1.0)
+```
+
+### SimilarityCritic
+
+Evaluates the similarity between expected and actual values.
+
+```python
+from arcade.sdk.eval import SimilarityCritic
+
+SimilarityCritic(critic_field="message", weight=1.0)
+```
+
+### NumericCritic
+
+Assesses numeric values within a specified tolerance.
+
+```python
+from arcade.sdk.eval import NumericCritic
+
+NumericCritic(critic_field="score", tolerance=0.1, weight=1.0)
+```
+
+### DatetimeCritic
+
+Evaluates the closeness of datetime values within a specified tolerance.
+
+```python
+from datetime import timedelta
+from arcade.sdk.eval import DatetimeCritic
+
+DatetimeCritic(critic_field="start_time", tolerance=timedelta(seconds=10), weight=1.0)
+```
+
+## Advanced evaluation cases
+
+You can add more evaluation cases to test different scenarios.
+
+### Example: Greeting with emotion
+
+Modify your `hello` tool to accept an `emotion` parameter:
+
+```python
+from arcade.sdk import tool
+from typing import Annotated
+
+class Emotion(str, Enum):
+    HAPPY = "happy"
+    SLIGHTLY_HAPPY = "slightly happy"
+    SAD = "sad"
+    SLIGHTLY_SAD = "slightly sad"
+
+@tool
+def hello(
+    name: Annotated[str, "The name of the person to greet"] = "there",
+    emotion: Annotated[Emotion, "The emotion to convey"] = Emotion.HAPPY
+) -> Annotated[str, "A greeting to the user"]:
+    """
+    Say hello to the user with a specific emotion.
+    """
+    return f"Hello {name}! I'm feeling {emotion.value} today."
+```
+
+Add an evaluation case for this new parameter:
+
+```python
+suite.add_case(
+    name="Greeting with Emotion",
+    user_message="Say hello to Bob sadly",
+    expected_tool_calls=[
+        ExpectedToolCall(
+            name="Hello",
+            args={
+                "name": "Bob",
+                "emotion": Emotion.SAD,
+            },
+        )
+    ],
+    critics=[
+        BinaryCritic(critic_field="name", weight=0.5),
+        SimilarityCritic(critic_field="emotion", weight=0.5),
+    ],
+)
+```
+
+Add an evaluation case with additional conversation context:
+
+```python
+suite.add_case(
+    name="Greeting with Emotion",
+    user_message="Say hello to Bob based on my current mood.",
+    expected_tool_calls=[
+        ExpectedToolCall(
+            name="Hello",
+            args={
+                "name": "Bob",
+                "emotion": Emotion.HAPPY,
+            },
+        )
+    ],
+    critics=[
+        BinaryCritic(critic_field="name", weight=0.5),
+        SimilarityCritic(critic_field="emotion", weight=0.5),
+    ],
+    # Add some context to the evaluation case
+    additional_messages= [
+        {"role": "user", "content": "Hi, I'm so happy!"},
+        {
+            "role": "assistant",
+            "content": "That’s awesome! What’s got you feeling so happy today?",
+        },
+    ]
+)
+```
+
+Add an evalutation case with multiple expected tool calls:
+
+```python
+suite.add_case(
+    name="Greeting with Emotion",
+    user_message="Say hello to Bob based on my current mood. And then say hello to Alice with slightly less of that emotion.",
+    expected_tool_calls=[
+        ExpectedToolCall(
+            name="Hello",
+            args={
+                "name": "Bob",
+                "emotion": Emotion.HAPPY,
+            },
+        ),
+        ExpectedToolCall(
+            name="Hello",
+            args={
+                "name": "Alice",
+                "emotion": Emotion.SLIGHTLY_HAPPY,
+            },
+        )
+    ],
+    critics=[
+        BinaryCritic(critic_field="name", weight=0.5),
+        SimilarityCritic(critic_field="emotion", weight=0.5),
+    ],
+    # Add some context to the evaluation case
+    additional_messages= [
+        {"role": "user", "content": "Hi, I'm so happy!"},
+        {
+            "role": "assistant",
+            "content": "That’s awesome! What’s got you feeling so happy today?",
+        },
+    ]
+)
+```
+
+---
+
+<Tip>
+  Ensure that your `hello` tool and evaluation cases are updated accordingly and
+  that you rerun `arcade evals .` to test your changes.
+</Tip>
