@@ -1,0 +1,181 @@
+# Agent Authentication
+
+Applications that use Large Language Models (LLM) to perform tasks (_agentic applications_) commonly require access to sensitive data and services. Authentication complexities often hinder AI from performing tasks that require user-specific information, like what emails you recently received or what's coming up on your calendar.
+
+To retrieve this information, agentic applications need to be able to authenticate and authorize access to external services you use like Gmail or Google Calendar.
+
+Authenticating to retrieve information, however, is not the only challenge. Agentic applications also need to authenticate in order to **act** on your behalf - like sending an email or updating your calendar.
+
+Without auth, AI agents are severely limited in what they can do.
+
+### How Arcade AI solves this
+
+Arcade AI provides an authorization system that handles OAuth 2.0, API keys, and user tokens needed by AI agents to access external services through tools. This means your AI agents can now act on behalf of users securely and privately.
+
+With Arcade AI, developer can now create agents that can as _as the end user of their application_ to perform tasks like:
+
+- Creating a new Zoom meeting
+- Sending or reading email
+- Answering questions about files in Google Drive.
+
+Arcade AI also allows for actions (tools) to be authorized directly. For example, to access a user's Gmail account, you can initiate an authorization flow:
+
+```python
+from arcade.client import Arcade
+
+client = Arcade()
+
+# Unique identifier for the end user
+user_id = "user@example.com"
+
+# Request access to the user's Gmail account
+auth_response = client.tools.authorize(
+    tool_name="Google.ListEmails",
+    user_id=user_id,
+)
+
+print(f"Please authorize access by visiting: {auth_response.auth_url}")
+```
+
+After the user completes the authorization, you can check the status:
+
+```python
+# Poll for authorization status
+while auth_response.status != "completed":
+    time.sleep(5)
+    auth_response = client.auth.status(auth_response.auth_id)
+```
+
+Once authorized, your AI agent can securely access the user's emails:
+
+```python
+emails_response = client.tools.run(
+    tool_name="Google.ListEmails",
+    user_id=user_id,
+)
+print(emails_response)
+```
+
+## Tool Authorization
+
+Consider the difference between accessing public information and private user data:
+
+- **Tools that don't require authorization**: Some tools, like `search.GoogleSearch`, allow AI agents to retrieve information from the web without needing user-specific authorization.
+
+  ```python
+  from arcade.client import Arcade
+
+  client = Arcade()
+
+  # Use the search.GoogleSearch tool to perform a web search
+  search_response = client.tool.run(
+      tool_name="search.GoogleSearch",
+      inputs={"query": "Latest AI advancements"},
+  )
+  print(search_response)
+  ```
+
+- **Tools that require authorization**: Other tools, like `Google.ListEmails`, require user authorization to access private data such as emails.
+
+  ```python
+  from arcade.client import Arcade
+
+  client = Arcade()
+
+  # Unique identifier for the end user
+  user_id = "user@example.com"
+
+  # Request access to the user's Gmail account
+  auth_response = client.tools.authorize(
+      tool_name="Google.ListEmails",
+      user_id=user_id,
+  )
+
+  print(f"Please authorize access by visiting: {auth_response.auth_url}")
+
+  # Wait for the user to authorize and then run the tool
+  # (Assume authorization is completed)
+  emails_response = client.tools.run(
+      tool_name="Google.ListEmails",
+      user_id=user_id,
+  )
+  print(emails_response)
+  ```
+
+## Custom Tools with Auth
+
+You can also create custom tools that require authorization for all of the services that Arcade AI supports. The `ToolContext` object provides tools tokens at runtime enabling tools to make authenticated requests on behalf of the user.
+
+`ToolContext` is a crucial component in Arcade AI that manages authorization and user information for tools requiring authentication. Let's explore how it works and how you can use it in your projects.
+
+## What is ToolContext?
+
+`ToolContext` is a class that holds two main pieces of information:
+
+1. Authorization context: This includes a token for making authenticated requests to external APIs as well as structured user information for providers that support retrieving user information.
+2. User ID: This identifies the user invoking the tool.
+
+Some authorization providers may also include additional structured user information in the `ToolContext`.
+
+## How ToolContext Works
+
+When you invoke a tool that requires authorization, Arcade AI's Tool SDK automatically:
+
+1. Creates a `ToolContext` object
+2. Passes this object to your tool
+
+You can then use the `ToolContext` object to make authenticated requests to external APIs.
+
+## Using ToolContext in Your Tools
+
+To use `ToolContext`, include it as the first parameter in your tool's function signature. Here's a step-by-step guide:
+
+1. Import the necessary modules:
+
+```python
+import httpx
+import json
+from typing import Annotated
+from arcade.core.schema import ToolContext
+from arcade.sdk import tool
+from arcade.sdk.auth import GitHub
+```
+
+2. Define your tool with `ToolContext` as the first parameter:
+
+```python
+@tool(requires_auth=Github())
+async def create_issue(
+  context: ToolContext,
+  owner: Annotated[str, "The owner of the repository"],
+  repo: Annotated[str, "The repository to create the issue in"],
+  title: Annotated[str, "The title of the issue"],
+  body: Annotated[str, "The body of the issue"]
+) -> Annotated[str, "The URL of the created issue"]:
+  """
+  Create an issue in a private GitHub repository
+  """
+  # TODO: Implement your tool's functionality here
+```
+
+3. Implement your tool's functionality using the provided context. Here's an example of creating an issue in a GitHub repository:
+
+```python
+url = f"https://api.github.com/repos/{owner}/{repo}/issues"
+headers = {
+  "Authorization": f"Bearer {context.authorization.token}",
+  "Accept": "application/vnd.github+json",
+  "X-GitHub-Api-Version": "2022-11-28",
+}
+data = {
+  "title": title,
+  "body": body
+}
+
+async with httpx.AsyncClient() as client:
+    response = await client.post(url, headers=headers, json=data)
+
+return response.json().get("url")
+```
+
+By using `ToolContext`, you can easily manage authorization and user information for tools that require authentication, simplifying the process of interacting with external APIs.

@@ -1,0 +1,140 @@
+---
+title: "Creating a Toolkit"
+description: "Learn how to create a custom toolkit for Arcade AI"
+---
+
+import { Steps } from "nextra/components";
+
+# Creating a Toolkit
+
+In this guide, we'll walk through the process of creating a custom toolkit for Arcade AI.
+
+You'll create a simple arithmetic toolkit with operations like addition, subtraction, multiplication, and more.
+
+<Steps>
+
+### Prerequisites
+
+- [Set up Arcade AI](/guides/quickstart)
+- Install the Arcade SDK:
+
+```bash
+pip install arcade-ai
+```
+
+### Create a new toolkit
+
+Use `arcade new` to create a new toolkit:
+
+```bash
+arcade new
+```
+
+### Define your tools
+
+Create a Python file for your tools, e.g., `arithmetic.py`, and import the necessary modules:
+
+```python
+from typing import Annotated
+from arcade.sdk import tool
+```
+
+Now, define your tools using the `@tool` decorator:
+
+```python
+@tool
+def add(
+    a: Annotated[int, "The first number"],
+    b: Annotated[int, "The second number"]
+) -> Annotated[int, "The sum of the two numbers"]:
+    """
+    Add two numbers together
+    """
+    return a + b
+
+@tool
+def subtract(
+    a: Annotated[int, "The first number"],
+    b: Annotated[int, "The second number"]
+) -> Annotated[int, "The difference of the two numbers"]:
+    """
+    Subtract two numbers
+    """
+    return a - b
+
+@tool
+def multiply(
+    a: Annotated[int, "The first number"],
+    b: Annotated[int, "The second number"]
+) -> Annotated[int, "The product of the two numbers"]:
+    """
+    Multiply two numbers together
+    """
+    return a * b
+
+@tool
+def divide(
+    a: Annotated[int, "The numerator"],
+    b: Annotated[int, "The denominator"]
+) -> Annotated[float, "The quotient of the two numbers"]:
+    """
+    Divide two numbers
+    """
+    return a / b
+```
+
+### Register your tools
+
+In order for Arcade AI to recognize your tools, you need to register them in a `ToolCatalog`.
+
+Create a new Python file, e.g., `catalog.py`:
+
+```python
+from arcade.core.catalog import ToolCatalog
+from arithmetic import add, subtract, multiply, divide  # Import your tools
+
+catalog = ToolCatalog()
+catalog.add_tool(add)
+catalog.add_tool(subtract)
+catalog.add_tool(multiply)
+catalog.add_tool(divide)
+```
+
+### Use your tools with Arcade
+
+Now you can use your custom tools with Arcade AI in your application.
+
+Here's an example of how to use your tools:
+
+```python
+from arcade.client import Arcade
+from catalog import catalog
+
+client = Arcade(api_key="your_api_key")
+
+# Use the tools in a chat completion
+response = client.chat.completions.create(
+    messages=[{"role": "user", "content": "What is 6 times 7?"}],
+    model="gpt-4o",
+    tools=list(catalog.tools.keys()),
+    tool_choice="auto",
+)
+
+print(response.choices[0].message.content)
+```
+
+</Steps>
+
+### How it works
+
+By decorating your functions with `@tool`, you expose them to the Arcade AI platform.
+
+The `Annotated` types and docstrings provide metadata that helps the AI understand how to use your tools.
+
+The `ToolCatalog` collects your tools and makes them available to the AI assistant.
+
+### Next steps
+
+Try adding more tools to your toolkit, such as `sqrt`, `sum_list`, or `sum_range`.
+
+Explore advanced features like tool authorization and evaluation to enhance your tools.

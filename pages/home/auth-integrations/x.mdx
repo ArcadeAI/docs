@@ -1,0 +1,97 @@
+# X auth provider
+
+The X auth provider enables tools and agents to call the X (Twitter) API on behalf of a user. Behind the scenes, the Arcade Engine and the X auth provider seamlessly manage X OAuth 2.0 authorization for your users.
+
+<Tip>
+  Want to quickly get started with X services in your agent or AI app? The
+  pre-built [Arcade X toolkit](/integrations/toolkits/x) is what you want!
+</Tip>
+
+### What's documented here
+
+This page describes how to use and configure X auth with Arcade AI.
+
+This auth provider is used by:
+
+- The [Arcade X toolkit](/integrations/toolkits/x), which provides pre-built tools for interacting with X
+- Your [app code](#using-x-auth-in-your-app-code) that needs to call X APIs
+- Or, your [custom tools](#using-x-auth-in-customtools) that need to call X APIs
+
+## Configuring X auth
+
+How you configure the X auth provider depends on whether you use the Arcade [Cloud Engine](/home/cloud-engine) or a [self-hosted Engine](/guides/installation).
+
+With the Arcade Cloud Engine, you can start building and testing X auth without any configuration. Your users will see `Arcade AI (demo)` as the name of the application that's requesting permission.
+
+When you are ready to go to production, you'll want to configure the X auth provider with your own X app credentials, so users see your app name when they authorize access.
+
+### Create an X app
+
+- Follow X's guide to [creating an app](https://developer.x.com/en/docs/x-api/getting-started/getting-access-to-the-x-api)
+- Configure user authentication for your new app and set its type to "Web app"
+- Set the redirect URL to: `https://cloud.arcade-ai.com/api/v1/oauth/callback`
+- Copy the client ID and client secret
+
+### Configuring X auth with the Arcade Cloud Engine
+
+<Warning type="warning" emoji="⚠️">
+  Coming soon! In 0.1.0-preview, the Arcade Cloud Engine does not yet support
+  configuring auth providers.
+</Warning>
+
+### Configuring X auth with a self-hosted Arcade Engine
+
+<Steps>
+
+### Set environment variables
+
+Set the following environment variables:
+
+```bash
+export X_CLIENT_ID="<your client ID>"
+export X_CLIENT_SECRET="<your client secret>"
+```
+
+Or, you can set these values in a `.env` file:
+
+```bash
+X_CLIENT_ID="<your client ID>"
+X_CLIENT_SECRET="<your client secret>"
+```
+
+<Tip>
+  See [Engine configuration](/home/configuration/engine) for more information on
+  how to set environment variables and configure the Arcade Engine.
+</Tip>
+
+### Edit the Engine configuration
+
+Edit the `engine.yaml` file and add an `x` item to the `auth.providers` section:
+
+```yaml file=<rootDir>/examples/code/integrations/x/config_provider.engine.yaml {3-5}
+
+```
+
+</Steps>
+
+## Using X auth in app code
+
+Use the X auth provider in your own agents and AI apps to get a user token for the X API. See [authorizing agents with Arcade](/guides/agentauth) to understand how this works.
+
+Use `client.auth.authorize()` to get a user token for X:
+
+```python file=<rootDir>/examples/code/integrations/x/custom_auth.py {9-13}
+
+```
+
+## Using X auth in custom tools
+
+The Arcade [LLM API](/guides/llmtoolcalling) is a convenient way to call LLMs and automatically invoke tools. You can use the pre-built [Arcade X toolkit](/integrations/toolkits/x) to quickly build agents and AI apps that interact with X.
+
+If the pre-built tools in the X toolkit don't meet your needs, you can author your own [custom tools](/guides/customtools) that interact with the X API.
+
+Use the `X()` auth class to specify that a tool requires authorization with X. The `context.authorization.token` field will be automatically populated with the user's X token:
+
+```python file=<rootDir>/examples/code/integrations/x/custom_tool.py {7,10-14,22}
+
+```

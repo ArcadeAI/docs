@@ -25,7 +25,7 @@ export const Hero = () => {
         </p>
         <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
           <Button href="/home">Learn more</Button>
-          <Button href="/home/quickstart">Get started</Button>
+          <Button href="/guides/quickstart">Get started</Button>
         </div>
       </div>
     </section>
