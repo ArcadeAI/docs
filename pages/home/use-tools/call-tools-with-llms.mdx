@@ -1,0 +1,92 @@
+---
+title: "Call tools with LLMs"
+description: "Learn how to call tools with LLMs using Arcade AI"
+---
+
+import { Steps } from "nextra/components";
+
+# Call tools with LLMs
+
+In this guide, you'll learn how to call tools in an AI workflow using OpenAI and Arcade AI.
+
+To do this, you'll build an AI chatbot that can star GitHub repositories on your behalf using the [`GitHub.SetStarred`](/integrations/toolkits/Github/github#setstarred) tool.
+
+<Steps>
+
+### Prerequisites
+
+- [Set up Arcade AI](/home/quickstart)
+- Sign up for an [OpenAI account](https://platform.openai.com/signup) and follow their [Python quickstart guide](https://platform.openai.com/docs/quickstart?language-preference=python)
+
+### Initialize the OpenAI client
+
+Start a new Python file in your favorite editor. If you followed the OpenAI quickstart guide, use the `example.py` file you created.
+
+Use the `OpenAI` client, but change the base URL and API key to point to Arcade AI:
+
+```python file=<rootDir>/examples/code/home/use-tools/call-tools-with-llms/github_stars.py#L1-L8 {6-7}
+
+```
+
+Requests made with this client will be routed to Arcade AI first, then to OpenAI. The AI model will instantly have access to the tools provided by Arcade AI.
+
+### Set the user ID
+
+Authorized tools access data on behalf of an end-user, so they need to know the user's ID.
+
+```python file=<rootDir>/examples/code/home/use-tools/call-tools-with-llms/github_stars.py#L10-L11
+
+```
+
+For now, put your own email address in `user_id`.
+
+In a web or mobile app, you'd get this from the current user session.
+
+### Generate a response
+
+With the client set up, use `client.chat.completions.create` to generate a response to a user's prompt:
+
+```python file=<rootDir>/examples/code/home/use-tools/call-tools-with-llms/github_stars.py#L13-
+
+```
+
+### Try it!
+
+Run your script:
+
+```bash
+python github_stars.py # or example.py
+```
+
+Ask the AI to:
+
+```
+star the arcade-ai/arcade-ai repo
+```
+
+You'll be prompted to authorize the connection to GitHub, and then the AI will perform the action.
+
+</Steps>
+
+### How it works
+
+When you use `tool_choice="generate"` and specify a tool like `GitHub.SetStarred`, Arcade AI coordinates the interaction between the tool and the AI model (OpenAI). To your users, it appears that the model magically has new capabilities.
+
+<Note>
+  In this example, Arcade Cloud Engine is executing the pre-built tool
+  `GitHub.SetStarred`. You can also [create your own custom
+  tools](/home/build-tools).
+</Note>
+
+### Add more tools
+
+Add more tools to the `tools` array to give the AI model more capabilities.
+
+- Add `Math.SquareRoot` and ask for the square root of a big number
+- Add `X.WritePost` and ask the AI to post on X for you
+
+### Next steps
+
+For apps and agents that aren't directly generating chat completions, you can [authorize and call tools programmatically](/home/use-tools/call-tools-in-code). This is useful when you need more control over the tool calling process.
+
+When you're ready to build your own tools, read about [how to create tools](/home/build-tools).
