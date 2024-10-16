@@ -1,0 +1,28 @@
+---
+title: "Retry Tools with Improved Prompt"
+description: "Documentation for retrying tools with improved prompts in the Arcade AI Tool SDK"
+---
+
+# RetryableToolError in Arcade AI
+
+Sometimes you may want to retry a tool call with additional context to improve the tool call's input parameters predicted by the LLM and try again. You can do this by raising a `RetryableToolError` within the tool.
+
+### Understanding RetryableToolError
+
+Raising the `RetryableToolError` is useful when you want to retry the tool call and give the LLM that is generating the tool call's input parameters additional context to improve the parameters for the next tool call.
+
+### When to Use RetryableToolError
+
+A RetryableToolError should be raised from within a tool if additional prompt content would likely improve the tool call outcome.
+
+### Example: Sending a Direct Message in Slack
+
+Below is an example of a tool that sends a direct message to a user in Slack:
+
+1. If the specified user is not found, the tool retrieves a list of all valid inputs for the `user_name` parameter.
+2. The tool then raises a `RetryableToolError` with the list of valid inputs.
+3. This allows the LLM to generate a valid input for the `user_name` parameter in the next tool call iteration.
+
+```python file=<rootDir>/examples/code/guides/toolsdk/retryable_tool_error_example.py {44-49}
+
+```
