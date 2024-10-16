@@ -16,7 +16,7 @@ while True:
     if prompt.lower() == "exit":
         break
 
-    # Generate a response
+    # Use a tool and generate a response
     response = client.chat.completions.create(
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
@@ -24,11 +24,9 @@ while True:
         ],
         model="gpt-4o",
         user=user_id,
-        # Make specific tools available to the AI model
         tools=[
             "GitHub.SetStarred",
         ],
-        # Instruct the model to use tools and generate a response
         tool_choice="generate",
     )
 
