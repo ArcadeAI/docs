@@ -38,7 +38,7 @@ Use the Arcade client to authorize:
 import time
 user_id = "user@example.com"
 
-auth_response = client.tool.authorize(
+auth_response = client.tools.authorize(
     tool_name="ListEmails",
     user_id=user_id,
 )
@@ -116,7 +116,7 @@ class State(TypedDict):
 def step_1(state: State, config) -> State:
     # Authorization
     user_id = config["user_id"]
-    auth_response = client.tool.authorize(
+    auth_response = client.tools.authorize(
         tool_name="Google.ListEmails",
         user_id=user_id,
     )
@@ -126,7 +126,7 @@ def step_1(state: State, config) -> State:
         raise NodeInterrupt("Awaiting user authorization")
 
     # Tool execution
-    result = client.tool.run(
+    result = client.tools.run(
         tool_name="Google.ListEmails",
         user_id=user_id,
         inputs={"n_emails": 5},
