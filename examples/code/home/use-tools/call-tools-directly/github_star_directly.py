@@ -2,7 +2,7 @@ from arcade.client import Arcade
 
 client = Arcade()
 
-result = client.tool.run(
+result = client.tools.run(
     tool_name="GitHub.SetStarred",
     inputs={"owner": "ArcadeAI", "name": "arcade-ai", "starred": True},
 )
