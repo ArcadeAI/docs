@@ -10,24 +10,24 @@ const Badges: React.FC<BadgesProps> = ({ repo }) => {
 
   const badges = [
     {
-      href: `https://github.com/${org}/${repoName}/releases`,
-      src: `https://img.shields.io/github/v/release/${org}/${repoName}`,
-      alt: "Release",
-    },
-    {
-      href: `https://github.com/${org}/${repoName}/blob/main/LICENSE`,
-      src: `https://img.shields.io/github/license/${org}/${repoName}`,
-      alt: "License",
-    },
-    {
-      href: `https://github.com/${org}/${repoName}/issues`,
-      src: `https://img.shields.io/github/issues/${org}/${repoName}`,
-      alt: "Issues",
+      href: `https://pypi.org/project/${repoName}/`,
+      src: `https://img.shields.io/pypi/v/${repoName}`,
+      alt: "PyPI Version",
     },
     {
       href: `https://pypi.org/project/${repoName}/`,
-      src: `https://img.shields.io/pypi/v/${repoName}`,
-      alt: "PyPI",
+      src: `https://img.shields.io/pypi/l/${repoName}`,
+      alt: "License",
+    },
+    {
+      href: `https://pypi.org/project/${repoName}/`,
+      src: `https://img.shields.io/pypi/pyversions/${repoName}`,
+      alt: "Python Versions",
+    },
+    {
+      href: `https://pypi.org/project/${repoName}/`,
+      src: `https://img.shields.io/pypi/wheel/${repoName}`,
+      alt: "Wheel Status",
     },
     {
       href: `https://pypi.org/project/${repoName}/`,

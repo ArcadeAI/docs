@@ -53,9 +53,6 @@ const ToolInfo: React.FC<ToolInfoProps> = ({
           authType
         )}
       </p>
-      <p>
-        <strong>Versions: </strong> {versions.join(", ")}
-      </p>
     </div>
   );
 };
