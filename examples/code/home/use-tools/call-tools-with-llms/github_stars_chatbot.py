@@ -4,7 +4,7 @@ from openai import OpenAI
 # Initialize the OpenAI client, pointing to Arcade AI
 client = OpenAI(
     base_url="https://api.arcade-ai.com/v1",
-    api_key=config.api_key,
+    api_key=config.api.key,
 )
 
 # Get a unique identifier for your end user
