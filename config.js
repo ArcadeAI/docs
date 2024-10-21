@@ -6,7 +6,7 @@ exports.config = {
     email: "contact@arcade-ai.com",
     linkedIn: "https://www.linkedin.com/company/arcade-ai/",
     github: "https://github.com/ArcadeAI",
-    discord: "https://discord.com/invite/cKUrvXpg",
+    discord: "https://discord.gg/GUZEMpEZ9p",
   },
   engine: {
     github: "https://github.com/ArcadeAI/arcade-ai",
