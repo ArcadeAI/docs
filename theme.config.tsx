@@ -27,7 +27,7 @@ const config: DocsThemeConfig = {
     placeholder: "Search...",
   },
   chat: {
-    link: "https://discord.com/invite/cKUrvXpg",
+    link: "https://discord.gg/GUZEMpEZ9p",
     icon: <Discord />,
   },
   docsRepositoryBase: "https://github.com/ArcadeAI/docs",
