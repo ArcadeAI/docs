@@ -23,6 +23,10 @@ const config: DocsThemeConfig = {
   themeSwitch: {
     component: () => null,
   },
+  nextThemes: {
+    defaultTheme: "dark",
+    forcedTheme: "dark",
+  },
   search: {
     placeholder: "Search...",
   },
@@ -56,7 +60,7 @@ const config: DocsThemeConfig = {
     Cards,
     NavCard,
     NavCards,
-    LightOnly: () => null,
+    LightOnly,
     DarkOnly,
     Steps,
     Info,
