@@ -56,7 +56,7 @@ const config: DocsThemeConfig = {
     Cards,
     NavCard,
     NavCards,
-    LightOnly,
+    LightOnly: () => null,
     DarkOnly,
     Steps,
     Info,
