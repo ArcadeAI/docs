@@ -27,6 +27,7 @@ const config: DocsThemeConfig = {
     defaultTheme: "dark",
     forcedTheme: "dark",
   },
+  darkMode: true,
   search: {
     placeholder: "Search...",
   },
