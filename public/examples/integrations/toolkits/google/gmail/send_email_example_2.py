@@ -1,4 +1,3 @@
-import json
 from arcade.client import Arcade
 
 client = Arcade()
@@ -16,14 +15,14 @@ if auth_response.status != "completed":
     input("After you have authorized, press Enter to continue...")
 
 inputs = {
-    'subject': 'Meeting Update',
-    'body': 'The meeting is rescheduled to 3 PM. Sorry for the inconvenience.',
-    'recipient': 'jane.doe@example.com'
+    "subject": "Meeting Update",
+    "body": "The meeting is rescheduled to 3 PM. Sorry for the inconvenience.",
+    "recipient": "jane.doe@example.com",
 }
 
 response = client.tools.run(
     tool_name=TOOL_NAME,
-    inputs=json.dumps(inputs),
+    inputs=inputs,
     user_id=USER_ID,
 )
 print(response)
