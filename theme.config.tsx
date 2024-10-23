@@ -9,7 +9,7 @@ import { titleRenderer } from "@components/TopNav";
 import GitHub from "@geist-ui/react-icons/github";
 import { Check, Important, Info, Note, Tip, Warning } from "@markdown/Callouts";
 import { Card, Cards } from "@markdown/Cards";
-import { DarkOnly, LightOnly } from "@markdown/ThemeContent";
+import { DarkOnly } from "@markdown/ThemeContent";
 import {
   DocsThemeConfig,
   Card as NavCard,
@@ -20,6 +20,7 @@ import {
 const config: DocsThemeConfig = {
   primaryHue: { dark: 335, light: 335 }, // Hue for #ED155D
   logo: <Logo />,
+  darkMode: true,
   themeSwitch: {
     component: () => null,
   },
@@ -27,7 +28,6 @@ const config: DocsThemeConfig = {
     defaultTheme: "dark",
     forcedTheme: "dark",
   },
-  darkMode: true,
   search: {
     placeholder: "Search...",
   },
@@ -61,7 +61,6 @@ const config: DocsThemeConfig = {
     Cards,
     NavCard,
     NavCards,
-    LightOnly,
     DarkOnly,
     Steps,
     Info,
