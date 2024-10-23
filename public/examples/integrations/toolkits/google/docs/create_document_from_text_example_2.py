@@ -1,4 +1,3 @@
-import json
 from arcade.client import Arcade
 
 client = Arcade()
