@@ -15,7 +15,10 @@ if auth_response.status != "completed":
     print(f"Click this link to authorize: {auth_response.auth_url}")
     input("After you have authorized, press Enter to continue...")
 
-inputs = {"owner": "ArcadeAI", "name": "hello-world"}
+inputs = {
+    "owner": "ArcadeAI",
+    "name": "hello-world",
+}
 
 response = client.tools.run(
     tool_name=TOOL_NAME,
