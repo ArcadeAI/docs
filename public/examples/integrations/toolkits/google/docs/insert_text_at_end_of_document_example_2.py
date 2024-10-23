@@ -16,13 +16,13 @@ if auth_response.status != "completed":
     input("After you have authorized, press Enter to continue...")
 
 inputs = {
-    'document_id': 'your_document_id_here', # Document Ids can be found with the ListDocuments tool
-    'text_content': 'Your text here'
+    "document_id": "your_document_id_here",  # Document Ids can be found with the ListDocuments tool
+    "text_content": "Your text here",
 }
 
 response = client.tools.run(
     tool_name=TOOL_NAME,
-    inputs=json.dumps(inputs),
+    inputs=inputs,
     user_id=USER_ID,
 )
 print(response)

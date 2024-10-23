@@ -16,15 +16,15 @@ if auth_response.status != "completed":
     input("After you have authorized, press Enter to continue...")
 
 inputs = {
-    'owner': 'ArcadeAI',
-    'repo': 'hello-world',
-    'issue_number': 1,
-    'body': 'This is a comment.'
+    "owner": "ArcadeAI",
+    "repo": "hello-world",
+    "issue_number": 1,
+    "body": "This is a comment.",
 }
 
 response = client.tools.run(
     tool_name=TOOL_NAME,
-    inputs=json.dumps(inputs),
+    inputs=inputs,
     user_id=USER_ID,
 )
 print(response)

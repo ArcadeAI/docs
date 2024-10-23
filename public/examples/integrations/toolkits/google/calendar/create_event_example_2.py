@@ -16,18 +16,18 @@ if auth_response.status != "completed":
     input("After you have authorized, press Enter to continue...")
 
 inputs = {
-    'summary': '1:1 with John Doe',
-    'description': 'Discuss project updates and next steps',
-    'start_date': 'today',
-    'start_time': '10:00',
-    'end_date': 'today',
-    'end_time': '10:30',
-    'attendee_emails': ['john.doe@example.com']
+    "summary": "1:1 with John Doe",
+    "description": "Discuss project updates and next steps",
+    "start_date": "today",
+    "start_time": "10:00",
+    "end_date": "today",
+    "end_time": "10:30",
+    "attendee_emails": ["john.doe@example.com"],
 }
 
 response = client.tools.run(
     tool_name=TOOL_NAME,
-    inputs=json.dumps(inputs),
+    inputs=inputs,
     user_id=USER_ID,
 )
 print(response)

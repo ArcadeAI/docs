@@ -16,12 +16,12 @@ if auth_response.status != "completed":
     input("After you have authorized, press Enter to continue...")
 
 inputs = {
-    'event_id': 'your_event_id_here' # Event IDs can be retrieved from the ListEvents tool.
+    "event_id": "your_event_id_here"  # Event IDs can be retrieved from the ListEvents tool.
 }
 
 response = client.tools.run(
     tool_name=TOOL_NAME,
-    inputs=json.dumps(inputs),
+    inputs=inputs,
     user_id=USER_ID,
 )
 print(response)

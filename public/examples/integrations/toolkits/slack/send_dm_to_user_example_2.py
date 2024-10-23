@@ -15,14 +15,11 @@ if auth_response.status != "completed":
     print(f"Click this link to authorize: {auth_response.auth_url}")
     input("After you have authorized, press Enter to continue...")
 
-inputs = {
-    'user_name': 'john_doe',
-    'message': 'Hello, John!'
-}
+inputs = {"user_name": "john_doe", "message": "Hello, John!"}
 
 response = client.tools.run(
     tool_name=TOOL_NAME,
-    inputs=json.dumps(inputs),
+    inputs=inputs,
     user_id=USER_ID,
 )
 print(response)

@@ -16,14 +16,14 @@ if auth_response.status != "completed":
     input("After you have authorized, press Enter to continue...")
 
 inputs = {
-    'subject': 'Project Update',
-    'body': 'Please find the attached project update.',
-    'recipient': 'john.doe@example.com'
+    "subject": "Project Update",
+    "body": "Please find the attached project update.",
+    "recipient": "john.doe@example.com",
 }
 
 response = client.tools.run(
     tool_name=TOOL_NAME,
-    inputs=json.dumps(inputs),
+    inputs=inputs,
     user_id=USER_ID,
 )
 print(response)

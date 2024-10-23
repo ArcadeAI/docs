@@ -16,15 +16,15 @@ if auth_response.status != "completed":
     input("After you have authorized, press Enter to continue...")
 
 inputs = {
-    'id': 'your_draft_id_here', # The ID of a draft email can be found with the ListDraftEmails tool
-    'subject': 'Updated Project Update',
-    'body': 'Please find the updated project update attached.',
-    'recipient': 'john.doe@example.com'
+    "id": "your_draft_id_here",  # The ID of a draft email can be found with the ListDraftEmails tool
+    "subject": "Updated Project Update",
+    "body": "Please find the updated project update attached.",
+    "recipient": "john.doe@example.com",
 }
 
 response = client.tools.run(
     tool_name=TOOL_NAME,
-    inputs=json.dumps(inputs),
+    inputs=inputs,
     user_id=USER_ID,
 )
 print(response)
