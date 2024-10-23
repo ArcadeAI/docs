@@ -1,4 +1,3 @@
-import json
 from arcade.client import Arcade
 
 client = Arcade()
@@ -15,14 +14,11 @@ if auth_response.status != "completed":
     print(f"Click this link to authorize: {auth_response.auth_url}")
     input("After you have authorized, press Enter to continue...")
 
-inputs = {
-    'title': 'Project Plan',
-    'text_content': 'This is the project plan.'
-}
+inputs = {"title": "Project Plan", "text_content": "This is the project plan."}
 
 response = client.tools.run(
     tool_name=TOOL_NAME,
-    inputs=json.dumps(inputs),
+    inputs=inputs,
     user_id=USER_ID,
 )
 print(response)

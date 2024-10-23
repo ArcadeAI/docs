@@ -1,4 +1,3 @@
-import json
 from arcade.client import Arcade
 
 client = Arcade()
@@ -16,16 +15,16 @@ if auth_response.status != "completed":
     input("After you have authorized, press Enter to continue...")
 
 inputs = {
-    'min_day': 'today',
-    'min_time_slot': '00:00',
-    'max_day': 'tomorrow',
-    'max_time_slot': '23:59',
-    'max_results': 15
+    "min_day": "today",
+    "min_time_slot": "00:00",
+    "max_day": "tomorrow",
+    "max_time_slot": "23:59",
+    "max_results": 15,
 }
 
 response = client.tools.run(
     tool_name=TOOL_NAME,
-    inputs=json.dumps(inputs),
+    inputs=inputs,
     user_id=USER_ID,
 )
 print(response)

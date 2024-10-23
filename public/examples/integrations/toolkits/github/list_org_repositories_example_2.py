@@ -1,4 +1,3 @@
-import json
 from arcade.client import Arcade
 
 client = Arcade()
@@ -16,17 +15,17 @@ if auth_response.status != "completed":
     input("After you have authorized, press Enter to continue...")
 
 inputs = {
-    'org': 'ArcadeAI',
-    'sort': 'created',
-    'sort_direction': 'desc',
-    'per_page': 100,
-    'page': 1,
-    'include_extra_data': False
+    "org": "ArcadeAI",
+    "sort": "created",
+    "sort_direction": "desc",
+    "per_page": 100,
+    "page": 1,
+    "include_extra_data": False,
 }
 
 response = client.tools.run(
     tool_name=TOOL_NAME,
-    inputs=json.dumps(inputs),
+    inputs=inputs,
     user_id=USER_ID,
 )
 print(response)
