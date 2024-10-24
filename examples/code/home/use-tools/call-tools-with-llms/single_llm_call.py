@@ -14,7 +14,10 @@ user_id = "you@example.com"
 response = client.chat.completions.create(
     messages=[
         {"role": "system", "content": "You are a helpful assistant."},
-        {"role": "user", "content": "Star the ArcadeAI/arcade-ai repo on GitHub"},
+        {
+            "role": "user",
+            "content": "Star the ArcadeAI/langchain-arcade repo on GitHub",
+        },
     ],
     model="gpt-4o",
     user=user_id,
