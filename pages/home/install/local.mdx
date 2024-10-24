@@ -68,7 +68,9 @@ In order to run the arcade actor, we need to install a tool. For local developme
 pip install arcade-math
 ```
 
-For more information on installing toolkits, see the [Toolkit Installation](/home/install/toolkits) page
+For more information on installing toolkits, see the [Toolkit Installation](/home/install/toolkits) page.
+
+To see all available toolkits, view theintegrations page
 
 ### Start the Engine and Actor
 To run both the engine and a local actor, use:
@@ -81,17 +83,22 @@ arcade-engine
 ```
 
 ### Connect
+- In a separate terminal
 To chat with the running engine, you can run:
 ```bash
 arcade chat -h localhost -p 9099
 ```
+
+Add a summary here
 </Steps>
+
+## Next Steps
+
+- **Hosting With Docker**: Learn how to run the [Engine in Docker](/home/install/docker).
 
 ## Troubleshooting
 
 ### Engine Binary Not Found
-If you see a message that says:
-
 ```bash
 ❌ Engine binary not found
 ```
@@ -100,23 +107,55 @@ or
 command not found: arcade-engine
 ```
 
+This means that the Arcade Engine cannot be found in your path. Brew and Apt will automatically add the binary to you path.
+
+Check that the binary has been properly installed (These are the common installation locations):
+
+**Brew**
+```bash
+ls $HOMEBREW_REPOSITORY/Cellar/arcade-engine/<version>/bin/arcade-engine
+```
+
+**Apt**
+```bash
+ls /usr/bin/arcade-engine
+```
+
+If the binary is found, add it to your path with:
+```bash
+export PATH=$PATH:/path/to/your/binary
+```
+<br/>
+
 ### Toolkits Not Found
 ```bash
 No toolkits found in Python environment. Exiting...
 ```
+This means that there are no toolkits found in the same environment as the Arcade Client. Ensure that you are installing the toolkit package in the same environment
+and see the [Toolkit Installation Guide](/home/install/toolkits) for more details.
+
+<br/>
 
 ### Engine Config Not Found
 ```bash
 ❌ Config file 'engine.yaml' not found in any of the default locations.
 ```
-
+or
 ```bash
 Arcade Engine has finished with error: unable to read config file $HOME/.arcade/engine.yaml: open $HOME/.arcade/engine.yaml: no such file or directory
 ```
 
-## Next Steps
+`arcade dev` will search for the engine config in known directories including:
+- $HOME/.arcade/engine.yaml
+- $HOMEBREW_REPOSITORY/etc/arcade-engine/engine.yaml (Homebrew)
+- /etc/arcade-ai/engine.yaml (Apt)
 
-- **Build Custom Tools**: Learn how to create your own tools in the [Build Custom Tools guide](/home/build-tools/create-a-toolkit).
-- **Evaluate Your Tools**: Discover how to test and improve your tools in the [Evaluate Tools guide](/home/evaluate-tools/why-evaluate-tools).
+The engine config will be downloaded by and added to one of these locations when installing the engine.
+
+When running the engine without `arcade dev`, the config needs to be in the `$HOME/.arcade/` directory or explicitly located with `arcade-engine -c /path/to/engine.yaml`
+
+If you cannot find your engine config, you can save and use the [template config]().
+
+
 
 ---
