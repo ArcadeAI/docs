@@ -4,6 +4,7 @@ description: "How to install Arcade AI"
 ---
 
 import { Steps } from "nextra/components";
+import { Tabs } from "nextra/components";
 
 # Installing Arcade AI Locally
 
@@ -31,36 +32,32 @@ To connect to the cloud or local engine, we need to install the ArcadeAI Client.
 pip install 'arcade-ai[fastapi,evals]'
 arcade login
 ```
-For a simple example on using the client, see the [quickstart](/home/quickstart)
+For a simple example on using the client, see the [quickstart](/home/quickstart).
 
 
 ### Install the Engine
 To run the Arcade AI engine locally, you need to install the `arcade-engine`. Choose the installation method that matches your operating system.
 
-This will install a template engine configuration and environment file.
+This will install a template engine configuration.
 
-#### macOS (Homebrew)
-
-If you're using macOS, install the Arcade AI Engine using Homebrew:
-
-```bash
-brew install ArcadeAI/tap/arcade-engine
-```
-
-#### Ubuntu/Debian (APT)
-
-For Ubuntu or Debian systems, add the Arcade AI repository and install via APT:
-
-```bash
-wget -qO - https://deb.arcade-ai.com/public-key.asc | sudo apt-key add -
-echo "deb https://deb.arcade-ai.com/ubuntu stable main" | sudo tee /etc/apt/sources.list.d/arcade-ai.list
-sudo apt update
-sudo apt install arcade-engine
-```
-
-#### Other Operating Systems
-
-For other operating systems, download the appropriate binary from the [Arcade AI Releases](https://arcade-ai.com/releases) page and add it to your system's `PATH`.
+<Tabs items={['macOS (Homebrew)', 'Ubuntu/Debian (APT)', 'Other Operating Systems']}>
+  <Tabs.Tab>
+  ```bash
+  brew install ArcadeAI/tap/arcade-engine
+  ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+  ```bash
+  wget -qO - https://deb.arcade-ai.com/public-key.asc | sudo apt-key add -
+  echo "deb https://deb.arcade-ai.com/ubuntu stable main" | sudo tee /etc/apt/sources.list.d/arcade-ai.list
+  sudo apt update
+  sudo apt install arcade-engine
+  ```
+  </Tabs.Tab>
+  <Tabs.Tab>
+  For other operating systems, download the appropriate binary from the [Arcade AI Releases](https://arcade-ai.com/releases) page and add it to your system's `PATH`.
+  </Tabs.Tab>
+</Tabs>
 
 ### Install a toolkit
 In order to run the arcade actor, we need to install a tool. For local development, we can just pip install a tool in the same environment as the client.
@@ -70,30 +67,44 @@ pip install arcade-math
 
 For more information on installing toolkits, see the [Toolkit Installation](/home/install/toolkits) page.
 
-To see all available toolkits, view theintegrations page
+To see all available toolkits, view the [Integrations Page](/integrations#toolkits).
+
+### Set OpenAI API key
+Before starting the Engine, we need to set an OpenAI API Key that the engine can use to connect to OpenAI.
+```bash
+export OPENAI_API_KEY="<your_openai_api_key>"
+```
+To make the API key persistent or to change other configurations, see the [Configuration Overview](/home/configure/overview).
 
 ### Start the Engine and Actor
 To run both the engine and a local actor, use:
 ```bash
 arcade dev
 ```
+The Engine and Actor should both be running locally now.
+
+
 To run the Engine on it's own, you can run:
 ```bash
 arcade-engine
 ```
+Note that the Engine requires connection to at least one actor to run. Running the engine on it's own should only be used
+if external actors are available.
+
 
 ### Connect
-- In a separate terminal
-To chat with the running engine, you can run:
+
+To chat with the running engine, in a separate terminal instance, run:
 ```bash
 arcade chat -h localhost -p 9099
 ```
 
-Add a summary here
+You should now be chatting with your local Arcade setup. To see an example of chatting, view the [quickstart](/home/quickstart).
 </Steps>
 
 ## Next Steps
 
+- **Building Tools**: Learn how to build tools with your local Arcade Instance [Create a Toolkit](/home/build-tools/create-a-toolkit) !!!!Theres a disconnect here between using arcade dev and building your own actor
 - **Hosting With Docker**: Learn how to run the [Engine in Docker](/home/install/docker).
 
 ## Troubleshooting
