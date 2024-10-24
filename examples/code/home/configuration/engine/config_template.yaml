@@ -1,0 +1,91 @@
+telemetry:
+  environment: ${env:TELEMETRY_ENVIRONMENT}
+  version: ${env:VERSION}
+  logging:
+    level: ${env:TELEMETRY_LOGGING_LEVEL} # debug, info, warn, error
+    encoding: ${env:TELEMETRY_LOGGING_ENCODING}
+
+api:
+  development: ${env:API_DEVELOPMENT}
+  host: ${env:ARCADE_API_HOST}
+  port: ${env:ARCADE_API_PORT}
+
+llm:
+  models:
+    - id: openai
+      openai:
+        api_key: ${env:OPENAI_API_KEY}
+    #- id: anthropic
+    #  anthropic:
+    #    api_key: ${env:ANTHROPIC_API_KEY}
+    #- id: ollama
+    #  openai:
+    #    base_url: "http://localhost:11434"
+    #    api_key: ollama
+    #- id: groq
+    #  openai:
+    #    base_url: "https://api.groq.com/openai/v1"
+    #    api_key: ${env:GROQ_API_KEY}
+
+tools:
+  directors:
+    - id: default
+      enabled: true
+      actors:
+        - id: "actor"
+          enabled: true
+          http:
+            uri: ${env:ARCADE_ACTOR_URI}
+            timeout: 30
+            retry: 3
+            secret: ${env:ARCADE_ACTOR_SECRET}
+
+auth:
+  token_store:
+    # Uncomment to have persistent storage tokens through redis
+    # redis:
+    #   addr: ${env:REDIS_HOST}:${env:REDIS_PORT}
+    #   password: ""
+    in_memory:
+      max_size: 1000000
+
+  providers:
+    - id: github
+      enabled: false
+      client_id: ${env:GITHUB_CLIENT_ID}
+      client_secret: ${env:GITHUB_CLIENT_SECRET}
+
+    - id: google
+      enabled: false
+      client_id: ${env:GOOGLE_CLIENT_ID}
+      client_secret: ${env:GOOGLE_CLIENT_SECRET}
+
+    - id: linkedin
+      enabled: false
+      client_id: ${env:LINKEDIN_CLIENT_ID}
+      client_secret: ${env:LINKEDIN_CLIENT_SECRET}
+
+    - id: microsoft
+      enabled: false
+      client_id: ${env:MICROSOFT_CLIENT_ID}
+      client_secret: ${env:MICROSOFT_CLIENT_SECRET}
+
+    - id: slack
+      enabled: false
+      client_id: ${env:SLACK_CLIENT_ID}
+      client_secret: ${env:SLACK_CLIENT_SECRET}
+
+    - id: spotify
+      enabled: false
+      client_id: ${env:SPOTIFY_CLIENT_ID}
+      client_secret: ${env:SPOTIFY_CLIENT_SECRET}
+
+    - id: x
+      enabled: false
+      client_id: ${env:X_CLIENT_ID}
+      client_secret: ${env:X_CLIENT_SECRET}
+
+    - id: zoom
+      enabled: false
+      client_id: ${env:ZOOM_CLIENT_ID}
+      client_secret: ${env:ZOOM_CLIENT_SECRET}
