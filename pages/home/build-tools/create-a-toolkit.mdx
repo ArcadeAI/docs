@@ -15,7 +15,7 @@ You'll create a simple arithmetic toolkit with operations like addition, subtrac
 
 ### Prerequisites
 
-- [Set up Arcade AI](/home/quickstart)
+- [Set up Arcade AI Locally](/home/install/local)
 - Install the Arcade SDK:
 
 ```bash
@@ -85,20 +85,24 @@ def divide(
 
 ### Register your tools
 
-In order for Arcade AI to recognize your tools, you need to register them in a `ToolCatalog`.
+To register your tools locally, you can run pip install them and test them in `arcade dev`
 
-Create a new Python file, e.g., `catalog.py`:
-
-```python
-from arcade.core.catalog import ToolCatalog
-from arithmetic import add, subtract, multiply, divide  # Import your tools
-
-catalog = ToolCatalog()
-catalog.add_tool(add)
-catalog.add_tool(subtract)
-catalog.add_tool(multiply)
-catalog.add_tool(divide)
+In the tool directory with the `pyproject.toml`, run:
+```bash
+pip install .
 ```
+
+This will load the tool into the local actor environment.
+
+You can now run:
+```bash
+arcade dev
+```
+
+To start the Engine and Actor with your new tool.
+
+<Warning>See the [Local Installation Guide](/home/install/local) for setting up `arcade dev` if you have not done so already. </Warning>
+
 
 ### Use your tools with Arcade
 
@@ -107,16 +111,14 @@ Now you can use your custom tools with Arcade AI in your application.
 Here's an example of how to use your tools:
 
 ```python
-from arcade.client import Arcade
-from catalog import catalog
+from arcadepy import Arcade
 
-client = Arcade(api_key="your_api_key")
+client = Arcade(api_key="your_api_key", base_url="localhost:9099")
 
 # Use the tools in a chat completion
 response = client.chat.completions.create(
     messages=[{"role": "user", "content": "What is 6 times 7?"}],
     model="gpt-4o",
-    tools=list(catalog.tools.keys()),
     tool_choice="auto",
 )
 
