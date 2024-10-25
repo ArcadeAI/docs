@@ -11,7 +11,7 @@ auth_response = client.auth.start(
 )
 
 if auth_response.status != "completed":
-    print("Please complete the authorization challenge in your browser: ")
+    print("Please complete the authorization challenge in your browser:")
     print(auth_response.auth_url)
 
 # Wait for the authorization to complete

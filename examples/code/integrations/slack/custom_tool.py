@@ -2,9 +2,9 @@ from typing import Annotated
 
 from slack_sdk import WebClient
 
-from arcade.sdk.errors import ToolExecutionError
 from arcade.sdk import ToolContext, tool
 from arcade.sdk.auth import Slack
+from arcade.sdk.errors import RetryableToolError
 
 
 @tool(
@@ -38,7 +38,7 @@ def send_dm_to_user(
             break
 
     if not user_id:
-        raise ToolExecutionError(
+        raise RetryableToolError(
             "User not found",
             developer_message=f"User with username '{user_name}' not found.",
         )

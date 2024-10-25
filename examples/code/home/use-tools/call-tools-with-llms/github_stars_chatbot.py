@@ -12,7 +12,7 @@ user_id = "you@example.com"
 
 while True:
     # Ask the user for input
-    prompt = input("Enter your prompt (type 'exit' to quit): ")
+    prompt = input("Enter your prompt (type 'exit' to quit):")
     if prompt.lower() == "exit":
         break
 
