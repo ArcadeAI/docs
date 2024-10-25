@@ -1,10 +1,10 @@
-from arcade.core.config import config
+import os
 from openai import OpenAI
 
 # Initialize the OpenAI client, pointing to Arcade AI
 client = OpenAI(
+    api_key=os.environ["ARCADE_API_KEY"],
     base_url="https://api.arcade-ai.com/v1",
-    api_key=config.api.key,
 )
 
 # Get a unique identifier for your end user

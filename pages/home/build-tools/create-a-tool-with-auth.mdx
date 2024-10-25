@@ -29,10 +29,9 @@ Create a new Python file, e.g., `slack_tools.py`, and import the necessary modul
 
 ```python
 from typing import Annotated
-from arcade.core.schema import ToolContext
-from arcade.sdk import tool
+from arcade.sdk import ToolContext, tool
 from arcade.sdk.auth import SlackUser
-from arcade.core.errors import ToolExecutionError, RetryableToolError
+from arcade.sdk.errors import RetryableToolError
 ```
 
 Now, define your tool using the `@tool` decorator and specify the required authorization:
@@ -55,30 +54,24 @@ def send_dm_to_user(
 ):
     """Send a direct message to a user in Slack."""
     slack_client = WebClient(token=context.authorization.token)
-    try:
-        # Retrieve the user ID based on username
-        user_list_response = slack_client.users_list()
-        user_id = None
-        for user in user_list_response["members"]:
-            if user["name"].lower() == user_name.lower():
-                user_id = user["id"]
-                break
-        if not user_id:
-            raise RetryableToolError(
-                "User not found",
-                developer_message=f"User with username '{user_name}' not found."
-            )
 
-        # Open a conversation and send the message
-        im_response = slack_client.conversations_open(users=[user_id])
-        dm_channel_id = im_response["channel"]["id"]
-        slack_client.chat_postMessage(channel=dm_channel_id, text=message)
-    except SlackApiError as e:
-        error_message = e.response["error"] if "error" in e.response else str(e)
-        raise ToolExecutionError(
-            "Error sending message",
-            developer_message=f"Slack API Error: {error_message}",
+    # Retrieve the user ID based on username
+    user_list_response = slack_client.users_list()
+    user_id = None
+    for user in user_list_response["members"]:
+        if user["name"].lower() == user_name.lower():
+            user_id = user["id"]
+            break
+    if not user_id:
+        raise RetryableToolError(
+            "User not found",
+            developer_message=f"User with username '{user_name}' not found."
         )
+
+    # Open a conversation and send the message
+    im_response = slack_client.conversations_open(users=[user_id])
+    dm_channel_id = im_response["channel"]["id"]
+    slack_client.chat_postMessage(channel=dm_channel_id, text=message)
 ```
 
 ### Register your tool
@@ -86,7 +79,7 @@ def send_dm_to_user(
 As before, you need to register your tool in a `ToolCatalog`:
 
 ```python
-from arcade.core.catalog import ToolCatalog
+from arcade.sdkimport ToolCatalog
 from slack_tools import send_dm_to_user
 
 catalog = ToolCatalog()

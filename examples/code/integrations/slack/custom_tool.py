@@ -2,9 +2,8 @@ from typing import Annotated
 
 from slack_sdk import WebClient
 
-from arcade.core.errors import ToolExecutionError
-from arcade.core.schema import ToolContext
-from arcade.sdk import tool
+from arcade.sdk.errors import ToolExecutionError
+from arcade.sdk import ToolContext, tool
 from arcade.sdk.auth import Slack
 
 
