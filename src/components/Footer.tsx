@@ -100,7 +100,7 @@ const ResourceCol: React.FC<ResourceColProps> = ({ title, resources }) => {
 const Footer: React.FC = () => {
   const projectResources: Resource[] = [
     {
-      url: "/engine/github",
+      url: "https://github.com/ArcadeAI/arcade-ai",
       title: "GitHub",
       external: true,
     },
@@ -118,12 +118,12 @@ const Footer: React.FC = () => {
       external: false,
     },
     {
-      url: "/engine/releases",
+      url: "https://github.com/ArcadeAI/arcade-ai/releases",
       title: "Releases",
       external: true,
     },
     {
-      url: "/engine/examples",
+      url: "https://github.com/ArcadeAI/arcade-ai/tree/main/examples",
       title: "Examples",
       external: true,
     },
