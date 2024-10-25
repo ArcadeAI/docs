@@ -41,23 +41,23 @@ We'll set up a FastAPI application that acts as an Actor to serve the tools from
    from pydantic import BaseModel
 
    from arcade.actor.fastapi.actor import FastAPIActor
-   from arcade.client import AsyncArcade
-   from arcade.core.config import config
-   from arcade.core.toolkit import Toolkit
+   from arcade.sdk import Toolkit
+   from arcadepy import AsyncArcade
    import arcade_math
    ```
 
 2. **Ensure Arcade API Key is Set**
 
-   ```python
-   if not config.api or not config.api.key:
-       raise ValueError("Arcade API key not set. Please run `arcade login`.")
+   The Arcade API key is automatically loaded from the `ARCADE_API_KEY` environment variable. If you haven't set this yet, you can do so by running:
+
+   ```bash
+   export ARCADE_API_KEY="your_api_key"   # On Windows use `set`
    ```
 
 3. **Initialize the Arcade Client**
 
    ```python
-   client = AsyncArcade(api_key=config.api.key)
+   client = AsyncArcade()
    ```
 
 4. **Initialize the FastAPI Application and Actor**
@@ -80,6 +80,7 @@ We'll set up a FastAPI application that acts as an Actor to serve the tools from
    ```python
    class ChatRequest(BaseModel):
        message: str
+       user_id: str
    ```
 
 7. **Define the Chat Endpoint**
@@ -97,7 +98,7 @@ We'll set up a FastAPI application that acts as an Actor to serve the tools from
                max_tokens=500,
                tools=[],  # List your tools here if needed
                tool_choice=tool_choice,
-               user=config.user.email if config.user else None,
+               user=request.user_id,
            )
        except Exception as e:
            raise HTTPException(status_code=500, detail=str(e))
@@ -128,7 +129,7 @@ Example request using `curl`:
 ```bash
 curl -X POST "http://127.0.0.1:8000/chat" \
      -H "Content-Type: application/json" \
-     -d '{"message": "What is the square root of 16?"}'
+     -d '{"message": "What is the square root of 16?", "user_id": "user@example.com"}'
 ```
 
 ### Customize the Tools (Optional)

@@ -1,26 +1,22 @@
-from arcade.client.errors import APITimeoutError
-from arcade.client import Arcade, AuthProvider
+from arcadepy import Arcade
 
-client = Arcade()
+client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
 user_id = "user@example.com"
 
 # Start the authorization process
-auth_response = client.auth.authorize(
-    provider=AuthProvider.linkedin,
-    scopes=["w_member_social"],
+auth_response = client.auth.start(
     user_id=user_id,
+    provider="linkedin",
+    scopes=["w_member_social"],
 )
 
 if auth_response.status != "completed":
     print("Please complete the authorization challenge in your browser:")
     print(auth_response.auth_url)
 
-while auth_response.status != "completed":
-    try:
-        auth_response = client.auth.status(auth_response, wait=60)
-    except APITimeoutError:
-        continue
+# Wait for the authorization to complete
+auth_response = client.auth.wait_for_completion(auth_response)
 
 token = auth_response.context.token
-# Do something interesting with the token...
+# TODO: Do something interesting with the token...
