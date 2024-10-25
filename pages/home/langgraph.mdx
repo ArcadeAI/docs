@@ -25,9 +25,9 @@ pip install arcade-ai langchain-openai langgraph langchain-google-community
 #### Step 1: Initialize the Arcade client
 
 ```python
-from arcade.client import Arcade
+from arcadepy import Arcade
 
-client = Arcade(api_key="your_api_key")
+client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 ```
 
 #### Step 2: Initiate authorization
@@ -46,12 +46,9 @@ auth_response = client.tools.authorize(
 if auth_response.status != "completed":
     print("Please complete the authorization challenge:")
     print(auth_response.auth_url)
-    input("Press Enter after completing authorization...")
 
-    # Poll for authorization status
-    while auth_response.status != "completed":
-        time.sleep(5)
-        auth_response = client.auth.status(auth_response)
+# Wait for the authorization to complete
+auth_response = client.auth.wait_for_completion(auth_response)
 ```
 
 #### Step 3: Obtain credentials
@@ -106,9 +103,9 @@ Use LangGraph to define a state graph workflow.
 from typing import TypedDict
 from langgraph.graph import END, START, StateGraph
 from langgraph.errors import NodeInterrupt
-from arcade.client import Arcade
+from arcadepy import Arcade
 
-client = Arcade(api_key="your_api_key")
+client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
 class State(TypedDict):
     emails: Any
@@ -126,7 +123,7 @@ def step_1(state: State, config) -> State:
         raise NodeInterrupt("Awaiting user authorization")
 
     # Tool execution
-    result = client.tools.run(
+    result = client.tools.execute(
         tool_name="Google.ListEmails",
         user_id=user_id,
         inputs={"n_emails": 5},

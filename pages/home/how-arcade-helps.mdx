@@ -28,9 +28,9 @@ With Arcade AI, developer can now create agents that can as _as the end user of 
 Arcade AI also allows for actions (tools) to be authorized directly. For example, to access a user's Gmail account, you can initiate an authorization flow:
 
 ```python
-from arcade.client import Arcade
+from arcadepy import Arcade
 
-client = Arcade()
+client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
 # Unique identifier for the end user
 user_id = "user@example.com"
@@ -44,19 +44,17 @@ auth_response = client.tools.authorize(
 print(f"Please authorize access by visiting: {auth_response.auth_url}")
 ```
 
-After the user completes the authorization, you can check the status:
+Then, wait for the user to complete the authorization process:
 
 ```python
-# Poll for authorization status
-while auth_response.status != "completed":
-    time.sleep(5)
-    auth_response = client.auth.status(auth_response.auth_id)
+# Wait for the authorization to complete
+auth_response = client.auth.wait_for_completion(auth_response)
 ```
 
 Once authorized, your AI agent can securely access the user's emails:
 
 ```python
-emails_response = client.tools.run(
+emails_response = client.tools.execute(
     tool_name="Google.ListEmails",
     user_id=user_id,
 )
@@ -70,12 +68,12 @@ Consider the difference between accessing public information and private user da
 - **Tools that don't require authorization**: Some tools, like `Search.SearchGoogle`, allow AI agents to retrieve information from the web without needing user-specific authorization.
 
   ```python
-  from arcade.client import Arcade
+  from arcadepy import Arcade
 
   client = Arcade()
 
   # Use the Search.SearchGoogle tool to perform a web search
-  search_response = client.tools.run(
+  search_response = client.tools.execute(
       tool_name="Search.SearchGoogle",
       inputs={"query": "Latest AI advancements"},
   )
@@ -85,7 +83,7 @@ Consider the difference between accessing public information and private user da
 - **Tools that require authorization**: Other tools, like `Google.ListEmails`, require user authorization to access private data such as emails.
 
   ```python
-  from arcade.client import Arcade
+  from arcadepy import Arcade
 
   client = Arcade()
 
@@ -94,15 +92,17 @@ Consider the difference between accessing public information and private user da
 
   # Request access to the user's Gmail account
   auth_response = client.tools.authorize(
-      tool_name="Google.ListEmails",
       user_id=user_id,
+      tool_name="Google.ListEmails",
   )
 
   print(f"Please authorize access by visiting: {auth_response.auth_url}")
 
-  # Wait for the user to authorize and then run the tool
-  # (Assume authorization is completed)
-  emails_response = client.tools.run(
+  # Wait for the authorization to complete
+  auth_response = client.auth.wait_for_completion(auth_response)
+
+  # Run the tool
+  emails_response = client.tools.execute(
       tool_name="Google.ListEmails",
       user_id=user_id,
   )

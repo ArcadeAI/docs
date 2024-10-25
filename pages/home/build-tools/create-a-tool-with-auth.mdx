@@ -79,7 +79,7 @@ def send_dm_to_user(
 As before, you need to register your tool in a `ToolCatalog`:
 
 ```python
-from arcade.sdkimport ToolCatalog
+from arcade.sdk import ToolCatalog
 from slack_tools import send_dm_to_user
 
 catalog = ToolCatalog()
@@ -93,16 +93,21 @@ Now you can use your custom authorized tool with Arcade AI in your application.
 Here's an example of how to use your tool:
 
 ```python
-from arcade.client import Arcade
+from arcadepy import Arcade
 from catalog import catalog
 
-client = Arcade(api_key="your_api_key")
+client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
 user_id = "user@example.com"
 
 # Use the tool in a chat completion
 response = client.chat.completions.create(
-    messages=[{"role": "user", "content": "Send a message to johndoe on Slack saying 'Hello!'"}],
+    messages=[
+        {
+            "role": "user",
+            "content": "Send a message to johndoe on Slack saying 'Hello!'",
+        }
+    ],
     model="gpt-4o",
     tools=list(catalog.tools.keys()),
     tool_choice="auto",
