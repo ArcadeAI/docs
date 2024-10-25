@@ -19,7 +19,7 @@ You'll create a simple arithmetic toolkit with operations like addition, subtrac
 - Install the Arcade SDK:
 
 ```bash
-pip install arcade-ai
+pip install arcade-ai arcadepy
 ```
 
 ### Create a new toolkit
@@ -32,7 +32,7 @@ arcade new
 
 ### Define your tools
 
-Create a Python file for your tools, e.g., `arithmetic.py`, and import the necessary modules:
+Create a Python file for your tools, e.g., `arithmetic.py`, in the `arcade_<toolkit_name>/tools` directory of your new toolkit and import the necessary modules:
 
 ```python
 from typing import Annotated
@@ -87,7 +87,7 @@ def divide(
 
 To register your tools locally, you can run pip install them and test them in `arcade dev`
 
-Navigate to the directory created by `arcade new`, run:
+Navigate to the directory created by `arcade new` (with the `pyproject.toml` file) and run:
 ```bash
 pip install .
 ```
@@ -111,13 +111,13 @@ Here's an example of how to use your tools:
 ```python
 from arcadepy import Arcade
 
-client = Arcade(api_key="your_api_key", base_url="localhost:9099")
+client = Arcade(base_url="http://localhost:9099")
 
 # Use the tools in a chat completion
 response = client.chat.completions.create(
     messages=[{"role": "user", "content": "What is 6 times 7?"}],
     model="gpt-4o",
-    tool_choice="auto",
+    tool_choice="generate",
 )
 
 print(response.choices[0].message.content)
@@ -131,10 +131,8 @@ By decorating your functions with `@tool`, you expose them to the Arcade AI plat
 
 The `Annotated` types and docstrings provide metadata that helps the AI understand how to use your tools.
 
-The `ToolCatalog` collects your tools and makes them available to the AI assistant.
-
 ### Next steps
 
 Try adding more tools to your toolkit, such as `sqrt`, `sum_list`, or `sum_range`.
 
-Explore advanced features like tool authorization and evaluation to enhance your tools.
+Explore advanced features like tool [authorization](/home/build-tools/create-a-tool-with-auth) and [evaluation](/home/evaluate-tools/why-evaluate-tools) to enhance your tools.
