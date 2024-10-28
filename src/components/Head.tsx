@@ -10,12 +10,12 @@ export const Head = () => {
 
   // TODO: make metadata depend on the project docs
 
-  const description = frontMatter.description ?? "";
-  const title = frontMatter.title ?? pageTitle;
+  const description = frontMatter.description ?? "Arcade AI";
+  const title = frontMatter.title ?? "Arcade AI";
 
   const image = frontMatter.ogImage
     ? "https://docs.arcade-ai.com" + frontMatter.ogImage
-    : "https://docs.arcade-ai.com/images/engine/arcadeai.png";
+    : "https://docs.arcade-ai.com/images/logo/arcadeai.png";
   const video = frontMatter.ogVideo
     ? "https://docs.arcade-ai.com" + frontMatter.ogVideo
     : null;
@@ -23,7 +23,7 @@ export const Head = () => {
   return (
     <>
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <meta name="apple-mobile-web-app-title" content="ArcadeAI Docs" />
+      <meta name="apple-mobile-web-app-title" content="Arcade AI Documentation" />
       <title>Arcade AI</title>
 
       <link rel="manifest" href="/site.webmanifest" />
@@ -38,7 +38,7 @@ export const Head = () => {
       {video && <meta property="og:video" content={video} />}
 
       <meta property="og:image" content={image} />
-      <meta property="twitter:image" content={image} />
+      <meta name="twitter:image" content={image} />
 
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:site:domain" content="docs.arcade-ai.com" />
@@ -60,6 +60,24 @@ export const Head = () => {
         type="image/png"
         sizes="16x16"
         href="/favicon-16x16.png"
+      />
+
+      {/* Google tag (gtag.js) */}
+      <script
+        async
+        src="https://www.googletagmanager.com/gtag/js?id=G-29HSQ3LQ13"
+      ></script>
+      <script
+        // Initialize Google Analytics
+        dangerouslySetInnerHTML={{
+          __html: `
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-29HSQ3LQ13');
+          `,
+        }}
       />
     </>
   );
