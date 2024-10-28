@@ -1,6 +1,7 @@
 import ToggleContent from "@/components/ToggleContent";
 import CustomLayout from "@components/CustomLayout";
 import { Footer } from "@components/Footer";
+import { Head } from "@components/Head";
 import { Hero } from "@components/Hero";
 import Discord from "@components/icons/discord";
 import { Logo } from "@components/Logo";
@@ -44,6 +45,7 @@ const config: DocsThemeConfig = {
     defaultMenuCollapseLevel: 1,
     autoCollapse: true,
   },
+  head: Head,
   footer: {
     text: <Footer />,
   },
