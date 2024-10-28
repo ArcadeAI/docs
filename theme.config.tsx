@@ -31,7 +31,7 @@ const config: DocsThemeConfig = {
     link: "https://discord.gg/GUZEMpEZ9p",
     icon: <Discord />,
   },
-  docsRepositoryBase: "https://github.com/ArcadeAI/docs",
+  docsRepositoryBase: "https://github.com/ArcadeAI/arcade-ai",
   editLink: {
     component: () => null, // Provide a no-op component to disable the edit link
   },
