@@ -16,7 +16,7 @@ response = client.chat.completions.create(
         {"role": "system", "content": "You are a helpful assistant."},
         {
             "role": "user",
-            "content": "Star the ArcadeAI/langchain-arcade repo on GitHub",
+            "content": "Star the ArcadeAI/arcade-ai repo on GitHub",
         },
     ],
     model="gpt-4o",
