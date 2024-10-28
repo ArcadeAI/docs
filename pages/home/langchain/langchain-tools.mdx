@@ -1,0 +1,100 @@
+---
+title: "Authorize LangChain Tools"
+description: "Use Arcade AI to authorize LangChain Tools"
+---
+
+import { Steps } from "nextra/components";
+
+## Authorize LangChain Tools
+
+In this guide, we'll show you how to authorize LangChain tools like the `GmailToolkit` using Arcade AI.
+
+<Steps>
+
+### Prerequisites
+
+- [Set up Arcade AI](/home/quickstart)
+- Install the required packages:
+
+  ```bash
+  pip install arcade-ai langchain-openai langgraph langchain-google-community
+  ```
+
+### Import the necessary packages
+
+```python
+import os
+from arcadepy import Arcade
+from google.oauth2.credentials import Credentials
+from langchain_google_community import GmailToolkit
+from langchain_google_community.gmail.utils import build_resource_service
+from langchain_openai import ChatOpenAI
+from langgraph.prebuilt import create_react_agent
+```
+
+### Initialize the Arcade client
+
+```python
+api_key = os.getenv("ARCADE_API_KEY")
+client = Arcade(api_key=api_key)
+```
+
+### Start the authorization process for Gmail
+
+```python
+user_id = "user@example.com"
+auth_response = client.auth.start(
+    user_id=user_id,
+    provider="google",
+    scopes=["https://www.googleapis.com/auth/gmail.readonly"],
+)
+```
+
+### Prompt the user to authorize
+
+```python
+if auth_response.status != "completed":
+    print("Please authorize the application in your browser:")
+    print(auth_response.authorization_url)
+```
+
+### Wait for authorization completion
+
+```python
+auth_response = client.auth.wait_for_completion(auth_response)
+```
+
+### Use the token to initialize the Gmail toolkit
+
+```python
+creds = Credentials(auth_response.context.token)
+api_resource = build_resource_service(credentials=creds)
+toolkit = GmailToolkit(api_resource=api_resource)
+tools = toolkit.get_tools()
+```
+
+### Initialize the agent
+
+```python
+llm = ChatOpenAI(model="gpt-4o")
+agent_executor = create_react_agent(llm, tools)
+```
+
+### Execute the agent
+
+```python
+example_query = "Read my latest emails and summarize them."
+
+events = agent_executor.stream(
+    {"messages": [("user", example_query)]},
+    stream_mode="values",
+)
+for event in events:
+    event["messages"][-1].pretty_print()
+```
+
+</Steps>
+
+### Next Steps
+
+Now you're ready to explore more LangChain tools with Arcade AI. Try integrating additional toolkits and crafting more complex queries to enhance your AI workflows.
