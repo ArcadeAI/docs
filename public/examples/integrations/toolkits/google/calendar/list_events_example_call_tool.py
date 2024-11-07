@@ -17,11 +17,10 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 inputs = {
-    "min_day": "today",
-    "min_time_slot": "00:00",
-    "max_day": "tomorrow",
-    "max_time_slot": "23:59",
+    "min_end_datetime": "2024-09-15T00:00:00",
+    "max_start_datetime": "2024-09-16T23:59:00",
     "max_results": 15,
+    "calendar_id": "primary",
 }
 
 response = client.tools.execute(

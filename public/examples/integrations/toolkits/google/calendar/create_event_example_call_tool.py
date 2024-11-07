@@ -19,11 +19,10 @@ client.auth.wait_for_completion(auth_response)
 inputs = {
     "summary": "1:1 with John Doe",
     "description": "Discuss project updates and next steps",
-    "start_date": "today",
-    "start_time": "10:00",
-    "end_date": "today",
-    "end_time": "10:30",
+    "start_datetime": "2024-12-31T10:00:00",
+    "end_datetime": "2024-12-31T10:30:00",
     "attendee_emails": ["john.doe@example.com"],
+    "calendar_id": "primary",
 }
 
 response = client.tools.execute(

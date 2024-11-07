@@ -19,11 +19,10 @@ client.auth.wait_for_completion(auth_response)
 inputs = {
     "event_id": "your_event_id_here",
     "updated_summary": "Updated 1:1 with John Doe",
-    "updated_start_day": "today",
-    "updated_start_time": "11:00",
-    "updated_end_day": "today",
-    "updated_end_time": "11:30",
+    "updated_start_datetime": "2024-12-31T11:00:00",
+    "updated_end_datetime": "2024-12-31T11:30:00",
     "attendee_emails_to_add": ["jane.doe@example.com"],
+    "updated_calendar_id": "primary",
 }
 
 response = client.tools.execute(
