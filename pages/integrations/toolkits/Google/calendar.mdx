@@ -74,16 +74,14 @@ Create a new event in the specified calendar.
 
 **Parameters**
 
-- **`summary`** _(string, required)_ The title of the event.
-- **`start_date`** _(enum ([DateRange](/integrations/toolkits/Google/reference#daterange)), required)_ The day the event starts.
-- **`start_time`** _(enum ([TimeSlot](/integrations/toolkits/Google/reference#timeslot)), required)_ The time the event starts.
-- **`end_date`** _(enum ([DateRange](/integrations/toolkits/Google/reference#daterange)), required)_ The day the event ends.
-- **`end_time`** _(enum ([TimeSlot](/integrations/toolkits/Google/reference#timeslot)), required)_ The time the event ends.
-- **`calendar_id`** _(string, optional, Defaults to `'primary'`)_ The ID of the calendar.
-- **`description`** _(string, optional)_ The description of the event.
-- **`location`** _(string, optional)_ The location of the event.
-- **`visibility`** _(string, optional)_ The visibility of the event (`'default'`, `'public'`, `'private'`, `'confidential'`).
-- **`attendee_emails`** _(array of strings, optional)_ Attendee emails.
+- **`summary`** _(string, required)_ The title of the event
+- **`start_datetime`** _(string, required)_ The datetime when the event starts in ISO 8601 format, e.g., '2024-12-31T15:30:00'.
+- **`end_datetime`** _(string, required)_ The datetime when the event ends in ISO 8601 format, e.g., '2024-12-31T17:30:00'.
+- **`calendar_id`** _(string, optional)_ The ID of the calendar to create the event in, usually 'primary'.
+- **`description`** _(string, optional)_ The description of the event
+- **`location`** _(string, optional)_ The location of the event
+- **`visibility`** _(string, optional)_ The visibility of the event
+- **`attendee_emails`** _(array, optional)_ The list of attendee emails. Must be valid email addresses e.g., username@domain.com.
 
 ---
 
@@ -113,16 +111,21 @@ Create a new event in the specified calendar.
   ]}
 />
 
-List events from the specified calendar within the given date range.
+List events from the specified calendar within the given datetime range.
+
+min_end_datetime serves as the lower bound (exclusive) for an event's end time. max_start_datetime serves as the upper bound (exclusive) for an event's start time.
+
+For example: If min_end_datetime is set to 2024-09-15T09:00:00 and max_start_datetime is set to 2024-09-16T17:00:00, the function will return events that:
+
+1. End after 09:00 on September 15, 2024 (exclusive)
+2. Start before 17:00 on September 16, 2024 (exclusive) This means an event starting at 08:00 on September 15 and ending at 10:00 on September 15 would be included, but an event starting at 17:00 on September 16 would not be included.
 
 **Parameters**
 
-- **`min_day`** _(enum ([Day](/integrations/toolkits/Google/reference#day)), required)_ Events ending on or after this day.
-- **`min_time_slot`** _(enum ([TimeSlot](/integrations/toolkits/Google/reference#timeslot)), required)_ Events ending after this time.
-- **`max_day`** _(enum ([Day](/integrations/toolkits/Google/reference#day)), required)_ Events starting on or before this day.
-- **`max_time_slot`** _(enum ([TimeSlot](/integrations/toolkits/Google/reference#timeslot)), required)_ Events starting before this time.
-- **`calendar_id`** _(string, optional, Defaults to `'primary'`)_ The ID of the calendar.
-- **`max_results`** _(integer, optional, Defaults to `10`)_ Maximum number of events to return.
+- **`min_end_datetime`** _(string, required)_ Filter by events that end on or after this datetime in ISO 8601 format, e.g., '2024-09-15T09:00:00'.
+- **`max_start_datetime`** _(string, required)_ Filter by events that start before this datetime in ISO 8601 format, e.g., '2024-09-16T17:00:00'.
+- **`calendar_id`** _(string, optional)_ The ID of the calendar to list events from
+- **`max_results`** _(integer, optional)_ The maximum number of events to return
 
 ---
 
@@ -152,23 +155,23 @@ List events from the specified calendar within the given date range.
   ]}
 />
 
-Update an existing event with provided details.
+Update an existing event in the specified calendar with the provided details. Only the provided fields will be updated; others will remain unchanged.
+
+`updated_start_datetime` and `updated_end_datetime` are independent and can be provided separately.
 
 **Parameters**
 
-- **`event_id`** _(string, required)_ The ID of the event to update.
-- **`updated_start_day`** _(enum ([Day](/integrations/toolkits/Google/reference#day)), optional)_ Updated start day.
-- **`updated_start_time`** _(enum ([TimeSlot](/integrations/toolkits/Google/reference#timeslot)), optional)_ Updated start time.
-- **`updated_end_day`** _(enum ([Day](/integrations/toolkits/Google/reference#day)), optional)_ Updated end day.
-- **`updated_end_time`** _(enum ([TimeSlot](/integrations/toolkits/Google/reference#timeslot)), optional)_ Updated end time.
-- **`updated_calendar_id`** _(string, optional)_ Updated calendar ID.
-- **`updated_summary`** _(string, optional)_ Updated event title.
-- **`updated_description`** _(string, optional)_ Updated description.
-- **`updated_location`** _(string, optional)_ Updated location.
-- **`updated_visibility`** _(string, optional)_ Updated visibility.
-- **`attendee_emails_to_add`** _(array of strings, optional)_ Attendee emails to add.
-- **`attendee_emails_to_remove`** _(array of strings, optional)_ Attendee emails to remove.
-- **`send_updates`** _(enum ([SendUpdatesOptions](/integrations/toolkits/Google/reference#sendupdatesoptions)), optional, Defaults to `'all'`)_ Who to notify about the update.
+- **`event_id`** _(string, required)_ The ID of the event to update
+- **`updated_start_datetime`** _(string, optional)_ The updated datetime that the event starts in ISO 8601 format, e.g., '2024-12-31T15:30:00'.
+- **`updated_end_datetime`** _(string, optional)_ The updated datetime that the event ends in ISO 8601 format, e.g., '2024-12-31T17:30:00'.
+- **`updated_calendar_id`** _(string, optional)_ The updated ID of the calendar containing the event.
+- **`updated_summary`** _(string, optional)_ The updated title of the event
+- **`updated_description`** _(string, optional)_ The updated description of the event
+- **`updated_location`** _(string, optional)_ The updated location of the event
+- **`updated_visibility`** _(enum ([EventVisibility](/integrations/toolkits/Google/reference#eventvisibility)), optional)_ The visibility of the event
+- **`attendee_emails_to_add`** _(array, optional)_ The list of attendee emails to add. Must be valid email addresses e.g., username@domain.com.
+- **`attendee_emails_to_remove`** _(array, optional)_ The list of attendee emails to remove. Must be valid email addresses e.g., username@domain.com.
+- **`send_updates`** _(enum ([SendUpdatesOptions](/integrations/toolkits/Google/reference#sendupdatesoptions)), optional, Defaults to `'all'`)_ Should attendees be notified of the update? (none, all, external_only)
 
 ---
 
@@ -202,9 +205,11 @@ Delete an event from Google Calendar.
 
 **Parameters**
 
-- **`event_id`** _(string, required)_ The ID of the event to delete.
-- **`calendar_id`** _(string, optional, Defaults to `'primary'`)_ The ID of the calendar.
-- **`send_updates`** _(enum ([SendUpdatesOptions](/integrations/toolkits/Google/reference#sendupdatesoptions)), optional, Defaults to `'all'`)_ Who to notify about the deletion.
+- **`event_id`** _(string, required)_ The ID of the event to delete
+- **`calendar_id`** _(string, optional, Defaults to `'primary'`)_ The ID of the calendar containing the event
+- **`send_updates`** _(enum ([SendUpdatesOptions](/integrations/toolkits/Google/reference#sendupdatesoptions)), optional, Defaults to `'all'`)_ Specifies which attendees to notify about the deletion
+
+---
 
 ## Auth
 

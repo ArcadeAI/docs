@@ -17,7 +17,8 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 inputs = {
-    "event_id": "your_event_id_here"  # Event IDs can be retrieved from the ListEvents tool.
+    "event_id": "your_event_id_here",
+    "calendar_id": "primary",
 }
 
 response = client.tools.execute(
