@@ -6,6 +6,7 @@ import { Hero } from "@components/Hero";
 import Discord from "@components/icons/discord";
 import { Logo } from "@components/Logo";
 import { SEO } from "@components/SEO";
+import { SignUpButton } from "@/components/SignUpButton";
 import { titleRenderer } from "@components/TopNav";
 import GitHub from "@geist-ui/react-icons/github";
 import { Check, Important, Info, Note, Tip, Warning } from "@markdown/Callouts";
@@ -38,6 +39,9 @@ const config: DocsThemeConfig = {
   project: {
     link: "https://github.com/ArcadeAI/arcade-ai",
     icon: <GitHub />,
+  },
+  navbar: {
+    extraContent: <SignUpButton />,
   },
   sidebar: {
     toggleButton: true,
