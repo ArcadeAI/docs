@@ -8,14 +8,14 @@ from arcade.sdk.auth import Discord
 
 @tool(
     requires_auth=Discord(
-        scopes=["identify", "email", "guilds", "guilds.join"],
+        scopes=["guilds"],
     )
 )
-async def list_upcoming_meetings(
+async def list_servers(
     context: ToolContext,
     user_id: Annotated[
         Optional[str],
-        "The user's user ID or email address. Defaults to 'me' for the current user.",
+        "The user's user ID. Defaults to '@me' for the current user.",
     ] = "@me",
 ) -> Annotated[dict, "List of servers the user is a member of"]:
     """List a Discord user's servers they are a member of."""
