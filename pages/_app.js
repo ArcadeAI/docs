@@ -3,7 +3,7 @@ import "../styles/globals.css";
 
 function Docs({ Component, pageProps }) {
   return (
-    <ThemeProvider attribute="class">
+    <ThemeProvider attribute="class" defaultTheme="dark">
       <Component {...pageProps} />
     </ThemeProvider>
   );
