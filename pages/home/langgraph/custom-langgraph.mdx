@@ -78,14 +78,14 @@ model_with_tools = model.bind_tools(tools)
 Set up functions that will act as nodes in your LangGraph:
 
 ```python
-# Function to invoke the model and get a response
+# Invoke the model and get a response
 def call_agent(state):
     messages = state["messages"]
     response = model_with_tools.invoke(messages)
     # Return the updated message history
     return {"messages": [*messages, response]}
 
-# Function to determine the next step based on the last message
+# Determine the next step based on the last message
 def should_continue(state: MessagesState):
     last_message = state["messages"][-1]
     if last_message.tool_calls:
@@ -96,7 +96,7 @@ def should_continue(state: MessagesState):
             return "tools"  # Proceed to tool execution if no authorization is needed
     return END  # End the workflow if no tool calls are present
 
-# Function to handle tool authorization
+# Handle tool authorization and prompt for authorization only when necessary
 def authorize(state: MessagesState, config: dict):
     user_id = config["configurable"].get("user_id")
     tool_name = state["messages"][-1].tool_calls[0]["name"]
@@ -112,6 +112,8 @@ def authorize(state: MessagesState, config: dict):
             time.sleep(1)
         return {"messages": state["messages"]}
 ```
+
+Structuring the nodes in this way allows for users who have already authorized the tool to skip the authorization step so they won't have to login every time they run the tool.
 
 ### Build the workflow graph
 
