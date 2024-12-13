@@ -22,6 +22,7 @@ import {
 const config: DocsThemeConfig = {
   primaryHue: { dark: 335, light: 335 }, // Hue for #ED155D
   logo: <Logo />,
+  logoLink: "https://www.arcade-ai.com/",
   themeSwitch: {
     component: () => null,
   },
