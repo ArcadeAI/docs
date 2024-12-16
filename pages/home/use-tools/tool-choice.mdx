@@ -47,8 +47,8 @@ The `execute` option empowers the LLM to run tools as if it were executing them 
 1. **Client Request**: The client calls the AI model via the Arcade Engine.
 2. **Tool Definition**: The Engine adds tool definitions to the request.
 3. **Model Prediction**: The LLM predicts which tool to use and its arguments.
-4. **Tool Execution**: The Engine sends the arguments to the appropriate Actor.
-5. **Result Return**: The Actor executes the tool and returns results to the Engine.
+4. **Tool Execution**: The Engine sends the arguments to the appropriate Worker.
+5. **Result Return**: The Worker executes the tool and returns results to the Engine.
 6. **Client Response**: The Engine sends the results back to the client.
 
 **Example**: Sending a Slack Message
@@ -59,7 +59,7 @@ Imagine a user wants to send a Slack message:
 - **LLM Prediction**: Use the `Slack.SendDmToUser` tool with arguments:
   - `user_name: "john"`
   - `message: "Meeting at 3 PM"`
-- **Tool Execution**: The Engine forwards these arguments to the Actor that hosts the Slack toolkit, which sends the message.
+- **Tool Execution**: The Engine forwards these arguments to the Worker that hosts the Slack toolkit, which sends the message.
 - **Response**: The client receives the return value from the tool
 
 This process happens seamlessly, with the client only seeing the initial request and final response.
@@ -73,8 +73,8 @@ The `generate` option works like `execute` but adds a step where the Engine asks
 1. **Client Request**: The client calls the AI model via the Arcade Engine.
 2. **Tool Definition**: The Engine adds tool definitions to the request.
 3. **Model Prediction**: The LLM predicts which tool to use and its arguments.
-4. **Tool Execution**: The Engine sends the arguments to the appropriate Actor.
-5. **Intermediate Results**: The Actor executes the tool and returns results to the Engine.
+4. **Tool Execution**: The Engine sends the arguments to the appropriate Worker.
+5. **Intermediate Results**: The Worker executes the tool and returns results to the Engine.
 6. **Response Generation**: The Engine sends a second request to the LLM with the tool's results.
 7. **Final Response**: The LLM generates a response incorporating the tool's output, and the Engine returns it to the client.
 
@@ -84,8 +84,8 @@ Suppose a user wants to know their availability for the next day:
 
 - **User Input**: "What's my availability for tomorrow?"
 - **LLM Prediction**: Use the `Google.ListEvents` tool for the specified date.
-- **Tool Execution**: The Engine requests the Actor hosting the Calendar toolkit to retrieve events for tomorrow.
-- **Results**: The Actor returns calendar data (e.g., three meetings scheduled).
+- **Tool Execution**: The Engine requests the Worker hosting the Calendar toolkit to retrieve events for tomorrow.
+- **Results**: The Worker returns calendar data (e.g., three meetings scheduled).
 - **LLM Response Generation**: The Engine provides the calendar data to the LLM.
 - **Response**: The LLM generates: "You have 3 meetings tomorrow. You're free from 9-10 AM, 12-2 PM, and after 4 PM."
 - **Client Receives**: The summarized availability information.
