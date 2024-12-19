@@ -8,7 +8,7 @@ ARCADE_API_HOST=localhost
 ARCADE_API_PORT=9099
 
 
-### Model API KEY ###
+### Model Provider API Keys ###
 
 # OPENAI_API_KEY=
 # ANTHROPIC_API_KEY=
