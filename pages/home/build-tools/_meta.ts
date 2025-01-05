@@ -1,4 +1,4 @@
-{
+export default {
   "create-a-toolkit": "Create a toolkit",
   "tool-context": "Tool Context",
   "create-a-tool-with-auth": "Create a tool with auth",

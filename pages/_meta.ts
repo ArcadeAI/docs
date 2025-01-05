@@ -1,4 +1,4 @@
-{
+export default {
   "home": {
     "type": "page",
     "title": "Home",

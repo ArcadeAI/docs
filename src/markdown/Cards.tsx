@@ -48,9 +48,9 @@ const allowedIcons = {
 
 export const Card = ({ title, children, footer, icon, color, href }) => {
   const borderColorVariations = {
-    grey: "hover:nx-bg-slate-50 nx-border-gray-200 hover:nx-border-gray-300 dark:hover:nx-border-neutral-700",
+    grey: "hover:_bg-slate-50 _border-gray-200 hover:_border-gray-300 dark:hover:_border-neutral-700",
     accent:
-      "hover:nx-border-[var(--brand-accent)] dark:hover:nx-border-[var(--brand-accent)] nx-border-[var(--brand-accent)] dark:nx-border-[var(--brand-accent)]",
+      "hover:_border-[var(--brand-accent)] dark:hover:_border-[var(--brand-accent)] _border-[var(--brand-accent)] dark:_border-[var(--brand-accent)]",
   };
 
   const iconStyle = color ? { color } : { color: "var(--brand-accent)" };
@@ -69,11 +69,11 @@ export const Card = ({ title, children, footer, icon, color, href }) => {
   );
 
   const wrapperClasses: string =
-    "block nx-border dark:nx-border-neutral-800 nx-rounded-lg nx-text-current nx-no-underline dark:nx-shadow-none hover:nx-shadow-gray-100 dark:hover:nx-shadow-none nx-shadow-gray-100 active:nx-shadow-sm active:nx-shadow-gray-200 nx-transition-all nx-duration-200 nx-bg-transparent nx-shadow-sm hover:nx-shadow-md dark:hover:nx-bg-neutral-900 p-4"; // Reduced padding from p-5 to p-4
+    "block _border dark:_border-neutral-800 _rounded-lg _text-current _no-underline dark:_shadow-none hover:_shadow-gray-100 dark:hover:_shadow-none _shadow-gray-100 active:_shadow-sm active:_shadow-gray-200 _transition-all _duration-200 _bg-transparent _shadow-sm hover:_shadow-md dark:hover:_bg-neutral-900 p-4"; // Reduced padding from p-5 to p-4
 
   return href ? (
     <Link
-      className={`${wrapperClasses} ${borderColorVariations["accent"]} cursor-pointer hover:nx-bg-[var(--brand-accent-hover)]`}
+      className={`${wrapperClasses} ${borderColorVariations["accent"]} cursor-pointer hover:_bg-[var(--brand-accent-hover)]`}
       href={href}
       passHref
     >

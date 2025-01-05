@@ -1,8 +1,4 @@
-{
-  "-- TopNav": {
-    "type": "separator",
-    "title": "TopNav"
-  },
+export default {
   "-- Introduction": {
     "type": "separator",
     "title": "Get started"
@@ -13,7 +9,7 @@
     "type": "separator",
     "title": "Using Arcade"
   },
-  "install-clients": "Quickstart",
+  // "install-clients": "Quickstart",
   "use-tools": "Call Arcade Tools",
   "auth": "Authorize Tools",
   "frameworks": "Integrations",
@@ -30,6 +26,6 @@
     "title": "Self-hosting"
   },
   "install": "Install",
-  "deploy": "Deploy",
+  // "deploy": "Deploy",
   "configure": "Configure"
 }

@@ -1,4 +1,4 @@
-{
+export default {
   "-- Integrations": {
     "type": "separator",
     "title": "Integrations"

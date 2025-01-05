@@ -31,6 +31,8 @@ export const Head = () => {
       <link rel="shortcut icon" href="/favicon.ico" />
       <meta property="og:url" content={url} />
       <meta httpEquiv="Content-Language" content="en" />
+      <meta property="og:site_name" content="Arcade AI" />
+      <meta property="og:title" content={pageTitle} />
 
       <meta name="description" content={description} />
       <meta property="og:description" content={description} />
@@ -61,24 +63,9 @@ export const Head = () => {
         sizes="16x16"
         href="/favicon-16x16.png"
       />
-
-      {/* Google tag (gtag.js) */}
-      <script
-        async
-        src="https://www.googletagmanager.com/gtag/js?id=G-29HSQ3LQ13"
-      ></script>
-      <script
-        // Initialize Google Analytics
-        dangerouslySetInnerHTML={{
-          __html: `
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-
-            gtag('config', 'G-29HSQ3LQ13');
-          `,
-        }}
-      />
+      {/* Early connection to reduce the time to fetch the script */}
+       <link rel="preconnect" href="https://www.googletagmanager.com" />
+       <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
     </>
   );
 };
