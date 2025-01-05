@@ -4,9 +4,8 @@ import CustomLayout from "@components/CustomLayout";
 import { Footer } from "@components/Footer";
 import { Head } from "@components/Head";
 import { Hero } from "@components/Hero";
-import Discord from "@components/icons/discord";
+import { SiDiscord, SiGithub } from "@icons-pack/react-simple-icons";
 import { Logo } from "@components/Logo";
-import GitHub from "@geist-ui/react-icons/github";
 import { Check, Important, Info, Note, Tip, Warning } from "@markdown/Callouts";
 import { Card, Cards } from "@markdown/Cards";
 import { DarkOnly, LightOnly } from "@markdown/ThemeContent";
@@ -26,7 +25,7 @@ const config: DocsThemeConfig = {
   },
   chat: {
     link: "https://discord.gg/GUZEMpEZ9p",
-    icon: <Discord />,
+    icon: <SiDiscord />,
   },
   docsRepositoryBase: "https://github.com/ArcadeAI/arcade-ai",
   editLink: {
@@ -34,7 +33,7 @@ const config: DocsThemeConfig = {
   },
   project: {
     link: "https://github.com/ArcadeAI/arcade-ai",
-    icon: <GitHub />,
+    icon: <SiGithub />,
   },
   navbar: {
     extraContent: <SignUpButton />,
@@ -48,7 +47,7 @@ const config: DocsThemeConfig = {
     content: <Footer />,
   },
   toc: {
-    backToTop: 'Scroll to top',
+    backToTop: "Scroll to top",
   },
   components: {
     Hero,

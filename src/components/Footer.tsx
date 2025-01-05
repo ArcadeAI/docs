@@ -1,14 +1,12 @@
 import {
-  faDiscord,
-  faGithub,
-  faLinkedin,
-} from "@fortawesome/free-brands-svg-icons";
-import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+  SiDiscord,
+  SiGithub,
+  SiLinkedin,
+} from "@icons-pack/react-simple-icons";
+import { Mail } from "lucide-react";
 import React from "react";
 
 import { config } from "@config";
-
 import styles from "./Footer.module.css";
 
 const ArcadeLogo = () => {
@@ -39,7 +37,7 @@ const Socials = () => {
         title="View Engine Github"
         rel="noreferrer"
       >
-        <FontAwesomeIcon className={styles.social} icon={faGithub} />
+        <SiGithub className={styles.social} />
       </a>
       <a
         target="_blank"
@@ -47,7 +45,7 @@ const Socials = () => {
         title="Join us in Discord"
         rel="noreferrer"
       >
-        <FontAwesomeIcon className={styles.social} icon={faDiscord} />
+        <SiDiscord className={styles.social} />
       </a>
       <a
         target="_blank"
@@ -55,7 +53,7 @@ const Socials = () => {
         title="View Arcade-ai LinkedIn"
         rel="noreferrer"
       >
-        <FontAwesomeIcon className={styles.social} icon={faLinkedin} />
+        <SiLinkedin className={styles.social} />
       </a>
       <a
         target="_blank"
@@ -63,7 +61,7 @@ const Socials = () => {
         title="Send us an email"
         rel="noreferrer"
       >
-        <FontAwesomeIcon className={styles.social} icon={faEnvelope} />
+        <Mail className={styles.social} />
       </a>
     </div>
   );

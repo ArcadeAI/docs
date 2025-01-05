@@ -1,52 +1,52 @@
-import { faDocker } from "@fortawesome/free-brands-svg-icons";
 import {
-  faBolt,
-  faCheckCircle,
-  faCloud,
-  faCode,
-  faCodeBranch,
-  faList,
-  faPeopleGroup,
-  faPlug,
-  faPuzzlePiece,
-  faRocket,
-  faScaleBalanced,
-  faServer,
-  faTerminal,
-  faToolbox,
-  faWandMagicSparkles,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+  Bolt,
+  Fingerprint,
+  Cloud,
+  Code,
+  GitBranch,
+  List,
+  Plug,
+  Puzzle,
+  Rocket,
+  Scale,
+  Server,
+  Terminal,
+  PencilRuler,
+  Users,
+  Wand2,
+} from "lucide-react";
+import { SiDocker } from "@icons-pack/react-simple-icons";
 import Link from "next/link";
+import React from "react";
 
 type Props = {
   children?: React.ReactNode;
   footer?: React.ReactNode;
   color?: string;
   title: string;
-  icon: string;
+  icon: keyof typeof allowedIcons;
   arrow?: boolean;
   href: string;
 };
 
 const allowedIcons = {
-  "wand-magic-sparkles": faWandMagicSparkles,
-  "scale-balanced": faScaleBalanced,
-  bolt: faBolt,
-  "puzzle-piece": faPuzzlePiece,
-  plug: faPlug,
-  "people-group": faPeopleGroup,
-  docker: faDocker,
-  cloud: faCloud,
-  terminal: faTerminal,
-  rocket: faRocket,
-  code: faCode,
-  list: faList,
-  "check-circle": faCheckCircle,
-  server: faServer,
-  git: faCodeBranch,
-  tool: faToolbox,
-};
+  "wand-magic-sparkles": Wand2,
+  "scale-balanced": Scale,
+  bolt: Bolt,
+  "puzzle-piece": Puzzle,
+  plug: Plug,
+  "people-group": Users,
+  docker: SiDocker,
+  cloud: Cloud,
+  terminal: Terminal,
+  rocket: Rocket,
+  code: Code,
+  list: List,
+  fingerprint: Fingerprint,
+  server: Server,
+  git: GitBranch,
+  toolkit: PencilRuler,
+} as const;
 
 export const Card = ({ title, children, footer, icon, color, href }: Props) => {
   const borderColorVariations = {
@@ -61,7 +61,9 @@ export const Card = ({ title, children, footer, icon, color, href }: Props) => {
     <>
       {icon && (
         <div className="h-6 w-6" style={iconStyle}>
-          <FontAwesomeIcon className="h-6 w-6" icon={allowedIcons[icon]} />
+          {React.createElement(allowedIcons[icon], {
+            className: "h-6 w-6",
+          })}
         </div>
       )}
       {title && <div className="mb-2 mt-2 text-xl font-bold">{title}</div>}
@@ -71,7 +73,7 @@ export const Card = ({ title, children, footer, icon, color, href }: Props) => {
   );
 
   const wrapperClasses: string =
-    "block _border dark:_border-neutral-800 _rounded-lg _text-current _no-underline dark:_shadow-none hover:_shadow-gray-100 dark:hover:_shadow-none _shadow-gray-100 active:_shadow-sm active:_shadow-gray-200 _transition-all _duration-200 _bg-transparent _shadow-sm hover:_shadow-md dark:hover:_bg-neutral-900 p-4"; // Reduced padding from p-5 to p-4
+    "block _border dark:_border-neutral-800 _rounded-lg _text-current _no-underline dark:_shadow-none hover:_shadow-gray-100 dark:hover:_shadow-none _shadow-gray-100 active:_shadow-sm active:_shadow-gray-200 _transition-all _duration-200 _bg-transparent _shadow-sm hover:_shadow-md dark:hover:_bg-neutral-900 p-4";
 
   return href ? (
     <Link

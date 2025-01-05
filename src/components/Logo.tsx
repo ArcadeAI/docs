@@ -1,6 +1,6 @@
 export function Logo() {
   return (
-    <div className="mr-4 flex w-40 items-center">
+    <div className="mr-16 flex w-40 items-center">
       <img
         className="dark:hidden"
         loading="lazy"

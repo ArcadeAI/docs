@@ -4,11 +4,6 @@ export default {
     title: "Home",
     href: "/",
   },
-  toolkits: {
-    type: "page",
-    title: "Toolkits",
-    href: "/toolkits",
-  },
   integrations: {
     type: "page",
     title: "Integrations",
