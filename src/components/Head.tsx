@@ -11,7 +11,7 @@ export const Head = () => {
   // TODO: make metadata depend on the project docs
 
   const description = frontMatter.description ?? "Arcade AI";
-  const title = frontMatter.title ?? "Arcade AI";
+  // const title = frontMatter.title ?? "Arcade AI";
 
   const image = frontMatter.ogImage
     ? "https://docs.arcade-ai.com" + frontMatter.ogImage
@@ -23,7 +23,10 @@ export const Head = () => {
   return (
     <>
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <meta name="apple-mobile-web-app-title" content="Arcade AI Documentation" />
+      <meta
+        name="apple-mobile-web-app-title"
+        content="Arcade AI Documentation"
+      />
       <title>Arcade AI</title>
 
       <link rel="manifest" href="/site.webmanifest" />
@@ -64,8 +67,8 @@ export const Head = () => {
         href="/favicon-16x16.png"
       />
       {/* Early connection to reduce the time to fetch the script */}
-       <link rel="preconnect" href="https://www.googletagmanager.com" />
-       <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+      <link rel="preconnect" href="https://www.googletagmanager.com" />
+      <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
     </>
   );
 };

@@ -1,11 +1,11 @@
 export default {
   "-- Integrations": {
-    "type": "separator",
-    "title": "Integrations"
+    type: "separator",
+    title: "Integrations",
   },
-  "index": "Overview",
-  "auth": "Auth Providers",
-  "toolkits": "Prebuilt Toolkits",
+  index: "Overview",
+  auth: "Auth Providers",
+  toolkits: "Prebuilt Toolkits",
   "community-toolkits": "Community Toolkits",
-  "models": "Supported Models"
-}
+  models: "Supported Models",
+};

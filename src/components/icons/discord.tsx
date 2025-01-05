@@ -1,5 +1,5 @@
 // icon:discord | Fontawesome https://fontawesome.com/ | Fontawesome
-function IconDiscord(props: React.SVGProps<SVGSVGElement>) {
+function IconDiscord(props) {
   return (
     <svg
       viewBox="0 0 640 512"

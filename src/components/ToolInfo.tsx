@@ -18,7 +18,6 @@ const ToolInfo: React.FC<ToolInfoProps> = ({
   authType,
   authProviderName,
   authProviderDocsUrl,
-  versions,
 }) => {
   return (
     <div className={styles.toolInfo}>

@@ -21,8 +21,10 @@ import Link from "next/link";
 
 type Props = {
   children?: React.ReactNode;
+  footer?: React.ReactNode;
+  color?: string;
   title: string;
-  icon: React.ReactNode;
+  icon: string;
   arrow?: boolean;
   href: string;
 };
@@ -46,7 +48,7 @@ const allowedIcons = {
   tool: faToolbox,
 };
 
-export const Card = ({ title, children, footer, icon, color, href }) => {
+export const Card = ({ title, children, footer, icon, color, href }: Props) => {
   const borderColorVariations = {
     grey: "hover:_bg-slate-50 _border-gray-200 hover:_border-gray-300 dark:hover:_border-neutral-700",
     accent:
@@ -62,7 +64,7 @@ export const Card = ({ title, children, footer, icon, color, href }) => {
           <FontAwesomeIcon className="h-6 w-6" icon={allowedIcons[icon]} />
         </div>
       )}
-      {title && <div className="font-bold text-xl mb-2 mt-2">{title}</div>}
+      {title && <div className="mb-2 mt-2 text-xl font-bold">{title}</div>}
       <div>{children}</div>
       {footer && <div className="mt-4">{footer}</div>}
     </>
@@ -73,7 +75,7 @@ export const Card = ({ title, children, footer, icon, color, href }) => {
 
   return href ? (
     <Link
-      className={`${wrapperClasses} ${borderColorVariations["accent"]} cursor-pointer hover:_bg-[var(--brand-accent-hover)]`}
+      className={`${wrapperClasses} ${borderColorVariations["accent"]} hover:_bg-[var(--brand-accent-hover)] cursor-pointer`}
       href={href}
       passHref
     >
@@ -94,7 +96,7 @@ export const Cards = ({ children, columns = 1 }) => {
   };
 
   return (
-    <div className={`grid ${columnVariants[columns]} gap-6 mt-8`}>
+    <div className={`grid ${columnVariants[columns]} mt-8 gap-6`}>
       {children}
     </div>
   );

@@ -1,9 +1,10 @@
-const { config } = require("./config");
+import { config } from "./config";
+
+export type Redirect = [string, string];
 
 // Don't forget to apply any changes to public/_redirects file too
 // NextJS redirects don't work in Netlify for some reason
-
-exports.tempRedirects = [
+export const tempRedirects: Redirect[] = [
   ["/", "/home/"],
   ["/discord", config.company.discord],
   ["/github", config.engine.github],

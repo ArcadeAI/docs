@@ -8,7 +8,7 @@ export const ExternalLink = ({
 }: {
   children: React.ReactNode;
   href: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }) => {
   return (
     <a href={href} {...rest} target="_blank" className="button">

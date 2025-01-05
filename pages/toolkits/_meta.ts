@@ -1,9 +1,9 @@
 export default {
   "-- Integrations": {
-    "type": "separator",
-    "title": "Toolkits"
+    type: "separator",
+    title: "Toolkits",
   },
-  "index": "Overview",
-  "toolkits": "Prebuilt Toolkits",
-  "community-toolkits": "Community Toolkits"
-}
+  index: "Overview",
+  toolkits: "Prebuilt Toolkits",
+  "community-toolkits": "Community Toolkits",
+};

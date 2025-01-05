@@ -1,6 +1,29 @@
 // Make sure your changes are in sync with public/_redirects
 
-exports.config = {
+export interface CompanyConfig {
+  url: string;
+  email: string;
+  linkedIn: string;
+  github: string;
+  discord: string;
+}
+
+export interface EngineConfig {
+  github: string;
+  newIssue: string;
+  releases: string;
+  conduct: string;
+  contributing: string;
+  examples: string;
+  dockerhub: string;
+}
+
+export interface AppConfig {
+  company: CompanyConfig;
+  engine: EngineConfig;
+}
+
+export const config: AppConfig = {
   company: {
     url: "https://arcade-ai.com/",
     email: "contact@arcade-ai.com",

@@ -37,6 +37,7 @@ const Socials = () => {
         target="_blank"
         href={config.company.github}
         title="View Engine Github"
+        rel="noreferrer"
       >
         <FontAwesomeIcon className={styles.social} icon={faGithub} />
       </a>
@@ -44,6 +45,7 @@ const Socials = () => {
         target="_blank"
         href={config.company.discord}
         title="Join us in Discord"
+        rel="noreferrer"
       >
         <FontAwesomeIcon className={styles.social} icon={faDiscord} />
       </a>
@@ -51,6 +53,7 @@ const Socials = () => {
         target="_blank"
         href={config.company.linkedIn}
         title="View Arcade-ai LinkedIn"
+        rel="noreferrer"
       >
         <FontAwesomeIcon className={styles.social} icon={faLinkedin} />
       </a>
@@ -58,6 +61,7 @@ const Socials = () => {
         target="_blank"
         href={`mailto:${config.company.email}`}
         title="Send us an email"
+        rel="noreferrer"
       >
         <FontAwesomeIcon className={styles.social} icon={faEnvelope} />
       </a>
@@ -87,6 +91,7 @@ const ResourceCol: React.FC<ResourceColProps> = ({ title, resources }) => {
               <a
                 target={resource.external ? "_blank" : "_self"}
                 href={resource.url}
+                rel="noreferrer"
               >
                 {resource.title} {resource.external ? "" : ""}
               </a>

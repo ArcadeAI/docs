@@ -1,23 +1,23 @@
 export default {
-  "home": {
-    "type": "page",
-    "title": "Home",
-    "href": "/"
+  home: {
+    type: "page",
+    title: "Home",
+    href: "/",
   },
-  "toolkits": {
-    "type": "page",
-    "title": "Toolkits",
-    "href": "/toolkits"
+  toolkits: {
+    type: "page",
+    title: "Toolkits",
+    href: "/toolkits",
   },
-  "integrations": {
-    "type": "page",
-    "title": "Integrations",
-    "href": "/integrations"
+  integrations: {
+    type: "page",
+    title: "Integrations",
+    href: "/integrations",
   },
-  "index": {
-    "type": "page",
-    "title": "Index",
-    "href": "/",
-    "display": "hidden"
-  }
-}
+  index: {
+    type: "page",
+    title: "Index",
+    href: "/",
+    display: "hidden",
+  },
+};

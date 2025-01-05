@@ -1,6 +1,7 @@
 import { ThemeProvider } from "next-themes";
 import Script from "next/script";
 import "../styles/globals.css";
+import * as React from "react";
 
 function Docs({ Component, pageProps }) {
   return (

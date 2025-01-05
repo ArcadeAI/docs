@@ -1,6 +1,7 @@
-import { tempRedirects } from "./redirects.js";
+import { tempRedirects } from "./redirects";
 import nextra from "nextra";
 import remarkCodeImport from "remark-code-import";
+import { NextConfig } from "next";
 
 const withNextra = nextra({
   theme: "nextra-theme-docs",
@@ -12,7 +13,7 @@ const withNextra = nextra({
   },
 });
 
-export default withNextra({
+const nextraConfig = withNextra({
   redirects: async () => [
     ...tempRedirects.map(([source, destination]) => ({
       source,
@@ -21,3 +22,9 @@ export default withNextra({
     })),
   ],
 });
+
+const nextConfig: NextConfig = {
+  ...nextraConfig,
+};
+
+export default nextConfig;

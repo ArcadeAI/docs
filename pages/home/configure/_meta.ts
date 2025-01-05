@@ -1,5 +1,5 @@
 export default {
-  "overview": "Overview",
-  "engine": "Engine",
-  "models": "Models"
-}
+  overview: "Overview",
+  engine: "Engine",
+  models: "Models",
+};

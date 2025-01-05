@@ -5,6 +5,6 @@ export default {
   "call-tools-directly": "Call tools directly",
   "get-tool-definitions": "Get tool definitions",
   "auth-tool-calling": {
-    "display": "hidden"
-  }
-}
+    display: "hidden",
+  },
+};
