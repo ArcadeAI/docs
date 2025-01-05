@@ -1,0 +1,226 @@
+# Calendar
+
+import ToolInfo from "@/components/ToolInfo";
+import Badges from "@/components/Badges";
+import TabbedCodeBlock from "@/components/TabbedCodeBlock";
+import TableOfContents from "@/components/TableOfContents";
+
+<ToolInfo
+  description="Enable agents to interact with Google Calendar events."
+  author="Arcade AI"
+  codeLink="https://github.com/ArcadeAI/arcade-ai"
+  authType="OAuth2"
+  versions={["0.1.0"]}
+/>
+
+<Badges repo="arcadeai/arcade_google" />
+
+The Arcade AI Calendar toolkit provides a pre-built set of tools for interacting with Google Calendar. These tools make it easy to build agents and AI apps that can:
+
+- Create, update, list, and delete events
+
+## Install
+
+```bash
+pip install arcade_google
+```
+
+## Available Tools
+
+<TableOfContents
+  headers={["Tool Name", "Description"]}
+  data={[
+    ["CreateEvent", "Create a new event in Google Calendar."],
+    ["ListEvents", "List events from Google Calendar."],
+    ["UpdateEvent", "Update an existing event in Google Calendar."],
+    ["DeleteEvent", "Delete an event from Google Calendar."],
+  ]}
+/>
+
+<Tip>
+  If you need to perform an action that's not listed here, you can [get in touch
+  with us](mailto:contact@arcade-ai.com) to request a new tool, or [create your
+  own tools](/home/build-tools/create-a-toolkit) with the [Google auth
+  provider](/integrations/auth/google#using-google-auth-in-custom-tools).
+</Tip>
+
+## CreateEvent
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/google/calendar/create_event_example_call_tool.py",
+        ],
+        JavaScript: ["Coming Soon"],
+      },
+    },
+    {
+      label: "Execute the Tool with OpenAI",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/google/calendar/create_event_example_llm_oai.py",
+        ],
+        JavaScript: ["Coming Soon"],
+      },
+    },
+  ]}
+/>
+
+Create a new event in the specified calendar.
+
+**Parameters**
+
+- **`summary`** _(string, required)_ The title of the event
+- **`start_datetime`** _(string, required)_ The datetime when the event starts in ISO 8601 format, e.g., '2024-12-31T15:30:00'.
+- **`end_datetime`** _(string, required)_ The datetime when the event ends in ISO 8601 format, e.g., '2024-12-31T17:30:00'.
+- **`calendar_id`** _(string, optional)_ The ID of the calendar to create the event in, usually 'primary'.
+- **`description`** _(string, optional)_ The description of the event
+- **`location`** _(string, optional)_ The location of the event
+- **`visibility`** _(string, optional)_ The visibility of the event
+- **`attendee_emails`** _(array, optional)_ The list of attendee emails. Must be valid email addresses e.g., username@domain.com.
+
+---
+
+## ListEvents
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/google/calendar/list_events_example_call_tool.py",
+        ],
+        JavaScript: ["Coming Soon"],
+      },
+    },
+    {
+      label: "Execute the Tool with OpenAI",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/google/calendar/list_events_example_llm_oai.py",
+        ],
+        JavaScript: ["Coming Soon"],
+      },
+    },
+  ]}
+/>
+
+List events from the specified calendar within the given datetime range.
+
+min_end_datetime serves as the lower bound (exclusive) for an event's end time. max_start_datetime serves as the upper bound (exclusive) for an event's start time.
+
+For example: If min_end_datetime is set to 2024-09-15T09:00:00 and max_start_datetime is set to 2024-09-16T17:00:00, the function will return events that:
+
+1. End after 09:00 on September 15, 2024 (exclusive)
+2. Start before 17:00 on September 16, 2024 (exclusive) This means an event starting at 08:00 on September 15 and ending at 10:00 on September 15 would be included, but an event starting at 17:00 on September 16 would not be included.
+
+**Parameters**
+
+- **`min_end_datetime`** _(string, required)_ Filter by events that end on or after this datetime in ISO 8601 format, e.g., '2024-09-15T09:00:00'.
+- **`max_start_datetime`** _(string, required)_ Filter by events that start before this datetime in ISO 8601 format, e.g., '2024-09-16T17:00:00'.
+- **`calendar_id`** _(string, optional)_ The ID of the calendar to list events from
+- **`max_results`** _(integer, optional)_ The maximum number of events to return
+
+---
+
+## UpdateEvent
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/google/calendar/update_event_example_call_tool.py",
+        ],
+        JavaScript: ["Coming Soon"],
+      },
+    },
+    {
+      label: "Execute the Tool with OpenAI",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/google/calendar/update_event_example_llm_oai.py",
+        ],
+        JavaScript: ["Coming Soon"],
+      },
+    },
+  ]}
+/>
+
+Update an existing event in the specified calendar with the provided details. Only the provided fields will be updated; others will remain unchanged.
+
+`updated_start_datetime` and `updated_end_datetime` are independent and can be provided separately.
+
+**Parameters**
+
+- **`event_id`** _(string, required)_ The ID of the event to update
+- **`updated_start_datetime`** _(string, optional)_ The updated datetime that the event starts in ISO 8601 format, e.g., '2024-12-31T15:30:00'.
+- **`updated_end_datetime`** _(string, optional)_ The updated datetime that the event ends in ISO 8601 format, e.g., '2024-12-31T17:30:00'.
+- **`updated_calendar_id`** _(string, optional)_ The updated ID of the calendar containing the event.
+- **`updated_summary`** _(string, optional)_ The updated title of the event
+- **`updated_description`** _(string, optional)_ The updated description of the event
+- **`updated_location`** _(string, optional)_ The updated location of the event
+- **`updated_visibility`** _(enum ([EventVisibility](/integrations/toolkits/Google/reference#eventvisibility)), optional)_ The visibility of the event
+- **`attendee_emails_to_add`** _(array, optional)_ The list of attendee emails to add. Must be valid email addresses e.g., username@domain.com.
+- **`attendee_emails_to_remove`** _(array, optional)_ The list of attendee emails to remove. Must be valid email addresses e.g., username@domain.com.
+- **`send_updates`** _(enum ([SendUpdatesOptions](/integrations/toolkits/Google/reference#sendupdatesoptions)), optional, Defaults to `'all'`)_ Should attendees be notified of the update? (none, all, external_only)
+
+---
+
+## DeleteEvent
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/google/calendar/delete_event_example_call_tool.py",
+        ],
+        JavaScript: ["Coming Soon"],
+      },
+    },
+    {
+      label: "Execute the Tool with OpenAI",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/google/calendar/delete_event_example_llm_oai.py",
+        ],
+        JavaScript: ["Coming Soon"],
+      },
+    },
+  ]}
+/>
+
+Delete an event from Google Calendar.
+
+**Parameters**
+
+- **`event_id`** _(string, required)_ The ID of the event to delete
+- **`calendar_id`** _(string, optional, Defaults to `'primary'`)_ The ID of the calendar containing the event
+- **`send_updates`** _(enum ([SendUpdatesOptions](/integrations/toolkits/Google/reference#sendupdatesoptions)), optional, Defaults to `'all'`)_ Specifies which attendees to notify about the deletion
+
+---
+
+## Auth
+
+The Arcade AI Calendar toolkit uses the [Google auth provider](/integrations/auth/google) to connect to users' Google accounts.
+
+With the hosted Arcade AI Engine, there's nothing to configure. Your users will see `Arcade AI (demo)` as the name of the application that's requesting permission.
+
+<Warning type="warning" emoji="⚠️">
+  The hosted Arcade Engine is intended for demo and testing purposes only, not
+  for production use. To use Arcade AI and Google Calendar in production, you
+  must use a self-hosted instance of the Arcade Engine.
+</Warning>
+
+With a self-hosted installation of Arcade AI, you need to [configure the Google auth provider](/integrations/auth/google#configuring-google-auth) with your own Google app credentials.
