@@ -16,7 +16,7 @@ if auth_response.status != "completed":
 # Wait for the authorization to complete
 client.auth.wait_for_completion(auth_response)
 
-inputs = {"tweet_id": "1234567890", "return_attachments_metadata": True}
+inputs = {"tweet_id": "1234567890"}
 
 response = client.tools.execute(
     tool_name=TOOL_NAME,
