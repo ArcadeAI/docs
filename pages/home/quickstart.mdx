@@ -1,85 +1,120 @@
 ---
-title: "Quickstart"
-description: "Quick start guide for Arcade AI"
+title: "Start using Arcade AI"
+description: "Learn how to get started with Arcade AI"
 ---
-
-import { Steps } from "nextra/components";
 
 # Quickstart
 
-First, make sure you have these pre-requisites installed on your system:
+Let's get started with Arcade AI. You can use Arcade AI in several ways:
 
-- **Python 3.10** or higher <br/> Verify your Python version by running `python --version` or `python3 --version` in your terminal.
-- **pip**: The Python package installer should be available. It's typically included with Python.
-- **Arcade AI Account**: Sign up for an [Arcade AI account](https://arcade-ai.typeform.com/early-access?typeform-source=docs.arcade-ai.com) if you haven't already.
+- Through our interactive CLI tool
+- Using our Python or TypeScript libraries
+- Directly via REST API endpoints
 
-Let's set up Arcade AI and give it a try!
+## Prerequisites
 
-<Steps>
+1. An Arcade AI account - [Sign up here](https://arcade-ai.typeform.com/early-access)
+2. (Optional) Python 3.8+ for Python SDK
+3. (Optional) Node.js 16+ for TypeScript SDK
 
-### Install Arcade AI
+## Try Arcade Chat
 
-```bash
-pip install 'arcade-ai[fastapi]'
-```
-
-This will install the `arcade` CLI and our development SDK.
-
-### Log in to Arcade AI
+The fastest way to try Arcade AI is through our CLI tool:
 
 ```bash
+# Install the CLI
+pip install arcade-ai
+
+# Log in to get your API key
 arcade login
-```
 
-Your Arcade API key will be saved to `~/.arcade/credentials.yaml`.
-
-### Try `arcade chat`
-
-With Arcade CLI installed, you can test out our API with the `arcade chat` command:
-
-```bash
+# Start chatting!
 arcade chat
 ```
 
-This launches a chat with the Arcade Cloud Engine (hosted at `api.arcade-ai.com`). All pre-built Arcade tools are available to use.
+Try these prompts in the chat:
 
-For example, try asking:
+- "Star the ArcadeAI/arcade-ai repo on Github"
+- "What's the weather in San Francisco?"
+- "Summarize my recent emails"
 
+## Use with Python
+
+Install and use our Python SDK:
+
+```python
+from openai import OpenAI
+
+# Initialize the client
+client = OpenAI(
+    base_url="https://api.arcade-ai.com",
+    api_key=os.environ["ARCADE_API_KEY"]
+)
+
+# Make a request using a tool
+response = client.chat.completions.create(
+    model="gpt-4",
+    messages=[{"role": "user", "content": "What's 625 squared?"}],
+    tools=[{"type": "function", "function": {"name": "Math.SquareRoot"}}],
+    tool_choice="generate",
+    user="your.email@example.com"
+)
+
+print(response.choices[0].message.content)
 ```
-star the ArcadeAI/arcade-ai repo on Github
+
+## Use with TypeScript
+
+Use OpenAI's TypeScript SDK:
+
+```typescript
+import { OpenAI } from "openai";
+
+export const client = new OpenAI({
+  baseURL: "https://api.arcade-ai.com/v1",
+  apiKey: process.env.ARCADE_API_KEY,
+});
+
+const response = await client.chat.completions.create({
+  model: "gpt-4",
+  messages: [{ role: "user", content: "What's 625 squared?" }],
+  tools: ["Math.SquareRoot"],
+  tool_choice: "auto",
+  user: "your.email@example.com",
+});
+
+console.log(response.data.choices[0].message.content);
 ```
 
-Arcade AI will ask you to authorize with GitHub, and then the AI assistant will star the [ArcadeAI/arcade-ai](https://github.com/ArcadeAI/arcade-ai) repo on your behalf.
+## Use via REST API
 
-You'll see output similar to this:
-
-```
-Assistant (gpt-4o):
-I starred the ArcadeAI/arcade-ai repo on Github for you!
-```
-
-You can use Ctrl-C to exit the chat at any time.
-
-### Try more tools
-
-Try prompting the AI with different requests:
-
-- Search the web to find when The Winds of Winter will be released
-- Summarize my emails from today
-- What's playing on my Spotify right now?
-
-To see all tools available in the Cloud, run:
+You can also call our API endpoints directly from any language:
 
 ```bash
-arcade show
+curl https://api.arcade-ai.com/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_ARCADE_API_KEY" \
+  -d '{
+    "model": "gpt-4",
+    "messages": [{"role": "user", "content": "What is the squared root of 625"}],
+    "tools": ["Math.Sqrt"],
+    "tool_choice": "generate",
+    "user": "your.email@example.com"
+  }'
 ```
 
-</Steps>
+## What's happening?
 
-Great job! 🎉 You've set up Arcade AI and used your first tool.
+1. Arcade AI routes your requests through our engine
+2. The AI model gets access to the tools you specify
+3. The model can use these tools to perform real actions
+4. Results are returned through the same interface
 
-### Next steps
+## Next steps
 
-- [Learn about tools](tools-overview) and how they work
-- Learn how to [call tools with models](use-tools/call-tools-with-models)
-- Or, jump ahead to building your own [custom tools](build-tools/create-a-toolkit)
+1. [Call tools with models](/home/use-tools/call-tools-with-models) - Learn more about using AI models with tools
+2. [Specify tools](/home/use-tools/specify-tools) - Control which tools are available to the AI
+3. [Call tools directly](/home/use-tools/call-tools-directly) - Use tools programmatically without AI
+4. [Tool authorization](/home/use-tools/auth-tool-calling) - Learn how to handle tools that need user authorization
+
+For a complete list of available tools, visit our [integrations page](/integrations).

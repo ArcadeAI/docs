@@ -25,19 +25,16 @@ export default {
     href: "https://reference.arcade-ai.com/",
     target: "_blank",
   },
-  "-- Introduction": {
-    type: "separator",
-    title: "Get started",
-  },
+
   "-- Getting Started": {
     type: "separator",
     title: "Using Arcade",
-    display: "hidden",
   },
-  // "install-clients": "Quickstart",
+  quickstart: {
+    title: "Quickstart",
+  },
   "use-tools": {
     title: "Call Arcade Tools",
-    display: "hidden",
   },
   auth: {
     title: "Authorize Tools",
@@ -52,7 +49,7 @@ export default {
     title: "Building Custom Tools",
     display: "hidden",
   },
-  quickstart: {
+  "build-tools-quickstart": {
     title: "Quickstart",
     display: "hidden",
   },
