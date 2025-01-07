@@ -135,7 +135,7 @@ export function LandingPage() {
               }}
               solution={{
                 icon: Code,
-                title: "Universal Tool Interface",
+                title: "Flexible SDK",
                 description:
                   "Provides a unified SDK to create and execute tools seamlessly across LLM providers like OpenAI and Anthropic. Build once, integrate everywhere, with powerful evaluation and testing tools.",
                 href: "/docs/providers",
@@ -144,9 +144,9 @@ export function LandingPage() {
             <ChallengeSolution
               challenge={{
                 icon: Puzzle,
-                title: "Tool Integration & Execution",
+                title: "Tool Integration",
                 description:
-                  "Connecting AI with external services requires handling different APIs and execution patterns, making integration complex.",
+                  "Building and maintaining integrations is challenging. Developers often face the burden of navigating complex documentation, adapting to API changes, and managing authentication intricacies.",
               }}
               solution={{
                 icon: PencilRuler,
@@ -159,15 +159,15 @@ export function LandingPage() {
             <ChallengeSolution
               challenge={{
                 icon: RefreshCcw,
-                title: "Error Recovery & Reliability",
+                title: "Failures, monitoring & scalability",
                 description:
-                  "AI systems need to handle failures gracefully at every step, from network issues to invalid responses, ensuring robust operation.",
+                  "AI systems need to handle failures smoothly, from network issues to unexpected responses, while ensuring effective monitoring, scaling and orchestration.",
               }}
               solution={{
                 icon: Zap,
-                title: "Robust Execution Engine",
+                title: "Reliable execution & monitoring",
                 description:
-                  "Handles errors gracefully with intelligent retries, timeouts, and fallbacks.",
+                  "Ensure smooth and reliable execution by handling errors with intelligent retries, timeouts, and fallbacks. Monitor your AI tools comprehensively and scale effortlessly to meet demands.",
                 href: "/docs/error-handling",
               }}
             />
