@@ -102,11 +102,12 @@ export function LandingPage() {
         <div className="container px-4">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="mb-4 text-3xl font-bold tracking-tight text-white md:text-4xl">
-              Challenges & Solutions
+              The Hard Parts of AI Development
             </h2>
-            <p className="text-gray-300">
-              Common challenges developers face when building AI agents and how
-              Arcade AI solves them.
+            <p className="font-medium text-gray-300">
+              Creating AI tools that interact with real-world services is
+              complex. Arcade AI solves the hard technical challenges, so you
+              can focus on building tools that deliver value.
             </p>
           </div>
           <div className="mt-16 grid gap-8 md:grid-cols-2">
