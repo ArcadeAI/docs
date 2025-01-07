@@ -16,7 +16,11 @@ if auth_response.status != "completed":
 # Wait for the authorization to complete
 client.auth.wait_for_completion(auth_response)
 
-inputs = {"keywords": ["AI"], "max_results": 10}
+inputs = {
+    "keywords": ["AI"],
+    "max_results": 10,
+    "return_attachments_metadata": True,
+}
 
 response = client.tools.execute(
     tool_name=TOOL_NAME,
