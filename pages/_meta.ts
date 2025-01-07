@@ -2,12 +2,19 @@ export default {
   home: {
     type: "page",
     title: "Home",
-    href: "/",
+    href: "/get-started",
+    breadcrumb: true,
   },
-  integrations: {
+  learn: {
     type: "page",
-    title: "Integrations",
-    href: "/integrations",
+    title: "Learn",
+    href: "/learn",
+  },
+  reference: {
+    type: "page",
+    title: "Reference",
+    href: "https://reference.arcade-ai.com/",
+    target: "_blank",
   },
   index: {
     type: "page",

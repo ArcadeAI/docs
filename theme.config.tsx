@@ -10,7 +10,6 @@ import { Check, Important, Info, Note, Tip, Warning } from "@markdown/Callouts";
 import { Card, Cards } from "@markdown/Cards";
 import { DarkOnly, LightOnly } from "@markdown/ThemeContent";
 import { DocsThemeConfig } from "nextra-theme-docs";
-
 import { Cards as NavCards, Steps } from "nextra/components";
 
 const config: DocsThemeConfig = {

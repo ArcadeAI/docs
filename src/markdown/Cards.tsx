@@ -1,21 +1,25 @@
+import { SiDocker } from "@icons-pack/react-simple-icons";
 import {
   Bolt,
-  Fingerprint,
+  Book,
   Cloud,
   Code,
+  Fingerprint,
   GitBranch,
   List,
+  PencilRuler,
   Plug,
   Puzzle,
   Rocket,
   Scale,
   Server,
   Terminal,
-  PencilRuler,
   Users,
   Wand2,
+  Lock,
+  Zap,
+  Globe,
 } from "lucide-react";
-import { SiDocker } from "@icons-pack/react-simple-icons";
 import Link from "next/link";
 import React from "react";
 
@@ -30,22 +34,26 @@ type Props = {
 };
 
 const allowedIcons = {
-  "wand-magic-sparkles": Wand2,
-  "scale-balanced": Scale,
   bolt: Bolt,
-  "puzzle-piece": Puzzle,
-  plug: Plug,
-  "people-group": Users,
-  docker: SiDocker,
+  book: Book,
   cloud: Cloud,
-  terminal: Terminal,
-  rocket: Rocket,
   code: Code,
-  list: List,
+  docker: SiDocker,
   fingerprint: Fingerprint,
-  server: Server,
   git: GitBranch,
+  globe: Globe,
+  list: List,
+  lock: Lock,
+  plug: Plug,
+  rocket: Rocket,
+  server: Server,
+  terminal: Terminal,
   toolkit: PencilRuler,
+  zap: Zap,
+  "people-group": Users,
+  "puzzle-piece": Puzzle,
+  "scale-balanced": Scale,
+  "wand-magic-sparkles": Wand2,
 } as const;
 
 export const Card = ({ title, children, footer, icon, color, href }: Props) => {
