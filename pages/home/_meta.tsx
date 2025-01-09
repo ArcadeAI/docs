@@ -38,50 +38,50 @@ export default {
   },
   auth: {
     title: "Authorize Tools",
-    display: "hidden",
   },
   frameworks: {
     title: "Integrations",
-    display: "hidden",
   },
   "-- Building Custom Tools": {
     type: "separator",
     title: "Building Custom Tools",
-    display: "hidden",
   },
   "build-tools-quickstart": {
     title: "Quickstart",
-    display: "hidden",
   },
   "build-tools": {
     title: "Build tools",
-    display: "hidden",
   },
   "evaluate-tools": {
     title: "Evaluate tools",
-    display: "hidden",
   },
   "serve-tools": {
     title: "Serve tools",
-    display: "hidden",
   },
   "-- Self-Hosted": {
     type: "separator",
     title: "Self-hosting",
-    display: "hidden",
   },
   install: {
     title: "Install",
-    display: "hidden",
   },
-  // "deploy": "Deploy",
   configure: {
     title: "Configure",
-    display: "hidden",
   },
-  integrations: {
+  "-- Integrations": {
     type: "separator",
     title: "Integrations",
-    display: "hidden",
+  },
+  "integrations-overview": {
+    title: "Overview",
+  },
+  toolkits: {
+    title: "Toolkits",
+  },
+  "auth-providers": {
+    title: "Auth Providers",
+  },
+  "supported-models": {
+    title: "Supported Models",
   },
 };
