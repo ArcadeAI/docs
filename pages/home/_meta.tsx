@@ -1,4 +1,4 @@
-import { Code2, Home } from "lucide-react";
+import { Code2, Home, BookOpen } from "lucide-react";
 
 export default {
   "*": {
@@ -14,6 +14,15 @@ export default {
     theme: {
       layout: "full",
     },
+  },
+  learn: {
+    title: (
+      <span className="flex items-center gap-2 font-medium">
+        <BookOpen className="size-4" />
+        Learning Arcade
+      </span>
+    ),
+    href: "/learn",
   },
   reference: {
     title: (
