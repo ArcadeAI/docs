@@ -57,7 +57,7 @@ llm:
 
 HTTP is the only supported protocol for Arcade Engine's API. The following configuration options are available:
 
-- `api.development` _(optional, default: `false`)_ - Enable development mode, with more logging and simple [actor authentication](/home/configure/engine#http-actor-configuration)
+- `api.development` _(optional, default: `false`)_ - Enable development mode, with more logging and simple [worker authentication](/home/configure/engine#http-worker-configuration)
 - `api.http.host` _(default: `localhost`)_ - Address to which Arcade Engine binds its server (e.g., `localhost` or `0.0.0.0`)
 - `api.http.read_timeout` _(optional, default: `30s`)_ - Timeout for reading data from clients
 - `api.http.write_timeout` _(optional, default: `1m`)_ - Timeout for writing data to clients
@@ -104,28 +104,30 @@ For example, given an `llm.models` configuration with one provider named `primar
 
 ## Tools configuration
 
-Arcade Engine orchestrates [tools](/home/tools-overview) that AI models can use. Tools are executed by distributed workers called **actors**, which are grouped into **directors**.
+Arcade Engine orchestrates [tools](/home/tools-overview) that AI models can use. Tools are executed by distributed workers called **workers**, which are grouped into **directors**.
 
-The `tools.directors` section configures the actors that are available to service tool calls:
+The `tools.directors` section configures the workers that are available to service tool calls:
 
 ```yaml file=<rootDir>/examples/code/home/configuration/engine/full_config.yaml#L15-L26
 
 ```
 
-When an actor is added to an enabled director, all of the tools hosted by that actor will be available to the model and the Arcade API.
 
-### HTTP actor configuration
+When a worker is added to an enabled director, all of the tools hosted by that worker will be available to the model and the Arcade API.
 
-The `http` sub-section configures the HTTP client used to call the actor's tools:
 
-- `uri` _(required)_ - The base URL of the actor's tools
-- `secret` _(required)_ - Secret used to authenticate with the actor
-- `timeout` _(required)_ - Timeout for calling the actor's tools
+### HTTP worker configuration
+
+The `http` sub-section configures the HTTP client used to call the worker's tools:
+
+- `uri` _(required)_ - The base URL of the worker's tools
+- `secret` _(required)_ - Secret used to authenticate with the worker
+- `timeout` _(required)_ - Timeout for calling the worker's tools
 - `retry` _(required)_ - Number of retries to attempt
 
 <Note>
-  Actors must be configured with a `secret` that is used to authenticate with
-  the actor. This ensures that actors are not exposed to the public internet
+  Workers must be configured with a `secret` that is used to authenticate with
+  the worker. This ensures that workers are not exposed to the public internet
   without security.
 
 If `api.development = true`, the secret will default to `"dev"` for local development **only**. In production, the secret must be set to a random value.

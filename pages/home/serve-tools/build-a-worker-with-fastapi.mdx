@@ -1,11 +1,11 @@
 ---
-title: Build an actor with FastAPI
-description: Learn how to build an actor with FastAPI
+title: Build an worker with FastAPI
+description: Learn how to build an worker with FastAPI
 ---
 
-# Build an Arcade AI actor with FastAPI
+# Build an Arcade AI worker with FastAPI
 
-In this guide, we'll walk through the process of building an actor with FastAPI that can serve tools from a pre-built toolkit.
+In this guide, we'll walk through the process of building a worker with FastAPI that can serve tools from a pre-built toolkit.
 
 <Steps>
 
@@ -30,7 +30,7 @@ Arcade AI offers a variety of pre-built toolkits that you can install and use im
 
 ### Create a FastAPI Application to Serve the Toolkit
 
-We'll set up a FastAPI application that acts as an Actor to serve the tools from the installed toolkit.
+We'll set up a FastAPI application that acts as a Worker to serve the tools from the installed toolkit.
 
 1. **Create a new Python file** (e.g., `main.py`) and import the necessary modules:
 
@@ -40,7 +40,7 @@ We'll set up a FastAPI application that acts as an Actor to serve the tools from
    from fastapi import FastAPI, HTTPException
    from pydantic import BaseModel
 
-   from arcade.actor.fastapi.actor import FastAPIActor
+   from arcade.worker.fastapi.worker import FastAPIWorker
    from arcade.sdk import Toolkit
    from arcadepy import AsyncArcade
    import arcade_math
@@ -60,19 +60,19 @@ We'll set up a FastAPI application that acts as an Actor to serve the tools from
    client = AsyncArcade()
    ```
 
-4. **Initialize the FastAPI Application and Actor**
+4. **Initialize the FastAPI Application and Worker**
 
    ```python
    app = FastAPI()
 
-   actor_secret = os.environ.get("ARCADE_ACTOR_SECRET")
-   actor = FastAPIActor(app, secret=actor_secret)
+   worker_secret = os.environ.get("ARCADE_WORKER_SECRET")
+   worker = FastAPIWorker(app, secret=worker_secret)
    ```
 
-5. **Register the Toolkit with the Actor**
+5. **Register the Toolkit with the Worker**
 
    ```python
-   actor.register_toolkit(Toolkit.from_module(arcade_math))
+   worker.register_toolkit(Toolkit.from_module(arcade_math))
    ```
 
 6. **Create a Pydantic Model for Chat Requests**
@@ -108,10 +108,10 @@ We'll set up a FastAPI application that acts as an Actor to serve the tools from
 
 ### Run Your Application
 
-Ensure you have the `ARCADE_ACTOR_SECRET` environment variable set for authentication:
+Ensure you have the `ARCADE_WORKER_SECRET` environment variable set for authentication:
 
 ```bash
-export ARCADE_ACTOR_SECRET="your_actor_secret_key"  # On Windows use `set`
+export ARCADE_WORKER_SECRET="your_worker_secret_key"  # On Windows use `set`
 ```
 
 Start your FastAPI application using Uvicorn:
@@ -144,8 +144,8 @@ tools = ["Math.Sqrt"]  # Replace with the actual tool names
 
 ### How It Works
 
-- **Arcade Actor**: The `FastAPIActor` serves your tools over HTTP, allowing them to be called by the Arcade Engine.
-- **Toolkit Registration**: By registering the toolkit with the Actor, you make all tools within `arcade_math` available to your application.
+- **Arcade Worker**: The `FastAPIWorker` serves your tools over HTTP, allowing them to be called by the Arcade Engine.
+- **Toolkit Registration**: By registering the toolkit with the Worker, you make all tools within `arcade_math` available to your application.
 - **Arcade Client**: The `AsyncArcade` client is used to interact with the Arcade AI services, sending chat completions and making use of the tools.
 - **Chat Endpoint**: The `/chat` endpoint accepts user messages and processes them using the AI assistant, leveraging the tools provided.
 
