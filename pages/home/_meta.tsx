@@ -46,7 +46,7 @@ export default {
     type: "separator",
     title: "Building Custom Tools",
   },
-  "build-tools-quickstart": {
+  "custom-tools": {
     title: "Quickstart",
   },
   "build-tools": {
@@ -72,7 +72,7 @@ export default {
     type: "separator",
     title: "Integrations",
   },
-  "integrations-overview": {
+  integrations: {
     title: "Overview",
   },
   toolkits: {

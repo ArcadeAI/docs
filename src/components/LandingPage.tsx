@@ -77,7 +77,7 @@ export function LandingPage() {
               size="lg"
               className="h-12 border-white bg-transparent px-6 text-white hover:bg-white/10"
             >
-              <Link href="#">
+              <Link href="/home/build-tools/create-a-toolkit">
                 <Wrench className="mr-2 h-5 w-5" />
                 Build a tool
               </Link>
@@ -97,7 +97,44 @@ export function LandingPage() {
           />
         </div>
       </section>
-
+      <section className="relative py-16">
+        <div className="container relative px-4">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="mb-4 text-3xl font-bold tracking-tight text-white md:text-4xl">
+              Start Building in Minutes
+            </h2>
+            <p className="text-gray-300">
+              Everything you need to get started with Arcade AI.
+            </p>
+          </div>
+          <div className="mt-16 grid gap-8 md:grid-cols-2">
+            <QuickStartCard
+              icon={Rocket}
+              title="Quick Start Guide"
+              description="Get up and running with Arcade AI in no time. Follow our step-by-step guide to start building your first AI agent."
+              href="/home/quickstart"
+            />
+            <QuickStartCard
+              icon={Puzzle}
+              title="Browse Integrations"
+              description="Explore our library of 30+ production-ready tools for popular services. Find the perfect integration for your needs."
+              href="/home/integrations"
+            />
+            <QuickStartCard
+              icon={Wrench}
+              title="Create Custom Tools"
+              description="Learn how to build and deploy your own custom tools. Extend Arcade AI's capabilities to match your specific requirements."
+              href="/home/custom-tools"
+            />
+            <QuickStartCard
+              icon={Cloud}
+              title="Deploy Anywhere"
+              description="Choose between local deployment, Docker, Kubernetes, or our cloud service. Deploy Arcade AI wherever you need it."
+              href="/home/install/overview"
+            />
+          </div>
+        </div>
+      </section>
       <section className="py-8">
         <div className="container px-4">
           <div className="mx-auto max-w-3xl text-center">
@@ -123,7 +160,7 @@ export function LandingPage() {
                 title: "Built-in Auth Management",
                 description:
                   "Securely manages OAuth flows, API keys, and user tokens with automatic refresh and scoped access, allowing agents to retrieve and act on user-specific data seamlessly and securely.",
-                href: "/docs/auth-management",
+                href: "/home/auth/how-arcade-helps",
               }}
             />
             <ChallengeSolution
@@ -138,7 +175,7 @@ export function LandingPage() {
                 title: "Flexible SDK",
                 description:
                   "Provides a unified SDK to create and execute tools seamlessly across LLM providers like OpenAI and Anthropic. Build once, integrate everywhere, with powerful evaluation and testing tools.",
-                href: "/docs/providers",
+                href: "/home/supported-models",
               }}
             />
             <ChallengeSolution
@@ -153,7 +190,7 @@ export function LandingPage() {
                 title: "Production-ready Tools",
                 description:
                   "30+ pre-built integrations with popular services, ready to use with built-in auth handling.",
-                href: "/docs/integrations",
+                href: "/home/toolkits",
               }}
             />
             <ChallengeSolution
@@ -168,46 +205,8 @@ export function LandingPage() {
                 title: "Reliable execution & monitoring",
                 description:
                   "Ensure smooth and reliable execution by handling errors with intelligent retries, timeouts, and fallbacks. Monitor your AI tools comprehensively and scale effortlessly to meet demands.",
-                href: "/docs/error-handling",
+                href: "/home/evaluate-tools/why-evaluate-tools",
               }}
-            />
-          </div>
-        </div>
-      </section>
-      <section className="relative py-16">
-        <div className="container relative px-4">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="mb-4 text-3xl font-bold tracking-tight text-white md:text-4xl">
-              Start Building in Minutes
-            </h2>
-            <p className="text-gray-300">
-              Everything you need to get started with Arcade AI.
-            </p>
-          </div>
-          <div className="mt-16 grid gap-8 md:grid-cols-2">
-            <QuickStartCard
-              icon={Rocket}
-              title="Quick Start Guide"
-              description="Get up and running with Arcade AI in no time. Follow our step-by-step guide to start building your first AI agent."
-              href="/home/quickstart"
-            />
-            <QuickStartCard
-              icon={Puzzle}
-              title="Browse Integrations"
-              description="Explore our library of 30+ production-ready tools for popular services. Find the perfect integration for your needs."
-              href="/integrations"
-            />
-            <QuickStartCard
-              icon={Wrench}
-              title="Create Custom Tools"
-              description="Learn how to build and deploy your own custom tools. Extend Arcade AI's capabilities to match your specific requirements."
-              href="/home/build-tools"
-            />
-            <QuickStartCard
-              icon={Cloud}
-              title="Deploy Anywhere"
-              description="Choose between local deployment, Docker, Kubernetes, or our cloud service. Deploy Arcade AI wherever you need it."
-              href="/home/install/overview"
             />
           </div>
         </div>
