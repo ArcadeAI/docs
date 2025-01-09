@@ -33,7 +33,6 @@ type ToolkitsProps = {
 };
 
 export default function Toolkits({ tools, categories }: ToolkitsProps) {
-  console.log(tools);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 300);
@@ -58,6 +57,8 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
     return filtered.sort((a, b) => {
       if (a.type === "arcade" && b.type !== "arcade") return -1;
       if (b.type === "arcade" && a.type !== "arcade") return 1;
+      if (a.type === "verified" && b.type !== "verified") return -1;
+      if (b.type === "verified" && a.type !== "verified") return 1;
       return a.name.localeCompare(b.name);
     });
   }, [tools, selectedCategory, debouncedSearchQuery]);
@@ -71,7 +72,7 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
 
   return (
     <div className="min-h-screen">
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 pb-4 pt-6 sm:px-6 lg:px-8">
         <div className="space-y-6">
           <h1 className="text-2xl font-bold text-gray-50 sm:text-3xl">
             Toolkits
@@ -115,7 +116,7 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
                 placeholder="Search toolkits..."
                 value={searchQuery}
                 onChange={handleSearchChange}
-                className="w-full rounded-md border-gray-700/50 bg-gray-900/50 py-2 pl-10 pr-10 text-gray-200 placeholder:text-gray-500 focus:border-gray-600 focus:ring-gray-600"
+                className="flex w-full items-center gap-4 border-none bg-[#f9fafb1a] pl-10 text-white placeholder:text-white/50"
               />
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-500" />
               {searchQuery && (

@@ -62,10 +62,10 @@ export const ToolCard: React.FC<ToolCardProps> = ({
     >
       <CardHeader className="flex-grow space-y-0 p-4">
         <div className="flex items-start justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="relative h-10 w-10 overflow-hidden rounded-lg bg-gray-800">
+          <div className="flex items-center space-x-5">
+            <div className="relative h-10 w-10 overflow-hidden rounded-lg">
               <Image
-                src={`/images/toolkits/${image}.png`}
+                src={`/images/icons/${image}.png`}
                 alt={`${name} logo`}
                 width={40}
                 height={40}
@@ -74,19 +74,19 @@ export const ToolCard: React.FC<ToolCardProps> = ({
             </div>
             <div>
               <CardTitle className="text-base text-gray-50">{name}</CardTitle>
-              <p className="mt-1 flex items-center text-xs text-gray-400">
+              <div className="flex items-center text-xs text-gray-400">
                 <Icon className={`h-3 w-3 ${color} mr-1`} />
                 {label}
-              </p>
+              </div>
             </div>
           </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-2 p-4 pt-0">
-        <p className="text-xs leading-relaxed text-gray-300">{summary}</p>
+        <div className="text-xs leading-relaxed text-gray-300">{summary}</div>
         <Link
           href={link}
-          className="inline-flex items-center text-xs font-medium text-blue-400 transition-colors hover:text-blue-300"
+          className="inline-flex items-center text-xs font-medium text-primary transition-colors hover:text-primary/80"
         >
           View Documentation
           <svg
