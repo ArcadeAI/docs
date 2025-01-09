@@ -1,19 +1,22 @@
-import { Terminal, Globe } from "lucide-react";
+import { IntegrationCard } from "@/components/IntegrationCard";
 import {
+  IconType,
+  SiOpenai,
   SiPython,
   SiTypescript,
-  SiOpenai,
 } from "@icons-pack/react-simple-icons";
-import { IntegrationCard } from "@/components/IntegrationCard";
+import { Globe, LucideIcon } from "lucide-react";
 import { useRouter } from "next/router";
 
-const integrations = [
-  {
-    id: "cli",
-    icon: Terminal,
-    title: "Interactive CLI",
-    description: "The fastest way to get started with Arcade AI",
-  },
+interface Integration {
+  id: string;
+  icon: LucideIcon | IconType;
+  title: string;
+  description: string;
+  href?: string;
+}
+
+const integrations: Integration[] = [
   {
     id: "python",
     icon: SiPython,
@@ -27,23 +30,24 @@ const integrations = [
     description: "Build powerful apps with our TypeScript SDK",
   },
   {
-    id: "rest",
-    icon: Globe,
-    title: "REST API",
-    description: "Use Arcade AI's REST API with any language",
-  },
-  {
     id: "openai",
     icon: SiOpenai,
     title: "OpenAI",
     description: "Works with any OpenAI library out of the box",
+  },
+  {
+    id: "rest",
+    icon: Globe,
+    title: "REST API",
+    description: "Use Arcade AI's REST API with any language",
+    href: "https://reference.arcade-ai.com",
   },
 ] as const;
 
 export default function GettingStarted() {
   const router = useRouter();
 
-  const activeLang = router.query.lang || "cli";
+  const activeLang = router.query.lang || "python";
 
   return (
     <div className="w-full">
@@ -64,7 +68,10 @@ export default function GettingStarted() {
               description={integration.description}
               isActive={activeLang === integration.id}
               onClick={() => {
-                console.log(integration.id);
+                if (integration.href) {
+                  window.open(integration.href, "_blank");
+                  return;
+                }
                 router.push(`/home/quickstart?lang=${integration.id}`);
               }}
             />
