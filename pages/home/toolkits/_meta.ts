@@ -5,13 +5,19 @@ export default {
       layout: "full",
     },
   },
-  communication: "Communication",
-  social_media: "Social Media",
-  calendar: "Calendar & Scheduling",
-  documents: "Document Management",
-  development: "Development Tools",
-  web: "Web & Search",
-  entertainment: "Entertainment",
-  iot: "Smart Devices & IoT",
-  business: "CRM & Business Tools",
+  productivity: {
+    title: "Productivity & Docs",
+  },
+  "social-communication": {
+    title: "Social & Communication",
+  },
+  entertainment: {
+    title: "Entertainment",
+  },
+  development: {
+    title: "Developer Tools",
+  },
+  automation: {
+    title: "Automation",
+  },
 };

@@ -107,8 +107,8 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
           </div>
         </div>
       </div>
-      <div className="border-t border-gray-800/60">
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="border-t border-gray-600/60 py-6">
           <div className="w-full sm:w-64 lg:w-80">
             <div className="relative">
               <Input
@@ -128,7 +128,7 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
                 </button>
               )}
             </div>
-            <p className="mt-2 text-xs text-gray-400 sm:text-sm">
+            <p className="mt-2 !text-xs text-gray-400 sm:text-sm">
               {filteredTools.length} toolkit(s) found
             </p>
           </div>
@@ -144,9 +144,9 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
                     size="sm"
                     onClick={() => setSelectedCategory(category.id)}
                     className={cn(
-                      "text-xs sm:text-sm",
+                      "h-10 px-4 text-xs sm:text-sm",
                       selectedCategory === category.id
-                        ? "bg-gray-200 text-gray-900 hover:bg-gray-300"
+                        ? "bg-primary/80 text-white hover:bg-primary/90"
                         : "bg-gray-800/50 text-gray-300 hover:bg-gray-700/50",
                     )}
                   >
