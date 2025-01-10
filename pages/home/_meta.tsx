@@ -1,4 +1,4 @@
-import { Code2, Home, BookOpen } from "lucide-react";
+import { BookOpen, Code2, Home } from "lucide-react";
 
 export default {
   "*": {
@@ -43,17 +43,27 @@ export default {
     title: "Quickstart",
   },
   "use-tools": {
-    title: "Call Arcade Tools",
+    title: "Tool Calling",
   },
   auth: {
-    title: "Authorize Tools",
+    title: "Authorization",
   },
-  frameworks: {
-    title: "Integrations",
-  },
-  "-- Building Custom Tools": {
+  "-- Agent Frameworks": {
     type: "separator",
-    title: "Building Custom Tools",
+    title: "Agent Frameworks",
+  },
+  langchain: {
+    title: "LangChain",
+  },
+  langgraph: {
+    title: "LangGraph",
+  },
+  crewai: {
+    title: "CrewAI",
+  },
+  "-- Building Tools": {
+    type: "separator",
+    title: "Building Tools",
   },
   "custom-tools": {
     title: "Quickstart",
@@ -77,20 +87,10 @@ export default {
   configure: {
     title: "Configure",
   },
-  "-- Integrations": {
-    type: "separator",
-    title: "Integrations",
-  },
-  integrations: {
-    title: "Overview",
-  },
-  toolkits: {
-    title: "Toolkits",
+  "supported-models": {
+    title: "Model Providers",
   },
   "auth-providers": {
     title: "Auth Providers",
-  },
-  "supported-models": {
-    title: "Supported Models",
   },
 };

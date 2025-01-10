@@ -10,6 +10,11 @@ export default {
     title: "Learn",
     href: "/learn",
   },
+  toolkits: {
+    type: "page",
+    title: "Toolkits",
+    href: "/toolkits",
+  },
   reference: {
     type: "page",
     title: "Reference",

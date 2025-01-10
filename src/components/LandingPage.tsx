@@ -190,7 +190,7 @@ export function LandingPage() {
                 title: "Production-ready Tools",
                 description:
                   "30+ pre-built integrations with popular services, ready to use with built-in auth handling.",
-                href: "/home/toolkits",
+                href: "/toolkits",
               }}
             />
             <ChallengeSolution

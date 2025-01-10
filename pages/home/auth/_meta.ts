@@ -1,4 +1,4 @@
 export default {
-  "how-arcade-helps": "Agent Auth",
+  "auth-tool-calling": "Tool authorization",
   "get-a-token-for-a-user": "Obtaining Tokens",
 };
