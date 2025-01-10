@@ -118,7 +118,7 @@ export function LandingPage() {
               icon={Puzzle}
               title="Browse Integrations"
               description="Explore our library of 30+ production-ready tools for popular services. Find the perfect integration for your needs."
-              href="/home/integrations"
+              href="/toolkits"
             />
             <QuickStartCard
               icon={Wrench}
@@ -228,13 +228,14 @@ export function LandingPage() {
               title="Arcade Chat"
               description="A chatbot that can help you with your daily tasks."
               image="/images/sample-apps/arcade-chat.png"
-              href="/templates/ai-customer-support"
+              href="https://chat.arcade-ai.com/"
+              blank
             />
             <SampleAppCard
               title="Archer"
               description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
               image=""
-              href="/templates/content-generation"
+              href="#"
             />
           </div>
         </div>

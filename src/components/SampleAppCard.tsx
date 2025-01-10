@@ -8,6 +8,7 @@ interface SampleAppCardProps {
   description: string;
   image: string;
   href: string;
+  blank?: boolean;
 }
 
 export function SampleAppCard({
@@ -15,6 +16,7 @@ export function SampleAppCard({
   description,
   image,
   href,
+  blank = false,
 }: SampleAppCardProps) {
   return (
     <motion.div
@@ -24,7 +26,7 @@ export function SampleAppCard({
       }}
       whileTap={{ scale: 0.98 }}
     >
-      <Link href={href}>
+      <Link href={href} target={blank ? "_blank" : undefined}>
         <Card className="group h-full overflow-hidden border-gray-800 bg-[rgba(17,17,17,0.8)] backdrop-blur-sm transition-all hover:border-[#ee175e]/30">
           <CardContent className="p-0">
             <div className="relative aspect-[16/9] overflow-hidden bg-zinc-900">
