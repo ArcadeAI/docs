@@ -20,7 +20,7 @@ In this guide, we'll walk through the process of building a worker with FastAPI 
 
 ### Install a Pre-Built Toolkit
 
-Arcade AI offers a variety of pre-built toolkits that you can install and use immediately. For this guide, we'll use the `arcade-math` toolkit as an example.
+Arcade AI offers a variety of [pre-built toolkits](/toolkits) that you can install and use immediately. For this guide, we'll use the `arcade-math` toolkit as an example.
 
 - Install the `arcade-math` toolkit:
 
@@ -28,91 +28,63 @@ Arcade AI offers a variety of pre-built toolkits that you can install and use im
   pip install arcade-math
   ```
 
+### Set Environment Variables
+
+```bash
+export ARCADE_API_KEY=<your-api-key>
+export ARCADE_WORKER_SECRET=<your-worker-secret> # Use 'dev' for development
+```
+
 ### Create a FastAPI Application to Serve the Toolkit
 
-We'll set up a FastAPI application that acts as a Worker to serve the tools from the installed toolkit.
+We'll set up a FastAPI application that acts as a Worker to serve the tools from the installed toolkit. For this example, we will set up two endpoints:
+
+- `/worker/health` - This endpoint will be used to check the health of the worker.
+- `/worker/tools` - This endpoint will be used to list the definitions of the tools served by the worker.
 
 1. **Create a new Python file** (e.g., `main.py`) and import the necessary modules:
 
    ```python
-   import os
+    import os
 
-   from fastapi import FastAPI, HTTPException
-   from pydantic import BaseModel
+    import arcade_math
+    from fastapi import FastAPI
 
-   from arcade.worker.fastapi.worker import FastAPIWorker
-   from arcade.sdk import Toolkit
-   from arcadepy import AsyncArcade
-   import arcade_math
+    from arcade.sdk import Toolkit
+    from arcade.worker.fastapi.worker import FastAPIWorker
    ```
 
-2. **Ensure Arcade API Key is Set**
-
-   The Arcade API key is automatically loaded from the `ARCADE_API_KEY` environment variable. If you haven't set this yet, you can do so by running:
-
-   ```bash
-   export ARCADE_API_KEY="your_api_key"   # On Windows use `set`
-   ```
-
-3. **Initialize the Arcade Client**
-
-   ```python
-   client = AsyncArcade()
-   ```
-
-4. **Initialize the FastAPI Application and Worker**
+2. **Initialize the FastAPI Application and Worker**
 
    ```python
    app = FastAPI()
 
    worker_secret = os.environ.get("ARCADE_WORKER_SECRET")
-   worker = FastAPIWorker(app, secret=worker_secret)
+   worker = FastAPIWorker(
+    app, secret=worker_secret, disable_auth=True
+   )  # disabling auth for the worker is not recommended for production
    ```
 
-5. **Register the Toolkit with the Worker**
+3. **Register the Toolkit with the Worker**
 
    ```python
    worker.register_toolkit(Toolkit.from_module(arcade_math))
    ```
 
-6. **Create a Pydantic Model for Chat Requests**
+4. **Define the two endpoints**
 
    ```python
-   class ChatRequest(BaseModel):
-       message: str
-       user_id: str
-   ```
+    @app.get("/worker/health")
+    async def getWorkerHealth():
+        return worker.health_check()
 
-7. **Define the Chat Endpoint**
 
-   ```python
-   @app.post("/chat")
-   async def postChat(request: ChatRequest, tool_choice: str = "execute"):
-       try:
-           raw_response = await client.chat.completions.create(
-               messages=[
-                   {"role": "system", "content": "You are a helpful assistant."},
-                   {"role": "user", "content": request.message},
-               ],
-               model="gpt-4o-mini",
-               max_tokens=500,
-               tools=[],  # List your tools here if needed
-               tool_choice=tool_choice,
-               user=request.user_id,
-           )
-       except Exception as e:
-           raise HTTPException(status_code=500, detail=str(e))
-       else:
-           return raw_response.choices
+    @app.get("/worker/tools")
+    async def getWorkerTools():
+        return worker.get_catalog()
    ```
 
 ### Run Your Application
-
-Ensure you have the `ARCADE_WORKER_SECRET` environment variable set for authentication:
-
-```bash
-export ARCADE_WORKER_SECRET="your_worker_secret_key"  # On Windows use `set`
-```
 
 Start your FastAPI application using Uvicorn:
 
@@ -122,22 +94,27 @@ uvicorn main:app --host 127.0.0.1 --port 8000
 
 ### Test the Setup
 
-You can now send a POST request to the `/chat` endpoint with a message, and the assistant will respond using the tools from the `arcade-math` toolkit.
+You can now send a GET request to the `/worker/health` and `/worker/tools` endpoints to verify that your worker is running and to see the definitions of the tools that are available.
 
-Example request using `curl`:
+Example `/worker/health` request using `curl`:
 
 ```bash
-curl -X POST "http://127.0.0.1:8000/chat" \
-     -H "Content-Type: application/json" \
-     -d '{"message": "What is the square root of 16?", "user_id": "user@example.com"}'
+curl -X GET "http://127.0.0.1:8000/worker/health"
 ```
 
-### Customize the Tools (Optional)
+_Example Output:_
 
-If you wish to specify which tools to make available in the assistant's responses, modify the `tools` parameter in the `postChat` function:
+```json
+{
+  "status": "ok",
+  "tool_count": 9
+}
+```
 
-```python
-tools = ["Math.Sqrt"]  # Replace with the actual tool names
+Example `/worker/tools` request using `curl`:
+
+```bash
+curl -X GET "http://127.0.0.1:8000/worker/tools"
 ```
 
 </Steps>
@@ -146,11 +123,11 @@ tools = ["Math.Sqrt"]  # Replace with the actual tool names
 
 - **Arcade Worker**: The `FastAPIWorker` serves your tools over HTTP, allowing them to be called by the Arcade Engine.
 - **Toolkit Registration**: By registering the toolkit with the Worker, you make all tools within `arcade_math` available to your application.
-- **Arcade Client**: The `AsyncArcade` client is used to interact with the Arcade AI services, sending chat completions and making use of the tools.
-- **Chat Endpoint**: The `/chat` endpoint accepts user messages and processes them using the AI assistant, leveraging the tools provided.
+- **Worker Health Check**: The `/worker/health` endpoint is used to check the health of the worker.
+- **Worker Tools**: The `/worker/tools` endpoint is used to list the definitions of the tools served by the worker.
 
 ### Next Steps
 
 - **Explore Other Toolkits**: Install other pre-built toolkits like `arcade-search` or `arcade-slack` to add more functionality.
 - **Build Custom Tools**: When you're ready, learn how to [create your own custom toolkits](/home/build-tools/create-a-toolkit) to extend your application's capabilities.
-- **Enhance the Assistant**: Customize the assistant's behavior by modifying the system prompt or adjusting parameters like `model` and `max_tokens`.
+- **Add more endpoints**: Customize the worker to serve more endpoints, such as a chat endpoint.
