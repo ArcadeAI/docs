@@ -7,4 +7,5 @@ export default {
   "what-is-arcade": "What is Arcade?",
   "tools-overview": "Tool Calling",
   arch: "Architecture",
+  "how-arcade-helps": "Agent Authorization",
 };

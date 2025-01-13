@@ -160,7 +160,7 @@ export function LandingPage() {
                 title: "Built-in Auth Management",
                 description:
                   "Securely manages OAuth flows, API keys, and user tokens with automatic refresh and scoped access, allowing agents to retrieve and act on user-specific data seamlessly and securely.",
-                href: "/home/auth/how-arcade-helps",
+                href: "/learn/how-arcade-helps",
               }}
             />
             <ChallengeSolution
