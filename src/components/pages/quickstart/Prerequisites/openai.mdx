@@ -1,0 +1,66 @@
+import { Steps } from "nextra/components";
+import { Info } from "lucide-react";
+
+- **Node.js 18** or higher <br/> Verify your Node.js version by running node --version in your terminal. Don't have it? Download it from nodejs.org.
+- **npm**: Your package manager included with Node.js
+
+### Install and use our TypeScript SDK
+
+<Steps>
+
+### Install the SDK
+
+Fire up your terminal and run:
+
+```bash
+npm install openai
+```
+
+### Set up your OpenAI client
+
+```typescript
+import { OpenAI } from "openai";
+
+export const client = new OpenAI({
+  baseURL: "https://api.arcade-ai.com/v1",
+  apiKey: process.env["ARCADE_API_KEY"],
+});
+```
+
+<details className="rounded-lg border border-blue-100 bg-blue-50/30 p-4 my-4 dark:border-blue-900/50 dark:bg-blue-950/30 hover:bg-blue-100/50 dark:hover:bg-blue-950/40 transition-colors">
+  <summary className="flex items-center gap-2 text-sm font-medium dark:hover:bg-transparent">
+    <Info className="text-blue-500 dark:text-blue-400 w-4 h-4" />
+    <span>Keep your API key secure with environment variables</span>
+  </summary>
+
+  <div className="mt-4 text-sm text-neutral-700 dark:text-neutral-300">
+    We recommend storing your API key in a `.env` file:
+
+    1. Create a `.env` file:
+
+    ```
+    ARCADE_API_KEY=your_api_key_here
+    ```
+
+  </div>
+</details>
+
+### Call a tool
+
+You can now call tools with your client. Here's an example of calling a tool using OpenAI's chat completion:
+
+```typescript
+const response = await client.chat.completions.create({
+  model: "gpt-4",
+  messages: [{ role: "user", content: "What's 625 squared?" }],
+  tools: ["Math.SquareRoot"],
+  tool_choice: "auto",
+  user: "your.email@example.com",
+});
+
+console.log(response.data.choices[0].message.content);
+```
+
+For a complete list of available tools, visit our [integrations page](/integrations). You can explore tools for email, calendar, GitHub, and many other services.
+
+</Steps>

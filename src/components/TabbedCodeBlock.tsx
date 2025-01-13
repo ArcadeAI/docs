@@ -18,7 +18,7 @@ const CodeTabSwitcher = ({ tabs }: CodeTabSwitcherProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
   const [selectedLanguage, setSelectedLanguage] = useState("Python");
-  const [selectedExample, setSelectedExample] = useState(0);
+  const [selectedExample] = useState(0);
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [fileContent, setFileContent] = useState("");
 
@@ -96,20 +96,20 @@ const CodeTabSwitcher = ({ tabs }: CodeTabSwitcherProps) => {
         {/* Collapse button */}
         {/* <div style={{ flexGrow: 1 }}></div>{" "} */}
         {/* <button className={styles.button} onClick={() => setIsExpanded(false)}> */}
-          {/* X */}
+        {/* X */}
         {/* </button> */}
       </div>
 
       <div className={styles.tabContent}>
-        <div style={{ position: 'relative' }}>
+        <div style={{ position: "relative" }}>
           <button
             className={styles.copyButton}
             onClick={() => {
               navigator.clipboard.writeText(fileContent);
               const button = event.target as HTMLButtonElement;
-              button.textContent = 'Copied!';
+              button.textContent = "Copied!";
               setTimeout(() => {
-                button.textContent = 'Copy';
+                button.textContent = "Copy";
               }, 2000);
             }}
           >

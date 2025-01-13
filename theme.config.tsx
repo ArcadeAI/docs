@@ -1,26 +1,19 @@
+import { SignUpButton } from "@/components/SignUpButton";
 import ToggleContent from "@/components/ToggleContent";
 import CustomLayout from "@components/CustomLayout";
 import { Footer } from "@components/Footer";
 import { Head } from "@components/Head";
 import { Hero } from "@components/Hero";
-import Discord from "@components/icons/discord";
+import { SiDiscord, SiGithub } from "@icons-pack/react-simple-icons";
 import { Logo } from "@components/Logo";
-import { SEO } from "@components/SEO";
-import { SignUpButton } from "@/components/SignUpButton";
-import { titleRenderer } from "@components/TopNav";
-import GitHub from "@geist-ui/react-icons/github";
 import { Check, Important, Info, Note, Tip, Warning } from "@markdown/Callouts";
 import { Card, Cards } from "@markdown/Cards";
 import { DarkOnly, LightOnly } from "@markdown/ThemeContent";
-import {
-  DocsThemeConfig,
-  Card as NavCard,
-  Cards as NavCards,
-  Steps,
-} from "nextra-theme-docs";
+import { DocsThemeConfig } from "nextra-theme-docs";
+import { Cards as NavCards, Steps } from "nextra/components";
 
 const config: DocsThemeConfig = {
-  primaryHue: { dark: 335, light: 335 }, // Hue for #ED155D
+  color: { hue: { dark: 335, light: 335 } }, // Hue for #ED155D
   logo: <Logo />,
   logoLink: "https://www.arcade-ai.com/",
   themeSwitch: {
@@ -31,37 +24,35 @@ const config: DocsThemeConfig = {
   },
   chat: {
     link: "https://discord.gg/GUZEMpEZ9p",
-    icon: <Discord />,
+    icon: <SiDiscord />,
   },
   docsRepositoryBase: "https://github.com/ArcadeAI/arcade-ai",
   editLink: {
-    component: () => null, // Provide a no-op component to disable the edit link
+    content: null, // TODO: add edit link when our repo is public
   },
   project: {
     link: "https://github.com/ArcadeAI/arcade-ai",
-    icon: <GitHub />,
+    icon: <SiGithub />,
   },
   navbar: {
     extraContent: <SignUpButton />,
   },
   sidebar: {
-    toggleButton: true,
-    titleComponent: titleRenderer,
     defaultMenuCollapseLevel: 1,
     autoCollapse: true,
   },
   head: Head,
   footer: {
-    text: <Footer />,
+    content: <Footer />,
   },
   toc: {
-    backToTop: true,
+    backToTop: "Scroll to top",
   },
   components: {
     Hero,
     Card,
     Cards,
-    NavCard,
+    NavCard: NavCards.Card,
     NavCards,
     LightOnly,
     DarkOnly,
@@ -74,7 +65,6 @@ const config: DocsThemeConfig = {
     Check,
     ToggleContent,
   },
-  useNextSeoProps: SEO,
   main: ({ children }) => <CustomLayout>{children}</CustomLayout>,
 };
 

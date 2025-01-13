@@ -1,56 +1,66 @@
-import { faDocker } from "@fortawesome/free-brands-svg-icons";
+import { SiDocker } from "@icons-pack/react-simple-icons";
 import {
-  faBolt,
-  faCheckCircle,
-  faCloud,
-  faCode,
-  faCodeBranch,
-  faList,
-  faPeopleGroup,
-  faPlug,
-  faPuzzlePiece,
-  faRocket,
-  faScaleBalanced,
-  faServer,
-  faTerminal,
-  faToolbox,
-  faWandMagicSparkles,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+  Bolt,
+  Book,
+  Cloud,
+  Code,
+  Fingerprint,
+  GitBranch,
+  List,
+  PencilRuler,
+  Plug,
+  Puzzle,
+  Rocket,
+  Scale,
+  Server,
+  Terminal,
+  Users,
+  Wand2,
+  Lock,
+  Zap,
+  Globe,
+} from "lucide-react";
 import Link from "next/link";
+import React from "react";
 
 type Props = {
   children?: React.ReactNode;
+  footer?: React.ReactNode;
+  color?: string;
   title: string;
-  icon: React.ReactNode;
+  icon: keyof typeof allowedIcons;
   arrow?: boolean;
   href: string;
 };
 
 const allowedIcons = {
-  "wand-magic-sparkles": faWandMagicSparkles,
-  "scale-balanced": faScaleBalanced,
-  bolt: faBolt,
-  "puzzle-piece": faPuzzlePiece,
-  plug: faPlug,
-  "people-group": faPeopleGroup,
-  docker: faDocker,
-  cloud: faCloud,
-  terminal: faTerminal,
-  rocket: faRocket,
-  code: faCode,
-  list: faList,
-  "check-circle": faCheckCircle,
-  server: faServer,
-  git: faCodeBranch,
-  tool: faToolbox,
-};
+  bolt: Bolt,
+  book: Book,
+  cloud: Cloud,
+  code: Code,
+  docker: SiDocker,
+  fingerprint: Fingerprint,
+  git: GitBranch,
+  globe: Globe,
+  list: List,
+  lock: Lock,
+  plug: Plug,
+  rocket: Rocket,
+  server: Server,
+  terminal: Terminal,
+  toolkit: PencilRuler,
+  zap: Zap,
+  "people-group": Users,
+  "puzzle-piece": Puzzle,
+  "scale-balanced": Scale,
+  "wand-magic-sparkles": Wand2,
+} as const;
 
-export const Card = ({ title, children, footer, icon, color, href }) => {
+export const Card = ({ title, children, footer, icon, color, href }: Props) => {
   const borderColorVariations = {
-    grey: "hover:nx-bg-slate-50 nx-border-gray-200 hover:nx-border-gray-300 dark:hover:nx-border-neutral-700",
+    grey: "hover:_bg-slate-50 _border-gray-200 hover:_border-gray-300 dark:hover:_border-neutral-700",
     accent:
-      "hover:nx-border-[var(--brand-accent)] dark:hover:nx-border-[var(--brand-accent)] nx-border-[var(--brand-accent)] dark:nx-border-[var(--brand-accent)]",
+      "hover:_border-[var(--brand-accent)] dark:hover:_border-[var(--brand-accent)] _border-[var(--brand-accent)] dark:_border-[var(--brand-accent)]",
   };
 
   const iconStyle = color ? { color } : { color: "var(--brand-accent)" };
@@ -59,21 +69,23 @@ export const Card = ({ title, children, footer, icon, color, href }) => {
     <>
       {icon && (
         <div className="h-6 w-6" style={iconStyle}>
-          <FontAwesomeIcon className="h-6 w-6" icon={allowedIcons[icon]} />
+          {React.createElement(allowedIcons[icon], {
+            className: "h-6 w-6",
+          })}
         </div>
       )}
-      {title && <div className="font-bold text-xl mb-2 mt-2">{title}</div>}
+      {title && <div className="mb-2 mt-2 text-xl font-bold">{title}</div>}
       <div>{children}</div>
       {footer && <div className="mt-4">{footer}</div>}
     </>
   );
 
   const wrapperClasses: string =
-    "block nx-border dark:nx-border-neutral-800 nx-rounded-lg nx-text-current nx-no-underline dark:nx-shadow-none hover:nx-shadow-gray-100 dark:hover:nx-shadow-none nx-shadow-gray-100 active:nx-shadow-sm active:nx-shadow-gray-200 nx-transition-all nx-duration-200 nx-bg-transparent nx-shadow-sm hover:nx-shadow-md dark:hover:nx-bg-neutral-900 p-4"; // Reduced padding from p-5 to p-4
+    "block _border dark:_border-neutral-800 _rounded-lg _text-current _no-underline dark:_shadow-none hover:_shadow-gray-100 dark:hover:_shadow-none _shadow-gray-100 active:_shadow-sm active:_shadow-gray-200 _transition-all _duration-200 _bg-transparent _shadow-sm hover:_shadow-md dark:hover:_bg-neutral-900 p-4";
 
   return href ? (
     <Link
-      className={`${wrapperClasses} ${borderColorVariations["accent"]} cursor-pointer hover:nx-bg-[var(--brand-accent-hover)]`}
+      className={`${wrapperClasses} ${borderColorVariations["accent"]} hover:_bg-[var(--brand-accent-hover)] cursor-pointer`}
       href={href}
       passHref
     >
@@ -94,7 +106,7 @@ export const Cards = ({ children, columns = 1 }) => {
   };
 
   return (
-    <div className={`grid ${columnVariants[columns]} gap-6 mt-8`}>
+    <div className={`grid ${columnVariants[columns]} mt-8 gap-6`}>
       {children}
     </div>
   );

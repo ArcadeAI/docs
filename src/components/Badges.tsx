@@ -6,7 +6,7 @@ interface BadgesProps {
 }
 
 const Badges: React.FC<BadgesProps> = ({ repo }) => {
-  const [org, repoName] = repo.split("/");
+  const [, repoName] = repo.split("/");
 
   const badges = [
     {
