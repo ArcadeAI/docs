@@ -2,12 +2,12 @@ import os
 from openai import OpenAI
 
 USER_ID = "you@example.com"
-PROMPT = "Now that you have already gotten my currently playing track and its audio features, give me some recommendations that are similar to it."
-TOOL_NAME = "Spotify.GetRecommendations"
+PROMPT = "Lookup a tweet with the ID 'your_tweet_id_here'." # Tweet IDs can be found in the response of other X tools, like SearchRecentTweetsByUsername
+TOOL_NAME = "X.LookupTweetById"
 
 client = OpenAI(
-    base_url="https://api.arcade-ai.com", api_key=os.environ.get("ARCADE_API_KEY")
-)
+    base_url="https://api.arcade-ai.com",
+    api_key=os.environ.get("ARCADE_API_KEY"))
 
 response = client.chat.completions.create(
     messages=[
