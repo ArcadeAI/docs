@@ -20,7 +20,6 @@ export const categories: Category[] = [
   { id: "social", name: "Social & Communication" },
   { id: "development", name: "Developer Tools" },
   { id: "entertainment", name: "Entertainment" },
-  { id: "automation", name: "Smart Automation" },
 ];
 
 export const tools: Tool[] = [
