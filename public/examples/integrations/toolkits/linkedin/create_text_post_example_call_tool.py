@@ -3,7 +3,7 @@ from arcadepy import Arcade
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
 USER_ID = "you@example.com"
-TOOL_NAME = "Google.TrashEmail"
+TOOL_NAME = "LinkedIn.CreateTextPost"
 
 auth_response = client.tools.authorize(
     tool_name=TOOL_NAME,
@@ -17,7 +17,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 inputs = {
-    "email_id": "your_email_id_here"  # The ID of an email can be found with the ListEmails tool
+    "text": "Hello, world! This post was created programmatically with Arcade AI!",
 }
 
 response = client.tools.execute(
