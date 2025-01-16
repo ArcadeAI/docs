@@ -2,8 +2,8 @@ import os
 from openai import OpenAI
 
 USER_ID = "you@example.com"
-PROMPT = "Update pull request #1 in the ArcadeAI/hello-world repository with the title 'Updated Title' and body 'Updated body content.'"
-TOOL_NAME = "Github.UpdatePullRequest"
+PROMPT = "Share a new text post to LinkedIn with the text 'Hello, world! This post was created programmatically with Arcade AI!'"
+TOOL_NAME = "LinkedIn.CreateTextPost"
 
 client = OpenAI(
     base_url="https://api.arcade-ai.com", api_key=os.environ.get("ARCADE_API_KEY")

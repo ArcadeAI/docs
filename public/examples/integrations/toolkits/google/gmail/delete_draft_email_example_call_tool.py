@@ -17,7 +17,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 inputs = {
-    "id": "your_draft_id_here"  # The ID of an email can be found with the ListDraftEmails tool
+    "draft_email_id": "your_draft_id_here"  # The ID of an email can be found with the ListDraftEmails tool
 }
 
 response = client.tools.execute(

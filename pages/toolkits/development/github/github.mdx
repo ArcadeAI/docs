@@ -8,7 +8,7 @@ import TableOfContents from "@/components/TableOfContents";
 <ToolInfo
   description="Enable agents to interact with GitHub repositories, issues, and pull requests."
   author="Arcade AI"
-  codeLink="https://github.com/ArcadeAI/arcade-ai"
+  codeLink="https://github.com/ArcadeAI/arcade-ai/tree/main/toolkits/github"
   authType="oauth2"
   authProviderName="GitHub"
   authProviderDocsUrl="/integrations/auth/github"
@@ -35,6 +35,7 @@ pip install arcade_github
   headers={["Tool Name", "Description"]}
   data={[
     ["SetStarred", "Star or unstar a GitHub repository."],
+    ["ListStargazers", "List the stargazers of a GitHub repository."],
     ["CreateIssue", "Create an issue in a GitHub repository."],
     [
       "CreateIssueComment",
@@ -110,6 +111,42 @@ Star or unstar a GitHub repository.
 - **`owner`** _(string, required)_ The owner of the repository.
 - **`name`** _(string, required)_ The name of the repository.
 - **`starred`** _(boolean, required)_ Whether to star (`true`) or unstar (`false`) the repository.
+
+---
+
+## ListStargazers
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/github/list_stargazers_example_call_tool.py",
+        ],
+        JavaScript: ["Coming Soon"],
+      },
+    },
+    {
+      label: "Execute the Tool with OpenAI",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/github/list_stargazers_example_llm_oai.py",
+        ],
+        JavaScript: ["Coming Soon"],
+      },
+    },
+  ]}
+/>
+
+List the stargazers of a GitHub repository.
+
+**Parameters**
+
+- **`owner`** _(string, required)_ The owner of the repository.
+- **`repo`** _(string, required)_ The name of the repository.
+- **`limit`** _(int, optional, Defaults to `None`)_ The maximum number of stargazers to return. If not provided, all stargazers will be returned.
 
 ---
 
@@ -628,7 +665,7 @@ List repository activities such as pushes, merges, force pushes, and branch chan
 - **`before`** _(string, optional)_ A cursor (unique identifier, e.g., a SHA of a commit) to search for results before this cursor.
 - **`after`** _(string, optional)_ A cursor (unique identifier, e.g., a SHA of a commit) to search for results after this cursor.
 - **`ref`** _(string, optional)_ The Git reference for the activities you want to list. Can be formatted as `refs/heads/BRANCH_NAME` or just `BRANCH_NAME`.
-- **`worker`** _(string, optional)_ The GitHub username to filter by the worker who performed the activity.
+- **`actor`** _(string, optional)_ The GitHub username to filter by the actor who performed the activity.
 - **`time_period`** _(enum ([RepoTimePeriod](/integrations/toolkits/Github/reference#repotimeperiod)), optional)_ The time period to filter by.
 - **`activity_type`** _(enum ([ActivityType](/integrations/toolkits/Github/reference#activitytype)), optional)_ The activity type to filter by.
 - **`include_extra_data`** _(boolean, optional, Defaults to `false`)_ If true, return all the data available about the activities. This is a large payload and may impact performance - use with caution.

@@ -17,7 +17,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 inputs = {
-    "id": "your_draft_id_here",  # The ID of a draft email can be found with the ListDraftEmails tool
+    "draft_email_id": "your_draft_id_here",  # The ID of a draft email can be found with the ListDraftEmails tool
     "subject": "Updated Project Update",
     "body": "Please find the updated project update attached.",
     "recipient": "john.doe@example.com",

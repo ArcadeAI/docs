@@ -2,8 +2,8 @@ import os
 from openai import OpenAI
 
 USER_ID = "you@example.com"
-PROMPT = "Update pull request #1 in the ArcadeAI/hello-world repository with the title 'Updated Title' and body 'Updated body content.'"
-TOOL_NAME = "Github.UpdatePullRequest"
+PROMPT = "List all stargazers of the ArcadeAI/arcade-ai repository."
+TOOL_NAME = "Github.ListStargazers"
 
 client = OpenAI(
     base_url="https://api.arcade-ai.com", api_key=os.environ.get("ARCADE_API_KEY")
