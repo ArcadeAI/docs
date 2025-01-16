@@ -1,4 +1,4 @@
 export default {
-  gmail: "Gmail",
+  google: "Google",
   notion: "Notion",
 };

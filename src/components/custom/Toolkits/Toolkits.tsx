@@ -2,7 +2,7 @@ import { ToolCard } from "@/components/custom/Toolkits/ToolCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { Category, Tool } from "@pages/toolkits/toolkits";
+import { Category, Tool } from "@/components/custom/Toolkits/toolkits-config";
 import { useDebounce } from "@uidotdev/usehooks";
 import { BadgeCheck, CheckCircle, Search, Users, X } from "lucide-react";
 import React, { useCallback, useMemo, useState } from "react";

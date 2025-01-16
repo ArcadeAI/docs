@@ -29,7 +29,7 @@ export const tools: Tool[] = [
     image: "gmail",
     summary:
       "Send, write, draft, delete, trash, and search Gmail emails with your agents.",
-    link: "/toolkits/productivity/gmail",
+    link: "/toolkits/productivity/google/gmail",
     category: "productivity",
     type: "arcade",
   },
@@ -65,7 +65,7 @@ export const tools: Tool[] = [
     image: "google_calendar",
     summary:
       "Create, update, delete, and search events in Google Calendar with your agents.",
-    link: "/toolkits/productivity/google_calendar",
+    link: "/toolkits/productivity/google/calendar",
     category: "productivity",
     type: "arcade",
   },
@@ -73,7 +73,7 @@ export const tools: Tool[] = [
     name: "Google Drive",
     image: "google_drive",
     summary: "List documents in Google Drive with your agents.",
-    link: "/toolkits/productivity/google_drive",
+    link: "/toolkits/productivity/google/drive",
     category: "productivity",
     type: "arcade",
   },
@@ -82,7 +82,7 @@ export const tools: Tool[] = [
     image: "google_docs",
     summary:
       "Create, edit, and get information about Google Docs documents with your agents.",
-    link: "/toolkits/productivity/google_docs",
+    link: "/toolkits/productivity/google/docs",
     category: "productivity",
     type: "arcade",
   },
