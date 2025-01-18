@@ -11,12 +11,12 @@ auth_response = client.tools.authorize(
 )
 
 if auth_response.status != "completed":
-    print(f"Click this link to authorize: {auth_response.authorization_url}")
+    print(f"Click this link to authorize: {auth_response.url}")
 
 # Wait for the authorization to complete
 client.auth.wait_for_completion(auth_response)
 
-inputs = {
+tool_input = {
     "event_id": "your_event_id_here",
     "updated_summary": "Updated 1:1 with John Doe",
     "updated_start_datetime": "2024-12-31T11:00:00",
@@ -27,7 +27,7 @@ inputs = {
 
 response = client.tools.execute(
     tool_name=TOOL_NAME,
-    inputs=inputs,
+    input=tool_input,
     user_id=USER_ID,
 )
 print(response)

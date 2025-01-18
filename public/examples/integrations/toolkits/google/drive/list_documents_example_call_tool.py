@@ -11,18 +11,18 @@ auth_response = client.tools.authorize(
 )
 
 if auth_response.status != "completed":
-    print(f"Click this link to authorize: {auth_response.authorization_url}")
+    print(f"Click this link to authorize: {auth_response.url}")
 
 # Wait for the authorization to complete
 client.auth.wait_for_completion(auth_response)
 
-inputs = {
+tool_input = {
     "title_keywords": ["report"],
 }
 
 response = client.tools.execute(
     tool_name=TOOL_NAME,
-    inputs=inputs,
+    input=tool_input,
     user_id=USER_ID,
 )
 print(response)
