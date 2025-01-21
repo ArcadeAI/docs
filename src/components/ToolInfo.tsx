@@ -19,6 +19,10 @@ const ToolInfo: React.FC<ToolInfoProps> = ({
   authProviderName,
   authProviderDocsUrl,
 }) => {
+  authProviderDocsUrl =
+    authProviderName && !authProviderDocsUrl
+      ? `/home/auth-providers/${authProviderName.toLowerCase()}`
+      : authProviderDocsUrl;
   return (
     <div className={styles.toolInfo}>
       <p>

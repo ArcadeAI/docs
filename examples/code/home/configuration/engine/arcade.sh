@@ -23,7 +23,7 @@ ARCADE_WORKER_URI=http://localhost:8002
 # REDIS_HOST=
 # REDIS_PORT=
 
-### Integrations ###
+### Auth Providers ###
 
 # GITHUB_CLIENT_ID=
 # GITHUB_CLIENT_SECRET=
