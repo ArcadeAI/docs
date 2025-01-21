@@ -35,7 +35,7 @@ const ToolInfo: React.FC<ToolInfoProps> = ({
       </p>
       <p>
         <strong>Auth: </strong>
-        {authType === "oauth2" ? (
+        {authType.toLowerCase() === "oauth2" ? (
           <>
             User authorization
             {authProviderName && authProviderDocsUrl && (
