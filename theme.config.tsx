@@ -15,7 +15,7 @@ import { Cards as NavCards, Steps } from "nextra/components";
 const config: DocsThemeConfig = {
   color: { hue: { dark: 335, light: 335 } }, // Hue for #ED155D
   logo: <Logo />,
-  logoLink: "https://www.arcade-ai.com/",
+  logoLink: "https://www.arcade.dev/",
   themeSwitch: {
     component: () => null,
   },

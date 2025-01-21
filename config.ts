@@ -25,8 +25,8 @@ export interface AppConfig {
 
 export const config: AppConfig = {
   company: {
-    url: "https://arcade-ai.com/",
-    email: "contact@arcade-ai.com",
+    url: "https://arcade.dev/",
+    email: "contact@arcade.dev",
     linkedIn: "https://www.linkedin.com/company/arcade-ai/",
     github: "https://github.com/ArcadeAI",
     discord: "https://discord.gg/GUZEMpEZ9p",

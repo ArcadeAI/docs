@@ -6,8 +6,8 @@ PROMPT = "Send a message to the channel 'general' saying 'Good morning, team!'."
 TOOL_NAME = "Slack.SendMessageToChannel"
 
 client = OpenAI(
-    base_url="https://api.arcade-ai.com",
-    api_key=os.environ.get("ARCADE_API_KEY"))
+    base_url="https://api.arcade.dev", api_key=os.environ.get("ARCADE_API_KEY")
+)
 
 response = client.chat.completions.create(
     messages=[

@@ -3,7 +3,7 @@ export const SignUpButton = () => (
     className="button"
     onClick={() =>
       window.open(
-        "https://arcade-ai.typeform.com/early-access?typeform-source=docs.arcade-ai.com",
+        "https://arcade-ai.typeform.com/early-access?typeform-source=docs.arcade.dev",
         "_blank",
       )
     }

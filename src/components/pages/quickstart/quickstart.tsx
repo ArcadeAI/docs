@@ -40,7 +40,7 @@ const integrations: Integration[] = [
     icon: Globe,
     title: "REST API",
     description: "Use Arcade AI's REST API with any language",
-    href: "https://reference.arcade-ai.com",
+    href: "https://reference.arcade.dev",
   },
 ] as const;
 

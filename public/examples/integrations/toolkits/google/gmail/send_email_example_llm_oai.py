@@ -6,8 +6,8 @@ PROMPT = "Send an email to jane.doe@example.com with the subject 'Meeting Update
 TOOL_NAME = "Google.SendEmail"
 
 client = OpenAI(
-    base_url="https://api.arcade-ai.com",
-    api_key=os.environ.get("ARCADE_API_KEY"))
+    base_url="https://api.arcade.dev", api_key=os.environ.get("ARCADE_API_KEY")
+)
 
 response = client.chat.completions.create(
     messages=[

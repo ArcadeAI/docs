@@ -2,12 +2,14 @@ import os
 from openai import OpenAI
 
 USER_ID = "you@example.com"
-PROMPT = "List review comments on pull request #1 in the ArcadeAI/hello-world repository."
+PROMPT = (
+    "List review comments on pull request #1 in the ArcadeAI/hello-world repository."
+)
 TOOL_NAME = "Github.ListReviewCommentsOnPullRequest"
 
 client = OpenAI(
-    base_url="https://api.arcade-ai.com",
-    api_key=os.environ.get("ARCADE_API_KEY"))
+    base_url="https://api.arcade.dev", api_key=os.environ.get("ARCADE_API_KEY")
+)
 
 response = client.chat.completions.create(
     messages=[

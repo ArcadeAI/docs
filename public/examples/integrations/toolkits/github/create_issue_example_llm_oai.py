@@ -6,8 +6,8 @@ PROMPT = "Create an issue in the ArcadeAI/hello-world repository titled 'Example
 TOOL_NAME = "Github.CreateIssue"
 
 client = OpenAI(
-    base_url="https://api.arcade-ai.com",
-    api_key=os.environ.get("ARCADE_API_KEY"))
+    base_url="https://api.arcade.dev", api_key=os.environ.get("ARCADE_API_KEY")
+)
 
 response = client.chat.completions.create(
     messages=[

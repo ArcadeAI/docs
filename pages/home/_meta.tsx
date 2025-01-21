@@ -31,7 +31,7 @@ export default {
         API Reference
       </span>
     ),
-    href: "https://reference.arcade-ai.com/",
+    href: "https://reference.arcade.dev/",
     target: "_blank",
   },
 

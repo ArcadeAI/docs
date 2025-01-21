@@ -228,7 +228,7 @@ export function LandingPage() {
               title="Arcade Chat"
               description="A chatbot that can help you with your daily tasks."
               image="/images/sample-apps/arcade-chat.png"
-              href="https://chat.arcade-ai.com/"
+              href="https://chat.arcade.dev/"
               blank
             />
             <SampleAppCard
