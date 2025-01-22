@@ -6,8 +6,8 @@ PROMPT = "List commits for pull request #1 in the ArcadeAI/hello-world repositor
 TOOL_NAME = "Github.ListPullRequestCommits"
 
 client = OpenAI(
-    base_url="https://api.arcade-ai.com",
-    api_key=os.environ.get("ARCADE_API_KEY"))
+    base_url="https://api.arcade.dev", api_key=os.environ.get("ARCADE_API_KEY")
+)
 
 response = client.chat.completions.create(
     messages=[

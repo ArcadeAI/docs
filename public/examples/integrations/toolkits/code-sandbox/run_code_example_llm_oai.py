@@ -6,7 +6,7 @@ PROMPT = "Write a JavaScript program that merges two sorted lists into one sorte
 TOOL_NAME = "CodeSandbox.RunCode"
 
 client = OpenAI(
-    base_url="https://api.arcade-ai.com", api_key=os.environ.get("ARCADE_API_KEY")
+    base_url="https://api.arcade.dev", api_key=os.environ.get("ARCADE_API_KEY")
 )
 
 response = client.chat.completions.create(

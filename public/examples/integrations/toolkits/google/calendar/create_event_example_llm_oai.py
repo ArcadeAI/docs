@@ -6,8 +6,8 @@ PROMPT = "Create a new calendar event for tomorrow at 10am. This meeting is for 
 TOOL_NAME = "Google.CreateEvent"
 
 client = OpenAI(
-    base_url="https://api.arcade-ai.com",
-    api_key=os.environ.get("ARCADE_API_KEY"))
+    base_url="https://api.arcade.dev", api_key=os.environ.get("ARCADE_API_KEY")
+)
 
 response = client.chat.completions.create(
     messages=[

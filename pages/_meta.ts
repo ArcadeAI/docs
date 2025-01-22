@@ -18,7 +18,7 @@ export default {
   reference: {
     type: "page",
     title: "Reference",
-    href: "https://reference.arcade-ai.com/",
+    href: "https://reference.arcade.dev/",
     target: "_blank",
   },
   index: {

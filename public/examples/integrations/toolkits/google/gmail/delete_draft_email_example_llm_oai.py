@@ -2,12 +2,12 @@ import os
 from openai import OpenAI
 
 USER_ID = "you@example.com"
-PROMPT = "Delete the draft email with the ID 'your_draft_id_here'." # The ID of an email can be found with the ListDraftEmails tool
+PROMPT = "Delete the draft email with the ID 'your_draft_id_here'."  # The ID of an email can be found with the ListDraftEmails tool
 TOOL_NAME = "Google.DeleteDraftEmail"
 
 client = OpenAI(
-    base_url="https://api.arcade-ai.com",
-    api_key=os.environ.get("ARCADE_API_KEY"))
+    base_url="https://api.arcade.dev", api_key=os.environ.get("ARCADE_API_KEY")
+)
 
 response = client.chat.completions.create(
     messages=[

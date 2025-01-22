@@ -6,7 +6,7 @@ PROMPT = "Update the calendar event with the ID 'your_event_id_here' to be tomor
 TOOL_NAME = "Google.UpdateEvent"
 
 client = OpenAI(
-    base_url="https://api.arcade-ai.com", api_key=os.environ.get("ARCADE_API_KEY")
+    base_url="https://api.arcade.dev", api_key=os.environ.get("ARCADE_API_KEY")
 )
 
 response = client.chat.completions.create(

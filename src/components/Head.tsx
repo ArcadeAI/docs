@@ -5,7 +5,7 @@ export const Head = () => {
   const { asPath, defaultLocale, locale } = useRouter();
   const { frontMatter, title: pageTitle } = useConfig();
   const url =
-    "https://docs.arcade-ai.com" +
+    "https://docs.arcade.dev" +
     (defaultLocale === locale ? asPath : `/${locale}${asPath}`);
 
   // TODO: make metadata depend on the project docs
@@ -14,10 +14,10 @@ export const Head = () => {
   // const title = frontMatter.title ?? "Arcade AI";
 
   const image = frontMatter.ogImage
-    ? "https://docs.arcade-ai.com" + frontMatter.ogImage
-    : "https://docs.arcade-ai.com/images/logo/arcadeai.png";
+    ? "https://docs.arcade.dev" + frontMatter.ogImage
+    : "https://docs.arcade.dev/images/logo/arcadeai.png";
   const video = frontMatter.ogVideo
-    ? "https://docs.arcade-ai.com" + frontMatter.ogVideo
+    ? "https://docs.arcade.dev" + frontMatter.ogVideo
     : null;
 
   return (
@@ -46,8 +46,8 @@ export const Head = () => {
       <meta name="twitter:image" content={image} />
 
       <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:site:domain" content="docs.arcade-ai.com" />
-      <meta name="twitter:url" content="https://docs.arcade-ai.com" />
+      <meta name="twitter:site:domain" content="docs.arcade.dev" />
+      <meta name="twitter:url" content="https://docs.arcade.dev" />
 
       <link
         rel="apple-touch-icon"

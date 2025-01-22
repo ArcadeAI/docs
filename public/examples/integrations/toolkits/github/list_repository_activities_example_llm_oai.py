@@ -6,8 +6,8 @@ PROMPT = "List the activities for the ArcadeAI/hello-world repository, sorted in
 TOOL_NAME = "Github.ListRepositoryActivities"
 
 client = OpenAI(
-    base_url="https://api.arcade-ai.com",
-    api_key=os.environ.get("ARCADE_API_KEY"))
+    base_url="https://api.arcade.dev", api_key=os.environ.get("ARCADE_API_KEY")
+)
 
 response = client.chat.completions.create(
     messages=[

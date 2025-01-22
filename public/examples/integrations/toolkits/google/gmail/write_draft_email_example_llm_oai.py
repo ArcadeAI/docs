@@ -6,8 +6,8 @@ PROMPT = "Write a draft email to john.doe@example.com with the subject 'Project 
 TOOL_NAME = "Google.WriteDraftEmail"
 
 client = OpenAI(
-    base_url="https://api.arcade-ai.com",
-    api_key=os.environ.get("ARCADE_API_KEY"))
+    base_url="https://api.arcade.dev", api_key=os.environ.get("ARCADE_API_KEY")
+)
 
 response = client.chat.completions.create(
     messages=[

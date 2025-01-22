@@ -6,8 +6,8 @@ PROMPT = "Create a reply to review comment #1 on pull request #1 in the ArcadeAI
 TOOL_NAME = "Github.CreateReplyForReviewComment"
 
 client = OpenAI(
-    base_url="https://api.arcade-ai.com",
-    api_key=os.environ.get("ARCADE_API_KEY"))
+    base_url="https://api.arcade.dev", api_key=os.environ.get("ARCADE_API_KEY")
+)
 
 response = client.chat.completions.create(
     messages=[
