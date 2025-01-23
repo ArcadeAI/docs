@@ -2,8 +2,8 @@ import os
 from openai import OpenAI
 
 USER_ID = "you@example.com"
-PROMPT = "Send a message to the channel 'general' saying 'Hello, General!'."
-TOOL_NAME = "Slack.SendMessageToChannel"
+PROMPT = "List all users in my Slack team, excluding bots, limiting to 100 users."
+TOOL_NAME = "Slack.ListUsers"
 
 client = OpenAI(
     base_url="https://api.arcade.dev", api_key=os.environ.get("ARCADE_API_KEY")

@@ -6,7 +6,7 @@ import TabbedCodeBlock from "@/components/TabbedCodeBlock";
 import TableOfContents from "@/components/TableOfContents";
 
 <ToolInfo
-  description="Enable agents to send messages in Slack."
+  description="Enable agents to interact with Slack by sending messages, retrieving user and conversation information."
   author="Arcade AI"
   codeLink="https://github.com/ArcadeAI/arcade-ai/tree/main/toolkits/slack"
   authType="oauth2"
@@ -16,10 +16,14 @@ import TableOfContents from "@/components/TableOfContents";
 
 <Badges repo="arcadeai/arcade_slack" />
 
-The Arcade AI Slack toolkit provides a pre-built set of tools for interacting with Slack. These tools make it easy to build agents and AI apps that can:
+The Arcade AI Slack toolkit provides a comprehensive set of tools for interacting with Slack. With these tools, you can build agents and AI applications that can:
 
 - Send direct messages to users
 - Send messages to channels
+- Retrieve members of conversations
+- Access conversation histories
+- Manage conversation metadata
+- Retrieve user information
 
 ## Install
 
@@ -34,13 +38,56 @@ pip install arcade_slack
   data={[
     ["SendDmToUser", "Send a direct message to a user in Slack."],
     ["SendMessageToChannel", "Send a message to a channel in Slack."],
+    [
+      "GetMembersInConversationById",
+      "Retrieve members of a conversation using its ID.",
+    ],
+    [
+      "GetMembersInConversationByName",
+      "Retrieve members of a conversation using its name.",
+    ],
+    [
+      "GetConversationHistoryById",
+      "Fetch the history of a conversation using its ID.",
+    ],
+    [
+      "GetConversationHistoryByName",
+      "Fetch the history of a conversation using its name.",
+    ],
+    [
+      "GetConversationMetadataById",
+      "Retrieve metadata of a conversation using its ID.",
+    ],
+    [
+      "GetConversationMetadataByName",
+      "Retrieve metadata of a conversation using its name.",
+    ],
+    ["ListConversationsMetadata", "List metadata for Slack conversations."],
+    [
+      "ListPublicChannelsMetadata",
+      "List metadata for public channels in Slack.",
+    ],
+    [
+      "ListPrivateChannelsMetadata",
+      "List metadata for private channels in Slack.",
+    ],
+    [
+      "ListGroupDirectMessageChannelsMetadata",
+      "List metadata for group direct message channels in Slack.",
+    ],
+    [
+      "ListDirectMessageChannelsMetadata",
+      "List metadata for direct message channels in Slack.",
+    ],
+    ["GetUserInfoById", "Retrieve information of a user by their ID."],
+    ["ListUsers", "List all users in the authenticated Slack team."],
   ]}
 />
 
 <Tip>
   If you need to perform an action that's not listed here, you can [get in touch
-  with us](mailto:contact@arcade.dev) to request a new tool, or [create your
-  own tools](/home/build-tools/create-a-toolkit) with the [Slack auth
+  with us](mailto:contact@arcade.dev) to request a new tool, or [create your own
+  tools](/home/build-tools/create-a-toolkit) with the [Slack auth
   provider](/home/auth-providers/slack#using-slack-auth-in-custom-tools).
 </Tip>
 
@@ -74,7 +121,7 @@ Send a direct message to a user in Slack.
 
 **Parameters**
 
-- **`user_name`** _(string, required)_ The Slack username of the person you want to message. Slack usernames are always lowercase.
+- **`user_name`** _(string, required)_ The Slack username of the person you want to message. Slack usernames are ALWAYS lowercase.
 - **`message`** _(string, required)_ The message you want to send.
 
 ---
@@ -109,8 +156,473 @@ Send a message to a channel in Slack.
 
 **Parameters**
 
-- **`channel_name`** _(string, required)_ The Slack channel name where you want to send the message. Slack channel names are always lowercase.
+- **`channel_name`** _(string, required)_ The Slack channel name where you want to send the message. Slack channel names are ALWAYS lowercase.
 - **`message`** _(string, required)_ The message you want to send.
+
+---
+
+## GetMembersInConversationById
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/slack/get_members_in_conversation_by_id_example_call_tool.py",
+        ],
+        JavaScript: ["Coming Soon"],
+      },
+    },
+    {
+      label: "Execute the Tool with OpenAI",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/slack/get_members_in_conversation_by_id_example_llm_oai.py",
+        ],
+        JavaScript: ["Coming Soon"],
+      },
+    },
+  ]}
+/>
+
+Get the members of a conversation in Slack by the conversation's ID.
+
+**Parameters**
+
+- **`conversation_id`** _(string, required)_ The ID of the conversation to get members for.
+- **`limit`** _(int, optional)_ The maximum number of members to return. Defaults to 200.
+- **`next_cursor`** _(string, optional)_ The cursor to use for pagination.
+
+---
+
+## GetMembersInConversationByName
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/slack/get_members_in_conversation_by_name_example_call_tool.py",
+        ],
+        JavaScript: ["Coming Soon"],
+      },
+    },
+    {
+      label: "Execute the Tool with OpenAI",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/slack/get_members_in_conversation_by_name_example_llm_oai.py",
+        ],
+        JavaScript: ["Coming Soon"],
+      },
+    },
+  ]}
+/>
+
+Get the members of a conversation in Slack by the conversation's name.
+
+**Parameters**
+
+- **`conversation_name`** _(string, required)_ The name of the conversation to get members for.
+- **`limit`** _(int, optional)_ The maximum number of members to return. Defaults to 200.
+- **`next_cursor`** _(string, optional)_ The cursor to use for pagination.
+
+---
+
+## GetConversationHistoryById
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/slack/get_conversation_history_by_id_example_call_tool.py",
+        ],
+        JavaScript: ["Coming Soon"],
+      },
+    },
+    {
+      label: "Execute the Tool with OpenAI",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/slack/get_conversation_history_by_id_example_llm_oai.py",
+        ],
+        JavaScript: ["Coming Soon"],
+      },
+    },
+  ]}
+/>
+
+Get the history of a conversation in Slack.
+
+**Parameters**
+
+- **`conversation_id`** _(string, required)_ The ID of the conversation to get history for.
+- **`oldest_relative`** _(string, optional)_ The oldest message to include, in 'DD:HH:MM' format.
+- **`latest_relative`** _(string, optional)_ The latest message to include, in 'DD:HH:MM' format.
+- **`oldest_datetime`** _(string, optional)_ The oldest message to include, in 'YYYY-MM-DD HH:MM:SS' format.
+- **`latest_datetime`** _(string, optional)_ The latest message to include, in 'YYYY-MM-DD HH:MM:SS' format.
+- **`limit`** _(int, optional)_ The maximum number of messages to return. Defaults to 200.
+- **`next_cursor`** _(string, optional)_ The cursor to use for pagination, if continuing from a previous search.
+
+---
+
+## GetConversationHistoryByName
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/slack/get_conversation_history_by_name_example_call_tool.py",
+        ],
+        JavaScript: ["Coming Soon"],
+      },
+    },
+    {
+      label: "Execute the Tool with OpenAI",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/slack/get_conversation_history_by_name_example_llm_oai.py",
+        ],
+        JavaScript: ["Coming Soon"],
+      },
+    },
+  ]}
+/>
+
+Get the history of a conversation in Slack.
+
+**Parameters**
+
+- **`conversation_name`** _(string, required)_ The name of the conversation to get history for.
+- **`oldest_relative`** _(string, optional)_ The oldest message to include, in 'DD:HH:MM' format.
+- **`latest_relative`** _(string, optional)_ The latest message to include, in 'DD:HH:MM' format.
+- **`oldest_datetime`** _(string, optional)_ The oldest message to include, in 'YYYY-MM-DD HH:MM:SS' format.
+- **`latest_datetime`** _(string, optional)_ The latest message to include, in 'YYYY-MM-DD HH:MM:SS' format.
+- **`limit`** _(int, optional)_ The maximum number of messages to return. Defaults to 200.
+- **`next_cursor`** _(string, optional)_ The cursor to use for pagination, if continuing from a previous search.
+
+---
+
+## GetConversationMetadataById
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/slack/get_conversation_metadata_by_id_example_call_tool.py",
+        ],
+        JavaScript: ["Coming Soon"],
+      },
+    },
+    {
+      label: "Execute the Tool with OpenAI",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/slack/get_conversation_metadata_by_id_example_llm_oai.py",
+        ],
+        JavaScript: ["Coming Soon"],
+      },
+    },
+  ]}
+/>
+
+Get the metadata of a conversation in Slack searching by its ID.
+
+**Parameters**
+
+- **`conversation_id`** _(string, required)_ The ID of the conversation to get metadata for.
+
+---
+
+## GetConversationMetadataByName
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/slack/get_conversation_metadata_by_name_example_call_tool.py",
+        ],
+        JavaScript: ["Coming Soon"],
+      },
+    },
+    {
+      label: "Execute the Tool with OpenAI",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/slack/get_conversation_metadata_by_name_example_llm_oai.py",
+        ],
+        JavaScript: ["Coming Soon"],
+      },
+    },
+  ]}
+/>
+
+Get the metadata of a conversation in Slack searching by its name.
+
+**Parameters**
+
+- **`conversation_name`** _(string, required)_ The name of the conversation to get metadata for.
+- **`next_cursor`** _(string, optional)_ The cursor to use for pagination, if continuing from a previous search.
+
+---
+
+## ListConversationsMetadata
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/slack/list_conversations_metadata_example_call_tool.py",
+        ],
+        JavaScript: ["Coming Soon"],
+      },
+    },
+    {
+      label: "Execute the Tool with OpenAI",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/slack/list_conversations_metadata_example_llm_oai.py",
+        ],
+        JavaScript: ["Coming Soon"],
+      },
+    },
+  ]}
+/>
+
+List metadata for Slack conversations (channels and/or direct messages) that the user is a member of.
+
+**Parameters**
+
+- **`conversation_types`** _(list of str, optional)_ The type(s) of conversations to list. Defaults to all types. Each must be one of: 'public_channel', 'private_channel', 'multi_person_direct_message', or 'direct_message'.
+- **`limit`** _(int, optional)_ The maximum number of conversations to list. Defaults to 200.
+- **`next_cursor`** _(string, optional)_ The cursor to use for pagination.
+
+---
+
+## ListPublicChannelsMetadata
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/slack/list_public_channels_metadata_example_call_tool.py",
+        ],
+        JavaScript: ["Coming Soon"],
+      },
+    },
+    {
+      label: "Execute the Tool with OpenAI",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/slack/list_public_channels_metadata_example_llm_oai.py",
+        ],
+        JavaScript: ["Coming Soon"],
+      },
+    },
+  ]}
+/>
+
+List metadata for public channels in Slack that the user is a member of.
+
+**Parameters**
+
+- **`limit`** _(int, optional)_ The maximum number of channels to list. Defaults to 200.
+
+---
+
+## ListPrivateChannelsMetadata
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/slack/list_private_channels_metadata_example_call_tool.py",
+        ],
+        JavaScript: ["Coming Soon"],
+      },
+    },
+    {
+      label: "Execute the Tool with OpenAI",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/slack/list_private_channels_metadata_example_llm_oai.py",
+        ],
+        JavaScript: ["Coming Soon"],
+      },
+    },
+  ]}
+/>
+
+List metadata for private channels in Slack that the user is a member of.
+
+**Parameters**
+
+- **`limit`** _(int, optional)_ The maximum number of channels to list. Defaults to 200.
+
+---
+
+## ListGroupDirectMessageChannelsMetadata
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/slack/list_group_direct_message_channels_metadata_example_call_tool.py",
+        ],
+        JavaScript: ["Coming Soon"],
+      },
+    },
+    {
+      label: "Execute the Tool with OpenAI",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/slack/list_group_direct_message_channels_metadata_example_llm_oai.py",
+        ],
+        JavaScript: ["Coming Soon"],
+      },
+    },
+  ]}
+/>
+
+List metadata for group direct message channels in Slack that the user is a member of.
+
+**Parameters**
+
+- **`limit`** _(int, optional)_ The maximum number of channels to list. Defaults to 200.
+
+---
+
+## ListDirectMessageChannelsMetadata
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/slack/list_direct_message_channels_metadata_example_call_tool.py",
+        ],
+        JavaScript: ["Coming Soon"],
+      },
+    },
+    {
+      label: "Execute the Tool with OpenAI",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/slack/list_direct_message_channels_metadata_example_llm_oai.py",
+        ],
+        JavaScript: ["Coming Soon"],
+      },
+    },
+  ]}
+/>
+
+List metadata for direct message channels in Slack that the user is a member of.
+
+**Parameters**
+
+- **`limit`** _(int, optional)_ The maximum number of channels to list. Defaults to 200.
+
+---
+
+## GetUserInfoById
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/slack/get_user_info_by_id_example_call_tool.py",
+        ],
+        JavaScript: ["Coming Soon"],
+      },
+    },
+    {
+      label: "Execute the Tool with OpenAI",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/slack/get_user_info_by_id_example_llm_oai.py",
+        ],
+        JavaScript: ["Coming Soon"],
+      },
+    },
+  ]}
+/>
+
+Get the information of a user in Slack.
+
+**Parameters**
+
+- **`user_id`** _(string, required)_ The ID of the user to get.
+
+---
+
+## ListUsers
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/slack/list_users_example_call_tool.py",
+        ],
+        JavaScript: ["Coming Soon"],
+      },
+    },
+    {
+      label: "Execute the Tool with OpenAI",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/slack/list_users_example_llm_oai.py",
+        ],
+        JavaScript: ["Coming Soon"],
+      },
+    },
+  ]}
+/>
+
+List all users in the authenticated user's Slack team.
+
+**Parameters**
+
+- **`exclude_bots`** _(bool, optional)_ Whether to exclude bots from the results. Defaults to `True`.
+- **`limit`** _(int, optional)_ The maximum number of users to return. Defaults to 200.
+- **`next_cursor`** _(string, optional)_ The cursor to use for pagination.
+
+---
 
 ## Auth
 

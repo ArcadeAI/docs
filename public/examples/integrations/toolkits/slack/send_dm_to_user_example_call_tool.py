@@ -16,7 +16,7 @@ if auth_response.status != "completed":
 # Wait for the authorization to complete
 client.auth.wait_for_completion(auth_response)
 
-tool_input = {"user_name": "john_doe", "message": "Hello, John!"}
+tool_input = {"user_name": "johndoe", "message": "Hello, John!"}
 
 response = client.tools.execute(
     tool_name=TOOL_NAME,

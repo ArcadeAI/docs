@@ -3,7 +3,7 @@ from arcadepy import Arcade
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
 USER_ID = "you@example.com"
-TOOL_NAME = "Slack.SendMessageToChannel"
+TOOL_NAME = "Slack.GetConversationMetadataById"
 
 auth_response = client.tools.authorize(
     tool_name=TOOL_NAME,
@@ -16,7 +16,7 @@ if auth_response.status != "completed":
 # Wait for the authorization to complete
 client.auth.wait_for_completion(auth_response)
 
-tool_input = {"channel_name": "general", "message": "Hello, General!"}
+tool_input = {"conversation_id": "C1234567890"}
 
 response = client.tools.execute(
     tool_name=TOOL_NAME,
