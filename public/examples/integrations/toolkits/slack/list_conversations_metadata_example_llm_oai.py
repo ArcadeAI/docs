@@ -2,8 +2,8 @@ import os
 from openai import OpenAI
 
 USER_ID = "you@example.com"
-PROMPT = "Send a message to the channel 'general' saying 'Hello, General!'."
-TOOL_NAME = "Slack.SendMessageToChannel"
+PROMPT = "List metadata for all Slack conversations including public channels, private channels, IMs, and group DMs, limiting to 100 results."
+TOOL_NAME = "Slack.ListConversationsMetadata"
 
 client = OpenAI(
     base_url="https://api.arcade.dev", api_key=os.environ.get("ARCADE_API_KEY")
