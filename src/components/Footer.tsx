@@ -158,7 +158,7 @@ const Footer: React.FC = () => {
       </div>
       <div className={styles.copyrightContent}>
         <div className={styles.copyright}>
-          <p>&copy; 2024 &mdash; present Arcade.</p>
+          <p>&copy; 2024 &mdash; present Arcade AI.</p>
         </div>
       </div>
     </div>
