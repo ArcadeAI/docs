@@ -18,9 +18,9 @@ client.auth.wait_for_completion(auth_response)
 
 tool_input = {
     "owner": "ArcadeAI",
-    "repo": "hello-world",
+    "repo": "example",
     "issue_number": 1,
-    "body": "This is a comment.",
+    "body": "I scored over 9000!",
 }
 
 response = client.tools.execute(

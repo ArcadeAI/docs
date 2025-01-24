@@ -2,7 +2,7 @@ import os
 from openai import OpenAI
 
 USER_ID = "you@example.com"
-PROMPT = "List the activities for the ArcadeAI/hello-world repository, sorted in descending order"
+PROMPT = "List the activities for the ArcadeAI/arcade-ai repository, sorted in descending order"
 TOOL_NAME = "Github.ListRepositoryActivities"
 
 client = OpenAI(

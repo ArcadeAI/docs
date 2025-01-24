@@ -2,7 +2,7 @@ import os
 from openai import OpenAI
 
 USER_ID = "you@example.com"
-PROMPT = "Create an issue in the ArcadeAI/hello-world repository titled 'Example Issue' with the body 'This is an example issue.'"
+PROMPT = "Create an issue in the ArcadeAI/example repository titled 'Example Issue' with the body 'This is an example issue.'"
 TOOL_NAME = "Github.CreateIssue"
 
 client = OpenAI(

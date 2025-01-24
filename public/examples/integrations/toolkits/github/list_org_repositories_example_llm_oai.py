@@ -2,7 +2,7 @@ import os
 from openai import OpenAI
 
 USER_ID = "you@example.com"
-PROMPT = "List all of the repositories for the ArcadeAI organization."
+PROMPT = "List all of the GitHub repositories for the ArcadeAI organization."
 TOOL_NAME = "Github.ListOrgRepositories"
 
 client = OpenAI(

@@ -2,7 +2,7 @@ import os
 from openai import OpenAI
 
 USER_ID = "you@example.com"
-PROMPT = "Create a review comment on pull request #1 in the ArcadeAI/hello-world repository with the body 'This is a review comment.'"
+PROMPT = "Create a review comment on pull request #2 in the ArcadeAI/example repository with the body 'This is a review comment.'"
 TOOL_NAME = "Github.CreateReviewComment"
 
 client = OpenAI(

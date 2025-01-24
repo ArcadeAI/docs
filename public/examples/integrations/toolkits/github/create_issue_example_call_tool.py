@@ -18,7 +18,7 @@ client.auth.wait_for_completion(auth_response)
 
 tool_input = {
     "owner": "ArcadeAI",
-    "repo": "hello-world",
+    "repo": "example",
     "title": "Example Issue",
     "body": "This is an example issue.",
 }

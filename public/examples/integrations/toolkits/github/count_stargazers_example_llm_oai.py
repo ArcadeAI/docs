@@ -2,7 +2,7 @@ import os
 from openai import OpenAI
 
 USER_ID = "you@example.com"
-PROMPT = "Count the number of stargazers for the ArcadeAI/hello-world repository."
+PROMPT = "Count the number of stargazers for the ArcadeAI/arcade-ai repository."
 TOOL_NAME = "Github.CountStargazers"
 
 client = OpenAI(

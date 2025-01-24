@@ -2,7 +2,7 @@ import os
 from openai import OpenAI
 
 USER_ID = "you@example.com"
-PROMPT = "Share a new text post to LinkedIn with the text 'Hello, world! This post was created programmatically with Arcade AI!'"
+PROMPT = "Share a new text post to LinkedIn with the text 'Hello, world! This post was created programmatically with Arcade!'"
 TOOL_NAME = "LinkedIn.CreateTextPost"
 
 client = OpenAI(

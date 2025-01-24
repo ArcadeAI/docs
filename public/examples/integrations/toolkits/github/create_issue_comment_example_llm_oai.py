@@ -2,7 +2,7 @@ import os
 from openai import OpenAI
 
 USER_ID = "you@example.com"
-PROMPT = "Create a comment on issue #1 in the ArcadeAI/hello-world repository with the body 'This is a comment.'"
+PROMPT = "Create a comment on issue #1 in the ArcadeAI/example repository with the body 'I scored over 9000!'"
 TOOL_NAME = "Github.CreateIssueComment"
 
 client = OpenAI(

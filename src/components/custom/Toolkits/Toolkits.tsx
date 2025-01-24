@@ -94,11 +94,11 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
                     </h2>
                     <p className="mt-1 text-xs text-gray-400 sm:text-sm">
                       {key === "arcade" &&
-                        "Official integrations developed and maintained by Arcade AI."}
+                        "Official integrations developed and maintained by Arcade."}
                       {key === "verified" &&
-                        "Community-created integrations, thoroughly tested and verified by Arcade AI."}
+                        "Community-created integrations, thoroughly tested and verified by Arcade."}
                       {key === "community" &&
-                        "Created and maintained by the Arcade AI community, offering a wide range of integrations."}
+                        "Created and maintained by the Arcade community, offering a wide range of integrations."}
                     </p>
                   </div>
                 </div>

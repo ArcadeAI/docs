@@ -21,7 +21,7 @@ const integrations: Integration[] = [
     id: "python",
     icon: SiPython,
     title: "Python",
-    description: "Integrate Arcade AI into your Python apps seamlessly",
+    description: "Integrate Arcade into your Python apps seamlessly",
   },
   {
     id: "typescript",
@@ -39,7 +39,7 @@ const integrations: Integration[] = [
     id: "rest",
     icon: Globe,
     title: "REST API",
-    description: "Use Arcade AI's REST API with any language",
+    description: "Use Arcade's REST API with any language",
     href: "https://reference.arcade.dev",
   },
 ] as const;
@@ -54,7 +54,7 @@ export default function GettingStarted() {
       <div className="mx-auto max-w-7xl">
         <div className="mb-8">
           <p className="text-base text-zinc-400 sm:text-lg">
-            Choose your preferred way to start building with Arcade AI
+            Choose your preferred way to start building with Arcade
           </p>
         </div>
 

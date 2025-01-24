@@ -18,8 +18,8 @@ client.auth.wait_for_completion(auth_response)
 
 tool_input = {
     "owner": "ArcadeAI",
-    "repo": "hello-world",
-    "pull_number": 1,
+    "repo": "example",
+    "pull_number": 2,
     "body": "This is a review comment.",
     "path": "README.md",
 }
