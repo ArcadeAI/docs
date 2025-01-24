@@ -5,7 +5,7 @@ description: "Guide on calling tools that require authentication"
 
 # Calling Tools with Authentication
 
-import { Steps } from "nextra/components";
+import { Steps, Tabs } from "nextra/components";
 
 <Steps>
 
@@ -13,18 +13,31 @@ import { Steps } from "nextra/components";
 
 Import the Arcade AI client in a Python script. The client automatically finds API keys set by `arcade login`.
 
+<Tabs items={["Python", "JavaScript"]}>
+<Tabs.Tab>
 ```python
 from arcadepy import Arcade
 
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 ```
+</Tabs.Tab>
+<Tabs.Tab>
+```js
+import Arcade from "@arcadeai/arcadejs";
+
+const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
+```
+</Tabs.Tab>
+</Tabs>
 
 ### Authorize a tool directly
 
-Many tools require authorization. For example, the `Google.GetEmails` tool requires authorization with Google.
+Many tools require authorization. For example, the `Google.ListEmails` tool requires authorization with Google.
 
 This authorization must be approved by the user. By approving, the user allows your agent or app to access only the data they've approved.
 
+<Tabs items={["Python", "JavaScript"]}>
+<Tabs.Tab>
 ```python
 # As the developer, you must identify the user you're authorizing
 # and pass a unique identifier for them (e.g. an email or user ID) to Arcade:
@@ -32,12 +45,29 @@ THE_USER_ID = "you@example.com"
 
 # Request access to the user's Gmail account
 auth_response = client.tools.authorize(
-    tool_name="Google.GetEmails",
+    tool_name="Google.ListEmails",
     user_id=THE_USER_ID,
 )
 
 print(f"Click this link to authorize: {auth_response.url}")
 ```
+</Tabs.Tab>
+<Tabs.Tab>
+```js
+// As the developer, you must identify the user you're authorizing
+// and pass a unique identifier for them (e.g. an email or user ID) to Arcade:
+const THE_USER_ID = "you@example.com";
+
+// Request access to the user's Gmail account
+const auth_response = await client.tools.authorize({
+  tool_name: "Google.ListEmails",
+  user_id: THE_USER_ID,
+});
+
+console.log(`Click this link to authorize: ${auth_response.url}`);
+```
+</Tabs.Tab>
+</Tabs>
 
 This will print a URL that the user must visit to approve the authorization.
 
@@ -45,23 +75,46 @@ This will print a URL that the user must visit to approve the authorization.
 
 It may take a few minutes for the user to approve the authorization.
 
-Use the `client.auth.wait_for_completion()` method to wait for the authorization to complete:
+You can wait for the authorization to complete using the following methods:
 
+<Tabs items={["Python", "JavaScript"]}>
+<Tabs.Tab>
 ```python
-auth_response = client.auth.wait_for_completion(auth_response)
+auth_status = client.auth.wait_for_completion(auth_response)
 ```
+</Tabs.Tab>
+<Tabs.Tab>
+```js
+const auth_status = await client.auth.waitForCompletion(auth_response);
+```
+</Tabs.Tab>
+</Tabs>
 
 ### Call the tool with authorization
 
 Once the user has approved the action, you can run the tool. You only need to pass the `user_id`:
 
+<Tabs items={["Python", "JavaScript"]}>
+<Tabs.Tab>
 ```python
 emails_response = client.tools.execute(
-    tool_name="Google.GetEmails",
-    user_id=MY_USER_ID,
+    tool_name="Google.ListEmails",
+    user_id=THE_USER_ID,
 )
 print(emails_response)
 ```
+</Tabs.Tab>
+<Tabs.Tab>
+```js
+const emails_response = await client.tools.execute({
+  tool_name: "Google.ListEmails",
+  user_id: THE_USER_ID,
+});
+
+console.log(emails_response);
+```
+</Tabs.Tab>
+</Tabs>
 
 ### How it works
 
