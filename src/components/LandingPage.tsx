@@ -98,7 +98,7 @@ export function LandingPage() {
         </div>
       </section>
       <section className="relative py-16">
-        <div className="container relative px-4">
+        <div className="container relative mx-auto px-4">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="mb-4 text-3xl font-bold tracking-tight text-white md:text-4xl">
               Start Building in Minutes
@@ -136,7 +136,7 @@ export function LandingPage() {
         </div>
       </section>
       <section className="py-8">
-        <div className="container px-4">
+        <div className="container mx-auto px-4">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="mb-4 text-3xl font-bold tracking-tight text-white md:text-4xl">
               The Hard Parts of AI Development
@@ -213,7 +213,7 @@ export function LandingPage() {
       </section>
 
       <section className="py-12">
-        <div className="container px-4">
+        <div className="container mx-auto px-4">
           <div className="max-w-2xl">
             <h2 className="mb-4 text-3xl font-bold tracking-tight text-white md:text-4xl">
               Sample Applications
