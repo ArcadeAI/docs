@@ -50,6 +50,7 @@ This authorization must be approved by the user. By approving, the user allows y
 
 <Tabs items={["Python", "JavaScript"]}>
 <Tabs.Tab>
+
 ```python
 # As the developer, you must identify the user you're authorizing
 # and pass a unique identifier for them (e.g. an email or user ID) to Arcade:
@@ -61,7 +62,8 @@ auth_response = client.tools.authorize( tool_name="Google.ListEmails", user_id=T
 
 print(f"Click this link to authorize: {auth_response.url}")
 
-````
+```
+
 </Tabs.Tab>
 <Tabs.Tab>
 ```js
@@ -69,13 +71,10 @@ print(f"Click this link to authorize: {auth_response.url}")
 // and pass a unique identifier for them (e.g. an email or user ID) to Arcade:
 const THE_USER_ID = "you@example.com";
 
-// Request access to the user's Gmail account
-const auth_response = await client.tools.authorize({
-  tool_name: "Google.ListEmails",
-  user_id: THE_USER_ID,
-});
+// Request access to the user's Gmail account const auth_response = await client.tools.authorize({ tool_name: "Google.ListEmails", user_id: THE_USER_ID, });
 
 console.log(`Click this link to authorize: ${auth_response.url}`);
+
 ````
 
 </Tabs.Tab>
@@ -94,10 +93,13 @@ You can wait for the authorization to complete using the following methods:
     ```python auth_status = client.auth.wait_for_completion(auth_response) ```
   </Tabs.Tab>
   <Tabs.Tab>
+
     ```js const auth_status = await
-    client.auth.waitForCompletion(auth_response); ```
+    client.auth.waitForCompletion(auth_response);
+    ```
   </Tabs.Tab>
 </Tabs>
+
 
 ### Call the tool with authorization
 
@@ -105,15 +107,19 @@ Once the user has approved the action, you can run the tool. You only need to pa
 
 <Tabs items={["Python", "JavaScript"]}>
 <Tabs.Tab>
+
+
 ```python
 emails_response = client.tools.execute(
     tool_name="Google.ListEmails",
     user_id=THE_USER_ID,
 )
 print(emails_response)
-```
+````
+
 </Tabs.Tab>
 <Tabs.Tab>
+
 ```js
 const emails_response = await client.tools.execute({
   tool_name: "Google.ListEmails",
@@ -121,11 +127,10 @@ const emails_response = await client.tools.execute({
 });
 
 console.log(emails_response);
-
 ```
+
 </Tabs.Tab>
 </Tabs>
-
 
 Arcade remembers the user's authorization tokens, so you don't have to! Next time the user runs the same tool, they won't have to go through the authorization process again until the auth expires or is revoked.
 
@@ -146,4 +151,3 @@ These APIs give you programmatic control over tool calling. If you just want to 
 ### Next steps
 
 Once you've mastered tool calling, see how you can [build your own tools](/home/build-tools/create-a-toolkit) to integrate any custom functionality or API to your AI workflows.
-```
