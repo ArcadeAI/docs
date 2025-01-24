@@ -2,8 +2,8 @@ import os
 from openai import OpenAI
 
 USER_ID = "you@example.com"
-PROMPT = "Fetch the conversation history for the conversation named 'general' between '2023-01-01 00:00:00' and '2023-01-31 23:59:59'."
-TOOL_NAME = "Slack.GetConversationHistoryByName"
+PROMPT = "List metadata for group direct message conversations in Slack, limiting to 100 results."
+TOOL_NAME = "Slack.ListGroupDirectMessageConversationsMetadata"
 
 client = OpenAI(
     base_url="https://api.arcade.dev", api_key=os.environ.get("ARCADE_API_KEY")

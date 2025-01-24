@@ -2,8 +2,10 @@ import os
 from openai import OpenAI
 
 USER_ID = "you@example.com"
-PROMPT = "List metadata for direct message channels in Slack, limiting to 100 results."
-TOOL_NAME = "Slack.ListDirectMessageChannelsMetadata"
+PROMPT = (
+    "List metadata for direct message conversations in Slack, limiting to 100 results."
+)
+TOOL_NAME = "Slack.ListDirectMessageConversationsMetadata"
 
 client = OpenAI(
     base_url="https://api.arcade.dev", api_key=os.environ.get("ARCADE_API_KEY")

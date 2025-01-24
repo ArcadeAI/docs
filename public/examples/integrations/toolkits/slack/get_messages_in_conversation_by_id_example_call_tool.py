@@ -3,7 +3,7 @@ from arcadepy import Arcade
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
 USER_ID = "you@example.com"
-TOOL_NAME = "Slack.GetConversationHistoryByName"
+TOOL_NAME = "Slack.GetMessagesInConversationById"
 
 auth_response = client.tools.authorize(
     tool_name=TOOL_NAME,
@@ -17,7 +17,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    "conversation_name": "general",
+    "conversation_id": "C1234567890",
     "limit": 100,
     "oldest_datetime": "2023-01-01 00:00:00",
     "latest_datetime": "2023-01-31 23:59:59",
