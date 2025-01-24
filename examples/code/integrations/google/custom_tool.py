@@ -9,10 +9,10 @@ from googleapiclient.discovery import build
 
 @tool(
     requires_auth=Google(
-        scopes=["https://www.googleapis.com/auth/gmail.send"],
+        scopes=["https://www.googleapis.com/auth/gmail.readonly"],
     )
 )
-async def send_email(
+async def list_emails(
     context: ToolContext,
     subject: Annotated[str, "The subject of the email"],
     body: Annotated[str, "The body of the email"],
@@ -21,6 +21,14 @@ async def send_email(
     """
     Send an email using the Gmail API.
     """
+    if not context.authorization or not context.authorization.token:
+        raise ValueError("No token found in context")
 
-    # Set up the Gmail API client
-    service = build("gmail", "v1", credentials=Credentials(context.authorization.token))
+    credentials = Credentials(context.authorization.token)
+    gmail = build("gmail", "v1", credentials=credentials)
+
+    email_messages = (
+        gmail.users().messages().list(userId="me").execute().get("messages", [])
+    )
+
+    return email_messages
