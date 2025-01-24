@@ -1,5 +1,7 @@
 from typing import Annotated
 
+import httpx
+
 from arcade.sdk import ToolContext, tool
 from arcade.sdk.auth import GitHub
 
@@ -11,6 +13,14 @@ async def count_stargazers(
     name: Annotated[str, "The name of the repository"],
 ) -> Annotated[int, "The number of stargazers (stars) for the specified repository"]:
     """Count the number of stargazers (stars) for a GitHub repository."""
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "Authorization": f"Bearer {context.authorization.token}",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+    url = f"https://api.github.com/repos/{owner}/{name}"
 
-    token = context.authorization.token
-    # TODO: Call the GitHub API with this token!
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url, headers=headers)
+        response.raise_for_status()
+        return response.json().get("stargazers_count", 0)
