@@ -5,6 +5,18 @@ client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
 user_id = "user@example.com"
 
+"""
+In this example, we will use Arcade to authenticate with GitHub and retrieve
+the number of stargazers of the ArcadeAI/arcade-ai repository.
+
+There is a tool for that in the Arcade SDK, which simplifies the process for
+you to interact with GitHub either through our Python or JavaScript SDKs or via
+LLM tool calling.
+
+Below we are just showing how to use Arcade as an auth provider, if you ever
+need to.
+"""
+
 # Start the authorization process
 auth_response = client.auth.start(
     user_id=user_id,
@@ -23,7 +35,6 @@ if not auth_response.context.token:
 
 token = auth_response.context.token
 
-# We are going to count the stargazers of a GitHub repository
 owner = "ArcadeAI"
 name = "arcade-ai"
 headers = {

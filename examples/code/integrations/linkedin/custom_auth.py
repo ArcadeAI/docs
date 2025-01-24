@@ -7,6 +7,18 @@ client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
 user_id = "user@example.com"
 
+"""
+In this example, we will use Arcade to authenticate with LinkedIn and post a
+message to the user's LinkedIn feed.
+
+There is a tool for that in the Arcade SDK, which simplifies the process for
+you to post messages to the user's LinkedIn feed either through our Python or
+JavaScript SDKs or via LLM tool calling.
+
+Below we are just showing how to use Arcade as an auth provider, if you ever
+need to.
+"""
+
 # Start the authorization process
 auth_response = client.auth.start(
     user_id=user_id,
@@ -26,9 +38,6 @@ if not auth_response.context.token:
 
 token = auth_response.context.token
 
-# We will not post a message to LinkedIn in this example
-
-# The user_id is needed by the LinkedIn API
 user_id = (
     None
     if not auth_response.context.authorization
@@ -52,7 +61,6 @@ payload = {
     "visibility": {"com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC"},
 }
 
-# Send the request to the LinkedIn API
 response = requests.post(
     "https://api.linkedin.com/v2/ugcPosts",
     headers={"Authorization": f"Bearer {token}"},
