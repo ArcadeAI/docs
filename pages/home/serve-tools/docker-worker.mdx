@@ -1,0 +1,85 @@
+---
+title: "Build custom worker images with docker"
+description: "Learn how to build a custom worker image using Arcade AI"
+---
+
+import { Steps } from "nextra/components";
+
+# Build custom worker images with docker
+
+This guide shows you how to build a custom Worker image using Arcade's base Worker image. It takes you through creating a Dockerfile, installing toolkits, and running the resulting container.
+
+<Steps>
+
+### Requirements
+
+- Docker installed on your machine
+
+### Create your Dockerfile
+
+Create a Dockerfile in your project directory:
+
+```dockerfile
+ARG VERSION=latest
+
+FROM ghcr.io/arcadeai/worker-base:${VERSION}
+
+# Copy the file that lists all your desired toolkits
+COPY toolkits.txt ./
+
+# Install these toolkits
+RUN pip install -r toolkits.txt
+```
+
+With this Dockerfile, we start from the Arcade AI worker base image, copy in a file named toolkits.txt, and install each toolkit listed there.
+
+---
+
+## List Your Toolkits
+
+Create a file named toolkits.txt in the same directory. Add the toolkits you want installed:
+
+```
+arcade-google
+arcade-web
+arcade-zoom
+```
+
+Adjust this file as needed. Each line in toolkits.txt should specify a Python package name and version.
+
+---
+
+## 3. Build the Image
+
+From the directory containing the Dockerfile and toolkits.txt, run:
+
+```bash
+docker build -t custom-worker:0.1.0 .
+```
+
+This command creates a Docker image named custom-worker with the tag 0.1.0 using the instructions in your Dockerfile.
+
+---
+
+## Run the Worker
+
+To start the worker container:
+
+```bash
+docker run -p 8002:8002 \
+  -e ARCADE_WORKER_SECRET="your_secret_here" \
+  custom-worker:0.1.0
+```
+
+Replace "your_secret_here" with a secret of your choice. The worker will be accessible on port 8002 of your local machine.
+
+</Steps>
+
+---
+
+## Next Steps
+
+- Set environment variables (like ARCADE_WORKER_SECRET) securely for production use.
+- Deploy your container to a suitable environment (Docker Swarm, Kubernetes, or another container orchestration platform).
+
+Happy coding with Arcade!

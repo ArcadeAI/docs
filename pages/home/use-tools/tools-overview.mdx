@@ -9,16 +9,63 @@ Language models excel at text generation but struggle with tasks like calculatio
 
 To solve this, many AI models support tool calling (also called function calling). This unlocks the ability for models to use _tools_, which are code functions or APIs that perform actions.
 
-### How tool calling works
+## How tool calling works
 
 AI models that support tool calling can determine when and how to use specific tools to fulfill a user's request. It's up to the developer to build the tools and make them available to the model. Think of it like giving the AI a toolbox and asking it to pick the right tool for the job.
 
 For example, if a user asks, "Who is the CEO of Apple?", the AI can:
 
 1. Recognize the need for current information about Apple's CEO
-2. Select a search tool like `Search.SearchGoogle`
+2. Select a search tool like `Web.SearchGoogle`
 3. Use the tool to retrieve relevant information from the web
 4. Write a response using the gathered data
+
+## Tool Augmented Generation (TAG)
+
+Similar to Retrieval Augmented Generation (RAG), tool calling allows the AI to use external data to answer questions. Unlike RAG, tool calling is more flexible and allows the AI to use tools that are much more diverse than text or vector search alone.
+
+The following is a diagram of how tool calling is used to provide context to a language model similar to RAG.
+
+<img
+  src="/images/tool-call-diagrams/tool-call-1.png"
+  alt="Tool calling diagram 1"
+  style={{
+    borderRadius: "8px",
+    width: "70%",
+    display: "block",
+    margin: "0 auto",
+  }}
+/>
+
+First, a language model is given a user's request. The model then determines if it needs to use a tool to fulfill the request. If so, the model selects the appropriate tool from the tools listed in the request.
+
+The model then predicts the parameters of that tool and passes these parameters back to the client application.
+
+<img
+  src="/images/tool-call-diagrams/tool-call-2.png"
+  alt="Tool calling diagram 2"
+  style={{
+    borderRadius: "8px",
+    width: "70%",
+    display: "block",
+    margin: "1rem auto",
+  }}
+/>
+
+Now that the tool has been executed, the model can use the output to generate a response.
+
+<img
+  src="/images/tool-call-diagrams/tool-call-3.png"
+  alt="Tool calling diagram 3"
+  style={{
+    borderRadius: "8px",
+    width: "70%",
+    display: "block",
+    margin: "1rem auto",
+  }}
+/>
+
+This process shows the general outline of the Tool Augmented Generation (TAG) process at a high level.
 
 ### Tool calling with Arcade AI
 

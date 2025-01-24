@@ -1,3 +1,4 @@
 export default {
-  "build-a-worker-with-fastapi": "Build a worker with FastAPI",
+  "docker-worker": "Docker",
+  "modal-worker": "Modal",
 };
