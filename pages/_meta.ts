@@ -5,11 +5,6 @@ export default {
     href: "/get-started",
     breadcrumb: true,
   },
-  learn: {
-    type: "page",
-    title: "Learn",
-    href: "/learn",
-  },
   toolkits: {
     type: "page",
     title: "Toolkits",
