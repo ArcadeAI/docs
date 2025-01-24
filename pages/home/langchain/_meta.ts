@@ -1,4 +1,4 @@
 export default {
-  chain: "Use Arcade AI Tools with LangChain",
-  "langchain-tools": "Authorize LangChain Tools",
+  chain: "Using Arcade tools",
+  "langchain-tools": "Authorizing existing tools",
 };

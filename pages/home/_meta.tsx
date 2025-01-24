@@ -1,4 +1,4 @@
-import { BookOpen, Code2, Home } from "lucide-react";
+import { Code2, Home, Plug } from "lucide-react";
 
 export default {
   "*": {
@@ -18,11 +18,11 @@ export default {
   learn: {
     title: (
       <span className="flex items-center gap-2 font-medium">
-        <BookOpen className="size-4" />
-        Learning Arcade
+        <Plug className="size-4" />
+        Toolkits
       </span>
     ),
-    href: "/learn",
+    href: "/toolkits",
   },
   reference: {
     title: (
@@ -52,11 +52,11 @@ export default {
     type: "separator",
     title: "Agent Frameworks",
   },
-  langchain: {
-    title: "LangChain",
-  },
   langgraph: {
     title: "LangGraph",
+  },
+  langchain: {
+    title: "LangChain",
   },
   crewai: {
     title: "CrewAI",
