@@ -2,7 +2,7 @@ import os
 from openai import OpenAI
 
 USER_ID = "you@example.com"
-PROMPT = "Update pull request #1 in the ArcadeAI/hello-world repository with the title 'Updated Title' and body 'Updated body content.'"
+PROMPT = "Update pull request #1 in the YourGitHubOrg/your-repo repository with the title 'Updated Title' and body 'Updated body content.'"
 TOOL_NAME = "Github.UpdatePullRequest"
 
 client = OpenAI(

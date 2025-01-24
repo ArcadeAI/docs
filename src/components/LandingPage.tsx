@@ -41,7 +41,7 @@ export function LandingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            Welcome to Arcade AI!
+            Welcome to Arcade!
           </motion.h1>
           <motion.p
             className="mx-auto mt-8 max-w-2xl text-pretty text-base font-medium leading-relaxed text-gray-300"
@@ -104,14 +104,14 @@ export function LandingPage() {
               Start Building in Minutes
             </h2>
             <p className="text-gray-300">
-              Everything you need to get started with Arcade AI.
+              Everything you need to get started with Arcade.
             </p>
           </div>
           <div className="mt-16 grid gap-8 md:grid-cols-2">
             <QuickStartCard
               icon={Rocket}
               title="Quick Start Guide"
-              description="Get up and running with Arcade AI in no time. Follow our step-by-step guide to start building your first AI agent."
+              description="Get up and running with Arcade in no time. Follow our step-by-step guide to start building your first AI agent."
               href="/home/quickstart"
             />
             <QuickStartCard
@@ -123,13 +123,13 @@ export function LandingPage() {
             <QuickStartCard
               icon={Wrench}
               title="Create Custom Tools"
-              description="Learn how to build and deploy your own custom tools. Extend Arcade AI's capabilities to match your specific requirements."
+              description="Learn how to build and deploy your own custom tools. Extend Arcade's capabilities to match your specific requirements."
               href="/home/custom-tools"
             />
             <QuickStartCard
               icon={Cloud}
               title="Deploy Anywhere"
-              description="Choose between local deployment, Docker, Kubernetes, or our cloud service. Deploy Arcade AI wherever you need it."
+              description="Choose between local deployment, Docker, Kubernetes, or our cloud service. Deploy Arcade wherever you need it."
               href="/home/install/overview"
             />
           </div>
@@ -143,8 +143,8 @@ export function LandingPage() {
             </h2>
             <p className="font-medium text-gray-300">
               Creating AI tools that interact with real-world services is
-              complex. Arcade AI solves the hard technical challenges, so you
-              can focus on building tools that deliver value.
+              complex. Arcade solves the hard technical challenges, so you can
+              focus on building tools that deliver value.
             </p>
           </div>
           <div className="mt-16 grid gap-8 md:grid-cols-2">

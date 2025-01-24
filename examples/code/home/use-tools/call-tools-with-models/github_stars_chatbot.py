@@ -1,7 +1,7 @@
 import os
 from openai import OpenAI
 
-# Initialize the OpenAI client, pointing to Arcade AI
+# Initialize the OpenAI client, pointing to Arcade
 client = OpenAI(
     api_key=os.environ["ARCADE_API_KEY"],
     base_url="https://api.arcade.dev/v1",

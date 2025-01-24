@@ -17,8 +17,8 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    "owner": "ArcadeAI",
-    "repo": "hello-world",
+    "owner": "YourGitHubOrg",
+    "repo": "your-repo",
     "pull_number": 1,
     "title": "Updated Title",
     "body": "Updated body content.",

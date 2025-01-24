@@ -1,14 +1,11 @@
-# Arcade AI Documentation
+# Arcade Documentation
 
-Documentation for Arcade AI
+Documentation for Arcade
 
 ## Local Development
 
-Requires:
+See the `package.json` for the dependencies required.
 
-- NodeJS 18+
-- Yarn 1.22+
+First, run `pnpm install` to install the dependencies.
 
-First, run `yarn` to install the dependencies.
-
-Then, run `yarn dev` to start the development server and visit localhost:3000.
+Then, run `pnpm dev` to start the development server and visit localhost:3000.

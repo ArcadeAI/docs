@@ -16,7 +16,7 @@ if auth_response.status != "completed":
 # Wait for the authorization to complete
 client.auth.wait_for_completion(auth_response)
 
-tool_input = {"owner": "ArcadeAI", "name": "Hello-World", "starred": True}
+tool_input = {"owner": "ArcadeAI", "name": "arcade-ai", "starred": True}
 
 response = client.tools.execute(
     tool_name=TOOL_NAME,

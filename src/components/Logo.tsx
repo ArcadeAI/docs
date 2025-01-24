@@ -5,16 +5,16 @@ export function Logo() {
         <img
           className="dark:hidden"
           loading="lazy"
-          src={"/images/logo/arcade-ai-logo.png"}
-          alt="Arcade AI Logo"
+          src={"/images/logo/arcade-logo.png"}
+          alt="Arcade Logo"
           width={150}
           height={30}
         />
         <img
           className="hidden dark:block"
           loading="lazy"
-          src={"/images/logo/arcadeai-title-dark.png"}
-          alt="Arcade AI Logo"
+          src={"/images/logo/arcade-title-dark.png"}
+          alt="Arcade Logo"
           width={150}
           height={30}
         />
@@ -23,8 +23,8 @@ export function Logo() {
         <img
           className="dark:block"
           loading="lazy"
-          src={"/images/logo/arcadeai.png"}
-          alt="Arcade AI Logo"
+          src={"/images/logo/arcade.png"}
+          alt="Arcade Logo"
           width={30}
           height={30}
         />

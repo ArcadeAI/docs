@@ -2,7 +2,7 @@ import os
 from openai import OpenAI
 
 USER_ID = "you@example.com"
-PROMPT = "Get details of the ArcadeAI/hello-world repository."
+PROMPT = "Get details of the ArcadeAI/arcade-ai repository."
 TOOL_NAME = "Github.GetRepository"
 
 client = OpenAI(

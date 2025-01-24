@@ -17,7 +17,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    "text": "Hello, world! This post was created programmatically with Arcade AI!",
+    "text": "Hello, world! This post was created programmatically with Arcade!",
 }
 
 response = client.tools.execute(

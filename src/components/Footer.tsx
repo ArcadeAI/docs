@@ -15,14 +15,14 @@ const ArcadeLogo = () => {
       <img
         className={"dark:hidden"}
         loading="lazy"
-        src={"/images/logo/arcade-ai-logo.png"}
-        alt="Arcade AI Logo"
+        src={"/images/logo/arcade-logo.png"}
+        alt=" Arcade Logo"
       />
       <img
         className={"hidden dark:block"}
         loading="lazy"
-        src={"/images/logo/arcadeai-title-dark.png"}
-        alt="Arcade AI Logo"
+        src={"/images/logo/arcade-title-dark.png"}
+        alt="Arcade Logo"
       />
     </div>
   );
@@ -158,7 +158,7 @@ const Footer: React.FC = () => {
       </div>
       <div className={styles.copyrightContent}>
         <div className={styles.copyright}>
-          <p>&copy; 2024 &mdash; present Arcade AI.</p>
+          <p>&copy; 2024 &mdash; present Arcade.</p>
         </div>
       </div>
     </div>

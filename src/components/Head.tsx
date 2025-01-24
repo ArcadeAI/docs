@@ -10,12 +10,12 @@ export const Head = () => {
 
   // TODO: make metadata depend on the project docs
 
-  const description = frontMatter.description ?? "Arcade AI";
-  // const title = frontMatter.title ?? "Arcade AI";
+  const description = frontMatter.description ?? "Arcade";
+  // const title = frontMatter.title ?? "Arcade";
 
   const image = frontMatter.ogImage
     ? "https://docs.arcade.dev" + frontMatter.ogImage
-    : "https://docs.arcade.dev/images/logo/arcadeai.png";
+    : "https://docs.arcade.dev/images/logo/arcade.png";
   const video = frontMatter.ogVideo
     ? "https://docs.arcade.dev" + frontMatter.ogVideo
     : null;
@@ -23,18 +23,15 @@ export const Head = () => {
   return (
     <>
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <meta
-        name="apple-mobile-web-app-title"
-        content="Arcade AI Documentation"
-      />
-      <title>Arcade AI</title>
+      <meta name="apple-mobile-web-app-title" content="Arcade Documentation" />
+      <title>Arcade Docs</title>
 
       <link rel="manifest" href="/site.webmanifest" />
       <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5" />
       <link rel="shortcut icon" href="/favicon.ico" />
       <meta property="og:url" content={url} />
       <meta httpEquiv="Content-Language" content="en" />
-      <meta property="og:site_name" content="Arcade AI" />
+      <meta property="og:site_name" content="Arcade Docs" />
       <meta property="og:title" content={pageTitle} />
 
       <meta name="description" content={description} />

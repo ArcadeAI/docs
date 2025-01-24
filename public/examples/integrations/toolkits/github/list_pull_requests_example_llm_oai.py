@@ -2,7 +2,7 @@ import os
 from openai import OpenAI
 
 USER_ID = "you@example.com"
-PROMPT = "List all pull requests in the ArcadeAI/hello-world repository."
+PROMPT = "List all pull requests in the ArcadeAI/arcade-ai repository."
 TOOL_NAME = "Github.ListPullRequests"
 
 client = OpenAI(

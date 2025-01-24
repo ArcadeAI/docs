@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 
-// Initialize the OpenAI client, pointing to Arcade AI
+// Initialize the OpenAI client, pointing to Arcade
 const client = new OpenAI({
   apiKey: process.env.ARCADE_API_KEY,
   baseURL: "https://api.arcade.dev/v1",

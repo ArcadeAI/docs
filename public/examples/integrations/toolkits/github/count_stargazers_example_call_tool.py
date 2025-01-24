@@ -18,7 +18,7 @@ client.auth.wait_for_completion(auth_response)
 
 tool_input = {
     "owner": "ArcadeAI",
-    "name": "hello-world",
+    "name": "arcade-ai",
 }
 
 response = client.tools.execute(

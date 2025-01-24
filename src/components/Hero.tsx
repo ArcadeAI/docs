@@ -9,15 +9,15 @@ export const Hero = () => {
       <div className="absolute inset-0">
         <img
           src="/images/arcade-hero-1.png"
-          alt="Arcade AI Hero"
+          alt="Arcade Hero"
           className="h-full w-full rounded-xl object-cover blur-sm filter"
         />
         <div className="absolute inset-0 bg-black opacity-50"></div>
       </div>
       <div className="relative z-10 flex h-full flex-col items-center justify-center px-4 text-center">
         <img
-          src="/images/logo/arcadeai-title-dark.png"
-          alt="Arcade AI Logo"
+          src="/images/logo/arcade-title-dark.png"
+          alt="Arcade Logo"
           className="mb-1 w-3/4 sm:w-1/2"
         />
         <p className="mb-4 text-lg text-white sm:mb-8 sm:text-xl">
