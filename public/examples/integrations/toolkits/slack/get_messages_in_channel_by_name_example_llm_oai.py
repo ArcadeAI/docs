@@ -2,10 +2,8 @@ import os
 from openai import OpenAI
 
 USER_ID = "you@example.com"
-PROMPT = (
-    "List metadata for group direct message channels in Slack, limiting to 100 results."
-)
-TOOL_NAME = "Slack.ListGroupDirectMessageChannelsMetadata"
+PROMPT = "Fetch the messages in the channel named 'general' between '2023-01-01 00:00:00' and '2023-01-31 23:59:59'."
+TOOL_NAME = "Slack.GetMessagesInChannelByName"
 
 client = OpenAI(
     base_url="https://api.arcade.dev", api_key=os.environ.get("ARCADE_API_KEY")
