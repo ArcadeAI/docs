@@ -1,0 +1,75 @@
+---
+title: "Get a token in an agent"
+description: "Guide on how to authorize agents in Arcade AI"
+---
+
+import { Steps } from "nextra/components";
+
+# Generic Agent Authorization
+
+In this guide, you'll learn how to use Arcade AI to obtain user authorization for accessing third-party services, without using Arcade for tool execution or definition.
+
+This can be useful when you need to manage authorization flows in your application.
+
+<Steps>
+
+### Prerequisites
+
+- [Set up Arcade AI](/home/quickstart)
+- Install the Arcade Client:
+
+```bash
+pip install arcadepy google-api-python-client google-auth-httplib2 google-auth-oauthlib
+```
+
+### Initialize the Arcade client
+
+Create an instance of the Arcade client:
+
+```python file=<rootDir>/examples/code/guides/agentauth/auth_with_google.py#L1-L3 {3}
+
+```
+
+### Initiate an authorization request
+
+Use `client.auth.start` to initiate the authorization process:
+
+```python file=<rootDir>/examples/code/guides/agentauth/auth_with_google.py#L7-L12
+
+```
+
+### Guide the user through authorization
+
+If authorization is not completed, prompt the user to visit the authorization URL:
+
+```python file=<rootDir>/examples/code/guides/agentauth/auth_with_google.py#L14-L16
+
+```
+
+### Poll for authorization status
+
+Wait for the user to complete authorization and poll for the status:
+
+```python file=<rootDir>/examples/code/guides/agentauth/auth_with_google.py#L18-L19
+
+```
+
+### Use the obtained token
+
+Once authorization is complete, you can use the obtained token to access the third-party service:
+
+```python file=<rootDir>/examples/code/guides/agentauth/use_token_with_google.py {5}
+
+```
+
+</Steps>
+
+### How it works
+
+By using `client.auth.start` and `client.auth.wait_for_completion`, you leverage Arcade AI to manage the OAuth flow for user authorization.
+
+Arcade AI handles the authorization challenges and tokens, simplifying the process for you.
+
+### Next steps
+
+Integrate this authorization flow into your application, and explore how you can manage different providers and scopes.

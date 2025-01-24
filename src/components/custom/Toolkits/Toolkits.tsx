@@ -50,7 +50,7 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
             .includes(debouncedSearchQuery.toLowerCase()) ||
           typeConfig[tool.type].label
             .toLowerCase()
-            .includes(debouncedSearchQuery.toLowerCase()))
+            .includes(debouncedSearchQuery.toLowerCase())),
     );
 
     // Sort alphabetically and prioritize Arcade toolkits
@@ -67,7 +67,7 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setSearchQuery(e.target.value);
     },
-    []
+    [],
   );
 
   return (
@@ -102,7 +102,7 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
                     </p>
                   </div>
                 </div>
-              )
+              ),
             )}
           </div>
         </div>
@@ -147,7 +147,7 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
                       "h-10 px-4 text-xs sm:text-sm",
                       selectedCategory === category.id
                         ? "bg-primary/80 text-white hover:bg-primary/90"
-                        : "bg-gray-800/50 text-gray-300 hover:bg-gray-700/50"
+                        : "bg-gray-800/50 text-gray-300 hover:bg-gray-700/50",
                     )}
                   >
                     {category.name}

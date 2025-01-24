@@ -6,8 +6,8 @@ PROMPT = "Update pull request #1 in the ArcadeAI/hello-world repository with the
 TOOL_NAME = "Github.UpdatePullRequest"
 
 client = OpenAI(
-    base_url="https://api.arcade-ai.com",
-    api_key=os.environ.get("ARCADE_API_KEY"))
+    base_url="https://api.arcade.dev", api_key=os.environ.get("ARCADE_API_KEY")
+)
 
 response = client.chat.completions.create(
     messages=[

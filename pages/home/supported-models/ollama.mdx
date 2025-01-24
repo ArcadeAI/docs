@@ -1,0 +1,48 @@
+# Ollama
+
+First, make sure you have completed these pre-requisites:
+
+- A self-hosted Arcade AI instance, see the [self-hosted install docs](https://docs.arcade.dev/home/install/overview)
+- [Ollama](https://ollama.com/) installed and running
+
+## Connecting
+
+To send a message to Ollama, you can use the OpenAI Client. Arcade will use the OpenAI interface internally to send messages to Ollama.
+
+<Warning>Ollama is currently not supported on Arcade Cloud, but can be used with a self hosted engine.</Warning>
+
+```python
+import os
+
+from openai import OpenAI
+
+client = OpenAI(
+  base_url="http://localhost:9099/v1", #  Where your self-hosted Arcade engine is running
+  api_key=os.environ.get("ARCADE_API_KEY")
+)
+
+
+response = client.chat.completions.create(
+    model="ollama/llama3.2",
+    user="user@arcade.dev",
+    messages=[{"role": "user", "content": "hello"}],
+    stream=False,
+)
+```
+
+## Configuration
+
+This is a simple example for enabling Ollama in the Arcade Engine
+
+```yaml
+llm:
+  models:
+    - id: ollama
+      openai: # Use the OpenAI interface for Ollama
+        base_url: http://localhost:11434
+        chat_endpoint: /v1/chat/completions
+        model: llama3.2
+        api_key: ollama # Required, but ignored
+```
+
+For more advanced configuration, see the [model docs](/home/configure/models#ollama)

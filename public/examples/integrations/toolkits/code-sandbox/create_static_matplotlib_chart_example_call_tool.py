@@ -23,12 +23,12 @@ plt.title('Fruit Distribution')
 plt.savefig('fruit_pie_chart.png')
 """
 
-inputs = {"code": chart_code}
+tool_input = {"code": chart_code}
 
 # Execute the tool
 response = client.tools.execute(
     tool_name=TOOL_NAME,
-    inputs=inputs,
+    input=tool_input,
     user_id=USER_ID,
 )
 print(response)

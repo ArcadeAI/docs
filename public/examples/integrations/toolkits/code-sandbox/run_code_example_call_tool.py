@@ -41,7 +41,7 @@ sorted_list = merge_sort(sample_list)
 print("Sorted list:", sorted_list)
 """
 
-inputs = {
+tool_input = {
     "code": merge_sort,
     "language": "python",
 }
@@ -49,7 +49,7 @@ inputs = {
 # Execute the tool
 response = client.tools.execute(
     tool_name=TOOL_NAME,
-    inputs=inputs,
+    input=tool_input,
     user_id=USER_ID,
 )
 print(response)

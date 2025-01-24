@@ -6,7 +6,7 @@ export const Note = ({ children }) => {
       viewBox="0 0 14 14"
       fill="currentColor"
       xmlns="http://www.w3.org/2000/svg"
-      className="w-4 h-4 text-sky-500"
+      className="h-4 w-4 text-sky-500"
       aria-label="Note"
     >
       <path
@@ -20,14 +20,14 @@ export const Note = ({ children }) => {
   return (
     <div
       className={
-        "callout note my-4 px-5 py-4 overflow-hidden rounded-xl border border-sky-500/20 bg-sky-50/50 dark:border-sky-500/30 dark:bg-sky-500/10"
+        "callout note my-4 overflow-hidden rounded-xl border border-sky-500/20 bg-sky-50/50 px-5 py-4 dark:border-sky-500/30 dark:bg-sky-500/10"
       }
     >
       <div className={"flex items-center space-x-3"}>
         <div className={"mt-0.5"}>{icon}</div>
         <div
           className={
-            "flex-1 text-sm prose overflow-x-auto text-sky-900 dark:text-sky-200"
+            "prose flex-1 overflow-x-auto text-sm text-sky-900 dark:text-sky-200"
           }
         >
           {children}
@@ -40,7 +40,7 @@ export const Note = ({ children }) => {
 export const Warning = ({ children }) => {
   const icon = (
     <svg
-      className="flex-none text-yellow-400 dark:text-yellow-300/80 h-5 w-5"
+      className="h-5 w-5 flex-none text-yellow-400 dark:text-yellow-300/80"
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"
@@ -58,14 +58,14 @@ export const Warning = ({ children }) => {
   return (
     <div
       className={
-        "callout warning my-4 px-5 py-4 overflow-hidden rounded-xl border border-yellow-500/20 bg-yellow-50/50 dark:border-yellow-500/30 dark:bg-yellow-500/10"
+        "callout warning my-4 overflow-hidden rounded-xl border border-yellow-500/20 bg-yellow-50/50 px-5 py-4 dark:border-yellow-500/30 dark:bg-yellow-500/10"
       }
     >
       <div className={"flex items-center space-x-3"}>
         <div className={"mt-0.5"}>{icon}</div>
         <div
           className={
-            "flex-1 text-sm prose overflow-x-auto text-amber-900 dark:text-amber-200"
+            "prose flex-1 overflow-x-auto text-sm text-amber-900 dark:text-amber-200"
           }
         >
           {children}
@@ -81,7 +81,7 @@ export const Info = ({ children }) => {
       viewBox="0 0 20 20"
       fill="currentColor"
       xmlns="http://www.w3.org/2000/svg"
-      className="flex-none w-5 h-5 text-zinc-400 dark:text-zinc-300"
+      className="h-5 w-5 flex-none text-zinc-400 dark:text-zinc-300"
       aria-label="Info"
     >
       <path d="M8 0C3.58125 0 0 3.58125 0 8C0 12.4187 3.58125 16 8 16C12.4187 16 16 12.4187 16 8C16 3.58125 12.4187 0 8 0ZM8 14.5C4.41563 14.5 1.5 11.5841 1.5 8C1.5 4.41594 4.41563 1.5 8 1.5C11.5844 1.5 14.5 4.41594 14.5 8C14.5 11.5841 11.5844 14.5 8 14.5ZM9.25 10.5H8.75V7.75C8.75 7.3375 8.41563 7 8 7H7C6.5875 7 6.25 7.3375 6.25 7.75C6.25 8.1625 6.5875 8.5 7 8.5H7.25V10.5H6.75C6.3375 10.5 6 10.8375 6 11.25C6 11.6625 6.3375 12 6.75 12H9.25C9.66406 12 10 11.6641 10 11.25C10 10.8359 9.66563 10.5 9.25 10.5ZM8 6C8.55219 6 9 5.55219 9 5C9 4.44781 8.55219 4 8 4C7.44781 4 7 4.44687 7 5C7 5.55313 7.44687 6 8 6Z"></path>
@@ -91,14 +91,14 @@ export const Info = ({ children }) => {
   return (
     <div
       className={
-        "callout info my-4 px-5 py-4 overflow-hidden rounded-xl border border-zinc-500/20 bg-zinc-50/50 dark:border-zinc-500/30 dark:bg-zinc-500/10"
+        "callout info my-4 overflow-hidden rounded-xl border border-zinc-500/20 bg-zinc-50/50 px-5 py-4 dark:border-zinc-500/30 dark:bg-zinc-500/10"
       }
     >
       <div className={"flex items-center space-x-3"}>
         <div className={"mt-0.5"}>{icon}</div>
         <div
           className={
-            "flex-1 text-sm prose overflow-x-auto text-zinc-900 dark:text-zinc-200"
+            "prose flex-1 overflow-x-auto text-sm text-zinc-900 dark:text-zinc-200"
           }
         >
           {children}
@@ -116,7 +116,7 @@ export const Tip = ({ children }) => {
       viewBox="0 0 11 14"
       fill="currentColor"
       xmlns="http://www.w3.org/2000/svg"
-      className="text-emerald-600 dark:text-emerald-400/80 w-3.5 h-auto"
+      className="h-auto w-3.5 text-emerald-600 dark:text-emerald-400/80"
       aria-label="Tip"
     >
       <path d="M3.12794 12.4232C3.12794 12.5954 3.1776 12.7634 3.27244 12.907L3.74114 13.6095C3.88471 13.8248 4.21067 14 4.46964 14H6.15606C6.41415 14 6.74017 13.825 6.88373 13.6095L7.3508 12.9073C7.43114 12.7859 7.49705 12.569 7.49705 12.4232L7.50055 11.3513H3.12521L3.12794 12.4232ZM5.31288 0C2.52414 0.00875889 0.5 2.26889 0.5 4.78826C0.5 6.00188 0.949566 7.10829 1.69119 7.95492C2.14321 8.47011 2.84901 9.54727 3.11919 10.4557C3.12005 10.4625 3.12175 10.4698 3.12261 10.4771H7.50342C7.50427 10.4698 7.50598 10.463 7.50684 10.4557C7.77688 9.54727 8.48281 8.47011 8.93484 7.95492C9.67728 7.13181 10.1258 6.02703 10.1258 4.78826C10.1258 2.15486 7.9709 0.000106649 5.31288 0ZM7.94902 7.11267C7.52078 7.60079 6.99082 8.37878 6.6077 9.18794H4.02051C3.63739 8.37878 3.10743 7.60079 2.67947 7.11294C2.11997 6.47551 1.8126 5.63599 1.8126 4.78826C1.8126 3.09829 3.12794 1.31944 5.28827 1.3126C7.2435 1.3126 8.81315 2.88226 8.81315 4.78826C8.81315 5.63599 8.50688 6.47551 7.94902 7.11267ZM4.87534 2.18767C3.66939 2.18767 2.68767 3.16939 2.68767 4.37534C2.68767 4.61719 2.88336 4.81288 3.12521 4.81288C3.36705 4.81288 3.56274 4.61599 3.56274 4.37534C3.56274 3.6515 4.1515 3.06274 4.87534 3.06274C5.11719 3.06274 5.31288 2.86727 5.31288 2.62548C5.31288 2.38369 5.11599 2.18767 4.87534 2.18767Z" />
@@ -126,14 +126,14 @@ export const Tip = ({ children }) => {
   return (
     <div
       className={
-        "callout tip my-4 px-5 py-4 overflow-hidden rounded-xl border border-emerald-500/20 bg-emerald-50/50 dark:border-emerald-500/30 dark:bg-emerald-500/10"
+        "callout tip my-4 overflow-hidden rounded-xl border border-emerald-500/20 bg-emerald-50/50 px-5 py-4 dark:border-emerald-500/30 dark:bg-emerald-500/10"
       }
     >
       <div className={"flex items-center space-x-3"}>
         <div className={"mt-0.5"}>{icon}</div>
         <div
           className={
-            "flex-1 text-sm prose overflow-x-auto text-emerald-900 dark:text-emerald-200"
+            "prose flex-1 overflow-x-auto text-sm text-emerald-900 dark:text-emerald-200"
           }
         >
           {children}
@@ -146,7 +146,7 @@ export const Tip = ({ children }) => {
 export const Check = ({ children }) => {
   const icon = (
     <svg
-      className="text-green-600 dark:text-green-400/80 w-3.5 h-auto"
+      className="h-auto w-3.5 text-green-600 dark:text-green-400/80"
       fill="currentColor"
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 448 512"
@@ -159,14 +159,14 @@ export const Check = ({ children }) => {
   return (
     <div
       className={
-        "callout check my-4 px-5 py-4 overflow-hidden rounded-xl border border-green-500/20 bg-green-50/50 dark:border-green-500/30 dark:bg-green-500/10"
+        "callout check my-4 overflow-hidden rounded-xl border border-green-500/20 bg-green-50/50 px-5 py-4 dark:border-green-500/30 dark:bg-green-500/10"
       }
     >
       <div className={"flex items-center space-x-3"}>
         <div className={"mt-0.5"}>{icon}</div>
         <div
           className={
-            "flex-1 text-sm prose overflow-x-auto text-green-900 dark:text-green-200"
+            "prose flex-1 overflow-x-auto text-sm text-green-900 dark:text-green-200"
           }
         >
           {children}
@@ -179,7 +179,7 @@ export const Check = ({ children }) => {
 export const Important = ({ children }) => {
   const icon = (
     <svg
-      className="text-violet-600 dark:text-violet-400/80 w-3.5 h-auto"
+      className="h-auto w-3.5 text-violet-600 dark:text-violet-400/80"
       fill="currentColor"
       viewBox="0 0 16 16"
       version="1.1"
@@ -195,14 +195,14 @@ export const Important = ({ children }) => {
   return (
     <div
       className={
-        "callout  important my-4 px-5 py-4 overflow-hidden rounded-xl border border-violet-500/20 bg-violet-50/50 dark:border-violet-500/30 dark:bg-violet-500/10"
+        "callout important my-4 overflow-hidden rounded-xl border border-violet-500/20 bg-violet-50/50 px-5 py-4 dark:border-violet-500/30 dark:bg-violet-500/10"
       }
     >
       <div className={"flex items-center space-x-3"}>
         <div className={"mt-0.5"}>{icon}</div>
         <div
           className={
-            "flex-1 text-sm prose overflow-x-auto text-violet-900 dark:text-violet-200"
+            "prose flex-1 overflow-x-auto text-sm text-violet-900 dark:text-violet-200"
           }
         >
           {children}

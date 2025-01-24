@@ -29,16 +29,18 @@ Create a new Python file, e.g., `slack_tools.py`, and import the necessary modul
 
 ```python
 from typing import Annotated
+
 from arcade.sdk import ToolContext, tool
-from arcade.sdk.auth import SlackUser
+from arcade.sdk.auth import Slack
 from arcade.sdk.errors import RetryableToolError
+from slack_sdk import WebClient
 ```
 
-Now, define your tool using the `@tool` decorator and specify the required authorization:
+Now, define your tool using the `@tool` decorator and specify the required authorization, in this case, by using the built-in `Slack` auth provider:
 
 ```python
 @tool(
-    requires_auth=SlackUser(
+    requires_auth=Slack(
         scopes=[
             "chat:write",
             "im:write",
@@ -73,6 +75,21 @@ def send_dm_to_user(
     dm_channel_id = im_response["channel"]["id"]
     slack_client.chat_postMessage(channel=dm_channel_id, text=message)
 ```
+
+Arcade offers a number of [built-in auth providers](/home/auth-providers), including Slack, Google, and GitHub. You can also require authorization with a custom auth provider, using the `OAuth2` class, a subclass of the `ToolAuthorization` class:
+
+```python
+@tool(
+    requires_auth=OAuth2(
+        id="your-oauth-provider-id",
+        scopes=["scope1", "scope2"],
+    )
+)
+```
+
+<Note>
+  The `OAuth2` class requires an `id` parameter to identify the auth provider in the Arcade Engine. For built-in providers like `Slack`, you can skip the `id` - the Arcade Engine will find the right provider using your credentials. While you can specify an `id` for built-in providers, only do this for private tools that won't be shared.
+</Note>
 
 ### Register your tool
 

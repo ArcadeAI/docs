@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import styles from './ToggleContent.module.css';
+import { useState } from "react";
+import styles from "./ToggleContent.module.css";
 
 interface ToggleContentProps {
   children: React.ReactNode;
@@ -9,8 +9,8 @@ interface ToggleContentProps {
 
 const ToggleContent: React.FC<ToggleContentProps> = ({
   children,
-  showText = 'Show more',
-  hideText = 'Hide',
+  showText = "Show more",
+  hideText = "Hide",
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 

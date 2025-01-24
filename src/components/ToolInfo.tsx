@@ -9,6 +9,7 @@ interface ToolInfoProps {
   authProviderName?: string;
   authProviderDocsUrl?: string;
   versions: string[];
+  note?: string;
 }
 
 const ToolInfo: React.FC<ToolInfoProps> = ({
@@ -18,8 +19,12 @@ const ToolInfo: React.FC<ToolInfoProps> = ({
   authType,
   authProviderName,
   authProviderDocsUrl,
-  versions,
+  note,
 }) => {
+  authProviderDocsUrl =
+    authProviderName && !authProviderDocsUrl
+      ? `/home/auth-providers/${authProviderName.toLowerCase()}`
+      : authProviderDocsUrl;
   return (
     <div className={styles.toolInfo}>
       <p>
@@ -36,7 +41,7 @@ const ToolInfo: React.FC<ToolInfoProps> = ({
       </p>
       <p>
         <strong>Auth: </strong>
-        {authType === "oauth2" ? (
+        {authType.toLowerCase() === "oauth2" ? (
           <>
             User authorization
             {authProviderName && authProviderDocsUrl && (
@@ -53,6 +58,12 @@ const ToolInfo: React.FC<ToolInfoProps> = ({
           authType
         )}
       </p>
+      {note && (
+        <p>
+          <strong>Note: </strong>
+          {note}
+        </p>
+      )}
     </div>
   );
 };

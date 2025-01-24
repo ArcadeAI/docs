@@ -5,25 +5,28 @@ export const Head = () => {
   const { asPath, defaultLocale, locale } = useRouter();
   const { frontMatter, title: pageTitle } = useConfig();
   const url =
-    "https://docs.arcade-ai.com" +
+    "https://docs.arcade.dev" +
     (defaultLocale === locale ? asPath : `/${locale}${asPath}`);
 
   // TODO: make metadata depend on the project docs
 
   const description = frontMatter.description ?? "Arcade AI";
-  const title = frontMatter.title ?? "Arcade AI";
+  // const title = frontMatter.title ?? "Arcade AI";
 
   const image = frontMatter.ogImage
-    ? "https://docs.arcade-ai.com" + frontMatter.ogImage
-    : "https://docs.arcade-ai.com/images/logo/arcadeai.png";
+    ? "https://docs.arcade.dev" + frontMatter.ogImage
+    : "https://docs.arcade.dev/images/logo/arcadeai.png";
   const video = frontMatter.ogVideo
-    ? "https://docs.arcade-ai.com" + frontMatter.ogVideo
+    ? "https://docs.arcade.dev" + frontMatter.ogVideo
     : null;
 
   return (
     <>
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <meta name="apple-mobile-web-app-title" content="Arcade AI Documentation" />
+      <meta
+        name="apple-mobile-web-app-title"
+        content="Arcade AI Documentation"
+      />
       <title>Arcade AI</title>
 
       <link rel="manifest" href="/site.webmanifest" />
@@ -31,6 +34,8 @@ export const Head = () => {
       <link rel="shortcut icon" href="/favicon.ico" />
       <meta property="og:url" content={url} />
       <meta httpEquiv="Content-Language" content="en" />
+      <meta property="og:site_name" content="Arcade AI" />
+      <meta property="og:title" content={pageTitle} />
 
       <meta name="description" content={description} />
       <meta property="og:description" content={description} />
@@ -41,8 +46,8 @@ export const Head = () => {
       <meta name="twitter:image" content={image} />
 
       <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:site:domain" content="docs.arcade-ai.com" />
-      <meta name="twitter:url" content="https://docs.arcade-ai.com" />
+      <meta name="twitter:site:domain" content="docs.arcade.dev" />
+      <meta name="twitter:url" content="https://docs.arcade.dev" />
 
       <link
         rel="apple-touch-icon"
@@ -61,24 +66,9 @@ export const Head = () => {
         sizes="16x16"
         href="/favicon-16x16.png"
       />
-
-      {/* Google tag (gtag.js) */}
-      <script
-        async
-        src="https://www.googletagmanager.com/gtag/js?id=G-29HSQ3LQ13"
-      ></script>
-      <script
-        // Initialize Google Analytics
-        dangerouslySetInnerHTML={{
-          __html: `
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-
-            gtag('config', 'G-29HSQ3LQ13');
-          `,
-        }}
-      />
+      {/* Early connection to reduce the time to fetch the script */}
+      <link rel="preconnect" href="https://www.googletagmanager.com" />
+      <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
     </>
   );
 };

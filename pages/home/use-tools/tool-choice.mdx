@@ -3,6 +3,8 @@ title: Control tool choice
 description: Understand how to control how the AI model uses the tools you provide
 ---
 
+import { Tabs } from "nextra/components";
+
 # Control tool choice
 
 Applies to:
@@ -13,20 +15,30 @@ Applies to:
 
 When you use a language model with Arcade AI, you can control how it selects and uses the [available tools](specify-tools) with the `tool_choice` parameter:
 
+<Tabs items={["Python", "JavaScript"]}>
+<Tabs.Tab>
 ```python file=<rootDir>/examples/code/home/use-tools/call-tools-with-models/single_model_call.py#L14-L29 {15}
 
 ```
+</Tabs.Tab>
+<Tabs.Tab>
+```js file=<rootDir>/examples/code/home/use-tools/call-tools-with-models/single_model_call.js#L13-L25 {12}
 
-The `tool_choice` parameter accepts these options:
+```
 
-- `none`: Prevent the model from running any tools
-- `execute`: The model runs the tool and returns the tool's output directly
+</Tabs.Tab>
+</Tabs>
+
+Arcade extends the OpenAI `tool_choice` parameter to accept these options:
+
+- `execute`: The model executes the tool and returns the tool's output directly
 - `generate`: The model runs the tool and generates a response based on the tool's output
 
 Additionally, these options from OpenAI's `tool_choice` parameter are supported, but are not commonly used:
 
-- `auto`: Let the model decide which tools to use, but does not run the tool
-- `required`: Ensure the model selects at least one tool, but does not run the tool
+- `none`: Prevent the model from calling any tools and instead generates a message
+- `auto`: Let the model pick between generating a message or calling one or more tools, but does not execute the tool
+- `required`: Ensure the model selects at least one tool, but does not execute the tool
 
 <Note>
   For backwards compatibility, `auto` and `required` only predict the tool
@@ -59,7 +71,7 @@ Imagine a user wants to send a Slack message:
 - **Model Prediction**: Use the `Slack.SendDmToUser` tool with arguments:
   - `user_name: "john"`
   - `message: "Meeting at 3 PM"`
-- **Tool Execution**: The Engine forwards these arguments to the Worker that hosts the Slack toolkit, which sends the message.
+- **Tool Execution**: The Engine forwards these arguments to the Worker that hosts the Slack toolkit. The worker then sends the message.
 - **Response**: The client receives the return value from the tool
 
 This process happens seamlessly, with the client only seeing the initial request and final response.
@@ -77,7 +89,6 @@ The `generate` option works like `execute` but adds a step where the Engine asks
 5. **Intermediate Results**: The Worker executes the tool and returns results to the Engine.
 6. **Response Generation**: The Engine sends a second request to the model with the tool's results.
 7. **Final Response**: The model generates a response incorporating the tool's output, and the Engine returns it to the client.
-
 
 **Example**: Checking Calendar Availability
 

@@ -2,12 +2,12 @@ import os
 from openai import OpenAI
 
 USER_ID = "you@example.com"
-PROMPT = "Star the ArcadeAI/hello-world repository."
+PROMPT = "Star the ArcadeAI/arcade-ai repository."
 TOOL_NAME = "Github.SetStarred"
 
 client = OpenAI(
-    base_url="https://api.arcade-ai.com",
-    api_key=os.environ.get("ARCADE_API_KEY"))
+    base_url="https://api.arcade.dev", api_key=os.environ.get("ARCADE_API_KEY")
+)
 
 response = client.chat.completions.create(
     messages=[

@@ -6,8 +6,8 @@ PROMPT = "Send a direct message to the user 'john_doe' saying 'Hello, John!'."
 TOOL_NAME = "Slack.SendDmToUser"
 
 client = OpenAI(
-    base_url="https://api.arcade-ai.com",
-    api_key=os.environ.get("ARCADE_API_KEY"))
+    base_url="https://api.arcade.dev", api_key=os.environ.get("ARCADE_API_KEY")
+)
 
 response = client.chat.completions.create(
     messages=[

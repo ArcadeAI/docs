@@ -58,7 +58,7 @@ export const ToolCard: React.FC<ToolCardProps> = ({
           "flex h-full flex-col transition-all duration-300",
           "border hover:shadow-lg",
           "bg-gray-900/80 backdrop-blur-sm",
-          className
+          className,
         )}
       >
         <CardHeader className="flex-grow space-y-0 p-4">
