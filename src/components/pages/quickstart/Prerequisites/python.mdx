@@ -4,9 +4,20 @@ import { Info } from "lucide-react";
 - **Python 3.10** or higher <br/> Verify your Python version by running `python --version` or `python3 --version` in your terminal. Don't have it? Grab it from [python.org](https://www.python.org/downloads/).
 - **pip**: Ensure you have pip, the Python package installer. It is included with Python, but you can verify it by running `pip --version`.
 
-### Install and use our Python SDK
+### Install and use Arcade
 
 <Steps>
+
+### Obtain an API key
+
+Install the Arcade CLI and SDK and log in. Your Arcade API key will be printed to the console as well as saved to `~/.arcade/credentials.yaml`.
+
+```bash
+pip install 'arcade-ai[fastapi]'
+arcade login
+```
+
+<Tip>Obtaining an API key through the Arcade dashboard is coming soon!</Tip>
 
 ### Install the SDK
 
@@ -64,15 +75,15 @@ client = Arcade(
 
 ### Call a tool
 
-You can now call tools with your client. Here's an example of calling the `Google.ListEmails` tool:
+You can now call tools with your client. Here's an example of calling the `Math.Sqrt` tool:
 
 ```python
 response = client.tools.execute(
-    tool_name="Google.ListEmails",
-    input={"n_emails": 10},
+    tool_name="Math.Sqrt",
+    input={"a": 625},
     user_id="user@example.com",
 )
-print(response.execution_id)
+print(response.output.value)  # 25
 ```
 
 For a complete list of available tools, visit our [Toolkits page](/toolkits). You can explore tools for email, calendar, GitHub, and many other services.
