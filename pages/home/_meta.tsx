@@ -52,9 +52,6 @@ export default {
     type: "separator",
     title: "Agent Frameworks",
   },
-  langgraph: {
-    title: "LangGraph",
-  },
   langchain: {
     title: "LangChain",
   },

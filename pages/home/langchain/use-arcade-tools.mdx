@@ -1,0 +1,123 @@
+---
+title: "Use Arcade tools with LangGraph"
+description: "Integrate Arcade tools into your LangGraph applications"
+---
+
+import { Steps } from "nextra/components";
+
+## Use LangGraph with Arcade
+
+In this guide, let's explore how to integrate Arcade tools into your LangGraph application. Follow the step-by-step instructions below.
+
+<Steps>
+
+### Set up your environment
+
+Install the required packages, and ensure your environment variables are set with your Arcade and OpenAI API keys:
+
+```bash
+pip install langchain-arcade langchain-openai langgraph
+```
+
+### Configure API keys
+
+Provide your Arcade and OpenAI API keys. You can store them in environment variables or directly in your code:
+
+```python
+import os
+
+arcade_api_key = os.environ.get("ARCADE_API_KEY", "YOUR_ARCADE_API_KEY")
+openai_api_key = os.environ.get("OPENAI_API_KEY", "YOUR_OPENAI_API_KEY")
+```
+
+### Create and manage Arcade tools
+
+Use the ArcadeToolManager to retrieve specific tools or entire toolkits:
+
+```python
+from langchain_arcade import ArcadeToolManager
+
+manager = ArcadeToolManager(api_key=arcade_api_key)
+
+# Fetch the "ScrapeUrl" tool from the "Web" toolkit
+tools = manager.get_tools(tools=["Web.ScrapeUrl"])
+print(manager.tools)
+
+# Get all tools from the "Google" toolkit
+tools = manager.get_tools(toolkits=["Google"])
+print(manager.tools)
+```
+
+### Set up the language model and memory
+
+Create an AI model and bind your tools. Use MemorySaver for checkpointing:
+
+```python
+from langchain_openai import ChatOpenAI
+from langgraph.checkpoint.memory import MemorySaver
+
+model = ChatOpenAI(model="gpt-4o", api_key=openai_api_key)
+bound_model = model.bind_tools(tools)
+
+memory = MemorySaver()
+```
+
+### Create a ReAct-style agent
+
+Use the prebuilt ReAct agent from LangGraph to handle your Arcade tools:
+
+```python
+from langgraph.prebuilt import create_react_agent
+
+graph = create_react_agent(model=bound_model, tools=tools, checkpointer=memory)
+```
+
+### Provide configuration and user query
+
+Supply a basic config dictionary and a user query. Notice that user_id is required for tool authorization:
+
+```python
+config = {
+    "configurable": {
+        "thread_id": "1",
+        "user_id": "user@example.coom"
+    }
+}
+user_input = {
+    "messages": [
+        ("user", "List any new and important emails in my inbox.")
+    ]
+}
+```
+
+### Stream the response
+
+Stream the assistant's output. If the tool requires authorization, the agent may raise a NodeInterrupt:
+
+```python
+from langgraph.errors import NodeInterrupt
+
+try:
+    for chunk in graph.stream(user_input, config, stream_mode="values"):
+        chunk["messages"][-1].pretty_print()
+except NodeInterrupt as exc:
+    print(f"\nNodeInterrupt occurred: {exc}")
+    print("Please authorize the tool or update the request, then re-run.")
+```
+
+</Steps>
+
+## Tips for selecting tools
+
+- **Relevance**: Pick only the tools you need. Avoid using all tools at once.
+- **Avoid conflicts**: Be mindful of duplicate or overlapping functionality.
+
+## Next steps
+
+Now that you have integrated Arcade tools into your LangGraph agent, you can:
+
+- Experiment with different toolkits, such as "Math" or "Search."
+- Customize the agent's prompts for specific tasks.
+- Try out other language models and compare their performance.
+
+Enjoy exploring Arcade and building powerful AI-enabled Python applications!
