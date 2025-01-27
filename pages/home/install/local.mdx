@@ -8,8 +8,7 @@ import { Tabs } from "nextra/components";
 
 # Installing Arcade Locally
 
-This guide will help you install Arcade and set up your development environment.
-
+This guide will help you install Arcade and set up your development environment. If you are developing tools to use with Arcade, this guide will provide you with a complete local deployment of Arcade for developing and testing tools.
 
 ## Prerequisites
 
@@ -26,16 +25,17 @@ Verify your Python version by running `python --version` or `python3 --version` 
 
 <Steps>
 ### Install the Client
-To connect to the cloud or local engine, we need to install the arcade-ai client.
+To connect to the cloud or local engine, we need to install the arcade-ai SDK and CLI from the `arcade-ai` package.
 
 ```bash
 pip install 'arcade-ai[fastapi,evals]'
 arcade login
 ```
+
 For a simple example on using the client, see the [quickstart](/home/quickstart).
 
-
 ### Install the Engine
+
 To run the Arcade Engine locally, you need to install `arcade-engine`. Choose the installation method that matches your operating system.
 
 This will install a template engine configuration.
@@ -60,7 +60,9 @@ This will install a template engine configuration.
 </Tabs>
 
 ### Install a toolkit
+
 In order to run the arcade worker, we need to install a tool. For local development, we can just pip install a tool in the same environment as the client.
+
 ```bash
 pip install arcade-math
 ```
@@ -70,36 +72,43 @@ For more information on installing toolkits, see the [Toolkit Installation](/hom
 To see all available toolkits, view the [Toolkits Page](/toolkits).
 
 ### Set OpenAI API key
+
 Before starting the Engine, we need to set an OpenAI API Key that the engine can use to connect to OpenAI.
+
 ```bash
 export OPENAI_API_KEY="<your_openai_api_key>"
 ```
+
 To make the API key persistent or to change other configurations, see the [Configuration Overview](/home/configure/overview).
 
 ### Start the Engine and Worker
+
 To run both the engine and a local worker, use:
+
 ```bash
 arcade dev
 ```
+
 The Engine and Worker should both be running locally now.
 
-
 To run the Engine on it's own, you can run:
+
 ```bash
 arcade-engine
 ```
-Note that the Engine requires connection to at least one worker to run. Running the engine on it's own should only be used
-if external workers are available.
 
+Note that the Engine requires connection to at least one worker to run. Running the engine on it's own should only be used if external workers are available.
 
 ### Connect
 
 To chat with the running engine, in a separate terminal instance, run:
+
 ```bash
 arcade chat -h localhost
 ```
 
 You should now be chatting with your local Arcade setup. To see an example of chatting, view the [quickstart](/home/quickstart).
+
 </Steps>
 
 ## Next Steps
@@ -110,10 +119,13 @@ You should now be chatting with your local Arcade setup. To see an example of ch
 ## Troubleshooting
 
 ### Engine Binary Not Found
+
 ```bash
 ❌ Engine binary not found
 ```
+
 or
+
 ```bash
 command not found: arcade-engine
 ```
@@ -123,40 +135,49 @@ This means that the Arcade Engine cannot be found in your path. Brew and Apt wil
 Check that the binary has been properly installed (These are the common installation locations):
 
 **Brew**
+
 ```bash
 ls $HOMEBREW_REPOSITORY/Cellar/arcade-engine/<version>/bin/arcade-engine
 ```
 
 **Apt**
+
 ```bash
 ls /usr/bin/arcade-engine
 ```
 
 If the binary is found, add it to your path with:
+
 ```bash
 export PATH=$PATH:/path/to/your/binary
 ```
-<br/>
+
+<br />
 
 ### Toolkits Not Found
+
 ```bash
 No toolkits found in Python environment. Exiting...
 ```
-This means that there are no toolkits found in the same environment as the Arcade Client. Ensure that you are installing the toolkit package in the same environment
-and see the [Toolkit Installation Guide](/home/install/toolkits) for more details.
 
-<br/>
+This means that there are no toolkits found in the same environment as the Arcade Client. Ensure that you are installing the toolkit package in the same environment and see the [Toolkit Installation Guide](/home/install/toolkits) for more details.
+
+<br />
 
 ### Engine Config Not Found
+
 ```bash
 ❌ Config file 'engine.yaml' not found in any of the default locations.
 ```
+
 or
+
 ```bash
 Arcade Engine has finished with error: unable to read config file $HOME/.arcade/engine.yaml: open $HOME/.arcade/engine.yaml: no such file or directory
 ```
 
 `arcade dev` will search for the engine config in known directories including:
+
 - $HOME/.arcade/engine.yaml
 - $HOMEBREW_REPOSITORY/etc/arcade-engine/engine.yaml (Homebrew)
 - /etc/arcade-ai/engine.yaml (Apt)
@@ -166,7 +187,5 @@ The engine config will be downloaded by and added to one of these locations when
 When running the engine without `arcade dev`, the config needs to be in the `$HOME/.arcade/` directory or explicitly located with `arcade-engine -c /path/to/engine.yaml`
 
 If you cannot find your engine config, you can save and use the [Configuration Templates](/home/configure/templates).
-
-
 
 ---

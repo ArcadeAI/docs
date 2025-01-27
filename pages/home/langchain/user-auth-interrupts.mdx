@@ -1,0 +1,171 @@
+---
+title: "Using Arcade User Auth"
+description: "Build a custom LangGraph that handles tool authorization with Arcade"
+---
+
+import { Steps } from "nextra/components";
+
+## User Authorization in LangGraph
+
+In this guide, you will create a LangGraph workflow that requires user authorization before running certain Arcade tools. When a tool needs authorization, the graph displays an authorization URL and waits for the user's approval. This ensures that only the tools you explicitly authorize are available to the language model.
+
+<Steps>
+
+### Install the required packages
+
+Set up your environment with the following installations:
+
+```bash
+pip install langchain-arcade langchain-openai langgraph
+```
+
+### Configure your Arcade environment
+
+Make sure you have set your Arcade API key (and any other relevant keys) in the environment, or assign them directly in the code:
+
+```python
+import os
+
+# Import necessary classes and modules
+from langchain_arcade import ArcadeToolManager
+from langchain_openai import ChatOpenAI
+from langgraph.checkpoint.memory import MemorySaver
+from langgraph.graph import END, START, MessagesState, StateGraph
+from langgraph.prebuilt import ToolNode
+
+arcade_api_key = os.environ["ARCADE_API_KEY"]
+
+# Initialize the tool manager and fetch tools compatible with langgraph
+tool_manager = ArcadeToolManager(api_key=arcade_api_key)
+tools = tool_manager.get_tools(toolkits=["Google"])
+tool_node = ToolNode(tools)
+
+# Create a language model instance and bind it with the tools
+model = ChatOpenAI(model="gpt-4o")
+model_with_tools = model.bind_tools(tools)
+```
+
+Here are the main code elements:
+
+- arcade_api_key is your Arcade key.
+- tool_manager fetches your Arcade tools, for example the "Google" toolkit.
+- tool_node encapsulates these tools for usage in LangGraph.
+- model_with_tools binds your tools to the "gpt-4o" language model, enabling tool calls.
+
+### Define the workflow steps
+
+You will create three primary functions to handle AI interaction, tool authorization, and flow control.
+
+```python
+# Function to invoke the model and get a response
+def call_agent(state: MessagesState):
+    messages = state["messages"]
+    response = model_with_tools.invoke(messages)
+    # Return the updated message history
+    return {"messages": [response]}
+
+
+# Function to determine the next step in the workflow based on the last message
+def should_continue(state: MessagesState):
+    if state["messages"][-1].tool_calls:
+        for tool_call in state["messages"][-1].tool_calls:
+            if tool_manager.requires_auth(tool_call["name"]):
+                return "authorization"
+        return "tools"  # Proceed to tool execution if no authorization is needed
+    return END  # End the workflow if no tool calls are present
+
+
+# Function to handle authorization for tools that require it
+def authorize(state: MessagesState, config: dict):
+    user_id = config["configurable"].get("user_id")
+    for tool_call in state["messages"][-1].tool_calls:
+        tool_name = tool_call["name"]
+        if not tool_manager.requires_auth(tool_name):
+            continue
+        auth_response = tool_manager.authorize(tool_name, user_id)
+        if auth_response.status != "completed":
+            # Prompt the user to visit the authorization URL
+            print(f"Visit the following URL to authorize: {auth_response.url}")
+
+            # Wait for the user to complete the authorization
+            # and then check the authorization status again
+            tool_manager.wait_for_auth(auth_response.id)
+            if not tool_manager.is_authorized(auth_response.id):
+                # This stops execution if authorization fails
+                raise ValueError("Authorization failed")
+
+    return {"messages": []}
+```
+
+Explanations for these functions:
+
+- call_agent: Invokes the language model using the latest conversation state.
+- should_continue: Checks the last AI message for any tool calls. If a tool requires authorization, the flow transitions to authorization. Otherwise, it goes straight to tool execution or ends if no tools are called.
+- authorize: Prompts the user to authorize any required tools, blocking until authorization is completed successfully or fails.
+
+### Build and compile your LangGraph workflow
+
+Use StateGraph to assemble the nodes and edges, then compile the graph with a MemorySaver.
+
+```python
+if __name__ == "__main__":
+    # Build the workflow graph using StateGraph
+    workflow = StateGraph(MessagesState)
+
+    # Add nodes (steps) to the graph
+    workflow.add_node("agent", call_agent)
+    workflow.add_node("tools", tool_node)
+    workflow.add_node("authorization", authorize)
+
+    # Define the edges and control flow between nodes
+    workflow.add_edge(START, "agent")
+    workflow.add_conditional_edges("agent", should_continue, ["authorization", "tools", END])
+    workflow.add_edge("authorization", "tools")
+    workflow.add_edge("tools", "agent")
+
+    # Set up memory for checkpointing the state
+    memory = MemorySaver()
+
+    # Compile the graph with the checkpointer
+    graph = workflow.compile(checkpointer=memory)
+```
+
+### Provide inputs and run the graph
+
+Finally, define user-supplied messages, authorization config, and stream the outputs. The graph will pause for any required tool authorization.
+
+```python
+    # Define the input messages from the user
+    inputs = {
+        "messages": [
+            {
+                "role": "user",
+                "content": "Check and see if I have any important emails in my inbox",
+            }
+        ],
+    }
+
+    # Configuration with thread and user IDs for authorization purposes
+    config = {"configurable": {"thread_id": "4", "user_id": "user@example.com"}}
+
+    # Run the graph and stream the outputs
+    for chunk in graph.stream(inputs, config=config, stream_mode="values"):
+        # Pretty-print the last message in the chunk
+        chunk["messages"][-1].pretty_print()
+```
+
+In this example:
+
+- The user prompts the agent to check emails.
+- The message triggers a potential need for the "Google" tools.
+- If authorization is required, the code prints a URL and waits until you permit the tool call.
+
+</Steps>
+
+## Next steps
+
+- Experiment with more Arcade toolkits for expanded capabilities.
+- Explore advanced authorization logic, such as multi-user or role-based checks.
+- Integrate additional nodes to handle more complex flows or multi-step tasks in your LangGraph.
+
+By combining Arcade's authorization features with stateful management in LangGraph, you can build AI-driven workflows that respect user permissions at every step. Have fun exploring Arcade!
