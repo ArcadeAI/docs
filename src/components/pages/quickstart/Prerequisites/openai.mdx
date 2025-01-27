@@ -1,7 +1,6 @@
-import { Steps } from "nextra/components";
-import { Info } from "lucide-react";
+import { Steps, Tabs } from "nextra/components"; import { Info } from "lucide-react";
 
-- OpenAI Client (Node.js shown here)
+- OpenAI Client - Install the official OpenAI SDK for your preferred programming language. See the [OpenAI libraries documentation](https://platform.openai.com/docs/libraries) for installation instructions specific to your language.
 - Arcade API Key
 
 <Tip>
@@ -15,13 +14,43 @@ import { Info } from "lucide-react";
 
 ### Install OpenAI Client
 
-Fire up your terminal and run:
+Below we show you Python and JavaScript installation commands, but you can find installation instructions for other languages in the [OpenAI libraries documentation](https://platform.openai.com/docs/libraries):
+
+<Tabs items={["Python", "JavaScript"]}> <Tabs.Tab>
 
 ```bash
-npm install openai
+ pip install openai
 ```
 
+</Tabs.Tab> <Tabs.Tab>
+
+```bash
+ npm install openai
+```
+
+</Tabs.Tab> </Tabs>
+
 ### Set up your OpenAI client
+
+To connect with Arcade's enhanced capabilities, configure your client with two essential pieces:
+
+1. Point your client to Arcade's endpoint
+2. Use your Arcade API key
+
+<Tabs items={["Python", "JavaScript"]}> <Tabs.Tab>
+
+```python
+import os
+from openai import OpenAI
+
+client = OpenAI(
+  base_url="https://api.arcade.dev/v1",
+  api_key=os.environ.get("ARCADE_API_KEY")
+)
+
+```
+
+</Tabs.Tab> <Tabs.Tab>
 
 ```typescript
 import { OpenAI } from "openai";
@@ -31,6 +60,8 @@ export const client = new OpenAI({
   apiKey: process.env["ARCADE_API_KEY"],
 });
 ```
+
+</Tabs.Tab> </Tabs>
 
 <details className="rounded-lg border border-blue-100 bg-blue-50/30 p-4 my-4 dark:border-blue-900/50 dark:bg-blue-950/30 hover:bg-blue-100/50 dark:hover:bg-blue-950/40 transition-colors">
   <summary className="flex items-center gap-2 text-sm font-medium dark:hover:bg-transparent">
@@ -54,6 +85,25 @@ export const client = new OpenAI({
 
 You can now call tools with your client. Here's an example of calling a tool using OpenAI's chat completion:
 
+<Tabs items={["Python", "JavaScript"]}> <Tabs.Tab>
+
+```python
+chat_completion = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[
+        {
+            "role": "user",
+            "content": "What's the square root of 625?",
+        }
+    ],
+    tools=["Math.Sqrt"],
+    tool_choice="generate",
+    user="your.email@example.com",
+)
+```
+
+</Tabs.Tab> <Tabs.Tab>
+
 ```typescript
 const response = await client.chat.completions.create({
   model: "gpt-4o-mini",
@@ -65,6 +115,8 @@ const response = await client.chat.completions.create({
 
 console.log(response.data.choices[0].message.content);
 ```
+
+</Tabs.Tab> </Tabs>
 
 In the example above, you'll notice a few key parameters that enable Arcade's tools:
 
