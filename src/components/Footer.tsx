@@ -108,8 +108,8 @@ const Footer: React.FC = () => {
       external: true,
     },
     {
-      url: "/engine/dockerhub",
-      title: "DockerHub",
+      url: "https://github.com/orgs/ArcadeAI/packages",
+      title: "GitHub Container Registry",
       external: true,
     },
   ];
