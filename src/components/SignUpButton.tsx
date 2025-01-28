@@ -1,20 +1,15 @@
+import Link from 'next/link'; import { Button } from './ui/button';
+
 export const SignUpButton = () => (
-  <button
-    className="button"
-    onClick={() =>
-      window.open(
-        "https://account.arcade.dev/register?return_to=https%3A%2F%2Fapi.arcade.dev%2Fdashboard%2Fwelcome",
-        "_blank",
-      )
-    }
-    style={{
-      margin: "0 0 0 0",
-      fontSize: "0.8rem",
-      whiteSpace: "nowrap",
-    }}
+
+  <Link
+    href="https://account.arcade.dev/registerOrRedirect?return_to=https%3A%2F%2Fapi.arcade.dev%2Fdashboard&new_user_return_to=https%3A%2F%2Fapi.arcade.dev%2Fdashboard%2Fwelcome"
+    target="_blank"
   >
-    Sign Up
-  </button>
+    <Button >
+      <span className="text-xs">Sign Up</span>
+    </Button>
+  </Link>
 );
 
 export default SignUpButton;
