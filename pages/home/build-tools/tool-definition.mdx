@@ -1,38 +1,248 @@
 ---
-title: "Tool Definition"
+title: "What is sent to language models?"
 description: "Documentation for what is sent to the language model when defining a tool"
 ---
 
-# Tool Definitions
+import { Tabs } from "nextra/components";
 
-When defining an Arcade tool, it's important to understand which parts of the tool's definition are sent to the language model and which are not. This understanding helps in designing tools that effectively communicate their purpose and usage to the model.
+# Understanding what is sent to language models
+
+Which parts of your tool definitions are sent to language models? By understanding this, you can ensure that your tools effectively communicate their purpose and usage to the models.
+
+The Arcade worker converts tools (functions with the `@tool` decorator) into `ToolDefinition` objects. The `ToolDefinition` object can be thought of as the intermediate representation of a tool before it is formatted for a specific model provider and sent to the model.
+
+## Defining a tool in code
+
+First, let's take a look at a tool written in Python before it is converted into a `ToolDefinition` object.
 
 ```python
+from enum import Enum
+from typing import Annotated, Optional
+
+from arcade.sdk import ToolContext, tool
+
+class ConversationType(str, Enum):
+    # Enum values are sent to the model
+    PUBLIC_CHANNEL = "public_channel"
+    PRIVATE_CHANNEL = "private_channel"
+    MULTI_PERSON_DIRECT_MESSAGE = "multi_person_direct_message"
+    DIRECT_MESSAGE = "direct_message"
+
 @tool(
-    requires_auth=Google(
-        scopes=["https://www.googleapis.com/auth/gmail.compose"],
-    )  # Not sent to the model
+    requires_auth=Slack(
+        scopes=["channels:read", "groups:read", "im:read", "mpim:read"],
+    ) # Not sent to the model
 )
-async def write_draft_email(  # Tool name and toolkit name is sent to the model
-    context: ToolContext,  # ToolContext is never sent to the model
-    subject: Annotated[str, "Subject of the email"],  # Sent to the model
-    body: Annotated[str, "Body content of the email"],  # Sent to the model
-    recipient: Annotated[str, "Email recipient"],  # Sent to the model
-    cc: Annotated[Optional[list[str]], "CC recipients"],  # Sent to the model
-    bcc: Annotated[Optional[list[str]], "BCC recipients"],  # Sent to the model
-) -> Annotated[dict, "Email draft details"]:  # Return type not sent to the model
+async def list_conversations_metadata( # Tool name and toolkit name is sent to the model
+    context: ToolContext, # ToolContext is never sent to the model
+    conversation_types: Annotated[Optional[list[ConversationType]], "The type(s) of conversations to list. Defaults to all types."] = None, # Sent to the model
+    limit: Annotated[Optional[int], "The maximum number of conversations to list."] = None, # Sent to the model
+    next_cursor: Annotated[Optional[str], "The cursor to use for pagination." = None, # Sent to the model
+) -> Annotated[dict,"The conversations metadata list and a pagination 'next_cursor', if there are more conversations to retrieve."]: # Not sent to the model
     """
-    Drafts an email with the given subject and body.  # Sent to the model
-    """
+    List metadata for Slack conversations (channels and/or direct messages) that the user
+    is a member of.
+    """ # Docstring is sent to the model
     # The body of the function is not sent to the model
     ...
 ```
 
+## A tool as a `ToolDefinition` object
+
+As mentioned above, the Arcade worker converts tools into `ToolDefinition` objects. Let's take a look at the `list_conversations_metadata` tool as a `ToolDefinition` object (the intermediate representation of the tool before it is formatted for a specific model).
+
+<Tabs items={["Python", "cURL"]}> <Tabs.Tab>
+
+```python
+from arcade_slack.tools.chat import list_conversations_metadata
+
+from arcade.sdk import ToolCatalog
+
+tool_def = ToolCatalog.create_tool_definition(list_conversations_metadata, "Slack")
+tool_def_json = tool_def.model_dump_json()
+
+print(tool_def_json)
+```
+
+</Tabs.Tab> <Tabs.Tab>
+
+```bash
+curl -X 'GET' 'https://api.arcade.dev/v1/tools/Slack.ListConversationsMetadata' \
+    -H 'Accept: application/json' \
+    -H 'Authorization: Bearer {{arcade_api_key}}'
+```
+
+</Tabs.Tab> </Tabs>
+
+<div style={{ paddingTop: "10px" }}></div>
+
+<ToggleContent showText="🔽 Show ToolDefinition" hideText="▶️ Hide ToolDefinition">
+
+```json
+{
+  "name": "ListConversationsMetadata",
+  "fully_qualified_name": "Slack.ListConversationsMetadata",
+  "description": "List metadata for Slack conversations (channels and/or direct messages) that the user\nis a member of.",
+  "toolkit": { "name": "Slack", "description": null, "version": null },
+  "input": {
+    "parameters": [
+      {
+        "name": "conversation_types",
+        "required": false,
+        "description": "The type(s) of conversations to list. Defaults to all types.",
+        "value_schema": {
+          "val_type": "array",
+          "inner_val_type": "string",
+          "enum": [
+            "public_channel",
+            "private_channel",
+            "multi_person_direct_message",
+            "direct_message"
+          ]
+        },
+        "inferrable": true
+      },
+      {
+        "name": "limit",
+        "required": false,
+        "description": "The maximum number of conversations to list.",
+        "value_schema": {
+          "val_type": "integer",
+          "inner_val_type": null,
+          "enum": null
+        },
+        "inferrable": true
+      },
+      {
+        "name": "next_cursor",
+        "required": false,
+        "description": "The cursor to use for pagination.",
+        "value_schema": {
+          "val_type": "string",
+          "inner_val_type": null,
+          "enum": null
+        },
+        "inferrable": true
+      }
+    ]
+  },
+  "output": {
+    "description": "The conversations metadata list and a pagination 'next_cursor', if there are more conversations to retrieve.",
+    "available_modes": ["value", "error"],
+    "value_schema": { "val_type": "json", "inner_val_type": null, "enum": null }
+  },
+  "requirements": {
+    "authorization": {
+      "provider_id": "slack",
+      "provider_type": "oauth2",
+      "id": null,
+      "oauth2": {
+        "scopes": ["channels:read", "groups:read", "im:read", "mpim:read"]
+      }
+    }
+  }
+}
+```
+
+</ToggleContent>
+
+## Formatting tools for model compatibility
+
+Before tools are sent to models, the `ToolDefinition` object is formatted such that it is compatible with the specific model provider's function calling format. For example, let's take a look at the `list_conversations_metadata` tool formatted for OpenAI.
+
+<Tabs items={["Python", "JavaScript", "cURL"]}>
+
+<Tabs.Tab>
+
+```python
+from arcadepy import Arcade
+
+client = Arcade()
+list_conversations_metadata = client.tools.formatted.get(
+    name="Slack.ListConversationsMetadata", format="openai"
+)
+
+print(list_conversations_metadata)
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```js
+import Arcade from "@arcadeai/arcadejs";
+
+const client = new Arcade();
+const listConversationsMetadata = await client.tools.formatted.get(
+  "Slack.ListConversationsMetadata",
+  {
+    format: "openai",
+  },
+);
+
+console.log(listConversationsMetadata);
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```bash
+curl -X 'GET' 'https://api.arcade.dev/v1/formatted_tools/Slack.ListConversationsMetadata?format=openai' \
+    -H 'Accept: application/json' \
+    -H 'Authorization: Bearer {{arcade_api_key}}'
+```
+
+</Tabs.Tab>
+
+</Tabs>
+
+<ToggleContent showText="🔽 Show Formatted Tool" hideText="▶️ Hide Formatted Tool">
+
+```json
+{
+  "type": "function",
+  "function": {
+    "name": "Slack_ListConversationsMetadata",
+    "description": "List metadata for Slack conversations (channels and/or direct messages) that the user\nis a member of.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "conversation_types": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "public_channel",
+              "private_channel",
+              "multi_person_direct_message",
+              "direct_message"
+            ]
+          },
+          "description": "The type(s) of conversations to list. Defaults to all types."
+        },
+        "limit": {
+          "type": "integer",
+          "description": "The maximum number of conversations to list."
+        },
+        "next_cursor": {
+          "type": "string",
+          "description": "The cursor to use for pagination."
+        }
+      },
+      "required": []
+    }
+  }
+}
+```
+
+</ToggleContent>
+
 ## Additional Information
 
-- _**Defaults:**_ The default value for optional parameters is not sent to the language model.
+- _**Defaults:**_ The default value for parameters listed as optional is not sent to the language model.
 - _**Enum Values:**_ If a parameter is an enum, each possible value for the enum is sent to the language model. This provides clarity on the valid options for that parameter.
 - _**Annotations:**_ The annotation for each parameter is sent to the language model, thus each parameter must be annotated.
 - _**Tool Definition Schema:**_ Check out the [Tool Definition JSON schema](https://github.com/ArcadeAI/arcade-ai/blob/main/schemas/preview/tool_definition.schema.jsonc) for more details on how to define your tools.
 
-Understanding these distinctions helps in crafting tools that are clear and informative for the language model. If you are ever unsure about what is sent to the language model, you can always retrieve a tool's definition formatted for a specific model. For more details, refer to the [get formatted tool definitions](home/use-tools/get-tool-definitions) documentation.
+Understanding how a tool is converted into a `ToolDefinition` object and then formatted for a specific model is important for crafting tools that are clear and informative for the language model.
