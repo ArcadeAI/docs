@@ -6,7 +6,7 @@ const userId = "user@example.com";
 
 // Start the authorization process
 const authResponse = await client.auth.start(userId, "dropbox", {
-  scopes: ["openid", "profile", "email", "guilds.join"],
+  scopes: ["openid", "sharing.read", "files.metadata.read"],
 });
 
 if (authResponse.status !== "completed") {
@@ -17,6 +17,5 @@ if (authResponse.status !== "completed") {
 // Wait for the authorization to complete
 authResponse = await client.auth.waitForCompletion(authResponse);
 
-// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 const token = authResponse.context.token;
 // Do something interesting with the token...

@@ -8,7 +8,7 @@ user_id = "user@example.com"
 auth_response = client.auth.start(
     user_id=user_id,
     provider="dropbox",
-    scopes=["openid", "profile", "email", "guilds.join"],
+    scopes=["openid", "sharing.read", "files.metadata.read"],
 )
 
 if auth_response.status != "completed":

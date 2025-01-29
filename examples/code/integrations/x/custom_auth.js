@@ -19,6 +19,5 @@ if (authResponse.status !== "completed") {
 // Wait for the authorization to complete
 authResponse = await client.auth.waitForCompletion(authResponse);
 
-// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
 const token = authResponse.context.token;
 // Do something interesting with the token...
