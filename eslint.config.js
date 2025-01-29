@@ -16,6 +16,7 @@ export default [
         ".cache/**",
         "package-lock.json",
         "public/**",
+        "examples/**",
         "node_modules/**",
         "next-env.d.ts",
         "next.config.ts",
