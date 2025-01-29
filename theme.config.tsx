@@ -35,7 +35,14 @@ const config: DocsThemeConfig = {
     icon: <SiGithub />,
   },
   navbar: {
-    extraContent: <SignUpButton />,
+    extraContent: (
+      <>
+        <SignUpButton href="https://account.arcade.dev/registerOrRedirect?
+    return_to=https%3A%2F%2Fapi.arcade.dev%2Fdashboard&
+    new_user_return_to=https%3A%2F%2Fapi.arcade.dev%2Fdashboard%2Fwelcome"text="Sign Up" />
+        <SignUpButton href="https://api.arcade.dev/dashboard/playground/chat" text="Dashboard" />
+      </>
+    ),
   },
   sidebar: {
     defaultMenuCollapseLevel: 1,
