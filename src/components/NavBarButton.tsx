@@ -4,7 +4,13 @@ import { Button } from "./ui/button";
 interface NavBarButtonProps {
   href: string;
   text: string;
-  variant?: string;
+  variant?:
+    | "default"
+    | "link"
+    | "destructive"
+    | "outline"
+    | "secondary"
+    | "ghost";
 }
 
 export const NavBarButton = ({
