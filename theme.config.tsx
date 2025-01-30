@@ -1,4 +1,4 @@
-import { SignUpButton } from "@/components/SignUpButton";
+import { NavBarButton } from "@/components/NavBarButton";
 import ToggleContent from "@/components/ToggleContent";
 import CustomLayout from "@components/CustomLayout";
 import { Footer } from "@components/Footer";
@@ -35,7 +35,15 @@ const config: DocsThemeConfig = {
     icon: <SiGithub />,
   },
   navbar: {
-    extraContent: <SignUpButton />,
+    extraContent: (
+      <>
+        <NavBarButton href="https://account.arcade.dev/registerOrRedirect?
+    return_to=https%3A%2F%2Fapi.arcade.dev%2Fdashboard&
+    new_user_return_to=https%3A%2F%2Fapi.arcade.dev%2Fdashboard%2Fwelcome"text="Sign Up" />
+        <NavBarButton href="https://api.arcade.dev/dashboard/playground/chat" text="Dashboard"
+        variant="outline" />
+      </>
+    ),
   },
   sidebar: {
     defaultMenuCollapseLevel: 1,
