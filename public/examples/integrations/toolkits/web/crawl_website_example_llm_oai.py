@@ -1,15 +1,21 @@
-from arcadepy import Arcade
+import os
+from openai import OpenAI
 
 USER_ID = "you@example.com"
+PROMPT = "Crawl the website https://example.com with a maximum depth of 2."
 TOOL_NAME = "Web.CrawlWebsite"
 
-client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
-
-tool_input = {"url": "https://example.com", "max_depth": 2}
-
-response = client.tools.execute(
-    tool_name=TOOL_NAME,
-    input=tool_input,
-    user_id=USER_ID,
+client = OpenAI(
+    base_url="https://api.arcade.dev", api_key=os.environ.get("ARCADE_API_KEY")
 )
-print(response)
+
+response = client.chat.completions.create(
+    messages=[
+        {"role": "user", "content": PROMPT},
+    ],
+    model="gpt-4o-mini",
+    user=USER_ID,
+    tools=[TOOL_NAME],
+    tool_choice="generate",
+)
+print(response.choices[0].message.content)
