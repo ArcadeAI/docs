@@ -4,19 +4,18 @@ from googleapiclient.discovery import build
 
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
-user_id = "user@example.com"
-
 """
 In this example, we will use Arcade to authenticate with Google and
 retrieve Gmail messages.
 
-There is a tool for that in the Arcade SDK, which simplifies the process for
-you to retrieve email messages either through our Python or JavaScript
-SDKs or via LLM tool calling.
+Consider using the Arcade Google toolkit, which simplifies the process for
+retrieving email messages even further!
 
-Below we are just showing how to use Arcade as an auth provider, if you ever
-need to.
+Below we are just showing how to use Arcade as an auth provider, if you need to directly get a token to use with Google.
 """
+
+# Get this user ID from a trusted source, like your database or user management system
+user_id = "user@example.com"
 
 # Start the authorization process
 auth_response = client.auth.start(
