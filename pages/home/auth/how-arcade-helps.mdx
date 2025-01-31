@@ -2,6 +2,7 @@
 title: "How Arcade helps"
 description: "Learn how Arcade helps with auth and tool calling"
 ---
+import { Tabs } from "nextra/components";
 
 # How Arcade helps with Agent Authorization
 
@@ -27,6 +28,8 @@ With Arcade, developers can now create agents that can _act as the end users of 
 
 Arcade also allows for actions (tools) to be authorized directly. For example, to access a user's Gmail account, you can initiate an authorization flow:
 
+<Tabs items={["Python", "JavaScript"]}>
+<Tabs.Tab>
 ```python
 from arcadepy import Arcade
 
@@ -43,16 +46,46 @@ auth_response = client.tools.authorize(
 
 print(f"Please authorize access by visiting: {auth_response.url}")
 ```
+</Tabs.Tab>
+<Tabs.Tab>
+```javascript
+import { Arcade } from "@arcadeai/arcadejs";
+
+const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
+
+// Unique identifier for the end user
+const user_id = "user@example.com";
+
+// Request access to the user's Gmail account
+let auth_response = client.tools.authorize({
+  tool_name: "Google.ListEmails",
+  user_id: user_id,
+});
+
+console.log(`Please authorize access by visiting: ${auth_response.url}`);
+```
+</Tabs.Tab>
+</Tabs>
 
 Then, wait for the user to complete the authorization process:
-
+<Tabs items={["Python", "JavaScript"]}>
+<Tabs.Tab>
 ```python
 # Wait for the authorization to complete
 auth_response = client.auth.wait_for_completion(auth_response)
 ```
+</Tabs.Tab>
+<Tabs.Tab>
+```javascript
+// Wait for the authorization to complete
+auth_response = client.auth.wait_for_completion(auth_response)
+```
+</Tabs.Tab>
+</Tabs>
 
 Once authorized, your AI agent can securely access the user's emails:
-
+<Tabs items={["Python", "JavaScript"]}>
+<Tabs.Tab>
 ```python
 emails_response = client.tools.execute(
     tool_name="Google.ListEmails",
@@ -60,6 +93,17 @@ emails_response = client.tools.execute(
 )
 print(emails_response)
 ```
+</Tabs.Tab>
+<Tabs.Tab>
+```javascript
+const emails_response = client.tools.execute({
+  tool_name: "Google.ListEmails",
+  user_id: user_id,
+});
+console.log(emails_response)
+```
+</Tabs.Tab>
+</Tabs>
 
 The best part? Arcade remembers the user's authorization tokens, so you don't have to! Next time the user runs the same tool, they won't have to go through the authorization process again until the auth expires or is revoked.
 
@@ -69,47 +113,97 @@ Consider the difference between accessing public information and private user da
 
 - **Tools that don't require authorization**: Some tools, like `Search.SearchGoogle`, allow AI agents to retrieve information from the web without needing user-specific authorization.
 
-  ```python
-  from arcadepy import Arcade
+<Tabs items={["Python", "JavaScript"]}>
+<Tabs.Tab>
+```python
+from arcadepy import Arcade
 
-  client = Arcade()
+client = Arcade()
 
-  # Use the Search.SearchGoogle tool to perform a web search
-  search_response = client.tools.execute(
-      tool_name="Search.SearchGoogle",
-      input={"query": "Latest AI advancements"},
-  )
-  print(search_response)
-  ```
+# Use the Search.SearchGoogle tool to perform a web search
+search_response = client.tools.execute(
+    tool_name="Search.SearchGoogle",
+    input={"query": "Latest AI advancements"},
+)
+print(search_response)
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```javascript
+import { Arcade } from "@arcadeai/arcadejs";
+
+const client = new Arcade(); 
+
+// Use the Search.SearchGoogle tool to perform a web search
+const search_response = client.tools.execute({
+  tool_name: "Search.SearchGoogle",
+  input: { query: "Latest AI advancements" },
+});
+console.log(search_response);
+```
+</Tabs.Tab>
+</Tabs>
 
 - **Tools that require authorization**: Other tools, like `Google.ListEmails`, require user authorization to access private data such as emails.
 
-  ```python
-  from arcadepy import Arcade
+<Tabs items={["Python", "JavaScript"]}>
+<Tabs.Tab>
+```python
+from arcadepy import Arcade
 
-  client = Arcade()
+client = Arcade()
 
-  # Unique identifier for the end user
-  user_id = "user@example.com"
+# Unique identifier for the end user
+user_id = "user@example.com"
 
-  # Request access to the user's Gmail account
-  auth_response = client.tools.authorize(
-      user_id=user_id,
-      tool_name="Google.ListEmails",
-  )
+# Request access to the user's Gmail account
+auth_response = client.tools.authorize(
+    user_id=user_id,
+    tool_name="Google.ListEmails",
+)
 
-  print(f"Please authorize access by visiting: {auth_response.url}")
+print(f"Please authorize access by visiting: {auth_response.url}")
 
-  # Wait for the authorization to complete
-  auth_response = client.auth.wait_for_completion(auth_response)
+# Wait for the authorization to complete
+auth_response = client.auth.wait_for_completion(auth_response)
 
-  # Run the tool
-  emails_response = client.tools.execute(
-      tool_name="Google.ListEmails",
-      user_id=user_id,
-  )
-  print(emails_response)
-  ```
+# Run the tool
+emails_response = client.tools.execute(
+    tool_name="Google.ListEmails",
+    user_id=user_id,
+)
+print(emails_response)
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```javascript
+import { Arcade } from "@arcadeai/arcadejs";
+
+const client = new Arcade();
+
+// Unique identifier for the end user
+const user_id = "user@example.com";
+
+// Request access to the user's Gmail account
+let auth_response = client.tools.authorize({
+  user_id: user_id,
+  tool_name: "Google.ListEmails",
+});
+
+console.log(`Please authorize access by visiting: ${auth_response.url}`);
+
+// Wait for the authorization to complete
+auth_response = client.auth.wait_for_completion(auth_response)
+
+// Run the tool
+const emails_response = client.tools.execute({
+  tool_name: "Google.ListEmails",
+  user_id: user_id,
+});
+console.log(emails_response)
+```
+</Tabs.Tab>
+</Tabs>
 
 ## Custom Tools with Auth
 
