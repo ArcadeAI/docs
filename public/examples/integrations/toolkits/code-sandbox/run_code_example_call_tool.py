@@ -6,7 +6,7 @@ client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 USER_ID = "you@example.com"
 TOOL_NAME = "CodeSandbox.RunCode"
 
-# Define the code to create a chart
+# Define the code to merge sort a list
 merge_sort = """
 def merge_sort(arr):
     if len(arr) <= 1:

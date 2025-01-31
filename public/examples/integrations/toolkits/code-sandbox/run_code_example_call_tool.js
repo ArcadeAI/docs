@@ -6,7 +6,7 @@ const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env var
 const USER_ID = "you@example.com";
 const TOOL_NAME = "CodeSandbox.RunCode";
 
-// Define the code to create a chart
+// Define the code to merge sort a list
 const mergeSort = `
 function mergeSort(arr) {
     if (arr.length <= 1) {
