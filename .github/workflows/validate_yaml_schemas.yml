@@ -1,0 +1,35 @@
+name: Validate YAML schemas
+
+on:
+  push:
+    branches:
+      - main # Always run on merges to main
+  pull_request:
+    types: [opened, synchronize, reopened] # Run against every push to open PRs
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: collect YAML files with $schema
+        id: collect
+        run: |
+          echo "Finding YAML files with a \$schema property…"
+          files=$(grep -rl "\$schema:" . --include="*.yaml" | paste -sd '|' -)
+          if [ -z "$files" ]; then
+              echo "No YAML files with \$schema were found."
+          else
+              echo "Files with \$schema: $files"
+          fi
+          # Set 'files' as an output so that it can be used later
+          echo "files=$files" >> $GITHUB_OUTPUT
+
+      - name: Validate YAML files using schema-validator-action
+        # Only run this step if there is at least one file with $schema
+        if: ${{ steps.collect.outputs.files != '' }}
+        uses: cardinalby/schema-validator-action@v3
+        with:
+          file: ${{ steps.collect.outputs.files }}

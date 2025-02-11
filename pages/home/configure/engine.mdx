@@ -8,30 +8,39 @@ description: "Arcade Engine Configuration"
 Arcade Engine's configuration is a [YAML file](https://yaml.org/) with the following sections:
 
 - [`api`](#api-configuration) - Configures the server for specific protocols
-- [`llm/models`](#llm-model-configuration) - Defines a collection of AI models available for routing
-- [`tools`](#tools-configuration) - Configures tools for AI models to use
 - [`auth`](#auth-configuration) - Configures user authorization providers and token storage
-- [`telemetry`](#telemetry-configuration) - Configures telemetry and observability
+- [`cache`](#cache-configuration) - Configures the short-lived cache
+- [`llm`](#model-configuration) - Defines a collection of AI models available for routing
+- [`security`](#security-configuration) - Configures security and encryption
+- [`storage`](#storage-configuration) - Configures persistent storage
+- [`telemetry`](#telemetry-configuration) - Configures telemetry and observability (OTEL)
+- [`tools`](#tools-configuration) - Configures tools for AI models to use
 
 ## Specify a config file
 
-To start the Arcade Engine, pass a config file:
+To start the Arcade Engine, pass a config file with `-c` or `--config`:
 
 ```bash
-engine --config /path/to/config.yaml
+arcade-engine -c /path/to/config.yaml
+```
+
+Or, for local development:
+
+```bash
+arcade dev -c /path/to/config.yaml
 ```
 
 ## Dotenv files
 
-Arcade Engine automatically loads environment variables from `.env` files in the directory where it was called. Use the `--env` flag to specify a path:
+Arcade Engine automatically loads environment variables from `.env` files in the directory where it was called. Use the `-e` or`--env` flag to specify a path:
 
 ```bash
-engine --env .env.dev --config config.yaml
+arcade-engine -e .env.dev -c config.yaml
 ```
 
 ## Secrets
 
-Arcade Engine supports two ways of passing sensitive information like API keys:
+Arcade Engine supports two ways of passing sensitive information like API keys without storing them directly in the config file.
 
 Environment variables:
 
@@ -66,21 +75,64 @@ HTTP is the only supported protocol for Arcade Engine's API. The following confi
 
 Sample configuration:
 
-```yaml file=<rootDir>/examples/code/home/configuration/engine/api.yaml
+```yaml file=<rootDir>/examples/code/home/configuration/engine/full_config.yaml#L3-L6
 
 ```
+
+
+## Auth configuration
+
+Arcade Engine manages auth for [tools](/home/auth/auth-tool-calling) and [agents](/home/auth/get-a-token-for-a-user). The `auth.providers` section defines the providers that users can authorize with.
+
+Arcade Engine supports many built-in [auth providers](/home/auth-providers), and can also connect to any [OAuth 2.0](/home/auth-providers/oauth2)-compatible authorization server.
+
+The `providers` array contains provider definitions, each which must have a unique `id` within this Arcade Engine instance. There are two ways to configure a provider:
+
+For [built-in providers](/home/auth-providers), use the `provider_id` field to reference the pre-built configuration. For example:
+
+```yaml file=<rootDir>/examples/code/home/configuration/engine/full_config.yaml#L8-L16 {7}
+
+```
+
+For custom OAuth 2.0 providers, specify the full connection details in the `oauth2` sub-section. For full documentation on the custom provider configuration, see the [OAuth 2.0 provider configuration](/home/auth-providers/oauth2) page.
+
+```yaml file=<rootDir>/examples/code/home/configuration/engine/full_config.yaml#L8-L25 {11-18}
+
+```
+
+You can specify a mix of built-in and custom providers.
+
+
+## Cache configuration
+
+The `cache` section configures the short-lived cache.
+
+<Note>
+  Configuring the cache is optional. If not configured, the cache will default to an in-memory cache implementation suitable for a single-node Arcade Engine deployment.
+</Note>
+
+The `cache` section has the following configuration options:
+
+- `api_key_ttl` _(optional, default: `10s`)_ - The time-to-live for API keys in the cache
+
+Additionally, two cache implementations are available:
+- `in_memory` - _(default)_ An in-memory cache implementation suitable for a single-node Arcade Engine deployment.
+- `redis` - A Redis cache implementation suitable for a multi-node Arcade Engine deployment:
+
+```yaml file=<rootDir>/examples/code/home/configuration/engine/full_config.yaml#L27-L32 {3-6}
+
+```
+
 
 ## Model configuration
 
 The `llm.models` section defines the models that the engine can route to, and the API keys or parameters for each model. Each item in the `models` array must have a unique `id` and a provider-specific configuration.
 
-This example shows configuration for connecting to OpenAI and Azure OpenAI:
+This example shows configuration for connecting to OpenAI and Anthropic:
 
-```yaml file=<rootDir>/examples/code/home/configuration/engine/llm_models.yaml
+```yaml file=<rootDir>/examples/code/home/configuration/engine/full_config.yaml#L34-L42
 
 ```
-
-For OpenAI, Cohere, and OctoML, only an API key is needed. For Azure OpenAI, specify a model name and base URL.
 
 For more details on model configuration and model-specific parameters, see [model configuration](/home/configure/models).
 
@@ -102,17 +154,83 @@ For example, given an `llm.models` configuration with one provider named `primar
 
 ```
 
+## Security configuration
+
+The `security` section configures the root encryption keys that the Arcade Engine uses to encrypt and decrypt data at rest. See the [storage configuration](#storage-configuration) section below to configure where data is stored.
+
+At least one root key must be specified. The `default` field indicates which key is used by default:
+
+```yaml file=<rootDir>/examples/code/home/configuration/engine/full_config.yaml#L44-L50 {2-7}
+
+```
+
+Keys should be a long random string of characters. For example:
+
+```bash
+openssl rand -base64 32
+```
+
+## Storage configuration
+
+The `storage` section configures the storage backend that the Arcade Engine uses to store persistent data.
+
+There are three storage implementations available:
+
+- `in_memory` - _(default)_ An in-memory database, suitable for testing.
+- `sqlite` - A SQLite file on disk, suitable for local development:
+```yaml
+storage:
+  sqlite:
+    # Stores DB in ~/.arcade/arcade-engine.sqlite3
+    connection_string: '@ARCADE_HOME/arcade-engine.sqlite3'
+```
+
+- `postgres` - A PostgreSQL database, suitable for production:
+
+```yaml file=<rootDir>/examples/code/home/configuration/engine/full_config.yaml#L52-L59
+
+```
+
+
+## Telemetry configuration
+
+Arcade supports logs, metrics, and traces with [OpenTelemetry](https://opentelemetry.io/).
+
+If you are using the Arcade Engine locally, you can set the `environment` field to `local`. This will only output logs to the console:
+
+```yaml
+telemetry:
+  environment: local
+  logging:
+    level: debug # debug, info, warn, error, fatal
+    encoding: console
+```
+
+
+To connect to OpenTelemetry compatible collectors, set the necessary [OpenTelemetry environment variables](https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/) in the `engine.env` file.
+`environment` and `version` are fields that are added to the telemetry attributes, which can be filtered on later.
+
+```yaml file=<rootDir>/examples/code/home/configuration/engine/full_config.yaml#L61-L65
+
+```
+
+### Notes
+
+- The Engine service name is set to `arcade_engine`
+- Traces currently cover the `/v1/health` and `/v1/chat/completions` endpoints, as well as authentication attempts
+
+
 ## Tools configuration
 
 Arcade Engine orchestrates [tools](/home/use-tools/tools-overview) that AI models can use. Tools are executed by distributed workers called **workers**, which are grouped into **directors**.
 
 The `tools.directors` section configures the workers that are available to service tool calls:
 
-```yaml file=<rootDir>/examples/code/home/configuration/engine/full_config.yaml#L15-L26
+```yaml file=<rootDir>/examples/code/home/configuration/engine/full_config.yaml#L67-L78 {5-12}
 
 ```
 
-When a worker is added to an enabled director, all of the tools hosted by that worker will be available to the model and the Arcade API.
+When a worker is added to an enabled director, all of the tools hosted by that worker will be available to the model and through the Arcade API.
 
 ### HTTP worker configuration
 
@@ -120,8 +238,8 @@ The `http` sub-section configures the HTTP client used to call the worker's tool
 
 - `uri` _(required)_ - The base URL of the worker's tools
 - `secret` _(required)_ - Secret used to authenticate with the worker
-- `timeout` _(required)_ - Timeout for calling the worker's tools
-- `retry` _(required)_ - Number of retries to attempt
+- `timeout` _(optional, default: `30s`)_ - Timeout for calling the worker's tools
+- `retry` _(optional, default: `3`)_ - Number of times to retry a failed tool call
 
 <Note>
   Workers must be configured with a `secret` that is used to authenticate with
@@ -131,73 +249,3 @@ The `http` sub-section configures the HTTP client used to call the worker's tool
 If `api.development = true`, the secret will default to `"dev"` for local development **only**. In production, the secret must be set to a random value.
 
 </Note>
-
-## Auth configuration
-
-Arcade Engine manages auth for [tools](/home/auth/auth-tool-calling) and [agents](/home/auth/get-a-token-for-a-user). This configuration controls what providers are available, and how tokens are stored.
-
-### Token store
-
-When users authorize with an external service, their tokens are stored securely in the token store. Tokens are later retrieved from the store when AI models need to perform authorized actions.
-
-Arcade Engine supports in-memory and Redis-based token stores.
-
-#### In-memory
-
-The in-memory token store is not persistent and is erased when the Engine process shuts down. It's intended for local development and testing.
-
-```yaml file=<rootDir>/examples/code/home/configuration/engine/auth_tokenstore.inmemory.yaml
-
-```
-
-#### Redis
-
-The Redis-based token store is persistent and can be used in production environments.
-
-```yaml file=<rootDir>/examples/code/home/configuration/engine/full_config.yaml#L28-L32 {3-5}
-
-```
-
-### Auth providers
-
-The `auth.providers` section defines the providers that users can authorize with. Arcade Engine supports many built-in [auth providers](/home/auth-providers), and can also connect to any [OAuth 2.0](/home/auth-providers/oauth2)-compatible authorization server.
-
-The `providers` array contains provider definitions, each which must have a unique `id` within this Arcade Engine instance. There are two ways to configure a provider:
-
-1. For [built-in providers](/home/auth-providers), use the `provider_id` field to reference them by name. For example:
-
-```yaml file=<rootDir>/examples/code/home/configuration/engine/full_config.yaml#L33-L40 {6}
-
-```
-
-2. For custom providers, specify the connection details using the relevant protocol-specific fields, such as `oauth2`. For full documentation on the custom provider configuration, see the [OAuth 2.0 provider configuration](/home/auth-providers/oauth2) page.
-
-```yaml file=<rootDir>/examples/code/home/configuration/engine/full_config.yaml#L42-L49 {7-8}
-
-```
-
-You can specify a mix of built-in and custom providers.
-
-## Telemetry configuration
-
-Arcade supports logs, metrics, and traces with [OpenTelemetry](https://opentelemetry.io/).
-
-If you are using the Arcade Engine locally, you can set the `environment` field to `local`. This will only output logs to the console.
-
-To connect to OpenTelemetry compatible collectors, set the necessary [OpenTelemetry environment variables](https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/) in the .env file.
-
-`environment` and `version` are fields that are added to the telemetry attributes, which can be filtered on later.
-
-```yaml
-telemetry:
-  environment: local
-  version: ${env:VERSION}
-  logging:
-    level: debug # debug, info, warn, error, fatal
-    encoding: console
-```
-
-### Notes
-
-- The Engine service name is set to `arcade_engine`
-- Traces currently cover the `/v1/health` and `/v1/chat/completions` endpoints as well as authentication attempts

@@ -1,35 +1,11 @@
+$schema: https://raw.githubusercontent.com/ArcadeAI/schemas/main/engine/1.0/schema.json
+
 api:
-  development: false
+  development: false # Set to true for local development and testing
   host: localhost
   port: 9099
 
-llm:
-  models:
-    - id: my-openai-model-provider
-      openai:
-        api_key: ${env:OPENAI_API_KEY}
-        default_params:
-          temperature: 0
-
-tools:
-  directors:
-    - id: default
-      enabled: true
-      workers:
-        - id: "localworker"
-          enabled: true
-          http:
-            uri: "http://localhost:8002"
-            timeout: 30
-            retry: 3
-            secret: ${env:ARCADE_WORKER_SECRET}
-
 auth:
-  token_store:
-    redis:
-      addr: "redis:6379"
-      password: ${env:REDIS_PASSWORD}
-
   providers:
     - id: default-github
       description: "The default GitHub provider"
@@ -48,9 +24,58 @@ auth:
       oauth2:
         # Connection details here...
 
+cache:
+  api_key_ttl: 10s
+  redis:
+    addr: 'localhost:6379'
+    password: ''
+    db: 0
+
+llm:
+  models:
+    - id: primary
+      openai:
+        api_key: ${env:OPENAI_API_KEY}
+    - id: secondary
+      anthropic:
+        api_key: ${env:ANTHROPIC_API_KEY}
+        api_version: "2023-06-01"
+
+security:
+  root_keys:
+    - id: key1
+      default: true
+      value: ${env:ROOT_KEY_1}
+    - id: key2
+      value: ${env:ROOT_KEY_2}
+
+storage:
+  postgres:
+    user: ${env:POSTGRES_USER}
+    password: ${env:POSTGRES_PASSWORD}
+    host: ${env:POSTGRES_HOST}
+    port: ${env:POSTGRES_PORT}
+    db: ${env:POSTGRES_DB}
+    sslmode: require
+
 telemetry:
-  environment: local
-  version: ${env:VERSION}
+  environment: prod
   logging:
     level: info
     encoding: console
+
+tools:
+  directors:
+    - id: default
+      enabled: true
+      workers:
+        - id: "localworker"
+          enabled: true
+          http:
+            uri: "http://localhost:8002"
+            timeout: 30
+            retry: 3
+            secret: ${env:ARCADE_WORKER_SECRET}
+
+
+
