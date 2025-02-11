@@ -5,7 +5,7 @@ client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 USER_ID = "you@example.com"
 TOOL_NAME = "Search.SearchGoogle"
 
-tool_input = {"query": "Arcade ai documentation", "n_results": 5}
+tool_input = {"query": "Arcade documentation", "n_results": 5}
 
 response = client.tools.execute(
     tool_name=TOOL_NAME,

@@ -2,7 +2,7 @@ import os
 from openai import OpenAI
 
 USER_ID = "you@example.com"
-PROMPT = "Search Google for 'Arcade ai documentation'."
+PROMPT = "Search Google for 'Arcade documentation'."
 TOOL_NAME = "Search.SearchGoogle"
 
 client = OpenAI(

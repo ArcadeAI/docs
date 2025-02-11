@@ -6,14 +6,14 @@ const USER_ID = "you@example.com";
 const TOOL_NAME = "Search.SearchGoogle";
 
 const toolInput = {
-  query: "Arcade ai documentation",
-  n_results: 5
+	query: "Arcade documentation",
+	n_results: 5,
 };
 
 const response = await client.tools.execute({
-  tool_name: TOOL_NAME,
-  input: toolInput,
-  user_id: USER_ID,
+	tool_name: TOOL_NAME,
+	input: toolInput,
+	user_id: USER_ID,
 });
 
-console.log(response); 
+console.log(response);
