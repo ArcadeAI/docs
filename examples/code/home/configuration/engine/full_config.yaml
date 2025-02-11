@@ -8,21 +8,67 @@ api:
 auth:
   providers:
     - id: default-github
-      description: "The default GitHub provider"
+      description: The default GitHub provider
       enabled: true
       type: oauth2
       provider_id: github
       client_id: ${env:GITHUB_CLIENT_ID}
       client_secret: ${env:GITHUB_CLIENT_SECRET}
 
-    - id: default-hooli
-      description: "The default Hooli provider"
+    - id: hooli
+      description: Hooli OAuth 2.0 provider
       enabled: true
       type: oauth2
       client_id: ${env:HOOLI_CLIENT_ID}
       client_secret: ${env:HOOLI_CLIENT_SECRET}
       oauth2:
-        # Connection details here...
+        # For a custom OAuth 2.0 provider, specify the full OAuth configuration:
+        scope_delimiter: ' '
+        pkce: # Optional
+          enabled: true
+          code_challenge_method: S256
+        authorize_request:
+          endpoint: 'https://example.com/oauth/authorize'
+          parameters:
+            response_type: code
+            client_id: '{{client_id}}'
+            redirect_uri: '{{redirect_uri}}'
+            scope: '{{scopes}} {{existing_scopes}}'
+        token_request:
+          endpoint: 'https://example.com/oauth/token'
+          auth_method: client_secret_basic # Optional
+          parameters:
+            grant_type: authorization_code
+            client_id: '{{client_id}}'
+            client_secret: '{{client_secret}}'
+            redirect_uri: '{{redirect_uri}}'
+          response_content_type: application/json # Optional
+          response_map: # Optional
+            access_token: '$.access_token'
+            refresh_token: '$.refresh_token'
+            expires_in: '$.expires_in'
+            scope: '$.scope'
+        refresh_request: # Optional
+          endpoint: 'https://example.com/oauth/token'
+          auth_method: client_secret_basic # Optional
+          parameters:
+            grant_type: refresh_token
+            client_id: '{{client_id}}'
+            client_secret: '{{client_secret}}'
+            refresh_token: '{{refresh_token}}'
+          response_content_type: application/json # Optional
+          response_map: # Optional
+            access_token: '$.access_token'
+            refresh_token: '$.refresh_token'
+            expires_in: '$.expires_in'
+            scope: '$.scope'
+        user_info_request: # Optional
+          endpoint: 'https://example.com/oauth/userinfo'
+          auth_method: bearer_access_token
+          response_content_type: application/json
+          triggers:
+            on_token_grant: true
+            on_token_refresh: true
 
 cache:
   api_key_ttl: 10s
@@ -39,7 +85,7 @@ llm:
     - id: secondary
       anthropic:
         api_key: ${env:ANTHROPIC_API_KEY}
-        api_version: "2023-06-01"
+        api_version: '2023-06-01'
 
 security:
   root_keys:
@@ -69,13 +115,10 @@ tools:
     - id: default
       enabled: true
       workers:
-        - id: "localworker"
+        - id: localworker
           enabled: true
           http:
-            uri: "http://localhost:8002"
+            uri: 'http://localhost:8002'
             timeout: 30
             retry: 3
             secret: ${env:ARCADE_WORKER_SECRET}
-
-
-

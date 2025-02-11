@@ -65,7 +65,7 @@ HOOLI_CLIENT_SECRET="<your client secret>"
 
 Edit the `engine.yaml` file and add a new item to the `auth.providers` section:
 
-```yaml file=<rootDir>/examples/code/integrations/oauth2/config_provider_slim.engine.yaml
+```yaml file=<rootDir>/examples/code/home/configuration/engine/full_config.yaml#L8-L25 {11-18}
 
 ```
 
@@ -84,7 +84,7 @@ Each service expects a slightly different set of parameters in the `oauth2` sect
 
 The only supported OAuth 2.0 flow is the authorization code grant (with or without PKCE).
 
-`scope_delimiter` _(optional, default `" "` / space)_: The delimiter for scopes, if any.
+`scope_delimiter` _(optional, defaults to the space character)_: The delimiter for scopes, if any.
 
 `pkce` _(optional)_:
 
@@ -96,9 +96,9 @@ The only supported OAuth 2.0 flow is the authorization code grant (with or witho
 This section configures the initial authorization request.
 
 - `endpoint`: The authorization endpoint for your OAuth 2.0 server, e.g. `/oauth/authorize`
-- `params`: A map of parameter keys and values to include in the authorization request.
+- `parameters`: A map of parameter keys and values to include in the authorization request.
 
-These placeholders are available in `params`:
+These placeholders are available in `parameters`:
 
 - `{{client_id}}`: The configured client ID.
 - `{{redirect_uri}}`: The redirect URI managed by Arcade.
@@ -107,32 +107,32 @@ These placeholders are available in `params`:
 
 <Tip>
   The `state` parameter is automatically added to the request, and does not need
-  to be included in `params`. If PKCE is enabled, `code_challenge` and
+  to be included in `parameters`. If PKCE is enabled, `code_challenge` and
   `code_challenge_method` are also added automatically.
 </Tip>
 
-For most providers, `oauth2.authorize_request.params` will look like:
+For most providers, `oauth2.authorize_request.parameters` will look like:
 
 ```yaml
 authorize_request:
-  params:
-    response_type: "code"
-    client_id: "{{client_id}}"
-    redirect_uri: "{{redirect_uri}}"
-    scope: "{{scopes}} {{existing_scopes}}"
+  parameters:
+    response_type: code
+    client_id: '{{client_id}}'
+    redirect_uri: '{{redirect_uri}}'
+    scope: '{{scopes}} {{existing_scopes}}'
 ```
 
-Some providers support additional parameters in the authorization request. These can be added to `params` as well. For example:
+Some providers support additional parameters in the authorization request. These can be added to `parameters` as well. For example:
 
 ```yaml
 authorize_request:
-  params:
-    response_type: "code"
-    client_id: "{{client_id}}"
-    redirect_uri: "{{redirect_uri}}"
-    scope: "{{scopes}} {{existing_scopes}}"
-    prompt: "consent"
-    access_type: "offline"
+  parameters:
+    response_type: code
+    client_id: '{{client_id}}'
+    redirect_uri: '{{redirect_uri}}'
+    scope: '{{scopes}} {{existing_scopes}}'
+    prompt: consent
+    access_type: offline
 ```
 
 #### `token_request`
@@ -141,9 +141,9 @@ This section configures the code/token exchange request, after the user has appr
 
 - `endpoint`: The token endpoint for your OAuth 2.0 server, e.g. `/oauth/token`
 - `auth_method` _(optional, default none)_: The authentication method to use. Supported values are none (omitted) and `client_secret_basic`.
-- `params`: A map of parameter keys and values to include in the token request.
+- `parameters`: A map of parameter keys and values to include in the token request.
 
-These placeholders are available in `params`:
+These placeholders are available in `parameters`:
 
 - `{{client_id}}`: The configured client ID.
 - `{{client_secret}}`: The configured client secret.
@@ -151,46 +151,46 @@ These placeholders are available in `params`:
 
 <Tip>
   The `code` parameter is automatically added to the request, and does not need
-  to be included in `params`. If PKCE is enabled, the `code_verifier` parameter
+  to be included in `parameters`. If PKCE is enabled, the `code_verifier` parameter
   is also added to the request automatically.
 </Tip>
 
-For most providers, `oauth2.token_request.params` will look like:
+For most providers, `oauth2.token_request.parameters` will look like:
 
 ```yaml
 token_request:
-  params:
-    grant_type: "authorization_code"
-    redirect_uri: "{{redirect_uri}}"
-    client_id: "{{client_id}}"
-    client_secret: "{{client_secret}}" # Omit if using PKCE
+  parameters:
+    grant_type: authorization_code
+    redirect_uri: '{{redirect_uri}}'
+    client_id: '{{client_id}}'
+    client_secret: '{{client_secret}}' # Omit if using PKCE
 ```
 
 - `response_content_type` _(optional, default `application/json`)_: The expected content type of the response. Supported values are `application/json` and `application/x-www-form-urlencoded`.
 - `response_map` _(optional)_: A map of keys and values to extract from the response. Supports simple JSONPath expressions. Only applicable if `response_content_type` is `application/json`. See the [JSONPath reference](#jsonpath-expressions-in-response_map) for details on extracting values using JSONPath.
 
-#### `refresh_token_request`
+#### `refresh_request`
 
 This section configures the refresh token request, if your OAuth 2.0 server supports refresh tokens. If not provided, refresh tokens will not be used.
 
 - `endpoint`: The refresh token endpoint for your OAuth 2.0 server, e.g. `/oauth/token`
 - `auth_method` _(optional, default none)_: The authentication method to use. Supported values are none (omitted), `client_secret_basic`, and `bearer_access_token`.
-- `params`: A map of parameter keys and values to include in the refresh token request.
+- `parameters`: A map of parameter keys and values to include in the refresh token request.
 
-These placeholders are available in `params`:
+These placeholders are available in `parameters`:
 
 - `{{refresh_token}}`: The refresh token to use.
 - `{{client_id}}`: The configured client ID.
 - `{{client_secret}}`: The configured client secret.
 
-For most providers, `oauth2.refresh_token_request.params` will look like:
+For most providers, `oauth2.refresh_request.parameters` will look like:
 
 ```yaml
-refresh_token_request:
-  params:
-    grant_type: "refresh_token"
-    client_id: "{{client_id}}"
-    client_secret: "{{client_secret}}"
+refresh_request:
+  parameters:
+    grant_type: refresh_token
+    client_id: '{{client_id}}'
+    client_secret: '{{client_secret}}'
 ```
 
 - `response_content_type` _(optional, default `application/json`)_: The expected content type of the response. Supported values are `application/json` and `application/x-www-form-urlencoded`.
@@ -209,7 +209,7 @@ Some OAuth 2.0 APIs provide a user info endpoint that returns information about 
 
 #### JSONPath expressions in `response_map`
 
-In the `token_request` and `refresh_token_request` sections, you can optionally configure `response_map`. Configuring `response_map` is useful if your OAuth 2.0 server returns a JSON object with nested properties, or properties with non-standard names.
+In the `token_request` and `refresh_request` sections, you can optionally configure `response_map`. Configuring `response_map` is useful if your OAuth 2.0 server returns a JSON object with nested properties, or properties with non-standard names.
 
 The typical JSON payload that most OAuth 2.0 servers return looks like this:
 
@@ -240,7 +240,7 @@ But if your server returns:
 Then you need to configure `response_map` to extract the properties from inside the `data` object. Use [JSONPath](https://en.wikipedia.org/wiki/JSONPath) expressions to select the properties you need:
 
 ```yaml
-token_request: # or refresh_token_request
+token_request: # or refresh_request
   response_map:
     access_token: "$.data.access_token"
     expires_in: "$.data.expires_in"
@@ -285,7 +285,7 @@ Here's a full example of the YAML configuration for a custom OAuth 2.0 provider:
 
 <ToggleContent showText="Click to view example" hideText="Hide example">
 
-```yaml file=<rootDir>/examples/code/integrations/oauth2/config_provider_full.engine.yaml
+```yaml file=<rootDir>/examples/code/home/configuration/engine/full_config.yaml#L8-L71 {11-71}
 
 ```
 
