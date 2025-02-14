@@ -2,8 +2,8 @@ import os
 from openai import OpenAI
 
 USER_ID = "you@example.com"
-PROMPT = "Retrieve the members of the conversation named 'general'."
-TOOL_NAME = "Slack.GetMembersInConversationByName"
+PROMPT = "Fetch the messages in the direct message conversation with the username 'john_doe' between '2023-01-01 00:00:00' and '2023-01-31 23:59:59'."
+TOOL_NAME = "Slack.GetMessagesInDirectMessageConversationByUsername"
 
 client = OpenAI(
     base_url="https://api.arcade.dev", api_key=os.environ.get("ARCADE_API_KEY")

@@ -2,8 +2,8 @@ import os
 from openai import OpenAI
 
 USER_ID = "you@example.com"
-PROMPT = "Retrieve the metadata for the conversation named 'general'."
-TOOL_NAME = "Slack.GetConversationMetadataByName"
+PROMPT = "Retrieve the metadata for the direct message conversation with the username 'john_doe'."
+TOOL_NAME = "Slack.GetDirectMessageConversationMetadataByUsername"
 
 client = OpenAI(
     base_url="https://api.arcade.dev", api_key=os.environ.get("ARCADE_API_KEY")

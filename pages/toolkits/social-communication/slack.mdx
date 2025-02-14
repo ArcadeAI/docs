@@ -24,6 +24,9 @@ The Arcade Slack toolkit provides a comprehensive set of tools for interacting w
 - Access conversation messages
 - Manage conversation metadata
 - Retrieve user information
+- List users
+- List conversations
+- Retrieve conversation metadata
 
 ## Install
 
@@ -43,8 +46,8 @@ pip install arcade_slack
       "Retrieve members of a conversation using its ID.",
     ],
     [
-      "GetMembersInConversationByName",
-      "Retrieve members of a conversation using its name.",
+      "GetMembersInChannelByName",
+      "Retrieve members of a channel using its name.",
     ],
     [
       "GetMessagesInConversationById",
@@ -55,12 +58,20 @@ pip install arcade_slack
       "Fetch the messages in a channel using its name.",
     ],
     [
+      "GetMessagesInDirectMessageConversationByUsername",
+      "Fetch the messages in a direct message conversation using the username of the other participant.",
+    ],
+    [
       "GetConversationMetadataById",
       "Retrieve metadata of a conversation using its ID.",
     ],
     [
-      "GetConversationMetadataByName",
-      "Retrieve metadata of a conversation using its name.",
+      "GetChannelMetadataByName",
+      "Retrieve metadata of a channel using its name.",
+    ],
+    [
+      "GetDirectMessageConversationMetadataByUsername",
+      "Retrieve metadata of a direct message conversation using the username of the other participant.",
     ],
     ["ListConversationsMetadata", "List metadata for Slack conversations."],
     [
@@ -197,7 +208,7 @@ Get the members of a conversation in Slack by the conversation's ID.
 
 ---
 
-## GetMembersInConversationByName
+## GetMembersInChannelByName
 
 <br />
 <TabbedCodeBlock
@@ -206,28 +217,28 @@ Get the members of a conversation in Slack by the conversation's ID.
       label: "Call the Tool with User Authorization",
       content: {
         Python: [
-          "/examples/integrations/toolkits/slack/get_members_in_conversation_by_name_example_call_tool.py",
+          "/examples/integrations/toolkits/slack/get_members_in_channel_by_name_example_call_tool.py",
         ],
-        JavaScript: ["/examples/integrations/toolkits/slack/get_members_in_conversation_by_name_example_call_tool.js"],
+        JavaScript: ["/examples/integrations/toolkits/slack/get_members_in_channel_by_name_example_call_tool.js"],
       },
     },
     {
       label: "Execute the Tool with OpenAI",
       content: {
         Python: [
-          "/examples/integrations/toolkits/slack/get_members_in_conversation_by_name_example_llm_oai.py",
+          "/examples/integrations/toolkits/slack/get_members_in_channel_by_name_example_llm_oai.py",
         ],
-        JavaScript: ["/examples/integrations/toolkits/slack/get_members_in_conversation_by_name_example_llm_oai.js"],
+        JavaScript: ["/examples/integrations/toolkits/slack/get_members_in_channel_by_name_example_llm_oai.js"],
       },
     },
   ]}
 />
 
-Get the members of a conversation in Slack by the conversation's name.
+Get the members of a channel in Slack by the channel's name.
 
 **Parameters**
 
-- **`conversation_name`** _(string, required)_ The name of the conversation to get members for.
+- **`channel_name`** _(string, required)_ The name of the channel to get members for.
 - **`limit`** _(int, optional)_ The maximum number of members to return. Defaults to 200.
 - **`next_cursor`** _(string, optional)_ The cursor to use for pagination.
 
@@ -304,12 +315,52 @@ Get the messages in a channel in Slack.
 **Parameters**
 
 - **`channel_name`** _(string, required)_ The name of the channel to get messages for.
-- **`oldest_relative`** _(string, optional)_ The oldest message to include, in 'DD:HH:MM' format.
-- **`latest_relative`** _(string, optional)_ The latest message to include, in 'DD:HH:MM' format.
-- **`oldest_datetime`** _(string, optional)_ The oldest message to include, in 'YYYY-MM-DD HH:MM:SS' format.
-- **`latest_datetime`** _(string, optional)_ The latest message to include, in 'YYYY-MM-DD HH:MM:SS' format.
+- **`oldest_relative`** _(string, optional)_ The oldest message to include in the results, specified as a time offset from the current time in the format 'DD:HH:MM'.
+- **`latest_relative`** _(string, optional)_ The latest message to include in the results, specified as a time offset from the current time in the format 'DD:HH:MM'.
+- **`oldest_datetime`** _(string, optional)_ The oldest message to include in the results, specified as a datetime string in the format 'YYYY-MM-DD HH:MM:SS'.
+- **`latest_datetime`** _(string, optional)_ The latest message to include in the results, specified as a datetime string in the format 'YYYY-MM-DD HH:MM:SS'.
 - **`limit`** _(int, optional)_ The maximum number of messages to return. Defaults to 200.
-- **`next_cursor`** _(string, optional)_ The cursor to use for pagination, if continuing from a previous search.
+- **`next_cursor`** _(string, optional)_ The cursor to use for pagination.
+
+---
+
+## GetMessagesInDirectMessageConversationByUsername
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/slack/get_messages_in_direct_message_conversation_by_username_example_call_tool.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/slack/get_messages_in_direct_message_conversation_by_username_example_call_tool.js"],
+      },
+    },
+    {
+      label: "Execute the Tool with OpenAI",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/slack/get_messages_in_direct_message_conversation_by_username_example_llm_oai.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/slack/get_messages_in_direct_message_conversation_by_username_example_llm_oai.js"],
+      },
+    },
+  ]}
+/>
+
+Get the messages in a channel in Slack.
+
+**Parameters**
+
+- **`channel_name`** _(string, required)_ The name of the channel to get messages for.
+- **`oldest_relative`** _(string, optional)_ The oldest message to include in the results, specified as a time offset from the current time in the format 'DD:HH:MM'.
+- **`latest_relative`** _(string, optional)_ The latest message to include in the results, specified as a time offset from the current time in the format 'DD:HH:MM'.
+- **`oldest_datetime`** _(string, optional)_ The oldest message to include in the results, specified as a datetime string in the format 'YYYY-MM-DD HH:MM:SS'.
+- **`latest_datetime`** _(string, optional)_ The latest message to include in the results, specified as a datetime string in the format 'YYYY-MM-DD HH:MM:SS'.
+- **`limit`** _(int, optional)_ The maximum number of messages to return. Defaults to 200.
+- **`next_cursor`** _(string, optional)_ The cursor to use for pagination.
 
 ---
 
@@ -347,7 +398,7 @@ Get the metadata of a conversation in Slack searching by its ID.
 
 ---
 
-## GetConversationMetadataByName
+## GetChannelMetadataByName
 
 <br />
 <TabbedCodeBlock
@@ -356,28 +407,63 @@ Get the metadata of a conversation in Slack searching by its ID.
       label: "Call the Tool with User Authorization",
       content: {
         Python: [
-          "/examples/integrations/toolkits/slack/get_conversation_metadata_by_name_example_call_tool.py",
+          "/examples/integrations/toolkits/slack/get_channel_metadata_by_name_example_call_tool.py",
         ],
-        JavaScript: ["/examples/integrations/toolkits/slack/get_conversation_metadata_by_name_example_call_tool.js"],
+        JavaScript: ["/examples/integrations/toolkits/slack/get_channel_metadata_by_name_example_call_tool.js"],
       },
     },
     {
       label: "Execute the Tool with OpenAI",
       content: {
         Python: [
-          "/examples/integrations/toolkits/slack/get_conversation_metadata_by_name_example_llm_oai.py",
+          "/examples/integrations/toolkits/slack/get_channel_metadata_by_name_example_llm_oai.py",
         ],
-        JavaScript: ["/examples/integrations/toolkits/slack/get_conversation_metadata_by_name_example_llm_oai.js"],
+        JavaScript: ["/examples/integrations/toolkits/slack/get_channel_metadata_by_name_example_llm_oai.js"],
       },
     },
   ]}
 />
 
-Get the metadata of a conversation in Slack searching by its name.
+Get the metadata of a channel in Slack searching by its name.
 
 **Parameters**
 
-- **`conversation_name`** _(string, required)_ The name of the conversation to get metadata for.
+- **`channel_name`** _(string, required)_ The name of the channel to get metadata for.
+- **`next_cursor`** _(string, optional)_ The cursor to use for pagination, if continuing from a previous search.
+
+---
+
+## GetDirectMessageConversationMetadataByUsername
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/slack/get_direct_message_conversation_metadata_by_username_example_call_tool.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/slack/get_direct_message_conversation_metadata_by_username_example_call_tool.js"],
+      },
+    },
+    {
+      label: "Execute the Tool with OpenAI",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/slack/get_direct_message_conversation_metadata_by_username_example_llm_oai.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/slack/get_direct_message_conversation_metadata_by_username_example_llm_oai.js"],
+      },
+    },
+  ]}
+/>
+
+Get the metadata of a direct message conversation in Slack searching by the username of the other participant.
+
+**Parameters**
+
+- **`username`** _(string, required)_ The username of the user/person to get messages with.
 - **`next_cursor`** _(string, optional)_ The cursor to use for pagination, if continuing from a previous search.
 
 ---

@@ -1,8 +1,8 @@
 import OpenAI from 'openai';
 
 const USER_ID = 'you@example.com';
-const PROMPT = "Retrieve the members of the conversation named 'general'."
-const TOOL_NAME = 'Slack.GetMembersInConversationByName';
+const PROMPT = "Retrieve the metadata for the direct message conversation with the username 'john_doe'."
+const TOOL_NAME = 'Slack.GetDirectMessageConversationMetadataByUsername';
 
 const client = new OpenAI({
     baseURL: 'https://api.arcade.dev',
@@ -19,4 +19,4 @@ const response = await client.chat.completions.create({
     tool_choice: 'generate'
 });
 
-console.log(response.choices[0].message.content); 
+console.log(response.choices[0].message.content);

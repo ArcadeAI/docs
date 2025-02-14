@@ -3,7 +3,7 @@ import { Arcade } from "@arcadeai/arcadejs";
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
 const USER_ID = "you@example.com";
-const TOOL_NAME = "Slack.GetConversationMetadataByName";
+const TOOL_NAME = "Slack.GetDirectMessageConversationMetadataByUsername";
 
 // Start the authorization process
 const authResponse = await client.tools.authorize({
@@ -19,7 +19,7 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-    conversation_name: "general"
+    username: "john_doe"
 };
 
 const response = await client.tools.execute({
@@ -28,4 +28,4 @@ const response = await client.tools.execute({
     user_id: USER_ID,
 });
 
-console.log(response); 
+console.log(response);
