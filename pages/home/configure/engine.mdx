@@ -73,20 +73,20 @@ HTTP is the only supported protocol for Arcade Engine's API. The following confi
 - `api.http.idle_timeout` _(optional, default: `30s`)_ - Timeout for idle connections
 - `api.http.max_request_body_size` _(optional, default: `4Mb`)_ - Maximum request body size
 
-Sample configuration:
+A typical configuration for production looks like:
 
 ```yaml file=<rootDir>/examples/code/home/configuration/engine/full_config.1.0.yaml#L4-L7
 
 ```
 
+For local development, set `api.development = true`. In development mode, Arcade Engine does not require [worker authentication](/home/configure/engine#http-worker-configuration).
+
 
 ## Auth configuration
 
-Arcade Engine manages auth for [tools](/home/auth/auth-tool-calling) and [agents](/home/auth/get-a-token-for-a-user). The `auth.providers` section defines the providers that users can authorize with.
+Arcade Engine manages auth for [tools](/home/auth/auth-tool-calling) and [agents](/home/auth/get-a-token-for-a-user). It supports many built-in [auth providers](/home/auth-providers), and can also connect to any [OAuth 2.0](/home/auth-providers/oauth2) authorization server.
 
-Arcade Engine supports many built-in [auth providers](/home/auth-providers), and can also connect to any [OAuth 2.0](/home/auth-providers/oauth2)-compatible authorization server.
-
-The `providers` array contains provider definitions, each which must have a unique `id` within this Arcade Engine instance. There are two ways to configure a provider:
+The `auth.providers` section defines the providers that users can authorize with. Each provider must have a unique `id` in the array. There are two ways to configure a provider:
 
 For [built-in providers](/home/auth-providers), use the `provider_id` field to reference the pre-built configuration. For example:
 
@@ -111,7 +111,7 @@ The `cache` section has the following configuration options:
 
 - `api_key_ttl` _(optional, default: `10s`)_ - The time-to-live for API keys in the cache
 
-Additionally, two cache implementations are available:
+Two cache implementations are available:
 - `in_memory` - _(default)_ An in-memory cache implementation suitable for a single-node Arcade Engine deployment.
 - `redis` - A Redis cache implementation suitable for a multi-node Arcade Engine deployment:
 
@@ -249,4 +249,4 @@ If `api.development = true`, the secret will default to `"dev"` for local develo
 
 ## Config file version history
 
-- 1.0: [Full example](https://raw.githubusercontent.com/ArcadeAI/docs/refs/heads/main/examples/code/home/configuration/engine/full_config.1.0.yaml), [schema](https://raw.githubusercontent.com/ArcadeAI/schemas/refs/heads/main/engine/config/1.0/schema.json)
+- 1.0: [Full example](https://raw.githubusercontent.com/ArcadeAI/docs/refs/heads/main/examples/code/home/configuration/engine/full_config.1.0.yaml) and [schema](https://raw.githubusercontent.com/ArcadeAI/schemas/refs/heads/main/engine/config/1.0/schema.json)

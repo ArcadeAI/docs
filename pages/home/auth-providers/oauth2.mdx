@@ -22,6 +22,10 @@ This page describes how to configure OAuth 2.0 with Arcade, and use it in:
 - Your [app code](#using-oauth-20-in-app-code) that needs to call APIs protected by OAuth 2.0
 - Or, your [custom tools](#using-oauth-20-in-custom-tools) that need to call APIs protected by OAuth 2.0
 
+### Supported OAuth 2.0 flows
+
+The only supported OAuth 2.0 flow is the authorization code grant flow (with or without PKCE).
+
 ## Configuring OAuth 2.0
 
 How you configure the OAuth 2.0 provider depends on whether you use the Arcade Cloud Engine or a [self-hosted Engine](/home/install/overview).
@@ -65,13 +69,13 @@ HOOLI_CLIENT_SECRET="<your client secret>"
 
 Edit the `engine.yaml` file and add a new item to the `auth.providers` section:
 
-```yaml file=<rootDir>/examples/code/home/configuration/engine/full_config.1.0.yaml#L8-L25 {11-18}
+```yaml file=<rootDir>/examples/code/home/configuration/engine/full_config.1.0.yaml#L9-L26 {11-18}
 
 ```
 
 The ID of the provider (`hooli` in this example) can be any string. It's used to reference the provider in your app code and must be unique.
 
-Each service expects a slightly different set of parameters in the `oauth2` section. Refer to the configuration reference below, and to your service's documentation to understand what parameters are required.
+Each service expects a slightly different set of values in the `oauth2` section. Refer to the configuration reference below, and to your service's documentation to understand what values are required.
 
 <Tip>
   If you need help configuring a specific provider, [get in touch with
@@ -82,9 +86,9 @@ Each service expects a slightly different set of parameters in the `oauth2` sect
 
 ### Configuration reference
 
-The only supported OAuth 2.0 flow is the authorization code grant (with or without PKCE).
+For a full example, see the [full configuration example](#full-configuration-example) below.
 
-`scope_delimiter` _(optional, defaults to the space character)_: The delimiter for scopes, if any.
+`scope_delimiter` _(optional, defaults to the space character)_: The delimiter to use between scopes.
 
 `pkce` _(optional)_:
 
@@ -95,10 +99,10 @@ The only supported OAuth 2.0 flow is the authorization code grant (with or witho
 
 This section configures the initial authorization request.
 
-- `endpoint`: The authorization endpoint for your OAuth 2.0 server, e.g. `/oauth/authorize`
-- `parameters`: A map of parameter keys and values to include in the authorization request.
+- `endpoint`: The authorization endpoint for your OAuth 2.0 server, e.g. `/oauth2/authorize`
+- `params`: A map of parameter keys and values to include in the authorization request.
 
-These placeholders are available in `parameters`:
+These placeholders are available in `params`:
 
 - `{{client_id}}`: The configured client ID.
 - `{{redirect_uri}}`: The redirect URI managed by Arcade.
@@ -107,26 +111,28 @@ These placeholders are available in `parameters`:
 
 <Tip>
   The `state` parameter is automatically added to the request, and does not need
-  to be included in `parameters`. If PKCE is enabled, `code_challenge` and
+  to be included in `params`. If PKCE is enabled, `code_challenge` and
   `code_challenge_method` are also added automatically.
 </Tip>
 
-For most providers, `oauth2.authorize_request.parameters` will look like:
+For most providers, `oauth2.authorize_request` will look like:
 
 ```yaml
 authorize_request:
-  parameters:
+  endpoint: 'https://example.com/oauth2/authorize'
+  params:
     response_type: code
     client_id: '{{client_id}}'
     redirect_uri: '{{redirect_uri}}'
     scope: '{{scopes}} {{existing_scopes}}'
 ```
 
-Some providers support additional parameters in the authorization request. These can be added to `parameters` as well. For example:
+Some providers support additional parameters in the authorization request. These can be added to `params` as well. For example:
 
 ```yaml
 authorize_request:
-  parameters:
+  endpoint: 'https://example.com/oauth2/authorize'
+  params:
     response_type: code
     client_id: '{{client_id}}'
     redirect_uri: '{{redirect_uri}}'
@@ -139,11 +145,11 @@ authorize_request:
 
 This section configures the code/token exchange request, after the user has approved access to your app.
 
-- `endpoint`: The token endpoint for your OAuth 2.0 server, e.g. `/oauth/token`
+- `endpoint`: The token endpoint for your OAuth 2.0 server, e.g. `/oauth2/token`
 - `auth_method` _(optional, default none)_: The authentication method to use. Supported values are none (omitted) and `client_secret_basic`.
-- `parameters`: A map of parameter keys and values to include in the token request.
+- `params`: A map of parameter keys and values to include in the token request.
 
-These placeholders are available in `parameters`:
+These placeholders are available in `params`:
 
 - `{{client_id}}`: The configured client ID.
 - `{{client_secret}}`: The configured client secret.
@@ -151,15 +157,16 @@ These placeholders are available in `parameters`:
 
 <Tip>
   The `code` parameter is automatically added to the request, and does not need
-  to be included in `parameters`. If PKCE is enabled, the `code_verifier` parameter
+  to be included in `params`. If PKCE is enabled, the `code_verifier` parameter
   is also added to the request automatically.
 </Tip>
 
-For most providers, `oauth2.token_request.parameters` will look like:
+For most providers, `oauth2.token_request.params` will look like:
 
 ```yaml
 token_request:
-  parameters:
+  endpoint: 'https://example.com/oauth2/token'
+  params:
     grant_type: authorization_code
     redirect_uri: '{{redirect_uri}}'
     client_id: '{{client_id}}'
@@ -173,21 +180,22 @@ token_request:
 
 This section configures the refresh token request, if your OAuth 2.0 server supports refresh tokens. If not provided, refresh tokens will not be used.
 
-- `endpoint`: The refresh token endpoint for your OAuth 2.0 server, e.g. `/oauth/token`
+- `endpoint`: The refresh token endpoint for your OAuth 2.0 server, e.g. `/oauth2/token`
 - `auth_method` _(optional, default none)_: The authentication method to use. Supported values are none (omitted), `client_secret_basic`, and `bearer_access_token`.
-- `parameters`: A map of parameter keys and values to include in the refresh token request.
+- `params`: A map of parameter keys and values to include in the refresh token request.
 
-These placeholders are available in `parameters`:
+These placeholders are available in `params`:
 
 - `{{refresh_token}}`: The refresh token to use.
 - `{{client_id}}`: The configured client ID.
 - `{{client_secret}}`: The configured client secret.
 
-For most providers, `oauth2.refresh_request.parameters` will look like:
+For most providers, `oauth2.refresh_request.params` will look like:
 
 ```yaml
 refresh_request:
-  parameters:
+  endpoint: 'https://example.com/oauth2/token'
+  params:
     grant_type: refresh_token
     client_id: '{{client_id}}'
     client_secret: '{{client_secret}}'
@@ -200,7 +208,7 @@ refresh_request:
 
 Some OAuth 2.0 APIs provide a user info endpoint that returns information about the user. Arcade Engine can automatically request user info from servers that support it. If the `user_info_request` section is omitted, user info will not be requested.
 
-- `endpoint`: The user info endpoint for your OAuth 2.0 server, e.g. `/oauth/userinfo`
+- `endpoint`: The user info endpoint for your OAuth 2.0 server, e.g. `/oauth2/userinfo`
 - `auth_method` _(optional, default `bearer_access_token`)_: The authentication method to use. The only supported value is `bearer_access_token`.
 - `response_content_type` _(optional, default `application/json`)_: The expected content type of the response. The only supported value is `application/json`.
 - `triggers`: Controls when the user info request is made.
@@ -209,7 +217,7 @@ Some OAuth 2.0 APIs provide a user info endpoint that returns information about 
 
 #### JSONPath expressions in `response_map`
 
-In the `token_request` and `refresh_request` sections, you can optionally configure `response_map`. Configuring `response_map` is useful if your OAuth 2.0 server returns a JSON object with nested properties, or properties with non-standard names.
+In the `token_request` and `refresh_request` sections, you can optionally configure a `response_map`. Configuring a response map is useful if your OAuth 2.0 server returns a JSON object with nested properties, or properties with non-standard names.
 
 The typical JSON payload that most OAuth 2.0 servers return looks like this:
 
@@ -222,7 +230,7 @@ The typical JSON payload that most OAuth 2.0 servers return looks like this:
 }
 ```
 
-If your server returns the above payload, you don't need `response_map`.
+If your server returns a payload that looks like this, you don't need `response_map`.
 
 But if your server returns:
 
@@ -250,7 +258,7 @@ token_request: # or refresh_request
 
 Not all OAuth 2.0 servers support refresh tokens, or use scopes. The only required properties are `access_token` and `expires_in`.
 
-#### Joining scopes in `response_map`
+#### Handling scope arrays
 
 Most OAuth 2.0 servers return scopes as a delimited string, such as `scope1 scope2` or `scope1,scope2`. If your server follows this convention, configuring the top-level `scope_delimiter` property in the `oauth2` section is all you need to do.
 
