@@ -1,14 +1,102 @@
-telemetry:
-  environment: ${env:TELEMETRY_ENVIRONMENT}
-  version: ${env:VERSION}
-  logging:
-    level: ${env:TELEMETRY_LOGGING_LEVEL} # debug, info, warn, error
-    encoding: ${env:TELEMETRY_LOGGING_ENCODING}
+# yaml-language-server: $schema=https://raw.githubusercontent.com/ArcadeAI/schemas/main/engine/config/1.0/schema.json
+$schema: https://raw.githubusercontent.com/ArcadeAI/schemas/main/engine/config/1.0/schema.json
 
 api:
   development: ${env:API_DEVELOPMENT}
   host: ${env:ARCADE_API_HOST}
   port: ${env:ARCADE_API_PORT}
+
+
+auth:
+  providers:
+    - id: default-atlassian
+      description: 'The default Atlassian provider'
+      enabled: false
+      type: oauth2
+      provider_id: atlassian
+      client_id: ${env:ATLASSIAN_CLIENT_ID}
+      client_secret: ${env:ATLASSIAN_CLIENT_SECRET}
+
+    - id: default-discord
+      description: 'The default Discord provider'
+      enabled: false
+      type: oauth2
+      provider_id: discord
+      client_id: ${env:DISCORD_CLIENT_ID}
+      client_secret: ${env:DISCORD_CLIENT_SECRET}
+
+    - id: default-dropbox
+      description: 'The default Dropbox provider'
+      enabled: false
+      type: oauth2
+      provider_id: dropbox
+      client_id: ${env:DROPBOX_CLIENT_ID}
+      client_secret: ${env:DROPBOX_CLIENT_SECRET}
+
+    - id: default-github
+      description: 'The default GitHub provider'
+      enabled: false
+      type: oauth2
+      provider_id: github
+      client_id: ${env:GITHUB_CLIENT_ID}
+      client_secret: ${env:GITHUB_CLIENT_SECRET}
+
+    - id: default-google
+      description: 'The default Google provider'
+      enabled: false
+      type: oauth2
+      provider_id: google
+      client_id: ${env:GOOGLE_CLIENT_ID}
+      client_secret: ${env:GOOGLE_CLIENT_SECRET}
+
+    - id: default-linkedin
+      description: 'The default LinkedIn provider'
+      enabled: false
+      type: oauth2
+      provider_id: linkedin
+      client_id: ${env:LINKEDIN_CLIENT_ID}
+      client_secret: ${env:LINKEDIN_CLIENT_SECRET}
+
+    - id: default-microsoft
+      description: 'The default Microsoft provider'
+      enabled: false
+      type: oauth2
+      provider_id: microsoft
+      client_id: ${env:MICROSOFT_CLIENT_ID}
+      client_secret: ${env:MICROSOFT_CLIENT_SECRET}
+
+    - id: default-slack
+      description: 'The default Slack provider'
+      enabled: false
+      type: oauth2
+      provider_id: slack
+      client_id: ${env:SLACK_CLIENT_ID}
+      client_secret: ${env:SLACK_CLIENT_SECRET}
+
+    - id: default-spotify
+      description: 'The default Spotify provider'
+      enabled: false
+      type: oauth2
+      provider_id: spotify
+      client_id: ${env:SPOTIFY_CLIENT_ID}
+      client_secret: ${env:SPOTIFY_CLIENT_SECRET}
+
+    - id: default-x
+      description: 'The default X provider'
+      enabled: false
+      type: oauth2
+      provider_id: x
+      client_id: ${env:X_CLIENT_ID}
+      client_secret: ${env:X_CLIENT_SECRET}
+
+    - id: default-zoom
+      description: 'The default Zoom provider'
+      enabled: false
+      type: oauth2
+      provider_id: zoom
+      client_id: ${env:ZOOM_CLIENT_ID}
+      client_secret: ${env:ZOOM_CLIENT_SECRET}
+
 
 llm:
   models:
@@ -26,116 +114,44 @@ llm:
     #     api_key: ollama
     #- id: my-groq-model-provider
     #  openai:
-    #    base_url: "https://api.groq.com/openai/v1"
+    #    base_url: 'https://api.groq.com/openai/v1'
     #    api_key: ${env:GROQ_API_KEY}
+
+
+security:
+  root_keys:
+    - id: key1
+      default: true
+      value: ${env:ROOT_KEY_1}
+
+
+storage:
+  postgres:
+    user: ${env:POSTGRES_USER}
+    password: ${env:POSTGRES_PASSWORD}
+    host: ${env:POSTGRES_HOST}
+    port: ${env:POSTGRES_PORT}
+    db: ${env:POSTGRES_DB}
+    sslmode: require
+
+
+telemetry:
+  environment: ${env:TELEMETRY_ENVIRONMENT}
+  logging:
+    # debug, info, warn, error
+    level: ${env:TELEMETRY_LOGGING_LEVEL}
+    encoding: ${env:TELEMETRY_LOGGING_ENCODING}
+
 
 tools:
   directors:
     - id: default
       enabled: true
       workers:
-        - id: "worker"
+        - id: worker
           enabled: true
           http:
             uri: ${env:ARCADE_WORKER_URI}
             timeout: 30
             retry: 3
             secret: ${env:ARCADE_WORKER_SECRET}
-
-auth:
-  token_store:
-    # Uncomment to have persistent storage tokens through redis
-    # redis:
-    #   addr: ${env:REDIS_HOST}:${env:REDIS_PORT}
-    #   password: ""
-    in_memory:
-      max_size: 1000000
-
-  providers:
-    - id: default-atlassian
-      description: "The default Atlassian provider"
-      enabled: false
-      type: oauth2
-      provider_id: atlassian
-      client_id: ${env:ATLASSIAN_CLIENT_ID}
-      client_secret: ${env:ATLASSIAN_CLIENT_SECRET}
-
-    - id: default-discord
-      description: "The default Discord provider"
-      enabled: false
-      type: oauth2
-      provider_id: discord
-      client_id: ${env:DISCORD_CLIENT_ID}
-      client_secret: ${env:DISCORD_CLIENT_SECRET}
-
-    - id: default-dropbox
-      description: "The default Dropbox provider"
-      enabled: false
-      type: oauth2
-      provider_id: dropbox
-      client_id: ${env:DROPBOX_CLIENT_ID}
-      client_secret: ${env:DROPBOX_CLIENT_SECRET}
-
-    - id: default-github
-      description: "The default GitHub provider"
-      enabled: false
-      type: oauth2
-      provider_id: github
-      client_id: ${env:GITHUB_CLIENT_ID}
-      client_secret: ${env:GITHUB_CLIENT_SECRET}
-
-    - id: default-google
-      description: "The default Google provider"
-      enabled: false
-      type: oauth2
-      provider_id: google
-      client_id: ${env:GOOGLE_CLIENT_ID}
-      client_secret: ${env:GOOGLE_CLIENT_SECRET}
-
-    - id: default-linkedin
-      description: "The default LinkedIn provider"
-      enabled: false
-      type: oauth2
-      provider_id: linkedin
-      client_id: ${env:LINKEDIN_CLIENT_ID}
-      client_secret: ${env:LINKEDIN_CLIENT_SECRET}
-
-    - id: default-microsoft
-      description: "The default Microsoft provider"
-      enabled: false
-      type: oauth2
-      provider_id: microsoft
-      client_id: ${env:MICROSOFT_CLIENT_ID}
-      client_secret: ${env:MICROSOFT_CLIENT_SECRET}
-
-    - id: default-slack
-      description: "The default Slack provider"
-      enabled: false
-      type: oauth2
-      provider_id: slack
-      client_id: ${env:SLACK_CLIENT_ID}
-      client_secret: ${env:SLACK_CLIENT_SECRET}
-
-    - id: default-spotify
-      description: "The default Spotify provider"
-      enabled: false
-      type: oauth2
-      provider_id: spotify
-      client_id: ${env:SPOTIFY_CLIENT_ID}
-      client_secret: ${env:SPOTIFY_CLIENT_SECRET}
-
-    - id: default-x
-      description: "The default X provider"
-      enabled: false
-      type: oauth2
-      provider_id: x
-      client_id: ${env:X_CLIENT_ID}
-      client_secret: ${env:X_CLIENT_SECRET}
-
-    - id: default-zoom
-      description: "The default Zoom provider"
-      enabled: false
-      type: oauth2
-      provider_id: zoom
-      client_id: ${env:ZOOM_CLIENT_ID}
-      client_secret: ${env:ZOOM_CLIENT_SECRET}
