@@ -15,7 +15,7 @@ export const Head = () => {
 
   const image = frontMatter.ogImage
     ? "https://docs.arcade.dev" + frontMatter.ogImage
-    : "https://docs.arcade.dev/images/logo/arcade.png";
+    : "https://docs.arcade.dev/images/logo/arcade-logo.png";
   const video = frontMatter.ogVideo
     ? "https://docs.arcade.dev" + frontMatter.ogVideo
     : null;

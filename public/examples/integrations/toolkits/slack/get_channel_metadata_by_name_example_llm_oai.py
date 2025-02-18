@@ -2,8 +2,8 @@ import os
 from openai import OpenAI
 
 USER_ID = "you@example.com"
-PROMPT = "Search Google for 'Arcade documentation'."
-TOOL_NAME = "Search.SearchGoogle"
+PROMPT = "Retrieve the metadata for the channel named 'general'."
+TOOL_NAME = "Slack.GetChannelMetadataByName"
 
 client = OpenAI(
     base_url="https://api.arcade.dev", api_key=os.environ.get("ARCADE_API_KEY")
