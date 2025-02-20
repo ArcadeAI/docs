@@ -42,6 +42,9 @@ export default {
   quickstart: {
     title: "Quickstart",
   },
+  "api-keys": {
+    title: "Get an API key",
+  },
   "use-tools": {
     title: "Tool Calling",
   },

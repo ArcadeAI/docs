@@ -17,38 +17,59 @@ To do this, you'll build an AI chatbot that can star GitHub repositories on your
 ### Prerequisites
 
 - [Set up Arcade](/home/quickstart)
-- Sign up for an [OpenAI account](https://platform.openai.com/signup) and follow their [quickstart guide](https://platform.openai.com/docs/quickstart)
+- Create an Arcade [API key](/home/api-keys), if you haven't already
+- Export your Arcade API key as an environment variable:
+```bash
+export ARCADE_API_KEY=<your-api-key>
+```
 
-### Initialize the OpenAI client
+### Install OpenAI Client
 
-Create a new file in your favorite editor. If you followed the OpenAI quickstart guide, use the `example.py` or `example.mjs` file you created.
+Below we show you Python and JavaScript installation commands, but you can find installation instructions for other languages in the [OpenAI libraries documentation](https://platform.openai.com/docs/libraries):
 
-Use the OpenAI client, and change the base URL and API key to point to Arcade:
+<Tabs items={["Python", "JavaScript"]}> <Tabs.Tab>
 
-<Tabs items={["Python", "JavaScript"]}>
-<Tabs.Tab>
+```bash
+ pip install openai
+```
 
-```python file=<rootDir>/examples/code/home/use-tools/call-tools-with-models/github_stars_chatbot.py#L1-L8 {1,6-7}
+</Tabs.Tab> <Tabs.Tab>
+
+```bash
+ npm install openai
+```
+
+</Tabs.Tab> </Tabs>
+
+### Set up your OpenAI client
+
+Create a new file in your favorite editor (e.g. `example.py` or `example.mjs`) and initialize the OpenAI client with Arcade's base URL and API key to enable tool access:
+
+<Tabs items={["Python", "JavaScript"]}> <Tabs.Tab>
+
+```python {1, 5-6}
+import os
+from openai import OpenAI
+
+client = OpenAI(
+  base_url="https://api.arcade.dev/v1",
+  api_key=os.environ.get("ARCADE_API_KEY")
+)
 
 ```
 
-</Tabs.Tab>
+</Tabs.Tab> <Tabs.Tab>
 
-<Tabs.Tab>
+```typescript
+import { OpenAI } from "openai";
 
-```js {1,5-6}
-import OpenAI from "openai";
-
-//# Initialize the OpenAI client, pointing to Arcade
-const openai = new OpenAI({
-  apiKey: process.env.ARCADE_API_KEY,
+export const client = new OpenAI({
   baseURL: "https://api.arcade.dev/v1",
+  apiKey: process.env["ARCADE_API_KEY"],
 });
 ```
 
-</Tabs.Tab>
-
-</Tabs>
+</Tabs.Tab> </Tabs>
 
 Requests made with this client will be routed to Arcade first, then to OpenAI. The AI model will instantly have access to the tools provided by Arcade.
 
