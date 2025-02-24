@@ -1,4 +1,4 @@
-import { Code2, Home, Plug } from "lucide-react";
+import { BadgeHelp, Code2, Home, Plug } from "lucide-react";
 
 export default {
   "*": {
@@ -33,6 +33,20 @@ export default {
     ),
     href: "https://reference.arcade.dev/",
     target: "_blank",
+  },
+
+  "contact-us": {
+    title: (
+      <span className="flex items-center gap-2 font-medium">
+        <BadgeHelp className="size-4" />
+        Contact us
+      </span>
+    ),
+    href: "/contact-us",
+    theme: {
+      breadcrumb: false,
+      pagination: false,
+    },
   },
 
   "-- Getting Started": {
