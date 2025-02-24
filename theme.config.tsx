@@ -37,9 +37,15 @@ const config: DocsThemeConfig = {
   navbar: {
     extraContent: (
       <>
-        <NavBarButton href="https://api.arcade.dev/signup"text="Sign Up" />
-        <NavBarButton href="https://api.arcade.dev/dashboard/playground/chat" text="Dashboard"
-        variant="outline" />
+        <NavBarButton
+          href="https://account.arcade.dev/registerOrRedirect?return_to=https%3A%2F%2Fapi.arcade.dev%2Fdashboard&new_user_return_to=https%3A%2F%2Fapi.arcade.dev%2Fdashboard%2Fwelcome&utm_source=docs&utm_medium=navbar&utm_campaign=signup"
+          text="Sign Up"
+        />
+        <NavBarButton
+          href="https://api.arcade.dev/dashboard/playground/chat?utm_source=docs&utm_medium=navbar&utm_campaign=dashboard"
+          text="Dashboard"
+          variant="outline"
+        />
       </>
     ),
   },
