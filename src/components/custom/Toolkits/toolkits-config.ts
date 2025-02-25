@@ -158,4 +158,12 @@ export const tools: Tool[] = [
     category: "productivity",
     type: "community",
   },
+  {
+    name: "Obsidian",
+    image: "obsidian",
+    summary: "Create, edit, and manage Obsidian notes",
+    link: "/toolkits/productivity/obsidian",
+    category: "productivity",
+    type: "verified",
+  },
 ];
