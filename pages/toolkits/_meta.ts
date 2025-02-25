@@ -5,6 +5,10 @@ export default {
       layout: "full",
     },
   },
+  "-- Categories": {
+    type: "separator",
+    title: "Categories",
+  },
   productivity: {
     title: "Productivity & Docs",
   },
@@ -19,5 +23,15 @@ export default {
   },
   automation: {
     title: "Automation",
+  },
+  "-- Submit your toolkit": {
+    type: "separator",
+    title: "Submit your toolkit",
+  },
+  "contribute-a-toolkit": {
+    title: "Contribute a toolkit",
+  },
+  "community-toolkit-template": {
+    display: "hidden",
   },
 };
