@@ -19,7 +19,6 @@ export const categories: Category[] = [
   { id: "social", name: "Social & Communication" },
   { id: "development", name: "Developer Tools" },
   { id: "entertainment", name: "Entertainment" },
-  { id: "automation", name: "Smart Automation" },
 ];
 
 export const tools: Tool[] = [
@@ -141,14 +140,6 @@ export const tools: Tool[] = [
     link: "/toolkits/social-communication/twilio/readme",
     category: "social",
     type: "verified",
-  },
-  {
-    name: "Govee",
-    image: "govee",
-    summary: "Control Govee smart lights",
-    link: "/toolkits/automation/govee",
-    category: "automation",
-    type: "community",
   },
   {
     name: "Close.io",
