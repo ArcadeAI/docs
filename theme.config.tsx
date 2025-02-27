@@ -38,7 +38,7 @@ const config: DocsThemeConfig = {
     extraContent: (
       <>
         <NavBarButton
-          href="https://account.arcade.dev/registerOrRedirect?return_to=https%3A%2F%2Fapi.arcade.dev%2Fdashboard&new_user_return_to=https%3A%2F%2Fapi.arcade.dev%2Fdashboard%2Fwelcome&utm_source=docs&utm_medium=navbar&utm_campaign=signup"
+          href="https://api.arcade.dev/signup?utm_source=docs&utm_medium=navbar&utm_campaign=signup"
           text="Sign Up"
         />
         <NavBarButton
