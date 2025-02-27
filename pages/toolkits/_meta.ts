@@ -21,9 +21,6 @@ export default {
   development: {
     title: "Developer Tools",
   },
-  automation: {
-    title: "Automation",
-  },
   "-- Submit your toolkit": {
     type: "separator",
     title: "Submit your toolkit",
