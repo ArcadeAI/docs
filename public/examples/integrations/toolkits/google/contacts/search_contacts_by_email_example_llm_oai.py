@@ -2,7 +2,7 @@ import os
 from openai import OpenAI
 
 USER_ID = "you@example.com"
-PROMPT = "Do i have any contacts with the email john.doe@example.com? If so get info on them."
+PROMPT = "Do I have any contacts with the email john.doe@example.com? If so get info on them."
 TOOL_NAME = "Google.SearchContactsByEmail"
 
 client = OpenAI(
