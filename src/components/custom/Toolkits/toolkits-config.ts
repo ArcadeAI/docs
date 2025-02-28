@@ -68,6 +68,14 @@ export const tools: Tool[] = [
     type: "arcade",
   },
   {
+    name: "Google Contacts",
+    image: "google_contacts",
+    summary: "Create and search contacts in Google Contacts with your agents.",
+    link: "/toolkits/productivity/google/contacts",
+    category: "productivity",
+    type: "arcade",
+  },
+  {
     name: "Google Drive",
     image: "google_drive",
     summary: "List documents in Google Drive with your agents.",
