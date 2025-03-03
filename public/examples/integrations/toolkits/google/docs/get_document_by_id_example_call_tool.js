@@ -19,7 +19,7 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  document_id: "your_document_id_here" // Document Ids can be found with the ListDocuments tool
+  document_id: "your_document_id_here" // Document Ids can be found with the SearchDocuments tool
 };
 
 const response = await client.tools.execute({
@@ -28,4 +28,4 @@ const response = await client.tools.execute({
   user_id: USER_ID,
 });
 
-console.log(response); 
+console.log(response);

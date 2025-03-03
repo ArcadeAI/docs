@@ -1,7 +1,7 @@
 import OpenAI from 'openai';
 
 const USER_ID = "you@example.com";
-const PROMPT = "Retrieve the Google Docs document with the ID 'your_document_id_here'."; // Document Ids can be found with the ListDocuments tool
+const PROMPT = "Retrieve the Google Docs document with the ID 'your_document_id_here'."; // Document Ids can be found with the SearchDocuments tool
 const TOOL_NAME = "Google.GetDocumentById";
 
 const client = new OpenAI({
@@ -19,4 +19,4 @@ const response = await client.chat.completions.create({
   tool_choice: 'generate'
 });
 
-console.log(response.choices[0].message.content); 
+console.log(response.choices[0].message.content);
