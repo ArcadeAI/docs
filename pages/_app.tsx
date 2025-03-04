@@ -17,7 +17,11 @@ function Docs({ Component, pageProps }) {
           process.env.NEXT_PUBLIC_POSTHOG_UI_HOST || "https://us.posthog.com",
         disable_session_recording: true,
         loaded: (posthog) => {
-          if (process.env.NODE_ENV === "development") posthog.debug();
+          if (
+            process.env.NODE_ENV === "development" ||
+            process.env.NEXT_PUBLIC_POSTHOG_DEBUG
+          )
+            posthog.debug();
         },
       });
 

@@ -1,8 +1,6 @@
-import Link from "next/link";
 import { Button } from "./ui/button";
 
 interface NavBarButtonProps {
-  href: string;
   text: string;
   variant?:
     | "default"
@@ -14,15 +12,12 @@ interface NavBarButtonProps {
 }
 
 export const NavBarButton = ({
-  href,
   text,
   variant = "default",
 }: NavBarButtonProps) => (
-  <Link href={href}>
-    <Button variant={variant}>
-      <span className="text-xs">{text}</span>
-    </Button>
-  </Link>
+  <Button variant={variant}>
+    <span className="text-xs">{text}</span>
+  </Button>
 );
 
 export default NavBarButton;

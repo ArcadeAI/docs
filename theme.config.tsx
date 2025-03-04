@@ -10,7 +10,9 @@ import { Check, Important, Info, Note, Tip, Warning } from "@markdown/Callouts";
 import { Card, Cards } from "@markdown/Cards";
 import { DarkOnly, LightOnly } from "@markdown/ThemeContent";
 import { DocsThemeConfig } from "nextra-theme-docs";
-import { Cards as NavCards, Steps } from "nextra/components";
+import { Button, Cards as NavCards, Steps } from "nextra/components";
+import { SignupLink } from "@/components/Analytics";
+import Link from "next/link";
 
 const config: DocsThemeConfig = {
   color: { hue: { dark: 335, light: 335 } }, // Hue for #ED155D
@@ -37,15 +39,26 @@ const config: DocsThemeConfig = {
   navbar: {
     extraContent: (
       <>
-        <NavBarButton
-          href="https://api.arcade.dev/signup?utm_source=docs&utm_medium=navbar&utm_campaign=signup"
-          text="Sign Up"
-        />
-        <NavBarButton
+        <SignupLink
+          utmParams={{
+            utm_source: "docs",
+            utm_medium: "navbar",
+            utm_campaign: "signup",
+          }}
+          linkLocation="docs:navbar"
+        >
+          <NavBarButton
+            text="Sign Up"
+          />
+        </SignupLink>
+        <Link
           href="https://api.arcade.dev/dashboard/playground/chat?utm_source=docs&utm_medium=navbar&utm_campaign=dashboard"
-          text="Dashboard"
-          variant="outline"
-        />
+        >
+          <NavBarButton
+            text="Dashboard"
+            variant="outline"
+          />
+        </Link>
       </>
     ),
   },
