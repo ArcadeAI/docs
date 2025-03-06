@@ -1,8 +1,8 @@
 import OpenAI from 'openai';
 
 const USER_ID = "you@example.com";
-const PROMPT = "Create a new calendar event for tomorrow at 10am. This meeting is for a 1:1 with John Doe. Please include john.doe@example.com in the attendees.";
-const TOOL_NAME = "Google.CreateEvent";
+const PROMPT = "Do i have any contacts with the email john.doe@example.com? If so get info on them.";
+const TOOL_NAME = "Google.SearchContactsByEmail";
 
 const client = new OpenAI({
   baseURL: 'https://api.arcade.dev',

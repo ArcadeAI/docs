@@ -3,7 +3,7 @@ import { Arcade } from "@arcadeai/arcadejs";
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
 const USER_ID = "you@example.com";
-const TOOL_NAME = "Google.CreateEvent";
+const TOOL_NAME = "Google.CreateContact";
 
 // Start the authorization process
 const authResponse = await client.tools.authorize({
@@ -19,12 +19,9 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  summary: "1:1 with John Doe",
-  description: "Discuss project updates and next steps",
-  start_datetime: "2024-12-31T10:00:00",
-  end_datetime: "2024-12-31T10:30:00",
-  attendee_emails: ["john.doe@example.com"],
-  calendar_id: "primary",
+  given_name: "John",
+  family_name: "Doe",
+  email: "john.doe@example.com",
 };
 
 const response = await client.tools.execute({
