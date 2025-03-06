@@ -164,15 +164,6 @@ export const tools: Tool[] = [
     summary: "Create, edit, and manage Obsidian notes",
     link: "/toolkits/productivity/obsidian",
     category: "productivity",
-    type: "verified",
-  },
-  {
-    name: "Memory",
-    image: "redis",
-    summary:
-      "Manage semantic memory for LLM apps with vector embeddings and Redis storage.",
-    link: "/toolkits/development/memory",
-    category: "development",
-    type: "verified",
+    type: "community",
   },
 ];
