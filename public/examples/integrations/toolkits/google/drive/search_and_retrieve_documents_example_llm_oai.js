@@ -1,8 +1,8 @@
 import OpenAI from 'openai';
 
 const USER_ID = "you@example.com";
-const PROMPT = "List all documents in my Google Drive that contain the word 'report'.";
-const TOOL_NAME = "Google.ListDocuments";
+const PROMPT = "Search for 10 documents in my Google Drive that contain the word 'report' and do not contain the word 'draft'. Return the documents in markdown format.";
+const TOOL_NAME = "Google.SearchAndRetrieveDocuments";
 
 const client = new OpenAI({
   baseURL: 'https://api.arcade.dev',
@@ -19,4 +19,4 @@ const response = await client.chat.completions.create({
   tool_choice: 'generate'
 });
 
-console.log(response.choices[0].message.content); 
+console.log(response.choices[0].message.content);

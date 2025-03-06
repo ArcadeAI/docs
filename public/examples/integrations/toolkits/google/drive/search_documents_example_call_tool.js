@@ -3,7 +3,7 @@ import { Arcade } from "@arcadeai/arcadejs";
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
 const USER_ID = "you@example.com";
-const TOOL_NAME = "Google.InsertTextAtEndOfDocument";
+const TOOL_NAME = "Google.SearchDocuments";
 
 // Start the authorization process
 const authResponse = await client.tools.authorize({
@@ -19,8 +19,9 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  document_id: "your_document_id_here", // Document Ids can be found with the SearchDocuments tool
-  text_content: "Your text here"
+  document_contains: ["report"],
+  document_not_contains: ["draft"],
+  limit: 10,
 };
 
 const response = await client.tools.execute({
