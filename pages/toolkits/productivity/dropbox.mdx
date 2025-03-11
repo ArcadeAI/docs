@@ -1,0 +1,116 @@
+import { Tabs } from "nextra/components";
+
+# Dropbox auth provider
+
+<Note>
+  At this time, Arcade does not offer a default Dropbox Auth Provider. To use
+  Dropbox auth, you must create a custom Auth Provider with your own Dropbox
+  OAuth 2.0 credentials as described below.
+</Note>
+
+The Dropbox auth provider enables tools and agents to call the Dropbox API on behalf of a user. Behind the scenes, the Arcade Engine and the Dropbox auth provider seamlessly manage Dropbox OAuth 2.0 authorization for your users.
+
+### What's documented here
+
+This page describes how to use and configure Dropbox auth with Arcade.
+
+This auth provider is used by:
+
+- Your [app code](#using-dropbox-auth-in-app-code) that needs to call Dropbox APIs
+- Or, your [custom tools](#using-dropbox-auth-in-custom-tools) that need to call Dropbox APIs
+
+## Configuring Dropbox auth
+
+### Create a Dropbox app
+
+- Create a Dropbox Application in the [Dropbox App Console](https://www.dropbox.com/developers/apps)
+- In the Settings tab, under the "OAuth 2" section, set the redirect URI to: `https://cloud.arcade.dev/api/v1/oauth/callback`
+- In the Permissions tab, add any scopes that your app will need
+- In the Settings tab, copy the App key (Client ID) and App secret (Client Secret), which you'll need below
+
+Next, add the Dropbox app to your Arcade Engine configuration. You can do this in the Arcade Dashboard, or by editing the `engine.yaml` file directly (for a self-hosted instance).
+
+### Configuring Dropbox auth with the Arcade Dashboard
+
+1. Navigate to the OAuth section of the Arcade Dashboard and click **Add OAuth Provider**.
+2. Select **Dropbox** as the provider.
+3. Choose a unique **ID** for your provider (e.g. "my-dropbox-provider") with an optional **Description**.
+4. Enter your **Client ID** and **Client Secret** from your Dropbox app.
+5. Click **Save**.
+
+When you use tools that require Dropbox auth using your Arcade account credentials, the Arcade Engine will automatically use this Dropbox OAuth provider.
+
+### Configuring Dropbox auth in self-hosted Arcade Engine configuration
+
+<Steps>
+
+### Set environment variables
+
+<Note>
+  The Client ID is the Dropbox "App key" and the Client Secret is the Dropbox
+  "App secret".
+</Note>
+
+Set the following environment variables:
+
+```bash
+export DROPBOX_CLIENT_ID="<your client ID>"
+export DROPBOX_CLIENT_SECRET="<your client secret>"
+```
+
+Or, you can set these values in a `.env` file:
+
+```bash
+DROPBOX_CLIENT_SECRET="<your client secret>"
+DROPBOX_CLIENT_ID="<your client ID>"
+```
+
+<Tip>
+  See [Engine configuration](/home/configure/engine) for more information on how
+  to set environment variables and configure the Arcade Engine.
+</Tip>
+
+### Edit the Engine configuration
+
+Edit the `engine.yaml` file and add a `dropbox` item to the `auth.providers` section:
+
+```yaml file=<rootDir>/examples/code/integrations/dropbox/config_provider.engine.yaml {3-9}
+
+```
+
+</Steps>
+
+## Using Dropbox auth in app code
+
+Use the Dropbox auth provider in your own agents and AI apps to get a user-scoped token for the Dropbox API. See [authorizing agents with Arcade](/home/auth/how-arcade-helps) to understand how this works.
+
+Use `client.auth.start()` to get a user token for the Dropbox API:
+
+<Tabs items={["Python", "JavaScript"]}>
+<Tabs.Tab>
+
+```python file=<rootDir>/examples/code/integrations/dropbox/custom_auth.py {8-12}
+
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```javascript file=<rootDir>/examples/code/integrations/dropbox/custom_auth.js {8-10}
+
+```
+
+</Tabs.Tab>
+
+</Tabs>
+
+## Using Dropbox auth in custom tools
+
+The Arcade [Model API](/home/use-tools/call-tools-with-models) is a convenient way to call language models and automatically invoke tools. You can author your own [custom tools](/home/build-tools/create-a-toolkit) that interact with the Dropbox API.
+
+Use the `Dropbox()` auth class to specify that a tool requires authorization with Dropbox. The `context.authorization.token` field will be automatically populated with the user's Dropbox token:
+
+```python file=<rootDir>/examples/code/integrations/dropbox/custom_tool.py {5-6,9-13,23}
+
+```

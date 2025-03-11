@@ -7,7 +7,7 @@ export default {
   },
   toolkits: {
     type: "page",
-    title: "Toolkits",
+    title: "Integrations",
     href: "/toolkits",
   },
   reference: {

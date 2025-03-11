@@ -111,25 +111,25 @@ export function LandingPage() {
             <QuickStartCard
               icon={Rocket}
               title="Quick Start Guide"
-              description="Get up and running with Arcade in no time. Follow our step-by-step guide to start building your first AI agent."
+              description="Start using Arcade in minutes with our quick start guide. We'll show you how to equip LLMs with the ability to take action."
               href="/home/quickstart"
             />
             <QuickStartCard
               icon={Puzzle}
               title="Browse Integrations"
-              description="Explore our library of 30+ production-ready tools for popular services. Find the perfect integration for your needs."
+              description="Explore our library of integrations for popular services. Find the perfect integration for your needs."
               href="/toolkits"
             />
             <QuickStartCard
               icon={Wrench}
-              title="Create Custom Tools"
-              description="Learn how to build and deploy your own custom tools. Extend Arcade's capabilities to match your specific requirements."
+              title="Start Building"
+              description="Learn how to build and deploy your own custom tools. Use Arcade's tool SDK to create custom capabilities for your agents."
               href="/home/custom-tools"
             />
             <QuickStartCard
               icon={Cloud}
-              title="Deploy Anywhere"
-              description="Choose between local deployment, Docker, Kubernetes, or our cloud service. Deploy Arcade wherever you need it."
+              title="Deploy Arcade"
+              description="Run Arcade locally, in Docker, or in the cloud. We'll show you how to get started with each option."
               href="/home/install/overview"
             />
           </div>
@@ -139,73 +139,73 @@ export function LandingPage() {
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="mb-4 text-3xl font-bold tracking-tight text-white md:text-4xl">
-              The Hard Parts of AI Development
+              Why Developers Choose Arcade
             </h2>
             <p className="font-medium text-gray-300">
-              Creating AI tools that interact with real-world services is
-              complex. Arcade solves the hard technical challenges, so you can
-              focus on building tools that deliver value.
+              Arcade solves the fundamental challenges that have limited AI
+              agents, empowering them to take meaningful actions in real-world
+              applications.
             </p>
           </div>
           <div className="mt-16 grid gap-8 md:grid-cols-2">
             <ChallengeSolution
               challenge={{
                 icon: Shield,
-                title: "Auth Management",
+                title: "Agents Can't Act on Users' Behalf",
                 description:
-                  "Managing authentication across services is complex, from OAuth flows and API keys to storing credentials, refreshing tokens, and keeping your AI agent connected to services.",
+                  "Today's agents can't securely access user data or perform actions as the user, limiting them to generic tools like search engines and calculators.",
               }}
               solution={{
                 icon: Key,
-                title: "Built-in Auth Management",
+                title: "Secure User Impersonation",
                 description:
-                  "Securely manages OAuth flows, API keys, and user tokens with automatic refresh and scoped access, allowing agents to retrieve and act on user-specific data seamlessly and securely.",
+                  "Arcade lets agents securely access user-specific services like email, calendars, and documents through built-in OAuth and token management.",
                 href: "/home/auth/how-arcade-helps",
               }}
             />
             <ChallengeSolution
               challenge={{
-                icon: Bot,
-                title: "AI Model Compatibility",
+                icon: RefreshCcw,
+                title: "Tools Can't Scale Independently",
                 description:
-                  "Each AI provider (OpenAI, Anthropic, etc.) has its own approach to function calling. You need a unified interface that works consistently across providers while maintaining flexibility to swap models.",
+                  "Tools run on the same resources as your application, creating performance bottlenecks and limiting what agents can do as demand grows.",
               }}
               solution={{
-                icon: Code,
-                title: "Flexible SDK",
+                icon: Zap,
+                title: "Tools That Scale Independently",
                 description:
-                  "Provides a unified SDK to create and execute tools seamlessly across LLM providers like OpenAI and Anthropic. Build once, integrate everywhere, with powerful evaluation and testing tools.",
-                href: "/home/supported-models",
+                  "Arcade separates tool execution from your application, allowing each tool to run on its optimal infrastructure and scale based on its specific needs.",
+                href: "/home/use-tools/tools-overview",
               }}
             />
             <ChallengeSolution
               challenge={{
                 icon: Puzzle,
-                title: "Tool Integration",
+                title: "Fragmented Tool Ecosystem",
                 description:
-                  "Building and maintaining integrations is challenging. Developers often face the burden of navigating complex documentation, adapting to API changes, and managing authentication intricacies.",
+                  "Each LLM provider and orchestration framework requires different tool formats, forcing developers to maintain multiple versions of the same tool for different models.",
               }}
               solution={{
-                icon: PencilRuler,
-                title: "Production-ready Tools",
+                icon: Code,
+                title: "Build Once, Run Anywhere",
                 description:
-                  "30+ pre-built integrations with popular services, ready to use with built-in auth handling.",
-                href: "/toolkits",
+                  "Define your tool once with Arcade's SDK and it works seamlessly across OpenAI, Anthropic, and frameworks like LangChain and CrewAI without any changes.",
+                href: "/home/build-tools/create-a-toolkit",
               }}
             />
             <ChallengeSolution
               challenge={{
-                icon: RefreshCcw,
-                title: "Failures, monitoring & scalability",
+                icon: Bot,
+                title: "Enterprise Requirements Aren't Met",
                 description:
-                  "AI systems need to handle failures smoothly, from network issues to unexpected responses, while ensuring effective monitoring, scaling and orchestration.",
+                  "Existing solutions lack the security, compliance, and integration capabilities needed for enterprise adoption of AI agents.",
               }}
               solution={{
-                icon: Zap,
-                title: "Reliable execution & monitoring",
+                icon: PencilRuler,
+                title: "Enterprise-Ready Platform",
                 description:
-                  "Ensure smooth and reliable execution by handling errors with intelligent retries, timeouts, and fallbacks. Monitor your AI tools comprehensively and scale effortlessly to meet demands.",
-                href: "/home/evaluate-tools/why-evaluate-tools",
+                  "Arcade provides the authentication, compliance, and integration capabilities required for production deployment in enterprise environments.",
+                href: "/toolkits",
               }}
             />
           </div>

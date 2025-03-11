@@ -1,0 +1,105 @@
+import {Tabs} from 'nextra/components'
+
+# Atlassian auth provider
+
+The Atlassian auth provider enables tools and agents to call the Atlassian API on behalf of a user. Behind the scenes, the Arcade Engine and the Atlassian auth provider seamlessly manage Atlassian OAuth 2.0 authorization for your users.
+
+### What's documented here
+
+This page describes how to use and configure Atlassian auth with Arcade.
+
+This auth provider is used by:
+
+- Your [app code](#using-atlassian-auth-in-app-code) that needs to call Atlassian APIs
+- Or, your [custom tools](#using-atlassian-auth-in-custom-tools) that need to call Atlassian APIs
+
+## Configuring Atlassian auth
+
+### Create an Atlassian app
+
+- Create a Atlassian app in the [Atlassian developer console](https://developer.atlassian.com/console/myapps/)
+- In the Authorization tab, click the "Add" action button and set the Callback URL to: `https://cloud.arcade.dev/api/v1/oauth/callback`
+- In the Permissions tab, enable any permissions you need for your app
+- In the Settings tab, copy the Client ID and Secret to use below
+
+Next, add the Atlassian app to your Arcade Engine configuration. You can do this in the Arcade Dashboard, or by editing the `engine.yaml` file directly (for a self-hosted instance).
+
+### Configuring Atlassian auth with the Arcade Dashboard
+
+1. Navigate to the OAuth section of the Arcade Dashboard and click **Add OAuth Provider**.
+2. Select **Atlassian** as the provider.
+3. Choose a unique **ID** for your provider (e.g. "my-atlassian-provider") with an optional **Description**.
+4. Enter your **Client ID** and **Client Secret** from your Atlassian app.
+5. Click **Save**.
+
+When you use tools that require Atlassian auth using your Arcade account credentials, the Arcade Engine will automatically use this Atlassian OAuth provider.
+
+### Configuring Atlassian auth in self-hosted Arcade Engine configuration
+
+<Steps>
+
+### Set environment variables
+
+Set the following environment variables:
+
+```bash
+export ATLASSIAN_CLIENT_ID="<your client ID>"
+export ATLASSIAN_CLIENT_SECRET="<your client secret>"
+```
+
+Or, you can set these values in a `.env` file:
+
+```bash
+ATLASSIAN_CLIENT_SECRET="<your client secret>"
+ATLASSIAN_CLIENT_ID="<your client ID>"
+```
+
+<Tip>
+  See [Engine configuration](/home/configure/engine) for more information on how
+  to set environment variables and configure the Arcade Engine.
+</Tip>
+
+### Edit the Engine configuration
+
+Edit the `engine.yaml` file and add a `atlassian` item to the `auth.providers` section:
+
+```yaml file=<rootDir>/examples/code/integrations/atlassian/config_provider.engine.yaml {3-9}
+
+```
+
+</Steps>
+
+## Using Atlassian auth in app code
+
+Use the Atlassian auth provider in your own agents and AI apps to get a user token for the Atlassian API. See [authorizing agents with Arcade](/home/auth/how-arcade-helps) to understand how this works.
+
+Use `client.auth.start()` to get a user token for the Atlassian API:
+
+<Tabs items={["Python", "JavaScript"]}>
+<Tabs.Tab>
+
+```python file=<rootDir>/examples/code/integrations/atlassian/custom_auth.py {8-12}
+
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```javascript file=<rootDir>/examples/code/integrations/atlassian/custom_auth.js {8-10}
+
+```
+
+</Tabs.Tab>
+
+</Tabs>
+
+## Using Atlassian auth in custom tools
+
+The Arcade [Model API](/home/use-tools/call-tools-with-models) is a convenient way to call language models and automatically invoke tools. You can author your own [custom tools](/home/build-tools/create-a-toolkit) that interact with the Atlassian API.
+
+Use the `Atlassian()` auth class to specify that a tool requires authorization with Atlassian. The `context.authorization.token` field will be automatically populated with the user's Atlassian token:
+
+```python file=<rootDir>/examples/code/integrations/atlassian/custom_tool.py {5-6,9-13,23}
+
+```

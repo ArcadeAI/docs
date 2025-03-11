@@ -1,13 +1,13 @@
 import { ToolCard } from "@/components/custom/Toolkits/ToolCard";
+import { Category, Tool } from "@/components/custom/Toolkits/toolkits-config";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { Category, Tool } from "@/components/custom/Toolkits/toolkits-config";
 import { useDebounce } from "@uidotdev/usehooks";
-import { BadgeCheck, CheckCircle, Search, Users, X } from "lucide-react";
+import { BadgeCheck, CheckCircle, Key, Search, Users, X } from "lucide-react";
 import React, { useCallback, useMemo, useState } from "react";
 
-export type ToolkitType = "arcade" | "verified" | "community";
+export type ToolkitType = "arcade" | "verified" | "community" | "auth";
 
 const typeConfig = {
   arcade: {
@@ -24,6 +24,11 @@ const typeConfig = {
     label: "Community Toolkit",
     icon: Users,
     color: "text-orange-400",
+  },
+  auth: {
+    label: "Auth Integration",
+    icon: Key,
+    color: "text-purple-400",
   },
 };
 
@@ -75,16 +80,15 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
       <div className="mx-auto max-w-7xl px-4 pb-4 pt-6 sm:px-6 lg:px-8">
         <div className="space-y-6">
           <h1 className="text-2xl font-bold text-gray-50 sm:text-3xl">
-            Toolkits
+            Integrations
           </h1>
           <p className="text-sm leading-relaxed text-gray-400 sm:text-base">
-            Enhance your AI agents with powerful integrations and capabilities.
-            Our toolkits come in three types:
+            There are 4 designations for Arcade integrations:
           </p>
-          <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:gap-4 md:grid-cols-4">
             {Object.entries(typeConfig).map(
               ([key, { label, icon: Icon, color }]) => (
-                <div key={key} className="flex items-start space-x-3">
+                <div key={key} className="flex items-start space-x-4">
                   <div className="mt-1">
                     <Icon className={`h-5 w-5 ${color}`} />
                   </div>
@@ -99,6 +103,8 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
                         "Community-created integrations, thoroughly tested and verified by Arcade."}
                       {key === "community" &&
                         "Created and maintained by the Arcade community, offering a wide range of integrations."}
+                      {key === "auth" &&
+                        "Auth integrations allow you to develop custom tools that connect your agent APIs and services."}
                     </p>
                   </div>
                 </div>
@@ -113,7 +119,7 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
             <div className="relative">
               <Input
                 type="text"
-                placeholder="Search toolkits..."
+                placeholder="Search ..."
                 value={searchQuery}
                 onChange={handleSearchChange}
                 className="flex w-full items-center gap-4 border-none bg-[#f9fafb1a] pl-10 text-white placeholder:text-white/50"
@@ -129,7 +135,7 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
               )}
             </div>
             <p className="mt-2 !text-xs text-gray-400 sm:text-sm">
-              {filteredTools.length} toolkit(s) found
+              {filteredTools.length} result(s) found
             </p>
           </div>
           <div className="mt-8 space-y-4">

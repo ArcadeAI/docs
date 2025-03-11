@@ -6,17 +6,24 @@ interface BadgesProps {
 }
 
 const Badges: React.FC<BadgesProps> = ({ repo }) => {
-  const [, repoName] = repo.split("/");
-
+  let repoName;
+  let packageName;
+  if (repo.startsWith("arcadeai")) {
+    repoName = "arcade-ai";
+    packageName = repo.split("/")[1];
+  } else {
+    repoName = repo.split("/")[1].toLowerCase();
+    packageName = repo.split("/")[1];
+  }
   const badges = [
     {
-      href: `https://pypi.org/project/${repoName}/`,
-      src: `https://img.shields.io/pypi/v/${repoName}`,
+      href: `https://pypi.org/project/${packageName}/`,
+      src: `https://img.shields.io/pypi/v/${packageName}`,
       alt: "PyPI Version",
     },
     {
-      href: `https://pypi.org/project/${repoName}/`,
-      src: `https://img.shields.io/pypi/l/${repoName}`,
+      href: `https://github.com/arcadeai/arcade-ai/blob/main/LICENSE`,
+      src: `https://img.shields.io/badge/License-MIT-yellow.svg`,
       alt: "License",
     },
     {
