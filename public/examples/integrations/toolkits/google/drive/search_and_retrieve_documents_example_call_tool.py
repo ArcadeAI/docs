@@ -3,7 +3,7 @@ from arcadepy import Arcade
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
 USER_ID = "you@example.com"
-TOOL_NAME = "Google.InsertTextAtEndOfDocument"
+TOOL_NAME = "Google.SearchAndRetrieveDocuments"
 
 auth_response = client.tools.authorize(
     tool_name=TOOL_NAME,
@@ -17,11 +17,13 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    "document_id": "your_document_id_here",  # Document Ids can be found with the SearchDocuments tool
-    "text_content": "Your text here",
+    "document_contains": ["report"],
+    "document_not_contains": ["draft"],
+    "limit": 10,
 }
 
 response = client.tools.execute(
+    return_format="markdown",
     tool_name=TOOL_NAME,
     input=tool_input,
     user_id=USER_ID,
