@@ -175,7 +175,7 @@ export function LandingPage() {
                 title: "Tools That Scale Independently",
                 description:
                   "Arcade separates tool execution from your application, allowing each tool to run on its optimal infrastructure and scale based on its specific needs.",
-                href: "/home/evaluate-tools/why-evaluate-tools",
+                href: "/home/use-tools/tools-overview",
               }}
             />
             <ChallengeSolution
