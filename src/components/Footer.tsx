@@ -138,6 +138,11 @@ const Footer: React.FC = () => {
       title: "Discord",
       external: true,
     },
+    {
+      url: "https://github.com/ArcadeAI/arcade-ai/issues/new/choose",
+      title: "Report an issue on GitHub",
+      external: true,
+    },
   ];
 
   return (
@@ -158,7 +163,16 @@ const Footer: React.FC = () => {
       </div>
       <div className={styles.copyrightContent}>
         <div className={styles.copyright}>
-          <p>&copy; 2024 &mdash; present Arcade.</p>
+          <p>&copy; 2024 &mdash; present Arcade AI, Inc.</p>
+        </div>
+        <div className={styles.privacyPolicy}>
+          <a
+            href="https://www.arcade.dev/privacy"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Privacy Policy
+          </a>
         </div>
       </div>
     </div>
