@@ -233,7 +233,7 @@ export function LandingPage() {
             />
             <SampleAppCard
               title="Archer"
-              description="A Slack bot that can act on your behalf."
+              description="A bot for Slack that can act on your behalf."
               image="/images/logo/arcade.png"
               href="https://github.com/ArcadeAI/ArcadeSlackAgent"
             />
