@@ -221,4 +221,12 @@ export const tools: Tool[] = [
     category: "social",
     type: "auth",
   },
+  {
+    name: "Twitch",
+    image: "twitch",
+    summary: "Create clips, get videos, and more from Twitch with your agents",
+    link: "/toolkits/entertainment/twitch",
+    category: "entertainment",
+    type: "auth",
+  },
 ];
