@@ -1,0 +1,115 @@
+import { Tabs } from "nextra/components";
+
+# Reddit auth provider
+
+<Note>
+  At this time, Arcade does not offer a default Reddit Auth Provider. To use
+  Reddit auth, you must create a custom Auth Provider with your own Reddit
+  OAuth 2.0 credentials as described below.
+</Note>
+
+The Reddit auth provider enables tools and agents to call the Reddit API on behalf of a user. Behind the scenes, the Arcade Engine and the Reddit auth provider seamlessly manage Reddit OAuth 2.0 authorization for your users.
+
+### What's documented here
+
+This page describes how to use and configure Reddit auth with Arcade.
+
+This auth provider is used by:
+
+- Your [app code](#using-reddit-auth-in-app-code) that needs to call Reddit APIs
+- Or, your [custom tools](#using-reddit-auth-in-custom-tools) that need to call Reddit APIs
+
+## Configuring Reddit auth
+
+### Create a Reddit app
+
+- Create a Reddit Application in the [Reddit App Console](https://www.reddit.com/prefs/apps)
+- Set the OAuth Redirect URL to: `https://cloud.arcade.dev/api/v1/oauth/callback`
+- Copy the App key (Client ID) and App secret (Client Secret), which you'll need below
+
+Next, add the Reddit app to your Arcade Engine configuration. You can do this in the Arcade Dashboard, or by editing the `engine.yaml` file directly (for a self-hosted instance).
+
+### Configuring Reddit auth with the Arcade Dashboard
+
+1. Navigate to the OAuth section of the Arcade Dashboard and click **Add OAuth Provider**.
+2. Select **Reddit** as the provider.
+3. Choose a unique **ID** for your provider (e.g. "my-reddit-provider") with an optional **Description**.
+4. Enter your **Client ID** and **Client Secret** from your Reddit app.
+5. Click **Save**.
+
+When you use tools that require Reddit auth using your Arcade account credentials, the Arcade Engine will automatically use this Reddit OAuth provider.
+
+### Configuring Reddit auth in self-hosted Arcade Engine configuration
+
+<Steps>
+
+### Set environment variables
+
+<Note>
+  The Client ID is the Reddit "App key" and the Client Secret is the Reddit
+  "App secret".
+</Note>
+
+Set the following environment variables:
+
+```bash
+export REDDIT_CLIENT_ID="<your client ID>"
+export REDDIT_CLIENT_SECRET="<your client secret>"
+```
+
+Or, you can set these values in a `.env` file:
+
+```bash
+REDDIT_CLIENT_SECRET="<your client secret>"
+REDDIT_CLIENT_ID="<your client ID>"
+```
+
+<Tip>
+  See [Engine configuration](/home/configure/engine) for more information on how
+  to set environment variables and configure the Arcade Engine.
+</Tip>
+
+### Edit the Engine configuration
+
+Edit the `engine.yaml` file and add a `reddit` item to the `auth.providers` section:
+
+```yaml file=<rootDir>/examples/code/integrations/reddit/config_provider.engine.yaml {3-9}
+
+```
+
+</Steps>
+
+## Using Reddit auth in app code
+
+Use the Reddit auth provider in your own agents and AI apps to get a user-scoped token for the Reddit API. See [authorizing agents with Arcade](/home/auth/how-arcade-helps) to understand how this works.
+
+Use `client.auth.start()` to get a user token for the Reddit API:
+
+<Tabs items={["Python", "JavaScript"]}>
+<Tabs.Tab>
+
+```python file=<rootDir>/examples/code/integrations/reddit/custom_auth.py {8-12}
+
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```javascript file=<rootDir>/examples/code/integrations/reddit/custom_auth.js {8-10}
+
+```
+
+</Tabs.Tab>
+
+</Tabs>
+
+## Using Reddit auth in custom tools
+
+The Arcade [Model API](/home/use-tools/call-tools-with-models) is a convenient way to call language models and automatically invoke tools. You can author your own [custom tools](/home/build-tools/create-a-toolkit) that interact with the Reddit API.
+
+Use the `Reddit()` auth class to specify that a tool requires authorization with Reddit. The `context.authorization.token` field will be automatically populated with the user's Reddit token:
+
+```python file=<rootDir>/examples/code/integrations/reddit/custom_tool.py {5-6,9-13,20}
+
+```
