@@ -1,0 +1,178 @@
+# Google Maps
+
+import ToolInfo from "@/components/ToolInfo";
+import Badges from "@/components/Badges";
+import TabbedCodeBlock from "@/components/TabbedCodeBlock";
+import TableOfContents from "@/components/TableOfContents";
+
+<ToolInfo
+  description="Enable agents to get directions between two locations with Google Maps."
+  author="Arcade"
+  codeLink="https://github.com/ArcadeAI/arcade-ai/tree/main/toolkits/search"
+  authType="API Key"
+  versions={["0.1.0"]}
+/>
+
+<Badges repo="arcadeai/arcade_search" />
+
+The Arcade Google Maps toolkit provides a pre-built set of tools for interacting with Google Maps. These tools make it easy to build agents and AI apps that can:
+
+- Get directions to a location using an address or latitude/longitude.
+
+## Install
+
+```bash
+pip install arcade_search
+```
+
+<Note>
+  pip installing the toolkit is only needed if you are [self-hosting](/home/install/overview) Arcade. You do not need to install the toolkit if you're using Arcade Cloud.
+</Note>
+
+## Available Tools
+
+<TableOfContents
+  headers={["Tool Name", "Description"]}
+  data={
+    [
+      ["GetDirectionsBetweenAddresses", "Get directions between two addresses."],
+      ["GetDirectionsBetweenCoordinates", "Get directions between two latitude/longitude coordinates."],
+    ]
+  }
+/>
+
+<Tip>
+  If you need to perform an action that's not listed here, you can [get in touch
+  with us](mailto:contact@arcade.dev) to request a new tool, or [create your
+  own tools](/home/build-tools/create-a-toolkit).
+</Tip>
+
+## GetDirectionsBetweenAddresses
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/search/google_maps/get_directions_between_addresses_example_call_tool.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/search/google_maps/get_directions_between_addresses_example_call_tool.js"],
+      },
+    },
+    {
+      label: "Execute the Tool with OpenAI",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/search/google_maps/get_directions_between_addresses_example_llm_oai.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/search/google_maps/get_directions_between_addresses_example_llm_oai.js"],
+      },
+    },
+  ]}
+/>
+
+Get directions between two addresses.
+
+**Parameters**
+
+- **`origin_address`** _(string, required)_ The origin address. Example: '123 Main St, New York, NY 10001'.
+- **`destination_address`** _(string, required)_ The destination address. Example: '456 Main St, New York, NY 10001'.
+- **`language`** _(string, optional, Defaults to 'en' English)_ 2-character language code to use in the Google Maps search. A list of supported language codes can be found [here](/toolkits/search/reference#languagecodes).
+- **`country`** _(string, optional, Defaults to `None`)_ 2-character country code to use in the Google Maps search. A list of supported country codes can be found [here](/toolkits/search/reference#countrycodes).
+- **`distance_unit`** _(enum ([GoogleMapsDistanceUnit](/toolkits/search/reference#googlemapsdistanceunit)), optional, Defaults to `GoogleMapsDistanceUnit.KM`)_ Distance unit to use in the Google Maps search.
+- **`travel_mode`** _(enum ([GoogleMapsTravelMode](/toolkits/search/reference#googlemapstravelmode)), optional, Defaults to `GoogleMapsTravelMode.BEST`)_ Travel mode to use in the Google Maps search.
+
+## GetDirectionsBetweenCoordinates
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/search/google_maps/get_directions_between_coordinates_example_call_tool.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/search/google_maps/get_directions_between_coordinates_example_call_tool.js"],
+      },
+    },
+    {
+      label: "Execute the Tool with OpenAI",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/search/google_maps/get_directions_between_coordinates_example_llm_oai.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/search/google_maps/get_directions_between_coordinates_example_llm_oai.js"],
+      },
+    },
+  ]}
+/>
+
+Get directions between two latitude/longitude coordinates.
+
+**Parameters**
+
+- **`origin_latitude`** _(float, required)_ The origin latitude.
+- **`origin_longitude`** _(float, required)_ The origin longitude.
+- **`destination_latitude`** _(float, required)_ The destination latitude.
+- **`destination_longitude`** _(float, required)_ The destination longitude.
+- **`language`** _(string, optional, Defaults to 'en' English)_ 2-character language code to use in the Google Maps search. A list of supported language codes can be found [here](/toolkits/search/reference#languagecodes).
+- **`country`** _(string, optional, Defaults to `None`)_ 2-character country code to use in the Google Maps search. A list of supported country codes can be found [here](/toolkits/search/reference#countrycodes).
+- **`distance_unit`** _(enum ([GoogleMapsDistanceUnit](/toolkits/search/reference#googlemapsdistanceunit)), optional, Defaults to `GoogleMapsDistanceUnit.KM`)_ Distance unit to use in the Google Maps search.
+- **`travel_mode`** _(enum ([GoogleMapsTravelMode](/toolkits/search/reference#googlemapstravelmode)), optional, Defaults to `GoogleMapsTravelMode.BEST`)_ Travel mode to use in the Google Maps search.
+
+## Auth
+
+The Arcade Google Maps toolkit uses the [SerpAPI](https://serpapi.com/) to get directions.
+
+- **Secret:**
+  - `SERP_API_KEY`: Your SerpAPI API key.
+<Note>
+  Setting the `SERP_API_KEY` secret is only required if you are [self-hosting](/home/install/overview) Arcade. If you're using Arcade Cloud, the secret is already set for you. To manage your secrets, go to the [Secrets page](https://api.arcade.dev/dashboard/auth/secrets) in the Arcade Dashboard.
+</Note>
+
+## Default parameters
+
+Language, Country, Distance Unit, and Travel Mode are configurable through environment variables. When set, they will be used as default for Google Maps tools.
+
+Providing a different value as `language`, `country`, `distance_unit`, or `travel_mode` argument in a tool call will override the default value.
+
+**Language**
+
+The language code is a 2-character code that determines the language in which the API will search and return directions. There are two environment variables:
+
+- `ARCADE_GOOGLE_LANGUAGE`: a default value for all Google tools. If not set, defaults to 'en' (English).
+- `ARCADE_GOOGLE_MAPS_LANGUAGE`: a default value for the Google Maps tools. If not set, defaults to `ARCADE_GOOGLE_LANGUAGE`.
+
+A list of supported language codes can be found [here](/toolkits/search/reference#languagecodes).
+
+**Country**
+
+The country code is a 2-character code that determines the country in which the API will search for directions:
+
+- `ARCADE_GOOGLE_MAPS_COUNTRY`: a default value for the Google Maps tools. If not set, defaults to `None`.
+
+A list of supported country codes can be found [here](/toolkits/search/reference#countrycodes).
+
+**Distance Unit**
+
+The distance unit is a string that determines the unit of distance to use in the Google Maps search:
+
+- `ARCADE_GOOGLE_MAPS_DISTANCE_UNIT`: a default value for the Google Maps tools. If not set, defaults to `GoogleMapsDistanceUnit.KM`.
+
+A list of supported distance units can be found [here](/toolkits/search/reference#googlemapsdistanceunit).
+
+**Travel Mode**
+
+The travel mode is a string that determines the mode of travel to use in the Google Maps search:
+
+- `ARCADE_GOOGLE_MAPS_TRAVEL_MODE`: a default value for the Google Maps tools. If not set, defaults to `GoogleMapsTravelMode.BEST`.
+
+A list of supported travel modes can be found [here](/toolkits/search/reference#googlemapstravelmode).
+- **Secret:**
+  - `SERP_API_KEY`: Your SerpAPI API key.
+<Note>
+  Setting the `SERP_API_KEY` secret is only required if you are [self-hosting](/home/install/overview) Arcade. If you're using Arcade Cloud, the secret is already set for you. To manage your secrets, go to the [Secrets page](https://api.arcade.dev/dashboard/auth/secrets) in the Arcade Dashboard.
+</Note>

@@ -21,6 +21,9 @@ export default {
   development: {
     title: "Developer Tools",
   },
+  search: {
+    title: "Search Tools",
+  },
   "-- Submit your toolkit": {
     type: "separator",
     title: "Submit your toolkit",
