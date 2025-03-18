@@ -1,9 +1,8 @@
 import OpenAI from "openai";
 
 const USER_ID = "you@example.com";
-const PROMPT =
-	"Get directions between '123 Main St, New York, NY 10001' and '456 Main St, New York, NY 10001'.";
-const TOOL_NAME = "Search.GetDirectionsBetweenAddresses";
+const PROMPT = "Search for news about 'Apple's new iPhone'.";
+const TOOL_NAME = "Search.SearchNews";
 
 const client = new OpenAI({
 	baseURL: "https://api.arcade.dev",

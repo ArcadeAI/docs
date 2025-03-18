@@ -2,8 +2,8 @@ import os
 from openai import OpenAI
 
 USER_ID = "you@example.com"
-PROMPT = "Get directions between '123 Main St, New York, NY 10001' and '456 Main St, New York, NY 10001'."
-TOOL_NAME = "Search.GetDirectionsBetweenAddresses"
+PROMPT = "Search for news about 'Apple's new iPhone'."
+TOOL_NAME = "Search.SearchNews"
 
 client = OpenAI(
     base_url="https://api.arcade.dev", api_key=os.environ.get("ARCADE_API_KEY")
