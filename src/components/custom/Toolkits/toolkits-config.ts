@@ -159,6 +159,14 @@ export const tools: Tool[] = [
     type: "arcade",
   },
   {
+    name: "Google Jobs",
+    image: "google_jobs",
+    summary: "Search for job openings with Google Jobs.",
+    link: "/toolkits/search/google_jobs",
+    category: "search",
+    type: "arcade",
+  },
+  {
     name: "Spotify",
     image: "spotify",
     summary: "Control music playback and manage playlists on Spotify",
