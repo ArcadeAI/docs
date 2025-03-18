@@ -1,6 +1,5 @@
 export default {
   google: "Google",
-  notion: "Notion",
   obsidian: "Obsidian",
   confluence: "Confluence",
   jira: "Jira",
