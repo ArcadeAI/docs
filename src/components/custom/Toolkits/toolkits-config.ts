@@ -136,10 +136,10 @@ export const tools: Tool[] = [
   {
     name: "Notion",
     image: "notion",
-    summary: "Create, edit, and manage Notion pages and databases",
+    summary: "Create, read, and search Notion pages",
     link: "/toolkits/productivity/notion/readme",
     category: "productivity",
-    type: "verified",
+    type: "arcade",
   },
   {
     name: "Twilio",
