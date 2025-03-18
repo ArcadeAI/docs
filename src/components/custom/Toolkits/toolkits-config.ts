@@ -145,10 +145,10 @@ export const tools: Tool[] = [
   {
     name: "Notion",
     image: "notion",
-    summary: "Create, edit, and manage Notion pages and databases",
+    summary: "Create, read, and search Notion pages",
     link: "/toolkits/productivity/notion/readme",
     category: "productivity",
-    type: "verified",
+    type: "arcade",
   },
   {
     name: "Twilio",
@@ -228,6 +228,22 @@ export const tools: Tool[] = [
     summary: "Manage Discord servers, channels, and more with your agents",
     link: "/toolkits/social-communication/discord",
     category: "social",
+    type: "auth",
+  },
+  {
+    name: "Reddit",
+    image: "reddit",
+    summary: "Interact with Reddit with your agents",
+    link: "/toolkits/social-communication/reddit",
+    category: "social",
+    type: "auth",
+  },
+  {
+    name: "Twitch",
+    image: "twitch",
+    summary: "Create clips, get videos, and more from Twitch with your agents",
+    link: "/toolkits/entertainment/twitch",
+    category: "entertainment",
     type: "auth",
   },
 ];
