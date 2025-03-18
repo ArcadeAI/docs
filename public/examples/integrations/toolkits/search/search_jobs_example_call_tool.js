@@ -3,15 +3,13 @@ import { Arcade } from "@arcadeai/arcadejs";
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
 const USER_ID = "you@example.com";
-const TOOL_NAME = "Search.GetDirectionsBetweenCoordinates";
+const TOOL_NAME = "Search.SearchJobs";
 
 const toolInput = {
-	origin_latitude: 37.7879,
-	origin_longitude: -122.4076,
-	destination_latitude: 37.8219,
-	destination_longitude: -122.4789,
-	distance_unit: "KM",
-	travel_mode: "BEST",
+  query: "software engineer",
+  location: "United States",
+  language: "en",
+  limit: 10,
 };
 
 const response = await client.tools.execute({

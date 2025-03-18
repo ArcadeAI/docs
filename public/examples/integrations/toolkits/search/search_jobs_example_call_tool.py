@@ -3,15 +3,13 @@ from arcadepy import Arcade
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
 USER_ID = "you@example.com"
-TOOL_NAME = "Search.GetDirectionsBetweenCoordinates"
+TOOL_NAME = "Search.SearchJobs"
 
 tool_input = {
-    "origin_latitude": 37.7879,
-    "origin_longitude": -122.4076,
-    "destination_latitude": 37.8219,
-    "destination_longitude": -122.4789,
-    "distance_unit": "KM",
-    "travel_mode": "BEST",
+    "query": "software engineer",
+    "location": "United States",
+    "language": "en",
+    "limit": 10,
 }
 
 response = client.tools.execute(

@@ -2,8 +2,8 @@ import os
 from openai import OpenAI
 
 USER_ID = "you@example.com"
-PROMPT = "Get directions between the following coordinates: 37.7879, -122.4076 and 37.8219, -122.4789."
-TOOL_NAME = "Search.GetDirectionsBetweenCoordinates"
+PROMPT = "Search for 'software engineer' job openings in the United States."
+TOOL_NAME = "Search.SearchJobs"
 
 client = OpenAI(
     base_url="https://api.arcade.dev", api_key=os.environ.get("ARCADE_API_KEY")
