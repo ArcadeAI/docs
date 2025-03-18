@@ -159,6 +159,14 @@ export const tools: Tool[] = [
     type: "arcade",
   },
   {
+    name: "Google News",
+    image: "google_news",
+    summary: "Search for news articles with Google News",
+    link: "/toolkits/search/google_news",
+    category: "search",
+    type: "arcade",
+  },
+  {
     name: "Google Jobs",
     image: "google_jobs",
     summary: "Search for job openings with Google Jobs.",
