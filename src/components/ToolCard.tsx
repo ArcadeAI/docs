@@ -27,7 +27,7 @@ export const ToolCard: React.FC<ToolCardProps> = ({
         }}
       >
         <img
-          src={`/images/icons/${image}.png`}
+          src={`/images/icons/${image}${image.includes(".") ? "" : ".png"}`}
           alt={`${name} logo`}
           className={styles.logo}
           style={{ width: "1.3rem", height: "1.3rem" }}
