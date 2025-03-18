@@ -1,0 +1,87 @@
+---
+title: "Configuring Arcade Deploy"
+description: "Learn how to configure Arcade Deploy"
+---
+
+import { Steps } from "nextra/components";
+import { SignupLink } from "@/components/Analytics";
+
+# Configuring Arcade Deploy
+
+The `arcade deploy` command deploys your worker to the cloud.
+
+## Requirements
+- **Python 3.10** or higher <br/> Verify your Python version by running `python --version` or `python3 --version` in your terminal.
+- **Arcade Account**: Sign up for an <SignupLink utmParams={{
+            utm_source: "docs",
+            utm_medium: "page",
+            utm_campaign: "custom-tools",
+          }} linkLocation="docs:custom-tools">Arcade account</SignupLink> if you haven't already.
+- **Arcade CLI**: Install the Arcade CLI with `pip install arcade-ai`.
+
+## Deployment Config
+
+The `worker.toml` file is used to configure your worker. Running `arcade deploy` will use the `worker.toml` file in the current directory or you can
+specify a different file with the `-d` flag.
+
+Running `arcade new` will automatically create an example `worker.toml` file for the created toolkit.
+
+```bash
+# worker.toml
+
+# Arcade Deploy supports configuring multiple workers in a single file.
+# Configurations below each [[worker]] block will be deployed as a separate worker.
+[[worker]]
+
+# (Required) The worker configuration
+[worker.config]
+
+# (Required) The unique identifier for the worker.
+id = "my-example-worker"
+# (Optional) Whether the worker is enabled.
+enabled = true
+# (Optional) The timeout for the worker for requests to the worker.
+timeout = 30
+# (Optional) The number of times to retry a connection to the worker before giving up.
+retries = 3
+# (Required) The secret for the worker.
+# The default "dev" secret or empty string is not allowed.
+secret = <your secret>
+
+# (Optional) Localy packages to deploy with the worker.
+# You can specify a list of directories that contain a toolkit.
+# The directory must contain a pyproject.toml file or a setup.py file.
+[worker.local_source]
+packages = [ "./my_toolkit1", "./my_toolkit2"]
+
+# (Optional) Pypi packages to install for the worker.
+[worker.pypi_source]
+packages = [ "arcade-math", "my-pypi-package"]
+```
+
+## Secrets
+
+You can use a secret from the environment to configure the worker with the `${env: MY_SECRET}` syntax.
+
+```bash
+[[worker]]
+
+[worker.config]
+secret = "${env: MY_ENVIRONMENT_SECRET}"
+```
+
+## Using with a local engine
+
+To register the worker with your local engine, you can use the host and port flags.
+
+```bash
+arcade deploy -h localhost -p 9099 --no-tls
+```
+
+## Logs
+
+To see the logs for the worker, you can use the `arcade logs` command.
+
+```bash
+arcade logs my-example-worker
+```
