@@ -221,4 +221,20 @@ export const tools: Tool[] = [
     category: "social",
     type: "auth",
   },
+  {
+    name: "Reddit",
+    image: "reddit",
+    summary: "Interact with Reddit with your agents",
+    link: "/toolkits/social-communication/reddit",
+    category: "social",
+    type: "auth",
+  },
+  {
+    name: "Twitch",
+    image: "twitch",
+    summary: "Create clips, get videos, and more from Twitch with your agents",
+    link: "/toolkits/entertainment/twitch",
+    category: "entertainment",
+    type: "auth",
+  },
 ];
