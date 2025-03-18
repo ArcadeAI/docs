@@ -19,6 +19,7 @@ export const categories: Category[] = [
   { id: "social", name: "Social & Communication" },
   { id: "development", name: "Developer Tools" },
   { id: "entertainment", name: "Entertainment" },
+  { id: "search", name: "Search" },
 ];
 
 export const tools: Tool[] = [
@@ -118,11 +119,19 @@ export const tools: Tool[] = [
     type: "arcade",
   },
   {
-    name: "Search",
-    image: "serpapi",
-    summary: "Perform web searches and retrieve relevant information",
-    link: "/toolkits/development/search",
-    category: "development",
+    name: "Google Search",
+    image: "google_search",
+    summary: "Perform Google searches and retrieve relevant information",
+    link: "/toolkits/search/google_search",
+    category: "search",
+    type: "arcade",
+  },
+  {
+    name: "Google Maps",
+    image: "google_maps",
+    summary: "Get directions between two locations with Google Maps",
+    link: "/toolkits/search/google_maps",
+    category: "search",
     type: "arcade",
   },
   {
