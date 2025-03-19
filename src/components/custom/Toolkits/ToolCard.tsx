@@ -147,7 +147,7 @@ export const ToolCard: React.FC<ToolCardProps> = ({
                 </div>
               ) : (
                 <Image
-                  src={`/images/icons/${image}.png`}
+                  src={`/images/icons/${image}`}
                   alt={`${name} logo`}
                   width={40}
                   height={40}
