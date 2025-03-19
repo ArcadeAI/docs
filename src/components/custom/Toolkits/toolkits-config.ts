@@ -393,6 +393,15 @@ const comingSoonTools: Tool[] = [
     isComingSoon: true,
   },
   {
+    name: "Bluesky",
+    image: "bluesky",
+    summary: "Interact with Bluesky with your agents.",
+    link: "/toolkits/social-communication/bluesky",
+    category: "social",
+    type: "arcade",
+    isComingSoon: true,
+  },
+  {
     name: "Box",
     image: "box",
     summary: "Manage files and folders in Box with your agents.",
