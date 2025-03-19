@@ -4,8 +4,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useDebounce } from "@uidotdev/usehooks";
-import { BadgeCheck, CheckCircle, Key, Search, Users, X } from "lucide-react";
+import {
+  BadgeCheck,
+  CheckCircle,
+  Key,
+  Search,
+  Users,
+  X,
+  Plus,
+} from "lucide-react";
 import React, { useCallback, useMemo, useState } from "react";
+import Link from "next/link";
 
 export type ToolkitType = "arcade" | "verified" | "community" | "auth";
 
@@ -110,6 +119,32 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
                 </div>
               ),
             )}
+          </div>
+
+          {/* Custom Integration Call-to-Action */}
+          <div className="mt-8 rounded-lg border border-dashed border-blue-500/50 bg-blue-500/10 p-6">
+            <div className="flex flex-col items-center space-y-4 sm:flex-row sm:space-x-6 sm:space-y-0">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-500/20">
+                <Plus className="h-8 w-8 text-blue-400" />
+              </div>
+              <div className="text-center sm:text-left">
+                <h2 className="text-xl font-bold text-gray-100">
+                  Build your own integration
+                </h2>
+                <p className="mt-2 text-gray-300">
+                  Don't see what you need? Use Arcade's SDK to easily integrate
+                  with any service or API you use!
+                </p>
+                <div className="mt-4">
+                  <Link
+                    href="https://docs.arcade.dev/home/build-tools/create-a-toolkit"
+                    className="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800"
+                  >
+                    Learn how to build a toolkit
+                  </Link>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
