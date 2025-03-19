@@ -132,8 +132,8 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
                   Build your own integration
                 </h2>
                 <p className="mt-2 text-gray-300">
-                  Don't see what you need? Create custom integrations to connect
-                  Arcade with any service or API you use!
+                  Don't see what you need? Use Arcade's SDK to easily integrate
+                  with any service or API you use!
                 </p>
                 <div className="mt-4">
                   <Link
