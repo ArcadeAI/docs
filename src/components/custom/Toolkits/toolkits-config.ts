@@ -474,15 +474,6 @@ const comingSoonTools: Tool[] = [
     isComingSoon: true,
   },
   {
-    name: "Dropbox",
-    image: "dropbox",
-    summary: "Manage Dropbox files and folders with your agents",
-    link: "/toolkits/productivity/dropbox",
-    category: "productivity",
-    type: "auth",
-    isComingSoon: true,
-  },
-  {
     name: "eBay",
     image: "ebay",
     summary: "Manage listings, orders, and inventory on eBay with your agents.",
