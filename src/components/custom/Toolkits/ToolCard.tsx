@@ -151,6 +151,7 @@ export const ToolCard: React.FC<ToolCardProps> = ({
                   alt={`${name} logo`}
                   width={40}
                   height={40}
+                  priority
                   className="object-cover"
                   onError={handleImageError}
                 />
