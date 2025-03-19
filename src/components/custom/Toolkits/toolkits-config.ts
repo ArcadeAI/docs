@@ -27,7 +27,7 @@ export const categories: Category[] = [
 const availableTools: Tool[] = [
   {
     name: "Gmail",
-    image: "gmail",
+    image: "gmail.png",
     summary:
       "Send, write, draft, delete, trash, and search Gmail emails with your agents.",
     link: "/toolkits/productivity/google/gmail",
@@ -36,7 +36,7 @@ const availableTools: Tool[] = [
   },
   {
     name: "Slack",
-    image: "slack",
+    image: "slack.png",
     summary:
       "Send and receive messages to Slack channels and users with agents",
     link: "/toolkits/social-communication/slack",
@@ -45,7 +45,7 @@ const availableTools: Tool[] = [
   },
   {
     name: "X",
-    image: "twitter",
+    image: "twitter.png",
     summary:
       "Integrate agents with X (Twitter), including tweets, users, and more",
     link: "/toolkits/social-communication/x",
@@ -54,7 +54,7 @@ const availableTools: Tool[] = [
   },
   {
     name: "LinkedIn",
-    image: "linkedin",
+    image: "linkedin.png",
     summary:
       "Connect and interact with LinkedIn's professional network through your agents",
     link: "/toolkits/social-communication/linkedin",
@@ -63,7 +63,7 @@ const availableTools: Tool[] = [
   },
   {
     name: "Google Calendar",
-    image: "google_calendar",
+    image: "google_calendar.png",
     summary:
       "Create, update, delete, and search events in Google Calendar with your agents.",
     link: "/toolkits/productivity/google/calendar",
@@ -72,7 +72,7 @@ const availableTools: Tool[] = [
   },
   {
     name: "Google Contacts",
-    image: "google_contacts",
+    image: "google_contacts.png",
     summary: "Create and search contacts in Google Contacts with your agents.",
     link: "/toolkits/productivity/google/contacts",
     category: "productivity",
@@ -80,7 +80,7 @@ const availableTools: Tool[] = [
   },
   {
     name: "Google Drive",
-    image: "google_drive",
+    image: "google_drive.png",
     summary: "List documents in Google Drive with your agents.",
     link: "/toolkits/productivity/google/drive",
     category: "productivity",
@@ -88,7 +88,7 @@ const availableTools: Tool[] = [
   },
   {
     name: "Google Docs",
-    image: "google_docs",
+    image: "google_docs.png",
     summary:
       "Create, edit, and get information about Google Docs documents with your agents.",
     link: "/toolkits/productivity/google/docs",
@@ -97,7 +97,7 @@ const availableTools: Tool[] = [
   },
   {
     name: "GitHub",
-    image: "github",
+    image: "github.png",
     summary:
       "Interact with private and public GitHub repositories, issues, pull requests, and more",
     link: "/toolkits/development/github/github",
@@ -106,7 +106,7 @@ const availableTools: Tool[] = [
   },
   {
     name: "Code Runner",
-    image: "e2b",
+    image: "e2b.png",
     summary: "Execute and test code in a secure sandbox environment",
     link: "/toolkits/development/code-sandbox",
     category: "development",
@@ -114,7 +114,7 @@ const availableTools: Tool[] = [
   },
   {
     name: "Web",
-    image: "web",
+    image: "web.png",
     summary: "Browse and interact with web pages programmatically",
     link: "/toolkits/development/web/web",
     category: "development",
@@ -122,7 +122,7 @@ const availableTools: Tool[] = [
   },
   {
     name: "Google Finance",
-    image: "google_finance",
+    image: "google_finance.png",
     summary: "Get stock data from Google Finance",
     link: "/toolkits/search/google_finance",
     category: "search",
@@ -130,7 +130,7 @@ const availableTools: Tool[] = [
   },
   {
     name: "Google Flights",
-    image: "google_flights",
+    image: "google_flights.png",
     summary: "Search for flights",
     link: "/toolkits/search/google_flights",
     category: "search",
@@ -138,7 +138,7 @@ const availableTools: Tool[] = [
   },
   {
     name: "Google Hotels",
-    image: "google_hotels",
+    image: "google_hotels.png",
     summary: "Search for hotels",
     link: "/toolkits/search/google_hotels",
     category: "search",
@@ -146,7 +146,7 @@ const availableTools: Tool[] = [
   },
   {
     name: "Google Search",
-    image: "google_search",
+    image: "google_search.png",
     summary: "Perform Google searches and retrieve relevant information",
     link: "/toolkits/search/google_search",
     category: "search",
@@ -154,7 +154,7 @@ const availableTools: Tool[] = [
   },
   {
     name: "Google Maps",
-    image: "google_maps",
+    image: "google_maps.png",
     summary: "Get directions between two locations with Google Maps",
     link: "/toolkits/search/google_maps",
     category: "search",
@@ -162,7 +162,7 @@ const availableTools: Tool[] = [
   },
   {
     name: "Google News",
-    image: "google_news",
+    image: "google_news.png",
     summary: "Search for news articles with Google News",
     link: "/toolkits/search/google_news",
     category: "search",
@@ -170,7 +170,7 @@ const availableTools: Tool[] = [
   },
   {
     name: "Google Jobs",
-    image: "google_jobs",
+    image: "google_jobs.png",
     summary: "Search for job openings with Google Jobs.",
     link: "/toolkits/search/google_jobs",
     category: "search",
@@ -178,7 +178,7 @@ const availableTools: Tool[] = [
   },
   {
     name: "Spotify",
-    image: "spotify",
+    image: "spotify.png",
     summary: "Control music playback and manage playlists on Spotify",
     link: "/toolkits/entertainment/spotify",
     category: "entertainment",
@@ -186,7 +186,7 @@ const availableTools: Tool[] = [
   },
   {
     name: "Notion",
-    image: "notion",
+    image: "notion.png",
     summary: "Create, read, and search Notion pages",
     link: "/toolkits/productivity/notion/readme",
     category: "productivity",
@@ -194,7 +194,7 @@ const availableTools: Tool[] = [
   },
   {
     name: "Twilio",
-    image: "twilio",
+    image: "twilio.png",
     summary: "Send SMS and WhatsApp messages through Twilio's platform",
     link: "/toolkits/social-communication/twilio/readme",
     category: "social",
@@ -202,7 +202,7 @@ const availableTools: Tool[] = [
   },
   {
     name: "Close.io",
-    image: "closeio",
+    image: "closeio.png",
     summary: "Manage leads, contacts, and deals in Close.io CRM",
     link: "/toolkits/productivity/closeio",
     category: "productivity",
@@ -210,7 +210,7 @@ const availableTools: Tool[] = [
   },
   {
     name: "Obsidian",
-    image: "obsidian",
+    image: "obsidian.png",
     summary: "Create, edit, and manage Obsidian notes",
     link: "/toolkits/productivity/obsidian",
     category: "productivity",
@@ -218,7 +218,7 @@ const availableTools: Tool[] = [
   },
   {
     name: "Zoom",
-    image: "zoom",
+    image: "zoom.png",
     summary: "Join and manage Zoom meetings with your agents",
     link: "/toolkits/social-communication/zoom",
     category: "social",
@@ -226,7 +226,7 @@ const availableTools: Tool[] = [
   },
   {
     name: "Jira",
-    image: "atlassian",
+    image: "atlassian.png",
     summary: "Manage Jira projects, issues, and more with your agents",
     link: "/toolkits/productivity/jira",
     category: "productivity",
@@ -234,7 +234,7 @@ const availableTools: Tool[] = [
   },
   {
     name: "Confluence",
-    image: "atlassian",
+    image: "atlassian.png",
     summary: "Manage Confluence pages and spaces with your agents",
     link: "/toolkits/productivity/confluence",
     category: "productivity",
@@ -242,7 +242,7 @@ const availableTools: Tool[] = [
   },
   {
     name: "Outlook",
-    image: "msft",
+    image: "msft.png",
     summary: "Manage Outlook emails, calendar, and contacts with your agents",
     link: "/toolkits/productivity/outlook",
     category: "productivity",
@@ -250,7 +250,7 @@ const availableTools: Tool[] = [
   },
   {
     name: "OneDrive",
-    image: "msft",
+    image: "msft.png",
     summary: "Manage OneDrive files and folders with your agents",
     link: "/toolkits/productivity/onedrive",
     category: "productivity",
@@ -258,7 +258,7 @@ const availableTools: Tool[] = [
   },
   {
     name: "Dropbox",
-    image: "dropbox",
+    image: "dropbox.png",
     summary: "Manage Dropbox files and folders with your agents",
     link: "/toolkits/productivity/dropbox",
     category: "productivity",
@@ -266,7 +266,7 @@ const availableTools: Tool[] = [
   },
   {
     name: "Discord",
-    image: "discord",
+    image: "discord.png",
     summary: "Manage Discord servers, channels, and more with your agents",
     link: "/toolkits/social-communication/discord",
     category: "social",
@@ -274,7 +274,7 @@ const availableTools: Tool[] = [
   },
   {
     name: "Reddit",
-    image: "reddit",
+    image: "reddit.png",
     summary: "Interact with Reddit with your agents",
     link: "/toolkits/social-communication/reddit",
     category: "social",
@@ -282,7 +282,7 @@ const availableTools: Tool[] = [
   },
   {
     name: "Twitch",
-    image: "twitch",
+    image: "twitch.png",
     summary: "Create clips, get videos, and more from Twitch with your agents",
     link: "/toolkits/entertainment/twitch",
     category: "entertainment",
@@ -330,7 +330,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Asana",
-    image: "asana",
+    image: "asana.svg",
     summary: "Manage projects, tasks, and more in Asana with your agents.",
     link: "/toolkits/productivity/asana",
     category: "productivity",
@@ -348,7 +348,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Auth0",
-    image: "auth0",
+    image: "auth0.svg",
     summary: "Manage authentication and authorization with your agents.",
     link: "/toolkits/development/auth0",
     category: "development",
@@ -394,7 +394,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Bluesky",
-    image: "bluesky",
+    image: "bluesky.svg",
     summary: "Interact with Bluesky with your agents.",
     link: "/toolkits/social-communication/bluesky",
     category: "social",
@@ -403,7 +403,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Box",
-    image: "box",
+    image: "box.svg",
     summary: "Manage files and folders in Box with your agents.",
     link: "/toolkits/productivity/box",
     category: "productivity",
@@ -439,7 +439,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Calendly",
-    image: "calendly",
+    image: "calendly.svg",
     summary: "Manage scheduling and appointments with your agents.",
     link: "/toolkits/productivity/calendly",
     category: "productivity",
@@ -457,7 +457,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Coinbase",
-    image: "coinbase",
+    image: "coinbase.svg",
     summary: "Manage cryptocurrency transactions and wallets with your agents.",
     link: "/toolkits/productivity/coinbase",
     category: "productivity",
@@ -466,7 +466,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Datadog",
-    image: "datadog",
+    image: "datadog.svg",
     summary: "Monitor applications and infrastructure with your agents.",
     link: "/toolkits/development/datadog",
     category: "development",
@@ -484,7 +484,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "eBay",
-    image: "ebay",
+    image: "ebay.svg",
     summary: "Manage listings, orders, and inventory on eBay with your agents.",
     link: "/toolkits/productivity/ebay",
     category: "productivity",
@@ -511,7 +511,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Figma",
-    image: "figma",
+    image: "figma.svg",
     summary: "Access design files and collaborate on designs with your agents.",
     link: "/toolkits/productivity/figma",
     category: "productivity",
@@ -520,7 +520,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "GitLab",
-    image: "gitlab",
+    image: "gitlab.svg",
     summary:
       "Manage repositories, issues, and merge requests with your agents.",
     link: "/toolkits/development/gitlab",
@@ -530,7 +530,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Heroku",
-    image: "heroku",
+    image: "heroku.svg",
     summary: "Deploy and manage applications on Heroku with your agents.",
     link: "/toolkits/development/heroku",
     category: "development",
@@ -567,7 +567,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Linear",
-    image: "linear",
+    image: "linear.svg",
     summary: "Manage issues and projects with your agents.",
     link: "/toolkits/productivity/linear",
     category: "productivity",
@@ -648,7 +648,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Pinterest",
-    image: "pinterest",
+    image: "pinterest.svg",
     summary: "Create and manage pins and boards with your agents.",
     link: "/toolkits/social-communication/pinterest",
     category: "social",
@@ -685,7 +685,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Salesforce",
-    image: "salesforce",
+    image: "salesforce.svg",
     summary: "Manage customer relationships and sales with your agents.",
     link: "/toolkits/productivity/salesforce",
     category: "productivity",
@@ -694,7 +694,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Shopify",
-    image: "shopify",
+    image: "shopify.svg",
     summary: "Manage e-commerce stores and products with your agents.",
     link: "/toolkits/productivity/shopify",
     category: "productivity",
@@ -749,7 +749,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Stripe",
-    image: "stripe",
+    image: "stripe.svg",
     summary: "Process payments and manage subscriptions with your agents.",
     link: "/toolkits/productivity/stripe",
     category: "productivity",
@@ -758,7 +758,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "TikTok",
-    image: "tiktok",
+    image: "tiktok.svg",
     summary: "Create and manage TikTok content with your agents.",
     link: "/toolkits/social-communication/tiktok",
     category: "social",
@@ -776,7 +776,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Vercel",
-    image: "vercel",
+    image: "vercel.svg",
     summary: "Deploy and manage web applications with your agents.",
     link: "/toolkits/development/vercel",
     category: "development",
