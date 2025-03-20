@@ -1,7 +1,6 @@
 import os
 from openai import OpenAI
 
-USER_ID = "you@example.com"
 PROMPT = "Search for 'Apple iPhone' on Walmart. Sort by price from low to high. Filter for products with next day delivery option and a price of $250 or less."
 TOOL_NAME = "Search.SearchWalmartProducts"
 
@@ -14,7 +13,6 @@ response = client.chat.completions.create(
         {"role": "user", "content": PROMPT},
     ],
     model="gpt-4o-mini",
-    user=USER_ID,
     tools=[TOOL_NAME],
     tool_choice="generate",
 )
