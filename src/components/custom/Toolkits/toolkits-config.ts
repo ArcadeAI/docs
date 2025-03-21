@@ -177,6 +177,22 @@ const availableTools: Tool[] = [
     type: "arcade",
   },
   {
+    name: "Youtube Search",
+    image: "youtube.png",
+    summary: "Search and get details about YouTube videos.",
+    link: "/toolkits/search/youtube",
+    category: "search",
+    type: "arcade",
+  },
+  {
+    name: "Walmart Search",
+    image: "walmart.png",
+    summary: "Search and get details about products listed on Walmart.",
+    link: "/toolkits/search/walmart",
+    category: "search",
+    type: "arcade",
+  },
+  {
     name: "Spotify",
     image: "spotify.png",
     summary: "Control music playback and manage playlists on Spotify",
