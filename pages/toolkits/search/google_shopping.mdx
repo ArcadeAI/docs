@@ -1,0 +1,113 @@
+# Google Shopping Search
+
+import ToolInfo from "@/components/ToolInfo";
+import Badges from "@/components/Badges";
+import TabbedCodeBlock from "@/components/TabbedCodeBlock";
+import TableOfContents from "@/components/TableOfContents";
+
+<ToolInfo
+  description="Enable agents to search for products with Google Shopping."
+  author="Arcade"
+  codeLink="https://github.com/ArcadeAI/arcade-ai/tree/main/toolkits/search"
+  authType="API Key"
+  versions={["0.1.0"]}
+/>
+
+<Badges repo="arcadeai/arcade_search" />
+
+The Arcade Google Shopping Search toolkit provides a pre-built set of tools for interacting with Google Shopping. These tools make it easy to build agents and AI apps that can:
+
+- Search for products on Google Shopping;
+
+## Install
+
+```bash
+pip install arcade_search
+```
+
+<Note>
+  pip installing the toolkit is only needed if you are [self-hosting](/home/install/overview) Arcade. You do not need to install the toolkit if you're using Arcade Cloud.
+</Note>
+
+## Available Tools
+
+<TableOfContents
+  headers={["Tool Name", "Description"]}
+  data={
+    [
+      ["SearchShoppingProducts", "Search for products on Google Shopping."],
+    ]
+  }
+/>
+
+<Tip>
+  If you need to perform an action that's not listed here, you can [get in touch
+  with us](mailto:contact@arcade.dev) to request a new tool, or [create your
+  own tools](/home/build-tools/create-a-toolkit).
+</Tip>
+
+## SearchGoogleShopping
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/search/google_shopping/search_google_shopping_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/search/google_shopping/search_google_shopping_example_call_tool.js"],
+      },
+    },
+    {
+      label: "Execute the Tool with OpenAI",
+      content: {
+        Python: ["/examples/integrations/toolkits/search/google_shopping/search_google_shopping_example_llm_oai.py"],
+        JavaScript: ["/examples/integrations/toolkits/search/google_shopping/search_google_shopping_example_llm_oai.js"],
+      },
+    },
+  ]}
+/>
+
+Search for products on Google Shopping.
+
+**Parameters**
+
+- **keywords** _(string, required)_ Keywords to search for. E.g. 'apple iphone' or 'samsung galaxy'
+- **`country_code`** _(string, optional, Defaults to 'us' United States)_ 2-character country code to use in the Google Shopping search. A list of supported country codes can be found [here](/toolkits/search/reference#countrycodes).
+- **`language_code`** _(string, optional, Defaults to 'en' English)_ 2-character language code to use in the Google Shopping search. A list of supported language codes can be found [here](/toolkits/search/reference#languagecodes).
+
+
+## Auth
+
+The Arcade Google Shopping Search toolkit uses the [SerpAPI](https://serpapi.com/) to get product information from Google Shopping.
+
+- **Secret:**
+  - `SERP_API_KEY`: Your SerpAPI API key.
+<Note>
+  Setting the `SERP_API_KEY` secret is only required if you are [self-hosting](/home/install/overview) Arcade. If you're using Arcade Cloud, the secret is already set for you. To manage your secrets, go to the [Secrets page](https://api.arcade.dev/dashboard/auth/secrets) in the Arcade Dashboard.
+</Note>
+
+
+## Default parameter values
+
+Language and Country are configurable through environment variables. When set, they will be used as default for YouTube tools.
+
+Providing a different value as `language_code` or `country_code` argument in a tool call will override the default value set in the environment variables.
+
+**Language**
+
+The language code is a 2-character code that determines the language in which the API will search and return video information. There are two environment variables:
+
+- `ARCADE_GOOGLE_LANGUAGE`: a default value for all Google Search tools. If not set, defaults to 'en' (English).
+- `ARCADE_GOOGLE_SHOPPING_LANGUAGE`: a default value for the YouTube Search tools. If not set, defaults to `ARCADE_GOOGLE_LANGUAGE`. If `ARCADE_GOOGLE_LANGUAGE` is not set, defaults to 'en' (English).
+
+A list of supported language codes can be found [here](/toolkits/search/reference#languagecodes).
+
+**Country**
+
+The country code is a 2-character code that determines the country in which the API will search for videos:
+
+- `ARCADE_GOOGLE_COUNTRY`: a default value for all Google Search tools. If not set, defaults to `None`.
+- `ARCADE_GOOGLE_SHOPPING_COUNTRY`: a default value for the YouTube Search tools. If not set, defaults to `ARCADE_GOOGLE_COUNTRY`. If `ARCADE_GOOGLE_COUNTRY` is not set, the default country for YouTube tools will be `us` (United States).
+
+A list of supported country codes can be found [here](/toolkits/search/reference#countrycodes).
