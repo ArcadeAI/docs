@@ -177,6 +177,14 @@ const availableTools: Tool[] = [
     type: "arcade",
   },
   {
+    name: "Google Shopping",
+    image: "google_shopping.png",
+    summary: "Search for products on Google Shopping.",
+    link: "/toolkits/search/google_shopping",
+    category: "search",
+    type: "arcade",
+  },
+  {
     name: "Youtube Search",
     image: "youtube.png",
     summary: "Search and get details about YouTube videos.",
