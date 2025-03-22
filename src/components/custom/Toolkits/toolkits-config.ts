@@ -281,6 +281,14 @@ const availableTools: Tool[] = [
     type: "auth",
   },
   {
+    name: "Tesla",
+    image: "tesla.png",
+    summary: "Control and monitor Tesla vehicles with your agents",
+    link: "/toolkits/social-communication/tesla",
+    category: "social",
+    type: "auth",
+  },
+  {
     name: "Twitch",
     image: "twitch.png",
     summary: "Create clips, get videos, and more from Twitch with your agents",
