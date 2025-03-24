@@ -1,8 +1,8 @@
 import OpenAI from 'openai';
 
 const USER_ID = "you@example.com";
-const PROMPT = "Delete the draft email with the ID 'your_draft_id_here'."; // The ID of an email can be found with the ListDraftEmails tool
-const TOOL_NAME = "Google.DeleteDraftEmail";
+const PROMPT = "Create a new spreadsheet named 'Customers'. I want three columns: Name, Age, and City. John is 20 y/o from New York. Jane is 25 y/o from Los Angeles. Calculate the average age of all customers and put it in the fifth row (use a formula so that it updates automatically)."
+const TOOL_NAME = "Google.CreateSpreadsheet";
 
 const client = new OpenAI({
   baseURL: 'https://api.arcade.dev',
