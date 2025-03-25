@@ -19,7 +19,8 @@ import TableOfContents from "@/components/TableOfContents";
 
 The Arcade Drive toolkit provides a pre-built set of tools for interacting with Google Drive. These tools make it easy to build agents and AI apps that can:
 
-- List Google documents in the user's Google Drive
+- Search Google documents in the user's Google Drive
+- Search and retrieve the contents of Google documents in the user's Google Drive
 
 ## Install
 
@@ -33,7 +34,10 @@ These tools are currently available in the Arcade Drive toolkit.
 
 <TableOfContents
   headers={["Tool Name", "Description"]}
-  data={[["ListDocuments", "List documents in the user's Google Drive. Note: This tool currently requires a self-hosted instance of Arcade."]]}
+  data={[
+    ["SearchDocuments", "Search for documents in the user's Google Drive. Note: This tool currently requires a self-hosted instance of Arcade."],
+    ["SearchAndRetrieveDocuments", "Search and retrieve the contents of Google documents in the user's Google Drive. Note: This tool currently requires a self-hosted instance of Arcade."]
+  ]}
 />
 
 <Tip>
@@ -43,7 +47,7 @@ These tools are currently available in the Arcade Drive toolkit.
   provider](/home/auth-providers/google#using-google-auth-in-custom-tools).
 </Tip>
 
-## ListDocuments
+## SearchDocuments
 
 <br />
 <TabbedCodeBlock
@@ -52,32 +56,75 @@ These tools are currently available in the Arcade Drive toolkit.
       label: "Call the Tool with User Authorization",
       content: {
         Python: [
-          "/examples/integrations/toolkits/google/drive/list_documents_example_call_tool.py",
+          "/examples/integrations/toolkits/google/drive/search_documents_example_call_tool.py",
         ],
-        JavaScript: ["/examples/integrations/toolkits/google/drive/list_documents_example_call_tool.js"],
+        JavaScript: ["/examples/integrations/toolkits/google/drive/search_documents_example_call_tool.js"],
       },
     },
     {
       label: "Execute the Tool with OpenAI",
       content: {
         Python: [
-          "/examples/integrations/toolkits/google/drive/list_documents_example_llm_oai.py",
+          "/examples/integrations/toolkits/google/drive/search_documents_example_llm_oai.py",
         ],
-        JavaScript: ["/examples/integrations/toolkits/google/drive/list_documents_example_llm_oai.js"],
+        JavaScript: ["/examples/integrations/toolkits/google/drive/search_documents_example_llm_oai.js"],
       },
     },
   ]}
 />
 
-List documents in the user's Google Drive. Excludes documents that are in the trash.
+Search Google documents in the user's Google Drive. Excludes documents that are in the trash.
 
 **Parameters**
 
-- **`corpora`** _(enum ([Corpora](/toolkits/productivity/google/reference#corpora)), optional)_ The source of files to list. Defaults to `Corpora.USER`.
-- **`title_keywords`** _(list[str], optional)_ Keywords or phrases that must be in the document title. Defaults to `None`.
-- **`order_by`** _(enum ([OrderBy](/toolkits/productivity/google/reference#orderby)), optional)_ Sort order. Defaults to `OrderBy.MODIFIED_TIME_DESC`.
-- **`supports_all_drives`** _(bool, optional)_ Whether the requesting application supports both My Drives and shared drives. Defaults to `False`.
+- **`document_contains`** _(list[str], optional)_ Keywords or phrases that must be in the document title or body. Provide a list of keywords or phrases if needed.
+- **`document_not_contains`** _(list[str], optional)_ Keywords or phrases that must not be in the document title or body. Provide a list of keywords or phrases if needed.
+- **`search_only_in_shared_drive_id`** _(str, optional)_ The ID of the shared drive to restrict the search to. If provided, the search will only return documents from this drive. Defaults to None, which searches across all drives.
+- **`include_shared_drives`** _(bool, optional)_ Whether to include documents from shared drives in the search results. Defaults to False (searches only in the user's 'My Drive').
+- **`include_organization_domain_documents`** _(bool, optional)_ Whether to include documents from the organization's domain. This is applicable to admin users who have permissions to view organization-wide documents in a Google Workspace account. Defaults to False.
+- **`order_by`** _(enum ([OrderBy](/toolkits/productivity/google/reference#orderby)), optional)_ Sort order. Defaults to listing the most recently modified documents first.
 - **`limit`** _(int, optional)_ The number of documents to list. Defaults to `50`.
+- **`pagination_token`** _(str, optional)_ The pagination token to continue a previous request
+
+## SearchAndRetrieveDocuments
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/google/drive/search_and_retrieve_documents_example_call_tool.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/google/drive/search_and_retrieve_documents_example_call_tool.js"],
+      },
+    },
+    {
+      label: "Execute the Tool with OpenAI",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/google/drive/search_and_retrieve_documents_example_llm_oai.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/google/drive/search_and_retrieve_documents_example_llm_oai.js"],
+      },
+    },
+  ]}
+/>
+
+Searches for documents in the user's Google Drive and returns a list of documents (with text content) matching the search criteria. Excludes documents that are in the trash.
+
+**Parameters**
+
+- **`document_format`** _(enum ([DocumentFormat](/toolkits/productivity/google/reference#documentformat)), optional)_ The format of the document to be returned. Defaults to Markdown.
+- **`document_contains`** _(list[str], optional)_ Keywords or phrases that must be in the document title or body. Provide a list of keywords or phrases if needed.
+- **`document_not_contains`** _(list[str], optional)_ Keywords or phrases that must not be in the document title or body. Provide a list of keywords or phrases if needed.
+- **`search_only_in_shared_drive_id`** _(str, optional)_ The ID of the shared drive to restrict the search to. If provided, the search will only return documents from this drive. Defaults to None, which searches across all drives.
+- **`include_shared_drives`** _(bool, optional)_ Whether to include documents from shared drives in the search results. Defaults to False (searches only in the user's 'My Drive').
+- **`include_organization_domain_documents`** _(bool, optional)_ Whether to include documents from the organization's domain. This is applicable to admin users who have permissions to view organization-wide documents in a Google Workspace account. Defaults to False.
+- **`order_by`** _(enum ([OrderBy](/toolkits/productivity/google/reference#orderby)), optional)_ Sort order. Defaults to listing the most recently modified documents first.
+- **`limit`** _(int, optional)_ The number of documents to list. Defaults to `50`.
+- **`pagination_token`** _(str, optional)_ The pagination token to continue a previous request
 
 ## GetFileTreeStructure
 

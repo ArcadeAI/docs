@@ -3,7 +3,7 @@ import { Arcade } from "@arcadeai/arcadejs";
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
 const USER_ID = "you@example.com";
-const TOOL_NAME = "Google.ListDocuments";
+const TOOL_NAME = "Google.SearchAndRetrieveDocuments";
 
 // Start the authorization process
 const authResponse = await client.tools.authorize({
@@ -19,7 +19,10 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  title_keywords: ["report"]
+  return_format: "markdown",
+  document_contains: ["report"],
+  document_not_contains: ["draft"],
+  limit: 10,
 };
 
 const response = await client.tools.execute({
@@ -28,4 +31,4 @@ const response = await client.tools.execute({
   user_id: USER_ID,
 });
 
-console.log(response); 
+console.log(response);

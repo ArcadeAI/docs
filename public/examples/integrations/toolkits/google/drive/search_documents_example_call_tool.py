@@ -3,7 +3,7 @@ from arcadepy import Arcade
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
 USER_ID = "you@example.com"
-TOOL_NAME = "Google.ListDocuments"
+TOOL_NAME = "Google.SearchDocuments"
 
 auth_response = client.tools.authorize(
     tool_name=TOOL_NAME,
@@ -17,7 +17,9 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    "title_keywords": ["report"],
+    "document_contains": ["report"],
+    "document_not_contains": ["draft"],
+    "limit": 10,
 }
 
 response = client.tools.execute(
