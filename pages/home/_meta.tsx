@@ -72,6 +72,9 @@ export default {
   langchain: {
     title: "LangChain",
   },
+  "oai-agents": {
+    title: "OpenAI Agents",
+  },
   crewai: {
     title: "CrewAI",
   },
