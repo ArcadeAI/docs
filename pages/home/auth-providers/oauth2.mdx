@@ -287,6 +287,45 @@ token_request:
 - `path`: The JSONPath expression to select the array to join.
 - `delimiter`: The delimiter to use between array elements. Make sure this matches the `scope_delimiter` setting in the `oauth2` section.
 
+#### Extracting values from JWT tokens
+
+Some OAuth 2.0 servers return JWT tokens that contain claims you might need to extract. For example, the token might contain scopes or other information about the user. You can use the `jwt_decode()` function in `response_map` to extract values from JWT tokens:
+
+```yaml
+token_request:
+  response_map:
+    access_token: "$.access_token"
+    expires_in: "$.expires_in"
+    scope: "jwt_decode('$.access_token', '$.scope')"
+```
+
+`jwt_decode()` takes two arguments:
+
+- `token_path`: The JSONPath expression to select the JWT token.
+- `claim_path`: The JSONPath expression to select the claim within the decoded JWT payload.
+
+If the claim is an array (like scopes often are), you can combine `jwt_decode()` with `join()` to extract and format the values:
+
+```yaml
+token_request:
+  response_map:
+    access_token: "$.access_token"
+    expires_in: "$.expires_in"
+    scope: "join(jwt_decode('$.access_token', '$.scp'), ' ')"
+```
+
+This is particularly useful when the JWT token contains scopes in an array format (like `scp: ["scope1", "scope2"]`) and you need to convert them to a space-delimited string.
+
+You can also extract nested claims from the JWT payload using dot notation in the claim path:
+
+```yaml
+token_request:
+  response_map:
+    access_token: "$.access_token"
+    expires_in: "$.expires_in"
+    scope: "jwt_decode('$.access_token', '$.nested.scopes')"
+```
+
 #### Full configuration example
 
 Here's a full example of the YAML configuration for a custom OAuth 2.0 provider:
