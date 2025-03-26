@@ -54,15 +54,18 @@ import { Arcade } from "@arcadeai/arcadejs";
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
 // Unique identifier for the end user
-const user_id = "user@example.com";
+const userId = "user@example.com";
 
 // Request access to the user's Gmail account
-let auth_response = client.tools.authorize({
+let authResponse = await client.tools.authorize({
   tool_name: "Google.ListEmails",
-  user_id: user_id,
+  user_id: userId,
 });
 
-console.log(`Please authorize access by visiting: ${auth_response.url}`);
+// Ask for user authorization
+if (authResponse.status !== "completed") {
+  console.log(`Click this link to authorize: ${authResponse.url}`);
+}
 ```
 </Tabs.Tab>
 </Tabs>
@@ -72,13 +75,13 @@ Then, wait for the user to complete the authorization process:
 <Tabs.Tab>
 ```python
 # Wait for the authorization to complete
-auth_response = client.auth.wait_for_completion(auth_response)
+client.auth.wait_for_completion(auth_response)
 ```
 </Tabs.Tab>
 <Tabs.Tab>
 ```javascript
 // Wait for the authorization to complete
-auth_response = client.auth.wait_for_completion(auth_response)
+await client.auth.waitForCompletion(authResponse);
 ```
 </Tabs.Tab>
 </Tabs>
@@ -96,11 +99,11 @@ print(emails_response)
 </Tabs.Tab>
 <Tabs.Tab>
 ```javascript
-const emails_response = client.tools.execute({
+const emailsResponse = client.tools.execute({
   tool_name: "Google.ListEmails",
   user_id: user_id,
 });
-console.log(emails_response)
+console.log(emailsResponse.output.value);
 ```
 </Tabs.Tab>
 </Tabs>
