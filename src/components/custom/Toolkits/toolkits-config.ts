@@ -600,7 +600,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Mailchimp",
-    image: "mailchimp",
+    image: "mailchimp.png",
     summary: "Manage email campaigns and subscribers with your agents.",
     link: "/toolkits/productivity/mailchimp",
     category: "productivity",
@@ -609,7 +609,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Microsoft Dynamics",
-    image: "msft_dynamics",
+    image: "msft.png",
     summary: "Manage CRM and ERP processes with your agents.",
     link: "/toolkits/productivity/microsoft_dynamics",
     category: "productivity",
@@ -618,7 +618,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Model Context Protocol (MCP)",
-    image: "mcp",
+    image: "mcp.png",
     summary: "Manage context and improve AI interactions with your agents.",
     link: "/toolkits/development/mcp",
     category: "development",
@@ -636,7 +636,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Monday",
-    image: "monday",
+    image: "monday.png",
     summary: "Manage projects and workflows with your agents.",
     link: "/toolkits/productivity/monday",
     category: "productivity",
@@ -645,7 +645,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Netsuite",
-    image: "netsuite",
+    image: "netsuite.svg",
     summary: "Manage financial and business operations with your agents.",
     link: "/toolkits/productivity/netsuite",
     category: "productivity",
@@ -654,7 +654,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Okta",
-    image: "okta",
+    image: "okta.png",
     summary: "Manage identity and access with your agents.",
     link: "/toolkits/productivity/okta",
     category: "productivity",
@@ -663,7 +663,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Pinecone",
-    image: "pinecone",
+    image: "pinecone.png",
     summary: "Manage vector databases and similarity search with your agents.",
     link: "/toolkits/development/pinecone",
     category: "development",
@@ -680,8 +680,17 @@ const comingSoonTools: Tool[] = [
     isComingSoon: true,
   },
   {
+    name: "Pipedrive",
+    image: "pipedrive.png",
+    summary: "Manage sales pipelines and leads with your agents.",
+    link: "/toolkits/productivity/pipedrive",
+    category: "productivity",
+    type: "arcade",
+    isComingSoon: true,
+  },
+  {
     name: "Plaid",
-    image: "plaid",
+    image: "plaid.png",
     summary:
       "Connect with financial accounts and manage financial data with your agents.",
     link: "/toolkits/productivity/plaid",
@@ -690,17 +699,8 @@ const comingSoonTools: Tool[] = [
     isComingSoon: true,
   },
   {
-    name: "Pipedrive",
-    image: "pipedrive",
-    summary: "Manage sales pipelines and leads with your agents.",
-    link: "/toolkits/productivity/pipedrive",
-    category: "productivity",
-    type: "arcade",
-    isComingSoon: true,
-  },
-  {
     name: "QuickBooks",
-    image: "quickbooks",
+    image: "quickbooks.png",
     summary: "Manage accounting and finances with your agents.",
     link: "/toolkits/productivity/quickbooks",
     category: "productivity",
@@ -727,7 +727,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "SingleStore",
-    image: "singlestore",
+    image: "singlestore.png",
     summary: "Manage databases and data operations with your agents.",
     link: "/toolkits/development/singlestore",
     category: "development",
@@ -736,7 +736,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Snowflake",
-    image: "snowflake",
+    image: "snowflake.png",
     summary: "Manage data warehouses and analytics with your agents.",
     link: "/toolkits/development/snowflake",
     category: "development",
@@ -745,7 +745,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Splunk",
-    image: "splunk",
+    image: "splunk.png",
     summary: "Monitor and analyze machine data with your agents.",
     link: "/toolkits/development/splunk",
     category: "development",
@@ -754,7 +754,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Square",
-    image: "square",
+    image: "square.png",
     summary:
       "Process payments and manage business operations with your agents.",
     link: "/toolkits/productivity/square",
@@ -764,7 +764,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Squarespace",
-    image: "squarespace",
+    image: "squarespace.png",
     summary: "Manage websites and online presence with your agents.",
     link: "/toolkits/productivity/squarespace",
     category: "productivity",
@@ -791,7 +791,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Trello",
-    image: "trello",
+    image: "trello.png",
     summary: "Manage boards, cards, and lists with your agents.",
     link: "/toolkits/productivity/trello",
     category: "productivity",
@@ -809,7 +809,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Weaviate",
-    image: "weaviate",
+    image: "weaviate.png",
     summary: "Manage vector databases and semantic search with your agents.",
     link: "/toolkits/development/weaviate",
     category: "development",
@@ -818,7 +818,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Workday",
-    image: "workday",
+    image: "workday.png",
     summary: "Manage HR, finance, and planning with your agents.",
     link: "/toolkits/productivity/workday",
     category: "productivity",
@@ -827,7 +827,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Wrike",
-    image: "wrike",
+    image: "wrike.png",
     summary: "Manage projects and collaborate with your agents.",
     link: "/toolkits/productivity/wrike",
     category: "productivity",
@@ -836,7 +836,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Xero",
-    image: "xero",
+    image: "xero.svg",
     summary: "Manage accounting and finances with your agents.",
     link: "/toolkits/productivity/xero",
     category: "productivity",
@@ -845,7 +845,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Zendesk",
-    image: "zendesk",
+    image: "zendesk.png",
     summary: "Manage customer support and service with your agents.",
     link: "/toolkits/productivity/zendesk",
     category: "productivity",
