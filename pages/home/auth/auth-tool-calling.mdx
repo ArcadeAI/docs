@@ -53,15 +53,16 @@ This authorization must be approved by the user. By approving, the user allows y
 ```python
 # As the developer, you must identify the user you're authorizing
 # and pass a unique identifier for them (e.g. an email or user ID) to Arcade:
-THE_USER_ID = "you@example.com"
+USER_ID = "you@example.com"
 
 # Request access to the user's Gmail account
 auth_response = client.tools.authorize(
   tool_name="Google.ListEmails",
-  user_id=THE_USER_ID,
+  user_id=USER_ID,
 )
 
-print(f"Click this link to authorize: {auth_response.url}")
+if auth_response.status != "completed":
+    print(f"Click this link to authorize: {auth_response.url}")
 ```
 
 </Tabs.Tab>
@@ -69,15 +70,17 @@ print(f"Click this link to authorize: {auth_response.url}")
 ```js
 // As the developer, you must identify the user you're authorizing
 // and pass a unique identifier for them (e.g. an email or user ID) to Arcade:
-const THE_USER_ID = "you@example.com";
+const userId = "you@example.com";
 
 // Request access to the user's Gmail account
-const auth_response = await client.tools.authorize({
+const authResponse = await client.tools.authorize({
   tool_name: "Google.ListEmails",
-  user_id: THE_USER_ID,
+  user_id: userId,
 });
 
-console.log(`Click this link to authorize: ${auth_response.url}`);
+if (authResponse.status !== "completed") {
+  console.log(`Click this link to authorize: ${authResponse.url}`);
+}
 ```
 
 </Tabs.Tab>
@@ -87,20 +90,18 @@ This will print a URL that the user must visit to approve the authorization.
 
 ### Check for authorization status
 
-It may take a few minutes for the user to approve the authorization.
-
 You can wait for the authorization to complete using the following methods:
 
 <Tabs items={["Python", "JavaScript"]}>
   <Tabs.Tab>
     ```python
-    auth_status = client.auth.wait_for_completion(auth_response)
+    client.auth.wait_for_completion(auth_response)
     ```
   </Tabs.Tab>
   <Tabs.Tab>
 
-    ```js const auth_status = await
-    client.auth.waitForCompletion(auth_response);
+    ```js
+    await client.auth.waitForCompletion(authResponse);
     ```
   </Tabs.Tab>
 </Tabs>
@@ -117,7 +118,7 @@ Once the user has approved the action, you can run the tool. You only need to pa
 ```python
 emails_response = client.tools.execute(
     tool_name="Google.ListEmails",
-    user_id=THE_USER_ID,
+    user_id=USER_ID,
 )
 print(emails_response)
 ```
@@ -126,12 +127,12 @@ print(emails_response)
 <Tabs.Tab>
 
 ```js
-const emails_response = await client.tools.execute({
+const emailsResponse = await client.tools.execute({
   tool_name: "Google.ListEmails",
-  user_id: THE_USER_ID,
+  user_id: userId,
 });
 
-console.log(emails_response);
+console.log(emailsResponse.output.value);
 ```
 
 </Tabs.Tab>
@@ -155,4 +156,6 @@ These APIs give you programmatic control over tool calling. If you just want to 
 
 ### Next steps
 
-Once you've mastered tool calling, see how you can [build your own tools](/home/build-tools/create-a-toolkit) to integrate any custom functionality or API to your AI workflows.
+Arcade also allows you to [build your own tools](/home/build-tools/create-a-toolkit) to integrate any custom functionality or API to your Agent or AI workflows.
+
+Your tools can use the [service providers supported by Arcade](/home/auth-providers) or you can integrate with any [OAuth2-compatible service](/home/auth-providers/oauth2).
