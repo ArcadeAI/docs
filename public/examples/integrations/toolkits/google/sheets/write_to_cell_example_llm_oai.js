@@ -1,8 +1,8 @@
 import OpenAI from 'openai';
 
 const USER_ID = "you@example.com";
-const PROMPT = "Delete the draft email with the ID 'your_draft_id_here'."; // The ID of an email can be found with the ListDraftEmails tool
-const TOOL_NAME = "Google.DeleteDraftEmail";
+const PROMPT = "Write the value 'Hello, world!' to the cell in the spreadsheet with the ID 'your_spreadsheet_id_here' at column 'B' and row 2.";
+const TOOL_NAME = "Google.WriteToCell";
 
 const client = new OpenAI({
   baseURL: 'https://api.arcade.dev',

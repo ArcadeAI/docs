@@ -96,6 +96,14 @@ const availableTools: Tool[] = [
     type: "arcade",
   },
   {
+    name: "Google Sheets",
+    image: "google_sheets.svg",
+    summary: "Create, read, and update Google Sheets with your agents.",
+    link: "/toolkits/productivity/google/sheets",
+    category: "productivity",
+    type: "arcade",
+  },
+  {
     name: "GitHub",
     image: "github.png",
     summary:
