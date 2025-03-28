@@ -1,11 +1,8 @@
-import { Steps, Tabs } from "nextra/components"; import { Info } from "lucide-react";
+import { Steps, Tabs } from "nextra/components";
+import { Info } from "lucide-react";
+import SetApiKey from "./set_api_key.mdx";
 
-- OpenAI Client: Install the official OpenAI SDK for your preferred programming language. See the [OpenAI libraries documentation](https://platform.openai.com/docs/libraries) for installation instructions specific to your language.
-- Arcade API key
-
-<Tip>
-  To obtain an API key, please refer to the [Get an API key](/home/api-keys) page.
-</Tip>
+- **OpenAI Client**: Install the official OpenAI SDK for your preferred programming language. See the [OpenAI libraries documentation](https://platform.openai.com/docs/libraries) for installation instructions specific to your language.
 
 ### Install and use Arcade
 
@@ -29,17 +26,13 @@ Below we show you Python and JavaScript installation commands, but you can find 
 
 </Tabs.Tab> </Tabs>
 
+## Set your Arcade API key
+
+<SetApiKey />
+
 ### Set up your OpenAI client
 
-To use the OpenAI client with Arcade's enhanced capabilities, configure your client with two essential values:
-
-1. Point your client to Arcade's endpoint (base URL)
-2. Use your Arcade API key
-
-First, set the `ARCADE_API_KEY` environment variable:
-```bash
-export ARCADE_API_KEY=your_api_key_here
-```
+To use the OpenAI client with Arcade's enhanced capabilities, point your client to Arcade's endpoint (base URL) and use your Arcade API key:
 
 <Tabs items={["Python", "JavaScript"]}> <Tabs.Tab>
 
@@ -67,10 +60,6 @@ export const client = new OpenAI({
 
 </Tabs.Tab> </Tabs>
 
-<Note>
-  We recommend storing your API key in a `.env` file and using a package like `dotenv` or `python-dotenv` to load the `.env` file in your code.
-</Note>
-
 ### Call a tool
 
 You can now call tools with your client. Here's an example of calling a tool using OpenAI's chat completion:
@@ -78,7 +67,7 @@ You can now call tools with your client. Here's an example of calling a tool usi
 <Tabs items={["Python", "JavaScript"]}> <Tabs.Tab>
 
 ```python
-chat_completion = client.chat.completions.create(
+response = client.chat.completions.create(
     model="gpt-4o-mini",
     messages=[
         {
@@ -90,6 +79,8 @@ chat_completion = client.chat.completions.create(
     tool_choice="generate",
     user="your.email@example.com",
 )
+
+print(response.choices[0].message.content)
 ```
 
 </Tabs.Tab> <Tabs.Tab>
@@ -117,8 +108,3 @@ In the example above, you'll notice a few key parameters that enable Arcade's to
 For a complete list of available tools, visit our [Toolkits page](/toolkits). You can explore tools for email, calendar, GitHub, and many other services.
 
 </Steps>
-
-<Tip>
-  For instructions on obtaining an API key, please refer to the [API Key
-  Setup](/setup/api-key) page.
-</Tip>

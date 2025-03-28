@@ -1,12 +1,8 @@
 import { Steps } from "nextra/components";
 import { Info } from "lucide-react";
+import SetApiKey from "./set_api_key.mdx";
 
 - **Python 3.10+** & **pip**
-- Arcade API key
-
-<Tip>
-  To obtain an API key, please refer to the [Get an API key](/home/api-keys) page.
-</Tip>
 
 ### Install and use Arcade
 
@@ -20,54 +16,29 @@ Fire up your terminal and run:
 pip install arcadepy
 ```
 
-### Set up your Arcade client
+### Set your Arcade API key
 
-In your Python application, import the Arcade client and initialize it with your Arcade API key:
+<SetApiKey />
+
+### Set up the Arcade client
+
+In your Python application, import the Arcade client and initialize it:
 
 ```python
 from arcadepy import Arcade
 
-client = Arcade(
-    api_key="your_api_key_here"
-)
+client = Arcade()
 ```
 
-<details className="rounded-lg border border-blue-100 bg-blue-50/30 p-4 my-4 dark:border-blue-900/50 dark:bg-blue-950/30 hover:bg-blue-100/50 dark:hover:bg-blue-950/40 transition-colors">
-  <summary className="flex items-center gap-2 text-sm font-medium dark:hover:bg-transparent">
-    <Info className="text-blue-500 dark:text-blue-400 w-4 h-4" />
-    <span>Keep your API key secure with environment variables</span>
-  </summary>
+Alternatively, you can initialize the client passing your API key as an argument, but it is not recommended to hardcode sensitive information:
 
-  <div className="mt-4 text-sm text-neutral-700 dark:text-neutral-300">
-    We recommend storing your API key in a `.env` file using `python-dotenv`.
-
-    1. Install python-dotenv:
-
-    ```bash
-    pip install python-dotenv
-    ```
-
-    2. Create a `.env` file:
-
-    ```
-    ARCADE_API_KEY=your_api_key_here
-    ```
-
-    3. Load the `.env` file in your code:
-
-    ```python
-    from dotenv import load_dotenv
-
-    load_dotenv()
-    client = Arcade() # the env var ARCADE_API_KEY is loaded automatically
-    ```
-
-  </div>
-</details>
+```python
+client = Arcade(api_key="your_api_key_here")
+```
 
 ### Call a tool
 
-You can now call tools with your client. Here's an example of calling the `Math.Sqrt` tool:
+You can now call tools using the Arcade client. Here's an example of calling the `Math.Sqrt` tool:
 
 ```python
 response = client.tools.execute(

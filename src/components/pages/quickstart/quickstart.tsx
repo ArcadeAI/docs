@@ -27,7 +27,7 @@ const integrations: Integration[] = [
     id: "typescript",
     icon: SiTypescript,
     title: "TypeScript",
-    description: "Build powerful apps with our TypeScript SDK",
+    description: "Build powerful apps with our TypeScript / JavaScript SDK",
   },
   {
     id: "openai",
