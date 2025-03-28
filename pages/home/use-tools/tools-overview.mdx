@@ -7,18 +7,42 @@ description: Overview of language model tool calling and how to use tools with A
 
 Language models excel at text generation but struggle with tasks like calculations, data retrieval, or interacting with external systems. To make an analogy, these models have impressive _brains_ or reasoning capabilities, but lack the _hands_ to interact with the digital world.
 
-To solve this, many AI models support tool calling (also called function calling). This unlocks the ability for models to use _tools_, which are code functions or APIs that perform actions.
+To solve this, many AI models support tool calling (sometimes referred to as 'function calling').
+
+## The use case for tool-calling
+
+Say a colleague shares a document with you on Google Drive and you'd like to chat with a LLM about it.
+
+You could go to your Drive, open the document, copy its contents, and paste it into your chat. But what if the LLM could do this for you? The Arcade Drive toolkit provides a [`SearchAndRetrieveDocuments`](/toolkits/productivity/google/drive#searchandretrievedocuments) tool. By calling it, the LLM can find and read the document without you having to do anything.
+
+After analyzing the document, you decide that a meeting is needed with your colleague. From the same chat, you can ask the LLM and it'll use the [Calendar toolkit](/toolkits/productivity/google/calendar) to schedule the meeting for you.
+
+Or you could ask the LLM to send a summary of your analysis to your colleague by email and it would use the [Gmail toolkit](/toolkits/productivity/google/gmail) for that.
+
+## Possibilities for Application and AI Agent developers
+
+With tool-calling, one can combine the reasoning power of LLMs with all information from their digital life in a seamless way, as well as execute virtually any action that is available through APIs or code execution.
+
+With the Arcade SDKs, it is easy to build applications and AI Agents that can leverage tool-calling in order to provide an LLM-powered experience to users.
 
 ## How tool calling works
 
-AI models that support tool calling can determine when and how to use specific tools to fulfill a user's request. It's up to the developer to build the tools and make them available to the model. Think of it like giving the AI a toolbox and asking it to pick the right tool for the job.
+AI models that support tool calling can determine when and how to use specific tools to fulfill a user's request. It's up to the developer to use existing tools (or build its own) and make them available to the model.
 
-For example, if a user asks, "Who is the CEO of Apple?", the AI can:
+In the example above, when the user asks: "_help me analyze the 'Project XYZ' document shared by John on Google Drive_", the LLM can use its reasoning capabilities to:
 
-1. Recognize the need for current information about Apple's CEO
-2. Select a search tool like `Web.SearchGoogle`
-3. Use the tool to retrieve relevant information from the web
-4. Write a response using the gathered data
+1. Recognize that it needs to access external data;
+1. Evaluate that the `Drive.SearchAndRetrieveDocuments` tool is the best way to get that data;
+1. Call the tool with the appropriate parameters;
+1. Read the document content and use it to answer the user's questions.
+
+## The authorization problem
+
+One challenge to make all that happen is authorization. How do you give the LLM permission to access someone's Google Drive and Gmail in a secure and convenient way?
+
+Arcade solves this problem by providing a standardized [interface for authorization](/home/auth/how-arcade-helps), as well as pre-built integrations with [popular services](/home/auth-providers) such as Google, Dropbox, GitHub, Notion, and many more.
+
+Our SDK also [allows you to integrate](/home/auth-providers/oauth2) LLMs with any OAuth 2.0-compliant API.
 
 ## Tool Augmented Generation (TAG)
 
@@ -66,28 +90,6 @@ Now that the tool has been executed, the model can use the output to generate a 
 />
 
 This process shows the general outline of the Tool Augmented Generation (TAG) process at a high level.
-
-### Tool calling with Arcade
-
-Arcade streamlines tool calling by providing a standardized interface, pre-built integrations, and support for complex interactions like authorization.
-
-For example, if a user asks, "Can you star the ArcadeAI/arcade-ai repo on Github for me?", the AI can:
-
-1. Recognize the need to interact with the GitHub API
-2. Select the `GitHub.SetStarred` tool
-3. With the help of Arcade, authorize with GitHub and get a token to act on behalf of the user (with the user's permission, of course!)
-4. Use the tool to perform the action of starring the repo
-5. Write a response to the user explaining that the action is complete
-
-With Arcade's extensive [tool catalog](/toolkits), you can easily integrate tools that:
-
-- Interact with APIs
-- Access databases
-- Execute code
-- Perform calculations
-- Retrieve real-time data
-
-You can also create [custom tools](/home/build-tools/create-a-toolkit) to fit your unique needs, and let Arcade handle coordinating, authorizing, and executing them.
 
 ### Next steps
 
