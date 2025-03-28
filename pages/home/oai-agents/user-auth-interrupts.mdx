@@ -1,0 +1,194 @@
+---
+title: "Managing user authorization"
+description: "Handle tool authorization with Arcade and OpenAI Agents"
+---
+
+import { Steps } from "nextra/components";
+
+## User authorization with OpenAI Agents
+
+In this guide, you will learn how to handle user authorization for Arcade tools in your OpenAI Agents application. When a tool requires authorization, the agent will raise an `AuthorizationError` with a URL for the user to visit and grant permissions.
+
+<Steps>
+
+### Prerequisites
+
+- [Obtain an Arcade API key](/home/api-key)
+
+### Install the required packages
+
+Set up your environment with the following installations:
+
+```bash
+pip install agents-arcade arcadepy
+```
+
+### Configure your Arcade environment
+
+Make sure you have set your Arcade API key in the environment, or assign it directly in the code:
+
+> Need an Arcade API key? Visit the [Get an API key](/home/api-keys) page to create one.
+
+```python
+import os
+from arcadepy import AsyncArcade
+from agents import Agent, Runner
+from agents_arcade import get_arcade_tools
+from agents_arcade.errors import AuthorizationError
+
+# Set your API key
+os.environ["ARCADE_API_KEY"] = "YOUR_ARCADE_API_KEY"
+
+# Initialize the Arcade client
+client = AsyncArcade()
+```
+
+### Fetch Arcade tools
+
+Get the tools you need for your agent. In this example, we'll use GitHub tools:
+
+```python
+# Get GitHub tools for this example
+tools = await get_arcade_tools(client, ["github"])
+
+# Create an agent with GitHub tools
+github_agent = Agent(
+    name="GitHub agent",
+    instructions="You are a helpful assistant that can assist with GitHub API calls.",
+    model="gpt-4o-mini",
+    tools=tools,
+)
+```
+
+### Handle authorization errors
+
+When a user needs to authorize access to a tool, the agent will raise an `AuthorizationError`. You can handle it like this:
+
+```python
+try:
+    result = await Runner.run(
+        starting_agent=github_agent,
+        input="Star the arcadeai/arcade-ai repo",
+        # Pass a unique user_id for authentication
+        context={"user_id": "user@example.com"},
+    )
+    print("Final output:\n\n", result.final_output)
+except AuthorizationError as e:
+    # Display the authorization URL to the user
+    print(f"Please Login to GitHub: {e}")
+    # The error contains the authorization URL that the user should visit
+```
+
+### Wait for authorization completion
+
+You can also wait for the user to complete the authorization before continuing:
+
+```python
+from arcadepy.auth import wait_for_auth, is_authorized
+import asyncio
+
+async def handle_auth_flow(auth_id):
+    # Display a message to the user
+    print("Please visit the authorization URL in your browser")
+
+    # Wait for the user to complete authorization
+    await wait_for_auth(auth_id)
+
+    # Check if authorization was successful
+    if await is_authorized(auth_id):
+        print("Authorization successful! You can now use the tool.")
+        return True
+    else:
+        print("Authorization failed or timed out.")
+        return False
+
+# In your main function
+try:
+    # Run agent code
+    # ...
+except AuthorizationError as e:
+    auth_id = e.auth_id
+    if await handle_auth_flow(auth_id):
+        # Try running the agent again
+        result = await Runner.run(
+            starting_agent=github_agent,
+            input="Star the arcadeai/arcade-ai repo",
+            context={"user_id": "user@example.com"},
+        )
+        print("Final output:\n\n", result.final_output)
+```
+
+### Complete example
+
+Here's a full example that demonstrates the authorization flow:
+
+```python
+from agents import Agent, Runner
+from arcadepy import AsyncArcade
+from agents_arcade import get_arcade_tools
+from agents_arcade.errors import AuthorizationError
+
+async def main():
+    client = AsyncArcade()
+    # Use the "github" toolkit for this example
+    tools = await get_arcade_tools(client, ["github"])
+
+    github_agent = Agent(
+        name="GitHub agent",
+        instructions="You are a helpful assistant that can assist with GitHub API calls.",
+        model="gpt-4o-mini",
+        tools=tools,
+    )
+
+    try:
+        result = await Runner.run(
+            starting_agent=github_agent,
+            input="Star the arcadeai/arcade-ai repo",
+            # make sure you pass a UNIQUE user_id for auth
+            context={"user_id": "user@example.com"},
+        )
+        print("Final output:\n\n", result.final_output)
+    except AuthorizationError as e:
+        print("Please Login to Github:", e)
+
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(main())
+```
+
+When run for the first time, this will output:
+
+```
+Please Login to Github: Authorization required: https://github.com/login/oauth/authorize...
+```
+
+After visiting the URL and authorizing, running the same script again will succeed:
+
+```
+Final output:
+
+The repository arcadeai/arcade-ai has been successfully starred! If you need any more assistance, feel free to ask.
+```
+
+</Steps>
+
+## Authentication persistence
+
+Once a user authorizes an integration, Arcade will remember the authorization for that specific user_id and toolkit. You don't need to re-authorize each time you run the agent.
+
+Key points to remember:
+
+- Always use a consistent and unique `user_id` for each user
+- Store the `user_id` securely in your application
+- Different toolkits require separate authorization flows
+- Authorization tokens are managed by Arcade, not your application
+
+## Next steps
+
+- Build a user interface to handle authorization flows smoothly
+- Explore other Arcade toolkits like Google, LinkedIn, or X
+- Create multi-step workflows with multiple tools and authorizations
+- Learn to build your own custom tools with the Arcade Tool SDK
+
+By handling Arcade's authorization flow correctly, you can build AI-driven applications that securely integrate with various services while respecting user permissions. Have fun exploring Arcade!
