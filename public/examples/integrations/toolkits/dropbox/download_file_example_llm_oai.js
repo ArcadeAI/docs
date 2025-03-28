@@ -1,8 +1,7 @@
 import OpenAI from 'openai';
 
-const USER_ID = "you@example.com";
-const PROMPT = "Send an email to jane.doe@example.com with the subject 'Meeting Update' and body 'The meeting is rescheduled to 3 PM.'";
-const TOOL_NAME = "Google.SendEmail";
+const PROMPT = "Download the file /My Documents/My Folder/quarterly report 2025.pdf";
+const TOOL_NAME = "Dropbox.DownloadFile";
 
 const client = new OpenAI({
   baseURL: 'https://api.arcade.dev',
@@ -14,7 +13,6 @@ const response = await client.chat.completions.create({
     { role: 'user', content: PROMPT }
   ],
   model: 'gpt-4o-mini',
-  user: USER_ID,
   tools: [TOOL_NAME],
   tool_choice: 'generate'
 });

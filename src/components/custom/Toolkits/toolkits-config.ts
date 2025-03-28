@@ -286,7 +286,7 @@ const availableTools: Tool[] = [
     summary: "Manage Dropbox files and folders with your agents",
     link: "/toolkits/productivity/dropbox",
     category: "productivity",
-    type: "auth",
+    type: "arcade",
   },
   {
     name: "Discord",
