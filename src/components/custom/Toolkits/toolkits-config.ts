@@ -220,7 +220,7 @@ const availableTools: Tool[] = [
     name: "Notion",
     image: "notion.png",
     summary: "Create, read, and search Notion pages",
-    link: "/toolkits/productivity/notion/readme",
+    link: "/toolkits/productivity/notion",
     category: "productivity",
     type: "arcade",
   },
