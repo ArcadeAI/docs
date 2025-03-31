@@ -15,11 +15,7 @@ You'll create a simple arithmetic toolkit with operations like addition, subtrac
 
 ### Prerequisites
 
-<Warning>
-  This guide requires a **self-hosted** installation of the Arcade Engine. It will not work with the Cloud version of Arcade. Ensure you complete the steps below before continuing.
-</Warning>
-
-- Follow the [Set up Arcade Locally](/home/install/local) guide to install Arcade and the SDK.
+- [Set up Arcade](/home/quickstart)
 
 ### Create a new toolkit
 
@@ -100,33 +96,116 @@ make install
 
 This will load the tool into the local worker environment.
 
-You can run the Engine and Worker to test your new tool with:
+
+you can then run ``arcade show --local`` to see your tool in the local worker environment.
+
+
+You can run the Worker, which serves tools, to test your new tool with:
 
 
 ```bash
-arcade dev
+arcade serve
 ```
+
+Then you can visit http://localhost:8002/docs to see your tools served by the worker.
 
 Additionally, the Makefile includes other helpful commands such as:
 
 - `make check`: Runs all pre-commit checks that must pass.
 - `make test`: Runs all unit tests in the toolkit's `test` directory.
 
-<Warning>
-  See the [Local Installation Guide](/home/install/local) for setting up `arcade
-  dev` if you have not done so already.{" "}
-</Warning>
 
-### Use your tools with Arcade
+### Deploy your toolkit
 
-Now that your local Engine and worker are running via the `arcade dev` command, you can use your custom tools with Arcade in your application.
+
+
+## Requirements
+
+- **Python 3.10** or higher <br/> Verify your Python version by running `python --version` or `python3 --version` in your terminal.
+- **Arcade Account**: Sign up for an <SignupLink utmParams={{
+            utm_source: "docs",
+            utm_medium: "page",
+            utm_campaign: "custom-tools",
+          }} linkLocation="docs:custom-tools">Arcade account</SignupLink> if you haven't already.
+- **Arcade CLI**: Install the Arcade CLI with `pip install arcade-ai`.
+
+<Steps>
+
+## Create your deployment config
+
+Create a `worker.toml` file in your project directory if there is not one already.
+
+```yaml
+### Worker 1
+[[worker]]
+
+[worker.config]
+id = "my-worker"
+secret = <your secret> # Replace with your own secret
+
+[worker.local_source]
+packages = ["./myToolkit"] # Replace with the path to your toolkit directory
+```
+<Note>
+  For more information on the `worker.toml` file, see the [Arcade Deploy documentation](/home/configure/arcade-deploy).
+</Note>
+---
+
+## Deploy your worker
+
+Run the deploy command in the directory containing your `worker.toml` file:
+
+```bash
+arcade deploy
+```
+
+You should see output like the following:
+```bash
+Deploying 'my-worker...'                                                                                                                                                                                                                                                                                                                 main.py:589
+⠏ Deploying 1 workers
+┏━━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━┓
+┃         Added   ┃ Removed ┃ Updated ┃ No Changes ┃
+┡━━━━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━┩
+│  custom-toolkit │         │         │            │
+└─────────────────┴─────────┴─────────┴────────────┘
+✅ Worker 'my-worker' deployed successfully.
+```
+
+---
+
+## List your workers
+
+Run the following command to list your workers:
+
+```bash
+arcade worker list
+```
+
+You should see output like the following:
+
+```bash
+                                                     Workers
+┏━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+┃ ID        ┃ Cloud Deployed ┃ Engine Registered ┃ Enabled ┃ Host                                                ┃ Toolkits      ┃
+┡━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
+│ my-worker │ True           │ True              │ True    │ https://4bdfrgfdgftlu0ahyko56gdsr.server.arcade.dev │ CustomToolkit │
+└───────────┴────────────────┴───────────────────┴─────────┴─────────────────────────────────────────────────────┴───────────────┘
+```
+
+
+Your worker and toolkits are now deployed and registered with the engine and ready to use!
+
+You can go to the [dashboard](https://api.arcade.dev/dashboard/workers) to see your worker and its details.
+
+
+## Use your tools with Arcade Hosted in the Cloud
 
 Here's an example of how to use your tools:
 
 ```python
 from arcadepy import Arcade
 
-client = Arcade(base_url="http://localhost:9099")
+client = Arcade(base_url="https://api.arcade.dev")
 
 # Use the tools in a chat completion
 response = client.chat.completions.create(
