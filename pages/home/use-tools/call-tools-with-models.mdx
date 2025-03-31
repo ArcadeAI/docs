@@ -5,171 +5,110 @@ description: "Learn how to call tools with LLMs using Arcade"
 
 import { Steps } from "nextra/components";
 import { Tabs } from "nextra/components";
+import { SignupLink } from "@/components/Analytics";
 
 # Call tools with LLMs
 
-In this guide, you'll learn how to call tools in an AI workflow using OpenAI and Arcade.
+In this guide, you'll learn how to have an LLM choose a tool to call given a prompt and a list of available tools.
 
-To do this, you'll build an AI chatbot that can star GitHub repositories on your behalf using the [`GitHub.SetStarred`](/toolkits/development/github/github#setstarred) tool.
+To do this, you'll build an AI chatbot that can interact with GitHub on your behalf using the [Github toolkit](/toolkits/development/github/github).
 
 <Steps>
 
-### Prerequisites
+### First steps
 
-- [Set up Arcade](/home/quickstart)
-- Create an Arcade [API key](/home/api-keys), if you haven't already
-- Export your Arcade API key as an environment variable:
-```bash
-export ARCADE_API_KEY=<your-api-key>
-```
+1. Create an <SignupLink utmParams={{
+            utm_source: "docs",
+            utm_medium: "page",
+            utm_campaign: "quickstart",
+          }} linkLocation="docs:quickstart">Arcade account</SignupLink>
+1. Get an [Arcade API key](/home/api-keys) and take note, you'll need it in the next steps.
 
-### Install OpenAI Client
-
-Below we show you Python and JavaScript installation commands, but you can find installation instructions for other languages in the [OpenAI libraries documentation](https://platform.openai.com/docs/libraries):
-
-<Tabs items={["Python", "JavaScript"]}> <Tabs.Tab>
-
-```bash
- pip install openai
-```
-
-</Tabs.Tab> <Tabs.Tab>
-
-```bash
- npm install openai
-```
-
-</Tabs.Tab> </Tabs>
-
-### Set up your OpenAI client
-
-Create a new file in your favorite editor (e.g. `example.py` or `example.mjs`) and initialize the OpenAI client with Arcade's base URL and API key to enable tool access:
-
-<Tabs items={["Python", "JavaScript"]}> <Tabs.Tab>
-
-```python {1, 5-6}
-import os
-from openai import OpenAI
-
-client = OpenAI(
-  base_url="https://api.arcade.dev/v1",
-  api_key=os.environ.get("ARCADE_API_KEY")
-)
-
-```
-
-</Tabs.Tab> <Tabs.Tab>
-
-```typescript
-import { OpenAI } from "openai";
-
-export const client = new OpenAI({
-  baseURL: "https://api.arcade.dev/v1",
-  apiKey: process.env["ARCADE_API_KEY"],
-});
-```
-
-</Tabs.Tab> </Tabs>
-
-Requests made with this client will be routed to Arcade first, then to OpenAI. The AI model will instantly have access to the tools provided by Arcade.
-
-### Set the user ID
-
-Authorized tools access data on behalf of an end-user, so they need to know the user's ID.
-
-```python file=<rootDir>/examples/code/home/use-tools/call-tools-with-models/github_stars_chatbot.py#L10-L11
-
-```
-
-For now, put your own email address in `user_id`.
-
-In a web or mobile app, you'd get this from the current user session.
-
-### Generate a response
-
-With the client set up, use `client.chat.completions.create` to generate a response to a user's prompt:
+### Install Arcade Client
 
 <Tabs items={["Python", "JavaScript"]}>
 <Tabs.Tab>
-
-```python file=<rootDir>/examples/code/home/use-tools/call-tools-with-models/github_stars_chatbot.py#L13-
-
+```python
+pip install arcadepy
 ```
-
-<ToggleContent showText="Click to view the full example" hideText="Hide example">
-
-```python file=<rootDir>/examples/code/home/use-tools/call-tools-with-models/github_stars_chatbot.py
-
-```
-
-</ToggleContent>
-
 </Tabs.Tab>
-
 <Tabs.Tab>
-
-```js
-while (true) {
-  // Ask the user for input
-  const prompt = await input("Enter your prompt (type 'exit' to quit):");
-  if (prompt.toLowerCase() === "exit") {
-    break;
-  }
-
-  // Use a tool and generate a response
-  const response = await openai.chat.completions.create({
-    messages: [
-      { role: "system", content: "You are a helpful assistant." },
-      { role: "user", content: prompt },
-    ],
-    model: "gpt-4",
-    user: userId,
-    tools: ["GitHub.SetStarred"],
-    tool_choice: "auto",
-  });
-
-  console.log(response.choices[0].message.content);
-}
+```javascript
+npm install @arcadeai/arcadejs
 ```
-
-<ToggleContent showText="Click to view the full example" hideText="Hide example">
-
-```js
-import OpenAI from "openai";
-
-//# Initialize the OpenAI client, pointing to Arcade
-const openai = new OpenAI({
-  apiKey: process.env.ARCADE_API_KEY,
-  baseURL: "https://api.arcade.dev/v1",
-});
-
-while (true) {
-  // Ask the user for input
-  const prompt = await input("Enter your prompt (type 'exit' to quit):");
-  if (prompt.toLowerCase() === "exit") {
-    break;
-  }
-
-  // Use a tool and generate a response
-  const response = await openai.chat.completions.create({
-    messages: [
-      { role: "system", content: "You are a helpful assistant." },
-      { role: "user", content: prompt },
-    ],
-    model: "gpt-4",
-    user: userId,
-    tools: ["GitHub.SetStarred"],
-    tool_choice: "auto",
-  });
-
-  console.log(response.choices[0].message.content);
-}
-```
-
-</ToggleContent>
-
 </Tabs.Tab>
+</Tabs>
 
+### Instantiate the client
+
+<Tabs items={["Python", "JavaScript"]}>
+<Tabs.Tab>
+Create a new script called `call_tools_with_llms.py` and instantiate the OpenAI client pointing to Arcade's endpoint and using the Arcade API key:
+```python file=<rootDir>/examples/code/home/use-tools/call-tools-with-models/github_chatbot.py#L1-L8
+```
+</Tabs.Tab>
+<Tabs.Tab>
+Create a new script called `call_tools_with_llms.js` and instantiate the OpenAI client pointing to Arcade's endpoint and using the Arcade API key:
+```javascript file=<rootDir>/examples/code/home/use-tools/call-tools-with-models/github_chatbot.js#L1-L7
+```
+</Tabs.Tab>
+</Tabs>
+
+### Set the user ID
+
+Arcade needs a unique identifier for your application user (this could be an email address, a UUID, etc). In this example, simply use your email address as the user ID:
+
+<Tabs items={["Python", "JavaScript"]}>
+<Tabs.Tab>
+```python file=<rootDir>/examples/code/home/use-tools/call-tools-with-models/github_chatbot.py#L11-L11
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```js file=<rootDir>/examples/code/home/use-tools/call-tools-with-models/github_chatbot.js#L10-L10
+```
+</Tabs.Tab>
+</Tabs>
+
+### Determine which tools will be available to the chatbot agent
+
+We are listing a few Github tools below. For an exhaustive list, refer to the [Github toolkit](/toolkits/development/github/github). You could add tools from other toolkits here as well, but we'll be sticking to Github for this example.
+
+This list restricts which tools the LLM can choose to call based on any user prompt.
+
+If you provide an empty list, the LLM will be able to call any tool available in the Arcade engine, from all toolkits.
+
+<Tabs items={["Python", "JavaScript"]}>
+<Tabs.Tab>
+```python file=<rootDir>/examples/code/home/use-tools/call-tools-with-models/github_chatbot.py#L14-L24
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```js file=<rootDir>/examples/code/home/use-tools/call-tools-with-models/github_chatbot.js#L13-L23
+```
+</Tabs.Tab>
+</Tabs>
+
+### Generate a response
+
+Use `client.chat.completions.create` to generate a response to a user's prompt:
+
+<Tabs items={["Python", "JavaScript"]}>
+<Tabs.Tab>
+```python file=<rootDir>/examples/code/home/use-tools/call-tools-with-models/github_chatbot.py#L26-L44
+```
+<ToggleContent showText="Click to view the full example" hideText="Hide example">
+```python file=<rootDir>/examples/code/home/use-tools/call-tools-with-models/github_chatbot.py
+```
+</ToggleContent>
+</Tabs.Tab>
+<Tabs.Tab>
+```js file=<rootDir>/examples/code/home/use-tools/call-tools-with-models/github_chatbot.js#L25-L48
+```
+<ToggleContent showText="Click to view the full example" hideText="Hide example">
+```js file=<rootDir>/examples/code/home/use-tools/call-tools-with-models/github_chatbot.js
+```
+</ToggleContent>
+</Tabs.Tab>
 </Tabs>
 
 ### Try it!
@@ -178,21 +117,15 @@ Run the script:
 
 <Tabs items={["Python", "JavaScript"]}>
 <Tabs.Tab>
-
 ```bash
-python example.py
+python3 call_tools_with_llms.py
 ```
-
 </Tabs.Tab>
-
 <Tabs.Tab>
-
 ```bash
-node example.mjs
+node call_tools_with_llms.js
 ```
-
 </Tabs.Tab>
-
 </Tabs>
 
 Ask the AI to:
@@ -207,23 +140,46 @@ You'll be prompted to authorize the connection to GitHub, and then the AI will p
 
 ### How it works
 
-When you use `tool_choice="generate"` and specify a tool like `GitHub.SetStarred`, Arcade coordinates the interaction between the tool and the AI model (OpenAI). To your users, it appears that the model magically has new capabilities.
+When you use `tool_choice="generate"` and specify a list of tools, Arcade coordinates the interaction between the available tools and the AI model (OpenAI's GPT-4o, in this case). To your users, it appears that the model magically has new capabilities.
 
 <Note>
-  In this example, Arcade Cloud Engine is executing the pre-built tool
-  `GitHub.SetStarred`. You can also [create your own custom
-  tools](/home/build-tools/create-a-toolkit).
+  In this example, Arcade Cloud Engine is executing the pre-built
+  [Github toolkit](/toolkits/development/github/github). You can also [create your own toolkit](/home/build-tools/create-a-toolkit).
 </Note>
 
 ### Add more tools
 
-Try adding more tools to the `tools` array to give the AI model more capabilities:
+Try adding more tools to the `tools` list / array to give the AI model more capabilities. As we mentioned earlier, you can add tools from other toolkits as well, such as the [Slack toolkit](/toolkits/social-communication/slack):
 
-- Add `Math.Sqrt` and ask for the square root of a big number
-- Add `X.PostTweet` and ask the AI to post on X for you
+For instance, add [`Slack.SendMessageToChannel`](/toolkits/social-communication/slack#sendmessagetochannel) and ask the LLM to send a message to a channel about a given Pull Request you retrieved previously from Github:
+
+<Tabs items={["Python", "JavaScript"]}>
+<Tabs.Tab>
+
+```python
+tools = [
+    ...
+    "Github.ListRepositoryActivities",
+    "Slack.SendMessageToChannel",
+]
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```js
+let tools = [
+  ...
+  "Github.ListRepositoryActivities",
+  "Slack.SendMessageToChannel",
+];
+```
+
+</Tabs.Tab>
+
+</Tabs>
 
 ### Next steps
 
-This example only uses one tool, but you can add more to give the AI model even more capabilities. Next, learn how to [use specific tools](specify-tools).
-
-For apps and agents that aren't directly generating chat completions, you can [authorize and call tools programmatically](/home/use-tools/call-tools-directly). This is useful when you need more control over the tool calling process.
+For apps and agents that aren't directly generating chat completions from user prompts, you can [authorize and call tools directly](/home/use-tools/call-tools-directly). This is useful when you need more control over the tool calling process.

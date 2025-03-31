@@ -1,8 +1,7 @@
 export default {
   "tools-overview": "Introduction",
-  "call-tools-directly": "Tool execution",
-  "call-tools-with-models": "Tool Augmented Generation",
+  "call-tools-with-models": "Call Tools with LLMs",
+  "call-tools-directly": "Call Tools Directly",
   "tool-choice": "Tool Choice",
-  "specify-tools": "Selecting tools",
   "get-tool-definitions": "Tool formats",
 };

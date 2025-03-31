@@ -4,64 +4,104 @@ description: "Learn how to call tools programmatically using Arcade"
 ---
 
 import { Steps, Tabs } from "nextra/components";
+import { SignupLink } from "@/components/Analytics";
 
-# Call tools directly
+# Call Tools Directly
 
-In this guide, you'll learn how to call tools programmatically using Arcade.
+In this guide, you'll learn how to call tools directly, instead of having the [LLM choosing](/home/use-tools/call-tools-with-models) which tool to call.
 
-Unlike [calling tools with models](/home/use-tools/call-tools-with-models), calling tools directly doesn't use an AI model to decide which tool to call and what arguments to pass. Instead, you specify the tool and its arguments in code.
-
-You still get the benefits of Arcade managing authorization and tool execution, but you have more control over when and how the tool is called. This is useful in apps and AI agents where the workflows are more complex than a single model call.
+Direct tool calling is useful in situations where you already know what tool is needed or when there is no prompt for an LLM to interpret and decide on the tool calling. It also gives you full control over what is executed by the Arcade Engine and how.
 
 <Steps>
 
-### Prerequisites
+### First steps
 
-- [Set up Arcade](/home/quickstart)
-- Create an Arcade [API key](/home/api-keys), if you haven't already
+1. Create an <SignupLink utmParams={{
+            utm_source: "docs",
+            utm_medium: "page",
+            utm_campaign: "quickstart",
+          }} linkLocation="docs:quickstart">Arcade account</SignupLink>
+1. Get an [Arcade API key](/home/api-keys) and take note, you'll need it in the next steps.
 
-### Set environment variables
-
-You can find your Arcade API key in one of these locations:
-
-- [Arcade Dashboard](https://api.arcade.dev/dashboard/api-keys) under API Keys
-- `~/.arcade/credentials.yaml`
-
-Export your Arcade API key as an environment variable:
-```bash
-export ARCADE_API_KEY=<your-api-key>
-```
-
-### Initialize the client
-
-Import and initialize the Arcade client. The client automatically uses the `ARCADE_API_KEY` environment variable.
+### Install Arcade Client
 
 <Tabs items={["Python", "JavaScript"]}>
 <Tabs.Tab>
-```python file=<rootDir>/examples/code/home/use-tools/call-tools-directly/math_add_directly.py#L1-L3
+```python
+pip install arcadepy
 ```
 </Tabs.Tab>
 <Tabs.Tab>
-```js file=<rootDir>/examples/code/home/use-tools/call-tools-directly/math_add_directly.js#L1-L3
+```javascript
+npm install @arcadeai/arcadejs
+```
+</Tabs.Tab>
+</Tabs>
+
+### Instantiate the client
+
+<Tabs items={["Python", "JavaScript"]}>
+<Tabs.Tab>
+Create a new script called `call_tools_directly.py` and instantiate the Arcade client:
+```python file=<rootDir>/examples/code/home/use-tools/call-tools-directly/math_sqrt_directly.py#L1-L3
+```
+</Tabs.Tab>
+<Tabs.Tab>
+Create a new script called `call_tools_directly.js` and instantiate the Arcade client:
+```javascript file=<rootDir>/examples/code/home/use-tools/call-tools-directly/math_sqrt_directly.js#L1-L3
+```
+</Tabs.Tab>
+</Tabs>
+
+### Set the user ID
+
+Arcade needs a unique identifier for your application user (this could be an email address, a UUID, etc). In this example, simply use your email address as the user ID:
+
+<Tabs items={["Python", "JavaScript"]}>
+<Tabs.Tab>
+```python file=<rootDir>/examples/code/home/use-tools/call-tools-directly/math_sqrt_directly.py#L5-L5
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```js file=<rootDir>/examples/code/home/use-tools/call-tools-directly/math_sqrt_directly.js#L5-L5
 ```
 </Tabs.Tab>
 </Tabs>
 
 ### Call a tool
 
-Let's use the `Math.Sqrt` tool from the Arcade Math toolkit to calculate the square root of 625.
+Let's use the `Math.Sqrt` tool from the Arcade Math toolkit to get the square root of a number.
 
 <Tabs items={["Python", "JavaScript"]}>
 <Tabs.Tab>
-```python file=<rootDir>/examples/code/home/use-tools/call-tools-directly/math_add_directly.py#L5-L11
+```python file=<rootDir>/examples/code/home/use-tools/call-tools-directly/math_sqrt_directly.py#L7-L17
 ```
 </Tabs.Tab>
 <Tabs.Tab>
-```js file=<rootDir>/examples/code/home/use-tools/call-tools-directly/math_add_directly.js#L5-L11
+```js file=<rootDir>/examples/code/home/use-tools/call-tools-directly/math_sqrt_directly.js#L7-L17
 ```
 </Tabs.Tab>
 </Tabs>
 
-Is this tool call too simple for your needs? Try executing a [tool with authentication](/home/auth/auth-tool-calling).
+### Execute the script
+
+<Tabs items={["Python", "JavaScript"]}>
+<Tabs.Tab>
+```bash
+python3 example.py
+> 25
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```bash
+node example.js
+> 25
+```
+</Tabs.Tab>
+</Tabs>
 
 </Steps>
+
+## Next Steps
+
+This was a very simple tool call. Try executing a [tool with user authorization](/home/auth/auth-tool-calling) next.
