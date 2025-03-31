@@ -237,6 +237,12 @@ export function LandingPage() {
               image="/images/logo/arcade.png"
               href="https://github.com/ArcadeAI/ArcadeSlackAgent"
             />
+            <SampleAppCard
+              title="Summarize YouTube Podcasts in Slack"
+              description="A Slack bot that extracts and summarizes YouTube transcripts in Weaviate, perfect for AI podcasts."
+              image="/images/sample-apps/slack-aipodcast-summaries.jpg"
+              href="https://github.com/dforwardfeed/slack-AIpodcast-summaries"
+            />
           </div>
         </div>
       </section>
