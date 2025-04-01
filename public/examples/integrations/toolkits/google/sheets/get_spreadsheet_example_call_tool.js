@@ -3,7 +3,7 @@ import { Arcade } from "@arcadeai/arcadejs";
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
 const USER_ID = "you@example.com";
-const TOOL_NAME = "Google.DeleteDraftEmail";
+const TOOL_NAME = "Google.GetSpreadsheet";
 
 // Start the authorization process
 const authResponse = await client.tools.authorize({
@@ -19,7 +19,7 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  draft_email_id: "your_draft_id_here" // The ID of an email can be found with the ListDraftEmails tool
+  spreadsheet_id: "your_spreadsheet_id_here"
 };
 
 const response = await client.tools.execute({

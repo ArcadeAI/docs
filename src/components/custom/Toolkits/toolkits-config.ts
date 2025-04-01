@@ -96,6 +96,14 @@ const availableTools: Tool[] = [
     type: "arcade",
   },
   {
+    name: "Google Sheets",
+    image: "google_sheets.svg",
+    summary: "Create, read, and update Google Sheets with your agents.",
+    link: "/toolkits/productivity/google/sheets",
+    category: "productivity",
+    type: "arcade",
+  },
+  {
     name: "GitHub",
     image: "github.png",
     summary:
@@ -212,7 +220,7 @@ const availableTools: Tool[] = [
     name: "Notion",
     image: "notion.png",
     summary: "Create, read, and search Notion pages",
-    link: "/toolkits/productivity/notion/readme",
+    link: "/toolkits/productivity/notion",
     category: "productivity",
     type: "arcade",
   },
