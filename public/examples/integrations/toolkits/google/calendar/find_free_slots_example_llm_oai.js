@@ -1,13 +1,13 @@
 import OpenAI from 'openai';
 
-// When using the FindSlotsWhenEveryoneIsFree tool, always ground the LLM with the current date and day of the week,
+// When using the FindTimeSlotsWhenEveryoneIsFree tool, always ground the LLM with the current date and day of the week,
 // so that it can call the tool with the correct date arguments.
 const TODAY = new Date().toISOString().split('T')[0];
 const DAY_OF_WEEK = new Date().toLocaleDateString('en-US', { weekday: 'long' });
 
 const USER_ID = "you@example.com";
 const PROMPT = `Today is ${TODAY}, ${DAY_OF_WEEK}. Find times when john.doe@example.com, jenifer.smith@example.com, and I are free next week. I'm looking for a time slot between 09:00 and 20:00.`;
-const TOOL_NAME = "Google.FindSlotsWhenEveryoneIsFree";
+const TOOL_NAME = "Google.FindTimeSlotsWhenEveryoneIsFree";
 
 const client = new OpenAI({
   baseURL: 'https://api.arcade.dev',
