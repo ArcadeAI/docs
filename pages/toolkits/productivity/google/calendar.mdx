@@ -41,6 +41,7 @@ These tools are currently available in the Arcade Calendar toolkit.
     ["ListEvents", "List events from Google Calendar."],
     ["UpdateEvent", "Update an existing event in Google Calendar."],
     ["DeleteEvent", "Delete an event from Google Calendar."],
+    ["FindSlotsWhenEveryoneIsFree", "Provides time slots when everyone is free within a given date range and time boundaries."],
   ]}
 />
 
@@ -215,6 +216,46 @@ Delete an event from Google Calendar.
 - **`event_id`** _(string, required)_ The ID of the event to delete
 - **`calendar_id`** _(string, optional, Defaults to `'primary'`)_ The ID of the calendar containing the event
 - **`send_updates`** _(enum ([SendUpdatesOptions](/toolkits/productivity/google/reference#sendupdatesoptions)), optional, Defaults to `'all'`)_ Specifies which attendees to notify about the deletion
+
+## FindSlotsWhenEveryoneIsFree
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/google/calendar/find_free_slots_example_call_tool.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/google/calendar/find_free_slots_example_call_tool.js"],
+      },
+    },
+    {
+      label: "Execute the Tool with OpenAI",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/google/calendar/find_free_slots_example_llm_oai.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/google/calendar/find_free_slots_example_llm_oai.js"],
+      },
+    },
+  ]}
+/>
+
+Provides time slots when everyone is free within a given date range and time boundaries.
+
+**Parameters**
+
+<Warning type="warning">
+  When using [model calling](/home/use-tools/call-tools-with-models) with the `Google.FindSlotsWhenEveryoneIsFree` tool, always ground the LLM with the current date and day of the week by appending it to the prompt. See examples above for "Execute the Tool with OpenAI".
+</Warning>
+
+- **`email_addresses`** _(list of strings, defaults to `None`)_ The list of email addresses from people in the same organization domain (apart from the currently logged in user) to search for free time slots. Defaults to None, which will return free time slots for the current user only.
+- **`start_date`** _(string, optional, Defaults to `None`)_ The start date to search for time slots in the format 'YYYY-MM-DD'. Defaults to today's date. It will search starting from this date at the time 00:00:00.
+- **`end_date`** _(string, optional, Defaults to `None`)_ The end date to search for time slots in the format 'YYYY-MM-DD'. Defaults to seven days from the start date. It will search until this date at the time 23:59:59.
+- **`start_time_boundary`** _(string, defaults to "08:00")_ Will return free slots in any given day starting from this time in the format 'HH:MM'. Defaults to '08:00', which is a usual business hour start time.
+- **`end_time_boundary`** _(string, defaults to "18:00")_ Will return free slots in any given day ending at this time in the format 'HH:MM'. Defaults to '18:00', which is a usual business hour end time.
 
 ---
 
