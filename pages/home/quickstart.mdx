@@ -24,50 +24,54 @@ In the example above, the user may have previously analyzed a set of pages from 
 
 You can skim through the code below to see how it works. In order to run it, you'll need to:
 
+<Steps>
+
+## Prerequisites
+
 1. Create an <SignupLink utmParams={{
             utm_source: "docs",
             utm_medium: "page",
             utm_campaign: "quickstart",
           }} linkLocation="docs:quickstart">Arcade account</SignupLink>
 1. Get an [Arcade API key](/home/api-keys) and take note, you'll need it in the next steps.
-1. Install the OpenAI SDK:
+
+
+## Install the OpenAI SDK:
 
 <Tabs items={["Python", "JavaScript", "Other languages"]}> <Tabs.Tab>
-
 ```python
 pip install openai
 ```
-
-</Tabs.Tab> <Tabs.Tab>
-
+</Tabs.Tab>
+<Tabs.Tab>
 ```javascript
 npm install openai
 ```
-
 </Tabs.Tab>
-
 <Tabs.Tab>
-You can find the installation instructions for other languages in the [OpenAI libraries documentation](https://platform.openai.com/docs/libraries)
+You can find the installation instructions for other languages in the [OpenAI libraries documentation](https://platform.openai.com/docs/libraries).
+
+In the next steps, we will present Python and JavaScript examples. If you need any assistance implementing it in your preferred language, please [contact our engineering team](/home/contact-us).
 </Tabs.Tab>
 </Tabs>
+
+## Implement the tool call
 
 Create a new file, open it with your preferred editor and enter the code indicated in the next steps.
 
 <Tabs items={["Python", "JavaScript"]}> <Tabs.Tab>
-
 ```python
-touch example.py
+touch example_openai.py
 ```
-
-</Tabs.Tab> <Tabs.Tab>
-
+</Tabs.Tab>
+<Tabs.Tab>
 ```javascript
-touch example.js
+touch example_openai.js
 ```
+</Tabs.Tab>
+</Tabs>
 
-</Tabs.Tab> </Tabs>
-
-First, instantiate the OpenAI client pointing to the Arcade's endpoint and use the Arcade API key you created prior.
+First, we need to instantiate the OpenAI client pointing to the Arcade's endpoint and using the Arcade API key you created prior.
 
 <Tabs items={["Python", "JavaScript"]}> <Tabs.Tab>
 
@@ -89,8 +93,6 @@ const client = new OpenAI({baseURL: "https://api.arcade.dev/v1", apiKey: "arcade
 
 Next, we define the parameters for the request. In the `prompt` below, you can replace "your@email.com" with your own email address. The Gmail tool will send a message to yourself, which you'll be able to see in your inbox.
 
-
-
 <Tabs items={["Python", "JavaScript"]}> <Tabs.Tab>
 
 ```python
@@ -111,12 +113,13 @@ let userId = "your@email.com"
 
 </Tabs.Tab> </Tabs>
 
-> In a real application, the `prompt` would come from your user and the `user_id` would be a unique identifier for your application's user (could be an email address, a UUID, etc.). In this example, use your own email address.
+<Note>
+In a real application, the `prompt` would come from your user and the `user_id` would be a unique identifier for your application's user (could be an email address, a UUID, etc.). In this example, use your own email address.
+</Note>
 
 And, finally, we send the request:
 
 <Tabs items={["Python", "JavaScript"]}> <Tabs.Tab>
-
 ```python
 response = client.chat.completions.create(
     model=model,
@@ -128,9 +131,8 @@ response = client.chat.completions.create(
 
 print(response.choices[0].message.content)
 ```
-
-</Tabs.Tab> <Tabs.Tab>
-
+</Tabs.Tab>
+<Tabs.Tab>
 ```typescript
 const response = await client.chat.completions.create({
   model: model,
@@ -142,27 +144,25 @@ const response = await client.chat.completions.create({
 
 console.log(response.data.choices[0].message.content);
 ```
+</Tabs.Tab>
+</Tabs>
 
-</Tabs.Tab> </Tabs>
-
-Now execute this script:
+## Execute the code
 
 <Tabs items={["Python", "JavaScript"]}>
 <Tabs.Tab>
-
 ```python
 python3 example_openai.py
 ```
-
 </Tabs.Tab>
 <Tabs.Tab>
-
 ```javascript
 node example_openai.js
 ```
-
 </Tabs.Tab>
 </Tabs>
+
+## Authorize the tool
 
 The first time you run this, you will see a URL to authorize the tool to send the message on your behalf:
 
@@ -176,18 +176,13 @@ Once you've followed the URL and completed the authorization flow, run the scrip
 The email with the subject "Meeting" and body "Let's meet at 3pm tomorrow" has been sent to your@email.com.
 ```
 
+</Steps>
+
 ## Next steps
 
-[Learn more about tools](use-tools/tools-overview) and how they work. Or follow other practical examples:
+[Learn more about tools](use-tools/tools-overview) and how they work. Or follow other examples listed below:
 
-#### See how the LLM chooses among multiple tools
 
-In the example we followed above, only a single tool was used: `Google.SendEmail`. Check out [this guide](/home/use-tools/call-tools-with-models) where we provide multiple tools for the LLM to choose from. It also features a simple multi-turn conversation loop.
-
-### Call tools directly, without LLM involvement
-
-In some cases, you may want full control of which tool is called and how. Check the [Call Tools Directly](/home/use-tools/call-tools-directly) guide to learn how to call tools directly.
-
-### Create your own custom tools
-
-Arcade allows you to build your own [custom tools](build-tools/create-a-toolkit) to fit any specific use case needed in your application, workflow, or AI Agent.
+* **LLM chooses among multiple tools**: In the example we followed above, only a single tool was used: `Google.SendEmail`. Check out [this guide](/home/use-tools/call-tools-with-models) where we provide multiple tools for the LLM to choose from. It also features a simple multi-turn conversation loop.
+* **Call tools directly, without LLM involvement**: In some cases, you may want full control of which tool is called and how. Check the [Call Tools Directly](/home/use-tools/call-tools-directly) guide to learn how to call tools directly.
+* **Create your own [custom tools](build-tools/create-a-toolkit)** to fit any specific use case needed in your application, workflow, or AI Agent.
