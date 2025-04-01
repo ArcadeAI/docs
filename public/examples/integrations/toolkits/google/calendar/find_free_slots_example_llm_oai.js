@@ -1,7 +1,7 @@
 import OpenAI from 'openai';
 
 // When using the FindTimeSlotsWhenEveryoneIsFree tool, always ground the LLM with the current date and day of the week,
-// so that it can call the tool with the correct date arguments.
+// so that it can call the tool with the correct date arguments. Consider your user's timezone when appropriate.
 const TODAY = new Date().toISOString().split('T')[0];
 const DAY_OF_WEEK = new Date().toLocaleDateString('en-US', { weekday: 'long' });
 

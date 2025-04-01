@@ -3,7 +3,7 @@ from openai import OpenAI
 from datetime import datetime
 
 # When using the FindTimeSlotsWhenEveryoneIsFree tool, always ground the LLM with the current date and day of the week,
-# so that it can call the tool with the correct date arguments.
+# so that it can call the tool with the correct date arguments. Consider your user's timezone when appropriate.
 TODAY = datetime.now().strftime("%Y-%m-%d")
 DAY_OF_WEEK = datetime.now().strftime("%A")
 
