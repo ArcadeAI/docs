@@ -310,7 +310,7 @@ const availableTools: Tool[] = [
     summary: "Interact with Reddit with your agents",
     link: "/toolkits/social-communication/reddit",
     category: "social",
-    type: "auth",
+    type: "arcade",
   },
   {
     name: "Twitch",
