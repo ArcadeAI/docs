@@ -14,7 +14,7 @@ retrieving email messages even further!
 Below we are just showing how to use Arcade as an auth provider, if you need to directly get a token to use with Google.
 """
 
-# Get this user ID from a trusted source, like your database or user management system
+# This would be your app's internal ID for the user (an email, UUID, etc.)
 user_id = "user@example.com"
 
 # Start the authorization process
