@@ -30,4 +30,4 @@ const response = await client.tools.execute({
   user_id: USER_ID,
 });
 
-console.log(response);
+console.log(response.output.value);

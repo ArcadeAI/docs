@@ -25,4 +25,4 @@ response = client.tools.execute(
     input=tool_input,
     user_id=USER_ID,
 )
-print(response)
+print(response.output.value)

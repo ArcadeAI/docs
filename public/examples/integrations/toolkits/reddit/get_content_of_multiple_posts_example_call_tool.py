@@ -3,7 +3,7 @@ from arcadepy import Arcade
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
 USER_ID = "you@example.com"
-TOOL_NAME = "Reddit.GetPostsInSubreddit"
+TOOL_NAME = "Reddit.GetContentOfMultiplePosts"
 
 auth_response = client.tools.authorize(
     tool_name=TOOL_NAME,
@@ -16,13 +16,13 @@ if auth_response.status != "completed":
 # Wait for the authorization to complete
 client.auth.wait_for_completion(auth_response)
 
+# TODO: Replace with an identifier for a real post
 tool_input = {
-    "subreddit": "TestSubreddit",
-    "listing": "top",
-    "time_range": "TODAY",
-    "limit": 10,
+    "post_identifiers": [
+        "https://www.reddit.com/r/TestSubreddit/comments/1abcdefg/",
+        "https://www.reddit.com/r/TestSubreddit/comments/2asdfefg/",
+    ],
 }
-
 response = client.tools.execute(
     tool_name=TOOL_NAME,
     input=tool_input,

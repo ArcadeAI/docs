@@ -3,7 +3,7 @@ import { Arcade } from "@arcadeai/arcadejs";
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
 const USER_ID = "you@example.com";
-const TOOL_NAME = "Reddit.SubmitTextPost";
+const TOOL_NAME = "Reddit.GetContentOfMultiplePosts";
 
 // Start the authorization process
 const authResponse = await client.tools.authorize({
@@ -18,13 +18,12 @@ if (authResponse.status !== "completed") {
 // Wait for the authorization to complete
 await client.auth.waitForCompletion(authResponse);
 
+// TODO: Replace with an identifier for a real post
 const toolInput = {
-  subreddit: "TestSubreddit",
-  title: "Why is the sky blue?",
-  body: "This is something I've been wondering about for a while. Wrong answers only.",
-  nsfw: false,
-  spoiler: false,
-  send_replies: true,
+  post_identifiers: [
+    "https://www.reddit.com/r/TestSubreddit/comments/1abcdefg/",
+    "https://www.reddit.com/r/TestSubreddit/comments/2asdfefg/",
+  ],
 };
 
 const response = await client.tools.execute({
