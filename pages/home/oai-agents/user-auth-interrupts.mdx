@@ -84,15 +84,18 @@ except AuthorizationError as e:
 You can also wait for the user to complete the authorization before continuing:
 
 ```python
-from arcadepy.auth import wait_for_auth, is_authorized
+from arcadepy import AsyncArcade
 import asyncio
+
+client = AsyncArcade()
 
 async def handle_auth_flow(auth_id):
     # Display a message to the user
     print("Please visit the authorization URL in your browser")
 
-    # Wait for the user to complete authorization
-    await wait_for_auth(auth_id)
+
+    # Wait for the user to authenticate
+    await client.auth.wait_for_completion(auth_id)
 
     # Check if authorization was successful
     if await is_authorized(auth_id):
@@ -120,13 +123,20 @@ except AuthorizationError as e:
 
 ### Complete example
 
-Here's a full example that demonstrates the authorization flow:
+Here's a full example that demonstrates the authorization flow with waiting for authentication:
 
 ```python
+```python
+from arcadepy.auth import wait_for_authorization_completion
+
+import time
+
 from agents import Agent, Runner
 from arcadepy import AsyncArcade
+
 from agents_arcade import get_arcade_tools
 from agents_arcade.errors import AuthorizationError
+
 
 async def main():
     client = AsyncArcade()
@@ -140,36 +150,41 @@ async def main():
         tools=tools,
     )
 
-    try:
-        result = await Runner.run(
-            starting_agent=github_agent,
-            input="Star the arcadeai/arcade-ai repo",
-            # make sure you pass a UNIQUE user_id for auth
-            context={"user_id": "user@example.com"},
-        )
-        print("Final output:\n\n", result.final_output)
-    except AuthorizationError as e:
-        print("Please Login to Github:", e)
+    user_id = "user@example.com"  # Make sure to use a unique user ID
+
+    while True:
+        try:
+            result = await Runner.run(
+                starting_agent=github_agent,
+                input="Star the arcadeai/arcade-ai repo",
+                # Pass the user_id for auth
+                context={"user_id": user_id},
+            )
+            print("Final output:\n\n", result.final_output)
+            break  # Exit the loop if successful
+
+        except AuthorizationError as e:
+            auth_url = str(e)
+            print(f"{auth_url}.  Please authenticate to continue.")
+
+            # Wait for the user to authenticate
+            await client.auth.wait_for_completion(e.result.id)
 
 
 if __name__ == "__main__":
     import asyncio
+
     asyncio.run(main())
 ```
 
-When run for the first time, this will output:
+This example handles the authentication flow by:
 
-```
-Please Login to Github: Authorization required: https://github.com/login/oauth/authorize...
-```
+1. Attempting to run the agent
+2. Catching any AuthorizationError
+3. Open the authentication URL in a browser
+4. Waiting for the user to complete authentication
+5. Retrying the operation after a wait period
 
-After visiting the URL and authorizing, running the same script again will succeed:
-
-```
-Final output:
-
-The repository arcadeai/arcade-ai has been successfully starred! If you need any more assistance, feel free to ask.
-```
 
 </Steps>
 
