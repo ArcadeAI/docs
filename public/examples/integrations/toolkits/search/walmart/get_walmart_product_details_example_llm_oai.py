@@ -1,9 +1,8 @@
 import os
 from openai import OpenAI
 
-USER_ID = "you@example.com"
-PROMPT = "List all documents in my Google Drive that contain the word 'report'."
-TOOL_NAME = "Google.ListDocuments"
+PROMPT = "Get details about the product with item id '1234567890' on Walmart."
+TOOL_NAME = "Search.GetWalmartProductDetails"
 
 client = OpenAI(
     base_url="https://api.arcade.dev", api_key=os.environ.get("ARCADE_API_KEY")
@@ -14,7 +13,6 @@ response = client.chat.completions.create(
         {"role": "user", "content": PROMPT},
     ],
     model="gpt-4o-mini",
-    user=USER_ID,
     tools=[TOOL_NAME],
     tool_choice="generate",
 )

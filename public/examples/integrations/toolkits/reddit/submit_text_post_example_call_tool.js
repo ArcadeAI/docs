@@ -3,7 +3,7 @@ import { Arcade } from "@arcadeai/arcadejs";
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
 const USER_ID = "you@example.com";
-const TOOL_NAME = "Google.ListDocuments";
+const TOOL_NAME = "Reddit.SubmitTextPost";
 
 // Start the authorization process
 const authResponse = await client.tools.authorize({
@@ -19,7 +19,12 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  title_keywords: ["report"]
+  subreddit: "TestSubreddit",
+  title: "Why is the sky blue?",
+  body: "This is something I've been wondering about for a while. Wrong answers only.",
+  nsfw: false,
+  spoiler: false,
+  send_replies: true,
 };
 
 const response = await client.tools.execute({
@@ -28,4 +33,4 @@ const response = await client.tools.execute({
   user_id: USER_ID,
 });
 
-console.log(response); 
+console.log(response.output.value);

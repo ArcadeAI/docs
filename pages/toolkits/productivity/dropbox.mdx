@@ -1,116 +1,152 @@
-import { Tabs } from "nextra/components";
+# Dropbox
 
-# Dropbox auth provider
+import ToolInfo from "@/components/ToolInfo";
+import Badges from "@/components/Badges";
+import TabbedCodeBlock from "@/components/TabbedCodeBlock";
+import TableOfContents from "@/components/TableOfContents";
 
-<Note>
-  At this time, Arcade does not offer a default Dropbox Auth Provider. To use
-  Dropbox auth, you must create a custom Auth Provider with your own Dropbox
-  OAuth 2.0 credentials as described below.
-</Note>
+<ToolInfo
+  description="Enable agents to interact with files and folders in Dropbox."
+  author="Arcade"
+  codeLink="https://github.com/ArcadeAI/arcade-ai/tree/main/toolkits/dropbox"
+  authType="API Key"
+  versions={["0.1.0"]}
+/>
 
-The Dropbox auth provider enables tools and agents to call the Dropbox API on behalf of a user. Behind the scenes, the Arcade Engine and the Dropbox auth provider seamlessly manage Dropbox OAuth 2.0 authorization for your users.
+<Badges repo="arcadeai/arcade_dropbox" />
 
-### What's documented here
+The Arcade Dropbox toolkit provides a pre-built set of tools for interacting with Dropbox. These tools make it easy to build agents and AI apps that can:
 
-This page describes how to use and configure Dropbox auth with Arcade.
+- Browse files and folders
+- Search for files and folders
+- Download files
 
-This auth provider is used by:
-
-- Your [app code](#using-dropbox-auth-in-app-code) that needs to call Dropbox APIs
-- Or, your [custom tools](#using-dropbox-auth-in-custom-tools) that need to call Dropbox APIs
-
-## Configuring Dropbox auth
-
-### Create a Dropbox app
-
-- Create a Dropbox Application in the [Dropbox App Console](https://www.dropbox.com/developers/apps)
-- In the Settings tab, under the "OAuth 2" section, set the redirect URI to: `https://cloud.arcade.dev/api/v1/oauth/callback`
-- In the Permissions tab, add any scopes that your app will need
-- In the Settings tab, copy the App key (Client ID) and App secret (Client Secret), which you'll need below
-
-Next, add the Dropbox app to your Arcade Engine configuration. You can do this in the Arcade Dashboard, or by editing the `engine.yaml` file directly (for a self-hosted instance).
-
-### Configuring Dropbox auth with the Arcade Dashboard
-
-1. Navigate to the OAuth section of the Arcade Dashboard and click **Add OAuth Provider**.
-2. Select **Dropbox** as the provider.
-3. Choose a unique **ID** for your provider (e.g. "my-dropbox-provider") with an optional **Description**.
-4. Enter your **Client ID** and **Client Secret** from your Dropbox app.
-5. Click **Save**.
-
-When you use tools that require Dropbox auth using your Arcade account credentials, the Arcade Engine will automatically use this Dropbox OAuth provider.
-
-### Configuring Dropbox auth in self-hosted Arcade Engine configuration
-
-<Steps>
-
-### Set environment variables
-
-<Note>
-  The Client ID is the Dropbox "App key" and the Client Secret is the Dropbox
-  "App secret".
-</Note>
-
-Set the following environment variables:
+## Install
 
 ```bash
-export DROPBOX_CLIENT_ID="<your client ID>"
-export DROPBOX_CLIENT_SECRET="<your client secret>"
+pip install arcade_dropbox
 ```
 
-Or, you can set these values in a `.env` file:
+<Note>
+  pip installing the toolkit is only needed if you are [self-hosting](/home/install/overview) Arcade. You do not need to install the toolkit if you're using Arcade Cloud.
+</Note>
 
-```bash
-DROPBOX_CLIENT_SECRET="<your client secret>"
-DROPBOX_CLIENT_ID="<your client ID>"
-```
+## Available Tools
+
+<TableOfContents
+  headers={["Tool Name", "Description"]}
+  data={
+    [
+      ["ListItemsInFolder", "List all items in a folder."],
+      ["SearchFilesAndFolders", "Search for files and folders in Dropbox."],
+      ["DownloadFile", "Download a file from Dropbox."],
+    ]
+  }
+/>
 
 <Tip>
-  See [Engine configuration](/home/configure/engine) for more information on how
-  to set environment variables and configure the Arcade Engine.
+  If you need to perform an action that's not listed here, you can [get in touch
+  with us](mailto:contact@arcade.dev) to request a new tool, or [create your
+  own tools](/home/build-tools/create-a-toolkit).
 </Tip>
 
-### Edit the Engine configuration
+## ListItemsInFolder
 
-Edit the `engine.yaml` file and add a `dropbox` item to the `auth.providers` section:
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/dropbox/list_items_in_folder_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/dropbox/list_items_in_folder_example_call_tool.js"],
+      },
+    },
+    {
+      label: "Execute the Tool with OpenAI",
+      content: {
+        Python: ["/examples/integrations/toolkits/dropbox/list_items_in_folder_example_llm_oai.py"],
+        JavaScript: ["/examples/integrations/toolkits/dropbox/list_items_in_folder_example_llm_oai.js"],
+      },
+    },
+  ]}
+/>
 
-```yaml file=<rootDir>/examples/code/integrations/dropbox/config_provider.engine.yaml {3-9}
+List all items in a folder.
 
-```
+**Parameters**
 
-</Steps>
+- **folder_path** _(string, required)_ Path to the folder. E.g. '/My Documents/My Folder'
+- **limit** _(int, optional, Defaults to `100`)_ Maximum number of items to return. Defaults to 100. Maximum allowed is 2000.
+- **cursor** _(string, optional)_ A cursor to use for pagination. Defaults to `None`.
 
-## Using Dropbox auth in app code
+## SearchFilesAndFolders
 
-Use the Dropbox auth provider in your own agents and AI apps to get a user-scoped token for the Dropbox API. See [authorizing agents with Arcade](/home/auth/how-arcade-helps) to understand how this works.
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/dropbox/search_files_and_folders_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/dropbox/search_files_and_folders_example_call_tool.js"],
+      },
+    },
+    {
+      label: "Execute the Tool with OpenAI",
+      content: {
+        Python: ["/examples/integrations/toolkits/dropbox/search_files_and_folders_example_llm_oai.py"],
+        JavaScript: ["/examples/integrations/toolkits/dropbox/search_files_and_folders_example_llm_oai.js"],
+      },
+    },
+  ]}
+/>
 
-Use `client.auth.start()` to get a user token for the Dropbox API:
+Search for files and folders in Dropbox.
 
-<Tabs items={["Python", "JavaScript"]}>
-<Tabs.Tab>
+**Parameters**
 
-```python file=<rootDir>/examples/code/integrations/dropbox/custom_auth.py {8-12}
+- **keywords** _(string, required)_ The keywords to search for. E.g. 'quarterly report'
+- **search_in_folder_path** _(string, optional)_ Restricts the search to the specified folder path. E.g. '/My Documents/My Folder'. Defaults to `None` (search in the entire Dropbox).
+- **filter_by_category** _(list of enum [DropboxItemCategory](/toolkits/productivity/reference#dropboxitemcategory), optional)_ Restricts the search to the specified category(ies) of items. Defaults to `None` (returns all items).
+- **limit** _(int, optional, Defaults to `100`)_ Maximum number of items to return. Defaults to 100. Maximum allowed is 2000.
+- **cursor** _(string, optional)_ A cursor to use for pagination. Defaults to `None`.
 
-```
+# DownloadFile
 
-</Tabs.Tab>
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/dropbox/download_file_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/dropbox/download_file_example_call_tool.js"],
+      },
+    },
+    {
+      label: "Execute the Tool with OpenAI",
+      content: {
+        Python: ["/examples/integrations/toolkits/dropbox/download_file_example_llm_oai.py"],
+        JavaScript: ["/examples/integrations/toolkits/dropbox/download_file_example_llm_oai.js"],
+      },
+    },
+  ]}
+/>
 
-<Tabs.Tab>
+Download a file from Dropbox.
 
-```javascript file=<rootDir>/examples/code/integrations/dropbox/custom_auth.js {8-10}
+**Parameters**
 
-```
+- **file_path** _(string, optional)_ Path to the file. E.g. '/My Documents/My Folder/My File.pdf'
+- **file_id** _(string, optional)_ The ID of the file to download. E.g. 'id:a4ayc_80_OEAAAAAAAAAYa'
 
-</Tabs.Tab>
+Note: to call this tool, you must provide either `file_path` or `file_id`.
 
-</Tabs>
+## Auth
 
-## Using Dropbox auth in custom tools
+The Arcade Dropbox toolkit uses the [Dropbox auth provider](/home/auth-providers/dropbox) to connect to users' Dropbox accounts.
 
-The Arcade [Model API](/home/use-tools/call-tools-with-models) is a convenient way to call language models and automatically invoke tools. You can author your own [custom tools](/home/build-tools/create-a-toolkit) that interact with the Dropbox API.
+With the hosted Arcade Engine, there's nothing to configure. Your users will see `Arcade` as the name of the application that's requesting permission.
 
-Use the `Dropbox()` auth class to specify that a tool requires authorization with Dropbox. The `context.authorization.token` field will be automatically populated with the user's Dropbox token:
-
-```python file=<rootDir>/examples/code/integrations/dropbox/custom_tool.py {5-6,9-13,23}
-
-```
+With a self-hosted installation of Arcade, you need to [configure the Dropbox auth provider](/home/auth-providers/dropbox#configuring-dropbox-auth) with your own Dropbox app credentials.

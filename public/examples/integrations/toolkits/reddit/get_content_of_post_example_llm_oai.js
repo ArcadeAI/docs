@@ -1,8 +1,9 @@
 import OpenAI from 'openai';
 
 const USER_ID = "you@example.com";
-const PROMPT = "List all documents in my Google Drive that contain the word 'report'.";
-const TOOL_NAME = "Google.ListDocuments";
+// TODO: Replace with an identifier for a real post
+const PROMPT = "Get the content of the post https://www.reddit.com/r/TestSubreddit/comments/1abcdefg/"
+const TOOL_NAME = "Reddit.GetContentOfPost";
 
 const client = new OpenAI({
   baseURL: 'https://api.arcade.dev',
@@ -19,4 +20,4 @@ const response = await client.chat.completions.create({
   tool_choice: 'generate'
 });
 
-console.log(response.choices[0].message.content); 
+console.log(response.choices[0].message.content);

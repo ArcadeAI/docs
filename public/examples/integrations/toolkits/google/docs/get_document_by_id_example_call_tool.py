@@ -17,7 +17,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    "document_id": "your_document_id_here"  # Document Ids can be found with the ListDocuments tool
+    "document_id": "your_document_id_here"  # Document Ids can be found with the SearchDocuments tool
 }
 
 response = client.tools.execute(
