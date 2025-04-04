@@ -1,0 +1,232 @@
+---
+title: "Schedule tool execution"
+description: "Learn how to schedule tools to run at a future time with Arcade.dev"
+---
+
+import { Steps, Tabs } from "nextra/components";
+
+# Schedule tool execution
+
+In this guide, you'll learn how to schedule tools to run at a future time with Arcade.dev.
+
+Scheduled tool execution allows you to set up tools to run automatically at a specific time in the future. This is useful for tasks like sending notifications, generating reports, or performing maintenance operations on a schedule.
+
+<Steps>
+
+### Prerequisites
+
+- [Set up Arcade.dev](/home/quickstart)
+- Create an Arcade.dev [API key](/home/api-keys), if you haven't already
+- Understand how to [call tools directly](/home/use-tools/call-tools-directly)
+
+### Set environment variables
+
+You can find your Arcade.dev API key in one of these locations:
+
+- [Arcade.dev Dashboard](https://api.arcade.dev/dashboard/api-keys) under API Keys
+- `~/.arcade/credentials.yaml`
+
+Export your Arcade.dev API key as an environment variable:
+```bash
+export ARCADE_API_KEY=<your-api-key>
+```
+
+### Initialize the client
+
+Import and initialize the Arcade.dev client. The client automatically uses the `ARCADE_API_KEY` environment variable.
+
+<Tabs items={["Python", "JavaScript", "REST API"]}>
+<Tabs.Tab>
+```python file=<rootDir>/examples/code/home/use-tools/schedule-tool-execution/schedule_tool.py#L1-L3
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```js file=<rootDir>/examples/code/home/use-tools/schedule-tool-execution/schedule_tool.js#L1-L3
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```bash
+# No client initialization needed for REST API
+# Just include your API key in the Authorization header
+```
+</Tabs.Tab>
+</Tabs>
+
+### Schedule a tool execution
+
+Let's schedule the `Github.CreateIssue` tool to run at a future time. You'll need to specify:
+
+1. The tool name
+2. The input parameters for the tool
+3. The time when the tool should run
+4. Optionally, a user ID for attribution
+
+<Tabs items={["Python", "JavaScript", "REST API"]}>
+<Tabs.Tab>
+```python file=<rootDir>/examples/code/home/use-tools/schedule-tool-execution/schedule_tool.py#L5-L19
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```js file=<rootDir>/examples/code/home/use-tools/schedule-tool-execution/schedule_tool.js#L5-L19
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```bash
+# Schedule tool execution
+curl -X POST "https://api.arcade.dev/v1/tools/execute" \
+  -H "Authorization: Bearer $ARCADE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_id": "user@example.com",
+    "tool_name": "Github.CreateIssue",
+    "input": {
+      "owner": "ArcadeAI",
+      "repo": "Docs",
+      "title": "Scheduled issue creation",
+      "body": "This issue was created by a scheduled tool execution"
+    },
+    "run_at": "2025-01-09T15:00:00-08:00"
+  }'
+```
+
+Response:
+```json
+{
+  "id": "te_2ur7QJuXu2eEHZWvPb6QBmEN76D",
+  "execution_id": "tc_2ur7QLXCUFsbo0HDY5ZAaM3mwei",
+  "execution_type": "scheduled",
+  "run_at": "2025-01-09T15:00:00-08:00",
+  "status": "pending",
+  "success": true
+}
+```
+</Tabs.Tab>
+</Tabs>
+
+The response includes an ID that you can use to check the status of the scheduled execution later.
+
+### List scheduled tool executions
+
+You can retrieve a list of all scheduled tool executions to monitor their status.
+
+<Tabs items={["Python", "JavaScript", "REST API"]}>
+<Tabs.Tab>
+```python file=<rootDir>/examples/code/home/use-tools/schedule-tool-execution/schedule_tool.py#L21-L23
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```js file=<rootDir>/examples/code/home/use-tools/schedule-tool-execution/schedule_tool.js#L21-L23
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```bash
+# List scheduled tool executions
+curl -X GET "https://api.arcade.dev/v1/scheduled_tools" \
+  -H "Authorization: Bearer $ARCADE_API_KEY"
+```
+
+Response:
+```json
+{
+  "items": [
+    {
+      "id": "te_2ur7QJuXu2eEHZWvPb6QBmEN76D",
+      "created_at": "2025-03-26T13:13:41Z",
+      "updated_at": "2025-03-26T13:13:42Z",
+      "execution_type": "scheduled",
+      "execution_status": "success",
+      "tool_name": "Github.CreateIssue",
+      "toolkit_name": "Github",
+      "user_id": "user@example.com",
+      "run_at": "2025-01-09T15:00:00-08:00",
+      "started_at": "2025-03-26T13:13:42Z",
+      "finished_at": "2025-03-26T13:13:42Z"
+    }
+  ],
+  "limit": 25,
+  "offset": 0,
+  "page_count": 1,
+  "total_count": 1
+}
+```
+</Tabs.Tab>
+</Tabs>
+
+### Get details of a scheduled execution
+
+You can retrieve detailed information about a specific scheduled execution using its ID.
+
+<Tabs items={["Python", "JavaScript", "REST API"]}>
+<Tabs.Tab>
+```python file=<rootDir>/examples/code/home/use-tools/schedule-tool-execution/schedule_tool.py#L25-L34
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```js file=<rootDir>/examples/code/home/use-tools/schedule-tool-execution/schedule_tool.js#L25-L36
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```bash
+# Get details of a scheduled tool execution
+curl -X GET "https://api.arcade.dev/v1/scheduled_tools/te_2ur7QJuXu2eEHZWvPb6QBmEN76D" \
+  -H "Authorization: Bearer $ARCADE_API_KEY"
+```
+
+Response:
+```json
+{
+  "id": "te_2ur7QJuXu2eEHZWvPb6QBmEN76D",
+  "created_at": "2025-03-26T13:13:41Z",
+  "updated_at": "2025-03-26T13:13:42Z",
+  "execution_type": "scheduled",
+  "execution_status": "success",
+  "tool_name": "Github.CreateIssue",
+  "toolkit_name": "Github",
+  "user_id": "user@example.com",
+  "run_at": "2025-01-09T15:00:00-08:00",
+  "started_at": "2025-03-26T13:13:42Z",
+  "finished_at": "2025-03-26T13:13:42Z",
+  "input": {
+    "owner": "ArcadeAI",
+    "repo": "Docs",
+    "title": "Scheduled issue creation",
+    "body": "This issue was created by a scheduled tool execution"
+  },
+  "attempts": [
+    {
+      "id": "ta_2ur7QPkwaPgfh6DCemcQ9Nmxj5z",
+      "started_at": "2025-03-26T13:13:42Z",
+      "finished_at": "2025-03-26T13:13:42Z",
+      "success": true,
+      "output": {
+        "value": "{JSON containing result details}"
+      }
+    }
+  ]
+}
+```
+</Tabs.Tab>
+</Tabs>
+
+The response includes detailed information about the scheduled execution, including:
+
+- The execution status
+- The input parameters
+- The time it was scheduled to run
+- The time it actually ran (if it has run)
+- The output of the execution (if it has run)
+- Any attempts that were made to run the tool
+
+### Use cases for scheduled tool execution
+
+Let's explore some common use cases for scheduled tool execution:
+
+1. **Automated reporting**: Schedule tools to generate and send reports at regular intervals
+2. **Maintenance tasks**: Schedule cleanup operations or database maintenance during off-peak hours
+3. **Delayed notifications**: Schedule notifications to be sent at appropriate times
+4. **Workflow automation**: Trigger the next step in a workflow after a specified delay
+5. **Scheduled content updates**: Automatically update content or publish posts at optimal times
+
+By scheduling tool executions, you can automate repetitive tasks and ensure they run at the most appropriate times.
+
+</Steps>
