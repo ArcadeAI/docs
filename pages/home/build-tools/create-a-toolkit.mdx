@@ -1,27 +1,26 @@
 ---
 title: "Creating a Toolkit"
-description: "Learn how to create a custom toolkit for Arcade"
+description: "Learn how to create, test, deploy, and publish a custom toolkit for Arcade"
 ---
 
 import { Steps } from "nextra/components";
 
 # Creating a Toolkit
 
-In this guide, we'll walk through the process of creating a custom toolkit for Arcade.
+This guide walks you through the complete process of creating a custom toolkit for Arcade - from initial setup to publishing on PyPI. You'll build a simple arithmetic toolkit with operations like addition, subtraction, and multiplication.
 
-You'll create a simple arithmetic toolkit with operations like addition, subtraction, multiplication, and more.
+## Prerequisites
+
+Before starting, make sure you have:
+
+- Python 3.10 or higher (verify with `python --version`)
+- An [Arcade account](https://api.arcade.dev/signup?utm_source=docs&utm_medium=page&utm_campaign=custom-tools)
+- Arcade CLI installed: `pip install arcade-ai`
+- Poetry for package management (the generated Makefile uses Poetry)
 
 <Steps>
 
-### Prerequisites
-
-<Warning>
-  This guide requires a **self-hosted** installation of the Arcade Engine. It will not work with the Cloud version of Arcade. Ensure you complete the steps below before continuing.
-</Warning>
-
-- Follow the [Set up Arcade Locally](/home/install/local) guide to install Arcade and the SDK.
-
-### Create a new toolkit
+### Generate a toolkit template
 
 Run the following command to start creating your toolkit:
 
@@ -29,24 +28,59 @@ Run the following command to start creating your toolkit:
 arcade new
 ```
 
-Arcade will prompt you to enter a name and other details for your toolkit. After you provide the information, a skeleton toolkit will be generated for you in a directory named with the toolkit name that you entered.
+Enter the required information when prompted:
+- **Toolkit name**: Choose a descriptive name (e.g., "arithmetic")
+- **Description**: Provide a brief explanation of your toolkit
+- **Author name and email**: Your contact information
+
+After completion, a directory with your toolkit name will be created with the following structure:
+
+```
+arithmetic/
+├── arcade_arithmetic/       # Core package directory
+│   ├── __init__.py          # Package initialization
+│   └── tools/               # Directory for your tools
+│       └── __init__.py
+├── tests/                   # Test directory
+├── pyproject.toml           # Poetry project configuration
+├── README.md                # Documentation
+└── Makefile                 # Helper commands
+```
+
+Navigate to your toolkit directory:
 
 ```bash
 cd <toolkit_name>
 ```
 
-### Define your tools
+### Set up the development environment
 
-Create a Python file for your tools, e.g., `arithmetic.py`, in the `arcade_<toolkit_name>/tools` directory of your new toolkit and import the necessary modules:
+Install dependencies and pre-commit hooks:
 
-```python
-from typing import Annotated
-from arcade.sdk import tool
+```bash
+make install
 ```
 
-Now, define your tools using the `@tool` decorator:
+This installs all dependencies specified in `pyproject.toml`, pre-commit hooks for code quality, and your toolkit in development mode.
+
+The Makefile provides several helpful commands:
+- `build` - Build wheel file using poetry
+- `bump-version` - Bump the version in pyproject.toml
+- `check` - Run code quality tools
+- `clean-build` - Clean build artifacts
+- `coverage` - Generate coverage report
+- `install` - Install the poetry environment and pre-commit hooks
+- `test` - Test the code with pytest
+
+### Define your tools
+
+Create a Python file for your tools in the `arcade_<toolkit_name>/tools` directory:
 
 ```python
+# arcade_arithmetic/tools/operations.py
+from typing import Annotated, List
+from arcade.sdk import tool
+
 @tool
 def add(
     a: Annotated[int, "The first number"],
@@ -54,6 +88,10 @@ def add(
 ) -> Annotated[int, "The sum of the two numbers"]:
     """
     Add two numbers together
+
+    Examples:
+        add(3, 4) -> 7
+        add(-1, 5) -> 4
     """
     return a + b
 
@@ -63,7 +101,11 @@ def subtract(
     b: Annotated[int, "The second number"]
 ) -> Annotated[int, "The difference of the two numbers"]:
     """
-    Subtract two numbers
+    Subtract the second number from the first
+
+    Examples:
+        subtract(10, 4) -> 6
+        subtract(5, 7) -> -2
     """
     return a - b
 
@@ -74,65 +116,192 @@ def multiply(
 ) -> Annotated[int, "The product of the two numbers"]:
     """
     Multiply two numbers together
+
+    Examples:
+        multiply(3, 4) -> 12
+        multiply(-2, 5) -> -10
     """
     return a * b
-
-@tool
-def divide(
-    a: Annotated[int, "The numerator"],
-    b: Annotated[int, "The denominator"]
-) -> Annotated[float, "The quotient of the two numbers"]:
-    """
-    Divide two numbers
-    """
-    return a / b
 ```
 
-### Register your tools
+Update the package initialization files to expose your tools:
 
-To register your tools locally, use the `make install` command provided in the Makefile created by `arcade new`. This will install the toolkit locally.
+```python
+# arcade_arithmetic/tools/__init__.py
+from .operations import add, subtract, multiply
 
-Navigate to the directory created by `arcade new` (with the `pyproject.toml` file) and run:
+__all__ = ["add", "subtract", "multiply"]
+```
+
+```python
+# arcade_arithmetic/__init__.py
+from arcade_arithmetic.tools import add, subtract, multiply
+
+__all__ = ["add", "subtract", "multiply"]
+```
+
+### Test your toolkit
+
+Write tests for your tools in the `tests` directory:
+
+```python
+# tests/test_operations.py
+import pytest
+from arcade_arithmetic.tools.operations import add, subtract, multiply
+
+def test_add():
+    assert add(3, 4) == 7
+    assert add(-1, 5) == 4
+    assert add(0, 0) == 0
+
+def test_subtract():
+    assert subtract(10, 4) == 6
+    assert subtract(5, 7) == -2
+    assert subtract(0, 0) == 0
+
+def test_multiply():
+    assert multiply(3, 4) == 12
+    assert multiply(-2, 5) == -10
+    assert multiply(0, 5) == 0
+```
+
+Run the tests:
 
 ```bash
-make install
+make test
 ```
 
-This will load the tool into the local worker environment.
+Check code quality:
 
-You can run the Engine and Worker to test your new tool with:
+```bash
+make check
+```
+
+Generate a coverage report (optional):
+
+```bash
+make coverage
+```
+
+### Verify local installation
+
+Your toolkit should already be installed locally from the `make install` command. Verify it's properly registered:
+
+```bash
+arcade show --local
+```
+
+You should see your toolkit listed in the output.
+
+### Test with a local worker
+
+Start a local worker to test your toolkit with the Arcade API:
+
+```bash
+arcade serve
+```
+
+Visit http://localhost:8002/docs to see your tools in the Swagger UI.
+
+### Deploy your toolkit to Arcade
+
+Create a `worker.toml` file in your toolkit's root directory:
+
+```toml
+[[worker]]
+
+[worker.config]
+id = "arithmetic-worker"  # Choose a unique ID
+secret = "<your-secret>"  # Replace with a secure secret
+
+[worker.local_source]
+packages = ["."]  # Path to your toolkit directory
+```
+
+Deploy your worker to Arcade:
+
+```bash
+arcade deploy
+```
+
+Verify the deployment:
+
+```bash
+arcade worker list
+```
+
+### Package and publish to PyPI
+
+Clean any previous build artifacts:
+
+```bash
+make clean-build
+```
+
+If you're updating an existing package, bump the version:
 
 
 ```bash
-arcade dev
+make bump-version
 ```
 
-Additionally, the Makefile includes other helpful commands such as:
+Update the project metadata in `pyproject.toml`:
 
-- `make check`: Runs all pre-commit checks that must pass.
-- `make test`: Runs all unit tests in the toolkit's `test` directory.
+```toml
+[tool.poetry]
+name = "arcade-arithmetic"
+version = "0.1.0"
+description = "Basic arithmetic operations toolkit for Arcade"
+authors = ["Your Name <your.email@example.com>"]
+readme = "README.md"
+license = "MIT"
+repository = "https://github.com/yourusername/arcade-arithmetic"
+```
 
-If you'd like to run the worker without the Engine, you can use the [`arcade serve`](/home/install/toolkits#running-a-local-worker) command.
+Create a comprehensive README.md file that explains your toolkit's purpose, installation, and usage.
 
-<Warning>
-  See the [Local Installation Guide](/home/install/local) for setting up `arcade
-  dev` if you have not done so already.{" "}
-</Warning>
+Build your package:
 
-### Use your tools with Arcade
+```bash
+make build
+```
 
-Now that your local Engine and worker are running via the `arcade dev` command, you can use your custom tools with Arcade in your application.
+Configure Poetry with your PyPI token (recommended for security):
 
-Here's an example of how to use your tools:
+```bash
+poetry config pypi-token.pypi your-token-here
+```
+
+Publish to PyPI:
+
+```bash
+poetry publish
+```
+
+Or build and publish in one step:
+
+```bash
+poetry publish --build
+```
+
+</Steps>
+
+## Using your published toolkit
+
+Now that your toolkit is published, you can use it in any Arcade application:
 
 ```python
 from arcadepy import Arcade
 
-client = Arcade(base_url="http://localhost:9099")
+# Initialize the Arcade client
+client = Arcade(base_url="https://api.arcade.dev")
 
-# Use the tools in a chat completion
+# Create a chat completion that can use your tools
 response = client.chat.completions.create(
-    messages=[{"role": "user", "content": "What is 6 times 7?"}],
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant with arithmetic skills."},
+        {"role": "user", "content": "Calculate 12 + 34 and then multiply by 2"}
+    ],
     model="gpt-4o",
     tool_choice="generate",
 )
@@ -140,16 +309,20 @@ response = client.chat.completions.create(
 print(response.choices[0].message.content)
 ```
 
-</Steps>
+## Ongoing toolkit maintenance
 
-### How it works
+As you continue to develop your toolkit, use these Makefile commands to maintain it:
 
-By decorating your functions with `@tool`, you expose them to the Arcade platform.
+- `make check` - Run code quality checks before committing changes
+- `make test` - Run tests to ensure your changes don't break existing functionality
+- `make coverage` - Monitor test coverage as you add new features
+- `make bump-version` - Update the version when releasing new changes
+- `make build` - Build new distribution packages
+- `make clean-build` - Clean up build artifacts when needed
 
-The `Annotated` types and docstrings provide metadata that helps the AI understand how to use your tools.
+## Next steps
 
-### Next steps
-
-Try adding more tools to your toolkit, such as `sqrt`, `sum_list`, or `sum_range`.
-
-Explore advanced features like tool [authorization](/home/build-tools/create-a-tool-with-auth) and [evaluation](/home/evaluate-tools/why-evaluate-tools) to enhance your tools.
+- **Add more tools**: Expand your toolkit with more complex operations
+- **Add authentication**: [Learn how to create tools with authentication](/home/build-tools/create-a-tool-with-auth)
+- **Evaluate your tools**: [Explore how to evaluate tool performance](/home/evaluate-tools/why-evaluate-tools)
+- **Set up CI/CD**: Automate testing and deployment with continuous integration
