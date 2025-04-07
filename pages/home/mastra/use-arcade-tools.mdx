@@ -38,7 +38,9 @@ npm install @arcadeai/arcadejs @dmitryrechkin/json-schema-to-zod
 ```
 
 <Callout type="info">
-  The `@dmitryrechkin/json-schema-to-zod` package converts Arcade's OpenAI-compatible JSON Schema tool definitions to Zod schemas used by Mastra, enabling type-safe tool definitions in your application.
+  The `@dmitryrechkin/json-schema-to-zod` package converts Arcade's
+  OpenAI-compatible JSON Schema tool definitions to Zod schemas used by Mastra,
+  enabling type-safe tool definitions in your application.
 </Callout>
 
 ### Configure API keys
@@ -201,8 +203,10 @@ Use your agent with the integrated Arcade tools:
 
 ```typescript
 // Generate a response from the agent
-const response = await githubAgent.generate("List my GitHub repositories");
-console.log(response.text);
+const response = await githubAgent.generate(
+  "How many stars does the ArcadeAI/arcade-ai repository have?",
+);
+console.log(response.content);
 
 // Or stream the response for a more interactive experience
 const stream = await githubAgent.stream("Create a new issue in my repository");
@@ -214,8 +218,9 @@ for await (const chunk of stream.textStream) {
 
 </Steps>
 
-<Callout type="warning" title="Initial Tool Authorization"> 
-  When running your agent for the first time with tools that require user consent (like GitHub or Google), the adapter will detect an authorization error and return an object with the authorization URL (e.g., `{ authorization_required: true, url: '...', message: '...' }`). Your agent's instructions should guide it to present this URL to the user. After the user visits this URL and grants permissions, the tool can be used successfully. 
-  
-  See the [Managing user authorization](./user-auth-interrupts) guide for more details on handling authentication flows.
+<Callout type="warning" title="Initial Tool Authorization">
+  When running your agent for the first time with tools that require user consent (like GitHub or Google), the adapter will detect an authorization error and return an object with the authorization URL (e.g., `{ authorization_required: true, url: '...', message: '...' }`). Your agent's instructions should guide it to present this URL to the user. After the user visits this URL and grants permissions, the tool can be used successfully.
+
+See the [Managing user authorization](./user-auth-interrupts) guide for more details on handling authentication flows.
+
 </Callout>
