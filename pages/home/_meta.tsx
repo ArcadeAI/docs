@@ -78,6 +78,9 @@ export default {
   crewai: {
     title: "CrewAI",
   },
+  mastra: {
+    title: "Mastra",
+  },
   "-- Building Tools": {
     type: "separator",
     title: "Building Tools",
