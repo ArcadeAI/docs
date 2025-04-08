@@ -37,11 +37,7 @@ Install the necessary packages for working with Arcade:
 npm install @arcadeai/arcadejs @dmitryrechkin/json-schema-to-zod
 ```
 
-<Callout type="info">
-  The `@dmitryrechkin/json-schema-to-zod` package converts Arcade's
-  OpenAI-compatible JSON Schema tool definitions to Zod schemas used by Mastra,
-  enabling type-safe tool definitions in your application.
-</Callout>
+<Callout type="info">The `@dmitryrechkin/json-schema-to-zod` package converts Arcade's OpenAI-compatible JSON Schema tool definitions to Zod schemas used by Mastra, enabling type-safe tool definitions in your application.</Callout>
 
 ### Configure API keys
 
@@ -199,7 +195,21 @@ export const githubAgent = new Agent({
 
 ### Interact with your agent
 
-Use your agent with the integrated Arcade tools:
+You can interact with your agent in two main ways:
+
+**1. Using the Mastra Development Playground:**
+
+Start the Mastra development server:
+
+```bash
+npm run dev
+```
+
+This will launch a local development playground, typically accessible at `http://localhost:4111`. Open this URL in your browser, select the `githubAgent` from the list of available agents, and start chatting with it directly in the UI.
+
+**2. Programmatically:**
+
+Alternatively, you can interact with the agent directly in your code:
 
 ```typescript
 // Generate a response from the agent
@@ -218,9 +228,4 @@ for await (const chunk of stream.textStream) {
 
 </Steps>
 
-<Callout type="warning" title="Initial Tool Authorization">
-  When running your agent for the first time with tools that require user consent (like GitHub or Google), the adapter will detect an authorization error and return an object with the authorization URL (e.g., `{ authorization_required: true, url: '...', message: '...' }`). Your agent's instructions should guide it to present this URL to the user. After the user visits this URL and grants permissions, the tool can be used successfully.
-
-See the [Managing user authorization](./user-auth-interrupts) guide for more details on handling authentication flows.
-
-</Callout>
+<Callout type="warning" title="Initial Tool Authorization">When running your agent for the first time with tools that require user consent (like GitHub or Google), the adapter will detect an authorization error and return an object with the authorization URL (e.g., `{ authorization_required: true, url: '...', message: '...' }`). Your agent's instructions should guide it to present this URL to the user. After the user visits this URL and grants permissions, the tool can be used successfully. See the [Managing user authorization](./user-auth-interrupts) guide for more details on handling authentication flows.</Callout>
