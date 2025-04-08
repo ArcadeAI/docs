@@ -1,0 +1,231 @@
+---
+title: "Using Arcade tools with Mastra"
+description: "Integrate Arcade tools into your Mastra applications for basic use cases."
+---
+
+import { Steps } from "nextra/components";
+import { Callout } from "nextra/components";
+
+This guide shows you how to integrate and use Arcade tools within a Mastra agent.
+
+<Steps>
+
+### Prerequisites
+
+- [Obtain an Arcade API key](/home/api-keys)
+- Basic familiarity with TypeScript and Mastra concepts
+
+### Create a Mastra project
+
+Start by creating a new Mastra project using the official CLI:
+
+```bash
+# Create a new Mastra project
+npx create-mastra@latest my-arcade-agent
+
+# Navigate to the project
+cd my-arcade-agent
+```
+
+For more details on setting up a Mastra project, refer to the [Mastra documentation](https://mastra.ai/docs/getting-started/installation).
+
+### Install required packages
+
+Install the necessary packages for working with Arcade:
+
+```bash
+npm install @arcadeai/arcadejs @dmitryrechkin/json-schema-to-zod
+```
+
+<Callout type="info">The `@dmitryrechkin/json-schema-to-zod` package converts Arcade's OpenAI-compatible JSON Schema tool definitions to Zod schemas used by Mastra, enabling type-safe tool definitions in your application.</Callout>
+
+### Configure API keys
+
+Set up your environment with the required API keys:
+
+```typescript
+// Set your API keys in your environment variables or .env file
+process.env.ARCADE_API_KEY = "your_arcade_api_key";
+process.env.ANTHROPIC_API_KEY = "your_anthropic_api_key"; // or another supported model provider
+```
+
+### Create the Arcade tool adapter
+
+Create a utility function to fetch Arcade tools and convert them into the format Mastra expects. This involves fetching tools, validating their schema, converting the input schema to Zod, and defining an `execute` function that calls the Arcade API.
+
+```typescript
+import { Agent } from "@mastra/core/agent";
+import { anthropic } from "@ai-sdk/anthropic";
+import { Arcade } from "@arcadeai/arcadejs";
+import { createTool } from "@mastra/core/tools";
+import { z } from "zod";
+
+// Utility to convert JSON Schema to Zod schemas
+import { JSONSchemaToZod } from "@dmitryrechkin/json-schema-to-zod";
+
+// Initialize the Arcade client
+const arcade = new Arcade();
+
+/**
+ * Schema to validate Arcade tool definitions
+ */
+const arcadeToolMinimumSchema = z.object({
+  function: z.object({
+    name: z.string(),
+    parameters: z.record(z.any()),
+    description: z.string(),
+  }),
+});
+
+/**
+ * Fetches Arcade tools and converts them to Mastra tools
+ */
+async function getArcadeMastraTools({
+  toolkit,
+  user_id,
+}: {
+  toolkit?: string;
+  user_id: string;
+}) {
+  // Fetch tools from Arcade in OpenAI format
+  const tools = await arcade.tools.formatted.list({
+    ...(toolkit && { toolkit }),
+    format: "openai",
+  });
+
+  // Convert each valid tool into a Mastra tool
+  return tools.items.reduce(
+    (acc: Record<string, ReturnType<typeof createTool>>, item) => {
+      const parsedItem = arcadeToolMinimumSchema.safeParse(item);
+
+      if (parsedItem.success) {
+        const { name, description, parameters } = parsedItem.data.function;
+
+        acc[name] = createTool({
+          id: name,
+          description,
+          // Convert JSON Schema to Zod schema
+          inputSchema: JSONSchemaToZod.convert(parameters),
+          // Execute function to call the Arcade tool
+          execute: async ({ context }) => {
+            try {
+              // Execute the tool via Arcade API
+              const result = await arcade.tools.execute({
+                tool_name: name,
+                input: context,
+                user_id,
+              });
+              return result;
+            } catch (error) {
+              // Handle authorization errors
+              if (
+                error instanceof Error &&
+                isAuthorizationRequiredError(error)
+              ) {
+                // Get authorization URL if needed
+                const response = await getAuthorizationResponse(name, user_id);
+                return {
+                  authorization_required: true,
+                  url: response.url,
+                  message: "Forward this url to the user for authorization",
+                };
+              }
+              throw error;
+            }
+          },
+        });
+      } else {
+        console.warn(
+          `Skipping tool due to invalid schema: ${JSON.stringify(item)}`,
+          parsedItem.error,
+        );
+      }
+
+      return acc;
+    },
+    {},
+  );
+}
+
+/**
+ * Check if an error indicates authorization is required
+ */
+function isAuthorizationRequiredError(error: Error) {
+  return (
+    error?.name === "PermissionDeniedError" ||
+    error?.message?.includes("permission denied") ||
+    error?.message?.includes("authorization required")
+  );
+}
+
+/**
+ * Get the authorization URL for a tool
+ */
+async function getAuthorizationResponse(toolName: string, user_id: string) {
+  return await arcade.tools.authorize({
+    tool_name: toolName,
+    user_id,
+  });
+}
+```
+
+### Create and configure your Mastra agent
+
+Now create a Mastra agent that uses Arcade tools:
+
+```typescript
+const USER_ID = "user@example.com";
+
+// Fetch and prepare Arcade tools for a specific toolkit
+const arcadeTools = await getArcadeMastraTools({
+  toolkit: "github", // Choose the toolkit you need
+  user_id: USER_ID, // Pass an application-side user id
+});
+
+// Create the Mastra agent with Arcade tools
+export const githubAgent = new Agent({
+  name: "githubAgent",
+  instructions: `You are a GitHub Agent that can help with code-related tasks.
+  If a tool requires authorization, you will receive an authorization URL.
+  When that happens, clearly present this URL to the user and ask them to visit it to grant permissions.`,
+  model: anthropic("claude-3-7-sonnet-20250219"),
+  tools: arcadeTools,
+});
+```
+
+### Interact with your agent
+
+You can interact with your agent in two main ways:
+
+**1. Using the Mastra Development Playground:**
+
+Start the Mastra development server:
+
+```bash
+npm run dev
+```
+
+This will launch a local development playground, typically accessible at `http://localhost:4111`. Open this URL in your browser, select the `githubAgent` from the list of available agents, and start chatting with it directly in the UI.
+
+**2. Programmatically:**
+
+Alternatively, you can interact with the agent directly in your code:
+
+```typescript
+// Generate a response from the agent
+const response = await githubAgent.generate(
+  "How many stars does the ArcadeAI/arcade-ai repository have?",
+);
+console.log(response.text);
+
+// Or stream the response for a more interactive experience
+const stream = await githubAgent.stream("Create a new issue in my repository");
+
+for await (const chunk of stream.textStream) {
+  process.stdout.write(chunk);
+}
+```
+
+</Steps>
+
+<Callout type="warning" title="Initial Tool Authorization">When running your agent for the first time with tools that require user consent (like GitHub or Google), the adapter will detect an authorization error and return an object with the authorization URL (e.g., `{ authorization_required: true, url: '...', message: '...' }`). Your agent's instructions should guide it to present this URL to the user. After the user visits this URL and grants permissions, the tool can be used successfully. See the [Managing user authorization](./user-auth-interrupts) guide for more details on handling authentication flows.</Callout>
