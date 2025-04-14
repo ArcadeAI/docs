@@ -1,0 +1,160 @@
+---
+title: "Use Arcade with OpenAI Agents"
+description: "Integrate Arcade tools into your OpenAI Agents applications"
+---
+
+import { Steps } from "nextra/components";
+
+## Use Arcade with OpenAI Agents
+
+In this guide, let's explore how to integrate Arcade tools into your OpenAI Agents application. Follow the step-by-step instructions below.
+
+<Steps>
+
+### Prerequisites
+
+- [Obtain an Arcade API key](/home/api-key)
+
+### Set up your environment
+
+Install the required packages, and ensure your environment variables are set with your Arcade API key:
+
+```bash
+pip install agents-arcade arcadepy
+```
+
+### Configure API keys
+
+Provide your Arcade API key. You can store it in environment variables or directly in your code:
+
+> Need an Arcade API key? Visit the [Get an API key](/home/api-keys) page to create one.
+
+```python
+import os
+
+os.environ["ARCADE_API_KEY"] = "YOUR_ARCADE_API_KEY"
+# Or set it directly when initializing the client
+```
+
+### Create and manage Arcade tools
+
+Use the `get_arcade_tools` function to retrieve tools from specific toolkits:
+
+```python
+from arcadepy import AsyncArcade
+from agents_arcade import get_arcade_tools
+
+# Initialize the Arcade client
+client = AsyncArcade()
+
+# Get all tools from the "Google" toolkit
+tools = await get_arcade_tools(client, ["google"])
+
+# You can request multiple toolkits at once
+tools = await get_arcade_tools(client, ["google", "github", "linkedin"])
+```
+
+### Set up the agent with Arcade tools
+
+Create an agent and provide it with the Arcade tools:
+
+```python
+from agents import Agent, Runner
+
+# Create an agent with Google tools
+google_agent = Agent(
+    name="Google agent",
+    instructions="You are a helpful assistant that can assist with Google API calls.",
+    model="gpt-4o-mini",
+    tools=tools,
+)
+```
+
+### Run the agent with user context
+
+Run the agent, providing a user_id for tool authorization:
+
+```python
+try:
+    result = await Runner.run(
+        starting_agent=google_agent,
+        input="What are my latest emails?",
+        context={"user_id": "user@example.com"},
+    )
+    print("Final output:\n\n", result.final_output)
+except AuthorizationError as e:
+    print("Please Login to Google:", e)
+```
+
+### Handle authentication errors
+
+If a tool requires authorization, an `AuthorizationError` will be raised with an authorization URL:
+
+```python
+from agents_arcade.errors import AuthorizationError
+
+try:
+    # Run agent code from earlier examples
+    # ...
+except AuthorizationError as e:
+    print(f"Please visit this URL to authorize: {e}")
+    # The URL contained in the error will take the user to the authorization page
+```
+
+### Complete example
+
+Here's a complete example putting everything together:
+
+```python
+from agents import Agent, Runner
+from arcadepy import AsyncArcade
+
+from agents_arcade import get_arcade_tools
+from agents_arcade.errors import AuthorizationError
+
+
+async def main():
+    client = AsyncArcade()
+    tools = await get_arcade_tools(client, ["google"])
+
+    google_agent = Agent(
+        name="Google agent",
+        instructions="You are a helpful assistant that can assist with Google API calls.",
+        model="gpt-4o-mini",
+        tools=tools,
+    )
+
+    try:
+        result = await Runner.run(
+            starting_agent=google_agent,
+            input="What are my latest emails?",
+            context={"user_id": "user@example.com"},
+        )
+        print("Final output:\n\n", result.final_output)
+    except AuthorizationError as e:
+        print("Please Login to Google:", e)
+
+
+if __name__ == "__main__":
+    import asyncio
+
+    asyncio.run(main())
+```
+
+</Steps>
+
+## Tips for selecting tools
+
+- **Relevance**: Pick only the tools you need. Avoid using all tools at once.
+- **User identification**: Always provide a unique and consistent `user_id` for each user. Use your internal or database user ID, not something entered by the user.
+
+## Next steps
+
+Now that you have integrated Arcade tools into your OpenAI Agents application, you can:
+
+- Experiment with different toolkits, such as "github" or "linkedin"
+- Customize the agent's instructions for specific tasks
+- Try out multi-agent systems using different Arcade tools
+- Build your own custom tools with the Arcade Tool SDK
+
+Enjoy exploring Arcade and building powerful AI-enabled Python applications!

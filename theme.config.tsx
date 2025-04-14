@@ -29,6 +29,7 @@ const config: DocsThemeConfig = {
     icon: <SiDiscord />,
   },
   docsRepositoryBase: "https://github.com/ArcadeAI/arcade-ai",
+  gitTimestamp: null,
   editLink: {
     content: null, // TODO: add edit link when our repo is public
   },

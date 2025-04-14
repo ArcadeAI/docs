@@ -1,13 +1,14 @@
 ---
-title: "Get a token in an agent"
-description: "Guide on how to authorize agents in Arcade"
+title: "Direct Third-Party API Call"
+description: "Guide on how to retrieve an authorization token to call third-party APIs directly"
 ---
 
 import { Steps, Tabs } from "nextra/components";
+import { SignupLink } from "@/components/Analytics";
 
-# Generic Agent Authorization
+# Direct Third-Party API Call
 
-In this guide, you'll learn how to use Arcade to obtain user authorization for accessing third-party services, without using Arcade for tool execution or definition. We'll use Google's Gmail API as an example to demonstrate how to:
+In this guide, you'll learn how to use Arcade to obtain user authorization and interact with third-party services by calling their API endpoints directly, without using Arcade for tool execution or definition. We'll use Google's Gmail API as an example to demonstrate how to:
 
 - Get authorization tokens through Arcade
 - Handle user authentication flows
@@ -19,8 +20,14 @@ This can be useful when you need to manage authorization flows in your applicati
 
 ### Prerequisites
 
-- [Set up Arcade](/home/quickstart)
-- Install the Arcade Client and the required libraries:
+- Sign up for an <SignupLink utmParams={{
+            utm_source: "docs",
+            utm_medium: "page",
+            utm_campaign: "call-third-party-apis-directly",
+          }} linkLocation="docs:call-third-party-apis-directly">Arcade account</SignupLink> if you haven't already
+- Generate an [Arcade API key](/home/api-keys) and take note of it
+
+### Install required libraries
 
 <Tabs items={["Python", "JavaScript"]}>
 <Tabs.Tab>
@@ -35,19 +42,19 @@ npm install @arcadeai/arcadejs googleapis
 </Tabs.Tab>
 </Tabs>
 
-### Import required libraries
-
-First, let's import all the libraries we'll need:
+### Start coding
 
 <Tabs items={["Python", "JavaScript"]}>
 <Tabs.Tab>
-```python file=<rootDir>/examples/code/guides/agentauth/auth_with_google.py#L1-L3
+Create a new file `direct_api_call.py` and import all libraries we're going to use:
 
+```python file=<rootDir>/examples/code/guides/agentauth/auth_with_google.py#L1-L3
 ```
 </Tabs.Tab>
 <Tabs.Tab>
-```javascript file=<rootDir>/examples/code/guides/agentauth/auth_with_google.js#L1-L2
+Create a new file `direct_api_call.js` and import all libraries we're going to use:
 
+```javascript file=<rootDir>/examples/code/guides/agentauth/auth_with_google.js#L1-L2
 ```
 </Tabs.Tab>
 </Tabs>
@@ -105,8 +112,6 @@ If authorization is not completed, prompt the user to visit the authorization UR
 
 ### Wait for the user to authorize the request
 
-Use `wait_for_completion()` to wait for the user to authorize the request:
-
 <Tabs items={["Python", "JavaScript"]}>
 <Tabs.Tab>
 ```python file=<rootDir>/examples/code/guides/agentauth/auth_with_google.py#L32
@@ -137,6 +142,29 @@ Once authorization is complete, you can use the obtained token to access the thi
 </Tabs.Tab>
 </Tabs>
 
+### Execute the code
+
+<Tabs items={["Python", "JavaScript"]}>
+<Tabs.Tab>
+```python
+python3 direct_api_call.py
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```javascript
+node direct_api_call.js
+```
+</Tabs.Tab>
+</Tabs>
+
+You should see an output similar to this:, which is a list of the email messages returned by the Gmail API:
+
+```text
+[{'id': '195f77a8ce90f2c1', 'threadId': '195f77a8ce90f2c1'}, {'id': '195ed467a90e8538', 'threadId': '195ed467a90e8538'}, ...]
+```
+
+For each item in the list/array, you could use the [`users.messages.get`](https://developers.google.com/workspace/gmail/api/reference/rest/v1/users.messages/get) endpoint to get the full message details.
+
 </Steps>
 
 <Note>
@@ -151,4 +179,4 @@ Arcade handles the authorization challenges and tokens, simplifying the process 
 
 ### Next steps
 
-Integrate this authorization flow into your application, and explore how you can manage different providers and scopes.
+Integrate this authorization flow into your application, and explore how you can manage different [auth providers](/home/auth-providers) and scopes.
