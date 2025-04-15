@@ -3,28 +3,181 @@ title: "Start using Arcade"
 description: "Learn how to get started with Arcade"
 ---
 
-import GettingStarted from "@components/pages/quickstart/quickstart";
-import { Prerequisites } from "@components/pages/quickstart/Prerequisites/prerequisites";
+import { Steps, Tabs } from "nextra/components";
 import { SignupLink } from "@/components/Analytics";
 
 # Let's get started with Arcade
 
-<GettingStarted />
+Arcade allows LLMs to call tools on behalf of users while taking care of the authorization flow using OAuth 2.0 or API key authentication.
+
+An example of a tool is `Google.SendEmail`. With Arcade, a user interacting with an LLM in a chat interface could ask:
+
+> send an email to john@example.com with the subject "Meeting" and the body "Let's meet at 3pm tomorrow"
+
+Our [tool catalog](/toolkits) covers multiple services, such as Slack, Notion, X, Dropbox, GitHub, Drive, Calendar, and many more.
+
+In the example above, the user may have previously analyzed a set of pages from Notion, for example. After chatting with the LLM, they would send an email to a colleague summarizing the analysis. All of our digital life can now be integrated with the reasoning power of LLMs. Arcade enables developers to easily integrate that power into any application, workflow, or AI Agent.
+
+
+You can skim through the code below to see how it works. In order to run it, you'll need to:
+
+<Steps>
 
 ## Prerequisites
 
-First, make sure you have these prerequisites installed on your system:
-
-- **Arcade Account**: Sign up for an <SignupLink utmParams={{
+1. Create an <SignupLink utmParams={{
             utm_source: "docs",
             utm_medium: "page",
             utm_campaign: "quickstart",
-          }} linkLocation="docs:quickstart">Arcade account</SignupLink> if you haven't already.
+          }} linkLocation="docs:quickstart">Arcade account</SignupLink>
+1. Get an [Arcade API key](/home/api-keys) and take note, you'll need it in the next steps.
 
-<Prerequisites />
 
-### Next steps
+## Install the OpenAI SDK:
 
-- [Learn about tools](use-tools/tools-overview) and how they work
-- Learn how to [call tools with models](use-tools/call-tools-with-models)
-- Or, jump ahead to building your own [custom tools](build-tools/create-a-toolkit)
+<Tabs items={["Python", "JavaScript", "Other languages"]}> <Tabs.Tab>
+```python
+pip install openai
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```javascript
+npm install openai
+```
+</Tabs.Tab>
+<Tabs.Tab>
+You can find the installation instructions for other languages in the [OpenAI libraries documentation](https://platform.openai.com/docs/libraries).
+
+In the next steps, we will present Python and JavaScript examples. If you need any assistance implementing it in your preferred language, please [contact our engineering team](/home/contact-us).
+</Tabs.Tab>
+</Tabs>
+
+## Implement the tool call
+
+Create a new file, open it with your preferred editor and enter the code indicated in the next steps.
+
+<Tabs items={["Python", "JavaScript"]}> <Tabs.Tab>
+```python
+touch example_openai.py
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```javascript
+touch example_openai.js
+```
+</Tabs.Tab>
+</Tabs>
+
+Next we'll edit that file and add some code. Open the file you just created in your preferred editor.
+
+First, we need to instantiate the OpenAI client pointing to the Arcade's endpoint and using the Arcade API key you created prior.
+
+<Tabs items={["Python", "JavaScript"]}> <Tabs.Tab>
+
+```python
+from openai import OpenAI
+
+client = OpenAI(base_url="https://api.arcade.dev/v1", api_key="arcade_api_key")
+```
+
+</Tabs.Tab> <Tabs.Tab>
+
+```javascript
+import { OpenAI } from "openai";
+
+const client = new OpenAI({baseURL: "https://api.arcade.dev/v1", apiKey: "arcade_api_key"});
+```
+
+</Tabs.Tab> </Tabs>
+
+Next, we define the parameters for the request. In the `prompt` below, you can replace `your@email.com` with your own email address. The Gmail tool will send a message to yourself, which you'll be able to see in your inbox.
+
+<Tabs items={["Python", "JavaScript"]}> <Tabs.Tab>
+
+```python
+prompt = "send an email to your@email.com with the subject 'Meeting' and the body 'Let's meet at 3pm tomorrow'"
+tools = ["Google.SendEmail"]
+model = "gpt-4o"
+user_id = "your@email.com"
+```
+
+</Tabs.Tab> <Tabs.Tab>
+
+```typescript
+let prompt = "send an email to your@email.com with the subject 'Meeting' and the body 'Let's meet at 3pm tomorrow'"
+let tools = ["Google.SendEmail"]
+let model = "gpt-4o"
+let userId = "your@email.com"
+```
+
+</Tabs.Tab> </Tabs>
+
+<Note>
+In a real application, the `prompt` would come from your user and the `user_id` would be a unique identifier for your application's user (could be an email address, a UUID, etc.). In this example, use your own email address.
+</Note>
+
+And, finally, we send the request:
+
+<Tabs items={["Python", "JavaScript"]}> <Tabs.Tab>
+```python
+response = client.chat.completions.create(
+    model=model,
+    messages=[{"role": "user", "content": prompt}],
+    tools=tools,
+    tool_choice="generate",
+    user=user_id,
+)
+
+print(response.choices[0].message.content)
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```typescript
+const response = await client.chat.completions.create({
+  model: model,
+  messages: [{ role: "user", content: prompt }],
+  tools: tools,
+  tool_choice: "generate",
+  user: userId,
+});
+
+console.log(response.data.choices[0].message.content);
+```
+</Tabs.Tab>
+</Tabs>
+
+## Execute the code
+
+<Tabs items={["Python", "JavaScript"]}>
+<Tabs.Tab>
+```python
+python3 example_openai.py
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```javascript
+node example_openai.js
+```
+</Tabs.Tab>
+</Tabs>
+
+## Authorize the tool
+
+The first time you run this, you will see a URL to authorize the tool to send the message on your behalf:
+
+> `Please go to this URL and authorize the action: https://accounts.google.com/o/oauth2/v2/auth?...`
+
+Once you've followed the URL and completed the authorization flow, run the script again. You should see a message like this:
+
+> `The email with the subject "Meeting" and body "Let's meet at 3pm tomorrow" has been sent to your@email.com.`
+
+</Steps>
+
+## Next steps
+
+[Learn more about tools](use-tools/tools-overview) and how they work. Or follow other examples listed below:
+
+
+* **Choosing among multiple tools**: In the example we followed above, only a single tool was used: `Google.SendEmail`. Check out [this guide](/home/use-tools/call-tools-with-models) where we provide multiple tools for the LLM to choose from. It also features a simple multi-turn conversation loop.
+* **Call tools directly, without LLM involvement**: In some cases, you may want full control of which tool is called and how. Check the [Call Tools Directly](/home/use-tools/call-tools-directly) guide to learn how to call tools directly.
+* **Create your own [custom tools](build-tools/create-a-toolkit)** to fit any specific use case needed in your application, workflow, or AI Agent.

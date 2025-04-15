@@ -96,6 +96,14 @@ const availableTools: Tool[] = [
     type: "arcade",
   },
   {
+    name: "Google Sheets",
+    image: "google_sheets.svg",
+    summary: "Create, read, and update Google Sheets with your agents.",
+    link: "/toolkits/productivity/google/sheets",
+    category: "productivity",
+    type: "arcade",
+  },
+  {
     name: "GitHub",
     image: "github.png",
     summary:
@@ -212,7 +220,7 @@ const availableTools: Tool[] = [
     name: "Notion",
     image: "notion.png",
     summary: "Create, read, and search Notion pages",
-    link: "/toolkits/productivity/notion/readme",
+    link: "/toolkits/productivity/notion",
     category: "productivity",
     type: "arcade",
   },
@@ -286,7 +294,7 @@ const availableTools: Tool[] = [
     summary: "Manage Dropbox files and folders with your agents",
     link: "/toolkits/productivity/dropbox",
     category: "productivity",
-    type: "auth",
+    type: "arcade",
   },
   {
     name: "Discord",
@@ -302,7 +310,7 @@ const availableTools: Tool[] = [
     summary: "Interact with Reddit with your agents",
     link: "/toolkits/social-communication/reddit",
     category: "social",
-    type: "auth",
+    type: "arcade",
   },
   {
     name: "Twitch",
@@ -318,7 +326,7 @@ const availableTools: Tool[] = [
 const comingSoonTools: Tool[] = [
   {
     name: "ADP Workforce Now",
-    image: "adp",
+    image: "adp.png",
     summary: "Manage payroll, HR, and workforce data with your agents.",
     link: "/toolkits/productivity/adp",
     category: "productivity",
@@ -327,7 +335,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Aha",
-    image: "aha",
+    image: "aha.png",
     summary: "Manage product roadmaps and strategy with your agents.",
     link: "/toolkits/productivity/aha",
     category: "productivity",
@@ -336,7 +344,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Airtable",
-    image: "airtable",
+    image: "airtable.svg",
     summary: "Create, edit, and manage Airtable bases with your agents.",
     link: "/toolkits/productivity/airtable",
     category: "productivity",
@@ -345,7 +353,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Amplitude",
-    image: "amplitude",
+    image: "amplitude.png",
     summary: "Analyze user behavior and product analytics with your agents.",
     link: "/toolkits/productivity/amplitude",
     category: "productivity",
@@ -363,7 +371,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Ashby",
-    image: "ashby",
+    image: "ashby.png",
     summary: "Manage recruiting and hiring processes with your agents.",
     link: "/toolkits/productivity/ashby",
     category: "productivity",
@@ -381,7 +389,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "BambooHR",
-    image: "bamboohr",
+    image: "bamboohr.png",
     summary: "Manage employee data and HR processes with your agents.",
     link: "/toolkits/productivity/bamboohr",
     category: "productivity",
@@ -390,7 +398,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Basecamp",
-    image: "basecamp",
+    image: "basecamp.png",
     summary: "Manage projects, tasks, and team communication with your agents.",
     link: "/toolkits/productivity/basecamp",
     category: "productivity",
@@ -399,7 +407,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Bill.com",
-    image: "bill",
+    image: "bill.png",
     summary: "Manage invoices and payments with your agents.",
     link: "/toolkits/productivity/bill",
     category: "productivity",
@@ -408,7 +416,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Bitbucket",
-    image: "bitbucket",
+    image: "bitbucket.png",
     summary:
       "Manage repositories, pull requests, and pipelines with your agents.",
     link: "/toolkits/development/bitbucket",
@@ -436,7 +444,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Braze",
-    image: "braze",
+    image: "braze.png",
     summary: "Manage customer engagement campaigns with your agents.",
     link: "/toolkits/productivity/braze",
     category: "productivity",
@@ -445,7 +453,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Brex",
-    image: "brex",
+    image: "brex.png",
     summary: "Manage business expenses and cards with your agents.",
     link: "/toolkits/productivity/brex",
     category: "productivity",
@@ -454,7 +462,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Buffer",
-    image: "buffer",
+    image: "buffer.png",
     summary: "Schedule and manage social media posts with your agents.",
     link: "/toolkits/social-communication/buffer",
     category: "social",
@@ -472,7 +480,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "ClickUp",
-    image: "clickup",
+    image: "clickup.svg",
     summary: "Manage projects, tasks, and documents with your agents.",
     link: "/toolkits/productivity/clickup",
     category: "productivity",
@@ -499,7 +507,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "DigitalOcean",
-    image: "digitalocean",
+    image: "digitalocean.png",
     summary: "Manage cloud servers and infrastructure with your agents.",
     link: "/toolkits/development/digitalocean",
     category: "development",
@@ -517,7 +525,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Evernote",
-    image: "evernote",
+    image: "evernote.png",
     summary: "Create and manage notes with your agents.",
     link: "/toolkits/productivity/evernote",
     category: "productivity",
@@ -526,7 +534,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Factorial",
-    image: "factorial",
+    image: "factorial.png",
     summary: "Manage HR processes and employee data with your agents.",
     link: "/toolkits/productivity/factorial",
     category: "productivity",
@@ -563,7 +571,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Hootsuite",
-    image: "hootsuite",
+    image: "hootsuite.png",
     summary: "Manage and schedule social media content with your agents.",
     link: "/toolkits/social-communication/hootsuite",
     category: "social",
@@ -572,7 +580,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "HubSpot",
-    image: "hubspot",
+    image: "hubspot.png",
     summary:
       "Manage contacts, deals, and marketing campaigns in HubSpot with your agents.",
     link: "/toolkits/productivity/hubspot",
@@ -582,7 +590,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Intercom",
-    image: "intercom",
+    image: "intercom.png",
     summary: "Manage customer communications and support with your agents.",
     link: "/toolkits/social-communication/intercom",
     category: "social",
@@ -600,7 +608,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Mailchimp",
-    image: "mailchimp",
+    image: "mailchimp.png",
     summary: "Manage email campaigns and subscribers with your agents.",
     link: "/toolkits/productivity/mailchimp",
     category: "productivity",
@@ -609,7 +617,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Microsoft Dynamics",
-    image: "msft_dynamics",
+    image: "msft.png",
     summary: "Manage CRM and ERP processes with your agents.",
     link: "/toolkits/productivity/microsoft_dynamics",
     category: "productivity",
@@ -618,7 +626,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Model Context Protocol (MCP)",
-    image: "mcp",
+    image: "mcp.png",
     summary: "Manage context and improve AI interactions with your agents.",
     link: "/toolkits/development/mcp",
     category: "development",
@@ -636,7 +644,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Monday",
-    image: "monday",
+    image: "monday.png",
     summary: "Manage projects and workflows with your agents.",
     link: "/toolkits/productivity/monday",
     category: "productivity",
@@ -645,7 +653,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Netsuite",
-    image: "netsuite",
+    image: "netsuite.svg",
     summary: "Manage financial and business operations with your agents.",
     link: "/toolkits/productivity/netsuite",
     category: "productivity",
@@ -654,7 +662,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Okta",
-    image: "okta",
+    image: "okta.png",
     summary: "Manage identity and access with your agents.",
     link: "/toolkits/productivity/okta",
     category: "productivity",
@@ -663,7 +671,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Pinecone",
-    image: "pinecone",
+    image: "pinecone.png",
     summary: "Manage vector databases and similarity search with your agents.",
     link: "/toolkits/development/pinecone",
     category: "development",
@@ -680,8 +688,17 @@ const comingSoonTools: Tool[] = [
     isComingSoon: true,
   },
   {
+    name: "Pipedrive",
+    image: "pipedrive.png",
+    summary: "Manage sales pipelines and leads with your agents.",
+    link: "/toolkits/productivity/pipedrive",
+    category: "productivity",
+    type: "arcade",
+    isComingSoon: true,
+  },
+  {
     name: "Plaid",
-    image: "plaid",
+    image: "plaid.png",
     summary:
       "Connect with financial accounts and manage financial data with your agents.",
     link: "/toolkits/productivity/plaid",
@@ -690,17 +707,8 @@ const comingSoonTools: Tool[] = [
     isComingSoon: true,
   },
   {
-    name: "Pipedrive",
-    image: "pipedrive",
-    summary: "Manage sales pipelines and leads with your agents.",
-    link: "/toolkits/productivity/pipedrive",
-    category: "productivity",
-    type: "arcade",
-    isComingSoon: true,
-  },
-  {
     name: "QuickBooks",
-    image: "quickbooks",
+    image: "quickbooks.png",
     summary: "Manage accounting and finances with your agents.",
     link: "/toolkits/productivity/quickbooks",
     category: "productivity",
@@ -727,7 +735,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "SingleStore",
-    image: "singlestore",
+    image: "singlestore.png",
     summary: "Manage databases and data operations with your agents.",
     link: "/toolkits/development/singlestore",
     category: "development",
@@ -736,7 +744,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Snowflake",
-    image: "snowflake",
+    image: "snowflake.png",
     summary: "Manage data warehouses and analytics with your agents.",
     link: "/toolkits/development/snowflake",
     category: "development",
@@ -745,7 +753,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Splunk",
-    image: "splunk",
+    image: "splunk.png",
     summary: "Monitor and analyze machine data with your agents.",
     link: "/toolkits/development/splunk",
     category: "development",
@@ -754,7 +762,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Square",
-    image: "square",
+    image: "square.png",
     summary:
       "Process payments and manage business operations with your agents.",
     link: "/toolkits/productivity/square",
@@ -764,7 +772,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Squarespace",
-    image: "squarespace",
+    image: "squarespace.png",
     summary: "Manage websites and online presence with your agents.",
     link: "/toolkits/productivity/squarespace",
     category: "productivity",
@@ -791,7 +799,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Trello",
-    image: "trello",
+    image: "trello.png",
     summary: "Manage boards, cards, and lists with your agents.",
     link: "/toolkits/productivity/trello",
     category: "productivity",
@@ -809,7 +817,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Weaviate",
-    image: "weaviate",
+    image: "weaviate.png",
     summary: "Manage vector databases and semantic search with your agents.",
     link: "/toolkits/development/weaviate",
     category: "development",
@@ -818,7 +826,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Workday",
-    image: "workday",
+    image: "workday.png",
     summary: "Manage HR, finance, and planning with your agents.",
     link: "/toolkits/productivity/workday",
     category: "productivity",
@@ -827,7 +835,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Wrike",
-    image: "wrike",
+    image: "wrike.png",
     summary: "Manage projects and collaborate with your agents.",
     link: "/toolkits/productivity/wrike",
     category: "productivity",
@@ -836,7 +844,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Xero",
-    image: "xero",
+    image: "xero.svg",
     summary: "Manage accounting and finances with your agents.",
     link: "/toolkits/productivity/xero",
     category: "productivity",
@@ -845,7 +853,7 @@ const comingSoonTools: Tool[] = [
   },
   {
     name: "Zendesk",
-    image: "zendesk",
+    image: "zendesk.png",
     summary: "Manage customer support and service with your agents.",
     link: "/toolkits/productivity/zendesk",
     category: "productivity",

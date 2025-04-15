@@ -19,4 +19,4 @@ const response = await client.chat.completions.create({
   tool_choice: 'generate'
 });
 
-console.log(response.choices[0].message.content); 
+console.log(response.choices[0].message.content);

@@ -1,115 +1,340 @@
-import { Tabs } from "nextra/components";
+# Reddit
 
-# Reddit auth provider
+import ToolInfo from "@/components/ToolInfo";
+import Badges from "@/components/Badges";
+import TabbedCodeBlock from "@/components/TabbedCodeBlock";
+import TableOfContents from "@/components/TableOfContents";
 
-<Note>
-  At this time, Arcade does not offer a default Reddit Auth Provider. To use
-  Reddit auth, you must create a custom Auth Provider with your own Reddit
-  OAuth 2.0 credentials as described below.
-</Note>
+<ToolInfo
+  description="Enable agents to interact with Reddit."
+  author="Arcade"
+  codeLink="https://github.com/ArcadeAI/arcade-ai/tree/main/toolkits/reddit"
+  authType="oauth2"
+  authProviderName="Reddit"
+  versions={["0.1.0"]}
+/>
 
-The Reddit auth provider enables tools and agents to call the Reddit API on behalf of a user. Behind the scenes, the Arcade Engine and the Reddit auth provider seamlessly manage Reddit OAuth 2.0 authorization for your users.
+<Badges repo="arcadeai/arcade_reddit" />
 
-### What's documented here
+The Arcade Reddit toolkit provides a pre-built set of tools for interacting with Reddit. These tools make it easy to build agents and AI apps that can:
 
-This page describes how to use and configure Reddit auth with Arcade.
+- Submit text posts
+- Comment on posts
+- Reply to comments
+- Get posts (title and other metadata) in a subreddit
+- Get content (body) of posts
+- Get top-level comments of a post
 
-This auth provider is used by:
-
-- Your [app code](#using-reddit-auth-in-app-code) that needs to call Reddit APIs
-- Or, your [custom tools](#using-reddit-auth-in-custom-tools) that need to call Reddit APIs
-
-## Configuring Reddit auth
-
-### Create a Reddit app
-
-- Create a Reddit Application in the [Reddit App Console](https://www.reddit.com/prefs/apps)
-- Set the OAuth Redirect URL to: `https://cloud.arcade.dev/api/v1/oauth/callback`
-- Copy the App key (Client ID) and App secret (Client Secret), which you'll need below
-
-Next, add the Reddit app to your Arcade Engine configuration. You can do this in the Arcade Dashboard, or by editing the `engine.yaml` file directly (for a self-hosted instance).
-
-### Configuring Reddit auth with the Arcade Dashboard
-
-1. Navigate to the OAuth section of the Arcade Dashboard and click **Add OAuth Provider**.
-2. Select **Reddit** as the provider.
-3. Choose a unique **ID** for your provider (e.g. "my-reddit-provider") with an optional **Description**.
-4. Enter your **Client ID** and **Client Secret** from your Reddit app.
-5. Click **Save**.
-
-When you use tools that require Reddit auth using your Arcade account credentials, the Arcade Engine will automatically use this Reddit OAuth provider.
-
-### Configuring Reddit auth in self-hosted Arcade Engine configuration
-
-<Steps>
-
-### Set environment variables
-
-<Note>
-  The Client ID is the Reddit "App key" and the Client Secret is the Reddit
-  "App secret".
-</Note>
-
-Set the following environment variables:
+## Install
 
 ```bash
-export REDDIT_CLIENT_ID="<your client ID>"
-export REDDIT_CLIENT_SECRET="<your client secret>"
+pip install arcade_reddit
 ```
 
-Or, you can set these values in a `.env` file:
+<Note>
+  pip installing the toolkit is not needed if you're using the tools hosted on Arcade Cloud.
+</Note>
 
-```bash
-REDDIT_CLIENT_SECRET="<your client secret>"
-REDDIT_CLIENT_ID="<your client ID>"
-```
+## Available Tools
+
+These tools are currently available in the Arcade Reddit toolkit.
+
+<TableOfContents
+  headers={["Tool Name", "Description"]}
+  data={[
+    ["SubmitTextPost", "Submit a text-based post to Reddit."],
+    ["CommentOnPost", "Comment on a Reddit post."],
+    ["ReplyToComment", "Reply to a Reddit comment."],
+    ["GetPostsInSubreddit", "Gets posts titles, links, and other metadata in the specified subreddit"],
+    ["GetContentOfPost", "Get content (body) of a Reddit post."],
+    ["GetContentOfMultiplePosts", "Get content (body) of multiple Reddit posts."],
+    ["GetTopLevelCommentsOfPost", "Get the first page of top-level comments of a Reddit post."],
+  ]}
+/>
 
 <Tip>
-  See [Engine configuration](/home/configure/engine) for more information on how
-  to set environment variables and configure the Arcade Engine.
+  If you need to perform an action that's not listed here, you can [get in touch
+  with us](mailto:contact@arcade.dev) to request a new tool, or [create your
+  own tools](/home/build-tools/create-a-toolkit) with the [Reddit auth
+  provider](/home/auth-providers/reddit#using-reddit-auth-in-custom-tools).
 </Tip>
 
-### Edit the Engine configuration
+## SubmitTextPost
 
-Edit the `engine.yaml` file and add a `reddit` item to the `auth.providers` section:
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/reddit/submit_text_post_example_call_tool.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/reddit/submit_text_post_example_call_tool.js"],
+      },
+    },
+    {
+      label: "Execute the Tool with OpenAI",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/reddit/submit_text_post_example_llm_oai.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/reddit/submit_text_post_example_llm_oai.js"],
+      },
+    },
+  ]}
+/>
 
-```yaml file=<rootDir>/examples/code/integrations/reddit/config_provider.engine.yaml {3-9}
+Submit a text-based post to a subreddit
 
-```
+**Parameters**
 
-</Steps>
+- **`subreddit`** _(string, required)_ The name of the subreddit to which the post will be submitted.
+- **`title`** _(string, required)_ The title of the submission.
+- **`body`** _(string, optional)_ The body of the post in markdown format. Should never be the same as the title.
+- **`nsfw`** _(boolean, optional)_ Indicates if the submission is NSFW. Default is `False`.
+- **`spoiler`** _(boolean, optional)_ Indicates if the post is marked as a spoiler. Default is `False`.
+- **`send_replies`** _(boolean, optional)_ If true, sends replies to the user's inbox. Default is `True`.
 
-## Using Reddit auth in app code
+---
 
-Use the Reddit auth provider in your own agents and AI apps to get a user-scoped token for the Reddit API. See [authorizing agents with Arcade](/home/auth/how-arcade-helps) to understand how this works.
+## CommentOnPost
 
-Use `client.auth.start()` to get a user token for the Reddit API:
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/reddit/comment_on_post_example_call_tool.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/reddit/comment_on_post_example_call_tool.js"],
+      },
+    },
+    {
+      label: "Execute the Tool with OpenAI",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/reddit/comment_on_post_example_llm_oai.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/reddit/comment_on_post_example_llm_oai.js"],
+      },
+    },
+  ]}
+/>
 
-<Tabs items={["Python", "JavaScript"]}>
-<Tabs.Tab>
+Comment on a Reddit post.
 
-```python file=<rootDir>/examples/code/integrations/reddit/custom_auth.py {8-12}
+**Parameters**
 
-```
+- **`post_identifier`** _(string, required)_ The identifier of the Reddit post. The identifier may be a Reddit URL, a permalink, a fullname, or a post id.
+- **`text`** _(string, required)_ The body of the comment in markdown format.
 
-</Tabs.Tab>
+---
 
-<Tabs.Tab>
+## ReplyToComment
 
-```javascript file=<rootDir>/examples/code/integrations/reddit/custom_auth.js {8-10}
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/reddit/reply_to_comment_example_call_tool.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/reddit/reply_to_comment_example_call_tool.js"],
+      },
+    },
+    {
+      label: "Execute the Tool with OpenAI",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/reddit/reply_to_comment_example_llm_oai.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/reddit/reply_to_comment_example_llm_oai.js"],
+      },
+    },
+  ]}
+/>
 
-```
+Reply to a Reddit comment
 
-</Tabs.Tab>
+**Parameters**
 
-</Tabs>
+- **`comment_identifier`** _(string, required)_ The identifier of the Reddit comment to reply to. The identifier may be a comment ID, a Reddit URL to the comment, a permalink to the comment, or the fullname of the comment.
+- **`text`** _(string, required)_ The body of the reply in markdown format.
 
-## Using Reddit auth in custom tools
+---
 
-The Arcade [Model API](/home/use-tools/call-tools-with-models) is a convenient way to call language models and automatically invoke tools. You can author your own [custom tools](/home/build-tools/create-a-toolkit) that interact with the Reddit API.
+## GetPostsInSubreddit
 
-Use the `Reddit()` auth class to specify that a tool requires authorization with Reddit. The `context.authorization.token` field will be automatically populated with the user's Reddit token:
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/reddit/get_posts_in_subreddit_example_call_tool.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/reddit/get_posts_in_subreddit_example_call_tool.js"],
+      },
+    },
+    {
+      label: "Execute the Tool with OpenAI",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/reddit/get_posts_in_subreddit_example_llm_oai.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/reddit/get_posts_in_subreddit_example_llm_oai.js"],
+      },
+    },
+  ]}
+/>
 
-```python file=<rootDir>/examples/code/integrations/reddit/custom_tool.py {5-6,9-13,20}
+Gets posts titles, links, and other metadata in the specified subreddit.
 
-```
+The time_range is required if the listing type is 'top' or 'controversial'.
+
+**Parameters**
+
+- **`subreddit`** _(string, required)_ The name of the subreddit to fetch posts from.
+- **`listing`** _(enum ([SubredditListingType](/toolkits/social-communication/reddit#subredditlistingtype)), optional)_ The type of listing to fetch. For simple listings such as 'hot', 'new', or 'rising', the time_range parameter is ignored. For time-based listings such as 'top' or 'controversial', the 'time_range' parameter is required. Default is 'hot'.
+- **`limit`** _(integer, optional)_ The maximum number of posts to fetch. Default is 10, max is 100.
+- **`cursor`** _(str, optional)_ The pagination token from a previous call.
+- **`time_range`** _(enum ([RedditTimeFilter](/toolkits/social-communication/reddit#reddittimefilter)), optional)_ The time range for filtering posts. Must be provided if the listing type is 'top' or 'controversial'. Otherwise, it is ignored. Defaults to 'today'.
+
+---
+
+## GetContentOfPost
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/reddit/get_content_of_post_example_call_tool.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/reddit/get_content_of_post_example_call_tool.js"],
+      },
+    },
+    {
+      label: "Execute the Tool with OpenAI",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/reddit/get_content_of_post_example_llm_oai.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/reddit/get_content_of_post_example_llm_oai.js"],
+      },
+    },
+  ]}
+/>
+
+Get the content (body) of a Reddit post by its identifier.
+
+**Parameters**
+
+- **`post_identifier`** _(string, required)_ The identifier of the Reddit post. The identifier may be a Reddit URL, a permalink, a fullname, or a post id.
+
+---
+
+## GetContentOfMultiplePosts
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/reddit/get_content_of_multiple_posts_example_call_tool.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/reddit/get_content_of_multiple_posts_example_call_tool.js"],
+      },
+    },
+    {
+      label: "Execute the Tool with OpenAI",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/reddit/get_content_of_multiple_posts_example_llm_oai.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/reddit/get_content_of_multiple_posts_example_llm_oai.js"],
+      },
+    },
+  ]}
+/>
+
+Get the content (body) of multiple Reddit posts by their identifiers in a single request
+
+**Parameters**
+
+- **`post_identifiers`** _(list of strings, required)_ A list of identifiers of the Reddit posts. The identifiers may be Reddit URLs, permalinks, fullnames, or post ids.
+
+---
+
+## GetTopLevelCommentsOfPost
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/reddit/get_top_level_comments_of_post_example_call_tool.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/reddit/get_top_level_comments_of_post_example_call_tool.js"],
+      },
+    },
+    {
+      label: "Execute the Tool with OpenAI",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/reddit/get_top_level_comments_of_post_example_llm_oai.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/reddit/get_top_level_comments_of_post_example_llm_oai.js"],
+      },
+    },
+  ]}
+/>
+
+Get the first page of top-level comments of a Reddit post.
+
+**Parameters**
+
+- **`post_identifier`** _(string, required)_ The identifier of the Reddit post. The identifier may be a Reddit URL, a permalink, a fullname, or a post id.
+
+## Auth
+
+The Arcade Reddit toolkit uses the [Reddit auth provider](/home/auth-providers/reddit) to connect to users' Reddit accounts.
+
+With the hosted Arcade Engine, there's nothing to configure. Your users will see `Arcade` as the name of the application that's requesting permission.
+
+With a self-hosted installation of Arcade, you need to [configure the Reddit auth provider](/home/auth-providers/reddit#configuring-reddit-auth) with your own Reddit app credentials.
+
+## Reference
+
+### SubredditListingType
+
+The type of listing to fetch.
+
+- **`HOT`** _(string: "hot")_: The hottest posts in the subreddit.
+- **`NEW`** _(string: "new")_: The newest posts in the subreddit.
+- **`RISING`** _(string: "rising")_: The posts that are trending up in the subreddit.
+- **`TOP`** _(string: "top")_: The top posts in the subreddit (time-based).
+- **`CONTROVERSIAL`** _(string: "controversial")_: The posts that are currently controversial in the subreddit (time-based).
+
+### RedditTimeFilter
+
+The time range for filtering posts.
+
+- **`NOW`** _(string: "NOW")_
+- **`TODAY`** _(string: "TODAY")_
+- **`THIS_WEEK`** _(string: "THIS_WEEK")_
+- **`THIS_MONTH`** _(string: "THIS_MONTH")_
+- **`THIS_YEAR`** _(string: "THIS_YEAR")_
+- **`ALL_TIME`** _(string: "ALL_TIME")_
