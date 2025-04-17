@@ -21,6 +21,9 @@ export default {
   development: {
     title: "Developer Tools",
   },
+  payments: {
+    title: "Payments & Finance",
+  },
   search: {
     title: "Search Tools",
   },
