@@ -21,6 +21,7 @@ export const categories: Category[] = [
   { id: "development", name: "Developer Tools" },
   { id: "entertainment", name: "Entertainment" },
   { id: "search", name: "Search" },
+  { id: "payments", name: "Payments & Finance" },
 ];
 
 // Available tools
@@ -783,8 +784,8 @@ const comingSoonTools: Tool[] = [
     name: "Stripe",
     image: "stripe.svg",
     summary: "Process payments and manage subscriptions with your agents.",
-    link: "/toolkits/productivity/stripe",
-    category: "productivity",
+    link: "/toolkits/payments/stripe",
+    category: "payments",
     type: "arcade",
     isComingSoon: true,
   },
