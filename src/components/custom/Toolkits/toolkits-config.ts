@@ -787,7 +787,7 @@ const comingSoonTools: Tool[] = [
     link: "/toolkits/payments/stripe",
     category: "payments",
     type: "arcade",
-    isComingSoon: true,
+    isComingSoon: false,
   },
   {
     name: "TikTok",
