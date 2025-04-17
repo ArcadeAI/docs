@@ -1,0 +1,1 @@
+pip install arcade-ai sqlalchemy psycopg2-binary
