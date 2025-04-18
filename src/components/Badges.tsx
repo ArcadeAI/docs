@@ -6,14 +6,11 @@ interface BadgesProps {
 }
 
 const Badges: React.FC<BadgesProps> = ({ repo }) => {
-  let repoName;
   let packageName;
   if (repo.startsWith("arcadeai")) {
-    repoName = "arcade-ai";
-    packageName = repo.split("/")[1];
+    packageName = repo.split("/")[1].replace("-", "_");
   } else {
-    repoName = repo.split("/")[1].toLowerCase();
-    packageName = repo.split("/")[1];
+    packageName = repo.split("/")[1].replace("-", "_");
   }
   const badges = [
     {
@@ -27,18 +24,18 @@ const Badges: React.FC<BadgesProps> = ({ repo }) => {
       alt: "License",
     },
     {
-      href: `https://pypi.org/project/${repoName}/`,
-      src: `https://img.shields.io/pypi/pyversions/${repoName}`,
+      href: `https://pypi.org/project/${packageName}/`,
+      src: `https://img.shields.io/pypi/pyversions/${packageName}`,
       alt: "Python Versions",
     },
     {
-      href: `https://pypi.org/project/${repoName}/`,
-      src: `https://img.shields.io/pypi/wheel/${repoName}`,
+      href: `https://pypi.org/project/${packageName}/`,
+      src: `https://img.shields.io/pypi/wheel/${packageName}`,
       alt: "Wheel Status",
     },
     {
-      href: `https://pypi.org/project/${repoName}/`,
-      src: `https://img.shields.io/pypi/dm/${repoName}`,
+      href: `https://pypi.org/project/${packageName}/`,
+      src: `https://img.shields.io/pypi/dm/${packageName}`,
       alt: "Downloads",
     },
   ];
