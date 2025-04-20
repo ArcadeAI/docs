@@ -1,0 +1,31 @@
+auth:
+  providers:
+    - id: arcade-salesforce
+      description: "Custom Salesforce provider"
+      enabled: true
+      type: oauth2
+      provider_id: arcade-salesforce
+      client_id: ${env:SALESFORCE_CLIENT_ID}
+      client_secret: ${env:SALESFORCE_CLIENT_SECRET}
+      oauth2:
+        authorize_request:
+          endpoint: 'https://{salesforce-org-subdomain}.my.salesforce.com/services/oauth2/authorize'
+          params:
+            client_id: '{{client_id}}'
+            redirect_uri: '{{redirect_uri}}'
+            scope: '{{scopes}}'
+            response_type: code
+        token_request:
+          endpoint: 'https://{salesforce-org-subdomain}.my.salesforce.com/services/oauth2/token'
+          params:
+            grant_type: authorization_code
+            client_id: '{{client_id}}'
+            client_secret: '{{client_secret}}'
+            redirect_uri: '{{redirect_uri}}'
+        refresh_request:
+          endpoint: 'https://{salesforce-org-subdomain}.my.salesforce.com/services/oauth2/token'
+          params:
+            grant_type: refresh_token
+            client_id: '{{client_id}}'
+            client_secret: '{{client_secret}}'
+            refresh_token: '{{refresh_token}}'

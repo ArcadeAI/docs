@@ -22,6 +22,7 @@ export const categories: Category[] = [
   { id: "entertainment", name: "Entertainment" },
   { id: "search", name: "Search" },
   { id: "payments", name: "Payments & Finance" },
+  { id: "sales", name: "Sales" },
 ];
 
 // Available tools
@@ -720,10 +721,10 @@ const comingSoonTools: Tool[] = [
     name: "Salesforce",
     image: "salesforce.svg",
     summary: "Manage customer relationships and sales with your agents.",
-    link: "/toolkits/productivity/salesforce",
-    category: "productivity",
+    link: "/toolkits/sales/salesforce",
+    category: "sales",
     type: "arcade",
-    isComingSoon: true,
+    isComingSoon: false,
   },
   {
     name: "Shopify",
