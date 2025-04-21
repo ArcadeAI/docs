@@ -2,14 +2,15 @@ import { Arcade } from "@arcadeai/arcadejs";
 
 const client = new Arcade((base_url = "http://localhost:9099")); // Automatically finds the `ARCADE_API_KEY` env variable
 
-const salesforce_provider_id = "arcade-salesforce";
-const salesforce_org_subdomain = "salesforce-org-subdomain";
-const user_id = "user@example.com";
+const salesforceProviderId = "arcade-salesforce";
+const salesforceOrgSubdomain = "salesforce-org-subdomain";
+const userId = "user@example.com";
 const scopes = ["read_account"];
 
 // Start the authorization process
-let authResponse = await client.auth.start(userId, "salesforce", {
-  scopes: ["api"],
+let authResponse = await client.auth.start(userId, {
+  id: salesforceProviderId,
+  scopes: scopes,
 });
 
 if (authResponse.status !== "completed") {
@@ -32,7 +33,7 @@ if (!token) {
 
 // Use the Salesforce API
 const response = await fetch(
-  `https://${salesforce_org_subdomain}.my.salesforce.com/services/data/v63.0/parameterizedSearch`,
+  `https://${salesforceOrgSubdomain}.my.salesforce.com/services/data/v63.0/parameterizedSearch`,
   {
     headers: {
       Authorization: `Bearer ${token}`,

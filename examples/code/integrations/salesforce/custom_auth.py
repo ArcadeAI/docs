@@ -11,7 +11,7 @@ scopes = ["read_account"]
 # Start the authorization process
 auth_response = client.auth.start(
     user_id=user_id,
-    provider=salesforce_provider_id,
+    id=salesforce_provider_id,
     scopes=scopes,
 )
 
