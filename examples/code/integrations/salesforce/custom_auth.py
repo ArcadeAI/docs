@@ -3,7 +3,7 @@ from arcadepy import Arcade
 
 client = Arcade(base_url="http://localhost:9099")  # Automatically finds the `ARCADE_API_KEY` env variable
 
-salesforce_provider_id = "arcade-salesforce"
+salesforce_provider_id = "salesforce"
 salesforce_org_subdomain = "salesforce-org-subdomain"
 user_id = "user@example.com"
 scopes = ["read_account"]
@@ -11,7 +11,7 @@ scopes = ["read_account"]
 # Start the authorization process
 auth_response = client.auth.start(
     user_id=user_id,
-    id=salesforce_provider_id,
+    provider=salesforce_provider_id,
     scopes=scopes,
 )
 

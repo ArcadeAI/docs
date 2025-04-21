@@ -2,14 +2,14 @@ import { Arcade } from "@arcadeai/arcadejs";
 
 const client = new Arcade((base_url = "http://localhost:9099")); // Automatically finds the `ARCADE_API_KEY` env variable
 
-const salesforceProviderId = "arcade-salesforce";
+const salesforceProviderId = "salesforce";
 const salesforceOrgSubdomain = "salesforce-org-subdomain";
 const userId = "user@example.com";
 const scopes = ["read_account"];
 
 // Start the authorization process
 let authResponse = await client.auth.start(userId, {
-  id: salesforceProviderId,
+  provider: salesforceProviderId,
   scopes: scopes,
 });
 
