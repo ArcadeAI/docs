@@ -155,27 +155,26 @@ Use the Hubspot auth provider in your own agents and AI apps to get a user-scope
 
 Use `client.auth.start()` to get a user token for the Hubspot API:
 
+<Tabs items={["Python", "JavaScript"]}>
+<Tabs.Tab>
 <Note>
   If you are [self-hosting Arcade](/home/install/overview), change the `base_url` parameter in the `Arcade` constructor to match your Arcade Engine URL. By default, the Engine will be available at `http://localhost:9099`.
 </Note>
 
-<Tabs items={["Python", "JavaScript"]}>
-<Tabs.Tab>
-
 ```python file=<rootDir>/examples/code/integrations/hubspot/custom_auth.py {21}
 
 ```
-
 </Tabs.Tab>
 
 <Tabs.Tab>
+<Note>
+  If you are [self-hosting Arcade](/home/install/overview), change the `baseURL` parameter in the `Arcade` constructor to match your Arcade Engine URL. By default, the Engine will be available at `http://localhost:9099`.
+</Note>
 
 ```javascript file=<rootDir>/examples/code/integrations/hubspot/custom_auth.js {20}
 
 ```
-
 </Tabs.Tab>
-
 </Tabs>
 
 You can use the auth token to call [Hubspot Companies endpoints](https://developers.hubspot.com/docs/guides/api/crm/objects/companies) and read information about companies. By changing or adding scopes to the `client.auth.start` call, you can call other Hubspot endpoints.
@@ -186,9 +185,9 @@ The scopes supported by the Arcade Hubspot auth provider are the ones [listed ab
 
 The Arcade [Model API](/home/use-tools/call-tools-with-models) is a convenient way to call language models and automatically invoke tools. You can author your own [custom tools](/home/build-tools/create-a-toolkit) that interact with the Hubspot API.
 
-Use the `Hubspot()` auth class to specify that a tool requires authorization with Hubspot:
+Use the `Hubspot()` auth class to specify that a tool requires authorization with Hubspot. The authentication token needed to call the Hubspot API is available in the tool context through the `context.get_auth_token_or_empty()` method.
 
-```python file=<rootDir>/examples/code/integrations/hubspot/custom_tool.py
+```python file=<rootDir>/examples/code/integrations/hubspot/custom_tool.py {10,23}
 
 ```
 
@@ -196,6 +195,8 @@ If you are [self-hosting Arcade](/home/install/overview), you will need to resta
 
 Your new tool can be called like demonstrated below:
 
+<Tabs items={["Python", "JavaScript"]}>
+<Tabs.Tab>
 <Note>
   If you are self-hosting, change the `base_url` parameter in the `Arcade` constructor to match your Arcade Engine URL. By default, the Engine will be available at `http://localhost:9099`.
 </Note>
@@ -203,3 +204,15 @@ Your new tool can be called like demonstrated below:
 ```python file=<rootDir>/examples/code/integrations/hubspot/custom_tool_call.py
 
 ```
+</Tabs.Tab>
+<Tabs.Tab>
+<Note>
+  If you are self-hosting, change the `baseURL` parameter in the `Arcade` constructor to match your Arcade Engine URL. By default, the Engine will be available at `http://localhost:9099`.
+</Note>
+
+```javascript file=<rootDir>/examples/code/integrations/hubspot/custom_tool_call.js
+
+```
+</Tabs.Tab>
+</Tabs>
+
