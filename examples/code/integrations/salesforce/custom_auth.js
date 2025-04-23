@@ -1,6 +1,6 @@
 import { Arcade } from "@arcadeai/arcadejs";
 
-const client = new Arcade((base_url = "http://localhost:9099")); // Automatically finds the `ARCADE_API_KEY` env variable
+const client = new Arcade((baseURL = "http://localhost:9099")); // Automatically finds the `ARCADE_API_KEY` env variable
 
 const salesforceProviderId = "salesforce";
 const salesforceOrgSubdomain = "salesforce-org-subdomain";

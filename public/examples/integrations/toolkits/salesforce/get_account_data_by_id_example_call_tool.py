@@ -1,6 +1,6 @@
 from arcadepy import Arcade
 
-client = Arcade(base_url="https://api.arcade.dev")  # Automatically finds the `ARCADE_API_KEY` env variable
+client = Arcade(base_url="http://localhost:9099")  # Automatically finds the `ARCADE_API_KEY` env variable
 
 USER_ID = "user@example.com"
 TOOL_NAME = "Salesforce.GetAccountDataById"

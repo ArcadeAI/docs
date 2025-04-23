@@ -5,7 +5,7 @@ PROMPT = "Get the data for the account with the id '001111111111111111'"
 TOOL_NAME = "Salesforce.GetAccountDataById"
 
 client = OpenAI(
-    base_url="https://api.arcade.dev", api_key=os.environ.get("ARCADE_API_KEY")
+    base_url="http://localhost:9099/v1", api_key=os.environ.get("ARCADE_API_KEY")
 )
 
 response = client.chat.completions.create(

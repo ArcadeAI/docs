@@ -5,7 +5,7 @@ PROMPT = "Get the data for the account with the name 'Acme Inc'"
 TOOL_NAME = "Salesforce.GetAccountDataByKeywords"
 
 client = OpenAI(
-    base_url="https://api.arcade.dev", api_key=os.environ.get("ARCADE_API_KEY")
+    base_url="http://localhost:9099/v1", api_key=os.environ.get("ARCADE_API_KEY")
 )
 
 response = client.chat.completions.create(

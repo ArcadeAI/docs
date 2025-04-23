@@ -4,7 +4,7 @@ const PROMPT = "Get the data for the account with the name 'Acme Inc'";
 const TOOL_NAME = "Salesforce.GetAccountDataByKeywords";
 
 const client = new OpenAI({
-  baseURL: 'https://api.arcade.dev',
+  baseURL: 'http://localhost:9099/v1',
   apiKey: process.env.ARCADE_API_KEY
 });
 

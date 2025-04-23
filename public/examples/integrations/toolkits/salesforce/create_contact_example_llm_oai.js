@@ -4,7 +4,7 @@ const PROMPT = "Create a contact for the account with the id '001111111111111111
 const TOOL_NAME = "Salesforce.CreateContact";
 
 const client = new OpenAI({
-  baseURL: 'https://api.arcade.dev',
+  baseURL: 'http://localhost:9099/v1',
   apiKey: process.env.ARCADE_API_KEY
 });
 
