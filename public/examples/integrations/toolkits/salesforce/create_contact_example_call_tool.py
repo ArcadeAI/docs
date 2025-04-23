@@ -1,10 +1,11 @@
 from arcadepy import Arcade
 
-client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
+client = Arcade(base_url="https://api.arcade.dev")  # Automatically finds the `ARCADE_API_KEY` env variable
 
+USER_ID = "user@example.com"
 TOOL_NAME = "Salesforce.CreateContact"
 
-auth_response = client.tools.authorize(tool_name=TOOL_NAME)
+auth_response = client.tools.authorize(tool_name=TOOL_NAME, user_id=USER_ID)
 
 if auth_response.status != "completed":
     print(f"Click this link to authorize: {auth_response.url}")
@@ -27,5 +28,6 @@ tool_input = {
 response = client.tools.execute(
     tool_name=TOOL_NAME,
     input=tool_input,
+    user_id=USER_ID,
 )
 print(response.output.value)
