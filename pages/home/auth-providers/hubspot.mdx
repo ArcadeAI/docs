@@ -1,0 +1,218 @@
+import { Tabs } from "nextra/components";
+
+# Hubspot auth provider
+
+The Hubspot auth provider enables tools and agents to call Hubspot APIs on behalf of a user. Behind the scenes, the Arcade Engine and the Hubspot auth provider seamlessly manage Hubspot OAuth 2.0 authorization for your users.
+
+<Tip>
+  Want to quickly get started with Hubspot services in your agent or AI app? The
+  pre-built [Arcade Hubspot toolkit](/toolkits/sales/hubspot) is what
+  you want!
+</Tip>
+
+## What's documented here
+
+This page describes how to use and configure Hubspot auth with Arcade.
+
+This auth provider is used by:
+
+- The [Arcade Hubspot toolkit](/toolkits/sales/hubspot), which provides pre-built tools for interacting with Hubspot
+- Your [app code](#using-hubspot-auth-in-app-code) that needs to call Hubspot APIs
+- Or, your [custom tools](#using-hubspot-auth-in-custom-tools) that need to call Hubspot APIs
+
+## Use Arcade's Default Hubspot Auth Provider
+
+Arcade offers a default Hubspot auth provider that you can use in the Arcade Cloud. In this case, your users will see `Arcade` as the name of the application that's requesting permission.
+
+If you choose to use Arcade's Hubspot auth, you don't need to configure anything. Follow the [Hubspot toolkit examples](/toolkits/sales/hubspot) to get started calling Hubspot tools.
+
+## Use Your Own Hubspot App Credentials
+
+In a production environment, you will most likely want to use your own Hubspot app credentials. This way, your users will see your application's name requesting permission.
+
+You can use your own Hubspot credentials in both the Arcade Cloud and in a [self-hosted Arcade Engine](/home/install/local) instance.
+
+Before showing how to configure your Hubspot app credentials, let's go through the steps to create a Hubspot app.
+
+## Create a Hubspot App
+
+Hubspot has two types of apps: Public and Private. You will need to create a Public one.
+
+Follow [Hubspot's tutorial](https://developers.hubspot.com/docs/guides/apps/public-apps/overview) to create your Public App. You will need a [developer account](https://app.hubspot.com/signup-hubspot/developers) to do this.
+
+When creating your app, use the following settings:
+
+- Under **App Info**, choose a name, description, and logo for your app
+- Under **Auth**, enter the **Redirect URL**: `https://cloud.arcade.dev/api/v1/oauth/callback`
+- In the **Scopes** section, click **Add Scope** and add the following scopes with the **Conditionally Required** scope type:
+  - `crm.objects.companies.read`
+  - `crm.objects.contacts.read`
+  - `crm.objects.contacts.write`
+  - `crm.objects.deals.read`
+  - `sales-email-read`
+
+Create the app and take note of the **Client ID** and **Client Secret**. You don't need to follow Hubspot's instructions to install the app.
+
+<Note>
+  If you are implementing your own [Hubspot custom tools](#using-hubspot-auth-in-custom-tools), make sure to also add [any extra scopes](https://developers.hubspot.com/docs/guides/apps/authentication/scopes) necessary for the actions your tools need to perform.
+</Note>
+
+## Configuring your own Hubspot Auth Provider in Arcade
+
+There are two ways to configure your Hubspot app credentials in Arcade:
+
+1. From the Arcade Dashboard GUI
+2. By editing the `engine.yaml` file directly (only possible with a self-hosted Arcade Engine)
+
+We show both options step-by-step below.
+
+<Tabs items={["Dashboard GUI", "Engine Configuration YAML"]}>
+<Tabs.Tab>
+
+### Configure Hubspot Auth Using the Arcade Dashboard GUI
+
+<Steps>
+
+#### Access the Arcade Dashboard
+
+To access the Arcade Cloud dashboard, go to [api.arcade.dev/dashboard](https://api.arcade.dev/dashboard). If you are self-hosting, by default the dashboard will be available at `http://localhost:9099/dashboard`. Adjust the host and port number to match your environment.
+
+#### Navigate to the OAuth Providers page
+
+- Under the **OAuth** section of the Arcade Dashboard left-side menu, click **Providers**.
+- Click **Add OAuth Provider** in the top right corner.
+- Select the **Included Providers** tab at the top.
+- In the **Provider** dropdown, select **Hubspot**.
+
+#### Enter the provider details
+
+- Enter `hubspot` as the **ID** for your provider
+- Optionally enter a **Description**.
+- Enter the **Client ID** and **Client Secret** from your Hubspot app.
+
+#### Create the provider
+
+Hit the **Create** button and the provider will be ready to be used in the Arcade Engine.
+</Steps>
+
+</Tabs.Tab>
+<Tabs.Tab>
+
+### Configure Hubspot Auth Using the Engine Configuration YAML
+
+<Tip>
+  Refer to [Engine configuration](/home/configure/engine) for more information on how to set environment variables and configure the Arcade Engine.
+</Tip>
+
+<Steps>
+
+#### Set environment variables
+
+Set the following environment variables:
+
+```bash
+export HUBSPOT_CLIENT_ID="<your client ID>"
+export HUBSPOT_CLIENT_SECRET="<your client secret>"
+```
+
+Or, you can set these values in a `.env` file:
+
+```bash
+HUBSPOT_CLIENT_ID="<your client ID>"
+HUBSPOT_CLIENT_SECRET="<your client secret>"
+```
+
+#### Edit the Engine configuration
+
+<Tip>
+  To locate the `engine.yaml` file in your OS after installing the Arcade Engine, check the [Engine configuration file](/home/configure/overview#engine-configuration-file) documentation.
+</Tip>
+
+Edit the `engine.yaml` file and add a Hubspot item to the `auth.providers` section:
+
+```yaml file=<rootDir>/examples/code/integrations/hubspot/config_provider.engine.yaml {3-9}
+
+```
+
+#### Restart the Arcade Engine
+
+If the Arcade Engine is already running, you will need to restart it for the changes to take effect.
+
+</Steps>
+
+</Tabs.Tab>
+</Tabs>
+
+## Using the Arcade Hubspot Toolkit
+
+The [Arcade Hubspot toolkit](/toolkits/sales/hubspot) provides tools to interact with various Hubspot objects, such as companies, contacts, deals, and email messages.
+
+Refer to the [toolkit documentation and examples](/toolkits/sales/hubspot) to learn how to use the toolkit to build agents and AI apps that interact with Hubspot services.
+
+## Using Hubspot auth in app code
+
+Use the Hubspot auth provider in your own agents and AI apps to get a user-scoped token for the Hubspot API. See [authorizing agents with Arcade](/home/auth/how-arcade-helps) to understand how this works.
+
+Use `client.auth.start()` to get a user token for the Hubspot API:
+
+<Tabs items={["Python", "JavaScript"]}>
+<Tabs.Tab>
+<Note>
+  If you are [self-hosting Arcade](/home/install/overview), change the `base_url` parameter in the `Arcade` constructor to match your Arcade Engine URL. By default, the Engine will be available at `http://localhost:9099`.
+</Note>
+
+```python file=<rootDir>/examples/code/integrations/hubspot/custom_auth.py {21}
+
+```
+</Tabs.Tab>
+
+<Tabs.Tab>
+<Note>
+  If you are [self-hosting Arcade](/home/install/overview), change the `baseURL` parameter in the `Arcade` constructor to match your Arcade Engine URL. By default, the Engine will be available at `http://localhost:9099`.
+</Note>
+
+```javascript file=<rootDir>/examples/code/integrations/hubspot/custom_auth.js {20}
+
+```
+</Tabs.Tab>
+</Tabs>
+
+You can use the auth token to call [Hubspot Companies endpoints](https://developers.hubspot.com/docs/guides/api/crm/objects/companies) and read information about companies. By changing or adding scopes to the `client.auth.start` call, you can call other Hubspot endpoints.
+
+The scopes supported by the Arcade Hubspot auth provider are the ones [listed above](#create-a-hubspot-app). If you created your own Hubspot app, make sure to add the scopes you intend to use in the `client.auth.start` call.
+
+## Using Hubspot auth in custom tools
+
+The Arcade [Model API](/home/use-tools/call-tools-with-models) is a convenient way to call language models and automatically invoke tools. You can author your own [custom tools](/home/build-tools/create-a-toolkit) that interact with the Hubspot API.
+
+Use the `Hubspot()` auth class to specify that a tool requires authorization with Hubspot. The authentication token needed to call the Hubspot API is available in the tool context through the `context.get_auth_token_or_empty()` method.
+
+```python file=<rootDir>/examples/code/integrations/hubspot/custom_tool.py {10,23}
+
+```
+
+If you are [self-hosting Arcade](/home/install/overview), you will need to restart the Arcade Worker and the Engine for the new tool to be available.
+
+Your new tool can be called like demonstrated below:
+
+<Tabs items={["Python", "JavaScript"]}>
+<Tabs.Tab>
+<Note>
+  If you are self-hosting, change the `base_url` parameter in the `Arcade` constructor to match your Arcade Engine URL. By default, the Engine will be available at `http://localhost:9099`.
+</Note>
+
+```python file=<rootDir>/examples/code/integrations/hubspot/custom_tool_call.py
+
+```
+</Tabs.Tab>
+<Tabs.Tab>
+<Note>
+  If you are self-hosting, change the `baseURL` parameter in the `Arcade` constructor to match your Arcade Engine URL. By default, the Engine will be available at `http://localhost:9099`.
+</Note>
+
+```javascript file=<rootDir>/examples/code/integrations/hubspot/custom_tool_call.js
+
+```
+</Tabs.Tab>
+</Tabs>
+
