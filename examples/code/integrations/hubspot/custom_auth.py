@@ -1,6 +1,6 @@
 from arcadepy import Arcade
 
-client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
+client = Arcade(base_url="https://api.arcade.dev")  # Automatically finds the `ARCADE_API_KEY` env variable
 
 user_id = "user@example.com"
 

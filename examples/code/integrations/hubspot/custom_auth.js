@@ -1,6 +1,6 @@
 import { Arcade } from "@arcadeai/arcadejs";
 
-const client = new Arcade();
+const client = new Arcade({ baseURL: "https://api.arcade.dev" }); // Automatically finds the `ARCADE_API_KEY` env variable
 
 const userId = "user@example.com";
 
@@ -15,7 +15,7 @@ if (authResponse.status !== "completed") {
 }
 
 // Wait for the authorization to complete
-authResponse = await client.auth.waitForCompletion(authResponse);
+const response = await client.auth.waitForCompletion(authResponse);
 
-const token = authResponse.context.token;
+const token = response.context.token;
 // Do something interesting with the token...

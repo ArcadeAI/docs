@@ -11,7 +11,7 @@ from arcade.sdk.auth import Hubspot
         scopes=["oauth", "crm.objects.companies.read"],
     )
 )
-async def list_companies(
+async def get_company_details(
     context: ToolContext,
     company_id: Annotated[
         str,
