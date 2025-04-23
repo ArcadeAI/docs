@@ -4,4 +4,5 @@ export default {
   obsidian: "Obsidian",
   confluence: "Confluence",
   jira: "Jira",
+  dropbox: "Dropbox",
 };
