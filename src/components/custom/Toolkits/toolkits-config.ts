@@ -584,11 +584,11 @@ const comingSoonTools: Tool[] = [
     name: "HubSpot",
     image: "hubspot.png",
     summary:
-      "Manage contacts, deals, and marketing campaigns in HubSpot with your agents.",
-    link: "/toolkits/productivity/hubspot",
-    category: "productivity",
+      "Manage companies, contacts, deals, and more in HubSpot with your agents.",
+    link: "/toolkits/sales/hubspot",
+    category: "sales",
     type: "arcade",
-    isComingSoon: true,
+    isComingSoon: false,
   },
   {
     name: "Intercom",
