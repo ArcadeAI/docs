@@ -23,7 +23,7 @@ This auth provider is used by:
 
 How you configure the GitHub auth provider depends on whether you use the Arcade Cloud Engine or a [self-hosted Engine](/home/install/overview).
 
-With the Arcade Cloud Engine, you can start building and testing GitHub auth without any configuration. Your users will see `Arcade (demo)` as the name of the application that's requesting permission.
+With the Arcade Cloud Engine, you can start building and testing GitHub auth without any configuration. Your users will see `Arcade.dev` as the name of the application that's requesting permission.
 
 When you are ready to go to production, you'll want to configure the GitHub auth provider with your own GitHub app credentials, so users see your app name when they authorize access.
 
@@ -32,8 +32,16 @@ When you are ready to go to production, you'll want to configure the GitHub auth
 - Follow GitHub's guide to [registering a GitHub app](https://docs.github.com/en/apps/creating-github-apps/registering-a-github-app/registering-a-github-app)
 - Choose the permissions you need for your app
   - At a minimum, you must enable read-only access to the Account > Email addresses permission
+  - To access repo data, you must enable at least the Repository > Contents permission
 - Set the redirect URL to: `https://cloud.arcade.dev/api/v1/oauth/callback`
-- Copy the client ID and client secret to use below
+- Leave "Request user authorization (OAuth) during installation" **unchecked**
+- Leave "Setup URL" blank and "Redirect on update" **unchecked**
+- Ensure Optional features > User-to-server token expiration is enabled
+- Copy the client ID and generate a client secret to use below
+
+If you need to access private repositories in an organization, you must also:
+  1. Make the app public via Advanced > Make public
+  2. Add the app to the organization via Install app
 
 Next, add the GitHub app to your Arcade Engine configuration. You can do this in the Arcade Dashboard, or by editing the `engine.yaml` file directly (for a self-hosted instance).
 
