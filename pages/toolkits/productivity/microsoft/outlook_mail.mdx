@@ -189,8 +189,8 @@ Create and immediately send a new email in Outlook to the specified recipients
 - **`subject`** (string, required): The subject of the email to create
 - **`body`** (string, required): The body of the email to create
 - **`to_recipients`** (list[str], required): The email addresses that will be the recipients of the email
-- **`cc_recipients`** (list[str] | None, optional): The email addresses that will be the CC recipients of the email.
-- **`bcc_recipients`** (list[str] | None, optional): The email addresses that will be the BCC recipients of the email.
+- **`cc_recipients`** (list[str], optional): The email addresses that will be the CC recipients of the email.
+- **`bcc_recipients`** (list[str], optional): The email addresses that will be the BCC recipients of the email.
 
 <TabbedCodeBlock
   tabs={[
@@ -215,14 +215,16 @@ Create and immediately send a new email in Outlook to the specified recipients
 
 ## ReplyToEmail
 
-Reply only to the sender of an existing email in Outlook.
+Reply to an existing email in Outlook.
 
-Use this tool when your answer is relevant only to the sender of the email.
+Use this tool to reply to the sender or all recipients of the email.
+Specify the reply_type to determine the scope of the reply.
 
 **Parameters**
 
 - **`message_id`** (string, required): The ID of the email to reply to
 - **`body`** (string, required): The body of the reply to the email
+- **`reply_type`** (enum ([ReplyType](/toolkits/productivity/microsoft/reference#replytype)), required): Specify "reply" to reply only to the sender or "reply_all" to reply to all recipients.
 
 <TabbedCodeBlock
   tabs={[
@@ -245,40 +247,6 @@ Use this tool when your answer is relevant only to the sender of the email.
 
 ---
 
-## ReplyAllToEmail
-
-Reply to all recipients of an existing email in Outlook.
-
-This includes everyone on the original To and Cc lists.
-Only use this tool when your reply adds value for ALL participants.
-Otherwise, use the reply_to_email tool.
-
-**Parameters**
-
-- **`message_id`** (string, required): The ID of the email to reply to
-- **`body`** (string, required): The body of the reply to the email
-
-<TabbedCodeBlock
-  tabs={[
-    {
-      label: "Call the tool with user authorization",
-      content: {
-        Python: ["/examples/integrations/toolkits/microsoft/outlook_mail/reply_all_to_email_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/toolkits/microsoft/outlook_mail/reply_all_to_email_example_call_tool.js"]
-      }
-    },
-    {
-      label: "Execute the tool with OpenAI",
-      content: {
-        Python: ["/examples/integrations/toolkits/microsoft/outlook_mail/reply_all_to_email_example_llm_oai.py"],
-        JavaScript: ["/examples/integrations/toolkits/microsoft/outlook_mail/reply_all_to_email_example_llm_oai.js"]
-      }
-    }
-  ]}
-/>
-
----
-
 ## ListEmails
 
 List emails in the user's mailbox across all folders.
@@ -289,7 +257,7 @@ and other items that are not in the inbox.
 **Parameters**
 
 - **`limit`** (int, optional): The number of messages to return. Max is 100. Defaults to 5.
-- **`pagination_token`** (str | None, optional): The pagination token to continue a previous request
+- **`pagination_token`** (str, optional): The pagination token to continue a previous request
 
 <TabbedCodeBlock
   tabs={[
@@ -320,10 +288,10 @@ Exactly one of `well_known_folder_name` or `folder_id` MUST be provided.
 
 **Parameters**
 
-- **`well_known_folder_name`** (WellKnownFolderNames | None, optional): The name of the folder to list emails from. Defaults to None.
-- **`folder_id`** (str | None, optional): The ID of the folder to list emails from if the folder is not a well-known folder. Defaults to None.
+- **`well_known_folder_name`** (enum ([WellKnownFolderNames](/toolkits/productivity/microsoft/reference#wellknownfoldernames)), optional): The name of the folder to list emails from. Defaults to None.
+- **`folder_id`** (str, optional): The ID of the folder to list emails from if the folder is not a well-known folder. Defaults to None.
 - **`limit`** (int, optional): The number of messages to return. Max is 100. Defaults to 5.
-- **`pagination_token`** (str | None, optional): The pagination token to continue a previous request
+- **`pagination_token`** (str, optional): The pagination token to continue a previous request
 
 <TabbedCodeBlock
   tabs={[
@@ -371,3 +339,9 @@ Instead of using the ID of these folders, you can use the well-known folder name
 - **`STARRED`** _(string: "starred")_
 - **`TODO`** _(string: "tasks")_
 
+### ReplyType
+
+The type of reply to send to an email.
+
+- **`REPLY`** _(string: "reply")_
+- **`REPLY_ALL`** _(string: "reply_all")_

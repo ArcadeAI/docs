@@ -19,6 +19,7 @@ client.auth.wait_for_completion(auth_response)
 tool_input = {
     "message_id": "1234567890",
     "body": "I am replying to the sender of the email with id 1234567890 with this text.",
+    "reply_type": "reply",
 }
 
 response = client.tools.execute(

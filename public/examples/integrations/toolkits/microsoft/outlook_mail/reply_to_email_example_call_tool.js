@@ -21,6 +21,7 @@ await client.auth.waitForCompletion(authResponse);
 const toolInput = {
   message_id: "1234567890",
   body: "I am replying to the sender of the email with id 1234567890 with this text.",
+  reply_type: "reply",
 };
 
 const response = await client.tools.execute({
