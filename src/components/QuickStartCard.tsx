@@ -7,6 +7,7 @@ interface QuickStartCardProps {
   title: string;
   description: string;
   href: string;
+  code?: string;
 }
 
 export function QuickStartCard({
@@ -14,6 +15,7 @@ export function QuickStartCard({
   title,
   description,
   href,
+  code,
 }: QuickStartCardProps) {
   return (
     <motion.div
@@ -37,6 +39,11 @@ export function QuickStartCard({
             <p className="text-sm leading-relaxed text-gray-300">
               {description}
             </p>
+            {code && (
+              <pre className="mt-1 rounded-md bg-gray-900 p-1 text-sm text-gray-300">
+                <code>{code}</code>
+              </pre>
+            )}
           </CardContent>
         </Link>
       </Card>
