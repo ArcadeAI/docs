@@ -27,6 +27,9 @@ export default {
   search: {
     title: "Search Tools",
   },
+  sales: {
+    title: "Sales",
+  },
   "-- Submit your toolkit": {
     type: "separator",
     title: "Submit your toolkit",
