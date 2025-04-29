@@ -1,7 +1,7 @@
 export function Logo() {
   return (
     <>
-      <div className="mr-16 hidden w-40 items-center md:block">
+      <div className="mr-2 hidden w-40 items-center md:block">
         <img
           className="dark:hidden"
           loading="lazy"
