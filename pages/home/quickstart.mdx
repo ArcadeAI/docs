@@ -57,94 +57,42 @@ In the next steps, we will present Python and JavaScript examples. If you need a
 Create a new file, open it with your preferred editor and enter the code indicated in the next steps.
 
 <Tabs items={["Python", "JavaScript"]}> <Tabs.Tab>
-```python
+```sh
 touch example_openai.py
 ```
 </Tabs.Tab>
 <Tabs.Tab>
-```javascript
+```sh
 touch example_openai.js
 ```
 </Tabs.Tab>
 </Tabs>
 
-Next we'll edit that file and add some code. Open the file you just created in your preferred editor.
-
-First, we need to instantiate the OpenAI client pointing to the Arcade's endpoint and using the Arcade API key you created prior.
+Next we'll edit that file and add some code. Open the file you just created in your preferred editor and add the following code:
 
 <Tabs items={["Python", "JavaScript"]}> <Tabs.Tab>
 
-```python
-from openai import OpenAI
-
-client = OpenAI(base_url="https://api.arcade.dev/v1", api_key="arcade_api_key")
+```python file=<rootDir>/examples/code/home/quickstart.py
 ```
 
 </Tabs.Tab> <Tabs.Tab>
 
-```javascript
-import { OpenAI } from "openai";
-
-const client = new OpenAI({baseURL: "https://api.arcade.dev/v1", apiKey: "arcade_api_key"});
+```javascript file=<rootDir>/examples/code/home/quickstart.js
 ```
 
 </Tabs.Tab> </Tabs>
 
-Next, we define the parameters for the request. In the `prompt` below, you can replace `your@email.com` with your own email address. The Gmail tool will send a message to yourself, which you'll be able to see in your inbox.
+You'll need to replace three key values in the code:
 
-<Tabs items={["Python", "JavaScript"]}> <Tabs.Tab>
+1. `ARCADE_API_KEY` - Your Arcade API key from the previous step
+2. `RECIPIENT_EMAIL` - The email address where you want to send the test message
+3. `YOUR_EMAIL` - Your email address (used for authorization)
 
-```python
-prompt = "send an email to your@email.com with the subject 'Meeting' and the body 'Let's meet at 3pm tomorrow'"
-tools = ["Google.SendEmail"]
-model = "gpt-4o"
-user_id = "your@email.com"
-```
-
-</Tabs.Tab> <Tabs.Tab>
-
-```typescript
-let prompt = "send an email to your@email.com with the subject 'Meeting' and the body 'Let's meet at 3pm tomorrow'"
-let tools = ["Google.SendEmail"]
-let model = "gpt-4o"
-let userId = "your@email.com"
-```
-
-</Tabs.Tab> </Tabs>
+Arcade's Gmail tool will send a message from your Gmail account, which you'll be able to see in your Sent Items.
 
 <Note>
 In a real application, the `prompt` would come from your user and the `user_id` would be a unique identifier for your application's user (could be an email address, a UUID, etc.). In this example, use your own email address.
 </Note>
-
-And, finally, we send the request:
-
-<Tabs items={["Python", "JavaScript"]}> <Tabs.Tab>
-```python
-response = client.chat.completions.create(
-    model=model,
-    messages=[{"role": "user", "content": prompt}],
-    tools=tools,
-    tool_choice="generate",
-    user=user_id,
-)
-
-print(response.choices[0].message.content)
-```
-</Tabs.Tab>
-<Tabs.Tab>
-```typescript
-const response = await client.chat.completions.create({
-  model: model,
-  messages: [{ role: "user", content: prompt }],
-  tools: tools,
-  tool_choice: "generate",
-  user: userId,
-});
-
-console.log(response.data.choices[0].message.content);
-```
-</Tabs.Tab>
-</Tabs>
 
 ## Execute the code
 
@@ -161,7 +109,7 @@ node example_openai.js
 </Tabs.Tab>
 </Tabs>
 
-## Authorize the tool
+### Authorize the tool
 
 The first time you run this, you will see a URL to authorize the tool to send the message on your behalf:
 
@@ -169,7 +117,7 @@ The first time you run this, you will see a URL to authorize the tool to send th
 
 Once you've followed the URL and completed the authorization flow, run the script again. You should see a message like this:
 
-> `The email with the subject "Meeting" and body "Let's meet at 3pm tomorrow" has been sent to your@email.com.`
+> `The email with the subject "Arcade.dev" has been sent to friend@email.com.`
 
 </Steps>
 
