@@ -13,13 +13,7 @@ export const EarlyAccessRegistrySurvey = () => {
   function loadSurvey() {
     posthog.getSurveys((surveys) => {
       const survey = surveys.find((s) => s.id === SURVEY_ID);
-
-      if (survey) {
-        setSurveyData(survey);
-        posthog?.capture("Early Access Registry Survey viewed", {
-          survey_version: survey.id,
-        });
-      }
+      if (survey) setSurveyData(survey);
     });
   }
 
