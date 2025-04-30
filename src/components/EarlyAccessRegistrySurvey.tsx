@@ -9,6 +9,7 @@ const SURVEY_ID = "019683f6-4fe2-0000-d182-6ef8f3982fc3";
 export const EarlyAccessRegistrySurvey = () => {
   const posthog = usePostHog();
   const [surveyData, setSurveyData] = useState<Survey | null>(null);
+  const [completed, setCompleted] = useState(false);
 
   function loadSurvey() {
     posthog.getSurveys((surveys) => {
@@ -18,26 +19,29 @@ export const EarlyAccessRegistrySurvey = () => {
   }
 
   useEffect(() => {
-    if (posthog) {
-      loadSurvey();
-    } else {
-      console.warn("PostHog is not initialized");
-    }
+    if (!posthog) return;
+    posthog.onFeatureFlags(loadSurvey);
   }, [posthog]);
 
-  const handleSurveyComplete = (data: Record<string, unknown>) => {
-    // Handle survey completion logic here
-    console.log("Survey completed with data:", data);
+  const handleSurveyComplete = () => {
+    setCompleted(true);
   };
 
   return (
     <>
       <h2 className="mb-4 text-2xl font-bold">Early Access Registry Survey</h2>
-      <DynamicSurvey
-        surveyData={surveyData}
-        onComplete={handleSurveyComplete}
-        onBack={() => {}}
-      />
+      {completed && (
+        <p className="mb-4 text-sm text-gray-500">
+          Thank you! We will be in touch soon.
+        </p>
+      )}
+      {!completed && (
+        <DynamicSurvey
+          surveyData={surveyData}
+          onComplete={handleSurveyComplete}
+          onBack={() => {}}
+        />
+      )}
     </>
   );
 };

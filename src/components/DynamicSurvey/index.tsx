@@ -9,6 +9,7 @@ import { useSurvey } from "./hooks/useSurvey";
 
 interface DynamicSurveyProps {
   surveyData: Survey | null;
+  /* eslint-disable no-unused-vars */
   onComplete: (data: Record<string, unknown>) => void;
   onBack: () => void;
 }
@@ -23,7 +24,7 @@ export default function DynamicSurvey({
 
   const {
     currentQuestion,
-    previousResponse,
+    responses,
     handleSubmitQuestion,
     handleBack,
     currentQuestionIndex,
@@ -82,11 +83,12 @@ export default function DynamicSurvey({
         <div className="space-y-8">
           <Question
             question={currentQuestion}
-            previousResponse={previousResponse}
+            previousResponse={responses[currentQuestionIndex]}
           />
           <Navigation
             onBack={handleBackButton}
             buttonText={currentQuestion.buttonText}
+            disableBackButton={currentQuestionIndex === 0}
           />
         </div>
       </form>

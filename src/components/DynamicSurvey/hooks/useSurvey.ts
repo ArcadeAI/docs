@@ -10,6 +10,7 @@ import {
 
 interface UseSurveyProps {
   surveyData: Survey | null;
+  /* eslint-disable no-unused-vars */
   onComplete: (data: Record<string, unknown>) => void;
 }
 
@@ -39,7 +40,7 @@ export const useSurvey = ({ surveyData, onComplete }: UseSurveyProps) => {
     const updatedResponses = hasValidResponse
       ? {
           ...responses,
-          [currentQuestion.originalQuestionIndex]: response,
+          [currentQuestionIndex]: response,
         }
       : responses;
 
@@ -75,13 +76,10 @@ export const useSurvey = ({ surveyData, onComplete }: UseSurveyProps) => {
   };
 
   const currentQuestion = surveyData?.questions[currentQuestionIndex];
-  const previousResponse = currentQuestion
-    ? responses[currentQuestion.originalQuestionIndex]
-    : undefined;
 
   return {
     currentQuestion,
-    previousResponse,
+    responses,
     handleSubmitQuestion,
     handleBack,
     currentQuestionIndex,
