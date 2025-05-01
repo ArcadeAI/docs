@@ -113,4 +113,11 @@ export default {
   "auth-providers": {
     title: "Auth Providers",
   },
+  "-- Registry": {
+    type: "separator",
+    title: "Registry",
+  },
+  "registry-early-access": {
+    title: "Registry Early Access",
+  },
 };
