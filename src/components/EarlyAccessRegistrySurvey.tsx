@@ -3,7 +3,6 @@ import DynamicSurvey from "./DynamicSurvey";
 import { Survey } from "posthog-js";
 import { usePostHog } from "posthog-js/react";
 
-// TODO: Make this an ENV variable
 const SURVEY_ID = "019683f6-4fe2-0000-d182-6ef8f3982fc3";
 
 export const EarlyAccessRegistrySurvey = () => {
