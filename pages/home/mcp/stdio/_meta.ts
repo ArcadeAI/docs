@@ -1,4 +1,4 @@
 export default {
   "claude-desktop-client": "For Claude Desktop Users",
-  "typescript-client": "Create a TypeScript Client",
+  "python-client": "Create a Python Client",
 };

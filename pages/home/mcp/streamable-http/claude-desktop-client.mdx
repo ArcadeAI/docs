@@ -1,0 +1,65 @@
+1. Get an Arcade API key
+2. Exchange your API key for a Bearer token. Copy the token returned in the response.
+```http
+POST https://api.arcade.dev/v1/tokens/exchange
+Authorization: Bearer YOUR_ARCADE_API_KEY_HERE
+Content-Type: application/json
+
+{
+  "user_id": "you@example.com"
+}
+```
+3. Initialize MCP. This will return a mcp-session-id in its header. Copy the mcp-session-id. You will need it for step 9.
+```http
+POST https://api.arcade.dev/v1/mcp
+Accept: application/json
+Authorization: Bearer YOUR_TOKEN_FROM_STEP_2_HERE
+Content-Type: application/json
+
+{
+  "jsonrpc": "2.0",
+  "id": 123,
+  "method": "initialize",
+  "params": {
+    "capabilities": {},
+    "clientInfo": {
+      "name": "init",
+      "version": "1.0.0"
+    },
+    "protocolVersions": "2024-11-05"
+  }
+}
+```
+4. Download [Claude Desktop](https://claude.ai/download)
+5. Open Claude Desktop
+6. Open up the Claude menu on your computer and select "Settings"
+7. Click on "Developer"
+8. Click "Edit Config". This will create a configuration file at:
+    - On Mac: `~/Library/Application Support/Claude/claude_desktop_config.json`
+    - On Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+9. Open up the configuration file and replace the file contents with this:
+```json
+{
+  "mcpServers": {
+    "arcade-http": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote@next",
+        "https://api.arcade.dev/v1/mcp",
+        "--transport",
+        "http-only",
+        "--header",
+        "Authorization:${BEARER_TOKEN}",
+        "--header",
+        "mcp-session-id:${MCP_SESSION_ID}"
+      ],
+      "env": {
+        "BEARER_TOKEN": "Bearer YOUR_BEARER_TOKEN_HERE",
+        "MCP_SESSION_ID": "YOUR_SESSION_ID_HERE"
+      }
+    }
+  }
+}
+```
+10. Restart Claude Desktop. Upon restarting, you should have access to Arcade tools.
