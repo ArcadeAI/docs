@@ -65,6 +65,9 @@ export default {
   auth: {
     title: "Authorization",
   },
+  mcp: {
+    title: "MCP",
+  },
   "-- Agent Frameworks": {
     type: "separator",
     title: "Agent Frameworks",
