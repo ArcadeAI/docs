@@ -1,0 +1,77 @@
+import { Steps, Tabs } from "nextra/components";
+import { SignupLink } from "@/components/Analytics";
+
+# Connect to Arcade's MCP server
+
+In this guide, you'll learn how to create a TypeScript client that can connect to a remote MCP server.
+
+<Steps>
+
+### Prerequisites
+
+1. Create an <SignupLink utmParams={{
+            utm_source: "docs",
+            utm_medium: "page",
+            utm_campaign: "mcp-remote-code-client",
+          }} linkLocation="docs:remote-code-client">Arcade account</SignupLink>
+1. Get an [Arcade API key](/home/api-keys) and take note, you'll need it in the next steps.
+
+### Install Dependencies
+
+Install the official [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk):
+```bash
+# Install the MCP SDK
+npm install @modelcontextprotocol/sdk
+npm install -D typescript tsx
+```
+
+### Define your constants
+Don't forget to replace the `arcadeApiKey` and `userId` with your own values.
+
+```typescript file=<rootDir>/examples/code/home/mcp/streamable-http/typescript-client.ts.fake#L1-L14
+```
+
+### Authentication
+
+Before connecting to the Arcade MCP server, you first need to exchange your API key for a user-scoped token:
+
+```typescript file=<rootDir>/examples/code/home/mcp/streamable-http/typescript-client.ts.fake#L16-L33
+```
+
+### Connecting to the MCP Server
+
+Once you have your authentication token, you can connect to the MCP server. The client will automatically begin the initialization flow with the server when `connect()` is called:
+
+```typescript file=<rootDir>/examples/code/home/mcp/streamable-http/typescript-client.ts.fake#L35-L49
+```
+
+### Listing Available Tools
+
+To discover what tools are available through the MCP server:
+
+```typescript file=<rootDir>/examples/code/home/mcp/streamable-http/typescript-client.ts.fake#L51-L62
+```
+
+### Calling a Tool with Auth Requirements
+
+Many tools require OAuth authentication. The below snippet shows how to detect when authentication is needed before calling a tool:
+
+1. Prepare the tool call request
+1. Call the tool
+1. Handle authorization flow
+    - If the tool call throws an error with code -32003, then we prompt the user to complete authorization for the tool call before attempting to call the tool again
+1. Execute the tool
+1. Display the tool result
+
+This enables seamless integration with services like Google, GitHub, Slack, Microsoft, and others.
+
+Here's an example of calling the Google_ListEmails tool with proper error handling for authentication:
+
+```typescript file=<rootDir>/examples/code/home/mcp/streamable-http/typescript-client.ts.fake#L64-L129
+```
+
+<ToggleContent showText="Click to view the full example" hideText="Hide example">
+```typescript file=<rootDir>/examples/code/home/mcp/streamable-http/typescript-client.ts.fake
+```
+</ToggleContent>
+</Steps>
