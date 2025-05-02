@@ -1,4 +1,0 @@
-export default {
-  "claude-desktop-client": "For Claude Desktop Users",
-  "typescript-client": "Create a TypeScript Client",
-};
