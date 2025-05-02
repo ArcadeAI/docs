@@ -1,0 +1,166 @@
+
+import express from 'express';
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import { UnauthorizedError } from "@modelcontextprotocol/sdk/client/auth.js";
+import { PublicOAuthClient } from "./src/PublicOAuthClient.js";
+import { OAuthClientMetadata } from "@modelcontextprotocol/sdk/shared/auth.js";
+import { CallToolResultSchema } from '@modelcontextprotocol/sdk/types.js';
+
+async function main() {
+    // Start an Express server to handle the OAuth callback
+    const app = express();
+    const callbackServer = app.listen(3000);
+
+    // Create a promise to resolve when we get the authorization code
+    const codePromise = new Promise<string>((resolve) => {
+        app.get('/callback', (req, res) => {
+            const code = req.query.code as string;
+            res.send('Authentication successful! You can close this window.');
+
+            // Resolve the promise with the authorization code
+            resolve(code);
+        });
+    });
+
+    // Set up our MCP client with OAuth support
+    const serverUrl = "https://api.arcade.dev/v1/mcps/beta/mcp";
+
+    const clientMetadata: OAuthClientMetadata = {
+        client_name: "My MCP Client",
+        redirect_uris: ["http://localhost:3000/callback"],
+    };
+
+    const authProvider = new PublicOAuthClient(
+        clientMetadata,
+        "mcp_beta",
+        "http://localhost:3000/callback"
+    );
+
+    let transport = new StreamableHTTPClientTransport(new URL(serverUrl), {
+        authProvider,
+        requestInit: {
+            headers: { Accept: "application/json" }
+        }
+    });
+
+    const client = new Client({
+        name: "example-client",
+        version: "1.0.0",
+    });
+    console.log("Connecting to MCP...");
+
+    try {
+        // This will likely fail with UnauthorizedError
+        try {
+            await client.connect(transport);
+            console.log("Connected without auth (unusual)");
+        } catch (error: any) {
+            if (error instanceof UnauthorizedError) {
+                console.log("Authentication required, waiting for callback...");
+                // Wait for the authorization code from the callback
+                const code = await codePromise;
+
+                // Complete the authentication with the code
+                await transport.finishAuth(code);
+                console.log("Auth complete");
+
+                // Need to rebuild the transport (to reset it), but the authProvider is persistent
+                transport = new StreamableHTTPClientTransport(new URL(serverUrl), {
+                    authProvider,
+                    requestInit: {
+                        headers: { Accept: "application/json" }
+                    }
+                });
+
+                // Now try connecting again
+                console.log("Connecting to MCP...");
+                await client.connect(transport);
+                console.log("Connected to MCP");
+            } else {
+                throw error;
+            }
+        }
+
+        // List available tools
+        console.log("Listing tools");
+        const toolsResult = await client.listTools();
+
+        console.log(`Available tools (${toolsResult.tools.length} tools):`);
+        for (const tool of toolsResult.tools) {
+            const firstLineOfDescription = tool.description?.split("\n")[0];
+            console.log(`  - ${tool.name} (${firstLineOfDescription})`);
+        }
+
+        // Call a tool
+        console.log("Calling tool math_multiply");
+        await callTool(client, "math_multiply", {
+            a: "2",
+            b: "3",
+        });
+
+        // Call another tool
+        console.log("Calling tool google_listemails");
+        await callTool(client, "google_listemails", {
+            n_emails: 3
+        });
+
+        console.log("Done! Goodbye");
+    } catch (error) {
+        console.error("Error:", error);
+    } finally {
+        await client.close();
+        callbackServer.close();
+        process.exit(0);
+    }
+}
+
+main().catch(error => {
+    console.error("Unhandled error:", error);
+    process.exit(1);
+});
+
+async function callTool(client: Client, toolName: string, args: any) {
+    try {
+        const result = await client.callTool({
+            name: toolName,
+            arguments: args,
+        });
+
+        console.log("Tool result:");
+        result.content.forEach((item) => {
+            if (item.type === "text") {
+                console.log(`  ${item.text}`);
+            } else {
+                console.log(`  ${item.type} content:`, item);
+            }
+        });
+    } catch (error: any) {
+        console.log("Error:", error);
+        // Check if this is an interaction_required error
+        if (error.code === -32003 && error.data && error.data.type === "url") {
+            console.log("\n------------------------------------------");
+            console.log(error.data.message.text);
+            console.log(error.data.url);
+            console.log("------------------------------------------\n");
+
+            // Prompt user to press any key after authorization
+            console.log(
+                "After completing the authorization flow, press Enter to continue...",
+            );
+            await new Promise((resolve) => {
+                process.stdin.once("data", () => {
+                    resolve(undefined);
+                });
+                process.stdin.resume();
+            });
+
+            // Retry the tool call
+            console.log("Retrying tool call after authorization...");
+            await callTool(client, toolName, args);
+        } else {
+            // Re-throw other errors
+            throw error;
+        }
+    }
+}
