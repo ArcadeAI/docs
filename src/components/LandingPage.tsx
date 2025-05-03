@@ -10,6 +10,7 @@ import {
   RefreshCcw,
   Rocket,
   Shield,
+  Users,
   Wrench,
   Zap,
 } from "lucide-react";
@@ -17,6 +18,7 @@ import Link from "next/link";
 import { ChallengeSolution } from "./ChallengeSolution";
 import { QuickStartCard } from "./QuickStartCard";
 import { SampleAppCard } from "./SampleAppCard";
+import { PolaroidImage } from "./PoloridImage";
 
 export function LandingPage() {
   return (
@@ -97,6 +99,7 @@ export function LandingPage() {
           />
         </div>
       </section>
+
       <section className="relative py-16">
         <div className="container relative mx-auto px-4">
           <div className="mx-auto max-w-2xl text-center">
@@ -135,6 +138,7 @@ export function LandingPage() {
           </div>
         </div>
       </section>
+
       <section className="py-8">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-3xl text-center">
@@ -207,6 +211,46 @@ export function LandingPage() {
                   "Arcade provides the authentication, compliance, and integration capabilities required for production deployment in enterprise environments.",
                 href: "/toolkits",
               }}
+            />
+          </div>
+        </div>
+      </section>
+
+      <section className="relative py-16">
+        <div className="container relative mx-auto px-4">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="mb-4 text-3xl font-bold tracking-tight text-white md:text-4xl">
+              Arcade Overview
+            </h2>
+            <PolaroidImage
+              src={"/images/overview.png"}
+              alt={"arcade overview"}
+            />
+          </div>
+          <div className="mt-16 grid gap-8 md:grid-cols-2">
+            <QuickStartCard
+              icon={Rocket}
+              title="Arcade Gateway"
+              description="The Arcade gateway is your MCP Server and Agentic tool provider.  It allows you to write your tools once and serve them across any LLM or orchestration framework, no matter the protocol.  The gateway manages agent authentication, tool registration, and tool execution."
+              href="#"
+            />
+            <QuickStartCard
+              icon={Users}
+              title="Control Plane"
+              description="The Control Plane is how you manage your tools, users, and deployments from a single place.  No matter how large your deployment or organization gets, the Control Plane will scale with you."
+              href="#"
+            />
+            <QuickStartCard
+              icon={Cloud}
+              title="Public and Private Tools"
+              description="Arcade makes it easy to develop custom tools that just work with Agents.  Our SDKs and framework integrations make it easy to get started.  When you are ready, it's easy to run your tools either on-prem or in our cloud."
+              href="#"
+            />
+            <QuickStartCard
+              icon={Wrench}
+              title="Tools and MCP Servers Together"
+              description="The Arcade Gateway is the only way to combine MCP servers with your Agentic tools. Regardless of where your tool is hosted, you can serve and manage access to it via the Gateway.  You easily can mix our public tools with your own private tools in your agents."
+              href="#"
             />
           </div>
         </div>
