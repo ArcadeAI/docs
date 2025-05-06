@@ -231,6 +231,53 @@ Some OAuth 2.0 APIs provide a user info endpoint that returns information about 
   - `on_token_grant`: If `true`, the user info request will be made when a token is granted. This is typically only once for each user, unless new scopes are granted.
   - `on_token_refresh`: If `true`, the user info request will be made every time a token is refreshed.
 
+#### `token_introspection_request`
+
+Some OAuth 2.0 APIs provide a token introspection endpoint that can be used to check the validity of a token and retrieve additional information such as token expiration time.
+
+An example of a token introspection request configuration:
+
+```yaml
+auth:
+  providers:
+    - id: custom-provider
+      description: "Custom provider"
+      enabled: true
+      type: oauth2
+      client_id: ${env:CUSTOM_CLIENT_ID}
+      client_secret: ${env:CUSTOM_CLIENT_SECRET}
+      oauth2:
+        token_introspection_request:
+          enabled: true
+          endpoint: 'https://example.oauth.com/services/oauth2/introspect'
+          method: POST
+          params:
+            token: '{{access_token}}'
+          auth_method: 'client_secret_basic'
+          request_content_type: application/x-www-form-urlencoded
+          response_content_type: application/json
+          response_map:
+            expires_in: '$.exp'
+            scope: '$.scope'
+          expiration_format: absolute_unix_timestamp
+          triggers:
+            on_token_grant: true
+            on_token_refresh: true
+```
+
+- `enabled` _(optional, default `false`)_: If `true`, the token introspection request will be made.
+- `endpoint` _(required)_: The endpoint to use for the token introspection request.
+- `method` _(optional, default `GET`)_: The HTTP method to use for the token introspection request.
+- `params` _(optional)_: A map of parameter keys and values to include in the token introspection request. Currently, only mapping a field to the internal `access_token` field is supported.
+- `auth_method` _(optional, default `client_secret_basic`)_: The authentication method to use for the token introspection request. Supported values are `client_secret_basic` and `bearer_access_token`.
+- `request_content_type` _(optional, default `application/x-www-form-urlencoded`)_: The content type of the request body.
+- `response_content_type` _(optional, default `application/json`)_: The content type of the response body.
+- `response_map` _(required)_: A map of keys and values to extract from the response. Supports simple JSONPath expressions. Supported keys are `access_token`, `expires_in`, `refresh_token`, `scope`, and `token_type`.
+- `expiration_format` _(optional, default `absolute_unix_timestamp`)_: The format of the expiration time. Supported values are `absolute_unix_timestamp` and `relative_seconds`.
+- `triggers` _(required)_: Controls when the token introspection request is made.
+  - `on_token_grant`: If `true`, the token introspection request will be made when a token is granted. This is typically only once for each user, unless new scopes are granted.
+  - `on_token_refresh`: If `true`, the token introspection request will be made every time a token is refreshed.
+
 #### JSONPath expressions in `response_map`
 
 In the `token_request` and `refresh_request` sections, you can optionally configure a `response_map`. Configuring a response map is useful if your OAuth 2.0 server returns a JSON object with nested properties, or properties with non-standard names.
