@@ -6,126 +6,100 @@ description: "Learn how to get started with Arcade"
 import { Steps, Tabs } from "nextra/components";
 import { SignupLink } from "@/components/Analytics";
 
-# Let's get started with Arcade
+# Get started with Arcade by calling tools directly
 
-Arcade allows LLMs to call tools on behalf of users while taking care of the authorization flow using OAuth 2.0 or API key authentication.
-
-An example of a tool is `Google.SendEmail`. With Arcade, a user interacting with an LLM in a chat interface could ask:
-
-> send an email to john@example.com with the subject "Meeting" and the body "Let's meet at 3pm tomorrow"
-
-Our [tool catalog](/toolkits) covers multiple services, such as Slack, Notion, X, Dropbox, GitHub, Drive, Calendar, and many more.
-
-In the example above, the user may have previously analyzed a set of pages from Notion, for example. After chatting with the LLM, they would send an email to a colleague summarizing the analysis. All of our digital life can now be integrated with the reasoning power of LLMs. Arcade enables developers to easily integrate that power into any application, workflow, or AI Agent.
-
-
-You can skim through the code below to see how it works. In order to run it, you'll need to:
+Direct tool calling is useful in situations where you already know what tool is needed or when there is no prompt for an LLM to interpret and decide on the tool calling. It also gives you full control over what is executed by the Arcade Engine and how.
 
 <Steps>
 
-## Prerequisites
+### Prerequisites
 
 1. Create an <SignupLink utmParams={{
             utm_source: "docs",
             utm_medium: "page",
-            utm_campaign: "quickstart",
-          }} linkLocation="docs:quickstart">Arcade account</SignupLink>
+            utm_campaign: "call-tools-directly",
+          }} linkLocation="docs:call-tools-directly">Arcade account</SignupLink>
 1. Get an [Arcade API key](/home/api-keys) and take note, you'll need it in the next steps.
 
-
-## Install the OpenAI SDK:
-
-<Tabs items={["Python", "JavaScript", "Other languages"]}> <Tabs.Tab>
-```python
-pip install openai arcadepy
-```
-</Tabs.Tab>
-<Tabs.Tab>
-```javascript
-npm install openai
-```
-</Tabs.Tab>
-<Tabs.Tab>
-You can find the installation instructions for other languages in the [OpenAI libraries documentation](https://platform.openai.com/docs/libraries).
-
-In the next steps, we will present Python and JavaScript examples. If you need any assistance implementing it in your preferred language, please [contact our engineering team](/home/contact-us).
-</Tabs.Tab>
-</Tabs>
-
-## Implement the tool call
-
-Create a new file, open it with your preferred editor and enter the code indicated in the next steps.
-
-<Tabs items={["Python", "JavaScript"]}> <Tabs.Tab>
-```sh
-touch example_openai.py
-```
-</Tabs.Tab>
-<Tabs.Tab>
-```sh
-touch example_openai.js
-```
-</Tabs.Tab>
-</Tabs>
-
-Next we'll edit that file and add some code. Open the file you just created in your preferred editor and add the following code:
-
-<Tabs items={["Python", "JavaScript"]}> <Tabs.Tab>
-
-```python file=<rootDir>/examples/code/home/quickstart.py
-```
-
-</Tabs.Tab> <Tabs.Tab>
-
-```javascript file=<rootDir>/examples/code/home/quickstart.js
-```
-
-</Tabs.Tab> </Tabs>
-
-You'll need to replace three key values in the code:
-
-1. `ARCADE_API_KEY` - Your Arcade API key from the previous step
-2. `RECIPIENT_EMAIL` - The email address where you want to send the test message
-3. `YOUR_EMAIL` - Your email address (used for authorization)
-
-Arcade's Gmail tool will send a message from your Gmail account, which you'll be able to see in your Sent Items.
-
-<Note>
-In a real application, the `prompt` would come from your user and the `user_id` would be a unique identifier for your application's user (could be an email address, a UUID, etc.). In this example, use your own email address.
-</Note>
-
-## Execute the code
+### Install the Arcade client
 
 <Tabs items={["Python", "JavaScript"]}>
 <Tabs.Tab>
 ```python
-python3 example_openai.py
+pip install arcadepy
 ```
 </Tabs.Tab>
 <Tabs.Tab>
 ```javascript
-node example_openai.js
+npm install @arcadeai/arcadejs
 ```
 </Tabs.Tab>
 </Tabs>
 
-### Authorize the tool
+### Instantiate the client
 
-The first time you run this, you will see a URL to authorize the tool to send the message on your behalf:
+<Tabs items={["Python", "JavaScript"]}>
+<Tabs.Tab>
+Create a new script called `call_tools_directly.py` and instantiate the Arcade client:
+```python file=<rootDir>/examples/code/home/use-tools/call-tools-directly/math_sqrt_directly.py#L1-L3
+```
+</Tabs.Tab>
+<Tabs.Tab>
+Create a new script called `call_tools_directly.js` and instantiate the Arcade client:
+```javascript file=<rootDir>/examples/code/home/use-tools/call-tools-directly/math_sqrt_directly.js#L1-L3
+```
+</Tabs.Tab>
+</Tabs>
 
-> `Please go to this URL and authorize the action: https://accounts.google.com/o/oauth2/v2/auth?...`
+<Note>
+You can also set the `ARCADE_API_KEY` environment variable instead of passing it as a parameter.
+</Note>
 
-Once you've followed the URL and completed the authorization flow, run the script again. You should see a message like this:
+### Set the user ID
 
-> `The email with the subject "Arcade.dev" has been sent to friend@email.com.`
+Arcade needs a unique identifier for your application user (this could be an email address, a UUID, etc). In this example, simply use your email address as the user ID:
+
+<Tabs items={["Python", "JavaScript"]}>
+<Tabs.Tab>
+```python file=<rootDir>/examples/code/home/use-tools/call-tools-directly/math_sqrt_directly.py#L5-L5
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```js file=<rootDir>/examples/code/home/use-tools/call-tools-directly/math_sqrt_directly.js#L5-L5
+```
+</Tabs.Tab>
+</Tabs>
+
+### Call a tool
+
+Let's use the `Math.Sqrt` tool from the Arcade Math toolkit to get the square root of a number.
+
+<Tabs items={["Python", "JavaScript"]}>
+<Tabs.Tab>
+```python file=<rootDir>/examples/code/home/use-tools/call-tools-directly/math_sqrt_directly.py#L7-L17
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```js file=<rootDir>/examples/code/home/use-tools/call-tools-directly/math_sqrt_directly.js#L7-L17
+```
+</Tabs.Tab>
+</Tabs>
+
+### Run the code
+
+<Tabs items={["Python", "JavaScript"]}>
+<Tabs.Tab>
+```bash
+python3 example.py
+> 25
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```bash
+node example.js
+> 25
+```
+</Tabs.Tab>
+</Tabs>
 
 </Steps>
-
-## Next steps
-
-[Learn more about tools](use-tools/tools-overview) and how they work. Or follow other examples listed below:
-
-
-* **Choosing among multiple tools**: In the example we followed above, only a single tool was used: `Google.SendEmail`. Check out [this guide](/home/use-tools/call-tools-with-models) where we provide multiple tools for the LLM to choose from. It also features a simple multi-turn conversation loop.
-* **Call tools directly, without LLM involvement**: In some cases, you may want full control of which tool is called and how. Check the [Call Tools Directly](/home/use-tools/call-tools-directly) guide to learn how to call tools directly.
-* **Create your own [custom tools](build-tools/create-a-toolkit)** to fit any specific use case needed in your application, workflow, or AI Agent.
