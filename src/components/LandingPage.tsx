@@ -18,7 +18,7 @@ import Link from "next/link";
 import { ChallengeSolution } from "./ChallengeSolution";
 import { QuickStartCard } from "./QuickStartCard";
 import { SampleAppCard } from "./SampleAppCard";
-import { PolaroidImage } from "./PoloridImage";
+import Image from "next/image";
 
 export function LandingPage() {
   return (
@@ -222,9 +222,11 @@ export function LandingPage() {
             <h2 className="mb-4 text-3xl font-bold tracking-tight text-white md:text-4xl">
               Arcade Overview
             </h2>
-            <PolaroidImage
+            <Image
               src={"/images/overview.png"}
               alt={"arcade overview"}
+              width={1880}
+              height={1676}
             />
           </div>
           <div className="mt-16 grid gap-8 md:grid-cols-2">
