@@ -68,6 +68,22 @@ export default {
   mcp: {
     title: "MCP",
   },
+  "-- Building Tools": {
+    type: "separator",
+    title: "Building Tools",
+  },
+  "custom-tools": {
+    title: "Quickstart",
+  },
+  "build-tools": {
+    title: "Build tools",
+  },
+  "evaluate-tools": {
+    title: "Evaluate tools",
+  },
+  "serve-tools": {
+    title: "Serve tools",
+  },
   "-- Agent Frameworks": {
     type: "separator",
     title: "Agent Frameworks",
@@ -84,21 +100,11 @@ export default {
   mastra: {
     title: "Mastra",
   },
-  "-- Building Tools": {
-    type: "separator",
-    title: "Building Tools",
+  vercelai: {
+    title: "Vercel AI",
   },
-  "custom-tools": {
-    title: "Quickstart",
-  },
-  "build-tools": {
-    title: "Build tools",
-  },
-  "evaluate-tools": {
-    title: "Evaluate tools",
-  },
-  "serve-tools": {
-    title: "Serve tools",
+  llamaindex: {
+    title: "LlamaIndex",
   },
   "-- Self-Hosted": {
     type: "separator",
