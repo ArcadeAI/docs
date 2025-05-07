@@ -14,7 +14,7 @@ const response_sqrt = await client.tools.execute({
   user_id: userId,
 });
 
-console.log(response_sqrt.output.value);
+console.log(`The square root of 625 is ${response_sqrt.output.value}`);
 
 // Now, let's use a tool that requires authentication to star a GitHub repository
 

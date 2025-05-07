@@ -14,7 +14,7 @@ response = client.tools.execute(
     user_id=user_id,
 )
 
-print(response.output.value)
+print(f"The square root of 625 is {response.output.value}")
 
 # Now, let's use a tool that requires authentication to star a GitHub repository
 
