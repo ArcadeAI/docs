@@ -59,15 +59,6 @@ export default {
   "api-keys": {
     title: "Get an API key",
   },
-  "use-tools": {
-    title: "Tool Calling",
-  },
-  auth: {
-    title: "Authorization",
-  },
-  mcp: {
-    title: "MCP",
-  },
   "-- Building Tools": {
     type: "separator",
     title: "Building Tools",
@@ -106,6 +97,33 @@ export default {
   llamaindex: {
     title: "LlamaIndex",
   },
+  "-- MCP": {
+    type: "separator",
+    title: "MCP",
+  },
+  mcp: {
+    title: "MCP",
+  },
+  "-- Core Concepts": {
+    type: "separator",
+    title: "Core Concepts",
+  },
+  "use-tools": {
+    title: "Tool Calling",
+  },
+  auth: {
+    title: "Authorization",
+  },
+  "best-practices": {
+    title: "Best Practices",
+  },
+  faq: {
+    title: "FAQ",
+  },
+  "-- CLI": {
+    type: "separator",
+    title: "Arcade CLI",
+  },
   "-- Self-Hosted": {
     type: "separator",
     title: "Self-hosting",
@@ -121,6 +139,10 @@ export default {
   },
   "auth-providers": {
     title: "Auth Providers",
+  },
+  "-- Guides": {
+    type: "separator",
+    title: "Guides",
   },
   "-- Registry": {
     type: "separator",
