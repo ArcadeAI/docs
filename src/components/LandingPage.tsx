@@ -73,7 +73,7 @@ export function LandingPage() {
               integrations, comprehensive testing, and MCP compatibility.
             </p>
             <p style={{ textAlign: "left" }}>
-              Get started with a 5-minute quickstart that demonstrates a working
+              Get started with a 5-minute quickstart and then move to a working
               agent integration.
             </p>
           </motion.div>
