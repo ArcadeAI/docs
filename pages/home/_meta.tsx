@@ -91,9 +91,6 @@ export default {
   vercelai: {
     title: "Vercel AI",
   },
-  llamaindex: {
-    title: "LlamaIndex",
-  },
   "-- MCP": {
     type: "separator",
     title: "MCP",
