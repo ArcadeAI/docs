@@ -68,8 +68,7 @@ export function LandingPage() {
               suite.
             </p>
             <p style={{ textAlign: "left" }}>
-              Get started with a 5-minute quickstart and then move to a working
-              agent integration.
+              Get started with a 5-minute quickstart.
             </p>
           </motion.div>
           <motion.div
