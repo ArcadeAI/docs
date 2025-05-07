@@ -122,17 +122,14 @@ export default {
     type: "separator",
     title: "Self-hosting",
   },
-  install: {
-    title: "Install",
+  "self-hosting-overview": {
+    title: "Self-hosting Overview",
   },
-  configure: {
-    title: "Configure",
+  "hybrid-deployment": {
+    title: "Hybrid Deployment",
   },
-  "supported-models": {
-    title: "Model Providers",
-  },
-  "auth-providers": {
-    title: "Auth Providers",
+  "local-deployment": {
+    title: "Local Deployment",
   },
   "-- Guides": {
     type: "separator",
