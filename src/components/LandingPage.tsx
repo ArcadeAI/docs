@@ -61,16 +61,11 @@ export function LandingPage() {
             transition={{ duration: 0.5, delay: 0.4 }}
           >
             <p style={{ textAlign: "left", paddingTop: "2rem" }}>
-              Arcade enables your AI to securely take real-world actions through
-              user-specific permissions, pre-built integrations, and custom
-              tools. Connect to Gmail, Slack, GitHub, and more, or build your
-              own tools with our authoring framework and LLM-to-tool evaluation
+              Arcade enables your AI agent to securely take real-world actions
+              through user-specific permissions, pre-built integrations with
+              Gmail, Slack, GitHub, and more. You can also build your own
+              agentic tools and MCP servers with our authoring and testing
               suite.
-            </p>
-            <p style={{ textAlign: "left" }}>
-              Available as a managed cloud service or self-hosted deployment,
-              Arcade delivers reliable agent capabilities through LLM-optimized
-              integrations, comprehensive testing, and MCP compatibility.
             </p>
             <p style={{ textAlign: "left" }}>
               Get started with a 5-minute quickstart and then move to a working
