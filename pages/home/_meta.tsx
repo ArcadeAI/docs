@@ -63,9 +63,6 @@ export default {
     type: "separator",
     title: "Building Tools",
   },
-  "custom-tools": {
-    title: "Quickstart",
-  },
   "build-tools": {
     title: "Build tools",
   },
