@@ -51,7 +51,9 @@ export function LandingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            Learn how to move AI agents from demo to production with Arcade.
+            <span className="font-bold text-primary">
+              Learn how to move AI agents from demo to production with Arcade.
+            </span>
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
