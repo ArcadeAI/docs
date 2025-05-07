@@ -1,21 +1,21 @@
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import {
-  Bot,
+  // Bot,
   Cloud,
-  Code,
-  Key,
-  PencilRuler,
-  Puzzle,
-  RefreshCcw,
+  // Code,
+  // Key,
+  // PencilRuler,
+  // Puzzle,
+  // RefreshCcw,
   Rocket,
-  Shield,
+  // Shield,
   Users,
   Wrench,
-  Zap,
+  // Zap,
 } from "lucide-react";
 import Link from "next/link";
-import { ChallengeSolution } from "./ChallengeSolution";
+// import { ChallengeSolution } from "./ChallengeSolution";
 import { QuickStartCard } from "./QuickStartCard";
 import { SampleAppCard } from "./SampleAppCard";
 import Image from "next/image";
@@ -46,22 +46,40 @@ export function LandingPage() {
             Welcome to Arcade!
           </motion.h1>
           <motion.p
-            className="mx-auto mt-8 max-w-2xl text-pretty text-base font-medium leading-relaxed text-gray-300"
+            className="mx-auto mt-8 max-w-4xl text-pretty text-base font-medium italic leading-relaxed text-gray-100"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            What if AI could do more than suggest? Imagine instead of getting a
-            to-do list, your AI could{" "}
-            <span className="font-bold text-primary">take action</span> -
-            sending urgent emails, updating customer records, or kicking off
-            complex workflows.
+            Learn how to move AI agents from demo to production with Arcade.
           </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
+            <p style={{ textAlign: "left", paddingTop: "2rem" }}>
+              Arcade enables your AI to securely take real-world actions through
+              user-specific permissions, pre-built integrations, and custom
+              tools. Connect to Gmail, Slack, GitHub, and more, or build your
+              own tools with our authoring framework and LLM-to-tool evaluation
+              suite.
+            </p>
+            <p style={{ textAlign: "left" }}>
+              Available as a managed cloud service or self-hosted deployment,
+              Arcade delivers reliable agent capabilities through LLM-optimized
+              integrations, comprehensive testing, and MCP compatibility.
+            </p>
+            <p style={{ textAlign: "left" }}>
+              Get started with a 5-minute quickstart that demonstrates a working
+              agent integration.
+            </p>
+          </motion.div>
           <motion.div
             className="mt-20 flex items-center justify-center gap-x-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
           >
             <Button
               asChild
@@ -100,7 +118,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section className="relative py-16">
+      {/* <section className="relative py-16">
         <div className="container relative mx-auto px-4">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="mb-4 text-3xl font-bold tracking-tight text-white md:text-4xl">
@@ -137,9 +155,9 @@ export function LandingPage() {
             />
           </div>
         </div>
-      </section>
+      </section> */}
 
-      <section className="py-8">
+      {/* <section className="py-8">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="mb-4 text-3xl font-bold tracking-tight text-white md:text-4xl">
@@ -214,6 +232,41 @@ export function LandingPage() {
             />
           </div>
         </div>
+      </section> */}
+
+      <section className="py-12">
+        <div className="container mx-auto px-4">
+          <div className="max-w-2xl">
+            <h2 className="mb-4 text-3xl font-bold tracking-tight text-white md:text-4xl">
+              Sample Applications
+            </h2>
+            <p className="text-gray-300">
+              Get started quickly with our pre-built templates and example
+              applications.
+            </p>
+          </div>
+          <div className="mt-16 grid gap-8 md:grid-cols-3">
+            <SampleAppCard
+              title="Arcade Chat"
+              description="A chatbot that can help you with your daily tasks."
+              image="/images/sample-apps/arcade-chat.png"
+              href="https://chat.arcade.dev/"
+              blank
+            />
+            <SampleAppCard
+              title="Archer"
+              description="A bot for Slack that can act on your behalf."
+              image="/images/logo/arcade.png"
+              href="https://github.com/ArcadeAI/ArcadeSlackAgent"
+            />
+            <SampleAppCard
+              title="Summarize YouTube Podcasts in Slack"
+              description="A Slack bot that extracts and summarizes YouTube transcripts in Weaviate, perfect for AI podcasts."
+              image="/images/sample-apps/slack-aipodcast-summaries.jpg"
+              href="https://github.com/dforwardfeed/slack-AIpodcast-summaries"
+            />
+          </div>
+        </div>
       </section>
 
       <section className="relative py-16">
@@ -253,41 +306,6 @@ export function LandingPage() {
               title="Tools and MCP Servers Together"
               description="The Arcade Gateway is the only way to combine MCP servers with your Agentic tools. Regardless of where your tool is hosted, you can serve and manage access to it via the Gateway.  You easily can mix our public tools with your own private tools in your agents."
               href="#"
-            />
-          </div>
-        </div>
-      </section>
-
-      <section className="py-12">
-        <div className="container mx-auto px-4">
-          <div className="max-w-2xl">
-            <h2 className="mb-4 text-3xl font-bold tracking-tight text-white md:text-4xl">
-              Sample Applications
-            </h2>
-            <p className="text-gray-300">
-              Get started quickly with our pre-built templates and example
-              applications.
-            </p>
-          </div>
-          <div className="mt-16 grid gap-8 md:grid-cols-3">
-            <SampleAppCard
-              title="Arcade Chat"
-              description="A chatbot that can help you with your daily tasks."
-              image="/images/sample-apps/arcade-chat.png"
-              href="https://chat.arcade.dev/"
-              blank
-            />
-            <SampleAppCard
-              title="Archer"
-              description="A bot for Slack that can act on your behalf."
-              image="/images/logo/arcade.png"
-              href="https://github.com/ArcadeAI/ArcadeSlackAgent"
-            />
-            <SampleAppCard
-              title="Summarize YouTube Podcasts in Slack"
-              description="A Slack bot that extracts and summarizes YouTube transcripts in Weaviate, perfect for AI podcasts."
-              image="/images/sample-apps/slack-aipodcast-summaries.jpg"
-              href="https://github.com/dforwardfeed/slack-AIpodcast-summaries"
             />
           </div>
         </div>
