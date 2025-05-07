@@ -275,7 +275,7 @@ export function LandingPage() {
         <div className="container mx-auto px-4">
           <div className="max-w-2xl">
             <h2 className="mb-4 text-3xl font-bold tracking-tight text-white md:text-4xl">
-              Sample Applications
+              Arcade Overview
             </h2>
           </div>
           <div className="flex w-full justify-center">
