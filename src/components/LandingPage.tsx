@@ -271,17 +271,20 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section className="relative py-16">
-        <div className="container relative mx-auto px-4">
-          <div className="mx-auto max-w-2xl text-center">
+      <section className="py-12">
+        <div className="container mx-auto px-4">
+          <div className="max-w-2xl">
             <h2 className="mb-4 text-3xl font-bold tracking-tight text-white md:text-4xl">
-              Arcade Overview
+              Sample Applications
             </h2>
+          </div>
+          <div className="flex w-full justify-center">
             <Image
               src={"/images/overview.png"}
               alt={"arcade overview"}
-              width={1880}
-              height={1676}
+              width={1880 / 3}
+              height={1676 / 3}
+              className="max-w-full"
             />
           </div>
           <div className="mt-16 grid gap-8 md:grid-cols-2">
