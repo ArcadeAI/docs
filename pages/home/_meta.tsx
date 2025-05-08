@@ -72,6 +72,9 @@ export default {
   "serve-tools": {
     title: "Serve tools",
   },
+  "auth-providers": {
+    title: "Customizing Auth",
+  },
   "-- Agent Frameworks": {
     type: "separator",
     title: "Agent Frameworks",
@@ -126,12 +129,6 @@ export default {
   },
   configure: {
     title: "Configure",
-  },
-  "supported-models": {
-    title: "Model Providers",
-  },
-  "auth-providers": {
-    title: "Auth Providers",
   },
   "-- Guides": {
     type: "separator",
