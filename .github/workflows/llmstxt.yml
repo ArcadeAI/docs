@@ -1,0 +1,33 @@
+on:
+  schedule:
+    - cron: '0 0 * * 0'  # Run at 00:00 every Sunday
+  workflow_dispatch:
+
+jobs:
+  llmstxt:
+    name: Generate LLMSTXT
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Install dependencies
+        run: npm install -g pnpm
+
+      - name: Install dependencies
+        run: pnpm llmstxt
+        env:
+          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
+
+      # commit the changes
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Update LLMSTXT"
+          commit_author: "GitHub Actions <actions@github.com>"
+          commit_email: "actions@github.com"
