@@ -72,6 +72,9 @@ export default {
   "serve-tools": {
     title: "Serve tools",
   },
+  "auth-providers": {
+    title: "Customizing Auth",
+  },
   "-- Agent Frameworks": {
     type: "separator",
     title: "Agent Frameworks",
@@ -134,8 +137,5 @@ export default {
   },
   "registry-early-access": {
     title: "Registry Early Access",
-  },
-  "auth-providers": {
-    title: "Auth Providers",
   },
 };
