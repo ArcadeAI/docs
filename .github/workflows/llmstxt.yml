@@ -27,9 +27,14 @@ jobs:
         env:
           FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
 
-      # commit the changes
-      - uses: stefanzweifel/git-auto-commit-action@v5
+      # commit the changes and make a PR (branch protection)
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
         with:
-          commit_message: "Update LLMSTXT"
-          commit_author: "GitHub Actions <actions@github.com>"
-          commit_email: "actions@github.com"
+          token: ${{ secrets.PAT }}
+          commit-message: Update llms.txt
+          branch: auto-update-llms-txt
+          delete-branch: true
+          add-paths: |
+            public/llms.txt
+
