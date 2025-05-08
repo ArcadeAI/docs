@@ -108,15 +108,14 @@ export default {
   auth: {
     title: "Authorization",
   },
+  "arcade-cli": {
+    title: "Arcade CLI",
+  },
   "best-practices": {
     title: "Best Practices",
   },
   faq: {
     title: "FAQ",
-  },
-  "-- CLI": {
-    type: "separator",
-    title: "Arcade CLI",
   },
   "-- Self-Hosted": {
     type: "separator",
