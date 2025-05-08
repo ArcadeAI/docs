@@ -15,7 +15,6 @@ Arcade Engine's configuration is a [YAML file](https://yaml.org/) with the follo
     ["API Configuration", "Configures the server for specific protocols"],
     ["Auth Configuration", "Configures user authorization providers and token storage"],
     ["Cache Configuration", "Configures the short-lived cache"],
-    ["Model Configuration", "Defines a collection of AI models for routing"],
     ["Security Configuration", "Configures security and encryption"],
     ["Storage Configuration", "Configures persistent storage"],
     ["Telemetry Configuration", "Configures telemetry and observability (OTEL)"],
@@ -52,20 +51,20 @@ Arcade Engine supports two ways of passing sensitive information like API keys w
 Environment variables:
 
 ```yaml {5}
-llm:
-  models:
+topic:
+  area:
     - id: primary
-      openai:
+      vendor:
         api_key: ${env:OPENAI_API_KEY}
 ```
 
 External files (useful in cloud setups):
 
 ```yaml {5}
-llm:
-  models:
+topic:
+  area:
     - id: primary
-      openai:
+      vendor:
         api_key: ${file:/path/to/secret}
 ```
 
@@ -123,37 +122,6 @@ Two cache implementations are available:
 - `redis` - A Redis cache implementation suitable for a multi-node Arcade Engine deployment:
 
 ```yaml file=<rootDir>/examples/code/home/configuration/engine/full_config.1.0.yaml#L74-L79 {3-6}
-
-```
-
-
-## Model configuration
-
-The `llm.models` section defines the models that the engine can route to, and the API keys or parameters for each model. Each item in the `models` array must have a unique `id` and a provider-specific configuration.
-
-This example shows configuration for connecting to OpenAI and Anthropic:
-
-```yaml file=<rootDir>/examples/code/home/configuration/engine/full_config.1.0.yaml#L81-L89
-
-```
-
-For more details on model configuration and model-specific parameters, see [model configuration](/home/configure/models).
-
-### Routing
-
-When client code calls the Arcade Model API, it specifies a model by name. Arcade Engine matches the model name to a model in the configuration and routes the request to the appropriate provider.
-
-If more than one model provider is configured, Arcade Engine will attempt to route to the correct provider using known model names.
-
-```python file=<rootDir>/examples/code/home/configuration/engine/model_selection.implicit.py {9}
-
-```
-
-If two model providers have the same models or a custom model is used, the provider can be explicitly specified using its `id`.
-
-For example, given an `llm.models` configuration with one provider named `primary`, this request will be routed to `primary` with the model `gpt-4o`:
-
-```python file=<rootDir>/examples/code/home/configuration/engine/model_selection.explicit.py#L5- {5}
 
 ```
 
