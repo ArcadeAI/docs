@@ -142,7 +142,4 @@ export default {
   "auth-providers": {
     title: "Auth Providers",
   },
-  "supported-models": {
-    title: "Model Providers",
-  },
 };
