@@ -59,9 +59,9 @@ export default {
   "api-keys": {
     title: "Get an API key",
   },
-  "-- Building Tools": {
+  "-- Authoring Tools": {
     type: "separator",
-    title: "Building Tools",
+    title: "Authoring Tools",
   },
   "build-tools": {
     title: "Build tools",
