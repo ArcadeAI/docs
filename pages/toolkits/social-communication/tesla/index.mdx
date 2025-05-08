@@ -1,0 +1,106 @@
+---
+title: Tesla Toolkit
+description: Control and monitor Tesla vehicles with your agents
+---
+
+import { Callout } from 'nextra/components'
+
+# Tesla Toolkit
+
+<Callout type="info">
+  This toolkit requires the [Tesla auth provider](/home/auth-providers/tesla).
+</Callout>
+
+The Tesla toolkit allows your agents to interact with Tesla vehicles through the [Tesla Fleet API](https://developer.tesla.com/docs/fleet-api/getting-started/what-is-fleet-api). With this toolkit, your agents can:
+
+- Get information about Tesla vehicles
+- Control vehicle features (climate, doors, etc.)
+- Monitor vehicle status and location
+- Manage charging settings
+
+## Getting Started
+
+To use the Tesla toolkit, you'll need to:
+
+1. Set up the [Tesla auth provider](/home/auth-providers/tesla)
+2. Install the Tesla toolkit
+
+```bash
+pip install arcade-tesla
+```
+
+## Example Usage
+
+```python
+from arcade import ArcadeClient
+from arcade.tools import ModelAPI
+
+# Initialize the Arcade client
+client = ArcadeClient()
+
+# Create a model API instance with the Tesla toolkit
+model_api = ModelAPI(
+    client=client,
+    model="gpt-4",
+    tools=["tesla"]
+)
+
+# Run the model with a prompt
+response = model_api.run(
+    "Check the battery level of my Tesla and turn on the climate control if it's below 20%."
+)
+
+print(response.content)
+```
+
+## Available Tools
+
+The Tesla toolkit provides the following tools:
+
+### get_vehicles
+
+Get a list of vehicles associated with the user's Tesla account.
+
+### get_vehicle_data
+
+Get detailed information about a specific Tesla vehicle, including battery level, climate settings, and more.
+
+### wake_up_vehicle
+
+Wake up a sleeping Tesla vehicle.
+
+### set_climate
+
+Control the climate settings of a Tesla vehicle, including temperature and climate mode.
+
+### control_doors
+
+Lock or unlock the doors of a Tesla vehicle.
+
+### control_windows
+
+Open or close the windows of a Tesla vehicle.
+
+### start_charging
+
+Start charging a Tesla vehicle if it's connected to a charger.
+
+### stop_charging
+
+Stop charging a Tesla vehicle.
+
+### set_charge_limit
+
+Set the charging limit for a Tesla vehicle.
+
+### get_vehicle_location
+
+Get the current location of a Tesla vehicle.
+
+## Authentication
+
+This toolkit uses the [Tesla auth provider](/home/auth-providers/tesla) for authentication. When a user interacts with your agent, they will be prompted to authorize access to their Tesla account if they haven't already done so.
+
+## API Reference
+
+For more details on the Tesla Fleet API, see the [official documentation](https://developer.tesla.com/docs/fleet-api/getting-started/what-is-fleet-api).
