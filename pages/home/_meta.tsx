@@ -135,4 +135,10 @@ export default {
   "registry-early-access": {
     title: "Registry Early Access",
   },
+  "auth-providers": {
+    title: "Auth Providers",
+  },
+  "supported-models": {
+    title: "Model Providers",
+  },
 };
