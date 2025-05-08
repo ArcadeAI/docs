@@ -128,12 +128,6 @@ export default {
   configure: {
     title: "Configure",
   },
-  "supported-models": {
-    title: "Model Providers",
-  },
-  "auth-providers": {
-    title: "Auth Providers",
-  },
   "-- Guides": {
     type: "separator",
     title: "Guides",
@@ -144,5 +138,11 @@ export default {
   },
   "registry-early-access": {
     title: "Registry Early Access",
+  },
+  "auth-providers": {
+    title: "Auth Providers",
+  },
+  "supported-models": {
+    title: "Model Providers",
   },
 };
