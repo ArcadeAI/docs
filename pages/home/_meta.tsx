@@ -72,6 +72,9 @@ export default {
   "serve-tools": {
     title: "Serve tools",
   },
+  "auth-providers": {
+    title: "Customizing Auth",
+  },
   "-- Agent Frameworks": {
     type: "separator",
     title: "Agent Frameworks",
@@ -114,10 +117,6 @@ export default {
   faq: {
     title: "FAQ",
   },
-  "-- CLI": {
-    type: "separator",
-    title: "Arcade CLI",
-  },
   "-- Self-Hosted": {
     type: "separator",
     title: "Self-hosting",
@@ -138,8 +137,5 @@ export default {
   },
   "registry-early-access": {
     title: "Registry Early Access",
-  },
-  "auth-providers": {
-    title: "Auth Providers",
   },
 };
