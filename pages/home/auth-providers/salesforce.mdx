@@ -21,27 +21,36 @@ This auth provider is used by:
 
 ## Create a Salesforce app
 
-Follow Salesforce's guide to [creating your Connected App](https://help.salesforce.com/s/articleView?id=xcloud.connected_app_create.htm&type=5).
+Follow Salesforce's guide to [creating your Connected App](https://help.salesforce.com/s/articleView?id=xcloud.connected_app_create.htm&type=5). Be sure to create a **Connected App**, not a Lightning App.
 
 When creating your app, make sure to:
 
-- Check the **Enable OAuth Settings** box
+- Under "API (Enable OAuth Settings)", check the **Enable OAuth Settings** box
 - Set the callback URL to: `https://cloud.arcade.dev/api/v1/oauth/callback`
-- In the **Available OAuth Scopes**, add the **Manage User Data Via APIs (api)** scope
+- In the **Available OAuth Scopes**, add the two following scopes:
+  - "Manage User Data Via APIs (api)"
+  - "Perform requests at any time (refresh_token, offline_access)"
 - Uncheck the **Require Proof Key for Code Exchange (PKCE)** option, unless you want to use PKCE (in which case, you'll also need to enable PKCE in the Salesforce auth configuration as [described below](#configuring-salesforce-auth))
-- Leave all other settings as default
+- Check "Enable Token Exchange Flow"
+- Check "Enable Refresh Token Rotation"
+- Leave all other settings as default and save your app
 
-After your app is created, take note of the client ID and client secret to use in the next steps.
+Right after creating the app, Salesforce will redirect you to the app's page. In the "API (Enable OAuth Settings)" section, click on the **Manage Consumer Details** button and take note of the **API Key** and **Client Secret** values.
+
+Then, go back to the App's page and click on the **Manage** button at the top, then click on the **Edit Policies** button, at the top of the Manage page, and follow the instructions below:
+
+- In "IP Relaxation", select **Relax IP Restrictions**.
+- In "Refresh Token Policy", make sure the option **Refresh token is valid until revoked** is checked.
+
+With that, your Salesforce app is ready to be used with Arcade.
 
 ## Get your Salesforce Org Subdomain
 
 Follow the steps below to find your Salesforce Org Subdomain:
 
-1. Log into your Salesforce account.
-1. Click on the **Setup** gear icon in the top right corner, then click on **Setup**.
-1. In the **Quick Find** box in the top left corner, type `"my domain"`.
+1. In the Setup menu, click on **Quick Find** in the top left corner and type `"my domain"`.
 1. In the search results, under **Company Settings**, click on **My Domain**.
-1. Under **My Domain Details**, check the **Current My Domain URL** field.
+1. Under **My Domain Details**, check the value of the **Current My Domain URL** field.
 
 Your **Salesforce Org Subdomain** is the value before the `.my.salesforce.com` part. For example, if your Salesforce domain is `https://acme-inc.my.salesforce.com`, your Salesforce Org Subdomain is `acme-inc`. If you have a developer account, your URL might look like `https://acme-inc.develop.my.salesforce.com`. In this case, your Salesforce Org Subdomain is `acme-inc.develop`.
 
@@ -62,7 +71,7 @@ export SALESFORCE_ORG_SUBDOMAIN={your-salesforce-subdomain}
 
 ## Create and Assign Custom Scopes to your Connected App
 
-By default, Salesforce offers only one [OAuth scope](https://oauth.net/2/scope/) (`api`) that is applicable to using their CRM REST API. The developer is tasked with creating [OAuth custom scopes](https://help.salesforce.com/s/articleView?id=xcloud.remoteaccess_oauth_customscopes.htm&type=5) to define granular permissions for their application users.
+The Salesforce API requires the App developer to create [OAuth custom scopes](https://help.salesforce.com/s/articleView?id=xcloud.remoteaccess_oauth_customscopes.htm&type=5) defining granular permissions for their application users to authorize.
 
 The custom scopes required by the [Arcade Salesforce toolkit](/toolkits/sales/salesforce) are listed below, along with their descriptions:
 
@@ -81,6 +90,10 @@ The custom scopes required by the [Arcade Salesforce toolkit](/toolkits/sales/sa
 - `write_contact`: Write access to create contact.
 
 Follow the [Create an OAuth Custom Scope](https://help.salesforce.com/s/articleView?id=xcloud.remoteaccess_oauth_customscopes_create.htm&type=5) and [Assign an OAuth Custom Scope to a Connected App](https://help.salesforce.com/s/articleView?id=xcloud.remoteaccess_oauth_customscopes_assign.htm&type=5) Salesforce documentation to understand how to define and assign these scopes to your Salesforce app.
+
+<Tip>
+  The scope names aren't really attached to any endpoint or action. It's the developer's job to honor the permissions communicated to the user when authorizing the app. You could, in theory, assign one single scope (e.g. `fullaccess`) and use it to query any Salesforce API endpoint.
+</Tip>
 
 ## Configuring Salesforce Auth
 
@@ -117,15 +130,25 @@ By default, the Arcade Dashboard will be available at `http://localhost:9099/das
 #### Configure the auth endpoints
 
 <Note>
-  Replace `{salesforce-org-subdomain}` with your [Salesforce Org Subdomain](#get-your-salesforce-org-subdomain).
+  Replace `salesforce-org-subdomain` with your [Salesforce Org Subdomain](#get-your-salesforce-org-subdomain).
 </Note>
 
 - Enter the auth endpoints:
-  - **Authorization Endpoint**: `https://{salesforce-org-subdomain}.my.salesforce.com/services/oauth2/authorize`
-  - **Token Endpoint**: `https://{salesforce-org-subdomain}.my.salesforce.com/services/oauth2/token`
+  - **Authorization Endpoint**: `https://salesforce-org-subdomain.my.salesforce.com/services/oauth2/authorize`
+  - **Token Endpoint**: `https://salesforce-org-subdomain.my.salesforce.com/services/oauth2/token`
 - Under **Refresh Token Settings**:
-  - Enter the **Refresh Token Endpoint**: `https://{salesforce-org-subdomain}.my.salesforce.com/services/oauth2/token`
+  - Enter the **Refresh Token Endpoint**: `https://salesforce-org-subdomain.my.salesforce.com/services/oauth2/token`
   - In **Response Content Type**, select `application/json`.
+- Under **Token Introspection Settings**:
+  - Check the **Enable Token Introspection** option.
+  - Enter the **Token Introspection Endpoint**: `https://salesforce-org-subdomain.my.salesforce.com/services/oauth2/introspect`
+  - In **Request Content Type**, select `application/x-www-form-urlencoded`.
+  - In **Response Content Type**, select `application/json`.
+  - In **Response Map**, enter:
+    - **Expires In**: `$.exp`
+    - **Scope**: `$.scope`
+  - In **Expiration Format**, select `absolute_unix_timestamp`.
+  - In **Triggers**, check the **On Token Grant** and **On Token Refresh** options.
 
 #### Optional Auth Settings
 
@@ -172,7 +195,7 @@ SALESFORCE_CLIENT_SECRET="<your client secret>"
 #### Edit the Engine configuration
 
 <Note>
-  In the YAML code demonstrated below, replace `{salesforce-org-subdomain}` in the endpoint URLs with your [Salesforce Org Subdomain](#get-your-salesforce-org-subdomain).
+  In the YAML code demonstrated below, replace `salesforce-org-subdomain` in the endpoint URLs with your [Salesforce Org Subdomain](#get-your-salesforce-org-subdomain).
 </Note>
 
 Edit the `engine.yaml` file and add a Salesforce item to the `auth.providers` section:
