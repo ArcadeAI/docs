@@ -34,9 +34,9 @@ The Arcade Asana toolkit provides a pre-built set of tools for interacting with 
       ["GetTagById", "Get a tag by its ID."],
       ["CreateTag", "Create a tag."],
       ["ListTags", "List tags associated to one or more workspaces."],
+      ["GetTasksWithoutId", "Search and retrieve tasks using full-text and filters when you don't have the task ID."],
       ["GetTaskById", "Get a task by its ID."],
       ["GetSubtasksFromATask", "Get subtasks associated to a task."],
-      ["SearchTasks", "Search for tasks using full-text and filters."],
       ["UpdateTask", "Update a task."],
       ["CreateTask", "Create a task."],
       ["AttachFileToTask", "Attach a file to a task."],
@@ -173,6 +173,44 @@ List tags associated to one or more workspaces.
 - **next_page_token** _(string, optional)_ The token to retrieve the next page of tags. Defaults to None (start from the first page).
 
 
+## GetTasksWithoutId
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/asana/tasks/get_tasks_without_id_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/asana/tasks/get_tasks_without_id_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Search and retrieve tasks using full-text and filters when you don't have the task ID.
+
+**Parameters**
+
+- **keywords** _(string, optional)_ Keywords to search for tasks. Matches against the task name and description. Defaults to None (no keyword filter).
+- **workspace_id** _(string, optional)_ The workspace ID to search for tasks. Defaults to None. If not provided and the user has only one workspace, it will use that workspace. If not provided and the user has multiple workspaces, it will raise an error listing the available workspaces.
+- **assignee_id** _(string, optional)_ The ID of the user to filter tasks assigned to. Defaults to None (does not filter by assignee).
+- **project** _(string, optional)_ The ID or name of the project to filter tasks. Defaults to None (does not filter by project).
+- **team_id** _(string, optional)_ The ID of the team to filter tasks. Defaults to None (does not filter by team).
+- **tags** _(list of strings, optional)_ Restricts the search to tasks associated to the given tags. Each item in the list can be a tag name (e.g. 'My Tag') or a tag ID (e.g. '1234567890'). Defaults to None (searches tasks associated to any tag or no tag).
+- **due_on** _(string, optional)_ Match tasks that are due exactly on this date. Format: YYYY-MM-DD. Ex: '2025-01-01'. Defaults to None (searches tasks due on any date or without a due date).
+- **due_on_or_after** _(string, optional)_ Match tasks that are due on OR AFTER this date. Format: YYYY-MM-DD. Ex: '2025-01-01'. Defaults to None (searches tasks due on any date or without a due date).
+- **due_on_or_before** _(string, optional)_ Match tasks that are due on OR BEFORE this date. Format: YYYY-MM-DD. Ex: '2025-01-01'. Defaults to None (searches tasks due on any date or without a due date).
+- **completed** _(bool, optional)_ Match tasks that are completed. Defaults to False (tasks that are NOT completed).
+- **start_on** _(string, optional)_ Match tasks that started on this date. Format: YYYY-MM-DD. Ex: '2025-01-01'. Defaults to None (searches tasks started on any date or without a start date).
+- **start_on_or_after** _(string, optional)_ Match tasks that started on OR AFTER this date. Format: YYYY-MM-DD. Ex: '2025-01-01'. Defaults to None (searches tasks started on any date or without a start date).
+- ** start_on_or_before** _(string, optional)_ Match tasks that started on OR BEFORE this date. Format: YYYY-MM-DD. Ex: '2025-01-01'. Defaults to None (searches tasks started on any date or without a start date).
+- **completed** _(bool, optional)_ Match tasks that are completed. Defaults to False (tasks that are NOT completed).
+- **limit** _(int, optional, Defaults to `20`)_ Maximum number of tasks to return. Min of 1, max of 20. Defaults to 20.
+- **sort_by** _(enum [TaskSortBy](/toolkits/productivity/asana/reference#tasksortby), optional)_ The field to sort the tasks by. Defaults to TaskSortBy.MODIFIED_AT.
+- **sort_order** _(enum [SortOrder](/toolkits/productivity/asana/reference#sortorder), optional)_ The order to sort the tasks by. Defaults to SortOrder.DESCENDING.
+
+
 ## GetTaskById
 
 <br />
@@ -218,44 +256,6 @@ Get subtasks associated to a task.
 - **task_id** _(string, required)_ The ID of the task. E.g. '1234567890'
 - **limit** _(int, optional, Defaults to `100`)_ Maximum number of subtasks to return. Defaults to 100. Maximum allowed is 100.
 - **next_page_token** _(string, optional)_ The token to retrieve the next page of subtasks. Defaults to None (start from the first page).
-
-
-## SearchTasks
-
-<br />
-<TabbedCodeBlock
-  tabs={[
-    {
-      label: "Call the Tool Directly",
-      content: {
-        Python: ["/examples/integrations/toolkits/asana/tasks/search_tasks_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/toolkits/asana/tasks/search_tasks_example_call_tool.js"],
-      },
-    },
-  ]}
-/>
-
-Search for tasks using full-text and filters.
-
-**Parameters**
-
-- **keywords** _(string, optional)_ Keywords to search for tasks. Matches against the task name and description. Defaults to None (no keyword filter).
-- **workspace_id** _(string, optional)_ The workspace ID to search for tasks. Defaults to None. If not provided and the user has only one workspace, it will use that workspace. If not provided and the user has multiple workspaces, it will raise an error listing the available workspaces.
-- **assignee_id** _(string, optional)_ The ID of the user to filter tasks assigned to. Defaults to None (does not filter by assignee).
-- **project** _(string, optional)_ The ID or name of the project to filter tasks. Defaults to None (does not filter by project).
-- **team_id** _(string, optional)_ The ID of the team to filter tasks. Defaults to None (does not filter by team).
-- **tags** _(list of strings, optional)_ Restricts the search to tasks associated to the given tags. Each item in the list can be a tag name (e.g. 'My Tag') or a tag ID (e.g. '1234567890'). Defaults to None (searches tasks associated to any tag or no tag).
-- **due_on** _(string, optional)_ Match tasks that are due exactly on this date. Format: YYYY-MM-DD. Ex: '2025-01-01'. Defaults to None (searches tasks due on any date or without a due date).
-- **due_on_or_after** _(string, optional)_ Match tasks that are due on OR AFTER this date. Format: YYYY-MM-DD. Ex: '2025-01-01'. Defaults to None (searches tasks due on any date or without a due date).
-- **due_on_or_before** _(string, optional)_ Match tasks that are due on OR BEFORE this date. Format: YYYY-MM-DD. Ex: '2025-01-01'. Defaults to None (searches tasks due on any date or without a due date).
-- **completed** _(bool, optional)_ Match tasks that are completed. Defaults to False (tasks that are NOT completed).
-- **start_on** _(string, optional)_ Match tasks that started on this date. Format: YYYY-MM-DD. Ex: '2025-01-01'. Defaults to None (searches tasks started on any date or without a start date).
-- **start_on_or_after** _(string, optional)_ Match tasks that started on OR AFTER this date. Format: YYYY-MM-DD. Ex: '2025-01-01'. Defaults to None (searches tasks started on any date or without a start date).
-- ** start_on_or_before** _(string, optional)_ Match tasks that started on OR BEFORE this date. Format: YYYY-MM-DD. Ex: '2025-01-01'. Defaults to None (searches tasks started on any date or without a start date).
-- **completed** _(bool, optional)_ Match tasks that are completed. Defaults to False (tasks that are NOT completed).
-- **limit** _(int, optional, Defaults to `20`)_ Maximum number of tasks to return. Min of 1, max of 20. Defaults to 20.
-- **sort_by** _(enum [TaskSortBy](/toolkits/productivity/asana/reference#tasksortby), optional)_ The field to sort the tasks by. Defaults to TaskSortBy.MODIFIED_AT.
-- **sort_order** _(enum [SortOrder](/toolkits/productivity/asana/reference#sortorder), optional)_ The order to sort the tasks by. Defaults to SortOrder.DESCENDING.
 
 
 ## UpdateTask
