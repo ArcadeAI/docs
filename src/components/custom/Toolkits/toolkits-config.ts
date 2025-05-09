@@ -361,7 +361,7 @@ const comingSoonTools: Tool[] = [
     link: "/toolkits/productivity/asana",
     category: "productivity",
     type: "arcade",
-    isComingSoon: true,
+    isComingSoon: false,
   },
   {
     name: "Ashby",
