@@ -111,12 +111,6 @@ export default {
   "arcade-cli": {
     title: "Arcade CLI",
   },
-  "best-practices": {
-    title: "Best Practices",
-  },
-  faq: {
-    title: "FAQ",
-  },
   "-- Self-Hosted": {
     type: "separator",
     title: "Self-hosting",
