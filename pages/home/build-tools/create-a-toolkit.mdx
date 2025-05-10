@@ -3,7 +3,7 @@ title: "Creating a Toolkit"
 description: "Learn how to create, test, deploy, and publish a custom toolkit for Arcade"
 ---
 
-import { Steps } from "nextra/components";
+import { Steps, Tabs } from "nextra/components";
 
 # Creating a Toolkit
 
@@ -13,13 +13,13 @@ This guide walks you through the complete process of creating a custom toolkit f
 
 Before starting, make sure you have:
 
-- Python 3.10 or higher (verify with `python --version`)
 - An [Arcade account](https://api.arcade.dev/signup?utm_source=docs&utm_medium=page&utm_campaign=custom-tools)
-- An active virtual environment for your shell(s).
+- An active virtual environment for your shell(s) (e.g. `uv venv --seed -p 3.13`)
     - We recommend using [uv](https://docs.astral.sh/uv/pip/environments/) or [miniconda](https://www.anaconda.com/docs/getting-started/miniconda/main).
     - Toolkits each have a poetry project with their own virtual environment, but toolkits are loaded into the top-level arcade environment based on the active  "parent" virtual environment.  **The local development commands will not work without an active virtual environment.**
+- `pip` installed within that virtual environment (verify with `pip --version`)
 - Arcade CLI installed within your python virtual environment: `pip install arcade-ai`
-- Poetry for package management (the generated Makefile uses Poetry)
+- Poetry for package management (the generated Makefile uses Poetry): `pip install poetry`
 
 <Steps>
 
@@ -28,6 +28,7 @@ Before starting, make sure you have:
 Run the following command to start creating your toolkit:
 
 ```bash
+git init
 arcade new
 ```
 
@@ -77,12 +78,16 @@ The Makefile provides several helpful commands:
 
 ### Define your tools
 
-Create a Python file for your tools in the `arcade_<toolkit_name>/tools` directory:
+Create a Python file for your tools in the `arcade_<toolkit_name>/tools` directory.
+
+The following example shows a simple math toolkit with three tools: `add`, `subtract`, and `multiply`:
 
 ```python
 # arcade_arithmetic/tools/operations.py
-from typing import Annotated, List
+from typing import Annotated
+
 from arcade.sdk import tool
+
 
 @tool
 def add(
@@ -131,16 +136,16 @@ Update the package initialization files to expose your tools:
 
 ```python
 # arcade_arithmetic/tools/__init__.py
-from .operations import add, subtract, multiply
+from .operations import add, multiply, subtract
 
-__all__ = ["add", "subtract", "multiply"]
+__all__ = ["add", "multiply", "subtract"]
 ```
 
 ```python
 # arcade_arithmetic/__init__.py
-from arcade_arithmetic.tools import add, subtract, multiply
+from arcade_arithmetic.tools import add, multiply, subtract
 
-__all__ = ["add", "subtract", "multiply"]
+__all__ = ["add", "multiply", "subtract"]
 ```
 
 ### Test your toolkit
@@ -150,7 +155,9 @@ Write tests for your tools in the `tests` directory:
 ```python
 # tests/test_operations.py
 import pytest
-from arcade_arithmetic.tools.operations import add, subtract, multiply
+
+from arcade_arithmetic.tools.operations import add, multiply, subtract
+
 
 def test_add():
     assert add(3, 4) == 7
@@ -196,32 +203,81 @@ arcade show --local
 
 You should see your toolkit listed in the output.
 
-### Test with a local worker
+### Test your tools locally
 
-Start a local worker to test your toolkit with the Arcade API:
+Serve your toolkit locally with the Arcade CLI:
 
 ```bash
 arcade serve
 ```
 
-Visit http://localhost:8002/docs to see your tools in the Swagger UI.
+Visit http://localhost:8002/worker/health to see that your worker is running.
+
+### Connect your toolkit to Arcade
+
+In another terminal, use a service like [ngrok](https://ngrok.com/docs/), [tailscale](https://tailscale.com/kb/1223/funnel), or [cloudflare](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/local-management/create-local-tunnel/) to give your local worker a public URL.
+
+<Tabs items={["ngrok", "Tailscale", "Cloudflare"]}>
+<Tabs.Tab>
+
+```bash
+ngrok http 8002
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```bash
+tailscale funnel 8002
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```bash
+cloudflared tunnel --url http://localhost:8002
+```
+
+</Tabs.Tab>
+
+</Tabs>
+
+Then in your Arcade dashboard:
+
+1. Navigate to the [Workers](https://api.arcade.dev/dashboard/workers) page.
+1. Click **Add Worker**.
+1. Fill in the form with the following values:
+    - **ID**: `my-arithmetic-worker`
+    - **Worker Type**: `Arcade`
+    - **URL**: your public URL from ngrok, tailscale, or cloudflare
+    - **Secret**: `dev`
+    - **Timeout** and **Retry**: can be left at default values
+1. Click **Create**.
+
+Now, in the [Playground](https://api.arcade.dev/playground/execute), you can see your tools in action.
 
 ### Deploy your toolkit to Arcade
 
-Create a `worker.toml` file in your toolkit's root directory:
+Alternatively, you can deploy your toolkit to Arcade's cloud instead of tunneling to it locally.
+
+Find the `worker.toml` file in your toolkit's root directory (where you ran `arcade new`):
 
 ```toml
 [[worker]]
 
 [worker.config]
-id = "arithmetic-worker"  # Choose a unique ID
-secret = "<your-secret>"  # Replace with a secure secret
-
+id = "demo-worker"  # Choose a unique ID
+enabled = true
+timeout = 30
+retries = 3
+secret = "<your-secret>"  # This is randomly generated for you by `arcade new`
 [worker.local_source]
-packages = ["."]  # Path to your toolkit directory
+packages = ["./arithmetic"]  # Path to your toolkit directory
 ```
 
-Deploy your worker to Arcade:
+From the root of your toolkit, deploy your toolkit to Arcade's cloud with:
 
 ```bash
 arcade deploy

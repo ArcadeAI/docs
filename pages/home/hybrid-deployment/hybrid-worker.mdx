@@ -1,0 +1,123 @@
+---
+title: "Hybrid Worker"
+description: "Learn how to deploy Arcade workers in a hybrid architecture"
+---
+
+import { Steps, Tabs } from "nextra/components";
+
+# Hybrid Worker
+
+A hybrid deployment allows you to execute tools in your own environment while still leveraging Arcade's cloud Gateway infrastructure. This gives you the flexibility to access private resources, maintain data security, and customize your worker environment while leveraging Arcade's gateway and management capabilities.
+
+## How hybrid workers work
+
+The hybrid worker model uses a bidirectional connection between your local environment and Arcade's cloud gateway:
+
+1. You run the Arcade worker in your environment (on-premises, private cloud, etc.)
+2. Your worker is exposed to Arcade's cloud gateway using a public URL
+3. The Arcade cloud gateway routes tool calls to your worker
+4. Your worker processes the requests and returns responses to the gateway
+
+## Benefits of hybrid workers
+
+- **Resource access**: Access private databases, APIs, or other resources not accessible from Arcade's cloud
+- **Data control**: Keep sensitive data within your environment while still using Arcade's capabilities
+- **Custom environments**: Use specific dependencies or configurations required by your tools
+- **Compliance**: Meet regulatory requirements by keeping data processing within your infrastructure
+
+## Setting up a hybrid worker
+
+<Steps>
+
+### Setup your toolkits
+
+Follow the [Creating a Toolkit](/home/build-tools/create-a-toolkit) guide to create your toolkits.
+
+Alternatively, you can install an Arcade Toolkit:
+
+```sh
+pip install arcade-math
+```
+
+### Start your local worker
+
+Run your Arcade worker locally with a secret that you generate in some secure way:
+
+```sh
+export ARCADE_WORKER_SECRET=your-secret
+arcade serve
+```
+
+Verify your worker is running by visiting http://localhost:8002/worker/health.
+
+### Create a public URL
+
+To allow the Arcade cloud gateway to connect to your locally running worker, you need a public URL. Here are a few options:
+
+<Tabs items={["ngrok", "Cloudflare", "Tailscale"]}>
+<Tabs.Tab>
+
+```sh
+ngrok http 8002
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```sh
+cloudflared tunnel --url http://localhost:8002
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```sh
+tailscale funnel 8002
+```
+
+</Tabs.Tab>
+</Tabs>
+
+### Register your worker in Arcade
+
+1. Navigate to the [Workers](https://api.arcade.dev/dashboard/workers) page in your Arcade dashboard
+1. Click **Add Worker**
+1. Fill in the form:
+   - **ID**: Choose a unique identifier (e.g., `my-hybrid-worker`)
+   - **Worker Type**: Select `Arcade`
+   - **URL**: Enter your public URL from Step 3
+   - **Secret**: Enter the secret for your worker (or use `dev` for testing)
+   - **Timeout** and **Retry**: Configure as needed for your use case
+1. Click **Create**
+
+### Test the connection to your worker
+
+You can now test your  worker by making requests through the Arcade API or using the Playground:
+
+1. Go to the [Playground](https://api.arcade.dev/playground/execute)
+1. Select a tool from your toolkit and execute it
+1. Verify that the response is correct and you see request logs in your worker
+
+</Steps>
+
+## Best practices
+
+- **Persistent URLs**: For production use, set up a persistent public URL rather than ephemeral ones
+- **TLS**: Use a TLS-enabled URL for production use
+- **Security**: Use strong secrets for worker authentication
+- **Monitoring**: Set up monitoring for your hybrid workers to ensure availability
+- **Scaling**: For high-load scenarios, consider running multiple workers behind a load balancer
+
+## Troubleshooting
+
+- **Connection issues**: Ensure your public URL is accessible and that your local worker is running
+- **Authentication failures**: Verify that the worker secret matches what's configured in the Arcade dashboard
+- **Timeout errors**: If your worker takes too long to respond, increase the timeout value in the worker configuration
+
+## Next steps
+
+- [Create custom tools](/home/build-tools/create-a-toolkit) for your hybrid worker
+- [Set up authentication](/home/build-tools/create-a-tool-with-auth) for secure access to resources
+- [Configure secrets](/home/build-tools/create-a-tool-with-secrets) for your worker
