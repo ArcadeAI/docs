@@ -355,17 +355,16 @@ from arcadepy import Arcade
 # Initialize the Arcade client
 client = Arcade(base_url="https://api.arcade.dev")
 
-# Create a chat completion that can use your tools
-response = client.chat.completions.create(
-    messages=[
-        {"role": "system", "content": "You are a helpful assistant with arithmetic skills."},
-        {"role": "user", "content": "Calculate 12 + 34 and then multiply by 2"}
-    ],
-    model="gpt-4o",
-    tool_choice="generate",
+# Use your Tools
+response = client.tools.execute(
+    tool_name="Arithmetic.Add",
+    input={
+        "a": 12,
+        "b": 34
+    },
 )
 
-print(response.choices[0].message.content)
+print(response.output.value)
 ```
 
 ## Ongoing toolkit maintenance
