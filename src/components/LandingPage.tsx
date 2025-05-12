@@ -65,9 +65,12 @@ export function LandingPage() {
               through user-specific permissions, pre-built integrations with
               Gmail, Slack, GitHub, and more. You can also build your own
               agentic tools and MCP servers with our authoring and testing
-              suite.
+              suite. Arcade is your tool{" "}
+              <span className="font-bold text-primary">gateway</span>,{" "}
+              <span className="font-bold text-primary">registry</span>, and{" "}
+              <span className="font-bold text-primary">runtime</span>.
             </p>
-            <p style={{ textAlign: "left" }}>
+            <p style={{ textAlign: "left", paddingTop: "2rem" }}>
               Get started with a 5-minute quickstart.
             </p>
           </motion.div>
