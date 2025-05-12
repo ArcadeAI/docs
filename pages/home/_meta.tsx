@@ -59,14 +59,18 @@ export default {
   "api-keys": {
     title: "Get an API key",
   },
-  "use-tools": {
-    title: "Tool Calling",
+  "-- Authoring Tools": {
+    type: "separator",
+    title: "Authoring Tools",
   },
-  auth: {
-    title: "Authorization",
+  "build-tools": {
+    title: "Build tools",
   },
-  mcp: {
-    title: "MCP",
+  "evaluate-tools": {
+    title: "Evaluate tools",
+  },
+  "serve-tools": {
+    title: "Serve tools",
   },
   "-- Agent Frameworks": {
     type: "separator",
@@ -84,37 +88,51 @@ export default {
   mastra: {
     title: "Mastra",
   },
-  "-- Building Tools": {
+  vercelai: {
+    title: "Vercel AI",
+  },
+  "-- MCP": {
     type: "separator",
-    title: "Building Tools",
+    title: "MCP",
   },
-  "custom-tools": {
-    title: "Quickstart",
+  mcp: {
+    title: "MCP",
   },
-  "build-tools": {
-    title: "Build tools",
-  },
-  "evaluate-tools": {
-    title: "Evaluate tools",
-  },
-  "serve-tools": {
-    title: "Serve tools",
-  },
-  "-- Self-Hosted": {
+  "-- Core Concepts": {
     type: "separator",
-    title: "Self-hosting",
+    title: "Core Concepts",
   },
-  install: {
-    title: "Install",
+  "use-tools": {
+    title: "Tool Calling",
   },
-  configure: {
-    title: "Configure",
+  auth: {
+    title: "Authorization",
   },
-  "supported-models": {
-    title: "Model Providers",
+  "arcade-cli": {
+    title: "Arcade CLI",
+  },
+  "-- Hosting options": {
+    type: "separator",
+    title: "Hosting options",
+  },
+  "hosting-overview": {
+    title: "Overview",
+  },
+  "hybrid-deployment": {
+    title: "Hybrid Deployment",
+  },
+  "local-deployment": {
+    title: "Local Deployment",
   },
   "auth-providers": {
-    title: "Auth Providers",
+    title: "Customizing Auth",
+  },
+  "-- Guides": {
+    type: "separator",
+    title: "Guides",
+  },
+  faq: {
+    title: "FAQ",
   },
   "-- Registry": {
     type: "separator",

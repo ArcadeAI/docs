@@ -1,21 +1,21 @@
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import {
-  Bot,
+  // Bot,
   Cloud,
-  Code,
-  Key,
-  PencilRuler,
-  Puzzle,
-  RefreshCcw,
+  // Code,
+  // Key,
+  // PencilRuler,
+  // Puzzle,
+  // RefreshCcw,
   Rocket,
-  Shield,
+  // Shield,
   Users,
   Wrench,
-  Zap,
+  // Zap,
 } from "lucide-react";
 import Link from "next/link";
-import { ChallengeSolution } from "./ChallengeSolution";
+// import { ChallengeSolution } from "./ChallengeSolution";
 import { QuickStartCard } from "./QuickStartCard";
 import { SampleAppCard } from "./SampleAppCard";
 import Image from "next/image";
@@ -46,22 +46,39 @@ export function LandingPage() {
             Welcome to Arcade!
           </motion.h1>
           <motion.p
-            className="mx-auto mt-8 max-w-2xl text-pretty text-base font-medium leading-relaxed text-gray-300"
+            className="mx-auto mt-8 max-w-4xl text-pretty text-base font-medium italic leading-relaxed text-gray-100"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            What if AI could do more than suggest? Imagine instead of getting a
-            to-do list, your AI could{" "}
-            <span className="font-bold text-primary">take action</span> -
-            sending urgent emails, updating customer records, or kicking off
-            complex workflows.
+            <span className="font-bold text-primary">
+              Learn how to move AI agents from demo to production with Arcade.
+            </span>
           </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+          >
+            <p style={{ textAlign: "left", paddingTop: "2rem" }}>
+              Arcade enables your AI agent to securely take real-world actions
+              through user-specific permissions, pre-built integrations with
+              Gmail, Slack, GitHub, and more. You can also build your own
+              agentic tools and MCP servers with our authoring and testing
+              suite. Arcade is your tool{" "}
+              <span className="font-bold text-primary">gateway</span>,{" "}
+              <span className="font-bold text-primary">registry</span>, and{" "}
+              <span className="font-bold text-primary">runtime</span>.
+            </p>
+            <p style={{ textAlign: "left", paddingTop: "2rem" }}>
+              Get started with a 5-minute quickstart.
+            </p>
+          </motion.div>
           <motion.div
             className="mt-20 flex items-center justify-center gap-x-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
           >
             <Button
               asChild
@@ -100,7 +117,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      <section className="relative py-16">
+      {/* <section className="relative py-16">
         <div className="container relative mx-auto px-4">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="mb-4 text-3xl font-bold tracking-tight text-white md:text-4xl">
@@ -137,9 +154,9 @@ export function LandingPage() {
             />
           </div>
         </div>
-      </section>
+      </section> */}
 
-      <section className="py-8">
+      {/* <section className="py-8">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="mb-4 text-3xl font-bold tracking-tight text-white md:text-4xl">
@@ -214,49 +231,7 @@ export function LandingPage() {
             />
           </div>
         </div>
-      </section>
-
-      <section className="relative py-16">
-        <div className="container relative mx-auto px-4">
-          <div className="mx-auto max-w-2xl text-center">
-            <h2 className="mb-4 text-3xl font-bold tracking-tight text-white md:text-4xl">
-              Arcade Overview
-            </h2>
-            <Image
-              src={"/images/overview.png"}
-              alt={"arcade overview"}
-              width={1880}
-              height={1676}
-            />
-          </div>
-          <div className="mt-16 grid gap-8 md:grid-cols-2">
-            <QuickStartCard
-              icon={Rocket}
-              title="Arcade Gateway"
-              description="The Arcade gateway is your MCP Server and Agentic tool provider.  It allows you to write your tools once and serve them across any LLM or orchestration framework, no matter the protocol.  The gateway manages agent authentication, tool registration, and tool execution."
-              href="#"
-            />
-            <QuickStartCard
-              icon={Users}
-              title="Control Plane"
-              description="The Control Plane is how you manage your tools, users, and deployments from a single place.  No matter how large your deployment or organization gets, the Control Plane will scale with you."
-              href="#"
-            />
-            <QuickStartCard
-              icon={Cloud}
-              title="Public and Private Tools"
-              description="Arcade makes it easy to develop custom tools that just work with Agents.  Our SDKs and framework integrations make it easy to get started.  When you are ready, it's easy to run your tools either on-prem or in our cloud."
-              href="#"
-            />
-            <QuickStartCard
-              icon={Wrench}
-              title="Tools and MCP Servers Together"
-              description="The Arcade Gateway is the only way to combine MCP servers with your Agentic tools. Regardless of where your tool is hosted, you can serve and manage access to it via the Gateway.  You easily can mix our public tools with your own private tools in your agents."
-              href="#"
-            />
-          </div>
-        </div>
-      </section>
+      </section> */}
 
       <section className="py-12">
         <div className="container mx-auto px-4">
@@ -288,6 +263,51 @@ export function LandingPage() {
               description="A Slack bot that extracts and summarizes YouTube transcripts in Weaviate, perfect for AI podcasts."
               image="/images/sample-apps/slack-aipodcast-summaries.jpg"
               href="https://github.com/dforwardfeed/slack-AIpodcast-summaries"
+            />
+          </div>
+        </div>
+      </section>
+
+      <section className="py-12">
+        <div className="container mx-auto px-4">
+          <div className="max-w-2xl">
+            <h2 className="mb-4 text-3xl font-bold tracking-tight text-white md:text-4xl">
+              Arcade Overview
+            </h2>
+          </div>
+          <div className="flex w-full justify-center">
+            <Image
+              src={"/images/overview.png"}
+              alt={"arcade overview"}
+              width={1880 / 3}
+              height={1676 / 3}
+              className="max-w-full"
+            />
+          </div>
+          <div className="mt-16 grid gap-8 md:grid-cols-2">
+            <QuickStartCard
+              icon={Rocket}
+              title="Arcade Gateway"
+              description="The Arcade gateway is your MCP Server and Agentic tool provider.  It allows you to write your tools once and serve them across any LLM or orchestration framework, no matter the protocol.  The gateway manages agent authentication, tool registration, and tool execution."
+              href="#"
+            />
+            <QuickStartCard
+              icon={Users}
+              title="Control Plane"
+              description="The Control Plane is how you manage your tools, users, and deployments from a single place.  No matter how large your deployment or organization gets, the Control Plane will scale with you."
+              href="#"
+            />
+            <QuickStartCard
+              icon={Cloud}
+              title="Public and Private Tools"
+              description="Arcade makes it easy to develop custom tools that just work with Agents.  Our SDKs and framework integrations make it easy to get started.  When you are ready, it's easy to run your tools either on-prem or in our cloud."
+              href="#"
+            />
+            <QuickStartCard
+              icon={Wrench}
+              title="Tools and MCP Servers Together"
+              description="The Arcade Gateway is the only way to combine MCP servers with your Agentic tools. Regardless of where your tool is hosted, you can serve and manage access to it via the Gateway.  You easily can mix our public tools with your own private tools in your agents."
+              href="#"
             />
           </div>
         </div>
