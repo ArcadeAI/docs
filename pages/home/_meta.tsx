@@ -131,6 +131,9 @@ export default {
     type: "separator",
     title: "Guides",
   },
+  faq: {
+    title: "FAQ",
+  },
   "-- Registry": {
     type: "separator",
     title: "Registry",
