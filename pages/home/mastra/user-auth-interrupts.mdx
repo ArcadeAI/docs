@@ -59,7 +59,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { mastra } from "@/mastra";
 import { Arcade } from "@arcadeai/arcadejs";
 import { getUserSession } from "@/lib/auth"; // Your authentication handling
-import { getArcadeMastraTools } from "@/lib/arcade-tools"; // Your tool adapter implementation
+import { toZodToolSet } from "@arcadeai/arcadejs/lib";
+import { executeOrAuthorizeZodTool } from "@arcadeai/arcadejs/lib";
 
 export async function POST(req: NextRequest) {
   // Extract request data
@@ -75,10 +76,15 @@ export async function POST(req: NextRequest) {
     // Get the agent from Mastra
     const githubAgent = mastra.getAgent("githubAgent");
 
+    const arcade = new Arcade();
+    const githubToolkit = await arcade.tools.list({ toolkit: "github", limit: 30 });
+
     // Fetch user-specific Arcade tools for GitHub
-    const arcadeTools = await getArcadeMastraTools({
-      toolkit: "github",
-      user_id: session.user.email,
+    const arcadeTools = toZodToolSet({
+      tools: githubToolkit.items,
+      client: arcade,
+      userId: session.user.email,
+      executeFactory: executeOrAuthorizeZodTool,
     });
 
     // Stream the response with dynamically provided tools
