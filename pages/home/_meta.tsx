@@ -111,18 +111,21 @@ export default {
   "arcade-cli": {
     title: "Arcade CLI",
   },
-  "-- Self-Hosted": {
+  "-- Hosting options": {
     type: "separator",
-    title: "Self-hosting",
+    title: "Hosting options",
   },
-  "self-hosting-overview": {
-    title: "Self-hosting Overview",
+  "hosting-overview": {
+    title: "Overview",
   },
   "hybrid-deployment": {
     title: "Hybrid Deployment",
   },
   "local-deployment": {
     title: "Local Deployment",
+  },
+  "auth-providers": {
+    title: "Customizing Auth",
   },
   "-- Guides": {
     type: "separator",

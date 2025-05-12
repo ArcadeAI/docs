@@ -5,7 +5,4 @@ export default {
   configure: {
     title: "Configure",
   },
-  "auth-providers": {
-    title: "Auth Providers",
-  },
 };
