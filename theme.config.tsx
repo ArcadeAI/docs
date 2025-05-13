@@ -49,6 +49,7 @@ const config: DocsThemeConfig = {
           linkLocation="docs:navbar"
         >
           <NavBarButton
+            hideOnPath={["/home/registry-early-access"]}
             text="Sign Up"
           />
         </SignupLink>

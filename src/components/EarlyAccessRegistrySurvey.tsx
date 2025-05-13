@@ -28,7 +28,12 @@ export const EarlyAccessRegistrySurvey = () => {
 
   return (
     <>
-      <h2 className="mb-4 text-2xl font-bold">Early Access Registry Survey</h2>
+      <h2
+        className="mb-4 text-2xl font-bold"
+        id="early-access-registry-survey-header"
+      >
+        Early Access Registry Survey
+      </h2>
       {completed && (
         <p className="mb-4 text-sm text-gray-500">
           Thank you! We will be in touch soon.
