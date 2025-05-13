@@ -1,7 +1,9 @@
+import { usePathname } from "next/navigation";
 import { Button } from "./ui/button";
 
 interface NavBarButtonProps {
   text: string;
+  hideOnPath?: string[];
   variant?:
     | "default"
     | "link"
@@ -14,10 +16,15 @@ interface NavBarButtonProps {
 export const NavBarButton = ({
   text,
   variant = "default",
-}: NavBarButtonProps) => (
-  <Button variant={variant}>
-    <span className="text-xs">{text}</span>
-  </Button>
-);
+  hideOnPath = [],
+}: NavBarButtonProps) => {
+  const pathname = usePathname();
+  if (hideOnPath.includes(pathname)) return null;
+  return (
+    <Button variant={variant}>
+      <span className="text-xs">{text}</span>
+    </Button>
+  );
+};
 
 export default NavBarButton;
