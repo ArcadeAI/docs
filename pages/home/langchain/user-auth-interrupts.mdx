@@ -3,11 +3,11 @@ title: "Using Arcade User Auth"
 description: "Build a custom LangGraph that handles tool authorization with Arcade"
 ---
 
-import { Steps } from "nextra/components";
+import { Steps, Tabs } from "nextra/components";
 
 ## User Authorization in LangGraph
 
-In this guide, you will create a LangGraph workflow that requires user authorization before running certain Arcade tools. When a tool needs authorization, the graph displays an authorization URL and waits for the user's approval. This ensures that only the tools you explicitly authorize are available to the language model.
+In this guide, you will create a LangGraph workflow that requires user authorization before running certain Arcade tools. When a tool needs authorization, the graph displays an authorization URL and waits for the user's approval. This ensures that only the tools you explicitly authorize are available to the language model. For complete working examples, see our [Python](https://github.com/ArcadeAI/arcade-ai/blob/main/examples/langchain/langgraph_with_user_auth.py) and [JavaScript](https://github.com/ArcadeAI/arcade-ai/blob/main/examples/langchain-ts/langgraph-with-user-auth.ts) examples.
 
 <Steps>
 
@@ -19,9 +19,18 @@ In this guide, you will create a LangGraph workflow that requires user authoriza
 
 Set up your environment with the following installations:
 
+<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs.Tab>
 ```bash
 pip install langchain-arcade langchain-openai langgraph
 ```
+</Tabs.Tab>
+<Tabs.Tab>
+```bash
+npm install @arcadeai/arcadejs @langchain/openai @langchain/core @langchain/langgraph
+```
+</Tabs.Tab>
+</Tabs>
 
 ### Configure your Arcade environment
 
@@ -29,6 +38,8 @@ Make sure you have set your Arcade API key (and any other relevant keys) in the 
 
 > Need an Arcade API key? Visit the [Get an API key](/home/api-keys) page to create one.
 
+<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs.Tab>
 ```python
 import os
 
@@ -58,10 +69,67 @@ Here are the main code elements:
 - tool_node encapsulates these tools for usage in LangGraph.
 - model_with_tools binds your tools to the "gpt-4o" language model, enabling tool calls.
 
+</Tabs.Tab>
+<Tabs.Tab>
+```javascript
+import { pathToFileURL } from "node:url";
+import { Arcade } from "@arcadeai/arcadejs";
+import { toZod } from "@arcadeai/arcadejs/lib";
+import type { AIMessage } from "@langchain/core/messages";
+import { tool } from "@langchain/core/tools";
+import { MessagesAnnotation, StateGraph } from "@langchain/langgraph";
+import { ToolNode } from "@langchain/langgraph/prebuilt";
+import { ChatOpenAI } from "@langchain/openai";
+
+// Initialize Arcade with API key from environment
+const arcade = new Arcade();
+
+// Replace with your application's user ID (e.g. email address, UUID, etc.)
+const USER_ID = "user@example.com";
+
+// Initialize tools from Google toolkit
+const googleToolkit = await arcade.tools.list({ toolkit: "google", limit: 30 });
+const arcadeTools = toZod({
+	tools: googleToolkit.items,
+	client: arcade,
+	userId: USER_ID,
+});
+
+// Convert Arcade tools to LangGraph tools
+const tools = arcadeTools.map(({ name, description, execute, parameters }) =>
+	tool(execute, {
+		name,
+		description,
+		schema: parameters,
+	}),
+);
+
+// Initialize the prebuilt tool node
+const toolNode = new ToolNode(tools);
+
+// Create a language model instance and bind it with the tools
+const model = new ChatOpenAI({
+	model: "gpt-4o",
+	apiKey: process.env.OPENAI_API_KEY,
+});
+const modelWithTools = model.bindTools(tools);
+```
+
+Here are the main code elements:
+
+- arcade.tools.list fetches your Arcade tools, for example the "Google" toolkit.
+- toZod converts Arcade tools to Zod schemas, which are required by LangGraph.
+- ToolNode encapsulates these tools for usage in LangGraph.
+- modelWithTools binds your tools to the "gpt-4o" language model, enabling tool calls.
+
+</Tabs.Tab>
+</Tabs>
+
 ### Define the workflow steps
 
 You will create three primary functions to handle AI interaction, tool authorization, and flow control.
-
+<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs.Tab>
 ```python
 # Function to invoke the model and get a response
 def call_agent(state: MessagesState):
@@ -102,17 +170,97 @@ def authorize(state: MessagesState, config: dict):
 
     return {"messages": []}
 ```
-
 Explanations for these functions:
 
 - call_agent: Invokes the language model using the latest conversation state.
 - should_continue: Checks the last AI message for any tool calls. If a tool requires authorization, the flow transitions to authorization. Otherwise, it goes straight to tool execution or ends if no tools are called.
 - authorize: Prompts the user to authorize any required tools, blocking until authorization is completed successfully or fails.
+</Tabs.Tab>
+<Tabs.Tab>
+```javascript
+// Function to check if a tool requires authorization
+async function requiresAuth(toolName: string): Promise<{
+	needsAuth: boolean;
+	id: string;
+	authUrl: string;
+}> {
+	const authResponse = await arcade.tools.authorize({
+		tool_name: toolName,
+		user_id: USER_ID,
+	});
+	return {
+		needsAuth: authResponse.status === "pending",
+		id: authResponse.id ?? "",
+		authUrl: authResponse.url ?? "",
+	};
+}
+
+// Function to invoke the model and get a response
+async function callAgent(
+	state: typeof MessagesAnnotation.State,
+): Promise<typeof MessagesAnnotation.Update> {
+	const messages = state.messages;
+	const response = await modelWithTools.invoke(messages);
+	return { messages: [response] };
+}
+
+// Function to determine the next step in the workflow based on the last message
+async function shouldContinue(
+	state: typeof MessagesAnnotation.State,
+): Promise<string> {
+	const lastMessage = state.messages[state.messages.length - 1] as AIMessage;
+	if (lastMessage.tool_calls?.length) {
+		for (const toolCall of lastMessage.tool_calls) {
+			const { needsAuth } = await requiresAuth(toolCall.name);
+			if (needsAuth) {
+				return "authorization";
+			}
+		}
+		return "tools"; // Proceed to tool execution if no authorization is needed
+	}
+	return "__end__"; // End the workflow if no tool calls are present
+}
+
+// Function to handle authorization for tools that require it
+async function authorize(
+	state: typeof MessagesAnnotation.State,
+): Promise<typeof MessagesAnnotation.Update> {
+	const lastMessage = state.messages[state.messages.length - 1] as AIMessage;
+	for (const toolCall of lastMessage.tool_calls || []) {
+		const toolName = toolCall.name;
+		const { needsAuth, id, authUrl } = await requiresAuth(toolName);
+		if (needsAuth) {
+			// Prompt the user to visit the authorization URL
+			console.log(`Visit the following URL to authorize: ${authUrl}`);
+
+			// Wait for the user to complete the authorization
+			const response = await arcade.auth.waitForCompletion(id);
+			if (response.status !== "completed") {
+				throw new Error("Authorization failed");
+			}
+		}
+	}
+
+	return { messages: [] };
+}
+```
+
+Explanations for these functions:
+
+- requiresAuth: Checks if a tool requires authorization.
+- callAgent: Invokes the language model using the latest conversation state.
+- shouldContinue: Checks the last AI message for any tool calls. If a tool requires authorization, the flow transitions to authorization. Otherwise, it goes straight to tool execution or ends if no tools are called.
+- authorize: Prompts the user to authorize any required tools, blocking until authorization is completed successfully or fails.
+</Tabs.Tab>
+</Tabs>
+
 
 ### Build and compile your LangGraph workflow
 
 Use StateGraph to assemble the nodes and edges, then compile the graph with a MemorySaver.
 
+<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs.Tab>
 ```python
 if __name__ == "__main__":
     # Build the workflow graph using StateGraph
@@ -135,30 +283,74 @@ if __name__ == "__main__":
     # Compile the graph with the checkpointer
     graph = workflow.compile(checkpointer=memory)
 ```
+</Tabs.Tab>
+<Tabs.Tab>
+```javascript
+// Build the workflow graph
+const workflow = new StateGraph(MessagesAnnotation)
+	.addNode("agent", callAgent)
+	.addNode("tools", toolNode)
+	.addNode("authorization", authorize)
+	.addEdge("__start__", "agent")
+	.addConditionalEdges("agent", shouldContinue, [
+		"authorization",
+		"tools",
+		"__end__",
+	])
+	.addEdge("authorization", "tools")
+	.addEdge("tools", "agent");
+
+// Compile the graph
+const graph = workflow.compile();
+```
+</Tabs.Tab>
+</Tabs>
 
 ### Provide inputs and run the graph
 
 Finally, define user-supplied messages, authorization config, and stream the outputs. The graph will pause for any required tool authorization.
 
+<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs.Tab>
 ```python
-    # Define the input messages from the user
-    inputs = {
-        "messages": [
-            {
-                "role": "user",
-                "content": "Check and see if I have any important emails in my inbox",
-            }
-        ],
-    }
+# Define the input messages from the user
+inputs = {
+    "messages": [
+        {
+            "role": "user",
+            "content": "Check and see if I have any important emails in my inbox",
+        }
+    ],
+}
 
-    # Configuration with thread and user IDs for authorization purposes
-    config = {"configurable": {"thread_id": "4", "user_id": "user@example.com"}}
+# Configuration with thread and user IDs for authorization purposes
+config = {"configurable": {"thread_id": "4", "user_id": "user@example.com"}}
 
-    # Run the graph and stream the outputs
-    for chunk in graph.stream(inputs, config=config, stream_mode="values"):
-        # Pretty-print the last message in the chunk
-        chunk["messages"][-1].pretty_print()
+# Run the graph and stream the outputs
+for chunk in graph.stream(inputs, config=config, stream_mode="values"):
+    # Pretty-print the last message in the chunk
+    chunk["messages"][-1].pretty_print()
 ```
+</Tabs.Tab>
+<Tabs.Tab>
+```javascript
+const inputs = {
+    messages: [
+        {
+            role: "user",
+            content: "Check and see if I have any important emails in my inbox",
+        },
+    ],
+};
+// Run the graph and stream the outputs
+const stream = await graph.stream(inputs, { streamMode: "values" });
+for await (const chunk of stream) {
+    // Print the last message in the chunk
+    console.log(chunk.messages[chunk.messages.length - 1].content);
+}
+```
+</Tabs.Tab>
+</Tabs>
 
 In this example:
 
