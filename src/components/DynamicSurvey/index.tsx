@@ -64,10 +64,13 @@ export default function DynamicSurvey({
     }
   };
 
-  if (!surveyData || !currentQuestion) return null;
+  if (!surveyData || !currentQuestion) return <div>Loading...</div>;
 
   return (
-    <div className="flex h-full w-full flex-col space-y-4 border-t border-border py-4">
+    <div
+      className="flex h-full w-full flex-col space-y-4 border-t border-border py-4"
+      id="dynamic-survey-container"
+    >
       <Progress
         currentIndex={currentQuestionIndex}
         totalQuestions={totalQuestions}
