@@ -95,8 +95,8 @@ export default {
     type: "separator",
     title: "MCP",
   },
-  mcp: {
-    title: "MCP",
+  "mcp-desktop-clients": {
+    title: "IDEs and desktop clients",
   },
   "-- Core Concepts": {
     type: "separator",
