@@ -11,7 +11,9 @@ export const EarlyAccessRegistrySurvey = () => {
   const [completed, setCompleted] = useState(false);
 
   function loadSurvey() {
+    console.log("Loading surveys...");
     posthog.getSurveys((surveys) => {
+      console.log("Surveys loaded:", surveys);
       const survey = surveys.find((s) => s.id === SURVEY_ID);
       if (survey) setSurveyData(survey);
     });
