@@ -38,6 +38,7 @@ These tools are currently available in the Arcade Sheets toolkit.
     ["ReplyAllToEmail", "Reply to all recipients of an existing email in Outlook."],
     ["ListEmails", "List emails in the user's mailbox across all folders."],
     ["ListEmailsInFolder", "List the user's emails in the specified folder."],
+    ["ListEmailsByProperty", "List emails in the user's mailbox across all folders filtering by a property."]
   ]}
 />
 
@@ -252,6 +253,32 @@ Exactly one of `well_known_folder_name` or `folder_id` MUST be provided.
 
 ---
 
+## ListEmailsByProperty
+
+List emails in the user's mailbox across all folders filtering by a property.
+
+**Parameters**
+
+- **`property`** (enum ([EmailFilterProperty](#emailfilterproperty)), required): The property to filter the emails by.
+- **`operator`** (enum ([FilterOperator](#filteroperator)), required): The operator to use for the filter
+- **`value`** (string, required): The value to filter the emails by.
+- **`limit`** (int, optional): The number of messages to return. Max is 100. Defaults to 5.
+- **`pagination_token`** (str, optional): The pagination token to continue a previous request
+
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool with user authorization",
+      content: {
+        Python: ["/examples/integrations/toolkits/microsoft/outlook_mail/list_emails_by_property_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/microsoft/outlook_mail/list_emails_by_property_example_call_tool.js"]
+      }
+    },
+  ]}
+/>
+
+---
+
 ## Auth
 
 The Arcade Outlook Mail toolkit uses the [Microsoft auth provider](/home/auth-providers/microsoft) to connect to users' Microsoft accounts.
@@ -285,3 +312,26 @@ The type of reply to send to an email.
 - **`REPLY_ALL`** _(string: "reply_all")_
 
 <ToolFooter pipPackageName="arcade_microsoft" />
+
+### EmailFilterProperty
+
+The property to filter the emails by.
+
+- **`SUBJECT`** _(string: "subject")_
+- **`CONVERSATION_ID`** _(string: "conversationId")_
+- **`RECEIVED_DATE_TIME`** _(string: "receivedDateTime")_
+- **`SENDER`** _(string: "sender/emailAddress/address")_
+
+### FilterOperator
+
+The operator to use for the filter.
+
+- **`EQUAL`** _(string: "eq")_
+- **`NOT_EQUAL`** _(string: "ne")_
+- **`GREATER_THAN`** _(string: "gt")_
+- **`GREATER_THAN_OR_EQUAL_TO`** _(string: "ge")_
+- **`LESS_THAN`** _(string: "lt")_
+- **`LESS_THAN_OR_EQUAL_TO`** _(string: "le")_
+- **`STARTS_WITH`** _(string: "startsWith")_
+- **`ENDS_WITH`** _(string: "endsWith")_
+- **`CONTAINS`** _(string: "contains")_
