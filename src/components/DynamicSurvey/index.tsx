@@ -63,8 +63,8 @@ export default function DynamicSurvey({
       handleBack();
     }
   };
-
-  if (!surveyData || !currentQuestion) return <div>Loading...</div>;
+  
+  if (!surveyData || !currentQuestion) return <div role="status" aria-live="polite">Loading...</div>;
 
   return (
     <div
