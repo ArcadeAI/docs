@@ -16,7 +16,7 @@ export const EarlyAccessRegistrySurvey = () => {
       console.log("Surveys loaded:", surveys);
       const survey = surveys.find((s) => s.id === SURVEY_ID);
       if (survey) setSurveyData(survey);
-    });
+    }, true);
   }
 
   useEffect(() => {
