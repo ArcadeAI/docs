@@ -14,7 +14,7 @@ export const EarlyAccessRegistrySurvey = () => {
     posthog.getSurveys((surveys) => {
       const survey = surveys.find((s) => s.id === SURVEY_ID);
       if (survey) setSurveyData(survey);
-    });
+    }, true);
   }
 
   useEffect(() => {
