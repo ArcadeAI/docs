@@ -24,5 +24,5 @@ These are the guidelines for writing documentation for Arcade, to help keep the 
 ## Naming and terminology
 
 - **Arcade**: Always refer to the product as "Arcade" in both titles and body text. Do not abbreviate or shorten the product name. Do not append "AI" to the product name.
-- **Engine**: Refer to "the Arcade Engine" when the deployment option is irrelevant. Otherwise, refer to "the Arcade Cloud Engine" or "a self-hosted Arcade Engine."
+- **Gateway**: Refer to "the Arcade Gateway" when the deployment option is irrelevant. Otherwise, refer to "the Arcade Cloud Gateway" or "a self-hosted Arcade Gateway."
 - **Toolkits**: Toolkits are collections of tools, either built by Arcade or a third party developer. For toolkits built by Arcade, refer to "the Arcade [Toolkit name] toolkit." For example, "the Arcade GitHub toolkit."
