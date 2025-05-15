@@ -111,6 +111,9 @@ export default {
   "arcade-cli": {
     title: "Arcade CLI",
   },
+  "arcade-clients": {
+    title: "Arcade Clients",
+  },
   "-- Hosting options": {
     type: "separator",
     title: "Hosting options",
