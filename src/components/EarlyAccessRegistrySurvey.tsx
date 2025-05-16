@@ -10,16 +10,14 @@ export const EarlyAccessRegistrySurvey = () => {
   const [surveyData, setSurveyData] = useState<Survey | null>(null);
   const [completed, setCompleted] = useState(false);
 
-  function loadSurvey() {
-    posthog.getSurveys((surveys) => {
-      const survey = surveys.find((s) => s.id === SURVEY_ID);
-      if (survey) setSurveyData(survey);
-    }, true);
-  }
-
   useEffect(() => {
     if (!posthog) return;
-    posthog.onFeatureFlags(loadSurvey);
+    posthog.onFeatureFlags(() => {
+      posthog.getSurveys((surveys) => {
+        const survey = surveys.find((s) => s.id === SURVEY_ID);
+        if (survey) setSurveyData(survey);
+      }, true);
+    });
   }, [posthog]);
 
   const handleSurveyComplete = () => {
