@@ -1,13 +1,13 @@
 ---
 title: "Configuration"
-description: "Arcade Engine Configuration"
+description: "Arcade Gateway Configuration"
 ---
 
 import TableOfContents from "@/components/TableOfContents";
 
-# Arcade Engine configuration
+# Arcade Gateway configuration
 
-Arcade Engine's configuration is a [YAML file](https://yaml.org/) with the following sections:
+Arcade Gateway's configuration is a [YAML file](https://yaml.org/) with the following sections:
 
 <TableOfContents
   headers={["Section", "Description"]}
@@ -24,7 +24,7 @@ Arcade Engine's configuration is a [YAML file](https://yaml.org/) with the follo
 
 ## Specify a config file
 
-To start the Arcade Engine, pass a config file with `-c` or `--config`:
+To start the Arcade Gateway, pass a config file with `-c` or `--config`:
 
 ```bash
 arcade-engine -c /path/to/config.yaml
@@ -38,7 +38,7 @@ arcade dev -c /path/to/config.yaml
 
 ## Dotenv files
 
-Arcade Engine automatically loads environment variables from `.env` files in the directory where it was called. Use the `-e` or`--env` flag to specify a path:
+Arcade Gateway automatically loads environment variables from `.env` files in the directory where it was called. Use the `-e` or`--env` flag to specify a path:
 
 ```bash
 arcade-engine -e .env.dev -c config.yaml
@@ -46,7 +46,7 @@ arcade-engine -e .env.dev -c config.yaml
 
 ## Secrets
 
-Arcade Engine supports two ways of passing sensitive information like API keys without storing them directly in the config file.
+Arcade Gateway supports two ways of passing sensitive information like API keys without storing them directly in the config file.
 
 Environment variables:
 
@@ -70,10 +70,10 @@ topic:
 
 ## API configuration
 
-HTTP is the supported protocol for Arcade Engine's API. The following configuration options are available:
+HTTP is the supported protocol for Arcade Gateway's API. The following configuration options are available:
 
 - `api.development` _(optional, default: `false`)_ - Enable development mode, with more logging and simple [worker authentication](/home/configure/engine#http-worker-configuration)
-- `api.http.host` _(default: `localhost`)_ - Address to which Arcade Engine binds its server (e.g., `localhost` or `0.0.0.0`)
+- `api.http.host` _(default: `localhost`)_ - Address to which Arcade Gateway binds its server (e.g., `localhost` or `0.0.0.0`)
 - `api.http.read_timeout` _(optional, default: `30s`)_ - Timeout for reading data from clients
 - `api.http.write_timeout` _(optional, default: `1m`)_ - Timeout for writing data to clients
 - `api.http.idle_timeout` _(optional, default: `30s`)_ - Timeout for idle connections
@@ -85,12 +85,12 @@ A typical configuration for production looks like:
 
 ```
 
-For local development, set `api.development = true`. In development mode, Arcade Engine does not require [worker authentication](/home/configure/engine#http-worker-configuration).
+For local development, set `api.development = true`. In development mode, Arcade Gateway does not require [worker authentication](/home/configure/engine#http-worker-configuration).
 
 
 ## Auth configuration
 
-Arcade Engine manages auth for [AI tools](/home/auth/auth-tool-calling) and [direct API calls](/home/auth/call-third-party-apis-directly). It supports many built-in [auth providers](/home/auth-providers), and can also connect to any [OAuth 2.0](/home/auth-providers/oauth2) authorization server.
+Arcade Gateway manages auth for [AI tools](/home/auth/auth-tool-calling) and [direct API calls](/home/auth/call-third-party-apis-directly). It supports many built-in [auth providers](/home/auth-providers), and can also connect to any [OAuth 2.0](/home/auth-providers/oauth2) authorization server.
 
 The `auth.providers` section defines the providers that users can authorize with. Each provider must have a unique `id` in the array. There are two ways to configure a provider:
 
@@ -110,7 +110,7 @@ You can specify a mix of built-in and custom providers.
 The `cache` section configures the short-lived cache.
 
 <Note>
-  Configuring the cache is optional. If not configured, the cache will default to an in-memory cache implementation suitable for a single-node Arcade Engine deployment.
+  Configuring the cache is optional. If not configured, the cache will default to an in-memory cache implementation suitable for a single-node Arcade Gateway deployment.
 </Note>
 
 The `cache` section has the following configuration options:
@@ -118,8 +118,8 @@ The `cache` section has the following configuration options:
 - `api_key_ttl` _(optional, default: `10s`)_ - The time-to-live for API keys in the cache
 
 Two cache implementations are available:
-- `in_memory` - _(default)_ An in-memory cache implementation suitable for a single-node Arcade Engine deployment.
-- `redis` - A Redis cache implementation suitable for a multi-node Arcade Engine deployment:
+- `in_memory` - _(default)_ An in-memory cache implementation suitable for a single-node Arcade Gateway deployment.
+- `redis` - A Redis cache implementation suitable for a multi-node Arcade Gateway deployment:
 
 ```yaml file=<rootDir>/examples/code/home/configuration/engine/full_config.1.0.yaml#L74-L79 {3-6}
 
@@ -127,7 +127,7 @@ Two cache implementations are available:
 
 ## Security configuration
 
-The `security` section configures the root encryption keys that the Arcade Engine uses to encrypt and decrypt data at rest. See the [storage configuration](#storage-configuration) section below to configure where data is stored.
+The `security` section configures the root encryption keys that the Arcade Gateway uses to encrypt and decrypt data at rest. See the [storage configuration](#storage-configuration) section below to configure where data is stored.
 
 A typical configuration looks like this:
 
@@ -143,7 +143,7 @@ openssl rand -base64 32
 
 ### Default root key
 
-When you [install Arcade Engine locally](/home/install/local), an `engine.env` file is created with a default root key:
+When you [install Arcade Gateway locally](/home/install/local), an `engine.env` file is created with a default root key:
 
 ```bash file=<rootDir>/examples/code/home/configuration/engine/engine.env#L7-L8 {2}
 
@@ -157,7 +157,7 @@ This default value can only be used in development mode (see [API configuration]
 
 ## Storage configuration
 
-The `storage` section configures the storage backend that the Arcade Engine uses to store persistent data.
+The `storage` section configures the storage backend that the Arcade Gateway uses to store persistent data.
 
 There are three storage implementations available:
 
@@ -181,7 +181,7 @@ storage:
 
 Arcade supports logs, metrics, and traces with [OpenTelemetry](https://opentelemetry.io/).
 
-If you are using the Arcade Engine locally, you can set the `environment` field to `local`. This will only output logs to the console:
+If you are using the Arcade Gateway locally, you can set the `environment` field to `local`. This will only output logs to the console:
 
 ```yaml
 telemetry:
@@ -208,7 +208,7 @@ To connect to OpenTelemetry compatible collectors, set the necessary [OpenTeleme
 
 ## Tools configuration
 
-Arcade Engine orchestrates [tools](/home/use-tools/tools-overview) that AI models can use. Tools are executed by distributed workers called **workers**, which are grouped into **directors**.
+Arcade Gateway orchestrates [tools](/home/use-tools/tools-overview) that AI models can use. Tools are executed by distributed workers called **workers**, which are grouped into **directors**.
 
 The `tools.directors` section configures the workers that are available to service tool calls:
 
