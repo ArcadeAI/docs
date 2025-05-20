@@ -66,7 +66,7 @@ export function LandingPage() {
               Gmail, Slack, GitHub, and more. You can also build your own
               agentic tools and MCP servers with our authoring and testing
               suite. Arcade is your tool{" "}
-              <span className="font-bold text-primary">gateway</span>,{" "}
+              <span className="font-bold text-primary">engine</span>,{" "}
               <span className="font-bold text-primary">registry</span>, and{" "}
               <span className="font-bold text-primary">runtime</span>.
             </p>
@@ -287,8 +287,8 @@ export function LandingPage() {
           <div className="mt-16 grid gap-8 md:grid-cols-2">
             <QuickStartCard
               icon={Rocket}
-              title="Arcade Gateway"
-              description="The Arcade gateway is your MCP Server and Agentic tool provider.  It allows you to write your tools once and serve them across any LLM or orchestration framework, no matter the protocol.  The gateway manages agent authentication, tool registration, and tool execution."
+              title="Arcade Engine"
+              description="The Arcade engine is your MCP Server and Agentic tool provider.  It allows you to write your tools once and serve them across any LLM or orchestration framework, no matter the protocol.  The engine manages agent authentication, tool registration, and tool execution."
               href="#"
             />
             <QuickStartCard
@@ -306,7 +306,7 @@ export function LandingPage() {
             <QuickStartCard
               icon={Wrench}
               title="Tools and MCP Servers Together"
-              description="The Arcade Gateway is the only way to combine MCP servers with your Agentic tools. Regardless of where your tool is hosted, you can serve and manage access to it via the Gateway.  You easily can mix our public tools with your own private tools in your agents."
+              description="The Arcade Engine is the only way to combine MCP servers with your Agentic tools. Regardless of where your tool is hosted, you can serve and manage access to it via the Engine.  You easily can mix our public tools with your own private tools in your agents."
               href="#"
             />
           </div>
