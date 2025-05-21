@@ -21,6 +21,12 @@ This auth provider is used by:
 
 ## Configuring Atlassian auth
 
+In a production environment, you will most likely want to use your own Atlassian app credentials. This way, your users will see your application's name requesting permission.
+
+You can use your own Atlassian credentials in both the Arcade Cloud and in a [self-hosted Arcade Engine](/home/install/local) instance.
+
+Before showing how to configure your Atlassian app credentials, let's go through the steps to create an Atlassian app.
+
 ### Create an Atlassian app
 
 - Create a Atlassian app in the [Atlassian developer console](https://developer.atlassian.com/console/myapps/)
@@ -28,18 +34,53 @@ This auth provider is used by:
 - In the Permissions tab, enable any permissions you need for your app
 - In the Settings tab, copy the Client ID and Secret to use below
 
-Next, add the Atlassian app to your Arcade Engine configuration. You can do this in the Arcade Dashboard, or by editing the `engine.yaml` file directly (for a self-hosted instance).
+## Configuring your own Atlassian Auth Provider in Arcade
 
-### Configuring Atlassian auth with the Arcade Dashboard
+There are two ways to configure your Atlassian app credentials in Arcade:
 
-1. Navigate to the OAuth section of the Arcade Dashboard and click **Add OAuth Provider**.
-2. Select **Atlassian** as the provider.
-3. Choose a unique **ID** for your provider (e.g. "my-atlassian-provider") with an optional **Description**.
-4. Enter your **Client ID** and **Client Secret** from your Atlassian app.
-5. Click **Save**.
+1. From the Arcade Dashboard GUI
+2. By editing the `engine.yaml` file directly (for a self-hosted Arcade Engine)
+
+We show both options step-by-step below.
+
+
+<Tabs items={["Dashboard GUI", "Engine Configuration YAML"]}>
+<Tabs.Tab>
+
+### Configure Atlassian Auth Using the Arcade Dashboard GUI
+
+<Note>
+  If you're adding more than one Atlassian provider and your app relies on the built-in toolkit, please ensure to set the **ID** of one of your Atlassian providers to `atlassian`. This ensures the Arcade Engine will connect the built-in tools to that provider. [Read more](/home/faq#can-i-add-multiple-providers-of-the-same-type).
+</Note>
+
+<Steps>
+
+#### Access the Arcade Dashboard
+
+To access the Arcade Cloud dashboard, go to [api.arcade.dev/dashboard](https://api.arcade.dev/dashboard). If you are self-hosting, by default the dashboard will be available at `http://localhost:9099/dashboard`. Adjust the host and port number to match your environment.
+
+#### Navigate to the OAuth Providers page
+
+- Under the **OAuth** section of the Arcade Dashboard left-side menu, click **Providers**.
+- Click **Add OAuth Provider** in the top right corner.
+- Select the **Included Providers** tab at the top.
+- In the **Provider** dropdown, select **Atlassian**.
+
+#### Enter the provider details
+
+- Choose a unique **ID** for your provider (e.g. "my-atlassian-provider").
+- Optionally enter a **Description**.
+- Enter the **Client ID** and **Client Secret** from your Atlassian app.
+
+#### Create the provider
+
+Hit the **Create** button and the provider will be ready to be used in the Arcade Engine.
+</Steps>
 
 When you use tools that require Atlassian auth using your Arcade account credentials, the Arcade Engine will automatically use this Atlassian OAuth provider.
 
+</Tabs.Tab>
+<Tabs.Tab>
 ### Configuring Atlassian auth in self-hosted Arcade Engine configuration
 
 <Steps>
@@ -75,6 +116,8 @@ Edit the `engine.yaml` file and add a `atlassian` item to the `auth.providers` s
 
 </Steps>
 
+</Tabs.Tab>
+</Tabs>
 ## Using Atlassian auth in app code
 
 Use the Atlassian auth provider in your own agents and AI apps to get a user token for the Atlassian API. See [authorizing agents with Arcade](/home/auth/how-arcade-helps) to understand how this works.

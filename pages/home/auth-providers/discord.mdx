@@ -21,6 +21,12 @@ This auth provider is used by:
 
 ## Configuring Discord auth
 
+In a production environment, you will most likely want to use your own Discord app credentials. This way, your users will see your application's name requesting permission.
+
+You can use your own Discord credentials in both the Arcade Cloud and in a [self-hosted Arcade Engine](/home/install/local) instance.
+
+Before showing how to configure your Discord app credentials, let's go through the steps to create a Discord app.
+
 ### Create a Discord app
 
 - Create a Discord Application in the [Discord developer portal](https://discord.com/developers/applications)
@@ -29,15 +35,52 @@ This auth provider is used by:
 
 Next, add the Discord app to your Arcade Engine configuration. You can do this in the Arcade Dashboard, or by editing the `engine.yaml` file directly (for a self-hosted instance).
 
-### Configuring Discord auth with the Arcade Dashboard
+## Configuring your own Discord Auth Provider in Arcade
 
-1. Navigate to the OAuth section of the Arcade Dashboard and click **Add OAuth Provider**.
-2. Select **Discord** as the provider.
-3. Choose a unique **ID** for your provider (e.g. "my-discord-provider") with an optional **Description**.
-4. Enter your **Client ID** and **Client Secret** from your Discord app.
-5. Click **Save**.
+There are two ways to configure your Atlassian app credentials in Arcade:
+
+1. From the Arcade Dashboard GUI
+2. By editing the `engine.yaml` file directly (for a self-hosted Arcade Engine)
+
+We show both options step-by-step below.
+
+<Tabs items={["Dashboard GUI", "Engine Configuration YAML"]}>
+<Tabs.Tab>
+
+### Configure Discord Auth Using the Arcade Dashboard GUI
+
+<Note>
+  If you're adding more than one Discord provider and your app relies on the built-in toolkit, please ensure to set the **ID** of one of your Discord providers to `discord`. This ensures the Arcade Engine will connect the built-in tools to that provider. [Read more](/home/faq#can-i-add-multiple-providers-of-the-same-type).
+</Note>
+
+<Steps>
+
+#### Access the Arcade Dashboard
+
+To access the Arcade Cloud dashboard, go to [api.arcade.dev/dashboard](https://api.arcade.dev/dashboard). If you are self-hosting, by default the dashboard will be available at `http://localhost:9099/dashboard`. Adjust the host and port number to match your environment.
+
+#### Navigate to the OAuth Providers page
+
+- Under the **OAuth** section of the Arcade Dashboard left-side menu, click **Providers**.
+- Click **Add OAuth Provider** in the top right corner.
+- Select the **Included Providers** tab at the top.
+- In the **Provider** dropdown, select **Discord**.
+
+#### Enter the provider details
+
+- Choose a unique **ID** for your provider (e.g. "my-discord-provider").
+- Optionally enter a **Description**.
+- Enter the **Client ID** and **Client Secret** from your Discord app.
+
+#### Create the provider
+
+Hit the **Create** button and the provider will be ready to be used in the Arcade Engine.
+</Steps>
 
 When you use tools that require Discord auth using your Arcade account credentials, the Arcade Engine will automatically use this Discord OAuth provider.
+
+</Tabs.Tab>
+<Tabs.Tab>
 
 ### Configuring Discord auth in self-hosted Arcade Engine configuration
 
@@ -73,6 +116,9 @@ Edit the `engine.yaml` file and add a `discord` item to the `auth.providers` sec
 ```
 
 </Steps>
+
+</Tabs.Tab>
+</Tabs>
 
 ## Using Discord auth in app code
 

@@ -21,9 +21,11 @@ This auth provider is used by:
 
 ## Configuring Zoom auth
 
-How you configure the Zoom auth provider depends on whether you use the Arcade Cloud Engine or a [self-hosted Engine](/home/install/overview).
+In a production environment, you will most likely want to use your own Zoom app credentials. This way, your users will see your application's name requesting permission.
 
-When you are ready to go to production, you'll want to configure the Zoom auth provider with your own Zoom app credentials, so users see your app name when they authorize access.
+You can use your own Zoom credentials in both the Arcade Cloud and in a [self-hosted Arcade Engine](/home/install/local) instance.
+
+Before showing how to configure your Zoom app credentials, let's go through the steps to create a Zoom app.
 
 ### Create a Zoom app
 
@@ -34,15 +36,52 @@ When you are ready to go to production, you'll want to configure the Zoom auth p
 
 Next, add the Zoom app to your Arcade Engine configuration. You can do this in the Arcade Dashboard, or by editing the `engine.yaml` file directly (for a self-hosted instance).
 
-### Configuring Zoom auth with the Arcade Dashboard
+## Configuring your own Zoom Auth Provider in Arcade
 
-1. Navigate to the OAuth section of the Arcade Dashboard and click **Add OAuth Provider**.
-2. Select **Zoom** as the provider.
-3. Choose a unique **ID** for your provider (e.g. "my-zoom-provider") with an optional **Description**.
-4. Enter your **Client ID** and **Client Secret** from your Zoom app.
-5. Click **Save**.
+There are two ways to configure your Zoom app credentials in Arcade:
+
+1. From the Arcade Dashboard GUI
+2. By editing the `engine.yaml` file directly (for a self-hosted Arcade Engine)
+
+We show both options step-by-step below.
+
+<Tabs items={["Dashboard GUI", "Engine Configuration YAML"]}>
+<Tabs.Tab>
+
+### Configure Zoom Auth Using the Arcade Dashboard GUI
+
+<Note>
+  If you're adding more than one Zoom provider and your app relies on the built-in toolkit, please ensure to set the **ID** of one of your Zoom providers to `zoom`. This ensures the Arcade Engine will connect the built-in tools to that provider. [Read more](/home/faq#can-i-add-multiple-providers-of-the-same-type).
+</Note>
+
+<Steps>
+
+#### Access the Arcade Dashboard
+
+To access the Arcade Cloud dashboard, go to [api.arcade.dev/dashboard](https://api.arcade.dev/dashboard). If you are self-hosting, by default the dashboard will be available at `http://localhost:9099/dashboard`. Adjust the host and port number to match your environment.
+
+#### Navigate to the OAuth Providers page
+
+- Under the **OAuth** section of the Arcade Dashboard left-side menu, click **Providers**.
+- Click **Add OAuth Provider** in the top right corner.
+- Select the **Included Providers** tab at the top.
+- In the **Provider** dropdown, select **Zoom**.
+
+#### Enter the provider details
+
+- Choose a unique **ID** for your provider (e.g. "my-zoom-provider").
+- Optionally enter a **Description**.
+- Enter the **Client ID** and **Client Secret** from your Zoom app.
+
+#### Create the provider
+
+Hit the **Create** button and the provider will be ready to be used in the Arcade Engine.
+</Steps>
 
 When you use tools that require Zoom auth using your Arcade account credentials, the Arcade Engine will automatically use this Zoom OAuth provider.
+
+</Tabs.Tab>
+<Tabs.Tab>
 
 ### Configuring Zoom auth in self-hosted Arcade Engine configuration
 
@@ -78,6 +117,9 @@ Edit the `engine.yaml` file and add a `zoom` item to the `auth.providers` sectio
 ```
 
 </Steps>
+
+</Tabs.Tab>
+</Tabs>
 
 ## Using Zoom auth in app code
 
