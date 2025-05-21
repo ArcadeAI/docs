@@ -48,10 +48,13 @@ from agents_arcade import get_arcade_tools
 client = AsyncArcade()
 
 # Get all tools from the "Google" toolkit
-tools = await get_arcade_tools(client, ["google"])
+tools = await get_arcade_tools(client, toolkits=["google"])
 
 # You can request multiple toolkits at once
-tools = await get_arcade_tools(client, ["google", "github", "linkedin"])
+tools = await get_arcade_tools(client, toolkits=["google", "github", "linkedin"])
+
+# You can request specific tools
+tools = await get_arcade_tools(client, tools=["Google_ListEmails", "Slack_ListUsers", "Slack_SendDmToUser"])
 ```
 
 ### Set up the agent with Arcade tools
@@ -115,7 +118,7 @@ from agents_arcade.errors import AuthorizationError
 
 async def main():
     client = AsyncArcade()
-    tools = await get_arcade_tools(client, ["google"])
+    tools = await get_arcade_tools(client, toolkits=["google"])
 
     google_agent = Agent(
         name="Google agent",
