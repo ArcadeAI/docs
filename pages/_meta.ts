@@ -16,6 +16,12 @@ export default {
     href: "https://reference.arcade.dev/",
     target: "_blank",
   },
+  status: {
+    type: "page",
+    title: "Status",
+    href: "https://status.arcade.dev/",
+    target: "_blank",
+  },
   index: {
     type: "page",
     title: "Index",
