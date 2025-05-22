@@ -272,7 +272,7 @@ const availableTools: Tool[] = [
     summary: "Manage Confluence pages and spaces with your agents",
     link: "/toolkits/productivity/confluence",
     category: "productivity",
-    type: "auth",
+    type: "arcade",
   },
   {
     name: "Outlook Calendar",
