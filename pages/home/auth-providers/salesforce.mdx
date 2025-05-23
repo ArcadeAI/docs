@@ -142,13 +142,19 @@ By default, the Arcade Dashboard will be available at `http://localhost:9099/das
 - Under **Token Introspection Settings**:
   - Check the **Enable Token Introspection** option.
   - Enter the **Token Introspection Endpoint**: `https://salesforce-org-subdomain.my.salesforce.com/services/oauth2/introspect`
+  - In **HTTP Method**, select `POST`
+  - In **Authentication Method**, select `Client Secret Basic`
   - In **Request Content Type**, select `application/x-www-form-urlencoded`.
+  - Under **Request Parameters** section, add the following key-value pair:
+    - **Key**: `token`
+    - **Value**: `{{access_token}}`
   - In **Response Content Type**, select `application/json`.
-  - In **Response Map**, enter:
-    - **Expires In**: `$.exp`
-    - **Scope**: `$.scope`
-  - In **Expiration Format**, select `absolute_unix_timestamp`.
-  - In **Triggers**, check the **On Token Grant** and **On Token Refresh** options.
+  - In **Expiration Format**, select `Absolute Unix Timestamp`.
+  - Under the **Response Map** section:
+    - Set the **expires_in** field to `$.exp`
+    - Set the **scope** field to `$.scope`
+    - Leave the other fields as default
+  - Under **Triggers** section, enable the **On Token Grant** and **On Token Refresh** options.
 
 #### Optional Auth Settings
 
@@ -157,7 +163,7 @@ By default, the Arcade Dashboard will be available at `http://localhost:9099/das
 
 #### Create the provider
 
-Hit the **Create** button and the provider will be ready to be used in the Arcade Engine.
+Click the **Create** button and the provider will be ready to be used in the Arcade Engine.
 
 </Steps>
 </Tabs.Tab>
@@ -204,7 +210,11 @@ Edit the `engine.yaml` file and add a Salesforce item to the `auth.providers` se
   The `id` must be set to `salesforce` in order to use the [Arcade Salesforce toolkit](/toolkits/sales/salesforce).
 </Note>
 
-```yaml file=<rootDir>/examples/code/integrations/salesforce/config_provider.engine.yaml {3-31}
+<Note>
+  Replace `salesforce-org-subdomain` with your [Salesforce Org Subdomain](#get-your-salesforce-org-subdomain).
+</Note>
+
+```yaml file=<rootDir>/examples/code/integrations/salesforce/config_provider.engine.yaml {3-3,11-11,18-18,25-25,33-33}
 
 ```
 
