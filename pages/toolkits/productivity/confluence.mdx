@@ -1,105 +1,440 @@
-import {Tabs} from 'nextra/components'
-
 # Confluence
 
-The Atlassian auth provider enables tools and agents to call the Atlassian API on behalf of a user. Behind the scenes, the Arcade Engine and the Atlassian auth provider seamlessly manage Atlassian OAuth 2.0 authorization for your users.
+import ToolInfo from "@/components/ToolInfo";
+import Badges from "@/components/Badges";
+import TabbedCodeBlock from "@/components/TabbedCodeBlock";
+import TableOfContents from "@/components/TableOfContents";
+import ToolFooter from "@/components/ToolFooter";
 
-### What's documented here
+<ToolInfo
+  description="Enable agents to interact with Confluence."
+  author="Arcade"
+  codeLink="https://github.com/ArcadeAI/arcade-ai/tree/main/toolkits/confluence"
+  authType="oauth2"
+  authProviderName="Confluence"
+  versions={["0.1.0"]}
+/>
 
-This page describes how to use and configure Atlassian auth with Arcade.
+<Badges repo="arcadeai/arcade-confluence" />
 
-This auth provider is used by:
+The Arcade Confluence toolkit provides a pre-built set of tools for interacting with Confluence. These tools make it easy to build agents and AI apps that can:
 
-- Your [app code](#using-atlassian-auth-in-app-code) that needs to call Atlassian APIs
-- Or, your [custom tools](#using-atlassian-auth-in-custom-tools) that need to call Atlassian APIs
+- Work with pages, spaces, and attachments
+- Search for content
 
-## Configuring Atlassian auth
+## Available tools
 
-### Create an Atlassian app
+These tools are currently available in the Arcade Confluence toolkit.
 
-- Create a Atlassian app in the [Atlassian developer console](https://developer.atlassian.com/console/myapps/)
-- In the Authorization tab, click the "Add" action button and set the Callback URL to: `https://cloud.arcade.dev/api/v1/oauth/callback`
-- In the Permissions tab, enable any permissions you need for your app
-- In the Settings tab, copy the Client ID and Secret to use below
-
-Next, add the Atlassian app to your Arcade Engine configuration. You can do this in the Arcade Dashboard, or by editing the `engine.yaml` file directly (for a self-hosted instance).
-
-### Configuring Atlassian auth with the Arcade Dashboard
-
-1. Navigate to the OAuth section of the Arcade Dashboard and click **Add OAuth Provider**.
-2. Select **Atlassian** as the provider.
-3. Choose a unique **ID** for your provider (e.g. "my-atlassian-provider") with an optional **Description**.
-4. Enter your **Client ID** and **Client Secret** from your Atlassian app.
-5. Click **Save**.
-
-When you use tools that require Atlassian auth using your Arcade account credentials, the Arcade Engine will automatically use this Atlassian OAuth provider.
-
-### Configuring Atlassian auth in self-hosted Arcade Engine configuration
-
-<Steps>
-
-### Set environment variables
-
-Set the following environment variables:
-
-```bash
-export ATLASSIAN_CLIENT_ID="<your client ID>"
-export ATLASSIAN_CLIENT_SECRET="<your client secret>"
-```
-
-Or, you can set these values in a `.env` file:
-
-```bash
-ATLASSIAN_CLIENT_SECRET="<your client secret>"
-ATLASSIAN_CLIENT_ID="<your client ID>"
-```
+<TableOfContents
+  headers={["Tool Name", "Description"]}
+  data={[
+    ["CreatePage", "Create a new page at the root of the given space."],
+    ["UpdatePageContent", "Update a page's content."],
+    ["RenamePage", "Rename a page by changing its title."],
+    ["GetPage", "Retrieve a SINGLE page's content by its ID or title."],
+    ["GetPagesById", "Get the content of MULTIPLE pages by their ID in a single efficient request."],
+    ["ListPages", "Get the content of multiple pages by their ID."],
+    ["ListAttachments", "List attachments in a workspace."],
+    ["GetAttachmentsForPage", "Get attachments for a page by its ID or title."],
+    ["SearchContent", "Search for content in Confluence."],
+    ["GetSpace", "Get the details of a space by its ID or key."],
+    ["ListSpaces", "List all spaces sorted by name in ascending order."],
+    ["GetSpaceHierarchy", "Retrieve the full hierarchical structure of a Confluence space as a tree structure."],
+  ]}
+/>
 
 <Tip>
-  See [Engine configuration](/home/configure/engine) for more information on how
-  to set environment variables and configure the Arcade Engine.
+  If you need to perform an action that's not listed here, you can [get in touch with us](mailto:contact@arcade.dev) to request a new tool, or [create your own tools](/home/build-tools/create-a-toolkit) with the [Confluence auth provider](/home/auth-providers/confluence).
 </Tip>
 
-### Edit the Engine configuration
+## CreatePage
 
-Edit the `engine.yaml` file and add a `atlassian` item to the `auth.providers` section:
+Create a new page at the root of the given space.
 
-```yaml file=<rootDir>/examples/code/integrations/atlassian/config_provider.engine.yaml {3-9}
+**Parameters**
 
-```
+- **`space_identifier`** _(string, required)_: The ID or title of the space to create the page in
+- **`title`** _(string, required)_: The title of the page
+- **`content`** _(string, required)_: The content of the page. Only plain text is supported
+- **`parent_id`** _(string, optional)_: The ID of the parent. If not provided, the page will be created at the root of the space
+- **`is_private`** _(bool, optional)_: If true, then only the user who creates this page will be able to see it. Defaults to False
+- **`is_draft`** _(bool, optional)_: If true, then the page will be created as a draft. Defaults to False
 
-</Steps>
 
-## Using Atlassian auth in app code
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool with user authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/confluence/create_page_example_call_tool.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/confluence/create_page_example_call_tool.js"],
+      },
+    }
+  ]}
+/>
 
-Use the Atlassian auth provider in your own agents and AI apps to get a user token for the Atlassian API. See [authorizing agents with Arcade](/home/auth/how-arcade-helps) to understand how this works.
+---
 
-Use `client.auth.start()` to get a user token for the Atlassian API:
+## UpdatePageContent
 
-<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
-<Tabs.Tab>
+Update a page's content.
 
-```python file=<rootDir>/examples/code/integrations/atlassian/custom_auth.py {8-12}
+**Parameters**
 
-```
+- **`page_identifier`** _(string, required)_: The ID or title of the page to update. Numerical titles are NOT supported
+- **`content`** _(string, required)_: The content of the page. Only plain text is supported
+- **`update_mode`** _(enum ([PageUpdateMode](#pageupdatemode)), optional)_: The mode of update. Defaults to 'append'
 
-</Tabs.Tab>
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool with user authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/confluence/update_page_content_example_call_tool.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/confluence/update_page_content_example_call_tool.js"],
+      },
+    }
+  ]}
+/>
 
-<Tabs.Tab>
+## RenamePage
 
-```javascript file=<rootDir>/examples/code/integrations/atlassian/custom_auth.js {8-10}
+Rename a page by changing its title.
 
-```
+**Parameters**
 
-</Tabs.Tab>
+- **`page_identifier`** _(string, required)_: The ID or title of the page to rename. Numerical titles are NOT supported
+- **`title`** _(string, required)_: The title of the page
 
-</Tabs>
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool with user authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/confluence/rename_page_example_call_tool.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/confluence/rename_page_example_call_tool.js"],
+      },
+    }
+  ]}
+/>
 
-## Using Atlassian auth in custom tools
+---
 
-You can author your own [custom tools](/home/build-tools/create-a-toolkit) that interact with the Atlassian API.
+## GetPage
 
-Use the `Atlassian()` auth class to specify that a tool requires authorization with Atlassian. The `context.authorization.token` field will be automatically populated with the user's Atlassian token:
+Retrieve a SINGLE page's content by its ID or title.
 
-```python file=<rootDir>/examples/code/integrations/atlassian/custom_tool.py {5-6,9-13,23}
+If a title is provided, then the first page with an exact matching title will be returned.
 
-```
+IMPORTANT: For retrieving MULTIPLE pages, use `get_pages_by_id` instead for a massive performance and efficiency boost. If you call this function multiple times instead of using `get_pages_by_id`, then the universe will explode.
+
+**Parameters**
+
+- **`page_identifier`** _(string, required)_: Can be a page's ID or title. Numerical titles are NOT supported
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool with user authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/confluence/get_page_example_call_tool.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/confluence/get_page_example_call_tool.js"],
+      },
+    }
+  ]}
+/>
+
+---
+
+## GetPagesById
+
+Get the content of MULTIPLE pages by their ID in a single efficient request.
+
+IMPORTANT: Always use this function when you need to retrieve content from more than one page, rather than making multiple separate calls to get_page, because this function is significantly more efficient than calling get_page multiple times.
+
+**Parameters**
+
+- **`page_ids`** _(list of strings, required)_: The IDs of the pages to get. IDs are numeric. Titles of pages are NOT supported. Maximum of 250 page ids supported
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool with user authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/confluence/get_pages_by_id_example_call_tool.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/confluence/get_pages_by_id_example_call_tool.js"],
+      },
+    }
+  ]}
+/>
+
+---
+
+## ListPages
+
+Get the content of multiple pages by their ID.
+
+**Parameters**
+
+- **`space_ids`** _(list of strings, optional)_: Restrict the response to only include pages in these spaces. Only space IDs are supported. Titles of spaces are NOT supported. If not provided, then no restriction is applied. Maximum of 100 space ids supported
+- **`sort_by`** _(enum ([PageSortOrder](#pagesortorder)), optional)_: The order of the pages to sort by. Defaults to created-date-newest-to-oldest
+- **`limit`** _(int, optional)_: The maximum number of pages to return. Defaults to 25. Max is 250
+- **`pagination_token`** _(string, optional)_: The pagination token to use for the next page of results
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool with user authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/confluence/list_pages_example_call_tool.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/confluence/list_pages_example_call_tool.js"],
+      },
+    }
+  ]}
+/>
+
+---
+
+## ListAttachments
+
+List attachments in a workspace.
+
+**Parameters**
+
+- **`sort_order`** _(enum ([AttachmentSortOrder](#attachmentsortorder)), optional)_: The order of the attachments to sort by. Defaults to created-date-newest-to-oldest
+- **`limit`** _(int, optional)_: The maximum number of attachments to return. Defaults to 25. Max is 250
+- **`pagination_token`** _(string, optional)_: The pagination token to use for the next page of results
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool with user authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/confluence/list_attachments_example_call_tool.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/confluence/list_attachments_example_call_tool.js"],
+      },
+    }
+  ]}
+/>
+
+---
+
+## GetAttachmentsForPage
+
+Get attachments for a page by its ID or title.
+
+If a page title is provided, then the first page with an exact matching title will be returned.
+
+**Parameters**
+
+- **`page_identifier`** _(string, required)_: The ID or title of the page to get attachments for
+- **`limit`** _(int, optional)_: The maximum number of attachments to return. Defaults to 25. Max is 250
+- **`pagination_token`** _(string, optional)_: The pagination token to use for the next page of results
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool with user authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/confluence/get_attachments_for_page_example_call_tool.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/confluence/get_attachments_for_page_example_call_tool.js"],
+      },
+    }
+  ]}
+/>
+
+---
+
+## SearchContent
+
+Search for content in Confluence.
+
+The search is performed across all content in the authenticated user's Confluence workspace.
+All search terms in Confluence are case insensitive.
+
+You can use the parameters in different ways:
+- must_contain_all: For AND logic - content must contain ALL of these
+- can_contain_any: For OR logic - content can contain ANY of these
+- Combine them: must_contain_all=['banana'] AND can_contain_any=['database', 'guide']
+
+**Parameters**
+
+- **`must_contain_all`** _(list of strings, optional)_: Words/phrases that content MUST contain (AND logic). Each item can be:
+  - Single word: 'banana' - content must contain this word
+  - Multi-word phrase: 'How to' - content must contain all these words (in any order)
+  - All items in this list must be present for content to match
+  - Example: ['banana', 'apple'] finds content containing BOTH 'banana' AND 'apple'
+- **`can_contain_any`** _(list of strings, optional)_: Words/phrases where content can contain ANY of these (OR logic). Each item can be:
+  - Single word: 'project' - content containing this word will match
+  - Multi-word phrase: 'pen & paper' - content containing all these words will match
+  - Content matching ANY item in this list will be included
+  - Example: ['project', 'documentation'] finds content with 'project' OR 'documentation'
+- **`enable_fuzzy`** _(bool, optional)_: Enable fuzzy matching to find similar terms (e.g. 'roam' will find 'foam'). Defaults to True
+- **`limit`** _(int, optional)_: Maximum number of results to return (1-100). Defaults to 25
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool with user authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/confluence/search_content_example_call_tool.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/confluence/search_content_example_call_tool.js"],
+      },
+    }
+  ]}
+/>
+
+---
+
+## GetSpace
+
+Get the details of a space by its ID or key.
+
+**Parameters**
+
+- **`space_identifier`** _(string, required)_: Can be a space's ID or key. Numerical keys are NOT supported
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool with user authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/confluence/get_space_example_call_tool.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/confluence/get_space_example_call_tool.js"],
+      },
+    }
+  ]}
+/>
+
+---
+
+## ListSpaces
+
+List all spaces sorted by name in ascending order.
+
+**Parameters**
+
+- **`limit`** _(int, optional)_: The maximum number of spaces to return. Defaults to 25. Max is 250
+- **`pagination_token`** _(string, optional)_: The pagination token to use for the next page of results
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool with user authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/confluence/list_spaces_example_call_tool.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/confluence/list_spaces_example_call_tool.js"],
+      },
+    }
+  ]}
+/>
+
+---
+
+## GetSpaceHierarchy
+
+Retrieve the full hierarchical structure of a Confluence space as a tree structure.
+
+Only structural metadata is returned (not content).
+The response is akin to the sidebar in the Confluence UI.
+
+Includes all pages, folders, whiteboards, databases,
+smart links, etc. organized by parent-child relationships.
+
+**Parameters**
+
+- **`space_identifier`** _(string, required)_: Can be a space's ID or key. Numerical keys are NOT supported
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool with user authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/confluence/get_space_hierarchy_example_call_tool.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/confluence/get_space_hierarchy_example_call_tool.js"],
+      },
+    }
+  ]}
+/>
+
+## Auth
+
+The Arcade Notion toolkit uses the [Notion auth provider](/home/auth-providers/notion) to connect to users' Notion accounts.
+
+With the hosted Arcade Engine, there's nothing to configure. Your users will see `Arcade` as the name of the application that's requesting permission.
+
+With a self-hosted installation of Arcade, you need to [configure the Notion auth provider](/home/auth-providers/notion#configuring-notion-auth) with your own Notion app credentials.
+
+---
+
+## Reference
+
+### PageUpdateMode
+
+The mode of update.
+
+- **`prepend`** _(string: "prepend")_
+- **`append`** _(string: "append")_
+- **`replace`** _(string: "replace")_
+
+
+### PageSortOrder
+
+The order of the pages to sort by.
+
+- **`id-ascending`**: Sort by ID in ascending order.
+- **`id-descending`**: Sort by ID in descending order.
+- **`title-ascending`**: Sort by title in ascending order.
+- **`title-descending`**: Sort by title in descending order.
+- **`created-date-oldest-to-newest`**: Sort by created date from oldest to newest.
+- **`created-date-newest-to-oldest`**: Sort by created date from newest to oldest.
+- **`modified-date-oldest-to-newest`**: Sort by modified date from oldest to newest.
+- **`modified-date-newest-to-oldest`**: Sort by modified date from newest to oldest.
+
+### AttachmentSortOrder
+
+The order of the attachments to sort by.
+- **`created-date-oldest-to-newest`**: Sort by created date from oldest to newest.
+- **`created-date-newest-to-oldest`**: Sort by created date from newest to oldest.
+- **`modified-date-oldest-to-newest`**: Sort by modified date from oldest to newest.
+- **`modified-date-newest-to-oldest`**: Sort by modified date from newest to oldest.
+
+
+<ToolFooter pipPackageName="arcade_confluence" />
