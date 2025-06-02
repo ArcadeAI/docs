@@ -16,7 +16,7 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "issue": "JIRA-123",
+  "issue": "ISSUE-123",
   "labels": [
     "bug",
     "urgent"

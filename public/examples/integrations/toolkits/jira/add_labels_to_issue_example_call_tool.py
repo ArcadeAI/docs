@@ -15,7 +15,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    "issue": "JIRA-123",
+    "issue": "ISSUE-123",
     "labels": [
         "bug",
         "urgent"

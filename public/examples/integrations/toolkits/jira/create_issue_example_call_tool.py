@@ -18,15 +18,7 @@ tool_input = {
     "title": "Sample Issue",
     "issue_type": "Bug",
     "project": "PROJ-123",
-    "due_date": "2025-01-01",
-    "description": "This is a sample issue description.",
-    "environment": "Production",
-    "labels": [
-        "bug",
-        "urgent"
-    ],
-    "assignee": "user@example.com",
-    "reporter": "reporter@example.com"
+    "description": "This is a sample issue description."
 }
 
 response = client.tools.execute(

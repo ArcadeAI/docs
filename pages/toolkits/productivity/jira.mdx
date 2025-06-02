@@ -16,15 +16,15 @@ import ToolFooter from "@/components/ToolFooter";
 
 <Badges repo="arcadeai/arcade_jira" />
 
-The Jira toolkit provides a comprehensive set of tools for managing issues within Jira. Users can easily create, update, and transition issues, as well as manage comments, attachments, and labels. Key actions include:
+The Jira toolkit provides a comprehensive set of tools for interacting with Jira, enabling users and AI applications to efficiently manage issues and projects. With this toolkit, you can:
 
-- Create and update issues with specific details like project, priority, and assignee.
-- Add comments and labels to existing issues.
-- Attach files and download attachments associated with issues.
-- Search for issues using JQL or by various criteria.
-- Retrieve information about projects, users, and issue types.
+- Create, update, and search for Jira issues using various criteria, including JQL.
+- Manage issue types, priorities, and labels associated with issues.
+- Retrieve detailed information about issues, projects, users, and comments.
+- Transition issues between different statuses and manage attachments.
+- Browse and list available projects, users, and labels within your Jira instance.
 
-This toolkit streamlines the process of interacting with Jira, making it efficient for users and applications to manage their workflows.
+This toolkit streamlines the process of issue tracking and project management in Jira, making it easier to collaborate and stay organized.
 
 ## Available Tools
 
@@ -32,37 +32,37 @@ This toolkit streamlines the process of interacting with Jira, making it efficie
   headers={["Tool Name", "Description"]}
   data={
     [
-      ["AddCommentToIssue", "Add a comment to a Jira issue."],
-      ["AddLabelsToIssue", "Add labels to an existing Jira issue."],
-      ["AttachFileToIssue", "Add an attachment to an issue."],
-      ["CreateIssue", "Create a new Jira issue."],
-      ["DownloadAttachment", "Download the contents of an attachment associated with an issue."],
-      ["GetAttachmentMetadata", "Get the metadata of an attachment."],
-      ["GetCommentById", "Get a comment by its ID."],
-      ["GetIssueById", "Get the details of a Jira issue by its ID."],
-      ["GetIssueComments", "Get the comments of a Jira issue by its ID."],
-      ["GetIssuesWithoutId", "Search for Jira issues when you don't have the issue ID(s)."],
+      ["ListIssueTypesByProject", "Get the list of issue types (e.g. 'Task', 'Epic', etc.) available to a given project."],
       ["GetIssueTypeById", "Get the details of a Jira issue type by its ID."],
-      ["GetPriorityById", "Get the details of a priority by its ID."],
-      ["GetProjectById", "Get the details of a Jira project by its ID or key."],
-      ["GetTransitionByStatusName", "Get a transition available for an issue by the transition name."],
-      ["GetTransitionsAvailableForIssue", "Get the transitions available for an existing Jira issue."],
+      ["GetIssueById", "Get the details of a Jira issue by its ID."],
+      ["GetIssuesWithoutId", "Search for Jira issues when you don't have the issue ID(s)."],
+      ["SearchIssuesWithJql", "Search for Jira issues using a JQL (Jira Query Language) query."],
+      ["CreateIssue", "Create a new Jira issue."],
+      ["AddLabelsToIssue", "Add labels to an existing Jira issue."],
+      ["RemoveLabelsFromIssue", "Remove labels from an existing Jira issue."],
+      ["UpdateIssue", "Update an existing Jira issue."],
+      ["ListLabels", "Get the existing labels (tags) in the user's Jira instance."],
+      ["ListUsers", "Browse users in Jira."],
       ["GetUserById", "Get user information by their ID."],
       ["GetUsersWithoutId", "Get users without their account ID, searching by display name and email address."],
+      ["AttachFileToIssue", "Add an attachment to an issue."],
       ["ListIssueAttachmentsMetadata", "Get the metadata about the files attached to an issue."],
-      ["ListIssueTypesByProject", "Get the list of issue types (e.g. 'Task', 'Epic', etc.) available to a given project."],
-      ["ListLabels", "Get the existing labels (tags) in the user's Jira instance."],
-      ["ListPrioritiesAssociatedWithAPriorityScheme", "Browse the priorities associated with a priority scheme."],
-      ["ListPrioritiesAvailableToAnIssue", "Browse the priorities available to be used in the specified Jira issue."],
-      ["ListPrioritiesAvailableToAProject", "Browse the priorities available to be used in issues in the specified Jira project."],
-      ["ListPrioritySchemes", "Browse the priority schemes available in Jira."],
-      ["ListProjectsAssociatedWithAPriorityScheme", "Browse the projects associated with a priority scheme."],
-      ["ListUsers", "Browse users in Jira."],
-      ["RemoveLabelsFromIssue", "Remove labels from an existing Jira issue."],
-      ["SearchIssuesWithJql", "Search for Jira issues using a JQL (Jira Query Language) query."],
-      ["SearchProjects", "Get the details of all Jira projects."],
+      ["GetAttachmentMetadata", "Get the metadata of an attachment."],
+      ["DownloadAttachment", "Download the contents of an attachment associated with an issue."],
+      ["GetTransitionsAvailableForIssue", "Get the transitions available for an existing Jira issue."],
+      ["GetTransitionByStatusName", "Get a transition available for an issue by the transition name."],
       ["TransitionIssueToNewStatus", "Transition a Jira issue to a new status."],
-      ["UpdateIssue", "Update an existing Jira issue."],
+      ["SearchProjects", "Get the details of all Jira projects."],
+      ["GetProjectById", "Get the details of a Jira project by its ID or key."],
+      ["GetPriorityById", "Get the details of a priority by its ID."],
+      ["ListPrioritySchemes", "Browse the priority schemes available in Jira."],
+      ["ListPrioritiesAssociatedWithAPriorityScheme", "Browse the priorities associated with a priority scheme."],
+      ["ListProjectsAssociatedWithAPriorityScheme", "Browse the projects associated with a priority scheme."],
+      ["ListPrioritiesAvailableToAProject", "Browse the priorities available to be used in issues in the specified Jira project."],
+      ["ListPrioritiesAvailableToAnIssue", "Browse the priorities available to be used in the specified Jira issue."],
+      ["GetCommentById", "Get a comment by its ID."],
+      ["GetIssueComments", "Get the comments of a Jira issue by its ID."],
+      ["AddCommentToIssue", "Add a comment to a Jira issue."],
     ]
   }
 />
@@ -73,7 +73,7 @@ This toolkit streamlines the process of interacting with Jira, making it efficie
   own tools](/home/build-tools/create-a-toolkit).
 </Tip>
 
-## AddCommentToIssue
+## ListIssueTypesByProject
 
 <br />
 <TabbedCodeBlock
@@ -81,24 +81,23 @@ This toolkit streamlines the process of interacting with Jira, making it efficie
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/toolkits/jira/add_comment_to_issue_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/toolkits/jira/add_comment_to_issue_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/jira/list_issue_types_by_project_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/jira/list_issue_types_by_project_example_call_tool.js"],
       },
     },
   ]}
 />
 
-Add a comment to a Jira issue.
+Get the list of issue types (e.g. 'Task', 'Epic', etc.) available to a given project.
 
 **Parameters**
 
-- **issue** (`string`, required) The ID or key of the issue to comment on.
-- **body** (`string`, required) The body of the comment to add to the issue.
-- **reply_to_comment** (`string`, optional) Quote a previous comment as a reply to it. Provide the comment's ID. Must be a comment from the same issue. Defaults to None (no quoted comment).
-- **mention_users** (`array[string]`, optional) The users to mention in the comment. Provide the user display name, email address, or ID. Ex: 'John Doe' or 'john.doe@example.com'. Defaults to None (no user mentions).
+- **project** (`string`, required) The project to get issue types for. Provide a project name, key, or ID. If a project name is provided, the tool will try to find a unique exact match among the available projects.
+- **limit** (`integer`, optional) The maximum number of issue types to retrieve. Min of 1, max of 200. Defaults to 200.
+- **offset** (`integer`, optional) The number of issue types to skip. Defaults to 0 (start from the first issue type).
 
 
-## AddLabelsToIssue
+## GetIssueTypeById
 
 <br />
 <TabbedCodeBlock
@@ -106,147 +105,18 @@ Add a comment to a Jira issue.
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/toolkits/jira/add_labels_to_issue_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/toolkits/jira/add_labels_to_issue_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/jira/get_issue_type_by_id_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/jira/get_issue_type_by_id_example_call_tool.js"],
       },
     },
   ]}
 />
 
-Add labels to an existing Jira issue.
+Get the details of a Jira issue type by its ID.
 
 **Parameters**
 
-- **issue** (`string`, required) The ID or key of the issue to update
-- **labels** (`array[string]`, required) The labels to add to the issue
-- **notify_watchers** (`boolean`, optional) Whether to notify the issue's watchers. Defaults to True (notifies watchers).
-
-
-## AttachFileToIssue
-
-<br />
-<TabbedCodeBlock
-  tabs={[
-    {
-      label: "Call the Tool Directly",
-      content: {
-        Python: ["/examples/integrations/toolkits/jira/attach_file_to_issue_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/toolkits/jira/attach_file_to_issue_example_call_tool.js"],
-      },
-    },
-  ]}
-/>
-
-Add an attachment to an issue.
-
-**Parameters**
-
-- **issue** (`string`, required) The issue ID or key to add the attachment to
-- **filename** (`string`, required) The name of the file to add as an attachment. The filename should contain the file extension (e.g. 'test.txt', 'report.pdf'), but it is not mandatory.
-- **file_content_str** (`string`, optional) The string content of the file to attach. Use this if the file is a text file. Defaults to None.
-- **file_content_base64** (`string`, optional) The base64-encoded binary contents of the file. Use this for binary files like images or PDFs. Defaults to None.
-- **file_encoding** (`string`, optional) The encoding of the file to attach. Only used with file_content_str. Defaults to 'utf-8'.
-- **file_type** (`string`, optional) The type of the file to attach. E.g. 'application/pdf', 'text', 'image/png'. If not provided, the tool will try to infer the type from the filename. If the filename is not recognized, it will attach the file without specifying a type. Defaults to None (infer from filename or attach without type).
-
-
-## CreateIssue
-
-<br />
-<TabbedCodeBlock
-  tabs={[
-    {
-      label: "Call the Tool Directly",
-      content: {
-        Python: ["/examples/integrations/toolkits/jira/create_issue_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/toolkits/jira/create_issue_example_call_tool.js"],
-      },
-    },
-  ]}
-/>
-
-Create a new Jira issue.
-
-**Parameters**
-
-- **title** (`string`, required) The title of the issue.
-- **issue_type** (`string`, required) The name or ID of the issue type. If a name is provided, the tool will try to find a unique exact match among the available issue types.
-- **project** (`string`, optional) The ID, key or name of the project to associate the issue with. If a name is provided, the tool will try to find a unique exact match among the available projects. Defaults to None (no project). Must provide at least one of `project` or `parent_issue` arguments.
-- **due_date** (`string`, optional) The due date of the issue. Format: YYYY-MM-DD. Ex: '2025-01-01'. Defaults to None (no due date).
-- **description** (`string`, optional) The description of the issue. Defaults to None (no description).
-- **environment** (`string`, optional) The environment of the issue. Defaults to None (no environment).
-- **labels** (`array[string]`, optional) The labels of the issue. Defaults to None (no labels).
-- **parent_issue** (`string`, optional) The ID or key of the parent issue. Defaults to None (no parent issue). Must provide at least one of `parent_issue` or `project` arguments.
-- **priority** (`string`, optional) The ID or name of the priority to use for the issue. If a name is provided, the tool will try to find a unique exact match among the available priorities. Defaults to None (the issue is created with Jira's default priority for the specified project).
-- **assignee** (`string`, optional) The name, email or ID of the user to assign the issue to. If a name or email is provided, the tool will try to find a unique exact match among the available users. Defaults to None (no assignee).
-- **reporter** (`string`, optional) The name, email or ID of the user who is the reporter of the issue. If a name or email is provided, the tool will try to find a unique exact match among the available users. Defaults to None (no reporter).
-
-
-## DownloadAttachment
-
-<br />
-<TabbedCodeBlock
-  tabs={[
-    {
-      label: "Call the Tool Directly",
-      content: {
-        Python: ["/examples/integrations/toolkits/jira/download_attachment_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/toolkits/jira/download_attachment_example_call_tool.js"],
-      },
-    },
-  ]}
-/>
-
-Download the contents of an attachment associated with an issue.
-
-**Parameters**
-
-- **attachment_id** (`string`, required) The ID of the attachment to download
-
-
-## GetAttachmentMetadata
-
-<br />
-<TabbedCodeBlock
-  tabs={[
-    {
-      label: "Call the Tool Directly",
-      content: {
-        Python: ["/examples/integrations/toolkits/jira/get_attachment_metadata_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/toolkits/jira/get_attachment_metadata_example_call_tool.js"],
-      },
-    },
-  ]}
-/>
-
-Get the metadata of an attachment.
-
-**Parameters**
-
-- **attachment_id** (`string`, required) The ID of the attachment to retrieve
-
-
-## GetCommentById
-
-<br />
-<TabbedCodeBlock
-  tabs={[
-    {
-      label: "Call the Tool Directly",
-      content: {
-        Python: ["/examples/integrations/toolkits/jira/get_comment_by_id_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/toolkits/jira/get_comment_by_id_example_call_tool.js"],
-      },
-    },
-  ]}
-/>
-
-Get a comment by its ID.
-
-**Parameters**
-
-- **issue_id** (`string`, required) The ID or key of the issue to retrieve the comment from.
-- **comment_id** (`string`, required) The ID of the comment to retrieve
-- **include_adf_content** (`boolean`, optional) Whether to include the ADF (Atlassian Document Format) content of the comment in the response. Defaults to False (return only the HTML rendered content).
+- **issue_type_id** (`string`, required) The ID of the issue type to retrieve
 
 
 ## GetIssueById
@@ -269,32 +139,6 @@ Get the details of a Jira issue by its ID.
 **Parameters**
 
 - **issue** (`string`, required) The ID or key of the issue to retrieve
-
-
-## GetIssueComments
-
-<br />
-<TabbedCodeBlock
-  tabs={[
-    {
-      label: "Call the Tool Directly",
-      content: {
-        Python: ["/examples/integrations/toolkits/jira/get_issue_comments_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/toolkits/jira/get_issue_comments_example_call_tool.js"],
-      },
-    },
-  ]}
-/>
-
-Get the comments of a Jira issue by its ID.
-
-**Parameters**
-
-- **issue** (`string`, required) The ID or key of the issue to retrieve
-- **limit** (`integer`, optional) The maximum number of comments to retrieve. Min 1, max 100, default 100.
-- **offset** (`integer`, optional) The number of comments to skip. Defaults to 0 (start from the first comment).
-- **order_by** (`Enum` [IssueCommentOrderBy](/toolkits/productivity/jira/reference#IssueCommentOrderBy), optional) The order in which to return the comments. Defaults to 'created_date_descending' (most recent first).
-- **include_adf_content** (`boolean`, optional) Whether to include the ADF (Atlassian Document Format) content of the comment in the response. Defaults to False (return only the HTML rendered content).
 
 
 ## GetIssuesWithoutId
@@ -330,7 +174,7 @@ Search for Jira issues when you don't have the issue ID(s).
 - **next_page_token** (`string`, optional) The token to use to get the next page of issues. Defaults to None (first page).
 
 
-## GetIssueTypeById
+## SearchIssuesWithJql
 
 <br />
 <TabbedCodeBlock
@@ -338,21 +182,23 @@ Search for Jira issues when you don't have the issue ID(s).
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/toolkits/jira/get_issue_type_by_id_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/toolkits/jira/get_issue_type_by_id_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/jira/search_issues_with_jql_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/jira/search_issues_with_jql_example_call_tool.js"],
       },
     },
   ]}
 />
 
-Get the details of a Jira issue type by its ID.
+Search for Jira issues using a JQL (Jira Query Language) query.
 
 **Parameters**
 
-- **issue_type_id** (`string`, required) The ID of the issue type to retrieve
+- **jql** (`string`, required) The JQL (Jira Query Language) query to search for issues
+- **limit** (`integer`, optional) The maximum number of issues to retrieve. Min of 1, max of 100. Defaults to 50.
+- **next_page_token** (`string`, optional) The token to use to get the next page of issues. Defaults to None (first page).
 
 
-## GetPriorityById
+## CreateIssue
 
 <br />
 <TabbedCodeBlock
@@ -360,21 +206,31 @@ Get the details of a Jira issue type by its ID.
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/toolkits/jira/get_priority_by_id_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/toolkits/jira/get_priority_by_id_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/jira/create_issue_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/jira/create_issue_example_call_tool.js"],
       },
     },
   ]}
 />
 
-Get the details of a priority by its ID.
+Create a new Jira issue.
 
 **Parameters**
 
-- **priority_id** (`string`, required) The ID of the priority to retrieve.
+- **title** (`string`, required) The title of the issue.
+- **issue_type** (`string`, required) The name or ID of the issue type. If a name is provided, the tool will try to find a unique exact match among the available issue types.
+- **project** (`string`, optional) The ID, key or name of the project to associate the issue with. If a name is provided, the tool will try to find a unique exact match among the available projects. Defaults to None (no project). Must provide at least one of `project` or `parent_issue` arguments.
+- **due_date** (`string`, optional) The due date of the issue. Format: YYYY-MM-DD. Ex: '2025-01-01'. Defaults to None (no due date).
+- **description** (`string`, optional) The description of the issue. Defaults to None (no description).
+- **environment** (`string`, optional) The environment of the issue. Defaults to None (no environment).
+- **labels** (`array[string]`, optional) The labels of the issue. Defaults to None (no labels).
+- **parent_issue** (`string`, optional) The ID or key of the parent issue. Defaults to None (no parent issue). Must provide at least one of `parent_issue` or `project` arguments.
+- **priority** (`string`, optional) The ID or name of the priority to use for the issue. If a name is provided, the tool will try to find a unique exact match among the available priorities. Defaults to None (the issue is created with Jira's default priority for the specified project).
+- **assignee** (`string`, optional) The name, email or ID of the user to assign the issue to. If a name or email is provided, the tool will try to find a unique exact match among the available users. Defaults to None (no assignee).
+- **reporter** (`string`, optional) The name, email or ID of the user who is the reporter of the issue. If a name or email is provided, the tool will try to find a unique exact match among the available users. Defaults to None (no reporter).
 
 
-## GetProjectById
+## AddLabelsToIssue
 
 <br />
 <TabbedCodeBlock
@@ -382,21 +238,23 @@ Get the details of a priority by its ID.
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/toolkits/jira/get_project_by_id_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/toolkits/jira/get_project_by_id_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/jira/add_labels_to_issue_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/jira/add_labels_to_issue_example_call_tool.js"],
       },
     },
   ]}
 />
 
-Get the details of a Jira project by its ID or key.
+Add labels to an existing Jira issue.
 
 **Parameters**
 
-- **project** (`string`, required) The ID or key of the project to retrieve
+- **issue** (`string`, required) The ID or key of the issue to update
+- **labels** (`array[string]`, required) The labels to add to the issue
+- **notify_watchers** (`boolean`, optional) Whether to notify the issue's watchers. Defaults to True (notifies watchers).
 
 
-## GetTransitionByStatusName
+## RemoveLabelsFromIssue
 
 <br />
 <TabbedCodeBlock
@@ -404,22 +262,23 @@ Get the details of a Jira project by its ID or key.
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/toolkits/jira/get_transition_by_status_name_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/toolkits/jira/get_transition_by_status_name_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/jira/remove_labels_from_issue_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/jira/remove_labels_from_issue_example_call_tool.js"],
       },
     },
   ]}
 />
 
-Get a transition available for an issue by the transition name.
+Remove labels from an existing Jira issue.
 
 **Parameters**
 
-- **issue** (`string`, required) The ID or key of the issue
-- **transition** (`string`, required) The name of the transition status
+- **issue** (`string`, required) The ID or key of the issue to update
+- **labels** (`array[string]`, required) The labels to remove from the issue (case-insensitive)
+- **notify_watchers** (`boolean`, optional) Whether to notify the issue's watchers. Defaults to True (notifies watchers).
 
 
-## GetTransitionsAvailableForIssue
+## UpdateIssue
 
 <br />
 <TabbedCodeBlock
@@ -427,18 +286,76 @@ Get a transition available for an issue by the transition name.
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/toolkits/jira/get_transitions_available_for_issue_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/toolkits/jira/get_transitions_available_for_issue_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/jira/update_issue_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/jira/update_issue_example_call_tool.js"],
       },
     },
   ]}
 />
 
-Get the transitions available for an existing Jira issue.
+Update an existing Jira issue.
 
 **Parameters**
 
-- **issue** (`string`, required) The ID or key of the issue
+- **issue** (`string`, required) The key or ID of the issue to update
+- **title** (`string`, optional) The new issue title. Provide an empty string to clear the title. Defaults to None (does not change the title).
+- **description** (`string`, optional) The new issue description. Provide an empty string to clear the description. Defaults to None (does not change the description).
+- **environment** (`string`, optional) The new issue environment. Provide an empty string to clear the environment. Defaults to None (does not change the environment).
+- **due_date** (`string`, optional) The new issue due date. Format: YYYY-MM-DD. Ex: '2025-01-01'. Provide an empty string to clear the due date. Defaults to None (does not change the due date).
+- **issue_type** (`string`, optional) The new issue type name or ID. If a name is provided, the tool will try to find a unique exact match among the available issue types. Defaults to None (does not change the issue type).
+- **priority** (`string`, optional) The name or ID of the new issue priority. If a name is provided, the tool will try to find a unique exact match among the available priorities. Defaults to None (does not change the priority).
+- **parent_issue** (`string`, optional) The ID or key of the parent issue. A parent cannot be removed by providing an empty string. It is possible to change the parent issue by providing a new issue ID or key, or to leave it unchanged. Defaults to None (does not change the parent issue).
+- **assignee** (`string`, optional) The new issue assignee name, email, or ID. If a name or email is provided, the tool will try to find a unique exact match among the available users. Provide an empty string to remove the assignee. Defaults to None (does not change the assignee).
+- **reporter** (`string`, optional) The new issue reporter name, email, or ID. If a name or email is provided, the tool will try to find a unique exact match among the available users. Provide an empty string to remove the reporter. Defaults to None (does not change the reporter).
+- **labels** (`array[string]`, optional) The new issue labels. This argument will replace all labels with the new list. Providing None or an empty list will remove all labels. To add or remove a subset of labels, use the `Jira.AddLabelsToIssue` or the `Jira.RemoveLabelsFromIssue` tools. Defaults to None (does not change the labels).
+- **notify_watchers** (`boolean`, optional) Whether to notify the issue's watchers. Defaults to True (notifies watchers).
+
+
+## ListLabels
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/jira/list_labels_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/jira/list_labels_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Get the existing labels (tags) in the user's Jira instance.
+
+**Parameters**
+
+- **limit** (`integer`, optional) The maximum number of labels to return. Min of 1, Max of 200. Defaults to 200.
+- **offset** (`integer`, optional) The number of labels to skip. Defaults to 0 (starts from the first label)
+
+
+## ListUsers
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/jira/list_users_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/jira/list_users_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Browse users in Jira.
+
+**Parameters**
+
+- **account_type** (`string`, optional) The account type of the users to return. Defaults to 'atlassian'. Provide `None` to  disable filtering by account type. The account type filter will be applied after retrieving users from Jira API, thus the tool may return less users than the limit and still have more users to paginate. Check the `pagination` key in the response dictionary.
+- **limit** (`integer`, optional) The maximum number of users to return. Min of 1, max of 50. Defaults to 50.
+- **offset** (`integer`, optional) The number of users to skip before starting to return users. Defaults to 0 (start from the first user).
 
 
 ## GetUserById
@@ -488,6 +405,33 @@ Get users without their account ID, searching by display name and email address.
 - **offset** (`integer`, optional) The number of users to skip before starting to return users. Defaults to 0 (start from the first user).
 
 
+## AttachFileToIssue
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/jira/attach_file_to_issue_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/jira/attach_file_to_issue_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Add an attachment to an issue.
+
+**Parameters**
+
+- **issue** (`string`, required) The issue ID or key to add the attachment to
+- **filename** (`string`, required) The name of the file to add as an attachment. The filename should contain the file extension (e.g. 'test.txt', 'report.pdf'), but it is not mandatory.
+- **file_content_str** (`string`, optional) The string content of the file to attach. Use this if the file is a text file. Defaults to None.
+- **file_content_base64** (`string`, optional) The base64-encoded binary contents of the file. Use this for binary files like images or PDFs. Defaults to None.
+- **file_encoding** (`string`, optional) The encoding of the file to attach. Only used with file_content_str. Defaults to 'utf-8'.
+- **file_type** (`string`, optional) The type of the file to attach. E.g. 'application/pdf', 'text', 'image/png'. If not provided, the tool will try to infer the type from the filename. If the filename is not recognized, it will attach the file without specifying a type. Defaults to None (infer from filename or attach without type).
+
+
 ## ListIssueAttachmentsMetadata
 
 <br />
@@ -510,7 +454,7 @@ Get the metadata about the files attached to an issue.
 - **issue** (`string`, required) The ID or key of the issue to retrieve
 
 
-## ListIssueTypesByProject
+## GetAttachmentMetadata
 
 <br />
 <TabbedCodeBlock
@@ -518,23 +462,21 @@ Get the metadata about the files attached to an issue.
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/toolkits/jira/list_issue_types_by_project_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/toolkits/jira/list_issue_types_by_project_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/jira/get_attachment_metadata_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/jira/get_attachment_metadata_example_call_tool.js"],
       },
     },
   ]}
 />
 
-Get the list of issue types (e.g. 'Task', 'Epic', etc.) available to a given project.
+Get the metadata of an attachment.
 
 **Parameters**
 
-- **project** (`string`, required) The project to get issue types for. Provide a project name, key, or ID. If a project name is provided, the tool will try to find a unique exact match among the available projects.
-- **limit** (`integer`, optional) The maximum number of issue types to retrieve. Min of 1, max of 200. Defaults to 200.
-- **offset** (`integer`, optional) The number of issue types to skip. Defaults to 0 (start from the first issue type).
+- **attachment_id** (`string`, required) The ID of the attachment to retrieve
 
 
-## ListLabels
+## DownloadAttachment
 
 <br />
 <TabbedCodeBlock
@@ -542,22 +484,21 @@ Get the list of issue types (e.g. 'Task', 'Epic', etc.) available to a given pro
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/toolkits/jira/list_labels_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/toolkits/jira/list_labels_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/jira/download_attachment_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/jira/download_attachment_example_call_tool.js"],
       },
     },
   ]}
 />
 
-Get the existing labels (tags) in the user's Jira instance.
+Download the contents of an attachment associated with an issue.
 
 **Parameters**
 
-- **limit** (`integer`, optional) The maximum number of labels to return. Min of 1, Max of 200. Defaults to 200.
-- **offset** (`integer`, optional) The number of labels to skip. Defaults to 0 (starts from the first label)
+- **attachment_id** (`string`, required) The ID of the attachment to download
 
 
-## ListPrioritiesAssociatedWithAPriorityScheme
+## GetTransitionsAvailableForIssue
 
 <br />
 <TabbedCodeBlock
@@ -565,23 +506,21 @@ Get the existing labels (tags) in the user's Jira instance.
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/toolkits/jira/list_priorities_associated_with_a_priority_scheme_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/toolkits/jira/list_priorities_associated_with_a_priority_scheme_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/jira/get_transitions_available_for_issue_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/jira/get_transitions_available_for_issue_example_call_tool.js"],
       },
     },
   ]}
 />
 
-Browse the priorities associated with a priority scheme.
+Get the transitions available for an existing Jira issue.
 
 **Parameters**
 
-- **scheme_id** (`string`, required) The ID of the priority scheme to retrieve priorities for.
-- **limit** (`integer`, optional) The maximum number of priority schemes to return. Min of 1, max of 50. Defaults to 50.
-- **offset** (`integer`, optional) The number of priority schemes to skip. Defaults to 0 (start from the first scheme).
+- **issue** (`string`, required) The ID or key of the issue
 
 
-## ListPrioritiesAvailableToAnIssue
+## GetTransitionByStatusName
 
 <br />
 <TabbedCodeBlock
@@ -589,21 +528,22 @@ Browse the priorities associated with a priority scheme.
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/toolkits/jira/list_priorities_available_to_an_issue_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/toolkits/jira/list_priorities_available_to_an_issue_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/jira/get_transition_by_status_name_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/jira/get_transition_by_status_name_example_call_tool.js"],
       },
     },
   ]}
 />
 
-Browse the priorities available to be used in the specified Jira issue.
+Get a transition available for an issue by the transition name.
 
 **Parameters**
 
-- **issue** (`string`, required) The ID, key or name of the issue to retrieve priorities for.
+- **issue** (`string`, required) The ID or key of the issue
+- **transition** (`string`, required) The name of the transition status
 
 
-## ListPrioritiesAvailableToAProject
+## TransitionIssueToNewStatus
 
 <br />
 <TabbedCodeBlock
@@ -611,18 +551,87 @@ Browse the priorities available to be used in the specified Jira issue.
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/toolkits/jira/list_priorities_available_to_a_project_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/toolkits/jira/list_priorities_available_to_a_project_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/jira/transition_issue_to_new_status_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/jira/transition_issue_to_new_status_example_call_tool.js"],
       },
     },
   ]}
 />
 
-Browse the priorities available to be used in issues in the specified Jira project.
+Transition a Jira issue to a new status.
 
 **Parameters**
 
-- **project** (`string`, required) The ID, key or name of the project to retrieve priorities for.
+- **issue** (`string`, required) The ID or key of the issue
+- **transition** (`string`, required) The transition to perform. Provide the transition ID or its name (case insensitive).
+
+
+## SearchProjects
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/jira/search_projects_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/jira/search_projects_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Get the details of all Jira projects.
+
+**Parameters**
+
+- **keywords** (`string`, optional) The keywords to search for projects. Matches against project name and key (case insensitive). Defaults to None (no keywords filter).
+- **limit** (`integer`, optional) The maximum number of projects to return. Min of 1, Max of 50. Defaults to 50.
+- **offset** (`integer`, optional) The number of projects to skip. Defaults to 0 (starts from the first project)
+
+
+## GetProjectById
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/jira/get_project_by_id_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/jira/get_project_by_id_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Get the details of a Jira project by its ID or key.
+
+**Parameters**
+
+- **project** (`string`, required) The ID or key of the project to retrieve
+
+
+## GetPriorityById
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/jira/get_priority_by_id_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/jira/get_priority_by_id_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Get the details of a priority by its ID.
+
+**Parameters**
+
+- **priority_id** (`string`, required) The ID of the priority to retrieve.
 
 
 ## ListPrioritySchemes
@@ -650,6 +659,30 @@ Browse the priority schemes available in Jira.
 - **order_by** (`Enum` [PrioritySchemeOrderBy](/toolkits/productivity/jira/reference#PrioritySchemeOrderBy), optional) The order in which to return the priority schemes. Defaults to name ascending.
 
 
+## ListPrioritiesAssociatedWithAPriorityScheme
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/jira/list_priorities_associated_with_a_priority_scheme_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/jira/list_priorities_associated_with_a_priority_scheme_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Browse the priorities associated with a priority scheme.
+
+**Parameters**
+
+- **scheme_id** (`string`, required) The ID of the priority scheme to retrieve priorities for.
+- **limit** (`integer`, optional) The maximum number of priority schemes to return. Min of 1, max of 50. Defaults to 50.
+- **offset** (`integer`, optional) The number of priority schemes to skip. Defaults to 0 (start from the first scheme).
+
+
 ## ListProjectsAssociatedWithAPriorityScheme
 
 <br />
@@ -675,7 +708,7 @@ Browse the projects associated with a priority scheme.
 - **offset** (`integer`, optional) The number of projects to skip. Defaults to 0 (start from the first project).
 
 
-## ListUsers
+## ListPrioritiesAvailableToAProject
 
 <br />
 <TabbedCodeBlock
@@ -683,23 +716,21 @@ Browse the projects associated with a priority scheme.
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/toolkits/jira/list_users_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/toolkits/jira/list_users_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/jira/list_priorities_available_to_a_project_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/jira/list_priorities_available_to_a_project_example_call_tool.js"],
       },
     },
   ]}
 />
 
-Browse users in Jira.
+Browse the priorities available to be used in issues in the specified Jira project.
 
 **Parameters**
 
-- **account_type** (`string`, optional) The account type of the users to return. Defaults to 'atlassian'. Provide `None` to  disable filtering by account type. The account type filter will be applied after retrieving users from Jira API, thus the tool may return less users than the limit and still have more users to paginate. Check the `pagination` key in the response dictionary.
-- **limit** (`integer`, optional) The maximum number of users to return. Min of 1, max of 50. Defaults to 50.
-- **offset** (`integer`, optional) The number of users to skip before starting to return users. Defaults to 0 (start from the first user).
+- **project** (`string`, required) The ID, key or name of the project to retrieve priorities for.
 
 
-## RemoveLabelsFromIssue
+## ListPrioritiesAvailableToAnIssue
 
 <br />
 <TabbedCodeBlock
@@ -707,23 +738,21 @@ Browse users in Jira.
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/toolkits/jira/remove_labels_from_issue_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/toolkits/jira/remove_labels_from_issue_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/jira/list_priorities_available_to_an_issue_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/jira/list_priorities_available_to_an_issue_example_call_tool.js"],
       },
     },
   ]}
 />
 
-Remove labels from an existing Jira issue.
+Browse the priorities available to be used in the specified Jira issue.
 
 **Parameters**
 
-- **issue** (`string`, required) The ID or key of the issue to update
-- **labels** (`array[string]`, required) The labels to remove from the issue (case-insensitive)
-- **notify_watchers** (`boolean`, optional) Whether to notify the issue's watchers. Defaults to True (notifies watchers).
+- **issue** (`string`, required) The ID, key or name of the issue to retrieve priorities for.
 
 
-## SearchIssuesWithJql
+## GetCommentById
 
 <br />
 <TabbedCodeBlock
@@ -731,23 +760,23 @@ Remove labels from an existing Jira issue.
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/toolkits/jira/search_issues_with_jql_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/toolkits/jira/search_issues_with_jql_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/jira/get_comment_by_id_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/jira/get_comment_by_id_example_call_tool.js"],
       },
     },
   ]}
 />
 
-Search for Jira issues using a JQL (Jira Query Language) query.
+Get a comment by its ID.
 
 **Parameters**
 
-- **jql** (`string`, required) The JQL (Jira Query Language) query to search for issues
-- **limit** (`integer`, optional) The maximum number of issues to retrieve. Min of 1, max of 100. Defaults to 50.
-- **next_page_token** (`string`, optional) The token to use to get the next page of issues. Defaults to None (first page).
+- **issue_id** (`string`, required) The ID or key of the issue to retrieve the comment from.
+- **comment_id** (`string`, required) The ID of the comment to retrieve
+- **include_adf_content** (`boolean`, optional) Whether to include the ADF (Atlassian Document Format) content of the comment in the response. Defaults to False (return only the HTML rendered content).
 
 
-## SearchProjects
+## GetIssueComments
 
 <br />
 <TabbedCodeBlock
@@ -755,23 +784,25 @@ Search for Jira issues using a JQL (Jira Query Language) query.
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/toolkits/jira/search_projects_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/toolkits/jira/search_projects_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/jira/get_issue_comments_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/jira/get_issue_comments_example_call_tool.js"],
       },
     },
   ]}
 />
 
-Get the details of all Jira projects.
+Get the comments of a Jira issue by its ID.
 
 **Parameters**
 
-- **keywords** (`string`, optional) The keywords to search for projects. Matches against project name and key (case insensitive). Defaults to None (no keywords filter).
-- **limit** (`integer`, optional) The maximum number of projects to return. Min of 1, Max of 50. Defaults to 50.
-- **offset** (`integer`, optional) The number of projects to skip. Defaults to 0 (starts from the first project)
+- **issue** (`string`, required) The ID or key of the issue to retrieve
+- **limit** (`integer`, optional) The maximum number of comments to retrieve. Min 1, max 100, default 100.
+- **offset** (`integer`, optional) The number of comments to skip. Defaults to 0 (start from the first comment).
+- **order_by** (`Enum` [IssueCommentOrderBy](/toolkits/productivity/jira/reference#IssueCommentOrderBy), optional) The order in which to return the comments. Defaults to 'created_date_descending' (most recent first).
+- **include_adf_content** (`boolean`, optional) Whether to include the ADF (Atlassian Document Format) content of the comment in the response. Defaults to False (return only the HTML rendered content).
 
 
-## TransitionIssueToNewStatus
+## AddCommentToIssue
 
 <br />
 <TabbedCodeBlock
@@ -779,52 +810,21 @@ Get the details of all Jira projects.
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/toolkits/jira/transition_issue_to_new_status_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/toolkits/jira/transition_issue_to_new_status_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/jira/add_comment_to_issue_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/jira/add_comment_to_issue_example_call_tool.js"],
       },
     },
   ]}
 />
 
-Transition a Jira issue to a new status.
+Add a comment to a Jira issue.
 
 **Parameters**
 
-- **issue** (`string`, required) The ID or key of the issue
-- **transition** (`string`, required) The transition to perform. Provide the transition ID or its name (case insensitive).
-
-
-## UpdateIssue
-
-<br />
-<TabbedCodeBlock
-  tabs={[
-    {
-      label: "Call the Tool Directly",
-      content: {
-        Python: ["/examples/integrations/toolkits/jira/update_issue_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/toolkits/jira/update_issue_example_call_tool.js"],
-      },
-    },
-  ]}
-/>
-
-Update an existing Jira issue.
-
-**Parameters**
-
-- **issue** (`string`, required) The key or ID of the issue to update
-- **title** (`string`, optional) The new issue title. Provide an empty string to clear the title. Defaults to None (does not change the title).
-- **description** (`string`, optional) The new issue description. Provide an empty string to clear the description. Defaults to None (does not change the description).
-- **environment** (`string`, optional) The new issue environment. Provide an empty string to clear the environment. Defaults to None (does not change the environment).
-- **due_date** (`string`, optional) The new issue due date. Format: YYYY-MM-DD. Ex: '2025-01-01'. Provide an empty string to clear the due date. Defaults to None (does not change the due date).
-- **issue_type** (`string`, optional) The new issue type name or ID. If a name is provided, the tool will try to find a unique exact match among the available issue types. Defaults to None (does not change the issue type).
-- **priority** (`string`, optional) The name or ID of the new issue priority. If a name is provided, the tool will try to find a unique exact match among the available priorities. Defaults to None (does not change the priority).
-- **parent_issue** (`string`, optional) The ID or key of the parent issue. A parent cannot be removed by providing an empty string. It is possible to change the parent issue by providing a new issue ID or key, or to leave it unchanged. Defaults to None (does not change the parent issue).
-- **assignee** (`string`, optional) The new issue assignee name, email, or ID. If a name or email is provided, the tool will try to find a unique exact match among the available users. Provide an empty string to remove the assignee. Defaults to None (does not change the assignee).
-- **reporter** (`string`, optional) The new issue reporter name, email, or ID. If a name or email is provided, the tool will try to find a unique exact match among the available users. Provide an empty string to remove the reporter. Defaults to None (does not change the reporter).
-- **labels** (`array[string]`, optional) The new issue labels. This argument will replace all labels with the new list. Providing None or an empty list will remove all labels. To add or remove a subset of labels, use the `Jira.AddLabelsToIssue` or the `Jira.RemoveLabelsFromIssue` tools. Defaults to None (does not change the labels).
-- **notify_watchers** (`boolean`, optional) Whether to notify the issue's watchers. Defaults to True (notifies watchers).
+- **issue** (`string`, required) The ID or key of the issue to comment on.
+- **body** (`string`, required) The body of the comment to add to the issue.
+- **reply_to_comment** (`string`, optional) Quote a previous comment as a reply to it. Provide the comment's ID. Must be a comment from the same issue. Defaults to None (no quoted comment).
+- **mention_users** (`array[string]`, optional) The users to mention in the comment. Provide the user display name, email address, or ID. Ex: 'John Doe' or 'john.doe@example.com'. Defaults to None (no user mentions).
 
 
 

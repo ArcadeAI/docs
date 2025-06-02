@@ -17,8 +17,7 @@ await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
   "jql": "project = TEST AND status = 'Open'",
-  "limit": 50,
-  "next_page_token": "abc123"
+  "limit": 10
 };
 
 const response = await client.tools.execute({

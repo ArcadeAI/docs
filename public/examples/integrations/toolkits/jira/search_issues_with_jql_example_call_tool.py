@@ -16,8 +16,7 @@ client.auth.wait_for_completion(auth_response)
 
 tool_input = {
     "jql": "project = TEST AND status = 'Open'",
-    "limit": 50,
-    "next_page_token": "abc123"
+    "limit": 10
 }
 
 response = client.tools.execute(

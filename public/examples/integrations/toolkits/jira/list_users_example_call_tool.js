@@ -17,7 +17,7 @@ await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
   "account_type": "atlassian",
-  "limit": 25,
+  "limit": 10,
   "offset": 0
 };
 

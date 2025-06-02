@@ -16,7 +16,7 @@ client.auth.wait_for_completion(auth_response)
 
 tool_input = {
     "account_type": "atlassian",
-    "limit": 25,
+    "limit": 10,
     "offset": 0
 }
 

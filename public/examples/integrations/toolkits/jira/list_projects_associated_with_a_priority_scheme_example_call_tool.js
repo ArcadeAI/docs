@@ -17,7 +17,7 @@ await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
   "scheme_id": "12345",
-  "project": "MyProject",
+  "project": "proj-1",
   "limit": 10,
   "offset": 0
 };
