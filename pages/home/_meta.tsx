@@ -76,14 +76,14 @@ export default {
     type: "separator",
     title: "Agent Frameworks",
   },
+  langchain: {
+    title: "LangChain",
+  },
   crewai: {
     title: "CrewAI",
   },
   "google-adk": {
     title: "Google ADK",
-  },
-  langchain: {
-    title: "LangChain",
   },
   mastra: {
     title: "Mastra",
