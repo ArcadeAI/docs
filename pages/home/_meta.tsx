@@ -76,17 +76,20 @@ export default {
     type: "separator",
     title: "Agent Frameworks",
   },
-  langchain: {
-    title: "LangChain",
-  },
-  "oai-agents": {
-    title: "OpenAI Agents",
-  },
   crewai: {
     title: "CrewAI",
   },
+  "google-adk": {
+    title: "Google ADK",
+  },
+  langchain: {
+    title: "LangChain",
+  },
   mastra: {
     title: "Mastra",
+  },
+  "oai-agents": {
+    title: "OpenAI Agents",
   },
   vercelai: {
     title: "Vercel AI",
