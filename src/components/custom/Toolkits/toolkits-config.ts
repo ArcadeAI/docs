@@ -730,10 +730,10 @@ const comingSoonTools: Tool[] = [
     name: "Salesforce",
     image: "salesforce.svg",
     summary: "Manage customer relationships and sales with your agents.",
-    link: "/toolkits/productivity/salesforce",
-    category: "productivity",
+    link: "/toolkits/sales/salesforce",
+    category: "sales",
     type: "arcade",
-    isComingSoon: true,
+    isComingSoon: false,
   },
   {
     name: "Shopify",
