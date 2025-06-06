@@ -150,7 +150,7 @@ export function LandingPage() {
               icon={Cloud}
               title="Deploy Arcade"
               description="Run Arcade locally, in Docker, or in the cloud. We'll show you how to get started with each option."
-              href="/home/install/overview"
+              href="/home/local-deployment/install/overview"
             />
           </div>
         </div>
