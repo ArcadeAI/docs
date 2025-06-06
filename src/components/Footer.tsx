@@ -167,7 +167,7 @@ const Footer: React.FC = () => {
         </div>
         <div className={styles.privacyPolicy}>
           <a
-            href="https://www.arcade.dev/privacy"
+            href="https://www.arcade.dev/privacy-policy"
             target="_blank"
             rel="noreferrer"
           >
