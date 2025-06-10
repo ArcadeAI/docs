@@ -15,10 +15,12 @@ This same package contains the SDK that you will use to [build your own toolkits
 
 Like all python packages, the Arcade CLI needs to be installed within the python virtual environment you are using for your Arcade development environment.
 
-<Tabs items={["Standard Python", "Python + Conda", "Python + uv"]}>
+<Tabs items={["Python + uv", "Python + Conda", "Standard Python"]}>
 <Tabs.Tab>
 ```bash
-python -m venv .venv
+# install uv: https://docs.astral.sh/uv/getting-started/installation/
+
+uv venv --seed
 source .venv/bin/activate
 ```
 </Tabs.Tab>
@@ -32,18 +34,25 @@ conda activate arcade
 </Tabs.Tab>
 <Tabs.Tab>
 ```bash
-# install uv: https://docs.astral.sh/uv/getting-started/installation/
-
-uv venv --seed
+python -m venv .venv
 source .venv/bin/activate
 ```
 </Tabs.Tab>
 </Tabs>
 
 Now that your python virtual environment is activated, you can install the Arcade CLI with the following command:
+<Tabs items={["uv", "pip"]}>
+<Tabs.Tab>
+```bash
+uv pip install arcade-ai
+```
+</Tabs.Tab>
+<Tabs.Tab>
 ```bash
 pip install arcade-ai
 ```
+</Tabs.Tab>
+</Tabs>
 
 ## Usage
 
@@ -67,7 +76,6 @@ pip install arcade-ai
 ╰─────────────────────────────────────────────────────────────────────────────────────╯
 ╭─ Launch ────────────────────────────────────────────────────────────────────────────╮
 │ serve  Start tool server worker with locally installed tools                        │
-│ dev    Launch Arcade - requires 'arcade-engine'                                     │
 ╰─────────────────────────────────────────────────────────────────────────────────────╯
 ╭─ Deployment ────────────────────────────────────────────────────────────────────────╮
 │ deploy  Deploy toolkits to Arcade Cloud                                             │
@@ -130,10 +138,13 @@ You can learn more about any of the commands by running `arcade <command> --help
 ## `arcade new`
 
 ```bash
- Usage: arcade new [OPTIONS]
+Usage: arcade new [OPTIONS] TOOLKIT_NAME
 
- Create a new toolkit package directory
+Create a new toolkit package directory. Example: arcade new my_toolkit
 
+╭─ Arguments ──────────────────────────────────────────────────────────────────────╮
+│ *    toolkit_name      TEXT  The name of the toolkit to create [required]        │
+╰───────────────────────────────────────────────────────────────────────────────────╯
 ╭─ Options ─────────────────────────────────────────────────────────────────────────╮
 │ --dir         TEXT  tools directory path                                          │
 │                     [default: current directory]                                  │
@@ -254,27 +265,6 @@ You can learn more about any of the commands by running `arcade <command> --help
 ╰─────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
-## `arcade dev`
-
-```bash
- Usage: arcade dev [OPTIONS]
-
- Launch Arcade - requires 'arcade-engine'
-
-╭─ Options ───────────────────────────────────────────────────────────────────────────╮
-│ --host              TEXT     Host for the toolkit server.                           │
-│                              [default: 127.0.0.1]                                   │
-│ --port      -p      INTEGER  Port for the toolkit server.                           │
-│                              [default: 8002]                                        │
-│ --config    -c      TEXT     Path to the engine configuration file.                 │
-│                              [default: None]                                        │
-│ --env-file  -e      TEXT     Path to the environment variables file.                │
-│                              [default: None]                                        │
-│ --debug     -d               Show debug information                                 │
-│ --help                       Show this message and exit.                            │
-╰─────────────────────────────────────────────────────────────────────────────────────╯
-```
-
 ## `arcade deploy`
 
 ```bash
@@ -326,13 +316,3 @@ You can learn more about any of the commands by running `arcade <command> --help
 │ logs     Get logs for a worker                                                      │
 ╰─────────────────────────────────────────────────────────────────────────────────────╯
 ```
-
-
-
-
-
-
-
-
-
-

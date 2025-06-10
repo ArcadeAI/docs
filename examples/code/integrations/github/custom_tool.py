@@ -1,8 +1,8 @@
 from typing import Annotated
 
 import httpx
-from arcade.sdk import ToolContext, tool
-from arcade.sdk.auth import GitHub
+from arcade_tdk import ToolContext, tool
+from arcade_tdk.auth import GitHub
 
 
 @tool(requires_auth=GitHub())
