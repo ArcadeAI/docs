@@ -25,6 +25,34 @@ const nextraConfig = withNextra({
 
 const nextConfig: NextConfig = {
   ...nextraConfig,
+  async headers() {
+    const commonHeaders = [
+      {
+        key: "X-Frame-Options",
+        value: "SAMEORIGIN",
+      },
+      {
+        key: "X-Content-Type-Options",
+        value: "nosniff",
+      },
+      {
+        key: "Permissions-Policy",
+        value:
+          "camera=(), battery=(), browsing-topics=(), geolocation=(), microphone=()",
+      },
+      {
+        key: "Referrer-Policy",
+        value: "strict-origin-when-cross-origin",
+      },
+    ]
+
+    return [
+      {
+        source: "/(.*)",
+        headers: commonHeaders,
+      },
+    ]
+  },
 };
 
 export default nextConfig;
