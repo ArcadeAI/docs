@@ -18,7 +18,7 @@ await client.auth.waitForCompletion(authResponse);
 const toolInput = {
   "issue": "ISSUE-123",
   "filename": "report.pdf",
-  "file_content_base64": "[file_content]"
+  "file_content_base64": "[base64_encoded_content]"
 };
 
 const response = await client.tools.execute({

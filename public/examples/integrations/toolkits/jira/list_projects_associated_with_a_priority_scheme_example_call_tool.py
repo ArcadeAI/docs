@@ -16,7 +16,7 @@ client.auth.wait_for_completion(auth_response)
 
 tool_input = {
     "scheme_id": "12345",
-    "project": "proj-1",
+    "project": "proj-001",
     "limit": 10,
     "offset": 0
 }

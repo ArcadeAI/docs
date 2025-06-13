@@ -15,7 +15,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    "attachment_id": "12345"
+    "attachment_id": "att_12345"
 }
 
 response = client.tools.execute(

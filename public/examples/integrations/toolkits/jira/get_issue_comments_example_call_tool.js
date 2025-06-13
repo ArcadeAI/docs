@@ -17,10 +17,9 @@ await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
   "issue": "JIRA-123",
-  "limit": 50,
-  "offset": 0,
+  "limit": 10,
   "order_by": "created_date_descending",
-  "include_adf_content": false
+  "include_adf_content": true
 };
 
 const response = await client.tools.execute({

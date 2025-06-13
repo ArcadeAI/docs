@@ -16,7 +16,7 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "keywords": "project",
+  "keywords": "development",
   "limit": 10,
   "offset": 0
 };

@@ -16,7 +16,7 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "limit": 100,
+  "limit": 50,
   "offset": 10
 };
 

@@ -15,10 +15,16 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    "title": "Sample Issue",
+    "title": "Bug in login feature",
     "issue_type": "Bug",
-    "project": "PROJ-123",
-    "description": "This is a sample issue description."
+    "project": "PROJ123",
+    "due_date": "2025-01-15",
+    "description": "There is a bug that prevents users from logging in.",
+    "labels": [
+        "login_issue",
+        "urgent"
+    ],
+    "assignee": "john.doe@example.com"
 }
 
 response = client.tools.execute(

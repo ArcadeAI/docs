@@ -15,7 +15,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    "keywords": "project",
+    "keywords": "development",
     "limit": 10,
     "offset": 0
 }

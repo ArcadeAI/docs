@@ -3,7 +3,7 @@ import { Arcade } from "@arcadeai/arcadejs";
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
 const USER_ID = "user@example.com";  // Unique identifier for your user (email, UUID, etc.)
-const TOOL_NAME = "Jira.CreateIssue";
+const TOOL_NAME = "Jira.SearchIssuesWithoutJql";
 
 // Start the authorization process
 const authResponse = await client.tools.authorize({tool_name: TOOL_NAME});
@@ -16,16 +16,18 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "title": "Bug in login feature",
-  "issue_type": "Bug",
-  "project": "PROJ123",
-  "due_date": "2025-01-15",
-  "description": "There is a bug that prevents users from logging in.",
+  "keywords": "bug",
+  "due_from": "2023-10-01",
+  "status": "In Progress",
+  "priority": "Highest",
+  "assignee": "john.doe@example.com",
+  "project": "ProjectX",
+  "issue_type": "Task",
   "labels": [
-    "login_issue",
+    "frontend",
     "urgent"
   ],
-  "assignee": "john.doe@example.com"
+  "limit": 10
 };
 
 const response = await client.tools.execute({

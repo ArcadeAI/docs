@@ -18,8 +18,7 @@ await client.auth.waitForCompletion(authResponse);
 const toolInput = {
   "name_or_email": "john",
   "enforce_exact_match": false,
-  "limit": 10,
-  "offset": 0
+  "limit": 10
 };
 
 const response = await client.tools.execute({

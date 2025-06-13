@@ -16,7 +16,7 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "jql": "project = TEST AND status = 'Open'",
+  "jql": "project = MYPROJECT AND status = 'Open'",
   "limit": 10
 };
 

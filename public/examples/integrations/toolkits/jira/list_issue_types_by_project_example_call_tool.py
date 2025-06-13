@@ -16,8 +16,7 @@ client.auth.wait_for_completion(auth_response)
 
 tool_input = {
     "project": "ProjectX",
-    "limit": 10,
-    "offset": 0
+    "limit": 10
 }
 
 response = client.tools.execute(

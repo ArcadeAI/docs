@@ -17,7 +17,7 @@ client.auth.wait_for_completion(auth_response)
 tool_input = {
     "issue": "ISSUE-123",
     "filename": "report.pdf",
-    "file_content_base64": "[file_content]"
+    "file_content_base64": "[base64_encoded_content]"
 }
 
 response = client.tools.execute(

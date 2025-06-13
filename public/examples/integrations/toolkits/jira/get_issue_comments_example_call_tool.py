@@ -16,10 +16,9 @@ client.auth.wait_for_completion(auth_response)
 
 tool_input = {
     "issue": "JIRA-123",
-    "limit": 50,
-    "offset": 0,
+    "limit": 10,
     "order_by": "created_date_descending",
-    "include_adf_content": False
+    "include_adf_content": True
 }
 
 response = client.tools.execute(

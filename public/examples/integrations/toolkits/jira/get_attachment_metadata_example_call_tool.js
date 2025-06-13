@@ -16,7 +16,7 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "attachment_id": "12345"
+  "attachment_id": "att_12345"
 };
 
 const response = await client.tools.execute({

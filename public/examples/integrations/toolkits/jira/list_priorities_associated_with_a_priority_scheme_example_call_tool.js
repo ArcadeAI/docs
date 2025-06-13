@@ -17,8 +17,7 @@ await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
   "scheme_id": "12345",
-  "limit": 10,
-  "offset": 0
+  "limit": 10
 };
 
 const response = await client.tools.execute({

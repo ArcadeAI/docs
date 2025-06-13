@@ -17,8 +17,7 @@ client.auth.wait_for_completion(auth_response)
 tool_input = {
     "name_or_email": "john",
     "enforce_exact_match": False,
-    "limit": 10,
-    "offset": 0
+    "limit": 10
 }
 
 response = client.tools.execute(

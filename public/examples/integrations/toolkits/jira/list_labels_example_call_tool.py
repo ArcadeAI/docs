@@ -15,7 +15,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    "limit": 100,
+    "limit": 50,
     "offset": 10
 }
 

@@ -16,12 +16,12 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "issue": "ISSUE-123",
-  "body": "This is a comment.",
+  "issue": "PROJ-123",
+  "body": "This is a comment on the issue.",
   "reply_to_comment": "456",
   "mention_users": [
     "john.doe@example.com",
-    "Jane Doe"
+    "jane.smith@example.com"
   ]
 };
 

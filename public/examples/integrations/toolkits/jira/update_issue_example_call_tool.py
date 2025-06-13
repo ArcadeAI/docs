@@ -15,8 +15,8 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    "issue": "ISSUE-123",
-    "title": "New Title",
+    "issue": "JIRA-123",
+    "title": "Fix login bug",
     "assignee": "john.doe@example.com",
     "priority": "High"
 }
