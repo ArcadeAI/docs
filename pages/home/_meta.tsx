@@ -79,14 +79,17 @@ export default {
   langchain: {
     title: "LangChain",
   },
-  "oai-agents": {
-    title: "OpenAI Agents",
-  },
   crewai: {
     title: "CrewAI",
   },
+  "google-adk": {
+    title: "Google ADK",
+  },
   mastra: {
     title: "Mastra",
+  },
+  "oai-agents": {
+    title: "OpenAI Agents",
   },
   vercelai: {
     title: "Vercel AI",

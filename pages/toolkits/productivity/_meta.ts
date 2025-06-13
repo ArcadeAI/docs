@@ -1,8 +1,10 @@
 export default {
-  google: "Google",
-  microsoft: "Microsoft",
-  obsidian: "Obsidian",
+  asana: "Asana",
   confluence: "Confluence",
-  jira: "Jira",
   dropbox: "Dropbox",
+  google: "Google",
+  jira: "Jira",
+  microsoft: "Microsoft",
+  notion: "Notion",
+  obsidian: "Obsidian",
 };

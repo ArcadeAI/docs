@@ -1,0 +1,46 @@
+auth:
+  providers:
+    - id: salesforce
+      description: "Custom Salesforce provider"
+      enabled: true
+      type: oauth2
+      client_id: ${env:SALESFORCE_CLIENT_ID}
+      client_secret: ${env:SALESFORCE_CLIENT_SECRET}
+      oauth2:
+        authorize_request:
+          endpoint: 'https://salesforce-org-subdomain.my.salesforce.com/services/oauth2/authorize'
+          params:
+            client_id: '{{client_id}}'
+            redirect_uri: '{{redirect_uri}}'
+            scope: '{{scopes}}'
+            response_type: code
+        token_request:
+          endpoint: 'https://salesforce-org-subdomain.my.salesforce.com/services/oauth2/token'
+          params:
+            grant_type: authorization_code
+            client_id: '{{client_id}}'
+            client_secret: '{{client_secret}}'
+            redirect_uri: '{{redirect_uri}}'
+        refresh_request:
+          endpoint: 'https://salesforce-org-subdomain.my.salesforce.com/services/oauth2/token'
+          params:
+            grant_type: refresh_token
+            client_id: '{{client_id}}'
+            client_secret: '{{client_secret}}'
+            refresh_token: '{{refresh_token}}'
+        token_introspection_request:
+          enabled: false
+          endpoint: 'https://salesforce-org-subdomain.my.salesforce.com/services/oauth2/introspect'
+          method: POST
+          params:
+            token: '{{access_token}}'
+          auth_method: 'client_secret_basic'
+          request_content_type: application/x-www-form-urlencoded
+          response_content_type: application/json
+          response_map:
+            expires_in: '$.exp'
+            scope: '$.scope'
+          expiration_format: absolute_unix_timestamp
+          triggers:
+            on_token_grant: true
+            on_token_refresh: true
