@@ -48,6 +48,7 @@ function Docs({ Component, pageProps }) {
         src="https://www.googletagmanager.com/gtag/js?id=G-29HSQ3LQ13"
         strategy="afterInteractive"
       />
+
       {/* Initialize Google Analytics */}
       <Script id="google-analytics" strategy="afterInteractive">
         {`
@@ -58,6 +59,13 @@ function Docs({ Component, pageProps }) {
       `}
       </Script>
 
+      {/* Statuspage.io embed */}
+      <Script
+        src="https://status.arcade.dev/embed/script.js"
+        strategy="afterInteractive"
+      />
+
+      {/* PostHog */}
       <PostHogProvider client={posthog}>
         <ThemeProvider attribute="class" defaultTheme="dark">
           <Component {...pageProps} />
