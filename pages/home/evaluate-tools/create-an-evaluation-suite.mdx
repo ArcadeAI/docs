@@ -9,7 +9,7 @@ In this guide, you'll learn how to evaluate your custom tools to ensure they fun
 
 We'll create evaluation cases to test our `hello` tool and measure its performance.
 
-import { Steps } from "nextra/components";
+import { Steps, Tabs } from "nextra/components";
 
 <Steps>
 
@@ -18,9 +18,18 @@ import { Steps } from "nextra/components";
 - [Build a custom tool](/home/build-tools/create-a-toolkit)
 - Install the evaluation dependencies:
 
+<Tabs items={["uv", "pip"]}>
+<Tabs.Tab>
 ```bash
-pip install arcade-ai[evals]
+uv pip install 'arcade-ai[evals]'
 ```
+</Tabs.Tab>
+<Tabs.Tab>
+```bash
+pip install 'arcade-ai[evals]'
+```
+</Tabs.Tab>
+</Tabs>
 
 ### Create an evaluation suite
 
@@ -37,14 +46,14 @@ Create a new Python file for your evaluations, e.g., `eval_hello.py`.
 Open `eval_hello.py` and add the following code:
 
 ```python
-from arcade.sdk.eval import (
+from arcade_evals import (
     EvalSuite,
     EvalRubric,
     ExpectedToolCall,
     BinaryCritic,
     tool_eval,
 )
-from arcade.sdk import ToolCatalog
+from arcade_tdk import ToolCatalog
 from arcade_my_new_toolkit.tools.hello import hello
 
 # Create a catalog of tools to include in the evaluation
@@ -128,7 +137,7 @@ BinaryCritic(critic_field="name", weight=1.0)
 Evaluates the similarity between expected and actual values.
 
 ```python
-from arcade.sdk.eval import SimilarityCritic
+from arcade_evals import SimilarityCritic
 
 SimilarityCritic(critic_field="message", weight=1.0)
 ```
@@ -138,7 +147,7 @@ SimilarityCritic(critic_field="message", weight=1.0)
 Assesses numeric values within a specified tolerance.
 
 ```python
-from arcade.sdk.eval import NumericCritic
+from arcade_evals import NumericCritic
 
 NumericCritic(critic_field="score", tolerance=0.1, weight=1.0)
 ```
@@ -149,7 +158,7 @@ Evaluates the closeness of datetime values within a specified tolerance.
 
 ```python
 from datetime import timedelta
-from arcade.sdk.eval import DatetimeCritic
+from arcade_evals import DatetimeCritic
 
 DatetimeCritic(critic_field="start_time", tolerance=timedelta(seconds=10), weight=1.0)
 ```
@@ -163,7 +172,7 @@ You can add more evaluation cases to test different scenarios.
 Modify your `hello` tool to accept an `emotion` parameter:
 
 ```python
-from arcade.sdk import tool
+from arcade_tdk import tool
 from typing import Annotated
 
 class Emotion(str, Enum):

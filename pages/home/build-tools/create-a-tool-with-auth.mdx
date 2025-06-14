@@ -3,7 +3,7 @@ title: "Adding user authorization to your tools"
 description: "Learn how to build custom tools that require user authorization using Arcade"
 ---
 
-import { Steps } from "nextra/components";
+import { Steps, Tabs } from "nextra/components";
 
 # Adding user authorization to your tools
 
@@ -19,9 +19,18 @@ You'll create a tool that sends a message on behalf of a user via Slack.
 - Install the Arcade SDK and any third-party SDKs you need (e.g., Slack SDK):
 - [Understand Tool Context](/home/build-tools/tool-context)
 
+<Tabs items={["uv", "pip"]}>
+<Tabs.Tab>
+```bash
+uv pip install arcade-ai slack_sdk
+```
+</Tabs.Tab>
+<Tabs.Tab>
 ```bash
 pip install arcade-ai slack_sdk
 ```
+</Tabs.Tab>
+</Tabs>
 
 ### Define your authorized tool
 
@@ -30,9 +39,9 @@ Create a new Python file, e.g., `slack_tools.py`, and import the necessary modul
 ```python
 from typing import Annotated
 
-from arcade.sdk import ToolContext, tool
-from arcade.sdk.auth import Slack
-from arcade.sdk.errors import RetryableToolError
+from arcade_tdk import ToolContext, tool
+from arcade_tdk.auth import Slack
+from arcade_tdk.errors import RetryableToolError
 from slack_sdk import WebClient
 ```
 
@@ -53,7 +62,7 @@ def send_dm_to_user(
     context: ToolContext,
     user_name: Annotated[str, "The Slack username of the person you want to message"],
     message: Annotated[str, "The message you want to send"],
-):
+) -> Annotated[str, "A confirmation message that the DM was sent"]:
     """Send a direct message to a user in Slack."""
     slack_client = WebClient(token=context.authorization.token)
 
@@ -74,6 +83,8 @@ def send_dm_to_user(
     im_response = slack_client.conversations_open(users=[user_id])
     dm_channel_id = im_response["channel"]["id"]
     slack_client.chat_postMessage(channel=dm_channel_id, text=message)
+
+    return "DM sent successfully"
 ```
 
 Arcade offers a number of [built-in auth providers](/home/auth-providers), including Slack, Google, and GitHub. You can also require authorization with a custom auth provider, using the `OAuth2` class, a subclass of the `ToolAuthorization` class:
@@ -99,7 +110,6 @@ Here's an example of how to use your tool:
 
 ```python
 from arcadepy import Arcade
-from catalog import catalog
 
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 

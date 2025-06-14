@@ -26,12 +26,7 @@ import { Steps, Tabs } from "nextra/components";
 Before starting, make sure you have:
 
 - An [Arcade account](https://api.arcade.dev/signup?utm_source=docs&utm_medium=page&utm_campaign=custom-tools)
-- An active virtual environment for your shell(s) (e.g. `uv venv --seed -p 3.13`)
-    - We recommend using [uv](https://docs.astral.sh/uv/pip/environments/) or [miniconda](https://www.anaconda.com/docs/getting-started/miniconda/main).
-    - Toolkits each have a poetry project with their own virtual environment, but toolkits are loaded into the top-level arcade environment based on the active  "parent" virtual environment.  **The local development commands will not work without an active virtual environment.**
-- `pip` installed within that virtual environment (verify with `pip --version`)
-- Arcade CLI installed within your python virtual environment: `pip install arcade-ai`
-- Poetry for package management (the generated Makefile uses Poetry): `pip install poetry`
+- For this guide, we'll use [uv](https://docs.astral.sh/uv/getting-started/installation/) as our package manager.
 
 <Steps>
 
@@ -40,36 +35,45 @@ Before starting, make sure you have:
 Run the following command to start creating your toolkit:
 
 ```bash
-git init
-arcade new
+uv tool run --from arcade-ai arcade new arithmetic
 ```
 
-Enter the required information when prompted:
-- **Toolkit name**: Choose a descriptive name (e.g., "arithmetic")
-- **Description**: Provide a brief explanation of your toolkit
-- **Author name and email**: Your contact information
+Enter the optional information when prompted:
+- **Description**: Provide a brief explanation of what your toolkit will do
+- **Author GitHub username and email**: Your contact information
+- **Generate test and evaluation directories**: Whether you want additional directories created for you
 
-After completion, a directory with your toolkit name will be created with the following structure:
+After completion, a directory with your toolkit name (arithmetic) will be created with the following structure:
 
 ```
 arithmetic/
 ├── arcade_arithmetic/       # Core package directory
-│   ├── __init__.py          # Package initialization
+│   ├── __init__.py
 │   └── tools/               # Directory for your tools
-│       └── __init__.py
+│       ├── __init__.py
+│       └── hello.py         # Example tool
+├── evals/                   # Evaluation directory
+│   └── eval_arithmetic.py   # Example evaluation file
 ├── tests/                   # Test directory
-├── pyproject.toml           # Poetry project configuration
-├── README.md                # Documentation
-└── Makefile                 # Helper commands
+│   ├── __init__.py
+│   └── test_arithmetic.py   # Example test file
+├── pyproject.toml           # uv project configuration
+├── README.md
+└── Makefile                 # uv helper commands
 ```
 
 Navigate to your toolkit directory:
 
 ```bash
-cd <toolkit_name>
+cd arithmetic
 ```
 
 ## Set up the development environment
+
+An active virtual environment for your shell(s) is required to run the local development commands.
+```bash
+uv venv --seed -p 3.13
+```
 
 Install dependencies and pre-commit hooks:
 
@@ -80,17 +84,18 @@ make install
 This installs all dependencies specified in `pyproject.toml`, pre-commit hooks for code quality, and your toolkit in development mode.
 
 The Makefile provides several helpful commands:
-- `build` - Build wheel file using poetry
-- `bump-version` - Bump the version in pyproject.toml
+- `build` - Build wheel file using uv
+- `bump-version` - Bump the version in the pyproject.toml file by a patch version
 - `check` - Run code quality tools
 - `clean-build` - Clean build artifacts
 - `coverage` - Generate coverage report
-- `install` - Install the poetry environment and pre-commit hooks
+- `install` - Install the uv environment and install all packages with dependencies
+- `install-local` - Install Arcade components (CLI, TDK, etc.) from source in editable mode. Only use this when you are developing against the latest unreleased code from the [arcade-ai repo](https://github.com/ArcadeAI/arcade-ai) main branch instead of the published packages
 - `test` - Test the code with pytest
 
 ## Define your tools
 
-Create a Python file for your tools in the `arcade_<toolkit_name>/tools` directory.
+Create a Python file for your tools in the `arcade_arithmetic/tools` directory.
 
 The following example shows a simple math toolkit with three tools: `add`, `subtract`, and `multiply`:
 
@@ -98,7 +103,7 @@ The following example shows a simple math toolkit with three tools: `add`, `subt
 # arcade_arithmetic/tools/operations.py
 from typing import Annotated
 
-from arcade.sdk import tool
+from arcade_tdk import tool
 
 
 @tool
@@ -148,7 +153,7 @@ Update the package initialization files to expose your tools:
 
 ```python
 # arcade_arithmetic/tools/__init__.py
-from .operations import add, multiply, subtract
+from arcade_arithmetic.tools.operations import add, multiply, subtract
 
 __all__ = ["add", "multiply", "subtract"]
 ```
@@ -280,7 +285,7 @@ Now, in the [Playground](https://api.arcade.dev/dashboard/playground), you can s
 
 Alternatively, you can deploy your toolkit to Arcade's cloud instead of tunneling to it locally.
 
-Find the `worker.toml` file in your toolkit's root directory (where you ran `arcade new`):
+Find the `worker.toml` file in your toolkit's root directory (where you ran `uv tool run --from arcade-ai arcade new arithmetic`):
 
 ```toml
 [[worker]]
@@ -290,7 +295,7 @@ id = "demo-worker"  # Choose a unique ID
 enabled = true
 timeout = 30
 retries = 3
-secret = "<your-secret>"  # This is randomly generated for you by `arcade new`
+secret = "<your-secret>"  # This is randomly generated for you by `uv tool run --from arcade-ai arcade new arithmetic`
 [worker.local_source]
 packages = ["./arithmetic"]  # Path to your toolkit directory
 ```
@@ -298,6 +303,7 @@ See [Configuring Arcade Deploy](/home/local-deployment/configure/arcade-deploy) 
 
 From the root of your toolkit, deploy your toolkit to Arcade's cloud with:
 
+This may take a while your first time.
 ```bash
 arcade deploy
 ```
@@ -323,19 +329,6 @@ If you're updating an existing package, bump the version:
 make bump-version
 ```
 
-Update the project metadata in `pyproject.toml`:
-
-```toml
-[tool.poetry]
-name = "arcade-arithmetic"
-version = "0.1.0"
-description = "Basic arithmetic operations toolkit for Arcade"
-authors = ["Your Name <your.email@example.com>"]
-readme = "README.md"
-license = "MIT"
-repository = "https://github.com/yourusername/arcade-arithmetic"
-```
-
 Create a comprehensive README.md file that explains your toolkit's purpose, installation, and usage.
 
 Build your package:
@@ -344,22 +337,10 @@ Build your package:
 make build
 ```
 
-Configure Poetry with your PyPI token (recommended for security):
-
-```bash
-poetry config pypi-token.pypi your-token-here
-```
-
 Publish to PyPI:
 
 ```bash
-poetry publish
-```
-
-Or build and publish in one step:
-
-```bash
-poetry publish --build
+uv publish --token YOUR_PYPI_TOKEN_HERE
 ```
 
 </Steps>
@@ -372,7 +353,7 @@ Now that your toolkit is published, you can use it in any Arcade application:
 from arcadepy import Arcade
 
 # Initialize the Arcade client
-client = Arcade(base_url="https://api.arcade.dev")
+client = Arcade()
 
 # Use your Tools
 response = client.tools.execute(

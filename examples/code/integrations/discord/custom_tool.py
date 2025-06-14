@@ -2,8 +2,8 @@ from typing import Annotated, Optional
 
 import httpx
 
-from arcade.sdk import ToolContext, tool
-from arcade.sdk.auth import Discord
+from arcade_tdk import ToolContext, tool
+from arcade_tdk.auth import Discord
 
 
 @tool(

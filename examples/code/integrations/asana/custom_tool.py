@@ -2,8 +2,8 @@ from typing import Annotated
 
 import httpx
 
-from arcade.sdk import ToolContext, tool
-from arcade.sdk.auth import Asana
+from arcade_tdk import ToolContext, tool
+from arcade_tdk.auth import Asana
 
 
 @tool(requires_auth=Asana(scopes=["default"]))
