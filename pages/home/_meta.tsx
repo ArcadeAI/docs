@@ -150,4 +150,7 @@ export default {
   "registry-early-access": {
     title: "Registry Early Access",
   },
+  "migrate-to-v2": {
+    display: "hidden",
+  },
 };
