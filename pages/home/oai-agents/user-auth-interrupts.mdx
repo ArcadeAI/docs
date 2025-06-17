@@ -3,7 +3,7 @@ title: "Managing user authorization"
 description: "Handle tool authorization with Arcade and OpenAI Agents"
 ---
 
-import { Steps } from "nextra/components";
+import { Steps, Tabs } from "nextra/components";
 
 ## User authorization with OpenAI Agents
 
@@ -19,15 +19,33 @@ In this guide, you will learn how to handle user authorization for Arcade tools 
 
 Set up your environment with the following installations:
 
+<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs.Tab>
+
 ```bash
 pip install agents-arcade arcadepy
 ```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```bash
+npm install @openai/agents @arcadeai/agents-arcade
+```
+
+</Tabs.Tab>
+
+</Tabs>
 
 ### Configure your Arcade environment
 
 Make sure you have set your Arcade API key in the environment, or assign it directly in the code:
 
 > Need an Arcade API key? Visit the [Get an API key](/home/api-keys) page to create one.
+
+<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs.Tab>
 
 ```python
 import os
@@ -43,9 +61,34 @@ os.environ["ARCADE_API_KEY"] = "YOUR_ARCADE_API_KEY"
 client = AsyncArcade()
 ```
 
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+Add your API key to your environment variables:
+
+```bash
+# In your .env file
+ARCADE_API_KEY=YOUR_ARCADE_API_KEY
+```
+
+```javascript
+import Arcade from '@arcadeai/arcadejs';
+import { isAuthorizationRequiredError, toZod } from "@arcadeai/arcadejs/lib";
+import { Agent, run, tool } from '@openai/agents';
+
+const client = new Arcade();
+```
+</Tabs.Tab>
+
+</Tabs>
+
 ### Fetch Arcade tools
 
 Get the tools you need for your agent. In this example, we'll use GitHub tools:
+
+<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs.Tab>
 
 ```python
 # Get GitHub tools for this example
@@ -60,7 +103,28 @@ github_agent = Agent(
 )
 ```
 
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```javascript
+const githubToolkit = await client.tools.list({ toolkit: "github", limit: 30 });
+const arcadeTools = toZod({
+  tools: githubToolkit.items,
+  client,
+  userId: "<YOUR_SYSTEM_USER_ID_2>", // Replace this with your application's user ID (e.g. email address, UUID, etc.)
+})
+```
+
+</Tabs.Tab>
+
+</Tabs>
+
+
 ### Handle authorization errors
+
+<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs.Tab>
 
 When a user needs to authorize access to a tool, the agent will raise an `AuthorizationError`. You can handle it like this:
 
@@ -79,9 +143,72 @@ except AuthorizationError as e:
     # The error contains the authorization URL that the user should visit
 ```
 
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+Choose how to handle authorization errors based on your needs:
+
+**Default behavior (throws errors):**
+```javascript
+const arcadeTools = toZod({
+  tools: githubToolkit.items,
+  client,
+  userId: "<YOUR_SYSTEM_USER_ID>", // Replace with your user ID
+});
+```
+
+Use this when you want to handle authorization flow yourself with custom logic.
+
+**Auto-handle authorization (recommended):**
+```javascript
+import { executeOrAuthorizeZodTool } from "@arcadeai/arcadejs/lib";
+
+const arcadeTools = toZod({
+  tools: githubToolkit.items,
+  client,
+  userId: "<YOUR_SYSTEM_USER_ID>", // Replace with your user ID
+  executeFactory: executeOrAuthorizeZodTool,
+});
+```
+
+This automatically returns authorization URLs instead of throwing errors.
+
+**Custom error handling:**
+
+```javascript
+import { isAuthorizationRequiredError } from "@arcadeai/arcadejs/lib";
+
+const tools =  arcadeTools.map(({ name, description, execute, parameters }) =>
+    tool({
+        name,
+        description: description ?? "",
+        parameters: parameters as any,
+        execute,
+        errorFunction: async(_, error) => {
+        if (error instanceof Error && isAuthorizationRequiredError(error)) {
+            const response = await client.tools.authorize({
+            tool_name: name,
+            user_id: "<YOUR_SYSTEM_USER_ID_2>",
+            });
+            return `Please login to Google: ${response.url}`;
+        }
+        return "Error executing tool"
+        }
+    }),
+);
+```
+</Tabs.Tab>
+
+
+</Tabs>
+
 ### Wait for authorization completion
 
 You can also wait for the user to complete the authorization before continuing:
+
+<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs.Tab>
 
 ```python
 from arcadepy import AsyncArcade
@@ -121,11 +248,64 @@ except AuthorizationError as e:
         print("Final output:\n\n", result.final_output)
 ```
 
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+To wait for authorization completion, follow this approach:
+
+1. Throw the error to the agent
+2. Catch and handle the error while waiting for completion
+
+
+
+```javascript
+const tools =  arcadeTools.map(({ name, description, execute, parameters }) =>
+    tool({
+        name,
+        description: description ?? "",
+        parameters: parameters as any,
+        execute,
+        errorFunction: (_, error) => { throw error } // Throw the error to the agent for handling
+    }),
+);
+
+while (true) {
+    try {
+      const result = await run(googleAgent, "What are my latest emails?");
+      console.log(result.finalOutput);
+    } catch (error) {
+      // Catch the authorization error and wait for completion
+      if (error instanceof Error && isAuthorizationRequiredError(error)) {
+        const response = await client.tools.authorize({
+          tool_name: "Google_ListEmails",
+          user_id: "<YOUR_SYSTEM_USER_ID_2>",
+        });
+        if (response.status !== "completed") {
+          console.log(`Please complete the authorization challenge in your browser: ${response.url}`);
+        }
+        
+        // Wait for the authorization to complete
+        await client.auth.waitForCompletion(response);
+        console.log("Authorization completed, retrying...");
+      }
+    }
+  }
+```
+
+</Tabs.Tab>
+
+</Tabs>
+
+
+
 ### Complete example
 
 Here's a full example that demonstrates the authorization flow with waiting for authentication:
 
-```python
+<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs.Tab>
+
 ```python
 from arcadepy.auth import wait_for_authorization_completion
 
@@ -177,6 +357,75 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+Check out the complete working example in our [GitHub repository](https://github.com/ArcadeAI/arcade-ai/tree/main/examples/openai-agents-ts/src/waitForCompletion.ts).
+
+```javascript
+import Arcade from '@arcadeai/arcadejs';
+import { isAuthorizationRequiredError, toZod } from "@arcadeai/arcadejs/lib";
+import { Agent, run, tool } from '@openai/agents';
+
+async function main() {
+  // 1) Initialize Arcade client
+  const client = new Arcade();
+
+  // 2) Fetch Google toolkit from Arcade and prepare tools for OpenAI Agents
+  const googleToolkit = await client.tools.list({ toolkit: "google", limit: 30 });
+  const arcadeTools = toZod({
+    tools: googleToolkit.items,
+    client,
+    userId: "<YOUR_SYSTEM_USER_ID_2>", // Replace this with your application's user ID (e.g. email address, UUID, etc.)
+  })
+
+  // 3) Convert the tools to a format that OpenAI Agents can use
+  const tools =  arcadeTools.map(({ name, description, execute, parameters }) =>
+    tool({
+      name,
+      description: description ?? "",
+      parameters: parameters as any,
+      execute,
+      errorFunction: (_, error) => { throw error }
+    }),
+  );
+
+  // 4) Create a new agent with the Google toolkit
+  const googleAgent = new Agent({
+    name: "Google agent",
+    instructions: "You are a helpful assistant that can assist with Google API calls.",
+    model: "gpt-4o-mini",
+    tools
+  });
+
+  while (true) {
+    try {
+      const result = await run(googleAgent, "What are my latest emails?");
+      console.log(result.finalOutput);
+      break; // Exit the loop if the result is successful
+    } catch (error) {
+      if (error instanceof Error && isAuthorizationRequiredError(error)) {
+        const response = await client.tools.authorize({
+          tool_name: "Google_ListEmails",
+          user_id: "<YOUR_SYSTEM_USER_ID_2>",
+        });
+        if (response.status !== "completed") {
+          console.log(`Please complete the authorization challenge in your browser: ${response.url}`);
+        }
+        
+        // Wait for the authorization to complete
+        await client.auth.waitForCompletion(response);
+        console.log("Authorization completed, retrying...");
+      }
+    }
+  }
+}
+
+main();
+```
+</Tabs.Tab>
+
 This example handles the authentication flow by:
 
 1. Attempting to run the agent
@@ -184,7 +433,7 @@ This example handles the authentication flow by:
 3. Open the authentication URL in a browser
 4. Waiting for the user to complete authentication
 5. Retrying the operation after a wait period
-
+</Tabs>
 
 </Steps>
 
