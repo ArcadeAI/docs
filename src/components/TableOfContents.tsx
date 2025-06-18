@@ -11,7 +11,10 @@ import styles from "./TableOfContents.module.css";
 function TableOfContents({ headers, data }) {
   const handleRowClick = (firstColumnValue) => {
     // Convert first column value to a valid ID format
-    const sectionId = firstColumnValue.toLowerCase().replace(/\s+/g, "-");
+    const sectionId = firstColumnValue
+      .toLowerCase()
+      .replace(/\s+/g, "-")
+      .replace(".", "");
     // Update the URL hash to navigate to the section
     window.location.hash = `#${sectionId}`;
   };
