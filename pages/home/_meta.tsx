@@ -143,6 +143,9 @@ export default {
   faq: {
     title: "FAQ",
   },
+  changelog: {
+    title: "Changelog",
+  },
   "-- Registry": {
     type: "separator",
     title: "Registry",
