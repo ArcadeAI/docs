@@ -55,7 +55,7 @@ export async function execute(
   https://api.github.com/repos/OWNER/REPO/commits?since=2025-06-16&until=2025-06-20
   */
 
-  const url = `https://api.github.com/repos/${organization_name}/${repository_name}/${branch_name}/commits?since=${since}`;
+  const url = `https://api.github.com/repos/${organization_name}/${repository_name}/commits?branch=${branch_name}&since=${since}`;
 
   const response = await fetch(url, {
     headers: {
