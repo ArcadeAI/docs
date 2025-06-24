@@ -1,7 +1,7 @@
 import { CodaAgent } from "../classes/codaAgent";
 import type { Config } from "../classes/config";
 import type { Logger } from "../classes/logger";
-import { getNewCommitsTool } from "../tools/getNewCommits";
+import { getNewCommitsTool } from "../tools/getNewCommitsAndPRs";
 import { readFileTool } from "../tools/readFile";
 import { writeFileTool } from "../tools/writeFile";
 
@@ -10,7 +10,7 @@ export class ChangelogAgent extends CodaAgent {
     const systemPrompt = `
 You are a helpful assistant that writes changelogs for the Arcade.dev software projects.
 
-Your goal is to load all the new git commits from provided Github repositories since the last entry in the changelog.md file, and produce a list of the changes for our customers.  You will use the GitHub API to get the changes for all of the relevant projects.  There are no changelog files for these repositories - do not try to read them - only use the GitHub API to get the changes.
+Your goal is to load all the new git commits and pull requests from provided Github repositories since the last entry in the changelog.md file, and produce a list of the changes for our customers.  You will use the GitHub API to get the changes and pull requests for all of the relevant projects.
 
 There are 5 possible categories of changes:
 - Frameworks
@@ -19,18 +19,19 @@ There are 5 possible categories of changes:
 - Platform and Engine
 - Misc
 
-There are 3 possible types of changes, which each have an emoji associated with them:
+There are 4 possible types of changes, which each have an emoji associated with them:
 - 🚀 Feature
 - 🐛 Bugfix
 - 📝 Documentation
+- 🔧 Maintenance
 
 The steps to follow are:
-1. Load the changelog.md file and note the date of the most recent entry.
-2. Load all new commits since the most recent entry in the changelog.md file from the provided Github repositories.
+1. Load the changelog.mdx file and note the date of the most recent entry.
+2. Load all new commits since the most recent entry in the changelog.mdx file from the provided Github repositories.
 3. Categorize the changes into the 5 categories and 3 types.  If the change is not in one of the categories, it should be categorized as "Misc".  Ignore small changes that are not worth mentioning - use your judgement.
-4. Write a changelog for the project.  The changelog should be in the same format as the changelog.md file.  Do not include any other text in the changelog.md file.
+4. Update the changelog.mdx file with the new changes.  The changelog should be in the same format as the changelog.mdx file.  Do not include any other text in the changelog.mdx file.
 
-Report the steps you took to generate the changelog.
+Report the steps you took to update the changelog when complete, or any errors you encountered.
 `;
 
     const tools = [
@@ -50,8 +51,7 @@ Report the steps you took to generate the changelog.
     const result = await this.run(
       `
       Today is ${new Date().toISOString().split("T")[0]}.
-      The full path to the changelog.md that you will be updating is ${changelogPath}.
-
+      The full path to the changelog.md that you will be updating is \`${changelogPath}\`.
       The Github repositories to load commits from are: ${repositories.join(", ")}
       `,
     );
