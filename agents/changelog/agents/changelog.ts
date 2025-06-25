@@ -1,11 +1,11 @@
-import { CodaAgent } from "../classes/codaAgent";
+import { WrappedAgent } from "../classes/wrappedAgent";
 import type { Config } from "../classes/config";
 import type { Logger } from "../classes/logger";
 import { getNewCommitsTool } from "../tools/getNewCommitsAndPRs";
 import { readFileTool } from "../tools/readFile";
 import { writeFileTool } from "../tools/writeFile";
 
-export class ChangelogAgent extends CodaAgent {
+export class ChangelogAgent extends WrappedAgent {
   constructor(config: Config, logger: Logger) {
     const systemPrompt = `
 You are a helpful assistant that writes changelogs for the Arcade.dev software projects.

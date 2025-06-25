@@ -12,7 +12,7 @@ import OpenAI from "openai";
 import { Config } from "./config";
 import type { Logger } from "./logger";
 
-export abstract class CodaAgent {
+export abstract class WrappedAgent {
   readonly agent: Agent<unknown, "text">;
   readonly runner: Runner;
   history: AgentInputItem[] = [];
