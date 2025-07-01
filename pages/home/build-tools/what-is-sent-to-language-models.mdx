@@ -1,0 +1,94 @@
+---
+title: "What is sent to language models?"
+description: "Documentation for what is sent to the language model when defining a tool"
+---
+
+import { Tabs } from "nextra/components";
+
+# Understanding what parts of a tool are sent to language models
+
+Which parts of your tool definitions are sent to language models? By understanding this, you can ensure that your tools effectively communicate their purpose and usage to the models.
+
+The Arcade worker converts tools (functions with the `@tool` decorator) into `ToolDefinition` objects. The `ToolDefinition` object can be thought of as the intermediate representation of a tool before it is formatted for a specific model provider and sent to the model.
+
+## Defining a tool in code
+
+First, let's take a look at a tool written in Python before it is converted into a `ToolDefinition` object.
+
+```python file=<rootDir>/examples/code/home/build-tools/what-is-sent-to-language-models/defining_a_tool_in_code.py
+
+```
+
+## A tool as a `ToolDefinition` object
+
+As mentioned above, the Arcade worker converts tools into `ToolDefinition` objects. Let's take a look at the `list_conversations_metadata` tool as a `ToolDefinition` object (the intermediate representation of the tool before it is formatted for a specific model).
+
+<Tabs items={["Python", "cURL"]}> <Tabs.Tab>
+
+```python file=<rootDir>/examples/code/home/build-tools/what-is-sent-to-language-models/get_tool_definition.py
+
+```
+
+</Tabs.Tab> <Tabs.Tab>
+
+```bash file=<rootDir>/examples/code/home/build-tools/what-is-sent-to-language-models/get_tool_definition.sh
+
+```
+
+</Tabs.Tab> </Tabs>
+
+<div style={{ paddingTop: "10px" }}></div>
+
+<ToggleContent showText="🔽 Show ToolDefinition" hideText="▶️ Hide ToolDefinition">
+
+```json file=<rootDir>/examples/code/home/build-tools/what-is-sent-to-language-models/get_tool_definition_output.json
+
+```
+
+</ToggleContent>
+
+## Formatting tools for model compatibility
+
+Before tools are sent to models, the `ToolDefinition` object is formatted such that it is compatible with the specific model provider's function calling format. For example, let's take a look at the `list_conversations_metadata` tool formatted for OpenAI.
+
+<Tabs items={["Python", "JavaScript", "cURL"]}>
+
+<Tabs.Tab>
+
+```python file=<rootDir>/examples/code/home/build-tools/what-is-sent-to-language-models/get_formatted_tool_oai.py
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```js file=<rootDir>/examples/code/home/build-tools/what-is-sent-to-language-models/get_formatted_tool_oai.js
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```bash file=<rootDir>/examples/code/home/build-tools/what-is-sent-to-language-models/get_formatted_tool_oai.sh
+```
+
+</Tabs.Tab>
+
+</Tabs>
+
+<ToggleContent showText="🔽 Show Formatted Tool" hideText="▶️ Hide Formatted Tool">
+
+```json file=<rootDir>/examples/code/home/build-tools/what-is-sent-to-language-models/get_formatted_tool_oai_output.json
+```
+
+</ToggleContent>
+
+## Additional Information
+
+- _**Defaults:**_ The default value for parameters listed as optional is not sent to the language model.
+- _**Enum Values:**_ If a parameter is an enum, each possible value for the enum is sent to the language model. This provides clarity on the valid options for that parameter.
+- _**Annotations:**_ The annotation for each parameter is sent to the language model, thus each parameter must be annotated.
+- _**Tool Definition Schema:**_ Check out the [Tool Definition JSON schema](https://github.com/ArcadeAI/arcade-ai/blob/main/schemas/preview/tool_definition.schema.jsonc) for more details on how to define your tools.
+
+
+In this example, we've learned that tools are converted into `ToolDefinition` objects and then formatted for specific models. Understanding that a tool is converted into a `ToolDefinition` object and then formatted for a specific model is important because it informs you, the tool developer, what parts of the tool are sent to the language model.
