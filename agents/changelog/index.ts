@@ -65,7 +65,7 @@ program
   .argument(
     "[repos]",
     "A comma separated list of repositories to load the changelogs from",
-    "ArcadeAI/docs,ArcadeAI/arcade-ai,ArcadeAI/Cloud,ArcadeAI/Engine",
+    "ArcadeAI/docs,ArcadeAI/arcade-ai,ArcadeAI/Cloud,ArcadeAI/Engine,ArcadeAI/dashboard",
   )
   .action(async (changelog_path: string, repositories: string, options) => {
     const config = new Config(options);
