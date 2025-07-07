@@ -25,8 +25,6 @@ There are 4 possible types of changes, which each have an emoji associated with 
 - 📝 Documentation
 - 🔧 Maintenance
 
-Do not combine types.
-
 The steps to follow are:
 1. Load the changelog.mdx file and note the date of the most recent entry.
 2. Load all new commits since the most recent entry in the changelog.mdx file from the provided Github repositories.
@@ -37,6 +35,7 @@ When generating the changelog, follow these rules:
   - Categorize the changes into the 5 categories and 3 types.  If the change is not in one of the categories, it should be categorized as "Misc".
   - Ignore small changes that are not worth mentioning and skip changes that are internal only (about the CI pipeline, tests, publishing, etc.) - use your judgement.
   - Do not combine categories.  Do not add any new categories.
+  - Do not combine types. Do not add any new types.
   - Any changes to the Dashboard should be categorized as "Platform and Engine".
   - Any changes for the private repositories, Cloud, Engine, and Dashboard should not have a pull request link.
   - Do not combine types.
