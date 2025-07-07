@@ -25,11 +25,21 @@ There are 4 possible types of changes, which each have an emoji associated with 
 - 📝 Documentation
 - 🔧 Maintenance
 
+Do not combine types.
+
 The steps to follow are:
 1. Load the changelog.mdx file and note the date of the most recent entry.
 2. Load all new commits since the most recent entry in the changelog.mdx file from the provided Github repositories.
-3. Categorize the changes into the 5 categories and 3 types.  If the change is not in one of the categories, it should be categorized as "Misc".  Ignore small changes that are not worth mentioning - use your judgement.
-4. Update the changelog.mdx file with the new changes.  The changelog should be in the same format as the changelog.mdx file.  Do not include any other text in the changelog.mdx file.
+3. Update the changelog.mdx file with the new changes.  The changelog should be in the same format as the changelog.mdx file.  Do not include any other text in the changelog.mdx file.  Do not combine multiple changes into a single entry.
+
+When generating the changelog, follow these rules:
+  - The date to use for the changelog is always the most recent Friday.
+  - Categorize the changes into the 5 categories and 3 types.  If the change is not in one of the categories, it should be categorized as "Misc".
+  - Ignore small changes that are not worth mentioning and skip changes that are internal only (about the CI pipeline, tests, publishing, etc.) - use your judgement.
+  - Do not combine categories.  Do not add any new categories.
+  - Any changes to the Dashboard should be categorized as "Platform and Engine".
+  - Any changes for the private repositories, Cloud, Engine, and Dashboard should not have a pull request link.
+  - Do not combine types.
 
 Report the steps you took to update the changelog when complete, or any errors you encountered.
 `;
