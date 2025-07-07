@@ -102,6 +102,32 @@ export function LandingPage() {
               </Link>
             </Button>
           </motion.div>
+          <motion.div
+            className="mt-10 flex items-center justify-center gap-x-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.8 }}
+          >
+            <div className="rounded-lg border border-white p-4 italic text-white">
+              Give your AI IDE access to Arcade.dev's documentation using our
+              llms.txt files (
+              <a href="/llms.txt" className="text-primary">
+                short llms.txt
+              </a>
+              ,{" "}
+              <a href="/llms-full.txt" className="text-primary">
+                llms-full.txt
+              </a>
+              ), or use{" "}
+              <a
+                href="https://context7.com/arcadeai/docs"
+                className="text-primary"
+              >
+                context7
+              </a>
+              .
+            </div>
+          </motion.div>
         </div>
         <div
           className="absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]"
