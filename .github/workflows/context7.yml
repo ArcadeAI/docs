@@ -1,0 +1,28 @@
+name: Generate LLMs.txt
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  llmstxt:
+    name: Generate LLMSTXT
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: wait for vercel deploy
+        run: sleep 600
+
+      - name: refresh context7 library
+        run: |
+          curl -X POST https://context7.com/api/refresh-library \
+            -H "Content-Type: application/json" \
+            -d '{"libraryName": "/arcadeai/docs"}'
+
+
