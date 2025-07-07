@@ -38,7 +38,6 @@ When generating the changelog, follow these rules:
   - Do not combine types. Do not add any new types.
   - Any changes to the Dashboard should be categorized as "Platform and Engine".
   - Any changes for the private repositories, Cloud, Engine, and Dashboard should not have a pull request link.
-  - Do not combine types.
 
 Report the steps you took to update the changelog when complete, or any errors you encountered.
 `;
