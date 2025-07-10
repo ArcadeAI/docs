@@ -3,7 +3,7 @@ from arcadepy import Arcade
 # Initialize the Arcade client
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
-USER_ID = "you@example.com"
+USER_ID = "{arcade_user_id}"
 TOOL_NAME = "CodeSandbox.RunCode"
 
 # Define the code to merge sort a list
