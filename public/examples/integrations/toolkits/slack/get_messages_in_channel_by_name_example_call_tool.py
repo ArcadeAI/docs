@@ -1,14 +1,12 @@
+import json
 from arcadepy import Arcade
 
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
-USER_ID = "you@example.com"
+USER_ID = "user@example.com"  # Unique identifier for your user (email, UUID, etc.)
 TOOL_NAME = "Slack.GetMessagesInChannelByName"
 
-auth_response = client.tools.authorize(
-    tool_name=TOOL_NAME,
-    user_id=USER_ID,
-)
+auth_response = client.tools.authorize(tool_name=TOOL_NAME)
 
 if auth_response.status != "completed":
     print(f"Click this link to authorize: {auth_response.url}")
@@ -17,10 +15,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    "channel_name": "general",
-    "limit": 100,
-    "oldest_datetime": "2023-01-01 00:00:00",
-    "latest_datetime": "2023-01-31 23:59:59",
+    'channel_name': 'general', 'oldest_relative': '1:00:00', 'limit': 50
 }
 
 response = client.tools.execute(
@@ -28,4 +23,4 @@ response = client.tools.execute(
     input=tool_input,
     user_id=USER_ID,
 )
-print(response)
+print(json.dumps(response.output.value, indent=2))

@@ -3,7 +3,7 @@ import { Arcade } from "@arcadeai/arcadejs";
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
 const USER_ID = "user@example.com";  // Unique identifier for your user (email, UUID, etc.)
-const TOOL_NAME = "Slack.GetConversationMetadataById";
+const TOOL_NAME = "Slack.GetUsersInConversation";
 
 // Start the authorization process
 const authResponse = await client.tools.authorize({tool_name: TOOL_NAME});
@@ -16,7 +16,8 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "conversation_id": "C1234567890"
+  "conversation_id": "C1234567890",
+  "limit": 100
 };
 
 const response = await client.tools.execute({

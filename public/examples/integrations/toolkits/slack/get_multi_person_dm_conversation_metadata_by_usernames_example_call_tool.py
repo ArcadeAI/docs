@@ -1,14 +1,12 @@
+import json
 from arcadepy import Arcade
 
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
-USER_ID = "you@example.com"
-TOOL_NAME = "Slack.GetMultiPersonDmConversationMetadataByUsername"
+USER_ID = "user@example.com"  # Unique identifier for your user (email, UUID, etc.)
+TOOL_NAME = "Slack.GetMultiPersonDmConversationMetadataByUsernames"
 
-auth_response = client.tools.authorize(
-    tool_name=TOOL_NAME,
-    user_id=USER_ID,
-)
+auth_response = client.tools.authorize(tool_name=TOOL_NAME)
 
 if auth_response.status != "completed":
     print(f"Click this link to authorize: {auth_response.url}")
@@ -16,11 +14,13 @@ if auth_response.status != "completed":
 # Wait for the authorization to complete
 client.auth.wait_for_completion(auth_response)
 
-tool_input = {"usernames": ["john_doe", "jane_doe"]}
+tool_input = {
+    'usernames': ['alice', 'bob', 'charlie'], 'next_cursor': 'abc123'
+}
 
 response = client.tools.execute(
     tool_name=TOOL_NAME,
     input=tool_input,
     user_id=USER_ID,
 )
-print(response)
+print(json.dumps(response.output.value, indent=2))
