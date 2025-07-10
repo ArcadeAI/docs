@@ -13,7 +13,6 @@ const OrySessionContext = createContext<OrySessionContextType>({
   error: null,
 });
 
-// Initialize Ory client - you'll need to update this with your actual Ory domain
 const ory = new FrontendApi(
   new Configuration({
     basePath: process.env.NEXT_PUBLIC_ORY_SDK_URL || "https://auth.arcade.dev",
