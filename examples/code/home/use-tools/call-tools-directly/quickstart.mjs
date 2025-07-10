@@ -2,12 +2,12 @@ import Arcade from "@arcadeai/arcadejs";
 
 // You can also set the `ARCADE_API_KEY` environment variable instead of passing it as a parameter.
 const client = new Arcade({
-  apiKey: "arcade_api_key",
+  apiKey: "{arcade_api_key}",
 });
 
 // Arcade needs a unique identifier for your application user (this could be an email address, a UUID, etc).
-// In this example, simply use your email address as the user ID:
-let userId = "you@example.com";
+// In this example, use the email you used to sign up for Arcade.dev:
+let userId = "{arcade_user_id}";
 
 // Let's use the `Math.Sqrt` tool from the Arcade Math toolkit to get the square root of a number.
 const response_sqrt = await client.tools.execute({
