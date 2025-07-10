@@ -1,14 +1,21 @@
 import { useEffect } from "react";
 import { useOrySession } from "@/lib/OrySessionContext";
+import { getCookie } from "@/lib/utils";
 
 export function PlaceholderReplacer() {
   const { email, loading } = useOrySession();
 
   useEffect(() => {
-    // Determine the replacement value
+    // Determine the replacement value with fallback priority:
+    // 1. If loading, keep original placeholder
+    // 2. If Ory email is available, use that (highest priority)
+    // 3. If no Ory email but cookie exists, use cookie value
+    // 4. Otherwise, use original placeholder
+    const getCookieEmail = () => getCookie("last_arcadedev_account_email");
+
     const replacement = loading
       ? "{arcade_user_id}" // Keep original while loading
-      : email || "{arcade_user_id}";
+      : email || getCookieEmail() || "{arcade_user_id}";
 
     // Function to replace text in a text node
     const replaceInTextNode = (node: Text) => {
