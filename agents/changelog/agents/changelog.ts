@@ -28,7 +28,7 @@ There are 4 possible types of changes, which each have an emoji associated with 
 The steps to follow are:
 1. Load the changelog.mdx file and note the date of the most recent entry.
 2. Load all new commits since the most recent entry in the changelog.mdx file from the provided Github repositories.
-3. Update the changelog.mdx file with the new changes.  The changelog should be in the same format as the changelog.mdx file.  Do not include any other text in the changelog.mdx file.  Do not combine multiple changes into a single entry.
+3. Update the changelog.mdx file and append the new changes.  Do not alter the older entires in the changelog.  The changelog should be in the same format as the changelog.mdx file.  Do not include any other text in the changelog.mdx file.  Do not combine multiple changes into a single entry.
 
 When generating the changelog, follow these rules:
   - The date to use for the changelog is always the most recent Friday.
