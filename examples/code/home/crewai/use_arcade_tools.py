@@ -4,7 +4,7 @@ from crewai_arcade import ArcadeToolManager
 
 manager = ArcadeToolManager(default_user_id="user@example.com")
 
-tools = manager.get_tools(tools=["Google.ListEmails"])
+tools = manager.get_tools(tools=["Gmail.ListEmails"])
 
 
 crew_agent = Agent(

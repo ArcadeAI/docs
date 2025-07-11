@@ -2,7 +2,7 @@ import { Arcade } from "@arcadeai/arcadejs";
 
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
-const TOOL_NAME = "Search.SearchYoutubeVideos";
+const TOOL_NAME = "Youtube.SearchForVideos";
 
 const toolInput = {
 	keywords: "Apple iPhone",

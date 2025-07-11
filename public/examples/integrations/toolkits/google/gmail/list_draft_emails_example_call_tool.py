@@ -3,7 +3,7 @@ from arcadepy import Arcade
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
 USER_ID = "you@example.com"
-TOOL_NAME = "Google.ListDraftEmails"
+TOOL_NAME = "Gmail.ListDraftEmails"
 
 auth_response = client.tools.authorize(
     tool_name=TOOL_NAME,

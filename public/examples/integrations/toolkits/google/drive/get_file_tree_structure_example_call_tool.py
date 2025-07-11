@@ -3,7 +3,7 @@ from arcadepy import Arcade
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
 USER_ID = "you@example.com"
-TOOL_NAME = "Google.GetFileTreeStructure"
+TOOL_NAME = "GoogleDrive.GetFileTreeStructure"
 
 auth_response = client.tools.authorize(
     tool_name=TOOL_NAME,

@@ -95,7 +95,7 @@ import { toZod } from "@arcadeai/arcadejs/lib"
 
 const googleToolkit = await arcade.tools.list({
     limit: 20,
-    toolkit: "google",
+    toolkit: "gmail",
 });
 
 const tools = toZod({
@@ -114,7 +114,7 @@ import { toZodToolSet } from "@arcadeai/arcadejs/lib"
 
 const googleToolkit = await arcade.tools.list({
     limit: 20,
-    toolkit: "google",
+    toolkit: "gmail",
 });
 
 const tools = toZodToolSet({
@@ -123,7 +123,7 @@ const tools = toZodToolSet({
     userId: "<YOUR_USER_ID>",
 })
 
-const emails = await tools.Google_ListEmails.execute({
+const emails = await tools.Gmail_ListEmails.execute({
   limit: 10,
 });
 ```
@@ -135,7 +135,7 @@ When you only need to work with a specific tool, use this method to convert just
 ```ts
 import { createZodTool } from "@arcadeai/arcadejs/lib"
 
-const listEmails = await arcade.tools.get("Google_ListEmails");
+const listEmails = await arcade.tools.get("Gmail_ListEmails");
 
 const listEmailsTool = createZodTool({
     tool: listEmails,
@@ -153,7 +153,7 @@ When working with tools that require user authorization (like Gmail, GitHub, Sla
 
 #### Option 1: Manual handling
 
-When you convert Arcade tools to Zod without adding an `executeFactory`, Arcade will try to run tools directly. For tools that need permission (like Google or Slack), you'll see a `PermissionDeniedError` if the user hasn't given access yet.
+When you convert Arcade tools to Zod without adding an `executeFactory`, Arcade will try to run tools directly. For tools that need permission (like Gmail or Slack), you'll see a `PermissionDeniedError` if the user hasn't given access yet.
 
 This approach gives you complete control over the authorization flow, making it perfect for custom UI implementations or complex workflows. You'll have full flexibility to design your own user experience, but you'll need to handle authorization flows and error states manually in your code.
 
@@ -167,7 +167,7 @@ const tools = toZodToolSet({
 })
 
 try {
-	const result = await tools.Google_ListEmails.execute({
+	const result = await tools.Gmail_ListEmails.execute({
 		limit: 10,
 	});
 	console.log(result);
@@ -175,7 +175,7 @@ try {
 	if (error instanceof PermissionDeniedError) {
 		// You can use the `arcade.tools.authorize` method to get an authorization URL for the user
 		const authorizationResponse = await arcade.tools.authorize({
-			tool_name: "Google.ListEmails",
+			tool_name: "Gmail.ListEmails",
 			user_id: "<YOUR_USER_ID>",
 		});
 		console.log(authorizationResponse.url);
@@ -207,7 +207,7 @@ const tools = toZodToolSet({
 	executeFactory: executeOrAuthorizeZodTool, // Automatically handles tool authorization flows, including generating auth URLs
 });
 
-const result = await tools.Google_ListEmails.execute({
+const result = await tools.Gmail_ListEmails.execute({
 	limit: 10,
 });
 

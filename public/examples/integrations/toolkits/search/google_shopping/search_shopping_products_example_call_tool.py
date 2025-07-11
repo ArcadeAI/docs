@@ -2,7 +2,7 @@ from arcadepy import Arcade
 
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
-TOOL_NAME = "Search.SearchShoppingProducts"
+TOOL_NAME = "GoogleShopping.SearchProducts"
 
 tool_input = {
     "keywords": "Apple iPhone",

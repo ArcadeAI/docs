@@ -1,0 +1,139 @@
+# Google Drive
+
+import ToolInfo from "@/components/ToolInfo";
+import Badges from "@/components/Badges";
+import TabbedCodeBlock from "@/components/TabbedCodeBlock";
+import TableOfContents from "@/components/TableOfContents";
+import ToolFooter from "@/components/ToolFooter";
+
+<ToolInfo
+  description="Enable agents to interact with Google Drive."
+  author="Arcade"
+  codeLink="https://github.com/ArcadeAI/arcade-ai/tree/main/toolkits/google_drive"
+  authType="oauth2"
+  authProviderName="Google"
+  versions={["0.1.0"]}
+/>
+
+
+<Badges repo="arcadeai/arcade_google_drive" />
+
+The Arcade Google Drive toolkit provides a pre-built set of tools for interacting with Google Drive. These tools make it easy to build agents and AI apps that can:
+
+- Search Google documents in the user's Google Drive
+- Search and retrieve the contents of Google documents in the user's Google Drive
+
+## Available Tools
+
+These tools are currently available in the Arcade Google Drive toolkit.
+
+<TableOfContents
+  headers={["Tool Name", "Description"]}
+  data={[
+    ["GoogleDrive.GetFileTreeStructure", "Get the file/folder tree structure of the user's Google Drive."],
+    ["GoogleDrive.GenerateGoogleFilePickerUrl", "Generate a Google File Picker URL for user-driven file selection and authorization"],
+  ]}
+/>
+
+<Tip>
+  If you need to perform an action that's not listed here, you can [get in touch
+  with us](mailto:contact@arcade.dev) to request a new tool, or [create your
+  own tools](/home/build-tools/create-a-toolkit) with the [Google auth
+  provider](/home/auth-providers/google#using-google-auth-in-custom-tools).
+</Tip>
+
+## GoogleDrive.GetFileTreeStructure
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/google/drive/get_file_tree_structure_example_call_tool.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/google/drive/get_file_tree_structure_example_call_tool.js"],
+      },
+    }
+  ]}
+/>
+
+Get the file/folder tree structure of the user's Google Drive.
+
+**Parameters**
+
+- **`include_shared_drives`** _(bool, optional)_ Whether to include shared drives in the file tree structure. Defaults to False.
+- **`restrict_to_shared_drive_id`** _(str, optional)_ If provided, only include files from this shared drive in the file tree structure. Defaults to None, which will include files and folders from all drives.
+- **`include_organization_domain_documents`** _(bool, optional)_ Whether to include documents from the organization's domain. This is applicable to admin users who have permissions to view organization-wide documents in a Google Workspace account. Defaults to False.
+- **`order_by`** _(enum ([OrderBy](#orderby)), optional)_ Sort order. Defaults to listing the most recently modified documents first.
+- **`limit`** _(int, optional)_ The number of files and folders to list. Defaults to None, which will list all files and folders.
+
+## GoogleDrive.GenerateGoogleFilePickerUrl
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/google/drive/generate_google_file_picker_url_example_call_tool.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/google/drive/generate_google_file_picker_url_example_call_tool.js"],
+      },
+    }
+  ]}
+/>
+
+Generate a Google File Picker URL for user-driven file selection and authorization.
+
+This tool generates a URL that directs the end-user to a Google File Picker interface where
+where they can select or upload Google Drive files. Users can grant permission to access their
+Drive files, providing a secure and authorized way to interact with their files.
+
+This is particularly useful when prior tools (e.g., those accessing or modifying
+Google Docs, Google Sheets, etc.) encountered failures due to file non-existence
+(Requested entity was not found) or permission errors. Once the user completes the file
+picker flow, the prior tool can be retried.
+
+## Auth
+
+The Arcade Google Drive toolkit uses the [Google auth provider](/home/auth-providers/google) to connect to users' Google accounts.
+
+With the hosted Arcade Engine, there's nothing to configure. Your users will see `Arcade` as the name of the application that's requesting permission.
+
+With a self-hosted installation of Arcade, you need to [configure the Google auth provider](/home/auth-providers/google#configuring-google-auth) with your own Google app credentials.
+
+---
+
+## Reference
+
+## OrderBy
+
+Sort keys for ordering files in Google Drive. Each key has both ascending and descending options.
+
+- **`CREATED_TIME`**: When the file was created (ascending).
+- **`CREATED_TIME_DESC`**: When the file was created (descending).
+- **`FOLDER`**: The folder ID, sorted using alphabetical ordering (ascending).
+- **`FOLDER_DESC`**: The folder ID, sorted using alphabetical ordering (descending).
+- **`MODIFIED_BY_ME_TIME`**: The last time the file was modified by the user (ascending).
+- **`MODIFIED_BY_ME_TIME_DESC`**: The last time the file was modified by the user (descending).
+- **`MODIFIED_TIME`**: The last time the file was modified by anyone (ascending).
+- **`MODIFIED_TIME_DESC`**: The last time the file was modified by anyone (descending).
+- **`NAME`**: The name of the file, sorted using alphabetical ordering (ascending).
+- **`NAME_DESC`**: The name of the file, sorted using alphabetical ordering (descending).
+- **`NAME_NATURAL`**: The name of the file, sorted using natural sort ordering (ascending).
+- **`NAME_NATURAL_DESC`**: The name of the file, sorted using natural sort ordering (descending).
+- **`QUOTA_BYTES_USED`**: The number of storage quota bytes used by the file (ascending).
+- **`QUOTA_BYTES_USED_DESC`**: The number of storage quota bytes used by the file (descending).
+- **`RECENCY`**: The most recent timestamp from the file's date-time fields (ascending).
+- **`RECENCY_DESC`**: The most recent timestamp from the file's date-time fields (descending).
+- **`SHARED_WITH_ME_TIME`**: When the file was shared with the user, if applicable (ascending).
+- **`SHARED_WITH_ME_TIME_DESC`**: When the file was shared with the user, if applicable (descending).
+- **`STARRED`**: Whether the user has starred the file (ascending).
+- **`STARRED_DESC`**: Whether the user has starred the file (descending).
+- **`VIEWED_BY_ME_TIME`**: The last time the file was viewed by the user (ascending).
+- **`VIEWED_BY_ME_TIME_DESC`**: The last time the file was viewed by the user (descending).
+
+<ToolFooter pipPackageName="arcade_google_drive" />

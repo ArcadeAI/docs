@@ -3,7 +3,7 @@ import { Arcade } from "@arcadeai/arcadejs";
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
 const USER_ID = "you@example.com";
-const TOOL_NAME = "Search.SearchJobs";
+const TOOL_NAME = "GoogleJobs.SearchJobs";
 
 const toolInput = {
   query: "software engineer",
