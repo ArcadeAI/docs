@@ -2,7 +2,7 @@ from arcadepy import Arcade
 
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
-TOOL_NAME = "Search.GetYoutubeVideoDetails"
+TOOL_NAME = "Youtube.GetYoutubeVideoDetails"
 
 tool_input = {
     "video_id": "dQw4w9WgXcQ",

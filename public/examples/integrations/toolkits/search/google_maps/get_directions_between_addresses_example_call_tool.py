@@ -3,7 +3,7 @@ from arcadepy import Arcade
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
 USER_ID = "{arcade_user_id}"
-TOOL_NAME = "Search.GetDirectionsBetweenAddresses"
+TOOL_NAME = "GoogleMaps.GetDirectionsBetweenAddresses"
 
 tool_input = {
     "origin_address": "123 Main St, New York, NY 10001",

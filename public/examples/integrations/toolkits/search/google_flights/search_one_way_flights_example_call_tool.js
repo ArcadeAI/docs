@@ -3,7 +3,7 @@ import { Arcade } from "@arcadeai/arcadejs";
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
 const USER_ID = "{arcade_user_id}";
-const TOOL_NAME = "Search.SearchOneWayFlights";
+const TOOL_NAME = "GoogleFlights.SearchOneWayFlights";
 
 const toolInput = {
 	departure_airport_code: "LAX",
