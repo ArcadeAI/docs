@@ -3,7 +3,7 @@ from arcadepy import Arcade
 
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
-USER_ID = "user@example.com"  # Unique identifier for your user (email, UUID, etc.)
+USER_ID = "{arcade_user_id}"  # Unique identifier for your user (email, UUID, etc.)
 TOOL_NAME = "Jira.ListPrioritiesAvailableToAnIssue"
 
 auth_response = client.tools.authorize(tool_name=TOOL_NAME)

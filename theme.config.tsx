@@ -10,7 +10,7 @@ import { Check, Important, Info, Note, Tip, Warning } from "@markdown/Callouts";
 import { Card, Cards } from "@markdown/Cards";
 import { DarkOnly, LightOnly } from "@markdown/ThemeContent";
 import { DocsThemeConfig } from "nextra-theme-docs";
-import { Button, Cards as NavCards, Steps } from "nextra/components";
+import { Cards as NavCards, Steps } from "nextra/components";
 import { SignupLink } from "@/components/Analytics";
 import Link from "next/link";
 

@@ -2,8 +2,8 @@ import { Arcade } from "@arcadeai/arcadejs";
 
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
-const USER_ID = "user@example.com";  // Unique identifier for your user (email, UUID, etc.)
-const TOOL_NAME = "Slack.GetMultiPersonDmConversationMetadataByUsernames";
+const USER_ID = "{arcade_user_id}";
+const TOOL_NAME = "Slack.GetMultiPersonDmConversationMetadataByUsername";
 
 // Start the authorization process
 const authResponse = await client.tools.authorize({tool_name: TOOL_NAME});

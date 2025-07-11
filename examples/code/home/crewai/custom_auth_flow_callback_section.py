@@ -2,7 +2,7 @@ from typing import Any
 
 from crewai_arcade import ArcadeToolManager
 
-USER_ID = "user@example.com"
+USER_ID = "{arcade_user_id}"
 
 def custom_auth_flow(
     manager: ArcadeToolManager, tool_name: str, **tool_input: dict[str, Any]
