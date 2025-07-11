@@ -4,7 +4,7 @@ from googleapiclient.discovery import build
 
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
-user_id = "user@example.com"
+user_id = "{arcade_user_id}"
 
 """
 In this example, we will use Arcade to authenticate with Google and

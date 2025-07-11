@@ -2,7 +2,7 @@ import { Arcade } from "@arcadeai/arcadejs";
 
 const client = new Arcade({ baseURL: "https://api.arcade.dev" }); // Automatically finds the `ARCADE_API_KEY` env variable
 
-const USER_ID = "user@example.com";
+const USER_ID = "{arcade_user_id}";
 const TOOL_NAME = "Hubspot.GetCompanyDetails";
 
 // Start the authorization process

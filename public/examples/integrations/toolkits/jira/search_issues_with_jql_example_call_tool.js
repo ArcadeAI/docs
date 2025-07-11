@@ -2,7 +2,7 @@ import { Arcade } from "@arcadeai/arcadejs";
 
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
-const USER_ID = "user@example.com";  // Unique identifier for your user (email, UUID, etc.)
+const USER_ID = "{arcade_user_id}";  // Unique identifier for your user (email, UUID, etc.)
 const TOOL_NAME = "Jira.SearchIssuesWithJql";
 
 // Start the authorization process

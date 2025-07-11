@@ -3,7 +3,7 @@ from arcadepy import Arcade
 client = Arcade(base_url="http://localhost:9099")  # Automatically finds the `ARCADE_API_KEY` env variable
 
 TOOL_NAME = "Salesforce.GetAccountDataByKeywords"
-USER_ID = "user@example.com"
+USER_ID = "{arcade_user_id}"
 
 auth_response = client.tools.authorize(tool_name=TOOL_NAME, user_id=USER_ID)
 
