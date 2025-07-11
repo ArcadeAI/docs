@@ -3,8 +3,8 @@ from arcadepy import Arcade
 
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
-USER_ID = "{arcade_user_id}"
-TOOL_NAME = "Slack.GetMultiPersonDmConversationMetadataByUsername"
+USER_ID = "user@example.com"  # Unique identifier for your user (email, UUID, etc.)
+TOOL_NAME = "Slack.GetMessages"
 
 auth_response = client.tools.authorize(tool_name=TOOL_NAME)
 
@@ -15,7 +15,9 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'usernames': ['alice', 'bob', 'charlie'], 'next_cursor': 'abc123'
+    'channel_name': 'general',
+    'oldest_relative': '01:00:00',
+    'limit': 50
 }
 
 response = client.tools.execute(
