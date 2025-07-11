@@ -15,7 +15,7 @@ Below we are just showing how to use Arcade as an auth provider, if you need to 
 """
 
 # This would be your app's internal ID for the user (an email, UUID, etc.)
-user_id = "user@example.com"
+user_id = "{arcade_user_id}"
 
 # Start the authorization process
 auth_response = client.auth.start(

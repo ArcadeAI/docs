@@ -13,8 +13,10 @@ import { google } from "googleapis";
 
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
-// Your app's internal ID for the user (an email, UUID, etc). It's used internally to identify your user in Arcade, not to identify with the Gmail service.
-const user_id = "user@example.com";
+// Your app's internal ID for the user (an email, UUID, etc).
+// It's used internally to identify your user in Arcade, not to identify with the Gmail service.
+// Use your Arcade account email for testing:
+const user_id = "{arcade_user_id}";
 
 // Start the authorization process
 let auth_response = await client.auth.start(user_id, "google", {

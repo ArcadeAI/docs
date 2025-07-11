@@ -4,7 +4,7 @@ const client = new Arcade((baseURL = "http://localhost:9099")); // Automatically
 
 const salesforceProviderId = "salesforce";
 const salesforceOrgSubdomain = "salesforce-org-subdomain";
-const userId = "user@example.com";
+const userId = "{arcade_user_id}";
 const scopes = ["read_account"];
 
 // Start the authorization process
