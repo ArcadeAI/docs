@@ -23,6 +23,7 @@ export const categories: Category[] = [
   { id: "search", name: "Search" },
   { id: "payments", name: "Payments & Finance" },
   { id: "sales", name: "Sales" },
+  { id: "databases", name: "Databases" },
 ];
 
 // Available tools
@@ -870,6 +871,15 @@ const comingSoonTools: Tool[] = [
     category: "productivity",
     type: "arcade",
     isComingSoon: true,
+  },
+  {
+    name: "Postgres",
+    image: "postgres.svg",
+    summary: "Interact with PostgreSQL databases with your agents.",
+    link: "/toolkits/databases/postgres",
+    category: "databases",
+    type: "community",
+    isComingSoon: false,
   },
 ];
 

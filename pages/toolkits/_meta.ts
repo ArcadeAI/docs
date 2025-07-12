@@ -30,6 +30,9 @@ export default {
   sales: {
     title: "Sales",
   },
+  databases: {
+    title: "Databases",
+  },
   "-- Submit your toolkit": {
     type: "separator",
     title: "Submit your toolkit",
