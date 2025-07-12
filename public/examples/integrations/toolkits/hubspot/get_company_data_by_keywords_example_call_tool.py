@@ -4,7 +4,7 @@ client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
 TOOL_NAME = "Hubspot.GetCompanyDataByKeywords"
 
-user_id = "user@example.com"
+user_id = "{arcade_user_id}"
 auth_response = client.tools.authorize(tool_name=TOOL_NAME, user_id=user_id)
 
 if auth_response.status != "completed":

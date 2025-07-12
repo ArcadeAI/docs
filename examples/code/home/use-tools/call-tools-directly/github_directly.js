@@ -2,7 +2,7 @@ import Arcade from "@arcadeai/arcadejs";
 
 const client = new Arcade();
 
-let userId = "you@example.com";
+let userId = "{arcade_user_id}";
 
 const response = await client.tools.execute({
   tool_name: "GitHub.SetStarred",

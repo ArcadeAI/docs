@@ -2,8 +2,8 @@ import { Arcade } from "@arcadeai/arcadejs";
 
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
-const USER_ID = "you@example.com";
-const TOOL_NAME = "Search.GetDirectionsBetweenAddresses";
+const USER_ID = "{arcade_user_id}";
+const TOOL_NAME = "GoogleMaps.GetDirectionsBetweenAddresses";
 
 const toolInput = {
 	origin_address: "123 Main St, New York, NY 10001",

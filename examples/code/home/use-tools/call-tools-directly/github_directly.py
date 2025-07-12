@@ -2,7 +2,7 @@ from arcadepy import Arcade
 
 client = Arcade()
 
-user_id = "user@example.com"
+user_id = "{arcade_user_id}"
 
 response = client.tools.execute(
     tool_name="GitHub.SetStarred",

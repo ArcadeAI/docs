@@ -3,7 +3,7 @@ from arcade_search.enums import WalmartSortBy
 
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
-TOOL_NAME = "Search.SearchWalmartProducts"
+TOOL_NAME = "Walmart.SearchProducts"
 
 tool_input = {
     "query": "Apple iPhone",

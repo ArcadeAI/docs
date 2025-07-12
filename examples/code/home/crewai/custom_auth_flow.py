@@ -4,7 +4,7 @@ from crewai import Agent, Crew, Task
 from crewai.llm import LLM
 from crewai_arcade import ArcadeToolManager
 
-USER_ID = "user@example.com"
+USER_ID = "{arcade_user_id}"
 
 def custom_auth_flow(
     manager: ArcadeToolManager, tool_name: str, **tool_input: dict[str, Any]
@@ -50,7 +50,7 @@ def tool_manager_callback(tool_manager: ArcadeToolManager, tool_name: str, **too
 
 manager = ArcadeToolManager(executor=tool_manager_callback)
 
-tools = manager.get_tools(tools=["Google.ListEmails"], toolkits=["Slack"])
+tools = manager.get_tools(tools=["Gmail.ListEmails"], toolkits=["Slack"])
 
 crew_agent = Agent(
     role="Main Agent",

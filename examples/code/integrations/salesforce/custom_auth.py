@@ -5,7 +5,7 @@ client = Arcade(base_url="http://localhost:9099")  # Automatically finds the `AR
 
 salesforce_provider_id = "salesforce"
 salesforce_org_subdomain = "salesforce-org-subdomain"
-user_id = "user@example.com"
+user_id = "{arcade_user_id}"
 scopes = ["read_account"]
 
 # Start the authorization process

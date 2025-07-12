@@ -2,7 +2,7 @@ import { Arcade } from "@arcadeai/arcadejs";
 
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
-const TOOL_NAME = "Search.GetWalmartProductDetails";
+const TOOL_NAME = "Walmart.GetProductDetails";
 
 const toolInput = {
 	item_id: "1234567890",

@@ -1,11 +1,11 @@
 from arcadepy import Arcade
 
 # You can also set the `ARCADE_API_KEY` environment variable instead of passing it as a parameter.
-client = Arcade(api_key="arcade_api_key")
+client = Arcade(api_key="{arcade_api_key}")
 
 # Arcade needs a unique identifier for your application user (this could be an email address, a UUID, etc).
-# In this example, simply use your email address as the user ID:
-user_id = "user@example.com"
+# In this example, use the email you used to sign up for Arcade.dev:
+user_id = "{arcade_user_id}"
 
 # Let's use the `Math.Sqrt` tool from the Arcade Math toolkit to get the square root of a number.
 response = client.tools.execute(

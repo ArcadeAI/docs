@@ -2,8 +2,8 @@ from arcadepy import Arcade
 
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
-USER_ID = "you@example.com"
-TOOL_NAME = "Search.SearchGoogle"
+USER_ID = "{arcade_user_id}"
+TOOL_NAME = "GoogleSearch.Search"
 
 tool_input = {"query": "Arcade documentation", "n_results": 5}
 

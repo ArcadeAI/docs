@@ -2,7 +2,7 @@ from arcadepy import Arcade
 
 client = Arcade(base_url="https://api.arcade.dev")  # Automatically finds the `ARCADE_API_KEY` env variable
 
-user_id = "user@example.com"
+user_id = "{arcade_user_id}"
 
 # Start the authorization process
 auth_response = client.auth.start(

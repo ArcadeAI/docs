@@ -2,7 +2,7 @@ import { Arcade } from "@arcadeai/arcadejs";
 
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
-const userId = "user@example.com";
+const userId = "{arcade_user_id}";
 
 /*
 In this example, we will use Arcade to authenticate with GitHub and retrieve

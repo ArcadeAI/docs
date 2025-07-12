@@ -1,5 +1,5 @@
 export default {
-  "code-sandbox": "Code Sandbox",
+  e2b: "E2B",
   github: "GitHub",
-  web: "Web",
+  firecrawl: "Firecrawl",
 };

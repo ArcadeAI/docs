@@ -23,6 +23,7 @@ export const categories: Category[] = [
   { id: "search", name: "Search" },
   { id: "payments", name: "Payments & Finance" },
   { id: "sales", name: "Sales" },
+  { id: "databases", name: "Databases" },
 ];
 
 // Available tools
@@ -32,7 +33,7 @@ const availableTools: Tool[] = [
     image: "gmail.png",
     summary:
       "Send, write, draft, delete, trash, and search Gmail emails with your agents.",
-    link: "/toolkits/productivity/google/gmail",
+    link: "/toolkits/productivity/gmail",
     category: "productivity",
     type: "arcade",
   },
@@ -68,7 +69,7 @@ const availableTools: Tool[] = [
     image: "google_calendar.png",
     summary:
       "Create, update, delete, and search events in Google Calendar with your agents.",
-    link: "/toolkits/productivity/google/calendar",
+    link: "/toolkits/productivity/google_calendar",
     category: "productivity",
     type: "arcade",
   },
@@ -76,7 +77,7 @@ const availableTools: Tool[] = [
     name: "Google Contacts",
     image: "google_contacts.png",
     summary: "Create and search contacts in Google Contacts with your agents.",
-    link: "/toolkits/productivity/google/contacts",
+    link: "/toolkits/productivity/google_contacts",
     category: "productivity",
     type: "arcade",
   },
@@ -84,7 +85,7 @@ const availableTools: Tool[] = [
     name: "Google Drive",
     image: "google_drive.png",
     summary: "List documents in Google Drive with your agents.",
-    link: "/toolkits/productivity/google/drive",
+    link: "/toolkits/productivity/google_drive",
     category: "productivity",
     type: "arcade",
   },
@@ -93,7 +94,7 @@ const availableTools: Tool[] = [
     image: "google_docs.png",
     summary:
       "Create, edit, and get information about Google Docs documents with your agents.",
-    link: "/toolkits/productivity/google/docs",
+    link: "/toolkits/productivity/google_docs",
     category: "productivity",
     type: "arcade",
   },
@@ -101,7 +102,7 @@ const availableTools: Tool[] = [
     name: "Google Sheets",
     image: "google_sheets.svg",
     summary: "Create, read, and update Google Sheets with your agents.",
-    link: "/toolkits/productivity/google/sheets",
+    link: "/toolkits/productivity/google_sheets",
     category: "productivity",
     type: "arcade",
   },
@@ -115,18 +116,18 @@ const availableTools: Tool[] = [
     type: "arcade",
   },
   {
-    name: "Code Runner",
+    name: "E2B",
     image: "e2b.png",
     summary: "Execute and test code in a secure sandbox environment",
-    link: "/toolkits/development/code-sandbox",
+    link: "/toolkits/development/e2b",
     category: "development",
     type: "arcade",
   },
   {
-    name: "Web",
-    image: "web.png",
+    name: "Firecrawl",
+    image: "firecrawl.png",
     summary: "Browse and interact with web pages programmatically",
-    link: "/toolkits/development/web/web",
+    link: "/toolkits/development/firecrawl/firecrawl",
     category: "development",
     type: "arcade",
   },
@@ -870,6 +871,15 @@ const comingSoonTools: Tool[] = [
     category: "productivity",
     type: "arcade",
     isComingSoon: true,
+  },
+  {
+    name: "Postgres",
+    image: "postgres.svg",
+    summary: "Interact with PostgreSQL databases with your agents.",
+    link: "/toolkits/databases/postgres",
+    category: "databases",
+    type: "community",
+    isComingSoon: false,
   },
 ];
 

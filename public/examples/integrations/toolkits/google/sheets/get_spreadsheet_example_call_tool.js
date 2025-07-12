@@ -2,8 +2,8 @@ import { Arcade } from "@arcadeai/arcadejs";
 
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
-const USER_ID = "you@example.com";
-const TOOL_NAME = "Google.GetSpreadsheet";
+const USER_ID = "{arcade_user_id}";
+const TOOL_NAME = "GoogleSheets.GetSpreadsheet";
 
 // Start the authorization process
 const authResponse = await client.tools.authorize({
