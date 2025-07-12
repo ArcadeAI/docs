@@ -5,37 +5,36 @@ description: "How to secure and brand your auth flows in production"
 
 # Secure and Brand the Auth Flow in Production
 
-To keep your users safe, Arcade.dev performs a session verification check when a tool is authorized for the first time. This check verifies that the user who is authorizing the tool is the same user who started the authorization flow, which helps prevent phishing attacks.
+To keep your users safe, Arcade.dev performs a user verification check when a tool is authorized for the first time. This check verifies that the user who is authorizing the tool is the same user who started the authorization flow, which helps prevent phishing attacks.
 
 There are two ways to secure your auth flows with Arcade.dev:
-- Use the **Arcade session verifier** for development (enabled by default)
-- Implement a **custom session verifier** for production
+- Use the **Arcade user verifier** for development (enabled by default)
+- Implement a **custom user verifier** for production
 
 This setting is configured in the Arcade Dashboard.
 
 
-## Use the Arcade session verifier
+## Use the Arcade user verifier
 
-If you're building a proof-of-concept app or a solo project, use the Arcade session verifier. This option is on by default when you create a new Arcade.dev account.
+If you're building a proof-of-concept app or a solo project, use the Arcade user verifier. This option is on by default when you create a new Arcade.dev account.
 
 When you authorize a tool, you'll be prompted to sign in to your Arcade.dev account. If you are already signed in (to the Arcade Dashboard, for example), this verification will succeed silently.
 
+The Arcade.dev user verifier helps keep your auth flows secure while you are building and testing your agent or app. When you're ready to share your work with others, implement a [custom user verifier](#build-a-custom-user-verifier) so your users don't need to sign in to Arcade.dev.
+
 <Note>
-  Arcade's default OAuth apps can *only* be used with the Arcade session verifier.
+  Arcade's default OAuth apps can *only* be used with the Arcade user verifier.
   If you are building a multi-user production app, you must obtain your own OAuth app credentials and add them to Arcade.
   For example, [configure Google auth in the Arcade Dashboard](https://docs.arcade.dev/home/auth-providers/google#access-the-arcade-dashboard).
 </Note>
 
-The Arcade.dev session verifier helps keep your auth flows secure while you are building and testing your agent or app. When you're ready to share your work with others, implement a [custom session verifier](#set-up-a-custom-session-verifier) so your users don't need to sign in to Arcade.dev.
+## Build a custom user verifier
 
+In a production application or agent, users are verified by your code, not Arcade.dev. This allows you to fully control your end-user's experience. To enable this, build a custom verifier route and add the URL to the Arcade Dashboard.
 
-## Set up a custom session verifier
+When your users authorize a tool, Arcade.dev will redirect the user's browser to your verifier route with some information in the query string. Your custom verifier route must send a response back to Arcade.dev to confirm the user's ID.
 
-In a production application or agent, user sessions are verified by your code, not Arcade.dev. To enable this, build a custom verifier route and add the URL to the Arcade Dashboard.
-
-When your users authorize a tool, Arcade.dev will redirect the user's browser to your verifier route with some information in the query string. Your custom verifier route must send a response back to Arcade.dev to confirm the user's session details.
-
-If you need help, start a [GitHub discussion](https://github.com/ArcadeAI/arcade-ai/discussions) and we'll be happy to assist.
+If you need help, start a [GitHub discussion](https://github.com/ArcadeAI/arcade-ai/discussions) and we'll be happy to assist. TODO prestart
 
 import { Steps, Tabs } from "nextra/components";
 
@@ -48,7 +47,9 @@ Create a public route in your app or API that can accept a browser redirect (HTT
 The route must gather the following information:
 
 - The `flow_id` from the current URL's query string
-- The unique ID of the user currently signed in. This varies depending on how your app is built, but it is typically retrieved from a session cookie or other secure storage. It **must** match the user ID that your code specified at the start of the authorization flow.
+- The unique ID of the user currently signed in, commonly an ID from your application, an email address, or similar.
+
+How it's retrieved varies depending on how your app is built, but it is typically retrieved from a session cookie or other secure storage. It **must** match the user ID that your code specified at the start of the authorization flow.
 
 
 ### Verify the user's session details
