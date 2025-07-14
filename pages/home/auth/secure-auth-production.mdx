@@ -34,7 +34,7 @@ In a production application or agent, users are verified by your code, not Arcad
 
 When your users authorize a tool, Arcade.dev will redirect the user's browser to your verifier route with some information in the query string. Your custom verifier route must send a response back to Arcade.dev to confirm the user's ID.
 
-If you need help, start a [GitHub discussion](https://github.com/ArcadeAI/arcade-ai/discussions) and we'll be happy to assist. TODO prestart
+If you need help, join the [Implementing a custom user verifier](https://github.com/ArcadeAI/arcade-ai/discussions/486) GitHub discussion and we'll be happy to assist.
 
 import { Steps, Tabs } from "nextra/components";
 
@@ -47,14 +47,14 @@ Create a public route in your app or API that can accept a browser redirect (HTT
 The route must gather the following information:
 
 - The `flow_id` from the current URL's query string
-- The unique ID of the user currently signed in, commonly an ID from your application, an email address, or similar.
+- The unique ID of the user currently signed in, commonly an ID from your application's database, an email address, or similar.
 
 How it's retrieved varies depending on how your app is built, but it is typically retrieved from a session cookie or other secure storage. It **must** match the user ID that your code specified at the start of the authorization flow.
 
 
-### Verify the user's session details
+### Verify the user's identity
 
-Use the Arcade SDK (or our REST API) to verify the user's session details.
+Use the Arcade SDK (or our REST API) to verify the user's identity.
 
 <Warning>
   Because this request uses your Arcade API key, it *must not* be made from the client side (a browser or desktop app). This code must be run on a server.
@@ -77,7 +77,7 @@ Content-Type: application/json
 
 **Valid Response**
 
-If the session details are valid, the response will contain some information about the auth flow:
+If the user's ID matches the ID specified at the start of the authorization flow, the response will contain some information about the auth flow:
 
 <Tabs items={["REST"]} storageKey="preferredLanguage">
 <Tabs.Tab>
@@ -100,7 +100,7 @@ You can optionally redirect the user's browser to the `next_uri`, which will dis
 
 **Invalid Response**
 
-If the session details are invalid, it means the user is not the same user who started the authorization flow.
+If the user's ID does not match the ID specified at the start of the authorization flow, the response will contain an error.
 
 <Tabs items={["REST"]} storageKey="preferredLanguage">
 <Tabs.Tab>
@@ -121,8 +121,8 @@ Content-Type: application/json
 In the Arcade Dashboard, pick the **Custom verifier** option and add the URL of your verifier route.
 
 <Note>
-  Arcade's default OAuth apps *only* support the Arcade session verifier.
-  Authorization flows using Arcade's default OAuth apps will use the Arcade session verifier even if you have a custom verifier route set up.
+  Arcade's default OAuth apps *only* support the Arcade user verifier.
+  Authorization flows using Arcade's default OAuth apps will use the Arcade user verifier even if you have a custom verifier route set up.
 </Note>
 
 </Steps>
