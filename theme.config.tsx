@@ -41,11 +41,6 @@ const config: DocsThemeConfig = {
     extraContent: (
       <>
         <SignupLink
-          utmParams={{
-            utm_source: "docs",
-            utm_medium: "navbar",
-            utm_campaign: "signup",
-          }}
           linkLocation="docs:navbar"
         >
           <NavBarButton
@@ -54,7 +49,7 @@ const config: DocsThemeConfig = {
           />
         </SignupLink>
         <Link
-          href="https://api.arcade.dev/dashboard/playground/chat?utm_source=docs&utm_medium=navbar&utm_campaign=dashboard"
+          href="https://api.arcade.dev/dashboard/playground/chat"
         >
           <NavBarButton
             text="Dashboard"
