@@ -608,7 +608,7 @@ const comingSoonTools: Tool[] = [
     link: "/toolkits/productivity/linear",
     category: "productivity",
     type: "arcade",
-    isComingSoon: true,
+    isComingSoon: false,
   },
   {
     name: "Mailchimp",
