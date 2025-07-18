@@ -15,3 +15,16 @@ build: ## Build the docs site
 
 run: ## Run the docs site locally
 	@pnpm dev
+
+ruin:
+	@echo "\033[31m\033[1m💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️\033[0m"
+	@echo "\033[31m\033[1m👻                                          👻\033[0m"
+	@echo "\033[31m\033[1m🔥  With but a single command, the realm   🔥\033[0m"
+	@echo "\033[31m\033[1m🔥  of order shall collapse into chaos.    🔥\033[0m"
+	@echo "\033[31m\033[1m👻                                          👻\033[0m"
+	@echo "\033[31m\033[1m⚡  Beware, for what is ruined today may   ⚡\033[0m"
+	@echo "\033[31m\033[1m⚡  take an eternity to rebuild.           ⚡\033[0m"
+	@echo "\033[31m\033[1m👻                                          👻\033[0m"
+	@echo "\033[31m\033[1m🎃      - The Elders of Makefile           🎃\033[0m"
+	@echo "\033[31m\033[1m👻                                          👻\033[0m"
+	@echo "\033[31m\033[1m💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️\033[0m"
