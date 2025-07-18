@@ -12,6 +12,8 @@ install: ## Install the dependencies
 build: ## Build the docs site
 	@pnpm build
 
+test: ## Run the tests
+	@pnpm test -- --run
 
 run: ## Run the docs site locally
 	@pnpm dev
