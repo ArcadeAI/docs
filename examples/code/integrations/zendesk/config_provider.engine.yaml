@@ -1,0 +1,43 @@
+auth:
+  providers:
+    - id: zendesk
+      description: "Custom Zendesk provider"
+      enabled: true
+      type: oauth2
+      client_id: ${env:ZENDESK_CLIENT_ID}
+      oauth2:
+        scope_delimiter: ' '
+        pkce:
+          enabled: true
+          code_challenge_method: S256
+        authorize_request:
+          endpoint: 'https://<your-zendesk-subdomain>.zendesk.com/oauth/authorizations/new'
+          params:
+            client_id: '{{client_id}}'
+            redirect_uri: '{{redirect_uri}}'
+            scope: '{{scopes}} {{existing_scopes}}'
+            response_type: code
+        token_request:
+          endpoint: 'https://<your-zendesk-subdomain>.zendesk.com/oauth/tokens'
+          params:
+            grant_type: authorization_code
+            client_id: '{{client_id}}'
+            redirect_uri: '{{redirect_uri}}'
+          response_content_type: application/json
+          response_map:
+            access_token: '$.access_token'
+            refresh_token: '$.refresh_token'
+            expires_in: '$.expires_in'
+            scope: '$.scope'
+        refresh_request:
+          endpoint: 'https://<your-zendesk-subdomain>.zendesk.com/oauth/tokens'
+          params:
+            grant_type: refresh_token
+            refresh_token: '{{refresh_token}}'
+            client_id: '{{client_id}}'
+          response_content_type: application/json
+          response_map:
+            access_token: '$.access_token'
+            refresh_token: '$.refresh_token'
+            expires_in: '$.expires_in'
+            scope: '$.scope'
