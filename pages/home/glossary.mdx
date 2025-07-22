@@ -1,0 +1,114 @@
+---
+title: "Glossary"
+description: "Glossary of terms used in the Arcade platform"
+---
+
+# Arcade Glossary
+
+
+## Agents and Tools
+
+```mermaid
+graph TD
+    A[Agent] --> B[Toolkit]
+    B --> C[Tool]
+```
+
+### Agent
+
+An 'agent' is the application you are building.  It can be a chatbot, a web application, a mobile app, or any other type of application that happens to use an LLM to as part of its functionality.  Agents interact with the world by calling tools.  Helping you build, test, authenticate, and deploy tools is what Arcade is all about.
+
+### Tool
+
+A 'tool' is a function that can be called by an agent which interacts with another service - commonly via an API, filesystem, database etc.  Tools are written in python and deployed by running a worker which contains the toolkit's code.  Tools are defined by the `@tool()` decorator and can will be passed `ToolContext` as the first argument.  If a tool has dependencies that are not met (a secret is not provided, for example), the tool will fail to execute.
+
+An example of a tool, scoped by it's toolkit would be `Gmail.SendEmail`.
+
+*Learn more about [tools](/home/build-tools/create-a-toolkit).*
+
+### Toolkit
+
+A 'toolkit' is a collection of tools that can be used by an agent, grouped logically together by a common theme or provider.  Toolkits are the unit of deployment for tools within Arcade.
+
+### Tool Context
+
+A 'tool context' is an object that is passed to a tool when it is called as the first argument.  It contains information about the tool call and the user for which the tool is being called, and any secrets the tool requires to run.
+
+*Learn more about [tool context](/home/build-tools/tool-context).*
+
+
+## The Arcade Platform
+
+```mermaid
+graph TD
+    A[Tenant] --> B[Project]
+    B --> C[API Key]
+    C --> D[Agent]
+    Z[Account] --> B
+    Z[Account] --> A
+```
+
+### Account
+
+The 'account' is you, the user of Arcade who is developing an application or agent.  You can sign into the Arcade dashboard, manage projects, and more.
+
+### Tenant
+
+A 'tenant' is a collection of projects and users.  It is the top-level organization in Arcade.  You can be a member of one or more tenants, and each tenant can have multiple projects.  Billing is handled at the tenant level.
+
+### Project
+
+A 'project' is a collection of agents and tools.  It is the lowest level of organization in Arcade.  You can have multiple projects, and each project can have multiple agents and tools.  Different Accounts can be members of different projects, and each project will have different API keys.
+
+### API Key
+
+An 'API key' is a secret key that is used to authenticate requests to the Arcade API.  It is used to identify the project that the request is for.  API keys are project-specific.
+
+## Authentication and Billing
+
+```mermaid
+graph TD
+    A[Arcade] --> B[Agent]
+    B --> C[User]
+```
+
+### User
+
+A 'user' is your end-user, the person who is using your application or agent.  Users are counted by the unique `user_id` properties sent when calling tools.  `user_id` values are commonly email addresses, but can be any string or number.
+
+### Monthly Active Users (MAU)
+
+Monthly Active Users are the unique end-users (counted by `user_id`) who have executed a tool in your app/agent within the past month.  If the same `user_id` calls a tool multiple times in the same month, or executes multiple tools, it is only counted once.
+
+### Tool Executions
+
+A 'tool execution' is a single call to a tool to interact with a remote system or service. The tool execution itself may fail (e.g. the user does not have permission to call the tool), but as long as the execution was able to be routed to a worker, the tool execution will be counted.
+
+*Learn more about [tool executions](/home/use-tools/tools-overview).*
+
+### Tool Execution Flow
+
+```mermaid
+graph TD
+    A[Agent] --> B[Arcade Client]
+    B --> C[Arcade Engine]
+    C --> D[Worker]
+```
+
+### Arcade Client
+
+The 'Arcade client' is the SDK that you use to interact with the Arcade platform.  It is how your agent lists and calls tools, tied back to your project via an API key.  We offer clients for many popular languages and frameworks, including Python, JavaScript, and more.
+
+*Learn more about [the Arcade clients](/home/arcade-clients).*
+
+### Arcade Engine
+
+The 'Arcade engine' is the core of the Arcade platform.  It is responsible for routing tool execution requests to the correct worker, and for managing the lifecycle of tool executions.  It is also responsible for checking the user's permissions to call a tool, and for injecting secrets and other information into the tool call.
+
+The Arcade Engine is also responsible for the OAuth flow for your agent's users.  This includes granting and elevating permissions and keeping tokens fresh.
+
+### Worker
+
+A 'worker' is a process that runs all the tools with a toolkit.  Workers are microservices that interact with the Arcade Engine to respond to tool execution requests.  Workers are either deployed to Arcade's infrastructure via `arcade deploy` or run in your own infrastructure as a 'hybrid worker'.
+
+*Learn more about [workers](/home/hybrid-deployment/hybrid-worker).*
