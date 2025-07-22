@@ -190,7 +190,7 @@ token_request:
 ```
 
 - `response_content_type` _(optional, default `application/json`)_: The expected content type of the response. Supported values are `application/json` and `application/x-www-form-urlencoded`.
-- `response_map` _(optional)_: A map of keys and values to extract from the response. Supports simple JSONPath expressions. Only applicable if `response_content_type` is `application/json`. See the [JSONPath reference](#jsonpath-expressions-in-response_map) for details on extracting values using JSONPath.
+- `response_map` _(optional)_: A map of keys and values to extract from the response. Supported keys are `access_token`, `expires_in`, `refresh_token`, `scope`, and `token_type`. Supports simple JSONPath expressions. Only applicable if `response_content_type` is `application/json`. See the [JSONPath reference](#jsonpath-expressions-in-response_map) for details on extracting values using JSONPath.
 
 #### `refresh_request`
 
@@ -218,7 +218,7 @@ refresh_request:
 ```
 
 - `response_content_type` _(optional, default `application/json`)_: The expected content type of the response. Supported values are `application/json` and `application/x-www-form-urlencoded`.
-- `response_map` _(optional)_: A map of keys and values to extract from the response. Supports simple JSONPath expressions. Only applicable if `response_content_type` is `application/json`. See the [JSONPath reference](#jsonpath-expressions-in-response_map) for details on extracting values using JSONPath.
+- `response_map` _(optional)_: A map of keys and values to extract from the response. Supported keys are `access_token`, `expires_in`, `refresh_token`, `scope`, and `token_type`. Supports simple JSONPath expressions. Only applicable if `response_content_type` is `application/json`. See the [JSONPath reference](#jsonpath-expressions-in-response_map) for details on extracting values using JSONPath.
 
 #### `user_info_request`
 
@@ -227,6 +227,7 @@ Some OAuth 2.0 APIs provide a user info endpoint that returns information about 
 - `endpoint`: The user info endpoint for your OAuth 2.0 server, e.g. `/oauth2/userinfo`
 - `auth_method` _(optional, default `bearer_access_token`)_: The authentication method to use. The only supported value is `bearer_access_token`.
 - `response_content_type` _(optional, default `application/json`)_: The expected content type of the response. The only supported value is `application/json`.
+- `response_map` _(optional)_: A map of keys and values to extract from the response. If no `response_map` is provided, the entire response will be extracted verbatim. Supports simple JSONPath expressions. Only applicable if `response_content_type` is `application/json`. See the [JSONPath reference](#jsonpath-expressions-in-response_map) for details on extracting values using JSONPath.
 - `triggers`: Controls when the user info request is made.
   - `on_token_grant`: If `true`, the user info request will be made when a token is granted. This is typically only once for each user, unless new scopes are granted.
   - `on_token_refresh`: If `true`, the user info request will be made every time a token is refreshed.
@@ -272,7 +273,7 @@ auth:
 - `auth_method` _(optional, default `client_secret_basic`)_: The authentication method to use for the token introspection request. Supported values are `client_secret_basic` and `bearer_access_token`.
 - `request_content_type` _(optional, default `application/x-www-form-urlencoded`)_: The content type of the request body.
 - `response_content_type` _(optional, default `application/json`)_: The content type of the response body.
-- `response_map` _(required)_: A map of keys and values to extract from the response. Supports simple JSONPath expressions. Supported keys are `access_token`, `expires_in`, `refresh_token`, `scope`, and `token_type`.
+- `response_map` _(required)_: A map of keys and values to extract from the response. Supported keys are `expires_in` and `scope`. Supports simple JSONPath expressions.
 - `expiration_format` _(optional, default `absolute_unix_timestamp`)_: The format of the expiration time. Supported values are `absolute_unix_timestamp` and `relative_seconds`.
 - `triggers` _(required)_: Controls when the token introspection request is made.
   - `on_token_grant`: If `true`, the token introspection request will be made when a token is granted. This is typically only once for each user, unless new scopes are granted.
@@ -280,9 +281,9 @@ auth:
 
 #### JSONPath expressions in `response_map`
 
-In the `token_request` and `refresh_request` sections, you can optionally configure a `response_map`. Configuring a response map is useful if your OAuth 2.0 server returns a JSON object with nested properties, or properties with non-standard names.
+In the `token_request`, `refresh_request`, `token_introspection_request`, and `user_info_request` sections, you can specify a `response_map`. Configuring a response map is useful if your OAuth 2.0 server returns a JSON object with nested properties, or properties with non-standard names.
 
-The typical JSON payload that most OAuth 2.0 servers return looks like this:
+For example, for the token request, most OAuth 2.0 servers return a JSON payload that looks like this:
 
 ```json
 {
@@ -293,7 +294,7 @@ The typical JSON payload that most OAuth 2.0 servers return looks like this:
 }
 ```
 
-If your server returns a payload that looks like this, you don't need `response_map`.
+If your server returns a payload of this shape, you don't need `response_map`!
 
 But if your server returns:
 
@@ -308,10 +309,10 @@ But if your server returns:
 }
 ```
 
-Then you need to configure `response_map` to extract the properties from inside the `data` object. Use [JSONPath](https://en.wikipedia.org/wiki/JSONPath) expressions to select the properties you need:
+Then you need to configure `response_map` to extract the nested properties from inside the `data` object. Use [JSONPath](https://en.wikipedia.org/wiki/JSONPath) expressions to select the properties you need:
 
 ```yaml
-token_request: # or refresh_request
+token_request:
   response_map:
     access_token: "$.data.access_token"
     expires_in: "$.data.expires_in"
@@ -319,7 +320,7 @@ token_request: # or refresh_request
     scope: "$.data.scope" # Only needed if scopes are used
 ```
 
-Not all OAuth 2.0 servers support refresh tokens, or use scopes. The only required properties are `access_token` and `expires_in`.
+Similarly, for user info or token introspection requests, you can use `response_map` to extract custom properties from the response.
 
 #### Handling scope arrays
 
@@ -395,7 +396,7 @@ Here's a full example of the YAML configuration for a custom OAuth 2.0 provider:
 
 <ToggleContent showText="Click to view example" hideText="Hide example">
 
-```yaml file=<rootDir>/examples/code/home/configuration/engine/full_config.1.0.yaml#L8-L71 {11-71}
+```yaml file=<rootDir>/examples/code/home/configuration/engine/full_config.1.0.yaml#L9-L91 {11-83}
 
 ```
 

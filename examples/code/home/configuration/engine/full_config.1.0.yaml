@@ -65,10 +65,27 @@ auth:
             expires_in: '$.expires_in'
             scope: '$.scope'
             token_type: '$.token_type'
+        token_introspection_request: # Optional
+          endpoint: 'https://example.com/oauth/introspect'
+          method: POST
+          params:
+            token: '{{access_token}}'
+          auth_method: client_secret_basic # Optional
+          request_content_type: application/x-www-form-urlencoded # Optional
+          response_content_type: application/json # Optional
+          response_map: # Optional
+            expires_in: '$.data.expires_in'
+            scope: '$.data.scope'
+          expiration_format: relative_seconds # or absolute_unix_timestamp
+          triggers:
+            on_token_grant: true
+            on_token_refresh: true
         user_info_request: # Optional
           endpoint: 'https://example.com/oauth/userinfo'
           auth_method: bearer_access_token
           response_content_type: application/json
+          response_map:
+            custom_property: '$.data.custom_property'
           triggers:
             on_token_grant: true
             on_token_refresh: true
