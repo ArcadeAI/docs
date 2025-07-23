@@ -11,7 +11,7 @@ import ToolFooter from "@/components/ToolFooter";
   author="Arcade"
   codeLink="https://github.com/ArcadeAI/arcade-ai/tree/main/toolkits/jira"
   authType="OAuth2"
-  versions={["0.1.0"]}
+  versions={["1.0.0"]}
 />
 
 <Badges repo="arcadeai/arcade_jira" />
@@ -27,9 +27,20 @@ The Jira toolkit provides a comprehensive set of tools for interacting with Jira
 This toolkit streamlines the process of issue management, making it easier to integrate Jira functionalities into applications and workflows.
 
 <Warning>
-  **The Jira toolkit only supports users authenticated with a single Jira instance.**
+  ## Handling multiple Atlassian Clouds
 
-  When users are prompted to authorize access to their Jira account, they will be asked to select a Jira instance. If a user selects "Instance A" and later also authenticates with "Instance B", the toolkit will raise an exception.
+  A Jira user may have multiple Atlassian Clouds authorized. In such cases, the Jira tools must be called with the `atlassian_cloud_id` argument. The [`Jira.GetAvailableAtlassianClouds`](/toolkits/productivity/jira#jiragetavailableatlassianclouds) tool can be used to get the available Atlassian Clouds and their IDs.
+
+  When a tool call does not receive a value for `atlassian_cloud_id` and the user only has a single Atlassian Cloud authorized, the tool will use that. Otherwise, an error will be raised. The error will contain an additional content listing the available Atlassian Clouds and their IDs.
+
+  Your AI Agent or AI-powered chat application can use the tool referenced above (or the exception's additional content) to guide the user into selecting the correct Atlassian Cloud.
+
+  When the user selects an Atlassian Cloud, it may be appropriate to keep this information in the LLM's context window for subsequent tool calls, avoiding the need to ask the user multiple times.
+
+  **_It is the job of the AI Agent or chat application to:_**
+
+  1. Make it clear to the chat's end user which Atlassian Cloud is being used at any moment, to avoid, for example, having a Jira Issue being created in the wrong Atlassian Cloud;
+  1. Appropriately instruct the LLM and keep the relevant information in its context window, enabling it to correctly call the Jira tools.
 </Warning>
 
 ## Available Tools
@@ -53,6 +64,7 @@ This toolkit streamlines the process of issue management, making it easier to in
       ["Jira.ListUsers", "Browse users in Jira."],
       ["Jira.GetUserById", "Get user information by their ID."],
       ["Jira.GetUsersWithoutId", "Get users without their account ID, searching by display name and email address."],
+      ["Jira.GetAvailableAtlassianClouds", "Get available Atlassian Clouds."],
       ["Jira.AttachFileToIssue", "Add an attachment to an issue."],
       ["Jira.ListIssueAttachmentsMetadata", "Get the metadata about the files attached to an issue."],
       ["Jira.GetAttachmentMetadata", "Get the metadata of an attachment."],
@@ -105,6 +117,7 @@ Get the list of issue types (e.g. 'Task', 'Epic', etc.) available to a given pro
 - **project** (`string`, required) The project to get issue types for. Provide a project name, key, or ID. If a project name is provided, the tool will try to find a unique exact match among the available projects.
 - **limit** (`integer`, optional) The maximum number of issue types to retrieve. Min of 1, max of 200. Defaults to 200.
 - **offset** (`integer`, optional) The number of issue types to skip. Defaults to 0 (start from the first issue type).
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
 
 
 ## Jira.GetIssueTypeById
@@ -127,6 +140,7 @@ Get the details of a Jira issue type by its ID.
 **Parameters**
 
 - **issue_type_id** (`string`, required) The ID of the issue type to retrieve
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
 
 
 ## Jira.GetIssueById
@@ -149,6 +163,7 @@ Get the details of a Jira issue by its ID.
 **Parameters**
 
 - **issue** (`string`, required) The ID or key of the issue to retrieve
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
 
 
 ## Jira.GetIssuesWithoutId
@@ -182,6 +197,7 @@ Search for Jira issues when you don't have the issue ID(s).
 - **parent_issue** (`string`, optional) Match issues that are a child of this issue. Provide the issue's ID or key. Defaults to None (no parent issue filtering).
 - **limit** (`integer`, optional) The maximum number of issues to retrieve. Min 1, max 100, default 50.
 - **next_page_token** (`string`, optional) The token to use to get the next page of issues. Defaults to None (first page).
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
 
 
 ## Jira.ListIssues
@@ -206,6 +222,7 @@ Get the issues for a given project.
 - **project** (`string`, optional) The project to get issues for. Provide a project ID, key or name. If a project is not provided and 1) the user has only one project, the tool will use that; 2) the user has multiple projects, the tool will raise an error listing the available projects to choose from.
 - **limit** (`integer`, optional) The maximum number of issues to retrieve. Min 1, max 100, default 50.
 - **next_page_token** (`string`, optional) The token to use to get the next page of issues. Defaults to None (first page).
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
 
 
 ## Jira.SearchIssuesWithoutJql
@@ -239,6 +256,7 @@ Parameterized search for Jira issues (without having to provide a JQL query).
 - **parent_issue** (`string`, optional) Match issues that are a child of this issue. Provide the issue's ID or key. Defaults to None (no parent issue filtering).
 - **limit** (`integer`, optional) The maximum number of issues to retrieve. Min 1, max 100, default 50.
 - **next_page_token** (`string`, optional) The token to use to get the next page of issues. Defaults to None (first page).
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
 
 
 ## Jira.SearchIssuesWithJql
@@ -263,6 +281,7 @@ Search for Jira issues using a JQL (Jira Query Language) query.
 - **jql** (`string`, required) The JQL (Jira Query Language) query to search for issues
 - **limit** (`integer`, optional) The maximum number of issues to retrieve. Min of 1, max of 100. Defaults to 50.
 - **next_page_token** (`string`, optional) The token to use to get the next page of issues. Defaults to None (first page).
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
 
 
 ## Jira.CreateIssue
@@ -295,6 +314,7 @@ Create a new Jira issue.
 - **priority** (`string`, optional) The ID or name of the priority to use for the issue. If a name is provided, the tool will try to find a unique exact match among the available priorities. Defaults to None (the issue is created with Jira's default priority for the specified project).
 - **assignee** (`string`, optional) The name, email or ID of the user to assign the issue to. If a name or email is provided, the tool will try to find a unique exact match among the available users. Defaults to None (no assignee).
 - **reporter** (`string`, optional) The name, email or ID of the user who is the reporter of the issue. If a name or email is provided, the tool will try to find a unique exact match among the available users. Defaults to None (no reporter).
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
 
 
 ## Jira.AddLabelsToIssue
@@ -319,6 +339,7 @@ Add labels to an existing Jira issue.
 - **issue** (`string`, required) The ID or key of the issue to update
 - **labels** (`array[string]`, required) The labels to add to the issue. A label cannot contain spaces. If a label is provided with spaces, they will be trimmed and replaced by underscores.
 - **notify_watchers** (`boolean`, optional) Whether to notify the issue's watchers. Defaults to True (notifies watchers).
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
 
 
 ## Jira.RemoveLabelsFromIssue
@@ -343,6 +364,7 @@ Remove labels from an existing Jira issue.
 - **issue** (`string`, required) The ID or key of the issue to update
 - **labels** (`array[string]`, required) The labels to remove from the issue (case-insensitive)
 - **notify_watchers** (`boolean`, optional) Whether to notify the issue's watchers. Defaults to True (notifies watchers).
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
 
 
 ## Jira.UpdateIssue
@@ -376,6 +398,7 @@ Update an existing Jira issue.
 - **reporter** (`string`, optional) The new issue reporter name, email, or ID. If a name or email is provided, the tool will try to find a unique exact match among the available users. Provide an empty string to remove the reporter. Defaults to None (does not change the reporter).
 - **labels** (`array[string]`, optional) The new issue labels. This argument will replace all labels with the new list. Providing an empty list will remove all labels. To add or remove a subset of labels, use the `Jira.AddLabelsToIssue` or the `Jira.RemoveLabelsFromIssue` tools. Defaults to None (does not change the labels). A label cannot contain spaces. If a label is provided with spaces, they will be trimmed and replaced by underscores.
 - **notify_watchers** (`boolean`, optional) Whether to notify the issue's watchers. Defaults to True (notifies watchers).
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
 
 
 ## Jira.ListLabels
@@ -399,6 +422,7 @@ Get the existing labels (tags) in the user's Jira instance.
 
 - **limit** (`integer`, optional) The maximum number of labels to return. Min of 1, Max of 200. Defaults to 200.
 - **offset** (`integer`, optional) The number of labels to skip. Defaults to 0 (starts from the first label)
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
 
 
 ## Jira.ListUsers
@@ -423,6 +447,7 @@ Browse users in Jira.
 - **account_type** (`string`, optional) The account type of the users to return. Defaults to 'atlassian'. Provide `None` to  disable filtering by account type. The account type filter will be applied after retrieving users from Jira API, thus the tool may return less users than the limit and still have more users to paginate. Check the `pagination` key in the response dictionary.
 - **limit** (`integer`, optional) The maximum number of users to return. Min of 1, max of 50. Defaults to 50.
 - **offset** (`integer`, optional) The number of users to skip before starting to return users. Defaults to 0 (start from the first user).
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
 
 
 ## Jira.GetUserById
@@ -445,6 +470,7 @@ Get user information by their ID.
 **Parameters**
 
 - **user_id** (`string`, required) The the user's ID.
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
 
 
 ## Jira.GetUsersWithoutId
@@ -470,6 +496,28 @@ Get users without their account ID, searching by display name and email address.
 - **enforce_exact_match** (`boolean`, optional) Whether to enforce an exact match of the name_or_email against users' display name and email attributes. Defaults to False (return all users that match the prefix). If set to True, before returning results, the tool will filter users with a display name OR email address that match exactly the value of the `name_or_email` argument.
 - **limit** (`integer`, optional) The maximum number of users to return. Min of 1, max of 50. Defaults to 50.
 - **offset** (`integer`, optional) The number of users to skip before starting to return users. Defaults to 0 (start from the first user).
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+
+## Jira.GetAvailableAtlassianClouds
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/jira/get_available_atlassian_clouds_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/jira/get_available_atlassian_clouds_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Get available Atlassian Clouds.
+
+**Parameters**
+
 
 
 ## Jira.AttachFileToIssue
@@ -497,6 +545,7 @@ Add an attachment to an issue.
 - **file_content_base64** (`string`, optional) The base64-encoded binary contents of the file. Use this for binary files like images or PDFs. Defaults to None.
 - **file_encoding** (`string`, optional) The encoding of the file to attach. Only used with file_content_str. Defaults to 'utf-8'.
 - **file_type** (`string`, optional) The type of the file to attach. E.g. 'application/pdf', 'text', 'image/png'. If not provided, the tool will try to infer the type from the filename. If the filename is not recognized, it will attach the file without specifying a type. Defaults to None (infer from filename or attach without type).
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
 
 
 ## Jira.ListIssueAttachmentsMetadata
@@ -519,6 +568,7 @@ Get the metadata about the files attached to an issue.
 **Parameters**
 
 - **issue** (`string`, required) The ID or key of the issue to retrieve
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
 
 
 ## Jira.GetAttachmentMetadata
@@ -541,6 +591,7 @@ Get the metadata of an attachment.
 **Parameters**
 
 - **attachment_id** (`string`, required) The ID of the attachment to retrieve
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
 
 
 ## Jira.DownloadAttachment
@@ -563,6 +614,7 @@ Download the contents of an attachment associated with an issue.
 **Parameters**
 
 - **attachment_id** (`string`, required) The ID of the attachment to download
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
 
 
 ## Jira.GetTransitionById
@@ -586,6 +638,7 @@ Get a transition by its ID.
 
 - **issue** (`string`, required) The ID or key of the issue
 - **transition_id** (`string`, required) The ID of the transition
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
 
 
 ## Jira.GetTransitionsAvailableForIssue
@@ -608,6 +661,7 @@ Get the transitions available for an existing Jira issue.
 **Parameters**
 
 - **issue** (`string`, required) The ID or key of the issue
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
 
 
 ## Jira.GetTransitionByStatusName
@@ -631,6 +685,7 @@ Get a transition available for an issue by the transition name.
 
 - **issue** (`string`, required) The ID or key of the issue
 - **transition** (`string`, required) The name of the transition status
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
 
 
 ## Jira.TransitionIssueToNewStatus
@@ -654,6 +709,7 @@ Transition a Jira issue to a new status.
 
 - **issue** (`string`, required) The ID or key of the issue
 - **transition** (`string`, required) The transition to perform. Provide the transition ID or its name (case insensitive).
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
 
 
 ## Jira.ListProjects
@@ -677,6 +733,7 @@ Browse projects available in Jira.
 
 - **limit** (`integer`, optional) The maximum number of projects to return. Min of 1, Max of 50. Defaults to 50.
 - **offset** (`integer`, optional) The number of projects to skip. Defaults to 0 (starts from the first project)
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
 
 
 ## Jira.SearchProjects
@@ -701,6 +758,7 @@ Get the details of all Jira projects.
 - **keywords** (`string`, optional) The keywords to search for projects. Matches against project name and key (case insensitive). Defaults to None (no keywords filter).
 - **limit** (`integer`, optional) The maximum number of projects to return. Min of 1, Max of 50. Defaults to 50.
 - **offset** (`integer`, optional) The number of projects to skip. Defaults to 0 (starts from the first project)
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
 
 
 ## Jira.GetProjectById
@@ -723,6 +781,7 @@ Get the details of a Jira project by its ID or key.
 **Parameters**
 
 - **project** (`string`, required) The ID or key of the project to retrieve
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
 
 
 ## Jira.GetPriorityById
@@ -745,6 +804,7 @@ Get the details of a priority by its ID.
 **Parameters**
 
 - **priority_id** (`string`, required) The ID of the priority to retrieve.
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
 
 
 ## Jira.ListPrioritySchemes
@@ -770,6 +830,7 @@ Browse the priority schemes available in Jira.
 - **limit** (`integer`, optional) The maximum number of priority schemes to return. Min of 1, max of 50. Defaults to 50.
 - **offset** (`integer`, optional) The number of priority schemes to skip. Defaults to 0 (start from the first scheme).
 - **order_by** (`Enum` [PrioritySchemeOrderBy](/toolkits/productivity/jira/reference#PrioritySchemeOrderBy), optional) The order in which to return the priority schemes. Defaults to name ascending.
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
 
 
 ## Jira.ListPrioritiesAssociatedWithAPriorityScheme
@@ -794,6 +855,7 @@ Browse the priorities associated with a priority scheme.
 - **scheme_id** (`string`, required) The ID of the priority scheme to retrieve priorities for.
 - **limit** (`integer`, optional) The maximum number of priority schemes to return. Min of 1, max of 50. Defaults to 50.
 - **offset** (`integer`, optional) The number of priority schemes to skip. Defaults to 0 (start from the first scheme).
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
 
 
 ## Jira.ListProjectsAssociatedWithAPriorityScheme
@@ -819,6 +881,7 @@ Browse the projects associated with a priority scheme.
 - **project** (`string`, optional) Filter by project ID, key or name. Defaults to None (returns all projects).
 - **limit** (`integer`, optional) The maximum number of projects to return. Min of 1, max of 50. Defaults to 50.
 - **offset** (`integer`, optional) The number of projects to skip. Defaults to 0 (start from the first project).
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
 
 
 ## Jira.ListPrioritiesAvailableToAProject
@@ -841,6 +904,7 @@ Browse the priorities available to be used in issues in the specified Jira proje
 **Parameters**
 
 - **project** (`string`, required) The ID, key or name of the project to retrieve priorities for.
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
 
 
 ## Jira.ListPrioritiesAvailableToAnIssue
@@ -863,6 +927,7 @@ Browse the priorities available to be used in the specified Jira issue.
 **Parameters**
 
 - **issue** (`string`, required) The ID or key of the issue to retrieve priorities for.
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
 
 
 ## Jira.GetCommentById
@@ -887,6 +952,7 @@ Get a comment by its ID.
 - **issue_id** (`string`, required) The ID or key of the issue to retrieve the comment from.
 - **comment_id** (`string`, required) The ID of the comment to retrieve
 - **include_adf_content** (`boolean`, optional) Whether to include the ADF (Atlassian Document Format) content of the comment in the response. Defaults to False (return only the HTML rendered content).
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
 
 
 ## Jira.GetIssueComments
@@ -913,6 +979,7 @@ Get the comments of a Jira issue by its ID.
 - **offset** (`integer`, optional) The number of comments to skip. Defaults to 0 (start from the first comment).
 - **order_by** (`Enum` [IssueCommentOrderBy](/toolkits/productivity/jira/reference#IssueCommentOrderBy), optional) The order in which to return the comments. Defaults to 'created_date_descending' (most recent first).
 - **include_adf_content** (`boolean`, optional) Whether to include the ADF (Atlassian Document Format) content of the comment in the response. Defaults to False (return only the HTML rendered content).
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
 
 
 ## Jira.AddCommentToIssue
@@ -938,6 +1005,7 @@ Add a comment to a Jira issue.
 - **body** (`string`, required) The body of the comment to add to the issue.
 - **reply_to_comment** (`string`, optional) Quote a previous comment as a reply to it. Provide the comment's ID. Must be a comment from the same issue. Defaults to None (no quoted comment).
 - **mention_users** (`array[string]`, optional) The users to mention in the comment. Provide the user display name, email address, or ID. Ex: 'John Doe' or 'john.doe@example.com'. Defaults to None (no user mentions).
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
 
 
 
