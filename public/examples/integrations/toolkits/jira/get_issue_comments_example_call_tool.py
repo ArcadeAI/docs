@@ -18,7 +18,10 @@ tool_input = {
     "issue": "JIRA-123",
     "limit": 10,
     "order_by": "created_date_descending",
-    "include_adf_content": True
+    "include_adf_content": True,
+    # Important: about the atlassian_cloud_id argument, please refer to the documentation at
+    # https://docs.arcade.dev/toolkits/productivity/jira#handling-multiple-atlassian-clouds
+    "atlassian_cloud_id": "13516a07-1725-4dc0-9ae7-13b5749dd747"
 }
 
 response = client.tools.execute(
