@@ -140,6 +140,9 @@ export default {
     type: "separator",
     title: "Guides",
   },
+  glossary: {
+    title: "Glossary",
+  },
   faq: {
     title: "FAQ",
   },
