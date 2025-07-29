@@ -1,13 +1,10 @@
-import {
-  SiDiscord,
-  SiGithub,
-  SiLinkedin,
-} from "@icons-pack/react-simple-icons";
+import { SiDiscord, SiGithub } from "@icons-pack/react-simple-icons";
 import { Mail } from "lucide-react";
 import React from "react";
 
 import { config } from "@config";
 import styles from "./Footer.module.css";
+import Linkedin from "./icons/linkedin";
 
 const ArcadeLogo = () => {
   return (
@@ -53,7 +50,7 @@ const Socials = () => {
         title="View Arcade-ai LinkedIn"
         rel="noreferrer"
       >
-        <SiLinkedin className={styles.social} />
+        <Linkedin className={styles.social} />
       </a>
       <a
         target="_blank"
