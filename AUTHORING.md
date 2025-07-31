@@ -13,7 +13,7 @@ These are the guidelines for writing documentation for Arcade, to help keep the 
 - **Active voice**: Write in an active voice to make the instructions direct and easy to follow. Example: “Install Arcade” rather than “Arcade should be installed.”
 - **Friendly and supportive**: Assume the reader is unfamiliar with Arcade but is eager to learn. Keep the tone positive, friendly, and approachable.
 - **Developer-focused**: Tailor your language to a developer audience, using code-centric explanations but ensuring clarity for beginners. Assume the reader knows Python but might be unfamiliar with Arcade’s specifics.
-- **Encouraging exploration**: Use phrases that invite readers to try things out and explore the capabilities of Arcade. Example: “Let’s try…” or “You can explore…”
+- **Encouraging exploration**: Use phrases that invite readers to try things out and explore the capabilities of Arcade. Example: “Let’s try…” or “You can explore…”.
 
 ## Examples and code
 
@@ -26,3 +26,14 @@ These are the guidelines for writing documentation for Arcade, to help keep the 
 - **Arcade**: Always refer to the product as "Arcade" in both titles and body text. Do not abbreviate or shorten the product name. Do not append "AI" to the product name.
 - **Engine**: Refer to "the Arcade Engine" when the deployment option is irrelevant. Otherwise, refer to "the Arcade Cloud Engine" or "a self-hosted Arcade Engine."
 - **Toolkits**: Toolkits are collections of tools, either built by Arcade or a third party developer. For toolkits built by Arcade, refer to "the Arcade [Toolkit name] toolkit." For example, "the Arcade GitHub toolkit."
+
+## Multi-board and multi-sprint documentation guidance (July 30, 2025 update)
+
+When documenting Arcade tools—especially those related to Jira or project management integrations—always clarify that calls to board or sprint listing tools should include **all relevant board or sprint identifiers in a single tool call whenever possible**.
+
+- **Performance guidance**: Always note that including all desired board or sprint identifiers in one call provides much better performance than making several separate tool calls. Failure to do so may result in significant performance penalties.
+- **Multi-turn conversations**: When giving guidance or examples around board/sprint selection, encourage grouping requests into a single call, not as multiple sequential calls, to maximize efficiency.
+- **Deduplication clarity**: When documenting results for these endpoints, point out that the tools will deduplicate any duplicate board/sprint IDs or names automatically.
+- **Explicit parameter naming**: If the tool argument is named `board_identifiers_list` or similar, prefer using that exact parameter name in all examples and descriptions for additional clarity.
+
+This guidance applies to Arcade toolkits updated after July 30, 2025.
