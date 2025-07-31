@@ -24,6 +24,7 @@ export const categories: Category[] = [
   { id: "payments", name: "Payments & Finance" },
   { id: "sales", name: "Sales" },
   { id: "databases", name: "Databases" },
+  { id: "customer-support", name: "Customer Support" },
 ];
 
 // Available tools
@@ -607,7 +608,7 @@ const comingSoonTools: Tool[] = [
     link: "/toolkits/productivity/linear",
     category: "productivity",
     type: "arcade",
-    isComingSoon: true,
+    isComingSoon: false,
   },
   {
     name: "Mailchimp",
@@ -867,10 +868,10 @@ const comingSoonTools: Tool[] = [
     name: "Zendesk",
     image: "zendesk.png",
     summary: "Manage customer support and service with your agents.",
-    link: "/toolkits/productivity/zendesk",
-    category: "productivity",
+    link: "/toolkits/customer-support/zendesk",
+    category: "customer-support",
     type: "arcade",
-    isComingSoon: true,
+    isComingSoon: false,
   },
   {
     name: "Postgres",

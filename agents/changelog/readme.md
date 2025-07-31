@@ -5,7 +5,7 @@ This agent is used to generate a changelog for the Arcade.dev software projects.
 ## Usage
 
 ```bash
-pnpm install
+bun install
 cp .env.example .env # and fill in the values
-npm run agent
+bun run agent
 ```

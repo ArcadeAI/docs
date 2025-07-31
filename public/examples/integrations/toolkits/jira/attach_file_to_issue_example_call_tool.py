@@ -17,7 +17,10 @@ client.auth.wait_for_completion(auth_response)
 tool_input = {
     "issue": "ISSUE-123",
     "filename": "report.pdf",
-    "file_content_base64": "[base64_encoded_content]"
+    "file_content_base64": "[base64_encoded_content]",
+    # Important: about the atlassian_cloud_id argument, please refer to the documentation at
+    # https://docs.arcade.dev/toolkits/productivity/jira#handling-multiple-atlassian-clouds
+    "atlassian_cloud_id": "13516a07-1725-4dc0-9ae7-13b5749dd747"
 }
 
 response = client.tools.execute(

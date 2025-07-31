@@ -6,7 +6,9 @@ TOOL_NAME = "Postgres.DiscoverTables"
 
 user_id = "{arcade_user_id}"
 
-tool_input = {}
+tool_input = {
+    "schema_name": "public",
+}
 
 response = client.tools.execute(
     tool_name=TOOL_NAME,

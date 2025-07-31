@@ -33,6 +33,9 @@ export default {
   databases: {
     title: "Databases",
   },
+  "customer-support": {
+    title: "Customer Support",
+  },
   "-- Submit your toolkit": {
     type: "separator",
     title: "Submit your toolkit",

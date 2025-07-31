@@ -5,7 +5,9 @@ const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env var
 const USER_ID = "{arcade_user_id}";
 const TOOL_NAME = "Postgres.DiscoverTables";
 
-const toolInput = {};
+const toolInput = {
+  schema_name: "public",
+};
 
 const response = await client.tools.execute({
   tool_name: TOOL_NAME,

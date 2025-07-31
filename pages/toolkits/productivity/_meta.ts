@@ -9,6 +9,7 @@ export default {
   google_drive: "Google Drive",
   google_sheets: "Google Sheets",
   jira: "Jira",
+  linear: "Linear",
   notion: "Notion",
   obsidian: "Obsidian",
   outlook_calendar: "Outlook Calendar",
