@@ -11,7 +11,7 @@ import ToolFooter from "@/components/ToolFooter";
   author="Arcade"
   codeLink="https://github.com/ArcadeAI/arcade-ai/tree/main/toolkits/jira"
   authType="OAuth2"
-  versions={["1.0.0"]}
+  versions={["2.2.0"]}
 />
 
 <Badges repo="arcadeai/arcade_jira" />
@@ -23,6 +23,7 @@ The Jira toolkit provides a comprehensive set of tools for interacting with Jira
 - Manage issue labels and attachments, including adding and removing them.
 - Transition issues between different statuses and manage comments on issues.
 - Browse and list available projects, priorities, and users within Jira.
+- Browse and list information of available boards and sprints within a Jira cloud.
 
 This toolkit streamlines the process of issue management, making it easier to integrate Jira functionalities into applications and workflows.
 
@@ -60,6 +61,7 @@ This toolkit streamlines the process of issue management, making it easier to in
       ["Jira.AddLabelsToIssue", "Add labels to an existing Jira issue."],
       ["Jira.RemoveLabelsFromIssue", "Remove labels from an existing Jira issue."],
       ["Jira.UpdateIssue", "Update an existing Jira issue."],
+      ["Jira.ListSprintsForBoards", "Retrieve sprints from Jira boards with filtering options for planning and tracking purposes."],
       ["Jira.ListLabels", "Get the existing labels (tags) in the user's Jira instance."],
       ["Jira.ListUsers", "Browse users in Jira."],
       ["Jira.GetUserById", "Get user information by their ID."],
@@ -76,6 +78,7 @@ This toolkit streamlines the process of issue management, making it easier to in
       ["Jira.ListProjects", "Browse projects available in Jira."],
       ["Jira.SearchProjects", "Get the details of all Jira projects."],
       ["Jira.GetProjectById", "Get the details of a Jira project by its ID or key."],
+      ["Jira.GetBoards", "Get Jira boards, with the option to filter by a list of board names or IDs (accepts a mix of both). Supports 'offset' and 'limit' parameters."],
       ["Jira.GetPriorityById", "Get the details of a priority by its ID."],
       ["Jira.ListPrioritySchemes", "Browse the priority schemes available in Jira."],
       ["Jira.ListPrioritiesAssociatedWithAPriorityScheme", "Browse the priorities associated with a priority scheme."],
@@ -399,6 +402,35 @@ Update an existing Jira issue.
 - **labels** (`array[string]`, optional) The new issue labels. This argument will replace all labels with the new list. Providing an empty list will remove all labels. To add or remove a subset of labels, use the `Jira.AddLabelsToIssue` or the `Jira.RemoveLabelsFromIssue` tools. Defaults to None (does not change the labels). A label cannot contain spaces. If a label is provided with spaces, they will be trimmed and replaced by underscores.
 - **notify_watchers** (`boolean`, optional) Whether to notify the issue's watchers. Defaults to True (notifies watchers).
 - **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+
+## Jira.ListSprintsForBoards
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/jira/list_sprints_for_boards_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/jira/list_sprints_for_boards_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve sprints from Jira boards with filtering options for planning and tracking purposes.
+
+**Parameters**
+
+- **board_identifiers_list** (`array[string]`, optional) List of board names or numeric IDs (as strings) to retrieve sprints from. Include all mentioned boards in a single list for best performance. Optional, defaults to None.
+- **max_sprints_per_board** (`integer`, optional) Maximum sprints per board (1-50). Latest sprints first. Optional, defaults to 50.
+- **offset** (`integer`, optional) Number of sprints to skip per board for pagination. Optional, defaults to 0.
+- **state** (`Enum` [SprintState](/toolkits/productivity/jira/reference#SprintState), optional) Filter by sprint state using SprintState enum value. Available options: SprintState.FUTURE (future sprints), SprintState.ACTIVE (active sprints), SprintState.CLOSED (closed sprints), SprintState.FUTURE_AND_ACTIVE (future + active), SprintState.FUTURE_AND_CLOSED (future + closed), SprintState.ACTIVE_AND_CLOSED (active + closed), SprintState.ALL (all states). Optional, defaults to None (all states).
+- **start_date** (`string`, optional) Start date filter in YYYY-MM-DD format. Can combine with end_date. Optional, defaults to None.
+- **end_date** (`string`, optional) End date filter in YYYY-MM-DD format. Can combine with start_date. Optional, defaults to None.
+- **specific_date** (`string`, optional) Specific date in YYYY-MM-DD to find sprints active on that date. Cannot combine with start_date/end_date. Optional, defaults to None.
+- **atlassian_cloud_id** (`string`, optional) Atlassian Cloud ID to use. Optional, defaults to None (uses single authorized cloud).
 
 
 ## Jira.ListLabels
@@ -782,6 +814,31 @@ Get the details of a Jira project by its ID or key.
 
 - **project** (`string`, required) The ID or key of the project to retrieve
 - **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+
+## Jira.GetBoards
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/jira/get_boards_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/jira/get_boards_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve Jira boards either by specifying their names or IDs, or get all
+
+**Parameters**
+
+- **board_identifiers_list** (`array[string]`, optional) List of board names or numeric IDs (as strings) to retrieve using pagination. Include all mentioned boards in a single list for best performance. Default None retrieves all boards. Maximum 50 boards returned per call.
+- **limit** (`integer`, optional) Maximum number of boards to return (1-50). Defaults to max that is 50.
+- **offset** (`integer`, optional) Number of boards to skip for pagination. Must be 0 or greater. Defaults to 0.
+- **atlassian_cloud_id** (`string`, optional) Atlassian Cloud ID to use. Defaults to None (uses single authorized cloud).
 
 
 ## Jira.GetPriorityById
