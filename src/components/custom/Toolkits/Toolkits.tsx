@@ -1,3 +1,4 @@
+"use client";
 import { ToolCard } from "@/components/custom/Toolkits/ToolCard";
 import { Category, Tool } from "@/components/custom/Toolkits/toolkits-config";
 import { Button, buttonVariants } from "@/components/ui/button";

@@ -1,7 +1,8 @@
+"use client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { ArrowDown, ExternalLink } from "lucide-react";
 import Link from "next/link";
 

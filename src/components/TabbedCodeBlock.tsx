@@ -1,8 +1,9 @@
+"use client";
 import { useState, useEffect } from "react";
 import styles from "./TabbedCodeBlock.module.css";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { atomDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
-import { atomLight } from "react-syntax-highlighter/dist/cjs/styles/prism";
+import { oneLight } from "react-syntax-highlighter/dist/cjs/styles/prism";
 
 interface TabContent {
   label: string;
@@ -117,7 +118,7 @@ const CodeTabSwitcher = ({ tabs }: CodeTabSwitcherProps) => {
           </button>
           <SyntaxHighlighter
             language={selectedLanguage.toLowerCase()}
-            style={theme === "dark" ? atomDark : atomLight}
+            style={theme === "dark" ? atomDark : oneLight}
             wrapLines={true}
           >
             {fileContent}

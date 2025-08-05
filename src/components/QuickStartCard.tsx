@@ -1,4 +1,5 @@
-import { motion } from "framer-motion";
+"use client";
+import { motion } from "motion/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 

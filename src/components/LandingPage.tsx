@@ -1,5 +1,7 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import {
   // Bot,
   Cloud,
@@ -36,7 +38,7 @@ export function LandingPage() {
             }}
           />
         </div>
-        <div className="mx-auto max-w-(--breakpoint-xl) px-4 py-12 text-center sm:py-48 lg:py-24">
+        <div className="mx-auto max-w-7xl px-4 py-12 text-center sm:py-48 lg:py-24">
           <motion.h1
             className="mb-6 text-4xl font-extrabold tracking-tight text-white md:text-5xl lg:text-6xl"
             initial={{ opacity: 0, y: 20 }}

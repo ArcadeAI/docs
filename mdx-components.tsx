@@ -7,22 +7,20 @@ import { useMDXComponents as getDocsMDXComponents } from "nextra-theme-docs";
 
 const docsComponents = getDocsMDXComponents();
 
-export function useMDXComponents(components) {
-  return {
-    ...docsComponents,
-    ...components,
-    // ... your additional components
-    Hero,
-    Card,
-    Cards,
-    LightOnly,
-    DarkOnly,
-    Info,
-    Warning,
-    Note,
-    Tip,
-    Important,
-    Check,
-    ToggleContent,
-  };
-}
+export const useMDXComponents = (components) => ({
+  ...docsComponents,
+  ...components,
+  // ... your additional components
+  Hero,
+  Card,
+  Cards,
+  LightOnly,
+  DarkOnly,
+  Info,
+  Warning,
+  Note,
+  Tip,
+  Important,
+  Check,
+  ToggleContent,
+});
