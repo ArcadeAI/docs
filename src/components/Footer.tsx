@@ -1,3 +1,5 @@
+"use client";
+
 import { SiDiscord, SiGithub } from "@icons-pack/react-simple-icons";
 import { Mail } from "lucide-react";
 import React from "react";
