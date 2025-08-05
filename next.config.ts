@@ -4,8 +4,6 @@ import remarkCodeImport from "remark-code-import";
 import { tempRedirects } from "./redirects";
 
 const withNextra = nextra({
-  theme: "nextra-theme-docs",
-  themeConfig: "./theme.config.tsx",
   defaultShowCopyCode: true,
   codeHighlight: true,
   mdxOptions: {

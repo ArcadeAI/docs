@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect } from "react";
 import { useOrySession } from "@/lib/OrySessionContext";
 import { getCookie } from "@/lib/utils";
