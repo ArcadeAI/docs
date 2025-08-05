@@ -25,7 +25,7 @@ export function QuickStartCard({
       }}
       whileTap={{ scale: 0.98 }}
     >
-      <Card className="h-full border-gray-800 bg-[rgba(17,17,17,0.8)] backdrop-blur-sm transition-all hover:border-[#ee175e]/30">
+      <Card className="h-full border-gray-800 bg-[rgba(17,17,17,0.8)] backdrop-blur-xs transition-all hover:border-[#ee175e]/30">
         <Link href={href} className="block h-full">
           <CardHeader className="flex flex-row items-center gap-3 p-6">
             <div className="rounded-full bg-[#ee175e]/10 p-2">
