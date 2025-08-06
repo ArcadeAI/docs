@@ -882,6 +882,15 @@ const comingSoonTools: Tool[] = [
     type: "community",
     isComingSoon: false,
   },
+  {
+    name: "Clickhouse",
+    image: "clickhouse.svg",
+    summary: "Interact with Clickhouse databases with your agents.",
+    link: "/toolkits/databases/clickhouse",
+    category: "databases",
+    type: "community",
+    isComingSoon: false,
+  },
 ];
 
 // Merge and export all tools
