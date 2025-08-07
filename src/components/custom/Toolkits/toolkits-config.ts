@@ -324,6 +324,15 @@ const availableTools: Tool[] = [
     category: "entertainment",
     type: "auth",
   },
+  {
+    name: "Microsoft Teams",
+    image: "ms_teams.png",
+    summary: "Manage teams, messages, chats, and channels with your agents.",
+    link: "/toolkits/social-communication/microsoft_teams",
+    category: "social",
+    type: "arcade",
+    isComingSoon: false,
+  },
 ];
 
 // Coming soon tools
