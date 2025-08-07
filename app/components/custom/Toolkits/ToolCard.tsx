@@ -29,28 +29,28 @@ const typeConfig: Record<
 > = {
   arcade: {
     className:
-      "border-emerald-600/20 hover:border-primary bg-emerald-600/[0.02] hover:bg-emerald-600/[0.03]",
+      "border-emerald-600/20 hover:border-primary bg-emerald-600/2 hover:bg-emerald-600/3",
     label: "Arcade Toolkit",
     icon: BadgeCheck,
     color: "text-emerald-400",
   },
   verified: {
     className:
-      "border-blue-600/20 hover:border-primary bg-blue-600/[0.02] hover:bg-blue-600/[0.03]",
+      "border-blue-600/20 hover:border-primary bg-blue-600/2 hover:bg-blue-600/3",
     label: "Verified Toolkit",
     icon: CheckCircle,
     color: "text-blue-400",
   },
   community: {
     className:
-      "border-orange-600/20 hover:border-primary bg-orange-600/[0.02] hover:bg-orange-600/[0.03]",
+      "border-orange-600/20 hover:border-primary bg-orange-600/2 hover:bg-orange-600/3",
     label: "Community Toolkit",
     icon: Users,
     color: "text-orange-400",
   },
   auth: {
     className:
-      "border-purple-600/20 hover:border-primary bg-purple-600/[0.02] hover:bg-purple-600/[0.03]",
+      "border-purple-600/20 hover:border-primary bg-purple-600/2 hover:bg-purple-600/3",
     label: "Auth Integration",
     icon: Key,
     color: "text-purple-400",
@@ -130,12 +130,12 @@ export const ToolCard: React.FC<ToolCardProps> = ({
       className={cn(
         "flex h-full flex-col transition-all duration-300",
         "border hover:shadow-lg",
-        "bg-gray-900/80 backdrop-blur-sm",
+        "bg-gray-900/80 backdrop-blur-xs",
         className,
         isComingSoon && "relative",
       )}
     >
-      <CardHeader className="flex-grow space-y-0 p-4">
+      <CardHeader className="grow space-y-0 p-4">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div className="flex items-center space-x-5">
             <div className="relative h-10 w-10 overflow-hidden rounded-lg">
@@ -168,7 +168,7 @@ export const ToolCard: React.FC<ToolCardProps> = ({
           {isComingSoon && (
             <Badge
               variant="outline"
-              className="shrink-0 whitespace-nowrap border-gray-700 bg-gray-800/70 text-gray-300"
+              className="shrink-0 border-gray-700 bg-gray-800/70 whitespace-nowrap text-gray-300"
             >
               Coming Soon
             </Badge>

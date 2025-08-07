@@ -1,3 +1,4 @@
+"use client";
 import { ToolCard } from "@/components/custom/Toolkits/ToolCard";
 import { Category, Tool } from "@/components/custom/Toolkits/toolkits-config";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -97,7 +98,7 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
   return (
     <ComingSoonProvider>
       <div className="min-h-screen">
-        <div className="mx-auto max-w-7xl px-4 pb-4 pt-6 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4 pt-6 pb-4 sm:px-6 lg:px-8">
           <div className="space-y-6">
             <h1 className="text-2xl font-bold text-gray-50 sm:text-3xl">
               Integrations
@@ -142,11 +143,11 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
                   <h2 className="text-base font-bold text-gray-100">
                     Build your own integration
                   </h2>
-                  <p className="!mt-1.5 text-sm text-gray-300">
+                  <p className="mt-1.5! text-sm text-gray-300">
                     Don't see what you need? Use Arcade's SDK to integrate with
                     any service or API.
                   </p>
-                  <div className="mb-1 mt-3">
+                  <div className="mt-3 mb-1">
                     <Link
                       href="https://docs.arcade.dev/home/build-tools/create-a-toolkit"
                       className={cn(
@@ -174,17 +175,17 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
                     onChange={handleSearchChange}
                     className="flex w-full items-center gap-4 border-none bg-[#f9fafb1a] pl-10 text-white placeholder:text-white/50"
                   />
-                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-500" />
+                  <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-gray-500" />
                   {searchQuery && (
                     <button
                       onClick={() => setSearchQuery("")}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 transform text-gray-500 transition-colors hover:text-gray-300"
+                      className="absolute top-1/2 right-3 -translate-y-1/2 transform text-gray-500 transition-colors hover:text-gray-300"
                     >
                       <X className="h-4 w-4" />
                     </button>
                   )}
                 </div>
-                <p className="mt-2 !text-xs text-gray-400 sm:text-sm">
+                <p className="mt-2 text-xs! text-gray-400 sm:text-sm">
                   {filteredTools.length} result(s) found
                 </p>
               </div>
@@ -204,7 +205,7 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
                         className={cn(
                           "h-10 px-4 text-xs sm:text-sm",
                           selectedCategory === category.id
-                            ? "bg-primary/80 text-white hover:bg-primary/90"
+                            ? "bg-primary/80 hover:bg-primary/90 text-white"
                             : "bg-gray-800/50 text-gray-300 hover:bg-gray-700/50",
                         )}
                       >

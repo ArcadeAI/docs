@@ -8,7 +8,7 @@ interface NavBarButtonProps {
     | "default"
     | "link"
     | "destructive"
-    | "outline"
+    | "outline-solid"
     | "secondary"
     | "ghost";
 }

@@ -1,3 +1,4 @@
+"use client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,10 +33,10 @@ export function ChallengeSolution({
       whileTap={{ scale: 0.98 }}
       className="group"
     >
-      <Card className="h-full overflow-hidden border-zinc-700 bg-[rgba(17,17,17,0.8)] backdrop-blur-sm">
+      <Card className="h-full overflow-hidden border-zinc-700 bg-[rgba(17,17,17,0.8)] backdrop-blur-xs">
         <CardHeader className="flex flex-row items-center gap-3 border-b border-gray-800 bg-[rgba(25,25,25,0.5)] p-6">
-          <div className="rounded-full bg-primary/10 p-2.5">
-            <challenge.icon className="h-5 w-5 text-primary" />
+          <div className="bg-primary/10 rounded-full p-2.5">
+            <challenge.icon className="text-primary h-5 w-5" />
           </div>
           <CardTitle className="text-xl tracking-tight text-white">
             {challenge.title}
@@ -60,7 +61,7 @@ export function ChallengeSolution({
             <div>
               <Badge
                 variant="default"
-                className="mb-4 bg-primary/80 text-zinc-200"
+                className="bg-primary/80 mb-4 text-zinc-200"
               >
                 Arcade Solution
               </Badge>

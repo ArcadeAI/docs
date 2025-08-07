@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import {
@@ -29,14 +30,14 @@ export function LandingPage() {
           aria-hidden="true"
         >
           <div
-            className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[24rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#ee175e] to-[#9089fc] opacity-20 sm:left-[calc(50%-30rem)] sm:w-[48rem]"
+            className="relative left-[calc(50%-11rem)] aspect-1155/678 w-[24rem] -translate-x-1/2 rotate-30 bg-linear-to-tr from-[#ee175e] to-[#9089fc] opacity-20 sm:left-[calc(50%-30rem)] sm:w-3xl"
             style={{
               clipPath:
                 "polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)",
             }}
           />
         </div>
-        <div className="mx-auto max-w-screen-xl px-4 py-12 text-center sm:py-48 lg:py-24">
+        <div className="mx-auto max-w-(--breakpoint-xl) px-4 py-12 text-center sm:py-48 lg:py-24">
           <motion.h1
             className="mb-6 text-4xl font-extrabold tracking-tight text-white md:text-5xl lg:text-6xl"
             initial={{ opacity: 0, y: 20 }}
@@ -46,12 +47,12 @@ export function LandingPage() {
             Welcome to Arcade!
           </motion.h1>
           <motion.p
-            className="mx-auto mt-8 max-w-4xl text-pretty text-base font-medium italic leading-relaxed text-gray-100"
+            className="mx-auto mt-8 max-w-4xl text-base leading-relaxed font-medium text-pretty text-gray-100 italic"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <span className="font-bold text-primary">
+            <span className="text-primary font-bold">
               Learn how to move AI agents from demo to production with Arcade.
             </span>
           </motion.p>
@@ -66,9 +67,9 @@ export function LandingPage() {
               Gmail, Slack, GitHub, and more. You can also build your own
               agentic tools and MCP servers with our authoring and testing
               suite. Arcade is your tool{" "}
-              <span className="font-bold text-primary">engine</span>,{" "}
-              <span className="font-bold text-primary">registry</span>, and{" "}
-              <span className="font-bold text-primary">runtime</span>.
+              <span className="text-primary font-bold">engine</span>,{" "}
+              <span className="text-primary font-bold">registry</span>, and{" "}
+              <span className="text-primary font-bold">runtime</span>.
             </p>
             <p style={{ textAlign: "left", paddingTop: "2rem" }}>
               Get started with a 5-minute quickstart.
@@ -83,7 +84,7 @@ export function LandingPage() {
             <Button
               asChild
               size="lg"
-              className="h-12 bg-primary px-6 text-white hover:bg-primary/90"
+              className="bg-primary hover:bg-primary/90 h-12 px-6 text-white"
             >
               <Link href="/home/quickstart">
                 <Rocket className="mr-2 h-5 w-5" />
@@ -108,7 +109,7 @@ export function LandingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.8 }}
           >
-            <div className="rounded-lg border border-white p-4 italic text-white">
+            <div className="rounded-lg border border-white p-4 text-white italic">
               Give your AI IDE access to Arcade.dev's documentation using our
               llms.txt files (
               <a href="/llms.txt" className="text-primary">
@@ -134,7 +135,7 @@ export function LandingPage() {
           aria-hidden="true"
         >
           <div
-            className="relative left-[calc(50%+3rem)] aspect-[1155/678] w-[24rem] -translate-x-1/2 bg-gradient-to-tr from-[#ee175e] to-[#9089fc] opacity-20 sm:left-[calc(50%+36rem)] sm:w-[48rem]"
+            className="relative left-[calc(50%+3rem)] aspect-1155/678 w-[24rem] -translate-x-1/2 bg-linear-to-tr from-[#ee175e] to-[#9089fc] opacity-20 sm:left-[calc(50%+36rem)] sm:w-3xl"
             style={{
               clipPath:
                 "polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)",
