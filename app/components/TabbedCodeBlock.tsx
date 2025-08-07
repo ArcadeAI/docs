@@ -1,9 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
-import styles from "./TabbedCodeBlock.module.css";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { atomDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
-import { a11yLight } from "react-syntax-highlighter/dist/cjs/styles/prism";
+import { oneLight } from "react-syntax-highlighter/dist/cjs/styles/prism";
 
 interface TabContent {
   label: string;
@@ -66,7 +65,10 @@ const CodeTabSwitcher = ({ tabs }: CodeTabSwitcherProps) => {
 
   if (!isExpanded) {
     return (
-      <button className={styles.button} onClick={() => setIsExpanded(true)}>
+      <button
+        className="bg-neutral-dark-low text-neutral-light-high border-code-block-text hover:bg-neutral-dark-opacity mt-1.5 cursor-pointer rounded-lg border px-2 py-1.5 text-left text-sm transition-colors duration-400 sm:text-xs"
+        onClick={() => setIsExpanded(true)}
+      >
         See Example &gt;
       </button>
     );
@@ -74,9 +76,9 @@ const CodeTabSwitcher = ({ tabs }: CodeTabSwitcherProps) => {
 
   return (
     <div>
-      <div className={styles.tabs}>
+      <div className="mb-4 flex gap-1.5 rounded-lg sm:flex-col sm:text-xs">
         <select
-          className={styles.button}
+          className="bg-neutral-dark-low text-neutral-light-high border-code-block-text hover:bg-neutral-dark-opacity mt-1.5 cursor-pointer rounded-lg border px-2 py-1.5 text-left text-sm transition-colors duration-400 sm:text-xs"
           onChange={(e) => setSelectedLanguage(e.target.value)}
           value={selectedLanguage}
         >
@@ -84,7 +86,7 @@ const CodeTabSwitcher = ({ tabs }: CodeTabSwitcherProps) => {
           <option value="JavaScript">JavaScript</option>
         </select>
         <select
-          className={styles.button}
+          className="bg-neutral-dark-low text-neutral-light-high border-code-block-text hover:bg-neutral-dark-opacity mt-1.5 cursor-pointer rounded-lg border px-2 py-1.5 text-left text-sm transition-colors duration-400 sm:text-xs"
           onChange={(e) => setActiveTab(Number(e.target.value))}
           value={activeTab}
         >
@@ -101,10 +103,10 @@ const CodeTabSwitcher = ({ tabs }: CodeTabSwitcherProps) => {
         {/* </button> */}
       </div>
 
-      <div className={styles.tabContent}>
+      <div className="border-code-block-text text-code-block-text w-93 rounded-lg border p-1.5 pt-2 pr-2 pb-2 pl-2 break-words break-all sm:flex-col sm:text-xs">
         <div style={{ position: "relative" }}>
           <button
-            className={styles.copyButton}
+            className="bg-neutral-dark-low text-neutral-light-high border-code-block-text hover:bg-neutral-dark-opacity absolute top-0 right-4 z-10 mt-1.5 cursor-pointer rounded-lg border px-2 py-1.5 text-left text-sm transition-colors duration-400 sm:text-xs"
             onClick={() => {
               navigator.clipboard.writeText(fileContent);
               const button = event.target as HTMLButtonElement;
@@ -118,7 +120,7 @@ const CodeTabSwitcher = ({ tabs }: CodeTabSwitcherProps) => {
           </button>
           <SyntaxHighlighter
             language={selectedLanguage.toLowerCase()}
-            style={theme === "dark" ? atomDark : a11yLight}
+            style={theme === "dark" ? atomDark : oneLight}
             wrapLines={true}
           >
             {fileContent}

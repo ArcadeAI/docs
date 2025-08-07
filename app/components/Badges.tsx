@@ -1,5 +1,4 @@
 import React from "react";
-import styles from "./Badges.module.css";
 
 interface BadgesProps {
   repo: string; // Format: "org/repo"
@@ -41,7 +40,7 @@ const Badges: React.FC<BadgesProps> = ({ repo }) => {
   ];
 
   return (
-    <div className={styles.badgesContainer}>
+    <div className="flex flex-wrap justify-center gap-1 sm:gap-1 md:gap-1.5">
       {badges.map((badge, index) => (
         <a
           key={index}
@@ -49,7 +48,11 @@ const Badges: React.FC<BadgesProps> = ({ repo }) => {
           target="_blank"
           rel="noopener noreferrer"
         >
-          <img src={badge.src} alt={badge.alt} className={styles.badge} />
+          <img
+            src={badge.src}
+            alt={badge.alt}
+            className="h-auto max-h-6 sm:max-h-4.5 md:max-h-5"
+          />
         </a>
       ))}
     </div>

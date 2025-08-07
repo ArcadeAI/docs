@@ -1,5 +1,5 @@
+"use client";
 import { useState } from "react";
-import styles from "./ToggleContent.module.css";
 
 interface ToggleContentProps {
   children: React.ReactNode;
@@ -20,10 +20,13 @@ const ToggleContent: React.FC<ToggleContentProps> = ({
 
   return (
     <div>
-      <button className={styles.toggleButton} onClick={handleToggle}>
+      <button
+        className="bg-neutral-dark-medium hover:bg-neutral-dark-high mb-4 cursor-pointer rounded-md border-none px-3 py-2 font-normal text-white transition-colors duration-200 ease-in-out"
+        onClick={handleToggle}
+      >
         {isExpanded ? hideText : showText}
       </button>
-      {isExpanded && <div className={styles.toggleContent}>{children}</div>}
+      {isExpanded && <div>{children}</div>}
     </div>
   );
 };

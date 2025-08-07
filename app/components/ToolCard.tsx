@@ -1,5 +1,4 @@
 import React from "react";
-import styles from "./ToolCard.module.css";
 
 interface ToolCardProps {
   name: string;
@@ -17,7 +16,10 @@ export const ToolCard: React.FC<ToolCardProps> = ({
   category,
 }) => {
   return (
-    <a className={styles.card} href={link}>
+    <a
+      className="border-card-border-color rounded-lg border p-3 text-center text-inherit no-underline"
+      href={link}
+    >
       <div
         style={{
           display: "flex",
@@ -29,7 +31,7 @@ export const ToolCard: React.FC<ToolCardProps> = ({
         <img
           src={`/images/icons/${image}${image.includes(".") ? "" : ".png"}`}
           alt={`${name} logo`}
-          className={styles.logo}
+          className="mb-4 h-5 w-5 object-contain"
           style={{ width: "1.3rem", height: "1.3rem" }}
         />
         <div

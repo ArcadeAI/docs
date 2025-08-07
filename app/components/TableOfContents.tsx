@@ -1,5 +1,5 @@
+"use client";
 import React from "react";
-import styles from "./TableOfContents.module.css";
 
 /**
  * DynamicTable Component
@@ -20,11 +20,14 @@ function TableOfContents({ headers, data }) {
   };
 
   return (
-    <table className={styles.table}>
+    <table className="border-neutral-dark-high my-4 w-full border-collapse overflow-hidden rounded-lg border-2 shadow-sm sm:text-sm">
       <thead>
-        <tr className={styles.tr}>
+        <tr>
           {headers.map((header, index) => (
-            <th key={index} className={styles.th}>
+            <th
+              key={index}
+              className="bg-neutral-dark text-neutral-light-high border-neutral-dark-high border-b-4 px-3 py-2.5 text-left text-sm"
+            >
               {header}
             </th>
           ))}
@@ -34,11 +37,20 @@ function TableOfContents({ headers, data }) {
         {data.map((row, rowIndex) => (
           <tr
             key={rowIndex}
-            className={styles.tr}
+            className={`hover:bg-neutral-dark-opacity cursor-pointer text-xs ${
+              rowIndex % 2 === 0
+                ? "bg-neutral-dark"
+                : "border-neutral-dark-medium border-b bg-transparent"
+            }`}
             onClick={() => handleRowClick(row[0])}
           >
             {row.map((cell, cellIndex) => (
-              <td key={cellIndex} className={styles.td}>
+              <td
+                key={cellIndex}
+                className={`border-neutral-dark-low border-b px-3 py-2 text-left ${
+                  cellIndex === 0 ? "text-xs font-semibold" : ""
+                }`}
+              >
                 {cell}
               </td>
             ))}

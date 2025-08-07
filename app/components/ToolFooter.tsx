@@ -1,5 +1,4 @@
 import React from "react";
-import styles from "./ToolFooter.module.css";
 import { Cloud } from "lucide-react";
 import { Puzzle } from "lucide-react";
 import { QuickStartCard } from "./QuickStartCard";
@@ -10,7 +9,7 @@ interface ToolFooterProps {
 
 const ToolFooter: React.FC<ToolFooterProps> = ({ pipPackageName }) => {
   return (
-    <div className={styles.toolFooter}>
+    <div className="border-neutral-dark-medium mt-8 border-t pt-4">
       <h2 className="mb-4 text-2xl font-bold tracking-tight text-white md:text-2xl">
         Get Building
       </h2>

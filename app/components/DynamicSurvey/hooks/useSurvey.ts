@@ -1,3 +1,4 @@
+"use client";
 import { Survey } from "posthog-js";
 import { usePostHog } from "posthog-js/react";
 import { FormEvent, useRef, useState } from "react";

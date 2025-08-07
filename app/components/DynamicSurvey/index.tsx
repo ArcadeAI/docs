@@ -1,3 +1,4 @@
+"use client";
 import { Survey } from "posthog-js";
 import { usePostHog } from "posthog-js/react";
 import { useEffect, useRef } from "react";
@@ -73,7 +74,7 @@ export default function DynamicSurvey({
 
   return (
     <div
-      className="flex h-full w-full flex-col space-y-4 border-t border-border py-4"
+      className="border-border flex h-full w-full flex-col space-y-4 border-t py-4"
       id="dynamic-survey-container"
     >
       <Progress
@@ -82,7 +83,7 @@ export default function DynamicSurvey({
       />
       <span className="text-lg font-bold">{currentQuestion.question}</span>
       {currentQuestion.description && (
-        <span className="text-sm text-muted-foreground">
+        <span className="text-muted-foreground text-sm">
           {currentQuestion.description}
         </span>
       )}

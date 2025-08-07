@@ -1,5 +1,4 @@
 import React from "react";
-import styles from "./ToolInfo.module.css";
 
 interface ToolInfoProps {
   description: string;
@@ -26,21 +25,26 @@ const ToolInfo: React.FC<ToolInfoProps> = ({
       ? `/home/auth-providers/${authProviderName.toLowerCase()}`
       : authProviderDocsUrl;
   return (
-    <div className={styles.toolInfo}>
-      <p>
-        <strong>Description: </strong> {description}
+    <div className="border-neutral-dark-medium text-text-color mt-5 mb-6 rounded-lg border-4 p-6 shadow-lg sm:p-3">
+      <p className="text-text-color my-1.5 text-base sm:text-sm">
+        <strong className="text-text-color">Description: </strong> {description}
       </p>
-      <p>
-        <strong>Author: </strong> {author}
+      <p className="text-text-color my-1.5 text-base sm:text-sm">
+        <strong className="text-text-color">Author: </strong> {author}
       </p>
-      <p>
-        <strong>Code: </strong>
-        <a href={codeLink} target="_blank" rel="noopener noreferrer">
+      <p className="text-text-color my-1.5 text-base sm:text-sm">
+        <strong className="text-text-color">Code: </strong>
+        <a
+          href={codeLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-brand-accent underline-offset-0.5 no-underline hover:underline"
+        >
           GitHub
         </a>
       </p>
-      <p>
-        <strong>Auth: </strong>
+      <p className="text-text-color my-1.5 text-base sm:text-sm">
+        <strong className="text-text-color">Auth: </strong>
         {authType.toLowerCase() === "oauth2" ? (
           <>
             User authorization
@@ -48,7 +52,10 @@ const ToolInfo: React.FC<ToolInfoProps> = ({
               <>
                 {" "}
                 via the{" "}
-                <a href={authProviderDocsUrl}>
+                <a
+                  href={authProviderDocsUrl}
+                  className="text-brand-accent underline-offset-0.5 no-underline hover:underline"
+                >
                   {authProviderName} auth provider
                 </a>
               </>
@@ -59,8 +66,8 @@ const ToolInfo: React.FC<ToolInfoProps> = ({
         )}
       </p>
       {note && (
-        <p>
-          <strong>Note: </strong>
+        <p className="text-text-color my-1.5 text-base sm:text-sm">
+          <strong className="text-text-color">Note: </strong>
           {note}
         </p>
       )}

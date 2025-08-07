@@ -1,3 +1,4 @@
+"use client";
 import { usePostHog } from "posthog-js/react";
 import Link from "next/link";
 

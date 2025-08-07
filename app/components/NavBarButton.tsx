@@ -1,16 +1,11 @@
+"use client";
 import { usePathname } from "next/navigation";
-import { Button } from "./ui/button";
+import { Button, ButtonProps } from "./ui/button";
 
 interface NavBarButtonProps {
   text: string;
   hideOnPath?: string[];
-  variant?:
-    | "default"
-    | "link"
-    | "destructive"
-    | "outline-solid"
-    | "secondary"
-    | "ghost";
+  variant?: ButtonProps["variant"];
 }
 
 export const NavBarButton = ({
