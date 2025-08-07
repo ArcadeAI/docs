@@ -3,13 +3,10 @@ import { Arcade } from "@arcadeai/arcadejs";
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
 const USER_ID = "{arcade_user_id}";
-const TOOL_NAME = "GoogleDrive.GetFileTreeStructure";
+const TOOL_NAME = "GoogleDrive.SearchFiles";
 
 // Start the authorization process
-const authResponse = await client.tools.authorize({
-  tool_name: TOOL_NAME,
-  user_id: USER_ID,
-});
+const authResponse = await client.tools.authorize({tool_name: TOOL_NAME});
 
 if (authResponse.status !== "completed") {
   console.log(`Click this link to authorize: ${authResponse.url}`);
@@ -19,8 +16,13 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  include_shared_drives: true,
-  limit: 10,
+  "query": "project report",
+  "include_shared_drives": true,
+  "limit": 10,
+  "file_types": [
+    "document",
+    "spreadsheet"
+  ]
 };
 
 const response = await client.tools.execute({
@@ -29,4 +31,4 @@ const response = await client.tools.execute({
   user_id: USER_ID,
 });
 
-console.log(response);
+console.log(JSON.stringify(response.output.value, null, 2));
