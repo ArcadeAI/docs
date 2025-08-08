@@ -333,6 +333,16 @@ const availableTools: Tool[] = [
     type: "arcade",
     isComingSoon: false,
   },
+  {
+    name: "Microsoft SharePoint",
+    image: "ms_sharepoint.png",
+    summary:
+      "Manage SharePoint sites, lists, drives, and files with your agents.",
+    link: "/toolkits/productivity/sharepoint",
+    category: "productivity",
+    type: "arcade",
+    isComingSoon: false,
+  },
 ];
 
 // Coming soon tools
