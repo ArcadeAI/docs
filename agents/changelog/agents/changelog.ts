@@ -56,7 +56,7 @@ When generating the changelog, follow these rules:
     const result = await this.run(
       `
       Today is ${new Date().toISOString().split("T")[0]}.
-      The full path to the changelog.md that you will be updating is \`${changelogPath}\`.
+      The full path to the changelog.md that you will be appending to is \`${changelogPath}\`.
       The Github repositories to load commits from are: ${repositories.join(", ")}
       `,
     );
