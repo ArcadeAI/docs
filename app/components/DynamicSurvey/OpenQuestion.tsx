@@ -1,4 +1,4 @@
-import { Textarea } from "@/components/ui/textarea";
+import { Textarea } from "@arcadeai/design-system";
 import { BasicSurveyQuestion } from "posthog-js";
 
 interface OpenQuestionProps {

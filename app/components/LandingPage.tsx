@@ -1,5 +1,5 @@
 "use client";
-import { Button } from "@/components/ui/button";
+import { Button } from "@arcadeai/design-system";
 import { motion } from "framer-motion";
 import {
   // Bot,
@@ -86,7 +86,7 @@ export function LandingPage() {
               size="lg"
               className="bg-primary hover:bg-primary/90 h-12 px-6 text-white"
             >
-              <Link href="/home/quickstart">
+              <Link href="/home/getting-started/quickstart">
                 <Rocket className="mr-2 h-5 w-5" />
                 Get Started
               </Link>
@@ -97,7 +97,7 @@ export function LandingPage() {
               size="lg"
               className="h-12 border-white bg-transparent px-6 text-white hover:bg-white/10"
             >
-              <Link href="/home/build-tools/create-a-toolkit">
+              <Link href="/home/authoring-tools/build-tools/create-a-toolkit">
                 <Wrench className="mr-2 h-5 w-5" />
                 Build a tool
               </Link>

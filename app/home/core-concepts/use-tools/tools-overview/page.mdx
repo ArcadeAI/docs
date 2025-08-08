@@ -1,0 +1,97 @@
+---
+title: "What are tools?"
+description: Overview of language model tool calling and how to use tools with Arcade
+---
+
+# What are tools?
+
+Language models excel at text generation but struggle with tasks like calculations, data retrieval, or interacting with external systems. To make an analogy, these models have impressive _brains_ or reasoning capabilities, but lack the _hands_ to interact with the digital world.
+
+To solve this, many AI models support tool calling (sometimes referred to as 'function calling').
+
+## The use case for tool-calling
+
+Say a colleague shares a document with you on Google Drive, and you'd like an LLM to help you analyze it.
+
+You could go to your Drive/Docs, open the document, copy its contents, and paste it into your chat. But what if the LLM could do this for you? The Arcade Google Docs toolkit provides a [`SearchAndRetrieveDocuments`](/toolkits/categories/productivity/google_docs#searchandretrievedocuments) tool. By calling it, the LLM can find and read the document without you having to do anything.
+
+After analyzing the document, you decide that a meeting is needed with your colleague. You can ask the LLM to schedule a meeting and it will use the [Google Calendar toolkit](/toolkits/categories/productivity/google_calendar) to do it without you needing to leave the chat.
+
+Or you could ask the LLM to send a summary of the analysis to your colleague by email and it would use the [Gmail toolkit](/toolkits/categories/productivity/gmail) for that.
+
+## Possibilities for Application and AI Agent developers
+
+Tool-calling combines the reasoning power of LLMs with virtually any action available through APIs or code execution.
+
+With the Arcade SDKs, it is easy to build applications and AI Agents that can leverage tool-calling in order to provide an LLM-powered experience to users in a secure and privacy-forward way.
+
+## How tool calling works
+
+AI models that support tool calling can determine when and how to use specific tools to fulfill a user's request. The developer decides which tools to make available to the model, whether existing tools or tools they've built themselves.
+
+In the example above, when the user asks: "_help me analyze the 'Project XYZ' Google document shared by John_", the LLM can use its reasoning capabilities to:
+
+1. Recognize that it needs to access external data;
+1. Evaluate that the `GoogleDocs.SearchAndRetrieveDocuments` tool is the best way to get that data;
+1. Call the tool with the appropriate parameters;
+1. Read the document content and use it to answer the user's questions.
+
+## The authorization problem
+
+One challenge to make all that happen is authorization. How do you give the LLM permission to access someone's Google Docs and Gmail in a secure and convenient way?
+
+Arcade solves this problem by providing a standardized [interface for authorization](/home/core-concepts/auth/how-arcade-helps), as well as pre-built integrations with [popular services](/home/hosting-options/auth-providers) such as Google, Dropbox, GitHub, Notion, and many more.
+
+Our SDK also [allows you to integrate](/home/hosting-options/auth-providers/oauth2) LLMs with any OAuth 2.0-compliant API.
+
+## Tool Augmented Generation (TAG)
+
+Similar to Retrieval Augmented Generation (RAG), tool calling allows the AI to use external data to answer questions. Unlike RAG, tool calling is more flexible and allows the AI to use tools that are much more diverse than text or vector search alone.
+
+The following is a diagram of how tool calling is used to provide context to a language model similar to RAG.
+
+<img
+  src="/images/tool-call-diagrams/tool-call-1.png"
+  alt="Tool calling diagram 1"
+  style={{
+    borderRadius: "8px",
+    width: "70%",
+    display: "block",
+    margin: "0 auto",
+  }}
+/>
+
+First, a language model is given a user's request. The model then determines if it needs to use a tool to fulfill the request. If so, the model selects the appropriate tool from the tools listed in the request.
+
+The model then predicts the parameters of that tool and passes these parameters back to the client application.
+
+<img
+  src="/images/tool-call-diagrams/tool-call-2.png"
+  alt="Tool calling diagram 2"
+  style={{
+    borderRadius: "8px",
+    width: "70%",
+    display: "block",
+    margin: "1rem auto",
+  }}
+/>
+
+Now that the tool has been executed, the model can use the output to generate a response.
+
+<img
+  src="/images/tool-call-diagrams/tool-call-3.png"
+  alt="Tool calling diagram 3"
+  style={{
+    borderRadius: "8px",
+    width: "70%",
+    display: "block",
+    margin: "1rem auto",
+  }}
+/>
+
+This process shows the general outline of the Tool Augmented Generation (TAG) process at a high level.
+
+### Next steps
+
+- Explore the [Toolkits](/toolkits) available on Arcade
+- Build your own [custom toolkit](/home/authoring-tools/build-tools/create-a-toolkit)

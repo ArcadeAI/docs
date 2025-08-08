@@ -1,0 +1,131 @@
+# Hubspot
+
+import ToolInfo from "@/components/ToolInfo";
+import Badges from "@/components/Badges";
+import TabbedCodeBlock from "@/components/TabbedCodeBlock";
+import TableOfContents from "@/components/TableOfContents";
+import ToolFooter from "@/components/ToolFooter";
+
+<ToolInfo
+  description="Enable agents to interact with the Hubspot CRM."
+  author="Arcade"
+  codeLink="https://github.com/ArcadeAI/arcade-ai/tree/main/toolkits/hubspot"
+  authType="OAuth 2.0"
+  versions={["0.1.0"]}
+/>
+
+<Badges repo="arcadeai/arcade_hubspot" />
+
+The Arcade Hubspot toolkit provides a pre-built set of tools for interacting with the Hubspot CRM. These tools make it easy to build agents and AI apps that can:
+
+- Search and retrieve company data and associated objects (deals, calls, email messages, etc)
+- Search and retrieve contact data and associated objects (calls, email messages, notes, tasks, etc)
+- Create contacts
+
+## Available Tools
+
+<TableOfContents
+  headers={["Tool Name", "Description"]}
+  data={
+    [
+      ["Hubspot.GetCompanyDataByKeywords", "Retrieve data about companies in Hubspot using full-text search."],
+      ["Hubspot.GetContactDataByKeywords", "Retrieve data about contacts in Hubspot using full-text search."],
+      ["Hubspot.CreateContact", "Create a contact in Hubspot."],
+    ]
+  }
+/>
+
+<Tip>
+  If you need to perform an action that's not listed here, you can [get in touch
+  with us](mailto:contact@arcade.dev) to request a new tool, or [create your
+  own tools](/home/authoring-tools/build-tools/create-a-toolkit).
+</Tip>
+
+## Hubspot.GetCompanyDataByKeywords
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/hubspot/get_company_data_by_keywords_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/hubspot/get_company_data_by_keywords_example_call_tool.js"],
+      },
+    }
+  ]}
+/>
+
+Retrieve company data with associated contacts, deals, calls, emails, meetings, notes, and tasks.
+
+**Parameters**
+
+- **keywords** _(string, required)_ The keywords to search for companies. It will match against the company name, phone, and website.
+- **limit** _(int, optional, Defaults to `10`)_ The maximum number of companies to return. Defaults to 10. Max is 10.
+- **next_page_token** _(string, optional)_ The token to get the next page of results. Defaults to None (returns first page of results)
+
+## Hubspot.GetContactDataByKeywords
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/hubspot/get_contact_data_by_keywords_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/hubspot/get_contact_data_by_keywords_example_call_tool.js"],
+      },
+    }
+  ]}
+/>
+
+Retrieve contact data with associated companies, deals, calls, emails, meetings, notes, and tasks.
+
+**Parameters**
+
+- **keywords** _(string, required)_ The keywords to search for. E.g. 'quarterly report'
+- **limit** _(int, optional, Defaults to `10`)_ The maximum number of contacts to return. Defaults to 10. Max is 10.
+- **next_page_token** _(string, optional)_ The token to get the next page of results. Defaults to None (returns first page of results)
+
+## Hubspot.CreateContact
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/hubspot/create_contact_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/hubspot/create_contact_example_call_tool.js"],
+      },
+    }
+  ]}
+/>
+
+Create a contact associated with a company.
+
+**Parameters**
+
+- **company_id** _(string, required)_ The ID of the company to create the contact for.
+- **first_name** _(string, required)_ The first name of the contact.
+- **last_name** _(string, optional)_ The last name of the contact.
+- **email** _(string, optional)_ The email address of the contact.
+- **phone** _(string, optional)_ The phone number of the contact.
+- **mobile_phone** _(string, optional)_ The mobile phone number of the contact.
+- **job_title** _(string, optional)_ The job title of the contact.
+
+## Auth
+
+The Arcade Hubspot toolkit uses the [Hubspot auth provider](/home/hosting-options/auth-providers/hubspot) to connect to users' Hubspot accounts.
+
+### Arcade Cloud
+
+The Arcade Cloud offers a default Hubspot auth provider. If you use it, there's nothing to configure. Your users will see `Arcade` as the name of the application requesting permission.
+
+Alternatively, you can [configure a custom Hubspot auth provider](/home/hosting-options/auth-providers/hubspot#use-your-own-hubspot-app-credentials) with your own Hubspot app credentials. This way, your users will see your application's name requesting permission.
+
+### Self-hosted Arcade Engine
+
+With a [self-hosted installation of Arcade](/home/hosting-options/local-deployment/install/local), you must [configure the Hubspot auth provider](/home/hosting-options/auth-providers/hubspot) with your own Hubspot app credentials.
+
+<ToolFooter pipPackageName="arcade_hubspot" />

@@ -4,8 +4,8 @@ import {
   CardContent as CardContentUI,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+} from "@arcadeai/design-system";
+import { Badge } from "@arcadeai/design-system";
 import { cn } from "@/lib/utils";
 import { BadgeCheck, CheckCircle, Key, Users } from "lucide-react";
 import Image from "next/image";

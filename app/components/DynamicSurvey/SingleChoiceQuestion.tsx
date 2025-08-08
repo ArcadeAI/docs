@@ -1,5 +1,5 @@
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@arcadeai/design-system";
+import { RadioGroup, RadioGroupItem } from "@arcadeai/design-system";
 import { MultipleSurveyQuestion } from "posthog-js";
 
 interface SingleChoiceQuestionProps {

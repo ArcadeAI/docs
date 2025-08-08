@@ -1,5 +1,5 @@
 "use client";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@arcadeai/design-system";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";

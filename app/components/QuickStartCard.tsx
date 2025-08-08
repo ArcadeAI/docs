@@ -1,6 +1,11 @@
 "use client";
 import { motion } from "framer-motion";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@arcadeai/design-system";
 import Link from "next/link";
 
 interface QuickStartCardProps {

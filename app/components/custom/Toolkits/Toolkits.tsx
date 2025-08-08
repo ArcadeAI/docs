@@ -1,8 +1,8 @@
 "use client";
 import { ToolCard } from "@/components/custom/Toolkits/ToolCard";
 import { Category, Tool } from "@/components/custom/Toolkits/toolkits-config";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button, buttonVariants } from "@arcadeai/design-system";
+import { Input } from "@arcadeai/design-system";
 import { cn } from "@/lib/utils";
 import { useDebounce } from "@uidotdev/usehooks";
 import {

@@ -5,6 +5,7 @@ import { getPageMap } from "nextra/page-map";
 
 import { Logo } from "@components/Logo";
 import "./globals.css";
+import "nextra-theme-docs/style.css";
 import { SiDiscord, SiGithub } from "@icons-pack/react-simple-icons";
 import { SignupLink } from "@/components/Analytics";
 import NavBarButton from "@/components/NavBarButton";
@@ -100,6 +101,8 @@ export default async function RootLayout({ children }) {
           hue: { dark: 335, light: 335 },
         }}
       >
+        <meta httpEquiv="Content-Language" content="en" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         {/* Performance optimizations for external resources */}
         <link rel="preconnect" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
@@ -110,14 +113,21 @@ export default async function RootLayout({ children }) {
           pageMap={await getPageMap()}
           docsRepositoryBase="https://github.com/ArcadeAI/arcade-ai"
           editLink="Edit this page on GitHub"
-          sidebar={{ defaultMenuCollapseLevel: 1, autoCollapse: true }}
+          sidebar={{
+            defaultMenuCollapseLevel: 1,
+            autoCollapse: true,
+            defaultOpen: true,
+          }}
           toc={{ backToTop: "Scroll to top" }}
+          navigation={{
+            prev: true,
+            next: true,
+          }}
           footer={
             <NextraFooter>
               <Footer />
             </NextraFooter>
           }
-          // ...Your additional theme config options
         >
           <CustomLayout>{children}</CustomLayout>
         </Layout>

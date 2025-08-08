@@ -7,7 +7,7 @@ test("check for broken links", async () => {
     preset: "next",
   });
 
-  const found = await validateFiles(await fg("pages/**/*.{md,mdx}"), {
+  const found = await validateFiles(await fg("app/**/*.{md,mdx}"), {
     scanned,
   });
 
@@ -16,4 +16,4 @@ test("check for broken links", async () => {
   }
 
   expect(found.length).toBe(0);
-});
+}, 60000);

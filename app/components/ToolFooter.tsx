@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import { Cloud } from "lucide-react";
 import { Puzzle } from "lucide-react";

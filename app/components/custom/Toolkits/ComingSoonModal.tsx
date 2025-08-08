@@ -6,9 +6,9 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+} from "@arcadeai/design-system";
+import { Button } from "@arcadeai/design-system";
+import { Input } from "@arcadeai/design-system";
 import { usePostHog } from "posthog-js/react";
 import { useComingSoon } from "./ComingSoonContext";
 
@@ -108,7 +108,7 @@ const SuccessMessage = ({
   handleClose: () => void;
 }) => {
   return (
-    <div className="flex flex-col items-center justify-center pb-2 pt-6 text-center">
+    <div className="flex flex-col items-center justify-center pt-6 pb-2 text-center">
       <div className="mb-4 rounded-full bg-green-500/10 p-3">
         <svg
           className="h-6 w-6 text-green-500"

@@ -1,5 +1,5 @@
 "use client";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@arcadeai/design-system";
 import { type LucideIcon } from "lucide-react";
 import { IconType } from "@icons-pack/react-simple-icons";
 import { cn } from "@/lib/utils";

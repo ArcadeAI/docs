@@ -1,9 +1,10 @@
-export default {
+import type { MetaRecord } from "nextra";
+
+const meta: MetaRecord = {
   home: {
     type: "page",
     title: "Home",
     href: "/get-started",
-    breadcrumb: true,
   },
   toolkits: {
     type: "page",
@@ -27,3 +28,5 @@ export default {
     display: "hidden",
   },
 };
+
+export default meta;

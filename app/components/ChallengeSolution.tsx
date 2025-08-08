@@ -1,7 +1,12 @@
 "use client";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@arcadeai/design-system";
+import { Button } from "@arcadeai/design-system";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@arcadeai/design-system";
 import { motion } from "framer-motion";
 import { ArrowDown, ExternalLink } from "lucide-react";
 import Link from "next/link";

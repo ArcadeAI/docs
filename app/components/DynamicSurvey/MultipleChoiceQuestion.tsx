@@ -1,7 +1,7 @@
 "use client";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Checkbox } from "@arcadeai/design-system";
+import { Input } from "@arcadeai/design-system";
+import { Label } from "@arcadeai/design-system";
 import { MultipleSurveyQuestion } from "posthog-js";
 import { useState, useMemo } from "react";
 

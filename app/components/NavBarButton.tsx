@@ -1,11 +1,14 @@
 "use client";
 import { usePathname } from "next/navigation";
-import { Button, ButtonProps } from "./ui/button";
+import { Button } from "@arcadeai/design-system";
+import type { ComponentProps } from "react";
+
+type ButtonVariant = ComponentProps<typeof Button>["variant"];
 
 interface NavBarButtonProps {
   text: string;
   hideOnPath?: string[];
-  variant?: ButtonProps["variant"];
+  variant?: ButtonVariant;
 }
 
 export const NavBarButton = ({
@@ -15,11 +18,7 @@ export const NavBarButton = ({
 }: NavBarButtonProps) => {
   const pathname = usePathname();
   if (hideOnPath.includes(pathname)) return null;
-  return (
-    <Button variant={variant}>
-      <span className="text-xs">{text}</span>
-    </Button>
-  );
+  return <Button variant={variant}>{text}</Button>;
 };
 
 export default NavBarButton;

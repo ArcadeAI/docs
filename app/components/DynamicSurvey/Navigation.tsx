@@ -1,5 +1,5 @@
 "use client";
-import { Button } from "@/components/ui/button";
+import { Button } from "@arcadeai/design-system";
 
 export interface NavigationProps {
   onBack: () => void;

@@ -1,0 +1,98 @@
+---
+title: "Cloud deployments with Arcade Deploy"
+description: "Learn how to deploy a worker with Arcade Deploy"
+---
+
+import { Steps, Tabs } from "nextra/components";
+import { SignupLink } from "@/components/Analytics";
+
+# Deploying to the cloud with Arcade Deploy
+
+This guide shows you how to deploy a worker with a local toolkit with Arcade Deploy.
+
+## Requirements
+
+- **Python 3.10** or higher <br/> Verify your Python version by running `python --version` or `python3 --version` in your terminal.
+- **Arcade Account**: Sign up for an <SignupLink linkLocation="docs:custom-tools">Arcade account</SignupLink> if you haven't already.
+- **Arcade CLI**: Install the Arcade CLI
+<Tabs items={["uv", "pip"]}>
+<Tabs.Tab>
+```bash
+uv pip install arcade-ai
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```bash
+pip install arcade-ai
+```
+</Tabs.Tab>
+</Tabs>
+
+<Steps>
+
+## Create your deployment config
+
+Create a `worker.toml` file in your project directory:
+
+```yaml
+### Worker 1
+[[worker]]
+
+[worker.config]
+id = "my-worker"
+secret = <your secret> # Replace with your own secret
+
+[worker.local_source]
+packages = ["./<your-toolkit-directory>"] # Replace with the path to your toolkit directory
+```
+<Note>
+  For more information on the `worker.toml` file, see the [Arcade Deploy documentation](/home/hosting-options/local-deployment/configure/arcade-deploy).
+</Note>
+---
+
+## Deploy your worker
+
+Run the deploy command in the directory containing your `worker.toml` file:
+
+```bash
+arcade deploy
+```
+
+You should see output like the following:
+```bash
+Deploying 'my-worker...'                                                                                                                                                                                                                                                                                                                 main.py:589
+⠏ Deploying 1 workers
+┏━━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━┓
+┃         Added   ┃ Removed ┃ Updated ┃ No Changes ┃
+┡━━━━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━┩
+│  custom-toolkit │         │         │            │
+└─────────────────┴─────────┴─────────┴────────────┘
+✅ Worker 'my-worker' deployed successfully.
+```
+
+---
+
+## List your workers
+
+Run the following command to list your workers:
+
+```bash
+arcade worker list
+```
+
+You should see output like the following:
+
+```bash
+                                                     Workers
+┏━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+┃ ID        ┃ Cloud Deployed ┃ Engine Registered ┃ Enabled ┃ Host                                                ┃ Toolkits      ┃
+┡━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
+│ my-worker │ True           │ True              │ True    │ https://4bdfrgfdgftlu0ahyko56gdsr.server.arcade.dev │ CustomToolkit │
+└───────────┴────────────────┴───────────────────┴─────────┴─────────────────────────────────────────────────────┴───────────────┘
+```
+
+</Steps>
+
+Your worker and toolkits are now deployed and registered with the engine and ready to use!
+
+You can go to the [dashboard](https://api.arcade.dev/dashboard/workers) to see your worker and its details.

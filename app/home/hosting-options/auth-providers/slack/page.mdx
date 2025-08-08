@@ -1,0 +1,176 @@
+import { Tabs } from "nextra/components";
+
+# Slack auth provider
+
+The Slack auth provider enables tools and agents to call [Slack APIs](https://api.slack.com/docs) on behalf of a user. Behind the scenes, the Arcade Engine and the Slack auth provider seamlessly manage Slack OAuth 2.0 authorization for your users.
+
+<Tip>
+  Want to quickly get started with Slack in your agent or AI app? The pre-built
+  [Arcade Slack toolkit](/toolkits/categories/social-communication/slack) is what you want!
+</Tip>
+
+### What's documented here
+
+This page describes how to use and configure Slack auth with Arcade.
+
+This auth provider is used by:
+
+- The [Arcade Slack toolkit](/toolkits/categories/social-communication/slack), which provides pre-built tools for interacting with Slack
+- Your [app code](#using-slack-auth-in-app-code) that needs to call the Slack API
+- Or, your [custom tools](#using-slack-auth-in-custom-tools) that need to call the Slack API
+
+## Configuring Slack auth
+
+In a production environment, you will most likely want to use your own Slack app credentials. This way, your users will see your application's name requesting permission.
+
+You can use your own Slack credentials in both the Arcade Cloud and in a [self-hosted Arcade Engine](/home/hosting-options/local-deployment/install/local) instance.
+
+Before showing how to configure your Slack app credentials, let's go through the steps to create a Slack app.
+
+### Create a Slack app
+
+<Warning>
+  In May 29, 2025, [Slack announced](https://api.slack.com/changelog/2025-05-terms-rate-limit-update-and-faq) changes to their API rate-limits and terms of service for apps that are not approved for the Slack Marketplace.
+
+  The `conversations.history` and `conversations.replies` endpoints are now limited to 1 request/minute and up to 15 objects returned per request. This affects various tools in the [Arcade Slack toolkit](/toolkits/categories/social-communication/slack). Additionally, the [API Terms of Service](https://slack.com/terms-of-service/api) now requires [Slack Marketplace](https://api.slack.com/slack-marketplace/using) approval for commercial distribution.
+</Warning>
+
+- Follow Slack's guide to [registering a Slack app](https://api.slack.com/quickstart)
+- If you plan to use the [Arcade Slack toolkit](/toolkits/categories/social-communication/slack), select the scopes below (include additional scopes for your application's authorization needs or custom tools, in any):
+  - `channels:history`
+  - `channels:read`
+  - `chat:write`
+  - `groups:read`
+  - `groups:history`
+  - `groups:write`
+  - `im:history`
+  - `im:read`
+  - `im:write`
+  - `mpim:history`
+  - `mpim:read`
+  - `mpim:write`
+  - `users:read`
+  - `users:read.email`
+- Set the redirect URL to: `https://cloud.arcade.dev/api/v1/oauth/callback`
+- Copy the client ID and client secret
+
+Next, add the Slack app to your Arcade Engine configuration. You can do this in the Arcade Dashboard, or by editing the `engine.yaml` file directly (for a self-hosted instance).
+
+## Configuring your own Slack Auth Provider in Arcade
+
+There are two ways to configure your Slack app credentials in Arcade:
+
+1. From the Arcade Dashboard GUI
+2. By editing the `engine.yaml` file directly (for a self-hosted Arcade Engine)
+
+We show both options step-by-step below.
+
+<Tabs items={["Dashboard GUI", "Engine Configuration YAML"]}>
+<Tabs.Tab>
+
+### Configure Slack Auth Using the Arcade Dashboard GUI
+
+<Steps>
+
+#### Access the Arcade Dashboard
+
+To access the Arcade Cloud dashboard, go to [api.arcade.dev/dashboard](https://api.arcade.dev/dashboard). If you are self-hosting, by default the dashboard will be available at `http://localhost:9099/dashboard`. Adjust the host and port number to match your environment.
+
+#### Navigate to the OAuth Providers page
+
+- Under the **OAuth** section of the Arcade Dashboard left-side menu, click **Providers**.
+- Click **Add OAuth Provider** in the top right corner.
+- Select the **Included Providers** tab at the top.
+- In the **Provider** dropdown, select **Slack**.
+
+#### Enter the provider details
+
+- Choose a unique **ID** for your provider (e.g. "my-slack-provider").
+- Optionally enter a **Description**.
+- Enter the **Client ID** and **Client Secret** from your Slack app.
+
+#### Create the provider
+
+Hit the **Create** button and the provider will be ready to be used in the Arcade Engine.
+
+</Steps>
+
+When you use tools that require Slack auth using your Arcade account credentials, the Arcade Engine will automatically use this Slack OAuth provider. If you have multiple Slack providers, see [using multiple auth providers of the same type](/home/hosting-options/auth-providers#using-multiple-providers-of-the-same-type) for more information.
+
+</Tabs.Tab>
+<Tabs.Tab>
+
+### Configuring Slack auth in self-hosted Arcade Engine configuration
+
+<Steps>
+
+### Set environment variables
+
+Set the following environment variables:
+
+```bash
+export SLACK_CLIENT_ID="<your client ID>"
+export SLACK_CLIENT_SECRET="<your client secret>"
+```
+
+Or, you can set these values in a `.env` file:
+
+```bash
+SLACK_CLIENT_ID="<your client ID>"
+SLACK_CLIENT_SECRET="<your client secret>"
+```
+
+<Tip>
+  See [Engine configuration](/home/hosting-options/local-deployment/configure/engine) for more information on how
+  to set environment variables and configure the Arcade Engine.
+</Tip>
+
+### Edit the Engine configuration
+
+Edit the `engine.yaml` file and add a `slack` item to the `auth.providers` section:
+
+```yaml file=<rootDir>/examples/code/integrations/slack/config_provider.engine.yaml {3-9}
+
+```
+
+</Steps>
+
+</Tabs.Tab>
+</Tabs>
+
+## Using Slack auth in app code
+
+Use the Slack auth provider in your own agents and AI apps to get a user token for the Slack API. See [authorizing agents with Arcade](/home/core-concepts/auth/how-arcade-helps) to understand how this works.
+
+Use `client.auth.start()` to get a user token for the Slack API:
+
+<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs.Tab>
+
+```python file=<rootDir>/examples/code/integrations/slack/custom_auth.py {8-17}
+
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```javascript file=<rootDir>/examples/code/integrations/slack/custom_auth.js {8-10}
+
+```
+
+</Tabs.Tab>
+
+</Tabs>
+
+## Using Slack auth in custom tools
+
+You can use the pre-built [Arcade Slack toolkit](/toolkits/categories/social-communication/slack) to quickly build agents and AI apps that interact with Slack.
+
+If the pre-built tools in the Slack toolkit don't meet your needs, you can author your own [custom tools](/home/authoring-tools/build-tools/create-a-toolkit) that interact with the Slack API.
+
+Use the `Slack()` auth class to specify that a tool requires authorization with Slack. The `context.authorization.token` field will be automatically populated with the user's Slack token:
+
+```python file=<rootDir>/examples/code/integrations/slack/custom_tool.py {5-6,10-19,30}
+
+```
