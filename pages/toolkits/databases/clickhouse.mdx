@@ -1,4 +1,4 @@
-# Postgres
+# Clickhouse
 
 import ToolInfo from "@/components/ToolInfo";
 import Badges from "@/components/Badges";
@@ -7,16 +7,16 @@ import TableOfContents from "@/components/TableOfContents";
 import ToolFooter from "@/components/ToolFooter";
 
 <ToolInfo
-  description="Enable agents to interact with PostgreSQL databases (read only)."
+  description="Enable agents to interact with Clickhouse databases (read only)."
   author="Arcade"
-  codeLink="https://github.com/ArcadeAI/arcade-ai/tree/main/toolkits/postgres"
+  codeLink="https://github.com/ArcadeAI/arcade-ai/tree/main/toolkits/clickhouse"
   authType="database connection string"
   versions={["0.1.0"]}
 />
 
-<Badges repo="arcadeai/arcade-postgres" />
+<Badges repo="arcadeai/arcade-clickhouse" />
 
-The Arcade Postgres toolkit provides a pre-built set of tools for interacting with PostgreSQL databases in a read-only manner. This toolkit enables agents to discover database schemas, explore table structures, and execute SELECT queries safely.  This toolkit is a companion to the blog post [Designing SQL Tools for AI Agents](https://blog.arcade.dev/sql-tools-ai-agents-security).
+The Arcade Clickhouse toolkit provides a pre-built set of tools for interacting with Clickhouse databases in a read-only manner. This toolkit enables agents to discover database schemas, explore table structures, and execute SELECT queries safely.  This toolkit is a companion to the blog post [Designing SQL Tools for AI Agents](https://blog.arcade.dev/sql-tools-ai-agents-security).
 
 <Note>
 This toolkit is meant to be an example of how to build a toolkit for a database, and is not intended to be used in production. For production use, we recommend forking this repository and building your own toolkit with use-case specific tools.
@@ -40,19 +40,20 @@ This toolkit demonstrates several important concepts for LLM-powered database in
   headers={["Tool Name", "Description"]}
   data={
     [
-      ['Postgres.DiscoverSchemas', "Discover all schemas in a PostgreSQL database."],
-      ['Postgres.DiscoverTables', "Discover all tables in a specific schema."],
-      ['Postgres.GetTableSchema', "Get the detailed schema of a specific table."],
-      ['Postgres.ExecuteSelectQuery', "Execute a SELECT query with comprehensive clause support."],
+      ['Clickhouse.DiscoverDatabases', "Discover all databases in a Clickhouse database."],
+      ['Clickhouse.DiscoverSchemas', "Discover all schemas in a Clickhouse database."],
+      ['Clickhouse.DiscoverTables', "Discover all tables in a specific schema."],
+      ['Clickhouse.GetTableSchema', "Get the detailed schema of a specific table."],
+      ['Clickhouse.ExecuteSelectQuery', "Execute a SELECT query with comprehensive clause support."],
     ]
   }
 />
 
-Note that all tools require the `POSTGRES_DATABASE_CONNECTION_STRING` secret to be set.
+Note that all tools require the `CLICKHOUSE_DATABASE_CONNECTION_STRING` secret to be set.
 
-## Postgres.DiscoverSchemas
+## Clickhouse.DiscoverDatabases
 
-Discover all schemas in a PostgreSQL database. This tool returns a list of all available schemas, excluding the `information_schema` for security.
+Discover all databases in a Clickhouse database. This tool returns a list of all available databases.
 
 <TabbedCodeBlock
   tabs={[
@@ -60,15 +61,33 @@ Discover all schemas in a PostgreSQL database. This tool returns a list of all a
       label: "Call the Tool",
       content: {
         Python: [
-          "/examples/integrations/toolkits/postgres/discover_schemas_example_call_tool.py",
+          "/examples/integrations/toolkits/clickhouse/discover_databases_example_call_tool.py",
         ],
-        JavaScript: ["/examples/integrations/toolkits/postgres/discover_schemas_example_call_tool.js"],
+        JavaScript: ["/examples/integrations/toolkits/clickhouse/discover_databases_example_call_tool.js"],
       },
     }
   ]}
 />
 
-## Postgres.DiscoverTables
+## Clickhouse.DiscoverSchemas
+
+Discover all schemas in a Clickhouse database. This tool returns a list of all available schemas, excluding the `information_schema` for security.
+
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/clickhouse/discover_schemas_example_call_tool.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/clickhouse/discover_schemas_example_call_tool.js"],
+      },
+    }
+  ]}
+/>
+
+## Clickhouse.DiscoverTables
 
 Discover all tables in a specific schema. This tool should be used before any other tool that requires a table name.
 
@@ -81,15 +100,15 @@ Discover all tables in a specific schema. This tool should be used before any ot
       label: "Call the Tool",
       content: {
         Python: [
-          "/examples/integrations/toolkits/postgres/discover_tables_example_call_tool.py",
+          "/examples/integrations/toolkits/clickhouse/discover_tables_example_call_tool.py",
         ],
-        JavaScript: ["/examples/integrations/toolkits/postgres/discover_tables_example_call_tool.js"],
+        JavaScript: ["/examples/integrations/toolkits/clickhouse/discover_tables_example_call_tool.js"],
       },
     }
   ]}
 />
 
-## Postgres.GetTableSchema
+## Clickhouse.GetTableSchema
 
 Get the detailed schema of a specific table. This tool provides column information including data types, primary key indicators, and index information. Always use this tool before executing any query.
 
@@ -103,15 +122,15 @@ Get the detailed schema of a specific table. This tool provides column informati
       label: "Call the Tool",
       content: {
         Python: [
-          "/examples/integrations/toolkits/postgres/get_table_schema_example_call_tool.py",
+          "/examples/integrations/toolkits/clickhouse/get_table_schema_example_call_tool.py",
         ],
-        JavaScript: ["/examples/integrations/toolkits/postgres/get_table_schema_example_call_tool.js"],
+        JavaScript: ["/examples/integrations/toolkits/clickhouse/get_table_schema_example_call_tool.js"],
       },
     }
   ]}
 />
 
-## Postgres.ExecuteSelectQuery
+## Clickhouse.ExecuteSelectQuery
 
 Execute a SELECT query with comprehensive clause support. This tool allows you to build complex queries using individual clauses while maintaining safety and performance.
 
@@ -154,9 +173,9 @@ LIMIT {limit} OFFSET {offset}
       label: "Call the Tool",
       content: {
         Python: [
-          "/examples/integrations/toolkits/postgres/execute_select_query_example_call_tool.py",
+          "/examples/integrations/toolkits/clickhouse/execute_select_query_example_call_tool.py",
         ],
-        JavaScript: ["/examples/integrations/toolkits/postgres/execute_select_query_example_call_tool.js"],
+        JavaScript: ["/examples/integrations/toolkits/clickhouse/execute_select_query_example_call_tool.js"],
       },
     }
   ]}
@@ -164,7 +183,7 @@ LIMIT {limit} OFFSET {offset}
 
 ## Usage Workflow
 
-For optimal results, follow this workflow when using the Postgres toolkit:
+For optimal results, follow this workflow when using the Clickhouse toolkit:
 
 1. **Discover Schemas**: Use `discover_schemas` to see available schemas
 2. **Discover Tables**: Use `discover_tables` with your target schema
