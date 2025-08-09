@@ -1,4 +1,5 @@
-import { Button } from '@/components/button';
+import { Button } from '@arcadeai/design-system';
+import Link from 'next/link';
 
 /**
  * Hero component displays the main hero section with a background image and call-to-action button.
@@ -24,8 +25,12 @@ export const Hero = () => {
           Empower Agents to Act for your Users
         </p>
         <div className="flex flex-col space-y-2 sm:flex-row sm:space-x-4 sm:space-y-0">
-          <Button href="/home">Learn more</Button>
-          <Button href="/home/quickstart">Get started</Button>
+          <Button asChild>
+            <Link href="/home">Learn more</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/home/quickstart">Get started</Link>
+          </Button>
         </div>
       </div>
     </section>

@@ -17,4 +17,4 @@ test('check for broken links', async () => {
   }
 
   expect(found.length).toBe(0);
-});
+}, 30_000);

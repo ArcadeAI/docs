@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import type React from 'react';
 
 export const ExternalLink = ({
@@ -16,11 +15,3 @@ export const ExternalLink = ({
     </a>
   );
 };
-
-export const Button = ({ children, href }) => (
-  <Link href={href}>
-    <button className="button px-4 py-2 text-sm sm:text-base" type="button">
-      {children}
-    </button>
-  </Link>
-);
