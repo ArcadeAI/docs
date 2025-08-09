@@ -1,9 +1,9 @@
-import { WrappedAgent } from "../classes/wrappedAgent";
-import type { Config } from "../classes/config";
-import type { Logger } from "../classes/logger";
-import { getNewCommitsTool } from "../tools/getNewCommitsAndPRs";
-import { readFileTool } from "../tools/readFile";
-import { writeFileTool } from "../tools/writeFile";
+import type { Config } from '../classes/config';
+import type { Logger } from '../classes/logger';
+import { WrappedAgent } from '../classes/wrappedAgent';
+import { getNewCommitsTool } from '../tools/getNewCommitsAndPRs';
+import { readFileTool } from '../tools/readFile';
+import { writeFileTool } from '../tools/writeFile';
 
 export class ChangelogAgent extends WrappedAgent {
   constructor(config: Config, logger: Logger) {
@@ -45,20 +45,20 @@ When generating the changelog, follow these rules:
       getNewCommitsTool(config, logger),
     ];
 
-    super("ChangelogAgent", systemPrompt, tools, [], config, logger);
+    super('ChangelogAgent', systemPrompt, tools, [], config, logger);
   }
 
   async generate(changelogPath: string, repositories: string[]) {
     this.logger.startSpan(
-      `Generating changelog from changes in ${repositories.join(", ")}...`,
+      `Generating changelog from changes in ${repositories.join(', ')}...`
     );
 
     const result = await this.run(
       `
-      Today is ${new Date().toISOString().split("T")[0]}.
+      Today is ${new Date().toISOString().split('T')[0]}.
       The full path to the changelog.md that you will be updating is \`${changelogPath}\`.
-      The Github repositories to load commits from are: ${repositories.join(", ")}
-      `,
+      The Github repositories to load commits from are: ${repositories.join(', ')}
+      `
     );
 
     this.logger.endSpan(result.finalOutput);

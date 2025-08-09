@@ -1,12 +1,12 @@
-import { Arcade } from "@arcadeai/arcadejs";
+import { Arcade } from '@arcadeai/arcadejs';
 
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
-const USER_ID = "{arcade_user_id}";
-const TOOL_NAME = "Postgres.DiscoverTables";
+const USER_ID = '{arcade_user_id}';
+const TOOL_NAME = 'Postgres.DiscoverTables';
 
 const toolInput = {
-  schema_name: "public",
+  schema_name: 'public',
 };
 
 const response = await client.tools.execute({

@@ -1,35 +1,35 @@
-import { tool } from "@openai/agents";
-import { z } from "zod";
+import { tool } from '@openai/agents';
+import { z } from 'zod';
 
-import type { Config } from "../classes/config";
-import type { Logger } from "../classes/logger";
-import { ToolUtils } from "../utils/toolUtils";
+import type { Config } from '../classes/config';
+import type { Logger } from '../classes/logger';
+import { ToolUtils } from '../utils/toolUtils';
 
-const name = "get_new_commits_and_pull_requests";
+const name = 'get_new_commits_and_pull_requests';
 const description =
-  "Get the new commits and pull requests from a GitHub repository using the GitHub API";
+  'Get the new commits and pull requests from a GitHub repository using the GitHub API';
 const parametersSchema = z.object({
   organization_name: z
     .string()
     .describe(
-      "The name of the Github organization to read the new commits from",
+      'The name of the Github organization to read the new commits from'
     ),
   repository_name: z
     .string()
-    .describe("The name of the Github repository to read the new commits from"),
+    .describe('The name of the Github repository to read the new commits from'),
   branch_name: z
     .string()
-    .default("main")
-    .describe("The name of git the branch to read the new commits from"),
+    .default('main')
+    .describe('The name of git the branch to read the new commits from'),
   since: z
     .string()
     .describe(
-      "The date to start from. The date should be in the format YYYY-MM-DD.",
+      'The date to start from. The date should be in the format YYYY-MM-DD.'
     ),
   until: z
     .string()
     .describe(
-      "The date to end at.  The date should be in the format YYYY-MM-DD.",
+      'The date to end at.  The date should be in the format YYYY-MM-DD.'
     ),
 });
 
@@ -66,7 +66,7 @@ export const getNewCommitsTool = (config: Config, logger: Logger) =>
 
 export async function execute(
   parameters: z.infer<typeof parametersSchema>,
-  config: Config,
+  config: Config
 ) {
   const { organization_name, repository_name, branch_name, since } = parameters;
 
@@ -82,18 +82,18 @@ export async function execute(
 
   const response = await fetch(url, {
     headers: {
-      Accept: "application/vnd.github+json",
+      Accept: 'application/vnd.github+json',
       Authorization: `Bearer ${config.github_token}`,
-      "X-GitHub-Api-Version": "2022-11-28",
+      'X-GitHub-Api-Version': '2022-11-28',
     },
   });
 
   if (!response.ok) {
     throw new Error(
       `Failed to fetch commits from URL: ${url}: ${response.statusText} | ${JSON.stringify(
-        await response.json(),
+        await response.json()
       )}
-      `,
+      `
     );
   }
 
@@ -106,14 +106,14 @@ export async function execute(
     const pullRequestMatch = commit.commit.message.match(/\(#(\d+)\)/);
     if (!pullRequestMatch) continue;
 
-    const pull_request_number = parseInt(pullRequestMatch[1]);
+    const pull_request_number = Number.parseInt(pullRequestMatch[1]);
     if (!pull_request_number || isNaN(pull_request_number)) continue;
 
     const pull_request = await getPullRequest(
       pull_request_number,
       organization_name,
       repository_name,
-      config,
+      config
     );
     pull_requests.push(pull_request);
   }
@@ -125,7 +125,7 @@ async function getPullRequest(
   pull_request_number: number,
   organization_name: string,
   repository_name: string,
-  config: Config,
+  config: Config
 ) {
   const url = `https://api.github.com/repos/${organization_name}/${repository_name}/pulls/${pull_request_number}`;
 
@@ -139,18 +139,18 @@ async function getPullRequest(
 
   const response = await fetch(url, {
     headers: {
-      Accept: "application/vnd.github+json",
+      Accept: 'application/vnd.github+json',
       Authorization: `Bearer ${config.github_token}`,
-      "X-GitHub-Api-Version": "2022-11-28",
+      'X-GitHub-Api-Version': '2022-11-28',
     },
   });
 
   if (!response.ok) {
     throw new Error(
       `Failed to fetch pull request from URL: ${url}: ${response.statusText} | ${JSON.stringify(
-        await response.json(),
+        await response.json()
       )}
-      `,
+      `
     );
   }
 

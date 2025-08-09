@@ -1,14 +1,14 @@
-import { Arcade } from "@arcadeai/arcadejs";
+import { Arcade } from '@arcadeai/arcadejs';
 
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
-const USER_ID = "user@example.com";  // Unique identifier for your user (email, UUID, etc.)
-const TOOL_NAME = "Slack.GetMessages";
+const USER_ID = 'user@example.com'; // Unique identifier for your user (email, UUID, etc.)
+const TOOL_NAME = 'Slack.GetMessages';
 
 // Start the authorization process
-const authResponse = await client.tools.authorize({tool_name: TOOL_NAME});
+const authResponse = await client.tools.authorize({ tool_name: TOOL_NAME });
 
-if (authResponse.status !== "completed") {
+if (authResponse.status !== 'completed') {
   console.log(`Click this link to authorize: ${authResponse.url}`);
 }
 
@@ -16,9 +16,9 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "channel_name": "general",
-  "oldest_relative": "01:00:00",
-  "limit": 50
+  channel_name: 'general',
+  oldest_relative: '01:00:00',
+  limit: 50,
 };
 
 const response = await client.tools.execute({

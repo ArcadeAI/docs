@@ -1,9 +1,9 @@
-import { Arcade } from "@arcadeai/arcadejs";
+import { Arcade } from '@arcadeai/arcadejs';
 
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
-const USER_ID = "{arcade_user_id}";
-const TOOL_NAME = "GoogleSheets.CreateSpreadsheet";
+const USER_ID = '{arcade_user_id}';
+const TOOL_NAME = 'GoogleSheets.CreateSpreadsheet';
 
 // Start the authorization process
 const authResponse = await client.tools.authorize({
@@ -11,7 +11,7 @@ const authResponse = await client.tools.authorize({
   user_id: USER_ID,
 });
 
-if (authResponse.status !== "completed") {
+if (authResponse.status !== 'completed') {
   console.log(`Click this link to authorize: ${authResponse.url}`);
 }
 
@@ -19,28 +19,28 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  title: "My Spreadsheet",
+  title: 'My Spreadsheet',
   data: JSON.stringify({
-    "1": {
-      "A": "Name",
-      "B": "Age",
-      "C": "City"
+    1: {
+      A: 'Name',
+      B: 'Age',
+      C: 'City',
     },
-    "2": {
-      "A": "John",
-      "B": "20",
-      "C": "New York"
+    2: {
+      A: 'John',
+      B: '20',
+      C: 'New York',
     },
-    "3": {
-      "A": "Jane",
-      "B": "25",
-      "C": "Los Angeles"
+    3: {
+      A: 'Jane',
+      B: '25',
+      C: 'Los Angeles',
     },
-    "5": {
-      "A": "Average Age",
-      "B": "=AVERAGE(B2:B3)"
-    }
-  })
+    5: {
+      A: 'Average Age',
+      B: '=AVERAGE(B2:B3)',
+    },
+  }),
 };
 
 const response = await client.tools.execute({

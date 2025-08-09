@@ -1,10 +1,18 @@
 import { Tabs } from "nextra/components";
-import { SignupLink } from "@/components/Analytics";
+import { SignupLink } from "@/components/analytics";
 
 # Salesforce Auth Provider
 
 <Note>
-  At this time, Arcade does not offer a default Salesforce Auth Provider and cannot support Salesforce auth in the Arcade Cloud. To use Salesforce auth, the [Salesforce toolkit](/toolkits/categories/sales/salesforce), or to develop your [custom Salesforce tools](/home/authoring-tools/build-tools/create-a-toolkit), you must [self-host the Arcade Engine](/home/hosting-options/local-deployment/install/local) and create a custom Auth Provider with your own Salesforce OAuth 2.0 credentials as described below.
+  At this time, Arcade does not offer a default Salesforce Auth Provider and
+  cannot support Salesforce auth in the Arcade Cloud. To use Salesforce auth,
+  the [Salesforce toolkit](/toolkits/categories/sales/salesforce), or to develop
+  your [custom Salesforce
+  tools](/home/authoring-tools/build-tools/create-a-toolkit), you must
+  [self-host the Arcade
+  Engine](/home/hosting-options/local-deployment/install/local) and create a
+  custom Auth Provider with your own Salesforce OAuth 2.0 credentials as
+  described below.
 </Note>
 
 The Salesforce auth provider enables tools and agents to call Salesforce APIs on behalf of a user. Behind the scenes, the Arcade Engine and the Salesforce auth provider seamlessly manage Salesforce OAuth 2.0 authorization for your users.
@@ -59,8 +67,10 @@ Take note of your Salesforce Org Subdomain. You will need this value in the next
 ## Set the Salesforce Org Subdomain Environment Variable
 
 {/* The step is right before, but the note is intended for people coming from different pages that link directly to this sub-heading */}
+
 <Note>
-  Refer to the [previous step](#get-your-salesforce-org-subdomain) to find your Salesforce Org Subdomain.
+  Refer to the [previous step](#get-your-salesforce-org-subdomain) to find your
+  Salesforce Org Subdomain.
 </Note>
 
 Set the `SALESFORCE_ORG_SUBDOMAIN` environment variable in the same runtime where your Arcade Worker is executed:
@@ -78,7 +88,8 @@ The custom scopes required by the [Arcade Salesforce toolkit](/toolkits/categori
 <Note>
   The custom scopes listed below are only required if you are using the [Arcade Salesforce toolkit](/toolkits/categories/sales/salesforce).
 
-  If you're creating your own [custom Salesforce tools](/home/authoring-tools/build-tools/create-a-toolkit) or using Arcade to authorize users and call Salesforce APIs directly, you are free to define custom scope(s) that fit best your application use cases. Observe that you must have at least one custom scope assigned to your Salesforce app in order to use the Salesforce API.
+If you're creating your own [custom Salesforce tools](/home/authoring-tools/build-tools/create-a-toolkit) or using Arcade to authorize users and call Salesforce APIs directly, you are free to define custom scope(s) that fit best your application use cases. Observe that you must have at least one custom scope assigned to your Salesforce app in order to use the Salesforce API.
+
 </Note>
 
 - `read_account`: Read access to account data.
@@ -92,17 +103,21 @@ The custom scopes required by the [Arcade Salesforce toolkit](/toolkits/categori
 Follow the [Create an OAuth Custom Scope](https://help.salesforce.com/s/articleView?id=xcloud.remoteaccess_oauth_customscopes_create.htm&type=5) and [Assign an OAuth Custom Scope to a Connected App](https://help.salesforce.com/s/articleView?id=xcloud.remoteaccess_oauth_customscopes_assign.htm&type=5) Salesforce documentation to understand how to define and assign these scopes to your Salesforce app.
 
 <Tip>
-  The scope names aren't really attached to any endpoint or action. It's the developer's job to honor the permissions communicated to the user when authorizing the app. You could, in theory, assign one single scope (e.g. `fullaccess`) and use it to query any Salesforce API endpoint.
+  The scope names aren't really attached to any endpoint or action. It's the
+  developer's job to honor the permissions communicated to the user when
+  authorizing the app. You could, in theory, assign one single scope (e.g.
+  `fullaccess`) and use it to query any Salesforce API endpoint.
 </Tip>
 
 ## Configuring Salesforce Auth
 
 <Note>
-  Refer to [Installing Arcade Locally](/home/hosting-options/local-deployment/install/local) for more information on how to install and run the Arcade Engine.
+  Refer to [Installing Arcade
+  Locally](/home/hosting-options/local-deployment/install/local) for more
+  information on how to install and run the Arcade Engine.
 </Note>
 
 You can either configure Salesforce auth from the Arcade Engine Dashboard graphical interface or in the `engine.yaml` file. We describe both options below.
-
 
 <Tabs items={["Dashboard GUI", "Engine Configuration YAML"]}>
 <Tabs.Tab>
@@ -130,7 +145,8 @@ By default, the Arcade Dashboard will be available at `http://localhost:9099/das
 #### Configure the auth endpoints
 
 <Note>
-  Replace `salesforce-org-subdomain` with your [Salesforce Org Subdomain](#get-your-salesforce-org-subdomain).
+  Replace `salesforce-org-subdomain` with your [Salesforce Org
+  Subdomain](#get-your-salesforce-org-subdomain).
 </Note>
 
 - Enter the auth endpoints:
@@ -173,11 +189,17 @@ Click the **Create** button and the provider will be ready to be used in the Arc
 ### Configure Salesforce Auth Using the Engine Configuration YAML
 
 <Tip>
-  Refer to [Engine configuration](/home/hosting-options/local-deployment/configure/engine) for more information on how to set environment variables and configure the Arcade Engine.
+  Refer to [Engine
+  configuration](/home/hosting-options/local-deployment/configure/engine) for
+  more information on how to set environment variables and configure the Arcade
+  Engine.
 </Tip>
 
 <Tip>
-  To find where the `engine.yaml` file is located in your OS after installing the Arcade Engine, check the [Engine configuration file](/home/hosting-options/local-deployment/configure/overview#engine-configuration-file) documentation.
+  To find where the `engine.yaml` file is located in your OS after installing
+  the Arcade Engine, check the [Engine configuration
+  file](/home/hosting-options/local-deployment/configure/overview#engine-configuration-file)
+  documentation.
 </Tip>
 
 <Steps>
@@ -201,17 +223,21 @@ SALESFORCE_CLIENT_SECRET="<your client secret>"
 #### Edit the Engine configuration
 
 <Note>
-  In the YAML code demonstrated below, replace `salesforce-org-subdomain` in the endpoint URLs with your [Salesforce Org Subdomain](#get-your-salesforce-org-subdomain).
+  In the YAML code demonstrated below, replace `salesforce-org-subdomain` in the
+  endpoint URLs with your [Salesforce Org
+  Subdomain](#get-your-salesforce-org-subdomain).
 </Note>
 
 Edit the `engine.yaml` file and add a Salesforce item to the `auth.providers` section:
 
 <Note>
-  The `id` must be set to `salesforce` in order to use the [Arcade Salesforce toolkit](/toolkits/categories/sales/salesforce).
+  The `id` must be set to `salesforce` in order to use the [Arcade Salesforce
+  toolkit](/toolkits/categories/sales/salesforce).
 </Note>
 
 <Note>
-  Replace `salesforce-org-subdomain` with your [Salesforce Org Subdomain](#get-your-salesforce-org-subdomain).
+  Replace `salesforce-org-subdomain` with your [Salesforce Org
+  Subdomain](#get-your-salesforce-org-subdomain).
 </Note>
 
 ```yaml file=<rootDir>/examples/code/integrations/salesforce/config_provider.engine.yaml {3-3,11-11,18-18,25-25,33-33}
@@ -248,7 +274,8 @@ The [Arcade Salesforce toolkit](/toolkits/categories/sales/salesforce) provides 
 Refer to the [toolkit documentation and examples](/toolkits/categories/sales/salesforce) to learn how to use the toolkit to build agents and AI apps that interact with Salesforce services.
 
 <Tip>
-  Check our introductory documentation to understand what are tools and how [tool calling works](/home/core-concepts/use-tools/tools-overview).
+  Check our introductory documentation to understand what are tools and how
+  [tool calling works](/home/core-concepts/use-tools/tools-overview).
 </Tip>
 
 ## Calling Salesforce APIs directly
@@ -277,15 +304,18 @@ pip install arcadepy
 Create a new script called `salesforce_example.py`. Import the necessary modules and instantiate the Arcade client:
 
 <Note>
-  The Arcade Engine service is available at `http://localhost:9099` by default. Replace the host and port, if necessary, to match your environment.
+  The Arcade Engine service is available at `http://localhost:9099` by default.
+  Replace the host and port, if necessary, to match your environment.
 </Note>
 
 ```python file=<rootDir>/examples/code/integrations/salesforce/custom_auth.py#L1-L4 {4-4}
+
 ```
 
 ### Set the values required for the Salesforce API call
 
 ```python file=<rootDir>/examples/code/integrations/salesforce/custom_auth.py#L6-L9
+
 ```
 
 Here's a break down of each value:
@@ -300,10 +330,15 @@ Here's a break down of each value:
 The Arcade client will prompt the user to access a URL and authorize the app to access their Salesforce data. At the end of the auth process, you will have a token that can be used to call Salesforce APIs on behalf of that user.
 
 ```python file=<rootDir>/examples/code/integrations/salesforce/custom_auth.py#L12-L28 {25-25}
+
 ```
 
 <Tip>
-  If the same scopes have already been authorized by the user before and the token is still valid, the auth process will be skipped and the token will be returned immediately, without prompting with the authorization URL. The Arcade Engine associates a previously authorized token with the `user_id` you provided.
+  If the same scopes have already been authorized by the user before and the
+  token is still valid, the auth process will be skipped and the token will be
+  returned immediately, without prompting with the authorization URL. The Arcade
+  Engine associates a previously authorized token with the `user_id` you
+  provided.
 </Tip>
 
 ### Call the Salesforce API
@@ -311,12 +346,18 @@ The Arcade client will prompt the user to access a URL and authorize the app to 
 We will now call the Salesforce `/parameterizedSearch` API endpoint to search and retrieve account data.
 
 <Note>
-  Replace the `q` value of `"acme"` with any keyword combination of your choice. In a real-world scenario, this value would most likely come from a user's input. Observe that the `q` argument must be a string with two or more characters.
+  Replace the `q` value of `"acme"` with any keyword combination of your choice.
+  In a real-world scenario, this value would most likely come from a user's
+  input. Observe that the `q` argument must be a string with two or more
+  characters.
 </Note>
 
 ```python file=<rootDir>/examples/code/integrations/salesforce/custom_auth.py#L31-L48 {35-35}
+
 ```
+
 &nbsp;
+
 <ToggleContent showText="Click to view the full example" hideText="Hide example">
 ```python file=<rootDir>/examples/code/integrations/salesforce/custom_auth.py
 ```
@@ -338,16 +379,16 @@ npm install @arcadeai/arcadejs
 
 Create a new script called `salesforce_example.js`. Import the necessary modules and instantiate the Arcade client:
 
-<Note>
-  Replace `http://localhost:9099` with the URL of your Arcade Engine.
-</Note>
+<Note>Replace `http://localhost:9099` with the URL of your Arcade Engine.</Note>
 
 ```javascript file=<rootDir>/examples/code/integrations/salesforce/custom_auth.js#L1-L3 {3-3}
+
 ```
 
 ### Set the values required for the Salesforce API call
 
 ```javascript file=<rootDir>/examples/code/integrations/salesforce/custom_auth.js#L5-L8
+
 ```
 
 Here's a break down of each value:
@@ -362,10 +403,15 @@ Here's a break down of each value:
 The Arcade client will prompt the user to access a URL and authorize the app to access their Salesforce data. At the end of the auth process, you will have a token that can be used to call Salesforce APIs on behalf of that user.
 
 ```javascript file=<rootDir>/examples/code/integrations/salesforce/custom_auth.js#L11-L31 {27-27}
+
 ```
 
 <Tip>
-  If the same scopes have already been authorized by the user before and the token is still valid, the auth process will be skipped and the token will be returned immediately, without prompting with the authorization URL. The Arcade Engine associates a previously authorized token with the `user_id` you provide.
+  If the same scopes have already been authorized by the user before and the
+  token is still valid, the auth process will be skipped and the token will be
+  returned immediately, without prompting with the authorization URL. The Arcade
+  Engine associates a previously authorized token with the `user_id` you
+  provide.
 </Tip>
 
 ### Call the Salesforce API
@@ -373,12 +419,18 @@ The Arcade client will prompt the user to access a URL and authorize the app to 
 We will now call the Salesforce `/parameterizedSearch` API endpoint to search and retrieve account data.
 
 <Note>
-  Replace the `q` value of `"acme"` with any keyword combination of your choice. In a real-world scenario, this value would most likely come from a user's input. Observe that the `q` argument must be a string with two or more characters.
+  Replace the `q` value of `"acme"` with any keyword combination of your choice.
+  In a real-world scenario, this value would most likely come from a user's
+  input. Observe that the `q` argument must be a string with two or more
+  characters.
 </Note>
 
 ```javascript file=<rootDir>/examples/code/integrations/salesforce/custom_auth.js#L34-L57 {42-42}
+
 ```
+
 &nbsp;
+
 <ToggleContent showText="Click to view the full example" hideText="Hide example">
 ```javascript file=<rootDir>/examples/code/integrations/salesforce/custom_auth.js
 ```

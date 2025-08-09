@@ -1,20 +1,20 @@
-import { Arcade } from "@arcadeai/arcadejs";
+import { Arcade } from '@arcadeai/arcadejs';
 
-const client = new Arcade((baseURL = "http://localhost:9099")); // Automatically finds the `ARCADE_API_KEY` env variable
+const client = new Arcade((baseURL = 'http://localhost:9099')); // Automatically finds the `ARCADE_API_KEY` env variable
 
-const salesforceProviderId = "salesforce";
-const salesforceOrgSubdomain = "salesforce-org-subdomain";
-const userId = "{arcade_user_id}";
-const scopes = ["read_account"];
+const salesforceProviderId = 'salesforce';
+const salesforceOrgSubdomain = 'salesforce-org-subdomain';
+const userId = '{arcade_user_id}';
+const scopes = ['read_account'];
 
 // Start the authorization process
 let authResponse = await client.auth.start(userId, {
   provider: salesforceProviderId,
-  scopes: scopes,
+  scopes,
 });
 
-if (authResponse.status !== "completed") {
-  console.log("Please complete the authorization challenge in your browser:");
+if (authResponse.status !== 'completed') {
+  console.log('Please complete the authorization challenge in your browser:');
   console.log(authResponse.url);
 }
 
@@ -22,13 +22,13 @@ if (authResponse.status !== "completed") {
 authResponse = await client.auth.waitForCompletion(authResponse);
 
 if (!authResponse.context.token) {
-  throw new Error("No token found in auth response");
+  throw new Error('No token found in auth response');
 }
 
 const token = authResponse.context.token;
 
 if (!token) {
-  throw new Error("No token found in auth response");
+  throw new Error('No token found in auth response');
 }
 
 // Use the Salesforce API
@@ -38,22 +38,22 @@ const response = await fetch(
     headers: {
       Authorization: `Bearer ${token}`,
     },
-    method: "POST",
+    method: 'POST',
     body: JSON.stringify({
-      q: "acme",
+      q: 'acme',
       sobjects: [
-        { name: "Account", fields: ["Id", "Name", "Website", "Phone"] },
+        { name: 'Account', fields: ['Id', 'Name', 'Website', 'Phone'] },
       ],
-      in: "ALL",
+      in: 'ALL',
       overallLimit: 10,
       offset: 0,
     }),
-  },
+  }
 );
 
 if (!response.ok) {
   throw new Error(
-    `HTTP error! status: ${response.status} - ${await response.text()}`,
+    `HTTP error! status: ${response.status} - ${await response.text()}`
   );
 }
 

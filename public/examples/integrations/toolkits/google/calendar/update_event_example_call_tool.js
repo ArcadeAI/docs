@@ -1,9 +1,9 @@
-import { Arcade } from "@arcadeai/arcadejs";
+import { Arcade } from '@arcadeai/arcadejs';
 
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
-const USER_ID = "{arcade_user_id}";
-const TOOL_NAME = "GoogleCalendar.UpdateEvent";
+const USER_ID = '{arcade_user_id}';
+const TOOL_NAME = 'GoogleCalendar.UpdateEvent';
 
 // Start the authorization process
 const authResponse = await client.tools.authorize({
@@ -11,7 +11,7 @@ const authResponse = await client.tools.authorize({
   user_id: USER_ID,
 });
 
-if (authResponse.status !== "completed") {
+if (authResponse.status !== 'completed') {
   console.log(`Click this link to authorize: ${authResponse.url}`);
 }
 
@@ -19,12 +19,12 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  event_id: "your_event_id_here",
-  updated_summary: "Updated 1:1 with John Doe",
-  updated_start_datetime: "2024-12-31T11:00:00",
-  updated_end_datetime: "2024-12-31T11:30:00",
-  attendee_emails_to_add: ["jane.doe@example.com"],
-  updated_calendar_id: "primary",
+  event_id: 'your_event_id_here',
+  updated_summary: 'Updated 1:1 with John Doe',
+  updated_start_datetime: '2024-12-31T11:00:00',
+  updated_end_datetime: '2024-12-31T11:30:00',
+  attendee_emails_to_add: ['jane.doe@example.com'],
+  updated_calendar_id: 'primary',
 };
 
 const response = await client.tools.execute({

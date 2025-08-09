@@ -25,19 +25,19 @@ export interface AppConfig {
 
 export const config: AppConfig = {
   company: {
-    url: "https://arcade.dev/",
-    email: "contact@arcade.dev",
-    linkedIn: "https://www.linkedin.com/company/arcade-ai/",
-    github: "https://github.com/ArcadeAI",
-    discord: "https://discord.gg/GUZEMpEZ9p",
+    url: 'https://arcade.dev/',
+    email: 'contact@arcade.dev',
+    linkedIn: 'https://www.linkedin.com/company/arcade-ai/',
+    github: 'https://github.com/ArcadeAI',
+    discord: 'https://discord.gg/GUZEMpEZ9p',
   },
   engine: {
-    github: "https://github.com/ArcadeAI/arcade-ai",
-    newIssue: "https://github.com/ArcadeAI/arcade-ai/issues/new",
-    releases: "https://github.com/ArcadeAI/arcade-ai/releases",
-    conduct: "https://github.com/ArcadeAI/arcade-ai/CODE_OF_CONDUCT.md",
-    contributing: "https://github.com/ArcadeAI/arcade-ai/CONTRIBUTING.md",
-    examples: "https://github.com/ArcadeAI/arcade-ai",
-    dockerhub: "https://hub.docker.com/r/arcade-ai/engine",
+    github: 'https://github.com/ArcadeAI/arcade-ai',
+    newIssue: 'https://github.com/ArcadeAI/arcade-ai/issues/new',
+    releases: 'https://github.com/ArcadeAI/arcade-ai/releases',
+    conduct: 'https://github.com/ArcadeAI/arcade-ai/CODE_OF_CONDUCT.md',
+    contributing: 'https://github.com/ArcadeAI/arcade-ai/CONTRIBUTING.md',
+    examples: 'https://github.com/ArcadeAI/arcade-ai',
+    dockerhub: 'https://hub.docker.com/r/arcade-ai/engine',
   },
 };

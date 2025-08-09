@@ -1,13 +1,13 @@
-import { Arcade } from "@arcadeai/arcadejs";
+import { Arcade } from '@arcadeai/arcadejs';
 
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
-const USER_ID = "{arcade_user_id}";
-const TOOL_NAME = "Stripe.CreateRefund";
+const USER_ID = '{arcade_user_id}';
+const TOOL_NAME = 'Stripe.CreateRefund';
 
 const toolInput = {
-  payment_intent: "pi_123456789",
-  amount: 1000  // Refund $10.00
+  payment_intent: 'pi_123456789',
+  amount: 1000, // Refund $10.00
 };
 
 const response = await client.tools.execute({

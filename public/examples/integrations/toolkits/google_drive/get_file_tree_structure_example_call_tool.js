@@ -1,14 +1,14 @@
-import { Arcade } from "@arcadeai/arcadejs";
+import { Arcade } from '@arcadeai/arcadejs';
 
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
-const USER_ID = "{arcade_user_id}";
-const TOOL_NAME = "GoogleDrive.GetFileTreeStructure";
+const USER_ID = '{arcade_user_id}';
+const TOOL_NAME = 'GoogleDrive.GetFileTreeStructure';
 
 // Start the authorization process
-const authResponse = await client.tools.authorize({tool_name: TOOL_NAME});
+const authResponse = await client.tools.authorize({ tool_name: TOOL_NAME });
 
-if (authResponse.status !== "completed") {
+if (authResponse.status !== 'completed') {
   console.log(`Click this link to authorize: ${authResponse.url}`);
 }
 
@@ -16,12 +16,10 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "include_shared_drives": true,
-  "restrict_to_shared_drive_id": "abc123",
-  "order_by": [
-    "name"
-  ],
-  "limit": 10
+  include_shared_drives: true,
+  restrict_to_shared_drive_id: 'abc123',
+  order_by: ['name'],
+  limit: 10,
 };
 
 const response = await client.tools.execute({

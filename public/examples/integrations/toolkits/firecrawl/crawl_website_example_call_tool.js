@@ -1,13 +1,13 @@
-import { Arcade } from "@arcadeai/arcadejs";
+import { Arcade } from '@arcadeai/arcadejs';
 
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
-const USER_ID = "{arcade_user_id}";
-const TOOL_NAME = "Firecrawl.CrawlWebsite";
+const USER_ID = '{arcade_user_id}';
+const TOOL_NAME = 'Firecrawl.CrawlWebsite';
 
 const toolInput = {
-  url: "https://example.com",
-  max_depth: 2
+  url: 'https://example.com',
+  max_depth: 2,
 };
 
 const response = await client.tools.execute({

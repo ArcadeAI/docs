@@ -1,14 +1,14 @@
-import { Arcade } from "@arcadeai/arcadejs";
+import { Arcade } from '@arcadeai/arcadejs';
 
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
-const USER_ID = "{arcade_user_id}";
-const TOOL_NAME = "MicrosoftTeams.GetSignedInUser";
+const USER_ID = '{arcade_user_id}';
+const TOOL_NAME = 'MicrosoftTeams.GetSignedInUser';
 
 // Start the authorization process
-const authResponse = await client.tools.authorize({tool_name: TOOL_NAME});
+const authResponse = await client.tools.authorize({ tool_name: TOOL_NAME });
 
-if (authResponse.status !== "completed") {
+if (authResponse.status !== 'completed') {
   console.log(`Click this link to authorize: ${authResponse.url}`);
 }
 

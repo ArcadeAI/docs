@@ -1,14 +1,14 @@
-import { Arcade } from "@arcadeai/arcadejs";
+import { Arcade } from '@arcadeai/arcadejs';
 
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
-const USER_ID = "{arcade_user_id}";  // Unique identifier for your user (email, UUID, etc.)
-const TOOL_NAME = "Jira.GetAttachmentMetadata";
+const USER_ID = '{arcade_user_id}'; // Unique identifier for your user (email, UUID, etc.)
+const TOOL_NAME = 'Jira.GetAttachmentMetadata';
 
 // Start the authorization process
-const authResponse = await client.tools.authorize({tool_name: TOOL_NAME});
+const authResponse = await client.tools.authorize({ tool_name: TOOL_NAME });
 
-if (authResponse.status !== "completed") {
+if (authResponse.status !== 'completed') {
   console.log(`Click this link to authorize: ${authResponse.url}`);
 }
 
@@ -16,10 +16,10 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "attachment_id": "att_12345",
+  attachment_id: 'att_12345',
   // Important: about the atlassian_cloud_id argument, please refer to the documentation at
   // https://docs.arcade.dev/toolkits/productivity/jira#handling-multiple-atlassian-clouds
-  "atlassian_cloud_id": "13516a07-1725-4dc0-9ae7-13b5749dd747"
+  atlassian_cloud_id: '13516a07-1725-4dc0-9ae7-13b5749dd747',
 };
 
 const response = await client.tools.execute({

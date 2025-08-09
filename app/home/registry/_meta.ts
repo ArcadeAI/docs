@@ -1,3 +1,3 @@
 export default {
-  "registry-early-access": "Registry Early Access",
+  'registry-early-access': 'Registry Early Access',
 };

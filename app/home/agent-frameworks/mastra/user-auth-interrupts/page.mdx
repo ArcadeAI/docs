@@ -18,7 +18,7 @@ First, set up your Mastra configuration and agents in separate files:
 ```typescript
 // @/mastra/index.ts
 import { Mastra } from "@mastra/core";
-import { githubAgent } from "./agents/githubAgent";
+import { githubAgent } from "./agents/github-agent";
 
 // Initialize Mastra
 export const mastra = new Mastra({
@@ -29,7 +29,7 @@ export const mastra = new Mastra({
 ```
 
 ```typescript
-// @/mastra/agents/githubAgent.ts
+// @/mastra/agents/github-agent.ts
 import { Agent } from "@mastra/core/agent";
 import { anthropic } from "@ai-sdk/anthropic";
 
@@ -77,7 +77,10 @@ export async function POST(req: NextRequest) {
     const githubAgent = mastra.getAgent("githubAgent");
 
     const arcade = new Arcade();
-    const githubToolkit = await arcade.tools.list({ toolkit: "github", limit: 30 });
+    const githubToolkit = await arcade.tools.list({
+      toolkit: "github",
+      limit: 30,
+    });
 
     // Fetch user-specific Arcade tools for GitHub
     const arcadeTools = toZodToolSet({
@@ -103,7 +106,7 @@ export async function POST(req: NextRequest) {
     console.error("Error processing GitHub request:", error);
     return NextResponse.json(
       { message: "Failed to process request" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -114,7 +117,11 @@ This approach provides several benefits:
 - Each user gets their own separate authentication flow with Arcade tools
 - A single agent instance works with multiple user-specific toolsets
 
-<Callout type="info">The toolsets parameter provides tools only for the current request without modifying the agent's base configuration. This makes it ideal for multi-user applications where each user needs their own secure OAuth flow with Arcade.</Callout>
+<Callout type="info">
+  The toolsets parameter provides tools only for the current request without
+  modifying the agent's base configuration. This makes it ideal for multi-user
+  applications where each user needs their own secure OAuth flow with Arcade.
+</Callout>
 
 ## Handling Tool Authorization
 

@@ -1,9 +1,9 @@
-import { Arcade } from "@arcadeai/arcadejs";
+import { Arcade } from '@arcadeai/arcadejs';
 
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
-const USER_ID = "{arcade_user_id}";
-const TOOL_NAME = "Microsoft.CreateEvent";
+const USER_ID = '{arcade_user_id}';
+const TOOL_NAME = 'Microsoft.CreateEvent';
 
 // Start the authorization process
 const authResponse = await client.tools.authorize({
@@ -11,7 +11,7 @@ const authResponse = await client.tools.authorize({
   user_id: USER_ID,
 });
 
-if (authResponse.status !== "completed") {
+if (authResponse.status !== 'completed') {
   console.log(`Click this link to authorize: ${authResponse.url}`);
 }
 
@@ -19,11 +19,11 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  subject: "Coffee chat",
+  subject: 'Coffee chat',
   body: "Let's catch up!",
-  start_date_time: "2025-04-28T13:00:00",
-  end_date_time: "2025-04-28T13:30:00",
-  attendee_emails: ["johndoe@example.com"],
+  start_date_time: '2025-04-28T13:00:00',
+  end_date_time: '2025-04-28T13:30:00',
+  attendee_emails: ['johndoe@example.com'],
   is_online_meeting: true,
 };
 

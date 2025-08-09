@@ -1,4 +1,4 @@
 export default {
-  quickstart: "Quickstart",
-  "api-keys": "Get an API key",
+  quickstart: 'Quickstart',
+  'api-keys': 'Get an API key',
 };

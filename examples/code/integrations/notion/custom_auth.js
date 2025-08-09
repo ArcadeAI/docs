@@ -1,14 +1,14 @@
-import { Arcade } from "@arcadeai/arcadejs";
+import { Arcade } from '@arcadeai/arcadejs';
 
 const client = new Arcade();
 
-const userId = "{arcade_user_id}";
+const userId = '{arcade_user_id}';
 
 // Start the authorization process
-const authResponse = await client.auth.start(userId, "notion");
+const authResponse = await client.auth.start(userId, 'notion');
 
-if (authResponse.status !== "completed") {
-  console.log("Please complete the authorization challenge in your browser:");
+if (authResponse.status !== 'completed') {
+  console.log('Please complete the authorization challenge in your browser:');
   console.log(authResponse.url);
 }
 

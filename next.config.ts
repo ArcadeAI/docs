@@ -1,7 +1,7 @@
-import { NextConfig } from "next";
-import nextra from "nextra";
-import remarkCodeImport from "remark-code-import";
-import { tempRedirects } from "./redirects";
+import type { NextConfig } from 'next';
+import nextra from 'nextra';
+import remarkCodeImport from 'remark-code-import';
+import { tempRedirects } from './redirects';
 
 const withNextra = nextra({
   defaultShowCopyCode: true,
@@ -23,33 +23,33 @@ const nextraConfig = withNextra({
 
 const nextConfig: NextConfig = {
   ...nextraConfig,
-  async headers() {
+  headers() {
     const commonHeaders = [
       {
-        key: "X-Frame-Options",
-        value: "SAMEORIGIN",
+        key: 'X-Frame-Options',
+        value: 'SAMEORIGIN',
       },
       {
-        key: "X-Content-Type-Options",
-        value: "nosniff",
+        key: 'X-Content-Type-Options',
+        value: 'nosniff',
       },
       {
-        key: "Permissions-Policy",
+        key: 'Permissions-Policy',
         value:
-          "camera=(), battery=(), browsing-topics=(), geolocation=(), microphone=()",
+          'camera=(), battery=(), browsing-topics=(), geolocation=(), microphone=()',
       },
       {
-        key: "Referrer-Policy",
-        value: "strict-origin-when-cross-origin",
+        key: 'Referrer-Policy',
+        value: 'strict-origin-when-cross-origin',
       },
-    ]
+    ];
 
     return [
       {
-        source: "/(.*)",
+        source: '/(.*)',
         headers: commonHeaders,
       },
-    ]
+    ];
   },
 };
 

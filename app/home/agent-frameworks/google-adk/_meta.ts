@@ -1,4 +1,4 @@
 export default {
-  overview: "Overview",
-  "use-arcade-tools": "Use Arcade tools",
+  overview: 'Overview',
+  'use-arcade-tools': 'Use Arcade tools',
 };

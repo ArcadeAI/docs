@@ -1,0 +1,121 @@
+import { Tabs } from "nextra/components";
+import ToolFooter from "@/components/tool-footer";
+
+# Twitch auth provider
+
+<Note>
+  At this time, Arcade does not offer a default Twitch Auth Provider. To use
+  Twitch auth, you must create a custom Auth Provider with your own Twitch
+  OAuth 2.0 credentials as described below.
+</Note>
+
+The Twitch auth provider enables tools and agents to call the Twitch API on behalf of a user. Behind the scenes, the Arcade Engine and the Twitch auth provider seamlessly manage Twitch OAuth 2.0 authorization for your users.
+
+### What's documented here
+
+This page describes how to use and configure Twitch auth with Arcade.
+
+This auth provider is used by:
+
+- Your [app code](#using-twitch-auth-in-app-code) that needs to call Twitch APIs
+- Or, your [custom tools](#using-twitch-auth-in-custom-tools) that need to call Twitch APIs
+
+## Configuring Twitch auth
+
+### Create a Twitch app
+
+- Twitch requires that you have two-factor authentication enabled for your account. Enable in your [account security seetings](https://www.twitch.tv/settings/security)
+- Create a Twitch Application in the [Twitch App Console](https://dev.twitch.tv/console/apps)
+- Set the OAuth Redirect URL to: `https://cloud.arcade.dev/api/v1/oauth/callback`
+- Select your Application category
+- Select the 'Confidential' Client Type
+- Copy the App key (Client ID) and App secret (Client Secret), which you'll need below
+
+Next, add the Twitch app to your Arcade Engine configuration. You can do this in the Arcade Dashboard, or by editing the `engine.yaml` file directly (for a self-hosted instance).
+
+### Configuring Twitch auth with the Arcade Dashboard
+
+1. Navigate to the OAuth section of the Arcade Dashboard and click **Add OAuth Provider**.
+2. Select **Twitch** as the provider.
+3. Choose a unique **ID** for your provider (e.g. "my-twitch-provider") with an optional **Description**.
+4. Enter your **Client ID** and **Client Secret** from your Twitch app.
+5. Click **Save**.
+
+When you use tools that require Twitch auth using your Arcade account credentials, the Arcade Engine will automatically use this Twitch OAuth provider.
+
+### Configuring Twitch auth in self-hosted Arcade Engine configuration
+
+<Steps>
+
+### Set environment variables
+
+<Note>
+  The Client ID is the Twitch "App key" and the Client Secret is the Twitch
+  "App secret".
+</Note>
+
+Set the following environment variables:
+
+```bash
+export TWITCH_CLIENT_ID="<your client ID>"
+export TWITCH_CLIENT_SECRET="<your client secret>"
+```
+
+Or, you can set these values in a `.env` file:
+
+```bash
+TWITCH_CLIENT_SECRET="<your client secret>"
+TWITCH_CLIENT_ID="<your client ID>"
+```
+
+<Tip>
+  See [Engine configuration](/home/hosting-options/local-deployment/configure/engine) for more information on how
+  to set environment variables and configure the Arcade Engine.
+</Tip>
+
+### Edit the Engine configuration
+
+Edit the `engine.yaml` file and add a `twitch` item to the `auth.providers` section:
+
+```yaml file=<rootDir>/examples/code/integrations/twitch/config_provider.engine.yaml {3-9}
+
+```
+
+</Steps>
+
+## Using Twitch auth in app code
+
+Use the Twitch auth provider in your own agents and AI apps to get a user-scoped token for the Twitch API. See [authorizing agents with Arcade](/home/core-concepts/auth/how-arcade-helps) to understand how this works.
+
+Use `client.auth.start()` to get a user token for the Twitch API:
+
+<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs.Tab>
+
+```python file=<rootDir>/examples/code/integrations/twitch/custom_auth.py {8-12}
+
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```javascript file=<rootDir>/examples/code/integrations/twitch/custom_auth.js {8-10}
+
+```
+
+</Tabs.Tab>
+
+</Tabs>
+
+## Using Twitch auth in custom tools
+
+You can author your own [custom tools](/home/authoring-tools/build-tools/create-a-toolkit) that interact with the Twitch API.
+
+Use the `Twitch()` auth class to specify that a tool requires authorization with Twitch. The `context.authorization.token` field will be automatically populated with the user's Twitch token:
+
+```python file=<rootDir>/examples/code/integrations/twitch/custom_tool.py {5-6,9-13,36}
+
+```
+
+<ToolFooter pipPackageName="arcade_twitch" />

@@ -1,13 +1,13 @@
-import { Arcade } from "@arcadeai/arcadejs";
+import { Arcade } from '@arcadeai/arcadejs';
 
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
-const USER_ID = "{arcade_user_id}";
-const TOOL_NAME = "Postgres.GetTableSchema";
+const USER_ID = '{arcade_user_id}';
+const TOOL_NAME = 'Postgres.GetTableSchema';
 
 const toolInput = {
-  schema_name: "public",
-  table_name: "users",
+  schema_name: 'public',
+  table_name: 'users',
 };
 
 const response = await client.tools.execute({

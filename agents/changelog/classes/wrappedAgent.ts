@@ -1,19 +1,19 @@
 import {
   Agent,
   type AgentInputItem,
+  type handoff,
   Runner,
-  type Tool,
-  handoff,
   setDefaultOpenAIClient,
+  type Tool,
   user,
-} from "@openai/agents";
-import OpenAI from "openai";
+} from '@openai/agents';
+import OpenAI from 'openai';
 
-import { Config } from "./config";
-import type { Logger } from "./logger";
+import type { Config } from './config';
+import type { Logger } from './logger';
 
 export abstract class WrappedAgent {
-  readonly agent: Agent<unknown, "text">;
+  readonly agent: Agent<unknown, 'text'>;
   readonly runner: Runner;
   history: AgentInputItem[] = [];
 
@@ -21,9 +21,9 @@ export abstract class WrappedAgent {
     readonly name: string, // eslint-disable-line no-unused-vars
     readonly instructions: string, // eslint-disable-line no-unused-vars
     readonly tools: Tool[] | undefined, // eslint-disable-line no-unused-vars
-    readonly handoffs: ReturnType<typeof handoff<unknown, "text">>[], // eslint-disable-line no-unused-vars
+    readonly handoffs: ReturnType<typeof handoff<unknown, 'text'>>[], // eslint-disable-line no-unused-vars
     readonly config: Config, // eslint-disable-line no-unused-vars
-    readonly logger: Logger, // eslint-disable-line no-unused-vars
+    readonly logger: Logger // eslint-disable-line no-unused-vars
   ) {
     // TODO: This likely isn't necessary every time we make a new agent
     const client = new OpenAI({
@@ -32,7 +32,7 @@ export abstract class WrappedAgent {
     });
     setDefaultOpenAIClient(client);
 
-    this.agent = new Agent<unknown, "text">({
+    this.agent = new Agent<unknown, 'text'>({
       name: this.name,
       model: this.config.openai_model,
       instructions: this.instructions,

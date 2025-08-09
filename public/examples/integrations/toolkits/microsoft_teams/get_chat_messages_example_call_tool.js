@@ -1,14 +1,14 @@
-import { Arcade } from "@arcadeai/arcadejs";
+import { Arcade } from '@arcadeai/arcadejs';
 
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
-const USER_ID = "{arcade_user_id}";
-const TOOL_NAME = "MicrosoftTeams.GetChatMessages";
+const USER_ID = '{arcade_user_id}';
+const TOOL_NAME = 'MicrosoftTeams.GetChatMessages';
 
 // Start the authorization process
-const authResponse = await client.tools.authorize({tool_name: TOOL_NAME});
+const authResponse = await client.tools.authorize({ tool_name: TOOL_NAME });
 
-if (authResponse.status !== "completed") {
+if (authResponse.status !== 'completed') {
   console.log(`Click this link to authorize: ${authResponse.url}`);
 }
 
@@ -16,13 +16,10 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "chat_id": "12345",
-  "user_ids": [
-    "user1",
-    "user2"
-  ],
-  "start_datetime": "2023-10-01 00:00:00",
-  "limit": 10
+  chat_id: '12345',
+  user_ids: ['user1', 'user2'],
+  start_datetime: '2023-10-01 00:00:00',
+  limit: 10,
 };
 
 const response = await client.tools.execute({

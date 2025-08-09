@@ -1,5 +1,5 @@
 export default {
-  glossary: "Glossary",
-  faq: "FAQ",
-  changelog: "Changelog",
+  glossary: 'Glossary',
+  faq: 'FAQ',
+  changelog: 'Changelog',
 };

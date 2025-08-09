@@ -1,9 +1,9 @@
-import { Arcade } from "@arcadeai/arcadejs";
+import { Arcade } from '@arcadeai/arcadejs';
 
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
-const USER_ID = "{arcade_user_id}";
-const TOOL_NAME = "Gmail.UpdateDraftEmail";
+const USER_ID = '{arcade_user_id}';
+const TOOL_NAME = 'Gmail.UpdateDraftEmail';
 
 // Start the authorization process
 const authResponse = await client.tools.authorize({
@@ -11,7 +11,7 @@ const authResponse = await client.tools.authorize({
   user_id: USER_ID,
 });
 
-if (authResponse.status !== "completed") {
+if (authResponse.status !== 'completed') {
   console.log(`Click this link to authorize: ${authResponse.url}`);
 }
 
@@ -19,10 +19,10 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  draft_email_id: "your_draft_id_here", // The ID of a draft email can be found with the ListDraftEmails tool
-  subject: "Updated Project Update",
-  body: "Please find the updated project update attached.",
-  recipient: "john.doe@example.com"
+  draft_email_id: 'your_draft_id_here', // The ID of a draft email can be found with the ListDraftEmails tool
+  subject: 'Updated Project Update',
+  body: 'Please find the updated project update attached.',
+  recipient: 'john.doe@example.com',
 };
 
 const response = await client.tools.execute({
