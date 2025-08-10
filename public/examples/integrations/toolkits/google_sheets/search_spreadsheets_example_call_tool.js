@@ -3,13 +3,10 @@ import { Arcade } from "@arcadeai/arcadejs";
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
 const USER_ID = "{arcade_user_id}";
-const TOOL_NAME = "GoogleSheets.GetSpreadsheet";
+const TOOL_NAME = "GoogleSheets.SearchSpreadsheets";
 
 // Start the authorization process
-const authResponse = await client.tools.authorize({
-  tool_name: TOOL_NAME,
-  user_id: USER_ID,
-});
+const authResponse = await client.tools.authorize({tool_name: TOOL_NAME});
 
 if (authResponse.status !== "completed") {
   console.log(`Click this link to authorize: ${authResponse.url}`);
@@ -19,7 +16,21 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  spreadsheet_id: "your_spreadsheet_id_here"
+  "spreadsheet_contains": [
+    "budget",
+    "Q3"
+  ],
+  "spreadsheet_not_contains": [
+    "draft"
+  ],
+  "search_only_in_shared_drive_id": "0AOpXyz123DEFghIJK",
+  "include_shared_drives": true,
+  "include_organization_domain_spreadsheets": true,
+  "order_by": [
+    "modifiedTime desc"
+  ],
+  "limit": 25,
+  "pagination_token": "tok123"
 };
 
 const response = await client.tools.execute({
@@ -28,4 +39,4 @@ const response = await client.tools.execute({
   user_id: USER_ID,
 });
 
-console.log(response);
+console.log(JSON.stringify(response.output.value, null, 2));
