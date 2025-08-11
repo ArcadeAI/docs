@@ -108,6 +108,14 @@ const availableTools: Tool[] = [
     type: "arcade",
   },
   {
+    name: "Google Slides",
+    image: "google_slides.png",
+    summary: "Create, read, and update Google Slides with your agents.",
+    link: "/toolkits/productivity/google_slides",
+    category: "productivity",
+    type: "arcade",
+  },
+  {
     name: "GitHub",
     image: "github.png",
     summary:

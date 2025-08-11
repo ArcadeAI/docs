@@ -3,7 +3,7 @@ import { Arcade } from "@arcadeai/arcadejs";
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
 const USER_ID = "{arcade_user_id}";
-const TOOL_NAME = "GoogleSheets.CreateSpreadsheet";
+const TOOL_NAME = "GoogleDocs.ListDocumentComments";
 
 // Start the authorization process
 const authResponse = await client.tools.authorize({
@@ -19,28 +19,8 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  title: "My Spreadsheet",
-  data: JSON.stringify({
-    "1": {
-      "A": "Name",
-      "B": "Age",
-      "C": "City"
-    },
-    "2": {
-      "A": "John",
-      "B": "20",
-      "C": "New York"
-    },
-    "3": {
-      "A": "Jane",
-      "B": "25",
-      "C": "Los Angeles"
-    },
-    "5": {
-      "A": "Average Age",
-      "B": "=AVERAGE(B2:B3)"
-    }
-  })
+  document_id: "your_document_id_here",
+  include_deleted: false
 };
 
 const response = await client.tools.execute({

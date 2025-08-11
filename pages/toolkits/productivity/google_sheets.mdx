@@ -1,4 +1,4 @@
-# Google Sheets
+# GoogleSheets
 
 import ToolInfo from "@/components/ToolInfo";
 import Badges from "@/components/Badges";
@@ -7,130 +7,231 @@ import TableOfContents from "@/components/TableOfContents";
 import ToolFooter from "@/components/ToolFooter";
 
 <ToolInfo
-  description="Enable agents to create, read, and update spreadsheets in Google Sheets."
+  description="Enable agents to interact with GoogleSheets"
   author="Arcade"
-  codeLink="https://github.com/ArcadeAI/arcade-ai/tree/main/toolkits/google_sheets"
-  authType="oauth2"
-  authProviderName="Google"
-  versions={["0.1.0"]}
+  authType="OAuth2"
+  versions={["3.1.0"]}
 />
 
 <Badges repo="arcadeai/arcade_google_sheets" />
 
-The Arcade Google Sheets toolkit provides pre-built tools for working with spreadsheets using the Google Sheets API. Use these tools to:
+The Arcade GoogleSheets toolkit provides a pre-built set of tools for working with Google Sheets. These tools make it easy to build agents and AI apps that can:
 
-- Create new spreadsheets
-- Retrieve spreadsheet data
-- Update cell values
+- Create new spreadsheets and seed initial data.
+- Search Google Drive for spreadsheets and retrieve metadata (titles, IDs, URLs; excludes trash).
+- Read specific ranges from sheets.
+- Write to single cells or update ranges with flexible data formats.
+- Add notes to cells.
+- Get detailed spreadsheet and sheet metadata (names, IDs, positions, row/column counts; metadata only).
 
 ## Available Tools
 
-These tools are currently available in the Arcade Google Sheets toolkit.
-
 <TableOfContents
   headers={["Tool Name", "Description"]}
-  data={[
-    ["GoogleSheets.CreateSpreadsheet", "Create a new spreadsheet with a title and optional data."],
-    ["GoogleSheets.GetSpreadsheet", "Retrieve spreadsheet properties and cell data for all sheets."],
-    ["GoogleSheets.WriteToCell", "Write a value to a specific cell in a spreadsheet."],
-  ]}
+  data={
+    [
+      ["GoogleSheets.CreateSpreadsheet", "Create a new spreadsheet with the provided title and data in its first sheet"],
+      ["GoogleSheets.WriteToCell", "Write a value to a single cell in a spreadsheet."],
+      ["GoogleSheets.UpdateCells", "Write values to a Google Sheet using a flexible data format."],
+      ["GoogleSheets.AddNoteToCell", "Add a note to a specific cell in a spreadsheet. A note is a small"],
+      ["GoogleSheets.SearchSpreadsheets", "Searches for spreadsheets in the user's Google Drive based on the titles and content and"],
+      ["GoogleSheets.GetSpreadsheet", "Gets the specified range of cells from a single sheet in the spreadsheet."],
+      ["GoogleSheets.GetSpreadsheetMetadata", "Gets the metadata for a spreadsheet including the metadata for the sheets in the spreadsheet."],
+    ]
+  }
 />
 
 <Tip>
   If you need to perform an action that's not listed here, you can [get in touch
   with us](mailto:contact@arcade.dev) to request a new tool, or [create your
-  own tools](/home/build-tools/create-a-toolkit) with the [Google auth
-  provider](/home/auth-providers/google#using-google-auth-in-custom-tools).
+  own tools](/home/build-tools/create-a-toolkit).
 </Tip>
 
 ## GoogleSheets.CreateSpreadsheet
 
-Create a new spreadsheet with a custom title and optional data in the first sheet.
-
-**Parameters**
-
-- **`title`** _(string, required, default "Untitled spreadsheet")_: The title of the new spreadsheet.
-- **`data`** _(string, optional)_: A JSON string representing a dictionary that maps row numbers to dictionaries. Each sub-dictionary maps column letters to cell values. For example, `data[23]["C"]` is the value for row 23, column C.
-
 <br />
 <TabbedCodeBlock
   tabs={[
     {
-      label: "Call the Tool with User Authorization",
+      label: "Call the Tool Directly",
       content: {
-        Python: [
-          "/examples/integrations/toolkits/google/sheets/create_spreadsheet_example_call_tool.py",
-        ],
-        JavaScript: ["/examples/integrations/toolkits/google/sheets/create_spreadsheet_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/google_sheets/create_spreadsheet_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/google_sheets/create_spreadsheet_example_call_tool.js"],
       },
-    }
+    },
   ]}
 />
 
-## GoogleSheets.GetSpreadsheet
-
-Retrieve the specified range of cells from a single sheet in a spreadsheet.
+Create a new spreadsheet with the provided title and data in its first sheet
 
 **Parameters**
 
-- **`spreadsheet_id`** _(string, required)_: The ID of the spreadsheet to retrieve.
-- **`sheet_position`** _(int, optional, default 1)_: The position/tab of the sheet in the spreadsheet to get. A value of 1 represents the first (leftmost/Sheet1) sheet.
-- **`sheet_id_or_name`** _(string, optional, default None)_: The ID or name of the sheet to get. If not provided, `sheet_position` will be used.
-- **`start_row`** _(int, optional, default 1)_: Starting row number (1-indexed).
-- **`start_col`** _(string, optional, default 'A')_: Starting column letter(s) or 1-based column number.
-- **`max_rows`** _(int, optional, default 1000)_: Maximum number of rows to fetch for each sheet in the spreadsheet. Must be between 1 and 1000.
-- **`max_cols`** _(int, optional, default 100)_: Maximum number of columns to fetch for each sheet in the spreadsheet. Must be between 1 and 100.
+- **title** (`string`, optional) The title of the new spreadsheet
+- **data** (`string`, optional) The data to write to the spreadsheet. A JSON string (property names enclosed in double quotes) representing a dictionary that maps row numbers to dictionaries that map column letters to cell values. For example, data[23]['C'] would be the value of the cell in row 23, column C. Type hint: dict[int, dict[str, Union[int, float, str, bool]]]
 
-<br />
-<TabbedCodeBlock
-  tabs={[
-    {
-      label: "Call the Tool with User Authorization",
-      content: {
-        Python: [
-          "/examples/integrations/toolkits/google/sheets/get_spreadsheet_example_call_tool.py",
-        ],
-        JavaScript: ["/examples/integrations/toolkits/google/sheets/get_spreadsheet_example_call_tool.js"],
-      },
-    }
-  ]}
-/>
 
 ## GoogleSheets.WriteToCell
 
-Write a value to a specific cell in a spreadsheet.
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/google_sheets/write_to_cell_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/google_sheets/write_to_cell_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Write a value to a single cell in a spreadsheet.
 
 **Parameters**
 
-- **`spreadsheet_id`** _(string, required)_: The ID of the spreadsheet.
-- **`column`** _(string, required)_: The column to write to (for example, "A", "F", or "AZ").
-- **`row`** _(int, required)_: The row number to write to.
-- **`value`** _(string, required)_: The value to set in the specified cell.
-- **`sheet_name`** _(string, optional, default "Sheet1")_: The name of the sheet to update.
+- **spreadsheet_id** (`string`, required) The id of the spreadsheet to write to
+- **column** (`string`, required) The column string to write to. For example, 'A', 'F', or 'AZ'
+- **row** (`integer`, required) The row number to write to
+- **value** (`string`, required) The value to write to the cell
+- **sheet_name** (`string`, optional) The name of the sheet to write to. Defaults to 'Sheet1'
+
+
+## GoogleSheets.UpdateCells
 
 <br />
 <TabbedCodeBlock
   tabs={[
     {
-      label: "Call the Tool with User Authorization",
+      label: "Call the Tool Directly",
       content: {
-        Python: [
-          "/examples/integrations/toolkits/google/sheets/write_to_cell_example_call_tool.py",
-        ],
-        JavaScript: ["/examples/integrations/toolkits/google/sheets/write_to_cell_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/google_sheets/update_cells_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/google_sheets/update_cells_example_call_tool.js"],
       },
-    }
+    },
   ]}
 />
 
----
+Write values to a Google Sheet using a flexible data format.
+
+**Parameters**
+
+- **spreadsheet_id** (`string`, required) The id of the spreadsheet to write to
+- **data** (`string`, required) The data to write. A JSON string (property names enclosed in double quotes) representing a dictionary that maps row numbers to dictionaries that map column letters to cell values. For example, data[23]['C'] is the value for cell C23. This is the same format accepted by create_spreadsheet. Type hint: dict[int, dict[str, int | float | str | bool]]
+- **sheet_position** (`integer`, optional) The position/tab of the sheet in the spreadsheet to write to. A value of 1 represents the first (leftmost/Sheet1) sheet. Defaults to 1.
+- **sheet_id_or_name** (`string`, optional) The id or name of the sheet to write to. If provided, takes precedence over sheet_position.
+
+
+## GoogleSheets.AddNoteToCell
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/google_sheets/add_note_to_cell_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/google_sheets/add_note_to_cell_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Add a note to a specific cell in a spreadsheet. A note is a small
+
+**Parameters**
+
+- **spreadsheet_id** (`string`, required) The id of the spreadsheet to add a comment to
+- **column** (`string`, required) The column string to add a note to. For example, 'A', 'F', or 'AZ'
+- **row** (`integer`, required) The row number to add a note to
+- **note_text** (`string`, required) The text for the note to add
+- **sheet_position** (`integer`, optional) The position/tab of the sheet in the spreadsheet to write to. A value of 1 represents the first (leftmost/Sheet1) sheet. Defaults to 1.
+- **sheet_id_or_name** (`string`, optional) The id or name of the sheet to write to. If provided, takes precedence over sheet_position.
+
+
+## GoogleSheets.SearchSpreadsheets
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/google_sheets/search_spreadsheets_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/google_sheets/search_spreadsheets_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Searches for spreadsheets in the user's Google Drive based on the titles and content and
+
+**Parameters**
+
+- **spreadsheet_contains** (`array[string]`, optional) Keywords or phrases that must be in the spreadsheet title. Provide a list of keywords or phrases if needed.
+- **spreadsheet_not_contains** (`array[string]`, optional) Keywords or phrases that must NOT be in the spreadsheet title. Provide a list of keywords or phrases if needed.
+- **search_only_in_shared_drive_id** (`string`, optional) The ID of the shared drive to restrict the search to. If provided, the search will only return spreadsheets from this drive. Defaults to None, which searches across all drives.
+- **include_shared_drives** (`boolean`, optional) Whether to include spreadsheets from shared drives. Defaults to False (searches only in the user's 'My Drive').
+- **include_organization_domain_spreadsheets** (`boolean`, optional) Whether to include spreadsheets from the organization's domain. This is applicable to admin users who have permissions to view organization-wide spreadsheets in a Google Workspace account. Defaults to False.
+- **order_by** (`Enum` [OrderBy](/toolkits/productivity/google_sheets/reference#orderby), optional) Sort order. Defaults to listing the most recently modified spreadsheets first
+- **limit** (`integer`, optional) The maximum number of spreadsheets to list. Defaults to 10. Max is 50
+- **pagination_token** (`string`, optional) The pagination token to continue a previous request
+
+
+## GoogleSheets.GetSpreadsheet
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/google_sheets/get_spreadsheet_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/google_sheets/get_spreadsheet_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Gets the specified range of cells from a single sheet in the spreadsheet.
+
+**Parameters**
+
+- **spreadsheet_id** (`string`, required) The id of the spreadsheet to get
+- **sheet_position** (`integer`, optional) The position/tab of the sheet in the spreadsheet to get. A value of 1 represents the first (leftmost/Sheet1) sheet . Defaults to 1.
+- **sheet_id_or_name** (`string`, optional) The id or name of the sheet to get. Defaults to None, which means sheet_position will be used instead.
+- **start_row** (`integer`, optional) Starting row number (1-indexed, defaults to 1)
+- **start_col** (`string`, optional) Starting column letter(s) or 1-based column number (defaults to 'A')
+- **max_rows** (`integer`, optional) Maximum number of rows to fetch for each sheet in the spreadsheet. Must be between 1 and 1000. Defaults to 1000.
+- **max_cols** (`integer`, optional) Maximum number of columns to fetch for each sheet in the spreadsheet. Must be between 1 and 100. Defaults to 100.
+
+
+## GoogleSheets.GetSpreadsheetMetadata
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/google_sheets/get_spreadsheet_metadata_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/google_sheets/get_spreadsheet_metadata_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Gets the metadata for a spreadsheet including the metadata for the sheets in the spreadsheet.
+
+**Parameters**
+
+- **spreadsheet_id** (`string`, required) The id of the spreadsheet to get metadata for
+
+
+
 
 ## Auth
 
-The Arcade Google Sheets toolkit uses the [Google auth provider](/home/auth-providers/google) to connect to users' Google accounts.
-
-With the hosted Arcade Engine, there's nothing to configure. Your users will see `Arcade` as the name of the application that's requesting permission.
-
-With a self-hosted installation of Arcade, you need to [configure the Google auth provider](/home/auth-providers/google#configuring-google-auth) with your own Google app credentials.
+The Arcade GoogleSheets toolkit uses the [Google auth provider](/home/auth-providers/google) to connect to users' GoogleSheets accounts. Please refer to the [Google auth provider](/home/auth-providers/google) documentation to learn how to configure auth.
 
 <ToolFooter pipPackageName="arcade_google_sheets" />
+
