@@ -8,10 +8,10 @@ export const Head = () => {
     "https://docs.arcade.dev" +
     (defaultLocale === locale ? asPath : `/${locale}${asPath}`);
 
-  // TODO: make metadata depend on the project docs
-
-  const description = frontMatter.description ?? "Arcade";
-  // const title = frontMatter.title ?? "Arcade";
+  const title = pageTitle || frontMatter.title || "Arcade Docs";
+  const displayTitle =
+    title === "Arcade Docs" ? title : `${title} - Arcade Docs`;
+  const description = frontMatter.description || "Arcade Documentation";
 
   const image = frontMatter.ogImage
     ? "https://docs.arcade.dev" + frontMatter.ogImage
@@ -24,7 +24,7 @@ export const Head = () => {
     <>
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <meta name="apple-mobile-web-app-title" content="Arcade Documentation" />
-      <title>Arcade Docs</title>
+      <title>{displayTitle}</title>
 
       <link rel="manifest" href="/site.webmanifest" />
       <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5" />
@@ -32,7 +32,7 @@ export const Head = () => {
       <meta property="og:url" content={url} />
       <meta httpEquiv="Content-Language" content="en" />
       <meta property="og:site_name" content="Arcade Docs" />
-      <meta property="og:title" content={pageTitle} />
+      <meta property="og:title" content={displayTitle} />
 
       <meta name="description" content={description} />
       <meta property="og:description" content={description} />
@@ -41,8 +41,8 @@ export const Head = () => {
 
       <meta property="og:image" content={image} />
       <meta name="twitter:image" content={image} />
-
       <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:title" content={displayTitle} />
       <meta name="twitter:site:domain" content="docs.arcade.dev" />
       <meta name="twitter:url" content="https://docs.arcade.dev" />
 

@@ -5,6 +5,7 @@ import posthog from "posthog-js";
 import { PostHogProvider } from "posthog-js/react";
 import { useEffect } from "react";
 import "../styles/globals.css";
+import { GoogleTagManager } from "@next/third-parties/google";
 
 function Docs({ Component, pageProps }) {
   const router = useRouter();
@@ -44,20 +45,7 @@ function Docs({ Component, pageProps }) {
   return (
     <>
       {/* Google tag (gtag.js) */}
-      <Script
-        src="https://www.googletagmanager.com/gtag/js?id=G-29HSQ3LQ13"
-        strategy="afterInteractive"
-      />
-
-      {/* Initialize Google Analytics */}
-      <Script id="google-analytics" strategy="afterInteractive">
-        {`
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-29HSQ3LQ13');
-      `}
-      </Script>
+      <GoogleTagManager gtmId="GTM-TVS58H5F" />
 
       {/* Statuspage.io embed */}
       <Script
