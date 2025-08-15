@@ -48,7 +48,11 @@ When generating the changelog, follow these rules:
     super("ChangelogAgent", systemPrompt, tools, [], config, logger);
   }
 
-  async generate(changelogPath: string, repositories: string[]) {
+  async generate(
+    changelogPath: string,
+    repositories: string[],
+    privateRepositories: string[],
+  ) {
     this.logger.startSpan(
       `Generating changelog from changes in ${repositories.join(", ")}...`,
     );
@@ -58,6 +62,7 @@ When generating the changelog, follow these rules:
       Today is ${new Date().toISOString().split("T")[0]}.
       The full path to the changelog.md that you will be appending to is \`${changelogPath}\`.
       The Github repositories to load commits from are: ${repositories.join(", ")}
+      When writing the changelog, do not include links for the private repositories, which are: ${privateRepositories.join(", ")}
       `,
     );
 
