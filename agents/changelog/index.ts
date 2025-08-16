@@ -67,17 +67,30 @@ program
     "A comma separated list of repositories to load the changelogs from",
     "ArcadeAI/docs,ArcadeAI/arcade-ai,ArcadeAI/Cloud,ArcadeAI/Engine,ArcadeAI/dashboard,ArcadeAI/toolkits",
   )
-  .action(async (changelog_path: string, repositories: string, options) => {
-    const config = new Config(options);
-    const logger = new Logger(config);
-    const agent = new ChangelogAgent(config, logger);
+  .argument(
+    "[private_repos]",
+    "A comma separated list of private repositories to load the changelogs from",
+    "ArcadeAI/Cloud,ArcadeAI/Engine,ArcadeAI/dashboard,ArcadeAI/toolkits",
+  )
+  .action(
+    async (
+      changelog_path: string,
+      repositories: string,
+      privateRepositories: string,
+      options,
+    ) => {
+      const config = new Config(options);
+      const logger = new Logger(config);
+      const agent = new ChangelogAgent(config, logger);
 
-    await agent.generate(
-      changelog_path,
-      repositories.split(",").map((r) => r.trim()),
-    );
+      await agent.generate(
+        changelog_path,
+        repositories.split(",").map((r) => r.trim()),
+        privateRepositories.split(",").map((r) => r.trim()),
+      );
 
-    process.exit(0);
-  });
+      process.exit(0);
+    },
+  );
 
 program.parse();
