@@ -305,8 +305,8 @@ export function LandingPage() {
             <Image
               src={"/images/overview.png"}
               alt={"arcade overview"}
-              width={1880 / 3}
-              height={1676 / 3}
+              width={2922 / 3}
+              height={1861 / 3}
               className="max-w-full"
             />
           </div>
