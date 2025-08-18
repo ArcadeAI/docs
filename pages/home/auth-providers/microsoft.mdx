@@ -21,6 +21,10 @@ This auth provider is used by:
 
 ## Configuring Microsoft auth
 
+<Note>
+  When using your own app credentials, make sure you configure your project to use a [custom user verifier](/home/auth/secure-auth-production#build-a-custom-user-verifier). Without this, your end-users will not be able to use your app or agent in production.
+</Note>
+
 In a production environment, you will most likely want to use your own Microsoft app credentials. This way, your users will see your application's name requesting permission.
 
 You can use your own Microsoft credentials in both the Arcade Cloud and in a [self-hosted Arcade Engine](/home/local-deployment/install/local) instance.
@@ -30,11 +34,22 @@ Before showing how to configure your Microsoft app credentials, let's go through
 ### Create a Microsoft app
 
 - Follow Microsoft's guide to [registering an app with the Microsoft identity platform](https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app)
-- Choose the permissions (scopes) you need for your app
+- Choose the permissions (scopes) you need for your app. Refer to the [section below](#arcade-microsoft-toolkits-scopes) for a list of scopes needed by the Arcade Microsoft Toolkits, in case you intend to use them.
 - Set the redirect URL to: `https://cloud.arcade.dev/api/v1/oauth/callback`
 - Copy the client ID and client secret to use below
 
 Next, add the Microsoft app to your Arcade Engine configuration. You can do this in the Arcade Dashboard, or by editing the `engine.yaml` file directly (for a self-hosted instance).
+
+### Arcade Microsoft Toolkits Scopes
+
+Below is the list of scopes required by the Arcade Microsoft Toolkits:
+
+| Toolkit | Required Permissions |
+|---------|---------------------|
+| [Outlook Calendar](/toolkits/productivity/outlook_calendar) | `Calendars.ReadBasic`<br/>`Calendars.ReadWrite`<br/>`MailboxSettings.Read` |
+| [Outlook Mail](/toolkits/productivity/outlook_mail) | `Mail.Read`<br/>`Mail.ReadWrite`<br/>`Mail.Send` |
+| [Teams](/toolkits/social-communication/microsoft_teams) | `Channel.ReadBasic.All`<br/>`ChannelMessage.Read.All`<br/>`ChannelMessage.Send`<br/>`Chat.Create`<br/>`Chat.Read`<br/>`ChatMessage.Read`<br/>`ChatMessage.Send`<br/>`People.Read`<br/>`Team.ReadBasic.All`<br/>`TeamMember.Read.All`<br/>`User.Read` |
+| [SharePoint](/toolkits/productivity/sharepoint) | `Sites.Read.All` |
 
 ## Configuring your own Microsoft Auth Provider in Arcade
 

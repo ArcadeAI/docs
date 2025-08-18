@@ -3,7 +3,7 @@ from arcadepy import Arcade
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
 USER_ID = "{arcade_user_id}"
-TOOL_NAME = "GoogleSheets.CreateSpreadsheet"
+TOOL_NAME = "GoogleSlides.GetPresentationAsMarkdown"
 
 auth_response = client.tools.authorize(
     tool_name=TOOL_NAME,
@@ -17,29 +17,9 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    "title": "My Spreadsheet",
-    "data": {
-        "1": {
-            "A": "Name",
-            "B": "Age",
-            "C": "City"
-        },
-        "2": {
-            "A": "John",
-            "B": "20",
-            "C": "New York"
-        },
-        "3": {
-            "A": "Jane",
-            "B": "25",
-            "C": "Los Angeles"
-        },
-        "5": {
-            "A": "Average Age",
-            "B": "=AVERAGE(B2:B3)"
-        }
-    }
+  "presentation_id": "your_presentation_id_here"
 }
+
 response = client.tools.execute(
     tool_name=TOOL_NAME,
     input=tool_input,
