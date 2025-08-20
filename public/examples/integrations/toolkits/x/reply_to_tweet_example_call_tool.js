@@ -3,7 +3,7 @@ import { Arcade } from "@arcadeai/arcadejs";
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
 const USER_ID = "{arcade_user_id}";
-const TOOL_NAME = "X.DeleteTweetById";
+const TOOL_NAME = "X.ReplyToTweet";
 
 // Start the authorization process
 const authResponse = await client.tools.authorize({tool_name: TOOL_NAME});
@@ -16,7 +16,9 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "tweet_id": "1234567890"
+  "tweet_id": "1234567890",
+  "tweet_text": "This is a reply to your tweet!",
+  "quote_tweet_id": "0987654321"
 };
 
 const response = await client.tools.execute({
