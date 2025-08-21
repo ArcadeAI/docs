@@ -6,7 +6,7 @@ const USER_ID = "{arcade_user_id}";  // Unique identifier for your user (email, 
 const TOOL_NAME = "Jira.GetIssuesWithoutId";
 
 // Start the authorization process
-const authResponse = await client.tools.authorize({tool_name: TOOL_NAME});
+const authResponse = await client.tools.authorize({tool_name: TOOL_NAME, user_id: USER_ID});
 
 if (authResponse.status !== "completed") {
   console.log(`Click this link to authorize: ${authResponse.url}`);

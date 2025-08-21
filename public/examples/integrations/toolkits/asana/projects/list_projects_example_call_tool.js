@@ -5,7 +5,7 @@ const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env var
 const TOOL_NAME = "Asana.ListProjects";
 
 // Start the authorization process
-const authResponse = await client.tools.authorize({tool_name: TOOL_NAME});
+const authResponse = await client.tools.authorize({tool_name: TOOL_NAME, user_id: USER_ID});
 
 if (authResponse.status !== "completed") {
   console.log(`Click this link to authorize: ${authResponse.url}`);
