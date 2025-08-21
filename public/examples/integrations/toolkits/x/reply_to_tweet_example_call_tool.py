@@ -4,9 +4,12 @@ from arcadepy import Arcade
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
 USER_ID = "{arcade_user_id}"
-TOOL_NAME = "X.SearchRecentTweetsByKeywords"
+TOOL_NAME = "X.ReplyToTweet"
 
-auth_response = client.tools.authorize(tool_name=TOOL_NAME)
+auth_response = client.tools.authorize(
+    tool_name=TOOL_NAME,
+    user_id=USER_ID
+)
 
 if auth_response.status != "completed":
     print(f"Click this link to authorize: {auth_response.url}")
@@ -15,7 +18,9 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'keywords': ['AI', 'machine learning'], 'max_results': 10
+    'tweet_id': '1234567890',
+    'tweet_text': 'This is a reply to your tweet!',
+    'quote_tweet_id': '0987654321'
 }
 
 response = client.tools.execute(
