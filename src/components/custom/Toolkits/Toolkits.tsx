@@ -100,10 +100,10 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
         <div className="mx-auto max-w-7xl px-4 pb-4 pt-6 sm:px-6 lg:px-8">
           <div className="space-y-6">
             <h1 className="text-2xl font-bold text-gray-50 sm:text-3xl">
-              Integrations
+              Toolkits
             </h1>
             <p className="text-sm leading-relaxed text-gray-400 sm:text-base">
-              There are 4 designations for Arcade integrations:
+              There are 4 designations for Arcade toolkits:
             </p>
             <div className="grid grid-cols-1 gap-4 sm:gap-4 md:grid-cols-4">
               {Object.entries(typeConfig).map(
@@ -118,11 +118,11 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
                       </h2>
                       <p className="mt-1 text-xs text-gray-400 sm:text-sm">
                         {key === "arcade" &&
-                          "Official integrations developed and maintained by Arcade."}
+                          "Official toolkits developed and maintained by Arcade."}
                         {key === "verified" &&
-                          "Community-created integrations, thoroughly tested and verified by Arcade."}
+                          "Community-created toolkits, thoroughly tested and verified by Arcade."}
                         {key === "community" &&
-                          "Created and maintained by the Arcade community, offering a wide range of integrations."}
+                          "Created and maintained by the Arcade community, offering a wide range of toolkits."}
                         {key === "auth" &&
                           "Auth integrations allow you to develop custom tools that connect your agent APIs and services."}
                       </p>
