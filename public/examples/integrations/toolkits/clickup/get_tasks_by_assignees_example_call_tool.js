@@ -6,7 +6,10 @@ const USER_ID = "{arcade_user_id}";
 const TOOL_NAME = "Clickup.GetTasksByAssignees";
 
 // Start the authorization process
-const authResponse = await client.tools.authorize({tool_name: TOOL_NAME});
+const authResponse = await client.tools.authorize({
+    tool_name: TOOL_NAME,
+    user_id: USER_ID
+});
 
 if (authResponse.status !== "completed") {
   console.log(`Click this link to authorize: ${authResponse.url}`);
@@ -16,15 +19,24 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "workspace_id": "12345",
+  "workspace_id": "123456",
   "assignees_ids": [
-    "user_1",
-    "user_2"
+    "789",
+    "456"
   ],
-  "limit": 10,
+  "offset": 0,
+  "limit": 25,
   "order_by": "due_date",
   "should_sort_by_reverse": true,
-  "include_closed": false
+  "statuses": [
+    "in progress",
+    "review"
+  ],
+  "include_closed": false,
+  "due_date_gt": "2025-09-01",
+  "due_date_lt": "2025-09-30",
+  "date_created_gt": "2025-01-01",
+  "date_created_lt": "2025-08-01"
 };
 
 const response = await client.tools.execute({

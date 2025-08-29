@@ -6,7 +6,10 @@ const USER_ID = "{arcade_user_id}";
 const TOOL_NAME = "Clickup.GetStatusesForList";
 
 // Start the authorization process
-const authResponse = await client.tools.authorize({tool_name: TOOL_NAME});
+const authResponse = await client.tools.authorize({
+    tool_name: TOOL_NAME,
+    user_id: USER_ID
+});
 
 if (authResponse.status !== "completed") {
   console.log(`Click this link to authorize: ${authResponse.url}`);
@@ -16,7 +19,7 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "list_id": "12345"
+  "list_id": "12345678"
 };
 
 const response = await client.tools.execute({

@@ -6,7 +6,10 @@ const USER_ID = "{arcade_user_id}";
 const TOOL_NAME = "Clickup.FuzzySearchListsByName";
 
 // Start the authorization process
-const authResponse = await client.tools.authorize({tool_name: TOOL_NAME});
+const authResponse = await client.tools.authorize({
+    tool_name: TOOL_NAME,
+    user_id: USER_ID
+});
 
 if (authResponse.status !== "completed") {
   console.log(`Click this link to authorize: ${authResponse.url}`);
@@ -16,14 +19,18 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "name_to_search": "Project Alpha",
-  "workspace_id": "12345",
+  "name_to_search": "Sprint Backlog",
+  "workspace_id": "987654321",
   "scan_size": 200,
   "space_ids": [
-    "space1",
-    "space2"
+    "112233",
+    "445566"
   ],
-  "archived": false
+  "folder_ids": [
+    "778899"
+  ],
+  "should_include_archived": false,
+  "limit": 10
 };
 
 const response = await client.tools.execute({

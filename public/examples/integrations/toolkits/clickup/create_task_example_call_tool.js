@@ -6,7 +6,10 @@ const USER_ID = "{arcade_user_id}";
 const TOOL_NAME = "Clickup.CreateTask";
 
 // Start the authorization process
-const authResponse = await client.tools.authorize({tool_name: TOOL_NAME});
+const authResponse = await client.tools.authorize({
+    tool_name: TOOL_NAME,
+    user_id: USER_ID
+});
 
 if (authResponse.status !== "completed") {
   console.log(`Click this link to authorize: ${authResponse.url}`);
@@ -17,10 +20,13 @@ await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
   "list_id": "12345",
-  "task_title": "Implement feature X",
-  "description": "Details about feature X implementation",
+  "task_title": "Prepare Q3 roadmap slides",
+  "description": "Draft slides for the Q3 product roadmap presentation covering goals, milestones, and risks.",
   "priority": "HIGH",
-  "due_date": "2023-12-31"
+  "status": "In Progress",
+  "start_date": "2025-09-01",
+  "due_date": "2025-09-10 17:00",
+  "sprint_points": 5
 };
 
 const response = await client.tools.execute({

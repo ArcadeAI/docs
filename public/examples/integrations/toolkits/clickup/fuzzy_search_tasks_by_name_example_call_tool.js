@@ -6,7 +6,10 @@ const USER_ID = "{arcade_user_id}";
 const TOOL_NAME = "Clickup.FuzzySearchTasksByName";
 
 // Start the authorization process
-const authResponse = await client.tools.authorize({tool_name: TOOL_NAME});
+const authResponse = await client.tools.authorize({
+    tool_name: TOOL_NAME,
+    user_id: USER_ID
+});
 
 if (authResponse.status !== "completed") {
   console.log(`Click this link to authorize: ${authResponse.url}`);
@@ -16,10 +19,28 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "name_to_search": "task name",
-  "workspace_id": "workspace_123",
+  "name_to_search": "signup form validation",
+  "workspace_id": "987654321",
   "scan_size": 200,
-  "include_closed": true
+  "include_closed": false,
+  "statuses": [
+    "in progress",
+    "open"
+  ],
+  "assignee_ids": [
+    "123",
+    "456"
+  ],
+  "space_ids": [
+    "111"
+  ],
+  "folder_ids": [
+    "222"
+  ],
+  "list_ids": [
+    "333"
+  ],
+  "limit": 10
 };
 
 const response = await client.tools.execute({

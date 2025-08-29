@@ -6,7 +6,10 @@ client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 USER_ID = "{arcade_user_id}"
 TOOL_NAME = "Clickup.FuzzySearchListsByName"
 
-auth_response = client.tools.authorize(tool_name=TOOL_NAME)
+auth_response = client.tools.authorize(
+    tool_name=TOOL_NAME,
+    user_id=TOOL_NAME
+)
 
 if auth_response.status != "completed":
     print(f"Click this link to authorize: {auth_response.url}")
@@ -15,11 +18,13 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'name_to_search': 'Project Alpha',
-    'workspace_id': '12345',
+    'name_to_search': 'Sprint Backlog',
+    'workspace_id': '987654321',
     'scan_size': 200,
-    'space_ids': ['space1', 'space2'],
-    'archived': False
+    'space_ids': ['112233', '445566'],
+    'folder_ids': ['778899'],
+    'should_include_archived': False,
+    'limit': 10
 }
 
 response = client.tools.execute(

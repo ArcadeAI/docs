@@ -15,15 +15,14 @@ import ToolFooter from "@/components/ToolFooter";
 
 <Badges repo="arcadeai/arcade_clickup" />
 
-The ClickUp toolkit provides a comprehensive set of tools for managing tasks, comments, and team collaboration within ClickUp. Users can efficiently perform actions such as:
+The ClickUp toolkit provides tools for building agents and apps that manage tasks, comments, and workspace structure in ClickUp. Main capabilities:
 
-- Create, update, and retrieve tasks with detailed metadata.
-- Manage comments and threaded replies on tasks.
-- Filter and search for tasks, lists, folders, and members using advanced criteria.
-- Access workspace insights and member information.
-- Organize tasks within spaces, folders, and lists.
-
-This toolkit is designed to streamline project management and enhance team communication in ClickUp.
+- Create, retrieve, and update tasks (including custom IDs, status, priority, dates, parent/sprint points).
+- Manage task assignees (add/remove) and search tasks by scope, assignees, or fuzzy name matching.
+- Create, retrieve, update comments and threaded comment replies; paginate comment and reply lists.
+- Discover and navigate workspace hierarchy: workspaces (WhoAmI), spaces, folders, and lists; list statuses for a list.
+- Retrieve workspace members and fuzzy-search members, folders, lists, and tasks by name.
+- Get workspace insights and static system guidance for agent decision-making.
 
 ## Available Tools
 
@@ -31,8 +30,8 @@ This toolkit is designed to streamline project management and enhance team commu
   headers={["Tool Name", "Description"]}
   data={
     [
-      ["Clickup.GetCommentReplies", "Get threaded replies for a specific ClickUp comment with pagination support."],
-      ["Clickup.CreateCommentReply", "Create a new threaded reply to an existing ClickUp comment."],
+      ["Clickup.GetTaskCommentReplies", "Get threaded replies for a specific ClickUp comment with pagination support."],
+      ["Clickup.CreateTaskCommentReply", "Create a new threaded reply to an existing ClickUp comment."],
       ["Clickup.CreateTask", "Create a new task in a ClickUp list with optional planning metadata."],
       ["Clickup.GetTaskById", "Get detailed information about a specific task by its ID. Also supports custom task IDs"],
       ["Clickup.UpdateTask", "Update one or more fields of an existing ClickUp task."],
@@ -40,16 +39,17 @@ This toolkit is designed to streamline project management and enhance team commu
       ["Clickup.GetTasksByAssignees", "Get filtered tasks assigned to specific team members with advanced filtering options."],
       ["Clickup.UpdateTaskAssignees", "Update task assignees by adding and/or removing specific users."],
       ["Clickup.GetSpaces", "Retrieve spaces from a ClickUp workspace."],
-      ["Clickup.GetFoldersForSpace", "Retrieve folders from a ClickUp space. Folders are also called directories, project categories, or project areas."],
-      ["Clickup.GetListsForFolder", "Retrieve task lists from a ClickUp folder. A folder may also be called a directory."],
-      ["Clickup.GetStatusesForList", "Retrieve possible task statuses for a specific ClickUp list."],
+      ["Clickup.GetFoldersForSpace", "Retrieve folders (also called directories, project categories, or project areas) from a"],
+      ["Clickup.GetListsForFolder", "Retrieve task lists from a ClickUp folder (when users refer to a folder as a directory)"],
+      ["Clickup.GetListsForSpace", "Retrieve all task lists from a ClickUp space by collecting lists from all folders within the"],
+      ["Clickup.GetStatusesForList", "Retrieve the possible task statuses for a specific ClickUp list."],
       ["Clickup.GetMembersForWorkspace", "Retrieve all team members from a specific ClickUp workspace."],
-      ["Clickup.WhoIAm", "Return the current user profile and accessible workspaces (teams)."],
-      ["Clickup.GetSystemGuidance", "Return static guidance to help agents make informed decisions."],
+      ["Clickup.WhoAmI", "Return current user profile and accessible workspaces (teams)."],
+      ["Clickup.GetSystemGuidance", "Return static guidance intended solely to help agents make informed decisions."],
       ["Clickup.GetWorkspaceInsights", "Return a brief overview for a workspace using the latest updated tasks to inform the user."],
       ["Clickup.GetTaskComments", "Get comments for a specific ClickUp task with pagination support."],
-      ["Clickup.CreateComment", "Create a new comment on a ClickUp task with optional assignment."],
-      ["Clickup.UpdateComment", "Update an existing comment on a ClickUp task."],
+      ["Clickup.CreateTaskComment", "Create a new comment on a ClickUp task with optional assignment."],
+      ["Clickup.UpdateTaskComment", "Update an existing comment on a ClickUp task."],
       ["Clickup.FuzzySearchTasksByName", "Search for tasks using fuzzy matching on task names."],
       ["Clickup.FuzzySearchListsByName", "Search for lists using fuzzy matching on list names."],
       ["Clickup.FuzzySearchFoldersByName", "Search for folders using fuzzy matching on folder names."],
@@ -64,7 +64,7 @@ This toolkit is designed to streamline project management and enhance team commu
   own tools](/home/build-tools/create-a-toolkit).
 </Tip>
 
-## Clickup.GetCommentReplies
+## Clickup.GetTaskCommentReplies
 
 <br />
 <TabbedCodeBlock
@@ -72,8 +72,8 @@ This toolkit is designed to streamline project management and enhance team commu
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/toolkits/clickup/get_comment_replies_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/toolkits/clickup/get_comment_replies_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/clickup/get_task_comment_replies_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/clickup/get_task_comment_replies_example_call_tool.js"],
       },
     },
   ]}
@@ -88,7 +88,7 @@ Get threaded replies for a specific ClickUp comment with pagination support.
 - **limit** (`integer`, optional) Maximum number of replies to return (max: 50, default: 20)
 
 
-## Clickup.CreateCommentReply
+## Clickup.CreateTaskCommentReply
 
 <br />
 <TabbedCodeBlock
@@ -96,8 +96,8 @@ Get threaded replies for a specific ClickUp comment with pagination support.
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/toolkits/clickup/create_comment_reply_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/toolkits/clickup/create_comment_reply_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/clickup/create_task_comment_reply_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/clickup/create_task_comment_reply_example_call_tool.js"],
       },
     },
   ]}
@@ -109,7 +109,7 @@ Create a new threaded reply to an existing ClickUp comment.
 
 - **comment_id** (`string`, required) The ClickUp comment ID to reply to
 - **reply_text** (`string`, required) The text content of the reply
-- **assignee_id** (`integer`, optional) User ID to assign the reply to (optional)
+- **assignee_id** (`integer`, optional) User ID to assign the reply to
 
 
 ## Clickup.CreateTask
@@ -162,8 +162,9 @@ Get detailed information about a specific task by its ID. Also supports custom t
 **Parameters**
 
 - **task_id** (`string`, required) The task ID or custom task ID to retrieve
-- **use_custom_id** (`boolean`, optional) If true, treat task_id as a custom task ID instead of the standard ID
-- **include_subtasks** (`boolean`, optional) Include subtask information
+- **use_custom_id** (`boolean`, optional) If true, treat task_id as a custom task ID instead of the standard ID (default: false)
+- **include_subtasks** (`boolean`, optional) Include subtask information (default: false )
+- **workspace_id** (`string`, optional) The ClickUp workspace ID (required when use_custom_id is True)
 
 
 ## Clickup.UpdateTask
@@ -215,7 +216,7 @@ Get filtered tasks from ClickUp with advanced filtering options.
 
 **Parameters**
 
-- **workspace_id** (`string`, required) The ClickUp workspace ID for GUI URL generation
+- **workspace_id** (`string`, required) The ClickUp workspace ID for GUI URL generation (should be a number)
 - **scope** (`Enum` [FilterScope](/toolkits/productivity/clickup/reference#FilterScope), required) The scope to filter tasks by (all, spaces, folders, or lists)
 - **item_ids** (`array[string]`, optional) List of IDs to get tasks from (required for spaces/folders/lists, ignored for 'all')
 - **offset** (`integer`, optional) Starting position for offset-based retrieval (default: 0)
@@ -249,7 +250,7 @@ Get filtered tasks assigned to specific team members with advanced filtering opt
 
 **Parameters**
 
-- **workspace_id** (`string`, required) The ClickUp workspace ID for GUI URL generation
+- **workspace_id** (`string`, required) The ClickUp workspace ID for GUI URL generation (should be a number)
 - **assignees_ids** (`array[integer]`, required) List of assignee user IDs to get tasks for
 - **offset** (`integer`, optional) Starting position for offset-based retrieval (default: 0)
 - **limit** (`integer`, optional) Maximum number of tasks to return (max: 50, default: 20)
@@ -306,7 +307,7 @@ Retrieve spaces from a ClickUp workspace.
 
 **Parameters**
 
-- **workspace_id** (`string`, required) The ClickUp workspace ID to get spaces from
+- **workspace_id** (`string`, required) The ClickUp workspace ID to get spaces from (should be a number)
 - **offset** (`integer`, optional) Starting position for offset-based retrieval (default: 0)
 - **limit** (`integer`, optional) Maximum number of spaces to return (max: 50, default: 50)
 - **include_archived** (`boolean`, optional) Whether to include archived spaces (default: False)
@@ -327,12 +328,12 @@ Retrieve spaces from a ClickUp workspace.
   ]}
 />
 
-Retrieve folders (also called directories, project categories, or project areas) from a ClickUp space.
+Retrieve folders (also called directories, project categories, or project areas) from a
 
 **Parameters**
 
 - **space_id** (`string`, required) The ClickUp space ID to get folders from
-- **workspace_id** (`string`, required) The ClickUp workspace ID for GUI URL generation
+- **workspace_id** (`string`, required) The ClickUp workspace ID for GUI URL generation (should be a number)
 - **offset** (`integer`, optional) Starting position for offset-based retrieval (default: 0)
 - **limit** (`integer`, optional) Maximum number of folders to return (max: 50, default: 50)
 - **include_archived** (`boolean`, optional) Whether to include archived, inactive, or deleted folders (default: False)
@@ -353,12 +354,38 @@ Retrieve folders (also called directories, project categories, or project areas)
   ]}
 />
 
-Retrieve task lists from a ClickUp folder (when users refer to a folder as a "directory", they mean the same thing).
+Retrieve task lists from a ClickUp folder (when users refer to a folder as a "directory",
 
 **Parameters**
 
 - **folder_id** (`string`, required) The ClickUp folder ID (also called directory ID) to get lists from
-- **workspace_id** (`string`, required) The ClickUp workspace ID for GUI URL generation
+- **workspace_id** (`string`, required) The ClickUp workspace ID for GUI URL generation (should be a number)
+- **offset** (`integer`, optional) Starting position for offset-based retrieval (default: 0)
+- **limit** (`integer`, optional) Maximum number of lists to return (max: 50, default: 50)
+- **include_archived** (`boolean`, optional) Whether to include archived, inactive, or completed lists (default: False)
+
+
+## Clickup.GetListsForSpace
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/clickup/get_lists_for_space_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/clickup/get_lists_for_space_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve all task lists from a ClickUp space by collecting lists from all folders within the
+
+**Parameters**
+
+- **space_id** (`string`, required) The ClickUp space ID to get lists from
+- **workspace_id** (`string`, required) The ClickUp workspace ID for GUI URL generation (should be a number)
 - **offset** (`integer`, optional) Starting position for offset-based retrieval (default: 0)
 - **limit** (`integer`, optional) Maximum number of lists to return (max: 50, default: 50)
 - **include_archived** (`boolean`, optional) Whether to include archived, inactive, or completed lists (default: False)
@@ -405,12 +432,12 @@ Retrieve all team members from a specific ClickUp workspace.
 
 **Parameters**
 
-- **workspace_id** (`string`, required) The ID of the ClickUp workspace to get team members from
+- **workspace_id** (`string`, required) The ID of the ClickUp workspace to get team members from (should be a number)
 - **offset** (`integer`, optional) Starting position for offset-based retrieval (default: 0)
 - **limit** (`integer`, optional) Maximum number of members to return (max: 50, default: 50)
 
 
-## Clickup.WhoIAm
+## Clickup.WhoAmI
 
 <br />
 <TabbedCodeBlock
@@ -418,8 +445,8 @@ Retrieve all team members from a specific ClickUp workspace.
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/toolkits/clickup/who_i_am_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/toolkits/clickup/who_i_am_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/clickup/who_am_i_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/clickup/who_am_i_example_call_tool.js"],
       },
     },
   ]}
@@ -471,7 +498,7 @@ Return a brief overview for a workspace using the latest updated tasks to inform
 
 **Parameters**
 
-- **workspace_id** (`string`, required) The ClickUp workspace ID to summarize
+- **workspace_id** (`string`, required) The ClickUp workspace ID to summarize (should be a number)
 
 
 ## Clickup.GetTaskComments
@@ -494,11 +521,11 @@ Get comments for a specific ClickUp task with pagination support.
 **Parameters**
 
 - **task_id** (`string`, required) The ClickUp task ID to get comments for
-- **limit** (`integer`, optional) Number of comments to retrieve (max 25)
+- **limit** (`integer`, optional) Number of comments to retrieve (max 25, default: 5)
 - **oldest_comment_id** (`string`, optional) ID of the oldest comment from previous call for pagination
 
 
-## Clickup.CreateComment
+## Clickup.CreateTaskComment
 
 <br />
 <TabbedCodeBlock
@@ -506,8 +533,8 @@ Get comments for a specific ClickUp task with pagination support.
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/toolkits/clickup/create_comment_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/toolkits/clickup/create_comment_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/clickup/create_task_comment_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/clickup/create_task_comment_example_call_tool.js"],
       },
     },
   ]}
@@ -522,7 +549,7 @@ Create a new comment on a ClickUp task with optional assignment.
 - **assignee_id** (`integer`, optional) User ID to assign the comment to (optional)
 
 
-## Clickup.UpdateComment
+## Clickup.UpdateTaskComment
 
 <br />
 <TabbedCodeBlock
@@ -530,8 +557,8 @@ Create a new comment on a ClickUp task with optional assignment.
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/toolkits/clickup/update_comment_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/toolkits/clickup/update_comment_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/clickup/update_task_comment_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/clickup/update_task_comment_example_call_tool.js"],
       },
     },
   ]}
@@ -568,14 +595,15 @@ Search for tasks using fuzzy matching on task names.
 **Parameters**
 
 - **name_to_search** (`string`, required) Task name to search for (minimum 6 characters)
-- **workspace_id** (`string`, required) The workspace ID to search tasks in
-- **scan_size** (`integer`, optional) Number of recent tasks to scan (in increments of 100, max 500)
-- **include_closed** (`boolean`, optional) Include closed/completed tasks
+- **workspace_id** (`string`, required) The workspace ID to search tasks in (should be a number)
+  - **scan_size** (`integer`, optional) Number of recent tasks to scan (max 500 default: 100)
+- **include_closed** (`boolean`, optional) Include closed/completed tasks (default: false)
 - **statuses** (`array[string]`, optional) Filter by specific ClickUp status names. Each list has its own statuses set.
 - **assignee_ids** (`array[string]`, optional) Filter by assignee user IDs
 - **space_ids** (`array[string]`, optional) Filter by ClickUp space IDs - limit search to specific spaces/teams
 - **folder_ids** (`array[string]`, optional) Filter by ClickUp folder IDs - limit search to specific folders/projects
 - **list_ids** (`array[string]`, optional) Filter by ClickUp list IDs - limit search to specific lists
+- **limit** (`integer`, optional) Maximum number of matches to return (max: 50, default: 10)
 
 
 ## Clickup.FuzzySearchListsByName
@@ -598,11 +626,12 @@ Search for lists using fuzzy matching on list names.
 **Parameters**
 
 - **name_to_search** (`string`, required) List name to search for (minimum 6 characters)
-- **workspace_id** (`string`, required) The workspace ID to search lists in
-- **scan_size** (`integer`, optional) Number of lists to scan (in increments of 100, max 500)
+- **workspace_id** (`string`, required) The workspace ID to search lists in (should be a number)
+- **scan_size** (`integer`, optional) Number of lists to scan (in increments of 100, max 500 default: 100)
 - **space_ids** (`array[string]`, optional) Filter by ClickUp space IDs - limit search to specific spaces/teams
 - **folder_ids** (`array[string]`, optional) Filter by ClickUp folder IDs - limit search to specific folders/projects
-- **archived** (`boolean`, optional) Include archived lists
+- **should_include_archived** (`boolean`, optional) Include archived lists (default: false)
+- **limit** (`integer`, optional) Maximum number of matches to return (max: 50, default: 10)
 
 
 ## Clickup.FuzzySearchFoldersByName
@@ -625,10 +654,11 @@ Search for folders using fuzzy matching on folder names.
 **Parameters**
 
 - **name_to_search** (`string`, required) Folder name to search for (minimum 6 characters)
-- **workspace_id** (`string`, required) The workspace ID to search folders in
-- **scan_size** (`integer`, optional) Number of folders to scan (in increments of 100, max 500)
+- **workspace_id** (`string`, required) The workspace ID to search folders in (should be a number)
+- **scan_size** (`integer`, optional) Number of folders to scan (in increments of 100, max 500 default: 100)
 - **space_ids** (`array[string]`, optional) Filter by ClickUp space IDs - limit search to specific spaces/teams
-- **archived** (`boolean`, optional) Include archived folders
+- **should_include_archived** (`boolean`, optional) Include archived folders (default: false)
+- **limit** (`integer`, optional) Maximum number of matches to return (max: 50, default: 10)
 
 
 ## Clickup.FuzzySearchMembersByName
@@ -651,9 +681,40 @@ Search for workspace members using fuzzy matching on member names.
 **Parameters**
 
 - **name_to_search** (`string`, required) Member name to search for (minimum 6 characters)
-- **workspace_id** (`string`, required) The workspace ID to search members in
-- **scan_size** (`integer`, optional) Number of members to scan (in increments of 100, max 500)
+- **workspace_id** (`string`, required) The workspace ID to search members in (should be a number)
+- **scan_size** (`integer`, optional) Number of members to scan (in increments of 100, max 500 default: 100)
+- **limit** (`integer`, optional) Maximum number of matches to return (max: 50, default: 10)
 
+
+
+## Reference
+
+Below is a reference of enumerations used by some of the tools in the Clickup toolkit:
+
+## TaskPriority
+
+- **URGENT**: `URGENT`
+- **HIGH**: `HIGH`
+- **NORMAL**: `NORMAL`
+- **LOW**: `LOW`
+
+## FilterScope
+
+- **ALL**: `all`
+- **SPACES**: `spaces`
+- **FOLDERS**: `folders`
+- **LISTS**: `lists`
+
+## TaskOrderBy
+
+- **CREATED**: `created`
+- **UPDATED**: `updated`
+- **DUE_DATE**: `due_date`
+
+## CommentResolution
+
+- **SET_AS_RESOLVED**: `resolved`
+- **SET_AS_UNRESOLVED**: `unresolved`
 
 
 
@@ -662,4 +723,3 @@ Search for workspace members using fuzzy matching on member names.
 The Arcade Clickup toolkit uses the [Clickup auth provider](/home/auth-providers/clickup) to connect to users' Clickup accounts. Please refer to the [Clickup auth provider](/home/auth-providers/clickup) documentation to learn how to configure auth.
 
 <ToolFooter pipPackageName="arcade_clickup" />
-

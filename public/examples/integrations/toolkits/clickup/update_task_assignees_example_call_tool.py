@@ -6,7 +6,10 @@ client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 USER_ID = "{arcade_user_id}"
 TOOL_NAME = "Clickup.UpdateTaskAssignees"
 
-auth_response = client.tools.authorize(tool_name=TOOL_NAME)
+auth_response = client.tools.authorize(
+    tool_name=TOOL_NAME,
+    user_id=TOOL_NAME
+)
 
 if auth_response.status != "completed":
     print(f"Click this link to authorize: {auth_response.url}")
@@ -15,7 +18,9 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'task_id': '12345', 'assignee_ids_to_add': ['user1', 'user2'], 'assignee_ids_to_remove': ['user3']
+    'task_id': 'task_7890',
+    'assignee_ids_to_add': ['user_102', 'user_215'],
+    'assignee_ids_to_remove': ['user_007']
 }
 
 response = client.tools.execute(

@@ -6,7 +6,10 @@ const USER_ID = "{arcade_user_id}";
 const TOOL_NAME = "Clickup.UpdateTask";
 
 // Start the authorization process
-const authResponse = await client.tools.authorize({tool_name: TOOL_NAME});
+const authResponse = await client.tools.authorize({
+    tool_name: TOOL_NAME,
+    user_id: USER_ID
+});
 
 if (authResponse.status !== "completed") {
   console.log(`Click this link to authorize: ${authResponse.url}`);
@@ -16,10 +19,14 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "task_id": "12345",
-  "task_title": "Update API Documentation",
+  "task_id": "cpt-48291",
+  "task_title": "Refactor payment service for retry logic",
+  "description": "Implement exponential backoff and idempotency for payment retries. Add unit tests and update docs.",
   "priority": "HIGH",
-  "due_date": "2023-12-31"
+  "status": "In Progress",
+  "start_date": "2025-09-01",
+  "due_date": "2025-09-08",
+  "sprint_points": 5
 };
 
 const response = await client.tools.execute({

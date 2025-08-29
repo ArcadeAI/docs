@@ -4,7 +4,7 @@ from arcadepy import Arcade
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
 USER_ID = "{arcade_user_id}"
-TOOL_NAME = "Clickup.UpdateTask"
+TOOL_NAME = "Clickup.GetTaskCommentReplies"
 
 auth_response = client.tools.authorize(
     tool_name=TOOL_NAME,
@@ -18,15 +18,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'task_id': 'cpt-48291',
-    'task_title': 'Refactor payment service for retry logic',
-    'description': 'Implement exponential backoff and idempotency for payment retries. Add unit '
-                   'tests and update docs.',
-    'priority': 'HIGH',
-    'status': 'In Progress',
-    'start_date': '2025-09-01',
-    'due_date': '2025-09-08',
-    'sprint_points': 5
+    'comment_id': 'cmt_9876543210', 'offset': 0, 'limit': 20
 }
 
 response = client.tools.execute(

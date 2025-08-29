@@ -6,7 +6,10 @@ client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 USER_ID = "{arcade_user_id}"
 TOOL_NAME = "Clickup.GetWorkspaceInsights"
 
-auth_response = client.tools.authorize(tool_name=TOOL_NAME)
+auth_response = client.tools.authorize(
+    tool_name=TOOL_NAME,
+    user_id=TOOL_NAME
+)
 
 if auth_response.status != "completed":
     print(f"Click this link to authorize: {auth_response.url}")
@@ -15,7 +18,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'workspace_id': '12345'
+    'workspace_id': '123456'
 }
 
 response = client.tools.execute(

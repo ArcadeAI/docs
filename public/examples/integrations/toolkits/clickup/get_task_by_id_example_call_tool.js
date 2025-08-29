@@ -6,7 +6,10 @@ const USER_ID = "{arcade_user_id}";
 const TOOL_NAME = "Clickup.GetTaskById";
 
 // Start the authorization process
-const authResponse = await client.tools.authorize({tool_name: TOOL_NAME});
+const authResponse = await client.tools.authorize({
+    tool_name: TOOL_NAME,
+    user_id: USER_ID
+});
 
 if (authResponse.status !== "completed") {
   console.log(`Click this link to authorize: ${authResponse.url}`);
@@ -16,9 +19,10 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "task_id": "12345",
+  "task_id": "TASK-4567",
   "use_custom_id": true,
-  "include_subtasks": false
+  "include_subtasks": true,
+  "workspace_id": "ws_12345"
 };
 
 const response = await client.tools.execute({

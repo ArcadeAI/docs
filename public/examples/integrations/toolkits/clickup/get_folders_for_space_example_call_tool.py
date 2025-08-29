@@ -6,7 +6,10 @@ client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 USER_ID = "{arcade_user_id}"
 TOOL_NAME = "Clickup.GetFoldersForSpace"
 
-auth_response = client.tools.authorize(tool_name=TOOL_NAME)
+auth_response = client.tools.authorize(
+    tool_name=TOOL_NAME,
+    user_id=TOOL_NAME
+)
 
 if auth_response.status != "completed":
     print(f"Click this link to authorize: {auth_response.url}")
@@ -15,7 +18,11 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'space_id': '12345', 'workspace_id': '67890', 'offset': 0, 'limit': 10, 'include_archived': False
+    'space_id': 'spc_987654321',
+    'workspace_id': '123456',
+    'offset': 0,
+    'limit': 25,
+    'include_archived': False
 }
 
 response = client.tools.execute(

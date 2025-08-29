@@ -6,7 +6,10 @@ const USER_ID = "{arcade_user_id}";
 const TOOL_NAME = "Clickup.UpdateTaskAssignees";
 
 // Start the authorization process
-const authResponse = await client.tools.authorize({tool_name: TOOL_NAME});
+const authResponse = await client.tools.authorize({
+    tool_name: TOOL_NAME,
+    user_id: USER_ID
+});
 
 if (authResponse.status !== "completed") {
   console.log(`Click this link to authorize: ${authResponse.url}`);
@@ -16,13 +19,13 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "task_id": "12345",
+  "task_id": "task_7890",
   "assignee_ids_to_add": [
-    "user1",
-    "user2"
+    "user_102",
+    "user_215"
   ],
   "assignee_ids_to_remove": [
-    "user3"
+    "user_007"
   ]
 };
 

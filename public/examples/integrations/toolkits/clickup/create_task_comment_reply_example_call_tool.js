@@ -3,7 +3,7 @@ import { Arcade } from "@arcadeai/arcadejs";
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
 const USER_ID = "{arcade_user_id}";
-const TOOL_NAME = "Clickup.GetWorkspaceInsights";
+const TOOL_NAME = "Clickup.CreateTaskCommentReply";
 
 // Start the authorization process
 const authResponse = await client.tools.authorize({
@@ -19,7 +19,9 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "workspace_id": "123456"
+  "comment_id": "cmt_987654321",
+  "reply_text": "Thanks for the update — I'll take this on and report back by EOD.",
+  "assignee_id": 12345
 };
 
 const response = await client.tools.execute({
