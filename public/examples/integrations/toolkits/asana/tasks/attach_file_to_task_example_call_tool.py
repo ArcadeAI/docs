@@ -5,7 +5,7 @@ client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
 TOOL_NAME = "Asana.AttachFileToTask"
 
-auth_response = client.tools.authorize(tool_name=TOOL_NAME)
+auth_response = client.tools.authorize(tool_name=TOOL_NAME, user_id=USER_ID)
 
 if auth_response.status != "completed":
     print(f"Click this link to authorize: {auth_response.url}")

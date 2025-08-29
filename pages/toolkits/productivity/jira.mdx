@@ -11,7 +11,7 @@ import ToolFooter from "@/components/ToolFooter";
   author="Arcade"
   codeLink="https://github.com/ArcadeAI/arcade-ai/tree/main/toolkits/jira"
   authType="OAuth2"
-  versions={["2.2.0"]}
+  versions={["2.3.0"]}
 />
 
 <Badges repo="arcadeai/arcade_jira" />
@@ -62,6 +62,9 @@ This toolkit streamlines the process of issue management, making it easier to in
       ["Jira.RemoveLabelsFromIssue", "Remove labels from an existing Jira issue."],
       ["Jira.UpdateIssue", "Update an existing Jira issue."],
       ["Jira.ListSprintsForBoards", "Retrieve sprints from Jira boards with filtering options for planning and tracking purposes."],
+      ["Jira.GetSprintIssues", "Get all issues that are currently assigned to a specific sprint with pagination support."],
+      ["Jira.AddIssuesToSprint", "Add a list of issues to a sprint."],
+      ["Jira.MoveIssuesFromSprintToBacklog", "Move issues from active or future sprints back to the board's backlog."],
       ["Jira.ListLabels", "Get the existing labels (tags) in the user's Jira instance."],
       ["Jira.ListUsers", "Browse users in Jira."],
       ["Jira.GetUserById", "Get user information by their ID."],
@@ -79,6 +82,7 @@ This toolkit streamlines the process of issue management, making it easier to in
       ["Jira.SearchProjects", "Get the details of all Jira projects."],
       ["Jira.GetProjectById", "Get the details of a Jira project by its ID or key."],
       ["Jira.GetBoards", "Get Jira boards, with the option to filter by a list of board names or IDs (accepts a mix of both). Supports 'offset' and 'limit' parameters."],
+      ["Jira.GetBoardBacklogIssues", "Get all issues in a board's backlog. Supports 'offset' and 'limit' parameters."],
       ["Jira.GetPriorityById", "Get the details of a priority by its ID."],
       ["Jira.ListPrioritySchemes", "Browse the priority schemes available in Jira."],
       ["Jira.ListPrioritiesAssociatedWithAPriorityScheme", "Browse the priorities associated with a priority scheme."],
@@ -423,14 +427,87 @@ Retrieve sprints from Jira boards with filtering options for planning and tracki
 
 **Parameters**
 
-- **board_identifiers_list** (`array[string]`, optional) List of board names or numeric IDs (as strings) to retrieve sprints from. Include all mentioned boards in a single list for best performance. Optional, defaults to None.
+- **board_identifiers_list** (`array[string]`, optional) List of board names or numeric IDs (as strings) to retrieve sprints from. Include all mentioned boards in a single list for best performance. Maximum 25 boards per operation. Optional, defaults to None.
 - **max_sprints_per_board** (`integer`, optional) Maximum sprints per board (1-50). Latest sprints first. Optional, defaults to 50.
 - **offset** (`integer`, optional) Number of sprints to skip per board for pagination. Optional, defaults to 0.
-- **state** (`Enum` [SprintState](/toolkits/productivity/jira/reference#SprintState), optional) Filter by sprint state using SprintState enum value. Available options: SprintState.FUTURE (future sprints), SprintState.ACTIVE (active sprints), SprintState.CLOSED (closed sprints), SprintState.FUTURE_AND_ACTIVE (future + active), SprintState.FUTURE_AND_CLOSED (future + closed), SprintState.ACTIVE_AND_CLOSED (active + closed), SprintState.ALL (all states). Optional, defaults to None (all states).
+- **state** (`Enum` [SprintState](/toolkits/productivity/jira/reference#SprintState), optional) Filter by sprint state. NOTE: Date filters (start_date, end_date, specific_date) have higher priority than state filtering. Use state filtering only when no date criteria is specified. For temporal queries like 'last month' or 'next week', use date parameters instead. Optional, defaults to None (all states).
 - **start_date** (`string`, optional) Start date filter in YYYY-MM-DD format. Can combine with end_date. Optional, defaults to None.
 - **end_date** (`string`, optional) End date filter in YYYY-MM-DD format. Can combine with start_date. Optional, defaults to None.
 - **specific_date** (`string`, optional) Specific date in YYYY-MM-DD to find sprints active on that date. Cannot combine with start_date/end_date. Optional, defaults to None.
 - **atlassian_cloud_id** (`string`, optional) Atlassian Cloud ID to use. Optional, defaults to None (uses single authorized cloud).
+
+
+## Jira.GetSprintIssues
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/jira/get_sprint_issues_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/jira/get_sprint_issues_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Get all issues that are currently assigned to a specific sprint with pagination support.
+
+**Parameters**
+
+- **sprint_id** (`string`, required) The numeric Jira sprint ID that identifies the sprint in Jira's API.
+- **limit** (`integer`, optional) The maximum number of issues to return. Must be between 1 and 100 inclusive. Controls pagination and determines how many issues are fetched and returned. Defaults to 50 for improved performance.
+- **offset** (`integer`, optional) The number of issues to skip before starting to return results. Used for pagination when the sprint has many issues. Must be 0 or greater. Defaults to 0.
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+
+## Jira.AddIssuesToSprint
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/jira/add_issues_to_sprint_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/jira/add_issues_to_sprint_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Add a list of issues to a sprint.
+
+**Parameters**
+
+- **sprint_id** (`string`, required) The numeric Jira sprint ID that identifies the sprint in Jira's API.
+- **issue_ids** (`array[string]`, required) List of issue IDs or keys to add to the sprint. Must not be empty and cannot exceed 50 issues.
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+
+## Jira.MoveIssuesFromSprintToBacklog
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/jira/move_issues_from_sprint_to_backlog_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/jira/move_issues_from_sprint_to_backlog_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Move issues from active or future sprints back to the board's backlog.
+
+**Parameters**
+
+- **sprint_id** (`string`, required) The numeric Jira sprint ID that identifies the sprint in Jira's API.
+- **issue_identifiers** (`array[string]`, required) List of issue IDs or keys to move from the sprint to the backlog. Maximum 50 issues per call. Issues will be moved back to the board's backlog.
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
 
 
 ## Jira.ListLabels
@@ -550,7 +627,7 @@ Get available Atlassian Clouds.
 
 **Parameters**
 
-
+This tool does not take any parameters.
 
 ## Jira.AttachFileToIssue
 
@@ -839,6 +916,31 @@ Retrieve Jira boards either by specifying their names or IDs, or get all
 - **limit** (`integer`, optional) Maximum number of boards to return (1-50). Defaults to max that is 50.
 - **offset** (`integer`, optional) Number of boards to skip for pagination. Must be 0 or greater. Defaults to 0.
 - **atlassian_cloud_id** (`string`, optional) Atlassian Cloud ID to use. Defaults to None (uses single authorized cloud).
+
+
+## Jira.GetBoardBacklogIssues
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/jira/get_board_backlog_issues_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/jira/get_board_backlog_issues_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Get all issues in a board's backlog with pagination support.
+
+**Parameters**
+
+- **board_id** (`string`, required) The ID of the board to retrieve backlog issues from. Must be a valid board ID that supports backlogs (typically Scrum or Kanban boards).
+- **limit** (`integer`, optional) The maximum number of issues to return. Must be between 1 and 100 inclusive. Controls pagination and determines how many issues are fetched and returned. Defaults to 50 for improved performance.
+- **offset** (`integer`, optional) The number of issues to skip before starting to return results. Used for pagination when the backlog has many issues. For example, offset=50 with limit=50 would return issues 51-100. Must be 0 or greater. Defaults to 0.
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
 
 
 ## Jira.GetPriorityById
