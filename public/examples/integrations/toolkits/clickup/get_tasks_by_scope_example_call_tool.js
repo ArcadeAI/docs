@@ -22,10 +22,10 @@ const toolInput = {
   "workspace_id": "123456",
   "scope": "lists",
   "item_ids": [
-    "98765"
+    "78910"
   ],
   "offset": 0,
-  "limit": 25,
+  "limit": 20,
   "order_by": "due_date",
   "should_sort_by_reverse": true,
   "statuses": [

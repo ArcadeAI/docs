@@ -18,7 +18,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'folder_id': 'f1234567890',
+    'folder_id': 'f1234567890abcdef',
     'workspace_id': '987654321',
     'offset': 0,
     'limit': 25,

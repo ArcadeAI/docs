@@ -20,12 +20,12 @@ await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
   "list_id": "12345",
-  "task_title": "Prepare Q3 roadmap slides",
-  "description": "Draft slides for the Q3 product roadmap presentation covering goals, milestones, and risks.",
+  "task_title": "Prepare Q3 Marketing Plan",
+  "description": "Draft Q3 strategy, budget estimates, and channel plan. Assign owners and review schedule.",
   "priority": "HIGH",
   "status": "In Progress",
   "start_date": "2025-09-01",
-  "due_date": "2025-09-10 17:00",
+  "due_date": "2025-09-15",
   "sprint_points": 5
 };
 

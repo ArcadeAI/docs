@@ -19,9 +19,9 @@ client.auth.wait_for_completion(auth_response)
 
 tool_input = {
     'comment_id': 'cmt_987654321',
-    'task_id': 'task_123456789',
-    'comment_text': 'Updated: Please review the latest changes and confirm acceptance.',
-    'assignee_id': 4321,
+    'task_id': 'task_12345',
+    'comment_text': 'Updated: Please review the latest changes and confirm.',
+    'assignee_id': 1024,
     'resolution': 'resolved'
 }
 

@@ -18,7 +18,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'comment_id': 'cmt_9876543210', 'offset': 0, 'limit': 20
+    'comment_id': '5f6b8a12-3c4d-4e9a-9f1a-1234567890ab', 'offset': 0, 'limit': 20
 }
 
 response = client.tools.execute(

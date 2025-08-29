@@ -19,9 +19,9 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "task_id": "5k9fz2",
-  "comment_text": "Please review the API changes and update the integration tests by Friday.",
-  "assignee_id": 8421
+  "task_id": "5k9z1a2b",
+  "comment_text": "Please review the API changes and update the integration tests accordingly.",
+  "assignee_id": 12345
 };
 
 const response = await client.tools.execute({

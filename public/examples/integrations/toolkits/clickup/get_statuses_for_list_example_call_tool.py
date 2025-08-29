@@ -18,7 +18,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'list_id': '12345678'
+    'list_id': '5f6a7b8c9d0123456789abcd'
 }
 
 response = client.tools.execute(

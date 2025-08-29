@@ -18,10 +18,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'task_id': 'TASK-4567',
-    'use_custom_id': True,
-    'include_subtasks': True,
-    'workspace_id': 'ws_12345'
+    'task_id': 'T12345', 'include_subtasks': True, 'workspace_id_for_custom_id': 'ws_98765'
 }
 
 response = client.tools.execute(

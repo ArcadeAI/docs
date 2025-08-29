@@ -21,8 +21,8 @@ await client.auth.waitForCompletion(authResponse);
 const toolInput = {
   "workspace_id": "123456",
   "assignees_ids": [
-    "789",
-    "456"
+    "78910",
+    "11213"
   ],
   "offset": 0,
   "limit": 25,

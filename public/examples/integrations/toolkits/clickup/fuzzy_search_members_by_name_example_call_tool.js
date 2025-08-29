@@ -19,9 +19,9 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "name_to_search": "Jonathan Reed",
+  "name_to_search": "Jonathan Doe",
   "workspace_id": "12345",
-  "scan_size": 200,
+  "scan_size": 300,
   "limit": 10
 };
 

@@ -20,8 +20,8 @@ await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
   "comment_id": "cmt_987654321",
-  "reply_text": "Thanks for the update — I'll take this on and report back by EOD.",
-  "assignee_id": 12345
+  "reply_text": "Thanks — I’ve reviewed this and updated the spec. Please confirm the API endpoints by EOD.",
+  "assignee_id": 4321
 };
 
 const response = await client.tools.execute({

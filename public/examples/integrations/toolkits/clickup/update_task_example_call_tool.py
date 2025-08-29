@@ -18,15 +18,14 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'task_id': 'cpt-48291',
-    'task_title': 'Refactor payment service for retry logic',
-    'description': 'Implement exponential backoff and idempotency for payment retries. Add unit '
-                   'tests and update docs.',
+    'task_id': 'abc123',
+    'task_title': 'Finalize onboarding docs',
+    'description': 'Update docs for new hires: add checklist and links to resources.',
     'priority': 'HIGH',
     'status': 'In Progress',
-    'start_date': '2025-09-01',
-    'due_date': '2025-09-08',
-    'sprint_points': 5
+    'due_date': '2025-09-05',
+    'start_date': '2025-08-29 09:00',
+    'sprint_points': 3
 }
 
 response = client.tools.execute(

@@ -19,13 +19,13 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "task_id": "task_7890",
+  "task_id": "5f6a9b2c-1234-4d5e-8f00-abcdef123456",
   "assignee_ids_to_add": [
-    "user_102",
-    "user_215"
+    "user_789",
+    "user_456"
   ],
   "assignee_ids_to_remove": [
-    "user_007"
+    "user_123"
   ]
 };
 

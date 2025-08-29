@@ -18,15 +18,15 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'name_to_search': 'signup form validation',
-    'workspace_id': '987654321',
-    'scan_size': 200,
+    'name_to_search': 'quarterly roadmap update',
+    'workspace_id': '123456',
+    'scan_size': 250,
     'include_closed': False,
-    'statuses': ['in progress', 'open'],
-    'assignee_ids': ['123', '456'],
-    'space_ids': ['111'],
+    'statuses': ['In Progress', 'Backlog'],
+    'assignee_ids': ['78910', '78911'],
+    'space_ids': ['111', '112'],
     'folder_ids': ['222'],
-    'list_ids': ['333'],
+    'list_ids': ['333', '334'],
     'limit': 10
 }
 

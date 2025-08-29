@@ -19,7 +19,7 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "list_id": "12345678"
+  "list_id": "5f6a7b8c9d0123456789abcd"
 };
 
 const response = await client.tools.execute({

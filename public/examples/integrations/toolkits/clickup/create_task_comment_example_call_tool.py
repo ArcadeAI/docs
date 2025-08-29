@@ -18,9 +18,9 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'task_id': '5k9fz2',
-    'comment_text': 'Please review the API changes and update the integration tests by Friday.',
-    'assignee_id': 8421
+    'task_id': '5k9z1a2b',
+    'comment_text': 'Please review the API changes and update the integration tests accordingly.',
+    'assignee_id': 12345
 }
 
 response = client.tools.execute(

@@ -19,10 +19,9 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "task_id": "TASK-4567",
-  "use_custom_id": true,
+  "task_id": "T12345",
   "include_subtasks": true,
-  "workspace_id": "ws_12345"
+  "workspace_id_for_custom_id": "ws_98765"
 };
 
 const response = await client.tools.execute({

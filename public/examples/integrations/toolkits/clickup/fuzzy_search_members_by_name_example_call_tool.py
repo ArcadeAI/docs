@@ -18,7 +18,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'name_to_search': 'Jonathan Reed', 'workspace_id': '12345', 'scan_size': 200, 'limit': 10
+    'name_to_search': 'Jonathan Doe', 'workspace_id': '12345', 'scan_size': 300, 'limit': 10
 }
 
 response = client.tools.execute(

@@ -19,8 +19,8 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "space_id": "9876543210",
-  "workspace_id": "1234567890",
+  "space_id": "5f8d3a2b9c1e4b0012345678",
+  "workspace_id": "987654",
   "offset": 0,
   "limit": 50,
   "include_archived": false

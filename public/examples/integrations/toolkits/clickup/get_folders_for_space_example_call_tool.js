@@ -19,7 +19,7 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "space_id": "spc_987654321",
+  "space_id": "space_987654321",
   "workspace_id": "123456",
   "offset": 0,
   "limit": 25,

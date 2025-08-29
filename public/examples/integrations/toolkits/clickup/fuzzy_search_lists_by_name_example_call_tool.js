@@ -19,15 +19,16 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "name_to_search": "Sprint Backlog",
-  "workspace_id": "987654321",
+  "name_to_search": "Marketing Campaigns",
+  "workspace_id": "123456",
   "scan_size": 200,
   "space_ids": [
-    "112233",
-    "445566"
+    "78910",
+    "78911"
   ],
   "folder_ids": [
-    "778899"
+    "555",
+    "556"
   ],
   "should_include_archived": false,
   "limit": 10

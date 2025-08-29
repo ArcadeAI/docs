@@ -18,10 +18,10 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'name_to_search': 'marketing campaign',
+    'name_to_search': 'Marketing Campaigns Q3',
     'workspace_id': '987654321',
-    'scan_size': 200,
-    'space_ids': ['111', '222'],
+    'scan_size': 300,
+    'space_ids': ['12345', '67890'],
     'should_include_archived': False,
     'limit': 10
 }

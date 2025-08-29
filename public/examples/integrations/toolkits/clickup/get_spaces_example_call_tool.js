@@ -19,7 +19,7 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "workspace_id": "123456789",
+  "workspace_id": "123456",
   "offset": 0,
   "limit": 25,
   "include_archived": false

@@ -19,7 +19,7 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "comment_id": "cmt_9876543210",
+  "comment_id": "5f6b8a12-3c4d-4e9a-9f1a-1234567890ab",
   "offset": 0,
   "limit": 20
 };

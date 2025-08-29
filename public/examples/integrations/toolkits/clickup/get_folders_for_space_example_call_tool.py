@@ -18,7 +18,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'space_id': 'spc_987654321',
+    'space_id': 'space_987654321',
     'workspace_id': '123456',
     'offset': 0,
     'limit': 25,

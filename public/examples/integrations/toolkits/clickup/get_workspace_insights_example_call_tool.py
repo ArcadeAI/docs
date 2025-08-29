@@ -18,7 +18,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'workspace_id': '123456'
+    'workspace_id': '123456789'
 }
 
 response = client.tools.execute(

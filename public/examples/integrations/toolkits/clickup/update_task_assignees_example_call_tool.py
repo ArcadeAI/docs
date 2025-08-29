@@ -18,9 +18,9 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'task_id': 'task_7890',
-    'assignee_ids_to_add': ['user_102', 'user_215'],
-    'assignee_ids_to_remove': ['user_007']
+    'task_id': '5f6a9b2c-1234-4d5e-8f00-abcdef123456',
+    'assignee_ids_to_add': ['user_789', 'user_456'],
+    'assignee_ids_to_remove': ['user_123']
 }
 
 response = client.tools.execute(

@@ -18,7 +18,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'task_id': '5f7a1b2c-1234-4d5e-9f0a-abcdef123456', 'limit': 10
+    'task_id': '5f8d7a2b-1234-4abc-9ef0-abcdef123456', 'limit': 10
 }
 
 response = client.tools.execute(

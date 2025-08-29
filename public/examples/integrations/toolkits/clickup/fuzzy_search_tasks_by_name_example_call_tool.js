@@ -19,26 +19,28 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "name_to_search": "signup form validation",
-  "workspace_id": "987654321",
-  "scan_size": 200,
+  "name_to_search": "quarterly roadmap update",
+  "workspace_id": "123456",
+  "scan_size": 250,
   "include_closed": false,
   "statuses": [
-    "in progress",
-    "open"
+    "In Progress",
+    "Backlog"
   ],
   "assignee_ids": [
-    "123",
-    "456"
+    "78910",
+    "78911"
   ],
   "space_ids": [
-    "111"
+    "111",
+    "112"
   ],
   "folder_ids": [
     "222"
   ],
   "list_ids": [
-    "333"
+    "333",
+    "334"
   ],
   "limit": 10
 };

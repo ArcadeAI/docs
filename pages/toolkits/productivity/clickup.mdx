@@ -15,14 +15,16 @@ import ToolFooter from "@/components/ToolFooter";
 
 <Badges repo="arcadeai/arcade_clickup" />
 
-The ClickUp toolkit provides tools for building agents and apps that manage tasks, comments, and workspace structure in ClickUp. Main capabilities:
+The ClickUp toolkit provides tools to interact with ClickUp workspaces, projects (spaces/folders/lists), tasks, comments, and members. It enables building agents and apps that can:
 
-- Create, retrieve, and update tasks (including custom IDs, status, priority, dates, parent/sprint points).
-- Manage task assignees (add/remove) and search tasks by scope, assignees, or fuzzy name matching.
-- Create, retrieve, update comments and threaded comment replies; paginate comment and reply lists.
-- Discover and navigate workspace hierarchy: workspaces (WhoAmI), spaces, folders, and lists; list statuses for a list.
-- Retrieve workspace members and fuzzy-search members, folders, lists, and tasks by name.
-- Get workspace insights and static system guidance for agent decision-making.
+- Discover workspace structure and users (WhoAmI, GetWorkspaceInsights, GetSpaces, GetFoldersForSpace, GetListsForSpace, GetListsForFolder, GetMembersForWorkspace).
+- Create, view, and modify tasks (CreateTask, GetTaskById, UpdateTask, GetTasksByScope, GetTasksByAssignees, FuzzySearchTasksByName).
+- Manage task assignments (UpdateTaskAssignees) and task planning metadata (statuses via GetStatusesForList).
+- Work with comments and threaded replies (GetTaskComments, CreateTaskComment, UpdateTaskComment, GetTaskCommentReplies, CreateTaskCommentReply).
+- Search for containers and people by approximate name when location is unknown (FuzzySearchListsByName, FuzzySearchFoldersByName, FuzzySearchMembersByName).
+- Retrieve guidance for agent decision-making (GetSystemGuidance).
+
+Use WhoAmI first to identify accessible workspaces; then navigate spaces→folders→lists to locate lists/statuses before creating or updating tasks.
 
 ## Available Tools
 
@@ -40,7 +42,7 @@ The ClickUp toolkit provides tools for building agents and apps that manage task
       ["Clickup.UpdateTaskAssignees", "Update task assignees by adding and/or removing specific users."],
       ["Clickup.GetSpaces", "Retrieve spaces from a ClickUp workspace."],
       ["Clickup.GetFoldersForSpace", "Retrieve folders (also called directories, project categories, or project areas) from a"],
-      ["Clickup.GetListsForFolder", "Retrieve task lists from a ClickUp folder (when users refer to a folder as a directory)"],
+      ["Clickup.GetListsForFolder", "Retrieve task lists from a ClickUp folder (when users refer to a folder as a directory,"],
       ["Clickup.GetListsForSpace", "Retrieve all task lists from a ClickUp space by collecting lists from all folders within the"],
       ["Clickup.GetStatusesForList", "Retrieve the possible task statuses for a specific ClickUp list."],
       ["Clickup.GetMembersForWorkspace", "Retrieve all team members from a specific ClickUp workspace."],
@@ -162,9 +164,8 @@ Get detailed information about a specific task by its ID. Also supports custom t
 **Parameters**
 
 - **task_id** (`string`, required) The task ID or custom task ID to retrieve
-- **use_custom_id** (`boolean`, optional) If true, treat task_id as a custom task ID instead of the standard ID (default: false)
 - **include_subtasks** (`boolean`, optional) Include subtask information (default: false )
-- **workspace_id** (`string`, optional) The ClickUp workspace ID (required when use_custom_id is True)
+- **workspace_id_for_custom_id** (`string`, optional) The ClickUp workspace ID (provide this to use custom task IDs)
 
 
 ## Clickup.UpdateTask
@@ -596,7 +597,7 @@ Search for tasks using fuzzy matching on task names.
 
 - **name_to_search** (`string`, required) Task name to search for (minimum 6 characters)
 - **workspace_id** (`string`, required) The workspace ID to search tasks in (should be a number)
-  - **scan_size** (`integer`, optional) Number of recent tasks to scan (max 500 default: 100)
+- **scan_size** (`integer`, optional) Number of recent tasks to scan (max 500 default: 500)
 - **include_closed** (`boolean`, optional) Include closed/completed tasks (default: false)
 - **statuses** (`array[string]`, optional) Filter by specific ClickUp status names. Each list has its own statuses set.
 - **assignee_ids** (`array[string]`, optional) Filter by assignee user IDs
@@ -627,7 +628,7 @@ Search for lists using fuzzy matching on list names.
 
 - **name_to_search** (`string`, required) List name to search for (minimum 6 characters)
 - **workspace_id** (`string`, required) The workspace ID to search lists in (should be a number)
-- **scan_size** (`integer`, optional) Number of lists to scan (in increments of 100, max 500 default: 100)
+- **scan_size** (`integer`, optional) Number of lists to scan (in increments of 100, max 500 default: 500)
 - **space_ids** (`array[string]`, optional) Filter by ClickUp space IDs - limit search to specific spaces/teams
 - **folder_ids** (`array[string]`, optional) Filter by ClickUp folder IDs - limit search to specific folders/projects
 - **should_include_archived** (`boolean`, optional) Include archived lists (default: false)
@@ -655,7 +656,7 @@ Search for folders using fuzzy matching on folder names.
 
 - **name_to_search** (`string`, required) Folder name to search for (minimum 6 characters)
 - **workspace_id** (`string`, required) The workspace ID to search folders in (should be a number)
-- **scan_size** (`integer`, optional) Number of folders to scan (in increments of 100, max 500 default: 100)
+- **scan_size** (`integer`, optional) Number of folders to scan (in increments of 100, max 500 default: {FUZZY_SEARCH_DEFAULT_SCAN_SIZE})
 - **space_ids** (`array[string]`, optional) Filter by ClickUp space IDs - limit search to specific spaces/teams
 - **should_include_archived** (`boolean`, optional) Include archived folders (default: false)
 - **limit** (`integer`, optional) Maximum number of matches to return (max: 50, default: 10)
@@ -682,7 +683,7 @@ Search for workspace members using fuzzy matching on member names.
 
 - **name_to_search** (`string`, required) Member name to search for (minimum 6 characters)
 - **workspace_id** (`string`, required) The workspace ID to search members in (should be a number)
-- **scan_size** (`integer`, optional) Number of members to scan (in increments of 100, max 500 default: 100)
+- **scan_size** (`integer`, optional) Number of members to scan (in increments of 100, max 500 default: 500)
 - **limit** (`integer`, optional) Maximum number of matches to return (max: 50, default: 10)
 
 
