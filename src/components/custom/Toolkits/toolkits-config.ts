@@ -230,7 +230,7 @@ const availableTools: Tool[] = [
   },
   {
     name: "Imgflip",
-    image: "imgflip.png",
+    image: "imgflip.jpg",
     summary: "Create memes with Imgflip",
     link: "/toolkits/entertainment/imgflip",
     category: "entertainment",
