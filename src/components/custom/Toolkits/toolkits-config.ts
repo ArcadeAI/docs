@@ -229,6 +229,14 @@ const availableTools: Tool[] = [
     type: "arcade",
   },
   {
+    name: "Imgflip",
+    image: "imgflip.jpg",
+    summary: "Create memes with Imgflip",
+    link: "/toolkits/entertainment/imgflip",
+    category: "entertainment",
+    type: "arcade",
+  },
+  {
     name: "Notion",
     image: "notion.png",
     summary: "Create, read, and search Notion pages",
