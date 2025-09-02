@@ -7,51 +7,55 @@ import TableOfContents from "@/components/TableOfContents";
 import ToolFooter from "@/components/ToolFooter";
 
 <ToolInfo
-  description="Enable agents to send, read, and manage emails in Gmail."
+  description="Enable agents to interact with Gmail"
   author="Arcade"
-  codeLink="https://github.com/ArcadeAI/arcade-ai/tree/main/toolkits/google_gmail"
-  authType="oauth2"
-  authProviderName="Google"
-  versions={["0.1.0"]}
+  authType="OAuth2"
+  versions={["3.1.0"]}
 />
 
 <Badges repo="arcadeai/arcade_gmail" />
 
-The Arcade Gmail toolkit provides a pre-built set of tools for interacting with Gmail. These tools make it easy to build agents and AI apps that can:
+The Gmail toolkit provides a comprehensive set of tools for interacting with Gmail through its API. Users can easily manage their email communications and drafts, allowing them to:
 
-- Send, read, and manage emails
-- Compose and update draft emails
-- Delete emails
-- Search for emails by header
-- List emails in the user's mailbox
+- Send, reply to, and manage emails and drafts.
+- Search for and list emails and threads based on various criteria.
+- Organize emails with labels and manage draft emails.
+- Retrieve user profile information and account statistics.
+
+This toolkit simplifies email management and enhances productivity for users and applications.
 
 ## Available Tools
 
-These tools are currently available in the Arcade Gmail toolkit.
-
 <TableOfContents
   headers={["Tool Name", "Description"]}
-  data={[
-    ["Gmail.SendEmail", "Send an email using the Gmail API."],
-    ["Gmail.SendDraftEmail", "Send a draft email using the Gmail API."],
-    ["Gmail.WriteDraftEmail", "Compose a new email draft using the Gmail API."],
-    ["Gmail.UpdateDraftEmail", "Update an existing email draft."],
-    ["Gmail.DeleteDraftEmail", "Delete a draft email using the Gmail API."],
-    ["Gmail.TrashEmail", "Move an email to the trash folder."],
-    ["Gmail.ListDraftEmails", "List draft emails in the user's mailbox."],
-    ["Gmail.ListEmailsByHeader", "Search for emails by header using the Gmail API."],
-    ["Gmail.ListEmails", "Read emails and extract plain text content."],
-    ["Gmail.SearchThreads", "Search for threads in the user's mailbox."],
-    ["Gmail.ListThreads", "List threads in the user's mailbox."],
-    ["Gmail.GetThread", "Get the specified thread by ID."],
-  ]}
+  data={
+    [
+      ["Gmail.SendEmail", "Send an email using the Gmail API."],
+      ["Gmail.SendDraftEmail", "Send a draft email using the Gmail API."],
+      ["Gmail.ReplyToEmail", "Send a reply to an email message."],
+      ["Gmail.WriteDraftEmail", "Compose a new email draft using the Gmail API."],
+      ["Gmail.WriteDraftReplyEmail", "Compose a draft reply to an email message."],
+      ["Gmail.UpdateDraftEmail", "Update an existing email draft using the Gmail API."],
+      ["Gmail.DeleteDraftEmail", "Delete a draft email using the Gmail API."],
+      ["Gmail.TrashEmail", "Move an email to the trash folder using the Gmail API."],
+      ["Gmail.ListDraftEmails", "Lists draft emails in the user's draft mailbox using the Gmail API."],
+      ["Gmail.ListEmailsByHeader", "Search for emails by header using the Gmail API."],
+      ["Gmail.ListEmails", "Read emails from a Gmail account and extract plain text content."],
+      ["Gmail.SearchThreads", "Search for threads in the user's mailbox"],
+      ["Gmail.ListThreads", "List threads in the user's mailbox."],
+      ["Gmail.GetThread", "Get the specified thread by ID."],
+      ["Gmail.ChangeEmailLabels", "Add and remove labels from an email using the Gmail API."],
+      ["Gmail.ListLabels", "List all the labels in the user's mailbox."],
+      ["Gmail.CreateLabel", "Create a new label in the user's mailbox."],
+      ["Gmail.WhoAmI", "Get comprehensive user profile and Gmail account information."],
+    ]
+  }
 />
 
 <Tip>
   If you need to perform an action that's not listed here, you can [get in touch
   with us](mailto:contact@arcade.dev) to request a new tool, or [create your
-  own tools](/home/build-tools/create-a-toolkit) with the [Google auth
-  provider](/home/auth-providers/google#using-google-auth-in-custom-tools).
+  own tools](/home/build-tools/create-a-toolkit).
 </Tip>
 
 ## Gmail.SendEmail
@@ -60,14 +64,12 @@ These tools are currently available in the Arcade Gmail toolkit.
 <TabbedCodeBlock
   tabs={[
     {
-      label: "Call the Tool with User Authorization",
+      label: "Call the Tool Directly",
       content: {
-        Python: [
-          "/examples/integrations/toolkits/google/gmail/send_email_example_call_tool.py",
-        ],
-        JavaScript: ["/examples/integrations/toolkits/google/gmail/send_email_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/gmail/send_email_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/gmail/send_email_example_call_tool.js"],
       },
-    }
+    },
   ]}
 />
 
@@ -75,13 +77,12 @@ Send an email using the Gmail API.
 
 **Parameters**
 
-- **`subject`** _(string, required)_ The subject of the email.
-- **`body`** _(string, required)_ The body of the email.
-- **`recipient`** _(string, required)_ The recipient of the email.
-- **`cc`** _(array, optional, Defaults to None)_ CC recipients of the email.
-- **`bcc`** _(array, optional, Defaults to None)_ BCC recipients of the email.
+- **subject** (`string`, required) The subject of the email
+- **body** (`string`, required) The body of the email
+- **recipient** (`string`, required) The recipient of the email
+- **cc** (`array[string]`, optional) CC recipients of the email
+- **bcc** (`array[string]`, optional) BCC recipients of the email
 
----
 
 ## Gmail.SendDraftEmail
 
@@ -89,14 +90,12 @@ Send an email using the Gmail API.
 <TabbedCodeBlock
   tabs={[
     {
-      label: "Call the Tool with User Authorization",
+      label: "Call the Tool Directly",
       content: {
-        Python: [
-          "/examples/integrations/toolkits/google/gmail/send_draft_email_example_call_tool.py",
-        ],
-        JavaScript: ["/examples/integrations/toolkits/google/gmail/send_draft_email_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/gmail/send_draft_email_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/gmail/send_draft_email_example_call_tool.js"],
       },
-    }
+    },
   ]}
 />
 
@@ -104,9 +103,33 @@ Send a draft email using the Gmail API.
 
 **Parameters**
 
-- **`email_id`** _(string, required)_ The ID of the draft to send.
+- **email_id** (`string`, required) The ID of the draft to send
 
----
+
+## Gmail.ReplyToEmail
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/gmail/reply_to_email_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/gmail/reply_to_email_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Send a reply to an email message.
+
+**Parameters**
+
+- **body** (`string`, required) The body of the email
+- **reply_to_message_id** (`string`, required) The ID of the message to reply to
+- **reply_to_whom** (`Enum` [GmailReplyToWhom](/toolkits/productivity/gmail/reference#GmailReplyToWhom), optional) Whether to reply to every recipient (including cc) or only to the original sender. Defaults to 'GmailReplyToWhom.ONLY_THE_SENDER'.
+- **bcc** (`array[string]`, optional) BCC recipients of the email
+
 
 ## Gmail.WriteDraftEmail
 
@@ -114,14 +137,12 @@ Send a draft email using the Gmail API.
 <TabbedCodeBlock
   tabs={[
     {
-      label: "Call the Tool with User Authorization",
+      label: "Call the Tool Directly",
       content: {
-        Python: [
-          "/examples/integrations/toolkits/google/gmail/write_draft_email_example_call_tool.py",
-        ],
-        JavaScript: ["/examples/integrations/toolkits/google/gmail/write_draft_email_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/gmail/write_draft_email_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/gmail/write_draft_email_example_call_tool.js"],
       },
-    }
+    },
   ]}
 />
 
@@ -129,13 +150,37 @@ Compose a new email draft using the Gmail API.
 
 **Parameters**
 
-- **`subject`** _(string, required)_ The subject of the draft email.
-- **`body`** _(string, required)_ The body of the draft email.
-- **`recipient`** _(string, required)_ The recipient of the draft email.
-- **`cc`** _(array, optional, Defaults to None)_ CC recipients of the draft email.
-- **`bcc`** _(array, optional, Defaults to None)_ BCC recipients of the draft email.
+- **subject** (`string`, required) The subject of the draft email
+- **body** (`string`, required) The body of the draft email
+- **recipient** (`string`, required) The recipient of the draft email
+- **cc** (`array[string]`, optional) CC recipients of the draft email
+- **bcc** (`array[string]`, optional) BCC recipients of the draft email
 
----
+
+## Gmail.WriteDraftReplyEmail
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/gmail/write_draft_reply_email_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/gmail/write_draft_reply_email_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Compose a draft reply to an email message.
+
+**Parameters**
+
+- **body** (`string`, required) The body of the draft reply email
+- **reply_to_message_id** (`string`, required) The Gmail message ID of the message to draft a reply to
+- **reply_to_whom** (`Enum` [GmailReplyToWhom](/toolkits/productivity/gmail/reference#GmailReplyToWhom), optional) Whether to reply to every recipient (including cc) or only to the original sender. Defaults to 'GmailReplyToWhom.ONLY_THE_SENDER'.
+- **bcc** (`array[string]`, optional) BCC recipients of the draft reply email
+
 
 ## Gmail.UpdateDraftEmail
 
@@ -143,29 +188,26 @@ Compose a new email draft using the Gmail API.
 <TabbedCodeBlock
   tabs={[
     {
-      label: "Call the Tool with User Authorization",
+      label: "Call the Tool Directly",
       content: {
-        Python: [
-          "/examples/integrations/toolkits/google/gmail/update_draft_email_example_call_tool.py",
-        ],
-        JavaScript: ["/examples/integrations/toolkits/google/gmail/update_draft_email_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/gmail/update_draft_email_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/gmail/update_draft_email_example_call_tool.js"],
       },
-    }
+    },
   ]}
 />
 
-Update an existing email draft.
+Update an existing email draft using the Gmail API.
 
 **Parameters**
 
-- **`draft_email_id`** _(string, required)_ The ID of the draft email to update.
-- **`subject`** _(string, required)_ The subject of the draft email.
-- **`body`** _(string, required)_ The body of the draft email.
-- **`recipient`** _(string, required)_ The recipient of the draft email.
-- **`cc`** _(array, optional, Defaults to None)_ CC recipients of the draft email.
-- **`bcc`** _(array, optional, Defaults to None)_ BCC recipients of the draft email.
+- **draft_email_id** (`string`, required) The ID of the draft email to update.
+- **subject** (`string`, required) The subject of the draft email
+- **body** (`string`, required) The body of the draft email
+- **recipient** (`string`, required) The recipient of the draft email
+- **cc** (`array[string]`, optional) CC recipients of the draft email
+- **bcc** (`array[string]`, optional) BCC recipients of the draft email
 
----
 
 ## Gmail.DeleteDraftEmail
 
@@ -173,14 +215,12 @@ Update an existing email draft.
 <TabbedCodeBlock
   tabs={[
     {
-      label: "Call the Tool with User Authorization",
+      label: "Call the Tool Directly",
       content: {
-        Python: [
-          "/examples/integrations/toolkits/google/gmail/delete_draft_email_example_call_tool.py",
-        ],
-        JavaScript: ["/examples/integrations/toolkits/google/gmail/delete_draft_email_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/gmail/delete_draft_email_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/gmail/delete_draft_email_example_call_tool.js"],
       },
-    }
+    },
   ]}
 />
 
@@ -188,38 +228,30 @@ Delete a draft email using the Gmail API.
 
 **Parameters**
 
-- **`draft_email_id`** _(string, required)_ The ID of the draft email to delete.
+- **draft_email_id** (`string`, required) The ID of the draft email to delete
 
----
 
 ## Gmail.TrashEmail
-
-<Warning type="warning" emoji="⚠️">
-  The `TrashEmail` tool is currently only available on a self-hosted instance of the Arcade Engine. To learn more about self-hosting, see the [self-hosting documentation](/home/local-deployment/install/local#install-the-engine).
-</Warning>
 
 <br />
 <TabbedCodeBlock
   tabs={[
     {
-      label: "Call the Tool with User Authorization",
+      label: "Call the Tool Directly",
       content: {
-        Python: [
-          "/examples/integrations/toolkits/google/gmail/trash_email_example_call_tool.py",
-        ],
-        JavaScript: ["/examples/integrations/toolkits/google/gmail/trash_email_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/gmail/trash_email_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/gmail/trash_email_example_call_tool.js"],
       },
-    }
+    },
   ]}
 />
 
-Move an email to the trash folder.
+Move an email to the trash folder using the Gmail API.
 
 **Parameters**
 
-- **`email_id`** _(string, required)_ The ID of the email to trash.
+- **email_id** (`string`, required) The ID of the email to trash
 
----
 
 ## Gmail.ListDraftEmails
 
@@ -227,24 +259,21 @@ Move an email to the trash folder.
 <TabbedCodeBlock
   tabs={[
     {
-      label: "Call the Tool with User Authorization",
+      label: "Call the Tool Directly",
       content: {
-        Python: [
-          "/examples/integrations/toolkits/google/gmail/list_draft_emails_example_call_tool.py",
-        ],
-        JavaScript: ["/examples/integrations/toolkits/google/gmail/list_draft_emails_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/gmail/list_draft_emails_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/gmail/list_draft_emails_example_call_tool.js"],
       },
-    }
+    },
   ]}
 />
 
-List draft emails in the user's mailbox.
+Lists draft emails in the user's draft mailbox using the Gmail API.
 
 **Parameters**
 
-- **`n_drafts`** _(integer, optional, Defaults to 5)_ Number of draft emails to read.
+- **n_drafts** (`integer`, optional) Number of draft emails to read
 
----
 
 ## Gmail.ListEmailsByHeader
 
@@ -252,31 +281,27 @@ List draft emails in the user's mailbox.
 <TabbedCodeBlock
   tabs={[
     {
-      label: "Call the Tool with User Authorization",
+      label: "Call the Tool Directly",
       content: {
-        Python: [
-          "/examples/integrations/toolkits/google/gmail/list_emails_by_header_example_call_tool.py",
-        ],
-        JavaScript: ["/examples/integrations/toolkits/google/gmail/list_emails_by_header_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/gmail/list_emails_by_header_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/gmail/list_emails_by_header_example_call_tool.js"],
       },
-    }
+    },
   ]}
 />
 
 Search for emails by header using the Gmail API.
 
-_At least one of the following parameters must be provided: `sender`, `recipient`, `subject`, `body`._
-
 **Parameters**
 
-- **`sender`** _(string, optional, Defaults to None)_ The name or email address of the sender.
-- **`recipient`** _(string, optional, Defaults to None)_ The name or email address of the recipient.
-- **`subject`** _(string, optional, Defaults to None)_ Words to find in the subject of the email.
-- **`body`** _(string, optional, Defaults to None)_ Words to find in the body of the email.
-- **`date_range`** _(string, optional, Defaults to None)_ The date range of the emails.
-- **`limit`** _(integer, optional, Defaults to 25)_ The maximum number of emails to return.
+- **sender** (`string`, optional) The name or email address of the sender of the email
+- **recipient** (`string`, optional) The name or email address of the recipient
+- **subject** (`string`, optional) Words to find in the subject of the email
+- **body** (`string`, optional) Words to find in the body of the email
+- **date_range** (`Enum` [DateRange](/toolkits/productivity/gmail/reference#DateRange), optional) The date range of the email
+- **label** (`string`, optional) The label name to filter by
+- **max_results** (`integer`, optional) The maximum number of emails to return
 
----
 
 ## Gmail.ListEmails
 
@@ -284,14 +309,12 @@ _At least one of the following parameters must be provided: `sender`, `recipient
 <TabbedCodeBlock
   tabs={[
     {
-      label: "Call the Tool with User Authorization",
+      label: "Call the Tool Directly",
       content: {
-        Python: [
-          "/examples/integrations/toolkits/google/gmail/list_emails_example_call_tool.py",
-        ],
-        JavaScript: ["/examples/integrations/toolkits/google/gmail/list_emails_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/gmail/list_emails_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/gmail/list_emails_example_call_tool.js"],
       },
-    }
+    },
   ]}
 />
 
@@ -299,9 +322,8 @@ Read emails from a Gmail account and extract plain text content.
 
 **Parameters**
 
-- **`n_emails`** _(integer, optional, Defaults to 5)_ Number of emails to read.
+- **n_emails** (`integer`, optional) Number of emails to read
 
----
 
 ## Gmail.SearchThreads
 
@@ -309,14 +331,12 @@ Read emails from a Gmail account and extract plain text content.
 <TabbedCodeBlock
   tabs={[
     {
-      label: "Call the Tool with User Authorization",
+      label: "Call the Tool Directly",
       content: {
-        Python: [
-          "/examples/integrations/toolkits/google/gmail/search_threads_example_call_tool.py",
-        ],
-        JavaScript: ["/examples/integrations/toolkits/google/gmail/search_threads_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/gmail/search_threads_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/gmail/search_threads_example_call_tool.js"],
       },
-    }
+    },
   ]}
 />
 
@@ -324,17 +344,16 @@ Search for threads in the user's mailbox
 
 **Parameters**
 
-- **`page_token`** _(string, optional)_ Page token to retrieve a specific page of results in the list.
-- **`max_results`** _(integer, optional, Defaults to `10`)_ The maximum number of threads to return.
-- **`include_spam_trash`** _(boolean, optional)_ Whether to include spam and trash in the results.
-- **`label_ids`** _(array, optional)_ The IDs of labels to filter by.
-- **`sender`** _(string, optional)_ The name or email address of the sender of the email.
-- **`recipient`** _(string, optional)_ The name or email address of the recipient.
-- **`subject`** _(string, optional)_ Words to find in the subject of the email.
-- **`body`** _(string, optional)_ Words to find in the body of the email.
-- **`date_range`** _(string, optional)_ The date range of the email. Valid values are 'today', 'yesterday', 'last_7_days', 'last_30_days', 'this_month', 'last_month', 'this_year'.
+- **page_token** (`string`, optional) Page token to retrieve a specific page of results in the list
+- **max_results** (`integer`, optional) The maximum number of threads to return
+- **include_spam_trash** (`boolean`, optional) Whether to include spam and trash in the results
+- **label_ids** (`array[string]`, optional) The IDs of labels to filter by
+- **sender** (`string`, optional) The name or email address of the sender of the email
+- **recipient** (`string`, optional) The name or email address of the recipient
+- **subject** (`string`, optional) Words to find in the subject of the email
+- **body** (`string`, optional) Words to find in the body of the email
+- **date_range** (`Enum` [DateRange](/toolkits/productivity/gmail/reference#DateRange), optional) The date range of the email
 
----
 
 ## Gmail.ListThreads
 
@@ -342,14 +361,12 @@ Search for threads in the user's mailbox
 <TabbedCodeBlock
   tabs={[
     {
-      label: "Call the Tool with User Authorization",
+      label: "Call the Tool Directly",
       content: {
-        Python: [
-          "/examples/integrations/toolkits/google/gmail/list_threads_example_call_tool.py",
-        ],
-        JavaScript: ["/examples/integrations/toolkits/google/gmail/list_threads_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/gmail/list_threads_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/gmail/list_threads_example_call_tool.js"],
       },
-    }
+    },
   ]}
 />
 
@@ -357,11 +374,10 @@ List threads in the user's mailbox.
 
 **Parameters**
 
-- **`page_token`** _(string, optional)_ Page token to retrieve a specific page of results in the list.
-- **`max_results`** _(integer, optional, Defaults to `10`)_ The maximum number of threads to return.
-- **`include_spam_trash`** _(boolean, optional)_ Whether to include spam and trash in the results.
+- **page_token** (`string`, optional) Page token to retrieve a specific page of results in the list
+- **max_results** (`integer`, optional) The maximum number of threads to return
+- **include_spam_trash** (`boolean`, optional) Whether to include spam and trash in the results
 
----
 
 ## Gmail.GetThread
 
@@ -369,14 +385,12 @@ List threads in the user's mailbox.
 <TabbedCodeBlock
   tabs={[
     {
-      label: "Call the Tool with User Authorization",
+      label: "Call the Tool Directly",
       content: {
-        Python: [
-          "/examples/integrations/toolkits/google/gmail/get_thread_example_call_tool.py",
-        ],
-        JavaScript: ["/examples/integrations/toolkits/google/gmail/get_thread_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/gmail/get_thread_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/gmail/get_thread_example_call_tool.js"],
       },
-    }
+    },
   ]}
 />
 
@@ -384,26 +398,102 @@ Get the specified thread by ID.
 
 **Parameters**
 
-- **`thread_id`** _(string, required)_ The ID of the thread to retrieve.
+- **thread_id** (`string`, required) The ID of the thread to retrieve
+
+
+## Gmail.ChangeEmailLabels
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/gmail/change_email_labels_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/gmail/change_email_labels_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Add and remove labels from an email using the Gmail API.
+
+**Parameters**
+
+- **email_id** (`string`, required) The ID of the email to modify labels for
+- **labels_to_add** (`array[string]`, required) List of label names to add
+- **labels_to_remove** (`array[string]`, required) List of label names to remove
+
+
+## Gmail.ListLabels
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/gmail/list_labels_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/gmail/list_labels_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+List all the labels in the user's mailbox.
+
+**Parameters**
+
+This tool does not take any parameters.
+
+## Gmail.CreateLabel
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/gmail/create_label_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/gmail/create_label_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Create a new label in the user's mailbox.
+
+**Parameters**
+
+- **label_name** (`string`, required) The name of the label to create
+
+
+## Gmail.WhoAmI
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/gmail/who_am_i_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/gmail/who_am_i_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Get comprehensive user profile and Gmail account information.
+
+**Parameters**
+
+This tool does not take any parameters.
+
+
 
 ## Auth
 
-The Arcade Gmail toolkit uses the [Google auth provider](/home/auth-providers/google) to connect to users' Google accounts.
-
-With the hosted Arcade Engine, there's nothing to configure. Your users will see `Arcade` as the name of the application that's requesting permission.
-
-With a self-hosted installation of Arcade, you need to [configure the Google auth provider](/home/auth-providers/google#configuring-google-auth) with your own Google app credentials.
-
----
-
-## Reference
-
-### GmailReplyToWhom
-
-The type of recipient to reply to.
-
-- **`EVERY_RECIPIENT`**: Reply to the original sender and all recipients.
-- **`ONLY_THE_SENDER`**: Reply to the original sender only.
-
+The Arcade Gmail toolkit uses the [Google auth provider](/home/auth-providers/google) to connect to users' Gmail accounts. Please refer to the [Google auth provider](/home/auth-providers/google) documentation to learn how to configure auth.
 
 <ToolFooter pipPackageName="arcade_gmail" />
+
