@@ -516,7 +516,7 @@ const comingSoonTools: Tool[] = [
     link: "/toolkits/productivity/clickup",
     category: "productivity",
     type: "arcade",
-    isComingSoon: true,
+    isComingSoon: false,
   },
   {
     name: "Coinbase",
