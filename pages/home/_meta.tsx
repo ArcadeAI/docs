@@ -1,4 +1,4 @@
-import { BadgeHelp, Code2, Home, Plug } from "lucide-react";
+import { BadgeHelp, Code2, Home, Plug, BookMarked } from "lucide-react";
 
 export default {
   "*": {
@@ -15,7 +15,7 @@ export default {
       layout: "full",
     },
   },
-  learn: {
+  integrations: {
     title: (
       <span className="flex items-center gap-2 font-medium">
         <Plug className="size-4" />
@@ -23,6 +23,15 @@ export default {
       </span>
     ),
     href: "/toolkits",
+  },
+  learn: {
+    title: (
+      <span className="flex items-center gap-2 font-medium">
+        <BookMarked className="size-4" />
+        Learn
+      </span>
+    ),
+    href: "/learn",
   },
   reference: {
     title: (

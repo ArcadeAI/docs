@@ -5,7 +5,7 @@ import Link from "next/link";
 
 interface SampleAppCardProps {
   title: string;
-  description: string;
+  description: string | React.ReactNode;
   image: string;
   href: string;
   blank?: boolean;
@@ -41,9 +41,9 @@ export function SampleAppCard({
               <h3 className="text-xl font-semibold tracking-tight text-white transition-colors group-hover:text-[#ee175e]">
                 {title}
               </h3>
-              <p className="text-sm leading-relaxed text-gray-300">
+              <div className="text-sm leading-relaxed text-gray-300">
                 {description}
-              </p>
+              </div>
             </div>
           </CardContent>
         </Card>
