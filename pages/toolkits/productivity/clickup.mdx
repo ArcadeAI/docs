@@ -1,0 +1,724 @@
+# Clickup
+
+import ToolInfo from "@/components/ToolInfo";
+import Badges from "@/components/Badges";
+import TabbedCodeBlock from "@/components/TabbedCodeBlock";
+import TableOfContents from "@/components/TableOfContents";
+import ToolFooter from "@/components/ToolFooter";
+
+<ToolInfo
+  description="Enable agents to interact with Clickup"
+  author="Arcade"
+  authType="OAuth2"
+  versions={["1.0.0"]}
+/>
+
+<Badges repo="arcadeai/arcade_clickup" />
+
+The ClickUp toolkit provides tools to interact with ClickUp workspaces, projects (spaces/folders/lists), tasks, comments, and members. It enables building agents and apps that can:
+
+- Discover workspace structure and users.
+- Create, view, and modify tasks.
+- Manage task assignments and task planning metadata.
+- Work with comments and threaded replies.
+- Search for containers and people by approximate name when location is unknown.
+- Retrieve guidance for agent decision-making.
+
+## Available Tools
+
+<TableOfContents
+  headers={["Tool Name", "Description"]}
+  data={
+    [
+      ["Clickup.GetTaskCommentReplies", "Get threaded replies for a specific ClickUp comment with pagination support."],
+      ["Clickup.CreateTaskCommentReply", "Create a new threaded reply to an existing ClickUp comment."],
+      ["Clickup.CreateTask", "Create a new task in a ClickUp list with optional planning metadata."],
+      ["Clickup.GetTaskById", "Get detailed information about a specific task by its ID. Also supports custom task IDs"],
+      ["Clickup.UpdateTask", "Update one or more fields of an existing ClickUp task."],
+      ["Clickup.GetTasksByScope", "Get filtered tasks from ClickUp with advanced filtering options."],
+      ["Clickup.GetTasksByAssignees", "Get filtered tasks assigned to specific team members with advanced filtering options."],
+      ["Clickup.UpdateTaskAssignees", "Update task assignees by adding and/or removing specific users."],
+      ["Clickup.GetSpaces", "Retrieve spaces from a ClickUp workspace."],
+      ["Clickup.GetFoldersForSpace", "Retrieve folders (also called directories, project categories, or project areas) from a"],
+      ["Clickup.GetListsForFolder", "Retrieve task lists from a ClickUp folder (when users refer to a folder as a directory,"],
+      ["Clickup.GetListsForSpace", "Retrieve all task lists from a ClickUp space by collecting lists from all folders within the"],
+      ["Clickup.GetStatusesForList", "Retrieve the possible task statuses for a specific ClickUp list."],
+      ["Clickup.GetMembersForWorkspace", "Retrieve all team members from a specific ClickUp workspace."],
+      ["Clickup.WhoAmI", "Return current user profile and accessible workspaces (teams)."],
+      ["Clickup.GetSystemGuidance", "Return static guidance intended solely to help agents make informed decisions."],
+      ["Clickup.GetWorkspaceInsights", "Return a brief overview for a workspace using the latest updated tasks to inform the user."],
+      ["Clickup.GetTaskComments", "Get comments for a specific ClickUp task with pagination support."],
+      ["Clickup.CreateTaskComment", "Create a new comment on a ClickUp task with optional assignment."],
+      ["Clickup.UpdateTaskComment", "Update an existing comment on a ClickUp task."],
+      ["Clickup.FuzzySearchTasksByName", "Search for tasks using fuzzy matching on task names."],
+      ["Clickup.FuzzySearchListsByName", "Search for lists using fuzzy matching on list names."],
+      ["Clickup.FuzzySearchFoldersByName", "Search for folders using fuzzy matching on folder names."],
+      ["Clickup.FuzzySearchMembersByName", "Search for workspace members using fuzzy matching on member names."],
+    ]
+  }
+/>
+
+<Tip>
+  If you need to perform an action that's not listed here, you can [get in touch
+  with us](mailto:contact@arcade.dev) to request a new tool, or [create your
+  own tools](/home/build-tools/create-a-toolkit).
+</Tip>
+
+## Clickup.GetTaskCommentReplies
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/clickup/get_task_comment_replies_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/clickup/get_task_comment_replies_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Get threaded replies for a specific ClickUp comment with pagination support.
+
+**Parameters**
+
+- **comment_id** (`string`, required) The ClickUp comment ID to get replies for
+- **offset** (`integer`, optional) Starting position for offset-based retrieval (default: 0)
+- **limit** (`integer`, optional) Maximum number of replies to return (max: 50, default: 20)
+
+
+## Clickup.CreateTaskCommentReply
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/clickup/create_task_comment_reply_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/clickup/create_task_comment_reply_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Create a new threaded reply to an existing ClickUp comment.
+
+**Parameters**
+
+- **comment_id** (`string`, required) The ClickUp comment ID to reply to
+- **reply_text** (`string`, required) The text content of the reply
+- **assignee_id** (`integer`, optional) User ID to assign the reply to
+
+
+## Clickup.CreateTask
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/clickup/create_task_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/clickup/create_task_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Create a new task in a ClickUp list with optional planning metadata.
+
+**Parameters**
+
+- **list_id** (`string`, required) The ClickUp list ID where the task will be created
+- **task_title** (`string`, required) The name/title of the task
+- **description** (`string`, optional) The description/content of the task
+- **priority** (`Enum` [TaskPriority](/toolkits/productivity/clickup/reference#TaskPriority), optional) Task priority
+- **status** (`string`, optional) Task status label (string)
+- **parent_task_id** (`string`, optional) The parent task ID if this is a subtask
+- **start_date** (`string`, optional) Date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS]; ISO-8601 also supported
+- **due_date** (`string`, optional) Date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS]; ISO-8601 also supported
+- **sprint_points** (`integer`, optional) The sprint points for the task
+
+
+## Clickup.GetTaskById
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/clickup/get_task_by_id_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/clickup/get_task_by_id_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Get detailed information about a specific task by its ID. Also supports custom task IDs
+
+**Parameters**
+
+- **task_id** (`string`, required) The task ID or custom task ID to retrieve
+- **include_subtasks** (`boolean`, optional) Include subtask information (default: false )
+- **workspace_id_for_custom_id** (`string`, optional) The ClickUp workspace ID (provide this to use custom task IDs)
+
+
+## Clickup.UpdateTask
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/clickup/update_task_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/clickup/update_task_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Update one or more fields of an existing ClickUp task.
+
+**Parameters**
+
+- **task_id** (`string`, required) The ClickUp task ID to update
+- **task_title** (`string`, optional) The new name/title of the task
+- **description** (`string`, optional) The new description/content of the task
+- **priority** (`Enum` [TaskPriority](/toolkits/productivity/clickup/reference#TaskPriority), optional) Task priority
+- **status** (`string`, optional) Task status label (string)
+- **parent_task_id** (`string`, optional) The new parent task ID
+- **start_date** (`string`, optional) Date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS]; ISO-8601 also supported
+- **due_date** (`string`, optional) Date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS]; ISO-8601 also supported
+- **sprint_points** (`integer`, optional) The new sprint points for the task
+
+
+## Clickup.GetTasksByScope
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/clickup/get_tasks_by_scope_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/clickup/get_tasks_by_scope_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Get filtered tasks from ClickUp with advanced filtering options.
+
+**Parameters**
+
+- **workspace_id** (`string`, required) The ClickUp workspace ID for GUI URL generation (should be a number)
+- **scope** (`Enum` [FilterScope](/toolkits/productivity/clickup/reference#FilterScope), required) The scope to filter tasks by (all, spaces, folders, or lists)
+- **item_ids** (`array[string]`, optional) List of IDs to get tasks from (required for spaces/folders/lists, ignored for 'all')
+- **offset** (`integer`, optional) Starting position for offset-based retrieval (default: 0)
+- **limit** (`integer`, optional) Maximum number of tasks to return (max: 50, default: 20)
+- **order_by** (`Enum` [TaskOrderBy](/toolkits/productivity/clickup/reference#TaskOrderBy), optional) Field to sort tasks by
+- **should_sort_by_reverse** (`boolean`, optional) Whether to sort in descending order (default: False)
+- **statuses** (`array[string]`, optional) List of status strings to filter by
+- **include_closed** (`boolean`, optional) Whether to include closed tasks (default: False)
+- **due_date_gt** (`string`, optional) Due date greater than (date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS])
+- **due_date_lt** (`string`, optional) Due date less than (date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS])
+- **date_created_gt** (`string`, optional) Created date greater than (date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS])
+- **date_created_lt** (`string`, optional) Created date less than (date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS])
+
+
+## Clickup.GetTasksByAssignees
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/clickup/get_tasks_by_assignees_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/clickup/get_tasks_by_assignees_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Get filtered tasks assigned to specific team members with advanced filtering options.
+
+**Parameters**
+
+- **workspace_id** (`string`, required) The ClickUp workspace ID for GUI URL generation (should be a number)
+- **assignees_ids** (`array[integer]`, required) List of assignee user IDs to get tasks for
+- **offset** (`integer`, optional) Starting position for offset-based retrieval (default: 0)
+- **limit** (`integer`, optional) Maximum number of tasks to return (max: 50, default: 20)
+- **order_by** (`Enum` [TaskOrderBy](/toolkits/productivity/clickup/reference#TaskOrderBy), optional) Field to sort tasks by
+- **should_sort_by_reverse** (`boolean`, optional) Whether to sort in descending order (default: False)
+- **statuses** (`array[string]`, optional) List of status strings to filter by
+- **include_closed** (`boolean`, optional) Whether to include closed tasks (default: False)
+- **due_date_gt** (`string`, optional) Due date greater than (date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS])
+- **due_date_lt** (`string`, optional) Due date less than (date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS])
+- **date_created_gt** (`string`, optional) Created date greater than (date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS])
+- **date_created_lt** (`string`, optional) Created date less than (date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS])
+
+
+## Clickup.UpdateTaskAssignees
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/clickup/update_task_assignees_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/clickup/update_task_assignees_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Update task assignees by adding and/or removing specific users.
+
+**Parameters**
+
+- **task_id** (`string`, required) The ClickUp task ID to update assignees for
+- **assignee_ids_to_add** (`array[integer]`, optional) List of user IDs to add as assignees
+- **assignee_ids_to_remove** (`array[integer]`, optional) List of user IDs to remove from assignees
+
+
+## Clickup.GetSpaces
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/clickup/get_spaces_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/clickup/get_spaces_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve spaces from a ClickUp workspace.
+
+**Parameters**
+
+- **workspace_id** (`string`, required) The ClickUp workspace ID to get spaces from (should be a number)
+- **offset** (`integer`, optional) Starting position for offset-based retrieval (default: 0)
+- **limit** (`integer`, optional) Maximum number of spaces to return (max: 50, default: 50)
+- **include_archived** (`boolean`, optional) Whether to include archived spaces (default: False)
+
+
+## Clickup.GetFoldersForSpace
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/clickup/get_folders_for_space_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/clickup/get_folders_for_space_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve folders (also called directories, project categories, or project areas) from a
+
+**Parameters**
+
+- **space_id** (`string`, required) The ClickUp space ID to get folders from
+- **workspace_id** (`string`, required) The ClickUp workspace ID for GUI URL generation (should be a number)
+- **offset** (`integer`, optional) Starting position for offset-based retrieval (default: 0)
+- **limit** (`integer`, optional) Maximum number of folders to return (max: 50, default: 50)
+- **include_archived** (`boolean`, optional) Whether to include archived, inactive, or deleted folders (default: False)
+
+
+## Clickup.GetListsForFolder
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/clickup/get_lists_for_folder_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/clickup/get_lists_for_folder_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve task lists from a ClickUp folder (when users refer to a folder as a "directory",
+
+**Parameters**
+
+- **folder_id** (`string`, required) The ClickUp folder ID (also called directory ID) to get lists from
+- **workspace_id** (`string`, required) The ClickUp workspace ID for GUI URL generation (should be a number)
+- **offset** (`integer`, optional) Starting position for offset-based retrieval (default: 0)
+- **limit** (`integer`, optional) Maximum number of lists to return (max: 50, default: 50)
+- **include_archived** (`boolean`, optional) Whether to include archived, inactive, or completed lists (default: False)
+
+
+## Clickup.GetListsForSpace
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/clickup/get_lists_for_space_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/clickup/get_lists_for_space_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve all task lists from a ClickUp space by collecting lists from all folders within the
+
+**Parameters**
+
+- **space_id** (`string`, required) The ClickUp space ID to get lists from
+- **workspace_id** (`string`, required) The ClickUp workspace ID for GUI URL generation (should be a number)
+- **offset** (`integer`, optional) Starting position for offset-based retrieval (default: 0)
+- **limit** (`integer`, optional) Maximum number of lists to return (max: 50, default: 50)
+- **include_archived** (`boolean`, optional) Whether to include archived, inactive, or completed lists (default: False)
+
+
+## Clickup.GetStatusesForList
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/clickup/get_statuses_for_list_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/clickup/get_statuses_for_list_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve the possible task statuses for a specific ClickUp list.
+
+**Parameters**
+
+- **list_id** (`string`, required) The ClickUp list ID to retrieve possible task statuses for
+
+
+## Clickup.GetMembersForWorkspace
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/clickup/get_members_for_workspace_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/clickup/get_members_for_workspace_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve all team members from a specific ClickUp workspace.
+
+**Parameters**
+
+- **workspace_id** (`string`, required) The ID of the ClickUp workspace to get team members from (should be a number)
+- **offset** (`integer`, optional) Starting position for offset-based retrieval (default: 0)
+- **limit** (`integer`, optional) Maximum number of members to return (max: 50, default: 50)
+
+
+## Clickup.WhoAmI
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/clickup/who_am_i_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/clickup/who_am_i_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Return current user profile and accessible workspaces (teams).
+
+**Parameters**
+
+This tool does not take any parameters.
+
+## Clickup.GetSystemGuidance
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/clickup/get_system_guidance_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/clickup/get_system_guidance_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Return static guidance intended solely to help agents make informed decisions.
+
+**Parameters**
+
+This tool does not take any parameters.
+
+## Clickup.GetWorkspaceInsights
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/clickup/get_workspace_insights_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/clickup/get_workspace_insights_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Return a brief overview for a workspace using the latest updated tasks to inform the user.
+
+**Parameters**
+
+- **workspace_id** (`string`, required) The ClickUp workspace ID to summarize (should be a number)
+
+
+## Clickup.GetTaskComments
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/clickup/get_task_comments_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/clickup/get_task_comments_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Get comments for a specific ClickUp task with pagination support.
+
+**Parameters**
+
+- **task_id** (`string`, required) The ClickUp task ID to get comments for
+- **limit** (`integer`, optional) Number of comments to retrieve (max 25, default: 5)
+- **oldest_comment_id** (`string`, optional) ID of the oldest comment from previous call for pagination
+
+
+## Clickup.CreateTaskComment
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/clickup/create_task_comment_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/clickup/create_task_comment_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Create a new comment on a ClickUp task with optional assignment.
+
+**Parameters**
+
+- **task_id** (`string`, required) The ClickUp task ID to add a comment to
+- **comment_text** (`string`, required) The text content of the comment
+- **assignee_id** (`integer`, optional) User ID to assign the comment to (optional)
+
+
+## Clickup.UpdateTaskComment
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/clickup/update_task_comment_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/clickup/update_task_comment_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Update an existing comment on a ClickUp task.
+
+**Parameters**
+
+- **comment_id** (`string`, required) The ClickUp comment ID to update
+- **task_id** (`string`, required) The ClickUp task ID the comment belongs to
+- **comment_text** (`string`, optional) New text content for the comment (optional)
+- **assignee_id** (`integer`, optional) User ID to assign the comment to (optional)
+- **resolution** (`Enum` [CommentResolution](/toolkits/productivity/clickup/reference#CommentResolution), optional) Set comment resolution status (optional)
+
+
+## Clickup.FuzzySearchTasksByName
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/clickup/fuzzy_search_tasks_by_name_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/clickup/fuzzy_search_tasks_by_name_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Search for tasks using fuzzy matching on task names.
+
+**Parameters**
+
+- **name_to_search** (`string`, required) Task name to search for (minimum 6 characters)
+- **workspace_id** (`string`, required) The workspace ID to search tasks in (should be a number)
+- **scan_size** (`integer`, optional) Number of recent tasks to scan (max 500 default: 500)
+- **include_closed** (`boolean`, optional) Include closed/completed tasks (default: false)
+- **statuses** (`array[string]`, optional) Filter by specific ClickUp status names. Each list has its own statuses set.
+- **assignee_ids** (`array[string]`, optional) Filter by assignee user IDs
+- **space_ids** (`array[string]`, optional) Filter by ClickUp space IDs - limit search to specific spaces/teams
+- **folder_ids** (`array[string]`, optional) Filter by ClickUp folder IDs - limit search to specific folders/projects
+- **list_ids** (`array[string]`, optional) Filter by ClickUp list IDs - limit search to specific lists
+- **limit** (`integer`, optional) Maximum number of matches to return (max: 50, default: 10)
+
+
+## Clickup.FuzzySearchListsByName
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/clickup/fuzzy_search_lists_by_name_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/clickup/fuzzy_search_lists_by_name_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Search for lists using fuzzy matching on list names.
+
+**Parameters**
+
+- **name_to_search** (`string`, required) List name to search for (minimum 6 characters)
+- **workspace_id** (`string`, required) The workspace ID to search lists in (should be a number)
+- **scan_size** (`integer`, optional) Number of lists to scan (in increments of 100, max 500 default: 500)
+- **space_ids** (`array[string]`, optional) Filter by ClickUp space IDs - limit search to specific spaces/teams
+- **folder_ids** (`array[string]`, optional) Filter by ClickUp folder IDs - limit search to specific folders/projects
+- **should_include_archived** (`boolean`, optional) Include archived lists (default: false)
+- **limit** (`integer`, optional) Maximum number of matches to return (max: 50, default: 10)
+
+
+## Clickup.FuzzySearchFoldersByName
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/clickup/fuzzy_search_folders_by_name_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/clickup/fuzzy_search_folders_by_name_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Search for folders using fuzzy matching on folder names.
+
+**Parameters**
+
+- **name_to_search** (`string`, required) Folder name to search for (minimum 6 characters)
+- **workspace_id** (`string`, required) The workspace ID to search folders in (should be a number)
+- **scan_size** (`integer`, optional) Number of folders to scan (in increments of 100, max 500 default: 500)
+- **space_ids** (`array[string]`, optional) Filter by ClickUp space IDs - limit search to specific spaces/teams
+- **should_include_archived** (`boolean`, optional) Include archived folders (default: false)
+- **limit** (`integer`, optional) Maximum number of matches to return (max: 50, default: 10)
+
+
+## Clickup.FuzzySearchMembersByName
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/toolkits/clickup/fuzzy_search_members_by_name_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/clickup/fuzzy_search_members_by_name_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Search for workspace members using fuzzy matching on member names.
+
+**Parameters**
+
+- **name_to_search** (`string`, required) Member name to search for (minimum 6 characters)
+- **workspace_id** (`string`, required) The workspace ID to search members in (should be a number)
+- **scan_size** (`integer`, optional) Number of members to scan (in increments of 100, max 500 default: 500)
+- **limit** (`integer`, optional) Maximum number of matches to return (max: 50, default: 10)
+
+
+
+## Reference
+
+Below is a reference of enumerations used by some of the tools in the Clickup toolkit:
+
+## TaskPriority
+
+- **URGENT**: `URGENT`
+- **HIGH**: `HIGH`
+- **NORMAL**: `NORMAL`
+- **LOW**: `LOW`
+
+## FilterScope
+
+- **ALL**: `all`
+- **SPACES**: `spaces`
+- **FOLDERS**: `folders`
+- **LISTS**: `lists`
+
+## TaskOrderBy
+
+- **CREATED**: `created`
+- **UPDATED**: `updated`
+- **DUE_DATE**: `due_date`
+
+## CommentResolution
+
+- **SET_AS_RESOLVED**: `resolved`
+- **SET_AS_UNRESOLVED**: `unresolved`
+
+
+
+## Auth
+
+The Arcade Clickup toolkit uses the [Clickup auth provider](/home/auth-providers/clickup) to connect to users' Clickup accounts. Please refer to the [Clickup auth provider](/home/auth-providers/clickup) documentation to learn how to configure auth.
+
+<ToolFooter pipPackageName="arcade_clickup" />
