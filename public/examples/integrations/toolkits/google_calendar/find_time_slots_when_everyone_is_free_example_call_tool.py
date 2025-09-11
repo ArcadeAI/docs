@@ -1,13 +1,14 @@
+import json
 from arcadepy import Arcade
 
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
 USER_ID = "{arcade_user_id}"
-TOOL_NAME = "GoogleCalendar.UpdateEvent"
+TOOL_NAME = "GoogleCalendar.FindTimeSlotsWhenEveryoneIsFree"
 
 auth_response = client.tools.authorize(
     tool_name=TOOL_NAME,
-    user_id=USER_ID,
+    user_id=TOOL_NAME
 )
 
 if auth_response.status != "completed":
@@ -17,12 +18,11 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    "event_id": "your_event_id_here",
-    "updated_summary": "Updated 1:1 with John Doe",
-    "updated_start_datetime": "2024-12-31T11:00:00",
-    "updated_end_datetime": "2024-12-31T11:30:00",
-    "attendee_emails_to_add": ["jane.doe@example.com"],
-    "updated_calendar_id": "primary",
+    'email_addresses': ['alice@example.com', 'bob@example.com', 'carol@example.com'],
+    'start_date': '2025-09-15',
+    'end_date': '2025-09-19',
+    'start_time_boundary': '09:00',
+    'end_time_boundary': '17:00'
 }
 
 response = client.tools.execute(
@@ -30,4 +30,4 @@ response = client.tools.execute(
     input=tool_input,
     user_id=USER_ID,
 )
-print(response)
+print(json.dumps(response.output.value, indent=2))

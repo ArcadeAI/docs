@@ -3,12 +3,12 @@ import { Arcade } from "@arcadeai/arcadejs";
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
 const USER_ID = "{arcade_user_id}";
-const TOOL_NAME = "GoogleCalendar.ListEvents";
+const TOOL_NAME = "GoogleCalendar.FindTimeSlotsWhenEveryoneIsFree";
 
 // Start the authorization process
 const authResponse = await client.tools.authorize({
-  tool_name: TOOL_NAME,
-  user_id: USER_ID,
+    tool_name: TOOL_NAME,
+    user_id: USER_ID
 });
 
 if (authResponse.status !== "completed") {
@@ -19,10 +19,15 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  min_end_datetime: "2024-09-15T00:00:00",
-  max_start_datetime: "2024-09-16T23:59:00",
-  max_results: 15,
-  calendar_id: "primary",
+  "email_addresses": [
+    "alice@example.com",
+    "bob@example.com",
+    "carol@example.com"
+  ],
+  "start_date": "2025-09-15",
+  "end_date": "2025-09-19",
+  "start_time_boundary": "09:00",
+  "end_time_boundary": "17:00"
 };
 
 const response = await client.tools.execute({
@@ -31,4 +36,4 @@ const response = await client.tools.execute({
   user_id: USER_ID,
 });
 
-console.log(response);
+console.log(JSON.stringify(response.output.value, null, 2));
