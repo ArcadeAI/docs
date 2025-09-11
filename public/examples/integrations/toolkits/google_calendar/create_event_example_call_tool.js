@@ -3,12 +3,12 @@ import { Arcade } from "@arcadeai/arcadejs";
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
 const USER_ID = "{arcade_user_id}";
-const TOOL_NAME = "GoogleCalendar.UpdateEvent";
+const TOOL_NAME = "GoogleCalendar.CreateEvent";
 
 // Start the authorization process
 const authResponse = await client.tools.authorize({
-  tool_name: TOOL_NAME,
-  user_id: USER_ID,
+    tool_name: TOOL_NAME,
+    user_id: USER_ID
 });
 
 if (authResponse.status !== "completed") {
@@ -19,12 +19,19 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  event_id: "your_event_id_here",
-  updated_summary: "Updated 1:1 with John Doe",
-  updated_start_datetime: "2024-12-31T11:00:00",
-  updated_end_datetime: "2024-12-31T11:30:00",
-  attendee_emails_to_add: ["jane.doe@example.com"],
-  updated_calendar_id: "primary",
+  "summary": "Product roadmap sync",
+  "start_datetime": "2025-09-15T10:00:00",
+  "end_datetime": "2025-09-15T11:00:00",
+  "calendar_id": "primary",
+  "description": "Discuss Q4 roadmap, milestones, and blockers.",
+  "location": "Conference Room B",
+  "visibility": "private",
+  "attendee_emails": [
+    "alice@example.com",
+    "bob@example.org"
+  ],
+  "send_notifications_to_attendees": "all",
+  "add_google_meet": true
 };
 
 const response = await client.tools.execute({
@@ -33,4 +40,4 @@ const response = await client.tools.execute({
   user_id: USER_ID,
 });
 
-console.log(response);
+console.log(JSON.stringify(response.output.value, null, 2));

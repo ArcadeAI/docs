@@ -7,8 +7,8 @@ const TOOL_NAME = "GoogleCalendar.DeleteEvent";
 
 // Start the authorization process
 const authResponse = await client.tools.authorize({
-  tool_name: TOOL_NAME,
-  user_id: USER_ID,
+    tool_name: TOOL_NAME,
+    user_id: USER_ID
 });
 
 if (authResponse.status !== "completed") {
@@ -19,8 +19,9 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  event_id: "your_event_id_here",
-  calendar_id: "primary",
+  "event_id": "evt_9aBc123X",
+  "calendar_id": "primary",
+  "send_updates": "all"
 };
 
 const response = await client.tools.execute({
@@ -29,4 +30,4 @@ const response = await client.tools.execute({
   user_id: USER_ID,
 });
 
-console.log(response);
+console.log(JSON.stringify(response.output.value, null, 2));
