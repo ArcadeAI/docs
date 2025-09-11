@@ -3,7 +3,7 @@ import { Arcade } from "@arcadeai/arcadejs";
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
 const USER_ID = "{arcade_user_id}";
-const TOOL_NAME = "Hubspot.CreateContact";
+const TOOL_NAME = "Hubspot.CreateDeal";
 
 // Start the authorization process
 const authResponse = await client.tools.authorize({
@@ -19,13 +19,15 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "company_id": 12345,
-  "first_name": "Aisha",
-  "last_name": "Khan",
-  "email": "aisha.khan@example.com",
-  "phone": "+1-415-555-0123",
-  "mobile_phone": "+1-415-555-0456",
-  "job_title": "Product Manager"
+  "deal_name": "Q3 Enterprise Renewal",
+  "deal_amount": 125000,
+  "deal_stage": "appointmentscheduled",
+  "deal_type": "existingbusiness",
+  "expected_close_date": "2025-10-15",
+  "pipeline_id": "default",
+  "deal_owner": "78945",
+  "priority_level": "high",
+  "deal_description": "Renewal for enterprise account with added support package."
 };
 
 const response = await client.tools.execute({

@@ -1,0 +1,45 @@
+import json
+from arcadepy import Arcade
+
+client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
+
+USER_ID = "{arcade_user_id}"
+TOOL_NAME = "Hubspot.CreateEmailActivity"
+
+auth_response = client.tools.authorize(
+    tool_name=TOOL_NAME,
+    user_id=TOOL_NAME
+)
+
+if auth_response.status != "completed":
+    print(f"Click this link to authorize: {auth_response.url}")
+
+# Wait for the authorization to complete
+client.auth.wait_for_completion(auth_response)
+
+tool_input = {
+    'subject': 'Quarterly Partnership Update',
+    'when_occurred': '2025-09-10T14:30:00',
+    'from_email': 'alex.sender@example.com',
+    'to_email': 'jordan.partner@example.com',
+    'body_text': 'Hi Jordan,\n\nPlease find the Q3 partnership summary attached.\n\nBest,\nAlex',
+    'body_html': '<p>Hi Jordan,</p><p>Please find the Q3 partnership summary '
+                 'attached.</p><p>Best,<br>Alex</p>',
+    'from_first_name': 'Alex',
+    'from_last_name': 'Sender',
+    'to_first_name': 'Jordan',
+    'to_last_name': 'Partner',
+    'cc_emails': ['pm@example.com'],
+    'bcc_emails': ['archive@example.com'],
+    'direction': 'EMAIL',
+    'status': 'SENT',
+    'associate_to_contact_id': 742,
+    'associate_to_company_id': 58
+}
+
+response = client.tools.execute(
+    tool_name=TOOL_NAME,
+    input=tool_input,
+    user_id=USER_ID,
+)
+print(json.dumps(response.output.value, indent=2))

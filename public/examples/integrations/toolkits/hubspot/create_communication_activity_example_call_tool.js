@@ -3,7 +3,7 @@ import { Arcade } from "@arcadeai/arcadejs";
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
 const USER_ID = "{arcade_user_id}";
-const TOOL_NAME = "Hubspot.CreateContact";
+const TOOL_NAME = "Hubspot.CreateCommunicationActivity";
 
 // Start the authorization process
 const authResponse = await client.tools.authorize({
@@ -19,13 +19,11 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "company_id": 12345,
-  "first_name": "Aisha",
-  "last_name": "Khan",
-  "email": "aisha.khan@example.com",
-  "phone": "+1-415-555-0123",
-  "mobile_phone": "+1-415-555-0456",
-  "job_title": "Product Manager"
+  "channel": "WHATS_APP",
+  "when_occurred": "2025-09-10T14:30:00",
+  "body_text": "Sent follow-up about proposal and asked if they needed any changes.",
+  "associate_to_contact_id": 78431,
+  "associate_to_company_id": 1209
 };
 
 const response = await client.tools.execute({

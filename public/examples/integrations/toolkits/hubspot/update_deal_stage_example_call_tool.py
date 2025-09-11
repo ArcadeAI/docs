@@ -4,7 +4,7 @@ from arcadepy import Arcade
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
 USER_ID = "{arcade_user_id}"
-TOOL_NAME = "Hubspot.CreateContact"
+TOOL_NAME = "Hubspot.UpdateDealStage"
 
 auth_response = client.tools.authorize(
     tool_name=TOOL_NAME,
@@ -18,13 +18,10 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'company_id': 12345,
-    'first_name': 'Aisha',
-    'last_name': 'Khan',
-    'email': 'aisha.khan@example.com',
-    'phone': '+1-415-555-0123',
-    'mobile_phone': '+1-415-555-0456',
-    'job_title': 'Product Manager'
+    'deal_id': 987654,
+    'deal_stage': 'closedwon',
+    'current_pipeline_id': 'default-pipeline-1',
+    'allow_pipeline_change': True
 }
 
 response = client.tools.execute(

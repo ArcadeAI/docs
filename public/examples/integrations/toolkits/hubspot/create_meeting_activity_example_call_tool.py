@@ -4,7 +4,7 @@ from arcadepy import Arcade
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
 USER_ID = "{arcade_user_id}"
-TOOL_NAME = "Hubspot.CreateContact"
+TOOL_NAME = "Hubspot.CreateMeetingActivity"
 
 auth_response = client.tools.authorize(
     tool_name=TOOL_NAME,
@@ -18,13 +18,14 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'company_id': 12345,
-    'first_name': 'Aisha',
-    'last_name': 'Khan',
-    'email': 'aisha.khan@example.com',
-    'phone': '+1-415-555-0123',
-    'mobile_phone': '+1-415-555-0456',
-    'job_title': 'Product Manager'
+    'title': 'Product Demo',
+    'start_date': '2025-09-18',
+    'start_time': '14:30',
+    'duration': '0:45',
+    'location': 'Zoom',
+    'outcome': 'SCHEDULED',
+    'associate_to_contact_id': 78945,
+    'associate_to_company_id': 1023
 }
 
 response = client.tools.execute(
