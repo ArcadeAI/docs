@@ -3,7 +3,7 @@ import { Arcade } from "@arcadeai/arcadejs";
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
 const USER_ID = "{arcade_user_id}";
-const TOOL_NAME = "Hubspot.GetContactDataByKeywords";
+const TOOL_NAME = "Hubspot.UpdateDealStage";
 
 // Start the authorization process
 const authResponse = await client.tools.authorize({
@@ -19,9 +19,10 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "keywords": "Acme Corp",
-  "limit": 5,
-  "next_page_token": null
+  "deal_id": 987654,
+  "deal_stage": "appointmentscheduled",
+  "current_pipeline_id": "default-pipeline-1",
+  "allow_pipeline_change": true
 };
 
 const response = await client.tools.execute({
