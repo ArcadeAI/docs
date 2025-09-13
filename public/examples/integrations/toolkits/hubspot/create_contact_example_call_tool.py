@@ -1,3 +1,4 @@
+import json
 from arcadepy import Arcade
 
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
@@ -5,7 +6,10 @@ client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 USER_ID = "{arcade_user_id}"
 TOOL_NAME = "Hubspot.CreateContact"
 
-auth_response = client.tools.authorize(tool_name=TOOL_NAME, user_id=USER_ID)
+auth_response = client.tools.authorize(
+    tool_name=TOOL_NAME,
+    user_id=TOOL_NAME
+)
 
 if auth_response.status != "completed":
     print(f"Click this link to authorize: {auth_response.url}")
@@ -14,13 +18,13 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    "company_id": "1234567890",
-    "first_name": "John",
-    "last_name": "Doe",
-    "email": "john.doe@example.com",
-    "phone": "+1234567890",
-    "mobile_phone": "+1234567890",
-    "job_title": "Software Engineer",
+    'company_id': 12345,
+    'first_name': 'Ava',
+    'last_name': 'Lopez',
+    'email': 'ava.lopez@example.com',
+    'phone': '+1-555-0123',
+    'mobile_phone': '+1-555-0456',
+    'job_title': 'Product Manager'
 }
 
 response = client.tools.execute(
@@ -28,4 +32,4 @@ response = client.tools.execute(
     input=tool_input,
     user_id=USER_ID,
 )
-print(response.output.value)
+print(json.dumps(response.output.value, indent=2))

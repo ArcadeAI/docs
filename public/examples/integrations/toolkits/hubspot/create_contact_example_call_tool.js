@@ -7,8 +7,8 @@ const TOOL_NAME = "Hubspot.CreateContact";
 
 // Start the authorization process
 const authResponse = await client.tools.authorize({
-  tool_name: TOOL_NAME,
-  user_id: USER_ID,
+    tool_name: TOOL_NAME,
+    user_id: USER_ID
 });
 
 if (authResponse.status !== "completed") {
@@ -19,13 +19,13 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  company_id: "1234567890",
-  first_name: "John",
-  last_name: "Doe",
-  email: "john.doe@example.com",
-  phone: "+1234567890",
-  mobile_phone: "+1234567890",
-  job_title: "Software Engineer",
+  "company_id": 12345,
+  "first_name": "Ava",
+  "last_name": "Lopez",
+  "email": "ava.lopez@example.com",
+  "phone": "+1-555-0123",
+  "mobile_phone": "+1-555-0456",
+  "job_title": "Product Manager"
 };
 
 const response = await client.tools.execute({
@@ -34,4 +34,4 @@ const response = await client.tools.execute({
   user_id: USER_ID,
 });
 
-console.log(response.output.value);
+console.log(JSON.stringify(response.output.value, null, 2));
