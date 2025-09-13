@@ -926,6 +926,15 @@ const comingSoonTools: Tool[] = [
     type: "community",
     isComingSoon: false,
   },
+  {
+    name: "MongoDB",
+    image: "mongodb.svg",
+    summary: "Interact with MongoDB databases with your agents.",
+    link: "/toolkits/databases/mongodb",
+    category: "databases",
+    type: "community",
+    isComingSoon: false,
+  },
 ];
 
 // Merge and export all tools
