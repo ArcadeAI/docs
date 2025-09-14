@@ -103,6 +103,49 @@ if (auth_response.status !== "completed") {
 </Tabs.Tab>
 </Tabs>
 
+### Can I use broader OAuth scopes than what a tool requires?
+
+Yes! If you need broader permissions than what a tool defines as its minimum requirement, you can request additional scopes during authentication.
+
+For example, the `GoogleDrive.SearchFiles` tool requires the `/auth/drive.file` scope (which only searches files created by your app or selected via file picker), but if you have approval for the broader `/auth/drive` scope, you can authenticate with both scopes to search all files on Google Drive.
+
+The tool will work with the broader permissions while still satisfying its minimum scope requirement. Here's how to authenticate with multiple scopes:
+
+<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs.Tab>
+```python
+from arcadepy import Arcade
+
+client = Arcade() # Automatically finds the `ARCADE_API_KEY` env variable
+user_id = "{arcade_user_id}"
+
+auth_response = client.auth.start(
+    user_id=user_id,
+    provider="google",
+    scopes=[
+        "https://www.googleapis.com/auth/drive.file",
+        "https://www.googleapis.com/auth/drive"
+    ]
+)
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```javascript
+import Arcade from "@arcadeai/arcadejs";
+
+const client = new Arcade();
+const user_id = "{arcade_user_id}";
+
+const authResponse = await client.auth.start(user_id, "google", {
+    scopes: ["https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/drive"]
+});
+```
+</Tabs.Tab>
+</Tabs>
+
+After authentication, call `GoogleDrive.SearchFiles` as usual and it will be able to search all files using the broader token permissions.
+
+
 ## Your question is not here?
 
 Please go to the discussions page on GitHub. Someone else may have asked something similar already. If not, please start a new discussion and we'll get to it as soon as possible.

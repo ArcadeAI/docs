@@ -33,12 +33,14 @@ const ToolInfo: React.FC<ToolInfoProps> = ({
       <p>
         <strong>Author: </strong> {author}
       </p>
-      <p>
-        <strong>Code: </strong>
-        <a href={codeLink} target="_blank" rel="noopener noreferrer">
-          GitHub
-        </a>
-      </p>
+      {codeLink && (
+        <p>
+          <strong>Code: </strong>
+          <a href={codeLink} target="_blank" rel="noopener noreferrer">
+            GitHub
+          </a>
+        </p>
+      )}
       <p>
         <strong>Auth: </strong>
         {authType.toLowerCase() === "oauth2" ? (
