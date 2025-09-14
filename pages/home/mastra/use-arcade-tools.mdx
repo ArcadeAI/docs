@@ -85,9 +85,9 @@ import {
 const arcade = new Arcade();
 
 // Get Gmail tools
-const googleToolkit = await arcade.tools.list({ toolkit: "gmail", limit: 30 });
-export const googleTools = toZodToolSet({
-	tools: googleToolkit.items,
+const gmailToolkit = await arcade.tools.list({ toolkit: "Gmail", limit: 30 }); // Toolkit names can be found in the Arcade dashboard via Tools > view > Toolkit
+export const gmailTools = toZodToolSet({
+	tools: gmailToolkit.items,
 	client: arcade,
 	userId: "<YOUR_USER_ID>", // Your app's internal ID for the user (an email, UUID, etc). It's used internally to identify your user in Arcade
 	executeFactory: executeOrAuthorizeZodTool, // Checks if tool is authorized and executes it, or returns authorization URL if needed
@@ -104,13 +104,13 @@ import { Agent } from "@mastra/core/agent";
 import { anthropic } from "@ai-sdk/anthropic";
 
 // Create the Mastra agent with Arcade tools
-export const googleAgent = new Agent({
-  name: "googleAgent",
+export const gmailAgent = new Agent({
+  name: "gmailAgent",
   instructions: `You are a Google assistant that helps users manage their Google services (Gmail, Calendar, Sheets, Drive, and Contacts).
   If a tool requires authorization, you will receive an authorization URL.
   When that happens, clearly present this URL to the user and ask them to visit it to grant permissions.`,
   model: anthropic("claude-3-7-sonnet-20250219"),
-  tools: googleTools,
+  tools: gmailTools,
 });
 ```
 
