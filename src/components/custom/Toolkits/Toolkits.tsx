@@ -36,7 +36,7 @@ const typeConfig = {
     color: "text-orange-400",
   },
   auth: {
-    label: "Auth Integration",
+    label: "Auth Provider",
     icon: Key,
     color: "text-purple-400",
   },
