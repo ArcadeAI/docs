@@ -1,0 +1,170 @@
+---
+title: "Installation"
+description: "Learn how to install the Arcade client"
+---
+
+import { Steps, Tabs } from "nextra/components";
+import { SignupLink } from "@/components/Analytics";
+
+# Installation
+
+Arcade provides [client libraries for multiple languages](/home/arcade-clients). These are the easiest way to integrate Arcade into your applications.
+
+## Overview
+
+In this guide, you'll learn how to install the Arcade client for your preferred language, and test it with a simple example.
+
+<Note>
+You need to have an Arcade API key to use the clients. You can get one by [following this guide](/home/api-keys).
+</Note>
+
+<Tabs items={["Python", "JavaScript", "Go"]} storageKey="preferredLanguage">
+<Tabs.Tab>
+<Steps>
+### Setup your Python environment
+
+The Arcade client requires Python 3.10 or higher. We recommend using `uv` to manage your Python environment. First, [install uv](https://docs.astral.sh/uv/getting-started/installation/). Then you can safely install the latest version of Python.
+
+```bash
+uv python install
+```
+
+It's also a good idea to create a virtual environment for your project in a new directory.
+
+```bash
+mkdir arcade-project
+cd arcade-project
+uv venv
+source .venv/bin/activate
+```
+
+### Install the Arcade client
+
+Now that you have Python and a virtual environment, let's install the Arcade client.
+
+```bash
+uv pip install arcadepy
+```
+
+### Test the client
+
+Now that you have the Arcade client installed, let's test it with a simple example. We'll use the `Arcade` class to create a client, and then use the `list` method to get a list of tools. This will return a list of tools that are available to you in the `GitHub` toolkit.
+
+
+```python
+# main.py
+from arcadepy import Arcade
+
+client = Arcade()
+
+tools = client.tools.list(toolkit="github")
+print(f"Found these tools in the GitHub toolkit:")
+for tool in tools:
+    print(f" - {tool.name}")
+```
+
+And run it with:
+```bash
+python main.py
+```
+
+Example output:
+
+```
+Found these tools in the GitHub toolkit:
+ - CountStargazers
+ - CreateIssue
+ - CreateIssueComment
+ - CreateReplyForReviewComment
+ - CreateReviewComment
+ - GetPullRequest
+ - GetRepository
+ - ListOrgRepositories
+ - ListPullRequestCommits
+ - ListPullRequests
+ - ListRepositoryActivities
+ - ListReviewCommentsInARepository
+ - ListReviewCommentsOnPullRequest
+ - ListStargazers
+ - SetStarred
+ - UpdatePullRequest
+```
+
+</Steps>
+</Tabs.Tab>
+<Tabs.Tab>
+<Steps>
+### Setup your environment
+
+The Arcade client requires a JavaScript runtime. We recommend using `bun` to manage your JavaScript environment. First, [install bun](https://bun.com/docs/installation).
+
+We recommend creating a new project directory and installing the client in it.
+
+```bash
+mkdir arcade-project
+cd arcade-project
+bun init
+```
+
+### Install the Arcade client
+
+Now that you have bun, let's install the Arcade client.
+
+```bash
+bun add @arcadeai/arcadejs
+```
+
+### Test the client
+
+Now that you have the Arcade client installed, let's test it with a simple example. We'll use the `Arcade` class to create a client, and then use the `list` method to get a list of tools. This will return a list of tools that are available to you in the `GitHub` toolkit.
+
+```javascript
+// main.ts
+import { Arcade } from "@arcadeai/arcadejs";
+
+const client = new Arcade();
+
+const tools = await client.tools.list({toolkit:"github"});
+
+console.log("Found these tools in the GitHub toolkit:");
+for (const tool of tools.items) {
+    console.log(` - ${tool.name}`);
+}
+```
+And run it with:
+```bash
+bun run main.ts
+```
+
+Example output:
+
+```
+Found these tools in the GitHub toolkit:
+ - CountStargazers
+ - CreateIssue
+ - CreateIssueComment
+ - CreateReplyForReviewComment
+ - CreateReviewComment
+ - GetPullRequest
+ - GetRepository
+ - ListOrgRepositories
+ - ListPullRequestCommits
+ - ListPullRequests
+ - ListRepositoryActivities
+ - ListReviewCommentsInARepository
+ - ListReviewCommentsOnPullRequest
+ - ListStargazers
+ - SetStarred
+ - UpdatePullRequest
+```
+
+</Steps>
+</Tabs.Tab>
+<Tabs.Tab>
+<Steps>
+The guide for Go is coming soon.
+</Steps>
+</Tabs.Tab>
+</Tabs>
+
+

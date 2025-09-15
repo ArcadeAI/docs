@@ -62,6 +62,9 @@ export default {
     type: "separator",
     title: "Using Arcade",
   },
+  installation: {
+    title: "Installation",
+  },
   quickstart: {
     title: "Quickstart",
   },
