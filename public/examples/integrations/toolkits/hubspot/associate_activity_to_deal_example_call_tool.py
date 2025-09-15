@@ -4,7 +4,7 @@ from arcadepy import Arcade
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
 USER_ID = "{arcade_user_id}"
-TOOL_NAME = "Hubspot.GetContactDataByKeywords"
+TOOL_NAME = "Hubspot.AssociateActivityToDeal"
 
 auth_response = client.tools.authorize(
     tool_name=TOOL_NAME,
@@ -18,7 +18,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'keywords': 'Acme Corp', 'limit': 5, 'next_page_token': None
+    'activity_type': 'call', 'activity_id': 987654321, 'deal_id': 123456
 }
 
 response = client.tools.execute(

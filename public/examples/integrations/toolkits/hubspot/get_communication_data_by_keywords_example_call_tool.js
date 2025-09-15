@@ -3,7 +3,7 @@ import { Arcade } from "@arcadeai/arcadejs";
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
 const USER_ID = "{arcade_user_id}";
-const TOOL_NAME = "Hubspot.GetContactDataByKeywords";
+const TOOL_NAME = "Hubspot.GetCommunicationDataByKeywords";
 
 // Start the authorization process
 const authResponse = await client.tools.authorize({
@@ -19,9 +19,9 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "keywords": "Acme Corp",
+  "search_terms": "password reset failed",
   "limit": 5,
-  "next_page_token": null
+  "truncate_big_strings": true
 };
 
 const response = await client.tools.execute({
