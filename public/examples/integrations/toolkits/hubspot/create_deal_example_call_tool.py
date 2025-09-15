@@ -4,7 +4,7 @@ from arcadepy import Arcade
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
 USER_ID = "{arcade_user_id}"
-TOOL_NAME = "Hubspot.GetContactDataByKeywords"
+TOOL_NAME = "Hubspot.CreateDeal"
 
 auth_response = client.tools.authorize(
     tool_name=TOOL_NAME,
@@ -18,7 +18,15 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'keywords': 'Acme Corp', 'limit': 5, 'next_page_token': None
+    'deal_name': 'Website Redesign Contract',
+    'deal_amount': 25000,
+    'deal_stage': 'stage_3',
+    'deal_type': 'newbusiness',
+    'expected_close_date': '2025-10-15',
+    'pipeline_id': '123',
+    'deal_owner': '7890',
+    'priority_level': 'high',
+    'deal_description': 'Redesign of corporate website including CMS migration and SEO'
 }
 
 response = client.tools.execute(
