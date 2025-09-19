@@ -19,7 +19,7 @@ export default {
     title: (
       <span className="flex items-center gap-2 font-medium">
         <Plug className="size-4" />
-        Integrations
+        Toolkits
       </span>
     ),
     href: "/toolkits",
