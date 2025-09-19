@@ -10,6 +10,11 @@ export default {
     title: "Integrations",
     href: "/toolkits",
   },
+  learn: {
+    type: "page",
+    title: "Learn",
+    href: "/learn",
+  },
   reference: {
     type: "page",
     title: "Reference",

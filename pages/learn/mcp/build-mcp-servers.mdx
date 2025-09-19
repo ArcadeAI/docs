@@ -1,0 +1,87 @@
+---
+title: "Build MCP Servers"
+description: "Learn how to build MCP servers"
+---
+
+# Build MCP Servers
+
+MCP is a protocol for building servers that can be used to build AI agents. In this guide, you'll learn how to build MCP servers using Arcade.
+
+## Overview
+
+In this guide, you'll learn how to build MCP servers using `arcade-mcp`.
+
+The main purpose of an MCP server is to provide tools to other applications. Let's create a simple toolkit that returns up to date information about the user.
+
+<Steps>
+
+### Setup your environment
+
+This guide assumes you have `uv` installed. Let's create a new project and install the necessary dependencies:
+
+```bash
+uv init
+source .venv/bin/activate
+uv pip install arcade-mcp
+```
+
+### Create an MCP app
+
+An MCP app is the main entry point for your MCP server. It contains the tools you want to expose, as well as the configuration for the server. Let's create a simple MCP app that contains utility tools.
+
+```python
+from arcade_mcp import MCPApp
+
+app = MCPApp(
+    name="my_server",
+    version="1.0.0",
+    title="My MCP Server",
+    instructions="This server provides utility tools",
+    log_level="INFO"
+)
+```
+
+### Add tools to the app
+
+You can use the `@app.tool` decorator to add tools to the app. It's recommended to annotate the parameters and return type of the tool.
+
+```python
+from typing import Annotated
+from datetime import datetime
+
+@app.tool
+def get_current_date_and_time() -> Annotated[str, "The current date and time"]:
+    """Get the current date and time"""
+    return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+
+@app.tool
+def calculate_average(
+    numbers: Annotated[list[float], "The numbers to calculate the average of"],
+) -> Annotated[float, "The average of the numbers"]:
+    """Calculate the average of a list of numbers"""
+    if not numbers:
+        return 0.0
+    return sum(numbers) / len(numbers)
+```
+
+### Adding context to the tools
+
+From the tools you can access a `Context` object that gives you several runtime features:
+
+- Logging
+- Secrets management
+- User Context
+- Progress Reporting
+
+You can also decorate the tool with the secrets it requires to run, which must be present in the `Context` object.
+
+```python
+@app.tool(requires_secrets=["DATABASE_CONNECTION_STRING"])
+def get_current_date_and_time(context: Context) -> Annotated[str, "The current date and time"]:
+    """Get the current date and time"""
+    return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+```
+
+
+</Steps>

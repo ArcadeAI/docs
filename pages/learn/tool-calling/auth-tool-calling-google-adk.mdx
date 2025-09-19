@@ -1,0 +1,101 @@
+---
+title: "Authorized tool calling using Google ADK"
+description: "Learn how to use Arcade to authorize tools using Google ADK"
+---
+
+import { Steps, Tabs } from "nextra/components";
+
+# Authorized tool calling using Google ADK
+
+Google ADK is a framework for building AI agents. Arcade provides an integration with Google ADK to allow you to use Arcade tools in your Google ADK agents with ease.
+
+## Overview
+
+In this guide, you'll learn how to use Arcade to call tools using Google ADK. In particular, you'll learn how to call tools that require user authorization.
+
+We'll start with a barebones example of a Google ADK agent that can only chat. Then, we'll add tools one by one, we'll add entire toolkits at once, and we'll handle authorization for tools that require it.
+
+### Prerequisites
+
+- [Obtain an Arcade API key](/home/api-keys)
+- [Obtain a Google API key](https://console.cloud.google.com/apis/credentials)
+
+<Steps>
+
+### Setup your environment
+
+Google ADK uses Python. We'll use the `uv` package manager to install python, as well as the necessary dependencies.
+
+Create a new directory for this project. This guides assumes you will create it in your home directory, but feel free to create it anywhere you like.
+
+```bash
+mkdir -p ~/auth-tool-calling-adk
+cd ~/auth-tool-calling-adk
+```
+
+Create a new uv project, and activate the virtual environment.
+
+```bash
+uv init
+source .venv/bin/activate
+```
+
+This will have created a `.venv` directory with the virtual environment, as well as a `pyproject.toml` file with the project metadata, and a `main.py` file with the entry point for the application. We'll use the `main.py` file to write our code.
+
+Install the necessary dependencies:
+
+```bash
+uv add google-adk-arcade
+```
+
+### Configure your API keys
+
+Set the following environment variables:
+
+```bash
+export ARCADE_API_KEY='{arcade_api_key}'
+export GOOGLE_API_KEY='YOUR_GOOGLE_API_KEY'
+export GOOGLE_GENAI_USE_VERTEXAI=FALSE
+```
+
+
+or create a `.env` file with the following contents:
+
+```bash
+# .env
+ARCADE_API_KEY={arcade_api_key}
+GOOGLE_API_KEY=YOUR_GOOGLE_API_KEY
+GOOGLE_GENAI_USE_VERTEXAI=FALSE
+```
+
+<Note>
+We need to set `GOOGLE_GENAI_USE_VERTEXAI=FALSE` because we're using the Gemini API, not Vertex AI.
+</Note>
+
+### Create a simple agent
+
+We'll start with a simple agent that can only chat.
+
+```python file=<rootDir>/examples/code/guides/tool-callling/google-adk/google-adk-only.py
+```
+
+So far, we've only used Google ADK's primitives. The agent is already functional and will invoke the model and keep the messages in memory for the duration of the conversation.
+
+Now, let's add a tool to the agent.
+
+### Add a tool to the agent
+
+Now, let's update the code to add:
+- An Arcade client
+- Get a specific tool from the Arcade Platform
+- Pass the tool to the agent
+
+In 5 lines of code, we've done all of this. And now the agent can invoke the tool. If the tool requires authorization, the tool will reply with a URL for the user to visit, which will be displayed to the user. If the tool does not require authorization, the tool will be invoked directly.
+
+```python file=<rootDir>/examples/code/guides/tool-callling/google-adk/google-adk-arcade-init.py {2,7,15-16,22-23,30-34}
+```
+
+
+
+
+</Steps>
