@@ -19,44 +19,75 @@ This involves the following steps:
 - Run the agent only after all the tools are authorized
 
 <Note>
-This guide will rely on Arcade's built-in user verification system. If you want to run this in production, you'll need to implement a custom user verifier. Learn more about [user verification](/home/auth/secure-auth-production).
+This guide will rely on Arcade's built-in user verification system. If you want to run this in production, you'll need to implement a custom user verifier. Learn more about [user verification in production](/home/auth/secure-auth-production).
 </Note>
 
 ### Prerequisites
 
 - [Obtain an Arcade API key](/home/api-keys)
-- [Obtain a Google API key](https://console.cloud.google.com/apis/credentials)
-# Building real Agents with Arcade
+- [Install the Arcade Client](/home/installation)
 
-Welcome to the Arcade foundations course! In this free interactive course, you'll learn the core features of Arcade by building a real agentic application.
+<Steps>
 
-## What you'll build
+### Setup your environment
 
-(screenshot placeholder)
+Export your Arcade API key as an environment variable:
+```bash
+export ARCADE_API_KEY='{arcade_api_key}'
+```
 
-In this course, you'll build a chatbot that can interact with your personal context, contained in third party applications like Gmail, Slack, Notion, Google Docs, etc. The application will have:
+### Initialize the client
 
-- User login and registration
-- A dashboard to manage integrations and configurations
-  - Choose the LLM provider
-  - The ability to choose the LLM model
-- Secure tool calling with MCP
-- Just-in-time authentication
-- Human-in-the-loop
-- Multi-user support
-- Building your own tools
-- Integrating with third party apps
+<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs.Tab>
+```python
+from arcadepy import Arcade
 
-## Overview
+client = Arcade()
+user_id = "{arcade_user_id}"
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```javascript
+import Arcade from "@arcadeai/arcadejs";
 
-Here's an overview of the features you'll learn in this course:
+const client = new Arcade();
+const user_id = "{arcade_user_id}";
+```
+</Tabs.Tab>
+</Tabs>
 
-- Agentic application architectures
-- Agentic frameworks
-- Agentic gateways
-- Tool calling
-- MCP
-- Just-in-time authentication
-- Human-in-the-loop
-- Agentic testing and evals
-- Agentic monitoring and observability
+### Write a helper function to get the tools
+
+This guide is more useful when we are dealing with tools from multiple toolkits. We'll write a helper function to get the tools from the `Gmail` and `GitHub` toolkits.
+
+<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs.Tab>
+```python file=<rootDir>/examples/code/guides/tool-callling/get-tools-helper.py
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```python file=<rootDir>/examples/code/guides/tool-callling/get-tools-helper.py
+```
+</Tabs.Tab>
+</Tabs>
+
+
+### Define the tools that the agent will use
+
+To make this example representative, we'll use tools from two different toolkits: `Gmail` and `GitHub`.
+
+<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs.Tab>
+```python
+tools = await get_arcade_tools(client, toolkits=["Gmail", "GitHub"])
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```javascript
+const tools = await get_arcade_tools(client, toolkits=["Gmail", "GitHub"])
+```
+</Tabs.Tab>
+</Tabs>
+
+</Steps>

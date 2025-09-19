@@ -30,7 +30,7 @@ async def main():
                     " everyday tasks. It is very important that you use"
                     " the provided tools to ensure the task is successfully"
                     " achieved",
-        tools=gmail_list_emails,  # pass the tool to the agent
+        tools=all_gmail_tools,  # pass the tools to the agent
     )
     session = await session_service.create_session(
         app_name=app_name, user_id=user_id, state={

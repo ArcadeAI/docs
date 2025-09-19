@@ -8,6 +8,9 @@ export default {
       layout: "full",
     },
   },
+  mcp: {
+    title: "MCP",
+  },
   "tool-calling": {
     title: "Tool Calling",
   },
