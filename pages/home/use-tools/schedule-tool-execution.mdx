@@ -1,0 +1,297 @@
+---
+title: "Schedule tool execution"
+description: "Learn how to schedule tools to run at a future time using Arcade"
+---
+
+import { Steps, Tabs, Callout } from "nextra/components";
+
+# Schedule tool execution
+
+Sometimes you need tools to run at a specific time in the future rather than immediately. Arcade supports scheduling tool execution through its API, allowing you to set up tasks to run at predetermined times.
+
+This guide will walk you through scheduling tool calls using the Arcade API.
+
+## When to use scheduled execution
+
+Scheduled tool execution is useful for:
+
+- **Time-sensitive operations**: Execute tools at optimal times (e.g., send emails during business hours)
+- **Delayed actions**: Set up follow-up tasks or reminders
+- **Batch processing**: Run resource-intensive operations during off-peak hours
+
+## How scheduling works
+
+When you execute a tool with Arcade, you can provide a `run_at` parameter that specifies when the tool should run. The Arcade Engine will store your request and execute it at the specified time.
+
+<Callout type="info">The `run_at` parameter accepts timestamps in ISO 8601 format: `YYYY-MM-DDTHH:MM:SS`</Callout>
+
+<Steps>
+
+### Set up your Arcade client
+
+First, make sure you have the Arcade client installed and configured with your API key.
+
+<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs.Tab>
+```python
+pip install arcadepy
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```javascript
+npm install @arcadeai/arcadejs
+```
+</Tabs.Tab>
+</Tabs>
+
+### Schedule a tool execution
+
+Here's how to schedule a tool to run at a future time:
+
+<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs.Tab>
+```python
+import arcadepy
+from datetime import datetime, timedelta
+
+# Initialize the client
+client = arcadepy.Client(api_key="YOUR_API_KEY")
+
+# Calculate a time 1 hour from now
+future_time = datetime.now() + timedelta(hours=1)
+# Format as ISO 8601
+run_at = future_time.strftime("%Y-%m-%dT%H:%M:%S")
+
+# Schedule the tool execution
+response = client.tools.execute(
+    tool_name="Slack.SendMessage",
+    input={
+        "channel_name": "general",
+        "message": "This is a scheduled message from Arcade!"
+    },
+    run_at=run_at  # The tool will run at this time
+)
+
+print(f"Tool scheduled! Execution ID: {response.execution_id}")
+print(f"Will run at: {response.run_at}")
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```javascript
+import Arcade from '@arcadeai/arcadejs';
+
+// Initialize the client
+const client = new Arcade({ apiKey: 'YOUR_API_KEY' });
+
+// Calculate a time 1 hour from now
+const futureTime = new Date();
+futureTime.setHours(futureTime.getHours() + 1);
+// Format as ISO 8601
+const runAt = futureTime.toISOString().slice(0, 19);
+
+// Schedule the tool execution
+const response = await client.tools.execute({
+  tool_name: 'Slack.SendMessage',
+  input: {
+    channel_name: 'general',
+    message: 'This is a scheduled message from Arcade!'
+  },
+  run_at: runAt  // The tool will run at this time
+});
+
+console.log(`Tool scheduled! Execution ID: ${response.execution_id}`);
+console.log(`Will run at: ${response.run_at}`);
+```
+</Tabs.Tab>
+</Tabs>
+
+### Check scheduled execution status
+
+After scheduling a tool, you can check its status using the execution ID:
+
+<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs.Tab>
+```python
+# Get details about a scheduled execution
+execution_details = client.tools.scheduled.get(
+    id=response.execution_id
+)
+
+print(f"Status: {execution_details.execution_status}")
+print(f"Scheduled for: {execution_details.run_at}")
+print(f"Tool: {execution_details.tool_name}")
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```javascript
+// Get details about a scheduled execution
+const executionDetails = await client.tools.scheduled.get(
+  response.execution_id
+);
+
+console.log(`Status: ${executionDetails.execution_status}`);
+console.log(`Scheduled for: ${executionDetails.run_at}`);
+console.log(`Tool: ${executionDetails.tool_name}`);
+```
+</Tabs.Tab>
+</Tabs>
+
+### List scheduled executions
+
+You can also retrieve a list of all your scheduled tool executions:
+
+<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs.Tab>
+```python
+# List all scheduled executions
+scheduled_tools = client.tools.scheduled.list(
+    limit=10,
+    offset=0
+)
+
+for execution in scheduled_tools.items:
+    print(f"Tool: {execution.tool_name}")
+    print(f"Scheduled for: {execution.run_at}")
+    print(f"Status: {execution.execution_status}")
+    print("---")
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```javascript
+// List all scheduled executions
+const scheduledTools = await client.tools.scheduled.list({
+  limit: 10,
+  offset: 0
+});
+
+scheduledTools.items.forEach(execution => {
+  console.log(`Tool: ${execution.tool_name}`);
+  console.log(`Scheduled for: ${execution.run_at}`);
+  console.log(`Status: ${execution.execution_status}`);
+  console.log('---');
+});
+```
+</Tabs.Tab>
+</Tabs>
+
+</Steps>
+
+## Practical examples
+
+### Schedule a daily report
+
+Schedule a Google Sheets report to run every morning at 9 AM:
+
+<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs.Tab>
+```python
+from datetime import datetime, time, timedelta
+
+# Get tomorrow at 9 AM
+tomorrow = datetime.now().date() + timedelta(days=1)
+run_time = datetime.combine(tomorrow, time(9, 0, 0))
+
+response = client.tools.execute(
+    tool_name="GoogleSheets.UpdateSpreadsheet",
+    input={
+        "spreadsheet_id": "your-spreadsheet-id",
+        "range": "A1:D10",
+        "values": [["Daily Report", datetime.now().strftime("%Y-%m-%d")]]
+    },
+    run_at=run_time.strftime("%Y-%m-%dT%H:%M:%S")
+)
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```javascript
+// Get tomorrow at 9 AM
+const tomorrow = new Date();
+tomorrow.setDate(tomorrow.getDate() + 1);
+tomorrow.setHours(9, 0, 0, 0);
+
+const response = await client.tools.execute({
+  tool_name: 'GoogleSheets.UpdateSpreadsheet',
+  input: {
+    spreadsheet_id: 'your-spreadsheet-id',
+    range: 'A1:D10',
+    values: [['Daily Report', new Date().toISOString().slice(0, 10)]]
+  },
+  run_at: tomorrow.toISOString().slice(0, 19)
+});
+```
+</Tabs.Tab>
+</Tabs>
+
+### Schedule a follow-up email
+
+Send a follow-up email 3 days after an initial contact:
+
+<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs.Tab>
+```python
+# Schedule for 3 days from now
+follow_up_time = datetime.now() + timedelta(days=3)
+
+response = client.tools.execute(
+    tool_name="Gmail.SendEmail",
+    input={
+        "to": "contact@example.com",
+        "subject": "Following up on our conversation",
+        "body": "Hi! I wanted to follow up on our discussion from earlier this week..."
+    },
+    run_at=follow_up_time.strftime("%Y-%m-%dT%H:%M:%S")
+)
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```javascript
+// Schedule for 3 days from now
+const followUpTime = new Date();
+followUpTime.setDate(followUpTime.getDate() + 3);
+
+const response = await client.tools.execute({
+  tool_name: 'Gmail.SendEmail',
+  input: {
+    to: 'contact@example.com',
+    subject: 'Following up on our conversation',
+    body: 'Hi! I wanted to follow up on our discussion from earlier this week...'
+  },
+  run_at: followUpTime.toISOString().slice(0, 19)
+});
+```
+</Tabs.Tab>
+</Tabs>
+
+## Important considerations
+
+<Callout type="warning">**Time zones**: The `run_at` parameter expects times in UTC. Make sure to convert your local time to UTC when scheduling.</Callout>
+
+<Callout type="info">**Execution precision**: Scheduled tools typically execute within a few seconds of the specified time, but exact timing depends on system load.</Callout>
+
+<Callout>**Authorization**: Ensure that any required authorizations for the tool will still be valid at the scheduled execution time.</Callout>
+
+## Response handling
+
+When you schedule a tool execution, the response includes:
+
+- `execution_id`: Unique identifier for tracking the scheduled execution
+- `execution_type`: Will be `"scheduled"` for scheduled executions
+- `run_at`: The time when the tool is scheduled to run
+- `status`: Initial status (typically `"scheduled"`)
+- `success`: Boolean indicating if the scheduling was successful
+
+```json
+{
+  "execution_id": "exec_abc123",
+  "execution_type": "scheduled",
+  "run_at": "2024-01-15T09:00:00",
+  "status": "scheduled",
+  "success": true,
+  "tool_name": "Slack.SendMessage"
+}
+```
+
+## Next steps
+
+- Learn about [tool authorization](/home/auth/how-arcade-helps) for tools that require authentication
+- Build your own [custom tools](/home/build-tools/create-a-toolkit) with scheduling support
