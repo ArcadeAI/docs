@@ -7,6 +7,7 @@ export default {
   google_contacts: "Google Contacts",
   google_docs: "Google Docs",
   google_drive: "Google Drive",
+  google_slides: "Google Slides",
   google_sheets: "Google Sheets",
   jira: "Jira",
   linear: "Linear",

@@ -42,10 +42,19 @@ jobs:
 
       # commit the changes and make a PR (branch protection)
       - name: Create Pull Request
+        id: cpr
         uses: peter-evans/create-pull-request@v7
         with:
+          token: ${{ secrets.DOCS_PUBLISHABLE_GH_TOKEN }}
           commit-message: Regenerate LLMs.txt and related files
           branch: auto-update-llms-txt
           delete-branch: true
           title: '🤖 Regenerate LLMs.txt'
+          reviewers: >
+            evantahler
+            torresmateo
 
+      - name: Enable Pull Request Automerge
+        run: gh pr merge --squash --auto ${{ steps.cpr.outputs.pull-request-number }}
+        env:
+          GH_TOKEN: ${{ secrets.DOCS_PUBLISHABLE_GH_TOKEN }}

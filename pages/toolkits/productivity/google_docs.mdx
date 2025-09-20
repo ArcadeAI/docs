@@ -9,10 +9,9 @@ import ToolFooter from "@/components/ToolFooter";
 <ToolInfo
   description="Enable agents to interact with Google Docs documents."
   author="Arcade"
-  codeLink="https://github.com/ArcadeAI/arcade-ai/tree/main/toolkits/google_docs"
   authType="oauth2"
   authProviderName="Google"
-  versions={["0.1.0"]}
+  versions={["4.1.0"]}
 />
 
 <Warning>
@@ -32,12 +31,17 @@ These tools are currently available in the Arcade Google Docs toolkit.
 <TableOfContents
   headers={["Tool Name", "Description"]}
   data={[
-    ["GoogleDocs.GetDocumentById", "Retrieve a Google Docs document by ID. Note: This tool currently requires a self-hosted instance of Arcade.", ],
-    ["GoogleDocs.InsertTextAtEndOfDocument", "Insert text at the end of a Google Docs document. Note: This tool currently requires a self-hosted instance of Arcade.", ],
-    ["GoogleDocs.CreateBlankDocument", "Create a new blank Google Docs document with a title. Note: This tool currently requires a self-hosted instance of Arcade.", ],
-    ["GoogleDocs.CreateDocumentFromText", "Create a new Google Docs document with specified text content. Note: This tool currently requires a self-hosted instance of Arcade.", ],
-    ["GoogleDocs.SearchDocuments", "Search for documents in the user's Google Drive. Note: This tool currently requires a self-hosted instance of Arcade."],
-    ["GoogleDocs.SearchAndRetrieveDocuments", "Search and retrieve the contents of Google documents in the user's Google Drive. Note: This tool currently requires a self-hosted instance of Arcade."],
+    ["GoogleDocs.WhoAmI", "Get comprehensive user profile and Google Docs environment information."],
+    ["GoogleDocs.GetDocumentById", "Retrieve a Google Docs document by ID.", ],
+    ["GoogleDocs.GetDocumentAsDocMD", "Retrieve a Google Docs document by ID in DocMD format with metadata tags.", ],
+    ["GoogleDocs.EditDocument", "Edit a Google Docs document using natural language edit requests.", ],
+    ["GoogleDocs.InsertTextAtEndOfDocument", "Insert text at the end of a Google Docs document.", ],
+    ["GoogleDocs.CreateBlankDocument", "Create a new blank Google Docs document with a title.", ],
+    ["GoogleDocs.CreateDocumentFromText", "Create a new Google Docs document with specified text content.", ],
+    ["GoogleDocs.SearchDocuments", "Search for documents in the user's Google Drive."],
+    ["GoogleDocs.SearchAndRetrieveDocuments", "Search and retrieve the contents of Google documents in the user's Google Drive."],
+    ["GoogleDocs.ListDocumentComments", "List all comments on the specified Google Docs document.", ],
+    ["GoogleDocs.CommentOnDocument", "Comment on a specific document by its ID.", ],
   ]}
 />
 
@@ -47,6 +51,29 @@ These tools are currently available in the Arcade Google Docs toolkit.
   own tools](/home/build-tools/create-a-toolkit) with the [Google auth
   provider](/home/auth-providers/google#using-google-auth-in-custom-tools).
 </Tip>
+
+## GoogleDocs.WhoAmI
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: ["/examples/integrations/toolkits/google_docs/who_am_i_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/google_docs/who_am_i_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Get comprehensive user profile and Google Docs environment information.
+
+**Parameters**
+
+This tool does not take any parameters.
+
+---
 
 ## GoogleDocs.GetDocumentById
 
@@ -70,6 +97,60 @@ Get the latest version of the specified Google Docs document.
 **Parameters**
 
 - **`document_id`** _(string, required)_ The ID of the document to retrieve.
+
+---
+
+## GoogleDocs.GetDocumentAsDocMD
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/google/docs/get_document_as_docmd_example_call_tool.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/google/docs/get_document_as_docmd_example_call_tool.js"],
+      },
+    }
+  ]}
+/>
+
+Get the latest version of the specified Google Docs document in DocMD format. The DocMD output includes tags that can be used to annotate the document with location information, block types, block IDs, and other metadata.
+
+**Parameters**
+
+- **`document_id`** _(string, required)_ The ID of the document to retrieve.
+
+---
+
+## GoogleDocs.EditDocument
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/google/docs/edit_document_example_call_tool.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/google/docs/edit_document_example_call_tool.js"],
+      },
+    }
+  ]}
+/>
+
+Edit a Google Docs document using natural language edit requests. This tool is stateless and does not have context about previous edits. If your edit request depends on knowledge about previous edits, provide that context in the edit requests.
+
+Note that this tool is agentic, and requires the secret OPENAI_API_KEY to be set.
+
+**Parameters**
+
+- **`document_id`** _(string, required)_ The ID of the document to edit.
+- **`edit_requests`** _(list[str], required)_ A list of natural language descriptions of the desired changes to the document. Each entry should be a single, self-contained edit request that can be fully understood independently. Note: Each request may result in zero, one, or multiple actual edits depending on what changes are needed (e.g., a request might be ignored if the change already exists in the document).
+- **`reasoning_effort`** _(enum ([ReasoningEffort](#reasoningeffort)), optional)_ The effort to put into reasoning about the edits. Defaults to medium.
 
 ---
 
@@ -211,11 +292,65 @@ Searches for documents in the user's Google Drive and returns a list of document
 - **`limit`** _(int, optional)_ The number of documents to list. Defaults to `50`.
 - **`pagination_token`** _(str, optional)_ The pagination token to continue a previous request
 
+---
+
+## GoogleDocs.ListDocumentComments
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/google/docs/list_document_comments_example_call_tool.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/google/docs/list_document_comments_example_call_tool.js"],
+      },
+    }
+  ]}
+/>
+
+List all comments on the specified Google Docs document.
+
+**Parameters**
+
+- **`document_id`** _(string, required)_ The ID of the document to list comments for.
+- **`include_deleted`** _(bool, optional)_ Whether to include deleted comments in the results. Defaults to False.
+
+---
+
+## GoogleDocs.CommentOnDocument
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/google/docs/comment_on_document_example_call_tool.py",
+        ],
+        JavaScript: ["/examples/integrations/toolkits/google/docs/comment_on_document_example_call_tool.js"],
+      },
+    }
+  ]}
+/>
+
+Comment on a specific document by its ID.
+
+**Parameters**
+
+- **`document_id`** _(string, required)_ The ID of the document to comment on.
+- **`comment_text`** _(string, required)_ The comment to add to the document.
+
+
+---
 ## Auth
 
 The Arcade Docs toolkit uses the [Google auth provider](/home/auth-providers/google) to connect to users' Google accounts.
 
-With the hosted Arcade Engine, there's nothing to configure. Your users will see `Arcade` as the name of the application that's requesting permission.
+With the Arcade Cloud Platform, there's nothing to configure. Your users will see `Arcade` as the name of the application that's requesting permission.
 
 With a self-hosted installation of Arcade, you need to [configure the Google auth provider](/home/auth-providers/google#configuring-google-auth) with your own Google app credentials.
 
@@ -257,5 +392,14 @@ Sort keys for ordering files in Google Drive. Each key has both ascending and de
 - **`STARRED_DESC`**: Whether the user has starred the file (descending).
 - **`VIEWED_BY_ME_TIME`**: The last time the file was viewed by the user (ascending).
 - **`VIEWED_BY_ME_TIME_DESC`**: The last time the file was viewed by the user (descending).
+
+### ReasoningEffort
+
+The effort to put into reasoning about document edits.
+
+- **`MINIMAL`**: Minimal reasoning effort for simple, straightforward edits.
+- **`LOW`**: Minimal reasoning effort for simple, straightforward edits.
+- **`MEDIUM`**: Moderate reasoning effort for most editing tasks (default).
+- **`HIGH`**: Maximum reasoning effort for complex edits requiring careful analysis.
 
 <ToolFooter pipPackageName="arcade_google_docs" />

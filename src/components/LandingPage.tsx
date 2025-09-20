@@ -62,11 +62,10 @@ export function LandingPage() {
           >
             <p style={{ textAlign: "left", paddingTop: "2rem" }}>
               Arcade enables your AI agent to securely take real-world actions
-              through user-specific permissions, pre-built integrations with
-              Gmail, Slack, GitHub, and more. You can also build your own
-              agentic tools and MCP servers with our authoring and testing
-              suite. Arcade is your tool{" "}
-              <span className="font-bold text-primary">engine</span>,{" "}
+              through user-specific permissions, pre-built toolkits for Gmail,
+              Slack, GitHub, and more. You can also build your own agentic tools
+              and MCP servers with our authoring and testing suite. Arcade is
+              your tool <span className="font-bold text-primary">engine</span>,{" "}
               <span className="font-bold text-primary">registry</span>, and{" "}
               <span className="font-bold text-primary">runtime</span>.
             </p>
@@ -305,8 +304,8 @@ export function LandingPage() {
             <Image
               src={"/images/overview.png"}
               alt={"arcade overview"}
-              width={1880 / 3}
-              height={1676 / 3}
+              width={2922 / 3}
+              height={1861 / 3}
               className="max-w-full"
             />
           </div>
@@ -319,8 +318,8 @@ export function LandingPage() {
             />
             <QuickStartCard
               icon={Users}
-              title="Control Plane"
-              description="The Control Plane is how you manage your tools, users, and deployments from a single place.  No matter how large your deployment or organization gets, the Control Plane will scale with you."
+              title="Dashboard"
+              description="The Arcade Dashboard is how you manage your tools, users, and deployments from a single place.  No matter how large your deployment or organization gets, the Dashboard will scale with you."
               href="#"
             />
             <QuickStartCard
