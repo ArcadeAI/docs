@@ -20,7 +20,7 @@ await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
   "workspace_team_id": "T12345678",
-  "pagination_cursor": "dXNlcjpVMDYxTkYxV...",
+  "pagination_cursor": "dXNlcjpVMDYxTkZUQjA=",
   "user_retrieval_limit": 50,
   "return_only_active_users": true,
   "include_deactivated_user_workspaces": false,

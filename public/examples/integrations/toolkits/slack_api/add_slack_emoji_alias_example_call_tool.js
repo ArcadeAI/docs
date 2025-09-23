@@ -19,8 +19,8 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "emoji_alias_name": "party_parrot",
-  "target_emoji_name": "parrot_party"
+  "emoji_alias_name": "party_parrot_alt",
+  "target_emoji_name": "party_parrot"
 };
 
 const response = await client.tools.execute({

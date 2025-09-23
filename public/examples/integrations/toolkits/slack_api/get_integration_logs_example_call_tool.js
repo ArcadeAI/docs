@@ -19,13 +19,13 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "filter_by_app_id": "A123BCD45",
-  "filter_by_change_type": "added",
+  "filter_by_app_id": "A12345678",
+  "filter_by_change_type": "updated",
   "result_count": "50",
   "result_page_number": "1",
-  "filter_by_service_id": "SVC789",
-  "encoded_team_id": "T-ENC-9f8e7d6c",
-  "filter_by_user": "U234XYZ"
+  "filter_by_service_id": "SVC987",
+  "encoded_team_id": "T12345ENC",
+  "filter_by_user": "U23456789"
 };
 
 const response = await client.tools.execute({

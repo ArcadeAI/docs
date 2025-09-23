@@ -19,7 +19,7 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "call_id": "C1234567890"
+  "call_id": "R0lGODlhM0A0"
 };
 
 const response = await client.tools.execute({

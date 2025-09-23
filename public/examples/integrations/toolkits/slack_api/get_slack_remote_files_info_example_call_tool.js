@@ -19,11 +19,11 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "filter_by_channel_id": "C04567ABC",
-  "pagination_cursor": "dXNlcjpVMEc5V0ZYTlo=",
+  "filter_by_channel_id": "C04567ABCD",
+  "pagination_cursor": "dXNlcjoxMjM0NTY3OA==",
   "maximum_items_to_return": 25,
-  "filter_files_from_timestamp": "1693526400",
-  "timestamp_filter_end": "1696118400"
+  "filter_files_from_timestamp": "1691000000",
+  "timestamp_filter_end": "1693600000"
 };
 
 const response = await client.tools.execute({

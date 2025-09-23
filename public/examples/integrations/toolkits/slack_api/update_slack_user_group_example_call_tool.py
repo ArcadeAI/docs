@@ -18,13 +18,13 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'user_group_id': 'S01234567',
-    'default_channel_ids': ['C0123ABCD', 'C0456EFGH'],
-    'additional_channel_ids': ['C0999ZZZZ'],
-    'user_group_description': 'Frontend engineers responsible for UI components and UX',
-    'user_group_handle': 'frontend-engineers',
-    'user_group_name': 'Frontend Engineers',
-    'team_id_for_org_token': 'T12345678',
+    'user_group_id': 'S12345G',
+    'default_channel_ids': ['C11111', 'C22222'],
+    'additional_channel_ids': ['C33333'],
+    'user_group_description': 'On-call engineers for backend services',
+    'user_group_handle': 'oncall-backend',
+    'user_group_name': 'Backend Oncall',
+    'team_id_for_org_token': 'T98765',
     'include_user_count': True,
     'enable_sidebar_section': True
 }

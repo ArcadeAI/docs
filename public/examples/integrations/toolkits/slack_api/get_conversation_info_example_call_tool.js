@@ -19,7 +19,7 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "conversation_id": "C12345678",
+  "conversation_id": "C01234567",
   "include_locale": true,
   "include_member_count": true
 };

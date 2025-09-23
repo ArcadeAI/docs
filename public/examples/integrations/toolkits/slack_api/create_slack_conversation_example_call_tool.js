@@ -19,8 +19,8 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "channel_name": "project_alpha-updates",
-  "encoded_team_id": "T12345ABCDEF",
+  "channel_name": "project_alpha_updates",
+  "encoded_team_id": "T12345ORG",
   "create_private_channel": false
 };
 

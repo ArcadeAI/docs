@@ -19,7 +19,7 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "file_id_to_share": "F01234567ABC"
+  "file_id_to_share": "F1234567890"
 };
 
 const response = await client.tools.execute({

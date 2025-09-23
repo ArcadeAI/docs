@@ -18,14 +18,14 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'user_group_name': 'dev-frontend',
-    'default_channel_ids': ['C01234567', 'C08976543'],
-    'custom_additional_channels': ['C01234567'],
-    'user_group_description': 'Frontend developers working on web UI',
-    'unique_mention_handle': 'dev_frontend',
-    'team_id_for_user_group_creation': 'T12345678',
+    'user_group_name': 'oncall-engineers',
+    'default_channel_ids': ['C01234567', 'C08901234'],
+    'custom_additional_channels': ['C05555555'],
+    'user_group_description': 'Engineers responsible for on-call rotations and incident response.',
+    'unique_mention_handle': 'oncall',
+    'team_id_for_user_group_creation': 'T012ABCDEF',
     'include_user_count': True,
-    'enable_display_as_sidebar_section': False
+    'enable_display_as_sidebar_section': True
 }
 
 response = client.tools.execute(

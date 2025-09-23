@@ -20,7 +20,7 @@ client.auth.wait_for_completion(auth_response)
 tool_input = {
     'reaction_emoji_name': 'thumbsup',
     'message_channel_id': 'C024BE91L',
-    'message_timestamp': '1611784860.000200'
+    'message_timestamp': '1623850247.000200'
 }
 
 response = client.tools.execute(

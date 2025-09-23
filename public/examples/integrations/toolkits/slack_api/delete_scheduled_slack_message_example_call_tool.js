@@ -19,8 +19,8 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "channel_id": "C024BE91L",
-  "scheduled_message_id": "Q1298393284",
+  "channel_id": "C1234567890",
+  "scheduled_message_id": "Q1298391293",
   "delete_as_authenticated_user": true
 };
 

@@ -18,9 +18,9 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'slack_channel_id': 'C04ABCD1234',
+    'slack_channel_id': 'C024BE7LR',
     'reaction_emoji_name': 'thumbsup',
-    'message_timestamp': '1623850245.000200'
+    'message_timestamp': '1623867600.000200'
 }
 
 response = client.tools.execute(

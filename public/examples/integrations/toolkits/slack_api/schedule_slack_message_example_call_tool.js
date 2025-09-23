@@ -19,14 +19,14 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "slack_channel_id_or_name": "C024BE91L",
-  "schedule_time_unix_timestamp": 1716201600,
-  "message_text": "Reminder: stand-up meeting starts in 10 minutes. Please join the #standup channel.",
-  "structured_blocks_json": "[{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*Stand-up Reminder*\\nPlease join the meeting in 10 minutes.\"}}]",
+  "slack_channel_id_or_name": "#project-updates",
+  "schedule_time_unix_timestamp": 1767225600,
+  "structured_blocks_json": "%5B%7B%22type%22%3A%22section%22%2C%22text%22%3A%7B%22type%22%3A%22mrkdwn%22%2C%22text%22%3A%22Daily%20standup%20reminder%20%E2%9C%85%22%7D%7D%5D",
+  "message_text": "Reminder: daily standup in 15 minutes. Please post your updates.",
   "enable_group_linking": false,
+  "make_reply_visible_to_everyone": false,
   "enable_link_unfurling": true,
-  "disable_unfurling_of_media_content": false,
-  "make_reply_visible_to_everyone": false
+  "disable_unfurling_of_media_content": true
 };
 
 const response = await client.tools.execute({

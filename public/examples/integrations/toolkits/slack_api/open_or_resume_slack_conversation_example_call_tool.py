@@ -18,8 +18,8 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'target_user_ids': 'U12345,U67890',
-    'return_full_im_channel_definition': False,
+    'target_user_ids': 'U12345,U23456',
+    'return_full_im_channel_definition': True,
     'prevent_creation': False
 }
 

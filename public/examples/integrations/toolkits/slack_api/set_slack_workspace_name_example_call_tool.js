@@ -19,8 +19,8 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "workspace_id": "T12345678",
-  "new_workspace_name": "Acme Engineering"
+  "workspace_id": "T01234567",
+  "new_workspace_name": "Acme Corp Workspace"
 };
 
 const response = await client.tools.execute({

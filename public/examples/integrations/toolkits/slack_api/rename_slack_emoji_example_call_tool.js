@@ -19,7 +19,7 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "current_emoji_name": ":party_parrot:",
+  "current_emoji_name": "party_parrot",
   "new_emoji_name": "celebration_parrot"
 };
 

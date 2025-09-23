@@ -18,7 +18,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'current_emoji_name': ':party_parrot:', 'new_emoji_name': 'celebration_parrot'
+    'current_emoji_name': 'party_parrot', 'new_emoji_name': 'celebration_parrot'
 }
 
 response = client.tools.execute(

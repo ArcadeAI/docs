@@ -18,7 +18,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'channel_id': 'C1234567890', 'message_timestamp': '1623855600.000200'
+    'channel_id': 'C1234567890', 'message_timestamp': '1623861234.000200'
 }
 
 response = client.tools.execute(

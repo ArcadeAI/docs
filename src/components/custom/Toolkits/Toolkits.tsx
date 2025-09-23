@@ -9,6 +9,7 @@ import {
   CheckCircle,
   Key,
   Search,
+  Terminal,
   Users,
   X,
   Plus,
@@ -17,13 +18,23 @@ import React, { useCallback, useMemo, useState } from "react";
 import { ComingSoonProvider } from "./ComingSoonContext";
 import Link from "next/link";
 
-export type ToolkitType = "arcade" | "verified" | "community" | "auth";
+export type ToolkitType =
+  | "arcade"
+  | "api_proxy"
+  | "verified"
+  | "community"
+  | "auth";
 
 const typeConfig = {
   arcade: {
     label: "Arcade Toolkit",
     icon: BadgeCheck,
     color: "text-emerald-400",
+  },
+  api_proxy: {
+    label: "API Proxy Toolkit",
+    icon: Terminal,
+    color: "text-orange-400",
   },
   verified: {
     label: "Verified Toolkit",

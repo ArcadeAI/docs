@@ -18,7 +18,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'target_bot_id': 'B0456K7QZ', 'team_id_for_org_token_use': 'T12345ENT'
+    'target_bot_id': 'B0123ABCD', 'team_id_for_org_token_use': 'T9876XYZ'
 }
 
 response = client.tools.execute(

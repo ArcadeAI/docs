@@ -18,7 +18,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'call_id': 'R12345678', 'users_to_remove': ['U11111111', 'U22222222']
+    'call_id': 'C1234567890', 'users_to_remove': ['U2345678901', 'U3456789012']
 }
 
 response = client.tools.execute(

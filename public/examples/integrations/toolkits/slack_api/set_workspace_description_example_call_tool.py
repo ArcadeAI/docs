@@ -19,8 +19,8 @@ client.auth.wait_for_completion(auth_response)
 
 tool_input = {
     'workspace_id': 'T12345678',
-    'workspace_description': 'Acme Corp Slack workspace for product and engineering collaboration '
-                             '— shared guidelines and updates.'
+    'workspace_description': 'Project Alpha workspace for cross-team collaboration and weekly '
+                             'syncs. Focus: product roadmap, docs, and deployment updates.'
 }
 
 response = client.tools.execute(

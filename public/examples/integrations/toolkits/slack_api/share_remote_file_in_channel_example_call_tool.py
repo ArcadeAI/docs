@@ -18,7 +18,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'target_channel_ids': 'C12345678,C23456789', 'file_external_identifier': 'app-file-guid-98765'
+    'target_channel_ids': 'C12345678,C87654321', 'file_external_identifier': 'app-file-guid-001'
 }
 
 response = client.tools.execute(

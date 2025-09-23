@@ -19,7 +19,7 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "conversation_id": "C0456K9Q2"
+  "conversation_id": "C0456ABCDEF"
 };
 
 const response = await client.tools.execute({

@@ -18,12 +18,12 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'conversation_id': 'C01234567',
-    'thread_message_timestamp': '1622559600.000200',
-    'pagination_cursor': 'dXNlcjpVMEc5V0ZYT0=',
-    'latest_message_timestamp': '1622563200',
-    'maximum_items_to_return': 50,
-    'start_time_unix_timestamp': '1622556000',
+    'conversation_id': 'C1234567890',
+    'thread_message_timestamp': '1622547800.000200',
+    'pagination_cursor': 'dXNlcjpVMDYxTkZUQw==',
+    'latest_message_timestamp': '1622551400',
+    'maximum_items_to_return': 25,
+    'start_time_unix_timestamp': '1622540000',
     'include_all_message_metadata': True,
     'include_boundary_timestamps': False
 }

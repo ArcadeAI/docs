@@ -20,7 +20,7 @@ await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
   "channel_id": "C1234567890",
-  "message_timestamp": "1623855600.000200"
+  "message_timestamp": "1623861234.000200"
 };
 
 const response = await client.tools.execute({

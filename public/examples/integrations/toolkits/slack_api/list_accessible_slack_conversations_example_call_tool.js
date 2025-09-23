@@ -19,11 +19,11 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "pagination_cursor": "dGVzdDo1MA==",
-  "maximum_items_to_return": 150,
-  "slack_team_id": "T01234567",
+  "pagination_cursor": "dXNlcjpVMEc5V00=",
+  "maximum_items_to_return": 100,
+  "slack_team_id": "T012AB3CDE",
   "channel_types": "public_channel,private_channel,im",
-  "specific_user_id": "U89ABCD12",
+  "specific_user_id": "U234BCD56",
   "exclude_archived_channels": true
 };
 

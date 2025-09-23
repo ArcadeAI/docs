@@ -19,8 +19,8 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "pagination_cursor": "abc123cursor",
-  "max_items_to_return": 250
+  "pagination_cursor": "dXNlcjpVMEc5V0ZYTlo=",
+  "max_items_to_return": 100
 };
 
 const response = await client.tools.execute({

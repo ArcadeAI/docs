@@ -18,7 +18,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'pagination_cursor': 'abc123cursor', 'max_items_to_return': 250
+    'pagination_cursor': 'dXNlcjpVMEc5V0ZYTlo=', 'max_items_to_return': 100
 }
 
 response = client.tools.execute(

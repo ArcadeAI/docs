@@ -18,9 +18,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'workspace_team_id': 'T1234567890',
-    'pagination_cursor': 'dXNlcjpVMDYxTkZUQ0U=',
-    'result_limit': 100
+    'workspace_team_id': 'T12345678', 'pagination_cursor': 'dXNlcjpVMDYxTkZUQT0=', 'result_limit': 50
 }
 
 response = client.tools.execute(

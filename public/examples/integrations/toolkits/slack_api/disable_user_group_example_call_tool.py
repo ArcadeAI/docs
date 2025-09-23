@@ -18,7 +18,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'user_group_id': 'S12345', 'team_id': 'T67890', 'include_user_count': False
+    'user_group_id': 'S12345G', 'team_id': 'T67890', 'include_user_count': True
 }
 
 response = client.tools.execute(

@@ -19,8 +19,8 @@ client.auth.wait_for_completion(auth_response)
 
 tool_input = {
     'slack_channel_id_to_remove_bookmark': 'C1234567890',
-    'bookmark_id_to_remove': 'B9876543210',
-    'quip_section_id': 'Q-section-42'
+    'bookmark_id_to_remove': 'bkmk_987654321',
+    'quip_section_id': 'qs_13579'
 }
 
 response = client.tools.execute(

@@ -26,22 +26,27 @@ const toolInput = {
       "type": "section",
       "text": {
         "type": "mrkdwn",
-        "text": "Hey <@U2345678901>, here is a quick update about the deploy:"
+        "text": "Hey <@U2345678901>, here's an update just for you."
       }
     },
     {
-      "type": "context",
+      "type": "actions",
       "elements": [
         {
-          "type": "mrkdwn",
-          "text": "*Status:* Successful"
+          "type": "button",
+          "text": {
+            "type": "plain_text",
+            "text": "View Details"
+          },
+          "value": "view_details",
+          "action_id": "view_details"
         }
       ]
     }
   ],
-  "message_icon_emoji": ":rocket:",
-  "ephemeral_message_text": "Deploy completed successfully. Click the details button for more info.",
-  "bot_username": "deploy-bot",
+  "message_icon_emoji": ":bell:",
+  "ephemeral_message_text": "Quick update: your report is ready.",
+  "bot_username": "notify-bot",
   "link_names_auto_link": true
 };
 

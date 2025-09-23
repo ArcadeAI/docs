@@ -20,7 +20,7 @@ await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
   "file_id": "F1234567890",
-  "file_external_identifier": "external-guid-9876"
+  "file_external_identifier": "external-guid-abc123"
 };
 
 const response = await client.tools.execute({

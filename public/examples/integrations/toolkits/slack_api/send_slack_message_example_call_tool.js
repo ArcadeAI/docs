@@ -19,14 +19,13 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "target_channel_id_or_name": "#engineering",
-  "message_text": "Deployment succeeded for service-api v2.1. Rollout complete.",
-  "structured_blocks": "[{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*:white_check_mark: Deployment Complete*\\nservice-api v2.1 rolled out to production.\"}},{\"type\":\"context\",\"elements\":[{\"type\":\"mrkdwn\",\"text\":\"Triggered by @deployer\"}]}]",
+  "target_channel_id_or_name": "#project-updates",
+  "message_text": "Deployment completed successfully. All services are healthy.",
+  "structured_blocks": "[{\"type\":\"section\",\"text\":{\"type\":\"mrkdwn\",\"text\":\"*Deployment Complete*\\nAll services are healthy.\"}},{\"type\":\"context\",\"elements\":[{\"type\":\"mrkdwn\",\"text\":\"<@U12345> • 2m ago\"}]}]",
   "emoji_icon_for_message": ":rocket:",
   "bot_username": "deploy-bot",
-  "broadcast_reply_to_channel": false,
   "enable_slack_markup_parsing": true,
-  "enable_unfurling_text_content": false
+  "broadcast_reply_to_channel": false
 };
 
 const response = await client.tools.execute({

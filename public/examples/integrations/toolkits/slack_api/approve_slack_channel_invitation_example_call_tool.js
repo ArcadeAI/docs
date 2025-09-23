@@ -19,8 +19,8 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "shared_channel_invite_id": "SCINV-12345",
-  "other_party_team_id": "T98765"
+  "shared_channel_invite_id": "SINV-1234567890",
+  "other_party_team_id": "T12345"
 };
 
 const response = await client.tools.execute({

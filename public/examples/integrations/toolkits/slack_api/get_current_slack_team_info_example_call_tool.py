@@ -18,7 +18,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'specific_team_id': 'T12345678', 'query_by_domain': 'example.com,sub.example.com'
+    'query_by_domain': 'engineering.example.com,design.example.com', 'specific_team_id': 'T1234567890'
 }
 
 response = client.tools.execute(

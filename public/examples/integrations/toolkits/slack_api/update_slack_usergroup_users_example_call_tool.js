@@ -19,16 +19,16 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "user_group_id": "S0123456789",
+  "user_group_id": "S0614K5ZC",
   "user_ids_list": [
     "U12345678",
     "U23456789",
     "U34567890"
   ],
-  "team_id_for_org_token": "T9876543210",
+  "team_id_for_org_token": "T012AB3C4",
   "update_additional_channels": [
-    "C11111111",
-    "C22222222"
+    "C01AB2C3D",
+    "C02EF3G4H"
   ],
   "include_user_count": true,
   "is_shared_section": false

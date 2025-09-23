@@ -18,7 +18,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'team_id_for_org_token': 'T0123456789',
+    'team_id_for_org_token': 'T12345ORG',
     'include_user_count': True,
     'include_disabled_groups': False,
     'include_users_in_group': True

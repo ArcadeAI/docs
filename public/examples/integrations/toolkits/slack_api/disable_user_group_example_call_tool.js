@@ -19,9 +19,9 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "user_group_id": "S12345",
+  "user_group_id": "S12345G",
   "team_id": "T67890",
-  "include_user_count": false
+  "include_user_count": true
 };
 
 const response = await client.tools.execute({

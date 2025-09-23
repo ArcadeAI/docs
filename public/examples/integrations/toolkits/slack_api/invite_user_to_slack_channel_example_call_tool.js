@@ -20,7 +20,7 @@ await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
   "slack_channel_id": "C01234567",
-  "user_ids_list": "U11111111,U22222222,U33333333",
+  "user_ids_list": "U23456789,U34567890",
   "continue_with_valid_users": true
 };
 

@@ -18,8 +18,8 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'shared_channel_invite_id': 'S1234567890',
-    'deny_invite_message': 'We cannot approve external access at this time.'
+    'shared_channel_invite_id': 'SCI1234567890',
+    'deny_invite_message': 'We cannot approve external members for this channel at this time.'
 }
 
 response = client.tools.execute(

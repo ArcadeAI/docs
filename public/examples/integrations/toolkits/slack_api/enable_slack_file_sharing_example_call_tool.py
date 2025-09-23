@@ -18,7 +18,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'file_id_to_share': 'F01234567ABC'
+    'file_id_to_share': 'F1234567890'
 }
 
 response = client.tools.execute(

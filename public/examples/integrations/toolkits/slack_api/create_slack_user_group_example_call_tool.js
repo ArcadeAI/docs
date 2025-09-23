@@ -19,19 +19,19 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "user_group_name": "dev-frontend",
+  "user_group_name": "oncall-engineers",
   "default_channel_ids": [
     "C01234567",
-    "C08976543"
+    "C08901234"
   ],
   "custom_additional_channels": [
-    "C01234567"
+    "C05555555"
   ],
-  "user_group_description": "Frontend developers working on web UI",
-  "unique_mention_handle": "dev_frontend",
-  "team_id_for_user_group_creation": "T12345678",
+  "user_group_description": "Engineers responsible for on-call rotations and incident response.",
+  "unique_mention_handle": "oncall",
+  "team_id_for_user_group_creation": "T012ABCDEF",
   "include_user_count": true,
-  "enable_display_as_sidebar_section": false
+  "enable_display_as_sidebar_section": true
 };
 
 const response = await client.tools.execute({

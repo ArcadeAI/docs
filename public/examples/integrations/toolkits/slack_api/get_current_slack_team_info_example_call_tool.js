@@ -19,8 +19,8 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "specific_team_id": "T12345678",
-  "query_by_domain": "example.com,sub.example.com"
+  "query_by_domain": "engineering.example.com,design.example.com",
+  "specific_team_id": "T1234567890"
 };
 
 const response = await client.tools.execute({

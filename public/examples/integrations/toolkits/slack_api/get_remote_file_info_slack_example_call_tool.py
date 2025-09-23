@@ -18,7 +18,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'file_id': 'F1234567890', 'file_external_identifier': 'external-guid-9876'
+    'file_id': 'F1234567890', 'file_external_identifier': 'external-guid-abc123'
 }
 
 response = client.tools.execute(

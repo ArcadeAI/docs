@@ -19,7 +19,7 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "email_to_check": "jane.doe@example.com"
+  "email_to_check": "alice@example.com"
 };
 
 const response = await client.tools.execute({

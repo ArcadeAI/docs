@@ -20,7 +20,7 @@ await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
   "usergroup_id": "S12345",
-  "workspace_id": "T67890",
+  "workspace_id": "T98765",
   "include_member_count_in_channels": true
 };
 

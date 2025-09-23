@@ -18,7 +18,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'usergroup_id': 'S12345', 'workspace_id': 'T67890', 'include_member_count_in_channels': True
+    'usergroup_id': 'S12345', 'workspace_id': 'T98765', 'include_member_count_in_channels': True
 }
 
 response = client.tools.execute(

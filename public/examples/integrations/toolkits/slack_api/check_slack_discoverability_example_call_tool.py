@@ -18,7 +18,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'email_to_check': 'jane.doe@example.com'
+    'email_to_check': 'alice@example.com'
 }
 
 response = client.tools.execute(

@@ -19,7 +19,7 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "team_id_for_org_token": "T0123456789",
+  "team_id_for_org_token": "T12345ORG",
   "include_user_count": true,
   "include_disabled_groups": false,
   "include_users_in_group": true

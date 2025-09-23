@@ -18,10 +18,10 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'file_size_in_bytes': 5242880,
+    'file_size_in_bytes': 204800,
     'file_name': 'error_log.txt',
     'snippet_syntax_type': 'text',
-    'alt_text_description': 'Screenshot of error dialog showing stack trace'
+    'alt_text_description': 'Application error log file from 2025-09-23'
 }
 
 response = client.tools.execute(

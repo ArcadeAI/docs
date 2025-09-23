@@ -18,7 +18,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'conversation_id': 'C12345678', 'include_locale': True, 'include_member_count': True
+    'conversation_id': 'C01234567', 'include_locale': True, 'include_member_count': True
 }
 
 response = client.tools.execute(

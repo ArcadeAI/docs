@@ -19,10 +19,10 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "pagination_cursor": "dXNlcjoxMjM0NTY3OA==",
+  "pagination_cursor": "abc123cursor",
   "maximum_items_to_return": 50,
-  "specific_user_id": "U12345ABC",
-  "encoded_team_id": "T98765ENC"
+  "specific_user_id": "U12345678",
+  "encoded_team_id": "T12345encoded"
 };
 
 const response = await client.tools.execute({

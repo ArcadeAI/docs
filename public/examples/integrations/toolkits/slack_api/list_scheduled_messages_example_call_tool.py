@@ -19,11 +19,11 @@ client.auth.wait_for_completion(auth_response)
 
 tool_input = {
     'channel_id': 'C1234567890',
-    'pagination_cursor': 'dXNlcjpVMDYxTkZUQw==',
-    'latest_timestamp': '1735728000',
+    'pagination_cursor': 'dXNlcjpVMDYxTkY=',
+    'latest_timestamp': '1735689600',
     'max_number_of_entries': 25,
-    'oldest_timestamp': '1735641600',
-    'team_id': 'T9876543210'
+    'oldest_timestamp': '1735603200',
+    'team_id': 'T123ABC'
 }
 
 response = client.tools.execute(

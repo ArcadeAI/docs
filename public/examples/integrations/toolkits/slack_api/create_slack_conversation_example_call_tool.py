@@ -18,8 +18,8 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'channel_name': 'project_alpha-updates',
-    'encoded_team_id': 'T12345ABCDEF',
+    'channel_name': 'project_alpha_updates',
+    'encoded_team_id': 'T12345ORG',
     'create_private_channel': False
 }
 

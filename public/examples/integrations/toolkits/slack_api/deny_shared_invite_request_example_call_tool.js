@@ -19,8 +19,8 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "shared_channel_invite_id": "S1234567890",
-  "deny_invite_message": "We cannot approve external access at this time."
+  "shared_channel_invite_id": "SCI1234567890",
+  "deny_invite_message": "We cannot approve external members for this channel at this time."
 };
 
 const response = await client.tools.execute({

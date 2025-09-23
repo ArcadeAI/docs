@@ -19,7 +19,7 @@ client.auth.wait_for_completion(auth_response)
 
 tool_input = {
     'workspace_team_id': 'T12345678',
-    'pagination_cursor': 'dXNlcjpVMDYxTkYxV...',
+    'pagination_cursor': 'dXNlcjpVMDYxTkZUQjA=',
     'user_retrieval_limit': 50,
     'return_only_active_users': True,
     'include_deactivated_user_workspaces': False,

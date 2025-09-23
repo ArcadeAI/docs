@@ -18,7 +18,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'call_id': 'C1234567890'
+    'call_id': 'R0lGODlhM0A0'
 }
 
 response = client.tools.execute(

@@ -18,9 +18,8 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'pagination_cursor': 'dXNlcjpVMDYxTkZUVEQ=',
-    'maximum_number_of_channels': 50,
-    'team_id_for_org_app': 'T1234567890',
+    'pagination_cursor': 'dXNlcjpVMEc5V0ZYTlo=',
+    'maximum_number_of_channels': 200,
     'channel_types': 'public_channel,private_channel',
     'exclude_archived_channels': True
 }

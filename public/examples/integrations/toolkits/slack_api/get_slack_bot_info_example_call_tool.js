@@ -19,8 +19,8 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "target_bot_id": "B0456K7QZ",
-  "team_id_for_org_token_use": "T12345ENT"
+  "target_bot_id": "B0123ABCD",
+  "team_id_for_org_token_use": "T9876XYZ"
 };
 
 const response = await client.tools.execute({

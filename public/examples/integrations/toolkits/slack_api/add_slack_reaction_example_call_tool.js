@@ -19,9 +19,9 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "slack_channel_id": "C04ABCD1234",
+  "slack_channel_id": "C024BE7LR",
   "reaction_emoji_name": "thumbsup",
-  "message_timestamp": "1623850245.000200"
+  "message_timestamp": "1623867600.000200"
 };
 
 const response = await client.tools.execute({

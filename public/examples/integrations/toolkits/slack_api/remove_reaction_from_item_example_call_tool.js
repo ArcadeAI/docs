@@ -21,7 +21,7 @@ await client.auth.waitForCompletion(authResponse);
 const toolInput = {
   "reaction_emoji_name": "thumbsup",
   "message_channel_id": "C024BE91L",
-  "message_timestamp": "1611784860.000200"
+  "message_timestamp": "1623850247.000200"
 };
 
 const response = await client.tools.execute({

@@ -18,7 +18,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'conversation_id': 'C0456K9Q2'
+    'conversation_id': 'C0456ABCDEF'
 }
 
 response = client.tools.execute(

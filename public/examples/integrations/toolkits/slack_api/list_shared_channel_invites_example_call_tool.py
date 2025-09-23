@@ -20,7 +20,7 @@ client.auth.wait_for_completion(auth_response)
 tool_input = {
     'workspace_team_id': 'T12345678',
     'maximum_invites_to_return': 25,
-    'pagination_cursor': 'dXNlcjpVMEc5V0ZYTlo='
+    'pagination_cursor': 'dXNlcjpVMEc5V0ZYT0Q='
 }
 
 response = client.tools.execute(

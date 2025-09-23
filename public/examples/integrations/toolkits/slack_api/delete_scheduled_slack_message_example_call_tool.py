@@ -18,8 +18,8 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'channel_id': 'C024BE91L',
-    'scheduled_message_id': 'Q1298393284',
+    'channel_id': 'C1234567890',
+    'scheduled_message_id': 'Q1298391293',
     'delete_as_authenticated_user': True
 }
 

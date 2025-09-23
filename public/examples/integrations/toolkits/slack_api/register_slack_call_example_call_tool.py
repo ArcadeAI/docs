@@ -18,21 +18,21 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'unique_call_id': 'ext-call-987654',
-    'call_join_url': 'https://meet.example.com/j/987654',
-    'optional_human_readable_display_id': 'MEET-987654',
-    'desktop_app_join_url': 'slack-call://open?call_id=987654',
-    'call_start_timestamp': 1735689600,
-    'call_title': 'Weekly Sync',
+    'unique_call_id': 'call_3p_7890',
+    'call_join_url': 'https://meet.example.com/j/abc123',
+    'optional_human_readable_display_id': 'TeamSync-0925',
+    'desktop_app_join_url': 'slackcall://launch?room=abc123',
+    'call_start_timestamp': 1764364800,
+    'call_title': 'Weekly Team Sync',
     'call_creator_user_id': 'U12345678',
-    'participants_info': [   {   'slack_id': 'U11111111',
-                                 'external_id': 'alice@example.com',
-                                 'display_name': 'Alice',
-                                 'avatar_url': 'https://example.com/avatars/alice.png'},
-                             {   'slack_id': 'U22222222',
-                                 'external_id': 'bob@example.com',
-                                 'display_name': 'Bob',
-                                 'avatar_url': 'https://example.com/avatars/bob.png'}]
+    'participants_info': [   {   'slack_id': 'U23456789',
+                                 'external_id': 'ext_001',
+                                 'display_name': 'Alice Johnson',
+                                 'avatar_url': 'https://example.com/avatars/alice.jpg'},
+                             {   'slack_id': 'U34567890',
+                                 'external_id': 'ext_002',
+                                 'display_name': 'Bob Lee',
+                                 'avatar_url': 'https://example.com/avatars/bob.jpg'}]
 }
 
 response = client.tools.execute(

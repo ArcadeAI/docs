@@ -20,7 +20,7 @@ await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
   "workspace_id": "T1234567890",
-  "pagination_cursor": "dXNlcjpVMDYxTkZUQ0E=",
+  "pagination_cursor": "dXNlcjpVMDYxTkY=",
   "result_limit": 100
 };
 

@@ -18,9 +18,9 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'channel_name': 'project-collab',
-    'invite_id': 'INV-9a8b7c6d',
-    'workspace_id': 'T12345678',
+    'channel_name': 'partner-project',
+    'slack_channel_id_to_accept': 'C1234567890',
+    'workspace_id': 'T9876543210',
     'is_channel_private': False,
     'use_free_trial': True
 }

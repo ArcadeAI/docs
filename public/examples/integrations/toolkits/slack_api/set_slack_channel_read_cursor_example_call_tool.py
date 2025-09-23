@@ -18,7 +18,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'channel_id': 'C024BE91L', 'timestamp_of_message_to_mark_as_read': '1623854876.000200'
+    'channel_id': 'C12345678', 'timestamp_of_message_to_mark_as_read': '1657890123.000200'
 }
 
 response = client.tools.execute(

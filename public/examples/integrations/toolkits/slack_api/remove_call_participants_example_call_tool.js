@@ -19,10 +19,10 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "call_id": "R12345678",
+  "call_id": "C1234567890",
   "users_to_remove": [
-    "U11111111",
-    "U22222222"
+    "U2345678901",
+    "U3456789012"
   ]
 };
 

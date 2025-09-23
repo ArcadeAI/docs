@@ -18,7 +18,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'workspace_id': 'T12345678', 'new_workspace_name': 'Acme Engineering'
+    'workspace_id': 'T01234567', 'new_workspace_name': 'Acme Corp Workspace'
 }
 
 response = client.tools.execute(

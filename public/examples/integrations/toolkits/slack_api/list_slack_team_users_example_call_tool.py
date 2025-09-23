@@ -18,9 +18,9 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'pagination_cursor': 'dXNlcjpVMDYxTkZUQ05F',
+    'pagination_cursor': 'dXNlcjpVMDYxTkYxR0Y=',
     'maximum_items_to_return': 100,
-    'slack_team_id': 'T01234567',
+    'slack_team_id': 'T12345678',
     'include_user_locale': True
 }
 

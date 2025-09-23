@@ -18,12 +18,12 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'search_query': 'project roadmap Q3 budget',
+    'search_query': 'quarterly financial report Q2',
     'items_per_page': 25,
     'results_page_number': 1,
     'sort_files_by': 'timestamp',
     'sort_direction': 'desc',
-    'encoded_team_id': 'T12345ORG',
+    'encoded_team_id': 'T12345XYZ',
     'enable_query_highlight': True
 }
 

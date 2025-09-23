@@ -18,14 +18,13 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'call_id': 'R1234567890',
-    'participant_users': [   {   'slack_id': 'U2345678901',
-                                 'display_name': 'Ava Chen',
-                                 'avatar_url': 'https://example.com/avatars/ava.png'},
-                             {   'external_id': 'ext-98765',
-                                 'display_name': 'Dev Team Bot',
-                                 'avatar_url': 'https://example.com/avatars/bot.png'},
-                             {'slack_id': 'U3456789012', 'display_name': 'Liam Patel'}]
+    'call_id': 'C12345678',
+    'participant_users': [   {   'slack_id': 'U23456789',
+                                 'display_name': 'Alice Chen',
+                                 'avatar_url': 'https://example.com/alice.jpg'},
+                             {   'external_id': 'external-987',
+                                 'display_name': 'Bob Martín',
+                                 'avatar_url': 'https://example.com/bob.png'}]
 }
 
 response = client.tools.execute(

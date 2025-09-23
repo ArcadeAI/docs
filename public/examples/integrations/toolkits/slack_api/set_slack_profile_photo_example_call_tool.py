@@ -18,10 +18,10 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'crop_box_size': '200',
-    'crop_box_x_coordinate': '50',
-    'crop_y_coordinate': '50',
-    'profile_photo_image': '[file_content]'
+    'crop_box_size': '128',
+    'crop_box_x_coordinate': '10',
+    'crop_y_coordinate': '20',
+    'profile_photo_image': '[image_data_placeholder]'
 }
 
 response = client.tools.execute(

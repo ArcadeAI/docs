@@ -19,9 +19,9 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "channel_name": "project-collab",
-  "invite_id": "INV-9a8b7c6d",
-  "workspace_id": "T12345678",
+  "channel_name": "partner-project",
+  "slack_channel_id_to_accept": "C1234567890",
+  "workspace_id": "T9876543210",
   "is_channel_private": false,
   "use_free_trial": true
 };

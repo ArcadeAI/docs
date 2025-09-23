@@ -19,8 +19,8 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "target_channel_ids": "C12345678,C23456789",
-  "file_external_identifier": "app-file-guid-98765"
+  "target_channel_ids": "C12345678,C87654321",
+  "file_external_identifier": "app-file-guid-001"
 };
 
 const response = await client.tools.execute({

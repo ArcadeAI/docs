@@ -19,8 +19,8 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "channel_id": "C01234567",
-  "message_timestamp": "1623855600.000200"
+  "channel_id": "C1234567890",
+  "message_timestamp": "1627384957.000200"
 };
 
 const response = await client.tools.execute({

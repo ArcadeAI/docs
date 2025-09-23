@@ -19,10 +19,10 @@ client.auth.wait_for_completion(auth_response)
 
 tool_input = {
     'slack_channel_id': 'C12345678',
-    'target_bookmark_id': 'B987654321',
-    'bookmark_title': 'Project Plan',
-    'bookmark_link': 'https://example.com/project-plan',
-    'emoji_tag': ':clipboard:'
+    'target_bookmark_id': 'BKMK-98765',
+    'bookmark_title': 'Design Spec - Q4',
+    'bookmark_link': 'https://example.com/design-spec-q4',
+    'emoji_tag': ':bookmark:'
 }
 
 response = client.tools.execute(

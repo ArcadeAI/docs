@@ -19,8 +19,8 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "target_user_ids": "U12345,U67890",
-  "return_full_im_channel_definition": false,
+  "target_user_ids": "U12345,U23456",
+  "return_full_im_channel_definition": true,
   "prevent_creation": false
 };
 

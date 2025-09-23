@@ -19,9 +19,9 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "pagination_cursor": "dXNlcjpVMDYxTkZUQ05F",
+  "pagination_cursor": "dXNlcjpVMDYxTkYxR0Y=",
   "maximum_items_to_return": 100,
-  "slack_team_id": "T01234567",
+  "slack_team_id": "T12345678",
   "include_user_locale": true
 };
 

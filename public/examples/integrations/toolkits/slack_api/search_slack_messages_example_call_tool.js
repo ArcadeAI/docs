@@ -19,13 +19,12 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "search_query": "deploy rollback script error",
+  "search_query": "deploy rollback bug in production",
   "results_per_page": 25,
   "page_number": 1,
   "pagination_cursor": "*",
   "sort_results_by": "score",
   "sort_direction": "desc",
-  "team_id": "T1234567890",
   "enable_query_highlighting": true
 };
 
