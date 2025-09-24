@@ -9,6 +9,7 @@ import {
   CheckCircle,
   Key,
   Search,
+  Terminal,
   Users,
   X,
   Plus,
@@ -17,13 +18,23 @@ import React, { useCallback, useMemo, useState } from "react";
 import { ComingSoonProvider } from "./ComingSoonContext";
 import Link from "next/link";
 
-export type ToolkitType = "arcade" | "verified" | "community" | "auth";
+export type ToolkitType =
+  | "arcade"
+  | "arcade_starter"
+  | "verified"
+  | "community"
+  | "auth";
 
 const typeConfig = {
   arcade: {
-    label: "Arcade Toolkit",
+    label: "Arcade Optimized Toolkit",
     icon: BadgeCheck,
     color: "text-emerald-400",
+  },
+  arcade_starter: {
+    label: "Arcade Starter Toolkit",
+    icon: Terminal,
+    color: "text-orange-400",
   },
   verified: {
     label: "Verified Toolkit",
@@ -105,7 +116,7 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
             <p className="text-sm leading-relaxed text-gray-400 sm:text-base">
               There are 4 designations for Arcade toolkits:
             </p>
-            <div className="grid grid-cols-1 gap-4 sm:gap-4 md:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 sm:gap-4 md:grid-cols-3">
               {Object.entries(typeConfig).map(
                 ([key, { label, icon: Icon, color }]) => (
                   <div key={key} className="flex items-start space-x-4">
@@ -117,8 +128,32 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
                         {label}
                       </h2>
                       <p className="mt-1 text-xs text-gray-400 sm:text-sm">
-                        {key === "arcade" &&
-                          "Official toolkits developed and maintained by Arcade."}
+                        {key === "arcade" && (
+                          <>
+                            Official toolkits hand-crafted by Arcade that are
+                            ready for use and optimized for LLM-usage.{" "}
+                            <a
+                              href="/home/use-tools/types-of-tools#optimized-tools"
+                              style={{ textDecoration: "none" }}
+                            >
+                              Learn more
+                            </a>
+                            .
+                          </>
+                        )}
+                        {key === "arcade_starter" && (
+                          <>
+                            Auto-generated toolkits developed by Arcade that may
+                            require customization.{" "}
+                            <a
+                              href="/home/use-tools/types-of-tools#starter-tools"
+                              style={{ textDecoration: "none" }}
+                            >
+                              Learn more
+                            </a>
+                            .
+                          </>
+                        )}
                         {key === "verified" &&
                           "Community-created toolkits, thoroughly tested and verified by Arcade."}
                         {key === "community" &&

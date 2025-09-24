@@ -6,13 +6,18 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { BadgeCheck, CheckCircle, Key, Users } from "lucide-react";
+import { BadgeCheck, CheckCircle, Key, Terminal, Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
 import { ComingSoonModal } from "./ComingSoonModal";
 
-type ToolkitType = "arcade" | "verified" | "community" | "auth";
+type ToolkitType =
+  | "arcade"
+  | "arcade_starter"
+  | "verified"
+  | "community"
+  | "auth";
 
 interface ToolCardProps {
   name: string;
@@ -30,9 +35,16 @@ const typeConfig: Record<
   arcade: {
     className:
       "border-emerald-600/20 hover:border-primary bg-emerald-600/[0.02] hover:bg-emerald-600/[0.03]",
-    label: "Arcade Toolkit",
+    label: "Arcade Optimized Toolkit",
     icon: BadgeCheck,
     color: "text-emerald-400",
+  },
+  arcade_starter: {
+    className:
+      "border-orange-600/20 hover:border-primary bg-orange-600/[0.02] hover:bg-orange-600/[0.03]",
+    label: "Arcade Starter Toolkit",
+    icon: Terminal,
+    color: "text-orange-400",
   },
   verified: {
     className:

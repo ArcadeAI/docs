@@ -8,7 +8,7 @@ TOOL_NAME = "Hubspot.GetCompanyDataByKeywords"
 
 auth_response = client.tools.authorize(
     tool_name=TOOL_NAME,
-    user_id=TOOL_NAME
+    user_id=USER_ID
 )
 
 if auth_response.status != "completed":
