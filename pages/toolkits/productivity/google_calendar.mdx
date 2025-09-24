@@ -7,18 +7,20 @@ import TableOfContents from "@/components/TableOfContents";
 import ToolFooter from "@/components/ToolFooter";
 
 <ToolInfo
-  description="Enable agents to interact with Google Calendar events."
+  description="Enable agents to interact with Google Calendar"
   author="Arcade"
   authType="oauth2"
   authProviderName="Google"
-  versions={["0.1.0"]}
+  versions={["3.1.0"]}
 />
 
 <Badges repo="arcadeai/arcade_google_calendar" />
 
-The Arcade Google Calendar toolkit provides a pre-built set of tools for interacting with Google Calendar. These tools make it easy to build agents and AI apps that can:
+The Arcade Google Calendar toolkit provides a pre-built set of tools for interacting with a user’s Google Calendar. These tools make it easy to build agents and apps that can:
 
-- Create, update, list, and delete events
+- Discover calendars accessible to the user and inspect user/profile/calendar environment (ListCalendars, WhoAmI).
+- Create, update, list, and delete events (CreateEvent, UpdateEvent, ListEvents, DeleteEvent).
+- Find available meeting times across attendees within a date/time range (FindTimeSlotsWhenEveryoneIsFree).
 
 ## Available Tools
 
@@ -26,14 +28,17 @@ These tools are currently available in the Arcade Google Calendar toolkit.
 
 <TableOfContents
   headers={["Tool Name", "Description"]}
-  data={[
-    ["GoogleCalendar.ListCalendars", "List the calendars that the user can see."],
-    ["GoogleCalendar.CreateEvent", "Create a new event in Google Calendar."],
-    ["GoogleCalendar.ListEvents", "List events from Google Calendar."],
-    ["GoogleCalendar.UpdateEvent", "Update an existing event in Google Calendar."],
-    ["GoogleCalendar.DeleteEvent", "Delete an event from Google Calendar."],
-    ["GoogleCalendar.FindTimeSlotsWhenEveryoneIsFree", "Provides time slots when everyone is free within a given date range and time boundaries."],
-  ]}
+  data={
+    [
+      ["GoogleCalendar.ListCalendars", "List all calendars accessible by the user."],
+      ["GoogleCalendar.CreateEvent", "Create a new event/meeting/sync/meetup in the specified calendar."],
+      ["GoogleCalendar.ListEvents", "List events from Google Calendar."],
+      ["GoogleCalendar.UpdateEvent", "Update an existing event in the specified calendar with new details."],
+      ["GoogleCalendar.DeleteEvent", "Delete an event from Google Calendar."],
+      ["GoogleCalendar.FindTimeSlotsWhenEveryoneIsFree", "Provides time slots when everyone is free within a given date range and time boundaries."],
+      ["GoogleCalendar.WhoAmI", "Get comprehensive user profile and Google Calendar environment information."],
+    ]
+  }
 />
 
 <Tip>
@@ -51,25 +56,22 @@ These tools are currently available in the Arcade Google Calendar toolkit.
     {
       label: "Call the Tool with User Authorization",
       content: {
-        Python: [
-          "/examples/integrations/toolkits/google/calendar/list_calendars_example_call_tool.py",
-        ],
-        JavaScript: ["/examples/integrations/toolkits/google/calendar/list_calendars_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/google_calendar/list_calendars_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/google_calendar/list_calendars_example_call_tool.js"],
       },
-    }
+    },
   ]}
 />
 
-List the calendars that the user can access.
+List all calendars accessible by the user.
 
 **Parameters**
 
-- **`max_results`** _(int, optional)_ The maximum number of calendars to return. Up to 250 calendars, defaults to 10.
-- **`show_deleted`** _(boolean, optional)_ Whether to show deleted calendars. Defaults to False.
-- **`show_hidden`** _(boolean, optional)_ Whether to show hidden calendars. Defaults to False.
-- **`next_page_token`** _(string, optional)_ The token to retrieve the next page of calendars. Optional.
+- **`max_results`** (`integer`, optional) The maximum number of calendars to return. Up to 250 calendars, defaults to 10.
+- **`show_deleted`** (`boolean`, optional) Whether to show deleted calendars. Defaults to False
+- **`show_hidden`** (`boolean`, optional) Whether to show hidden calendars. Defaults to False
+- **`next_page_token`** (`string`, optional) The token to retrieve the next page of calendars. Optional.
 
----
 
 ## GoogleCalendar.CreateEvent
 
@@ -77,31 +79,30 @@ List the calendars that the user can access.
 <TabbedCodeBlock
   tabs={[
     {
-      label: "Call the Tool with User Authorization",
+      label: "Call the Tool Directly",
       content: {
-        Python: [
-          "/examples/integrations/toolkits/google/calendar/create_event_example_call_tool.py",
-        ],
-        JavaScript: ["/examples/integrations/toolkits/google/calendar/create_event_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/google_calendar/create_event_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/google_calendar/create_event_example_call_tool.js"],
       },
-    }
+    },
   ]}
 />
 
-Create a new event in the specified calendar.
+Create a new event/meeting/sync/meetup in the specified calendar.
 
 **Parameters**
 
-- **`summary`** _(string, required)_ The title of the event
-- **`start_datetime`** _(string, required)_ The datetime when the event starts in ISO 8601 format, e.g., '2024-12-31T15:30:00'.
-- **`end_datetime`** _(string, required)_ The datetime when the event ends in ISO 8601 format, e.g., '2024-12-31T17:30:00'.
-- **`calendar_id`** _(string, optional, Defaults to `'primary'`)_ The ID of the calendar to create the event in, usually 'primary'.
-- **`description`** _(string, optional)_ The description of the event
-- **`location`** _(string, optional)_ The location of the event
-- **`visibility`** _(string, optional)_ The visibility of the event
-- **`attendee_emails`** _(array, optional)_ The list of attendee emails. Must be valid email addresses e.g., `username@domain.com`.
+- **`summary`** (`string`, required) The title of the event
+- **`start_datetime`** (`string`, required) The datetime when the event starts in ISO 8601 format, e.g., '2024-12-31T15:30:00'.
+- **`end_datetime`** (`string`, required) The datetime when the event ends in ISO 8601 format, e.g., '2024-12-31T17:30:00'.
+- **`calendar_id`** (`string`, optional) The ID of the calendar to create the event in, usually 'primary'.
+- **`description`** (`string`, optional) The description of the event
+- **`location`** (`string`, optional) The location of the event
+- **`visibility`** (`Enum` [EventVisibility](/toolkits/productivity/google_calendar/reference#EventVisibility), optional) The visibility of the event
+- **`attendee_emails`** (`array[string]`, optional) The list of attendee emails. Must be valid email addresses e.g., username@domain.com.
+- **`send_notifications_to_attendees`** (`Enum` [SendUpdatesOptions](/toolkits/productivity/google_calendar/reference#SendUpdatesOptions), optional) Should attendees be notified by email of the invitation? (none, all, external_only)
+- **`add_google_meet`** (`boolean`, optional) Whether to add a Google Meet link to the event. Defaults to False.
 
----
 
 ## GoogleCalendar.ListEvents
 
@@ -111,12 +112,10 @@ Create a new event in the specified calendar.
     {
       label: "Call the Tool with User Authorization",
       content: {
-        Python: [
-          "/examples/integrations/toolkits/google/calendar/list_events_example_call_tool.py",
-        ],
-        JavaScript: ["/examples/integrations/toolkits/google/calendar/list_events_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/google_calendar/list_events_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/google_calendar/list_events_example_call_tool.js"],
       },
-    }
+    },
   ]}
 />
 
@@ -131,12 +130,11 @@ For example: If min_end_datetime is set to 2024-09-15T09:00:00 and max_start_dat
 
 **Parameters**
 
-- **`min_end_datetime`** _(string, required)_ Filter by events that end on or after this datetime in ISO 8601 format, e.g., '2024-09-15T09:00:00'.
-- **`max_start_datetime`** _(string, required)_ Filter by events that start before this datetime in ISO 8601 format, e.g., '2024-09-16T17:00:00'.
-- **`calendar_id`** _(string, optional)_ The ID of the calendar to list events from
-- **`max_results`** _(integer, optional)_ The maximum number of events to return
+- **`min_end_datetime`** (`string`, required) Filter by events that end on or after this datetime in ISO 8601 format, e.g., '2024-09-15T09:00:00'.
+- **`max_start_datetime`** (`string`, required) Filter by events that start before this datetime in ISO 8601 format, e.g., '2024-09-16T17:00:00'.
+- **`calendar_id`** (`string`, optional) The ID of the calendar to list events from
+- **`max_results`** (`integer`, optional) The maximum number of events to return
 
----
 
 ## GoogleCalendar.UpdateEvent
 
@@ -146,12 +144,10 @@ For example: If min_end_datetime is set to 2024-09-15T09:00:00 and max_start_dat
     {
       label: "Call the Tool with User Authorization",
       content: {
-        Python: [
-          "/examples/integrations/toolkits/google/calendar/update_event_example_call_tool.py",
-        ],
-        JavaScript: ["/examples/integrations/toolkits/google/calendar/update_event_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/google_calendar/update_event_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/google_calendar/update_event_example_call_tool.js"],
       },
-    }
+    },
   ]}
 />
 
@@ -161,19 +157,19 @@ Update an existing event in the specified calendar with the provided details. On
 
 **Parameters**
 
-- **`event_id`** _(string, required)_ The ID of the event to update
-- **`updated_start_datetime`** _(string, optional)_ The updated datetime that the event starts in ISO 8601 format, e.g., '2024-12-31T15:30:00'.
-- **`updated_end_datetime`** _(string, optional)_ The updated datetime that the event ends in ISO 8601 format, e.g., '2024-12-31T17:30:00'.
-- **`updated_calendar_id`** _(string, optional)_ The updated ID of the calendar containing the event.
-- **`updated_summary`** _(string, optional)_ The updated title of the event
-- **`updated_description`** _(string, optional)_ The updated description of the event
-- **`updated_location`** _(string, optional)_ The updated location of the event
-- **`updated_visibility`** _(enum ([EventVisibility](#eventvisibility)), optional)_ The visibility of the event
-- **`attendee_emails_to_add`** _(array, optional)_ The list of attendee emails to add. Must be valid email addresses e.g., `username@domain.com`.
-- **`attendee_emails_to_remove`** _(array, optional)_ The list of attendee emails to remove. Must be valid email addresses e.g., `username@domain.com`.
-- **`send_updates`** _(enum ([SendUpdatesOptions](#sendupdatesoptions)), optional, Defaults to `'all'`)_ Should attendees be notified of the update? (none, all, external_only)
+- **`event_id`** (`string`, required) The ID of the event to update
+- **`updated_start_datetime`** (`string`, optional) The updated datetime that the event starts in ISO 8601 format, e.g., '2024-12-31T15:30:00'.
+- **`updated_end_datetime`** (`string`, optional) The updated datetime that the event ends in ISO 8601 format, e.g., '2024-12-31T17:30:00'.
+- **`updated_calendar_id`** (`string`, optional) The updated ID of the calendar containing the event.
+- **`updated_summary`** (`string`, optional) The updated title of the event
+- **`updated_description`** (`string`, optional) The updated description of the event
+- **`updated_location`** (`string`, optional) The updated location of the event
+- **`updated_visibility`** (`Enum` [EventVisibility](/toolkits/productivity/google_calendar/reference#EventVisibility), optional) The visibility of the event
+- **`attendee_emails_to_add`** (`array[string]`, optional) The list of attendee emails to add. Must be valid email addresses e.g., username@domain.com.
+- **`attendee_emails_to_remove`** (`array[string]`, optional) The list of attendee emails to remove. Must be valid email addresses e.g., username@domain.com.
+- **`send_notifications_to_attendees`** (`Enum` [SendUpdatesOptions](/toolkits/productivity/google_calendar/reference#SendUpdatesOptions), optional) Should attendees be notified of the update? (none, all, external_only)
+- **`update_google_meet`** (`Enum` [UpdateGoogleMeetOptions](/toolkits/productivity/google_calendar/reference#UpdateGoogleMeetOptions), optional) Whether to update the Google Meet link to the event. (none, add, remove)
 
----
 
 ## GoogleCalendar.DeleteEvent
 
@@ -183,12 +179,10 @@ Update an existing event in the specified calendar with the provided details. On
     {
       label: "Call the Tool with User Authorization",
       content: {
-        Python: [
-          "/examples/integrations/toolkits/google/calendar/delete_event_example_call_tool.py",
-        ],
-        JavaScript: ["/examples/integrations/toolkits/google/calendar/delete_event_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/google_calendar/delete_event_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/google_calendar/delete_event_example_call_tool.js"],
       },
-    }
+    },
   ]}
 />
 
@@ -196,9 +190,10 @@ Delete an event from Google Calendar.
 
 **Parameters**
 
-- **`event_id`** _(string, required)_ The ID of the event to delete
-- **`calendar_id`** _(string, optional, Defaults to `'primary'`)_ The ID of the calendar containing the event
-- **`send_updates`** _(enum ([SendUpdatesOptions](#sendupdatesoptions)), optional, Defaults to `'all'`)_ Specifies which attendees to notify about the deletion
+- **`event_id`** (`string`, required) The ID of the event to delete
+- **`calendar_id`** (`string`, optional) The ID of the calendar containing the event
+- **`send_updates`** (`Enum` [SendUpdatesOptions](/toolkits/productivity/google_calendar/reference#SendUpdatesOptions), optional) Specifies which attendees to notify about the deletion
+
 
 ## GoogleCalendar.FindTimeSlotsWhenEveryoneIsFree
 
@@ -208,12 +203,10 @@ Delete an event from Google Calendar.
     {
       label: "Call the Tool with User Authorization",
       content: {
-        Python: [
-          "/examples/integrations/toolkits/google/calendar/find_free_slots_example_call_tool.py",
-        ],
-        JavaScript: ["/examples/integrations/toolkits/google/calendar/find_free_slots_example_call_tool.js"],
+        Python: ["/examples/integrations/toolkits/google_calendar/find_time_slots_when_everyone_is_free_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/google_calendar/find_time_slots_when_everyone_is_free_example_call_tool.js"],
       },
-    }
+    },
   ]}
 />
 
@@ -221,11 +214,33 @@ Provides time slots when everyone is free within a given date range and time bou
 
 **Parameters**
 
-- **`email_addresses`** _(list of strings, defaults to `None`)_ The list of email addresses from people in the same organization domain (apart from the currently logged in user) to search for free time slots. Defaults to None, which will return free time slots for the current user only.
-- **`start_date`** _(string, optional, Defaults to `None`)_ The start date to search for time slots in the format 'YYYY-MM-DD'. Defaults to today's date. It will search starting from this date at the time 00:00:00.
-- **`end_date`** _(string, optional, Defaults to `None`)_ The end date to search for time slots in the format 'YYYY-MM-DD'. Defaults to seven days from the start date. It will search until this date at the time 23:59:59.
-- **`start_time_boundary`** _(string, defaults to "08:00")_ Will return free slots in any given day starting from this time in the format 'HH:MM'. Defaults to '08:00', which is a usual business hour start time.
-- **`end_time_boundary`** _(string, defaults to "18:00")_ Will return free slots in any given day ending at this time in the format 'HH:MM'. Defaults to '18:00', which is a usual business hour end time.
+- **`email_addresses`** (`array[string]`, optional) The list of email addresses from people in the same organization domain (apart from the currently logged in user) to search for free time slots. Defaults to None, which will return free time slots for the current user only.
+- **`start_date`** (`string`, optional) The start date to search for time slots in the format 'YYYY-MM-DD'. Defaults to today's date. It will search starting from this date at the time 00:00:00.
+- **`end_date`** (`string`, optional) The end date to search for time slots in the format 'YYYY-MM-DD'. Defaults to seven days from the start date. It will search until this date at the time 23:59:59.
+- **`start_time_boundary`** (`string`, optional) Will return free slots in any given day starting from this time in the format 'HH:MM'. Defaults to '08:00', which is a usual business hour start time.
+- **`end_time_boundary`** (`string`, optional) Will return free slots in any given day until this time in the format 'HH:MM'. Defaults to '18:00', which is a usual business hour end time.
+
+
+## GoogleCalendar.WhoAmI
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: ["/examples/integrations/toolkits/google_calendar/who_am_i_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/toolkits/google_calendar/who_am_i_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Get comprehensive user profile and Google Calendar environment information.
+
+**Parameters**
+
+This tool does not take any parameters.
 
 ---
 
@@ -233,7 +248,7 @@ Provides time slots when everyone is free within a given date range and time bou
 
 The Arcade Google Calendar toolkit uses the [Google auth provider](/home/auth-providers/google) to connect to users' Google accounts.
 
-With the hosted Arcade Engine, there's nothing to configure. Your users will see `Arcade` as the name of the application that's requesting permission.
+With the Arcade Cloud Platform, there's nothing to configure. Your users will see `Arcade` as the name of the application that's requesting permission.
 
 With a self-hosted installation of Arcade, you need to [configure the Google auth provider](/home/auth-providers/google#configuring-google-auth) with your own Google app credentials.
 
@@ -252,10 +267,15 @@ Defines the visibility of an event.
 
 ### SendUpdatesOptions
 
-Options for sending updates about events.
-
 - **`NONE`**: No notifications are sent.
 - **`ALL`**: Notifications are sent to all guests.
 - **`EXTERNAL_ONLY`**: Notifications are sent to non-Google Calendar guests only.
+
+## UpdateGoogleMeetOptions
+
+- **`NONE`**: No action is taken.
+- **`ADD`**: Add the Google Meet link to the event.
+- **`REMOVE`**: Remove the Google Meet link from the event.
+
 
 <ToolFooter pipPackageName="arcade_google_calendar" />

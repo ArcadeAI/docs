@@ -63,7 +63,7 @@ const typeConfig: Record<
   auth: {
     className:
       "border-purple-600/20 hover:border-primary bg-purple-600/[0.02] hover:bg-purple-600/[0.03]",
-    label: "Auth Integration",
+    label: "Auth Provider",
     icon: Key,
     color: "text-purple-400",
   },
