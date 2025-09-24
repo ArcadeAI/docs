@@ -1,9 +1,9 @@
-import { Arcade } from '@arcadeai/arcadejs';
+import { Arcade } from "@arcadeai/arcadejs";
 
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
-const USER_ID = '{arcade_user_id}';
-const TOOL_NAME = 'NotionToolkit.GetObjectMetadata';
+const USER_ID = "{arcade_user_id}";
+const TOOL_NAME = "NotionToolkit.GetObjectMetadata";
 
 // Start the authorization process
 const authResponse = await client.tools.authorize({
@@ -11,7 +11,7 @@ const authResponse = await client.tools.authorize({
   user_id: USER_ID,
 });
 
-if (authResponse.status !== 'completed') {
+if (authResponse.status !== "completed") {
   console.log(`Click this link to authorize: ${authResponse.url}`);
 }
 
@@ -19,8 +19,8 @@ if (authResponse.status !== 'completed') {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  object_title: 'Arcade Toolkit Notes',
-  object_type: 'page',
+  object_title: "Arcade Toolkit Notes",
+  object_type: "page"
 };
 
 const response = await client.tools.execute({

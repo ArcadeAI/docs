@@ -17,7 +17,7 @@ export const meta: MetaRecord = {
     title: (
       <span className="flex items-center gap-2 font-medium">
         <Plug className="size-4" />
-        Integrations
+        Toolkits
       </span>
     ),
     href: "/toolkits",
@@ -29,7 +29,6 @@ export const meta: MetaRecord = {
         API Reference
       </span>
     ),
-    type: "page",
     href: "https://reference.arcade.dev/",
   },
   "contact-us": {
@@ -45,37 +44,116 @@ export const meta: MetaRecord = {
     //   pagination: false,
     // },
   },
-  "getting-started": {
+
+  "-- Getting Started": {
     type: "separator",
     title: "Using Arcade",
   },
-  "authoring-tools": {
+  quickstart: {
+    title: "Quickstart",
+  },
+  "api-keys": {
+    title: "Get an API key",
+  },
+  "-- Authoring Tools": {
     type: "separator",
     title: "Authoring Tools",
   },
-  "agent-frameworks": {
+  "build-tools": {
+    title: "Build tools",
+  },
+  "evaluate-tools": {
+    title: "Evaluate tools",
+  },
+  "serve-tools": {
+    title: "Serve tools",
+  },
+  "-- Agent Frameworks": {
     type: "separator",
     title: "Agent Frameworks",
   },
-  mcp: {
+  langchain: {
+    title: "LangChain",
+  },
+  crewai: {
+    title: "CrewAI",
+  },
+  "google-adk": {
+    title: "Google ADK",
+  },
+  mastra: {
+    title: "Mastra",
+  },
+  "oai-agents": {
+    title: "OpenAI Agents",
+  },
+  vercelai: {
+    title: "Vercel AI",
+  },
+  "-- MCP": {
     type: "separator",
     title: "MCP",
   },
-  "core-concepts": {
+  "mcp-overview": {
+    title: "MCP Overview",
+  },
+  "mcp-desktop-clients": {
+    title: "IDEs and desktop clients",
+  },
+  "-- Core Concepts": {
     type: "separator",
     title: "Core Concepts",
   },
-  "hosting-options": {
+  "use-tools": {
+    title: "Tool Calling",
+  },
+  auth: {
+    title: "Authorization",
+  },
+  "arcade-cli": {
+    title: "Arcade CLI",
+  },
+  "arcade-clients": {
+    title: "Arcade Clients",
+  },
+  "-- Hosting options": {
     type: "separator",
     title: "Hosting options",
   },
-  guides: {
+  "hosting-overview": {
+    title: "Overview",
+  },
+  "hybrid-deployment": {
+    title: "Hybrid Deployment",
+  },
+  "local-deployment": {
+    title: "Local Deployment",
+  },
+  "auth-providers": {
+    title: "Customizing Auth",
+  },
+  "-- Guides": {
     type: "separator",
     title: "Guides",
   },
-  registry: {
+  glossary: {
+    title: "Glossary",
+  },
+  faq: {
+    title: "FAQ",
+  },
+  changelog: {
+    title: "Changelog",
+  },
+  "-- Registry": {
     type: "separator",
     title: "Registry",
+  },
+  "registry-early-access": {
+    title: "Registry Early Access",
+  },
+  "migrate-to-v2": {
+    display: "hidden",
   },
 };
 

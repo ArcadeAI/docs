@@ -1,13 +1,13 @@
-import { Arcade } from '@arcadeai/arcadejs';
+import { Arcade } from "@arcadeai/arcadejs";
 
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
-const USER_ID = '{arcade_user_id}';
-const TOOL_NAME = 'Stripe.CreateBillingPortalSession';
+const USER_ID = "{arcade_user_id}";
+const TOOL_NAME = "Stripe.CreateBillingPortalSession";
 
 const toolInput = {
-  customer: 'cus_123456789',
-  return_url: 'https://example.com/billing',
+  customer: "cus_123456789",
+  return_url: "https://example.com/billing"
 };
 
 const response = await client.tools.execute({

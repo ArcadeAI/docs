@@ -16,7 +16,7 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  username: 'TryArcade',
+  "username": "john_doe"
 };
 
 const response = await client.tools.execute({

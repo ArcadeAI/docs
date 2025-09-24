@@ -8,7 +8,7 @@ TOOL_NAME = "GoogleCalendar.WhoAmI"
 
 auth_response = client.tools.authorize(
     tool_name=TOOL_NAME,
-    user_id=TOOL_NAME
+    user_id=USER_ID
 )
 
 if auth_response.status != "completed":
@@ -18,7 +18,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    
+
 }
 
 response = client.tools.execute(

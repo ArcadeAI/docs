@@ -1,10 +1,10 @@
-import { Arcade } from '@arcadeai/arcadejs';
+import { Arcade } from "@arcadeai/arcadejs";
 
 // Initialize the Arcade client
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
-const USER_ID = '{arcade_user_id}';
-const TOOL_NAME = 'E2b.CreateStaticMatplotlibChart';
+const USER_ID = "{arcade_user_id}";
+const TOOL_NAME = "E2b.CreateStaticMatplotlibChart";
 
 // Define the code to create a chart
 const chartCode = `
@@ -24,7 +24,7 @@ plt.savefig('fruit_pie_chart.png')
 `;
 
 const toolInput = {
-  code: chartCode,
+  code: chartCode
 };
 
 // Execute the tool

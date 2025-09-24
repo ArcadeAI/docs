@@ -1,10 +1,10 @@
-import { Arcade } from '@arcadeai/arcadejs';
+import { Arcade } from "@arcadeai/arcadejs";
 
 // Initialize the Arcade client
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
-const USER_ID = '{arcade_user_id}';
-const TOOL_NAME = 'E2b.RunCode';
+const USER_ID = "{arcade_user_id}";
+const TOOL_NAME = "E2b.RunCode";
 
 // Define the code to merge sort a list
 const mergeSort = `
@@ -46,7 +46,7 @@ console.log("Sorted list:", sortedList);
 
 const toolInput = {
   code: mergeSort,
-  language: 'js',
+  language: "js"
 };
 
 // Execute the tool

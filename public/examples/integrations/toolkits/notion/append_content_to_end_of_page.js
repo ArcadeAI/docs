@@ -1,9 +1,9 @@
-import { Arcade } from '@arcadeai/arcadejs';
+import { Arcade } from "@arcadeai/arcadejs";
 
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
-const USER_ID = '{arcade_user_id}';
-const TOOL_NAME = 'NotionToolkit.AppendContentToEndOfPage';
+const USER_ID = "{arcade_user_id}";
+const TOOL_NAME = "NotionToolkit.AppendContentToEndOfPage";
 
 // Start the authorization process
 const authResponse = await client.tools.authorize({
@@ -11,7 +11,7 @@ const authResponse = await client.tools.authorize({
   user_id: USER_ID,
 });
 
-if (authResponse.status !== 'completed') {
+if (authResponse.status !== "completed") {
   console.log(`Click this link to authorize: ${authResponse.url}`);
 }
 
@@ -19,8 +19,8 @@ if (authResponse.status !== 'completed') {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  page_id_or_title: 'YOUR_PAGE_ID_OR_TITLE',
-  content: 'P.S. Never forget that you are a wizard.',
+  page_id_or_title: "YOUR_PAGE_ID_OR_TITLE",
+  content: "P.S. Never forget that you are a wizard."
 };
 
 const response = await client.tools.execute({

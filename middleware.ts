@@ -35,6 +35,6 @@ export function middleware(request: NextRequest) {
 export const config = {
   // Matcher ignoring static assets and API routes
   matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico|manifest|_pagefind|.*\\.svg|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.gif|.*\\.webp|.*\\.ico|.*\\.css|.*\\.js|.*\\.woff|.*\\.woff2|.*\\.ttf|.*\\.eot|.*\\.otf|.*\\.pdf|.*\\.txt|.*\\.xml|.*\\.json).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|manifest|_pagefind|.*\\.svg|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.gif|.*\\.webp|.*\\.ico|.*\\.css|.*\\.js|.*\\.woff|.*\\.woff2|.*\\.ttf|.*\\.eot|.*\\.otf|.*\\.pdf|.*\\.txt|.*\\.xml|.*\\.json|.*\\.py).*)",
   ],
 };

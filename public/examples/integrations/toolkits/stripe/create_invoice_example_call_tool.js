@@ -1,13 +1,13 @@
-import { Arcade } from '@arcadeai/arcadejs';
+import { Arcade } from "@arcadeai/arcadejs";
 
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
-const USER_ID = '{arcade_user_id}';
-const TOOL_NAME = 'Stripe.CreateInvoice';
+const USER_ID = "{arcade_user_id}";
+const TOOL_NAME = "Stripe.CreateInvoice";
 
 const toolInput = {
-  customer: 'cus_123456789',
-  days_until_due: 30,
+  customer: "cus_123456789",
+  days_until_due: 30
 };
 
 const response = await client.tools.execute({

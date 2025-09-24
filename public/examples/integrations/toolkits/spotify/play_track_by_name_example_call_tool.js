@@ -1,9 +1,9 @@
-import { Arcade } from '@arcadeai/arcadejs';
+import { Arcade } from "@arcadeai/arcadejs";
 
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
-const USER_ID = '{arcade_user_id}';
-const TOOL_NAME = 'Spotify.PlayTrackByName';
+const USER_ID = "{arcade_user_id}";
+const TOOL_NAME = "Spotify.PlayTrackByName";
 
 // Start the authorization process
 const authResponse = await client.tools.authorize({
@@ -11,7 +11,7 @@ const authResponse = await client.tools.authorize({
   user_id: USER_ID,
 });
 
-if (authResponse.status !== 'completed') {
+if (authResponse.status !== "completed") {
   console.log(`Click this link to authorize: ${authResponse.url}`);
 }
 
@@ -19,8 +19,8 @@ if (authResponse.status !== 'completed') {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  track_name: 'Banana Pancakes',
-  artist_name: 'Jack Johnson',
+  track_name: "Banana Pancakes",
+  artist_name: "Jack Johnson"
 };
 
 const response = await client.tools.execute({
@@ -29,4 +29,4 @@ const response = await client.tools.execute({
   user_id: USER_ID,
 });
 
-console.log(response);
+console.log(response); 

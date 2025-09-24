@@ -1,4 +1,4 @@
-import SharedLayout from "@/app/layouts/shared-layout";
+import SharedLayout from "@/app/_layouts/shared-layout";
 
 type LayoutProps = {
   children: React.ReactNode;

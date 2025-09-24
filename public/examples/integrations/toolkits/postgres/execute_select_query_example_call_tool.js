@@ -1,15 +1,15 @@
-import { Arcade } from '@arcadeai/arcadejs';
+import { Arcade } from "@arcadeai/arcadejs";
 
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
-const USER_ID = '{arcade_user_id}';
-const TOOL_NAME = 'Postgres.ExecuteSelectQuery';
+const USER_ID = "{arcade_user_id}";
+const TOOL_NAME = "Postgres.ExecuteSelectQuery";
 
 const toolInput = {
-  select_clause: 'id, name, email',
-  from_clause: 'users',
-  where_clause: 'active = true',
-  order_by_clause: 'name',
+  select_clause: "id, name, email",
+  from_clause: "users",
+  where_clause: "active = true",
+  order_by_clause: "name",
   limit: 10,
 };
 

@@ -1,8 +1,8 @@
-import { Arcade } from '@arcadeai/arcadejs';
+import { Arcade } from "@arcadeai/arcadejs";
 
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
-const userId = '{arcade_user_id}';
+const userId = "{arcade_user_id}";
 
 /*
 In this example, we will use Arcade to authenticate with Google and
@@ -17,12 +17,12 @@ need to.
 */
 
 // Start the authorization process
-let authResponse = await client.auth.start(userId, 'google', {
-  scopes: ['https://www.googleapis.com/auth/gmail.readonly'],
+let authResponse = await client.auth.start(userId, "google", {
+  scopes: ["https://www.googleapis.com/auth/gmail.readonly"],
 });
 
-if (authResponse.status !== 'completed') {
-  console.log('Please complete the authorization challenge in your browser:');
+if (authResponse.status !== "completed") {
+  console.log("Please complete the authorization challenge in your browser:");
   console.log(authResponse.url);
 }
 
@@ -30,19 +30,19 @@ if (authResponse.status !== 'completed') {
 authResponse = await client.auth.waitForCompletion(authResponse);
 
 if (!authResponse.context.token) {
-  throw new Error('No token found in auth response');
+  throw new Error("No token found in auth response");
 }
 
 const token = authResponse.context.token;
 
 // Use the Google Gmail API
 const response = await fetch(
-  'https://gmail.googleapis.com/gmail/v1/users/me/messages',
+  "https://gmail.googleapis.com/gmail/v1/users/me/messages",
   {
     headers: {
       Authorization: `Bearer ${token}`,
     },
-  }
+  },
 );
 
 if (!response.ok) {

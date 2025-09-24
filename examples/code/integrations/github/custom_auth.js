@@ -1,8 +1,8 @@
-import { Arcade } from '@arcadeai/arcadejs';
+import { Arcade } from "@arcadeai/arcadejs";
 
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
-const userId = '{arcade_user_id}';
+const userId = "{arcade_user_id}";
 
 /*
 In this example, we will use Arcade to authenticate with GitHub and retrieve
@@ -17,10 +17,10 @@ need to.
 */
 
 // Start the authorization process
-let authResponse = await client.auth.start(userId, 'github');
+let authResponse = await client.auth.start(userId, "github");
 
-if (authResponse.status !== 'completed') {
-  console.log('Please complete the authorization challenge in your browser:');
+if (authResponse.status !== "completed") {
+  console.log("Please complete the authorization challenge in your browser:");
   console.log(authResponse.url);
 }
 
@@ -28,17 +28,17 @@ if (authResponse.status !== 'completed') {
 authResponse = await client.auth.waitForCompletion(authResponse);
 
 if (!authResponse.context.token) {
-  throw new Error('No token found in auth response');
+  throw new Error("No token found in auth response");
 }
 
 const token = authResponse.context.token;
 
-const owner = 'ArcadeAI';
-const name = 'arcade-ai';
+const owner = "ArcadeAI";
+const name = "arcade-ai";
 const headers = {
-  Accept: 'application/vnd.github+json',
+  Accept: "application/vnd.github+json",
   Authorization: `Bearer ${token}`,
-  'X-GitHub-Api-Version': '2022-11-28',
+  "X-GitHub-Api-Version": "2022-11-28",
 };
 const url = `https://api.github.com/repos/${owner}/${name}`;
 
