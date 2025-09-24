@@ -130,24 +130,26 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
                       <p className="mt-1 text-xs text-gray-400 sm:text-sm">
                         {key === "arcade" && (
                           <>
-                            Official toolkits developed by Arcade that are{" "}
+                            Official toolkits hand-crafted by Arcade that are
+                            ready for use and optimized for LLM-usage.{" "}
                             <a
                               href="/home/use-tools/types-of-tools#optimized-tools"
                               style={{ textDecoration: "none" }}
                             >
-                              optimized for LLM-usage
+                              Learn more
                             </a>
                             .
                           </>
                         )}
                         {key === "arcade_starter" && (
                           <>
-                            Official toolkits developed by Arcade that offer{" "}
+                            Auto-generated toolkits developed by Arcade that may
+                            require customization.{" "}
                             <a
                               href="/home/use-tools/types-of-tools#starter-tools"
                               style={{ textDecoration: "none" }}
                             >
-                              low-level access to the upstream service's API
+                              Learn more
                             </a>
                             .
                           </>
