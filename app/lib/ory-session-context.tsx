@@ -1,13 +1,13 @@
-'use client';
-import { Configuration, FrontendApi } from '@ory/client';
-import type React from 'react';
-import { createContext, useContext, useEffect, useState } from 'react';
+"use client";
+import { Configuration, FrontendApi } from "@ory/client";
+import type React from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
-interface OrySessionContextType {
+type OrySessionContextType = {
   email: string | null;
   loading: boolean;
   error: Error | null;
-}
+};
 
 const OrySessionContext = createContext<OrySessionContextType>({
   email: null,
@@ -17,7 +17,7 @@ const OrySessionContext = createContext<OrySessionContextType>({
 
 const ory = new FrontendApi(
   new Configuration({
-    basePath: process.env.NEXT_PUBLIC_ORY_SDK_URL || 'https://auth.arcade.dev',
+    basePath: process.env.NEXT_PUBLIC_ORY_SDK_URL || "https://auth.arcade.dev",
     baseOptions: {
       withCredentials: true,
     },
@@ -52,7 +52,7 @@ export function OrySessionProvider({
         // Session not found or expired
         setEmail(null);
         setError(
-          err instanceof Error ? err : new Error('Failed to fetch session')
+          err instanceof Error ? err : new Error("Failed to fetch session")
         );
       } finally {
         setLoading(false);

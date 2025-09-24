@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import {
   Badge,
   Button,
@@ -6,12 +6,12 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from '@arcadeai/design-system';
-import { motion } from 'framer-motion';
-import { ArrowDown, ExternalLink } from 'lucide-react';
-import Link from 'next/link';
+} from "@arcadeai/design-system";
+import { ArrowDown, ExternalLink } from "lucide-react";
+import { motion } from "motion/react";
+import Link from "next/link";
 
-interface ChallengeSolutionProps {
+type ChallengeSolutionProps = {
   challenge: {
     icon: React.ElementType;
     title: string;
@@ -23,7 +23,7 @@ interface ChallengeSolutionProps {
     description: string;
     href: string;
   };
-}
+};
 
 export function ChallengeSolution({
   challenge,
@@ -34,7 +34,7 @@ export function ChallengeSolution({
       className="group"
       whileHover={{
         scale: 1.01,
-        boxShadow: '0 0 20px 0 rgba(238, 23, 94, 0.1)',
+        boxShadow: "0 0 20px 0 rgba(238, 23, 94, 0.1)",
       }}
       whileTap={{ scale: 0.98 }}
     >

@@ -1,6 +1,5 @@
-'use client';
-import { Button } from '@arcadeai/design-system';
-import { motion } from 'framer-motion';
+"use client";
+import { Button } from "@arcadeai/design-system";
 import {
   // Bot,
   Cloud,
@@ -14,12 +13,26 @@ import {
   Users,
   Wrench,
   // Zap,
-} from 'lucide-react';
-import Image from 'next/image';
-import Link from 'next/link';
+} from "lucide-react";
+import { motion } from "motion/react";
+import Image from "next/image";
+import Link from "next/link";
 // import { ChallengeSolution } from "./ChallengeSolution";
-import { QuickStartCard } from './quick-start-card';
-import { SampleAppCard } from './sample-app-card';
+import { QuickStartCard } from "./quick-start-card";
+import { SampleAppCard } from "./sample-app-card";
+
+// Constants for magic numbers
+const IMAGE_SCALE_FACTOR = 3;
+const OVERVIEW_IMAGE_WIDTH = 2922;
+const OVERVIEW_IMAGE_HEIGHT = 1861;
+
+const ANIMATION_DURATION = 0.5;
+const ANIMATION_DELAYS = {
+  initial: 0.2,
+  secondary: 0.4,
+  buttons: 0.6,
+  final: 0.8,
+} as const;
 
 export function LandingPage() {
   return (
@@ -30,19 +43,19 @@ export function LandingPage() {
           className="-top-24 -z-10 sm:-top-40 absolute inset-x-0 transform-gpu overflow-hidden blur-3xl"
         >
           <div
-            className="-translate-x-1/2 relative left-[calc(50%-11rem)] aspect-1155/678 w-[24rem] rotate-30 bg-linear-to-tr from-[#ee175e] to-[#9089fc] opacity-20 sm:left-[calc(50%-30rem)] sm:w-3xl"
+            className="-translate-x-1/2 relative left-[calc(50%-11rem)] aspect-[1155/678] w-[24rem] rotate-[30deg] bg-gradient-to-tr from-[#ee175e] to-[#9089fc] opacity-20 sm:left-[calc(50%-30rem)] sm:w-[48rem]"
             style={{
               clipPath:
-                'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)',
+                "polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)",
             }}
           />
         </div>
-        <div className="mx-auto max-w-(--breakpoint-xl) px-4 py-12 text-center sm:py-48 lg:py-24">
+        <div className="mx-auto max-w-screen-xl px-4 py-12 text-center sm:py-48 lg:py-24">
           <motion.h1
             animate={{ opacity: 1, y: 0 }}
             className="mb-6 font-extrabold text-4xl text-white tracking-tight md:text-5xl lg:text-6xl"
             initial={{ opacity: 0, y: 20 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: ANIMATION_DURATION }}
           >
             Welcome to Arcade!
           </motion.h1>
@@ -50,7 +63,10 @@ export function LandingPage() {
             animate={{ opacity: 1, y: 0 }}
             className="mx-auto mt-8 max-w-4xl text-pretty font-medium text-base text-gray-100 italic leading-relaxed"
             initial={{ opacity: 0, y: 20 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+            transition={{
+              duration: ANIMATION_DURATION,
+              delay: ANIMATION_DELAYS.initial,
+            }}
           >
             <span className="font-bold text-primary">
               Learn how to move AI agents from demo to production with Arcade.
@@ -59,19 +75,21 @@ export function LandingPage() {
           <motion.div
             animate={{ opacity: 1, y: 0 }}
             initial={{ opacity: 0, y: 20 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
+            transition={{
+              duration: ANIMATION_DURATION,
+              delay: ANIMATION_DELAYS.secondary,
+            }}
           >
-            <p style={{ textAlign: 'left', paddingTop: '2rem' }}>
+            <p style={{ textAlign: "left", paddingTop: "2rem" }}>
               Arcade enables your AI agent to securely take real-world actions
-              through user-specific permissions, pre-built integrations with
-              Gmail, Slack, GitHub, and more. You can also build your own
-              agentic tools and MCP servers with our authoring and testing
-              suite. Arcade is your tool{' '}
-              <span className="font-bold text-primary">engine</span>,{' '}
-              <span className="font-bold text-primary">registry</span>, and{' '}
+              through user-specific permissions, pre-built toolkits for Gmail,
+              Slack, GitHub, and more. You can also build your own agentic tools
+              and MCP servers with our authoring and testing suite. Arcade is
+              your tool <span className="font-bold text-primary">engine</span>,{" "}
+              <span className="font-bold text-primary">registry</span>, and{" "}
               <span className="font-bold text-primary">runtime</span>.
             </p>
-            <p style={{ textAlign: 'left', paddingTop: '2rem' }}>
+            <p style={{ textAlign: "left", paddingTop: "2rem" }}>
               Get started with a 5-minute quickstart.
             </p>
           </motion.div>
@@ -79,14 +97,17 @@ export function LandingPage() {
             animate={{ opacity: 1, y: 0 }}
             className="mt-20 flex items-center justify-center gap-x-6"
             initial={{ opacity: 0, y: 20 }}
-            transition={{ duration: 0.5, delay: 0.6 }}
+            transition={{
+              duration: ANIMATION_DURATION,
+              delay: ANIMATION_DELAYS.buttons,
+            }}
           >
             <Button
               asChild
               className="h-12 bg-primary px-6 text-white hover:bg-primary/90"
               size="lg"
             >
-              <Link href="/home/getting-started/quickstart">
+              <Link href="/home/quickstart">
                 <Rocket className="mr-2 h-5 w-5" />
                 Get Started
               </Link>
@@ -97,7 +118,7 @@ export function LandingPage() {
               size="lg"
               variant="outline"
             >
-              <Link href="/home/authoring-tools/build-tools/create-a-toolkit">
+              <Link href="/home/build-tools/create-a-toolkit">
                 <Wrench className="mr-2 h-5 w-5" />
                 Build a tool
               </Link>
@@ -107,7 +128,10 @@ export function LandingPage() {
             animate={{ opacity: 1, y: 0 }}
             className="mt-10 flex items-center justify-center gap-x-6"
             initial={{ opacity: 0, y: 20 }}
-            transition={{ duration: 0.5, delay: 0.8 }}
+            transition={{
+              duration: ANIMATION_DURATION,
+              delay: ANIMATION_DELAYS.final,
+            }}
           >
             <div className="rounded-lg border border-white p-4 text-white italic">
               Give your AI IDE access to Arcade.dev's documentation using our
@@ -115,11 +139,11 @@ export function LandingPage() {
               <a className="text-primary" href="/llms.txt">
                 short llms.txt
               </a>
-              ,{' '}
+              ,{" "}
               <a className="text-primary" href="/llms-full.txt">
                 llms-full.txt
               </a>
-              ), or use{' '}
+              ), or use{" "}
               <a
                 className="text-primary"
                 href="https://context7.com/arcadeai/docs"
@@ -135,10 +159,10 @@ export function LandingPage() {
           className="-z-10 absolute inset-x-0 top-[calc(100%-13rem)] transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]"
         >
           <div
-            className="-translate-x-1/2 relative left-[calc(50%+3rem)] aspect-1155/678 w-[24rem] bg-linear-to-tr from-[#ee175e] to-[#9089fc] opacity-20 sm:left-[calc(50%+36rem)] sm:w-3xl"
+            className="-translate-x-1/2 relative left-[calc(50%+3rem)] aspect-[1155/678] w-[24rem] bg-gradient-to-tr from-[#ee175e] to-[#9089fc] opacity-20 sm:left-[calc(50%+36rem)] sm:w-[48rem]"
             style={{
               clipPath:
-                'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)',
+                "polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)",
             }}
           />
         </div>
@@ -304,11 +328,11 @@ export function LandingPage() {
           </div>
           <div className="flex w-full justify-center">
             <Image
-              alt={'arcade overview'}
+              alt={"arcade overview"}
               className="max-w-full"
-              height={1676 / 3}
-              src={'/images/overview.png'}
-              width={1880 / 3}
+              height={OVERVIEW_IMAGE_HEIGHT / IMAGE_SCALE_FACTOR}
+              src={"/images/overview.png"}
+              width={OVERVIEW_IMAGE_WIDTH / IMAGE_SCALE_FACTOR}
             />
           </div>
           <div className="mt-16 grid gap-8 md:grid-cols-2">
@@ -319,10 +343,10 @@ export function LandingPage() {
               title="Arcade Engine"
             />
             <QuickStartCard
-              description="The Control Plane is how you manage your tools, users, and deployments from a single place.  No matter how large your deployment or organization gets, the Control Plane will scale with you."
+              description="The Arcade Dashboard is how you manage your tools, users, and deployments from a single place.  No matter how large your deployment or organization gets, the Dashboard will scale with you."
               href="#"
               icon={Users}
-              title="Control Plane"
+              title="Dashboard"
             />
             <QuickStartCard
               description="Arcade makes it easy to develop custom tools that just work with Agents.  Our SDKs and framework integrations make it easy to get started.  When you are ready, it's easy to run your tools either on-prem or in our cloud."

@@ -1,0 +1,1331 @@
+---
+title: "Configuration"
+description: "Arcade Engine Configuration"
+---
+
+import TableOfContents from "@/app/components/table-of-contents";
+
+# Arcade Engine configuration
+
+Arcade Engine's configuration is a [YAML file](https://yaml.org/) with the following sections:
+
+<TableOfContents
+  headers={["Section", "Description"]}
+  data={[
+    ["API Configuration", "Configures the server for specific protocols"],
+    [
+      "Auth Configuration",
+      "Configures user authorization providers and token storage",
+    ],
+    ["Cache Configuration", "Configures the short-lived cache"],
+    ["Security Configuration", "Configures security and encryption"],
+    ["Storage Configuration", "Configures persistent storage"],
+    [
+      "Telemetry Configuration",
+      "Configures telemetry and observability (OTEL)",
+    ],
+    ["Tools Configuration", "Configures tools for AI models to use"],
+  ]}
+/>
+
+## Specify a config file
+
+To start the Arcade Engine, pass a config file with `-c` or `--config`:
+
+```bash
+arcade-engine -c /path/to/config.yaml
+```
+
+<Callout type="info">
+  Ensure you have a worker running before starting the engine. See [arcade serve
+  CLI command](/home/core-concepts/arcade-cli#arcade-serve) for how to start a
+  worker via the CLI.
+</Callout>
+
+## Dotenv files
+
+Arcade Engine automatically loads environment variables from `.env` files in the directory where it was called. Use the `-e` or`--env` flag to specify a path:
+
+```bash
+arcade-engine -e .env.dev -c config.yaml
+```
+
+## Secrets
+
+Arcade Engine supports two ways of passing sensitive information like API keys without storing them directly in the config file.
+
+Environment variables:
+
+```yaml {5}
+topic:
+  area:
+    - id: primary
+      vendor:
+        api_key: ${env:OPENAI_API_KEY}
+```
+
+External files (useful in cloud setups):
+
+```yaml {5}
+topic:
+  area:
+    - id: primary
+      vendor:
+        api_key: ${file:/path/to/secret}
+```
+
+## API configuration
+
+HTTP is the supported protocol for Arcade Engine's API. The following configuration options are available:
+
+- `api.development` _(optional, default: `false`)_ - Enable development mode, with more logging and simple [worker authentication](/home/hosting-options/local-deployment/configure/engine#http-worker-configuration)
+- `api.http.host` _(default: `localhost`)_ - Address to which Arcade Engine binds its server (e.g., `localhost` or `0.0.0.0`)
+- `api.http.read_timeout` _(optional, default: `30s`)_ - Timeout for reading data from clients
+- `api.http.write_timeout` _(optional, default: `1m`)_ - Timeout for writing data to clients
+- `api.http.idle_timeout` _(optional, default: `30s`)_ - Timeout for idle connections
+- `api.http.max_request_body_size` _(optional, default: `4Mb`)_ - Maximum request body size
+
+A typical configuration for production looks like:
+
+```yaml {4-7}
+# yaml-language-server: $schema=https://raw.githubusercontent.com/ArcadeAI/schemas/main/engine/config/1.0/schema.json
+$schema: https://raw.githubusercontent.com/ArcadeAI/schemas/main/engine/config/1.0/schema.json
+
+api:
+  development: false
+  host: localhost
+  port: 9099
+
+auth:
+  providers:
+    - id: default-github
+      description: The default GitHub provider
+      enabled: true
+      type: oauth2
+      provider_id: github
+      client_id: ${env:GITHUB_CLIENT_ID}
+      client_secret: ${env:GITHUB_CLIENT_SECRET}
+
+    - id: hooli
+      description: Hooli OAuth 2.0 provider
+      enabled: true
+      type: oauth2
+      client_id: ${env:HOOLI_CLIENT_ID}
+      client_secret: ${env:HOOLI_CLIENT_SECRET}
+      oauth2:
+        # For a custom OAuth 2.0 provider, specify the full OAuth configuration:
+        scope_delimiter: ' '
+        pkce: # Optional
+          enabled: true
+          code_challenge_method: S256
+        authorize_request:
+          endpoint: 'https://example.com/oauth/authorize'
+          params:
+            response_type: code
+            client_id: '{{client_id}}'
+            redirect_uri: '{{redirect_uri}}'
+            scope: '{{scopes}} {{existing_scopes}}'
+        token_request:
+          endpoint: 'https://example.com/oauth/token'
+          auth_method: client_secret_basic # Optional
+          params:
+            grant_type: authorization_code
+            client_id: '{{client_id}}'
+            client_secret: '{{client_secret}}'
+            redirect_uri: '{{redirect_uri}}'
+          response_content_type: application/json # Optional
+          response_map: # Optional
+            access_token: '$.access_token'
+            refresh_token: '$.refresh_token'
+            expires_in: '$.expires_in'
+            scope: '$.scope'
+            token_type: '$.token_type'
+        refresh_request: # Optional
+          endpoint: 'https://example.com/oauth/token'
+          auth_method: client_secret_basic # Optional
+          params:
+            grant_type: refresh_token
+            client_id: '{{client_id}}'
+            client_secret: '{{client_secret}}'
+            refresh_token: '{{refresh_token}}'
+          response_content_type: application/json # Optional
+          response_map: # Optional
+            access_token: '$.access_token'
+            refresh_token: '$.refresh_token'
+            expires_in: '$.expires_in'
+            scope: '$.scope'
+            token_type: '$.token_type'
+        token_introspection_request: # Optional
+          endpoint: 'https://example.com/oauth/introspect'
+          method: POST
+          params:
+            token: '{{access_token}}'
+          auth_method: client_secret_basic # Optional
+          request_content_type: application/x-www-form-urlencoded # Optional
+          response_content_type: application/json # Optional
+          response_map: # Optional
+            expires_in: '$.data.expires_in'
+            scope: '$.data.scope'
+          expiration_format: relative_seconds # or absolute_unix_timestamp
+          triggers:
+            on_token_grant: true
+            on_token_refresh: true
+        user_info_request: # Optional
+          endpoint: 'https://example.com/oauth/userinfo'
+          auth_method: bearer_access_token
+          response_content_type: application/json
+          response_map:
+            custom_property: '$.data.custom_property'
+          triggers:
+            on_token_grant: true
+            on_token_refresh: true
+
+cache:
+  api_key_ttl: 10s
+  redis:
+    addr: 'localhost:6379'
+    password: ''
+    db: 0
+
+llm:
+  models:
+    - id: primary
+      openai:
+        api_key: ${env:OPENAI_API_KEY}
+    - id: secondary
+      anthropic:
+        api_key: ${env:ANTHROPIC_API_KEY}
+        api_version: '2023-06-01'
+
+security:
+  root_keys:
+    - id: key1
+      default: true
+      value: ${env:ROOT_KEY_1}
+    - id: key2
+      value: ${env:ROOT_KEY_2}
+
+storage:
+  postgres:
+    user: ${env:POSTGRES_USER}
+    password: ${env:POSTGRES_PASSWORD}
+    host: ${env:POSTGRES_HOST}
+    port: ${env:POSTGRES_PORT}
+    db: ${env:POSTGRES_DB}
+    sslmode: require
+
+telemetry:
+  environment: prod
+  logging:
+    level: info
+    encoding: console
+
+tools:
+  directors:
+    - id: default
+      enabled: true
+      max_tools: 64
+      workers:
+        - id: local_worker
+          enabled: true
+          http:
+            uri: 'http://localhost:8002'
+            timeout: 30
+            retry: 3
+            secret: ${env:ARCADE_WORKER_SECRET}
+```
+
+For local development, set `api.development = true`. In development mode, Arcade Engine does not require [worker authentication](/home/hosting-options/local-deployment/configure/engine#http-worker-configuration).
+
+## Auth configuration
+
+Arcade Engine manages auth for [AI tools](/home/core-concepts/auth/auth-tool-calling) and [direct API calls](/home/core-concepts/auth/call-third-party-apis-directly). It supports many built-in [auth providers](/home/hosting-options/auth-providers), and can also connect to any [OAuth 2.0](/home/hosting-options/auth-providers/oauth2) authorization server.
+
+The `auth.providers` section defines the providers that users can authorize with. Each provider must have a unique `id` in the array. There are two ways to configure a provider:
+
+For [built-in providers](/home/hosting-options/auth-providers), use the `provider_id` field to reference the pre-built configuration. For example:
+
+```yaml {9-17,7}
+# yaml-language-server: $schema=https://raw.githubusercontent.com/ArcadeAI/schemas/main/engine/config/1.0/schema.json
+$schema: https://raw.githubusercontent.com/ArcadeAI/schemas/main/engine/config/1.0/schema.json
+
+api:
+  development: false
+  host: localhost
+  port: 9099
+
+auth:
+  providers:
+    - id: default-github
+      description: The default GitHub provider
+      enabled: true
+      type: oauth2
+      provider_id: github
+      client_id: ${env:GITHUB_CLIENT_ID}
+      client_secret: ${env:GITHUB_CLIENT_SECRET}
+
+    - id: hooli
+      description: Hooli OAuth 2.0 provider
+      enabled: true
+      type: oauth2
+      client_id: ${env:HOOLI_CLIENT_ID}
+      client_secret: ${env:HOOLI_CLIENT_SECRET}
+      oauth2:
+        # For a custom OAuth 2.0 provider, specify the full OAuth configuration:
+        scope_delimiter: ' '
+        pkce: # Optional
+          enabled: true
+          code_challenge_method: S256
+        authorize_request:
+          endpoint: 'https://example.com/oauth/authorize'
+          params:
+            response_type: code
+            client_id: '{{client_id}}'
+            redirect_uri: '{{redirect_uri}}'
+            scope: '{{scopes}} {{existing_scopes}}'
+        token_request:
+          endpoint: 'https://example.com/oauth/token'
+          auth_method: client_secret_basic # Optional
+          params:
+            grant_type: authorization_code
+            client_id: '{{client_id}}'
+            client_secret: '{{client_secret}}'
+            redirect_uri: '{{redirect_uri}}'
+          response_content_type: application/json # Optional
+          response_map: # Optional
+            access_token: '$.access_token'
+            refresh_token: '$.refresh_token'
+            expires_in: '$.expires_in'
+            scope: '$.scope'
+            token_type: '$.token_type'
+        refresh_request: # Optional
+          endpoint: 'https://example.com/oauth/token'
+          auth_method: client_secret_basic # Optional
+          params:
+            grant_type: refresh_token
+            client_id: '{{client_id}}'
+            client_secret: '{{client_secret}}'
+            refresh_token: '{{refresh_token}}'
+          response_content_type: application/json # Optional
+          response_map: # Optional
+            access_token: '$.access_token'
+            refresh_token: '$.refresh_token'
+            expires_in: '$.expires_in'
+            scope: '$.scope'
+            token_type: '$.token_type'
+        token_introspection_request: # Optional
+          endpoint: 'https://example.com/oauth/introspect'
+          method: POST
+          params:
+            token: '{{access_token}}'
+          auth_method: client_secret_basic # Optional
+          request_content_type: application/x-www-form-urlencoded # Optional
+          response_content_type: application/json # Optional
+          response_map: # Optional
+            expires_in: '$.data.expires_in'
+            scope: '$.data.scope'
+          expiration_format: relative_seconds # or absolute_unix_timestamp
+          triggers:
+            on_token_grant: true
+            on_token_refresh: true
+        user_info_request: # Optional
+          endpoint: 'https://example.com/oauth/userinfo'
+          auth_method: bearer_access_token
+          response_content_type: application/json
+          response_map:
+            custom_property: '$.data.custom_property'
+          triggers:
+            on_token_grant: true
+            on_token_refresh: true
+
+cache:
+  api_key_ttl: 10s
+  redis:
+    addr: 'localhost:6379'
+    password: ''
+    db: 0
+
+llm:
+  models:
+    - id: primary
+      openai:
+        api_key: ${env:OPENAI_API_KEY}
+    - id: secondary
+      anthropic:
+        api_key: ${env:ANTHROPIC_API_KEY}
+        api_version: '2023-06-01'
+
+security:
+  root_keys:
+    - id: key1
+      default: true
+      value: ${env:ROOT_KEY_1}
+    - id: key2
+      value: ${env:ROOT_KEY_2}
+
+storage:
+  postgres:
+    user: ${env:POSTGRES_USER}
+    password: ${env:POSTGRES_PASSWORD}
+    host: ${env:POSTGRES_HOST}
+    port: ${env:POSTGRES_PORT}
+    db: ${env:POSTGRES_DB}
+    sslmode: require
+
+telemetry:
+  environment: prod
+  logging:
+    level: info
+    encoding: console
+
+tools:
+  directors:
+    - id: default
+      enabled: true
+      max_tools: 64
+      workers:
+        - id: local_worker
+          enabled: true
+          http:
+            uri: 'http://localhost:8002'
+            timeout: 30
+            retry: 3
+            secret: ${env:ARCADE_WORKER_SECRET}
+```
+
+For custom OAuth 2.0 providers, specify the full connection details in the `oauth2` sub-section. For full documentation on the custom provider configuration, see the [OAuth 2.0 provider configuration](/home/hosting-options/auth-providers/oauth2) page.
+
+You can specify a mix of built-in and custom providers.
+
+## Cache configuration
+
+The `cache` section configures the short-lived cache.
+
+<Callout type="info">
+  Configuring the cache is optional. If not configured, the cache will default
+  to an in-memory cache implementation suitable for a single-node Arcade Engine
+  deployment.
+</Callout>
+
+The `cache` section has the following configuration options:
+
+- `api_key_ttl` _(optional, default: `10s`)_ - The time-to-live for API keys in the cache
+
+Two cache implementations are available:
+
+- `in_memory` - _(default)_ An in-memory cache implementation suitable for a single-node Arcade Engine deployment.
+- `redis` - A Redis cache implementation suitable for a multi-node Arcade Engine deployment:
+
+```yaml {93-98,3-6}
+# yaml-language-server: $schema=https://raw.githubusercontent.com/ArcadeAI/schemas/main/engine/config/1.0/schema.json
+$schema: https://raw.githubusercontent.com/ArcadeAI/schemas/main/engine/config/1.0/schema.json
+
+api:
+  development: false
+  host: localhost
+  port: 9099
+
+auth:
+  providers:
+    - id: default-github
+      description: The default GitHub provider
+      enabled: true
+      type: oauth2
+      provider_id: github
+      client_id: ${env:GITHUB_CLIENT_ID}
+      client_secret: ${env:GITHUB_CLIENT_SECRET}
+
+    - id: hooli
+      description: Hooli OAuth 2.0 provider
+      enabled: true
+      type: oauth2
+      client_id: ${env:HOOLI_CLIENT_ID}
+      client_secret: ${env:HOOLI_CLIENT_SECRET}
+      oauth2:
+        # For a custom OAuth 2.0 provider, specify the full OAuth configuration:
+        scope_delimiter: ' '
+        pkce: # Optional
+          enabled: true
+          code_challenge_method: S256
+        authorize_request:
+          endpoint: 'https://example.com/oauth/authorize'
+          params:
+            response_type: code
+            client_id: '{{client_id}}'
+            redirect_uri: '{{redirect_uri}}'
+            scope: '{{scopes}} {{existing_scopes}}'
+        token_request:
+          endpoint: 'https://example.com/oauth/token'
+          auth_method: client_secret_basic # Optional
+          params:
+            grant_type: authorization_code
+            client_id: '{{client_id}}'
+            client_secret: '{{client_secret}}'
+            redirect_uri: '{{redirect_uri}}'
+          response_content_type: application/json # Optional
+          response_map: # Optional
+            access_token: '$.access_token'
+            refresh_token: '$.refresh_token'
+            expires_in: '$.expires_in'
+            scope: '$.scope'
+            token_type: '$.token_type'
+        refresh_request: # Optional
+          endpoint: 'https://example.com/oauth/token'
+          auth_method: client_secret_basic # Optional
+          params:
+            grant_type: refresh_token
+            client_id: '{{client_id}}'
+            client_secret: '{{client_secret}}'
+            refresh_token: '{{refresh_token}}'
+          response_content_type: application/json # Optional
+          response_map: # Optional
+            access_token: '$.access_token'
+            refresh_token: '$.refresh_token'
+            expires_in: '$.expires_in'
+            scope: '$.scope'
+            token_type: '$.token_type'
+        token_introspection_request: # Optional
+          endpoint: 'https://example.com/oauth/introspect'
+          method: POST
+          params:
+            token: '{{access_token}}'
+          auth_method: client_secret_basic # Optional
+          request_content_type: application/x-www-form-urlencoded # Optional
+          response_content_type: application/json # Optional
+          response_map: # Optional
+            expires_in: '$.data.expires_in'
+            scope: '$.data.scope'
+          expiration_format: relative_seconds # or absolute_unix_timestamp
+          triggers:
+            on_token_grant: true
+            on_token_refresh: true
+        user_info_request: # Optional
+          endpoint: 'https://example.com/oauth/userinfo'
+          auth_method: bearer_access_token
+          response_content_type: application/json
+          response_map:
+            custom_property: '$.data.custom_property'
+          triggers:
+            on_token_grant: true
+            on_token_refresh: true
+
+cache:
+  api_key_ttl: 10s
+  redis:
+    addr: 'localhost:6379'
+    password: ''
+    db: 0
+
+llm:
+  models:
+    - id: primary
+      openai:
+        api_key: ${env:OPENAI_API_KEY}
+    - id: secondary
+      anthropic:
+        api_key: ${env:ANTHROPIC_API_KEY}
+        api_version: '2023-06-01'
+
+security:
+  root_keys:
+    - id: key1
+      default: true
+      value: ${env:ROOT_KEY_1}
+    - id: key2
+      value: ${env:ROOT_KEY_2}
+
+storage:
+  postgres:
+    user: ${env:POSTGRES_USER}
+    password: ${env:POSTGRES_PASSWORD}
+    host: ${env:POSTGRES_HOST}
+    port: ${env:POSTGRES_PORT}
+    db: ${env:POSTGRES_DB}
+    sslmode: require
+
+telemetry:
+  environment: prod
+  logging:
+    level: info
+    encoding: console
+
+tools:
+  directors:
+    - id: default
+      enabled: true
+      max_tools: 64
+      workers:
+        - id: local_worker
+          enabled: true
+          http:
+            uri: 'http://localhost:8002'
+            timeout: 30
+            retry: 3
+            secret: ${env:ARCADE_WORKER_SECRET}
+```
+
+## Security configuration
+
+The `security` section configures the root encryption keys that the Arcade Engine uses to encrypt and decrypt data at rest. See the [storage configuration](#storage-configuration) section below to configure where data is stored.
+
+A typical configuration looks like this:
+
+```yaml {110-116}
+# yaml-language-server: $schema=https://raw.githubusercontent.com/ArcadeAI/schemas/main/engine/config/1.0/schema.json
+$schema: https://raw.githubusercontent.com/ArcadeAI/schemas/main/engine/config/1.0/schema.json
+
+api:
+  development: false
+  host: localhost
+  port: 9099
+
+auth:
+  providers:
+    - id: default-github
+      description: The default GitHub provider
+      enabled: true
+      type: oauth2
+      provider_id: github
+      client_id: ${env:GITHUB_CLIENT_ID}
+      client_secret: ${env:GITHUB_CLIENT_SECRET}
+
+    - id: hooli
+      description: Hooli OAuth 2.0 provider
+      enabled: true
+      type: oauth2
+      client_id: ${env:HOOLI_CLIENT_ID}
+      client_secret: ${env:HOOLI_CLIENT_SECRET}
+      oauth2:
+        # For a custom OAuth 2.0 provider, specify the full OAuth configuration:
+        scope_delimiter: ' '
+        pkce: # Optional
+          enabled: true
+          code_challenge_method: S256
+        authorize_request:
+          endpoint: 'https://example.com/oauth/authorize'
+          params:
+            response_type: code
+            client_id: '{{client_id}}'
+            redirect_uri: '{{redirect_uri}}'
+            scope: '{{scopes}} {{existing_scopes}}'
+        token_request:
+          endpoint: 'https://example.com/oauth/token'
+          auth_method: client_secret_basic # Optional
+          params:
+            grant_type: authorization_code
+            client_id: '{{client_id}}'
+            client_secret: '{{client_secret}}'
+            redirect_uri: '{{redirect_uri}}'
+          response_content_type: application/json # Optional
+          response_map: # Optional
+            access_token: '$.access_token'
+            refresh_token: '$.refresh_token'
+            expires_in: '$.expires_in'
+            scope: '$.scope'
+            token_type: '$.token_type'
+        refresh_request: # Optional
+          endpoint: 'https://example.com/oauth/token'
+          auth_method: client_secret_basic # Optional
+          params:
+            grant_type: refresh_token
+            client_id: '{{client_id}}'
+            client_secret: '{{client_secret}}'
+            refresh_token: '{{refresh_token}}'
+          response_content_type: application/json # Optional
+          response_map: # Optional
+            access_token: '$.access_token'
+            refresh_token: '$.refresh_token'
+            expires_in: '$.expires_in'
+            scope: '$.scope'
+            token_type: '$.token_type'
+        token_introspection_request: # Optional
+          endpoint: 'https://example.com/oauth/introspect'
+          method: POST
+          params:
+            token: '{{access_token}}'
+          auth_method: client_secret_basic # Optional
+          request_content_type: application/x-www-form-urlencoded # Optional
+          response_content_type: application/json # Optional
+          response_map: # Optional
+            expires_in: '$.data.expires_in'
+            scope: '$.data.scope'
+          expiration_format: relative_seconds # or absolute_unix_timestamp
+          triggers:
+            on_token_grant: true
+            on_token_refresh: true
+        user_info_request: # Optional
+          endpoint: 'https://example.com/oauth/userinfo'
+          auth_method: bearer_access_token
+          response_content_type: application/json
+          response_map:
+            custom_property: '$.data.custom_property'
+          triggers:
+            on_token_grant: true
+            on_token_refresh: true
+
+cache:
+  api_key_ttl: 10s
+  redis:
+    addr: 'localhost:6379'
+    password: ''
+    db: 0
+
+llm:
+  models:
+    - id: primary
+      openai:
+        api_key: ${env:OPENAI_API_KEY}
+    - id: secondary
+      anthropic:
+        api_key: ${env:ANTHROPIC_API_KEY}
+        api_version: '2023-06-01'
+
+security:
+  root_keys:
+    - id: key1
+      default: true
+      value: ${env:ROOT_KEY_1}
+    - id: key2
+      value: ${env:ROOT_KEY_2}
+
+storage:
+  postgres:
+    user: ${env:POSTGRES_USER}
+    password: ${env:POSTGRES_PASSWORD}
+    host: ${env:POSTGRES_HOST}
+    port: ${env:POSTGRES_PORT}
+    db: ${env:POSTGRES_DB}
+    sslmode: require
+
+telemetry:
+  environment: prod
+  logging:
+    level: info
+    encoding: console
+
+tools:
+  directors:
+    - id: default
+      enabled: true
+      max_tools: 64
+      workers:
+        - id: local_worker
+          enabled: true
+          http:
+            uri: 'http://localhost:8002'
+            timeout: 30
+            retry: 3
+            secret: ${env:ARCADE_WORKER_SECRET}
+```
+
+Keys should be a long random string of characters. For example:
+
+```bash
+openssl rand -base64 32
+```
+
+### Default root key
+
+When you [install Arcade Engine locally](/home/hosting-options/local-deployment/install/local), an `engine.env` file is created with a default root key:
+
+```bash {7-8,2}
+### Engine configuration ###
+API_DEVELOPMENT=true
+ARCADE_API_HOST=localhost
+ARCADE_API_PORT=9099
+ANALYTICS_ENABLED=true
+
+# Encryption keys (change this when deploying to production)
+ROOT_KEY_1=default-key-value
+
+### Model Provider API keys ###
+# OPENAI_API_KEY=
+# ANTHROPIC_API_KEY=
+# GROQ_API_KEY=
+
+
+### Security configuration ###
+ROOT_KEY_1=
+
+
+### Storage configuration ###
+# POSTGRES_USER=
+# POSTGRES_PASSWORD=
+# POSTGRES_HOST=
+# POSTGRES_PORT=
+# POSTGRES_DB=
+
+
+### Telemetry (OTEL) configuration ###
+TELEMETRY_ENVIRONMENT=local
+TELEMETRY_LOGGING_LEVEL=debug
+TELEMETRY_LOGGING_ENCODING=console
+
+
+### Worker Configuration ###
+ARCADE_WORKER_URI=http://localhost:8002
+ARCADE_WORKER_SECRET=dev
+
+
+# OAuth Providers
+ATLASSIAN_CLIENT_ID=""
+ATLASSIAN_CLIENT_SECRET=
+
+DISCORD_CLIENT_ID=""
+DISCORD_CLIENT_SECRET=
+
+DROPBOX_CLIENT_ID=""
+DROPBOX_CLIENT_SECRET=
+
+GITHUB_CLIENT_ID=""
+GITHUB_CLIENT_SECRET=
+
+GOOGLE_CLIENT_ID=""
+GOOGLE_CLIENT_SECRET=
+
+LINKEDIN_CLIENT_ID=""
+LINKEDIN_CLIENT_SECRET=
+
+MICROSOFT_CLIENT_ID=""
+MICROSOFT_CLIENT_SECRET=
+
+REDDIT_CLIENT_ID=""
+REDDIT_CLIENT_SECRET=
+
+SLACK_CLIENT_ID=""
+SLACK_CLIENT_SECRET=
+
+SPOTIFY_CLIENT_ID=""
+SPOTIFY_CLIENT_SECRET=
+
+TWITCH_CLIENT_ID=""
+SPOTIFY_CLIENT_SECRET=
+
+X_CLIENT_ID=""
+X_CLIENT_SECRET=
+
+ZOOM_CLIENT_ID=""
+ZOOM_CLIENT_SECRET=
+```
+
+This default value can only be used in development mode (see [API configuration](#api-configuration) above).
+
+<Callout type="warning">
+  You **must** replace the value of `ROOT_KEY_1` in `engine.env` before
+  deploying to production.
+</Callout>
+
+## Storage configuration
+
+The `storage` section configures the storage backend that the Arcade Engine uses to store persistent data.
+
+There are three storage implementations available:
+
+- `in_memory` - _(default)_ An in-memory database, suitable for testing.
+- `sqlite` - A SQLite file on disk, suitable for local development:
+
+```yaml
+storage:
+  sqlite:
+    # Stores DB in ~/.arcade/arcade-engine.sqlite3
+    connection_string: "@ARCADE_HOME/arcade-engine.sqlite3"
+```
+
+- `postgres` - A PostgreSQL database, suitable for production:
+
+```yaml {118-125,2-10}
+# yaml-language-server: $schema=https://raw.githubusercontent.com/ArcadeAI/schemas/main/engine/config/1.0/schema.json
+$schema: https://raw.githubusercontent.com/ArcadeAI/schemas/main/engine/config/1.0/schema.json
+
+api:
+  development: false
+  host: localhost
+  port: 9099
+
+auth:
+  providers:
+    - id: default-github
+      description: The default GitHub provider
+      enabled: true
+      type: oauth2
+      provider_id: github
+      client_id: ${env:GITHUB_CLIENT_ID}
+      client_secret: ${env:GITHUB_CLIENT_SECRET}
+
+    - id: hooli
+      description: Hooli OAuth 2.0 provider
+      enabled: true
+      type: oauth2
+      client_id: ${env:HOOLI_CLIENT_ID}
+      client_secret: ${env:HOOLI_CLIENT_SECRET}
+      oauth2:
+        # For a custom OAuth 2.0 provider, specify the full OAuth configuration:
+        scope_delimiter: ' '
+        pkce: # Optional
+          enabled: true
+          code_challenge_method: S256
+        authorize_request:
+          endpoint: 'https://example.com/oauth/authorize'
+          params:
+            response_type: code
+            client_id: '{{client_id}}'
+            redirect_uri: '{{redirect_uri}}'
+            scope: '{{scopes}} {{existing_scopes}}'
+        token_request:
+          endpoint: 'https://example.com/oauth/token'
+          auth_method: client_secret_basic # Optional
+          params:
+            grant_type: authorization_code
+            client_id: '{{client_id}}'
+            client_secret: '{{client_secret}}'
+            redirect_uri: '{{redirect_uri}}'
+          response_content_type: application/json # Optional
+          response_map: # Optional
+            access_token: '$.access_token'
+            refresh_token: '$.refresh_token'
+            expires_in: '$.expires_in'
+            scope: '$.scope'
+            token_type: '$.token_type'
+        refresh_request: # Optional
+          endpoint: 'https://example.com/oauth/token'
+          auth_method: client_secret_basic # Optional
+          params:
+            grant_type: refresh_token
+            client_id: '{{client_id}}'
+            client_secret: '{{client_secret}}'
+            refresh_token: '{{refresh_token}}'
+          response_content_type: application/json # Optional
+          response_map: # Optional
+            access_token: '$.access_token'
+            refresh_token: '$.refresh_token'
+            expires_in: '$.expires_in'
+            scope: '$.scope'
+            token_type: '$.token_type'
+        token_introspection_request: # Optional
+          endpoint: 'https://example.com/oauth/introspect'
+          method: POST
+          params:
+            token: '{{access_token}}'
+          auth_method: client_secret_basic # Optional
+          request_content_type: application/x-www-form-urlencoded # Optional
+          response_content_type: application/json # Optional
+          response_map: # Optional
+            expires_in: '$.data.expires_in'
+            scope: '$.data.scope'
+          expiration_format: relative_seconds # or absolute_unix_timestamp
+          triggers:
+            on_token_grant: true
+            on_token_refresh: true
+        user_info_request: # Optional
+          endpoint: 'https://example.com/oauth/userinfo'
+          auth_method: bearer_access_token
+          response_content_type: application/json
+          response_map:
+            custom_property: '$.data.custom_property'
+          triggers:
+            on_token_grant: true
+            on_token_refresh: true
+
+cache:
+  api_key_ttl: 10s
+  redis:
+    addr: 'localhost:6379'
+    password: ''
+    db: 0
+
+llm:
+  models:
+    - id: primary
+      openai:
+        api_key: ${env:OPENAI_API_KEY}
+    - id: secondary
+      anthropic:
+        api_key: ${env:ANTHROPIC_API_KEY}
+        api_version: '2023-06-01'
+
+security:
+  root_keys:
+    - id: key1
+      default: true
+      value: ${env:ROOT_KEY_1}
+    - id: key2
+      value: ${env:ROOT_KEY_2}
+
+storage:
+  postgres:
+    user: ${env:POSTGRES_USER}
+    password: ${env:POSTGRES_PASSWORD}
+    host: ${env:POSTGRES_HOST}
+    port: ${env:POSTGRES_PORT}
+    db: ${env:POSTGRES_DB}
+    sslmode: require
+
+telemetry:
+  environment: prod
+  logging:
+    level: info
+    encoding: console
+
+tools:
+  directors:
+    - id: default
+      enabled: true
+      max_tools: 64
+      workers:
+        - id: local_worker
+          enabled: true
+          http:
+            uri: 'http://localhost:8002'
+            timeout: 30
+            retry: 3
+            secret: ${env:ARCADE_WORKER_SECRET}
+```
+
+## Telemetry configuration
+
+Arcade supports logs, metrics, and traces with [OpenTelemetry](https://opentelemetry.io/).
+
+If you are using the Arcade Engine locally, you can set the `environment` field to `local`. This will only output logs to the console:
+
+```yaml
+telemetry:
+  environment: local
+  logging:
+    # debug, info, warn, error, fatal
+    level: debug
+    encoding: console
+```
+
+To connect to OpenTelemetry compatible collectors, set the necessary [OpenTelemetry environment variables](https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/) in the `engine.env` file.
+`environment` and `version` are fields that are added to the telemetry attributes, which can be filtered on later.
+
+```yaml {127-131}
+# yaml-language-server: $schema=https://raw.githubusercontent.com/ArcadeAI/schemas/main/engine/config/1.0/schema.json
+$schema: https://raw.githubusercontent.com/ArcadeAI/schemas/main/engine/config/1.0/schema.json
+
+api:
+  development: false
+  host: localhost
+  port: 9099
+
+auth:
+  providers:
+    - id: default-github
+      description: The default GitHub provider
+      enabled: true
+      type: oauth2
+      provider_id: github
+      client_id: ${env:GITHUB_CLIENT_ID}
+      client_secret: ${env:GITHUB_CLIENT_SECRET}
+
+    - id: hooli
+      description: Hooli OAuth 2.0 provider
+      enabled: true
+      type: oauth2
+      client_id: ${env:HOOLI_CLIENT_ID}
+      client_secret: ${env:HOOLI_CLIENT_SECRET}
+      oauth2:
+        # For a custom OAuth 2.0 provider, specify the full OAuth configuration:
+        scope_delimiter: ' '
+        pkce: # Optional
+          enabled: true
+          code_challenge_method: S256
+        authorize_request:
+          endpoint: 'https://example.com/oauth/authorize'
+          params:
+            response_type: code
+            client_id: '{{client_id}}'
+            redirect_uri: '{{redirect_uri}}'
+            scope: '{{scopes}} {{existing_scopes}}'
+        token_request:
+          endpoint: 'https://example.com/oauth/token'
+          auth_method: client_secret_basic # Optional
+          params:
+            grant_type: authorization_code
+            client_id: '{{client_id}}'
+            client_secret: '{{client_secret}}'
+            redirect_uri: '{{redirect_uri}}'
+          response_content_type: application/json # Optional
+          response_map: # Optional
+            access_token: '$.access_token'
+            refresh_token: '$.refresh_token'
+            expires_in: '$.expires_in'
+            scope: '$.scope'
+            token_type: '$.token_type'
+        refresh_request: # Optional
+          endpoint: 'https://example.com/oauth/token'
+          auth_method: client_secret_basic # Optional
+          params:
+            grant_type: refresh_token
+            client_id: '{{client_id}}'
+            client_secret: '{{client_secret}}'
+            refresh_token: '{{refresh_token}}'
+          response_content_type: application/json # Optional
+          response_map: # Optional
+            access_token: '$.access_token'
+            refresh_token: '$.refresh_token'
+            expires_in: '$.expires_in'
+            scope: '$.scope'
+            token_type: '$.token_type'
+        token_introspection_request: # Optional
+          endpoint: 'https://example.com/oauth/introspect'
+          method: POST
+          params:
+            token: '{{access_token}}'
+          auth_method: client_secret_basic # Optional
+          request_content_type: application/x-www-form-urlencoded # Optional
+          response_content_type: application/json # Optional
+          response_map: # Optional
+            expires_in: '$.data.expires_in'
+            scope: '$.data.scope'
+          expiration_format: relative_seconds # or absolute_unix_timestamp
+          triggers:
+            on_token_grant: true
+            on_token_refresh: true
+        user_info_request: # Optional
+          endpoint: 'https://example.com/oauth/userinfo'
+          auth_method: bearer_access_token
+          response_content_type: application/json
+          response_map:
+            custom_property: '$.data.custom_property'
+          triggers:
+            on_token_grant: true
+            on_token_refresh: true
+
+cache:
+  api_key_ttl: 10s
+  redis:
+    addr: 'localhost:6379'
+    password: ''
+    db: 0
+
+llm:
+  models:
+    - id: primary
+      openai:
+        api_key: ${env:OPENAI_API_KEY}
+    - id: secondary
+      anthropic:
+        api_key: ${env:ANTHROPIC_API_KEY}
+        api_version: '2023-06-01'
+
+security:
+  root_keys:
+    - id: key1
+      default: true
+      value: ${env:ROOT_KEY_1}
+    - id: key2
+      value: ${env:ROOT_KEY_2}
+
+storage:
+  postgres:
+    user: ${env:POSTGRES_USER}
+    password: ${env:POSTGRES_PASSWORD}
+    host: ${env:POSTGRES_HOST}
+    port: ${env:POSTGRES_PORT}
+    db: ${env:POSTGRES_DB}
+    sslmode: require
+
+telemetry:
+  environment: prod
+  logging:
+    level: info
+    encoding: console
+
+tools:
+  directors:
+    - id: default
+      enabled: true
+      max_tools: 64
+      workers:
+        - id: local_worker
+          enabled: true
+          http:
+            uri: 'http://localhost:8002'
+            timeout: 30
+            retry: 3
+            secret: ${env:ARCADE_WORKER_SECRET}
+```
+
+### Notes
+
+- The Engine service name is set to `arcade_engine`
+- Traces currently cover the `/v1/health` endpoints, as well as authentication attempts
+
+## Tools configuration
+
+Arcade Engine orchestrates [tools](/home/core-concepts/use-tools/tools-overview) that AI models can use. Tools are executed by distributed workers called **workers**, which are grouped into **directors**.
+
+The `tools.directors` section configures the workers that are available to service tool calls:
+
+```yaml {133-146,3-13}
+# yaml-language-server: $schema=https://raw.githubusercontent.com/ArcadeAI/schemas/main/engine/config/1.0/schema.json
+$schema: https://raw.githubusercontent.com/ArcadeAI/schemas/main/engine/config/1.0/schema.json
+
+api:
+  development: false
+  host: localhost
+  port: 9099
+
+auth:
+  providers:
+    - id: default-github
+      description: The default GitHub provider
+      enabled: true
+      type: oauth2
+      provider_id: github
+      client_id: ${env:GITHUB_CLIENT_ID}
+      client_secret: ${env:GITHUB_CLIENT_SECRET}
+
+    - id: hooli
+      description: Hooli OAuth 2.0 provider
+      enabled: true
+      type: oauth2
+      client_id: ${env:HOOLI_CLIENT_ID}
+      client_secret: ${env:HOOLI_CLIENT_SECRET}
+      oauth2:
+        # For a custom OAuth 2.0 provider, specify the full OAuth configuration:
+        scope_delimiter: ' '
+        pkce: # Optional
+          enabled: true
+          code_challenge_method: S256
+        authorize_request:
+          endpoint: 'https://example.com/oauth/authorize'
+          params:
+            response_type: code
+            client_id: '{{client_id}}'
+            redirect_uri: '{{redirect_uri}}'
+            scope: '{{scopes}} {{existing_scopes}}'
+        token_request:
+          endpoint: 'https://example.com/oauth/token'
+          auth_method: client_secret_basic # Optional
+          params:
+            grant_type: authorization_code
+            client_id: '{{client_id}}'
+            client_secret: '{{client_secret}}'
+            redirect_uri: '{{redirect_uri}}'
+          response_content_type: application/json # Optional
+          response_map: # Optional
+            access_token: '$.access_token'
+            refresh_token: '$.refresh_token'
+            expires_in: '$.expires_in'
+            scope: '$.scope'
+            token_type: '$.token_type'
+        refresh_request: # Optional
+          endpoint: 'https://example.com/oauth/token'
+          auth_method: client_secret_basic # Optional
+          params:
+            grant_type: refresh_token
+            client_id: '{{client_id}}'
+            client_secret: '{{client_secret}}'
+            refresh_token: '{{refresh_token}}'
+          response_content_type: application/json # Optional
+          response_map: # Optional
+            access_token: '$.access_token'
+            refresh_token: '$.refresh_token'
+            expires_in: '$.expires_in'
+            scope: '$.scope'
+            token_type: '$.token_type'
+        token_introspection_request: # Optional
+          endpoint: 'https://example.com/oauth/introspect'
+          method: POST
+          params:
+            token: '{{access_token}}'
+          auth_method: client_secret_basic # Optional
+          request_content_type: application/x-www-form-urlencoded # Optional
+          response_content_type: application/json # Optional
+          response_map: # Optional
+            expires_in: '$.data.expires_in'
+            scope: '$.data.scope'
+          expiration_format: relative_seconds # or absolute_unix_timestamp
+          triggers:
+            on_token_grant: true
+            on_token_refresh: true
+        user_info_request: # Optional
+          endpoint: 'https://example.com/oauth/userinfo'
+          auth_method: bearer_access_token
+          response_content_type: application/json
+          response_map:
+            custom_property: '$.data.custom_property'
+          triggers:
+            on_token_grant: true
+            on_token_refresh: true
+
+cache:
+  api_key_ttl: 10s
+  redis:
+    addr: 'localhost:6379'
+    password: ''
+    db: 0
+
+llm:
+  models:
+    - id: primary
+      openai:
+        api_key: ${env:OPENAI_API_KEY}
+    - id: secondary
+      anthropic:
+        api_key: ${env:ANTHROPIC_API_KEY}
+        api_version: '2023-06-01'
+
+security:
+  root_keys:
+    - id: key1
+      default: true
+      value: ${env:ROOT_KEY_1}
+    - id: key2
+      value: ${env:ROOT_KEY_2}
+
+storage:
+  postgres:
+    user: ${env:POSTGRES_USER}
+    password: ${env:POSTGRES_PASSWORD}
+    host: ${env:POSTGRES_HOST}
+    port: ${env:POSTGRES_PORT}
+    db: ${env:POSTGRES_DB}
+    sslmode: require
+
+telemetry:
+  environment: prod
+  logging:
+    level: info
+    encoding: console
+
+tools:
+  directors:
+    - id: default
+      enabled: true
+      max_tools: 64
+      workers:
+        - id: local_worker
+          enabled: true
+          http:
+            uri: 'http://localhost:8002'
+            timeout: 30
+            retry: 3
+            secret: ${env:ARCADE_WORKER_SECRET}
+```
+
+When a worker is added to an enabled director, all of the tools hosted by that worker will be available to the model and through the Arcade API.
+
+### HTTP worker configuration
+
+The `http` sub-section configures the HTTP client used to call the worker's tools:
+
+- `uri` _(required)_ - The base URL of the worker's tools
+- `secret` _(required)_ - Secret used to authenticate with the worker
+- `timeout` _(optional, default: `30s`)_ - Timeout for calling the worker's tools
+- `retry` _(optional, default: `3`)_ - Number of times to retry a failed tool call
+
+<Callout type="info">
+  Workers must be configured with a `secret` that is used to authenticate with
+  the worker. This ensures that workers are not exposed to the public internet
+  without security.
+
+If `api.development = true`, the secret will default to `"dev"` for local development **only**. In production, the secret must be set to a random value.
+
+</Callout>
+
+## Config file version history
+
+- 1.0: [Full example](https://raw.githubusercontent.com/ArcadeAI/docs/refs/heads/main/examples/code/home/configuration/engine/full_config.1.0.yaml) and [schema](https://raw.githubusercontent.com/ArcadeAI/schemas/refs/heads/main/engine/config/1.0/schema.json)

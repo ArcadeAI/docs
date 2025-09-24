@@ -1,13 +1,13 @@
-import { Arcade } from '@arcadeai/arcadejs';
+import { Arcade } from "@arcadeai/arcadejs";
 
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
-const TOOL_NAME = 'Asana.AttachFileToTask';
+const TOOL_NAME = "Asana.AttachFileToTask";
 
 // Start the authorization process
-const authResponse = await client.tools.authorize({ tool_name: TOOL_NAME });
+const authResponse = await client.tools.authorize({tool_name: TOOL_NAME, user_id: USER_ID});
 
-if (authResponse.status !== 'completed') {
+if (authResponse.status !== "completed") {
   console.log(`Click this link to authorize: ${authResponse.url}`);
 }
 
@@ -15,10 +15,10 @@ if (authResponse.status !== 'completed') {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  task_id: '1234567890',
-  file_name: 'report.txt',
-  file_content_str: 'This is a report',
-  file_encoding: 'utf-8',
+  task_id: "1234567890",
+  file_name: "report.txt",
+  file_content_str: "This is a report",
+  file_encoding: "utf-8",
 };
 
 const response = await client.tools.execute({

@@ -1,16 +1,16 @@
-'use client';
-import { useState } from 'react';
+"use client";
+import { useState } from "react";
 
-interface ToggleContentProps {
+type ToggleContentProps = {
   children: React.ReactNode;
   showText?: string;
   hideText?: string;
-}
+};
 
 const ToggleContent: React.FC<ToggleContentProps> = ({
   children,
-  showText = 'Show more',
-  hideText = 'Hide',
+  showText = "Show more",
+  hideText = "Hide",
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
 

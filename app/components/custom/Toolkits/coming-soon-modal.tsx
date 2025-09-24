@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import {
   Button,
   Dialog,
@@ -7,17 +7,17 @@ import {
   DialogHeader,
   DialogTitle,
   Input,
-} from '@arcadeai/design-system';
-import { usePostHog } from 'posthog-js/react';
-import type React from 'react';
-import { useState } from 'react';
-import { useComingSoon } from './coming-soon-context';
+} from "@arcadeai/design-system";
+import { usePostHog } from "posthog-js/react";
+import type React from "react";
+import { useState } from "react";
+import { useComingSoon } from "./coming-soon-context";
 
-interface ComingSoonModalProps {
+type ComingSoonModalProps = {
   isOpen: boolean;
   onClose: () => void;
   toolkitName: string;
-}
+};
 
 export function ComingSoonModal({
   isOpen,
@@ -27,27 +27,29 @@ export function ComingSoonModal({
   const { email, setEmail } = useComingSoon();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const posthog = usePostHog();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email?.includes('@')) {
-      setError('Please enter a valid email address');
+    if (!email?.includes("@")) {
+      setError("Please enter a valid email address");
       return;
     }
 
     setIsSubmitting(true);
-    setError('');
+    setError("");
 
     try {
-      posthog?.capture('Notify me clicked', {
+      posthog?.capture("Notify me clicked", {
+        // biome-ignore lint/style/useNamingConvention: This is ok for PostHog
         toolkit_name: toolkitName,
+        // biome-ignore lint/style/useNamingConvention: This is ok for PostHog
         notify_email: email,
       });
       setIsSubmitted(true);
     } catch {
-      setError('Failed to submit. Please try again.');
+      setError("Failed to submit. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -55,7 +57,7 @@ export function ComingSoonModal({
 
   const handleClose = () => {
     setIsSubmitted(false);
-    setError('');
+    setError("");
     onClose();
   };
 
@@ -92,7 +94,7 @@ export function ComingSoonModal({
               {error && <p className="text-red-500 text-xs">{error}</p>}
             </div>
             <Button className="w-full" disabled={isSubmitting} type="submit">
-              {isSubmitting ? 'Submitting...' : 'Notify me'}
+              {isSubmitting ? "Submitting..." : "Notify me"}
             </Button>
           </form>
         )}
@@ -107,35 +109,33 @@ const SuccessMessage = ({
 }: {
   toolkitName: string;
   handleClose: () => void;
-}) => {
-  return (
-    <div className="flex flex-col items-center justify-center pt-6 pb-2 text-center">
-      <div className="mb-4 rounded-full bg-green-500/10 p-3">
-        <svg
-          className="h-6 w-6 text-green-500"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <title>Success</title>
-          <path
-            d="M5 13l4 4L19 7"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-          />
-        </svg>
-      </div>
-      <h3 className="mb-1 font-medium text-gray-100 text-lg">
-        Thanks for your interest!
-      </h3>
-      <p className="text-gray-400 text-sm">
-        We'll notify you when the {toolkitName} toolkit becomes available.
-      </p>
-      <Button className="mt-6 w-full" onClick={handleClose} variant="default">
-        Close
-      </Button>
+}) => (
+  <div className="flex flex-col items-center justify-center pt-6 pb-2 text-center">
+    <div className="mb-4 rounded-full bg-green-500/10 p-3">
+      <svg
+        className="h-6 w-6 text-green-500"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <title>Success</title>
+        <path
+          d="M5 13l4 4L19 7"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+        />
+      </svg>
     </div>
-  );
-};
+    <h3 className="mb-1 font-medium text-gray-100 text-lg">
+      Thanks for your interest!
+    </h3>
+    <p className="text-gray-400 text-sm">
+      We'll notify you when the {toolkitName} toolkit becomes available.
+    </p>
+    <Button className="mt-6 w-full" onClick={handleClose} variant="default">
+      Close
+    </Button>
+  </div>
+);

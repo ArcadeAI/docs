@@ -1,4 +1,4 @@
-import type { SVGProps } from 'react';
+import type { SVGProps } from "react";
 // No default React import needed
 
 export const Github = (props: SVGProps<SVGSVGElement>) => (

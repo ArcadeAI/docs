@@ -1,20 +1,20 @@
-'use client';
+"use client";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-} from '@arcadeai/design-system';
-import { motion } from 'framer-motion';
-import Link from 'next/link';
+} from "@arcadeai/design-system";
+import { motion } from "motion/react";
+import Link from "next/link";
 
-interface QuickStartCardProps {
+type QuickStartCardProps = {
   icon: React.ElementType;
   title: string;
   description: string;
   href: string;
   code?: string;
-}
+};
 
 export function QuickStartCard({
   icon: Icon,
@@ -27,7 +27,7 @@ export function QuickStartCard({
     <motion.div
       whileHover={{
         scale: 1.02,
-        boxShadow: '0 0 20px 0 rgba(238, 23, 94, 0.1)',
+        boxShadow: "0 0 20px 0 rgba(238, 23, 94, 0.1)",
       }}
       whileTap={{ scale: 0.98 }}
     >

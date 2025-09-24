@@ -1,15 +1,15 @@
-'use client';
-import type React from 'react';
-import { createContext, useContext, useState } from 'react';
+"use client";
+import type React from "react";
+import { createContext, useContext, useState } from "react";
 
-interface ComingSoonContextType {
+type ComingSoonContextType = {
   email: string;
   // eslint-disable-next-line no-unused-vars
   setEmail: (email: string) => void;
-}
+};
 
 const ComingSoonContext = createContext<ComingSoonContextType>({
-  email: '',
+  email: "",
   setEmail: () => {
     /* no-op */
   },
@@ -18,7 +18,7 @@ const ComingSoonContext = createContext<ComingSoonContextType>({
 export const ComingSoonProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
 
   return (
     <ComingSoonContext.Provider value={{ email, setEmail }}>

@@ -1,15 +1,15 @@
-'use client';
-import { Button } from '@arcadeai/design-system';
+"use client";
+import { Button } from "@arcadeai/design-system";
 
-export interface NavigationProps {
+export type NavigationProps = {
   onBack: () => void;
   buttonText?: string;
   disableBackButton?: boolean;
-}
+};
 
 export function Navigation({
   onBack,
-  buttonText = 'Next',
+  buttonText = "Next",
   disableBackButton,
 }: NavigationProps) {
   return (

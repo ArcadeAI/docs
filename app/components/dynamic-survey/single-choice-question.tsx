@@ -1,10 +1,10 @@
-import { Label, RadioGroup, RadioGroupItem } from '@arcadeai/design-system';
-import type { MultipleSurveyQuestion } from 'posthog-js';
+import { Label, RadioGroup, RadioGroupItem } from "@arcadeai/design-system";
+import type { MultipleSurveyQuestion } from "posthog-js";
 
-interface SingleChoiceQuestionProps {
+type SingleChoiceQuestionProps = {
   question: MultipleSurveyQuestion;
   previousResponse?: string;
-}
+};
 
 export function SingleChoiceQuestion({
   question,

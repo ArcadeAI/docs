@@ -1,18 +1,18 @@
-'use client';
-import type { Survey } from 'posthog-js';
-import { usePostHog } from 'posthog-js/react';
-import { useEffect, useRef } from 'react';
-import { useSurvey } from './hooks/use-survey';
-import { Navigation } from './navigation';
-import { Progress } from './progress';
-import { Question } from './question';
+"use client";
+import type { Survey } from "posthog-js";
+import { usePostHog } from "posthog-js/react";
+import { useEffect, useRef } from "react";
+import { useSurvey } from "./hooks/use-survey";
+import { Navigation } from "./navigation";
+import { Progress } from "./progress";
+import { Question } from "./question";
 
-interface DynamicSurveyProps {
+type DynamicSurveyProps = {
   surveyData: Survey | null;
   /* eslint-disable no-unused-vars */
   onComplete: (data: Record<string, unknown>) => void;
   onBack: () => void;
-}
+};
 
 export default function DynamicSurvey({
   surveyData,
@@ -37,7 +37,8 @@ export default function DynamicSurvey({
       return;
     }
     if (!surveyShown.current) {
-      posthog?.capture('survey shown', { $survey_id: surveyData.id });
+      // biome-ignore lint/style/useNamingConvention: This is ok for PostHog
+      posthog?.capture("survey shown", { $survey_id: surveyData.id });
       surveyShown.current = true;
     }
   }, [surveyData, posthog]);
@@ -50,12 +51,13 @@ export default function DynamicSurvey({
 
     const handleBeforeUnload = () => {
       if (currentQuestionIndex < surveyData.questions.length - 1) {
-        posthog?.capture('survey dismissed', { $survey_id: surveyData.id });
+        // biome-ignore lint/style/useNamingConvention: This is ok for PostHog
+        posthog?.capture("survey dismissed", { $survey_id: surveyData.id });
       }
     };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [surveyData, posthog, currentQuestionIndex]);
 
   // Handle back button click
@@ -91,7 +93,9 @@ export default function DynamicSurvey({
       <form key={currentQuestionIndex} onSubmit={handleSubmitQuestion}>
         <div className="space-y-8">
           <Question
-            previousResponse={responses[currentQuestionIndex]}
+            previousResponse={
+              responses[currentQuestionIndex] as string | undefined
+            }
             question={currentQuestion}
           />
           <Navigation

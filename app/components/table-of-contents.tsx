@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * DynamicTable Component
@@ -12,8 +12,8 @@ function TableOfContents({ headers, data }) {
     // Convert first column value to a valid ID format
     const sectionId = firstColumnValue
       .toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace('.', '');
+      .replace(/\s+/g, "-")
+      .replace(".", "");
     // Update the URL hash to navigate to the section
     window.location.hash = `#${sectionId}`;
   };
@@ -37,8 +37,8 @@ function TableOfContents({ headers, data }) {
           <tr
             className={`cursor-pointer text-xs hover:bg-neutral-dark-opacity ${
               rowIndex % 2 === 0
-                ? 'bg-neutral-dark'
-                : 'border-neutral-dark-medium border-b bg-transparent'
+                ? "bg-neutral-dark"
+                : "border-neutral-dark-medium border-b bg-transparent"
             }`}
             key={String(row[0])}
             onClick={() => handleRowClick(row[0])}
@@ -46,7 +46,7 @@ function TableOfContents({ headers, data }) {
             {row.map((cell, cellIndex) => (
               <td
                 className={`border-neutral-dark-low border-b px-3 py-2 text-left ${
-                  cellIndex === 0 ? 'font-semibold text-xs' : ''
+                  cellIndex === 0 ? "font-semibold text-xs" : ""
                 }`}
                 key={`${String(row[0])}-${String(cell)}`}
               >

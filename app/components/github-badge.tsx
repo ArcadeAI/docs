@@ -1,4 +1,4 @@
-import IconGithub from './icons/github';
+import IconGithub from "./icons/github";
 
 export const GithubMenuBadge = () => (
   <a

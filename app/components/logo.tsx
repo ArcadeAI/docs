@@ -7,7 +7,7 @@ export function Logo() {
           className="h-8 w-auto dark:hidden"
           height={32}
           loading="lazy"
-          src={'/images/logo/arcade-logo.png'}
+          src={"/images/logo/arcade-logo.png"}
           width={120}
         />
         <img
@@ -15,7 +15,7 @@ export function Logo() {
           className="hidden h-8 w-auto dark:block"
           height={32}
           loading="lazy"
-          src={'/images/logo/arcade-title-dark.png'}
+          src={"/images/logo/arcade-title-dark.png"}
           width={120}
         />
       </div>
@@ -25,7 +25,7 @@ export function Logo() {
           className="dark:block"
           height={30}
           loading="lazy"
-          src={'/images/logo/arcade.png'}
+          src={"/images/logo/arcade.png"}
           width={30}
         />
       </div>

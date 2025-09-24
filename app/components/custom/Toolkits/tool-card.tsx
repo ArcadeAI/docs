@@ -1,29 +1,29 @@
-'use client';
+"use client";
 import {
   Badge,
   Card,
-  CardContent as CardContentUI,
+  CardContent as CardContentUi,
   CardHeader,
   CardTitle,
-} from '@arcadeai/design-system';
-import { BadgeCheck, CheckCircle, Key, Users } from 'lucide-react';
-import Image from 'next/image';
-import Link from 'next/link';
-import type React from 'react';
-import { useState } from 'react';
-import { cn } from '@/lib/utils';
-import { ComingSoonModal } from './coming-soon-modal';
+} from "@arcadeai/design-system";
+import { cn } from "@arcadeai/design-system/lib/utils";
+import { BadgeCheck, CheckCircle, Key, Users } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import type React from "react";
+import { useState } from "react";
+import { ComingSoonModal } from "./coming-soon-modal";
 
-type ToolkitType = 'arcade' | 'verified' | 'community' | 'auth';
+type ToolkitType = "arcade" | "verified" | "community" | "auth";
 
-interface ToolCardProps {
+type ToolCardProps = {
   name: string;
   image: string;
   summary: string;
   link: string;
   type: ToolkitType;
   isComingSoon?: boolean;
-}
+};
 
 const typeConfig: Record<
   ToolkitType,
@@ -31,36 +31,36 @@ const typeConfig: Record<
 > = {
   arcade: {
     className:
-      'border-emerald-600/20 hover:border-primary bg-emerald-600/2 hover:bg-emerald-600/3',
-    label: 'Arcade Toolkit',
+      "border-emerald-600/20 hover:border-primary bg-emerald-600/[0.02] hover:bg-emerald-600/[0.03]",
+    label: "Arcade Toolkit",
     icon: BadgeCheck,
-    color: 'text-emerald-400',
+    color: "text-emerald-400",
   },
   verified: {
     className:
-      'border-blue-600/20 hover:border-primary bg-blue-600/2 hover:bg-blue-600/3',
-    label: 'Verified Toolkit',
+      "border-blue-600/20 hover:border-primary bg-blue-600/[0.02] hover:bg-blue-600/[0.03]",
+    label: "Verified Toolkit",
     icon: CheckCircle,
-    color: 'text-blue-400',
+    color: "text-blue-400",
   },
   community: {
     className:
-      'border-orange-600/20 hover:border-primary bg-orange-600/2 hover:bg-orange-600/3',
-    label: 'Community Toolkit',
+      "border-orange-600/20 hover:border-primary bg-orange-600/[0.02] hover:bg-orange-600/[0.03]",
+    label: "Community Toolkit",
     icon: Users,
-    color: 'text-orange-400',
+    color: "text-orange-400",
   },
   auth: {
     className:
-      'border-purple-600/20 hover:border-primary bg-purple-600/2 hover:bg-purple-600/3',
-    label: 'Auth Integration',
+      "border-purple-600/20 hover:border-primary bg-purple-600/[0.02] hover:bg-purple-600/[0.03]",
+    label: "Auth Provider",
     icon: Key,
-    color: 'text-purple-400',
+    color: "text-purple-400",
   },
 };
 
 export const ToolCard: React.FC<ToolCardProps> = ({
-  name,
+  name: toolName,
   image,
   summary,
   link,
@@ -69,9 +69,9 @@ export const ToolCard: React.FC<ToolCardProps> = ({
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [imageError, setImageError] = useState(false);
-  const { className, label, icon: Icon, color } = typeConfig[type];
+  const { className, label, icon: IconComponent, color } = typeConfig[type];
 
-  const handleCardClick = (e: React.MouseEvent) => {
+  const handleCardClick = (e: React.MouseEvent | React.KeyboardEvent) => {
     if (isComingSoon) {
       e.preventDefault();
       setIsModalOpen(true);
@@ -87,36 +87,36 @@ export const ToolCard: React.FC<ToolCardProps> = ({
   };
 
   // Generate a consistent color based on the tool name
-  const getColorFromName = (toolName: string) => {
+  const getColorFromName = (name: string) => {
     // Predefined attractive colors (tailwind colors at 500-600 level)
     const colors = [
-      'bg-red-500',
-      'bg-orange-500',
-      'bg-amber-500',
-      'bg-yellow-500',
-      'bg-lime-500',
-      'bg-green-500',
-      'bg-emerald-500',
-      'bg-teal-500',
-      'bg-cyan-500',
-      'bg-sky-500',
-      'bg-blue-500',
-      'bg-indigo-500',
-      'bg-violet-500',
-      'bg-purple-500',
-      'bg-fuchsia-500',
-      'bg-pink-500',
-      'bg-rose-500',
+      "bg-red-500",
+      "bg-orange-500",
+      "bg-amber-500",
+      "bg-yellow-500",
+      "bg-lime-500",
+      "bg-green-500",
+      "bg-emerald-500",
+      "bg-teal-500",
+      "bg-cyan-500",
+      "bg-sky-500",
+      "bg-blue-500",
+      "bg-indigo-500",
+      "bg-violet-500",
+      "bg-purple-500",
+      "bg-fuchsia-500",
+      "bg-pink-500",
+      "bg-rose-500",
     ];
+
+    // Constants for hash calculation
+    const hashMultiplier = 31;
+    const maxSafeInteger = 2_147_483_647;
 
     // Simple hash function to get a number from the name
     let hash = 0;
-    for (let i = 0; i < toolName.length; i++) {
-      // biome-ignore lint/nursery/noBitwiseOperators: hashing uses bitwise intentionally
-      hash = (hash << 5) - hash + toolName.charCodeAt(i);
-      // biome-ignore lint/style/useShorthandAssign: keep explicit form for clarity
-      // biome-ignore lint/nursery/noBitwiseOperators: convert to 32bit integer using bitwise
-      hash = hash & hash; // Convert to 32bit integer
+    for (let i = 0; i < name.length; i++) {
+      hash = (hash * hashMultiplier + name.charCodeAt(i)) % maxSafeInteger;
     }
 
     // Use absolute value to ensure positive index
@@ -125,22 +125,22 @@ export const ToolCard: React.FC<ToolCardProps> = ({
   };
 
   // Get the first two letters of the name
-  const firstTwoChars = name.substring(0, 2).toUpperCase();
+  const firstTwoChars = toolName.substring(0, 2).toUpperCase();
 
   // Get color based on the name
-  const bgColor = getColorFromName(name);
+  const bgColor = getColorFromName(toolName);
 
   const cardContent = (
     <Card
       className={cn(
-        'flex h-full flex-col transition-all duration-300',
-        'border hover:shadow-lg',
-        'bg-gray-900/80 backdrop-blur-xs',
+        "flex h-full flex-col transition-all duration-300",
+        "border hover:shadow-lg",
+        "bg-gray-900/80 backdrop-blur-sm",
         className,
-        isComingSoon && 'relative'
+        isComingSoon && "relative"
       )}
     >
-      <CardHeader className="grow space-y-0 p-4">
+      <CardHeader className="flex-grow space-y-0 p-4">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div className="flex items-center space-x-5">
             <div className="relative h-10 w-10 overflow-hidden rounded-lg">
@@ -152,7 +152,7 @@ export const ToolCard: React.FC<ToolCardProps> = ({
                 </div>
               ) : (
                 <Image
-                  alt={`${name} logo`}
+                  alt={`${toolName} logo`}
                   className="object-cover"
                   height={40}
                   onError={handleImageError}
@@ -163,9 +163,11 @@ export const ToolCard: React.FC<ToolCardProps> = ({
               )}
             </div>
             <div>
-              <CardTitle className="text-base text-gray-50">{name}</CardTitle>
+              <CardTitle className="text-base text-gray-50">
+                {toolName}
+              </CardTitle>
               <div className="flex items-center text-gray-400 text-xs">
-                <Icon className={`h-3 w-3 ${color} mr-1`} />
+                <IconComponent className={`h-3 w-3 ${color} mr-1`} />
                 {label}
               </div>
             </div>
@@ -180,9 +182,9 @@ export const ToolCard: React.FC<ToolCardProps> = ({
           )}
         </div>
       </CardHeader>
-      <CardContentUI className="space-y-2 p-4 pt-0">
+      <CardContentUi className="space-y-2 p-4 pt-0">
         <div className="text-gray-300 text-xs leading-relaxed">{summary}</div>
-      </CardContentUI>
+      </CardContentUi>
     </Card>
   );
 
@@ -190,8 +192,15 @@ export const ToolCard: React.FC<ToolCardProps> = ({
     <>
       {isComingSoon ? (
         <button
-          className="w-full text-left"
+          aria-label={`${toolName} - Coming Soon`}
+          className="w-full cursor-pointer text-left"
           onClick={handleCardClick}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              handleCardClick(e);
+            }
+          }}
           type="button"
         >
           {cardContent}
@@ -204,7 +213,7 @@ export const ToolCard: React.FC<ToolCardProps> = ({
         <ComingSoonModal
           isOpen={isModalOpen}
           onClose={handleModalClose}
-          toolkitName={name}
+          toolkitName={toolName}
         />
       )}
     </>

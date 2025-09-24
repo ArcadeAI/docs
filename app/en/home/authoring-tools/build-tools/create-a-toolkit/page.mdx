@@ -1,0 +1,411 @@
+---
+title: "Creating a Toolkit"
+description: "Learn how to create, test, deploy, and publish a custom toolkit for Arcade"
+---
+
+import { Steps, Tabs } from "nextra/components";
+
+# Creating a Toolkit
+
+<div className="grid grid-cols-1 md:grid-cols-[4fr_3fr] gap-8">
+  <div>
+    This guide walks you through the complete process of creating a custom
+    toolkit for Arcade - from initial setup to publishing on PyPI. You'll build
+    a simple arithmetic toolkit with operations like addition, subtraction, and
+    multiplication. When creating or extending an Arcade toolkit, we make it
+    easy to develop the tool alongside your agent, providing a pleasant local
+    development experience. As your agent will be loading its available tools
+    from the Arcade Engine, you can mix existing tools and your locally
+    developed tool by following this guide. You'll be running your local worker
+    with the Arcade CLI and registering it with the Engine so that your agent
+    can find and use your tool.
+  </div>
+  <iframe
+    className="aspect-video w-full max-w-[900px] rounded-xl shadow-2xl"
+    src="https://www.youtube.com/embed/q2V_P35KYCg?si=CYhKw-eYx1O98O9K"
+    title="Create a Toolkit"
+    allow="fullscreen; accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+    referrerPolicy="strict-origin-when-cross-origin"
+  ></iframe>
+</div>
+
+## Prerequisites
+
+Before starting, make sure you have:
+
+- An [Arcade account](https://api.arcade.dev/signup)
+- For this guide, we'll use [uv](https://docs.astral.sh/uv/getting-started/installation/) as our package manager.
+
+<Steps>
+
+## Generate a toolkit template
+
+Run the following command to start creating your toolkit:
+
+```bash
+uv tool run --from arcade-ai arcade new arithmetic
+```
+
+Enter the optional information when prompted:
+
+- **Description**: Provide a brief explanation of what your toolkit will do
+- **Author GitHub username and email**: Your contact information
+- **Generate test and evaluation directories**: Whether you want additional directories created for you
+
+After completion, a directory with your toolkit name (arithmetic) will be created with the following structure:
+
+```
+arithmetic/
+├── arcade_arithmetic/       # Core package directory
+│   ├── __init__.py
+│   └── tools/               # Directory for your tools
+│       ├── __init__.py
+│       └── hello.py         # Example tool
+├── evals/                   # Evaluation directory
+│   └── eval_arithmetic.py   # Example evaluation file
+├── tests/                   # Test directory
+│   ├── __init__.py
+│   └── test_arithmetic.py   # Example test file
+├── pyproject.toml           # uv project configuration
+├── README.md
+└── Makefile                 # uv helper commands
+```
+
+Navigate to your toolkit directory:
+
+```bash
+cd arithmetic
+```
+
+## Set up the development environment
+
+An active virtual environment for your shell(s) is required to run the local development commands.
+
+```bash
+uv venv --seed -p 3.13
+```
+
+Install dependencies and pre-commit hooks:
+
+```bash
+make install
+```
+
+This installs all dependencies specified in `pyproject.toml`, pre-commit hooks for code quality, and your toolkit in development mode.
+
+The Makefile provides several helpful commands:
+
+- `build` - Build wheel file using uv
+- `bump-version` - Bump the version in the pyproject.toml file by a patch version
+- `check` - Run code quality tools
+- `clean-build` - Clean build artifacts
+- `coverage` - Generate coverage report
+- `install` - Install the uv environment and install all packages with dependencies
+- `install-local` - Install Arcade components (CLI, TDK, etc.) from source in editable mode. Only use this when you are developing against the latest unreleased code from the [arcade-ai repo](https://github.com/ArcadeAI/arcade-ai) main branch instead of the published packages
+- `test` - Test the code with pytest
+
+Activate the environment with:
+
+```bash
+source .venv/bin/activate
+```
+
+or
+
+```bash
+uv run
+```
+
+## Define your tools
+
+Create a Python file for your tools in the `arcade_arithmetic/tools` directory.
+
+The following example shows a simple math toolkit with three tools: `add`, `subtract`, and `multiply`:
+
+```python
+# arcade_arithmetic/tools/operations.py
+from typing import Annotated
+
+from arcade_tdk import tool
+
+
+@tool
+def add(
+    a: Annotated[int, "The first number"],
+    b: Annotated[int, "The second number"]
+) -> Annotated[int, "The sum of the two numbers"]:
+    """
+    Add two numbers together
+
+    Examples:
+        add(3, 4) -> 7
+        add(-1, 5) -> 4
+    """
+    return a + b
+
+@tool
+def subtract(
+    a: Annotated[int, "The first number"],
+    b: Annotated[int, "The second number"]
+) -> Annotated[int, "The difference of the two numbers"]:
+    """
+    Subtract the second number from the first
+
+    Examples:
+        subtract(10, 4) -> 6
+        subtract(5, 7) -> -2
+    """
+    return a - b
+
+@tool
+def multiply(
+    a: Annotated[int, "The first number"],
+    b: Annotated[int, "The second number"]
+) -> Annotated[int, "The product of the two numbers"]:
+    """
+    Multiply two numbers together
+
+    Examples:
+        multiply(3, 4) -> 12
+        multiply(-2, 5) -> -10
+    """
+    return a * b
+```
+
+Update the package initialization files to expose your tools:
+
+```python
+# arcade_arithmetic/tools/__init__.py
+from arcade_arithmetic.tools.operations import add, multiply, subtract
+
+__all__ = ["add", "multiply", "subtract"]
+```
+
+```python
+# arcade_arithmetic/__init__.py
+from arcade_arithmetic.tools import add, multiply, subtract
+
+__all__ = ["add", "multiply", "subtract"]
+```
+
+## Test your toolkit
+
+Write tests for your tools in the `tests` directory:
+
+```python
+# tests/test_operations.py
+import pytest
+
+from arcade_arithmetic.tools.operations import add, multiply, subtract
+
+
+def test_add():
+    assert add(3, 4) == 7
+    assert add(-1, 5) == 4
+    assert add(0, 0) == 0
+
+def test_subtract():
+    assert subtract(10, 4) == 6
+    assert subtract(5, 7) == -2
+    assert subtract(0, 0) == 0
+
+def test_multiply():
+    assert multiply(3, 4) == 12
+    assert multiply(-2, 5) == -10
+    assert multiply(0, 5) == 0
+```
+
+Run the tests:
+
+```bash
+make test
+```
+
+Check code quality:
+
+```bash
+make check
+```
+
+Generate a coverage report (optional):
+
+```bash
+make coverage
+```
+
+## Verify local installation
+
+Your toolkit should already be installed locally from the `make install` command. Verify it's properly registered:
+
+```bash
+arcade show --local
+```
+
+You should see your toolkit listed in the output.
+
+## Test your tools locally
+
+Serve your toolkit locally with the Arcade CLI:
+
+```bash
+arcade serve
+```
+
+You can use the `--reload` flag to automatically reload the server when you make changes to your toolkit:
+
+```bash
+arcade serve --reload
+```
+
+Visit http://localhost:8002/worker/health to see that your worker is running.
+
+## Connect your toolkit to the Arcade Engine
+
+In another terminal, use a service like [ngrok](https://ngrok.com/docs/), [tailscale](https://tailscale.com/kb/1223/funnel), or [cloudflare](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/local-management/create-local-tunnel/) to give your local worker a public URL.
+
+<Tabs items={["ngrok", "Tailscale", "Cloudflare"]}>
+<Tabs.Tab>
+
+```bash
+ngrok http 8002
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```bash
+tailscale funnel 8002
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```bash
+cloudflared tunnel --url http://localhost:8002
+```
+
+</Tabs.Tab>
+
+</Tabs>
+
+Then in your Arcade dashboard:
+
+1. Navigate to the [Workers](https://api.arcade.dev/dashboard/workers) page.
+1. Click **Add Worker**.
+1. Fill in the form with the following values:
+   - **ID**: `my-arithmetic-worker`
+   - **Worker Type**: `Arcade`
+   - **URL**: your public URL from ngrok, tailscale, or cloudflare
+   - **Secret**: `dev`
+   - **Timeout** and **Retry**: can be left at default values
+1. Click **Create**.
+
+Now, in the [Playground](https://api.arcade.dev/dashboard/playground), you can see your tools in action.
+
+## Deploy your toolkit to the Arcade Engine
+
+Alternatively, you can deploy your toolkit to Arcade's cloud instead of tunneling to it locally.
+
+Find the `worker.toml` file in your toolkit's root directory (where you ran `uv tool run --from arcade-ai arcade new arithmetic`):
+
+```toml
+[[worker]]
+
+[worker.config]
+id = "demo-worker"  # Choose a unique ID
+enabled = true
+timeout = 30
+retries = 3
+secret = "<your-secret>"  # This is randomly generated for you by `uv tool run --from arcade-ai arcade new arithmetic`
+[worker.local_source]
+packages = ["./arithmetic"]  # Path to your toolkit directory
+```
+
+See [Configuring Arcade Deploy](/home/hosting-options/local-deployment/configure/arcade-deploy) for more configuration options.
+
+From the root of your toolkit, deploy your toolkit to Arcade's cloud with:
+
+This may take a while your first time.
+
+```bash
+arcade deploy
+```
+
+Verify the deployment:
+
+```bash
+arcade worker list
+```
+
+## Package and publish to PyPI
+
+Clean any previous build artifacts:
+
+```bash
+make clean-build
+```
+
+If you're updating an existing package, bump the version:
+
+```bash
+make bump-version
+```
+
+Create a comprehensive README.md file that explains your toolkit's purpose, installation, and usage.
+
+Build your package:
+
+```bash
+make build
+```
+
+Publish to PyPI:
+
+```bash
+uv publish --token YOUR_PYPI_TOKEN_HERE
+```
+
+</Steps>
+
+## Using your published toolkit
+
+Now that your toolkit is published, you can use it in any Arcade application:
+
+```python
+from arcadepy import Arcade
+
+# Initialize the Arcade client
+client = Arcade()
+
+# Use your Tools
+response = client.tools.execute(
+    tool_name="Arithmetic.Add",
+    input={
+        "a": 12,
+        "b": 34
+    },
+)
+
+print(response.output.value)
+```
+
+## Ongoing toolkit maintenance
+
+As you continue to develop your toolkit, use these Makefile commands to maintain it:
+
+- `make check` - Run code quality checks before committing changes
+- `make test` - Run tests to ensure your changes don't break existing functionality
+- `make coverage` - Monitor test coverage as you add new features
+- `make bump-version` - Update the version when releasing new changes
+- `make build` - Build new distribution packages
+- `make clean-build` - Clean up build artifacts when needed
+
+## Next steps
+
+- **Add more tools**: Expand your toolkit with more complex operations
+- **Add authentication**: [Learn how to create tools with authentication](/home/authoring-tools/build-tools/create-a-tool-with-auth)
+- **Add secrets**: [Learn how to create tools with secrets](/home/authoring-tools/build-tools/create-a-tool-with-secrets)
+- **Evaluate your tools**: [Explore how to evaluate tool performance](/home/authoring-tools/evaluate-tools/why-evaluate-tools)
+- **Set up CI/CD**: Automate testing and deployment with continuous integration

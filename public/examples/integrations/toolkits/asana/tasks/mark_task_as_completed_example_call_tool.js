@@ -1,13 +1,13 @@
-import { Arcade } from '@arcadeai/arcadejs';
+import { Arcade } from "@arcadeai/arcadejs";
 
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
-const TOOL_NAME = 'Asana.MarkTaskAsCompleted';
+const TOOL_NAME = "Asana.MarkTaskAsCompleted";
 
 // Start the authorization process
-const authResponse = await client.tools.authorize({ tool_name: TOOL_NAME });
+const authResponse = await client.tools.authorize({tool_name: TOOL_NAME, user_id: USER_ID});
 
-if (authResponse.status !== 'completed') {
+if (authResponse.status !== "completed") {
   console.log(`Click this link to authorize: ${authResponse.url}`);
 }
 
@@ -15,7 +15,7 @@ if (authResponse.status !== 'completed') {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  task_id: '1234567890',
+  task_id: "1234567890",
 };
 
 const response = await client.tools.execute({

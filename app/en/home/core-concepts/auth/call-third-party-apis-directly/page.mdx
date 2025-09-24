@@ -1,0 +1,702 @@
+---
+title: "Direct Third-Party API Call"
+description: "Guide on how to retrieve an authorization token to call third-party APIs directly"
+---
+
+import { Steps, Tabs } from "nextra/components";
+import { SignupLink } from "@/app/components/analytics";
+
+# Direct Third-Party API Call
+
+In this guide, you'll learn how to use Arcade to obtain user authorization and interact with third-party services by calling their API endpoints directly, without using Arcade for tool execution or definition. We'll use Google's Gmail API as an example to demonstrate how to:
+
+- Get authorization tokens through Arcade
+- Handle user authentication flows
+- Use tokens with external services
+
+This can be useful when you need to manage authorization flows in your application.
+
+<Steps>
+
+### Prerequisites
+
+- Sign up for an <SignupLink linkLocation="docs:call-third-party-apis-directly">Arcade account</SignupLink> if you haven't already
+- Generate an [Arcade API key](/home/getting-started/api-keys) and take note of it
+
+### Install required libraries
+
+<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+  <Tabs.Tab>
+    ```bash pip install arcadepy google-api-python-client google-auth-httplib2
+    google-auth-oauthlib ```
+  </Tabs.Tab>
+  <Tabs.Tab>```bash npm install @arcadeai/arcadejs googleapis ```</Tabs.Tab>
+</Tabs>
+
+### Start coding
+
+<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs.Tab>
+Create a new file `direct_api_call.py` and import all libraries we're going to use:
+
+```python
+from arcadepy import Arcade
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
+```
+
+</Tabs.Tab>
+<Tabs.Tab>
+Create a new file `direct_api_call.js` and import all libraries we're going to use:
+
+```javascript
+import { Arcade } from "@arcadeai/arcadejs";
+import { google } from "googleapis";
+
+/*
+ * In this example, we will use Arcade to authenticate with Google and
+ * retrieve Gmail messages.
+ *
+ * Consider using the Arcade Gmail toolkit, which simplifies the process for
+ * retrieving email messages even further!
+ *
+ * Below we are just showing how to use Arcade as an auth provider, if you need to directly get a token to use with Google.
+ */
+
+const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
+
+// Your app's internal ID for the user (an email, UUID, etc).
+// It's used internally to identify your user in Arcade, not to identify with the Gmail service.
+// Use your Arcade account email for testing:
+const user_id = "{arcade_user_id}";
+
+// Start the authorization process
+let auth_response = await client.auth.start(user_id, "google", {
+  scopes: ["https://www.googleapis.com/auth/gmail.readonly"],
+});
+
+if (auth_response.status !== "completed") {
+  console.log("Please complete the authorization challenge in your browser:");
+  console.log(auth_response.url);
+}
+
+// Wait for the authorization to complete
+auth_response = await client.auth.waitForCompletion(auth_response);
+
+if (!auth_response.context.token) {
+  throw new Error("No token found in auth response");
+}
+
+// Set up Google API client with the token
+const auth = new google.auth.OAuth2();
+auth.setCredentials({ access_token: auth_response.context.token });
+const gmail = google.gmail({ version: "v1", auth });
+
+// List email messages
+const response = await gmail.users.messages.list({
+  userId: "me",
+});
+
+const email_messages = response.data.messages || [];
+console.log(email_messages);
+```
+
+</Tabs.Tab>
+</Tabs>
+
+### Initialize the Arcade client
+
+Create an instance of the Arcade client:
+
+<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs.Tab>
+```python
+from arcadepy import Arcade
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
+
+client = Arcade() # Automatically finds the `ARCADE_API_KEY` env variable
+
+"""
+In this example, we will use Arcade to authenticate with Google and
+retrieve Gmail messages.
+
+Consider using the Arcade Gmail toolkit, which simplifies the process for
+retrieving email messages even further!
+
+Below we are just showing how to use Arcade as an auth provider, if you need to directly get a token to use with Google.
+"""
+
+# This would be your app's internal ID for the user (an email, UUID, etc.)
+
+user_id = "{arcade_user_id}"
+
+# Start the authorization process
+
+auth_response = client.auth.start(
+user_id=user_id,
+provider="google",
+scopes=["https://www.googleapis.com/auth/gmail.readonly"],
+)
+
+if auth_response.status != "completed":
+print("Please complete the authorization challenge in your browser:")
+print(auth_response.url)
+
+# Wait for the authorization to complete
+
+auth_response = client.auth.wait_for_completion(auth_response)
+
+if not auth_response.context.token:
+raise ValueError("No token found in auth response")
+
+credentials = Credentials(auth_response.context.token)
+gmail = build("gmail", "v1", credentials=credentials)
+
+email_messages = (
+gmail.users().messages().list(userId="me").execute().get("messages", [])
+)
+
+print(email_messages)
+
+````
+</Tabs.Tab>
+<Tabs.Tab>
+```javascript
+import { Arcade } from '@arcadeai/arcadejs';
+import { google } from 'googleapis';
+
+/*
+ * In this example, we will use Arcade to authenticate with Google and
+ * retrieve Gmail messages.
+ *
+ * Consider using the Arcade Gmail toolkit, which simplifies the process for
+ * retrieving email messages even further!
+ *
+ * Below we are just showing how to use Arcade as an auth provider, if you need to directly get a token to use with Google.
+ */
+
+const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
+
+// Your app's internal ID for the user (an email, UUID, etc).
+// It's used internally to identify your user in Arcade, not to identify with the Gmail service.
+// Use your Arcade account email for testing:
+const user_id = '{arcade_user_id}';
+
+// Start the authorization process
+let auth_response = await client.auth.start(user_id, 'google', {
+  scopes: ['https://www.googleapis.com/auth/gmail.readonly'],
+});
+
+if (auth_response.status !== 'completed') {
+  console.log('Please complete the authorization challenge in your browser:');
+  console.log(auth_response.url);
+}
+
+// Wait for the authorization to complete
+auth_response = await client.auth.waitForCompletion(auth_response);
+
+if (!auth_response.context.token) {
+  throw new Error('No token found in auth response');
+}
+
+// Set up Google API client with the token
+const auth = new google.auth.OAuth2();
+auth.setCredentials({ access_token: auth_response.context.token });
+const gmail = google.gmail({ version: 'v1', auth });
+
+// List email messages
+const response = await gmail.users.messages.list({
+  userId: 'me',
+});
+
+const email_messages = response.data.messages || [];
+console.log(email_messages);
+````
+
+</Tabs.Tab>
+</Tabs>
+
+### Initiate an authorization request
+
+Use `client.auth.start()` to initiate the authorization process:
+
+<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs.Tab>
+```python {17-25}
+from arcadepy import Arcade
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
+
+client = Arcade() # Automatically finds the `ARCADE_API_KEY` env variable
+
+"""
+In this example, we will use Arcade to authenticate with Google and
+retrieve Gmail messages.
+
+Consider using the Arcade Gmail toolkit, which simplifies the process for
+retrieving email messages even further!
+
+Below we are just showing how to use Arcade as an auth provider, if you need to directly get a token to use with Google.
+"""
+
+# This would be your app's internal ID for the user (an email, UUID, etc.)
+
+user_id = "{arcade_user_id}"
+
+# Start the authorization process
+
+auth_response = client.auth.start(
+user_id=user_id,
+provider="google",
+scopes=["https://www.googleapis.com/auth/gmail.readonly"],
+)
+
+if auth_response.status != "completed":
+print("Please complete the authorization challenge in your browser:")
+print(auth_response.url)
+
+# Wait for the authorization to complete
+
+auth_response = client.auth.wait_for_completion(auth_response)
+
+if not auth_response.context.token:
+raise ValueError("No token found in auth response")
+
+credentials = Credentials(auth_response.context.token)
+gmail = build("gmail", "v1", credentials=credentials)
+
+email_messages = (
+gmail.users().messages().list(userId="me").execute().get("messages", [])
+)
+
+print(email_messages)
+
+````
+</Tabs.Tab>
+<Tabs.Tab>
+```javascript {16-24}
+import { Arcade } from '@arcadeai/arcadejs';
+import { google } from 'googleapis';
+
+/*
+ * In this example, we will use Arcade to authenticate with Google and
+ * retrieve Gmail messages.
+ *
+ * Consider using the Arcade Gmail toolkit, which simplifies the process for
+ * retrieving email messages even further!
+ *
+ * Below we are just showing how to use Arcade as an auth provider, if you need to directly get a token to use with Google.
+ */
+
+const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
+
+// Your app's internal ID for the user (an email, UUID, etc).
+// It's used internally to identify your user in Arcade, not to identify with the Gmail service.
+// Use your Arcade account email for testing:
+const user_id = '{arcade_user_id}';
+
+// Start the authorization process
+let auth_response = await client.auth.start(user_id, 'google', {
+  scopes: ['https://www.googleapis.com/auth/gmail.readonly'],
+});
+
+if (auth_response.status !== 'completed') {
+  console.log('Please complete the authorization challenge in your browser:');
+  console.log(auth_response.url);
+}
+
+// Wait for the authorization to complete
+auth_response = await client.auth.waitForCompletion(auth_response);
+
+if (!auth_response.context.token) {
+  throw new Error('No token found in auth response');
+}
+
+// Set up Google API client with the token
+const auth = new google.auth.OAuth2();
+auth.setCredentials({ access_token: auth_response.context.token });
+const gmail = google.gmail({ version: 'v1', auth });
+
+// List email messages
+const response = await gmail.users.messages.list({
+  userId: 'me',
+});
+
+const email_messages = response.data.messages || [];
+console.log(email_messages);
+````
+
+</Tabs.Tab>
+</Tabs>
+
+### Guide the user through authorization
+
+If authorization is not completed, prompt the user to visit the authorization URL:
+
+<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs.Tab>
+```python {27-29}
+from arcadepy import Arcade
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
+
+client = Arcade() # Automatically finds the `ARCADE_API_KEY` env variable
+
+"""
+In this example, we will use Arcade to authenticate with Google and
+retrieve Gmail messages.
+
+Consider using the Arcade Gmail toolkit, which simplifies the process for
+retrieving email messages even further!
+
+Below we are just showing how to use Arcade as an auth provider, if you need to directly get a token to use with Google.
+"""
+
+# This would be your app's internal ID for the user (an email, UUID, etc.)
+
+user_id = "{arcade_user_id}"
+
+# Start the authorization process
+
+auth_response = client.auth.start(
+user_id=user_id,
+provider="google",
+scopes=["https://www.googleapis.com/auth/gmail.readonly"],
+)
+
+if auth_response.status != "completed":
+print("Please complete the authorization challenge in your browser:")
+print(auth_response.url)
+
+# Wait for the authorization to complete
+
+auth_response = client.auth.wait_for_completion(auth_response)
+
+if not auth_response.context.token:
+raise ValueError("No token found in auth response")
+
+credentials = Credentials(auth_response.context.token)
+gmail = build("gmail", "v1", credentials=credentials)
+
+email_messages = (
+gmail.users().messages().list(userId="me").execute().get("messages", [])
+)
+
+print(email_messages)
+
+````
+</Tabs.Tab>
+<Tabs.Tab>
+```javascript {26-29}
+import { Arcade } from '@arcadeai/arcadejs';
+import { google } from 'googleapis';
+
+/*
+ * In this example, we will use Arcade to authenticate with Google and
+ * retrieve Gmail messages.
+ *
+ * Consider using the Arcade Gmail toolkit, which simplifies the process for
+ * retrieving email messages even further!
+ *
+ * Below we are just showing how to use Arcade as an auth provider, if you need to directly get a token to use with Google.
+ */
+
+const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
+
+// Your app's internal ID for the user (an email, UUID, etc).
+// It's used internally to identify your user in Arcade, not to identify with the Gmail service.
+// Use your Arcade account email for testing:
+const user_id = '{arcade_user_id}';
+
+// Start the authorization process
+let auth_response = await client.auth.start(user_id, 'google', {
+  scopes: ['https://www.googleapis.com/auth/gmail.readonly'],
+});
+
+if (auth_response.status !== 'completed') {
+  console.log('Please complete the authorization challenge in your browser:');
+  console.log(auth_response.url);
+}
+
+// Wait for the authorization to complete
+auth_response = await client.auth.waitForCompletion(auth_response);
+
+if (!auth_response.context.token) {
+  throw new Error('No token found in auth response');
+}
+
+// Set up Google API client with the token
+const auth = new google.auth.OAuth2();
+auth.setCredentials({ access_token: auth_response.context.token });
+const gmail = google.gmail({ version: 'v1', auth });
+
+// List email messages
+const response = await gmail.users.messages.list({
+  userId: 'me',
+});
+
+const email_messages = response.data.messages || [];
+console.log(email_messages);
+````
+
+</Tabs.Tab>
+</Tabs>
+
+### Wait for the user to authorize the request
+
+<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs.Tab>
+```python
+from arcadepy import Arcade
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
+
+client = Arcade() # Automatically finds the `ARCADE_API_KEY` env variable
+
+"""
+In this example, we will use Arcade to authenticate with Google and
+retrieve Gmail messages.
+
+Consider using the Arcade Gmail toolkit, which simplifies the process for
+retrieving email messages even further!
+
+Below we are just showing how to use Arcade as an auth provider, if you need to directly get a token to use with Google.
+"""
+
+# This would be your app's internal ID for the user (an email, UUID, etc.)
+
+user_id = "{arcade_user_id}"
+
+# Start the authorization process
+
+auth_response = client.auth.start(
+user_id=user_id,
+provider="google",
+scopes=["https://www.googleapis.com/auth/gmail.readonly"],
+)
+
+if auth_response.status != "completed":
+print("Please complete the authorization challenge in your browser:")
+print(auth_response.url)
+
+# Wait for the authorization to complete
+
+auth_response = client.auth.wait_for_completion(auth_response)
+
+if not auth_response.context.token:
+raise ValueError("No token found in auth response")
+
+credentials = Credentials(auth_response.context.token)
+gmail = build("gmail", "v1", credentials=credentials)
+
+email_messages = (
+gmail.users().messages().list(userId="me").execute().get("messages", [])
+)
+
+print(email_messages)
+
+````
+</Tabs.Tab>
+<Tabs.Tab>
+```javascript
+import { Arcade } from '@arcadeai/arcadejs';
+import { google } from 'googleapis';
+
+/*
+ * In this example, we will use Arcade to authenticate with Google and
+ * retrieve Gmail messages.
+ *
+ * Consider using the Arcade Gmail toolkit, which simplifies the process for
+ * retrieving email messages even further!
+ *
+ * Below we are just showing how to use Arcade as an auth provider, if you need to directly get a token to use with Google.
+ */
+
+const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
+
+// Your app's internal ID for the user (an email, UUID, etc).
+// It's used internally to identify your user in Arcade, not to identify with the Gmail service.
+// Use your Arcade account email for testing:
+const user_id = '{arcade_user_id}';
+
+// Start the authorization process
+let auth_response = await client.auth.start(user_id, 'google', {
+  scopes: ['https://www.googleapis.com/auth/gmail.readonly'],
+});
+
+if (auth_response.status !== 'completed') {
+  console.log('Please complete the authorization challenge in your browser:');
+  console.log(auth_response.url);
+}
+
+// Wait for the authorization to complete
+auth_response = await client.auth.waitForCompletion(auth_response);
+
+if (!auth_response.context.token) {
+  throw new Error('No token found in auth response');
+}
+
+// Set up Google API client with the token
+const auth = new google.auth.OAuth2();
+auth.setCredentials({ access_token: auth_response.context.token });
+const gmail = google.gmail({ version: 'v1', auth });
+
+// List email messages
+const response = await gmail.users.messages.list({
+  userId: 'me',
+});
+
+const email_messages = response.data.messages || [];
+console.log(email_messages);
+````
+
+</Tabs.Tab>
+</Tabs>
+
+### Use the obtained token
+
+Once authorization is complete, you can use the obtained token to access the third-party service:
+
+<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs.Tab>
+```python {37-44}
+from arcadepy import Arcade
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
+
+client = Arcade() # Automatically finds the `ARCADE_API_KEY` env variable
+
+"""
+In this example, we will use Arcade to authenticate with Google and
+retrieve Gmail messages.
+
+Consider using the Arcade Gmail toolkit, which simplifies the process for
+retrieving email messages even further!
+
+Below we are just showing how to use Arcade as an auth provider, if you need to directly get a token to use with Google.
+"""
+
+# This would be your app's internal ID for the user (an email, UUID, etc.)
+
+user_id = "{arcade_user_id}"
+
+# Start the authorization process
+
+auth_response = client.auth.start(
+user_id=user_id,
+provider="google",
+scopes=["https://www.googleapis.com/auth/gmail.readonly"],
+)
+
+if auth_response.status != "completed":
+print("Please complete the authorization challenge in your browser:")
+print(auth_response.url)
+
+# Wait for the authorization to complete
+
+auth_response = client.auth.wait_for_completion(auth_response)
+
+if not auth_response.context.token:
+raise ValueError("No token found in auth response")
+
+credentials = Credentials(auth_response.context.token)
+gmail = build("gmail", "v1", credentials=credentials)
+
+email_messages = (
+gmail.users().messages().list(userId="me").execute().get("messages", [])
+)
+
+print(email_messages)
+
+````
+</Tabs.Tab>
+<Tabs.Tab>
+```javascript {39-49}
+import { Arcade } from '@arcadeai/arcadejs';
+import { google } from 'googleapis';
+
+/*
+ * In this example, we will use Arcade to authenticate with Google and
+ * retrieve Gmail messages.
+ *
+ * Consider using the Arcade Gmail toolkit, which simplifies the process for
+ * retrieving email messages even further!
+ *
+ * Below we are just showing how to use Arcade as an auth provider, if you need to directly get a token to use with Google.
+ */
+
+const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
+
+// Your app's internal ID for the user (an email, UUID, etc).
+// It's used internally to identify your user in Arcade, not to identify with the Gmail service.
+// Use your Arcade account email for testing:
+const user_id = '{arcade_user_id}';
+
+// Start the authorization process
+let auth_response = await client.auth.start(user_id, 'google', {
+  scopes: ['https://www.googleapis.com/auth/gmail.readonly'],
+});
+
+if (auth_response.status !== 'completed') {
+  console.log('Please complete the authorization challenge in your browser:');
+  console.log(auth_response.url);
+}
+
+// Wait for the authorization to complete
+auth_response = await client.auth.waitForCompletion(auth_response);
+
+if (!auth_response.context.token) {
+  throw new Error('No token found in auth response');
+}
+
+// Set up Google API client with the token
+const auth = new google.auth.OAuth2();
+auth.setCredentials({ access_token: auth_response.context.token });
+const gmail = google.gmail({ version: 'v1', auth });
+
+// List email messages
+const response = await gmail.users.messages.list({
+  userId: 'me',
+});
+
+const email_messages = response.data.messages || [];
+console.log(email_messages);
+````
+
+</Tabs.Tab>
+</Tabs>
+
+### Execute the code
+
+<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+  <Tabs.Tab>```python python3 direct_api_call.py ```</Tabs.Tab>
+  <Tabs.Tab>```javascript node direct_api_call.js ```</Tabs.Tab>
+</Tabs>
+
+You should see an output similar to this:, which is a list of the email messages returned by the Gmail API:
+
+```text
+[{'id': '195f77a8ce90f2c1', 'threadId': '195f77a8ce90f2c1'}, {'id': '195ed467a90e8538', 'threadId': '195ed467a90e8538'}, ...]
+```
+
+For each item in the list/array, you could use the [`users.messages.get`](https://developers.google.com/workspace/gmail/api/reference/rest/v1/users.messages/get) endpoint to get the full message details.
+
+</Steps>
+
+<Callout type="info">
+  Consider using the [Arcade Gmail toolkit](/toolkits/productivity/gmail), which
+  simplifies the process for retrieving email messages even further! The pattern
+  described here is useful if you need to directly get a token to use with
+  Google in other parts of your codebase.
+</Callout>
+
+### How it works
+
+By using `client.auth.start` and `client.auth.wait_for_completion`, you leverage Arcade to manage the OAuth flow for user authorization.
+
+Arcade handles the authorization challenges and tokens, simplifying the process for you.
+
+### Next steps
+
+Integrate this authorization flow into your application, and explore how you can manage different [auth providers](/home/hosting-options/auth-providers) and scopes.

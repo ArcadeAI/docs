@@ -1,16 +1,16 @@
-'use client';
-import { Card, CardContent } from '@arcadeai/design-system';
-import { motion } from 'framer-motion';
-import Image from 'next/image';
-import Link from 'next/link';
+"use client";
+import { Card, CardContent } from "@arcadeai/design-system";
+import { motion } from "motion/react";
+import Image from "next/image";
+import Link from "next/link";
 
-interface SampleAppCardProps {
+type SampleAppCardProps = {
   title: string;
   description: string;
   image: string;
   href: string;
   blank?: boolean;
-}
+};
 
 export function SampleAppCard({
   title,
@@ -23,11 +23,11 @@ export function SampleAppCard({
     <motion.div
       whileHover={{
         scale: 1.02,
-        boxShadow: '0 0 20px 0 rgba(238, 23, 94, 0.1)',
+        boxShadow: "0 0 20px 0 rgba(238, 23, 94, 0.1)",
       }}
       whileTap={{ scale: 0.98 }}
     >
-      <Link href={href} target={blank ? '_blank' : undefined}>
+      <Link href={href} target={blank ? "_blank" : undefined}>
         <Card className="group h-full overflow-hidden border-gray-800 bg-[rgba(17,17,17,0.8)] backdrop-blur-xs transition-all hover:border-[#ee175e]/30">
           <CardContent className="p-0">
             <div className="relative aspect-video overflow-hidden bg-zinc-900">
@@ -35,6 +35,7 @@ export function SampleAppCard({
                 alt={title}
                 className="scale-110 object-cover transition-transform duration-300"
                 fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 src={image}
               />
             </div>

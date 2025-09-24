@@ -2,19 +2,19 @@ import type {
   BasicSurveyQuestion,
   MultipleSurveyQuestion,
   SurveyQuestion,
-} from 'posthog-js';
+} from "posthog-js";
 
-import { MultipleChoiceQuestion } from './multiple-choice-question';
-import { OpenQuestion } from './open-question';
-import { SingleChoiceQuestion } from './single-choice-question';
+import { MultipleChoiceQuestion } from "./multiple-choice-question";
+import { OpenQuestion } from "./open-question";
+import { SingleChoiceQuestion } from "./single-choice-question";
 
-interface QuestionProps {
+type QuestionProps = {
   question: SurveyQuestion;
   previousResponse?: string;
-}
+};
 
 export function Question({ question, previousResponse }: QuestionProps) {
-  if (question.type === 'single_choice') {
+  if (question.type === "single_choice") {
     return (
       <SingleChoiceQuestion
         previousResponse={previousResponse as string}
@@ -23,16 +23,16 @@ export function Question({ question, previousResponse }: QuestionProps) {
     );
   }
 
-  if (question.type === 'multiple_choice') {
+  if (question.type === "multiple_choice") {
     return (
       <MultipleChoiceQuestion
-        previousResponse={[previousResponse]}
+        previousResponse={previousResponse ? [previousResponse] : undefined}
         question={question as MultipleSurveyQuestion}
       />
     );
   }
 
-  if (question.type === 'open') {
+  if (question.type === "open") {
     return (
       <OpenQuestion
         previousResponse={previousResponse}

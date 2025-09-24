@@ -1,15 +1,15 @@
-import type React from 'react';
+import type React from "react";
 
-interface ToolInfoProps {
+type ToolInfoProps = {
   description: string;
   author: string;
   codeLink: string;
-  authType: 'oauth2';
+  authType: "oauth2";
   authProviderName?: string;
   authProviderDocsUrl?: string;
   versions: string[];
   note?: string;
-}
+};
 
 const ToolInfo: React.FC<ToolInfoProps> = ({
   description,
@@ -45,13 +45,13 @@ const ToolInfo: React.FC<ToolInfoProps> = ({
       </p>
       <p className="my-1.5 text-base text-text-color sm:text-sm">
         <strong className="text-text-color">Auth: </strong>
-        {authType.toLowerCase() === 'oauth2' ? (
+        {authType.toLowerCase() === "oauth2" ? (
           <>
             User authorization
             {authProviderName && authProviderDocsUrl && (
               <>
-                {' '}
-                via the{' '}
+                {" "}
+                via the{" "}
                 <a
                   className="text-brand-accent no-underline underline-offset-0.5 hover:underline"
                   href={authProviderDocsUrl}

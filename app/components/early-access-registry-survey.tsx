@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import type { Survey } from 'posthog-js';
-import { usePostHog } from 'posthog-js/react';
-import { useEffect, useState } from 'react';
-import DynamicSurvey from './dynamic-survey';
+import type { Survey } from "posthog-js";
+import { usePostHog } from "posthog-js/react";
+import { useEffect, useState } from "react";
+import DynamicSurvey from "./dynamic-survey";
 
-const SURVEY_ID = '019683f6-4fe2-0000-d182-6ef8f3982fc3';
+const SURVEY_ID = "019683f6-4fe2-0000-d182-6ef8f3982fc3";
 
 export const EarlyAccessRegistrySurvey = () => {
   const posthog = usePostHog();

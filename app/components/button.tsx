@@ -1,4 +1,4 @@
-import type React from 'react';
+import type React from "react";
 
 export const ExternalLink = ({
   children,
@@ -8,10 +8,8 @@ export const ExternalLink = ({
   children: React.ReactNode;
   href: string;
   [key: string]: unknown;
-}) => {
-  return (
-    <a href={href} {...rest} className="button" target="_blank">
-      {children}
-    </a>
-  );
-};
+}) => (
+  <a href={href} {...rest} className="button" target="_blank">
+    {children}
+  </a>
+);

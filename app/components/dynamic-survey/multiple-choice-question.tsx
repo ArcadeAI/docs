@@ -1,19 +1,19 @@
-'use client';
-import { Checkbox, Input, Label } from '@arcadeai/design-system';
-import type { MultipleSurveyQuestion } from 'posthog-js';
-import { useMemo, useState } from 'react';
+"use client";
+import { Checkbox, Input, Label } from "@arcadeai/design-system";
+import type { MultipleSurveyQuestion } from "posthog-js";
+import { useMemo, useState } from "react";
 
-interface MultipleChoiceQuestionProps {
+type MultipleChoiceQuestionProps = {
   question: MultipleSurveyQuestion;
   previousResponse?: string[];
-}
+};
 
 export function MultipleChoiceQuestion({
   question,
   previousResponse,
 }: MultipleChoiceQuestionProps) {
   const hasOtherInChoices = question.choices?.some(
-    (choice) => choice.toLowerCase() === 'other'
+    (choice) => choice.toLowerCase() === "other"
   );
 
   const [selectedChoices, setSelectedChoices] = useState<string[]>(
@@ -27,13 +27,17 @@ export function MultipleChoiceQuestion({
 
     const [others, regular] = question.choices.reduce<[string[], string[]]>(
       ([o, r], choice) =>
-        choice.toLowerCase() === 'other'
+        choice.toLowerCase() === "other"
           ? [[...o, choice], r]
           : [o, [...r, choice]],
       [[], []]
     );
 
-    return [...regular.sort(() => Math.random() - 0.5), ...others];
+    const ShuffleRandomOffset = 0.5;
+    return [
+      ...regular.sort(() => Math.random() - ShuffleRandomOffset),
+      ...others,
+    ];
   }, [question.choices, question.shuffleOptions]);
 
   const handleCheckboxChange = (choice: string, checked: boolean) => {
@@ -46,8 +50,8 @@ export function MultipleChoiceQuestion({
   };
 
   const hasOtherSelected = hasOtherInChoices
-    ? selectedChoices.some((choice) => choice.toLowerCase() === 'other')
-    : selectedChoices.includes('other');
+    ? selectedChoices.some((choice) => choice.toLowerCase() === "other")
+    : selectedChoices.includes("other");
 
   return (
     <div className="space-y-3">
@@ -71,7 +75,7 @@ export function MultipleChoiceQuestion({
             checked={hasOtherSelected}
             id="other"
             onCheckedChange={(checked) =>
-              handleCheckboxChange('other', checked as boolean)
+              handleCheckboxChange("other", checked as boolean)
             }
           />
           <Label htmlFor="other">Other</Label>
@@ -84,7 +88,7 @@ export function MultipleChoiceQuestion({
             defaultValue={
               previousResponse?.find(
                 (choice) => !question.choices?.includes(choice)
-              ) || ''
+              ) || ""
             }
             id="other"
             name="other"

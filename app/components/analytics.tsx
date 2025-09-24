@@ -1,12 +1,12 @@
-'use client';
-import Link from 'next/link';
-import { usePostHog } from 'posthog-js/react';
+"use client";
+import Link from "next/link";
+import { usePostHog } from "posthog-js/react";
 
-export interface LinkClickedProps {
+export type LinkClickedProps = {
   linkLocation: string;
   children?: React.ReactNode;
   className?: string;
-}
+};
 
 export const SignupLink = ({
   linkLocation,
@@ -16,7 +16,8 @@ export const SignupLink = ({
   const posthog = usePostHog();
 
   const trackSignupClick = (source: string) => {
-    posthog?.capture('Signup clicked', {
+    posthog?.capture("Signup clicked", {
+      // biome-ignore lint/style/useNamingConvention: This is ok for PostHog
       link_location: source,
     });
   };
@@ -24,7 +25,7 @@ export const SignupLink = ({
   return (
     <Link
       className={className}
-      href={'https://api.arcade.dev/signup'}
+      href={"https://api.arcade.dev/signup"}
       onClick={() => trackSignupClick(linkLocation)}
     >
       {children}

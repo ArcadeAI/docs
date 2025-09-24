@@ -1,14 +1,14 @@
-import { Arcade } from '@arcadeai/arcadejs';
+import { Arcade } from "@arcadeai/arcadejs";
 
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
-const USER_ID = '{arcade_user_id}';
-const TOOL_NAME = 'Jira.GetBoards';
+const USER_ID = "{arcade_user_id}";
+const TOOL_NAME = "Jira.GetBoards";
 
 // Start the authorization process
-const authResponse = await client.tools.authorize({ tool_name: TOOL_NAME });
+const authResponse = await client.tools.authorize({tool_name: TOOL_NAME, user_id: USER_ID});
 
-if (authResponse.status !== 'completed') {
+if (authResponse.status !== "completed") {
   console.log(`Click this link to authorize: ${authResponse.url}`);
 }
 
@@ -16,9 +16,12 @@ if (authResponse.status !== 'completed') {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  board_identifiers_list: ['123', 'Project Board'],
-  limit: 10,
-  offset: 0,
+  "board_identifiers_list": [
+    "123",
+    "Project Board"
+  ],
+  "limit": 10,
+  "offset": 0
 };
 
 const response = await client.tools.execute({

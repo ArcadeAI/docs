@@ -1,0 +1,125 @@
+# Walmart Search
+
+import ToolInfo from "@/app/components/tool-info";
+import Badges from "@/app/components/badges";
+import TabbedCodeBlock from "@/app/components/tabbed-code-block";
+import TableOfContents from "@/app/components/table-of-contents";
+import ToolFooter from "@/app/components/tool-footer";
+
+<ToolInfo
+  description="Enable agents to search for products with Walmart."
+  author="Arcade"
+  authType="API Key"
+  versions={["0.1.0"]}
+/>
+
+<Badges repo="arcadeai/arcade-walmart" />
+
+The Arcade Walmart Search toolkit provides a pre-built set of tools for interacting with Walmart. These tools make it easy to build agents and AI apps that can:
+
+- Search for products listed on Walmart stores;
+- Get details about a product.
+
+## Available Tools
+
+<TableOfContents
+  headers={["Tool Name", "Description"]}
+  data={[
+    ["Walmart.SearchProducts", "Search for products listed on Walmart stores."],
+    [
+      "Walmart.GetProductDetails",
+      "Get details about a product listed on Walmart.",
+    ],
+  ]}
+/>
+
+<Callout>
+  If you need to perform an action that's not listed here, you can [get in touch
+  with us](mailto:contact@arcade.dev) to request a new tool, or [create your own
+  tools](/home/authoring-tools/build-tools/create-a-toolkit).
+</Callout>
+
+## Walmart.SearchProducts
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/search/walmart/search_walmart_products_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/search/walmart/search_walmart_products_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Search for products listed on Walmart stores.
+
+**Parameters**
+
+- **keywords** _(string, required)_ Keywords to search for. E.g. 'apple iphone' or 'samsung galaxy'
+- **sort_by** _(enum [WalmartSortBy](#walmartsortby), optional, Defaults to `WalmartSortBy.RELEVANCE`)_ Sort the results by the specified criteria. Defaults to `WalmartSortBy.RELEVANCE`.
+- **min_price** _(float, optional, Defaults to `None`)_ Minimum price to filter the results.
+- **max_price** _(float, optional, Defaults to `None`)_ Maximum price to filter the results.
+- **next_day_delivery** _(bool, optional, Defaults to `False`)_ Whether to filter the results by next day delivery. Defaults to False (returns all products, regardless of delivery status).
+- **page** _(int, optional, Defaults to `1`)_ Page number to fetch. Defaults to 1 (first page of results). The maximum page value is 100.
+
+## Walmart.GetProductDetails
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/search/walmart/get_walmart_product_details_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/search/walmart/get_walmart_product_details_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get details about a product listed on Walmart.
+
+**Parameters**
+
+- **item_id** _(string, required)_ Item ID. E.g. '414600577'. This can be retrieved from the search results of the `SearchWalmartProducts` tool.
+
+## Auth
+
+The Arcade Walmart Search toolkit uses the [SerpAPI](https://serpapi.com/) to get product information from Walmart.
+
+- **Secret:**
+  - `SERP_API_KEY`: Your SerpAPI API key.
+    <Callout type="info">
+    Setting the `SERP_API_KEY` secret is only required if you are
+    [self-hosting](/home/hosting-options/local-deployment/install/overview)
+    Arcade. If you're using Arcade Cloud, the secret is already set for you.
+    To manage your secrets, go to the [Secrets
+    page](https://api.arcade.dev/dashboard/auth/secrets) in the Arcade
+    Dashboard.
+    </Callout>
+
+---
+
+## Reference
+
+## WalmartSortBy
+
+- **`RELEVANCE`**: `'relevance_according_to_keywords_searched'` - Sort by relevance.
+- **`PRICE_LOW_TO_HIGH`**: `'lowest_price_first'` - Sort by price from low to high.
+- **`PRICE_HIGH_TO_LOW`**: `'highest_price_first'` - Sort by price from high to low.
+- **`BEST_SELLING`**: `'best_selling_products_first'` - Sort by best selling.
+- **`RATING_HIGH`**: `'highest_rating_first'` - Sort by rating from high to low.
+- **`NEW_ARRIVALS`**: `'new_arrivals_first'` - Sort by new arrivals.
+
+<ToolFooter pipPackageName="arcade_walmart" />

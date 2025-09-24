@@ -1,3 +1,4 @@
+import json
 from arcadepy import Arcade
 
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
@@ -5,10 +6,7 @@ client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 USER_ID = "{arcade_user_id}"
 TOOL_NAME = "X.DeleteTweetById"
 
-auth_response = client.tools.authorize(
-    tool_name=TOOL_NAME,
-    user_id=USER_ID,
-)
+auth_response = client.tools.authorize(tool_name=TOOL_NAME)
 
 if auth_response.status != "completed":
     print(f"Click this link to authorize: {auth_response.url}")
@@ -17,7 +15,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    "tweet_id": "your_tweet_id_here"  # Tweet IDs can be found in the response of other X tools, like SearchRecentTweetsByUsername
+    'tweet_id': '1234567890'
 }
 
 response = client.tools.execute(
@@ -25,4 +23,4 @@ response = client.tools.execute(
     input=tool_input,
     user_id=USER_ID,
 )
-print(response)
+print(json.dumps(response.output.value, indent=2))
