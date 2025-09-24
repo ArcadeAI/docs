@@ -12,7 +12,12 @@ import Link from "next/link";
 import React, { useState } from "react";
 import { ComingSoonModal } from "./ComingSoonModal";
 
-type ToolkitType = "arcade" | "api_proxy" | "verified" | "community" | "auth";
+type ToolkitType =
+  | "arcade"
+  | "arcade_starter"
+  | "verified"
+  | "community"
+  | "auth";
 
 interface ToolCardProps {
   name: string;
@@ -30,14 +35,14 @@ const typeConfig: Record<
   arcade: {
     className:
       "border-emerald-600/20 hover:border-primary bg-emerald-600/[0.02] hover:bg-emerald-600/[0.03]",
-    label: "Arcade Toolkit",
+    label: "Arcade Optimized Toolkit",
     icon: BadgeCheck,
     color: "text-emerald-400",
   },
-  api_proxy: {
+  arcade_starter: {
     className:
       "border-orange-600/20 hover:border-primary bg-orange-600/[0.02] hover:bg-orange-600/[0.03]",
-    label: "API Proxy Toolkit",
+    label: "Arcade Starter Toolkit",
     icon: Terminal,
     color: "text-orange-400",
   },

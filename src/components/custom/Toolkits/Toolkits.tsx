@@ -20,19 +20,19 @@ import Link from "next/link";
 
 export type ToolkitType =
   | "arcade"
-  | "api_proxy"
+  | "arcade_starter"
   | "verified"
   | "community"
   | "auth";
 
 const typeConfig = {
   arcade: {
-    label: "Arcade Toolkit",
+    label: "Arcade Optimized Toolkit",
     icon: BadgeCheck,
     color: "text-emerald-400",
   },
-  api_proxy: {
-    label: "API Proxy Toolkit",
+  arcade_starter: {
+    label: "Arcade Starter Toolkit",
     icon: Terminal,
     color: "text-orange-400",
   },
@@ -116,7 +116,7 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
             <p className="text-sm leading-relaxed text-gray-400 sm:text-base">
               There are 4 designations for Arcade integrations:
             </p>
-            <div className="grid grid-cols-1 gap-4 sm:gap-4 md:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 sm:gap-4 md:grid-cols-3">
               {Object.entries(typeConfig).map(
                 ([key, { label, icon: Icon, color }]) => (
                   <div key={key} className="flex items-start space-x-4">
@@ -128,8 +128,32 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
                         {label}
                       </h2>
                       <p className="mt-1 text-xs text-gray-400 sm:text-sm">
-                        {key === "arcade" &&
-                          "Official integrations developed and maintained by Arcade."}
+                        {key === "arcade" && (
+                          <>
+                            Official integrations developed and maintained by
+                            Arcade that are{" "}
+                            <a
+                              href="/home/use-tools/types-of-tools#optimized-tools"
+                              style={{ textDecoration: "none" }}
+                            >
+                              optimized for LLM-usage
+                            </a>
+                            .
+                          </>
+                        )}
+                        {key === "arcade_starter" && (
+                          <>
+                            Official integrations developed and maintained by
+                            Arcade that offer{" "}
+                            <a
+                              href="/home/use-tools/types-of-tools#starter-tools"
+                              style={{ textDecoration: "none" }}
+                            >
+                              low-level access to the upstream service's API
+                            </a>
+                            .
+                          </>
+                        )}
                         {key === "verified" &&
                           "Community-created integrations, thoroughly tested and verified by Arcade."}
                         {key === "community" &&
