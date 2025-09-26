@@ -187,7 +187,7 @@ const CodeTabSwitcher = ({ tabs }: CodeTabSwitcherProps) => {
               {fileContent ||
                 (error
                   ? `# ⚠️ ${error}\n\n# Please try again or check your connection.`
-                  : "# 📄 No code available\n\n# This example is not ready yet.")}
+                  : "🔜 Coming soon")}
             </SyntaxHighlighter>
           )}
         </div>

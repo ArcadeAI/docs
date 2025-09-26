@@ -1,4 +1,5 @@
 "use client";
+import { cn } from "@arcadeai/design-system/lib/utils";
 import Link from "next/link";
 import { usePostHog } from "posthog-js/react";
 
@@ -24,7 +25,7 @@ export const SignupLink = ({
 
   return (
     <Link
-      className={className}
+      className={cn("text-primary", className)}
       href={"https://api.arcade.dev/signup"}
       onClick={() => trackSignupClick(linkLocation)}
     >

@@ -9,7 +9,7 @@ type ToolFooterProps = {
 
 const ToolFooter: React.FC<ToolFooterProps> = ({ pipPackageName }) => (
   <div className="mt-8 border-neutral-dark-medium border-t pt-4">
-    <h2 className="mb-4 font-bold text-2xl text-white tracking-tight md:text-2xl">
+    <h2 className="mb-4 font-bold text-2xl text-text-color tracking-tight md:text-2xl">
       Get Building
     </h2>
     <div className="mt-16 grid gap-8 md:grid-cols-2">

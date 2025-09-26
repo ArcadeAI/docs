@@ -1,5 +1,6 @@
 import { Tabs } from "nextra/components";
 import ToolFooter from "@/app/_components/tool-footer";
+import { Callout, Steps } from "nextra/components";
 
 # Twitch auth provider
 
@@ -79,8 +80,16 @@ TWITCH_CLIENT_ID="<your client ID>"
 
 Edit the `engine.yaml` file and add a `twitch` item to the `auth.providers` section:
 
-```yaml file=<rootDir>/examples/code/integrations/twitch/config_provider.engine.yaml {3-9}
-
+```yaml {3-9}
+auth:
+  providers:
+    - id: default-twitch
+      description: "The default Twitch provider"
+      enabled: true
+      type: oauth2
+      provider_id: twitch
+      client_id: ${env:TWITCH_CLIENT_ID}
+      client_secret: ${env:TWITCH_CLIENT_SECRET}
 ```
 
 </Steps>
@@ -94,16 +103,57 @@ Use `client.auth.start()` to get a user token for the Twitch API:
 <Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
 <Tabs.Tab>
 
-```python file=<rootDir>/examples/code/integrations/twitch/custom_auth.py {8-12}
+```python {8-12}
+from arcadepy import Arcade
 
+client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
+
+user_id = "{arcade_user_id}"
+
+# Start the authorization process
+auth_response = client.auth.start(
+    user_id=user_id,
+    provider="twitch",
+    scopes=["channel:manage:polls"],
+)
+
+if auth_response.status != "completed":
+    print("Please complete the authorization challenge in your browser:")
+    print(auth_response.url)
+
+# Wait for the authorization to complete
+auth_response = client.auth.wait_for_completion(auth_response)
+
+token = auth_response.context.token
+# Do something interesting with the token...
 ```
 
 </Tabs.Tab>
 
 <Tabs.Tab>
 
-```javascript file=<rootDir>/examples/code/integrations/twitch/custom_auth.js {8-10}
+```javascript {8-10}
+import { Arcade } from "@arcadeai/arcadejs";
 
+const client = new Arcade();
+
+const userId = "{arcade_user_id}";
+
+// Start the authorization process
+const authResponse = await client.auth.start(userId, "twitch", {
+  scopes: ["channel:manage:polls"],
+});
+
+if (authResponse.status !== "completed") {
+  console.log("Please complete the authorization challenge in your browser:");
+  console.log(authResponse.url);
+}
+
+// Wait for the authorization to complete
+authResponse = await client.auth.waitForCompletion(authResponse);
+
+const token = authResponse.context.token;
+// Do something interesting with the token...
 ```
 
 </Tabs.Tab>
@@ -116,8 +166,57 @@ You can author your own [custom tools](/home/build-tools/create-a-toolkit) that 
 
 Use the `Twitch()` auth class to specify that a tool requires authorization with Twitch. The `context.authorization.token` field will be automatically populated with the user's Twitch token:
 
-```python file=<rootDir>/examples/code/integrations/twitch/custom_tool.py {5-6,9-13,36}
+```python {5-6,9-13,36}
+from typing import Annotated, Optional
 
+import httpx
+
+from arcade_tdk import ToolContext, tool
+from arcade_tdk.auth import Twitch
+
+
+@tool(
+    requires_auth=Twitch(
+        scopes=["channel:manage:polls"],
+    )
+)
+async def create_poll(
+    context: ToolContext,
+    broadcaster_id: Annotated[
+        str,
+        "The ID of the broadcaster to create the poll for.",
+    ],
+    title: Annotated[
+        str,
+        "The title of the poll.",
+    ],
+    choices: Annotated[
+        list[str],
+        "The choices of the poll.",
+    ],
+    duration: Annotated[
+        int,
+        "The duration of the poll in seconds.",
+    ],
+) -> Annotated[dict, "The poll that was created"]:
+    """Create a poll for a Twitch channel."""
+    url = "https://api.twitch.tv/helix/polls"
+    headers = {
+        "Authorization": f"Bearer {context.authorization.token}",
+        "Client-Id": "your_client_id",
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "broadcaster_id": broadcaster_id,
+        "title": title,
+        "choices": [{"title": choice} for choice in choices],
+        "duration": duration,
+    }
+
+    async with httpx.AsyncClient() as client:
+        response = await client.post(url, headers=headers, json=payload)
+        response.raise_for_status()
+        return response.json()
 ```
 
 <ToolFooter pipPackageName="arcade_twitch" />

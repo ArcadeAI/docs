@@ -32,17 +32,19 @@ const ToolInfo: React.FC<ToolInfoProps> = ({
       <p className="my-1.5 text-base text-text-color sm:text-sm">
         <strong className="text-text-color">Author: </strong> {author}
       </p>
-      <p className="my-1.5 text-base text-text-color sm:text-sm">
-        <strong className="text-text-color">Code: </strong>
-        <a
-          className="text-brand-accent no-underline underline-offset-0.5 hover:underline"
-          href={codeLink}
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          GitHub
-        </a>
-      </p>
+      {codeLink && (
+        <p className="my-1.5 text-base text-text-color sm:text-sm">
+          <strong className="text-text-color">Code: </strong>
+          <a
+            className="text-brand-accent no-underline underline-offset-0.5 hover:underline"
+            href={codeLink}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            GitHub
+          </a>
+        </p>
+      )}
       <p className="my-1.5 text-base text-text-color sm:text-sm">
         <strong className="text-text-color">Auth: </strong>
         {authType.toLowerCase() === "oauth2" ? (

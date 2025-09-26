@@ -1,11 +1,6 @@
 import type { MetaRecord } from "nextra";
 
 const meta: MetaRecord = {
-  "*": {
-    theme: {
-      breadcrumb: false,
-    },
-  },
   home: {
     type: "page",
     title: "Home",

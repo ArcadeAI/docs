@@ -146,7 +146,7 @@ export const ToolCard: React.FC<ToolCardProps> = ({
   const cardContent = (
     <Card
       className={cn(
-        "flex h-full flex-col gap-1.5 border bg-gray-900/80 py-3 backdrop-blur-sm transition-all duration-300 hover:shadow-lg",
+        "flex h-full flex-col gap-1.5 border bg-white/90 py-3 backdrop-blur-sm transition-all duration-300 hover:shadow-lg dark:bg-gray-900/80",
         className,
         isComingSoon && "relative"
       )}
@@ -174,10 +174,10 @@ export const ToolCard: React.FC<ToolCardProps> = ({
               )}
             </div>
             <div>
-              <CardTitle className="text-base text-gray-50">
+              <CardTitle className="text-base text-gray-900 dark:text-gray-50">
                 {toolName}
               </CardTitle>
-              <div className="flex items-center text-gray-400 text-xs">
+              <div className="flex items-center text-gray-600 text-xs dark:text-gray-400">
                 <IconComponent className={`h-3 w-3 ${color} mr-1`} />
                 {label}
               </div>
@@ -185,7 +185,7 @@ export const ToolCard: React.FC<ToolCardProps> = ({
           </div>
           {isComingSoon && (
             <Badge
-              className="shrink-0 whitespace-nowrap border-gray-700 bg-gray-800/70 text-gray-300"
+              className="shrink-0 whitespace-nowrap border-gray-400 bg-gray-200/70 text-gray-700 dark:border-gray-700 dark:bg-gray-800/70 dark:text-gray-300"
               variant="outline"
             >
               Coming Soon
@@ -194,7 +194,9 @@ export const ToolCard: React.FC<ToolCardProps> = ({
         </div>
       </CardHeader>
       <CardContentUi>
-        <div className="text-gray-300 text-xs leading-relaxed">{summary}</div>
+        <div className="text-gray-700 text-xs leading-relaxed dark:text-gray-300">
+          {summary}
+        </div>
       </CardContentUi>
     </Card>
   );

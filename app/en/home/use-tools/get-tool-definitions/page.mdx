@@ -4,6 +4,7 @@ description: "Learn how to get formatted tool definitions using Arcade"
 ---
 
 import { Tabs } from "nextra/components";
+import ToggleContent from "@/app/_components/toggle-content";
 
 # Get Formatted Tool Definitions
 
@@ -17,13 +18,29 @@ To do this, you can use the `client.tools.formatted.get` method and specify the 
 
 <Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
 <Tabs.Tab>
-```python file=<rootDir>/examples/code/home/use-tools/get-formatted-tool-definitions/get_openai_formatted_tool.py
+```python
+from arcadepy import Arcade
 
+client = Arcade()
+
+# Get a specific tool formatted for OpenAI
+github_star_repo = client.tools.formatted.get(name="Github.SetStarred", format="openai")
+
+print(github_star_repo)
 ```
 </Tabs.Tab>
 <Tabs.Tab>
-```js file=<rootDir>/examples/code/home/use-tools/get-formatted-tool-definitions/get_openai_formatted_tool.js
+```js
+import Arcade from "@arcadeai/arcadejs";
 
+const client = new Arcade();
+
+// Get a specific tool formatted for OpenAI
+const githubStarRepo = await client.tools.formatted.get("Github.SetStarred", {
+  format: "openai",
+});
+
+console.log(githubStarRepo);
 ```
 
 </Tabs.Tab>
@@ -31,8 +48,32 @@ To do this, you can use the `client.tools.formatted.get` method and specify the 
 
 <ToggleContent showText="See output" hideText="Hide output">
 
-```yaml file=<rootDir>/examples/code/home/use-tools/get-formatted-tool-definitions/get_openai_formatted_tool_output.json
-
+```yaml
+{
+  "type": "function",
+  "function": {
+    "name": "Github_SetStarred",
+    "description": "Star or un-star a GitHub repository.\nFor example, to star microsoft/vscode, you would use:\n```\nset_starred(owner=\"microsoft\", name=\"vscode\", starred=True)\n```",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The name of the repository"
+        },
+        "owner": {
+          "type": "string",
+          "description": "The owner of the repository"
+        },
+        "starred": {
+          "type": "boolean",
+          "description": "Whether to star the repository or not"
+        }
+      },
+      "required": ["owner", "name", "starred"]
+    }
+  }
+}
 ```
 
 </ToggleContent>
@@ -45,13 +86,32 @@ To do this, you can use the `client.tools.formatted.list` method and specify the
 
 <Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
 <Tabs.Tab>
-```python file=<rootDir>/examples/code/home/use-tools/get-formatted-tool-definitions/get_openai_formatted_toolkit.py
+```python
+from arcadepy import Arcade
 
+client = Arcade()
+
+# Get all tools in the Github toolkit formatted for OpenAI
+github_tools = list(client.tools.formatted.list(format="openai", toolkit="github"))
+
+# Print the number of tools in the Github toolkit
+print(len(github_tools))
 ```
 </Tabs.Tab>
 <Tabs.Tab>
-```js file=<rootDir>/examples/code/home/use-tools/get-formatted-tool-definitions/get_openai_formatted_toolkit.js
+```js
+import Arcade from "@arcadeai/arcadejs";
 
+const client = new Arcade();
+
+// Get all tools in the Github toolkit formatted for OpenAI
+const githubTools = await client.tools.formatted.list({
+  format: "openai",
+  toolkit: "github",
+});
+
+// Print the number of tools in the Github toolkit
+console.log(githubTools.total_count);
 ```
 
 </Tabs.Tab>
@@ -63,13 +123,29 @@ To get all tools formatted for OpenAI, you can use the `client.tools.formatted.l
 
 <Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
 <Tabs.Tab>
-```python file=<rootDir>/examples/code/home/use-tools/get-formatted-tool-definitions/get_openai_formatted_all_tools.py
+```python
+from arcadepy import Arcade
 
+client = Arcade()
+
+# Get all tools formatted for OpenAI
+all_tools = list(client.tools.formatted.list(format="openai"))
+
+# Print the number of tools
+print(len(all_tools))
 ```
 </Tabs.Tab>
 <Tabs.Tab>
-```js file=<rootDir>/examples/code/home/use-tools/get-formatted-tool-definitions/get_openai_formatted_all_tools.js
+```js
+import Arcade from "@arcadeai/arcadejs";
 
+const client = new Arcade();
+
+// Get all tools formatted for OpenAI
+const allTools = await client.tools.formatted.list({ format: "openai" });
+
+// Print the number of tools
+console.log(allTools.total_count);
 ```
 </Tabs.Tab>
 </Tabs>

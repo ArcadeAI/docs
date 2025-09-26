@@ -10,7 +10,9 @@ export const meta: MetaRecord = {
       </span>
     ),
     theme: {
+      breadcrumb: false,
       layout: "full",
+      toc: false,
     },
   },
   learn: {

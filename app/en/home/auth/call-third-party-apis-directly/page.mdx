@@ -3,7 +3,7 @@ title: "Direct Third-Party API Call"
 description: "Guide on how to retrieve an authorization token to call third-party APIs directly"
 ---
 
-import { Steps, Tabs } from "nextra/components";
+import { Steps, Tabs, Callout } from "nextra/components";
 import { SignupLink } from "@/app/_components/analytics";
 
 # Direct Third-Party API Call
@@ -27,10 +27,15 @@ This can be useful when you need to manage authorization flows in your applicati
 
 <Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
   <Tabs.Tab>
-    ```bash pip install arcadepy google-api-python-client google-auth-httplib2
-    google-auth-oauthlib ```
+    ```bash 
+    pip install arcadepy google-api-python-client google-auth-httplib2 google-auth-oauthlib 
+    ```
   </Tabs.Tab>
-  <Tabs.Tab>```bash npm install @arcadeai/arcadejs googleapis ```</Tabs.Tab>
+  <Tabs.Tab>
+  ```bash 
+  npm install @arcadeai/arcadejs googleapis 
+  ```
+  </Tabs.Tab>
 </Tabs>
 
 ### Start coding
@@ -39,16 +44,19 @@ This can be useful when you need to manage authorization flows in your applicati
 <Tabs.Tab>
 Create a new file `direct_api_call.py` and import all libraries we're going to use:
 
-```python file=<rootDir>/examples/code/guides/agentauth/auth_with_google.py#L1-L3
-
+```python
+from arcadepy import Arcade
+from google.oauth2.credentials import Credentials
+from googleapiclient.discovery import build
 ```
 
 </Tabs.Tab>
 <Tabs.Tab>
 Create a new file `direct_api_call.js` and import all libraries we're going to use:
 
-```javascript file=<rootDir>/examples/code/guides/agentauth/auth_with_google.js#L1-L2
-
+```javascript
+import { Arcade } from "@arcadeai/arcadejs";
+import { google } from "googleapis";
 ```
 
 </Tabs.Tab>
@@ -60,13 +68,13 @@ Create an instance of the Arcade client:
 
 <Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
 <Tabs.Tab>
-```python file=<rootDir>/examples/code/guides/agentauth/auth_with_google.py#L5
-
+```python
+client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 ```
 </Tabs.Tab>
 <Tabs.Tab>
-```javascript file=<rootDir>/examples/code/guides/agentauth/auth_with_google.js#L14
-
+```javascript
+const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 ```
 
 </Tabs.Tab>
@@ -78,13 +86,29 @@ Use `client.auth.start()` to initiate the authorization process:
 
 <Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
 <Tabs.Tab>
-```python file=<rootDir>/examples/code/guides/agentauth/auth_with_google.py#L17-L25
+```python
+# This would be your app's internal ID for the user (an email, UUID, etc.)
+user_id = "{arcade_user_id}"
 
+# Start the authorization process
+auth_response = client.auth.start(
+    user_id=user_id,
+    provider="google",
+    scopes=["https://www.googleapis.com/auth/gmail.readonly"],
+)
 ```
 </Tabs.Tab>
 <Tabs.Tab>
-```javascript file=<rootDir>/examples/code/guides/agentauth/auth_with_google.js#L16-L24
+```javascript
+// Your app's internal ID for the user (an email, UUID, etc).
+// It's used internally to identify your user in Arcade, not to identify with the Gmail service.
+// Use your Arcade account email for testing:
+const user_id = "{arcade_user_id}";
 
+// Start the authorization process
+let auth_response = await client.auth.start(user_id, "google", {
+  scopes: ["https://www.googleapis.com/auth/gmail.readonly"],
+});
 ```
 
 </Tabs.Tab>
@@ -96,13 +120,18 @@ If authorization is not completed, prompt the user to visit the authorization UR
 
 <Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
 <Tabs.Tab>
-```python file=<rootDir>/examples/code/guides/agentauth/auth_with_google.py#L27-L29
-
+```python
+if auth_response.status != "completed":
+    print("Please complete the authorization challenge in your browser:")
+    print(auth_response.url)
 ```
 </Tabs.Tab>
 <Tabs.Tab>
-```javascript file=<rootDir>/examples/code/guides/agentauth/auth_with_google.js#L26-L29
-
+```javascript
+if (auth_response.status !== "completed") {
+  console.log("Please complete the authorization challenge in your browser:");
+  console.log(auth_response.url);
+}
 ```
 
 </Tabs.Tab>
@@ -112,13 +141,15 @@ If authorization is not completed, prompt the user to visit the authorization UR
 
 <Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
 <Tabs.Tab>
-```python file=<rootDir>/examples/code/guides/agentauth/auth_with_google.py#L32
-
+```python
+# Wait for the authorization to complete
+auth_response = client.auth.wait_for_completion(auth_response)
 ```
 </Tabs.Tab>
 <Tabs.Tab>
-```javascript file=<rootDir>/examples/code/guides/agentauth/auth_with_google.js#L32
-
+```javascript
+// Wait for the authorization to complete
+auth_response = await client.auth.waitForCompletion(auth_response);
 ```
 
 </Tabs.Tab>
@@ -130,13 +161,30 @@ Once authorization is complete, you can use the obtained token to access the thi
 
 <Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
 <Tabs.Tab>
-```python file=<rootDir>/examples/code/guides/agentauth/auth_with_google.py#L37-L44
+```python
+credentials = Credentials(auth_response.context.token)
+gmail = build("gmail", "v1", credentials=credentials)
 
+email_messages = (
+    gmail.users().messages().list(userId="me").execute().get("messages", [])
+)
+
+print(email_messages)
 ```
 </Tabs.Tab>
 <Tabs.Tab>
-```javascript file=<rootDir>/examples/code/guides/agentauth/auth_with_google.js#L39-L49
+```javascript
+const auth = new google.auth.OAuth2();
+auth.setCredentials({ access_token: auth_response.context.token });
+const gmail = google.gmail({ version: "v1", auth });
 
+// List email messages
+const response = await gmail.users.messages.list({
+  userId: "me",
+});
+
+const email_messages = response.data.messages || [];
+console.log(email_messages);
 ```
 
 </Tabs.Tab>
@@ -145,8 +193,16 @@ Once authorization is complete, you can use the obtained token to access the thi
 ### Execute the code
 
 <Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
-  <Tabs.Tab>```python python3 direct_api_call.py ```</Tabs.Tab>
-  <Tabs.Tab>```javascript node direct_api_call.js ```</Tabs.Tab>
+  <Tabs.Tab>
+  ```python
+   python3 direct_api_call.py 
+   ```
+   </Tabs.Tab>
+  <Tabs.Tab>
+  ```javascript
+   node direct_api_call.js 
+   ```
+   </Tabs.Tab>
 </Tabs>
 
 You should see an output similar to this:, which is a list of the email messages returned by the Gmail API:

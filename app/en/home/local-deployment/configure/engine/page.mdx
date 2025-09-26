@@ -3,6 +3,7 @@ title: "Configuration"
 description: "Arcade Engine Configuration"
 ---
 
+import { Callout } from "nextra/components";
 import TableOfContents from "@/app/_components/table-of-contents";
 
 # Arcade Engine configuration
@@ -87,8 +88,11 @@ HTTP is the supported protocol for Arcade Engine's API. The following configurat
 
 A typical configuration for production looks like:
 
-```yaml file=<rootDir>/examples/code/home/configuration/engine/full_config.1.0.yaml#L4-L7
-
+```yaml
+api:
+  development: false
+  host: localhost
+  port: 9099
 ```
 
 For local development, set `api.development = true`. In development mode, Arcade Engine does not require [worker authentication](/home/local-deployment/configure/engine#http-worker-configuration).
@@ -101,8 +105,16 @@ The `auth.providers` section defines the providers that users can authorize with
 
 For [built-in providers](/home/auth-providers), use the `provider_id` field to reference the pre-built configuration. For example:
 
-```yaml file=<rootDir>/examples/code/home/configuration/engine/full_config.1.0.yaml#L9-L17 {7}
-
+```yaml
+auth:
+  providers:
+    - id: default-github
+      description: The default GitHub provider
+      enabled: true
+      type: oauth2
+      provider_id: github
+      client_id: ${env:GITHUB_CLIENT_ID}
+      client_secret: ${env:GITHUB_CLIENT_SECRET}
 ```
 
 For custom OAuth 2.0 providers, specify the full connection details in the `oauth2` sub-section. For full documentation on the custom provider configuration, see the [OAuth 2.0 provider configuration](/home/auth-providers/oauth2) page.
@@ -128,8 +140,13 @@ Two cache implementations are available:
 - `in_memory` - _(default)_ An in-memory cache implementation suitable for a single-node Arcade Engine deployment.
 - `redis` - A Redis cache implementation suitable for a multi-node Arcade Engine deployment:
 
-```yaml file=<rootDir>/examples/code/home/configuration/engine/full_config.1.0.yaml#L93-L98 {3-6}
-
+```yaml
+cache:
+  api_key_ttl: 10s
+  redis:
+    addr: 'localhost:6379'
+    password: ''
+    db: 0
 ```
 
 ## Security configuration
@@ -138,8 +155,14 @@ The `security` section configures the root encryption keys that the Arcade Engin
 
 A typical configuration looks like this:
 
-```yaml file=<rootDir>/examples/code/home/configuration/engine/full_config.1.0.yaml#L110-L116
-
+```yaml
+security:
+  root_keys:
+    - id: key1
+      default: true
+      value: ${env:ROOT_KEY_1}
+    - id: key2
+      value: ${env:ROOT_KEY_2}
 ```
 
 Keys should be a long random string of characters. For example:
@@ -152,16 +175,17 @@ openssl rand -base64 32
 
 When you [install Arcade Engine locally](/home/local-deployment/install/local), an `engine.env` file is created with a default root key:
 
-```bash file=<rootDir>/examples/code/home/configuration/engine/engine.env#L7-L8 {2}
-
+```bash
+# Encryption keys (change this when deploying to production)
+ROOT_KEY_1=default-key-value
 ```
 
 This default value can only be used in development mode (see [API configuration](#api-configuration) above).
 
-<Warning>
+<Callout type="warning">
   You **must** replace the value of `ROOT_KEY_1` in `engine.env` before
   deploying to production.
-</Warning>
+</Callout>
 
 ## Storage configuration
 
@@ -181,8 +205,15 @@ storage:
 
 - `postgres` - A PostgreSQL database, suitable for production:
 
-```yaml file=<rootDir>/examples/code/home/configuration/engine/full_config.1.0.yaml#L118-L125 {2-10}
-
+```yaml
+storage:
+  postgres:
+    user: ${env:POSTGRES_USER}
+    password: ${env:POSTGRES_PASSWORD}
+    host: ${env:POSTGRES_HOST}
+    port: ${env:POSTGRES_PORT}
+    db: ${env:POSTGRES_DB}
+    sslmode: require
 ```
 
 ## Telemetry configuration
@@ -203,8 +234,12 @@ telemetry:
 To connect to OpenTelemetry compatible collectors, set the necessary [OpenTelemetry environment variables](https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/) in the `engine.env` file.
 `environment` and `version` are fields that are added to the telemetry attributes, which can be filtered on later.
 
-```yaml file=<rootDir>/examples/code/home/configuration/engine/full_config.1.0.yaml#L127-L131
-
+```yaml
+telemetry:
+  environment: prod
+  logging:
+    level: info
+    encoding: console
 ```
 
 ### Notes
@@ -218,8 +253,20 @@ Arcade Engine orchestrates [tools](/home/use-tools/tools-overview) that AI model
 
 The `tools.directors` section configures the workers that are available to service tool calls:
 
-```yaml file=<rootDir>/examples/code/home/configuration/engine/full_config.1.0.yaml#L133-L146 {3-13}
-
+```yaml
+tools:
+  directors:
+    - id: default
+      enabled: true
+      max_tools: 64
+      workers:
+        - id: local_worker
+          enabled: true
+          http:
+            uri: 'http://localhost:8002'
+            timeout: 30
+            retry: 3
+            secret: ${env:ARCADE_WORKER_SECRET}
 ```
 
 When a worker is added to an enabled director, all of the tools hosted by that worker will be available to the model and through the Arcade API.

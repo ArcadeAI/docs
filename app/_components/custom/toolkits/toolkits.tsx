@@ -26,13 +26,15 @@ export type ToolkitType =
   | "community"
   | "auth";
 
-const DEFAULT_PRIORITY = 4;
+const DEFAULT_PRIORITY = 5;
 
 const TYPE_PRIORITY = {
   arcade: 0,
-  verified: 1,
-  community: 2,
-  auth: 3,
+  // biome-ignore lint/style/useNamingConvention: this is ok
+  arcade_starter: 1,
+  verified: 2,
+  community: 3,
+  auth: 4,
 } as const;
 
 const typeConfig = {
@@ -133,10 +135,10 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
       <div className="min-h-screen">
         <div className="mx-auto max-w-7xl px-4 pt-6 pb-4 sm:px-6 lg:px-8">
           <div className="space-y-6">
-            <h1 className="font-bold text-2xl text-gray-50 sm:text-3xl">
+            <h1 className="font-bold text-2xl text-gray-900 sm:text-3xl dark:text-gray-50">
               Toolkits
             </h1>
-            <p className="text-gray-400 text-sm leading-relaxed sm:text-base">
+            <p className="text-gray-600 text-sm leading-relaxed sm:text-base dark:text-gray-400">
               There are 4 designations for Arcade toolkits:
             </p>
             <div className="grid grid-cols-1 gap-4 sm:gap-4 md:grid-cols-3">
@@ -147,10 +149,10 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
                       <Icon className={`h-5 w-5 ${color}`} />
                     </div>
                     <div>
-                      <h2 className="font-semibold text-gray-200 text-sm sm:text-base">
+                      <h2 className="font-semibold text-gray-800 text-sm sm:text-base dark:text-gray-200">
                         {label}
                       </h2>
-                      <p className="mt-1 text-gray-400 text-xs sm:text-sm">
+                      <p className="mt-1 text-gray-600 text-xs sm:text-sm dark:text-gray-400">
                         {key === "arcade" && (
                           <>
                             Official toolkits hand-crafted by Arcade that are
@@ -191,16 +193,16 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
             </div>
 
             {/* Custom Integration Call-to-Action */}
-            <div className="mt-6 rounded-lg border border-blue-500/50 border-dashed bg-blue-500/10 p-4">
+            <div className="mt-6 rounded-lg border border-blue-500/50 border-dashed bg-blue-500/10 p-4 dark:bg-blue-500/10">
               <div className="flex flex-col items-center gap-4 md:flex-row md:gap-6">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/20">
                   <Plus className="h-4 w-4 text-blue-400" />
                 </div>
                 <div className="text-center md:text-left">
-                  <h2 className="font-bold text-base text-gray-100">
+                  <h2 className="font-bold text-base text-gray-900 dark:text-gray-100">
                     Build your own integration
                   </h2>
-                  <p className="!mt-1.5 text-gray-300 text-sm">
+                  <p className="!mt-1.5 text-gray-700 text-sm dark:text-gray-300">
                     Don't see what you need? Use Arcade's SDK to integrate with
                     any service or API.
                   </p>
@@ -221,12 +223,12 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
           </div>
         </div>
         <div className="mx-auto max-w-7xl px-4">
-          <div className="mx-auto mt-4 max-w-7xl border-gray-600/60 border-t px-4">
+          <div className="mx-auto mt-4 max-w-7xl border-gray-300/60 border-t px-4 dark:border-gray-600/60">
             <div className="py-6">
               <div className="w-full sm:w-64 lg:w-80">
                 <div className="relative">
                   <Input
-                    className="flex w-full items-center gap-4 border-none bg-[#f9fafb1a] pl-10 text-white placeholder:text-white/50"
+                    className="flex w-full items-center gap-4 border-none bg-gray-100/80 pl-10 text-gray-900 placeholder:text-gray-500 dark:bg-[#f9fafb1a] dark:text-white dark:placeholder:text-white/50"
                     onChange={handleSearchChange}
                     placeholder="Search ..."
                     type="text"
@@ -235,7 +237,7 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
                   <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform text-gray-500" />
                   {searchQuery && (
                     <button
-                      className="-translate-y-1/2 absolute top-1/2 right-3 transform text-gray-500 transition-colors hover:text-gray-300"
+                      className="-translate-y-1/2 absolute top-1/2 right-3 transform text-gray-500 transition-colors hover:text-gray-700 dark:hover:text-gray-300"
                       onClick={() => setSearchQuery("")}
                       type="button"
                     >
@@ -243,7 +245,7 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
                     </button>
                   )}
                 </div>
-                <p className="!text-xs mt-2 text-gray-400 sm:text-sm">
+                <p className="!text-xs mt-2 text-gray-600 sm:text-sm dark:text-gray-400">
                   {filteredTools.length} result(s) found
                 </p>
               </div>
@@ -256,7 +258,7 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
                           "h-10 px-4 text-xs sm:text-sm",
                           selectedCategory === category.id
                             ? "bg-primary/80 text-white hover:bg-primary/90"
-                            : "bg-gray-800/50 text-gray-300 hover:bg-gray-700/50"
+                            : "bg-gray-200/80 text-gray-700 hover:bg-gray-300/80 dark:bg-gray-800/50 dark:text-gray-300 dark:hover:bg-gray-700/50"
                         )}
                         key={category.id}
                         onClick={() => setSelectedCategory(category.id)}

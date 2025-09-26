@@ -28,9 +28,9 @@ export function SampleAppCard({
       whileTap={{ scale: 0.98 }}
     >
       <Link href={href} target={blank ? "_blank" : undefined}>
-        <Card className="group h-full overflow-hidden border-gray-800 bg-[rgba(17,17,17,0.8)] backdrop-blur-xs transition-all hover:border-[#ee175e]/30">
+        <Card className="group h-full overflow-hidden border-gray-200 bg-white/90 backdrop-blur-xs transition-all hover:border-[#ee175e]/30 dark:border-gray-800 dark:bg-[rgba(17,17,17,0.8)]">
           <CardContent className="p-0">
-            <div className="relative aspect-video overflow-hidden bg-zinc-900">
+            <div className="relative aspect-video overflow-hidden bg-gray-100 dark:bg-zinc-900">
               <Image
                 alt={title}
                 className="scale-110 object-cover transition-transform duration-300"
@@ -40,10 +40,10 @@ export function SampleAppCard({
               />
             </div>
             <div className="space-y-2 p-6">
-              <h3 className="font-semibold text-white text-xl tracking-tight transition-colors group-hover:text-[#ee175e]">
+              <h3 className="font-semibold text-gray-900 text-xl tracking-tight transition-colors group-hover:text-[#ee175e] dark:text-white">
                 {title}
               </h3>
-              <p className="text-gray-300 text-sm leading-relaxed">
+              <p className="text-gray-600 text-sm leading-relaxed dark:text-gray-300">
                 {description}
               </p>
             </div>

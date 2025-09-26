@@ -44,9 +44,7 @@ export function useExampleFile(
       .catch((err) => {
         if ((err as Error).name !== "AbortError") {
           setError(`Could not load ${fileName}`);
-          setFileContent(
-            "# Example code not available\n\n# This example file could not be loaded.\n# Please check the file path or try again later."
-          );
+          setFileContent("🔜 Coming soon");
         }
       })
       .finally(() => setLoading(false));

@@ -31,22 +31,22 @@ export function QuickStartCard({
       }}
       whileTap={{ scale: 0.98 }}
     >
-      <Card className="h-full border-gray-800 bg-[rgba(17,17,17,0.8)] backdrop-blur-xs transition-all hover:border-[#ee175e]/30">
+      <Card className="h-full border-gray-800 bg-white/80 backdrop-blur-xs transition-all hover:border-[#ee175e]/30 dark:border-gray-800 dark:bg-[rgba(17,17,17,0.8)]">
         <Link className="block h-full" href={href}>
           <CardHeader className="flex flex-row items-center gap-3 p-6">
             <div className="rounded-full bg-[#ee175e]/10 p-2">
               <Icon className="h-5 w-5 text-[#ee175e]" />
             </div>
-            <CardTitle className="text-white text-xl tracking-tight">
+            <CardTitle className="text-gray-900 text-xl tracking-tight dark:text-white">
               {title}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6 pt-0">
-            <p className="text-gray-300 text-sm leading-relaxed">
+            <p className="text-gray-600 text-sm leading-relaxed dark:text-gray-300">
               {description}
             </p>
             {code && (
-              <pre className="mt-1 rounded-md bg-gray-900 p-1 text-gray-300 text-sm">
+              <pre className="mt-1 rounded-md bg-gray-100 p-1 text-gray-800 text-sm dark:bg-gray-900 dark:text-gray-300">
                 <code>{code}</code>
               </pre>
             )}

@@ -53,7 +53,7 @@ export function LandingPage() {
         <div className="mx-auto max-w-screen-xl px-4 py-12 text-center sm:py-48 lg:py-24">
           <motion.h1
             animate={{ opacity: 1, y: 0 }}
-            className="mb-6 font-extrabold text-4xl text-white tracking-tight md:text-5xl lg:text-6xl"
+            className="mb-6 font-extrabold text-4xl text-black tracking-tight md:text-5xl lg:text-6xl dark:text-white"
             initial={{ opacity: 0, y: 20 }}
             transition={{ duration: ANIMATION_DURATION }}
           >
@@ -61,7 +61,7 @@ export function LandingPage() {
           </motion.h1>
           <motion.p
             animate={{ opacity: 1, y: 0 }}
-            className="mx-auto mt-8 max-w-4xl text-pretty font-medium text-base text-gray-100 italic leading-relaxed"
+            className="mx-auto mt-8 max-w-4xl text-pretty font-medium text-base text-gray-600 italic leading-relaxed dark:text-gray-100"
             initial={{ opacity: 0, y: 20 }}
             transition={{
               duration: ANIMATION_DURATION,
@@ -80,7 +80,7 @@ export function LandingPage() {
               delay: ANIMATION_DELAYS.secondary,
             }}
           >
-            <p style={{ textAlign: "left", paddingTop: "2rem" }}>
+            <p className="pt-8 text-left text-gray-700 dark:text-gray-200">
               Arcade enables your AI agent to securely take real-world actions
               through user-specific permissions, pre-built toolkits for Gmail,
               Slack, GitHub, and more. You can also build your own agentic tools
@@ -89,7 +89,7 @@ export function LandingPage() {
               <span className="font-bold text-primary">registry</span>, and{" "}
               <span className="font-bold text-primary">runtime</span>.
             </p>
-            <p style={{ textAlign: "left", paddingTop: "2rem" }}>
+            <p className="pt-8 text-left text-gray-700 dark:text-gray-200">
               Get started with a 5-minute quickstart.
             </p>
           </motion.div>
@@ -114,7 +114,7 @@ export function LandingPage() {
             </Button>
             <Button
               asChild
-              className="h-12 border-white bg-transparent px-6 text-white hover:bg-white/10"
+              className="h-12 border-gray-900 bg-transparent px-6 text-gray-900 hover:bg-gray-900 hover:text-white dark:border-white dark:text-white dark:hover:bg-white dark:hover:text-gray-900"
               size="lg"
               variant="outline"
             >
@@ -133,19 +133,19 @@ export function LandingPage() {
               delay: ANIMATION_DELAYS.final,
             }}
           >
-            <div className="rounded-lg border border-white p-4 text-white italic">
+            <div className="rounded-lg border border-gray-300 bg-gray-50/50 p-4 text-gray-700 italic backdrop-blur-sm dark:border-white dark:bg-gray-900/50 dark:text-white">
               Give your AI IDE access to Arcade.dev's documentation using our
               llms.txt files (
-              <a className="text-primary" href="/llms.txt">
+              <a className="text-primary hover:underline" href="/llms.txt">
                 short llms.txt
               </a>
               ,{" "}
-              <a className="text-primary" href="/llms-full.txt">
+              <a className="text-primary hover:underline" href="/llms-full.txt">
                 llms-full.txt
               </a>
               ), or use{" "}
               <a
-                className="text-primary"
+                className="text-primary hover:underline"
                 href="https://context7.com/arcadeai/docs"
               >
                 context7
@@ -287,10 +287,10 @@ export function LandingPage() {
       <section className="py-12">
         <div className="container mx-auto px-4">
           <div className="max-w-2xl">
-            <h2 className="mb-4 font-bold text-3xl text-white tracking-tight md:text-4xl">
+            <h2 className="mb-4 font-bold text-3xl text-gray-900 tracking-tight md:text-4xl dark:text-white">
               Sample Applications
             </h2>
-            <p className="text-gray-300">
+            <p className="text-gray-600 dark:text-gray-300">
               Get started quickly with our pre-built templates and example
               applications.
             </p>
@@ -322,18 +322,20 @@ export function LandingPage() {
       <section className="py-12">
         <div className="container mx-auto px-4">
           <div className="max-w-2xl">
-            <h2 className="mb-4 font-bold text-3xl text-white tracking-tight md:text-4xl">
+            <h2 className="mb-4 font-bold text-3xl text-gray-900 tracking-tight md:text-4xl dark:text-white">
               Arcade Overview
             </h2>
           </div>
           <div className="flex w-full justify-center">
-            <Image
-              alt={"arcade overview"}
-              className="max-w-full"
-              height={OVERVIEW_IMAGE_HEIGHT / IMAGE_SCALE_FACTOR}
-              src={"/images/overview.png"}
-              width={OVERVIEW_IMAGE_WIDTH / IMAGE_SCALE_FACTOR}
-            />
+            <div className="rounded-lg border border-gray-300 bg-gray-400 p-4 shadow-sm dark:border-gray-700 dark:bg-transparent">
+              <Image
+                alt={"arcade overview"}
+                className="max-w-full"
+                height={OVERVIEW_IMAGE_HEIGHT / IMAGE_SCALE_FACTOR}
+                src={"/images/overview.png"}
+                width={OVERVIEW_IMAGE_WIDTH / IMAGE_SCALE_FACTOR}
+              />
+            </div>
           </div>
           <div className="mt-16 grid gap-8 md:grid-cols-2">
             <QuickStartCard
