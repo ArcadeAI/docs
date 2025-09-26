@@ -7,8 +7,13 @@
  *
  */
 
-function TableOfContents({ headers, data }) {
-  const handleRowClick = (firstColumnValue) => {
+type TableOfContentsProps = {
+  headers: string[];
+  data: string[][];
+};
+
+function TableOfContents({ headers, data }: TableOfContentsProps) {
+  const handleRowClick = (firstColumnValue: string) => {
     // Convert first column value to a valid ID format
     const sectionId = firstColumnValue
       .toLowerCase()

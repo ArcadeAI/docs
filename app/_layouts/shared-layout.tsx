@@ -109,8 +109,8 @@ export default async function SharedLayout({
           }
           i18n={[
             { locale: "en", name: "English" },
-            { locale: "es", name: "Español" },
-            { locale: "pt-BR", name: "Português" },
+            // { locale: "es", name: "Español" },
+            // { locale: "pt-BR", name: "Português" },
           ]}
           lastUpdated={<LastUpdated>{dictionary.lastUpdated}</LastUpdated>}
           navbar={

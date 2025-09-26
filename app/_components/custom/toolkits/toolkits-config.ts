@@ -51,7 +51,7 @@ const availableTools: Tool[] = [
     name: "Slack API",
     image: "slack.png",
     summary: "Enable LLMs to interact with the low-level Slack API",
-    link: "/toolkits/social-communication/slack_api",
+    link: "/toolkits/social-communication/slack-api",
     category: "social",
     type: "arcade_starter",
   },
