@@ -163,7 +163,7 @@ export function LandingPage() {
               icon={Puzzle}
               title="Browse Integrations"
               description="Explore our library of integrations for popular services. Find the perfect integration for your needs."
-              href="/toolkits"
+              href="/mcp-servers"
             />
             <QuickStartCard
               icon={Wrench}
@@ -251,7 +251,7 @@ export function LandingPage() {
                 title: "Enterprise-Ready Platform",
                 description:
                   "Arcade provides the authentication, compliance, and integration capabilities required for production deployment in enterprise environments.",
-                href: "/toolkits",
+                href: "/mcp-servers",
               }}
             />
           </div>

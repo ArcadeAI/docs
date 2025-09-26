@@ -5,10 +5,10 @@ export default {
     href: "/get-started",
     breadcrumb: true,
   },
-  toolkits: {
+  "mcp-servers": {
     type: "page",
     title: "MCP Servers",
-    href: "/toolkits",
+    href: "/mcp-servers",
   },
   arcademcp: {
     type: "page",
