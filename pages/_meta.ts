@@ -19,7 +19,7 @@ export default {
   clients: {
     type: "page",
     title: "Clients",
-    href: "home/arcade-clients",
+    href: "/home/arcade-clients",
   },
   reference: {
     type: "page",
