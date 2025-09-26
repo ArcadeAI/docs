@@ -16,6 +16,11 @@ export default {
     href: "https://python.mcp.arcade.dev",
     target: "_blank",
   },
+  clients: {
+    type: "page",
+    title: "Clients",
+    href: "home/arcade-clients",
+  },
   reference: {
     type: "page",
     title: "API Reference",
