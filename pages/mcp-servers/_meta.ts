@@ -38,12 +38,9 @@ export default {
   },
   "-- Submit your toolkit": {
     type: "separator",
-    title: "Submit your toolkit",
+    title: "Submit your MCP Server",
   },
-  "contribute-a-toolkit": {
-    title: "Contribute a toolkit",
-  },
-  "community-toolkit-template": {
-    display: "hidden",
+  "contribute-a-mcp-server": {
+    title: "Contribute a MCP Server",
   },
 };

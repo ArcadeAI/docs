@@ -111,7 +111,7 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
         <div className="mx-auto max-w-7xl px-4 pb-4 pt-6 sm:px-6 lg:px-8">
           <div className="space-y-6">
             <h1 className="text-2xl font-bold text-gray-50 sm:text-3xl">
-              Toolkits
+              MCP Servers
             </h1>
             <p className="text-sm leading-relaxed text-gray-400 sm:text-base">
               There are 4 designations for Arcade MCP Servers:
