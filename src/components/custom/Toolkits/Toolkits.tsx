@@ -27,22 +27,22 @@ export type ToolkitType =
 
 const typeConfig = {
   arcade: {
-    label: "Arcade Optimized Toolkit",
+    label: "Arcade Optimized MCP Server",
     icon: BadgeCheck,
     color: "text-emerald-400",
   },
   arcade_starter: {
-    label: "Arcade Starter Toolkit",
+    label: "Arcade Starter MCP Server",
     icon: Terminal,
     color: "text-orange-400",
   },
   verified: {
-    label: "Verified Toolkit",
+    label: "Verified MCP Server",
     icon: CheckCircle,
     color: "text-blue-400",
   },
   community: {
-    label: "Community Toolkit",
+    label: "Community MCP Server",
     icon: Users,
     color: "text-orange-400",
   },
@@ -114,7 +114,7 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
               Toolkits
             </h1>
             <p className="text-sm leading-relaxed text-gray-400 sm:text-base">
-              There are 4 designations for Arcade toolkits:
+              There are 4 designations for Arcade MCP Servers:
             </p>
             <div className="grid grid-cols-1 gap-4 sm:gap-4 md:grid-cols-3">
               {Object.entries(typeConfig).map(
@@ -130,7 +130,7 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
                       <p className="mt-1 text-xs text-gray-400 sm:text-sm">
                         {key === "arcade" && (
                           <>
-                            Official toolkits hand-crafted by Arcade that are
+                            Official MCP Servers hand-crafted by Arcade that are
                             ready for use and optimized for LLM-usage.{" "}
                             <a
                               href="/home/use-tools/types-of-tools#optimized-tools"
@@ -143,8 +143,8 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
                         )}
                         {key === "arcade_starter" && (
                           <>
-                            Auto-generated toolkits developed by Arcade that may
-                            require customization.{" "}
+                            Auto-generated MCP Servers developed by Arcade that
+                            may require customization.{" "}
                             <a
                               href="/home/use-tools/types-of-tools#starter-tools"
                               style={{ textDecoration: "none" }}
@@ -155,9 +155,9 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
                           </>
                         )}
                         {key === "verified" &&
-                          "Community-created toolkits, thoroughly tested and verified by Arcade."}
+                          "Community-created MCP Servers, thoroughly tested and verified by Arcade."}
                         {key === "community" &&
-                          "Created and maintained by the Arcade community, offering a wide range of toolkits."}
+                          "Created and maintained by the Arcade community, offering a wide range of MCP Servers."}
                         {key === "auth" &&
                           "Auth integrations allow you to develop custom tools that connect your agent APIs and services."}
                       </p>
@@ -178,7 +178,7 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
                     Build your own integration
                   </h2>
                   <p className="!mt-1.5 text-sm text-gray-300">
-                    Don't see what you need? Use Arcade's SDK to integrate with
+                    Don't see what you need? Use arcade-mcp to integrate with
                     any service or API.
                   </p>
                   <div className="mb-1 mt-3">
@@ -189,7 +189,7 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
                         "bg-blue-600 hover:bg-blue-700 active:bg-blue-700",
                       )}
                     >
-                      Learn how to build a toolkit
+                      Learn how to build a MCP Server
                     </Link>
                   </div>
                 </div>

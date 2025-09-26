@@ -35,28 +35,28 @@ const typeConfig: Record<
   arcade: {
     className:
       "border-emerald-600/20 hover:border-primary bg-emerald-600/[0.02] hover:bg-emerald-600/[0.03]",
-    label: "Arcade Optimized Toolkit",
+    label: "Arcade Optimized MCP Server",
     icon: BadgeCheck,
     color: "text-emerald-400",
   },
   arcade_starter: {
     className:
       "border-orange-600/20 hover:border-primary bg-orange-600/[0.02] hover:bg-orange-600/[0.03]",
-    label: "Arcade Starter Toolkit",
+    label: "Arcade Starter MCP Server",
     icon: Terminal,
     color: "text-orange-400",
   },
   verified: {
     className:
       "border-blue-600/20 hover:border-primary bg-blue-600/[0.02] hover:bg-blue-600/[0.03]",
-    label: "Verified Toolkit",
+    label: "Verified MCP Server",
     icon: CheckCircle,
     color: "text-blue-400",
   },
   community: {
     className:
       "border-orange-600/20 hover:border-primary bg-orange-600/[0.02] hover:bg-orange-600/[0.03]",
-    label: "Community Toolkit",
+    label: "Community MCP Server",
     icon: Users,
     color: "text-orange-400",
   },
