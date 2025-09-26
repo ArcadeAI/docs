@@ -1,4 +1,4 @@
-import { BadgeHelp, Code2, Home, Plug } from "lucide-react";
+import { BadgeHelp, Home } from "lucide-react";
 
 export default {
   "*": {
@@ -14,25 +14,6 @@ export default {
     theme: {
       layout: "full",
     },
-  },
-  learn: {
-    title: (
-      <span className="flex items-center gap-2 font-medium">
-        <Plug className="size-4" />
-        Toolkits
-      </span>
-    ),
-    href: "/toolkits",
-  },
-  reference: {
-    title: (
-      <span className="flex items-center gap-2 font-medium">
-        <Code2 className="size-4" />
-        API Reference
-      </span>
-    ),
-    href: "https://reference.arcade.dev/",
-    target: "_blank",
   },
 
   "contact-us": {

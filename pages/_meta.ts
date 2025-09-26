@@ -7,12 +7,18 @@ export default {
   },
   toolkits: {
     type: "page",
-    title: "Integrations",
+    title: "MCP Servers",
     href: "/toolkits",
+  },
+  arcademcp: {
+    type: "page",
+    title: "Arcade MCP",
+    href: "https://python.mcp.arcade.dev",
+    target: "_blank",
   },
   reference: {
     type: "page",
-    title: "Reference",
+    title: "API Reference",
     href: "https://reference.arcade.dev/",
     target: "_blank",
   },
