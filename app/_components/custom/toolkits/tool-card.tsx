@@ -1,17 +1,17 @@
 "use client";
-import { BadgeCheck, CheckCircle, Key, Terminal, Users } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import type React from "react";
-import { useState } from "react";
 import {
   Badge,
   Card,
   CardContent as CardContentUi,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+} from "@arcadeai/design-system";
+import { cn } from "@arcadeai/design-system/lib/utils";
+import { BadgeCheck, CheckCircle, Key, Terminal, Users } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import type React from "react";
+import { useState } from "react";
 import { ComingSoonModal } from "./coming-soon-modal";
 
 type ToolkitType =
