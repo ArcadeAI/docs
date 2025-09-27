@@ -1,13 +1,13 @@
-import chalk from "chalk";
-import ora, { type Ora } from "ora";
+import chalk from 'chalk';
+import ora, { type Ora } from 'ora';
 
-import type { Config } from "./config";
+import type { Config } from './config';
 
 export enum LogLevel {
-  DEBUG = "debug", // eslint-disable-line no-unused-vars
-  INFO = "info", // eslint-disable-line no-unused-vars
-  WARN = "warn", // eslint-disable-line no-unused-vars
-  ERROR = "error", // eslint-disable-line no-unused-vars
+  DEBUG = 'debug', // eslint-disable-line no-unused-vars
+  INFO = 'info', // eslint-disable-line no-unused-vars
+  WARN = 'warn', // eslint-disable-line no-unused-vars
+  ERROR = 'error', // eslint-disable-line no-unused-vars
 }
 
 export class Logger {
@@ -16,7 +16,7 @@ export class Logger {
   private includeTimestamps: boolean;
   private spanStartTime: number | undefined = undefined;
   private spinner: Ora | undefined = undefined;
-  private toolCallCount: number = 0;
+  private toolCallCount = 0;
   private updateInterval: NodeJS.Timeout | undefined = undefined;
 
   constructor(config: Config) {
@@ -26,22 +26,22 @@ export class Logger {
   }
 
   private getTimestamp() {
-    const timestamp = new Date().toLocaleTimeString("en-US", {
+    const timestamp = new Date().toLocaleTimeString('en-US', {
       hour12: false,
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
     });
 
     return this.includeTimestamps
       ? this.color
         ? chalk.gray(`[${timestamp}]`)
         : `[${timestamp}]`
-      : "";
+      : '';
   }
 
   private getSpanMarker() {
-    return this.spanStartTime !== undefined ? " ├─" : "";
+    return this.spanStartTime !== undefined ? ' ├─' : '';
   }
 
   private getDuration() {
@@ -61,7 +61,7 @@ export class Logger {
   private logToConsole(
     message: string,
     level: LogLevel,
-    color: (text: string) => string,
+    color: (text: string) => string
   ) {
     const shouldSkip =
       (this.level === LogLevel.ERROR && level !== LogLevel.ERROR) ||
@@ -107,7 +107,7 @@ export class Logger {
 
   private updateSpanDisplay() {
     if (!this.spinner) return;
-    const mainMessage = this.spinner.text.split("\n")[0];
+    const mainMessage = this.spinner.text.split('\n')[0];
     this.spinner.text = `${mainMessage}\n${this.getToolCallStats()}`;
   }
 
@@ -137,13 +137,13 @@ export class Logger {
     this.updateSpanDisplay();
   }
 
-  endSpan(message: string = "Completed with no output") {
+  endSpan(message = 'Completed with no output') {
     if (this.updateInterval) {
       clearInterval(this.updateInterval);
       this.updateInterval = undefined;
     }
 
-    const doneMessage = "Done!";
+    const doneMessage = 'Done!';
     const timestamp = this.getTimestamp();
     const duration = this.getDuration();
 

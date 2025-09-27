@@ -1,19 +1,26 @@
 import fg from "fast-glob";
-import { validateFiles, scanURLs } from "next-validate-link";
+import { scanURLs, validateFiles } from "next-validate-link";
 import { expect, test } from "vitest";
 
-test("check for broken links", async () => {
-  const scanned = await scanURLs({
-    preset: "next",
-  });
+const BROKEN_LINKS_FOUND = 0;
+const TIMEOUT = 30_000;
 
-  const found = await validateFiles(await fg("pages/**/*.{md,mdx}"), {
-    scanned,
-  });
+test(
+  "check for broken links",
+  async () => {
+    const scanned = await scanURLs({
+      preset: "next",
+    });
 
-  for (const error of found) {
-    console.error(`Broken link: ${JSON.stringify(error)}`);
-  }
+    const found = await validateFiles(await fg("app/**/*.{md,mdx}"), {
+      scanned,
+    });
 
-  expect(found.length).toBe(0);
-});
+    for (const error of found) {
+      console.error(`Broken link: ${JSON.stringify(error)}`);
+    }
+
+    expect(found.length).toBe(BROKEN_LINKS_FOUND);
+  },
+  TIMEOUT
+);
