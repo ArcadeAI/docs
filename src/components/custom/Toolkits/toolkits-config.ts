@@ -1,4 +1,4 @@
-import { ToolkitType } from "@/components/custom/toolkits/Toolkits";
+import { ToolkitType } from "@/components/custom/Toolkits/Toolkits";
 export interface Tool {
   name: string;
   image: string;

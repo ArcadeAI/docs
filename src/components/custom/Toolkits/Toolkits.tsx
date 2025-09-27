@@ -1,5 +1,5 @@
-import { ToolCard } from "@/components/custom/toolkits/ToolCard";
-import { Category, Tool } from "@/components/custom/toolkits/toolkits-config";
+import { ToolCard } from "@/components/custom/Toolkits/ToolCard";
+import { Category, Tool } from "@/components/custom/Toolkits/toolkits-config";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
