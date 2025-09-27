@@ -5,14 +5,25 @@ export default {
     href: "/get-started",
     breadcrumb: true,
   },
-  toolkits: {
+  "mcp-servers": {
     type: "page",
-    title: "Integrations",
-    href: "/toolkits",
+    title: "MCP Servers",
+    href: "/mcp-servers",
+  },
+  arcademcp: {
+    type: "page",
+    title: "Arcade MCP",
+    href: "https://python.mcp.arcade.dev",
+    target: "_blank",
+  },
+  clients: {
+    type: "page",
+    title: "Clients",
+    href: "/home/arcade-clients",
   },
   reference: {
     type: "page",
-    title: "Reference",
+    title: "API Reference",
     href: "https://reference.arcade.dev/",
     target: "_blank",
   },
