@@ -16,7 +16,7 @@ import { ComingSoonModal } from "./coming-soon-modal";
 
 type ToolkitType =
   | "arcade"
-  | "arcadeStarter"
+  | "arcade_starter"
   | "verified"
   | "community"
   | "auth";
@@ -41,7 +41,8 @@ const typeConfig: Record<
     icon: BadgeCheck,
     color: "text-emerald-400",
   },
-  arcadeStarter: {
+  // biome-ignore lint/style/useNamingConvention: this is ok
+  arcade_starter: {
     className:
       "border-orange-600/20 hover:border-primary bg-orange-600/[0.02] hover:bg-orange-600/[0.03]",
     label: "Arcade Starter Toolkit",

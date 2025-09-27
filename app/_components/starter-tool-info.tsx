@@ -1,12 +1,12 @@
+import { Callout } from "nextra/components";
 import type React from "react";
-import { Warning } from "@/markdown/Callouts";
 
 type StarterToolInfoProps = {
   toolkitName: string;
 };
 
 const StarterToolInfo: React.FC<StarterToolInfoProps> = ({ toolkitName }) => (
-  <Warning>
+  <Callout type="warning">
     <p>
       {toolkitName} is a{" "}
       <a href="/home/use-tools/types-of-tools#starter-tools">Starter</a>{" "}
@@ -25,7 +25,7 @@ const StarterToolInfo: React.FC<StarterToolInfoProps> = ({ toolkitName }) => (
       <a href="/home/use-tools/types-of-tools">Read more</a> about Optimized vs
       Starter tools.
     </p>
-  </Warning>
+  </Callout>
 );
 
 export default StarterToolInfo;

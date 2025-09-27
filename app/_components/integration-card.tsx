@@ -31,7 +31,7 @@ export function IntegrationCard({
     >
       <div
         className={cn(
-          "absolute inset-0 bg-linear-to-tr from-white/10 to-transparent transition-opacity",
+          "absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent transition-opacity",
           isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
         )}
       />
