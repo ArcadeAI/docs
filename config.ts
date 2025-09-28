@@ -1,14 +1,12 @@
-// Make sure your changes are in sync with public/_redirects
-
-export interface CompanyConfig {
+export type CompanyConfig = {
   url: string;
   email: string;
   linkedIn: string;
   github: string;
   discord: string;
-}
+};
 
-export interface EngineConfig {
+export type EngineConfig = {
   github: string;
   newIssue: string;
   releases: string;
@@ -16,14 +14,14 @@ export interface EngineConfig {
   contributing: string;
   examples: string;
   dockerhub: string;
-}
+};
 
-export interface AppConfig {
+export type AppConfig = {
   company: CompanyConfig;
   engine: EngineConfig;
-}
+};
 
-export const config: AppConfig = {
+export const urlConfig: AppConfig = {
   company: {
     url: "https://arcade.dev/",
     email: "contact@arcade.dev",

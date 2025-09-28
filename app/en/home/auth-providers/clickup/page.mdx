@@ -1,0 +1,221 @@
+import { Tabs, Callout, Steps } from "nextra/components";
+
+# ClickUp
+
+The ClickUp auth provider enables tools and agents to call the ClickUp API on behalf of a user. Behind the scenes, the Arcade Engine and the ClickUp auth provider seamlessly manage ClickUp OAuth 2.0 authorization for your users.
+
+### What's documented here
+
+This page describes how to use and configure ClickUp auth with Arcade.
+
+This auth provider is used by:
+
+- Your [app code](#using-clickup-auth-in-app-code) that needs to call ClickUp APIs
+- Or, your [custom tools](#using-clickup-auth-in-custom-tools) that need to call ClickUp APIs
+
+## Configuring ClickUp auth
+<Callout type="info">
+  When using your own app credentials, make sure you configure your project to use a [custom user verifier](/home/auth/secure-auth-production#build-a-custom-user-verifier). Without this, your end-users will not be able to use your app or agent in production.
+</Callout>
+In a production environment, you will most likely want to use your own ClickUp app credentials. This way, your users will see your application's name requesting permission.
+
+You can use your own ClickUp credentials in both the Arcade Cloud Platform or in a [self-hosted Arcade Engine](/home/local-deployment/install/local) instance.
+
+Before showing how to configure your ClickUp app credentials, let's go through the steps to create a ClickUp app.
+
+### Create a ClickUp app
+
+- Navigate to your ClickUp workspace and go to **Settings → Apps**
+- Click **Create new app** in the OAuth Apps section
+- Fill in your app name and description
+- Set the OAuth Redirect URL to: `https://cloud.arcade.dev/api/v1/oauth/callback`
+- Copy the Client ID and Client Secret, which you'll need below
+
+Next, add the ClickUp app to your Arcade Engine configuration. You can do this in the Arcade Dashboard, or by editing the `engine.yaml` file directly (for a self-hosted instance).
+
+## Configuring your own ClickUp Auth Provider in Arcade
+
+There are two ways to configure your ClickUp app credentials in Arcade:
+
+1. From the Arcade Dashboard GUI
+2. By editing the `engine.yaml` file directly (for a self-hosted Arcade Engine)
+
+We show both options step-by-step below.
+
+<Tabs items={["Dashboard GUI", "Engine Configuration YAML"]}>
+<Tabs.Tab>
+
+### Configure ClickUp Auth Using the Arcade Dashboard GUI
+
+<Steps>
+
+#### Access the Arcade Dashboard
+
+To access the Arcade Cloud dashboard, go to [api.arcade.dev/dashboard](https://api.arcade.dev/dashboard). If you are self-hosting, by default the dashboard will be available at `http://localhost:9099/dashboard`. Adjust the host and port number to match your environment.
+
+#### Navigate to the OAuth Providers page
+
+- Under the **OAuth** section of the Arcade Dashboard left-side menu, click **Providers**.
+- Click **Add OAuth Provider** in the top right corner.
+- Select the **Included Providers** tab at the top.
+- In the **Provider** dropdown, select **ClickUp**.
+
+#### Enter the provider details
+
+- Choose a unique **ID** for your provider (e.g. "my-clickup-provider").
+- Optionally enter a **Description**.
+- Enter the **Client ID** and **Client Secret** from your ClickUp app.
+
+#### Create the provider
+
+Hit the **Create** button and the provider will be ready to be used in the Arcade Engine.
+
+</Steps>
+
+When you use tools that require ClickUp auth using your Arcade account credentials, the Arcade Engine will automatically use this ClickUp OAuth provider. If you have multiple ClickUp providers, see [using multiple auth providers of the same type](/home/auth-providers#using-multiple-providers-of-the-same-type) for more information.
+
+</Tabs.Tab>
+<Tabs.Tab>
+
+### Configuring ClickUp auth in self-hosted Arcade Engine configuration
+
+<Steps>
+
+### Set environment variables
+
+Set the following environment variables:
+
+```bash
+export CLICKUP_CLIENT_ID="<your client ID>"
+export CLICKUP_CLIENT_SECRET="<your client secret>"
+```
+
+Or, you can set these values in a `.env` file:
+
+```bash
+CLICKUP_CLIENT_ID="<your client ID>"
+CLICKUP_CLIENT_SECRET="<your client secret>"
+```
+
+<Callout>
+  See [Engine configuration](/home/local-deployment/configure/engine) for more information on how
+  to set environment variables and configure the Arcade Engine.
+</Callout>
+
+### Edit the Engine configuration
+
+Edit the `engine.yaml` file and add a `clickup` item to the `auth.providers` section:
+
+```yaml {3-9}
+auth:
+  providers:
+    - id: default-clickup
+      description: "The default ClickUp provider"
+      enabled: true
+      type: oauth2
+      provider_id: clickup
+      client_id: ${env:CLICKUP_CLIENT_ID}
+      client_secret: ${env:CLICKUP_CLIENT_SECRET}
+```
+
+</Steps>
+
+</Tabs.Tab>
+</Tabs>
+
+## Using ClickUp auth in app code
+
+Use the ClickUp auth provider in your own agents and AI apps to get a user-scoped token for the ClickUp API. See [authorizing agents with Arcade](/home/auth/how-arcade-helps) to understand how this works.
+
+Use `client.auth.start()` to get a user token for the ClickUp API:
+
+<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs.Tab>
+
+```python {8-12}
+from arcadepy import Arcade
+
+client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
+
+user_id = "{arcade_user_id}"
+
+# Start the authorization process
+auth_response = client.auth.start(
+    user_id=user_id,
+    provider="clickup",
+)
+
+if auth_response.status != "completed":
+    print("Please complete the authorization challenge in your browser:")
+    print(auth_response.url)
+
+# Wait for the authorization to complete
+auth_response = client.auth.wait_for_completion(auth_response)
+
+token = auth_response.context.token
+# TODO: Do something interesting with the token...
+```
+
+</Tabs.Tab>
+<Tabs.Tab>
+
+```javascript {8-10}
+import { Arcade } from "arcade-js";
+
+const client = new Arcade();
+
+const auth = await client.auth.start({
+  provider: "clickup",
+});
+
+if (auth.status !== "completed") {
+  console.log("Finish authorization at:", auth.url);
+  await client.auth.waitForCompletion(auth);
+}
+
+const { token } = auth.context;
+// Use the token in ClickUp API requests
+```
+
+</Tabs.Tab>
+</Tabs>
+
+## Using ClickUp auth in custom tools
+
+You can author your own [custom tools](/home/build-tools/create-a-toolkit) that interact with the ClickUp API.
+
+Use the `ClickUp()` auth class to specify that a tool requires authorization with ClickUp. The `context.authorization.token` field will be automatically populated with the user's ClickUp token:
+
+```python {5-6,9-13,20}
+import httpx
+from arcade_tdk import tool, ToolContext
+from arcade_tdk.auth import ClickUp
+
+@tool(requires_auth=ClickUp())
+async def get_my_workspaces(context: ToolContext) -> dict:
+    """Get the authenticated user's workspaces (teams) from ClickUp."""
+    token = context.authorization.token
+
+    # Make authenticated request to ClickUp API
+    async with httpx.AsyncClient() as client:
+        response = await client.get(
+            "https://api.clickup.com/api/v2/team",
+            headers={
+                "Authorization": token,
+                "Content-Type": "application/json"
+            }
+        )
+
+        if response.status_code == 200:
+            data = response.json()
+            teams = data.get("teams", [])
+            return {
+                "success": True,
+                "teams": [{"id": team["id"], "name": team["name"]} for team in teams]
+            }
+        else:
+            return {
+                "success": False,
+                "error": f"ClickUp API error: {response.status_code} - {response.text}"
+            }
+```
