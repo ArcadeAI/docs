@@ -4,7 +4,7 @@ import styles from "./ToolInfo.module.css";
 interface ToolInfoProps {
   description: string;
   author: string;
-  codeLink: string;
+  codeLink?: string;
   authType: "oauth2";
   authProviderName?: string;
   authProviderDocsUrl?: string;
