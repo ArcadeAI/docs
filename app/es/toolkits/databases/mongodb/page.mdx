@@ -1,0 +1,256 @@
+# MongoDB
+
+import ToolInfo from "@/app/_components/tool-info";
+import Badges from "@/app/_components/badges";
+import TabbedCodeBlock from "@/app/_components/tabbed-code-block";
+import TableOfContents from "@/app/_components/table-of-contents";
+import ToolFooter from "@/app/_components/tool-footer";
+import { Callout } from "nextra/components";
+
+<ToolInfo
+  description="Permitir a los agentes interactuar con bases de datos MongoDB (solo lectura)."
+  author="Arcade"
+  codeLink="https://github.com/ArcadeAI/arcade-ai/tree/main/toolkits/mongodb"
+  authType="cadena de conexión de base de datos"
+  versions={["0.1.0"]}
+/>
+
+<Badges repo="arcadeai/arcade-mongodb" />
+
+El kit de herramientas de MongoDB de Arcade proporciona un conjunto predefinido de herramientas para interactuar con bases de datos MongoDB de manera solo lectura. Este kit permite a los agentes descubrir bases de datos y colecciones, explorar estructuras de documentos y ejecutar consultas de manera segura. Este kit es un complemento de la publicación del blog [Diseñando herramientas SQL para agentes de IA](https://blog.arcade.dev/sql-tools-ai-agents-security).
+
+<Callout type="info">
+  Este kit de herramientas está destinado a ser un ejemplo de cómo construir un kit de herramientas para una
+  base de datos, y no está destinado a ser utilizado en producción; no lo encontrarás
+  listado en el panel de Arcade o en las APIs. Para uso en producción, recomendamos
+  bifurcar este repositorio y construir tu propio kit de herramientas con herramientas específicas para el caso de uso.
+</Callout>
+
+## Características Clave
+
+Este kit de herramientas demuestra varios conceptos importantes para interacciones con bases de datos impulsadas por LLM:
+
+- **Descubrimiento de Bases de Datos**: Descubrir automáticamente las bases de datos disponibles en la instancia de MongoDB
+- **Exploración de Colecciones**: Encontrar todas las colecciones dentro de una base de datos específica
+- **Inferencia de Esquema**: Muestrear documentos para inferir la estructura del esquema y los tipos de datos
+- **Ejecución Segura de Consultas**: Ejecutar consultas de búsqueda con medidas de seguridad integradas
+- **Soporte de Agregación**: Ejecutar tuberías de agregación complejas para análisis de datos
+- **Conteo de Documentos**: Contar documentos que coinciden con criterios específicos
+- **Agrupamiento de Conexiones**: Reutilizar conexiones de base de datos de manera eficiente
+- **Acceso Solo Lectura**: Hacer cumplir el acceso solo lectura para prevenir la modificación de datos
+- **Límites de Resultados**: Limitar automáticamente los resultados de las consultas para evitar respuestas abrumadoras
+
+## Herramientas Disponibles
+
+<TableOfContents
+  headers={["Nombre de la Herramienta", "Descripción"]}
+  data={[
+    [
+      "MongoDB.DiscoverDatabases",
+      "Descubrir todas las bases de datos en la instancia de MongoDB.",
+    ],
+    [
+      "MongoDB.DiscoverCollections",
+      "Descubrir todas las colecciones en una base de datos específica.",
+    ],
+    [
+      "MongoDB.GetCollectionSchema",
+      "Obtener la estructura del esquema de una colección muestreando documentos.",
+    ],
+    [
+      "MongoDB.FindDocuments",
+      "Encontrar documentos en una colección con filtrado, proyección y ordenamiento.",
+    ],
+    ["MongoDB.CountDocuments", "Contar documentos que coinciden con un filtro específico."],
+    [
+      "MongoDB.AggregateDocuments",
+      "Ejecutar tuberías de agregación para análisis de datos complejos.",
+    ],
+  ]}
+/>
+
+Ten en cuenta que todas las herramientas requieren que se establezca el secreto `MONGODB_CONNECTION_STRING`.
+
+## MongoDB.DiscoverDatabases
+
+Descubrir todas las bases de datos en la instancia de MongoDB. Esta herramienta devuelve una lista de todas las bases de datos disponibles, excluyendo bases de datos del sistema como `admin`, `config` y `local` por razones de seguridad.
+
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la Herramienta",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/mongodb/discover_databases_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/mongodb/discover_databases_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+## MongoDB.DiscoverCollections
+
+Descubrir todas las colecciones en una base de datos específica. Esta herramienta debe ser utilizada antes de cualquier otra herramienta que requiera un nombre de colección.
+
+**Parámetros:**
+
+- `database_name` (str): El nombre de la base de datos para descubrir colecciones
+
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la Herramienta",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/mongodb/discover_collections_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/mongodb/discover_collections_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+## MongoDB.GetCollectionSchema
+
+Obtener la estructura del esquema de una colección muestreando documentos. Dado que MongoDB no tiene esquema, esta herramienta muestrea un número configurable de documentos para inferir la estructura del esquema y los tipos de datos. Siempre usa esta herramienta antes de ejecutar cualquier consulta.
+
+**Parámetros:**
+
+- `database_name` (str): El nombre de la base de datos que contiene la colección
+- `collection_name` (str): El nombre de la colección a inspeccionar
+- `sample_size` (int): El número de documentos a muestrear para el descubrimiento del esquema (predeterminado: 100)
+
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la Herramienta",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/mongodb/get_collection_schema_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/mongodb/get_collection_schema_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+## MongoDB.FindDocuments
+
+Encontrar documentos en una colección con filtrado, proyección y ordenamiento. Esta herramienta te permite construir consultas complejas utilizando los operadores de consulta de MongoDB mientras mantienes la seguridad y el rendimiento.
+
+**Parámetros:**
+
+- `database_name` (str): El nombre de la base de datos a consultar
+- `collection_name` (str): El nombre de la colección a consultar
+- `filter_dict` (str, opcional): Filtro/consulta de MongoDB como cadena JSON. Deja None para no filtrar
+- `projection` (str, opcional): Campos a incluir/excluir como cadena JSON. Usa 1 para incluir, 0 para excluir
+- `sort` (list[str], opcional): Criterios de ordenamiento como lista de cadenas JSON con claves 'field' y 'direction'
+- `limit` (int): Número máximo de documentos a devolver (predeterminado: 100)
+- `skip` (int): Número de documentos a omitir (predeterminado: 0)
+
+**Mejores Prácticas:**
+
+- Siempre usa `discover_collections` y `get_collection_schema` antes de ejecutar consultas
+- Siempre especifica proyección para limitar los campos devueltos si no necesitas todos los datos
+- Siempre ordena tus resultados por los campos más importantes primero
+- Usa operadores de consulta de MongoDB apropiados para filtrado complejo ($gte, $lte, $in, $regex, etc.)
+- Ten en cuenta la sensibilidad a mayúsculas y minúsculas al consultar campos de texto
+- Usa índices cuando sea posible (típicamente en \_id y campos comúnmente consultados)
+
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la Herramienta",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/mongodb/find_documents_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/mongodb/find_documents_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+## MongoDB.CountDocuments
+
+Contar documentos en una colección que coinciden con el filtro dado. Esta herramienta es útil para obtener conteos rápidos sin recuperar los documentos reales.
+
+**Parámetros:**
+
+- `database_name` (str): El nombre de la base de datos a consultar
+- `collection_name` (str): El nombre de la colección a consultar
+- `filter_dict` (str, opcional): Filtro/consulta de MongoDB como cadena JSON. Deja None para contar todos los documentos
+
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la Herramienta",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/mongodb/count_documents_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/mongodb/count_documents_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+## MongoDB.AggregateDocuments
+
+Ejecutar tuberías de agregación para análisis de datos complejos. Esta herramienta te permite ejecutar operaciones de procesamiento de datos sofisticadas, incluyendo agrupamiento, filtrado y transformaciones.
+
+**Parámetros:**
+
+- `database_name` (str): El nombre de la base de datos a consultar
+- `collection_name` (str): El nombre de la colección a consultar
+- `pipeline` (list[str]): Tubería de agregación de MongoDB como una lista de cadenas JSON
+- `limit` (int): Número máximo de resultados a devolver (predeterminado: 100)
+
+**Etapas Comunes de Agregación:**
+
+- `$match` - filtrar documentos
+- `$group` - agrupar documentos y realizar cálculos
+- `$project` - reestructurar documentos
+- `$sort` - ordenar documentos
+- `$limit` - limitar resultados
+- `$lookup` - unir con otras colecciones
+
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la Herramienta",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/mongodb/aggregate_documents_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/mongodb/aggregate_documents_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+## Flujo de Trabajo de Uso
+
+Para obtener resultados óptimos, sigue este flujo de trabajo al usar el kit de herramientas de MongoDB:
+
+1. **Descubrir Bases de Datos**: Usa `discover_databases` para ver las bases de datos disponibles
+2. **Descubrir Colecciones**: Usa `discover_collections` con tu base de datos objetivo
+3. **Obtener Esquema de Colección**: Usa `get_collection_schema` para cada colección que planeas consultar
+4. **Ejecutar Consultas**: Usa `find_documents`, `count_documents` o `aggregate_documents` con la información del esquema
+
+Este flujo de trabajo asegura que tu agente tenga información completa sobre la estructura de la base de datos antes de intentar consultas, reduciendo errores y mejorando el rendimiento de las consultas.
+
+<ToolFooter pipPackageName="arcade_mongodb" />

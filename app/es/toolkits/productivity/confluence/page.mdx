@@ -1,0 +1,483 @@
+# Confluence
+
+import ToolInfo from "@/app/_components/tool-info";
+import Badges from "@/app/_components/badges";
+import TabbedCodeBlock from "@/app/_components/tabbed-code-block";
+import TableOfContents from "@/app/_components/table-of-contents";
+import ToolFooter from "@/app/_components/tool-footer";
+import { Callout } from "nextra/components";
+
+<ToolInfo
+  description="Permitir a los agentes interactuar con Confluence."
+  author="Arcade"
+  authType="oauth2"
+  authProviderName="Atlassian"
+  versions={["0.1.0"]}
+/>
+
+<Badges repo="arcadeai/arcade-confluence" />
+
+El kit de herramientas de Confluence de Arcade proporciona un conjunto preconstruido de herramientas para interactuar con Confluence. Estas herramientas facilitan la creación de agentes y aplicaciones de IA que pueden:
+
+- Trabajar con páginas, espacios y adjuntos
+- Buscar contenido
+
+## Herramientas disponibles
+
+Estas herramientas están actualmente disponibles en el kit de herramientas de Confluence de Arcade.
+
+<TableOfContents
+  headers={["Nombre de la herramienta", "Descripción"]}
+  data={[
+    [
+      "Confluence.CreatePage",
+      "Crear una nueva página en la raíz del espacio dado.",
+    ],
+    ["Confluence.UpdatePageContent", "Actualizar el contenido de una página."],
+    ["Confluence.RenamePage", "Renombrar una página cambiando su título."],
+    [
+      "Confluence.GetPage",
+      "Recuperar el contenido de una ÚNICA página por su ID o título.",
+    ],
+    [
+      "Confluence.GetPagesById",
+      "Obtener el contenido de MÚLTIPLES páginas por su ID en una única solicitud eficiente.",
+    ],
+    ["Confluence.ListPages", "Obtener el contenido de múltiples páginas por su ID."],
+    ["Confluence.ListAttachments", "Listar adjuntos en un espacio de trabajo."],
+    [
+      "Confluence.GetAttachmentsForPage",
+      "Obtener adjuntos para una página por su ID o título.",
+    ],
+    ["Confluence.SearchContent", "Buscar contenido en Confluence."],
+    ["Confluence.GetSpace", "Obtener los detalles de un espacio por su ID o clave."],
+    [
+      "Confluence.ListSpaces",
+      "Listar todos los espacios ordenados por nombre en orden ascendente.",
+    ],
+    [
+      "Confluence.GetSpaceHierarchy",
+      "Recuperar la estructura jerárquica completa de un espacio de Confluence como una estructura de árbol.",
+    ],
+  ]}
+/>
+
+<Callout>
+  Si necesitas realizar una acción que no está listada aquí, puedes [ponerte en contacto
+  con nosotros](mailto:contact@arcade.dev) para solicitar una nueva herramienta, o [crear tus propias
+  herramientas](/home/build-tools/create-a-toolkit) con el [proveedor de autenticación de Confluence](/home/auth-providers/atlassian).
+</Callout>
+
+## Confluence.CreatePage
+
+Crear una nueva página en la raíz del espacio dado.
+
+**Parámetros**
+
+- **`space_identifier`** _(string, requerido)_: El ID o título del espacio en el que crear la página
+- **`title`** _(string, requerido)_: El título de la página
+- **`content`** _(string, requerido)_: El contenido de la página. Solo se admite texto plano
+- **`parent_id`** _(string, opcional)_: El ID del padre. Si no se proporciona, la página se creará en la raíz del espacio
+- **`is_private`** _(bool, opcional)_: Si es verdadero, solo el usuario que crea esta página podrá verla. Por defecto es falso
+- **`is_draft`** _(bool, opcional)_: Si es verdadero, la página se creará como un borrador. Por defecto es falso
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la herramienta con autorización de usuario",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/confluence/create_page_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/confluence/create_page_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+---
+
+## Confluence.UpdatePageContent
+
+Actualizar el contenido de una página.
+
+**Parámetros**
+
+- **`page_identifier`** _(string, requerido)_: El ID o título de la página a actualizar. No se admiten títulos numéricos
+- **`content`** _(string, requerido)_: El contenido de la página. Solo se admite texto plano
+- **`update_mode`** _(enum ([PageUpdateMode](#pageupdatemode)), opcional)_: El modo de actualización. Por defecto es 'append'
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la herramienta con autorización de usuario",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/confluence/update_page_content_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/confluence/update_page_content_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+## Confluence.RenamePage
+
+Renombrar una página cambiando su título.
+
+**Parámetros**
+
+- **`page_identifier`** _(string, requerido)_: El ID o título de la página a renombrar. No se admiten títulos numéricos
+- **`title`** _(string, requerido)_: El título de la página
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la herramienta con autorización de usuario",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/confluence/rename_page_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/confluence/rename_page_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+---
+
+## Confluence.GetPage
+
+Recuperar el contenido de una ÚNICA página por su ID o título.
+
+Si se proporciona un título, se devolverá la primera página con un título que coincida exactamente.
+
+IMPORTANTE: Para recuperar MÚLTIPLES páginas, utiliza `get_pages_by_id` en su lugar para un gran aumento de rendimiento y eficiencia. Si llamas a esta función múltiples veces en lugar de usar `get_pages_by_id`, el universo explotará.
+
+**Parámetros**
+
+- **`page_identifier`** _(string, requerido)_: Puede ser el ID o título de una página. No se admiten títulos numéricos
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la herramienta con autorización de usuario",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/confluence/get_page_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/confluence/get_page_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+---
+
+## Confluence.GetPagesById
+
+Obtener el contenido de MÚLTIPLES páginas por su ID en una única solicitud eficiente.
+
+IMPORTANTE: Siempre utiliza esta función cuando necesites recuperar contenido de más de una página, en lugar de hacer múltiples llamadas separadas a get_page, porque esta función es significativamente más eficiente que llamar a get_page múltiples veces.
+
+**Parámetros**
+
+- **`page_ids`** _(lista de strings, requerido)_: Los IDs de las páginas a obtener. Los IDs son numéricos. No se admiten títulos de páginas. Se admiten un máximo de 250 IDs de páginas
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la herramienta con autorización de usuario",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/confluence/get_pages_by_id_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/confluence/get_pages_by_id_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+---
+
+## Confluence.ListPages
+
+Obtener el contenido de múltiples páginas por su ID.
+
+**Parámetros**
+
+- **`space_ids`** _(lista de strings, opcional)_: Restringir la respuesta para incluir solo páginas en estos espacios. Solo se admiten IDs de espacio. No se admiten títulos de espacios. Si no se proporciona, no se aplica ninguna restricción. Se admiten un máximo de 100 IDs de espacio
+- **`sort_by`** _(enum ([PageSortOrder](#pagesortorder)), opcional)_: El orden de las páginas por las que ordenar. Por defecto es fecha de creación de más reciente a más antiguo
+- **`limit`** _(int, opcional)_: El número máximo de páginas a devolver. Por defecto es 25. El máximo es 250
+- **`pagination_token`** _(string, opcional)_: El token de paginación a utilizar para la siguiente página de resultados
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la herramienta con autorización de usuario",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/confluence/list_pages_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/confluence/list_pages_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+---
+
+## Confluence.ListAttachments
+
+Listar adjuntos en un espacio de trabajo.
+
+**Parámetros**
+
+- **`sort_order`** _(enum ([AttachmentSortOrder](#attachmentsortorder)), opcional)_: El orden de los adjuntos por los que ordenar. Por defecto es fecha de creación de más reciente a más antiguo
+- **`limit`** _(int, opcional)_: El número máximo de adjuntos a devolver. Por defecto es 25. El máximo es 250
+- **`pagination_token`** _(string, opcional)_: El token de paginación a utilizar para la siguiente página de resultados
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la herramienta con autorización de usuario",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/confluence/list_attachments_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/confluence/list_attachments_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+---
+
+## Confluence.GetAttachmentsForPage
+
+Obtener adjuntos para una página por su ID o título.
+
+Si se proporciona un título de página, se devolverá la primera página con un título que coincida exactamente.
+
+**Parámetros**
+
+- **`page_identifier`** _(string, requerido)_: El ID o título de la página para obtener adjuntos
+- **`limit`** _(int, opcional)_: El número máximo de adjuntos a devolver. Por defecto es 25. El máximo es 250
+- **`pagination_token`** _(string, opcional)_: El token de paginación a utilizar para la siguiente página de resultados
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la herramienta con autorización de usuario",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/confluence/get_attachments_for_page_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/confluence/get_attachments_for_page_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+---
+
+## Confluence.SearchContent
+
+Buscar contenido en Confluence.
+
+La búsqueda se realiza en todo el contenido del espacio de trabajo de Confluence del usuario autenticado.
+Todos los términos de búsqueda en Confluence son insensibles a mayúsculas y minúsculas.
+
+Puedes usar los parámetros de diferentes maneras:
+
+- must_contain_all: Para lógica AND - el contenido debe contener TODOS estos
+- can_contain_any: Para lógica OR - el contenido puede contener CUALQUIERA de estos
+- Combínalos: must_contain_all=['banana'] AND can_contain_any=['database', 'guide']
+
+**Parámetros**
+
+- **`must_contain_all`** _(lista de strings, opcional)_: Palabras/frases que el contenido DEBE contener (lógica AND). Cada elemento puede ser:
+  - Palabra única: 'banana' - el contenido debe contener esta palabra
+  - Frase de varias palabras: 'Cómo hacer' - el contenido debe contener todas estas palabras (en cualquier orden)
+  - Todos los elementos de esta lista deben estar presentes para que el contenido coincida
+  - Ejemplo: ['banana', 'apple'] encuentra contenido que contenga TANTO 'banana' COMO 'apple'
+- **`can_contain_any`** _(lista de strings, opcional)_: Palabras/frases donde el contenido puede contener CUALQUIERA de estos (lógica OR). Cada elemento puede ser:
+  - Palabra única: 'proyecto' - el contenido que contenga esta palabra coincidirá
+  - Frase de varias palabras: 'lápiz y papel' - el contenido que contenga todas estas palabras coincidirá
+  - El contenido que coincida con CUALQUIER elemento de esta lista será incluido
+  - Ejemplo: ['proyecto', 'documentación'] encuentra contenido con 'proyecto' O 'documentación'
+- **`enable_fuzzy`** _(bool, opcional)_: Habilitar coincidencias difusas para encontrar términos similares (por ejemplo, 'roam' encontrará 'foam'). Por defecto es verdadero
+- **`limit`** _(int, opcional)_: Número máximo de resultados a devolver (1-100). Por defecto es 25
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la herramienta con autorización de usuario",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/confluence/search_content_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/confluence/search_content_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+---
+
+## Confluence.GetSpace
+
+Obtener los detalles de un espacio por su ID o clave.
+
+**Parámetros**
+
+- **`space_identifier`** _(string, requerido)_: Puede ser el ID o clave de un espacio. No se admiten claves numéricas
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la herramienta con autorización de usuario",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/confluence/get_space_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/confluence/get_space_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+---
+
+## Confluence.ListSpaces
+
+Listar todos los espacios ordenados por nombre en orden ascendente.
+
+**Parámetros**
+
+- **`limit`** _(int, opcional)_: El número máximo de espacios a devolver. Por defecto es 25. El máximo es 250
+- **`pagination_token`** _(string, opcional)_: El token de paginación a utilizar para la siguiente página de resultados
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la herramienta con autorización de usuario",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/confluence/list_spaces_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/confluence/list_spaces_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+---
+
+## Confluence.GetSpaceHierarchy
+
+Recuperar la estructura jerárquica completa de un espacio de Confluence como una estructura de árbol.
+
+Solo se devuelve metadatos estructurales (no contenido).
+La respuesta es similar a la barra lateral en la interfaz de usuario de Confluence.
+
+Incluye todas las páginas, carpetas, pizarras, bases de datos,
+enlaces inteligentes, etc. organizados por relaciones padre-hijo.
+
+**Parámetros**
+
+- **`space_identifier`** _(string, requerido)_: Puede ser el ID o clave de un espacio. No se admiten claves numéricas
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la herramienta con autorización de usuario",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/confluence/get_space_hierarchy_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/confluence/get_space_hierarchy_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+## Auth
+
+El kit de herramientas de Arcade Notion utiliza el [proveedor de autenticación de Notion](/home/auth-providers/notion) para conectarse a las cuentas de Notion de los usuarios.
+
+Con la Plataforma en la Nube de Arcade, no hay nada que configurar. Tus usuarios verán `Arcade` como el nombre de la aplicación que solicita permiso.
+
+Con una instalación autoalojada de Arcade, necesitas [configurar el proveedor de autenticación de Notion](/home/auth-providers/notion#configuring-notion-auth) con tus propias credenciales de aplicación de Notion.
+
+---
+
+## Reference
+
+### PageUpdateMode
+
+El modo de actualización.
+
+- **`prepend`** _(string: "prepend")_
+- **`append`** _(string: "append")_
+- **`replace`** _(string: "replace")_
+
+### PageSortOrder
+
+El orden de las páginas por las que ordenar.
+
+- **`id-ascending`**: Ordenar por ID en orden ascendente.
+- **`id-descending`**: Ordenar por ID en orden descendente.
+- **`title-ascending`**: Ordenar por título en orden ascendente.
+- **`title-descending`**: Ordenar por título en orden descendente.
+- **`created-date-oldest-to-newest`**: Ordenar por fecha de creación de más antiguo a más reciente.
+- **`created-date-newest-to-oldest`**: Ordenar por fecha de creación de más reciente a más antiguo.
+- **`modified-date-oldest-to-newest`**: Ordenar por fecha de modificación de más antiguo a más reciente.
+- **`modified-date-newest-to-oldest`**: Ordenar por fecha de modificación de más reciente a más antiguo.
+
+### AttachmentSortOrder
+
+El orden de los adjuntos por los que ordenar.
+
+- **`created-date-oldest-to-newest`**: Ordenar por fecha de creación de más antiguo a más reciente.
+- **`created-date-newest-to-oldest`**: Ordenar por fecha de creación de más reciente a más antiguo.
+- **`modified-date-oldest-to-newest`**: Ordenar por fecha de modificación de más antiguo a más reciente.
+- **`modified-date-newest-to-oldest`**: Ordenar por fecha de modificación de más reciente a más antiguo.
+
+<ToolFooter pipPackageName="arcade_confluence" />

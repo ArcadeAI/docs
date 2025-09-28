@@ -1,0 +1,219 @@
+import { Tabs } from "nextra/components";
+import ToolFooter from "@/app/_components/tool-footer";
+import { Callout, Steps } from "nextra/components";
+
+# Proveedor de autenticación de Twitch
+
+<Callout type="info">
+  En este momento, Arcade no ofrece un Proveedor de Autenticación de Twitch por defecto. Para usar
+  la autenticación de Twitch, debes crear un Proveedor de Autenticación personalizado con tus propias credenciales de OAuth 2.0 de Twitch como se describe a continuación.
+</Callout>
+
+El proveedor de autenticación de Twitch permite a las herramientas y agentes llamar a la API de Twitch en nombre de un usuario. Detrás de escena, el Motor de Arcade y el proveedor de autenticación de Twitch gestionan sin problemas la autorización de OAuth 2.0 de Twitch para tus usuarios.
+
+### Qué se documenta aquí
+
+Esta página describe cómo usar y configurar la autenticación de Twitch con Arcade.
+
+Este proveedor de autenticación es utilizado por:
+
+- Tu [código de aplicación](#using-twitch-auth-in-app-code) que necesita llamar a las APIs de Twitch
+- O, tus [herramientas personalizadas](#using-twitch-auth-in-custom-tools) que necesitan llamar a las APIs de Twitch
+
+## Configurando la autenticación de Twitch
+
+### Crear una aplicación de Twitch
+
+- Twitch requiere que tengas habilitada la autenticación de dos factores para tu cuenta. Habilítala en tu [configuración de seguridad de la cuenta](https://www.twitch.tv/settings/security)
+- Crea una Aplicación de Twitch en la [Consola de Aplicaciones de Twitch](https://dev.twitch.tv/console/apps)
+- Establece la URL de Redirección de OAuth a la URL de redirección generada por Arcade (ver más abajo)
+- Selecciona la categoría de tu Aplicación
+- Selecciona el Tipo de Cliente 'Confidencial'
+- Copia la clave de la Aplicación (ID de Cliente) y el secreto de la Aplicación (Secreto de Cliente), que necesitarás a continuación
+
+A continuación, agrega la aplicación de Twitch a la configuración de tu Motor de Arcade. Puedes hacer esto en el Arcade Dashboard, o editando directamente el archivo `engine.yaml` (para una instancia autoalojada).
+
+### Configurando la autenticación de Twitch con el Arcade Dashboard
+
+1. Navega a la sección de OAuth del Arcade Dashboard y haz clic en **Agregar Proveedor de OAuth**.
+2. Selecciona **Twitch** como proveedor.
+3. Elige un **ID** único para tu proveedor (por ejemplo, "mi-proveedor-twitch") con una **Descripción** opcional.
+4. Ingresa tu **ID de Cliente** y **Secreto de Cliente** de tu aplicación de Twitch.
+5. Toma nota de la **URL de Redirección** generada por Arcade. Esta debe establecerse como la URL de Redirección de OAuth de tu aplicación de Twitch.
+6. Haz clic en **Guardar**.
+
+Cuando uses herramientas que requieran autenticación de Twitch utilizando las credenciales de tu cuenta de Arcade, el Motor de Arcade utilizará automáticamente este proveedor de OAuth de Twitch.
+
+### Configurando la autenticación de Twitch en la configuración del Motor de Arcade autoalojado
+
+<Steps>
+
+### Establecer variables de entorno
+
+<Callout type="info">
+  El ID de Cliente es la "clave de la aplicación" de Twitch y el Secreto de Cliente es el "secreto de la aplicación" de Twitch.
+</Callout>
+
+Establece las siguientes variables de entorno:
+
+```bash
+export TWITCH_CLIENT_ID="<tu id de cliente>"
+export TWITCH_CLIENT_SECRET="<tu secreto de cliente>"
+```
+
+O, puedes establecer estos valores en un archivo `.env`:
+
+```bash
+TWITCH_CLIENT_SECRET="<tu secreto de cliente>"
+TWITCH_CLIENT_ID="<tu id de cliente>"
+```
+
+<Callout>
+  Consulta [Configuración del Motor](/home/local-deployment/configure/engine) para más
+  información sobre cómo establecer variables de entorno y configurar el Motor de Arcade.
+</Callout>
+
+### Editar la configuración del Motor
+
+Edita el archivo `engine.yaml` y agrega un ítem `twitch` a la sección `auth.providers`:
+
+```yaml {3-9}
+auth:
+  providers:
+    - id: default-twitch
+      description: "El proveedor de Twitch por defecto"
+      enabled: true
+      type: oauth2
+      provider_id: twitch
+      client_id: ${env:TWITCH_CLIENT_ID}
+      client_secret: ${env:TWITCH_CLIENT_SECRET}
+```
+
+</Steps>
+
+## Usando la autenticación de Twitch en el código de la aplicación
+
+Usa el proveedor de autenticación de Twitch en tus propios agentes y aplicaciones de IA para obtener un token específico del usuario para la API de Twitch. Consulta [autorizando agentes con Arcade](/home/auth/how-arcade-helps) para entender cómo funciona esto.
+
+Usa `client.auth.start()` para obtener un token de usuario para la API de Twitch:
+
+<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs.Tab>
+
+```python {8-12}
+from arcadepy import Arcade
+
+client = Arcade()  # Encuentra automáticamente la variable de entorno `ARCADE_API_KEY`
+
+user_id = "{arcade_user_id}"
+
+# Iniciar el proceso de autorización
+auth_response = client.auth.start(
+    user_id=user_id,
+    provider="twitch",
+    scopes=["channel:manage:polls"],
+)
+
+if auth_response.status != "completed":
+    print("Por favor completa el desafío de autorización en tu navegador:")
+    print(auth_response.url)
+
+# Esperar a que la autorización se complete
+auth_response = client.auth.wait_for_completion(auth_response)
+
+token = auth_response.context.token
+# Haz algo interesante con el token...
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```javascript {8-10}
+import { Arcade } from "@arcadeai/arcadejs";
+
+const client = new Arcade();
+
+const userId = "{arcade_user_id}";
+
+// Iniciar el proceso de autorización
+const authResponse = await client.auth.start(userId, "twitch", {
+  scopes: ["channel:manage:polls"],
+});
+
+if (authResponse.status !== "completed") {
+  console.log("Por favor completa el desafío de autorización en tu navegador:");
+  console.log(authResponse.url);
+}
+
+// Esperar a que la autorización se complete
+authResponse = await client.auth.waitForCompletion(authResponse);
+
+const token = authResponse.context.token;
+// Haz algo interesante con el token...
+```
+
+</Tabs.Tab>
+
+</Tabs>
+
+## Usando la autenticación de Twitch en herramientas personalizadas
+
+Puedes crear tus propias [herramientas personalizadas](/home/build-tools/create-a-toolkit) que interactúan con la API de Twitch.
+
+Usa la clase de autenticación `Twitch()` para especificar que una herramienta requiere autorización con Twitch. El campo `context.authorization.token` se llenará automáticamente con el token de Twitch del usuario:
+
+```python {5-6,9-13,36}
+from typing import Annotated, Optional
+
+import httpx
+
+from arcade_tdk import ToolContext, tool
+from arcade_tdk.auth import Twitch
+
+
+@tool(
+    requires_auth=Twitch(
+        scopes=["channel:manage:polls"],
+    )
+)
+async def create_poll(
+    context: ToolContext,
+    broadcaster_id: Annotated[
+        str,
+        "El ID del presentador para crear la encuesta.",
+    ],
+    title: Annotated[
+        str,
+        "El título de la encuesta.",
+    ],
+    choices: Annotated[
+        list[str],
+        "Las opciones de la encuesta.",
+    ],
+    duration: Annotated[
+        int,
+        "La duración de la encuesta en segundos.",
+    ],
+) -> Annotated[dict, "La encuesta que fue creada"]:
+    """Crea una encuesta para un canal de Twitch."""
+    url = "https://api.twitch.tv/helix/polls"
+    headers = {
+        "Authorization": f"Bearer {context.authorization.token}",
+        "Client-Id": "your_client_id",
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "broadcaster_id": broadcaster_id,
+        "title": title,
+        "choices": [{"title": choice} for choice in choices],
+        "duration": duration,
+    }
+
+    async with httpx.AsyncClient() as client:
+        response = await client.post(url, headers=headers, json=payload)
+        response.raise_for_status()
+        return response.json()
+```
+
+<ToolFooter pipPackageName="arcade_twitch" />

@@ -1,0 +1,116 @@
+# Google Flights
+
+import ToolInfo from "@/app/_components/tool-info";
+import Badges from "@/app/_components/badges";
+import TabbedCodeBlock from "@/app/_components/tabbed-code-block";
+import TableOfContents from "@/app/_components/table-of-contents";
+import ToolFooter from "@/app/_components/tool-footer";
+import { Callout } from "nextra/components";
+
+<ToolInfo
+  description="Empodera a tus agentes para buscar vuelos utilizando Arcade."
+  author="Arcade"
+  authType="API Key"
+  versions={["0.1.0"]}
+/>
+
+<Badges repo="arcadeai/arcade-google-flights" />
+
+El kit de herramientas de Google Flights de Arcade te permite buscar vuelos con facilidad. Usa estas herramientas para construir agentes y aplicaciones inteligentes que:
+
+- Busquen vuelos de ida.
+
+## Herramientas Disponibles
+
+<TableOfContents
+  headers={["Nombre de la Herramienta", "Descripción"]}
+  data={[
+    [
+      "GoogleFlights.SearchOneWayFlights",
+      "Recupera los resultados de búsqueda de vuelos de ida utilizando Google Flights.",
+    ],
+  ]}
+/>
+
+## GoogleFlights.SearchOneWayFlights
+
+Recupera los resultados de búsqueda de vuelos para un vuelo de ida utilizando Google Flights.
+
+**Parámetros**
+
+- **`departure_airport_code`** _(string, requerido)_: El código del aeropuerto de salida. Un código de 3 letras en mayúsculas.
+- **`arrival_airport_code`** _(string, requerido)_: El código del aeropuerto de llegada. Un código de 3 letras en mayúsculas.
+- **`outbound_date`** _(string, requerido)_: Fecha de salida del vuelo en formato AAAA-MM-DD.
+- **`currency_code`** _(string, opcional)_: Moneda de los precios devueltos. Por defecto es 'USD'.
+- **`travel_class`** _(enum ([GoogleFlightsTravelClass](#googleflightstravelclass)), opcional)_: Clase de viaje del vuelo. Por defecto es 'ECONOMY'.
+- **`num_adults`** _(int, opcional)_: Número de pasajeros adultos. Por defecto es 1.
+- **`num_children`** _(int, opcional)_: Número de pasajeros niños. Por defecto es 0.
+- **`max_stops`** _(enum ([GoogleFlightsMaxStops](#googleflightsmaxstops)), opcional)_: Número máximo de paradas (escalas) para el vuelo. Por defecto es cualquier número de paradas.
+- **`sort_by`** _(enum ([GoogleFlightsSortBy](#googleflightssortby)), opcional)_: El orden de clasificación de los resultados. Por defecto es TOP_FLIGHTS.
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la herramienta directamente",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/search/google_flights/search_one_way_flights_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/search/google_flights/search_one_way_flights_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+## Autenticación
+
+El kit de herramientas de Google Flights de Arcade utiliza [SerpAPI](https://serpapi.com/) para buscar vuelos desde Google Flights.
+
+- **Secreto:**
+  - `SERP_API_KEY`: Tu clave API de SerpAPI.
+
+<Callout type="info">
+  Establecer el secreto `SERP_API_KEY` solo es necesario si estás
+  [autoalojando](/home/local-deployment/install/overview) Arcade. Si estás
+  utilizando Arcade Cloud, el secreto ya está configurado para ti. Para gestionar tus secretos,
+  ve a la [página de Secretos](https://api.arcade.dev/dashboard/auth/secrets) en el
+  Arcade Dashboard.
+</Callout>
+
+---
+
+## Referencia
+
+## GoogleFlightsMaxStops
+
+Define el número máximo de paradas para los vuelos.
+
+- **`ANY`**: Se permite cualquier número de paradas.
+- **`NONSTOP`**: Solo se permiten vuelos directos.
+- **`ONE`**: Solo se permiten vuelos con una parada.
+- **`TWO`**: Solo se permiten vuelos con dos paradas.
+
+## GoogleFlightsSortBy
+
+Define las opciones de clasificación para los resultados de búsqueda de vuelos.
+
+- **`TOP_FLIGHTS`**: Clasificar por los mejores vuelos disponibles.
+- **`PRICE`**: Clasificar por el precio más bajo.
+- **`DEPARTURE_TIME`**: Clasificar por la hora de salida más temprana.
+- **`ARRIVAL_TIME`**: Clasificar por la hora de llegada más temprana.
+- **`DURATION`**: Clasificar por la duración de vuelo más corta.
+- **`EMISSIONS`**: Clasificar por las menores emisiones de carbono.
+
+## GoogleFlightsTravelClass
+
+Define las opciones de clase de viaje para los vuelos.
+
+- **`ECONOMY`**: Clase económica.
+- **`PREMIUM_ECONOMY`**: Clase económica premium.
+- **`BUSINESS`**: Clase ejecutiva.
+- **`FIRST`**: Primera clase.
+
+<ToolFooter pipPackageName="arcade_google_flights" />
