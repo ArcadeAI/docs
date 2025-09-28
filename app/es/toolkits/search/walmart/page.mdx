@@ -1,0 +1,125 @@
+# Búsqueda en Walmart
+
+import ToolInfo from "@/app/_components/tool-info";
+import Badges from "@/app/_components/badges";
+import TabbedCodeBlock from "@/app/_components/tabbed-code-block";
+import TableOfContents from "@/app/_components/table-of-contents";
+import ToolFooter from "@/app/_components/tool-footer";
+import { Callout } from "nextra/components";
+
+<ToolInfo
+  description="Permitir a los agentes buscar productos en Walmart."
+  author="Arcade"
+  authType="API Key"
+  versions={["0.1.0"]}
+/>
+
+<Badges repo="arcadeai/arcade-walmart" />
+
+El kit de herramientas de búsqueda en Walmart de Arcade proporciona un conjunto preconstruido de herramientas para interactuar con Walmart. Estas herramientas facilitan la creación de agentes y aplicaciones de IA que pueden:
+
+- Buscar productos listados en las tiendas de Walmart;
+- Obtener detalles sobre un producto.
+
+## Herramientas Disponibles
+
+<TableOfContents
+  headers={["Nombre de la Herramienta", "Descripción"]}
+  data={[
+    ["Walmart.SearchProducts", "Buscar productos listados en las tiendas de Walmart."],
+    [
+      "Walmart.GetProductDetails",
+      "Obtener detalles sobre un producto listado en Walmart.",
+    ],
+  ]}
+/>
+
+<Callout>
+  Si necesitas realizar una acción que no está listada aquí, puedes [ponerte en contacto
+  con nosotros](mailto:contact@arcade.dev) para solicitar una nueva herramienta, o [crear tus propias
+  herramientas](/home/build-tools/create-a-toolkit).
+</Callout>
+
+## Walmart.SearchProducts
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la Herramienta Directamente",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/search/walmart/search_walmart_products_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/search/walmart/search_walmart_products_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Buscar productos listados en las tiendas de Walmart.
+
+**Parámetros**
+
+- **keywords** _(string, requerido)_ Palabras clave para buscar. Ej. 'apple iphone' o 'samsung galaxy'
+- **sort_by** _(enum [WalmartSortBy](#walmartsortby), opcional, Predeterminado a `WalmartSortBy.RELEVANCE`)_ Ordenar los resultados según el criterio especificado. Predeterminado a `WalmartSortBy.RELEVANCE`.
+- **min_price** _(float, opcional, Predeterminado a `None`)_ Precio mínimo para filtrar los resultados.
+- **max_price** _(float, opcional, Predeterminado a `None`)_ Precio máximo para filtrar los resultados.
+- **next_day_delivery** _(bool, opcional, Predeterminado a `False`)_ Si se debe filtrar los resultados por entrega al día siguiente. Predeterminado a False (devuelve todos los productos, independientemente del estado de entrega).
+- **page** _(int, opcional, Predeterminado a `1`)_ Número de página a obtener. Predeterminado a 1 (primera página de resultados). El valor máximo de la página es 100.
+
+## Walmart.GetProductDetails
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la Herramienta Directamente",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/search/walmart/get_walmart_product_details_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/search/walmart/get_walmart_product_details_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Obtener detalles sobre un producto listado en Walmart.
+
+**Parámetros**
+
+- **item_id** _(string, requerido)_ ID del artículo. Ej. '414600577'. Esto se puede obtener de los resultados de búsqueda de la herramienta `SearchWalmartProducts`.
+
+## Auth
+
+El kit de herramientas de búsqueda en Walmart de Arcade utiliza el [SerpAPI](https://serpapi.com/) para obtener información sobre productos de Walmart.
+
+- **Secreto:**
+  - `SERP_API_KEY`: Tu clave API de SerpAPI.
+    <Callout type="info">
+      Configurar el secreto `SERP_API_KEY` solo es necesario si estás
+      [autoalojando](/home/local-deployment/install/overview) Arcade. Si estás
+      utilizando Arcade Cloud, el secreto ya está configurado para ti. Para gestionar tus
+      secretos, ve a la [página de Secretos](https://api.arcade.dev/dashboard/auth/secrets) en el
+      Dashboard de Arcade.
+    </Callout>
+
+---
+
+## Referencia
+
+## WalmartSortBy
+
+- **`RELEVANCE`**: `'relevance_according_to_keywords_searched'` - Ordenar por relevancia.
+- **`PRICE_LOW_TO_HIGH`**: `'lowest_price_first'` - Ordenar por precio de bajo a alto.
+- **`PRICE_HIGH_TO_LOW`**: `'highest_price_first'` - Ordenar por precio de alto a bajo.
+- **`BEST_SELLING`**: `'best_selling_products_first'` - Ordenar por los más vendidos.
+- **`RATING_HIGH`**: `'highest_rating_first'` - Ordenar por calificación de alta a baja.
+- **`NEW_ARRIVALS`**: `'new_arrivals_first'` - Ordenar por nuevas llegadas.
+
+<ToolFooter pipPackageName="arcade_walmart" />

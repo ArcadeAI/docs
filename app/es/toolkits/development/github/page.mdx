@@ -1,0 +1,625 @@
+---
+asIndexPage: true
+---
+# GitHub
+
+import ToolInfo from "@/app/_components/tool-info";
+import Badges from "@/app/_components/badges";
+import TabbedCodeBlock from "@/app/_components/tabbed-code-block";
+import TableOfContents from "@/app/_components/table-of-contents";
+import ToolFooter from "@/app/_components/tool-footer";
+import { Callout } from "nextra/components";
+
+<ToolInfo
+  description="Permitir a los agentes interactuar con repositorios, problemas y solicitudes de extracción de GitHub."
+  author="Arcade"
+  authType="oauth2"
+  authProviderName="GitHub"
+  versions={["0.1.0"]}
+/>
+
+<Badges repo="arcadeai/arcade_github" />
+
+El kit de herramientas de GitHub de Arcade proporciona un conjunto preconstruido de herramientas para interactuar con GitHub. Estas herramientas facilitan la creación de agentes y aplicaciones de IA que pueden:
+
+- Acceder a repositorios privados (con el permiso del usuario)
+- Obtener información sobre repositorios, problemas, solicitudes de extracción y más
+- Publicar problemas, comentarios y respuestas como el usuario
+
+## Herramientas Disponibles
+
+Estas herramientas están actualmente disponibles en el kit de herramientas de GitHub de Arcade.
+
+<TableOfContents
+  headers={["Nombre de la Herramienta", "Descripción"]}
+  data={[
+    ["Github.SetStarred", "Marcar o desmarcar un repositorio de GitHub."],
+    ["Github.ListStargazers", "Listar los estrelladores de un repositorio de GitHub."],
+    ["Github.CreateIssue", "Crear un problema en un repositorio de GitHub."],
+    [
+      "Github.CreateIssueComment",
+      "Crear un comentario en un problema en un repositorio de GitHub.",
+    ],
+    ["Github.ListPullRequests", "Listar solicitudes de extracción en un repositorio de GitHub."],
+    [
+      "Github.GetPullRequest",
+      "Obtener detalles de una solicitud de extracción en un repositorio de GitHub.",
+    ],
+    [
+      "Github.UpdatePullRequest",
+      "Actualizar una solicitud de extracción en un repositorio de GitHub.",
+    ],
+    [
+      "Github.ListPullRequestCommits",
+      "Listar commits en una solicitud de extracción en un repositorio de GitHub.",
+    ],
+    [
+      "Github.CreateReplyForReviewComment",
+      "Crear una respuesta a un comentario de revisión en una solicitud de extracción.",
+    ],
+    [
+      "Github.ListReviewCommentsOnPullRequest",
+      "Listar comentarios de revisión en una solicitud de extracción.",
+    ],
+    [
+      "Github.CreateReviewComment",
+      "Crear un comentario de revisión en una solicitud de extracción.",
+    ],
+    [
+      "Github.CountStargazers",
+      "Contar el número de estrelladores para un repositorio de GitHub.",
+    ],
+    [
+      "Github.ListOrgRepositories",
+      "Listar repositorios de una organización de GitHub.",
+    ],
+    ["Github.GetRepository", "Obtener detalles de un repositorio de GitHub."],
+    [
+      "Github.ListRepositoryActivities",
+      "Listar actividades de un repositorio de GitHub.",
+    ],
+    [
+      "Github.ListReviewCommentsInARepository",
+      "Listar comentarios de revisión en un repositorio.",
+    ],
+  ]}
+/>
+
+<Callout>
+  Si necesitas realizar una acción que no está listada aquí, puedes [ponerte en contacto
+  con nosotros](mailto:contact@arcade.dev) para solicitar una nueva herramienta, o [crear tus propias
+  herramientas](/home/build-tools/create-a-toolkit) con el [proveedor de autenticación de GitHub](/home/auth-providers/github#using-github-auth-in-custom-tools).
+</Callout>
+
+## Github.SetStarred
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la Herramienta con Autorización del Usuario",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/github/set_starred_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/github/set_starred_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Marcar o desmarcar un repositorio de GitHub.
+
+**Parámetros**
+
+- **`owner`** _(string, requerido)_ El propietario del repositorio.
+- **`name`** _(string, requerido)_ El nombre del repositorio.
+- **`starred`** _(booleano, requerido)_ Si marcar (`true`) o desmarcar (`false`) el repositorio.
+
+---
+
+## Github.ListStargazers
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la Herramienta con Autorización del Usuario",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/github/list_stargazers_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/github/list_stargazers_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Listar los estrelladores de un repositorio de GitHub.
+
+**Parámetros**
+
+- **`owner`** _(string, requerido)_ El propietario del repositorio.
+- **`repo`** _(string, requerido)_ El nombre del repositorio.
+- **`limit`** _(int, opcional, Predeterminado a `None`)_ El número máximo de estrelladores a devolver. Si no se proporciona, se devolverán todos los estrelladores.
+
+---
+
+## Github.CreateIssue
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la Herramienta con Autorización del Usuario",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/github/create_issue_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/github/create_issue_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Crear un problema en un repositorio de GitHub.
+
+**Parámetros**
+
+- **`owner`** _(string, requerido)_ El propietario de la cuenta del repositorio. El nombre no es sensible a mayúsculas.
+- **`repo`** _(string, requerido)_ El nombre del repositorio sin la extensión .git. El nombre no es sensible a mayúsculas.
+- **`title`** _(string, requerido)_ El título del problema.
+- **`body`** _(string, opcional)_ El contenido del problema.
+- **`assignees`** _(array de strings, opcional)_ Inicios de sesión de los usuarios a asignar a este problema.
+- **`milestone`** _(integer, opcional)_ El número del hito con el que asociar este problema.
+- **`labels`** _(array de strings, opcional)_ Etiquetas para asociar con este problema.
+- **`include_extra_data`** _(booleano, opcional, Predeterminado a `false`)_ Si es verdadero, devuelve todos los datos disponibles sobre el problema. Esta es una carga útil grande y puede afectar el rendimiento - úsalo con precaución.
+
+---
+
+## Github.CreateIssueComment
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la Herramienta con Autorización del Usuario",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/github/create_issue_comment_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/github/create_issue_comment_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Crear un comentario en un problema en un repositorio de GitHub.
+
+**Parámetros**
+
+- **`owner`** _(string, requerido)_ El propietario de la cuenta del repositorio. El nombre no es sensible a mayúsculas.
+- **`repo`** _(string, requerido)_ El nombre del repositorio sin la extensión .git. El nombre no es sensible a mayúsculas.
+- **`issue_number`** _(integer, requerido)_ El número que identifica el problema.
+- **`body`** _(string, requerido)_ El contenido del comentario.
+- **`include_extra_data`** _(booleano, opcional, Predeterminado a `false`)_ Si es verdadero, devuelve todos los datos disponibles sobre el comentario. Esta es una carga útil grande y puede afectar el rendimiento - úsalo con precaución.
+
+---
+
+## Github.ListPullRequests
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la Herramienta con Autorización del Usuario",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/github/list_pull_requests_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/github/list_pull_requests_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Listar solicitudes de extracción en un repositorio de GitHub.
+
+**Parámetros**
+
+- **`owner`** _(string, requerido)_ El propietario de la cuenta del repositorio. El nombre no es sensible a mayúsculas.
+- **`repo`** _(string, requerido)_ El nombre del repositorio sin la extensión .git. El nombre no es sensible a mayúsculas.
+- **`state`** _(enum ([PRState](/toolkits/development/github/reference#prstate)), opcional, Predeterminado a `PRState.OPEN`)_ El estado de las solicitudes de extracción a devolver.
+- **`head`** _(string, opcional)_ Filtrar solicitudes por usuario o nombre de organización y nombre de rama en el formato de usuario:ref-name o organización:ref-name.
+- **`base`** _(string, opcional, Predeterminado a `'main'`)_ Filtrar solicitudes por nombre de rama base.
+- **`sort`** _(enum ([PRSortProperty](/toolkits/development/github/reference#prsortproperty)), opcional, Predeterminado a `PRSortProperty.CREATED`)_ La propiedad por la que ordenar los resultados.
+- **`direction`** _(enum ([SortDirection](/toolkits/development/github/reference#sortdirection)), opcional)_ La dirección de la ordenación.
+- **`per_page`** _(integer, opcional, Predeterminado a `30`)_ El número de resultados por página (máx 100).
+- **`page`** _(integer, opcional, Predeterminado a `1`)_ El número de página de los resultados a obtener.
+- **`include_extra_data`** _(booleano, opcional, Predeterminado a `false`)_ Si es verdadero, devuelve todos los datos disponibles sobre las solicitudes de extracción. Esta es una carga útil grande y puede afectar el rendimiento - úsalo con precaución.
+
+---
+
+## Github.GetPullRequest
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la Herramienta con Autorización del Usuario",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/github/get_pull_request_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/github/get_pull_request_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Obtener detalles de una solicitud de extracción en un repositorio de GitHub.
+
+**Parámetros**
+
+- **`owner`** _(string, requerido)_ El propietario de la cuenta del repositorio. El nombre no es sensible a mayúsculas.
+- **`repo`** _(string, requerido)_ El nombre del repositorio sin la extensión .git. El nombre no es sensible a mayúsculas.
+- **`pull_number`** _(integer, requerido)_ El número que identifica la solicitud de extracción.
+- **`include_diff_content`** _(booleano, opcional, Predeterminado a `false`)_ Si es verdadero, devuelve el contenido de la diferencia de la solicitud de extracción.
+- **`include_extra_data`** _(booleano, opcional, Predeterminado a `false`)_ Si es verdadero, devuelve todos los datos disponibles sobre las solicitudes de extracción. Esta es una carga útil grande y puede afectar el rendimiento - úsalo con precaución.
+
+---
+
+## Github.UpdatePullRequest
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la Herramienta con Autorización del Usuario",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/github/update_pull_request_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/github/update_pull_request_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Actualizar una solicitud de extracción en un repositorio de GitHub.
+
+**Parámetros**
+
+- **`owner`** _(string, requerido)_ El propietario de la cuenta del repositorio. El nombre no es sensible a mayúsculas.
+- **`repo`** _(string, requerido)_ El nombre del repositorio sin la extensión .git. El nombre no es sensible a mayúsculas.
+- **`pull_number`** _(integer, requerido)_ El número que identifica la solicitud de extracción.
+- **`title`** _(string, opcional)_ El título de la solicitud de extracción.
+- **`body`** _(string, opcional)_ El contenido de la solicitud de extracción.
+- **`state`** _(enum ([PRState](/toolkits/development/github/reference#prstate)), opcional)_ Estado de esta solicitud de extracción. Puede ser abierta o cerrada.
+- **`base`** _(string, opcional)_ El nombre de la rama en la que deseas que se integren tus cambios.
+- **`maintainer_can_modify`** _(booleano, opcional)_ Indica si los mantenedores pueden modificar la solicitud de extracción.
+
+---
+
+## Github.ListPullRequestCommits
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la Herramienta con Autorización del Usuario",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/github/list_pull_request_commits_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/github/list_pull_request_commits_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Listar commits (de más antiguos a más nuevos) en una solicitud de extracción en un repositorio de GitHub.
+
+**Parámetros**
+
+- **`owner`** _(string, requerido)_ El propietario de la cuenta del repositorio. El nombre no es sensible a mayúsculas.
+- **`repo`** _(string, requerido)_ El nombre del repositorio sin la extensión .git. El nombre no es sensible a mayúsculas.
+- **`pull_number`** _(integer, requerido)_ El número que identifica la solicitud de extracción.
+- **`per_page`** _(integer, opcional, Predeterminado a `30`)_ El número de resultados por página (máx 100).
+- **`page`** _(integer, opcional, Predeterminado a `1`)_ El número de página de los resultados a obtener.
+- **`include_extra_data`** _(booleano, opcional, Predeterminado a `false`)_ Si es verdadero, devuelve todos los datos disponibles sobre las solicitudes de extracción. Esta es una carga útil grande y puede afectar el rendimiento - úsalo con precaución.
+
+---
+
+## Github.CreateReplyForReviewComment
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la Herramienta con Autorización del Usuario",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/github/create_reply_for_review_comment_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/github/create_reply_for_review_comment_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Crear una respuesta a un comentario de revisión para una solicitud de extracción en un repositorio de GitHub.
+
+**Parámetros**
+
+- **`owner`** _(string, requerido)_ El propietario de la cuenta del repositorio. El nombre no es sensible a mayúsculas.
+- **`repo`** _(string, requerido)_ El nombre del repositorio sin la extensión .git. El nombre no es sensible a mayúsculas.
+- **`pull_number`** _(integer, requerido)_ El número que identifica la solicitud de extracción.
+- **`comment_id`** _(integer, requerido)_ El identificador único del comentario al que se responde.
+- **`body`** _(string, requerido)_ El texto del comentario de respuesta.
+
+---
+
+## Github.ListReviewCommentsOnPullRequest
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la Herramienta con Autorización del Usuario",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/github/list_review_comments_on_pull_request_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/github/list_review_comments_on_pull_request_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Listar comentarios de revisión en una solicitud de extracción en un repositorio de GitHub.
+
+**Parámetros**
+
+- **`owner`** _(string, requerido)_ El propietario de la cuenta del repositorio. El nombre no es sensible a mayúsculas.
+- **`repo`** _(string, requerido)_ El nombre del repositorio sin la extensión .git. El nombre no es sensible a mayúsculas.
+- **`pull_number`** _(integer, requerido)_ El número que identifica la solicitud de extracción.
+- **`sort`** _(enum ([ReviewCommentSortProperty](/toolkits/development/github/reference#reviewcommentsortproperty)), opcional, Predeterminado a `'created'`)_ La propiedad por la que ordenar los resultados. Puede ser uno de: `created`, `updated`.
+- **`direction`** _(enum ([SortDirection](/toolkits/development/github/reference#sortdirection)), opcional, Predeterminado a `'desc'`)_ La dirección para ordenar los resultados. Puede ser uno de: `asc`, `desc`.
+- **`since`** _(string, opcional)_ Mostrar solo resultados que fueron actualizados por última vez después del tiempo dado. Este es un timestamp en formato ISO 8601: YYYY-MM-DDTHH:MM:SSZ.
+- **`per_page`** _(integer, opcional, Predeterminado a `30`)_ El número de resultados por página (máx 100).
+- **`page`** _(integer, opcional, Predeterminado a `1`)_ El número de página de los resultados a obtener.
+- **`include_extra_data`** _(booleano, opcional, Predeterminado a `false`)_ Si es verdadero, devuelve todos los datos disponibles sobre las solicitudes de extracción. Esta es una carga útil grande y puede afectar el rendimiento - úsalo con precaución.
+
+---
+
+## Github.CreateReviewComment
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la Herramienta con Autorización del Usuario",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/github/create_review_comment_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/github/create_review_comment_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Crear un comentario de revisión para una solicitud de extracción en un repositorio de GitHub.
+
+Si el subject_type no es 'file', entonces los parámetros start_line y end_line son requeridos. Si el subject_type es 'file', entonces los parámetros start_line y end_line son ignorados. Si el commit_id no se proporciona, se utilizará el último SHA de commit de la rama base de la PR.
+
+**Parámetros**
+
+- **`owner`** _(string, requerido)_ El propietario de la cuenta del repositorio. El nombre no es sensible a mayúsculas.
+- **`repo`** _(string, requerido)_ El nombre del repositorio sin la extensión .git. El nombre no es sensible a mayúsculas.
+- **`pull_number`** _(integer, requerido)_ El número que identifica la solicitud de extracción.
+- **`body`** _(string, requerido)_ El texto del comentario de revisión.
+- **`path`** _(string, requerido)_ La ruta relativa al archivo que necesita un comentario.
+- **`commit_id`** _(string, opcional)_ El SHA del commit que necesita un comentario. Si no se proporciona, se utilizará el último SHA de commit de la rama base de la PR.
+- **`start_line`** _(integer, opcional)_ La línea de inicio del rango de líneas en la diferencia de la solicitud de extracción a la que se aplica el comentario. Requerido a menos que 'subject_type' sea 'file'.
+- **`end_line`** _(integer, opcional)_ La línea final del rango de líneas en la diferencia de la solicitud de extracción a la que se aplica el comentario. Requerido a menos que 'subject_type' sea 'file'.
+- **`side`** _(enum ([DiffSide](/toolkits/development/github/reference#diffside)), opcional, Predeterminado a `'RIGHT'`)_ El lado de la diferencia en el que aparecen los cambios de la solicitud de extracción. Usa LEFT para eliminaciones que aparecen en rojo. Usa RIGHT para adiciones que aparecen en verde o líneas sin cambios que aparecen en blanco y se muestran para contexto.
+- **`start_side`** _(string, opcional)_ El lado de inicio de la diferencia a la que se aplica el comentario.
+- **`subject_type`** _(enum ([ReviewCommentSubjectType](/toolkits/development/github/reference#reviewcommentsubjecttype)), opcional, Predeterminado a `'FILE'`)_ El tipo de sujeto al que se aplica el comentario. Puede ser uno de: file, hunk, o line.
+- **`include_extra_data`** _(booleano, opcional, Predeterminado a `false`)_ Si es verdadero, devuelve todos los datos disponibles sobre el comentario de revisión. Esta es una carga útil grande y puede afectar el rendimiento - úsalo con precaución.
+
+---
+
+## Github.CountStargazers
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la Herramienta con Autorización del Usuario",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/github/count_stargazers_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/github/count_stargazers_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Contar el número de estrelladores (estrellas) para un repositorio de GitHub.
+
+**Parámetros**
+
+- **`owner`** _(string, requerido)_ El propietario del repositorio.
+- **`name`** _(string, requerido)_ El nombre del repositorio.
+
+---
+
+## Github.ListOrgRepositories
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la Herramienta con Autorización del Usuario",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/github/list_org_repositories_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/github/list_org_repositories_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Listar repositorios para la organización de GitHub especificada.
+
+**Parámetros**
+
+- **`org`** _(string, requerido)_ El nombre de la organización. El nombre no es sensible a mayúsculas.
+- **`repo_type`** _(enum ([RepoType](/toolkits/development/github/reference#repotype)), opcional, Predeterminado a `'ALL'`)_ Los tipos de repositorios a devolver.
+- **`sort`** _(enum ([RepoSortProperty](/toolkits/development/github/reference#reposortproperty)), opcional, Predeterminado a `'CREATED'`)_ La propiedad por la que ordenar los resultados.
+- **`sort_direction`** _(enum ([SortDirection](/toolkits/development/github/reference#sortdirection)), opcional, Predeterminado a `'ASC'`)_ El orden por el que ordenar.
+- **`per_page`** _(integer, opcional, Predeterminado a `30`)_ El número de resultados por página.
+- **`page`** _(integer, opcional, Predeterminado a `1`)_ El número de página de los resultados a obtener.
+- **`include_extra_data`** _(booleano, opcional, Predeterminado a `false`)_ Si es verdadero, devuelve todos los datos disponibles sobre los repositorios. Esta es una carga útil grande y puede afectar el rendimiento - úsalo con precaución.
+
+---
+
+## Github.GetRepository
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la Herramienta con Autorización del Usuario",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/github/get_repository_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/github/get_repository_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Obtener información detallada sobre un repositorio de GitHub.
+
+**Parámetros**
+
+- **`owner`** _(string, requerido)_ El propietario de la cuenta del repositorio. El nombre no es sensible a mayúsculas.
+- **`repo`** _(string, requerido)_ El nombre del repositorio sin la extensión .git. El nombre no es sensible a mayúsculas.
+- **`include_extra_data`** _(booleano, opcional, Predeterminado a `false`)_ Si es verdadero, devuelve todos los datos disponibles sobre el repositorio. Esta es una carga útil grande y puede afectar el rendimiento - úsalo con precaución.
+
+---
+
+## Github.ListRepositoryActivities
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la Herramienta con Autorización del Usuario",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/github/list_repository_activities_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/github/list_repository_activities_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Listar actividades del repositorio como pushes, merges, force pushes y cambios de rama. Recupera un historial detallado de cambios en un repositorio, como pushes, merges, force pushes y cambios de rama, y asocia estos cambios con commits y usuarios.
+
+**Parámetros**
+
+- **`owner`** _(string, requerido)_ El propietario de la cuenta del repositorio. El nombre no es sensible a mayúsculas.
+- **`repo`** _(string, requerido)_ El nombre del repositorio sin la extensión .git. El nombre no es sensible a mayúsculas.
+- **`direction`** _(enum ([SortDirection](/toolkits/development/github/reference#sortdirection)), opcional, Predeterminado a `'DESC'`)_ La dirección por la que ordenar los resultados.
+- **`per_page`** _(integer, opcional, Predeterminado a `30`)_ El número de resultados por página (máx 100).
+- **`before`** _(string, opcional)_ Un cursor (identificador único, por ejemplo, un SHA de un commit) para buscar resultados antes de este cursor.
+- **`after`** _(string, opcional)_ Un cursor (identificador único, por ejemplo, un SHA de un commit) para buscar resultados después de este cursor.
+- **`ref`** _(string, opcional)_ La referencia de Git para las actividades que deseas listar. Puede estar formateada como `refs/heads/BRANCH_NAME` o simplemente `BRANCH_NAME`.
+- **`actor`** _(string, opcional)_ El nombre de usuario de GitHub para filtrar por el actor que realizó la actividad.
+- **`time_period`** _(enum ([RepoTimePeriod](/toolkits/development/github/reference#repotimeperiod)), opcional)_ El período de tiempo para filtrar.
+- **`activity_type`** _(enum ([ActivityType](/toolkits/development/github/reference#activitytype)), opcional)_ El tipo de actividad para filtrar.
+- **`include_extra_data`** _(booleano, opcional, Predeterminado a `false`)_ Si es verdadero, devuelve todos los datos disponibles sobre las actividades. Esta es una carga útil grande y puede afectar el rendimiento - úsalo con precaución.
+
+---
+
+## Github.ListReviewCommentsInARepository
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la Herramienta con Autorización del Usuario",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/github/list_review_comments_in_a_repository_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/github/list_review_comments_in_a_repository_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Listar comentarios de revisión en un repositorio de GitHub.
+
+**Parámetros**
+
+- **`owner`** _(string, requerido)_ El propietario de la cuenta del repositorio. El nombre no es sensible a mayúsculas.
+- **`repo`** _(string, requerido)_ El nombre del repositorio sin la extensión .git. El nombre no es sensible a mayúsculas.
+- **`sort`** _(enum ([ReviewCommentSortProperty](/toolkits/development/github/reference#reviewcommentsortproperty)), opcional, Predeterminado a `'created'`)_ La propiedad por la que ordenar los resultados. Puede ser uno de: created, updated.
+- **`direction`** _(enum ([SortDirection](/toolkits/development/github/reference#sortdirection)), opcional, Predeterminado a `'DESC'`)_ La dirección para ordenar resultados. Ignorado sin el parámetro de ordenación. Puede ser uno de: asc, desc.
+- **`since`** _(string, opcional)_ Mostrar solo resultados que fueron actualizados por última vez después del tiempo dado. Este es un timestamp en formato ISO 8601: YYYY-MM-DDTHH:MM:SSZ.
+- **`per_page`** _(integer, opcional, Predeterminado a `30`)_ El número de resultados por página (máx 100).
+- **`page`** _(integer, opcional, Predeterminado a `1`)_ El número de página de los resultados a obtener.
+- **`include_extra_data`** _(booleano, opcional, Predeterminado a `false`)_ Si es verdadero, devuelve todos los datos disponibles sobre las solicitudes de extracción. Esta es una carga útil grande y puede afectar el rendimiento - úsalo con precaución.
+
+---
+
+## Auth
+
+El kit de herramientas de GitHub de Arcade utiliza el [proveedor de autenticación de GitHub](/home/auth-providers/github) para conectarse a las cuentas de GitHub de los usuarios.
+
+Con la Plataforma en la Nube de Arcade, no hay nada que configurar. Tus usuarios verán `Arcade` como el nombre de la aplicación que está solicitando permiso.
+
+Con una instalación autoalojada de Arcade, necesitas [configurar el proveedor de autenticación de GitHub](/home/auth-providers/github#configuring-github-auth) con tus propias credenciales de aplicación de GitHub.
+
+<ToolFooter pipPackageName="arcade_github" />

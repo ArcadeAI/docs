@@ -7,8 +7,14 @@ const meta: MetaRecord = {
       toc: true,
     },
   },
-  reference: {
-    title: "Reference",
+  imgflip: {
+    title: "Imgflip",
+  },
+  spotify: {
+    title: "Spotify",
+  },
+  twitch: {
+    title: "Twitch",
   },
 };
 

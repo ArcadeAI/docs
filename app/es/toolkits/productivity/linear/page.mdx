@@ -1,0 +1,113 @@
+# Linear
+
+import ToolInfo from "@/app/_components/tool-info";
+import Badges from "@/app/_components/badges";
+import TabbedCodeBlock from "@/app/_components/tabbed-code-block";
+import TableOfContents from "@/app/_components/table-of-contents";
+import ToolFooter from "@/app/_components/tool-footer";
+import { Callout } from "nextra/components";
+
+<ToolInfo
+  description="Permitir a los agentes interactuar con Linear"
+  author="Arcade"
+  authType="OAuth2"
+  versions={["0.1.0"]}
+/>
+
+<Badges repo="arcadeai/arcade_linear" />
+
+El kit de herramientas de Linear ofrece un conjunto simplificado de herramientas para interactuar con las funciones de seguimiento de problemas y gestión de equipos de Linear. Con este kit de herramientas, los usuarios pueden:
+
+- Recuperar información detallada sobre un problema específico, incluyendo su estado, comentarios y dependencias relacionadas.
+- Acceder a información completa del equipo, incluyendo miembros del equipo, roles y configuraciones.
+
+Este kit de herramientas es ideal para usuarios que buscan leer y analizar datos de problemas y equipos dentro de Linear sin realizar modificaciones.
+
+## Herramientas Disponibles
+
+<TableOfContents
+  headers={["Nombre de la Herramienta", "Descripción"]}
+  data={[
+    [
+      "Linear.GetIssue",
+      "Obtener información detallada sobre un problema específico de Linear",
+    ],
+    [
+      "Linear.GetTeams",
+      "Obtener equipos de Linear e información del equipo, incluyendo miembros del equipo",
+    ],
+  ]}
+/>
+
+<Callout>
+  Si necesitas realizar una acción que no está listada aquí, puedes [ponerte en contacto
+  con nosotros](mailto:contact@arcade.dev) para solicitar una nueva herramienta, o [crear tus propias
+  herramientas](/home/build-tools/create-a-toolkit).
+</Callout>
+
+## Linear.GetIssue
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la Herramienta Directamente",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/linear/get_issue_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/linear/get_issue_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Obtener información detallada sobre un problema específico de Linear
+
+**Parámetros**
+
+- **issue_id** (`string`, requerido) El ID o identificador del problema de Linear (por ejemplo, 'FE-123', 'API-456') a recuperar.
+- **include_comments** (`boolean`, opcional) Si se deben incluir comentarios en la respuesta. Por defecto es True.
+- **include_attachments** (`boolean`, opcional) Si se deben incluir archivos adjuntos en la respuesta. Por defecto es True.
+- **include_relations** (`boolean`, opcional) Si se deben incluir relaciones de problemas (bloqueos, dependencias) en la respuesta. Por defecto es True.
+- **include_children** (`boolean`, opcional) Si se deben incluir sub-problemas en la respuesta. Por defecto es True.
+
+## Linear.GetTeams
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Llamar a la Herramienta Directamente",
+      content: {
+        Python: [
+          "/examples/integrations/toolkits/linear/get_teams_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/toolkits/linear/get_teams_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Obtener equipos de Linear e información del equipo, incluyendo miembros del equipo
+
+**Parámetros**
+
+- **team_name** (`string`, opcional) Filtrar por nombre de equipo. Proporcionar un nombre de equipo específico (por ejemplo, 'Frontend', 'Product Web') o un nombre parcial. Utiliza esto para encontrar equipos específicos o verificar la membresía del equipo. Por defecto es None (todos los equipos).
+- **include_archived** (`boolean`, opcional) Si se deben incluir equipos archivados en los resultados. Por defecto es False.
+- **created_after** (`string`, opcional) Filtrar equipos creados después de esta fecha. Puede ser:
+- Cadena de fecha relativa (por ejemplo, 'el mes pasado', 'esta semana', 'ayer')
+- Cadena de fecha ISO (por ejemplo, 'YYYY-MM-DD')
+  Por defecto es None (todo el tiempo).
+- **limit** (`integer`, opcional) Número máximo de equipos a devolver. Mínimo 1, máximo 100. Por defecto es 50.
+- **end_cursor** (`string`, opcional) Cursor para paginación - obtener equipos después de este cursor. Utiliza el 'end_cursor' de la respuesta anterior. Por defecto es None (comenzar desde el principio).
+
+## Auth
+
+El kit de herramientas de Arcade Linear utiliza el [proveedor de autenticación de Linear](/home/auth-providers/linear) para conectarse a las cuentas de Linear de los usuarios. Por favor, consulta la documentación del [proveedor de autenticación de Linear](/home/auth-providers/linear) para aprender cómo configurar la autenticación.
+
+<ToolFooter pipPackageName="arcade_linear" />
