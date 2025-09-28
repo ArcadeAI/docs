@@ -100,7 +100,7 @@ export default async function SharedLayout({
       <body>
         <Layout
           copyPageButton={false}
-          docsRepositoryBase="https://github.com/ArcadeAI/arcade-ai"
+          docsRepositoryBase="https://github.com/ArcadeAI/docs"
           editLink={dictionary.editPage}
           footer={
             <NextraFooter>
@@ -124,7 +124,7 @@ export default async function SharedLayout({
               projectIcon={
                 <Github className="size-5.5 transition-colors duration-150 ease-in-out [&>path]:fill-current" />
               }
-              projectLink="https://github.com/ArcadeAI/arcade-ai"
+              projectLink="https://github.com/ArcadeAI/docs"
             >
               <SignupLink linkLocation="docs:navbar">
                 <NavBarButton
