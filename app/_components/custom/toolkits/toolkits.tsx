@@ -39,23 +39,23 @@ const TYPE_PRIORITY = {
 
 const typeConfig = {
   arcade: {
-    label: "Arcade Optimized Toolkit",
+    label: "Arcade Optimized MCP Server",
     icon: BadgeCheck,
     color: "text-emerald-400",
   },
   // biome-ignore lint/style/useNamingConvention: this is ok
   arcade_starter: {
-    label: "Arcade Starter Toolkit",
+    label: "Arcade Starter MCP Server",
     icon: Terminal,
     color: "text-orange-400",
   },
   verified: {
-    label: "Verified Toolkit",
+    label: "Verified MCP Server",
     icon: CheckCircle,
     color: "text-blue-400",
   },
   community: {
-    label: "Community Toolkit",
+    label: "Community MCP Server",
     icon: Users,
     color: "text-orange-400",
   },
@@ -136,10 +136,10 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
         <div className="mx-auto max-w-7xl px-4 pt-6 pb-4 sm:px-6 lg:px-8">
           <div className="space-y-6">
             <h1 className="font-bold text-2xl text-gray-900 sm:text-3xl dark:text-gray-50">
-              Toolkits
+              MCP Servers
             </h1>
             <p className="text-gray-600 text-sm leading-relaxed sm:text-base dark:text-gray-400">
-              There are 4 designations for Arcade toolkits:
+              There are 4 designations for Arcade MCP Servers:
             </p>
             <div className="grid grid-cols-1 gap-4 sm:gap-4 md:grid-cols-3">
               {Object.entries(typeConfig).map(
@@ -155,7 +155,7 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
                       <p className="mt-1 text-gray-600 text-xs sm:text-sm dark:text-gray-400">
                         {key === "arcade" && (
                           <>
-                            Official toolkits hand-crafted by Arcade that are
+                            Official MCP Servers hand-crafted by Arcade that are
                             ready for use and optimized for LLM-usage.{" "}
                             <a
                               href="/home/use-tools/types-of-tools#optimized-tools"
@@ -168,8 +168,8 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
                         )}
                         {key === "arcade_starter" && (
                           <>
-                            Auto-generated toolkits developed by Arcade that may
-                            require customization.{" "}
+                            Auto-generated MCP Servers developed by Arcade that
+                            may require customization.{" "}
                             <a
                               href="/home/use-tools/types-of-tools#starter-tools"
                               style={{ textDecoration: "none" }}
@@ -180,9 +180,9 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
                           </>
                         )}
                         {key === "verified" &&
-                          "Community-created toolkits, thoroughly tested and verified by Arcade."}
+                          "Community-created MCP Servers, thoroughly tested and verified by Arcade."}
                         {key === "community" &&
-                          "Created and maintained by the Arcade community, offering a wide range of toolkits."}
+                          "Created and maintained by the Arcade community, offering a wide range of MCP Servers."}
                         {key === "auth" &&
                           "Auth integrations allow you to develop custom tools that connect your agent APIs and services."}
                       </p>
@@ -200,7 +200,7 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
                 </div>
                 <div className="text-center md:text-left">
                   <h2 className="font-bold text-base text-gray-900 dark:text-gray-100">
-                    Build your own integration
+                    Build your own MCP Server
                   </h2>
                   <p className="!mt-1.5 text-gray-700 text-sm dark:text-gray-300">
                     Don't see what you need? Use Arcade's SDK to integrate with
@@ -214,7 +214,7 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
                       )}
                       href="https://docs.arcade.dev/home/build-tools/create-a-toolkit"
                     >
-                      Learn how to build a toolkit
+                      Learn how to build a MCP Server
                     </Link>
                   </div>
                 </div>
@@ -246,7 +246,7 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
                   )}
                 </div>
                 <p className="!text-xs mt-2 text-gray-600 sm:text-sm dark:text-gray-400">
-                  {filteredTools.length} result(s) found
+                  {filteredTools.length} MCP Server(s) found
                 </p>
               </div>
               <div className="mt-8 space-y-4">

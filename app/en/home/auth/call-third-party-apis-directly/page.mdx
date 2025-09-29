@@ -27,15 +27,10 @@ This can be useful when you need to manage authorization flows in your applicati
 
 <Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
   <Tabs.Tab>
-    ```bash 
-    pip install arcadepy google-api-python-client google-auth-httplib2 google-auth-oauthlib 
-    ```
+    ```bash pip install arcadepy google-api-python-client google-auth-httplib2
+    google-auth-oauthlib ```
   </Tabs.Tab>
-  <Tabs.Tab>
-  ```bash 
-  npm install @arcadeai/arcadejs googleapis 
-  ```
-  </Tabs.Tab>
+  <Tabs.Tab>```bash npm install @arcadeai/arcadejs googleapis ```</Tabs.Tab>
 </Tabs>
 
 ### Start coding
@@ -91,12 +86,14 @@ Use `client.auth.start()` to initiate the authorization process:
 user_id = "{arcade_user_id}"
 
 # Start the authorization process
+
 auth_response = client.auth.start(
-    user_id=user_id,
-    provider="google",
-    scopes=["https://www.googleapis.com/auth/gmail.readonly"],
+user_id=user_id,
+provider="google",
+scopes=["https://www.googleapis.com/auth/gmail.readonly"],
 )
-```
+
+````
 </Tabs.Tab>
 <Tabs.Tab>
 ```javascript
@@ -109,7 +106,7 @@ const user_id = "{arcade_user_id}";
 let auth_response = await client.auth.start(user_id, "google", {
   scopes: ["https://www.googleapis.com/auth/gmail.readonly"],
 });
-```
+````
 
 </Tabs.Tab>
 </Tabs>
@@ -166,11 +163,12 @@ credentials = Credentials(auth_response.context.token)
 gmail = build("gmail", "v1", credentials=credentials)
 
 email_messages = (
-    gmail.users().messages().list(userId="me").execute().get("messages", [])
+gmail.users().messages().list(userId="me").execute().get("messages", [])
 )
 
 print(email_messages)
-```
+
+````
 </Tabs.Tab>
 <Tabs.Tab>
 ```javascript
@@ -185,7 +183,7 @@ const response = await gmail.users.messages.list({
 
 const email_messages = response.data.messages || [];
 console.log(email_messages);
-```
+````
 
 </Tabs.Tab>
 </Tabs>
@@ -193,16 +191,8 @@ console.log(email_messages);
 ### Execute the code
 
 <Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
-  <Tabs.Tab>
-  ```python
-   python3 direct_api_call.py 
-   ```
-   </Tabs.Tab>
-  <Tabs.Tab>
-  ```javascript
-   node direct_api_call.js 
-   ```
-   </Tabs.Tab>
+  <Tabs.Tab>```python python3 direct_api_call.py ```</Tabs.Tab>
+  <Tabs.Tab>```javascript node direct_api_call.js ```</Tabs.Tab>
 </Tabs>
 
 You should see an output similar to this:, which is a list of the email messages returned by the Gmail API:
@@ -216,10 +206,10 @@ For each item in the list/array, you could use the [`users.messages.get`](https:
 </Steps>
 
 <Callout type="info">
-  Consider using the [Arcade Gmail toolkit](/toolkits/productivity/gmail), which
-  simplifies the process for retrieving email messages even further! The pattern
-  described here is useful if you need to directly get a token to use with
-  Google in other parts of your codebase.
+  Consider using the [Arcade Gmail toolkit](/mcp-servers/productivity/gmail),
+  which simplifies the process for retrieving email messages even further! The
+  pattern described here is useful if you need to directly get a token to use
+  with Google in other parts of your codebase.
 </Callout>
 
 ### How it works

@@ -29,6 +29,14 @@ export function middleware(request: NextRequest) {
   // Add the pathname to headers so the layout can access it
   const response = NextResponse.next();
   response.headers.set("x-pathname", pathname);
+
+  // Redirect /toolkit routes to /mcp-server route  s
+  if (pathname.includes("/toolkits/")) {
+    return NextResponse.redirect(
+      new URL(pathname.replace("/toolkits/", "/mcp-servers/"), request.url)
+    );
+  }
+
   return response;
 }
 

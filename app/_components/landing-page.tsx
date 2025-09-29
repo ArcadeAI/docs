@@ -82,10 +82,11 @@ export function LandingPage() {
           >
             <p className="pt-8 text-left text-gray-700 dark:text-gray-200">
               Arcade enables your AI agent to securely take real-world actions
-              through user-specific permissions, pre-built toolkits for Gmail,
-              Slack, GitHub, and more. You can also build your own agentic tools
-              and MCP servers with our authoring and testing suite. Arcade is
-              your tool <span className="font-bold text-primary">engine</span>,{" "}
+              through user-specific permissions, pre-built MCP Servers for
+              Gmail, Slack, GitHub, and more. You can also build your own
+              agentic tools and MCP servers with our authoring and testing
+              suite. Arcade is your tool{" "}
+              <span className="font-bold text-primary">engine</span>,{" "}
               <span className="font-bold text-primary">registry</span>, and{" "}
               <span className="font-bold text-primary">runtime</span>.
             </p>
@@ -189,7 +190,7 @@ export function LandingPage() {
               icon={Puzzle}
               title="Browse Integrations"
               description="Explore our library of integrations for popular services. Find the perfect integration for your needs."
-              href="/toolkits"
+              href="/mcp-servers"
             />
             <QuickStartCard
               icon={Wrench}
@@ -277,7 +278,7 @@ export function LandingPage() {
                 title: "Enterprise-Ready Platform",
                 description:
                   "Arcade provides the authentication, compliance, and integration capabilities required for production deployment in enterprise environments.",
-                href: "/toolkits",
+                href: "/mcp-servers",
               }}
             />
           </div>

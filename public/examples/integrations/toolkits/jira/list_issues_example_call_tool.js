@@ -19,7 +19,7 @@ const toolInput = {
   "project": "12345",
   "limit": 10,
   // Important: about the atlassian_cloud_id argument, please refer to the documentation at
-  // https://docs.arcade.dev/toolkits/productivity/jira#handling-multiple-atlassian-clouds
+  // https://docs.arcade.dev/mcp-servers/productivity/jira#handling-multiple-atlassian-clouds
   "atlassian_cloud_id": "13516a07-1725-4dc0-9ae7-13b5749dd747"
 };
 

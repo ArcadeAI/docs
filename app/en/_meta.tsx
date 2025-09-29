@@ -6,14 +6,19 @@ const meta: MetaRecord = {
     title: "Home",
     href: "/get-started",
   },
-  toolkits: {
+  "mc-servers": {
     type: "page",
-    title: "Toolkits",
-    href: "/toolkits",
+    title: "MCP Servers",
+    href: "/mcp-servers",
+  },
+  clients: {
+    type: "page",
+    title: "Clients",
+    href: "/home/arcade-clients",
   },
   reference: {
     type: "page",
-    title: "Reference",
+    title: "API Reference",
     href: "https://reference.arcade.dev/",
   },
   status: {

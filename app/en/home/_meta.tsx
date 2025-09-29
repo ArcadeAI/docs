@@ -19,10 +19,10 @@ export const meta: MetaRecord = {
     title: (
       <span className="flex items-center gap-2 font-medium">
         <Plug className="size-4" />
-        Toolkits
+        MCP Servers
       </span>
     ),
-    href: "/toolkits",
+    href: "/mcp-servers",
   },
   reference: {
     title: (
