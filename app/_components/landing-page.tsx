@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@arcadeai/design-system";
 import {
+  ArrowLeft,
   // Bot,
   Cloud,
   // Code,
@@ -16,7 +17,7 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
-import Link from "next/link";
+import { useState } from "react";
 // import { ChallengeSolution } from "./ChallengeSolution";
 import { QuickStartCard } from "./quick-start-card";
 import { SampleAppCard } from "./sample-app-card";
@@ -35,6 +36,130 @@ const ANIMATION_DELAYS = {
 } as const;
 
 export function LandingPage() {
+  const [showLanguageOptions, setShowLanguageOptions] = useState(false);
+  const [_selectedLanguage, setSelectedLanguage] = useState<string | null>(
+    null
+  );
+  const [showFrameworkOptions, setShowFrameworkOptions] = useState(false);
+
+  const handleLanguageSelect = (language: string) => {
+    setSelectedLanguage(language);
+    if (language === "Typescript" || language === "Python") {
+      setShowFrameworkOptions(true);
+    } else {
+      // Route directly to quickstart for other options
+      window.location.href = "https://docs.arcade.dev/en/home/quickstart";
+    }
+  };
+
+  const handleFrameworkSelect = (_framework: string) => {
+    // Route to quickstart with both language and framework context
+    window.location.href = "https://docs.arcade.dev/en/home/quickstart";
+  };
+
+  const handleBackToStart = () => {
+    setShowLanguageOptions(false);
+    setSelectedLanguage(null);
+    setShowFrameworkOptions(false);
+  };
+
+  const handleBackToLanguage = () => {
+    setShowFrameworkOptions(false);
+    setSelectedLanguage(null);
+  };
+
+  const renderQuickStartFlow = () => {
+    if (!showLanguageOptions) {
+      return (
+        <Button
+          className="h-12 bg-primary px-8 text-white hover:bg-primary/90"
+          onClick={() => setShowLanguageOptions(true)}
+          size="lg"
+        >
+          Start building your agent
+        </Button>
+      );
+    }
+
+    if (!showFrameworkOptions) {
+      return (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Button
+              className="h-8 w-8 border-gray-300 bg-white p-0 text-gray-900 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
+              onClick={handleBackToStart}
+              size="sm"
+              variant="outline"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <h3 className="font-semibold text-gray-900 text-lg dark:text-white">
+              How do you want to build your agent?
+            </h3>
+          </div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {[
+              "Typescript",
+              "Python",
+              "Cursor",
+              "ChatGPT",
+              "n8n",
+              "Claude",
+              "Generic MCP",
+            ].map((language) => (
+              <Button
+                className="h-10 border-gray-300 bg-white text-gray-900 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
+                key={language}
+                onClick={() => handleLanguageSelect(language)}
+                size="sm"
+                variant="outline"
+              >
+                {language}
+              </Button>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Button
+            className="h-8 w-8 border-gray-300 bg-white p-0 text-gray-900 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
+            onClick={handleBackToLanguage}
+            size="sm"
+            variant="outline"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <h3 className="font-semibold text-gray-900 text-lg dark:text-white">
+            Which agent building framework?
+          </h3>
+        </div>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {[
+            "LangGraph",
+            "OpenAI Agents SDK",
+            "Pydantic AI",
+            "Generic Python",
+            "Generic MCP",
+          ].map((framework) => (
+            <Button
+              className="h-10 border-gray-300 bg-white text-gray-900 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
+              key={framework}
+              onClick={() => handleFrameworkSelect(framework)}
+              size="sm"
+              variant="outline"
+            >
+              {framework}
+            </Button>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div>
       <section className="relative isolate px-6 lg:px-8">
@@ -57,7 +182,7 @@ export function LandingPage() {
             initial={{ opacity: 0, y: 20 }}
             transition={{ duration: ANIMATION_DURATION }}
           >
-            Welcome to Arcade!
+            Ship agents you can trust your users with
           </motion.h1>
           <motion.p
             animate={{ opacity: 1, y: 0 }}
@@ -67,11 +192,7 @@ export function LandingPage() {
               duration: ANIMATION_DURATION,
               delay: ANIMATION_DELAYS.initial,
             }}
-          >
-            <span className="font-bold text-primary">
-              Learn how to move AI agents from demo to production with Arcade.
-            </span>
-          </motion.p>
+          />
           <motion.div
             animate={{ opacity: 1, y: 0 }}
             initial={{ opacity: 0, y: 20 }}
@@ -80,49 +201,29 @@ export function LandingPage() {
               delay: ANIMATION_DELAYS.secondary,
             }}
           >
-            <p className="pt-8 text-left text-gray-700 dark:text-gray-200">
-              Arcade enables your AI agent to securely take real-world actions
+            <p className="pt-8 text-center text-gray-700 dark:text-gray-200">
+              {/* Arcade enables your AI agent to securely take real-world actions
               through user-specific permissions, pre-built toolkits for Gmail,
               Slack, GitHub, and more. You can also build your own agentic tools
               and MCP servers with our authoring and testing suite. Arcade is
               your tool <span className="font-bold text-primary">engine</span>,{" "}
               <span className="font-bold text-primary">registry</span>, and{" "}
-              <span className="font-bold text-primary">runtime</span>.
+              <span className="font-bold text-primary">runtime</span>. */}
+              Scoped permissions for every user, in any environment, across any
+              tool built by the public, Arcade, or you. Just 7 lines of code.
             </p>
-            <p className="pt-8 text-left text-gray-700 dark:text-gray-200">
-              Get started with a 5-minute quickstart.
-            </p>
-          </motion.div>
-          <motion.div
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-20 flex items-center justify-center gap-x-6"
-            initial={{ opacity: 0, y: 20 }}
-            transition={{
-              duration: ANIMATION_DURATION,
-              delay: ANIMATION_DELAYS.buttons,
-            }}
-          >
-            <Button
-              asChild
-              className="h-12 bg-primary px-6 text-white hover:bg-primary/90"
-              size="lg"
-            >
-              <Link href="/home/quickstart">
-                <Rocket className="mr-2 h-5 w-5" />
-                Get Started
-              </Link>
-            </Button>
-            <Button
-              asChild
-              className="h-12 border-gray-900 bg-transparent px-6 text-gray-900 hover:bg-gray-900 hover:text-white dark:border-white dark:text-white dark:hover:bg-white dark:hover:text-gray-900"
-              size="lg"
-              variant="outline"
-            >
-              <Link href="/home/build-tools/create-a-toolkit">
-                <Wrench className="mr-2 h-5 w-5" />
-                Build a tool
-              </Link>
-            </Button>
+            <div className="mt-6 rounded-lg bg-gray-900 p-4 text-left">
+              <pre className="text-green-400 text-sm">
+                {`{
+  "mcpServers": {
+    "arcade": {
+      "url": "https://api.arcacde.dev/mcp/my-project"
+    }
+  }
+}`}
+              </pre>
+            </div>
+            <div className="mt-8">{renderQuickStartFlow()}</div>
           </motion.div>
           <motion.div
             animate={{ opacity: 1, y: 0 }}
