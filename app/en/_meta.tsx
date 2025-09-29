@@ -6,7 +6,7 @@ const meta: MetaRecord = {
     title: "Home",
     href: "/get-started",
   },
-  "mc-servers": {
+  "mcp-servers": {
     type: "page",
     title: "MCP Servers",
     href: "/mcp-servers",
