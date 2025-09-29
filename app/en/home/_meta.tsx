@@ -1,4 +1,4 @@
-import { BadgeHelp, Code2, Home, Plug } from "lucide-react";
+import { BadgeHelp, Home } from "lucide-react";
 import type { MetaRecord } from "nextra";
 
 export const meta: MetaRecord = {
@@ -14,24 +14,6 @@ export const meta: MetaRecord = {
       layout: "full",
       toc: false,
     },
-  },
-  learn: {
-    title: (
-      <span className="flex items-center gap-2 font-medium">
-        <Plug className="size-4" />
-        MCP Servers
-      </span>
-    ),
-    href: "/mcp-servers",
-  },
-  reference: {
-    title: (
-      <span className="flex items-center gap-2 font-medium">
-        <Code2 className="size-4" />
-        API Reference
-      </span>
-    ),
-    href: "https://reference.arcade.dev/",
   },
   "contact-us": {
     title: (
