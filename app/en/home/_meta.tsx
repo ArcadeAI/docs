@@ -144,6 +144,9 @@ export const meta: MetaRecord = {
   faq: {
     title: "FAQ",
   },
+  "agentic-development": {
+    title: "Agentic Development",
+  },
   changelog: {
     title: "Changelog",
   },
