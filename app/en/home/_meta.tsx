@@ -52,9 +52,9 @@ export const meta: MetaRecord = {
   "serve-tools": {
     title: "Serve tools",
   },
-  "-- Agent Frameworks": {
+  "-- Agent Frameworks and MCP": {
     type: "separator",
-    title: "Agent Frameworks",
+    title: "Agent Frameworks and MCP",
   },
   "mcp-clients": {
     title: "MCP Clients",
