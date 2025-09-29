@@ -1,23 +1,32 @@
 ---
-title: "Creating a Toolkit"
+title: "Creating a MCP Server"
 description: "Learn how to create, test, deploy, and publish a custom toolkit for Arcade"
 ---
 
 import { Steps, Tabs, Callout } from "nextra/components";
 
-# Creating a Toolkit
+# Creating a MCP Server
 
 <div className="grid grid-cols-1 md:grid-cols-[4fr_3fr] gap-8">
   <div>
-    This guide walks you through the complete process of creating a custom toolkit for Arcade - from initial setup to publishing on PyPI. You'll build a simple arithmetic toolkit with operations like addition, subtraction, and multiplication.  When creating or extending an Arcade toolkit, we make it easy to develop the tool alongside your agent, providing a pleasant local development experience.  As your agent will be loading its available tools from the Arcade Engine, you can mix existing tools and your locally developed tool by following this guide.  You'll be running your local worker with the Arcade CLI and registering it with the Engine so that your agent can find and use your tool.
+    This guide walks you through the complete process of creating a custom
+    toolkit for Arcade - from initial setup to publishing on PyPI. You'll build
+    a simple arithmetic toolkit with operations like addition, subtraction, and
+    multiplication. When creating or extending an Arcade toolkit, we make it
+    easy to develop the tool alongside your agent, providing a pleasant local
+    development experience. As your agent will be loading its available tools
+    from the Arcade Engine, you can mix existing tools and your locally
+    developed tool by following this guide. You'll be running your local worker
+    with the Arcade CLI and registering it with the Engine so that your agent
+    can find and use your tool.
   </div>
   <iframe
-   className="aspect-video w-full max-w-[900px] rounded-xl shadow-2xl"
-   src="https://www.youtube.com/embed/q2V_P35KYCg?si=CYhKw-eYx1O98O9K"
-   title="Create a Toolkit"
-   allow="fullscreen; accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-   referrerPolicy="strict-origin-when-cross-origin"
-   ></iframe>
+    className="aspect-video w-full max-w-[900px] rounded-xl shadow-2xl"
+    src="https://www.youtube.com/embed/q2V_P35KYCg?si=CYhKw-eYx1O98O9K"
+    title="Create a Toolkit"
+    allow="fullscreen; accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+    referrerPolicy="strict-origin-when-cross-origin"
+  ></iframe>
 </div>
 
 ## Prerequisites
@@ -38,6 +47,7 @@ uv tool run --from arcade-ai arcade new arithmetic
 ```
 
 Enter the optional information when prompted:
+
 - **Description**: Provide a brief explanation of what your toolkit will do
 - **Author GitHub username and email**: Your contact information
 - **Generate test and evaluation directories**: Whether you want additional directories created for you
@@ -70,6 +80,7 @@ cd arithmetic
 ## Set up the development environment
 
 An active virtual environment for your shell(s) is required to run the local development commands.
+
 ```bash
 uv venv --seed -p 3.13
 ```
@@ -83,6 +94,7 @@ make install
 This installs all dependencies specified in `pyproject.toml`, pre-commit hooks for code quality, and your toolkit in development mode.
 
 The Makefile provides several helpful commands:
+
 - `build` - Build wheel file using uv
 - `bump-version` - Bump the version in the pyproject.toml file by a patch version
 - `check` - Run code quality tools
@@ -92,8 +104,8 @@ The Makefile provides several helpful commands:
 - `install-local` - Install Arcade components (CLI, TDK, etc.) from source in editable mode. Only use this when you are developing against the latest unreleased code from the [arcade-ai repo](https://github.com/ArcadeAI/arcade-ai) main branch instead of the published packages
 - `test` - Test the code with pytest
 
-
 Activate the environment with:
+
 ```bash
 source .venv/bin/activate
 ```
@@ -283,11 +295,11 @@ Then in your Arcade dashboard:
 1. Navigate to the [Workers](https://api.arcade.dev/dashboard/workers) page.
 1. Click **Add Worker**.
 1. Fill in the form with the following values:
-    - **ID**: `my-arithmetic-worker`
-    - **Worker Type**: `Arcade`
-    - **URL**: your public URL from ngrok, tailscale, or cloudflare
-    - **Secret**: `dev`
-    - **Timeout** and **Retry**: can be left at default values
+   - **ID**: `my-arithmetic-worker`
+   - **Worker Type**: `Arcade`
+   - **URL**: your public URL from ngrok, tailscale, or cloudflare
+   - **Secret**: `dev`
+   - **Timeout** and **Retry**: can be left at default values
 1. Click **Create**.
 
 Now, in the [Playground](https://api.arcade.dev/dashboard/playground), you can see your tools in action.
@@ -310,11 +322,13 @@ secret = "<your-secret>"  # This is randomly generated for you by `uv tool run -
 [worker.local_source]
 packages = ["./arithmetic"]  # Path to your toolkit directory
 ```
+
 See [Configuring Arcade Deploy](/home/local-deployment/configure/configuring-arcade-deploy) for more configuration options.
 
 From the root of your toolkit, deploy your toolkit to Arcade's cloud with:
 
 This may take a while your first time.
+
 ```bash
 arcade deploy
 ```
@@ -334,7 +348,6 @@ make clean-build
 ```
 
 If you're updating an existing package, bump the version:
-
 
 ```bash
 make bump-version
