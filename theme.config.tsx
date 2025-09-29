@@ -17,7 +17,7 @@ import Link from "next/link";
 const config: DocsThemeConfig = {
   color: { hue: { dark: 335, light: 335 } }, // Hue for #ED155D
   logo: <Logo />,
-  logoLink: "https://www.arcade.dev/",
+  logoLink: "https://docs.arcade.dev/home",
   themeSwitch: {
     component: () => null,
   },
@@ -62,6 +62,7 @@ const config: DocsThemeConfig = {
   sidebar: {
     defaultMenuCollapseLevel: 1,
     autoCollapse: true,
+    defaultOpen: false,
   },
   head: Head,
   footer: {

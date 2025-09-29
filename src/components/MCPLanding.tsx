@@ -1,9 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
+import { useState } from "react";
 import {
   // Bot,
   Cloud,
-  // Code,
+  Code2,
   // Key,
   // PencilRuler,
   // Puzzle,
@@ -12,15 +13,76 @@ import {
   // Shield,
   Users,
   Wrench,
+  ArrowLeft,
+  ChevronRight,
   // Zap,
 } from "lucide-react";
-import Link from "next/link";
 // import { ChallengeSolution } from "./ChallengeSolution";
 import { QuickStartCard } from "./QuickStartCard";
 import { SampleAppCard } from "./SampleAppCard";
 import Image from "next/image";
 
+const languages = [
+  { id: "typescript", name: "TypeScript", icon: Code2, href: "/typescript" },
+  { id: "python", name: "Python", icon: Code2, href: "/python" },
+  { id: "cursor", name: "Cursor", icon: Code2, href: "/cursor" },
+  { id: "chatgpt", name: "ChatGPT", icon: Code2, href: "/chatgpt" },
+  { id: "n8n", name: "n8n", icon: Wrench, href: "/n8n" },
+  { id: "claude", name: "Claude", icon: Code2, href: "/claude" },
+  { id: "generic-mcp", name: "GenericMCP", icon: Rocket, href: "/generic-mcp" },
+];
+
+const frameworks = [
+  { id: "langgraph", name: "LangGraph", icon: Rocket, href: "/langgraph" },
+  { id: "agents-sdk", name: "AgentsSDK", icon: Users, href: "/agents-sdk" },
+  { id: "pedantic", name: "Pedantic", icon: Code2, href: "/pedantic" },
+  {
+    id: "generic-python",
+    name: "Generic Python",
+    icon: Code2,
+    href: "/generic-python",
+  },
+  {
+    id: "generic-mcp",
+    name: "Generic MCP",
+    icon: Rocket,
+    href: "/generic-mcp",
+  },
+];
+
 export function MCPLanding() {
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [selectedLanguage, setSelectedLanguage] = useState<string | null>(null);
+  const [selectedFramework, setSelectedFramework] = useState<string | null>(
+    null,
+  );
+
+  const handleGetStarted = () => {
+    setShowOnboarding(true);
+  };
+
+  const handleLanguageSelect = (languageId: string) => {
+    setSelectedLanguage(languageId);
+    setSelectedFramework(null);
+  };
+
+  const handleFrameworkSelect = (frameworkId: string) => {
+    setSelectedFramework(frameworkId);
+  };
+
+  const handleBack = () => {
+    if (selectedFramework) {
+      setSelectedFramework(null);
+    } else if (selectedLanguage) {
+      setSelectedLanguage(null);
+    } else {
+      setShowOnboarding(false);
+    }
+  };
+
+  const showFrameworks =
+    selectedLanguage === "typescript" || selectedLanguage === "python";
+
   return (
     <div>
       <section className="relative isolate px-6 lg:px-8">
@@ -36,14 +98,14 @@ export function MCPLanding() {
             }}
           />
         </div>
-        <div className="mx-auto max-w-screen-xl px-4 py-12 text-center sm:py-48 lg:py-24">
+        <div className="mx-auto max-w-screen-xl px-4 py-8 text-center sm:py-12 lg:py-16">
           <motion.h1
             className="mb-6 text-4xl font-extrabold tracking-tight text-white md:text-5xl lg:text-6xl"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            Welcome to Arcade!
+            Ship agents you can trust your users with
           </motion.h1>
           <motion.p
             className="mx-auto mt-8 max-w-4xl text-pretty text-base font-medium italic leading-relaxed text-gray-100"
@@ -51,67 +113,204 @@ export function MCPLanding() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <span className="font-bold text-primary">
+            {/* <span className="font-bold text-primary">
               Learn how to move AI agents from demo to production with Arcade.
-            </span>
+            </span> */}
           </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
+            className="mt-12"
           >
-            <p style={{ textAlign: "left", paddingTop: "2rem" }}>
-              Arcade enables your AI agent to securely take real-world actions
-              through user-specific permissions, pre-built integrations with
-              Gmail, Slack, GitHub, and more. You can also build your own
-              agentic tools and MCP servers with our authoring and testing
-              suite. Arcade is your tool{" "}
-              <span className="font-bold text-primary">engine</span>,{" "}
-              <span className="font-bold text-primary">registry</span>, and{" "}
-              <span className="font-bold text-primary">runtime</span>.
-            </p>
-            <p style={{ textAlign: "left", paddingTop: "2rem" }}>
-              There are many ways to use Arcade. Pick the one that's right for
-              you.
-            </p>
+            <div className="mx-auto max-w-4xl">
+              <p className="mb-8 text-lg text-gray-300">
+                Scoped permissions for every user, in any environment, across
+                any tool built by the public, Arcade, or you. Just 7 lines of
+                code.
+              </p>
+
+              <div className="relative rounded-lg border border-gray-700 bg-slate-900 p-6">
+                <div className="absolute right-4 top-4 text-xs uppercase tracking-wide text-gray-400">
+                  MCP SERVER
+                </div>
+
+                <pre className="overflow-x-auto text-left text-sm">
+                  <code className="text-gray-300">
+                    {"{"}
+                    <br />
+                    &nbsp;&nbsp;
+                    <span className="text-green-300">"mcpServers"</span>: {"{"}
+                    <br />
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <span className="text-green-300">"arcade"</span>: {"{"}
+                    <br />
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <span className="text-green-300">"url"</span>:{" "}
+                    <span className="text-green-300">
+                      "https://api.arcacde.dev/mcp/my-project"
+                    </span>
+                    <br />
+                    &nbsp;&nbsp;&nbsp;&nbsp;{"}"}
+                    <br />
+                    &nbsp;&nbsp;{"}"}
+                    <br />
+                    {"}"}
+                  </code>
+                </pre>
+              </div>
+            </div>
           </motion.div>
           <motion.div
-            className="mt-20"
+            className="mt-8"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.6 }}
           >
-            <div className="grid grid-cols-1 justify-center gap-6 md:grid-cols-3">
-              <Link href="/home/quickstart" className="group">
-                <Card className="h-full cursor-pointer border-white/20 bg-white/5 text-white transition-colors hover:bg-white/10">
-                  <CardHeader className="flex-row items-center space-y-0 p-6">
-                    <Rocket className="mr-3 h-5 w-5" />
-                    <CardTitle>Supercharge my local Agent</CardTitle>
-                  </CardHeader>
-                  <CardContent className="pt-0 text-sm text-gray-200">
-                    <div>
-                      (VS Code Logo) (Cursor Logo) (Claude Code Logo) ...
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-              <Link href="/home/quickstart" className="group">
-                <Card className="h-full cursor-pointer border-white/20 bg-white/5 text-white transition-colors hover:bg-white/10">
-                  <CardHeader className="flex-row items-center space-y-0 p-6">
-                    <Rocket className="mr-3 h-5 w-5" />
-                    <CardTitle>Build multi-user agents</CardTitle>
+            {!showOnboarding && (
+              <div className="text-center">
+                <Card
+                  className="mx-auto max-w-md cursor-pointer border-white/20 bg-white/5 text-white transition-all hover:scale-105 hover:bg-white/10"
+                  onClick={handleGetStarted}
+                >
+                  <CardHeader className="flex-row items-center justify-center space-y-0 p-6">
+                    <Rocket className="mr-3 h-6 w-6" />
+                    <CardTitle className="text-lg">
+                      Get started building agents
+                    </CardTitle>
+                    <ChevronRight className="ml-3 h-5 w-5" />
                   </CardHeader>
                 </Card>
-              </Link>
-              <Link href="/home/build-tools/create-a-toolkit" className="group">
-                <Card className="h-full cursor-pointer border-white/20 bg-white/5 text-white transition-colors hover:bg-white/10">
-                  <CardHeader className="flex-row items-center space-y-0 p-6">
-                    <Wrench className="mr-3 h-5 w-5" />
-                    <CardTitle>Manage multiple Agents at my company</CardTitle>
-                  </CardHeader>
-                </Card>
-              </Link>
-            </div>
+              </div>
+            )}
+
+            {showOnboarding && !selectedLanguage && (
+              <div>
+                <button
+                  onClick={handleBack}
+                  className="mb-4 flex items-center text-white hover:text-gray-300"
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back
+                </button>
+                <h2 className="mb-6 text-center text-2xl font-bold text-white">
+                  Choose your language or platform
+                </h2>
+                <div className="grid grid-cols-1 justify-center gap-4 md:grid-cols-3 lg:grid-cols-4">
+                  {languages.map((language) => {
+                    const Icon = language.icon;
+                    return (
+                      <Card
+                        key={language.id}
+                        className="h-full cursor-pointer border-white/20 bg-white/5 text-white transition-all hover:scale-105 hover:bg-white/10"
+                        onClick={() => handleLanguageSelect(language.id)}
+                      >
+                        <CardHeader className="flex-row items-center space-y-0 p-4">
+                          <Icon className="mr-3 h-5 w-5" />
+                          <CardTitle className="text-sm">
+                            {language.name}
+                          </CardTitle>
+                          <ChevronRight className="ml-auto h-4 w-4" />
+                        </CardHeader>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {selectedLanguage && !showFrameworks && (
+              <div>
+                <button
+                  onClick={handleBack}
+                  className="mb-4 flex items-center text-white hover:text-gray-300"
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to languages
+                </button>
+                <div className="text-center">
+                  <h2 className="mb-6 text-2xl font-bold text-white">
+                    Get started with{" "}
+                    {languages.find((l) => l.id === selectedLanguage)?.name}
+                  </h2>
+                  <Card className="border-white/20 bg-white/5 text-white">
+                    <CardContent className="p-6">
+                      <p className="text-gray-200">
+                        Documentation and guides for{" "}
+                        {languages.find((l) => l.id === selectedLanguage)?.name}{" "}
+                        coming soon.
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            )}
+
+            {selectedLanguage && showFrameworks && !selectedFramework && (
+              <div>
+                <button
+                  onClick={handleBack}
+                  className="mb-4 flex items-center text-white hover:text-gray-300"
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to languages
+                </button>
+                <h2 className="mb-6 text-center text-2xl font-bold text-white">
+                  Choose your agent framework
+                </h2>
+                <div className="grid grid-cols-1 justify-center gap-4 md:grid-cols-3">
+                  {frameworks.map((framework) => {
+                    const Icon = framework.icon;
+                    return (
+                      <Card
+                        key={framework.id}
+                        className="h-full cursor-pointer border-white/20 bg-white/5 text-white transition-all hover:scale-105 hover:bg-white/10"
+                        onClick={() => handleFrameworkSelect(framework.id)}
+                      >
+                        <CardHeader className="flex-row items-center space-y-0 p-4">
+                          <Icon className="mr-3 h-5 w-5" />
+                          <CardTitle className="text-sm">
+                            {framework.name}
+                          </CardTitle>
+                          <ChevronRight className="ml-auto h-4 w-4" />
+                        </CardHeader>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {selectedLanguage && showFrameworks && selectedFramework && (
+              <div>
+                <button
+                  onClick={handleBack}
+                  className="mb-4 flex items-center text-white hover:text-gray-300"
+                >
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to frameworks
+                </button>
+                <div className="text-center">
+                  <h2 className="mb-6 text-2xl font-bold text-white">
+                    Get started with{" "}
+                    {frameworks.find((f) => f.id === selectedFramework)?.name}{" "}
+                    and {selectedLanguage}
+                  </h2>
+                  <Card className="border-white/20 bg-white/5 text-white">
+                    <CardContent className="p-6">
+                      <p className="text-gray-200">
+                        Documentation and guides for{" "}
+                        {
+                          frameworks.find((f) => f.id === selectedFramework)
+                            ?.name
+                        }{" "}
+                        with {selectedLanguage} coming soon.
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            )}
           </motion.div>
           <motion.div
             className="mt-10 flex items-center justify-center gap-x-6"

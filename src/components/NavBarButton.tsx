@@ -21,7 +21,10 @@ export const NavBarButton = ({
   const pathname = usePathname();
   if (hideOnPath.includes(pathname)) return null;
   return (
-    <Button variant={variant}>
+    <Button
+      variant={variant}
+      className={variant === "ghost" ? "mx-1 px-3" : ""}
+    >
       <span className="text-xs">{text}</span>
     </Button>
   );

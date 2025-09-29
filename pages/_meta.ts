@@ -1,4 +1,10 @@
 export default {
+  website: {
+    type: "page",
+    title: "Website",
+    href: "https://www.arcade.dev/",
+    target: "_blank",
+  },
   home: {
     type: "page",
     title: "Home",
