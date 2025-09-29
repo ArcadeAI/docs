@@ -56,6 +56,9 @@ export const meta: MetaRecord = {
     type: "separator",
     title: "Agent Frameworks",
   },
+  "mcp-clients": {
+    title: "MCP Clients",
+  },
   langchain: {
     title: "LangChain",
   },
@@ -73,16 +76,6 @@ export const meta: MetaRecord = {
   },
   vercelai: {
     title: "Vercel AI",
-  },
-  "-- MCP": {
-    type: "separator",
-    title: "MCP",
-  },
-  "mcp-overview": {
-    title: "MCP Overview",
-  },
-  "mcp-desktop-clients": {
-    title: "IDEs and desktop clients",
   },
   "-- Core Concepts": {
     type: "separator",
