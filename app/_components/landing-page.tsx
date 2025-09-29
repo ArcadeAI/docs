@@ -119,7 +119,7 @@ export function LandingPage() {
               size="lg"
               variant="outline"
             >
-              <Link href="/home/build-tools/create-a-toolkit">
+              <Link href="/home/build-tools/create-a-mcp-server">
                 <Wrench className="mr-2 h-5 w-5" />
                 Build a tool
               </Link>
@@ -263,7 +263,7 @@ export function LandingPage() {
                 title: "Build Once, Run Anywhere",
                 description:
                   "Define your tool once with Arcade's SDK and it works seamlessly across OpenAI, Anthropic, and frameworks like LangChain and CrewAI without any changes.",
-                href: "/home/build-tools/create-a-toolkit",
+                href: "/home/build-tools/create-a-mcp-server",
               }}
             />
             <ChallengeSolution

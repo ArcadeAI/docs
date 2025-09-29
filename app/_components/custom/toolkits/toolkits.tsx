@@ -212,7 +212,7 @@ export default function Toolkits({ tools, categories }: ToolkitsProps) {
                         buttonVariants({ variant: "default", size: "sm" }),
                         "bg-blue-600 hover:bg-blue-700 active:bg-blue-700"
                       )}
-                      href="https://docs.arcade.dev/home/build-tools/create-a-toolkit"
+                      href="https://docs.arcade.dev/home/build-tools/create-a-mcp-server"
                     >
                       Learn how to build a MCP Server
                     </Link>
