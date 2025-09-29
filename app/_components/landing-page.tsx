@@ -139,7 +139,7 @@ export function LandingPage() {
                 className="text-primary hover:underline"
                 href="/home/agentic-development"
               >
-                Learn how to give your AI IDE access to Arcade.dev's
+                Learn how to give your coding agents access to Arcade.dev's
                 documentation
               </Link>
             </div>
