@@ -1,5 +1,13 @@
 /** biome-ignore-all lint/style/useNamingConvention: This is ok for the meta file */
-const meta = {
+import type { MetaRecord } from "nextra";
+
+const meta: MetaRecord = {
+  "*": {
+    theme: {
+      breadcrumb: true,
+      toc: true,
+    },
+  },
   google_finance: {
     title: "Google Finance",
   },

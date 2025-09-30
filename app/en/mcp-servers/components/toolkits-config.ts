@@ -1,4 +1,4 @@
-import type { ToolkitType } from "@/app/_components/custom/toolkits/toolkits";
+import type { ToolkitType } from "./toolkits";
 export type Tool = {
   name: string;
   image: string;

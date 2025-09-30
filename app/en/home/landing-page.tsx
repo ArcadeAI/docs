@@ -18,8 +18,8 @@ import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 // import { ChallengeSolution } from "./ChallengeSolution";
-import { QuickStartCard } from "./quick-start-card";
-import { SampleAppCard } from "./sample-app-card";
+import { QuickStartCard } from "../../_components/quick-start-card";
+import { SampleAppCard } from "../../_components/sample-app-card";
 
 // Constants for magic numbers
 const IMAGE_SCALE_FACTOR = 3;

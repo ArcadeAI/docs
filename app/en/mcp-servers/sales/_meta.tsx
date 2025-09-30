@@ -7,8 +7,11 @@ const meta: MetaRecord = {
       toc: true,
     },
   },
-  reference: {
-    title: "Reference",
+  hubspot: {
+    title: "HubSpot",
+  },
+  salesforce: {
+    title: "Salesforce",
   },
 };
 

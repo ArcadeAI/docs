@@ -11,7 +11,7 @@ import {
 import { usePostHog } from "posthog-js/react";
 import type React from "react";
 import { useState } from "react";
-import { useComingSoon } from "./coming-soon-context";
+import { useComingSoon } from "@/app/_components/coming-soon-context";
 
 type ComingSoonModalProps = {
   isOpen: boolean;

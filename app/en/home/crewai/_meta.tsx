@@ -7,8 +7,11 @@ const meta: MetaRecord = {
       toc: true,
     },
   },
-  reference: {
-    title: "Reference",
+  "use-arcade-tools": {
+    title: "Using Arcade tools",
+  },
+  "custom-auth-flow": {
+    title: "Custom auth flow",
   },
 };
 

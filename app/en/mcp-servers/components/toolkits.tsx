@@ -15,7 +15,7 @@ import {
 import Link from "next/link";
 import type React from "react";
 import { useCallback, useMemo, useState } from "react";
-import { ComingSoonProvider } from "./coming-soon-context";
+import { ComingSoonProvider } from "@/app/_components/coming-soon-context";
 import { ToolCard } from "./tool-card";
 import type { Category, Tool } from "./toolkits-config";
 

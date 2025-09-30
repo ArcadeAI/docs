@@ -7,8 +7,14 @@ const meta: MetaRecord = {
       toc: true,
     },
   },
-  reference: {
-    title: "Reference",
+  postgres: {
+    title: "Postgres",
+  },
+  mongodb: {
+    title: "MongoDB",
+  },
+  clickhouse: {
+    title: "ClickHouse",
   },
 };
 

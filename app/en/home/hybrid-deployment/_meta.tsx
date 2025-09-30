@@ -7,8 +7,8 @@ const meta: MetaRecord = {
       toc: true,
     },
   },
-  reference: {
-    title: "Reference",
+  "hybrid-worker": {
+    title: "Hybrid Worker",
   },
 };
 
