@@ -100,6 +100,13 @@ export function middleware(request: NextRequest) {
     });
   }
 
+  // Redirect /toolkit routes to /mcp-server route  s
+  if (pathname.includes("/toolkits/")) {
+    return NextResponse.redirect(
+      new URL(pathname.replace("/toolkits/", "/mcp-servers/"), request.url)
+    );
+  }
+
   return response;
 }
 
