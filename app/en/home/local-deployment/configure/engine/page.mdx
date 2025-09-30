@@ -81,6 +81,7 @@ HTTP is the supported protocol for Arcade Engine's API. The following configurat
 
 - `api.development` _(optional, default: `false`)_ - Enable development mode, with more logging and simple [worker authentication](/home/local-deployment/configure/engine#http-worker-configuration)
 - `api.http.host` _(default: `localhost`)_ - Address to which Arcade Engine binds its server (e.g., `localhost` or `0.0.0.0`)
+- `api.public_host` _(optional)_ - Public host of the API (e.g., `my-public-host.com`), in case you want to expose it to the public
 - `api.http.read_timeout` _(optional, default: `30s`)_ - Timeout for reading data from clients
 - `api.http.write_timeout` _(optional, default: `1m`)_ - Timeout for writing data to clients
 - `api.http.idle_timeout` _(optional, default: `30s`)_ - Timeout for idle connections
@@ -93,6 +94,16 @@ api:
   development: false
   host: localhost
   port: 9099
+```
+
+To expose the API to the public, set `api.public_host` to the public host of the API:
+
+```yaml
+api:
+development: false
+  host: localhost
+  port: 9099
+  public_host: my-public-host.com
 ```
 
 For local development, set `api.development = true`. In development mode, Arcade Engine does not require [worker authentication](/home/local-deployment/configure/engine#http-worker-configuration).
@@ -144,8 +155,8 @@ Two cache implementations are available:
 cache:
   api_key_ttl: 10s
   redis:
-    addr: 'localhost:6379'
-    password: ''
+    addr: "localhost:6379"
+    password: ""
     db: 0
 ```
 
@@ -263,7 +274,7 @@ tools:
         - id: local_worker
           enabled: true
           http:
-            uri: 'http://localhost:8002'
+            uri: "http://localhost:8002"
             timeout: 30
             retry: 3
             secret: ${env:ARCADE_WORKER_SECRET}
