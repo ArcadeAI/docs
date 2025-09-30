@@ -1,4 +1,4 @@
-import { BadgeHelp, Code2, Home, Plug } from "lucide-react";
+import { BadgeHelp, Home } from "lucide-react";
 import type { MetaRecord } from "nextra";
 
 export const meta: MetaRecord = {
@@ -14,24 +14,6 @@ export const meta: MetaRecord = {
       layout: "full",
       toc: false,
     },
-  },
-  learn: {
-    title: (
-      <span className="flex items-center gap-2 font-medium">
-        <Plug className="size-4" />
-        Toolkits
-      </span>
-    ),
-    href: "/toolkits",
-  },
-  reference: {
-    title: (
-      <span className="flex items-center gap-2 font-medium">
-        <Code2 className="size-4" />
-        API Reference
-      </span>
-    ),
-    href: "https://reference.arcade.dev/",
   },
   "contact-us": {
     title: (
@@ -70,9 +52,12 @@ export const meta: MetaRecord = {
   "serve-tools": {
     title: "Serve tools",
   },
-  "-- Agent Frameworks": {
+  "-- Agent Frameworks and MCP": {
     type: "separator",
-    title: "Agent Frameworks",
+    title: "Agent Frameworks and MCP",
+  },
+  "mcp-clients": {
+    title: "MCP Clients",
   },
   langchain: {
     title: "LangChain",
@@ -91,16 +76,6 @@ export const meta: MetaRecord = {
   },
   vercelai: {
     title: "Vercel AI",
-  },
-  "-- MCP": {
-    type: "separator",
-    title: "MCP",
-  },
-  "mcp-overview": {
-    title: "MCP Overview",
-  },
-  "mcp-desktop-clients": {
-    title: "IDEs and desktop clients",
   },
   "-- Core Concepts": {
     type: "separator",
