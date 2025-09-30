@@ -1,0 +1,292 @@
+name: 📖 Translate Documentation
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_locale:
+        description: "Target locale to translate"
+        required: false
+        default: "all"
+        type: choice
+        options:
+          - "all"
+          - "es"
+          - "pt-BR"
+
+      concurrency:
+        description: "Max concurrent translations"
+        required: false
+        default: "10"
+        type: string
+
+      batch_size:
+        description: "Files per batch"
+        required: false
+        default: "10"
+        type: string
+
+      force_translate:
+        description: "Force translate all files (ignore cache)"
+        required: false
+        default: false
+        type: boolean
+
+      no_batch:
+        description: "Disable batch processing"
+        required: false
+        default: false
+        type: boolean
+
+      cleanup_deleted:
+        description: "Delete translated files when English originals are removed"
+        required: false
+        default: true
+        type: boolean
+
+jobs:
+  translate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🛒 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: 📥 Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: 📚 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🧹 Clean up deleted files
+        if: inputs.cleanup_deleted
+        run: |
+          echo "🔍 Checking for deleted English files..."
+          pnpm dlx tsx i18n-sync/index.ts --cleanup-deleted
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+      - name: 🌍 Run translation
+        run: |
+          echo "🚀 Starting translation process..."
+
+          # Build the command with dynamic inputs
+          CMD="pnpm dlx tsx i18n-sync/index.ts"
+
+          # Add concurrency if specified
+          if [ "${{ inputs.concurrency }}" != "10" ]; then
+            CMD="$CMD --concurrency ${{ inputs.concurrency }}"
+          fi
+
+          # Add batch size if specified
+          if [ "${{ inputs.batch_size }}" != "10" ]; then
+            CMD="$CMD --batch-size ${{ inputs.batch_size }}"
+          fi
+
+          # Add target locale if not 'all'
+          if [ "${{ inputs.target_locale }}" != "all" ]; then
+            CMD="$CMD --locale ${{ inputs.target_locale }}"
+          fi
+
+          # Add force flag if enabled
+          if [ "${{ inputs.force_translate }}" = "true" ]; then
+            CMD="$CMD --force"
+          fi
+
+          # Add no-batch flag if enabled
+          if [ "${{ inputs.no_batch }}" = "true" ]; then
+            CMD="$CMD --no-batch"
+          fi
+
+          echo "💻 Executing: $CMD"
+          eval $CMD
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          I18N_CONCURRENCY: ${{ inputs.concurrency }}
+
+      - name: 📊 Check translation status
+        id: check_changes
+        run: |
+          if git diff --quiet && git diff --cached --quiet; then
+            echo "No changes detected"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "Changes detected"
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            
+            # Count changed files
+            CHANGED_FILES=$(git diff --name-only | wc -l)
+            STAGED_FILES=$(git diff --cached --name-only | wc -l)
+            TOTAL_CHANGES=$((CHANGED_FILES + STAGED_FILES))
+            
+            echo "changed_files=$TOTAL_CHANGES" >> $GITHUB_OUTPUT
+            
+            # Get list of changed locales
+            CHANGED_LOCALES=$(git diff --name-only | grep -E '^app/(es|pt-BR)/' | cut -d'/' -f2 | sort -u | tr '\n' ',' | sed 's/,$//')
+            if [ -z "$CHANGED_LOCALES" ]; then
+              CHANGED_LOCALES=$(git diff --cached --name-only | grep -E '^app/(es|pt-BR)/' | cut -d'/' -f2 | sort -u | tr '\n' ',' | sed 's/,$//')
+            fi
+            echo "changed_locales=$CHANGED_LOCALES" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 🏷️ Generate branch name
+        if: steps.check_changes.outputs.has_changes == 'true'
+        id: branch_name
+        run: |
+          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+          if [ "${{ inputs.target_locale }}" != "all" ]; then
+            BRANCH_NAME="translations/${{ inputs.target_locale }}-$TIMESTAMP"
+          else
+            BRANCH_NAME="translations/all-locales-$TIMESTAMP"
+          fi
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+
+      - name: 🌿 Create and switch to new branch
+        if: steps.check_changes.outputs.has_changes == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b ${{ steps.branch_name.outputs.branch_name }}
+
+      - name: 📝 Commit changes
+        if: steps.check_changes.outputs.has_changes == 'true'
+        run: |
+          git add .
+
+          # Create detailed commit message
+          COMMIT_MSG="🌍 Update translations"
+
+          if [ "${{ inputs.target_locale }}" != "all" ]; then
+            COMMIT_MSG="$COMMIT_MSG for ${{ inputs.target_locale }}"
+          fi
+
+          COMMIT_MSG="$COMMIT_MSG (${{ steps.check_changes.outputs.changed_files }} files)"
+
+          if [ "${{ inputs.force_translate }}" = "true" ]; then
+            COMMIT_MSG="$COMMIT_MSG [forced]"
+          fi
+
+          if [ "${{ inputs.cleanup_deleted }}" = "true" ]; then
+            COMMIT_MSG="$COMMIT_MSG [with cleanup]"
+          fi
+
+          # Add configuration details to commit body
+          COMMIT_BODY="Translation Configuration:
+          - Target Locale: ${{ inputs.target_locale }}
+          - Concurrency: ${{ inputs.concurrency }}
+          - Batch Size: ${{ inputs.batch_size }}
+          - Force Translate: ${{ inputs.force_translate }}
+          - No Batch: ${{ inputs.no_batch }}
+          - Cleanup Deleted: ${{ inputs.cleanup_deleted }}
+          - Changed Locales: ${{ steps.check_changes.outputs.changed_locales }}
+
+          Generated by GitHub Actions workflow"
+
+          git commit -m "$COMMIT_MSG" -m "$COMMIT_BODY"
+
+      - name: 📤 Push branch
+        if: steps.check_changes.outputs.has_changes == 'true'
+        run: |
+          git push origin ${{ steps.branch_name.outputs.branch_name }}
+
+      - name: 🔧 Create Pull Request
+        if: steps.check_changes.outputs.has_changes == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: pr } = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🌍 Translation Update: ${{ inputs.target_locale }} (${{ steps.check_changes.outputs.changed_files }} files)`,
+              head: '${{ steps.branch_name.outputs.branch_name }}',
+              base: 'main',
+              body: `## 📖 Automated Translation Update
+              
+              This PR contains automated translations generated by the GitHub Actions workflow.
+              
+              ### 📊 Translation Summary
+              - **Target Locale**: ${{ inputs.target_locale }}
+              - **Files Changed**: ${{ steps.check_changes.outputs.changed_files }}
+              - **Locales Updated**: ${{ steps.check_changes.outputs.changed_locales }}
+              
+              ### ⚙️ Configuration Used
+              - **Concurrency**: ${{ inputs.concurrency }}
+              - **Batch Size**: ${{ inputs.batch_size }}
+              - **Force Translate**: ${{ inputs.force_translate }}
+              - **Batch Processing**: ${{ inputs.no_batch == 'false' && '✅ Enabled' || '❌ Disabled' }}
+              - **Cleanup Deleted Files**: ${{ inputs.cleanup_deleted }}
+              
+              ### 🔍 Review Guidelines
+              Please review the translations for:
+              - [ ] Accuracy and context preservation
+              - [ ] Proper handling of technical terms
+              - [ ] UI/Dashboard elements remain in English
+              - [ ] Code blocks and inline code unchanged
+              - [ ] Markdown formatting preserved
+              
+              ### 🚀 Auto-generated
+              This PR was automatically created by the \`translate-docs.yml\` GitHub Action.
+              
+              **Triggered by**: @${{ github.actor }}
+              **Workflow Run**: [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})`,
+              draft: false
+            });
+
+            // Add labels
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr.number,
+              labels: ['🌍 translation', '🤖 automated', 'documentation']
+            });
+
+            // Add specific locale label if not 'all'
+            if ('${{ inputs.target_locale }}' !== 'all') {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                labels: [`locale:${{ inputs.target_locale }}`]
+              });
+            }
+
+            console.log(`Created PR #${pr.number}: ${pr.html_url}`);
+
+      - name: 📄 Summary
+        if: always()
+        run: |
+          echo "## 🌍 Translation Workflow Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ steps.check_changes.outputs.has_changes }}" = "true" ]; then
+            echo "✅ **Translation completed successfully!**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "- **Files changed**: ${{ steps.check_changes.outputs.changed_files }}" >> $GITHUB_STEP_SUMMARY
+            echo "- **Target locale**: ${{ inputs.target_locale }}" >> $GITHUB_STEP_SUMMARY
+            echo "- **Branch created**: \`${{ steps.branch_name.outputs.branch_name }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "- **Changed locales**: ${{ steps.check_changes.outputs.changed_locales }}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "A Pull Request has been created for review." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "ℹ️ **No changes detected**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "All translations are up to date. No PR was created." >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Configuration Used" >> $GITHUB_STEP_SUMMARY
+          echo "- Concurrency: ${{ inputs.concurrency }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Batch Size: ${{ inputs.batch_size }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Force Translate: ${{ inputs.force_translate }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Batch Processing: ${{ inputs.no_batch == 'false' && 'Enabled' || 'Disabled' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Cleanup Deleted: ${{ inputs.cleanup_deleted }}" >> $GITHUB_STEP_SUMMARY

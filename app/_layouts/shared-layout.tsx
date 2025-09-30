@@ -4,6 +4,7 @@ import CustomLayout from "@/app/_components/custom-layout";
 import { Footer } from "@/app/_components/footer";
 import { Logo } from "@/app/_components/logo";
 import NavBarButton from "@/app/_components/nav-bar-button";
+import { TranslationBanner } from "@/app/_components/translation-banner";
 import "@/app/globals.css";
 import { Discord, Github } from "@arcadeai/design-system";
 import { GoogleTagManager } from "@next/third-parties/google";
@@ -91,13 +92,17 @@ export default async function SharedLayout({
           lightness: 50,
         }}
       >
-        <meta content="en" httpEquiv="Content-Language" />
+        <meta content={lang} httpEquiv="Content-Language" />
         <meta content="width=device-width, initial-scale=1" name="viewport" />
         {/* Performance optimizations for external resources */}
         <link href="https://www.googletagmanager.com" rel="preconnect" />
         <link href="https://www.googletagmanager.com" rel="dns-prefetch" />
       </Head>
       <body>
+        {/* Translation banner for non-English locales */}
+        {lang !== "en" && (
+          <TranslationBanner dictionary={dictionary} locale={lang} />
+        )}
         <Layout
           copyPageButton={false}
           docsRepositoryBase="https://github.com/ArcadeAI/docs"
