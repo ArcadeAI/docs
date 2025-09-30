@@ -52,7 +52,6 @@ export const createSurveyEventProperties = (
       // biome-ignore lint/performance/noAccumulatingSpread: safe and clearer here, small object size
       return { ...acc, [key]: formattedResponse };
     },
-    // biome-ignore lint/style/useNamingConvention: This is ok for PostHog
     { $survey_id: surveyId }
   );
 };

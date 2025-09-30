@@ -7,7 +7,6 @@ const docsComponents = getDocsMdxComponents({
   pre: withIcons(Pre, { js: GitHubIcon }),
 });
 
-// biome-ignore lint/style/useNamingConvention: This is ok for Nextra
 export const useMDXComponents: UseMDXComponents<typeof docsComponents> = <T>(
   components?: T
 ) => ({

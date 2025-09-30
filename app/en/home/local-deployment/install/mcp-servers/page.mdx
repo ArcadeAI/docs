@@ -1,0 +1,112 @@
+---
+title: "MCP Servers"
+description: "How to install Arcade Tools"
+---
+
+# Install a tool or toolkit
+
+## Running a Local worker
+
+To run a local worker without the arcade engine, you can run the following command locally:
+
+```bash
+arcade serve
+```
+
+This will check for any toolkits installed in the current python virtual environment and register them with the worker.
+
+You can also pass in the `--host` and `--port` flags to specify the host and port to run the worker on. The default host is `127.0.0.1` and the default port is `8002`.
+
+## PyPI Installation
+
+All Arcade toolkits are available on PyPI. To install a toolkit, run the following in the same python virtual environment as the arcade-ai package:
+
+```bash
+pip install arcade-[toolkit_name]
+```
+
+For example, to install the math toolkit, run:
+
+```bash
+pip install arcade-math
+```
+
+To verify the installation, run:
+
+```bash
+arcade show --local
+```
+
+which should return output similar to:
+
+```
+┏━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━┓
+┃ Name         ┃ Description                  ┃ Toolkit ┃ Version ┃
+┡━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━┩
+│ Math.Add     │ Add two numbers together     │  Math   │  0.1.0  │
+└──────────────┴──────────────────────────────┴─────────┴─────────┘
+```
+
+These are all tools that are installed in the same python virtual environment as the arcade-ai package.
+
+See our [MCP Servers Overview page](/mcp-servers) for all available MCP Servers and individual installation instructions.
+
+## Local Package Installation
+
+Locally built toolkits can also be installed with:
+
+```python
+pip install .
+```
+
+or
+
+```python
+pip install <wheel_name>
+```
+
+in the same python virtual environment as the arcade-ai package.
+
+## Hosted MCP Servers
+
+To add a toolkit to a hosted worker such as FastAPI, you can register them in the worker itself. This allows you to explicitly define which tools should be included on a particular worker.
+
+```python
+import arcade_math
+from fastapi import FastAPI
+from arcade_tdk import Toolkit
+from arcade_serve.fastapi import FastAPIWorker
+
+app = FastAPI()
+
+worker_secret = os.environ.get("ARCADE_WORKER_SECRET")
+worker = FastAPIWorker(app, secret=worker_secret)
+
+worker.register_toolkit(Toolkit.from_module(arcade_math))
+```
+
+## Showing Tools From a Hosted Engine
+
+To show all tools that are available on an engine, you can run
+
+```bash
+arcade show -h <engine_host> -p <engine_port>
+```
+
+```
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━┓
+┃ Name                                   ┃ Description                                                               ┃ Package  ┃ Version ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━┩
+│ Github.CountStargazers                 │ Count the number of stargazers (stars) for a GitHub repository.           │ Github   │ 0.0.15  │
+│ Github.CreateIssue                     │ Create an issue in a GitHub repository.                                   │ Github   │ 0.0.15  │
+│ Github.CreateIssueComment              │ Create a comment on an issue in a GitHub repository.                      │ Github   │ 0.0.15  │
+│ Github.CreateReplyForReviewComment     │ Create a reply to a review comment for a pull request.                    │ Github   │ 0.0.15  │
+│ Github.CreateReviewComment             │ Create a review comment for a pull request in a GitHub repository.        │ Github   │ 0.0.15  │
+│ Github.GetPullRequest                  │ Get details of a pull request in a GitHub repository.                     │ Github   │ 0.0.15  │
+│ Github.GetRepository                   │ Get a repository.                                                         │ Github   │ 0.0.15  │
+....
+```
+
+## Authenticated Tools
+
+Some MCP Servers may need authentication through an API key or OAuth, which can be configured in the Arcade Engine. To see the specific configuration requirements, you can checkout our [Auth Providers](/home/auth-providers).

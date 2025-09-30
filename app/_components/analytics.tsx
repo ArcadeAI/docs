@@ -18,7 +18,6 @@ export const SignupLink = ({
 
   const trackSignupClick = (source: string) => {
     posthog?.capture("Signup clicked", {
-      // biome-ignore lint/style/useNamingConvention: This is ok for PostHog
       link_location: source,
     });
   };
