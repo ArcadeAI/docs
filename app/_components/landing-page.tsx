@@ -134,23 +134,14 @@ export function LandingPage() {
             }}
           >
             <div className="rounded-lg border border-gray-300 bg-gray-50/50 p-4 text-gray-700 italic backdrop-blur-sm dark:border-white dark:bg-gray-900/50 dark:text-white">
-              Give your AI IDE access to Arcade.dev's documentation using our
-              llms.txt files (
-              <a className="text-primary hover:underline" href="/llms.txt">
-                short llms.txt
-              </a>
-              ,{" "}
-              <a className="text-primary hover:underline" href="/llms-full.txt">
-                llms-full.txt
-              </a>
-              ), or use{" "}
-              <a
+              Don't write code yourself - let your AI IDE do it for you! <br />
+              <Link
                 className="text-primary hover:underline"
-                href="https://context7.com/arcadeai/docs"
+                href="/home/agentic-development"
               >
-                context7
-              </a>
-              .
+                Learn how to give your coding agents access to Arcade.dev's
+                documentation
+              </Link>
             </div>
           </motion.div>
         </div>
