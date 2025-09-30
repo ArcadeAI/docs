@@ -15,11 +15,14 @@ function getLanguageName(locale: string): string {
 }
 
 function buildStyleGuidelines(languageName: string): string {
-  return `Style (CRITICAL):
-- Use natural ${languageName} that developers actually speak - NOT literal word-by-word translations
-- Choose concise terms over verbose calques (e.g., "Herramientas" NOT "Kits de herramientas")
-- Keep common technical terms in English: API, CLI, SDK, Framework, Plugin, Toolkit
-- Think: "What would a ${languageName} developer say?" not "What's the dictionary translation?"`;
+  return `Style (CRITICAL - Read carefully):
+- Write NATURAL ${languageName} as developers actually speak - NOT word-by-word literal translations
+- Restructure sentences to sound natural in ${languageName}, don't keep English sentence structure
+- Use SHORT, direct terms (e.g., "Herramientas" NOT "Kits de herramientas")
+- Keep technical terms in English: API, CLI, SDK, Framework, Plugin, OAuth, endpoint, webhook
+- BAD: "Detrás de escena, gestiona sin problemas" (too literal, sounds unnatural)
+- GOOD: "Gestiona automáticamente" or "El sistema maneja" (natural, concise)
+- Think: "How would a native ${languageName} developer write this?" NOT "What's each word's translation?"`;
 }
 
 function buildCommonPromptContext(locale: string) {
@@ -38,18 +41,23 @@ function buildMdxSystemPrompt(locale: string): string {
 
 ${arcadeContext}
 
+!!!CRITICAL - ABSOLUTELY NO ADDITIONS!!!
+- DO NOT wrap in code fences (\`\`\`mdx, \`\`\`, etc.)
+- DO NOT add ANY markdown formatting around the content
+- DO NOT add language tags, backticks, or any wrapper
+- The first character of your response MUST be the first character of the MDX file
+- The last character of your response MUST be the last character of the MDX file
+
 Preserve exactly:
 - MDX/JSX structure, imports/exports, props, frontmatter, whitespace, indentation
-- Code blocks/fences, inline code (\`...\`), URLs, identifiers, backticked text
+- Existing code blocks/fences, inline code (\`...\`), URLs, identifiers
 - Dashboard UI names ("Create API Key", "API Keys page", "Dashboard")
 
-Translate ONLY:
-- Visible text: headings, paragraphs, list items, text inside JSX elements
-- Localize language references (e.g., "English version" → "${languageName} version")
+Translate ONLY: Visible text (headings, paragraphs, list items, JSX text)
 
 ${styleGuidelines}
 
-Return ONLY the translated content with exact original structure.`;
+Return ONLY the raw MDX file content, character-for-character with translated text.`;
 }
 
 function buildMetaSystemPrompt(locale: string): string {
@@ -59,9 +67,15 @@ function buildMetaSystemPrompt(locale: string): string {
 
 ${arcadeContext}
 
+!!!CRITICAL - ABSOLUTELY NO ADDITIONS!!!
+- DO NOT wrap in code fences (\`\`\`typescript, \`\`\`ts, \`\`\`, etc.)
+- DO NOT add ANY formatting or wrapper text
+- The first line MUST start with "import" (or whatever the file starts with)
+- DO NOT add language tags or any extra characters
+
 Preserve exactly:
 - ALL imports, exports, type annotations, code structure
-- Object keys (property names), variable/function names, URLs, hrefs, className
+- Object keys (property names), variable/function names, URLs, hrefs
 - Formatting: quotes, commas, spacing, indentation
 
 Translate ONLY: String literal values (text in quotes) for titles/labels
@@ -72,7 +86,7 @@ Examples:
 
 ${styleGuidelines}
 
-Return complete file with imports/exports.`;
+Return raw TypeScript code ONLY - start with imports, end with export.`;
 }
 
 function buildTsxSystemPrompt(locale: string): string {
@@ -82,21 +96,25 @@ function buildTsxSystemPrompt(locale: string): string {
 
 ${arcadeContext}
 
+!!!CRITICAL - ABSOLUTELY NO ADDITIONS!!!
+- DO NOT wrap in code fences (\`\`\`tsx, \`\`\`typescript, \`\`\`, etc.)
+- DO NOT add ANY wrapper or formatting
+- First line MUST start with the actual file content (usually "import")
+- DO NOT add language tags or extra characters
+
 Translate ONLY: User-visible string literals (in quotes) for UI text, labels, titles
 
 Do NOT translate:
 - Variable/function names, imports, URLs, className, alt attributes
 - Dashboard UI elements ("Create API Key", "API Keys page", "Dashboard")
-- Preserve ALL code structure exactly
 
 ${styleGuidelines}
 
 Examples:
 - "Toolkits" → "Herramientas" or keep "Toolkits"
 - "Contact us" → "Contáctanos" (Spanish) / "Contate-nos" (Portuguese)
-- "Getting Started" → "Primeros pasos"
 
-Return complete file with exact structure.`;
+Return raw TypeScript/TSX code ONLY - NO wrappers.`;
 }
 
 function buildLayoutSystemPrompt(locale: string): string {
@@ -106,10 +124,16 @@ function buildLayoutSystemPrompt(locale: string): string {
 
 ${arcadeContext}
 
-Change: lang attribute from "en" to "${localeCode}"
+!!!CRITICAL - ABSOLUTELY NO ADDITIONS!!!
+- DO NOT wrap in code fences (\`\`\`tsx, \`\`\`, etc.)
+- DO NOT add ANY formatting or wrapper
+- First character MUST be the start of the actual file
+- Return ONLY raw TypeScript code
+
+Change ONLY: lang attribute from "en" to "${localeCode}"
 Preserve: ALL other code exactly as-is
 
-Return complete file.`;
+Return raw TSX file content - NO wrappers.`;
 }
 
 export const FILE_TYPE_PROMPTS: Record<FileType, (locale: string) => string> = {

@@ -20,7 +20,12 @@ function displayTranslationSummary(
   locales: string[],
   files: string[],
   cache: Cache,
-  options: { force: boolean; only: string | null; dryRun?: boolean }
+  options: {
+    force: boolean;
+    only: string | null;
+    dryRun?: boolean;
+    concurrency: number;
+  }
 ) {
   // Calculate files to process per locale
   const stats = locales.map((locale) => {
@@ -29,7 +34,8 @@ function displayTranslationSummary(
       shouldTranslateFile(rel, localeCache, options)
     ).length;
     const skipped = options.only ? 0 : files.length - toTranslate;
-    return { locale, toTranslate, skipped };
+    const batches = Math.ceil(toTranslate / options.concurrency);
+    return { locale, toTranslate, skipped, batches };
   });
 
   const totalToTranslate = stats.reduce((sum, s) => sum + s.toTranslate, 0);
@@ -47,6 +53,9 @@ function displayTranslationSummary(
   console.log(`   📁 ${files.length} source file${plural(files.length)}`);
   console.log(`   🌍 ${locales.join(", ")}`);
   console.log(`   🤖 ${model}`);
+  console.log(
+    `   ⚡ Concurrency: ${options.concurrency} file${plural(options.concurrency)} in parallel`
+  );
 
   const modes = [
     options.force && "🔄 force",
@@ -58,11 +67,13 @@ function displayTranslationSummary(
 
   console.log("");
   for (const stat of stats.filter((s) => s.toTranslate > 0)) {
-    console.log(
-      options.only
-        ? `   📄 ${stat.locale}: ${options.only}`
-        : `   ▸ ${stat.locale}: ${stat.toTranslate} to translate • ${stat.skipped} cached`
-    );
+    if (options.only) {
+      console.log(`   📄 ${stat.locale}: ${options.only}`);
+    } else {
+      console.log(
+        `   ▸ ${stat.locale}: ${stat.toTranslate} to translate • ${stat.skipped} cached • ${stat.batches} batch${plural(stat.batches)}`
+      );
+    }
   }
 
   console.log("");
@@ -79,6 +90,11 @@ async function main(argv: string[]) {
     .option("--force", "translate even if cached")
     .option("--dry-run", "do not write files or cache")
     .option("--cleanup", "remove translations whose sources were deleted")
+    .option(
+      "--concurrency <number>",
+      "number of files to translate in parallel (default: 3)",
+      "3"
+    )
     .parse(argv);
 
   const opts = program.opts();
@@ -107,10 +123,14 @@ async function main(argv: string[]) {
     throw new Error("OpenAI client is required for translation");
   }
 
+  const defaultConcurrency = 3;
   const translationOpts = {
     force: Boolean(opts.force),
     only: opts.file ?? null,
     dryRun: Boolean(opts.dryRun),
+    concurrency: opts.concurrency
+      ? Number.parseInt(opts.concurrency, 10)
+      : defaultConcurrency,
   };
 
   // Display summary and check if there's work to do

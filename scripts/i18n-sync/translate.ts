@@ -126,9 +126,10 @@ export async function translateLocale(
     force: boolean;
     only: string | null;
     dryRun?: boolean;
+    concurrency?: number;
   }
 ) {
-  const { files, force, only, dryRun } = options;
+  const { files, force, only, dryRun, concurrency = 1 } = options;
   const entries = (await buildEntries(locale, cache, files)).filter((entry) =>
     only ? entry.rel === only : force || entry.hash !== entry.cachedHash
   );
@@ -137,6 +138,7 @@ export async function translateLocale(
     return { ok: 0, failed: 0 };
   }
 
+  const totalBatches = Math.ceil(entries.length / concurrency);
   const spinner = ora({
     text: `(${locale}) preparing translations...`,
     spinner: "dots",
@@ -144,27 +146,57 @@ export async function translateLocale(
   let ok = 0;
   let failed = 0;
 
-  for (const entry of entries) {
-    spinner.text = `(${locale}) ${ok + failed + 1}/${entries.length} ${prettyPath(entry.rel)}`;
-    try {
-      const translated = await translate({
-        openai,
-        locale,
-        type: entry.type,
-        input: entry.content,
-      });
-      if (!dryRun) {
-        await writeText(entry.tgtPath, translated);
-        cache.data[locale] = cache.data[locale] || {};
-        cache.data[locale][entry.rel] = entry.hash;
-        await saveCache(cache);
+  // Process in batches for concurrency
+  for (let i = 0; i < entries.length; i += concurrency) {
+    const batch = entries.slice(i, i + concurrency);
+    const batchNum = Math.floor(i / concurrency) + 1;
+
+    spinner.text = `(${locale}) batch ${batchNum}/${totalBatches} | ${batch.length} in progress | ${ok + failed}/${entries.length} done`;
+
+    const results = await Promise.allSettled(
+      batch.map(async (entry) => {
+        try {
+          const translated = await translate({
+            openai,
+            locale,
+            type: entry.type,
+            input: entry.content,
+          });
+          if (!dryRun) {
+            await writeText(entry.tgtPath, translated);
+            cache.data[locale] = cache.data[locale] || {};
+            cache.data[locale][entry.rel] = entry.hash;
+          }
+          ok++;
+          spinner.text = `(${locale}) batch ${batchNum}/${totalBatches} | ${batch.length - (ok + failed - i)} in progress | ${ok + failed}/${entries.length} done`;
+          return { entry, success: true };
+        } catch (error) {
+          failed++;
+          spinner.text = `(${locale}) batch ${batchNum}/${totalBatches} | ${batch.length - (ok + failed - i)} in progress | ${ok + failed}/${entries.length} done`;
+          return { entry, success: false, error };
+        }
+      })
+    );
+
+    // Handle any failures
+    for (const result of results) {
+      if (result.status === "fulfilled" && !result.value.success) {
+        spinner.warn(
+          `${prettyPath(result.value.entry.rel)}: ${String(result.value.error)}`
+        );
+        await sleep(SPINNER_RESUME_DELAY_MS);
+        spinner.start();
+        spinner.text = `(${locale}) batch ${batchNum}/${totalBatches} | 0 in progress | ${ok + failed}/${entries.length} done`;
+      } else if (result.status === "rejected") {
+        spinner.warn(`Unexpected error: ${String(result.reason)}`);
+        await sleep(SPINNER_RESUME_DELAY_MS);
+        spinner.start();
+        spinner.text = `(${locale}) batch ${batchNum}/${totalBatches} | 0 in progress | ${ok + failed}/${entries.length} done`;
       }
-      ok++;
-    } catch (error) {
-      failed++;
-      spinner.warn(`${prettyPath(entry.rel)} failed: ${String(error)}`);
-      await sleep(SPINNER_RESUME_DELAY_MS);
-      spinner.start();
+    }
+
+    if (!dryRun && ok > 0) {
+      await saveCache(cache);
     }
   }
 
