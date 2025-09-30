@@ -1,4 +1,5 @@
-import { headers } from "next/headers";
+"use client";
+
 import Link from "next/link";
 import "@/app/globals.css";
 import {
@@ -11,21 +12,30 @@ import {
 } from "@arcadeai/design-system";
 import { cn } from "@arcadeai/design-system/lib/utils";
 import { Home, SearchX } from "lucide-react";
-import { getDictionary } from "@/_dictionaries/get-dictionary";
+import { usePathname } from "next/navigation";
+import { use, useMemo } from "react";
+import { getDictionaryClient } from "@/_dictionaries/get-dictionary-client";
 import { BackButton } from "@/app/_components/back-button";
 
 const LOCALE_PATH_REGEX = /^\/([a-z]{2}(?:-[A-Z]{2})?)(?:\/.+|$)/;
 const LOCALE_PREFIX_REGEX = /^\/[a-z]{2}(?:-[A-Z]{2})?/;
 
-export default async function NotFound() {
-  const headersList = await headers();
-  const pathname = headersList.get("x-pathname") || "/";
+export default function NotFound() {
+  const pathname = usePathname() || "/";
 
-  const currentLocale = pathname.match(LOCALE_PATH_REGEX)?.[1] || "en";
-  const englishPath = `/en${pathname.replace(LOCALE_PREFIX_REGEX, "") || "/"}`;
-  const showEnglishLink = currentLocale !== "en";
+  const { currentLocale, englishPath, showEnglishLink } = useMemo(() => {
+    const locale = pathname.match(LOCALE_PATH_REGEX)?.[1] || "en";
+    const enPath = `/en${pathname.replace(LOCALE_PREFIX_REGEX, "") || "/"}`;
+    const showEnLink = locale !== "en";
 
-  const dict = await getDictionary(currentLocale);
+    return {
+      currentLocale: locale,
+      englishPath: enPath,
+      showEnglishLink: showEnLink,
+    };
+  }, [pathname]);
+
+  const dict = use(getDictionaryClient(currentLocale));
 
   return (
     <div className="dark flex min-h-screen items-center justify-center bg-background px-4">
