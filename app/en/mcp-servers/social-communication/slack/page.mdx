@@ -1,0 +1,938 @@
+---
+asIndexPage: true
+---
+
+# Slack
+
+import ToolInfo from "@/app/_components/tool-info";
+import Badges from "@/app/_components/badges";
+import TabbedCodeBlock from "@/app/_components/tabbed-code-block";
+import TableOfContents from "@/app/_components/table-of-contents";
+import ToolFooter from "@/app/_components/tool-footer";
+import { Callout } from "nextra/components";
+
+<ToolInfo
+  description="Enable agents to interact with Slack"
+  author="Arcade"
+  authType="OAuth2"
+  versions={["1.1.0"]}
+/>
+
+<Badges repo="arcadeai/arcade_slack" />
+
+The Slack toolkit provides a comprehensive set of tools for interacting with the Slack platform, enabling users and AI applications to efficiently manage conversations and user information. With this toolkit, you can:
+
+- Retrieve detailed information about users, including their IDs, usernames, and emails.
+- List all users in your Slack team and get users in specific conversations.
+- Send messages to channels, direct messages, or multi-person conversations.
+- Access messages and metadata from various conversations, including channels and direct messages.
+- Manage and list conversations, including public and private channels.
+
+This toolkit streamlines communication and enhances collaboration within Slack.
+
+## Available Tools
+
+<TableOfContents
+  headers={["Tool Name", "Description"]}
+  data={
+    [
+      // New tools
+      ["Slack.WhoAmI", "Get comprehensive user profile."],
+      ["Slack.GetUsersInfo", "Get the information of one or more users in Slack by ID, username, and/or email."],
+      ["Slack.ListUsers", "List all users in the authenticated user's Slack team."],
+      ["Slack.SendMessage", "Send a message to a Channel, Direct Message (IM/DM), or Multi-Person (MPIM) conversation"],
+      ["Slack.GetUsersInConversation", "Get the users in a Slack conversation (Channel, DM/IM, or MPIM) by its ID or by channel name."],
+      ["Slack.GetMessages", "Get messages in a Slack Channel, DM (direct message) or MPIM (multi-person) conversation."],
+      ["Slack.GetConversationMetadata", "Get metadata of a Channel, a Direct Message (IM / DM) or a Multi-Person (MPIM) conversation."],
+      ["Slack.ListConversations", "List metadata for Slack conversations (channels, DMs, MPIMs) the user is a member of."],
+
+      // Tools marked for deprecation
+      ["Slack.GetUserInfoById", "Get the information of a user in Slack."],
+      ["Slack.SendDmToUser", "Send a direct message to a user in Slack."],
+      ["Slack.SendMessageToChannel", "Send a message to a channel in Slack."],
+      ["Slack.GetMembersInConversationById", "Get the members of a conversation in Slack by the conversation's ID."],
+      ["Slack.GetMembersInChannelByName", "Get the members of a conversation in Slack by the conversation's name."],
+      ["Slack.GetMessagesInChannelByName", "Get the messages in a channel by the channel's name."],
+      ["Slack.GetMessagesInConversationById", "Get the messages in a conversation by the conversation's ID."],
+      ["Slack.GetMessagesInDirectMessageConversationByUsername", "Get the messages in a direct conversation by the user's name."],
+      ["Slack.GetMessagesInMultiPersonDmConversationByUsernames", "Get the messages in a multi-person direct message conversation by the usernames."],
+      ["Slack.ListConversationsMetadata", "List Slack conversations (channels, DMs, MPIMs) the user is a member of."],
+      ["Slack.ListPublicChannelsMetadata", "List metadata for public channels in Slack that the user is a member of."],
+      ["Slack.ListPrivateChannelsMetadata", "List metadata for private channels in Slack that the user is a member of."],
+      ["Slack.ListGroupDirectMessageConversationsMetadata", "List metadata for group direct message conversations that the user is a member of."],
+      ["Slack.ListDirectMessageConversationsMetadata", "List metadata for direct message conversations in Slack that the user is a member of."],
+      ["Slack.GetConversationMetadataById", "Get the metadata of a conversation in Slack searching by its ID."],
+      ["Slack.GetChannelMetadataByName", "Get the metadata of a channel in Slack searching by its name."],
+      ["Slack.GetDirectMessageConversationMetadataByUsername", "Get the metadata of a direct message conversation in Slack by the username."],
+      ["Slack.GetMultiPersonDmConversationMetadataByUsernames", "Get the metadata of a multi-person direct message conversation in Slack by the usernames."],
+    ]
+
+}
+/>
+
+<Callout>
+  If you need to perform an action that's not listed here, you can [get in touch
+  with us](mailto:contact@arcade.dev) to request a new tool, or [create your own
+  tools](/home/build-tools/create-a-mcp-server).
+</Callout>
+
+## Slack.WhoAmI
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slack/who_am_i_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slack/who_am_i_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get comprehensive user profile information.
+
+**Parameters**
+
+This tool takes no parameters.
+
+## Slack.GetUsersInfo
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slack/get_users_info_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slack/get_users_info_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get the information of one or more users in Slack by ID, username, and/or email.
+
+**Parameters**
+
+- **user_ids** (`array[string]`, optional) The IDs of the users to get
+- **usernames** (`array[string]`, optional) The usernames of the users to get. Prefer retrieving by user_ids and/or emails, when available, since the performance is better.
+- **emails** (`array[string]`, optional) The emails of the users to get
+
+## Slack.ListUsers
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slack/list_users_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slack/list_users_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+List all users in the authenticated user's Slack team.
+
+**Parameters**
+
+- **exclude_bots** (`boolean`, optional) Whether to exclude bots from the results. Defaults to True.
+- **limit** (`integer`, optional) The maximum number of users to return. Defaults to 200. Maximum is 500.
+- **next_cursor** (`string`, optional) The next cursor token to use for pagination.
+
+## Slack.SendMessage
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slack/send_message_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slack/send_message_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Send a message to a Channel, Direct Message (IM/DM), or Multi-Person (MPIM) conversation.
+
+Provide exactly one of:
+
+- channel_name; or
+- conversation_id; or
+- any combination of user_ids, usernames, and/or emails.
+
+In case multiple user_ids, usernames, and/or emails are provided, the tool will open a
+multi-person conversation with the specified people and send the message to it.
+
+To improve performance, prefer providing a conversation_id over a channel_name, when available. When referencing users, prefer providing user_ids and/or emails, when possible.
+
+**Parameters**
+
+- **message** (`string`, required) The content of the message to send.
+- **channel_name** (`string`, optional) The channel name to send the message to. Prefer providing a conversation_id, when available, since the performance is better.
+- **conversation_id** (`string`, optional) The conversation ID to send the message to.
+- **user_ids** (`array[string]`, optional) The Slack user IDs of the people to message.
+- **emails** (`array[string]`, optional) The emails of the people to message.
+- **usernames** (`array[string]`, optional) The Slack usernames of the people to message. Prefer providing user_ids and/or emails, when available, since the performance is better.
+
+## Slack.GetUsersInConversation
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slack/get_users_in_conversation_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slack/get_users_in_conversation_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get the users in a Slack conversation (Channel, DM/IM, or MPIM) by its ID or by channel name.
+
+Provide exactly one of conversation_id or channel_name. Prefer providing a conversation_id, when available, since the performance is better.
+
+**Parameters**
+
+- **conversation_id** (`string`, optional) The ID of the conversation to get users in.
+- **channel_name** (`string`, optional) The name of the channel to get users in. Prefer providing a conversation_id, when available, since the performance is better.
+- **limit** (`integer`, optional) The maximum number of users to return. Defaults to 200. Maximum is 500.
+- **next_cursor** (`string`, optional) The cursor to use for pagination.
+
+## Slack.GetMessages
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slack/get_messages_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slack/get_messages_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get messages in a Slack Channel, DM (direct message) or MPIM (multi-person) conversation.
+
+Provide exactly one of:
+
+- conversation_id; or
+- channel_name; or
+- any combination of user_ids, usernames, and/or emails.
+
+To improve performance, prefer providing a conversation_id over a channel_name, when available. When referencing users, prefer providing user_ids and/or emails, when possible.
+
+**Parameters**
+
+- **conversation_id** (`string`, optional) The ID of the conversation to get messages from. Provide exactly one of conversation_id OR any combination of user_ids, usernames, and/or emails.
+- **channel_name** (`string`, optional) The name of the channel to get messages from. Prefer providing a conversation_id, when available, since the performance is better.
+- **user_ids** (`array[string]`, optional) The IDs of the users in the conversation to get messages from.
+- **usernames** (`array[string]`, optional) The usernames of the users in the conversation to get messages from. Prefer providinguser_ids and/or emails, when available, since the performance is better.
+- **emails** (`array[string]`, optional) The emails of the users in the conversation to get messages from.
+- **oldest_relative** (`string`, optional) The oldest message to include in the results, specified as a time offset from the current time in the format 'DD:HH:MM'
+- **latest_relative** (`string`, optional) The latest message to include in the results, specified as a time offset from the current time in the format 'DD:HH:MM'
+- **oldest_datetime** (`string`, optional) The oldest message to include in the results, specified as a datetime object in the format 'YYYY-MM-DD HH:MM:SS'
+- **latest_datetime** (`string`, optional) The latest message to include in the results, specified as a datetime object in the format 'YYYY-MM-DD HH:MM:SS'
+- **limit** (`integer`, optional) The maximum number of messages to return. Defaults to 20. Maximum is 100.
+- **next_cursor** (`string`, optional) The cursor to use for pagination.
+
+**Notes about the date/time filtering parameters:**
+
+To filter messages by an absolute datetime, use 'oldest_datetime' and/or 'latest_datetime'. If
+only 'oldest_datetime' is provided, it will return messages from the oldest_datetime to the
+current time. If only 'latest_datetime' is provided, it will return messages since the
+beginning of the conversation to the latest_datetime.
+
+To filter messages by a relative datetime (e.g. 3 days ago, 1 hour ago, etc.), use
+'oldest_relative' and/or 'latest_relative'. If only 'oldest_relative' is provided, it will
+return messages from the oldest_relative to the current time. If only 'latest_relative' is
+provided, it will return messages from the current time to the latest_relative.
+
+Do not provide both 'oldest_datetime' and 'oldest_relative' or both 'latest_datetime' and
+'latest_relative'.
+
+Leave all arguments with the default None to get messages without date/time filtering
+
+## Slack.GetConversationMetadata
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slack/get_conversation_metadata_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slack/get_conversation_metadata_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get metadata of a Channel, a Direct Message (IM / DM) or a Multi-Person (MPIM) conversation.
+
+Provide exactly one of:
+
+- conversation_id; or
+- channel_name; or
+- any combination of user_ids, usernames, and/or emails.
+
+To improve performance, prefer providing a conversation_id over a channel_name, when available. When referencing users, prefer providing user_ids and/or emails, when possible.
+
+**Parameters**
+
+- **conversation_id** (`string`, optional) The ID of the conversation to get metadata for
+- **channel_name** (`string`, optional) The name of the channel to get metadata for. Prefer providing a conversation_id, when available, since the performance is better.
+- **usernames** (`array[string]`, optional) The usernames of the users to get the conversation metadata. Prefer providing user_ids and/or emails, when available, since the performance is better.
+- **emails** (`array[string]`, optional) The emails of the users to get the conversation metadata.
+- **user_ids** (`array[string]`, optional) The IDs of the users to get the conversation metadata.
+
+## Slack.ListConversations
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slack/list_conversations_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slack/list_conversations_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+List metadata for Slack conversations (channels, DMs, MPIMs) the user is a member of.
+
+**Parameters**
+
+- **conversation_types** (`Enum` [ConversationType](/mcp-servers/social-communication/slack/reference#ConversationType), optional) Optionally filter by the type(s) of conversations. Defaults to None (all types).
+- **limit** (`integer`, optional) The maximum number of conversations to list. Defaults to 200. Maximum is 500.
+- **next_cursor** (`string`, optional) The cursor to use for pagination.
+
+## Slack.GetUserInfoById
+
+<Callout type="warning">
+  This tool is marked for deprecation and will be removed in a future release.
+  Please use [Slack.GetUsersInfo](#slackgetusersinfo) instead.
+</Callout>
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slack/get_user_info_by_id_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slack/get_user_info_by_id_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get the information of a user in Slack.
+
+**Parameters**
+
+- **user_id** (`string`, required) The ID of the user to get
+
+## Slack.SendDmToUser
+
+<Callout type="warning">
+  This tool is marked for deprecation and will be removed in a future release.
+  Please use [Slack.SendMessage](#slacksendmessage) instead.
+</Callout>
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slack/send_dm_to_user_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slack/send_dm_to_user_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Send a direct message to a user in Slack.
+
+**Parameters**
+
+- **user_name** (`string`, required) The Slack username of the person you want to message. Slack usernames are ALWAYS lowercase.
+- **message** (`string`, required) The message you want to send
+
+## Slack.SendMessageToChannel
+
+<Callout type="warning">
+  This tool is marked for deprecation and will be removed in a future release.
+  Please use [Slack.SendMessage](#slacksendmessage) instead.
+</Callout>
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slack/send_message_to_channel_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slack/send_message_to_channel_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Send a message to a channel in Slack.
+
+**Parameters**
+
+- **channel_name** (`string`, required) The Slack channel name where you want to send the message.
+- **message** (`string`, required) The message you want to send
+
+## Slack.GetMembersInConversationById
+
+<Callout type="warning">
+  This tool is marked for deprecation and will be removed in a future release.
+  Please use [Slack.GetUsersInConversation](#slackgetusersinconversation)
+  instead.
+</Callout>
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slack/get_members_in_conversation_by_id_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slack/get_members_in_conversation_by_id_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get the members of a conversation in Slack by the conversation's ID.
+
+**Parameters**
+
+- **conversation_id** (`string`, required) The ID of the conversation to get members for
+- **limit** (`integer`, optional) The maximum number of members to return.
+- **next_cursor** (`string`, optional) The cursor to use for pagination.
+
+## Slack.GetMembersInChannelByName
+
+<Callout type="warning">
+  This tool is marked for deprecation and will be removed in a future release.
+  Please use [Slack.GetUsersInConversation](#slackgetusersinconversation)
+  instead.
+</Callout>
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slack/get_members_in_channel_by_name_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slack/get_members_in_channel_by_name_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get the members of a conversation in Slack by the conversation's name.
+
+**Parameters**
+
+- **channel_name** (`string`, required) The name of the channel to get members for
+- **limit** (`integer`, optional) The maximum number of members to return.
+- **next_cursor** (`string`, optional) The cursor to use for pagination.
+
+## Slack.GetMessagesInChannelByName
+
+<Callout type="warning">
+  This tool is marked for deprecation and will be removed in a future release.
+  Please use [Slack.GetMessages](#slackgetmessages) instead.
+</Callout>
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slack/get_messages_in_channel_by_name_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slack/get_messages_in_channel_by_name_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get the messages in a channel by the channel's name.
+
+**Parameters**
+
+- **channel_name** (`string`, required) The name of the channel
+- **oldest_relative** (`string`, optional) The oldest message to include in the results, specified as a time offset from the current time in the format 'DD:HH:MM'
+- **latest_relative** (`string`, optional) The latest message to include in the results, specified as a time offset from the current time in the format 'DD:HH:MM'
+- **oldest_datetime** (`string`, optional) The oldest message to include in the results, specified as a datetime object in the format 'YYYY-MM-DD HH:MM:SS'
+- **latest_datetime** (`string`, optional) The latest message to include in the results, specified as a datetime object in the format 'YYYY-MM-DD HH:MM:SS'
+- **limit** (`integer`, optional) The maximum number of messages to return.
+- **next_cursor** (`string`, optional) The cursor to use for pagination.
+
+## Slack.GetMessagesInConversationById
+
+<Callout type="warning">
+  This tool is marked for deprecation and will be removed in a future release.
+  Please use [Slack.GetMessages](#slackgetmessages) instead.
+</Callout>
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slack/get_messages_in_conversation_by_id_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slack/get_messages_in_conversation_by_id_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get the messages in a conversation by the conversation's ID.
+
+**Parameters**
+
+- **conversation_id** (`string`, required) The ID of the conversation to get history for
+- **oldest_relative** (`string`, optional) The oldest message to include in the results, specified as a time offset from the current time in the format 'DD:HH:MM'
+- **latest_relative** (`string`, optional) The latest message to include in the results, specified as a time offset from the current time in the format 'DD:HH:MM'
+- **oldest_datetime** (`string`, optional) The oldest message to include in the results, specified as a datetime object in the format 'YYYY-MM-DD HH:MM:SS'
+- **latest_datetime** (`string`, optional) The latest message to include in the results, specified as a datetime object in the format 'YYYY-MM-DD HH:MM:SS'
+- **limit** (`integer`, optional) The maximum number of messages to return.
+- **next_cursor** (`string`, optional) The cursor to use for pagination.
+
+## Slack.GetMessagesInDirectMessageConversationByUsername
+
+<Callout type="warning">
+  This tool is marked for deprecation and will be removed in a future release.
+  Please use [Slack.GetMessages](#slackgetmessages) instead.
+</Callout>
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slack/get_messages_in_direct_message_conversation_by_username_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slack/get_messages_in_direct_message_conversation_by_username_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get the messages in a direct conversation by the user's name.
+
+**Parameters**
+
+- **username** (`string`, required) The username of the user to get messages from
+- **oldest_relative** (`string`, optional) The oldest message to include in the results, specified as a time offset from the current time in the format 'DD:HH:MM'
+- **latest_relative** (`string`, optional) The latest message to include in the results, specified as a time offset from the current time in the format 'DD:HH:MM'
+- **oldest_datetime** (`string`, optional) The oldest message to include in the results, specified as a datetime object in the format 'YYYY-MM-DD HH:MM:SS'
+- **latest_datetime** (`string`, optional) The latest message to include in the results, specified as a datetime object in the format 'YYYY-MM-DD HH:MM:SS'
+- **limit** (`integer`, optional) The maximum number of messages to return.
+- **next_cursor** (`string`, optional) The cursor to use for pagination.
+
+## Slack.GetMessagesInMultiPersonDmConversationByUsernames
+
+<Callout type="warning">
+  This tool is marked for deprecation and will be removed in a future release.
+  Please use [Slack.GetMessages](#slackgetmessages) instead.
+</Callout>
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slack/get_messages_in_multi_person_dm_conversation_by_usernames_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slack/get_messages_in_multi_person_dm_conversation_by_usernames_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get the messages in a multi-person direct message conversation by the usernames.
+
+**Parameters**
+
+- **usernames** (`array[string]`, required) The usernames of the users to get messages from
+- **oldest_relative** (`string`, optional) The oldest message to include in the results, specified as a time offset from the current time in the format 'DD:HH:MM'
+- **latest_relative** (`string`, optional) The latest message to include in the results, specified as a time offset from the current time in the format 'DD:HH:MM'
+- **oldest_datetime** (`string`, optional) The oldest message to include in the results, specified as a datetime object in the format 'YYYY-MM-DD HH:MM:SS'
+- **latest_datetime** (`string`, optional) The latest message to include in the results, specified as a datetime object in the format 'YYYY-MM-DD HH:MM:SS'
+- **limit** (`integer`, optional) The maximum number of messages to return.
+- **next_cursor** (`string`, optional) The cursor to use for pagination.
+
+## Slack.ListConversationsMetadata
+
+<Callout type="warning">
+  This tool is marked for deprecation and will be removed in a future release.
+  Please use [Slack.ListConversations](#slacklistconversations) instead.
+</Callout>
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slack/list_conversations_metadata_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slack/list_conversations_metadata_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+List Slack conversations (channels, DMs, MPIMs) the user is a member of.
+
+**Parameters**
+
+- **conversation_types** (`Enum` [ConversationType](/mcp-servers/social-communication/slack/reference#ConversationType), optional) Optionally filter by the type(s) of conversations. Defaults to None (all types).
+- **limit** (`integer`, optional) The maximum number of conversations to list.
+- **next_cursor** (`string`, optional) The cursor to use for pagination.
+
+## Slack.ListPublicChannelsMetadata
+
+<Callout type="warning">
+  This tool is marked for deprecation and will be removed in a future release.
+  Please use [Slack.ListConversations](#slacklistconversations) instead.
+</Callout>
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slack/list_public_channels_metadata_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slack/list_public_channels_metadata_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+List metadata for public channels in Slack that the user is a member of.
+
+**Parameters**
+
+- **limit** (`integer`, optional) The maximum number of channels to list.
+
+## Slack.ListPrivateChannelsMetadata
+
+<Callout type="warning">
+  This tool is marked for deprecation and will be removed in a future release.
+  Please use [Slack.ListConversations](#slacklistconversations) instead.
+</Callout>
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slack/list_private_channels_metadata_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slack/list_private_channels_metadata_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+List metadata for private channels in Slack that the user is a member of.
+
+**Parameters**
+
+- **limit** (`integer`, optional) The maximum number of channels to list.
+
+## Slack.ListGroupDirectMessageConversationsMetadata
+
+<Callout type="warning">
+  This tool is marked for deprecation and will be removed in a future release.
+  Please use [Slack.ListConversations](#slacklistconversations) instead.
+</Callout>
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slack/list_group_direct_message_conversations_metadata_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slack/list_group_direct_message_conversations_metadata_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+List metadata for group direct message conversations that the user is a member of.
+
+**Parameters**
+
+- **limit** (`integer`, optional) The maximum number of conversations to list.
+
+## Slack.ListDirectMessageConversationsMetadata
+
+<Callout type="warning">
+  This tool is marked for deprecation and will be removed in a future release.
+  Please use [Slack.ListConversations](#slacklistconversations) instead.
+</Callout>
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slack/list_direct_message_conversations_metadata_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slack/list_direct_message_conversations_metadata_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+List metadata for direct message conversations in Slack that the user is a member of.
+
+**Parameters**
+
+- **limit** (`integer`, optional) The maximum number of conversations to list.
+
+## Slack.GetConversationMetadataById
+
+<Callout type="warning">
+  This tool is marked for deprecation and will be removed in a future release.
+  Please use [Slack.GetConversationMetadata](#slackgetconversationmetadata)
+  instead.
+</Callout>
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slack/get_conversation_metadata_by_id_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slack/get_conversation_metadata_by_id_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get the metadata of a conversation in Slack searching by its ID.
+
+**Parameters**
+
+- **conversation_id** (`string`, required) The ID of the conversation to get metadata for
+
+## Slack.GetChannelMetadataByName
+
+<Callout type="warning">
+  This tool is marked for deprecation and will be removed in a future release.
+  Please use [Slack.GetConversationMetadata](#slackgetconversationmetadata)
+  instead.
+</Callout>
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slack/get_channel_metadata_by_name_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slack/get_channel_metadata_by_name_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get the metadata of a channel in Slack searching by its name.
+
+**Parameters**
+
+- **channel_name** (`string`, required) The name of the channel to get metadata for
+- **next_cursor** (`string`, optional) The cursor to use for pagination, if continuing from a previous search.
+
+## Slack.GetDirectMessageConversationMetadataByUsername
+
+<Callout type="warning">
+  This tool is marked for deprecation and will be removed in a future release.
+  Please use [Slack.GetConversationMetadata](#slackgetconversationmetadata)
+  instead.
+</Callout>
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slack/get_direct_message_conversation_metadata_by_username_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slack/get_direct_message_conversation_metadata_by_username_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get the metadata of a direct message conversation in Slack by the username.
+
+**Parameters**
+
+- **username** (`string`, required) The username of the user/person to get messages with
+- **next_cursor** (`string`, optional) The cursor to use for pagination, if continuing from a previous search.
+
+## Slack.GetMultiPersonDmConversationMetadataByUsernames
+
+<Callout type="warning">
+  This tool is marked for deprecation and will be removed in a future release.
+  Please use [Slack.GetConversationMetadata](#slackgetconversationmetadata)
+  instead.
+</Callout>
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slack/get_multi_person_dm_conversation_metadata_by_usernames_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slack/get_multi_person_dm_conversation_metadata_by_usernames_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get the metadata of a multi-person direct message conversation in Slack by the usernames.
+
+**Parameters**
+
+- **usernames** (`array[string]`, required) The usernames of the users/people to get messages with
+- **next_cursor** (`string`, optional) The cursor to use for pagination, if continuing from a previous search.
+
+## Auth
+
+The Arcade Slack toolkit uses the [Slack auth provider](/home/auth-providers/slack) to connect to users' Slack accounts. Please refer to the [Slack auth provider](/home/auth-providers/slack) documentation to learn how to configure auth.
+
+<ToolFooter pipPackageName="arcade_slack" />
