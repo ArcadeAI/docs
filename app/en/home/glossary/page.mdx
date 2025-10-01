@@ -9,7 +9,7 @@ description: "Glossary of terms used in the Arcade platform"
 
 ```mermaid
 graph TD
-    A[Agent] --> B[Toolkit]
+    A[Agent] --> B[MCP Server]
     B --> C[Tool]
 ```
 
@@ -17,15 +17,15 @@ graph TD
 
 An 'agent' is the application you are building. It can be a chatbot, a web application, a mobile app, or any other type of application that happens to use an LLM as part of its functionality. Agents interact with the world by calling tools. Helping you build, test, authenticate, and deploy tools is what Arcade is all about.
 
-### Toolkit
+### MCP Server
 
-A 'toolkit' is a collection of tools that can be used by an agent, grouped logically together by a common theme or provider. MCP Servers are the unit of deployment for tools within Arcade.
+A 'MCP Server' is a collection of tools that can be used by an agent, grouped logically together by a common theme or provider, and the running remote process that serves and executes the tools. MCP Servers are the unit of deployment for tools within Arcade.
 
 ### Tool
 
-A 'tool' is a function that can be called by an agent which performs some action - commonly via an API, filesystem, database, etc. Tools are written in Python and deployed by running a worker which contains the toolkit's code. Tools are defined by the `@tool()` decorator and will be passed `ToolContext` as the first argument. If a tool has dependencies that are not met (a secret is not provided, for example), the tool will fail to execute.
+A 'tool' is a function that can be called by an agent which performs some action - commonly via an API, filesystem, database, etc. Tools are written in Python and deployed by running a worker which contains the MCP Server's code. Tools are defined by the `@tool()` decorator and will be passed `ToolContext` as the first argument. If a tool has dependencies that are not met (a secret is not provided, for example), the tool will fail to execute.
 
-Tools are commonly referred to by a qualified name that includes their toolkit. For example, [Gmail.SendEmail](https://docs.arcade.dev/mcp-servers/productivity/gmail#gmailsendemail)
+Tools are commonly referred to by a qualified name that includes their MCP Server. For example, [Gmail.SendEmail](https://docs.arcade.dev/mcp-servers/productivity/gmail#gmailsendemail)
 
 _Learn more about [tools](/home/build-tools/create-a-mcp-server)._
 
@@ -96,7 +96,7 @@ Monthly Active Users are the unique end-users (counted by `user_id`) who have ex
 
 ### User Challenges
 
-User Challenges are the count of authorizations performed for any user (specified by `user_id` in Arcade's SDKs and APIs). Authorization challenges occur when a user needs a new permission or scope that they don't currently have, including previously-held scopes that were deleted or expired. The same user authenticating to multiple toolkits will have a User Challenge for each toolkit (e.g. once for Slack and once for Google). We also count the act of elevating permissions to a user who has already authenticated to a toolkit (e.g. adding a "write" scope when they previously only had a "read" scope).
+User Challenges are the count of authorizations performed for any user (specified by `user_id` in Arcade's SDKs and APIs). Authorization challenges occur when a user needs a new permission or scope that they don't currently have, including previously-held scopes that were deleted or expired. The same user authenticating to multiple MCP Servers will have a User Challenge for each MCP Server (e.g. once for Slack and once for Google). We also count the act of elevating permissions to a user who has already authenticated to a MCP Server (e.g. adding a "write" scope when they previously only had a "read" scope).
 
 ### Auth Provider
 
@@ -151,9 +151,9 @@ The Arcade Engine is also responsible for the OAuth flow for your agent's users.
 
 ### Worker
 
-A 'worker' is a process that runs all the tools with a toolkit. Workers are microservices that are called by the Arcade Engine to handle tool execution requests. Workers are either [deployed to Arcade's infrastructure](https://docs.arcade.dev/home/serve-tools/arcade-deploy) via `arcade deploy`, or run in your own infrastructure.
+A 'worker' is a process that runs all the tools with a MCP Server. Workers are microservices that are called by the Arcade Engine to handle tool execution requests. Workers are either [deployed to Arcade's infrastructure](https://docs.arcade.dev/home/serve-tools/arcade-deploy) via `arcade deploy`, or run in your own infrastructure.
 
-_Learn more about workers [here](/home/hybrid-deployment/hybrid-worker)._ and [here](/home/serve-tools/docker-worker).
+_Learn more about workers [here](/home/hybrid-deployment/hybrid-worker).
 
 ### TDK (Tool Development Kit)
 

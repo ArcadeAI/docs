@@ -46,15 +46,12 @@ const meta: MetaRecord = {
   "customer-support": {
     title: "Customer Support",
   },
-  "-- Submit your toolkit": {
+  "-- Submit your Server": {
     type: "separator",
-    title: "Submit your toolkit",
+    title: "Submit your Server",
   },
-  "contribute-a-toolkit": {
-    title: "Contribute a toolkit",
-  },
-  "community-toolkit-template": {
-    display: "hidden",
+  "contribute-a-server": {
+    title: "Contribute a Server",
   },
 };
 
