@@ -80,12 +80,13 @@ topic:
 HTTP is the supported protocol for Arcade Engine's API. The following configuration options are available:
 
 - `api.development` _(optional, default: `false`)_ - Enable development mode, with more logging and simple [worker authentication](/home/local-deployment/configure/engine#http-worker-configuration)
-- `api.public_host` _(optional)_ - Public host of the API (e.g., `my-public-host.com`), in case you want to expose it to the public
-- `api.http.host` _(default: `localhost`)_ - Address to which Arcade Engine binds its server (e.g., `localhost` or `0.0.0.0`)
-- `api.http.read_timeout` _(optional, default: `30s`)_ - Timeout for reading data from clients
-- `api.http.write_timeout` _(optional, default: `1m`)_ - Timeout for writing data to clients
-- `api.http.idle_timeout` _(optional, default: `30s`)_ - Timeout for idle connections
-- `api.http.max_request_body_size` _(optional, default: `4Mb`)_ - Maximum request body size
+- `api.host` _(default: `localhost`)_ - Address to which Arcade Engine binds its server (e.g., `localhost` or `0.0.0.0`)
+- `api.port` _(default: `9099`)_ - Port to which Arcade Engine binds its server (e.g., `9099` or `8080`)
+- `api.public_host` _(optional)_ - External hostname of the API (e.g., `my-public-host.com`), if it differs from host (for example, when the API is behind a reverse proxy)
+- `api.read_timeout` _(optional, default: `30s`)_ - Timeout for reading data from clients
+- `api.write_timeout` _(optional, default: `1m`)_ - Timeout for writing data to clients
+- `api.idle_timeout` _(optional, default: `30s`)_ - Timeout for idle connections
+- `api.max_request_body_size` _(optional, default: `4Mb`)_ - Maximum request body size
 
 A typical configuration for production looks like:
 
@@ -96,7 +97,7 @@ api:
   port: 9099
 ```
 
-To expose the API to the public, set `api.public_host` to the public host of the API:
+When the Arcade Engine is hosted in a container or behind a reverse proxy, for example, set `api.public_host` to the external hostname of the API:
 
 ```yaml
 api:
