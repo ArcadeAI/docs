@@ -53,9 +53,13 @@ export function LandingPage() {
     }
   };
 
-  const handleFrameworkSelect = (_framework: string) => {
+  const handleFrameworkSelect = (framework: string) => {
     // Route to quickstart with both language and framework context
-    window.location.href = "https://docs.arcade.dev/en/home/quickstart";
+    if (framework === "LangGraph") {
+      window.location.href = "/en/home/quickstart/working-agent";
+    } else {
+      window.location.href = "https://docs.arcade.dev/en/home/quickstart";
+    }
   };
 
   const handleBackToStart = () => {
