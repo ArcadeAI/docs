@@ -14,7 +14,7 @@ Your goal is to load all the new git commits and pull requests from provided Git
 
 There are 5 possible categories of changes:
 - Frameworks
-- Toolkits
+- MCP Servers
 - CLI and TDK
 - Platform and Engine
 - Misc
