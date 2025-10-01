@@ -1,9 +1,9 @@
-import { WrappedAgent } from "../classes/wrappedAgent";
+import { WrappedAgent } from "../classes/wrapped-agent";
 import type { Config } from "../classes/config";
 import type { Logger } from "../classes/logger";
-import { getNewCommitsTool } from "../tools/getNewCommitsAndPRs";
-import { readFileTool } from "../tools/readFile";
-import { writeFileTool } from "../tools/writeFile";
+import { getNewCommitsTool } from "../tools/get-new-commits-and-prs";
+import { readFileTool } from "../tools/read-file";
+import { writeFileTool } from "../tools/write-file";
 
 export class ChangelogAgent extends WrappedAgent {
   constructor(config: Config, logger: Logger) {
