@@ -1,0 +1,370 @@
+import { motion } from "framer-motion";
+import {
+  // Bot,
+  // Cloud,
+  // Code,
+  // Key,
+  // PencilRuler,
+  // Puzzle,
+  // RefreshCcw,
+  Rocket,
+  // Shield,
+  // Users,
+  Wrench,
+  // Zap,
+} from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+// import { ChallengeSolution } from "./ChallengeSolution";
+// import { QuickStartCard } from "./QuickStartCard";
+import { SampleAppCard } from "./SampleAppCard";
+
+export function Learn() {
+  return (
+    <div>
+      <section className="relative isolate px-6 lg:px-8">
+        <div
+          aria-hidden="true"
+          className="-top-24 -z-10 sm:-top-40 absolute inset-x-0 transform-gpu overflow-hidden blur-3xl"
+        >
+          <div
+            className="-translate-x-1/2 relative left-[calc(50%-11rem)] aspect-[1155/678] w-[24rem] rotate-[30deg] bg-gradient-to-tr from-[#ee175e] to-[#9089fc] opacity-20 sm:left-[calc(50%-30rem)] sm:w-[48rem]"
+            style={{
+              clipPath:
+                "polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)",
+            }}
+          />
+        </div>
+        <div className="mx-auto max-w-screen-xl px-4 py-12 text-center sm:py-48 lg:py-24">
+          <motion.h1
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 font-extrabold text-4xl text-white tracking-tight md:text-5xl lg:text-6xl"
+            initial={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.5 }}
+          >
+            Ship real Agents with Arcade
+          </motion.h1>
+          <motion.p
+            animate={{ opacity: 1, y: 0 }}
+            className="mx-auto mt-8 max-w-4xl text-pretty font-medium text-base text-gray-100 italic leading-relaxed"
+            initial={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            <span className="font-bold text-primary">
+              Learn the foundations of Arcade and build a fully functional
+              Agent. Then take it to production.
+            </span>
+          </motion.p>
+          <motion.div
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-20"
+            initial={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+          >
+            <div className="mx-48 grid grid-cols-1 justify-center gap-6 md:grid-cols-2">
+              <SampleAppCard
+                description={
+                  <div className="px-8 text-left">
+                    <p>Build a fully functional agent from scratch.</p>
+                    <ul className="list-inside list-disc">
+                      <li>Choose your framework</li>
+                      <li>Add secure tool calling</li>
+                      <li>Multi-user support</li>
+                      <li>Build your own tools</li>
+                    </ul>
+                  </div>
+                }
+                href="/learn/arcade-chat/setup"
+                image="/images/sample-apps/arcade-chat.png"
+                title="Build Production Agents"
+              />
+              <SampleAppCard
+                blank
+                description={
+                  <div className="px-8 text-left">
+                    <p>
+                      Leverage Arcade's MCP server to supercharge your Agent.
+                    </p>
+                    <div className="flex items-center gap-4">
+                      <Image
+                        alt="VS Code"
+                        height={32}
+                        src="/images/icons/vscode.svg"
+                        width={32}
+                      />
+                      <Image
+                        alt="Cursor"
+                        height={32}
+                        src="/images/icons/cursor.svg"
+                        width={32}
+                      />
+                      <Image
+                        alt="Claude Code"
+                        height={32}
+                        src="/images/icons/claude-light.svg"
+                        width={32}
+                      />
+                    </div>
+                    <ul className="list-inside list-disc">
+                      <li>VS Code</li>
+                      <li>Cursor</li>
+                      <li>Claude Code</li>
+                    </ul>
+                  </div>
+                }
+                href="/learn/chat-arcade"
+                image="/images/sample-apps/arcade-chat.png"
+                title="Smart IDEs with Arcade's MCP"
+              />
+              <Link className="group" href="/home/quickstart">
+                <Card className="h-full cursor-pointer border-white/20 bg-white/5 text-white transition-colors hover:bg-white/10">
+                  <CardHeader className="flex-row items-center space-y-0 p-6">
+                    <Rocket className="mr-3 h-5 w-5" />
+                    <CardTitle>Supercharge my local Agent</CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0 pl-14 text-left text-gray-200 text-sm">
+                    Leverage Arcade's MCP server to supercharge your Agent.
+                    <div className="flex items-center gap-4 pt-4">
+                      <Image
+                        alt="VS Code"
+                        height={32}
+                        src="/images/icons/vscode.svg"
+                        width={32}
+                      />
+                      <Image
+                        alt="Cursor"
+                        height={32}
+                        src="/images/icons/cursor.svg"
+                        width={32}
+                      />
+                      <Image
+                        alt="Claude Code"
+                        height={32}
+                        src="/images/icons/claude-light.svg"
+                        width={32}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
+              <Link className="group" href="/home/quickstart">
+                <Card className="h-full cursor-pointer border-white/20 bg-white/5 text-white transition-colors hover:bg-white/10">
+                  <CardHeader className="flex-row items-center space-y-0 p-6">
+                    <Rocket className="mr-3 h-5 w-5" />
+                    <CardTitle>Build multi-user agents</CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0 pl-14 text-left text-gray-200 text-sm">
+                    Pick your favorite framework and use Arcade to:
+                    <ul className="list-inside list-disc">
+                      <li>Build your own tools</li>
+                      <li>Use our public tools</li>
+                      <li>Manage your tools and users</li>
+                    </ul>
+                  </CardContent>
+                </Card>
+              </Link>
+              <Link className="group" href="/home/build-tools/create-a-toolkit">
+                <Card className="h-full cursor-pointer border-white/20 bg-white/5 text-white transition-colors hover:bg-white/10">
+                  <CardHeader className="flex-row items-center space-y-0 p-6">
+                    <Wrench className="mr-3 h-5 w-5" />
+                    <CardTitle>Manage multiple Agents at my company</CardTitle>
+                  </CardHeader>
+                </Card>
+              </Link>
+            </div>
+          </motion.div>
+          <motion.div
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-10 flex items-center justify-center gap-x-6"
+            initial={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.5, delay: 0.8 }}
+          >
+            <div className="rounded-lg border border-white p-4 text-white italic">
+              Give your AI IDE access to Arcade.dev's documentation using our
+              llms.txt files (
+              <a className="text-primary" href="/llms.txt">
+                short llms.txt
+              </a>
+              ,{" "}
+              <a className="text-primary" href="/llms-full.txt">
+                llms-full.txt
+              </a>
+              ), or use{" "}
+              <a
+                className="text-primary"
+                href="https://context7.com/arcadeai/docs"
+              >
+                context7
+              </a>
+              .
+            </div>
+          </motion.div>
+        </div>
+        <div
+          aria-hidden="true"
+          className="-z-10 absolute inset-x-0 top-[calc(100%-13rem)] transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]"
+        >
+          <div
+            className="-translate-x-1/2 relative left-[calc(50%+3rem)] aspect-[1155/678] w-[24rem] bg-gradient-to-tr from-[#ee175e] to-[#9089fc] opacity-20 sm:left-[calc(50%+36rem)] sm:w-[48rem]"
+            style={{
+              clipPath:
+                "polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)",
+            }}
+          />
+        </div>
+      </section>
+
+      {/* <section className="relative py-16">
+        <div className="container relative mx-auto px-4">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="mb-4 text-3xl font-bold tracking-tight text-white md:text-4xl">
+              Start Building in Minutes
+            </h2>
+            <p className="text-gray-300">
+              Everything you need to get started with Arcade.
+            </p>
+          </div>
+          <div className="mt-16 grid gap-8 md:grid-cols-2">
+            <QuickStartCard
+              icon={Rocket}
+              title="Quick Start Guide"
+              description="Start using Arcade in minutes with our quick start guide. We'll show you how to equip LLMs with the ability to take action."
+              href="/home/quickstart"
+            />
+            <QuickStartCard
+              icon={Puzzle}
+              title="Browse Integrations"
+              description="Explore our library of integrations for popular services. Find the perfect integration for your needs."
+              href="/toolkits"
+            />
+            <QuickStartCard
+              icon={Wrench}
+              title="Start Building"
+              description="Learn how to build and deploy your own custom tools. Use Arcade's tool SDK to create custom capabilities for your agents."
+              href="/home/custom-tools"
+            />
+            <QuickStartCard
+              icon={Cloud}
+              title="Deploy Arcade"
+              description="Run Arcade locally, in Docker, or in the cloud. We'll show you how to get started with each option."
+              href="/home/hosting-overview"
+            />
+          </div>
+        </div>
+      </section> */}
+
+      {/* <section className="py-8">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="mb-4 text-3xl font-bold tracking-tight text-white md:text-4xl">
+              Why Developers Choose Arcade
+            </h2>
+            <p className="font-medium text-gray-300">
+              Arcade solves the fundamental challenges that have limited AI
+              agents, empowering them to take meaningful actions in real-world
+              applications.
+            </p>
+          </div>
+          <div className="mt-16 grid gap-8 md:grid-cols-2">
+            <ChallengeSolution
+              challenge={{
+                icon: Shield,
+                title: "Agents Can't Act on Users' Behalf",
+                description:
+                  "Today's agents can't securely access user data or perform actions as the user, limiting them to generic tools like search engines and calculators.",
+              }}
+              solution={{
+                icon: Key,
+                title: "Secure User Impersonation",
+                description:
+                  "Arcade lets agents securely access user-specific services like email, calendars, and documents through built-in OAuth and token management.",
+                href: "/home/auth/how-arcade-helps",
+              }}
+            />
+            <ChallengeSolution
+              challenge={{
+                icon: RefreshCcw,
+                title: "Tools Can't Scale Independently",
+                description:
+                  "Tools run on the same resources as your application, creating performance bottlenecks and limiting what agents can do as demand grows.",
+              }}
+              solution={{
+                icon: Zap,
+                title: "Tools That Scale Independently",
+                description:
+                  "Arcade separates tool execution from your application, allowing each tool to run on its optimal infrastructure and scale based on its specific needs.",
+                href: "/home/use-tools/tools-overview",
+              }}
+            />
+            <ChallengeSolution
+              challenge={{
+                icon: Puzzle,
+                title: "Fragmented Tool Ecosystem",
+                description:
+                  "Each LLM provider and orchestration framework requires different tool formats, forcing developers to maintain multiple versions of the same tool for different models.",
+              }}
+              solution={{
+                icon: Code,
+                title: "Build Once, Run Anywhere",
+                description:
+                  "Define your tool once with Arcade's SDK and it works seamlessly across OpenAI, Anthropic, and frameworks like LangChain and CrewAI without any changes.",
+                href: "/home/build-tools/create-a-toolkit",
+              }}
+            />
+            <ChallengeSolution
+              challenge={{
+                icon: Bot,
+                title: "Enterprise Requirements Aren't Met",
+                description:
+                  "Existing solutions lack the security, compliance, and integration capabilities needed for enterprise adoption of AI agents.",
+              }}
+              solution={{
+                icon: PencilRuler,
+                title: "Enterprise-Ready Platform",
+                description:
+                  "Arcade provides the authentication, compliance, and integration capabilities required for production deployment in enterprise environments.",
+                href: "/toolkits",
+              }}
+            />
+          </div>
+        </div>
+      </section> */}
+
+      <section className="py-12">
+        <div className="container mx-auto px-4">
+          <div className="max-w-2xl">
+            <h2 className="mb-4 font-bold text-3xl text-white tracking-tight md:text-4xl">
+              Sample Applications
+            </h2>
+            <p className="text-gray-300">
+              Get started quickly with our pre-built templates and example
+              applications.
+            </p>
+          </div>
+          <div className="mt-16 grid gap-8 md:grid-cols-3">
+            <SampleAppCard
+              blank
+              description="A chatbot that can help you with your daily tasks."
+              href="https://chat.arcade.dev/"
+              image="/images/sample-apps/arcade-chat.png"
+              title="Arcade Chat"
+            />
+            <SampleAppCard
+              description="A bot for Slack that can act on your behalf."
+              href="https://github.com/ArcadeAI/ArcadeSlackAgent"
+              image="/images/logo/arcade.png"
+              title="Archer"
+            />
+            <SampleAppCard
+              description="A Slack bot that extracts and summarizes YouTube transcripts in Weaviate, perfect for AI podcasts."
+              href="https://github.com/dforwardfeed/slack-AIpodcast-summaries"
+              image="/images/sample-apps/slack-aipodcast-summaries.jpg"
+              title="Summarize YouTube Podcasts in Slack"
+            />
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}

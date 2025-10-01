@@ -1,0 +1,409 @@
+---
+title: "Build an agent with Arcade"
+description: "Learn how to build your first agent with Arcade"
+---
+
+# Build Your First AI Agent with Arcade
+
+Most AI apps are stuck in read-only mode. They can answer questions, but they can't do anything. Arcade changes that.
+
+With Arcade, your AI agents can take real actions: send emails through Gmail, update calendar events, message in Slack, and connect to 100+ other tools — all without building OAuth flows or managing API credentials yourself.
+
+## What You'll Build
+
+In this quickstart, you'll build a Morning Briefing Agent that:
+
+- Reads yesterday's emails from your Gmail inbox
+- Fetches today's calendar events from Google Calendar
+- Uses an LLM to generate a personalized briefing
+- Sends the briefing directly to you via Slack DM
+
+This is a real agent that takes real actions across multiple platforms. You'll go from zero to a working agent in under 10 minutes.
+
+## Prerequisites
+
+Before you start, make sure you have:
+
+1. An Arcade account - Sign up at https://account.arcade.dev/register if you haven't already
+2. Your Arcade API key - Get it from your Arcade dashboard at https://account.arcade.dev/dashboard/api-keys
+3. An OpenAI API key - Get one from OpenAI's platform at https://platform.openai.com/account/api-keys
+4. Python 3.11+ installed on your machine
+5. Active accounts for Gmail, Google Calendar, and Slack
+
+## Step 1: Set Up Your Environment
+
+First, create a new directory for your agent and set up a virtual environment:
+
+```bash
+mkdir morning-briefing-agent
+cd morning-briefing-agent
+
+# Create and activate virtual environment
+uv venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Install the required packages:
+uv pip install langchain-arcade langchain-openai langgraph
+uv pip install python-dotenv
+uv pip install langchain
+```
+
+## Step 2: Configure Your API Keys
+
+Create a `.env` file in your project directory with your API keys:
+
+```bash
+ARCADE_API_KEY=your_arcade_api_key_here
+OPENAI_API_KEY=your_openai_api_key_here
+```
+
+**Important:** Never commit your `.env` file to version control. Add it to your `.gitignore`.
+
+## Step 3: Build the Agent
+
+Create a new file called `morning_briefing.py` and add the following code:
+
+```python
+from dotenv import load_dotenv
+from langchain.chat_models import init_chat_model
+from arcadepy import Arcade
+from datetime import datetime, timedelta
+import os
+
+load_dotenv()
+
+# Initialize the Arcade client
+client = Arcade()
+
+# Set your user ID (use the email you signed up with)
+user_id = "your-email@example.com"  # Replace this with your email
+
+# Initialize the LLM
+llm = init_chat_model(
+    model="openai:gpt-4o",
+    api_key=os.getenv("OPENAI_API_KEY"),
+)
+
+def authorize_tool(tool_name: str) -> None:
+    """
+    Handle authorization for a tool.
+
+    Arcade manages the entire OAuth flow - you just need to
+    click the authorization link once per tool.
+    """
+    print(f"Checking authorization for {tool_name}...")
+    auth_response = client.tools.authorize(
+        user_id=user_id,
+        tool_name=tool_name,
+    )
+
+    if auth_response.status != "completed":
+        print(f"Please authorize {tool_name}:")
+        print(f"👉 {auth_response.url}")
+        auth_response = client.auth.wait_for_completion(auth_response.id)
+        print(f"✓ {tool_name} authorized")
+
+def get_yesterday_inbox_emails() -> dict:
+    """Get all inbox emails from yesterday using Arcade's Gmail tool."""
+    tool_name = "Gmail.SearchThreads"
+    authorize_tool(tool_name)
+
+    # Execute the tool - Arcade handles the API call and authentication
+    response = client.tools.execute(
+        user_id=user_id,
+        tool_name=tool_name,
+        input={
+            "date_range": "yesterday",
+            "label_ids": ["INBOX"],
+            "max_results": 100
+        }
+    )
+
+    threads = response.output.value.get("threads", [])
+    return {
+        "count": len(threads),
+        "threads": threads[:5]
+    }
+
+def get_todays_events() -> dict:
+    """Get today's calendar events using Arcade's Google Calendar tool."""
+    tool_name = "GoogleCalendar.ListEvents"
+    authorize_tool(tool_name)
+
+    # Calculate today's date range
+    today_start = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    today_end = today_start + timedelta(days=1)
+
+    # Execute the tool
+    response = client.tools.execute(
+        user_id=user_id,
+        tool_name=tool_name,
+        input={
+            "max_start_datetime": today_start.isoformat(),
+            "min_end_datetime": today_end.isoformat(),
+            "max_results": 20
+        }
+    )
+
+    events = response.output.value.get("events", [])
+    return {
+        "count": len(events),
+        "events": events
+    }
+
+def get_slack_user_info() -> dict:
+    """Get the user's Slack information using Arcade's Slack tool."""
+    tool_name = "Slack.WhoAmI"
+    authorize_tool(tool_name)
+
+    response = client.tools.execute(
+        user_id=user_id,
+        tool_name=tool_name,
+        input={}
+    )
+
+    return {
+        "email": response.output.value.get("email"),
+        "user_id": response.output.value.get("user_id"),
+        "username": response.output.value.get("username")
+    }
+
+def send_slack_message(user_email: str, message: str) -> None:
+    """Send a Slack message using Arcade's Slack tool."""
+    tool_name = "Slack.SendMessage"
+    authorize_tool(tool_name)
+
+    # This is the action - sending a real Slack message
+    response = client.tools.execute(
+        user_id=user_id,
+        tool_name=tool_name,
+        input={
+            "emails": [user_email],
+            "message": message
+        }
+    )
+
+    print("✓ Morning briefing sent to Slack")
+
+def generate_briefing(email_data: dict, calendar_data: dict) -> str:
+    """Use an LLM to generate a personalized morning briefing."""
+
+    prompt = f"""You are a helpful executive assistant creating a morning briefing.
+
+Based on the following data, create a concise, friendly morning briefing message:
+
+EMAILS (yesterday's inbox):
+- Total count: {email_data['count']}
+- Top threads: {email_data['threads'][:3] if email_data['threads'] else 'None'}
+
+CALENDAR (today):
+- Event count: {calendar_data['count']}
+- Events: {calendar_data['events']}
+
+Create a briefing that:
+1. Starts with a friendly greeting
+2. Summarizes yesterday's email volume including:
+   - Key topics and important senders with their subjects
+   - Action items, pending decisions, or time-sensitive requests
+   - Group related emails by topic (skip routine/automated emails)
+3. Lists today's meetings in chronological order with:
+   - Meeting title
+   - Time (with timezone if different from Pacific)
+   - List attendee names simply without RSVP status commentary
+   - DO NOT include meeting links or URLs
+4. Ends with an encouraging note
+5. Sign off with "— Your Arcade Assistant"
+
+Keep it under 500 words and use a warm, professional tone.
+Format for Slack (use *bold* and line breaks appropriately).
+Do NOT include phrases like "needs action" or RSVP status for attendees.
+Do NOT include meeting links or URLs in the output.
+"""
+
+    response = llm.invoke(prompt)
+    return response.content
+
+def run_morning_briefing():
+    """
+    Main orchestration function.
+
+    This is where the magic happens - your agent collects data from
+    multiple sources, uses AI to analyze it, and takes action.
+    """
+    print("🌅 Starting Morning Briefing Agent...\n")
+
+    # Step 1: Gather email data
+    print("📧 Fetching yesterday's inbox emails...")
+    email_data = get_yesterday_inbox_emails()
+    print(f"   Found {email_data['count']} emails from yesterday\n")
+
+    # Step 2: Gather calendar data
+    print("📅 Fetching today's calendar events...")
+    calendar_data = get_todays_events()
+    print(f"   Found {calendar_data['count']} events today\n")
+
+    # Step 3: Generate briefing with LLM
+    print("✨ Generating personalized briefing...")
+    briefing = generate_briefing(email_data, calendar_data)
+    print(f"\n--- BRIEFING PREVIEW ---\n{briefing}\n")
+
+    # Step 4: Get Slack user info
+    print("👤 Getting Slack user info...")
+    slack_info = get_slack_user_info()
+    print(f"   Slack email: {slack_info['email']}\n")
+
+    # Step 5: Send to Slack (the action!)
+    print("💬 Sending briefing to Slack...")
+    send_slack_message(slack_info['email'], briefing)
+
+    print("\n✅ Morning briefing complete!")
+
+if __name__ == "__main__":
+    run_morning_briefing()
+```
+
+**Important:** Update the `user_id` variable on line 71 with the email address you used to sign up for Arcade.
+
+## Step 4: Run Your Agent
+
+Now for the exciting part - let's run your agent:
+
+```bash
+python morning_briefing.py
+```
+
+### First-Time Authorization
+
+When you run the agent for the first time, you'll see authorization prompts for each tool:
+
+```
+🌅 Starting Morning Briefing Agent...
+
+📧 Fetching yesterday's inbox emails...
+Checking authorization for Gmail.SearchThreads...
+Please authorize Gmail.SearchThreads:
+👉 https://arcade.dev/auth/authorize/...
+```
+
+What's happening here? Arcade is managing the entire OAuth flow for you. Click each authorization link, grant access, and Arcade securely stores the credentials. You'll only need to do this once per tool.
+
+After authorizing all three tools (Gmail, Google Calendar, and Slack), your agent will:
+
+- Fetch your emails from yesterday
+- Retrieve today's calendar events
+- Generate a personalized briefing using AI
+- Send the briefing to your Slack DMs
+
+Check your Slack - you should see your personalized morning briefing!
+
+## What Just Happened?
+
+Let's break down what Arcade did for you:
+
+### Authentication Made Simple
+
+```python
+auth_response = client.tools.authorize(
+    user_id=user_id,
+    tool_name=tool_name,
+)
+```
+
+No OAuth flows to build. No API credentials to manage. Arcade handles everything.
+
+### Tool Execution
+
+```python
+response = client.tools.execute(
+    user_id=user_id,
+    tool_name="Gmail.SearchThreads",
+    input={"date_range": "yesterday", "label_ids": ["INBOX"]}
+)
+```
+
+Clean, simple API calls to real-world tools. The same pattern works for 100+ tools.
+
+### Real Actions
+
+```python
+client.tools.execute(
+    tool_name="Slack.SendMessage",
+    input={"emails": [user_email], "message": briefing}
+)
+```
+
+Your agent doesn't just read data - it takes action. This is what makes it truly useful.
+
+## Understanding the Code
+
+This agent demonstrates the core pattern for building with Arcade:
+
+1. **Authorize once** - Users click authorization links the first time
+2. **Execute tools** - Call any tool with a simple, consistent API
+3. **Combine with AI** - Use LLMs to analyze data and make decisions
+4. **Take action** - Execute tools that create, update, or send real data
+
+The same pattern works whether you're building a simple script or a complex multi-agent system.
+
+## Next Steps
+
+Now that you've built your first agent, here's what to explore next:
+
+### Customize Your Agent
+
+Modify the `generate_briefing()` prompt to match your preferences:
+
+- Change the tone (more formal, more casual)
+- Add specific email filtering logic
+- Include additional context about your priorities
+
+### Add More Tools
+
+Explore Arcade's 100+ tools and add new capabilities:
+
+- **Linear** - Check your assigned issues
+- **Notion** - Read from your workspace
+- **GitHub** - Monitor repository activity
+- And many more...
+
+### Build Production Agents
+
+Ready to build more complex agents? Check out our framework guides:
+
+- **LangGraph Integration** - Build stateful, multi-step agents
+- **OpenAI Agents SDK** - Use OpenAI's agent framework
+- **Custom Tools** - Build your own tools with Arcade
+
+### Learn More
+
+- **Core Concepts** - Understand how Arcade works
+- **Tool Catalog** - Browse all available tools
+- **Best Practices** - Build production-ready agents
+
+## Troubleshooting
+
+### Authorization Links Not Working
+
+Make sure your `ARCADE_API_KEY` is correct in your `.env` file and that you're using the correct `user_id` (the email you signed up with).
+
+### No Emails or Events Returned
+
+- Verify you have emails from yesterday in your Gmail inbox
+- Confirm you have calendar events scheduled for today
+- Check that you clicked all three authorization links
+
+### OpenAI Rate Limits
+
+If you're on OpenAI's free tier, you may hit rate limits. Consider adding a small amount of credit to your OpenAI account.
+
+## Get Help
+
+Need help? We're here for you:
+
+- Join our Discord community at https://discord.gg/arcade
+- Email support at support@arcade.dev
+- Read the full docs at https://docs.arcade.dev
+
+---
+
+You just built an AI agent that takes real actions. This is just the beginning - imagine what else you can build when your AI can access any tool, anywhere. Welcome to Arcade.
