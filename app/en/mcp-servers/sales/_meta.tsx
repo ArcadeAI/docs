@@ -5,6 +5,7 @@ const meta: MetaRecord = {
     theme: {
       breadcrumb: true,
       toc: true,
+      copyPage: true,
     },
   },
   hubspot: {

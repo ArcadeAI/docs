@@ -104,6 +104,7 @@ export default async function SharedLayout({
           <TranslationBanner dictionary={dictionary} locale={lang} />
         )}
         <Layout
+          copyPageButton={true}
           docsRepositoryBase="https://github.com/ArcadeAI/docs"
           editLink={dictionary.editPage}
           footer={
