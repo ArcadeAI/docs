@@ -481,13 +481,13 @@ const comingSoonTools: Tool[] = [
     isComingSoon: true,
   },
   {
-    name: "Box",
+    name: "Box API",
     image: "box.svg",
-    summary: "Manage files and folders in Box with your agents.",
-    link: "/mcp-servers/productivity/box",
+    summary: "Enable agents to interact with the low-level Box API.",
+    link: "/mcp-servers/productivity/box-api",
     category: "productivity",
-    type: "arcade",
-    isComingSoon: true,
+    type: "arcade_starter",
+    isComingSoon: false,
   },
   {
     name: "Braze",
