@@ -1,19 +1,19 @@
 import type { NextConfig } from "next";
 import nextra from "nextra";
+import { remarkGlossary } from "./lib/remark-glossary";
 
 // Set up Nextra with its configuration
 const withNextra = nextra({
   defaultShowCopyCode: true,
   codeHighlight: true,
+  mdxOptions: {
+    remarkPlugins: [
+      [remarkGlossary, { glossaryPath: "./app/en/home/glossary/page.mdx" }],
+    ],
+  },
 });
 
 const nextConfig: NextConfig = withNextra({
-  turbopack: {
-    resolveAlias: {
-      // Path to your `mdx-components` file with extension
-      "next-mdx-import-source-file": "./mdx-components.ts",
-    },
-  },
   headers: async () => [
     {
       source: "/(.*)",
