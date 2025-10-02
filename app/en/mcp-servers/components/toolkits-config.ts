@@ -490,6 +490,15 @@ const comingSoonTools: Tool[] = [
     isComingSoon: true,
   },
   {
+    name: "Box API",
+    image: "box.svg",
+    summary: "Enable agents to interact with the low-level Box API.",
+    link: "/mcp-servers/productivity/box-api",
+    category: "productivity",
+    type: "arcade_starter",
+    isComingSoon: false,
+  },
+  {
     name: "Braze",
     image: "braze.png",
     summary: "Manage customer engagement campaigns with your agents.",
