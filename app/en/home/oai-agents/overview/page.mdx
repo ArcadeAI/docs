@@ -2,8 +2,8 @@
 title: "Arcade with OpenAI Agents overview"
 description: "Comprehensive guide to using Arcade with the OpenAI Agents library"
 ---
-import { Steps, Tabs, Callout } from "nextra/components";
 
+import { Steps, Tabs, Callout } from "nextra/components";
 
 # Arcade with OpenAI Agents
 
@@ -34,11 +34,10 @@ npm install @openai/agents @arcadeai/arcadejs
 
 Make sure you have your Arcade API key ready. [Get an API key](/home/api-keys) if you don't already have one.
 
-
 ## Key features
 
 - **Easy integration** with the OpenAI Agents framework
-- **Access to all Arcade toolkits** including Google, GitHub, LinkedIn, X, and more
+- **Access to all Arcade MCP Servers** including Google, GitHub, LinkedIn, X, and more
 - **Create custom tools** with the Arcade Tool SDK
 - **Manage user authentication** for tools that require it
 - **Asynchronous support** compatible with OpenAI's Agent framework
@@ -60,7 +59,7 @@ async def main():
     # Initialize the Arcade client
     client = AsyncArcade()
 
-    # Get tools from the "gmail" toolkit
+    # Get tools from the "gmail" MCP Server
     tools = await get_arcade_tools(client, toolkits=["gmail"])
 
     # Create an agent with Gmail tools
@@ -94,14 +93,14 @@ if __name__ == "__main__":
 Check out the complete working example in our [GitHub repository](https://github.com/ArcadeAI/arcade-ai/tree/main/examples/openai-agents-ts/src/index.ts).
 
 ```javascript
-import Arcade from '@arcadeai/arcadejs';
+import Arcade from "@arcadeai/arcadejs";
 import { executeOrAuthorizeZodTool, toZod } from "@arcadeai/arcadejs/lib";
-import { Agent, run, tool } from '@openai/agents';
+import { Agent, run, tool } from "@openai/agents";
 
 // 1) Initialize Arcade client
 const client = new Arcade();
 
-// 2) Fetch Gmail toolkit from Arcade and prepare tools for OpenAI Agents
+// 2) Fetch Gmail MCP Server from Arcade and prepare tools for OpenAI Agents
 const googleToolkit = await client.tools.list({ toolkit: "gmail", limit: 30 });
 const tools = toZod({
   tools: googleToolkit.items,
@@ -110,12 +109,13 @@ const tools = toZod({
   executeFactory: executeOrAuthorizeZodTool,
 }).map(tool);
 
-// 3) Create a new agent with the Gmail toolkit
+// 3) Create a new agent with the Gmail MCP Server
 const googleAgent = new Agent({
   name: "Gmail agent",
-  instructions: "You are a helpful assistant that can assist with Google API calls.",
+  instructions:
+    "You are a helpful assistant that can assist with Google API calls.",
   model: "gpt-4o-mini",
-  tools
+  tools,
 });
 
 // 4) Run the agent
@@ -128,7 +128,6 @@ console.log(result.finalOutput);
 </Tabs.Tab>
 
 </Tabs>
-
 
 ## Handling authorization
 
@@ -162,9 +161,9 @@ Once you have authorized access, I can retrieve your latest emails.
 
 After visiting the URL and authorizing access, the user can run the agent again with the same `user_id`, and it will work without requiring re-authorization.
 
-## Available toolkits
+## Available MCP Servers
 
-Arcade provides a variety of toolkits you can use with your agents:
+Arcade provides a variety of MCP Servers you can use with your agents:
 
 - **Google Suite**: Gmail, Calendar, Drive, Docs
 - **Social Media**: LinkedIn, X
@@ -172,7 +171,7 @@ Arcade provides a variety of toolkits you can use with your agents:
 - **Web**: Web search, content extraction
 - **And more**: Weather, financial data, etc.
 
-For a full list of available toolkits, visit the [Arcade Toolkits](/toolkits) documentation.
+For a full list of available MCP Servers, visit the [Arcade MCP Servers](/mcp-servers) documentation.
 
 ## Next steps
 
@@ -180,6 +179,6 @@ Ready to start building with Arcade and OpenAI Agents? Check out these guides:
 
 - [Using Arcade tools](/home/oai-agents/use-arcade-tools) - Learn the basics of using Arcade tools with OpenAI Agents
 - [Managing user authorization](/home/oai-agents/user-auth-interrupts) - Handle tool authorization efficiently
-- [Creating custom tools](/home/build-tools/create-a-toolkit) - Build your own tools with the Arcade Tool SDK
+- [Creating custom tools](/home/build-tools/create-a-mcp-server) - Build your own tools with the Arcade Tool SDK
 
 Enjoy exploring Arcade and building powerful AI-enabled applications!

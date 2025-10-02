@@ -74,7 +74,7 @@ ARCADE_API_KEY=YOUR_ARCADE_API_KEY
 <Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
 <Tabs.Tab>
 
-Use the `get_arcade_tools` function to retrieve tools from specific toolkits:
+Use the `get_arcade_tools` function to retrieve tools from specific MCP Servers:
 
 ```python
 from arcadepy import AsyncArcade
@@ -83,10 +83,10 @@ from agents_arcade import get_arcade_tools
 # Initialize the Arcade client
 client = AsyncArcade()
 
-# Get all tools from the "Gmail" toolkit
+# Get all tools from the "Gmail" MCP Server
 tools = await get_arcade_tools(client, toolkits=["gmail"])
 
-# You can request multiple toolkits at once
+# You can request multiple MCP Servers at once
 tools = await get_arcade_tools(client, toolkits=["gmail", "github", "linkedin"])
 
 # You can request specific tools
@@ -104,11 +104,11 @@ import { tool } from '@openai/agents';
 
 const client = new Arcade();
 
-// Option 1: Get tools from a single toolkit
+// Option 1: Get tools from a single MCP Server
 const googleTools = await client.tools.list({ toolkit: "gmail", limit: 30 });
 const toolsFromGoogle = googleTools.items;
 
-// Option 2: Get tools from multiple toolkits
+// Option 2: Get tools from multiple MCP Servers
 const [google, github, linkedin] = await Promise.all([
   client.tools.list({ toolkit: "gmail", limit: 30 }),
   client.tools.list({ toolkit: "github", limit: 30 }),
@@ -300,7 +300,7 @@ import { Agent, run, tool } from '@openai/agents';
 // 1) Initialize Arcade client
 const client = new Arcade();
 
-// 2) Fetch Gmail toolkit from Arcade and prepare tools for OpenAI Agents
+// 2) Fetch Gmail MCP Server from Arcade and prepare tools for OpenAI Agents
 const googleToolkit = await client.tools.list({ toolkit: "gmail", limit: 30 });
 const tools = toZod({
   tools: googleToolkit.items,
@@ -309,7 +309,7 @@ const tools = toZod({
   executeFactory: executeOrAuthorizeZodTool,
 }).map(tool);
 
-// 3) Create a new agent with the Gmail toolkit
+// 3) Create a new agent with the Gmail MCP Server
 const googleAgent = new Agent({
   name: "Gmail agent",
   instructions: "You are a helpful assistant that can assist with Google API calls.",
@@ -338,7 +338,7 @@ console.log(result.finalOutput);
 
 Now that you have integrated Arcade tools into your OpenAI Agents application, you can:
 
-- Experiment with different toolkits, such as "github" or "linkedin"
+- Experiment with different MCP Servers, such as "Github" or "LinkedIn"
 - Customize the agent's instructions for specific tasks
 - Try out multi-agent systems using different Arcade tools
 - Build your own custom tools with the Arcade Tool SDK

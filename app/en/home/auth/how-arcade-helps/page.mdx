@@ -2,6 +2,7 @@
 title: "How Arcade helps"
 description: "Learn how Arcade helps with auth and tool calling"
 ---
+
 import { Tabs } from "nextra/components";
 
 # How Arcade helps with Agent Authorization
@@ -28,7 +29,7 @@ With Arcade, developers can now create agents that can _act as the end users of 
 
 ### Auth permissions and scopes
 
-Each tool in Arcade's toolkits has a set of required permissions - or, more commonly referred to in OAuth2, **scopes**. For example, the [`Gmail.SendEmail`](/toolkits/productivity/gmail#gmailsendemail) tool requires the [`https://www.googleapis.com/auth/gmail.send`](https://developers.google.com/identity/protocols/oauth2/scopes#gmail) scope.
+Each tool in Arcade's MCP Servers has a set of required permissions - or, more commonly referred to in OAuth2, **scopes**. For example, the [`Gmail.SendEmail`](/mcp-servers/productivity/gmail#gmailsendemail) tool requires the [`https://www.googleapis.com/auth/gmail.send`](https://developers.google.com/identity/protocols/oauth2/scopes#gmail) scope.
 
 A scope is what the user has authorized someone else (in this case, the AI agent) to do on their behalf. In any OAuth2-compatible service, each kind of action requires a different set of permissions. This gives the user fine-grained control over what data third-party services can access and what actions can be executed in their accounts.
 
@@ -38,25 +39,26 @@ When a tool is called, the Arcade Engine will check if the user has granted the 
 
 To learn how Arcade allows for actions (tools) to be authorized through OAuth2 and how to implement it, check out [Authorized Tool Calling](/home/auth/auth-tool-calling).
 
-
 ### Tools that don't require authorization
 
-Some tools, like [`GoogleSearch.Search`](/toolkits/search/google_search#googlesearchsearch), allow AI agents to retrieve information or perform actions without needing user-specific authorization.
+Some tools, like [`GoogleSearch.Search`](/mcp-servers/search/google_search#googlesearchsearch), allow AI agents to retrieve information or perform actions without needing user-specific authorization.
 
 <Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
 <Tabs.Tab>
 ```python
 from arcadepy import Arcade
 
-client = Arcade(api_key="arcade_api_key")  # or set the ARCADE_API_KEY env var
+client = Arcade(api_key="arcade_api_key") # or set the ARCADE_API_KEY env var
 
 # Use the GoogleSearch.Searchtool to perform a web search
+
 response = await client.tools.execute(
-    tool_name="GoogleSearch.Search",
-    input={"query": "Latest AI advancements"},
+tool_name="GoogleSearch.Search",
+input={"query": "Latest AI advancements"},
 )
 print(response.output.value)
-```
+
+````
 </Tabs.Tab>
 <Tabs.Tab>
 ```javascript
@@ -70,9 +72,7 @@ const response = await client.tools.execute({
   input: { query: "Latest AI advancements" },
 });
 console.log(response.output.value);
-```
+````
+
 </Tabs.Tab>
 </Tabs>
-
-
-
