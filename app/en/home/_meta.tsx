@@ -2,6 +2,11 @@ import { BadgeHelp, Home } from "lucide-react";
 import type { MetaRecord } from "nextra";
 
 export const meta: MetaRecord = {
+  "*": {
+    theme: {
+      copyPage: true,
+    },
+  },
   index: {
     title: (
       <span className="flex items-center gap-2 font-medium">
@@ -13,6 +18,7 @@ export const meta: MetaRecord = {
       breadcrumb: false,
       layout: "full",
       toc: false,
+      copyPage: false,
     },
   },
   "contact-us": {
