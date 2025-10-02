@@ -845,6 +845,15 @@ const comingSoonTools: Tool[] = [
     isComingSoon: false,
   },
   {
+    name: "Stripe API",
+    image: "stripe.svg",
+    summary: "Enable agents to interact with the low-level Stripe API.",
+    link: "/mcp-servers/payments/stripe_api",
+    category: "payments",
+    type: "arcade_starter",
+    isComingSoon: false,
+  },
+  {
     name: "TikTok",
     image: "tiktok.svg",
     summary: "Create and manage TikTok content with your agents.",
