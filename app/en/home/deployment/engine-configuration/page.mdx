@@ -168,12 +168,6 @@ To start the Arcade Engine, pass a config file with `-c` or `--config`:
 arcade-engine -c /path/to/config.yaml
 ```
 
-<Callout type="info">
-  Ensure you have a worker running before starting the engine. See [arcade serve
-  CLI command](/home/arcade-cli#arcade-serve) for how to start a worker via the
-  CLI.
-</Callout>
-
 ## Dotenv files
 
 Arcade Engine automatically loads environment variables from `.env` files in the directory where it was called. Use the `-e` or`--env` flag to specify a path:
@@ -210,7 +204,7 @@ topic:
 
 HTTP is the supported protocol for Arcade Engine's API. The following configuration options are available:
 
-- `api.development` _(optional, default: `false`)_ - Enable development mode, with more logging and simple [worker authentication](/home/deployment/engine-configuration#http-worker-configuration)
+- `api.development` _(optional, default: `false`)_ - Enable development mode, with more logging.
 - `api.host` _(default: `localhost`)_ - Address to which Arcade Engine binds its server (e.g., `localhost` or `0.0.0.0`)
 - `api.port` _(default: `9099`)_ - Port to which Arcade Engine binds its server (e.g., `9099` or `8080`)
 - `api.public_host` _(optional)_ - External hostname of the API (e.g., `my-public-host.com`), if it differs from `api.host` (for example, when Arcade Engine is behind a reverse proxy)
@@ -238,7 +232,7 @@ api:
   public_host: my-public-host.com
 ```
 
-For local development, set `api.development = true`. In development mode, Arcade Engine does not require [worker authentication](/home/deployment/engine-configuration#http-worker-configuration).
+For local development, set `api.development = true`.
 
 ## Auth configuration
 
@@ -392,9 +386,9 @@ telemetry:
 
 ## Tools configuration
 
-Arcade Engine orchestrates [tools](/home/use-tools/tools-overview) that AI models can use. Tools are executed by distributed workers called **workers**, which are grouped into **directors**.
+Arcade Engine orchestrates [tools](/home/use-tools/tools-overview) that AI models can use.
 
-The `tools.directors` section configures the workers that are available to service tool calls:
+The `tools.directors` section configures the mcp servers that are available to service tool calls:
 
 ```yaml
 tools:
@@ -412,7 +406,7 @@ tools:
             secret: ${env:ARCADE_WORKER_SECRET}
 ```
 
-When a worker is added to an enabled director, all of the tools hosted by that worker will be available to the model and through the Arcade API.
+When a worker is added to an enabled director, all of the tools hosted by that mcp server will be available to the model and through the Arcade API.
 
 ### HTTP worker configuration
 
