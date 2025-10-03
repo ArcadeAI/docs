@@ -321,9 +321,16 @@ export function LandingPage() {
           <div className="flex w-full justify-center">
             <Image
               alt={"arcade overview"}
-              className="max-w-full"
+              className="max-w-full dark:hidden"
               height={OVERVIEW_IMAGE_HEIGHT / IMAGE_SCALE_FACTOR}
-              src={"/images/overview.png"}
+              src={"/images/overview-light.png"}
+              width={OVERVIEW_IMAGE_WIDTH / IMAGE_SCALE_FACTOR}
+            />
+            <Image
+              alt={"arcade overview"}
+              className="hidden max-w-full dark:block"
+              height={OVERVIEW_IMAGE_HEIGHT / IMAGE_SCALE_FACTOR}
+              src={"/images/overview-dark.png"}
               width={OVERVIEW_IMAGE_WIDTH / IMAGE_SCALE_FACTOR}
             />
           </div>
