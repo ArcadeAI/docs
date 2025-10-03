@@ -319,6 +319,7 @@ export function LandingPage() {
             </h2>
           </div>
           <div className="flex w-full justify-center">
+            {/* The images come from https://whimsical.com/docs-overview-page-vMjufYdxnhfF6K9WjD8FL */}
             <Image
               alt={"arcade overview"}
               className="max-w-full dark:hidden"
