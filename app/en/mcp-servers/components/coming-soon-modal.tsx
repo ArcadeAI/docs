@@ -42,9 +42,7 @@ export function ComingSoonModal({
 
     try {
       posthog?.capture("Notify me clicked", {
-        // biome-ignore lint/style/useNamingConvention: This is ok for PostHog
         toolkit_name: toolkitName,
-        // biome-ignore lint/style/useNamingConvention: This is ok for PostHog
         notify_email: email,
       });
       setIsSubmitted(true);

@@ -6,6 +6,7 @@ const meta: MetaRecord = {
     theme: {
       breadcrumb: true,
       toc: true,
+      copyPage: true,
     },
   },
   google_finance: {

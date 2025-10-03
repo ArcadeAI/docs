@@ -5,6 +5,7 @@ const meta: MetaRecord = {
     theme: {
       breadcrumb: true,
       toc: true,
+      copyPage: true,
     },
   },
   index: {
@@ -13,6 +14,7 @@ const meta: MetaRecord = {
       breadcrumb: false,
       layout: "full",
       toc: false,
+      copyPage: false,
     },
   },
   "-- Categories": {

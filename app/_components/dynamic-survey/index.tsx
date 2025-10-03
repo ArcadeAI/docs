@@ -37,7 +37,6 @@ export default function DynamicSurvey({
       return;
     }
     if (!surveyShown.current) {
-      // biome-ignore lint/style/useNamingConvention: This is ok for PostHog
       posthog?.capture("survey shown", { $survey_id: surveyData.id });
       surveyShown.current = true;
     }
@@ -51,7 +50,6 @@ export default function DynamicSurvey({
 
     const handleBeforeUnload = () => {
       if (currentQuestionIndex < surveyData.questions.length - 1) {
-        // biome-ignore lint/style/useNamingConvention: This is ok for PostHog
         posthog?.capture("survey dismissed", { $survey_id: surveyData.id });
       }
     };
