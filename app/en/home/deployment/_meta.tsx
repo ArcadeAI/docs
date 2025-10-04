@@ -8,8 +8,11 @@ const meta: MetaRecord = {
       copyPage: true,
     },
   },
-  "hybrid-worker": {
-    title: "Hybrid Worker",
+  "on-prem-mcp": {
+    title: "On-premise MCP servers",
+  },
+  "engine-configuration": {
+    title: "Engine configuration",
   },
 };
 
