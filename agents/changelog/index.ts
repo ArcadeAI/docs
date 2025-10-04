@@ -12,7 +12,7 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const pagesDirectory = path.normalize(
-  path.join(__dirname, "..", "..", "pages"),
+  path.join(__dirname, "..", "..", "app", "en", "home"),
 );
 
 program.version(pkg.version).name(pkg.name).description(pkg.description);
@@ -60,12 +60,12 @@ program
   .argument(
     "[changelog_path]",
     "The path to the changelog.md file",
-    path.join(pagesDirectory, "home", "changelog.mdx"),
+    path.join(pagesDirectory, "changelog", "page.mdx"),
   )
   .argument(
     "[repos]",
     "A comma separated list of repositories to load the changelogs from",
-    "ArcadeAI/docs,ArcadeAI/arcade-ai,ArcadeAI/Cloud,ArcadeAI/Engine,ArcadeAI/dashboard,ArcadeAI/toolkits",
+    "ArcadeAI/docs,ArcadeAI/arcade-mcp,ArcadeAI/Cloud,ArcadeAI/Engine,ArcadeAI/dashboard,ArcadeAI/toolkits",
   )
   .argument(
     "[private_repos]",
