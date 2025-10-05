@@ -285,6 +285,14 @@ const availableTools: Tool[] = [
     type: "arcade",
   },
   {
+    name: "Zoom Meetings API",
+    image: "zoom.png",
+    summary: "Enable LLMs to interact with the low-level Zoom Meetings API",
+    link: "/mcp-servers/social-communication/zoom-meetings-api",
+    category: "social",
+    type: "arcade_starter",
+  },
+  {
     name: "Jira",
     image: "atlassian.png",
     summary: "Manage Jira projects, issues, and more with your agents",
