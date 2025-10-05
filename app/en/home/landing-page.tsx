@@ -1,5 +1,4 @@
 "use client";
-import { Button } from "@arcadeai/design-system";
 import {
   // Bot,
   Cloud,
@@ -57,21 +56,8 @@ export function LandingPage() {
             initial={{ opacity: 0, y: 20 }}
             transition={{ duration: ANIMATION_DURATION }}
           >
-            Welcome to Arcade!
+            Give AI agents power to do things.
           </motion.h1>
-          <motion.p
-            animate={{ opacity: 1, y: 0 }}
-            className="mx-auto mt-8 max-w-4xl text-pretty font-medium text-base text-gray-600 italic leading-relaxed dark:text-gray-100"
-            initial={{ opacity: 0, y: 20 }}
-            transition={{
-              duration: ANIMATION_DURATION,
-              delay: ANIMATION_DELAYS.initial,
-            }}
-          >
-            <span className="font-bold text-primary">
-              Learn how to move AI agents from demo to production with Arcade.
-            </span>
-          </motion.p>
           <motion.div
             animate={{ opacity: 1, y: 0 }}
             initial={{ opacity: 0, y: 20 }}
@@ -80,51 +66,95 @@ export function LandingPage() {
               delay: ANIMATION_DELAYS.secondary,
             }}
           >
-            <p className="pt-8 text-left text-gray-700 dark:text-gray-200">
-              Arcade enables your AI agent to securely take real-world actions
-              through user-specific permissions, pre-built MCP Servers for
-              Gmail, Slack, GitHub, and more. You can also build your own
-              agentic tools and MCP servers with our authoring and testing
-              suite. Arcade is your tool{" "}
-              <span className="font-bold text-primary">engine</span>,{" "}
-              <span className="font-bold text-primary">registry</span>, and{" "}
-              <span className="font-bold text-primary">runtime</span>.
+            <p className="pt-8 text-center text-gray-700 dark:text-gray-200">
+              Stop faking tool calls with mocks and hardcoded APIs. Arcade gives
+              your agent secure access to real tools—Gmail, Slack, GitHub, and
+              100+ more—with user-scoped permissions. Build custom tools when
+              you need something we don't have.
             </p>
-            <p className="pt-8 text-left text-gray-700 dark:text-gray-200">
-              Get started with a 5-minute quickstart.
+            <p className="pt-8 text-center text-gray-700 dark:text-gray-200">
+              Get your agent taking real actions in minutes ↓
             </p>
+            {/* <p className="pt-6 text-center text-gray-500 text-sm dark:text-gray-400">
+              Choose your path below ↓
+            </p> */}
           </motion.div>
+
           <motion.div
             animate={{ opacity: 1, y: 0 }}
-            className="mt-20 flex items-center justify-center gap-x-6"
+            className="mx-auto mt-12 grid max-w-6xl grid-cols-1 gap-6 px-4 md:grid-cols-3"
             initial={{ opacity: 0, y: 20 }}
             transition={{
               duration: ANIMATION_DURATION,
               delay: ANIMATION_DELAYS.buttons,
             }}
           >
-            <Button
-              asChild
-              className="h-12 bg-primary px-6 text-white hover:bg-primary/90"
-              size="lg"
+            {/* Card 1: Build an Agent */}
+            <Link
+              className="group flex flex-col rounded-lg border border-gray-300 bg-white p-6 opacity-75 transition-all hover:border-primary hover:opacity-100 hover:shadow-lg dark:border-gray-700 dark:bg-gray-900 dark:hover:border-primary"
+              href="/home/agent-frameworks-overview"
             >
-              <Link href="/home/quickstart">
-                <Rocket className="mr-2 h-5 w-5" />
-                Get Started
-              </Link>
-            </Button>
-            <Button
-              asChild
-              className="h-12 border-gray-900 bg-transparent px-6 text-gray-900 hover:bg-gray-900 hover:text-white dark:border-white dark:text-white dark:hover:bg-white dark:hover:text-gray-900"
-              size="lg"
-              variant="outline"
+              <div className="mb-4 text-4xl">🤖</div>
+              <h3 className="mb-2 font-bold text-gray-900 text-xl dark:text-white">
+                Build Agents
+              </h3>
+              <p className="mb-4 flex-grow text-gray-600 text-sm dark:text-gray-400">
+                Using 100+ pre-built tools
+              </p>
+              <div className="text-gray-500 text-xs dark:text-gray-500">
+                15 min
+              </div>
+            </Link>
+
+            {/* Card 2: Quickstart - PRIMARY */}
+            <Link
+              className="group flex animate-pulse-border flex-col rounded-lg border border-gray-300 bg-white p-6 shadow-md transition-all hover:border-primary hover:shadow-lg dark:border-gray-700 dark:bg-gray-900 dark:hover:border-primary"
+              href="/home/quickstart"
+              style={{
+                animation: "pulse-glow 3s ease-in-out infinite",
+              }}
             >
-              <Link href="/home/build-tools/create-a-mcp-server">
-                <Wrench className="mr-2 h-5 w-5" />
-                Build a tool
-              </Link>
-            </Button>
+              <div className="mb-4 text-6xl">🚀</div>
+              <h3 className="mb-2 font-extrabold text-gray-900 text-xl dark:text-white">
+                Quickstart
+              </h3>
+              <p className="flex-grow text-gray-600 text-sm dark:text-gray-400">
+                Call your first pre-built tool
+              </p>
+              <div className="text-gray-500 text-xs dark:text-gray-500">
+                5 min
+              </div>
+            </Link>
+
+            {/* Card 3: Build Custom Tools */}
+            <Link
+              className="group flex flex-col rounded-lg border border-gray-300 bg-white p-6 opacity-75 transition-all hover:border-primary hover:opacity-100 hover:shadow-lg dark:border-gray-700 dark:bg-gray-900 dark:hover:border-primary"
+              href="/home/build-tools/create-a-mcp-server"
+            >
+              <div className="mb-4 text-4xl">🔧</div>
+              <h3 className="mb-2 font-bold text-gray-900 text-xl dark:text-white">
+                Build Tools
+              </h3>
+              <p className="mb-4 flex-grow text-gray-600 text-sm dark:text-gray-400">
+                For any API or extend ours
+              </p>
+              <div className="text-gray-500 text-xs dark:text-gray-500">
+                30+ min
+              </div>
+            </Link>
           </motion.div>
+
+          <style jsx>{`
+            @keyframes pulse-glow {
+              0%, 100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.2);
+              }
+              50% {
+                box-shadow: 0 0 20px 5px rgba(239, 68, 68, 0.3);
+              }
+            }
+          `}</style>
+
           <motion.div
             animate={{ opacity: 1, y: 0 }}
             className="mt-10 flex items-center justify-center gap-x-6"
@@ -134,16 +164,14 @@ export function LandingPage() {
               delay: ANIMATION_DELAYS.final,
             }}
           >
-            <div className="rounded-lg border border-gray-300 bg-gray-50/50 p-4 text-gray-700 italic backdrop-blur-sm dark:border-white dark:bg-gray-900/50 dark:text-white">
-              Don't write code yourself - let your AI IDE do it for you! <br />
-              <Link
-                className="text-primary hover:underline"
-                href="/home/agentic-development"
-              >
-                Learn how to give your coding agents access to Arcade.dev's
-                documentation
-              </Link>
-            </div>
+            <Link
+              className="block rounded-lg border border-gray-300 bg-gray-50/50 p-4 text-gray-700 italic backdrop-blur-sm transition-all hover:border-primary hover:bg-gray-100/50 hover:shadow-md dark:border-white dark:bg-gray-900/50 dark:text-white dark:hover:bg-gray-800/50"
+              href="/home/agentic-development"
+            >
+              💡 Using Cursor, Codeium, or another AI IDE?
+              <br />
+              Give your coding agent access to Arcade's tools and documentation
+            </Link>
           </motion.div>
         </div>
         <div

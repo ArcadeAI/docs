@@ -43,16 +43,8 @@ Ready to start? Follow the Quickstart below.
 ### Install the Arcade client
 
 <Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
-  <Tabs.Tab>
-  ```python
-  pip install arcadepy
-  ```
-  </Tabs.Tab>
-  <Tabs.Tab>
-  ```javascript
-  npm install @arcadeai/arcadejs
-  ```
-  </Tabs.Tab>
+  <Tabs.Tab>```python pip install arcadepy ```</Tabs.Tab>
+  <Tabs.Tab>```javascript npm install @arcadeai/arcadejs ```</Tabs.Tab>
 </Tabs>
 
 ### Instantiate and use the client
@@ -64,44 +56,49 @@ Create a new script called `example.py`:
 from arcadepy import Arcade
 
 # You can also set the `ARCADE_API_KEY` environment variable instead of passing it as a parameter.
+
 client = Arcade(api_key="{arcade_api_key}")
 
 # Arcade needs a unique identifier for your application user (this could be an email address, a UUID, etc).
+
 # In this example, use the email you used to sign up for Arcade.dev:
+
 user_id = "{arcade_user_id}"
 
 # Let's use the `Math.Sqrt` tool from the Arcade Math MCP Server to get the square root of a number.
+
 response = client.tools.execute(
-    tool_name="Math.Sqrt",
-    input={"a": '625'},
-    user_id=user_id,
+tool_name="Math.Sqrt",
+input={"a": '625'},
+user_id=user_id,
 )
 
 print(f"The square root of 625 is {response.output.value}")
 
 # Now, let's use a tool that requires authentication to star a GitHub repository
+
 auth_response = client.tools.authorize(
 tool_name="GitHub.SetStarred",
 user_id=user_id,
 )
 
 if auth_response.status != "completed":
-    print(f"Click this link to authorize: `{auth_response.url}`.  The process will continue once you have authorized the app." )
-    # Wait for the user to authorize the app
-    client.auth.wait_for_completion(auth_response.id);
+print(f"Click this link to authorize: `{auth_response.url}`. The process will continue once you have authorized the app." ) # Wait for the user to authorize the app
+client.auth.wait_for_completion(auth_response.id);
 
 response = client.tools.execute(
-    tool_name="GitHub.SetStarred",
-    input={
-        "owner": "ArcadeAI",
-        "name": "arcade-ai",
-        "starred": True,
-    },
-    user_id=user_id,
+tool_name="GitHub.SetStarred",
+input={
+"owner": "ArcadeAI",
+"name": "arcade-ai",
+"starred": True,
+},
+user_id=user_id,
 )
 
 print(response.output.value)
-```
+
+````
 </Tabs.Tab>
 <Tabs.Tab>
 Create a new script called `example.mjs`:
@@ -152,31 +149,42 @@ const response_github = await client.tools.execute({
 });
 
 console.log(response_github.output.value);
-```
+````
+
 </Tabs.Tab>
 </Tabs>
 
 ### Run the code
 
 <Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
-  <Tabs.Tab>
-    ```bash
-    python3 example.py
-    > The square root of 625 is 25
-    > Successfully starred the repository ArcadeAI/arcade-ai
-    ```
-  </Tabs.Tab>
-  <Tabs.Tab>
-    ```bash
-    node example.mjs
-    > The square root of 625 is 25
-    > Successfully starred the repository ArcadeAI/arcade-ai
-    ```
-  </Tabs.Tab>
+<Tabs.Tab>
+
+```bash
+python3 example.py
+> The square root of 625 is 25
+> Successfully starred the repository ArcadeAI/arcade-ai
+```
+
+</Tabs.Tab>
+<Tabs.Tab>
+
+```bash
+node example.mjs
+> The square root of 625 is 25
+> Successfully starred the repository ArcadeAI/arcade-ai
+```
+
+</Tabs.Tab>
 </Tabs>
 
 </Steps>
 
 ## Next Steps
 
-In this simple example, we call the tool methods directly. In your real applications and agents, you'll likely be letting the LLM decide which tools to call - lean more about using Arcade with Frameworks in the [Frameworks](/home/langchain/use-arcade-tools) section, or [how to build your own tools](/home/build-tools/create-a-mcp-server).
+You just made your first tool calls! In this example, you called tools directly. In production agents, you'll let the LLM decide which tools to call based on user intent.
+
+**Choose your path:**
+
+- **[Build agents that choose tools automatically](/home/langchain/use-arcade-tools)** → LangGraph, OpenAI, Pydantic AI, and more
+- **[Browse pre-built tools](/mcp-servers)** → Gmail, Slack, Notion, and more
+- **[Build custom tools with MCP](/home/build-tools/create-a-mcp-server)** → Create custom tools for any API

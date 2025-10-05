@@ -8,6 +8,9 @@ const meta: MetaRecord = {
       copyPage: true,
     },
   },
+  tutorial: {
+    title: "Tutorial",
+  },
   "use-arcade-tools": {
     title: "Using Arcade tools",
   },

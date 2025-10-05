@@ -1,0 +1,101 @@
+---
+title: "Pydantic AI with Arcade"
+description: "Build a type-safe Python agent using Pydantic AI and Arcade tools"
+---
+
+# Pydantic AI with Arcade
+
+Build a type-safe morning briefing agent using Pydantic AI and Arcade's pre-built tools.
+
+## What you'll build
+
+A Python agent that:
+- Checks your Gmail for important messages
+- Reviews your Google Calendar for today's events
+- Sends a Slack summary to your preferred channel
+- Uses Pydantic for type safety and validation
+
+**Time to complete:** 15 minutes
+
+## Prerequisites
+
+- Python 3.10 or higher
+- [Arcade API key](/home/api-keys)
+- Gmail, Google Calendar, and Slack accounts
+
+## Step 1: Install dependencies
+
+```bash
+pip install pydantic-ai arcadepy
+```
+
+## Step 2: Set up your agent
+
+Create a new file `morning_briefing.py`:
+
+```python
+from pydantic import BaseModel
+from pydantic_ai import Agent
+from arcadepy import Arcade
+
+# Initialize Arcade client
+arcade = Arcade(api_key="your_api_key_here")
+
+# Define the briefing structure
+class MorningBriefing(BaseModel):
+    emails: list[str]
+    events: list[str]
+    summary: str
+
+# Create agent with Arcade tools
+agent = Agent(
+    model="openai:gpt-4",
+    result_type=MorningBriefing,
+    tools=[
+        arcade.get_tool("Gmail.ListMessages"),
+        arcade.get_tool("GoogleCalendar.ListEvents"),
+        arcade.get_tool("Slack.SendMessage"),
+    ]
+)
+
+# TODO: Add agent logic here
+```
+
+## Step 3: Implement the briefing logic
+
+```python
+async def generate_briefing(user_id: str):
+    result = await agent.run(
+        f"Generate a morning briefing for user {user_id}. "
+        "Check their email, calendar for today, and send a summary to Slack.",
+        user_id=user_id
+    )
+    return result.data
+```
+
+## Step 4: Run your agent
+
+```bash
+python morning_briefing.py
+```
+
+## Expected output
+
+```
+Morning Briefing Generated:
+- 5 unread emails (2 high priority)
+- 3 meetings today: Team standup (9am), Client call (2pm), Review session (4pm)
+- Summary sent to #general on Slack
+```
+
+## Next steps
+
+- [Customize tool parameters](/home/use-tools/tool-calling)
+- [Handle user authentication](/home/auth)
+- [Deploy your agent](/home/serve-tools)
+
+---
+
+**Other Pydantic AI guides:**
+- [Custom validation](/home/pydantic-ai/validation) (Coming soon)
+- [Error handling](/home/pydantic-ai/errors) (Coming soon)

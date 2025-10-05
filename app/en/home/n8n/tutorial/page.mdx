@@ -1,0 +1,164 @@
+---
+title: "n8n with Arcade"
+description: "Use Arcade tools in n8n workflows"
+---
+
+# n8n with Arcade
+
+Connect Arcade's 100+ tools to your n8n workflows for powerful automation.
+
+## What you'll build
+
+An n8n workflow that:
+- Checks Gmail for new messages
+- Analyzes email content with AI
+- Posts summaries to Slack
+- Updates Google Calendar
+
+**Time to complete:** 20 minutes
+
+## Prerequisites
+
+- [n8n instance](https://n8n.io/download) (cloud or self-hosted)
+- [Arcade API key](/home/api-keys)
+- Gmail, Slack, and Calendar accounts
+
+## Step 1: Install n8n Arcade node
+
+In n8n:
+
+1. Go to **Settings** → **Community Nodes**
+2. Search for `n8n-nodes-arcade`
+3. Click **Install**
+
+Or via CLI:
+```bash
+npm install n8n-nodes-arcade
+```
+
+## Step 2: Create a new workflow
+
+1. Click **+ Add Workflow**
+2. Name it "Email to Slack Briefing"
+
+## Step 3: Add trigger
+
+1. Click **Add first step**
+2. Search for **Schedule Trigger**
+3. Set to run daily at 9:00 AM
+
+## Step 4: Add Arcade Gmail node
+
+1. Click **+** to add node
+2. Search for **Arcade**
+3. Select **Gmail.ListMessages** operation
+4. Configure:
+   - **Credentials**: Add your Arcade API key
+   - **Max Results**: 10
+   - **Query**: `is:unread after:yesterday`
+
+## Step 5: Authorize Gmail
+
+1. Click **Execute Node**
+2. Follow the authorization URL
+3. Grant Gmail permissions
+4. Return to n8n
+
+## Step 6: Add AI analysis (optional)
+
+1. Add **OpenAI** or **Anthropic** node
+2. Connect to Gmail output
+3. Prompt: "Summarize these emails in 2-3 bullet points"
+
+## Step 7: Add Arcade Slack node
+
+1. Add another **Arcade** node
+2. Select **Slack.SendMessage** operation
+3. Configure:
+   - **Channel**: #general
+   - **Message**: Use output from previous nodes
+   - Example: `{{ $json.summary }}`
+
+## Step 8: Authorize Slack
+
+1. Click **Execute Node**
+2. Follow authorization URL
+3. Grant Slack permissions
+4. Return to n8n
+
+## Step 9: Test the workflow
+
+1. Click **Execute Workflow**
+2. Check each node's output
+3. Verify Slack message was sent
+
+## Step 10: Activate workflow
+
+1. Toggle **Active** in top right
+2. Workflow will now run daily at 9 AM
+
+## Example workflows
+
+### Daily standup automation
+```
+Trigger (Schedule)
+  → Gmail.ListMessages (check team emails)
+  → GoogleCalendar.ListEvents (get today's meetings)
+  → Slack.SendMessage (post summary to #standup)
+```
+
+### GitHub PR notifications
+```
+Trigger (Webhook)
+  → GitHub.GetPullRequest (check PR details)
+  → Slack.SendMessage (notify #engineering)
+  → Linear.CreateIssue (create follow-up task)
+```
+
+### Customer support triage
+```
+Trigger (Gmail webhook)
+  → Gmail.GetMessage (fetch full email)
+  → OpenAI (analyze urgency)
+  → Slack.SendMessage (alert support team)
+  → Linear.CreateIssue (create ticket)
+```
+
+### Weekly report generator
+```
+Trigger (Schedule - Friday 5pm)
+  → GitHub.ListIssues (closed this week)
+  → Linear.ListIssues (completed this week)
+  → GoogleDocs.CreateDocument (generate report)
+  → Gmail.SendMessage (email to team)
+```
+
+## Available Arcade nodes
+
+n8n can access all [100+ Arcade tools](/mcp-servers), including:
+
+**Communication:**
+- Gmail, Outlook
+- Slack, Discord, Teams
+
+**Project Management:**
+- GitHub, Linear, Jira
+- Asana, ClickUp
+
+**Productivity:**
+- Google Calendar, Notion
+- Google Drive, Dropbox
+
+**And many more...**
+
+## Next steps
+
+- [Browse all available tools](/mcp-servers)
+- [Learn about n8n workflows](https://docs.n8n.io)
+- [Build custom Arcade tools](/home/build-tools/create-a-mcp-server)
+
+---
+
+**Want to build code-based agents?** Check out framework guides:
+- [Python agents](/home/langchain/tutorial)
+- [TypeScript agents](/home/vercelai/tutorial)

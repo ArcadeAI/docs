@@ -1,0 +1,182 @@
+---
+title: "Google ADK with Arcade"
+description: "Build Google agents with Arcade tools"
+---
+
+# Google ADK with Arcade
+
+Build production agents with Google's Agent Development Kit (ADK) and Arcade's 100+ tools.
+
+## What you'll build
+
+A morning briefing agent that:
+- Checks Gmail for unread messages
+- Lists today's calendar events
+- Sends a summary to Slack
+- Uses Google's ADK for reliable agent orchestration
+
+**Time to complete:** 15 minutes
+
+## Prerequisites
+
+- Python 3.10 or higher
+- [Arcade API key](/home/api-keys)
+- [Google Cloud account](https://cloud.google.com)
+- Gmail, Google Calendar, and Slack accounts
+
+## Step 1: Install dependencies
+
+```bash
+pip install google-genai arcadepy
+```
+
+## Step 2: Initialize clients
+
+Create `briefing_agent.py`:
+
+```python
+from google import genai
+from arcadepy import Arcade
+
+# Initialize Google ADK
+client = genai.Client(
+    vertexai=True,
+    project="your-project-id",
+    location="us-central1"
+)
+
+# Initialize Arcade
+arcade = Arcade(api_key="your_api_key_here")
+
+# Your user identifier
+user_id = "user@example.com"
+```
+
+## Step 3: Get Arcade tools
+
+```python
+# Get tools from Arcade as ADK-compatible tools
+tools = [
+    arcade.get_tool("Gmail.ListMessages", user_id=user_id).to_google_adk(),
+    arcade.get_tool("GoogleCalendar.ListEvents", user_id=user_id).to_google_adk(),
+    arcade.get_tool("Slack.SendMessage", user_id=user_id).to_google_adk(),
+]
+```
+
+## Step 4: Create the agent
+
+```python
+# Create agent with tools
+agent = client.agentic.create(
+    model="gemini-2.0-flash-001",
+    tools=tools,
+    config={
+        "temperature": 0.7,
+    }
+)
+```
+
+## Step 5: Run the agent
+
+```python
+# Create a session
+session = agent.sessions.create()
+
+# Send message to agent
+response = session.send_message("""Generate my morning briefing:
+1. Check my Gmail for unread messages from today
+2. Check my calendar for events today
+3. Send a summary to #general on Slack with the format:
+   'Morning briefing: X unread emails, Y meetings today'
+""")
+
+print(response.text)
+```
+
+## Step 6: Handle authorization
+
+On first run, the agent will pause for tool authorization:
+
+```
+Please authorize Gmail: https://arcade.dev/auth/abc123
+Waiting for authorization...
+```
+
+1. Open the URL in your browser
+2. Grant permissions
+3. The agent will automatically continue
+
+## Expected output
+
+```
+I've generated your morning briefing:
+- You have 5 unread emails from today
+- You have 3 meetings scheduled today
+- Summary sent to #general on Slack
+```
+
+## Full example
+
+```python
+from google import genai
+from arcadepy import Arcade
+
+# Initialize
+client = genai.Client(
+    vertexai=True,
+    project="your-project-id",
+    location="us-central1"
+)
+
+arcade = Arcade(api_key="your_api_key_here")
+user_id = "user@example.com"
+
+# Get tools
+tools = [
+    arcade.get_tool("Gmail.ListMessages", user_id=user_id).to_google_adk(),
+    arcade.get_tool("GoogleCalendar.ListEvents", user_id=user_id).to_google_adk(),
+    arcade.get_tool("Slack.SendMessage", user_id=user_id).to_google_adk(),
+]
+
+# Create agent
+agent = client.agentic.create(
+    model="gemini-2.0-flash-001",
+    tools=tools,
+    config={"temperature": 0.7}
+)
+
+# Run agent
+session = agent.sessions.create()
+response = session.send_message("""Generate my morning briefing:
+1. Check Gmail for unread messages from today
+2. Check calendar for today's events
+3. Send summary to #general on Slack
+""")
+
+print(response.text)
+```
+
+## Advanced: Multi-turn conversations
+
+```python
+# Continue the conversation
+response2 = session.send_message(
+    "Can you also check if I have any meetings tomorrow?"
+)
+
+print(response2.text)
+```
+
+## Next steps
+
+- [Learn about using Arcade tools](/home/google-adk/use-arcade-tools)
+- [Explore all available tools](/mcp-servers)
+- [Build custom tools](/home/build-tools/create-a-mcp-server)
+- [Google ADK documentation](https://cloud.google.com/vertex-ai/docs/adk)
+
+---
+
+**Want to try a different framework?** Check out:
+- [LangGraph](/home/langchain/tutorial)
+- [OpenAI Agents](/home/oai-agents/tutorial)
+- [Pydantic AI](/home/pydantic-ai/tutorial)

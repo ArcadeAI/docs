@@ -1,4 +1,4 @@
-import { BadgeHelp, Home } from "lucide-react";
+import { Home } from "lucide-react";
 import type { MetaRecord } from "nextra";
 
 export const meta: MetaRecord = {
@@ -21,29 +21,62 @@ export const meta: MetaRecord = {
       copyPage: false,
     },
   },
-  "contact-us": {
-    title: (
-      <span className="flex items-center gap-2 font-medium">
-        <BadgeHelp className="size-4" />
-        Contact us
-      </span>
-    ),
-    href: "/contact-us",
-    // theme: {
-    //   breadcrumb: false,
-    //   pagination: false,
-    // },
-  },
 
   "-- Getting Started": {
     type: "separator",
     title: "Using Arcade",
   },
+  "api-keys": {
+    title: "Get an API key",
+  },
   quickstart: {
     title: "Quickstart",
   },
-  "api-keys": {
-    title: "Get an API key",
+  "-- Agent Frameworks and MCP": {
+    type: "separator",
+    title: "Agent Frameworks and MCP",
+  },
+  "agent-frameworks-overview": {
+    title: "Overview",
+  },
+  "mcp-clients": {
+    title: "MCP Clients",
+  },
+  "pydantic-ai": {
+    title: "Pydantic AI",
+  },
+  langchain: {
+    title: "LangChain",
+  },
+  crewai: {
+    title: "CrewAI",
+  },
+  "google-adk": {
+    title: "Google ADK",
+  },
+  "oai-agents": {
+    title: "OpenAI Agents",
+  },
+  "generic-python": {
+    title: "Generic Python",
+  },
+  mastra: {
+    title: "Mastra",
+  },
+  vercelai: {
+    title: "Vercel AI",
+  },
+  "generic-typescript": {
+    title: "Generic TypeScript",
+  },
+  cursor: {
+    title: "Cursor",
+  },
+  chatgpt: {
+    title: "ChatGPT",
+  },
+  n8n: {
+    title: "n8n",
   },
   "-- Authoring Tools": {
     type: "separator",
@@ -57,31 +90,6 @@ export const meta: MetaRecord = {
   },
   "serve-tools": {
     title: "Serve tools",
-  },
-  "-- Agent Frameworks and MCP": {
-    type: "separator",
-    title: "Agent Frameworks and MCP",
-  },
-  "mcp-clients": {
-    title: "MCP Clients",
-  },
-  langchain: {
-    title: "LangChain",
-  },
-  crewai: {
-    title: "CrewAI",
-  },
-  "google-adk": {
-    title: "Google ADK",
-  },
-  mastra: {
-    title: "Mastra",
-  },
-  "oai-agents": {
-    title: "OpenAI Agents",
-  },
-  vercelai: {
-    title: "Vercel AI",
   },
   "-- Core Concepts": {
     type: "separator",
@@ -130,6 +138,10 @@ export const meta: MetaRecord = {
   },
   changelog: {
     title: "Changelog",
+  },
+  "contact-us": {
+    title: "Contact Us",
+    href: "/contact-us",
   },
   "-- Registry": {
     type: "separator",

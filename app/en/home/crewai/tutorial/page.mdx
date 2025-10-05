@@ -1,0 +1,239 @@
+---
+title: "CrewAI with Arcade"
+description: "Build multi-agent crews with Arcade tools"
+---
+
+# CrewAI with Arcade
+
+Build a multi-agent crew that collaborates to complete complex tasks using Arcade's 100+ tools.
+
+## What you'll build
+
+A morning briefing crew with specialized agents:
+- **Email Agent**: Checks Gmail for unread messages
+- **Calendar Agent**: Lists today's calendar events
+- **Slack Agent**: Sends a summary to Slack
+- Agents collaborate to generate your briefing
+
+**Time to complete:** 20 minutes
+
+## Prerequisites
+
+- Python 3.10 or higher
+- [Arcade API key](/home/api-keys)
+- Gmail, Google Calendar, and Slack accounts
+
+## Step 1: Install dependencies
+
+```bash
+pip install crewai arcadepy
+```
+
+## Step 2: Initialize Arcade client
+
+Create `briefing_crew.py`:
+
+```python
+from crewai import Agent, Task, Crew
+from arcadepy import Arcade
+
+# Initialize Arcade
+arcade = Arcade(api_key="your_api_key_here")
+
+# Your user identifier
+user_id = "user@example.com"
+```
+
+## Step 3: Get Arcade tools
+
+```python
+# Get tools from Arcade
+gmail_tool = arcade.get_tool("Gmail.ListMessages", user_id=user_id)
+calendar_tool = arcade.get_tool("GoogleCalendar.ListEvents", user_id=user_id)
+slack_tool = arcade.get_tool("Slack.SendMessage", user_id=user_id)
+```
+
+## Step 4: Create specialized agents
+
+```python
+# Email Agent
+email_agent = Agent(
+    role="Email Analyst",
+    goal="Check Gmail and summarize important unread messages",
+    backstory="You are an expert at triaging emails and identifying important messages.",
+    tools=[gmail_tool],
+    verbose=True
+)
+
+# Calendar Agent
+calendar_agent = Agent(
+    role="Calendar Manager",
+    goal="Check calendar and summarize today's schedule",
+    backstory="You are an expert at managing schedules and identifying important meetings.",
+    tools=[calendar_tool],
+    verbose=True
+)
+
+# Slack Agent
+slack_agent = Agent(
+    role="Communication Specialist",
+    goal="Send briefing summaries to Slack",
+    backstory="You are an expert at crafting clear, concise team communications.",
+    tools=[slack_tool],
+    verbose=True
+)
+```
+
+## Step 5: Define tasks
+
+```python
+# Task 1: Check emails
+check_emails = Task(
+    description="Check Gmail for unread messages from today and summarize the key points.",
+    expected_output="A summary of unread emails including senders and subjects.",
+    agent=email_agent
+)
+
+# Task 2: Check calendar
+check_calendar = Task(
+    description="Check Google Calendar for events today and list all meetings.",
+    expected_output="A list of today's meetings with times and titles.",
+    agent=calendar_agent
+)
+
+# Task 3: Send to Slack
+send_briefing = Task(
+    description="""Using the email and calendar summaries, create a morning briefing
+    and send it to #general on Slack. Format: 'Morning briefing: X unread emails,
+    Y meetings today. [Brief highlights]'""",
+    expected_output="Confirmation that the briefing was sent to Slack.",
+    agent=slack_agent,
+    context=[check_emails, check_calendar]
+)
+```
+
+## Step 6: Create and run the crew
+
+```python
+# Create the crew
+crew = Crew(
+    agents=[email_agent, calendar_agent, slack_agent],
+    tasks=[check_emails, check_calendar, send_briefing],
+    verbose=True
+)
+
+# Run the crew
+result = crew.kickoff()
+
+print(result)
+```
+
+## Step 7: Handle authorization
+
+On first run, agents will pause for tool authorization:
+
+```
+Please authorize Gmail: https://arcade.dev/auth/abc123
+Waiting for authorization...
+```
+
+1. Open the URL in your browser
+2. Grant permissions
+3. The crew will automatically continue
+
+## Expected output
+
+```
+Email Agent: Found 5 unread emails from today...
+Calendar Agent: Found 3 meetings scheduled today...
+Slack Agent: Sent briefing to #general...
+
+Morning briefing: 5 unread emails, 3 meetings today.
+- Important: Meeting with Sarah at 10am
+- Urgent email from John about Q4 planning
+- Team standup at 2pm
+```
+
+## Full example
+
+```python
+from crewai import Agent, Task, Crew
+from arcadepy import Arcade
+
+# Initialize
+arcade = Arcade(api_key="your_api_key_here")
+user_id = "user@example.com"
+
+# Get tools
+gmail_tool = arcade.get_tool("Gmail.ListMessages", user_id=user_id)
+calendar_tool = arcade.get_tool("GoogleCalendar.ListEvents", user_id=user_id)
+slack_tool = arcade.get_tool("Slack.SendMessage", user_id=user_id)
+
+# Create agents
+email_agent = Agent(
+    role="Email Analyst",
+    goal="Check Gmail and summarize unread messages",
+    backstory="Expert at triaging emails",
+    tools=[gmail_tool],
+    verbose=True
+)
+
+calendar_agent = Agent(
+    role="Calendar Manager",
+    goal="Check calendar and summarize today's schedule",
+    backstory="Expert at managing schedules",
+    tools=[calendar_tool],
+    verbose=True
+)
+
+slack_agent = Agent(
+    role="Communication Specialist",
+    goal="Send briefing summaries to Slack",
+    backstory="Expert at team communications",
+    tools=[slack_tool],
+    verbose=True
+)
+
+# Define tasks
+check_emails = Task(
+    description="Check Gmail for unread messages from today",
+    expected_output="Summary of unread emails",
+    agent=email_agent
+)
+
+check_calendar = Task(
+    description="Check Google Calendar for events today",
+    expected_output="List of today's meetings",
+    agent=calendar_agent
+)
+
+send_briefing = Task(
+    description="Send morning briefing to #general on Slack",
+    expected_output="Confirmation of Slack message",
+    agent=slack_agent,
+    context=[check_emails, check_calendar]
+)
+
+# Run crew
+crew = Crew(
+    agents=[email_agent, calendar_agent, slack_agent],
+    tasks=[check_emails, check_calendar, send_briefing],
+    verbose=True
+)
+
+result = crew.kickoff()
+print(result)
+```
+
+## Next steps
+
+- [Learn about custom auth flows](/home/crewai/custom-auth-flow)
+- [Explore all available tools](/mcp-servers)
+- [Build custom tools](/home/build-tools/create-a-mcp-server)
+
+---
+
+**Want to try a different framework?** Check out:
+- [LangGraph](/home/langchain/tutorial)
+- [Pydantic AI](/home/pydantic-ai/tutorial)
+- [OpenAI Agents](/home/oai-agents/tutorial)
