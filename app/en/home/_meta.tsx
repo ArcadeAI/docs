@@ -106,11 +106,8 @@ export const meta: MetaRecord = {
   "hosting-overview": {
     title: "Overview",
   },
-  "hybrid-deployment": {
-    title: "Hybrid Deployment",
-  },
-  "local-deployment": {
-    title: "Local Deployment",
+  deployment: {
+    title: "Deployment",
   },
   "auth-providers": {
     title: "Customizing Auth",
