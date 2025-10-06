@@ -1,4 +1,4 @@
-import { BadgeHelp, Home } from "lucide-react";
+import { BadgeHelp, Globe, HeartPulse, Home } from "lucide-react";
 import type { MetaRecord } from "nextra";
 
 export const meta: MetaRecord = {
@@ -21,20 +21,15 @@ export const meta: MetaRecord = {
       copyPage: false,
     },
   },
-  "contact-us": {
+  arcade: {
     title: (
       <span className="flex items-center gap-2 font-medium">
-        <BadgeHelp className="size-4" />
-        Contact us
+        <Globe className="size-4" />
+        Arcade.dev
       </span>
     ),
-    href: "/contact-us",
-    // theme: {
-    //   breadcrumb: false,
-    //   pagination: false,
-    // },
+    href: "https://arcade.dev",
   },
-
   "-- Getting Started": {
     type: "separator",
     title: "Using Arcade",
@@ -137,6 +132,28 @@ export const meta: MetaRecord = {
   },
   "registry-early-access": {
     title: "Registry Early Access",
+  },
+  "-- Resources": {
+    type: "separator",
+    title: "Resources",
+  },
+  "contact-us": {
+    title: (
+      <span className="flex items-center gap-2 font-medium">
+        <BadgeHelp className="size-4" />
+        Contact us
+      </span>
+    ),
+    href: "/contact-us",
+  },
+  status: {
+    title: (
+      <span className="flex items-center gap-2 font-medium">
+        <HeartPulse className="size-4" />
+        Status
+      </span>
+    ),
+    href: "https://status.arcade.dev/",
   },
 };
 

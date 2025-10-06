@@ -26,11 +26,6 @@ const meta: MetaRecord = {
     title: "API Reference",
     href: "https://reference.arcade.dev/",
   },
-  status: {
-    type: "page",
-    title: "Status",
-    href: "https://status.arcade.dev/",
-  },
 };
 
 export default meta;
