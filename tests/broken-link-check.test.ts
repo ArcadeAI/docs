@@ -6,6 +6,13 @@ import { expect, test } from "vitest";
 
 const TIMEOUT = 30_000;
 
+const staticFiles = [
+  "/llms.txt",
+  "/llms-full.txt",
+  "/robots.txt",
+  "/sitemap.xml",
+];
+
 // Function to validate anchor fragments by checking file content
 function validateAnchorFragment(filePath: string, fragment: string): boolean {
   try {
@@ -62,6 +69,10 @@ test(
         // Split URL and anchor fragment
         const [basePath, fragment] = url.split("#");
         const localeUrl = `/en${basePath}`;
+
+        if (staticFiles.includes(basePath)) {
+          return true;
+        }
 
         // Check if the base path exists with locale prefix
         const baseExists = scanned.urls?.has(localeUrl);
