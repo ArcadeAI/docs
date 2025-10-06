@@ -41,16 +41,9 @@ Before showing how to configure your Dropbox app credentials, let's go through t
 - In the Permissions tab, add any scopes that your app will need
 - In the Settings tab, copy the App key (Client ID) and App secret (Client Secret), which you'll need below
 
-Next, add the Dropbox app to your Arcade Engine configuration. You can do this in the Arcade Dashboard, or by editing the `engine.yaml` file directly (for a self-hosted instance).
+Next, add the Dropbox app to your Arcade Engine configuration.
 
 ## Configuring your own Dropbox Auth Provider in Arcade
-
-There are two ways to configure your Dropbox app credentials in Arcade:
-
-1. From the Arcade Dashboard GUI
-2. By editing the `engine.yaml` file directly (for a self-hosted Arcade Engine)
-
-We show both options step-by-step below.
 
 <Tabs items={["Dashboard GUI", "Engine Configuration YAML"]}>
 <Tabs.Tab>
@@ -84,54 +77,6 @@ Hit the **Create** button and the provider will be ready to be used in the Arcad
 </Steps>
 
 When you use tools that require Dropbox auth using your Arcade account credentials, the Arcade Engine will automatically use this Dropbox OAuth provider. If you have multiple Dropbox providers, see [using multiple auth providers of the same type](/home/auth-providers#using-multiple-providers-of-the-same-type) for more information.
-
-</Tabs.Tab>
-<Tabs.Tab>
-
-### Configuring Dropbox auth in self-hosted Arcade Engine configuration
-
-<Steps>
-
-### Set environment variables
-
-<Callout type="info">
-  The Client ID is the Dropbox "App key" and the Client Secret is the Dropbox
-  "App secret".
-</Callout>
-
-Set the following environment variables:
-
-```bash
-export DROPBOX_CLIENT_ID="<your client ID>"
-export DROPBOX_CLIENT_SECRET="<your client secret>"
-```
-
-Or, you can set these values in a `.env` file:
-
-```bash
-DROPBOX_CLIENT_SECRET="<your client secret>"
-DROPBOX_CLIENT_ID="<your client ID>"
-```
-
-
-
-### Edit the Engine configuration
-
-Edit the `engine.yaml` file and add a `dropbox` item to the `auth.providers` section:
-
-```yaml {3-9}
-auth:
-  providers:
-    - id: default-dropbox
-      description: "The default Dropbox provider"
-      enabled: true
-      type: oauth2
-      provider_id: dropbox
-      client_id: ${env:DROPBOX_CLIENT_ID}
-      client_secret: ${env:DROPBOX_CLIENT_SECRET}
-```
-
-</Steps>
 
 </Tabs.Tab>
 </Tabs>
