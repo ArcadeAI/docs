@@ -1,6 +1,21 @@
 import { BadgeHelp, Globe, HeartPulse, Home } from "lucide-react";
 import type { MetaRecord } from "nextra";
 
+function TitleWithIcon({
+  icon: Icon,
+  children,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  children: React.ReactNode;
+}) {
+  return (
+    <span className="flex items-center gap-2 font-medium">
+      <Icon className="size-4" />
+      {children}
+    </span>
+  );
+}
+
 export const meta: MetaRecord = {
   "*": {
     theme: {
@@ -8,12 +23,7 @@ export const meta: MetaRecord = {
     },
   },
   index: {
-    title: (
-      <span className="flex items-center gap-2 font-medium">
-        <Home className="size-4" />
-        Home
-      </span>
-    ),
+    title: <TitleWithIcon icon={Home}>Home</TitleWithIcon>,
     theme: {
       breadcrumb: false,
       layout: "full",
@@ -22,12 +32,7 @@ export const meta: MetaRecord = {
     },
   },
   arcade: {
-    title: (
-      <span className="flex items-center gap-2 font-medium">
-        <Globe className="size-4" />
-        Arcade.dev
-      </span>
-    ),
+    title: <TitleWithIcon icon={Globe}>Arcade.dev</TitleWithIcon>,
     href: "https://arcade.dev",
   },
   "-- Getting Started": {
@@ -138,21 +143,11 @@ export const meta: MetaRecord = {
     title: "Resources",
   },
   "contact-us": {
-    title: (
-      <span className="flex items-center gap-2 font-medium">
-        <BadgeHelp className="size-4" />
-        Contact us
-      </span>
-    ),
+    title: <TitleWithIcon icon={BadgeHelp}>Contact us</TitleWithIcon>,
     href: "/contact-us",
   },
   status: {
-    title: (
-      <span className="flex items-center gap-2 font-medium">
-        <HeartPulse className="size-4" />
-        Status
-      </span>
-    ),
+    title: <TitleWithIcon icon={HeartPulse}>Status</TitleWithIcon>,
     href: "https://status.arcade.dev/",
   },
 };
