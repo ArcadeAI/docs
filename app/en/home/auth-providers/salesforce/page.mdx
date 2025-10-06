@@ -4,17 +4,9 @@ import { SignupLink } from "@/app/_components/analytics";
 
 # Salesforce
 
-<Callout type="info">
-  At this time, Arcade does not offer a default Salesforce Auth Provider and
-  cannot support Salesforce auth in the Arcade Cloud Platform. To use Salesforce
-  auth, the [Salesforce MCP Server](/mcp-servers/sales/salesforce), or to develop
-  your [custom Salesforce tools](/home/build-tools/create-a-mcp-server), you
-  must [self-host the Arcade Engine](/home/local-deployment/install/local) and
-  create a custom Auth Provider with your own Salesforce OAuth 2.0 credentials
-  as described below.
-</Callout>
 
-The Salesforce auth provider enables tools and agents to call Salesforce APIs on behalf of a user. Behind the scenes, the Arcade Engine and the Salesforce auth provider seamlessly manage Salesforce OAuth 2.0 authorization for your users.
+
+The Salesforce auth provider enables tools and agents to call Salesforce APIs on behalf of a user.
 
 ## What's documented here
 
@@ -118,14 +110,10 @@ Follow the [Create an OAuth Custom Scope](https://help.salesforce.com/s/articleV
 
 ## Configuring Salesforce Auth
 
-<Callout type="info">
-  Refer to [Installing Arcade Locally](/home/local-deployment/install/local) for
-  more information on how to install and run the Arcade Engine.
-</Callout>
 
-You can either configure Salesforce auth from the Arcade Engine Dashboard graphical interface or in the `engine.yaml` file. We describe both options below.
 
-<Tabs items={["Dashboard GUI", "Engine Configuration YAML"]}>
+
+<Tabs items={["Dashboard GUI"]}>
 <Tabs.Tab>
 
 ### Configure Salesforce Auth Using the Arcade Dashboard GUI
@@ -190,132 +178,6 @@ Click the **Create** button and the provider will be ready to be used in the Arc
 
 </Steps>
 </Tabs.Tab>
-
-<Tabs.Tab>
-
-### Configure Salesforce Auth Using the Engine Configuration YAML
-
-<Callout>
-  Refer to [Engine configuration](/home/local-deployment/configure/engine) for
-  more information on how to set environment variables and configure the Arcade
-  Engine.
-</Callout>
-
-<Callout>
-  To find where the `engine.yaml` file is located in your OS after installing
-  the Arcade Engine, check the [Engine configuration
-  file](/home/local-deployment/configure/overview#engine-configuration-file)
-  documentation.
-</Callout>
-
-<Steps>
-
-#### Set environment variables
-
-Set the following environment variables:
-
-```bash
-export SALESFORCE_CLIENT_ID="<your client ID>"
-export SALESFORCE_CLIENT_SECRET="<your client secret>"
-```
-
-Or, you can set these values in a `.env` file:
-
-```bash
-SALESFORCE_CLIENT_ID="<your client ID>"
-SALESFORCE_CLIENT_SECRET="<your client secret>"
-```
-
-#### Edit the Engine configuration
-
-<Callout type="info">
-  In the YAML code demonstrated below, replace `salesforce-org-subdomain` in the
-  endpoint URLs with your [Salesforce Org
-  Subdomain](#get-your-salesforce-org-subdomain).
-</Callout>
-
-Edit the `engine.yaml` file and add a Salesforce item to the `auth.providers` section:
-
-<Callout type="info">
-  The `id` must be set to `salesforce` in order to use the [Arcade Salesforce
-  MCP Server](/mcp-servers/sales/salesforce).
-</Callout>
-
-<Callout type="info">
-  Replace `salesforce-org-subdomain` with your [Salesforce Org
-  Subdomain](#get-your-salesforce-org-subdomain).
-</Callout>
-
-```yaml {3-3,11-11,18-18,25-25,33-33}
-auth:
-  providers:
-    - id: salesforce
-      description: "Custom Salesforce provider"
-      enabled: true
-      type: oauth2
-      client_id: ${env:SALESFORCE_CLIENT_ID}
-      client_secret: ${env:SALESFORCE_CLIENT_SECRET}
-      oauth2:
-        authorize_request:
-          endpoint: "https://salesforce-org-subdomain.my.salesforce.com/services/oauth2/authorize"
-          params:
-            client_id: "{{client_id}}"
-            redirect_uri: "{{redirect_uri}}"
-            scope: "{{scopes}}"
-            response_type: code
-        token_request:
-          endpoint: "https://salesforce-org-subdomain.my.salesforce.com/services/oauth2/token"
-          params:
-            grant_type: authorization_code
-            client_id: "{{client_id}}"
-            client_secret: "{{client_secret}}"
-            redirect_uri: "{{redirect_uri}}"
-        refresh_request:
-          endpoint: "https://salesforce-org-subdomain.my.salesforce.com/services/oauth2/token"
-          params:
-            grant_type: refresh_token
-            client_id: "{{client_id}}"
-            client_secret: "{{client_secret}}"
-            refresh_token: "{{refresh_token}}"
-        token_introspection_request:
-          enabled: false
-          endpoint: "https://salesforce-org-subdomain.my.salesforce.com/services/oauth2/introspect"
-          method: POST
-          params:
-            token: "{{access_token}}"
-          auth_method: "client_secret_basic"
-          request_content_type: application/x-www-form-urlencoded
-          response_content_type: application/json
-          response_map:
-            expires_in: "$.exp"
-            scope: "$.scope"
-          expiration_format: absolute_unix_timestamp
-          triggers:
-            on_token_grant: true
-            on_token_refresh: true
-```
-
-#### Optionally Enable PKCE
-
-If you have enabled PKCE when creating your Salesforce app, you must also enable PKCE in the Salesforce auth provider configuration by setting the `pkce` option to `true`.
-
-```yaml {6-6}
-auth:
-  providers:
-    - id: salesforce
-      description: "Custom Salesforce provider"
-      enabled: true
-      pkce: true
-      ...
-```
-
-#### Restart the Arcade Engine
-
-If the Arcade Engine is already running, you will need to restart it for the changes to take effect.
-
-</Steps>
-</Tabs.Tab>
-
 </Tabs>
 
 ## Using the Arcade Salesforce MCP Server
