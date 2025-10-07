@@ -76,61 +76,66 @@ const ToolInfo: React.FC<ToolInfoProps> = ({
 
   return (
     <div className="mt-5 mb-6 rounded-lg border-4 border-neutral-dark-medium p-6 text-text-color shadow-lg sm:p-3">
-      {IconComponent && (
-        <div className="mb-4">
-          <IconComponent className="h-16 w-16 shrink-0" />
+      <div className="flex gap-6 sm:gap-4">
+        {IconComponent && (
+          <div className="flex flex-col items-start">
+            <IconComponent className="h-32 w-32 shrink-0 sm:h-24 sm:w-24" />
+          </div>
+        )}
+        <div className="min-w-0 flex-1">
           {showBadges && (
             <ToolkitBadges isByoc={isByoc} isPro={isPro} typeInfo={typeInfo} />
           )}
-        </div>
-      )}
-      <p className="my-1.5 text-base text-text-color sm:text-sm">
-        <strong className="text-text-color">Description: </strong> {description}
-      </p>
-      <p className="my-1.5 text-base text-text-color sm:text-sm">
-        <strong className="text-text-color">Author: </strong> {author}
-      </p>
-      {codeLink && (
-        <p className="my-1.5 text-base text-text-color sm:text-sm">
-          <strong className="text-text-color">Code: </strong>
-          <a
-            className="text-brand-accent no-underline underline-offset-0.5 hover:underline"
-            href={codeLink}
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            GitHub
-          </a>
-        </p>
-      )}
-      <p className="my-1.5 text-base text-text-color sm:text-sm">
-        <strong className="text-text-color">Auth: </strong>
-        {authType.toLowerCase() === "oauth2" ? (
-          <>
-            User authorization
-            {authProviderName && resolvedAuthDocsUrl && (
+          <p className="my-1.5 text-base text-text-color sm:text-sm">
+            <strong className="text-text-color">Description: </strong>{" "}
+            {description}
+          </p>
+          <p className="my-1.5 text-base text-text-color sm:text-sm">
+            <strong className="text-text-color">Author: </strong> {author}
+          </p>
+          {codeLink && (
+            <p className="my-1.5 text-base text-text-color sm:text-sm">
+              <strong className="text-text-color">Code: </strong>
+              <a
+                className="text-brand-accent no-underline underline-offset-0.5 hover:underline"
+                href={codeLink}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                GitHub
+              </a>
+            </p>
+          )}
+          <p className="my-1.5 text-base text-text-color sm:text-sm">
+            <strong className="text-text-color">Auth: </strong>
+            {authType.toLowerCase() === "oauth2" ? (
               <>
-                {" "}
-                via the{" "}
-                <a
-                  className="text-brand-accent no-underline underline-offset-0.5 hover:underline"
-                  href={resolvedAuthDocsUrl}
-                >
-                  {authProviderName} auth provider
-                </a>
+                User authorization
+                {authProviderName && resolvedAuthDocsUrl && (
+                  <>
+                    {" "}
+                    via the{" "}
+                    <a
+                      className="text-brand-accent no-underline underline-offset-0.5 hover:underline"
+                      href={resolvedAuthDocsUrl}
+                    >
+                      {authProviderName} auth provider
+                    </a>
+                  </>
+                )}
               </>
+            ) : (
+              authType
             )}
-          </>
-        ) : (
-          authType
-        )}
-      </p>
-      {note && (
-        <p className="my-1.5 text-base text-text-color sm:text-sm">
-          <strong className="text-text-color">Note: </strong>
-          {note}
-        </p>
-      )}
+          </p>
+          {note && (
+            <p className="my-1.5 text-base text-text-color sm:text-sm">
+              <strong className="text-text-color">Note: </strong>
+              {note}
+            </p>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
