@@ -82,6 +82,7 @@ const ToolInfo: React.FC<ToolInfoProps> = ({
             <div className="rounded-lg bg-neutral-light p-3 dark:bg-neutral-dark-medium">
               <IconComponent className="h-16 w-16 shrink-0" />
             </div>
+          </div>
         )}
         <div className="min-w-0 flex-1">
           {showBadges && (
