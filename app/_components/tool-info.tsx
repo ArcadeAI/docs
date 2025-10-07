@@ -76,9 +76,9 @@ const ToolInfo: React.FC<ToolInfoProps> = ({
 
   return (
     <div className="mt-5 mb-6 rounded-lg border-4 border-neutral-dark-medium p-6 text-text-color shadow-lg sm:p-3">
-      <div className="flex gap-6 sm:gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:gap-6">
         {IconComponent && (
-          <div className="flex flex-col items-start">
+          <div className="flex flex-col items-center sm:items-start">
             <IconComponent className="h-32 w-32 shrink-0 sm:h-24 sm:w-24" />
           </div>
         )}
