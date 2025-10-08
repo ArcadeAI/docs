@@ -1,58 +1,64 @@
 ---
-title: "Creating a MCP Server"
-description: "Learn how to create, test, deploy, and publish a custom MCP Server for Arcade"
+title: "Creating a MCP Server with Arcade"
+description: "Learn how to create, test, deploy, and publish a custom MCP Server with Arcade"
 ---
 
 import { Steps, Tabs, Callout } from "nextra/components";
 
-# Creating a MCP Server
+# Creating an MCP Server with Arcade
 
-<div className="grid grid-cols-1 md:grid-cols-[4fr_3fr] gap-8">
-  <div>
-    This guide walks you through the complete process of creating a custom MCP
-    Server for Arcade - from initial setup to publishing on PyPI. You'll build a
-    simple arithmetic MCP Server with operations like addition, subtraction, and
-    multiplication. When creating or extending an Arcade MCP Server, we make it
-    easy to develop the tool alongside your agent, providing a pleasant local
-    development experience. As your agent will be loading its available tools
-    from the Arcade Engine, you can mix existing tools and your locally
-    developed tool by following this guide. You'll be running your local worker
-    with the Arcade CLI and registering it with the Engine so that your agent
-    can find and use your tool.
-  </div>
-  <iframe
-    className="aspect-video w-full max-w-[900px] rounded-xl shadow-2xl"
-    src="https://www.youtube.com/embed/q2V_P35KYCg?si=CYhKw-eYx1O98O9K"
-    title="Create a MCP Server"
-    allow="fullscreen; accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-    referrerPolicy="strict-origin-when-cross-origin"
-  ></iframe>
-</div>
+The `arcade_mcp_server` package provides powerful ways to run MCP servers with your Arcade tools. This guide walks you through the complete process of creating a custom MCP with Arcade.
 
-## Prerequisites
+## Outcomes
+
+Build a simple arithmetic MCP Server with operations like addition, subtraction, and multiplication.
+
+### You will Learn
+
+- How to run MCP Servers with Arcade tools using the [`arcade_mcp_server`](https://python.mcp.arcade.dev/api/server/server/) package
+- How to use `arcade new` from the `arcade-mcp` CLI to create your server project with all necessary files and dependencies.
+- How to run your local worker with the Arcade CLI and register it with the Engine so that your agent can find and use your tool.
+
+### Prerequisites
 
 Before starting, make sure you have:
 
 - An [Arcade account](https://api.arcade.dev/signup)
-- For this guide, we'll use [uv](https://docs.astral.sh/uv/getting-started/installation/) as our package manager.
+- For this guide, we'll use [uv](https://docs.astral.sh/uv/getting-started/installation/) as our package manager.`
 
 <Steps>
 
-## Generate a MCP Server template
+## Install the Arcade CLI
 
-Run the following command to start creating your MCP Server:
+In your terminal, run the following command to install the `arcade-mcp` package:
 
-```bash
-uv tool run --from arcade-ai arcade new arithmetic
+```python
+uv pip install arcade-mcp
 ```
 
-Enter the optional information when prompted:
+This package includes the CLI tools and the `arcade-mcp-server` library.
 
-- **Description**: Provide a brief explanation of what your MCP Server will do
-- **Author GitHub username and email**: Your contact information
-- **Generate test and evaluation directories**: Whether you want additional directories created for you
+## Create Your Server
 
-After completion, a directory with your MCP Server name (arithmetic) will be created with the following structure:
+In your terminal, run the following command to scaffold a new MCP Server called `my_server`:
+
+```bash
+arcade new my_server
+cd my_server
+```
+
+<Note>
+  If you aren't already logged into your Arcade account, you will be prompted to
+  do so by running `arcade login` in your terminal.
+</Note>
+
+This generates a complete project with:
+
+- **server.py** Main server file with MCPApp and example tools
+- **pyproject.toml** Dependencies and project configuration
+- **.env.example** Example `.env` file containing a secret required by one of the generated tools in `server.py`
+
+The generated `server.py` includes proper structure with command-line argument handling:
 
 ```
 arithmetic/
