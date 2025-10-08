@@ -4,6 +4,14 @@ export type ToolDefinition = Record<string, unknown>;
 
 export type ArcadeClient = InstanceType<typeof Arcade>;
 
+export type GetToolDefinitionsParams = {
+  client?: ArcadeClient;
+  tools?: string[];
+  toolkits?: string[];
+  raiseOnEmpty: boolean;
+  limit?: number;
+  offset?: number;
+};
 /**
  * Retrieve tool definitions from the Arcade client, accounting for pagination.
  *
@@ -12,13 +20,16 @@ export type ArcadeClient = InstanceType<typeof Arcade>;
  * - If neither `tools` nor `toolkits` are provided and `raiseOnEmpty` is true, throw an error.
  */
 export async function getToolDefinitions(
-  client?: ArcadeClient,
-  tools?: string[],
-  toolkits?: string[],
-  raiseOnEmpty: boolean = true,
-  limit?: number,
-  offset?: number,
+  params: GetToolDefinitionsParams,
 ): Promise<ToolDefinition[]> {
+  const {
+    client,
+    tools,
+    toolkits,
+    raiseOnEmpty = true,
+    limit,
+    offset,
+  } = params;
   const arcade = client ?? new Arcade();
   const allTools: ToolDefinition[] = [];
 
@@ -62,3 +73,7 @@ export async function getToolDefinitions(
 }
 
 export default getToolDefinitions;
+
+getToolDefinitions({
+  client: new Arcade(),
+});
