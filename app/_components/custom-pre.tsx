@@ -2,6 +2,7 @@ import { Pre, withIcons } from "nextra/components";
 import { GitHubIcon } from "nextra/icons";
 import type { ReactNode } from "react";
 import React from "react";
+import EnhancedCodeBlock from "./enhanced-code-block";
 import TerminalCodeBlock from "./terminal-code-block";
 
 type CustomPreProps = {
@@ -19,8 +20,12 @@ const CustomPre: React.FC<CustomPreProps> = ({
   "data-language": dataLanguage,
   ...props
 }) => {
-  // Check if this is a bash/shell code block
-  const language = dataLanguage || className?.replace("language-", "") || "";
+  // Parse language and optional filename
+  const rawLanguage = dataLanguage || className?.replace("language-", "") || "";
+  const [language, filename] = rawLanguage.includes(":")
+    ? rawLanguage.split(":", 2)
+    : [rawLanguage, undefined];
+
   const isTerminalLanguage = [
     "bash",
     "shell",
@@ -51,14 +56,28 @@ const CustomPre: React.FC<CustomPreProps> = ({
     return "";
   };
 
+  const codeContent = getCodeContent(children);
+
   if (isTerminalLanguage) {
-    const codeContent = getCodeContent(children);
     return (
       <TerminalCodeBlock className={className}>{codeContent}</TerminalCodeBlock>
     );
   }
 
-  // For non-terminal languages, use the default enhanced pre component
+  // If we have a language specified, use enhanced code block
+  if (language && language.trim() !== "") {
+    return (
+      <EnhancedCodeBlock
+        className={className}
+        filename={filename}
+        language={language}
+      >
+        {codeContent}
+      </EnhancedCodeBlock>
+    );
+  }
+
+  // For code blocks without language specification, use the default pre component
   return (
     <EnhancedPre className={className} data-language={dataLanguage} {...props}>
       {children}

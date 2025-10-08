@@ -1,4 +1,6 @@
-import { Terminal } from "lucide-react";
+"use client";
+
+import { Copy, Terminal } from "lucide-react";
 import type React from "react";
 
 type TerminalCodeBlockProps = {
@@ -18,10 +20,20 @@ const TerminalCodeBlock: React.FC<TerminalCodeBlockProps> = ({
           <Terminal className="h-4 w-4" />
           <span className="font-medium text-sm">Terminal</span>
         </div>
-        <div className="flex gap-2">
-          <div className="h-3 w-3 rounded-full bg-red-500" />
-          <div className="h-3 w-3 rounded-full bg-yellow-500" />
-          <div className="h-3 w-3 rounded-full bg-green-500" />
+        <div className="flex items-center gap-2">
+          <button
+            className="flex cursor-pointer items-center gap-1 rounded px-2 py-1 text-gray-300 text-xs transition-colors hover:bg-gray-700 hover:text-white"
+            onClick={() => navigator.clipboard.writeText(children)}
+            type="button"
+          >
+            <Copy className="h-3 w-3" />
+            Copy
+          </button>
+          <div className="flex gap-2">
+            <div className="h-3 w-3 rounded-full bg-red-500" />
+            <div className="h-3 w-3 rounded-full bg-yellow-500" />
+            <div className="h-3 w-3 rounded-full bg-green-500" />
+          </div>
         </div>
       </div>
 
