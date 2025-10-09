@@ -12,18 +12,18 @@ Then, run `pnpm dev` to start the development server and visit localhost:3000.
 
 ## Styling
 
-We have three kinds of callouts you can use with MDX:
+We use Nextra's built-in Callout component for callouts in MDX:
 
 ```mdx
-<Note>A general callout. Use sparingly.</Note>
+<Callout>A general callout. Use sparingly.</Callout>
 
-<Note type="caution">
+<Callout type="warning">
   Use this when there's something potentially destructive to call attention to.
-</Note>
+</Callout>
 
-<Note type="learn-more">
+<Callout type="info">
   Use this for asides you don't have time to get into, like mentioning that
   folks should checkout the [official MCP documentation](https://mcp.arcade.dev)
   to learn more. (Hint: it always has a link!)
-</Note>
+</Callout>
 ```
