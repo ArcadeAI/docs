@@ -1,9 +1,8 @@
 "use client";
 
-import { Copy, FileText, Terminal } from "lucide-react";
+import { FileText, Terminal } from "lucide-react";
 import { Pre } from "nextra/components";
-import type { ReactNode } from "react";
-import React from "react";
+import type React from "react";
 
 type CustomPreProps = {
   children?: React.ReactNode;
@@ -66,73 +65,6 @@ const CustomPre: React.FC<CustomPreProps> = ({
     "cmd",
   ].includes(language.toLowerCase());
 
-  // Extract the code content for copy functionality
-  const getCodeContent = (node: ReactNode, visited = new WeakSet()): string =>
-    extractTextFromNode(node, visited);
-
-  const extractTextFromNode = (
-    node: ReactNode,
-    visited: WeakSet<object>
-  ): string => {
-    // Handle null, undefined, boolean, number
-    if (node == null || typeof node === "boolean" || typeof node === "number") {
-      return String(node || "");
-    }
-
-    // Handle strings
-    if (typeof node === "string") {
-      return node;
-    }
-
-    // Handle arrays
-    if (Array.isArray(node)) {
-      return node.map((child) => extractTextFromNode(child, visited)).join("");
-    }
-
-    // Handle React elements with cycle detection
-    if (React.isValidElement(node)) {
-      return extractTextFromElement(node, visited);
-    }
-
-    // Handle functions (React components)
-    if (typeof node === "function") {
-      return "";
-    }
-
-    // Handle objects that might have a toString method
-    if (
-      typeof node === "object" &&
-      node !== null &&
-      "toString" in node &&
-      typeof node.toString === "function"
-    ) {
-      return node.toString();
-    }
-
-    return "";
-  };
-
-  const extractTextFromElement = (
-    element: React.ReactElement,
-    visited: WeakSet<object>
-  ): string => {
-    // Prevent infinite recursion by tracking visited elements
-    if (visited.has(element)) {
-      return "";
-    }
-    visited.add(element);
-
-    // Extract children from props with proper typing
-    const elementProps = element.props as { children?: ReactNode };
-    if (elementProps.children !== undefined) {
-      return extractTextFromNode(elementProps.children, visited);
-    }
-
-    return "";
-  };
-
-  const codeContent = getCodeContent(children);
-
   // If we have a language, add custom wrapper with header
   if (language && language.trim() !== "") {
     if (isTerminalLanguage) {
@@ -145,48 +77,22 @@ const CustomPre: React.FC<CustomPreProps> = ({
               <Terminal className="h-4 w-4" />
               <span className="font-medium text-sm">Terminal</span>
             </div>
-            <div className="flex items-center gap-2">
-              <button
-                className="flex cursor-pointer items-center gap-1 rounded px-2 py-1 text-gray-300 text-xs transition-colors hover:bg-gray-700 hover:text-white"
-                onClick={async () => {
-                  try {
-                    await navigator.clipboard.writeText(codeContent);
-                  } catch {
-                    // Fallback: try to select the text for manual copying
-                    const textArea = document.createElement("textarea");
-                    textArea.value = codeContent;
-                    document.body.appendChild(textArea);
-                    textArea.select();
-                    try {
-                      document.execCommand("copy");
-                    } catch {
-                      // Silent fallback failure
-                    }
-                    document.body.removeChild(textArea);
-                  }
-                }}
-                type="button"
-              >
-                <Copy className="h-3 w-3" />
-                Copy
-              </button>
-              <div className="flex gap-2">
-                <div className="h-3 w-3 rounded-full bg-red-500" />
-                <div className="h-3 w-3 rounded-full bg-yellow-500" />
-                <div className="h-3 w-3 rounded-full bg-green-500" />
-              </div>
+            <div className="flex gap-2">
+              <div className="h-3 w-3 rounded-full bg-red-500" />
+              <div className="h-3 w-3 rounded-full bg-yellow-500" />
+              <div className="h-3 w-3 rounded-full bg-green-500" />
             </div>
           </div>
 
           {/* Code content with syntax highlighting preserved */}
           <div className="overflow-x-auto">
-            <pre
+            <Pre
               className={`p-4 text-gray-100 text-sm ${className || ""}`}
               style={{ margin: 0, borderRadius: 0, background: "transparent" }}
               {...props}
             >
               {children}
-            </pre>
+            </Pre>
           </div>
         </div>
       );
@@ -202,41 +108,17 @@ const CustomPre: React.FC<CustomPreProps> = ({
               {getLanguageDisplayName(language)}
             </span>
           </div>
-          <button
-            className="flex cursor-pointer items-center gap-1 rounded px-2 py-1 text-gray-600 text-xs transition-colors hover:bg-gray-200 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
-            onClick={async () => {
-              try {
-                await navigator.clipboard.writeText(codeContent);
-              } catch {
-                // Fallback: try to select the text for manual copying
-                const textArea = document.createElement("textarea");
-                textArea.value = codeContent;
-                document.body.appendChild(textArea);
-                textArea.select();
-                try {
-                  document.execCommand("copy");
-                } catch {
-                  // Silent fallback failure
-                }
-                document.body.removeChild(textArea);
-              }
-            }}
-            type="button"
-          >
-            <Copy className="h-3 w-3" />
-            Copy
-          </button>
         </div>
 
         {/* Code content with syntax highlighting preserved */}
         <div className="overflow-x-auto">
-          <pre
+          <Pre
             className={`bg-white p-4 text-sm dark:bg-gray-950 ${className || ""}`}
             style={{ margin: 0, borderRadius: 0 }}
             {...props}
           >
             {children}
-          </pre>
+          </Pre>
         </div>
       </div>
     );
