@@ -1,8 +1,7 @@
 "use client";
 
 import { Copy, FileText, Terminal } from "lucide-react";
-import { Pre, withIcons } from "nextra/components";
-import { GitHubIcon } from "nextra/icons";
+import { Pre } from "nextra/components";
 import type { ReactNode } from "react";
 import React from "react";
 
@@ -12,8 +11,6 @@ type CustomPreProps = {
   "data-language"?: string;
   [key: string]: unknown;
 };
-
-const EnhancedPre = withIcons(Pre, { js: GitHubIcon });
 
 const languageDisplayNames: Record<string, string> = {
   js: "JavaScript",
@@ -121,14 +118,13 @@ const CustomPre: React.FC<CustomPreProps> = ({
 
           {/* Code content with syntax highlighting preserved */}
           <div className="overflow-x-auto">
-            <EnhancedPre
-              className={className}
-              data-language={dataLanguage}
-              {...props}
+            <pre
+              className={`p-4 text-gray-100 text-sm ${className || ""}`}
               style={{ margin: 0, borderRadius: 0, background: "transparent" }}
+              {...props}
             >
               {children}
-            </EnhancedPre>
+            </pre>
           </div>
         </div>
       );
@@ -156,14 +152,13 @@ const CustomPre: React.FC<CustomPreProps> = ({
 
         {/* Code content with syntax highlighting preserved */}
         <div className="overflow-x-auto">
-          <EnhancedPre
-            className={className}
-            data-language={dataLanguage}
-            {...props}
+          <pre
+            className={`bg-white p-4 text-sm dark:bg-gray-950 ${className || ""}`}
             style={{ margin: 0, borderRadius: 0 }}
+            {...props}
           >
             {children}
-          </EnhancedPre>
+          </pre>
         </div>
       </div>
     );
@@ -171,9 +166,9 @@ const CustomPre: React.FC<CustomPreProps> = ({
 
   // For code blocks without language, use default pre component
   return (
-    <EnhancedPre className={className} data-language={dataLanguage} {...props}>
+    <Pre className={className} data-language={dataLanguage} {...props}>
       {children}
-    </EnhancedPre>
+    </Pre>
   );
 };
 
