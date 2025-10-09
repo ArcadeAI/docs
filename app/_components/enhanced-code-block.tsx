@@ -64,7 +64,23 @@ const EnhancedCodeBlock: React.FC<EnhancedCodeBlockProps> = ({
         </div>
         <button
           className="flex cursor-pointer items-center gap-1 rounded px-2 py-1 text-gray-600 text-xs transition-colors hover:bg-gray-200 hover:text-gray-800 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
-          onClick={() => navigator.clipboard.writeText(children)}
+          onClick={async () => {
+            try {
+              await navigator.clipboard.writeText(children);
+            } catch {
+              // Fallback: try to select the text for manual copying
+              const textArea = document.createElement("textarea");
+              textArea.value = children;
+              document.body.appendChild(textArea);
+              textArea.select();
+              try {
+                document.execCommand("copy");
+              } catch {
+                // Silent fallback failure
+              }
+              document.body.removeChild(textArea);
+            }
+          }}
           type="button"
         >
           <Copy className="h-3 w-3" />
