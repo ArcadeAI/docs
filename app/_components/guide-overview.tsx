@@ -41,7 +41,8 @@ export function GuideOverview({ children, className }: GuideOverviewProps) {
             Outcomes
           </h2>
           <div className="text-muted-foreground">
-            {React.isValidElement(outcomes) && outcomes.props.children}
+            {React.isValidElement(outcomes) &&
+              (outcomes.props as { children: React.ReactNode }).children}
           </div>
         </div>
       )}
@@ -56,7 +57,7 @@ export function GuideOverview({ children, className }: GuideOverviewProps) {
             </h3>
             <div className="space-y-2 text-muted-foreground text-sm">
               {React.isValidElement(youWillLearn) &&
-                youWillLearn.props.children}
+                (youWillLearn.props as { children: React.ReactNode }).children}
             </div>
           </div>
         )}
@@ -69,7 +70,7 @@ export function GuideOverview({ children, className }: GuideOverviewProps) {
             </h3>
             <div className="space-y-2 text-muted-foreground text-sm">
               {React.isValidElement(prerequisites) &&
-                prerequisites.props.children}
+                (prerequisites.props as { children: React.ReactNode }).children}
             </div>
           </div>
         )}
