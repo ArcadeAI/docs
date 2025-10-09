@@ -3,17 +3,49 @@ title: "Tool Context"
 description: "What Arcade's Tool Context is and how to use it"
 ---
 
-# Understanding ToolContext
+import { Steps, Callout } from "nextra/components";
 
-`ToolContext` is a component in Arcade that manages authorization and user information for tools requiring authentication. `ToolContext` is a class that holds two main pieces of information:
+# Understanding `ToolContext`
 
-- **Authorization context** This includes a token for making authenticated requests to external APIs as well as structured user information for providers that support retrieving user information.
-- **User ID** This identifies the user invoking the tool.
+`ToolContext` is a component in Arcade that manages authorization and user information for tools requiring authentication.
 
-<Note>
-  Some authorization providers may also include additional structured user
-  information in the `ToolContext`.
-</Note>
+<GuideOverview>
+<GuideOverview.Outcomes>
+
+Access runtime features through `ToolContext` including logging,
+secrets, and progress reporting.
+
+</GuideOverview.Outcomes>
+
+<GuideOverview.Prerequisites>
+
+- An [Arcade account](https://api.arcade.dev/signup)
+- For this guide, we'll use [uv](https://docs.astral.sh/uv/getting-started/installation/) as our package manager.
+- [Set up Arcade CLI](/home/quickstart)
+
+</GuideOverview.Prerequisites>
+
+<GuideOverview.YouWillLearn>
+
+- How to use `ToolContext` to acess the user's ID, logging, secrets, and progress reporting.
+
+</GuideOverview.YouWillLearn>
+</GuideOverview>
+
+`ToolContext` is a class that provides access to the following runtime features:
+
+- Logging via `context.log`
+- Secrets via `context.get_secret`
+- User Context via `context.user_id`—this is the user ID of the user invoking the tool
+- Progress reporting via `context.progress.report`
+- Tool Decorator options
+
+<Callout type="notice">
+
+Some authorization providers may also include additional structured user
+information in the `ToolContext`.
+
+</Callout>
 
 ## How `ToolContext` Works
 
@@ -24,7 +56,139 @@ When you invoke a tool that requires authorization, Arcade's Tool SDK automatica
 
 You can then use the `ToolContext` object to make authenticated requests to external APIs.
 
-## Next Steps
+Let's walk through an example (or skip to [the full code](#example-code)).
+
+<Steps>
+
+### Create the MCP application
+
+```python
+from arcade_mcp_server import Context, MCPApp
+
+app = MCPApp(
+    name="context_demo",
+    version="1.0.0",
+    instructions="Demonstrates ToolContext features"
+)
+```
+
+### Add the tool
+
+```python
+@app.tool(requires_secrets=["API_KEY"])
+def process_data(context: Context, data_size: Annotated[int, "Amount of data to process"], operation: Annotated[str, "Type of operation to perform"] = "analyze") -> Annotated[str, "Processing result"]:
+    """Process data using all ToolContext features."""
+```
+
+### Use the user ID
+
+```python
+user_id = context.user_id
+await context.log.info(f"Processing started by user: {user_id}")
+```
+
+### Access the secret
+
+```python
+api_key = context.get_secret("API_KEY")
+await context.log.debug("API key retrieved successfully")
+```
+
+### Report progress
+
+```python
+await context.progress.report(0, f"Starting {operation} for {data_size} items")
+```
+
+### Log activity
+
+```python
+await context.log.info(f"Processing completed successfully")
+```
+
+### Run the MCP application
+
+```python
+if __name__ == "__main__":
+    app.run()
+```
+
+</Steps>
+
+## Example code
+
+Here's the full example:
+
+```python
+import asyncio
+from typing import Annotated
+
+from arcade_mcp_server import Context, MCPApp
+
+# Create the MCP application
+app = MCPApp(
+    name="context_demo",
+    version="1.0.0",
+    instructions="Demonstrates ToolContext features"
+)
+
+@app.tool(requires_secrets=["API_KEY"])
+async def process_data(
+    context: Context,
+    data_size: Annotated[int, "Amount of data to process"],
+    operation: Annotated[str, "Type of operation to perform"] = "analyze"
+) -> Annotated[str, "Processing result"]:
+    """Process data using all ToolContext features."""
+
+    # 1. User Context - Get the user ID
+    user_id = context.user_id
+    await context.log.info(f"Processing started by user: {user_id}")
+
+    # 2. Secrets - Access secure configuration
+    try:
+        api_key = context.get_secret("API_KEY")
+        await context.log.debug("API key retrieved successfully")
+    except ValueError:
+        await context.log.error("API_KEY not found in environment")
+        return "Error: Missing required API key"
+
+    # 3. Progress Reporting - Keep user informed
+    await context.progress.report(0, f"Starting {operation} for {data_size} items")
+
+    # Simulate processing with progress updates
+    for i in range(5):
+        # Simulate work
+        await asyncio.sleep(0.5)
+
+        progress = (i + 1) * 20  # 20%, 40%, 60%, 80%, 100%
+        await context.progress.report(
+            progress,
+            f"Processing batch {i + 1}/5 ({progress}% complete)"
+        )
+
+        # 4. Logging - Different log levels
+        if i == 0:
+            await context.log.info(f"Connected to API with key: {api_key[:8]}...")
+        elif i == 2:
+            await context.log.warning("High memory usage detected")
+        elif i == 4:
+            await context.log.info("Processing completed successfully")
+
+    result = f"Processed {data_size} items using {operation} for user {user_id}"
+    await context.log.info(f"Final result: {result}")
+
+    return result
+```
+
+## Key Concepts
+
+- **Context Parameter** Tools receive a `Context` as their first parameter
+- **Async Functions** Use `async def` for tools that use context features
+- **Secure Secrets** Secrets are accessed through context, not hardcoded
+- **Structured Logging** Log at appropriate levels for debugging
+- **Progress Updates** Keep users informed during long operations
+
+### Next Steps
 
 - [Build a custom tool that requires user authorization](/home/build-tools/create-a-tool-with-auth)
 - [Build a custom tool with secrets](/home/build-tools/create-a-tool-with-secrets)
