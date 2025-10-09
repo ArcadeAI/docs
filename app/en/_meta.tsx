@@ -24,7 +24,10 @@ const meta: MetaRecord = {
   reference: {
     type: "page",
     title: "API Reference",
-    href: "/home/references",
+    href: "/references",
+  },
+  references: {
+    display: "hidden",
   },
 };
 
