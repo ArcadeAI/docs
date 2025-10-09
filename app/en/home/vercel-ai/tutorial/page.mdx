@@ -1,0 +1,232 @@
+---
+title: "Vercel AI SDK with Arcade"
+description: "Build AI applications with Vercel AI SDK and Arcade tools"
+---
+
+# Vercel AI SDK with Arcade
+
+Build production-ready AI applications with Vercel AI SDK and Arcade's 100+ tools.
+
+## What you'll build
+
+A morning briefing agent that:
+- Checks Gmail for unread messages
+- Lists today's calendar events
+- Sends a summary to Slack
+- Uses Vercel AI SDK for reliable tool calling
+
+**Time to complete:** 15 minutes
+
+## Prerequisites
+
+- Node.js 18 or higher
+- [Arcade API key](/home/api-keys)
+- Gmail, Google Calendar, and Slack accounts
+
+## Step 1: Install dependencies
+
+```bash
+npm install ai @arcadeai/arcadejs
+```
+
+## Step 2: Initialize Arcade client
+
+Create `briefing-agent.ts`:
+
+```typescript
+import { generateText } from "ai";
+import { openai } from "@ai-sdk/openai";
+import Arcade from "@arcadeai/arcadejs";
+
+// Initialize Arcade
+const arcade = new Arcade({
+  apiKey: "your_api_key_here",
+});
+
+// Your user identifier
+const userId = "user@example.com";
+```
+
+## Step 3: Get Arcade tools
+
+```typescript
+// Get tools from Arcade
+const tools = {
+  listGmail: await arcade.getTool("Gmail.ListMessages", { userId }),
+  listCalendar: await arcade.getTool("GoogleCalendar.ListEvents", { userId }),
+  sendSlack: await arcade.getTool("Slack.SendMessage", { userId }),
+};
+```
+
+## Step 4: Generate with tools
+
+```typescript
+// Run the agent
+const { text } = await generateText({
+  model: openai("gpt-4o"),
+  tools,
+  maxSteps: 10,
+  prompt: `Generate my morning briefing:
+  1. Check my Gmail for unread messages from today
+  2. Check my calendar for events today
+  3. Send a summary to #general on Slack with the format:
+     'Morning briefing: X unread emails, Y meetings today'
+  `,
+});
+
+console.log(text);
+```
+
+## Step 5: Handle authorization
+
+On first run, tools will pause for authorization:
+
+```
+Please authorize Gmail: https://arcade.dev/auth/abc123
+Waiting for authorization...
+```
+
+1. Open the URL in your browser
+2. Grant permissions
+3. The agent will automatically continue
+
+## Expected output
+
+```
+I've generated your morning briefing:
+- You have 5 unread emails from today
+- You have 3 meetings scheduled today
+- Summary sent to #general on Slack
+```
+
+## Full example
+
+```typescript
+import { generateText } from "ai";
+import { openai } from "@ai-sdk/openai";
+import Arcade from "@arcadeai/arcadejs";
+
+async function main() {
+  // Initialize
+  const arcade = new Arcade({
+    apiKey: "your_api_key_here",
+  });
+  const userId = "user@example.com";
+
+  // Get tools
+  const tools = {
+    listGmail: await arcade.getTool("Gmail.ListMessages", { userId }),
+    listCalendar: await arcade.getTool("GoogleCalendar.ListEvents", { userId }),
+    sendSlack: await arcade.getTool("Slack.SendMessage", { userId }),
+  };
+
+  // Generate with tools
+  const { text } = await generateText({
+    model: openai("gpt-4o"),
+    tools,
+    maxSteps: 10,
+    prompt: `Generate my morning briefing:
+    1. Check Gmail for unread messages from today
+    2. Check calendar for today's events
+    3. Send summary to #general on Slack
+    `,
+  });
+
+  console.log(text);
+}
+
+main();
+```
+
+## Advanced: Streaming responses
+
+```typescript
+import { streamText } from "ai";
+
+// Stream agent responses
+const { textStream } = await streamText({
+  model: openai("gpt-4o"),
+  tools,
+  maxSteps: 10,
+  prompt: "Generate my morning briefing",
+});
+
+for await (const chunk of textStream) {
+  process.stdout.write(chunk);
+}
+```
+
+## Advanced: React integration
+
+```typescript
+"use client";
+
+import { useChat } from "ai/react";
+import Arcade from "@arcadeai/arcadejs";
+
+export default function Chat() {
+  const { messages, input, handleInputChange, handleSubmit } = useChat({
+    api: "/api/chat",
+  });
+
+  return (
+    <div>
+      {messages.map((m) => (
+        <div key={m.id}>
+          {m.role}: {m.content}
+        </div>
+      ))}
+
+      <form onSubmit={handleSubmit}>
+        <input value={input} onChange={handleInputChange} />
+        <button type="submit">Send</button>
+      </form>
+    </div>
+  );
+}
+```
+
+Create `app/api/chat/route.ts`:
+
+```typescript
+import { streamText } from "ai";
+import { openai } from "@ai-sdk/openai";
+import Arcade from "@arcadeai/arcadejs";
+
+const arcade = new Arcade({
+  apiKey: process.env.ARCADE_API_KEY,
+});
+
+export async function POST(req: Request) {
+  const { messages } = await req.json();
+  const userId = "user@example.com";
+
+  const tools = {
+    listGmail: await arcade.getTool("Gmail.ListMessages", { userId }),
+    listCalendar: await arcade.getTool("GoogleCalendar.ListEvents", { userId }),
+    sendSlack: await arcade.getTool("Slack.SendMessage", { userId }),
+  };
+
+  const result = await streamText({
+    model: openai("gpt-4o"),
+    messages,
+    tools,
+    maxSteps: 10,
+  });
+
+  return result.toDataStreamResponse();
+}
+```
+
+## Next steps
+
+- [Explore all available tools](/mcp-servers)
+- [Build custom tools](/home/build-tools/create-a-mcp-server)
+- [Vercel AI SDK docs](https://sdk.vercel.ai/docs)
+
+---
+
+**Want to try a different framework?** Check out:
+- [Mastra](/home/mastra/tutorial)
+- [LangGraph (TypeScript)](/home/langchain/tutorial)
+- [OpenAI Agents](/home/oai-agents/tutorial)

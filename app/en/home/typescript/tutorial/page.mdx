@@ -1,0 +1,136 @@
+---
+title: "Generic TypeScript with Arcade"
+description: "Use Arcade tools with any TypeScript setup"
+---
+
+# Generic TypeScript with Arcade
+
+Use Arcade's SDK directly in any TypeScript or JavaScript application without a specific agent framework.
+
+## What you'll build
+
+A simple TypeScript script that:
+- Fetches Gmail messages
+- Lists calendar events
+- Sends a Slack notification
+- No framework required - just the Arcade SDK
+
+**Time to complete:** 15 minutes
+
+## Prerequisites
+
+- Node.js 18 or higher
+- [Arcade API key](/home/api-keys)
+- Gmail, Google Calendar, and Slack accounts
+
+## Step 1: Install the Arcade SDK
+
+```bash
+npm install @arcadeai/arcadejs
+```
+
+## Step 2: Initialize the client
+
+Create a new file `briefing.ts`:
+
+```typescript
+import Arcade from "@arcadeai/arcadejs";
+
+// Initialize the Arcade client
+const client = new Arcade({
+  apiKey: "your_api_key_here",
+});
+
+// Your user identifier
+const userId = "user@example.com";
+```
+
+## Step 3: Call tools directly
+
+```typescript
+async function generateBriefing() {
+  // Check Gmail
+  const gmailResponse = await client.tools.execute({
+    tool_name: "Gmail.ListMessages",
+    input: { maxResults: 10, q: "is:unread" },
+    user_id: userId,
+  });
+
+  console.log(`Unread emails: ${gmailResponse.output.value.length}`);
+
+  // Check Calendar
+  const calendarResponse = await client.tools.execute({
+    tool_name: "GoogleCalendar.ListEvents",
+    input: {
+      calendarId: "primary",
+      timeMin: new Date().toISOString(),
+      maxResults: 10,
+    },
+    user_id: userId,
+  });
+
+  console.log(`Upcoming events: ${calendarResponse.output.value.length}`);
+
+  // Send Slack message
+  await client.tools.execute({
+    tool_name: "Slack.SendMessage",
+    input: {
+      channel: "#general",
+      text: `Morning briefing: ${gmailResponse.output.value.length} unread emails, ${calendarResponse.output.value.length} meetings today`,
+    },
+    user_id: userId,
+  });
+
+  console.log("Briefing sent to Slack!");
+}
+
+generateBriefing();
+```
+
+## Step 4: Handle authentication
+
+If a tool requires authentication:
+
+```typescript
+// Check if auth is needed
+const authResponse = await client.tools.authorize({
+  tool_name: "Gmail.ListMessages",
+  user_id: userId,
+});
+
+if (authResponse.status !== "completed") {
+  console.log(`Please authorize: ${authResponse.url}`);
+  // Wait for user to complete auth
+  await client.auth.waitForCompletion(authResponse.id);
+}
+```
+
+## Step 5: Run your script
+
+```bash
+npx tsx briefing.ts
+# or
+node briefing.js
+```
+
+## Expected output
+
+```
+Unread emails: 5
+Upcoming events: 3
+Briefing sent to Slack!
+```
+
+## Next steps
+
+- [Explore all available tools](/mcp-servers)
+- [Learn about authorization flows](/home/auth)
+- [Build your own tools](/home/build-tools/create-a-mcp-server)
+
+---
+
+**Using a framework?** Check out framework-specific guides:
+- [LangChain/LangGraph](/home/langchain/tutorial)
+- [OpenAI Agents](/home/oai-agents/tutorial)
+- [Mastra](/home/mastra/tutorial)
+- [Vercel AI](/home/vercelai/tutorial)

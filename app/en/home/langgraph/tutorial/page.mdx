@@ -1,0 +1,348 @@
+---
+title: "LangChain/LangGraph with Arcade"
+description: "Build production agents with LangGraph and Arcade tools"
+---
+
+import { Tabs } from "nextra/components";
+
+# LangChain/LangGraph with Arcade
+
+Build a production-ready agent that can automatically choose and execute tools based on user intent.
+
+## What you'll build
+
+A morning briefing agent that:
+- Checks Gmail for unread messages
+- Lists today's calendar events
+- Sends a summary to Slack
+- Uses LangGraph for reliable agent orchestration
+
+**Time to complete:** 15 minutes
+
+## Prerequisites
+
+<Tabs items={["Python", "TypeScript"]}>
+
+<Tabs.Tab>
+
+- Python 3.8 or higher
+- [Arcade API key](/home/api-keys)
+- Gmail, Google Calendar, and Slack accounts
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+- Node.js 18 or higher
+- [Arcade API key](/home/api-keys)
+- Gmail, Google Calendar, and Slack accounts
+
+</Tabs.Tab>
+
+</Tabs>
+
+## Step 1: Install dependencies
+
+<Tabs items={["Python", "TypeScript"]}>
+
+<Tabs.Tab>
+
+```bash
+pip install langgraph langchain-openai arcadepy
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```bash
+npm install @langchain/langgraph @langchain/openai @arcadeai/arcadejs
+```
+
+</Tabs.Tab>
+
+</Tabs>
+
+## Step 2: Initialize Arcade client
+
+<Tabs items={["Python", "TypeScript"]}>
+
+<Tabs.Tab>
+
+Create `briefing_agent.py`:
+
+```python
+from arcadepy import Arcade
+from langchain_openai import ChatOpenAI
+from langgraph.prebuilt import create_react_agent
+
+# Initialize Arcade
+arcade = Arcade(api_key="your_api_key_here")
+
+# Your user identifier
+user_id = "user@example.com"
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+Create `briefing-agent.ts`:
+
+```typescript
+import Arcade from "@arcadeai/arcadejs";
+import { ChatOpenAI } from "@langchain/openai";
+import { createReactAgent } from "@langchain/langgraph/prebuilt";
+
+// Initialize Arcade
+const arcade = new Arcade({
+  apiKey: "your_api_key_here",
+});
+
+// Your user identifier
+const userId = "user@example.com";
+```
+
+</Tabs.Tab>
+
+</Tabs>
+
+## Step 3: Get Arcade tools
+
+<Tabs items={["Python", "TypeScript"]}>
+
+<Tabs.Tab>
+
+```python
+# Get tools from Arcade
+tools = [
+    arcade.get_tool("Gmail.ListMessages", user_id=user_id),
+    arcade.get_tool("GoogleCalendar.ListEvents", user_id=user_id),
+    arcade.get_tool("Slack.SendMessage", user_id=user_id),
+]
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```typescript
+// Get tools from Arcade
+const tools = [
+  await arcade.getTool("Gmail.ListMessages", { userId }),
+  await arcade.getTool("GoogleCalendar.ListEvents", { userId }),
+  await arcade.getTool("Slack.SendMessage", { userId }),
+];
+```
+
+</Tabs.Tab>
+
+</Tabs>
+
+## Step 4: Create the agent
+
+<Tabs items={["Python", "TypeScript"]}>
+
+<Tabs.Tab>
+
+```python
+# Initialize LLM
+llm = ChatOpenAI(model="gpt-4o")
+
+# Create agent with tools
+agent = create_react_agent(llm, tools)
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```typescript
+// Initialize LLM
+const llm = new ChatOpenAI({ model: "gpt-4o" });
+
+// Create agent with tools
+const agent = createReactAgent({ llm, tools });
+```
+
+</Tabs.Tab>
+
+</Tabs>
+
+## Step 5: Run the agent
+
+<Tabs items={["Python", "TypeScript"]}>
+
+<Tabs.Tab>
+
+```python
+# Run the agent
+response = agent.invoke({
+    "messages": [
+        {
+            "role": "user",
+            "content": """Generate my morning briefing:
+            1. Check my Gmail for unread messages from today
+            2. Check my calendar for events today
+            3. Send a summary to #general on Slack with the format:
+               'Morning briefing: X unread emails, Y meetings today'
+            """
+        }
+    ]
+})
+
+print(response["messages"][-1].content)
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```typescript
+// Run the agent
+const response = await agent.invoke({
+  messages: [
+    {
+      role: "user",
+      content: `Generate my morning briefing:
+      1. Check my Gmail for unread messages from today
+      2. Check my calendar for events today
+      3. Send a summary to #general on Slack with the format:
+         'Morning briefing: X unread emails, Y meetings today'
+      `,
+    },
+  ],
+});
+
+console.log(response.messages[response.messages.length - 1].content);
+```
+
+</Tabs.Tab>
+
+</Tabs>
+
+## Step 6: Handle authorization
+
+On first run, the agent will pause for tool authorization:
+
+```
+Please authorize Gmail: https://arcade.dev/auth/abc123
+Waiting for authorization...
+```
+
+1. Open the URL in your browser
+2. Grant permissions
+3. The agent will automatically continue
+
+## Expected output
+
+```
+I've generated your morning briefing:
+- You have 5 unread emails from today
+- You have 3 meetings scheduled today
+- Summary sent to #general on Slack
+```
+
+## Full example
+
+<Tabs items={["Python", "TypeScript"]}>
+
+<Tabs.Tab>
+
+```python
+from arcadepy import Arcade
+from langchain_openai import ChatOpenAI
+from langgraph.prebuilt import create_react_agent
+
+# Initialize
+arcade = Arcade(api_key="your_api_key_here")
+user_id = "user@example.com"
+
+# Get tools
+tools = [
+    arcade.get_tool("Gmail.ListMessages", user_id=user_id),
+    arcade.get_tool("GoogleCalendar.ListEvents", user_id=user_id),
+    arcade.get_tool("Slack.SendMessage", user_id=user_id),
+]
+
+# Create agent
+llm = ChatOpenAI(model="gpt-4o")
+agent = create_react_agent(llm, tools)
+
+# Run agent
+response = agent.invoke({
+    "messages": [
+        {
+            "role": "user",
+            "content": """Generate my morning briefing:
+            1. Check Gmail for unread messages from today
+            2. Check calendar for today's events
+            3. Send summary to #general on Slack
+            """
+        }
+    ]
+})
+
+print(response["messages"][-1].content)
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```typescript
+import Arcade from "@arcadeai/arcadejs";
+import { ChatOpenAI } from "@langchain/openai";
+import { createReactAgent } from "@langchain/langgraph/prebuilt";
+
+// Initialize
+const arcade = new Arcade({
+  apiKey: "your_api_key_here",
+});
+const userId = "user@example.com";
+
+// Get tools
+const tools = [
+  await arcade.getTool("Gmail.ListMessages", { userId }),
+  await arcade.getTool("GoogleCalendar.ListEvents", { userId }),
+  await arcade.getTool("Slack.SendMessage", { userId }),
+];
+
+// Create agent
+const llm = new ChatOpenAI({ model: "gpt-4o" });
+const agent = createReactAgent({ llm, tools });
+
+// Run agent
+const response = await agent.invoke({
+  messages: [
+    {
+      role: "user",
+      content: `Generate my morning briefing:
+      1. Check Gmail for unread messages from today
+      2. Check calendar for today's events
+      3. Send summary to #general on Slack
+      `,
+    },
+  ],
+});
+
+console.log(response.messages[response.messages.length - 1].content);
+```
+
+</Tabs.Tab>
+
+</Tabs>
+
+## Next steps
+
+- [Learn about user authorization](/home/langchain/user-auth-interrupts)
+- [Authorize existing LangChain tools](/home/langchain/auth-langchain-tools)
+- [Explore all available tools](/mcp-servers)
+- [Build custom tools](/home/build-tools/create-a-mcp-server)
+
+---
+
+**Want to try a different framework?** Check out:
+- [Pydantic AI](/home/pydantic-ai/tutorial)
+- [OpenAI Agents](/home/oai-agents/tutorial)
+- [Mastra](/home/mastra/tutorial)
