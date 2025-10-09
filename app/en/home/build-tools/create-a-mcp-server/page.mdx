@@ -58,7 +58,7 @@ This generates a complete project with:
 - **pyproject.toml** Dependencies and project configuration
 - **.env.example** Example `.env` file containing a secret required by one of the generated tools in `server.py`
 
-`server.py` includes proper structure with command-line argument handling:
+`server.py` includes proper structure with command-line argument handling. It creates an `MCPApp`, defines tools with `@app.tool`, and runs with `app.run()`:
 
 ```python
 #!/usr/bin/env python3
@@ -71,9 +71,10 @@ import httpx
 from arcade_mcp_server import Context, MCPApp
 from arcade_mcp_server.auth import Reddit
 
+# Create an MCPApp instance
 app = MCPApp(name="my_server", version="1.0.0", log_level="DEBUG")
 
-
+# Add a tool
 @app.tool
 def greet(name: Annotated[str, "The name of the person to greet"]) -> str:
     """Greet a person by name."""
@@ -125,7 +126,7 @@ uv run server.py stdio
 </Tabs.Tab>
 </Tabs>
 
-You should see the following output:
+You should see output like this in your terminal:
 
 ```bash
 INFO | Starting server v1.0.0 (my_server)
@@ -164,11 +165,21 @@ Now you can connect your MCP server to apps that support MCP Clients, like AI as
   </Tabs.Tab>
 </Tabs>
 
+That's it! Your MCP server is running and connected to your AI assistant.
+
 </Steps>
 
-## Next steps
+## Key takeaways
 
-- **Add more tools**: Expand your MCP Server with more complex operations
+- **Minimal Setup** Create `MCPApp`, define tools with `@app.tool`, and run with `app.run()`
+- **Direct Execution** Run your server file directly with uv run or python
+- **Transport Flexibility** Works with both stdio (for Claude Desktop) and HTTP
+- **Type Annotations** Use Annotated to provide descriptions for parameters and return values
+- **Command Line Arguments** Pass transport type as command line argument
+
+### Next steps
+
+- [Understand the tool context](/home/build-tools/tool-context)
 - **Add authentication**: [Learn how to create tools with authentication](/home/build-tools/create-a-tool-with-auth)
 - **Add secrets**: [Learn how to create tools with secrets](/home/build-tools/create-a-tool-with-secrets)
 - **Evaluate your tools**: [Explore how to evaluate tool performance](/home/evaluate-tools/why-evaluate-tools)
