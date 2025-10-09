@@ -24,7 +24,7 @@ const meta: MetaRecord = {
   reference: {
     type: "page",
     title: "API Reference",
-    href: "https://reference.arcade.dev/",
+    href: "/home/references",
   },
 };
 
