@@ -16,15 +16,10 @@ const meta: MetaRecord = {
     title: "MCP Servers",
     href: "/mcp-servers",
   },
-  clients: {
-    type: "page",
-    title: "Clients",
-    href: "/home/arcade-clients",
-  },
   reference: {
     type: "page",
-    title: "API Reference",
-    href: "https://reference.arcade.dev/",
+    title: "Reference",
+    href: "/home/reference",
   },
 };
 
