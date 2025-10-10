@@ -1,7 +1,5 @@
 "use client";
 
-import Link from "next/link";
-import "@/app/globals.css";
 import {
   Button,
   buttonVariants,
@@ -12,6 +10,7 @@ import {
 } from "@arcadeai/design-system";
 import { cn } from "@arcadeai/design-system/lib/utils";
 import { Home, SearchX } from "lucide-react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { use, useMemo } from "react";
 import { getDictionaryClient } from "@/_dictionaries/get-dictionary-client";
@@ -105,18 +104,18 @@ export default function NotFound() {
                     buttonVariants({ variant: "ghost", size: "sm" }),
                     "h-8"
                   )}
-                  href={`/${currentLocale}/toolkits`}
+                  href={`/${currentLocale}/mcp-servers`}
                 >
-                  {dict.notFoundPage.toolkits}
+                  {dict.notFoundPage.mcpServers}
                 </Link>
                 <Link
                   className={cn(
                     buttonVariants({ variant: "ghost", size: "sm" }),
                     "h-8"
                   )}
-                  href={`/${currentLocale}/home/build-tools/create-a-toolkit`}
+                  href={`/${currentLocale}/home/build-tools/create-a-mcp-server`}
                 >
-                  {dict.notFoundPage.createToolkit}
+                  {dict.notFoundPage.createMcpServer}
                 </Link>
               </div>
             </div>

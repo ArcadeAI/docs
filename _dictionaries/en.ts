@@ -28,7 +28,7 @@ export default {
     goBack: "Go back",
     needHelp: "Need help? Try these popular pages:",
     quickstart: "Quickstart",
-    toolkits: "Toolkits",
-    createToolkit: "Create a toolkit",
+    mcpServers: "MCP Servers",
+    createMcpServer: "Create a MCP Server",
   },
 };
