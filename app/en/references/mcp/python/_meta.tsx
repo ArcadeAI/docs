@@ -12,8 +12,26 @@ const meta: MetaRecord = {
   overview: {
     title: "Overview",
   },
-  "other-page": {
-    title: "Other Page",
+  transports: {
+    title: "Transports",
+  },
+  sharing: {
+    title: "Sharing",
+  },
+  server: {
+    title: "Server",
+  },
+  middleware: {
+    title: "Middleware",
+  },
+  types: {
+    title: "Types",
+  },
+  errors: {
+    title: "Errors",
+  },
+  settings: {
+    title: "Settings",
   },
 };
 
