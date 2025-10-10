@@ -22,13 +22,7 @@ arcade evals <directory>
 For example, to run evaluations in the current directory:
 
 ```bash
-arcade evals .
-```
-
-The Arcade Evaluation Framework also supports running a single evaluation file:
-
-```bash
-arcade evals <eval_your_file.py>
+arcade evals
 ```
 
 #### Evaluation File Naming Convention
@@ -44,7 +38,7 @@ The `arcade evals` command supports several options to customize the evaluation 
   Example:
 
   ```bash
-  arcade evals . --details
+  arcade evals --details .
   ```
 
 - `--models`, `-m`: Specify the models to use for evaluation. Provide a comma-separated list of model names.
@@ -52,7 +46,7 @@ The `arcade evals` command supports several options to customize the evaluation 
   Example:
 
   ```bash
-  arcade evals . --models gpt-4o,gpt-3.5
+  arcade evals --models gpt-4o,gpt-3.5 .
   ```
 
 - `--max-concurrent`, `-c`: Set the maximum number of concurrent evaluations to run in parallel.
@@ -60,16 +54,40 @@ The `arcade evals` command supports several options to customize the evaluation 
   Example:
 
   ```bash
-  arcade evals . --max-concurrent 4
+  arcade evals --max-concurrent 4 .
   ```
 
-- `--host`, `-h`: Specify the Arcade Engine address to send evaluation requests to.
+- `--provider`, `-p`: The provider of the models to use for evaluation. Uses OpenAI by default.
 
-- `--port`, `-p`: Specify the port of the Arcade Engine.
+  Example:
 
-- `--tls`: Force TLS for the connection to the Arcade Engine.
+  ```bash
+  arcade evals --provider anthropic .
+  ```
 
-- `--no-tls`: Disable TLS for the connection to the Arcade Engine.
+- `--provider-api-key`, `-k`: The model provider API key. If not provided, will look for the appropriate environment variable based on the provider (e.g., OPENAI_API_KEY for openai provider), first in the current environment, then in the current working directory's .env file.
+
+  Example:
+
+  ```bash
+  arcade evals --provider-api-key my-api-key .
+  ```
+
+- `--debug`: Show debug information in the CLI.
+
+  Example:
+
+  ```bash
+  arcade evals --debug .
+  ```
+
+- `--help`: Show help information and exit.
+
+  Example:
+
+  ```bash
+  arcade evals --help
+  ```
 
 #### Example Command
 
@@ -158,11 +176,13 @@ arcade evals . --models gpt-4o,gpt-3.5
 
 ### Considerations
 
-- **Engine Availability**: Ensure the Arcade Engine is running and accessible. You can specify the host and port if running the engine locally or on a different server.
-
-- **Authentication**: Make sure you are logged in and have the necessary API keys configured.
-
 - **Evaluation Files**: Ensure your evaluation files are correctly named and contain the evaluation suites decorated with `@tool_eval`.
+
+- **Provider API Keys**: If you are using a different provider, you will need to set the appropriate API key in an environment variable, or use the `--provider-api-key` option.
+
+- **Tool Catalog**: Ensure your tool catalog is correctly defined and includes all the tools you want to evaluate.
+
+- **Weight distribution**: Ensure your weight distribution reflects the importance of each critic and that the sum of the weights is `1.0`.
 
 ## Conclusion
 

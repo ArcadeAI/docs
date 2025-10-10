@@ -7,7 +7,7 @@ description: "Learn how to evaluate your tools using Arcade"
 
 In this guide, you'll learn how to evaluate your custom tools to ensure they function correctly with the AI assistant, including defining evaluation cases and using different critics.
 
-We'll create evaluation cases to test our `hello` tool and measure its performance.
+We'll create evaluation cases to test our `greet` tool and measure its performance.
 
 import { Steps, Tabs, Callout } from "nextra/components";
 
@@ -15,44 +15,59 @@ import { Steps, Tabs, Callout } from "nextra/components";
 
 ### Prerequisites
 
-- [Build a custom tool](/home/build-tools/create-a-mcp-server)
+- [Create an MCP Server](/home/build-tools/create-a-mcp-server)
 - Install the evaluation dependencies:
 
 <Tabs items={["uv", "pip"]}>
-  <Tabs.Tab>```bash uv pip install 'arcade-ai[evals]' ```</Tabs.Tab>
-  <Tabs.Tab>```bash pip install 'arcade-ai[evals]' ```</Tabs.Tab>
+  <Tabs.Tab>
+
+```bash
+uv pip install 'arcade-mcp[evals]'
+```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+```bash
+pip install 'arcade-mcp[evals]'
+```
+
+  </Tabs.Tab>
 </Tabs>
 
 ### Create an evaluation suite
 
-Navigate to your MCP Server's `evals` directory:
+Navigate to your MCP Server's directory
 
 ```bash
-cd arcade_my_tools/evals
+cd my_server
 ```
 
-Create a new Python file for your evaluations, e.g., `eval_hello.py`.
+Create a new Python file for your evaluations, e.g., `eval_server.py`.
+
+<Callout type="info">
+  For evals, the file name should start with `eval_` and be a Python script
+  (using the `.py` extension).
+</Callout>
 
 ### Define your evaluation cases
 
-Open `eval_hello.py` and add the following code:
+Open `eval_server.py` and add the following code:
 
 ```python
 from arcade_evals import (
-    EvalSuite,
-    EvalRubric,
-    ExpectedToolCall,
-    BinaryCritic,
-    tool_eval,
+    EvalSuite, tool_eval, EvalRubric,
+    ExpectedToolCall, BinaryCritic
 )
-from arcade_tdk import ToolCatalog
-from arcade_my_tools.tools.hello import hello
+from arcade_core import ToolCatalog
+
+from server import greet
 
 # Create a catalog of tools to include in the evaluation
 catalog = ToolCatalog()
-catalog.add_tool(hello)
+catalog.add_tool(greet, "Greet")
 
-# Define the evaluation rubric
+# Create rubric with tool calls
 rubric = EvalRubric(
     fail_threshold=0.8,
     warn_threshold=0.9,
@@ -62,19 +77,18 @@ rubric = EvalRubric(
 def hello_eval_suite() -> EvalSuite:
     """Create an evaluation suite for the hello tool."""
     suite = EvalSuite(
-        name="Hello Tool Evaluation",
-        system_message="You are a helpful assistant.",
+        name="MCP Server Evaluation",
         catalog=catalog,
+        system_message="You are a helpful assistant.",
         rubric=rubric,
     )
 
-    # Example evaluation case
     suite.add_case(
         name="Simple Greeting",
-        user_message="Say hello to Alice",
+        user_message="Greet Alice",
         expected_tool_calls=[
             ExpectedToolCall(
-                func=hello,
+                func=greet,
                 args={
                     "name": "Alice",
                 },
@@ -90,13 +104,23 @@ def hello_eval_suite() -> EvalSuite:
 
 ### Run the evaluation
 
-From the `evals` directory, run:
+From the server directory, ensure you have an OpenAI API key set in the `OPENAI_API_KEY` environment variable. Then run:
 
 ```bash
+export OPENAI_API_KEY=<YOUR_OPENAI_API_KEY>
 arcade evals .
 ```
 
 This command executes your evaluation suite and provides a report.
+
+<Callout type="info">
+  By default, the evaluation suite will use the `gpt-4o` model. You can specify
+  a different model and provider using the `--models` and `--provider` options.
+  If you are using a different provider, you will need to set the appropriate
+  API key in an environment variable, or use the `--provider-api-key` option.
+  For more information, see the [Run
+  evaluations](/home/evaluate-tools/run-evaluations) guide.
+</Callout>
 
 ### How it works
 
@@ -164,7 +188,7 @@ You can add more evaluation cases to test different scenarios.
 Modify your `hello` tool to accept an `emotion` parameter:
 
 ```python
-from arcade_tdk import tool
+from arcade_mcp_server import tool
 from typing import Annotated
 
 class Emotion(str, Enum):
@@ -174,7 +198,7 @@ class Emotion(str, Enum):
     SLIGHTLY_SAD = "slightly sad"
 
 @tool
-def hello(
+def greet(
     name: Annotated[str, "The name of the person to greet"] = "there",
     emotion: Annotated[Emotion, "The emotion to convey"] = Emotion.HAPPY
 ) -> Annotated[str, "A greeting to the user"]:
@@ -192,7 +216,7 @@ suite.add_case(
     user_message="Say hello to Bob sadly",
     expected_tool_calls=[
         ExpectedToolCall(
-            func=hello,
+            func=greet,
             args={
                 "name": "Bob",
                 "emotion": Emotion.SAD,
@@ -214,7 +238,7 @@ suite.add_case(
     user_message="Say hello to Bob based on my current mood.",
     expected_tool_calls=[
         ExpectedToolCall(
-            func=hello,
+            func=greet,
             args={
                 "name": "Bob",
                 "emotion": Emotion.HAPPY,
@@ -230,13 +254,13 @@ suite.add_case(
         {"role": "user", "content": "Hi, I'm so happy!"},
         {
             "role": "assistant",
-            "content": "That’s awesome! What’s got you feeling so happy today?",
+            "content": "That's awesome! What's got you feeling so happy today?",
         },
     ]
 )
 ```
 
-Add an evalutation case with multiple expected tool calls:
+Add an evaluation case with multiple expected tool calls:
 
 ```python
 suite.add_case(
@@ -244,14 +268,14 @@ suite.add_case(
     user_message="Say hello to Bob based on my current mood. And then say hello to Alice with slightly less of that emotion.",
     expected_tool_calls=[
         ExpectedToolCall(
-            func=hello,
+            func=greet,
             args={
                 "name": "Bob",
                 "emotion": Emotion.HAPPY,
             },
         ),
         ExpectedToolCall(
-            func=hello,
+            func=greet,
             args={
                 "name": "Alice",
                 "emotion": Emotion.SLIGHTLY_HAPPY,
@@ -267,7 +291,7 @@ suite.add_case(
         {"role": "user", "content": "Hi, I'm so happy!"},
         {
             "role": "assistant",
-            "content": "That’s awesome! What’s got you feeling so happy today?",
+            "content": "That's awesome! What's got you feeling so happy today?",
         },
     ]
 )
@@ -275,7 +299,7 @@ suite.add_case(
 
 ---
 
-<Callout>
-  Ensure that your `hello` tool and evaluation cases are updated accordingly and
+<Callout type="info">
+  Ensure that your `greet` tool and evaluation cases are updated accordingly and
   that you rerun `arcade evals .` to test your changes.
 </Callout>
