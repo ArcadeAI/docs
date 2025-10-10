@@ -7,29 +7,51 @@ import { Steps, Tabs, Callout } from "nextra/components";
 
 # Adding user authorization to your tools
 
-In this guide, you'll learn how to add user authorization to your custom tools, using Arcade.
+<GuideOverview>
+<GuideOverview.Outcomes>
 
-You'll create a tool that sends a message on behalf of a user via Slack.
+Create a tool that sends a message on behalf of a user via Slack.
+
+</GuideOverview.Outcomes>
+
+<GuideOverview.Prerequisites>
+
+- An [Arcade account](https://api.arcade.dev/signup)
+- For this guide, we'll use [uv](https://docs.astral.sh/uv/getting-started/installation/) as our package manager.
+- [Set up Arcade CLI](/home/quickstart)
+- [Understand Tool Context](/home/build-tools/tool-context)
+
+</GuideOverview.Prerequisites>
+
+<GuideOverview.YouWillLearn>
+
+- How to add user authorization to your custom tools with Arcade.
+- How to use the `ToolContext` class to make authenticated requests to external APIs.
+- How to use the `Slack` auth provider to authorize your tool.
+
+</GuideOverview.YouWillLearn>
+</GuideOverview>
 
 <Steps>
 
-### Prerequisites
-
-- [Set up Arcade](/home/quickstart)
-- Install the Arcade SDK and any third-party SDKs you need (e.g., Slack SDK):
-- [Understand Tool Context](/home/build-tools/tool-context)
+## Install Arcade and Slack SDK
 
 <Tabs items={["uv", "pip"]}>
-<Tabs.Tab>
+  <Tabs.Tab>
+
 ```bash
 uv pip install arcade-ai slack_sdk
 ```
+
 </Tabs.Tab>
-<Tabs.Tab>
+  <Tabs.Tab>
+
 ```bash
 pip install arcade-ai slack_sdk
 ```
+
 </Tabs.Tab>
+
 </Tabs>
 
 ### Define your authorized tool
@@ -98,8 +120,12 @@ Arcade offers a number of [built-in auth providers](/home/auth-providers), inclu
 )
 ```
 
-<Callout type="info">
-  The `OAuth2` class requires an `id` parameter to identify the auth provider in the Arcade Engine. For built-in providers like `Slack`, you can skip the `id` - the Arcade Engine will find the right provider using your credentials. While you can specify an `id` for built-in providers, only do this for private tools that won't be shared.
+<Callout type="warning">
+  The `OAuth2` class requires an `id` parameter to identify the auth provider in
+  the Arcade Engine. For built-in providers like `Slack`, you can skip the `id`.
+  The Arcade Engine will find the right provider using your credentials. While
+  you can specify an `id` for built-in providers, only do this for private tools
+  that won't be shared.
 </Callout>
 
 ### Use your authorized tool with Arcade

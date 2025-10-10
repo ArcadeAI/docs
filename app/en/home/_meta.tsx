@@ -1,5 +1,20 @@
-import { BadgeHelp, Home } from "lucide-react";
+import { BadgeHelp, Globe, HeartPulse, Home } from "lucide-react";
 import type { MetaRecord } from "nextra";
+
+function TitleWithIcon({
+  icon: Icon,
+  children,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  children: React.ReactNode;
+}) {
+  return (
+    <span className="flex items-center gap-2 font-medium">
+      <Icon className="size-4" />
+      {children}
+    </span>
+  );
+}
 
 export const meta: MetaRecord = {
   "*": {
@@ -8,12 +23,7 @@ export const meta: MetaRecord = {
     },
   },
   index: {
-    title: (
-      <span className="flex items-center gap-2 font-medium">
-        <Home className="size-4" />
-        Home
-      </span>
-    ),
+    title: <TitleWithIcon icon={Home}>Home</TitleWithIcon>,
     theme: {
       breadcrumb: false,
       layout: "full",
@@ -21,20 +31,10 @@ export const meta: MetaRecord = {
       copyPage: false,
     },
   },
-  "contact-us": {
-    title: (
-      <span className="flex items-center gap-2 font-medium">
-        <BadgeHelp className="size-4" />
-        Contact us
-      </span>
-    ),
-    href: "/contact-us",
-    // theme: {
-    //   breadcrumb: false,
-    //   pagination: false,
-    // },
+  arcade: {
+    title: <TitleWithIcon icon={Globe}>Arcade.dev</TitleWithIcon>,
+    href: "https://arcade.dev",
   },
-
   "-- Getting Started": {
     type: "separator",
     title: "Using Arcade",
@@ -96,9 +96,6 @@ export const meta: MetaRecord = {
   "arcade-cli": {
     title: "Arcade CLI",
   },
-  "arcade-clients": {
-    title: "Arcade Clients",
-  },
   "-- Hosting options": {
     type: "separator",
     title: "Hosting options",
@@ -134,6 +131,18 @@ export const meta: MetaRecord = {
   },
   "registry-early-access": {
     title: "Registry Early Access",
+  },
+  "-- Resources": {
+    type: "separator",
+    title: "Resources",
+  },
+  "contact-us": {
+    title: <TitleWithIcon icon={BadgeHelp}>Contact us</TitleWithIcon>,
+    href: "/contact-us",
+  },
+  status: {
+    title: <TitleWithIcon icon={HeartPulse}>Status</TitleWithIcon>,
+    href: "https://status.arcade.dev/",
   },
 };
 
