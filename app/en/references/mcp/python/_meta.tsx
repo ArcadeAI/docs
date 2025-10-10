@@ -12,6 +12,9 @@ const meta: MetaRecord = {
   overview: {
     title: "Overview",
   },
+  "other-page": {
+    title: "Other Page",
+  },
 };
 
 export default meta;
