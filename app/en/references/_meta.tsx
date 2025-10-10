@@ -9,6 +9,9 @@ export const meta: MetaRecord = {
       copyPage: false,
     },
   },
+  index: {
+    display: "hidden",
+  },
 };
 
 export default meta;

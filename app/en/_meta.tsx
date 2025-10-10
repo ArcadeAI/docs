@@ -16,13 +16,10 @@ const meta: MetaRecord = {
     title: "MCP Servers",
     href: "/mcp-servers",
   },
-  reference: {
-    type: "page",
-    title: "API Reference",
-    href: "/references",
-  },
   references: {
-    display: "hidden",
+    type: "page",
+    title: "References",
+    href: "/references",
   },
 };
 
