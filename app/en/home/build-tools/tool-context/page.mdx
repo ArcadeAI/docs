@@ -1,38 +1,13 @@
 ---
-title: "Tool Context"
-description: "What Arcade's Tool Context is and how to use it"
+title: "Context and MCP tools"
+description: "What Arcade's Tool Context is and how to use it."
 ---
 
-import { Steps, Callout } from "nextra/components";
+import { Callout, Tabs } from "nextra/components";
 
-# Understanding `ToolContext`
+# Understanding `Context` and tools
 
-`ToolContext` is a component in Arcade that manages authorization and user information for tools requiring authentication.
-
-<GuideOverview>
-<GuideOverview.Outcomes>
-
-Access runtime features through `ToolContext` including logging,
-secrets, and progress reporting.
-
-</GuideOverview.Outcomes>
-
-<GuideOverview.Prerequisites>
-
-- An [Arcade account](https://api.arcade.dev/signup)
-- For this guide, we'll use [uv](https://docs.astral.sh/uv/getting-started/installation/) as our package manager.
-- [Set up Arcade CLI](/home/quickstart)
-
-</GuideOverview.Prerequisites>
-
-<GuideOverview.YouWillLearn>
-
-- How to use `ToolContext` to acess the user's ID, logging, secrets, and progress reporting.
-
-</GuideOverview.YouWillLearn>
-</GuideOverview>
-
-`ToolContext` is a class that provides access to the following runtime features:
+`Context` is a class in Arcade that manages authorization and user information for tools requiring authentication. `Context` provides access to the following runtime features:
 
 - Logging via `context.log`
 - Secrets via `context.get_secret`
@@ -47,138 +22,254 @@ information in the `ToolContext`.
 
 </Callout>
 
-## How `ToolContext` Works
+## How `Context` Works
 
 When you invoke a tool that requires authorization, Arcade's Tool SDK automatically:
 
-1. Creates a `ToolContext` object
+1. Creates a `Context` object
 2. Passes this object to your tool
 
-You can then use the `ToolContext` object to make authenticated requests to external APIs.
+You can then use the `Context` object to make authenticated requests to external APIs.
 
 Let's walk through an example (or skip to [the full code](#example-code)).
 
-<Steps>
+## Context Features
 
-### Create the MCP application
+`Context` provides access to runtime features:
+
+### Logging
+
+Send log messages at different levels using the `log` attribute of the `Context` object:
 
 ```python
-from arcade_mcp_server import Context, MCPApp
-
-app = MCPApp(
-    name="context_demo",
-    version="1.0.0",
-    instructions="Demonstrates ToolContext features"
-)
+await context.log.debug("Debug message")
+await context.log.info("Information message")
+await context.log.warning("Warning message")
+await context.log.error("Error message")
 ```
 
-### Add the tool
+### Secrets Management
+
+Access environment variables securely using the `get_secret` method:
 
 ```python
-@app.tool(requires_secrets=["API_KEY"])
-def process_data(context: Context, data_size: Annotated[int, "Amount of data to process"], operation: Annotated[str, "Type of operation to perform"] = "analyze") -> Annotated[str, "Processing result"]:
-    """Process data using all ToolContext features."""
+try:
+    api_key = context.get_secret("API_KEY")
+except ValueError:
+    # Handle missing secret
 ```
 
-### Use the user ID
+### User Context
+
+Access information about the current user using the `user_id` attribute:
 
 ```python
-user_id = context.user_id
-await context.log.info(f"Processing started by user: {user_id}")
+user_id = context.user_id or "anonymous"
 ```
 
-### Access the secret
+### Progress Reporting
+
+Report progress for long-running operations using the `progress` attribute:
 
 ```python
-api_key = context.get_secret("API_KEY")
-await context.log.debug("API key retrieved successfully")
+await context.progress.report(current, total, "Processing...")
 ```
 
-### Report progress
+### Tool Decorator Options
+
+Specify required secrets using the `requires_secrets` decorator:
 
 ```python
-await context.progress.report(0, f"Starting {operation} for {data_size} items")
+@tool(requires_secrets=["DATABASE_URL", "API_KEY"])
+async def my_tool(context: Context, ...):
 ```
 
-### Log activity
+## Example Code
 
-```python
-await context.log.info(f"Processing completed successfully")
+The following is an example shows how tools can access runtime features through
+`Context`, including logging,
+secrets, and progress reporting.
+
+### Environment Variables
+
+```env
+API_KEY="your-secret-key"
+DATABASE_URL="postgresql://localhost/mydb"
 ```
 
-### Run the MCP application
+<Callout type="warning">
 
-```python
-if __name__ == "__main__":
-    app.run()
-```
+For the code to work, you must define your environment variables in a `.env` file.
 
-</Steps>
+</Callout>
 
-## Example code
+```python filename="server.py"
+#!/usr/bin/env python3
 
-Here's the full example:
-
-```python
-import asyncio
-from typing import Annotated
+import sys
+from typing import Annotated, Any
 
 from arcade_mcp_server import Context, MCPApp
 
 # Create the MCP application
 app = MCPApp(
-    name="context_demo",
+    name="context_example",
     version="1.0.0",
-    instructions="Demonstrates ToolContext features"
+    instructions="Example server demonstrating Context usage",
 )
 
-@app.tool(requires_secrets=["API_KEY"])
-async def process_data(
+
+@app.tool
+async def secure_api_call(
     context: Context,
-    data_size: Annotated[int, "Amount of data to process"],
-    operation: Annotated[str, "Type of operation to perform"] = "analyze"
-) -> Annotated[str, "Processing result"]:
-    """Process data using all ToolContext features."""
+    endpoint: Annotated[str, "API endpoint to call"],
+    method: Annotated[str, "HTTP method (GET, POST, etc.)"] = "GET",
+) -> Annotated[str, "API response or error message"]:
+    """Make a secure API call using secrets from context."""
 
-    # 1. User Context - Get the user ID
-    user_id = context.user_id
-    await context.log.info(f"Processing started by user: {user_id}")
-
-    # 2. Secrets - Access secure configuration
+    # Access secrets from environment via Context helper
     try:
         api_key = context.get_secret("API_KEY")
-        await context.log.debug("API key retrieved successfully")
     except ValueError:
         await context.log.error("API_KEY not found in environment")
-        return "Error: Missing required API key"
+        return "Error: API_KEY not configured"
 
-    # 3. Progress Reporting - Keep user informed
-    await context.progress.report(0, f"Starting {operation} for {data_size} items")
+    # Log the API call
+    await context.log.info(f"Making {method} request to {endpoint}")
 
-    # Simulate processing with progress updates
-    for i in range(5):
-        # Simulate work
-        await asyncio.sleep(0.5)
+    # Simulate API call (in real code, use httpx or aiohttp)
+    return f"Successfully called {endpoint} with API key: {api_key[:4]}..."
 
-        progress = (i + 1) * 20  # 20%, 40%, 60%, 80%, 100%
-        await context.progress.report(
-            progress,
-            f"Processing batch {i + 1}/5 ({progress}% complete)"
-        )
 
-        # 4. Logging - Different log levels
-        if i == 0:
-            await context.log.info(f"Connected to API with key: {api_key[:8]}...")
-        elif i == 2:
-            await context.log.warning("High memory usage detected")
-        elif i == 4:
-            await context.log.info("Processing completed successfully")
+# Don't forget to add the secret to the .env file or export it as an environment variable
+@app.tool(requires_secrets=["DATABASE_URL"])
+async def database_info(
+    context: Context, table_name: Annotated[str | None, "Specific table to check"] = None
+) -> Annotated[str, "Database connection info"]:
+    """Get database connection information from context."""
 
-    result = f"Processed {data_size} items using {operation} for user {user_id}"
-    await context.log.info(f"Final result: {result}")
+    # Get database URL from secrets
+    try:
+        db_url = context.get_secret("DATABASE_URL")
+    except ValueError:
+        db_url = "Not configured"
 
-    return result
+    # Log at different levels
+    if db_url == "Not configured":
+        await context.log.warning("DATABASE_URL not set")
+    else:
+        await context.log.debug(f"Checking database: {db_url.split('@')[-1]}")
+
+    # Get user info
+    user_info = f"User: {context.user_id or 'anonymous'}"
+
+    if table_name:
+        return f"{user_info}\nDatabase: {db_url}\nChecking table: {table_name}"
+    else:
+        return f"{user_info}\nDatabase: {db_url}"
+
+
+@app.tool
+async def debug_context(
+    context: Context,
+    show_secrets: Annotated[bool, "Whether to show secret keys (not values)"] = False,
+) -> Annotated[dict, "Current context information"]:
+    """Debug tool to inspect the current context."""
+
+    info: dict[str, Any] = {
+        "user_id": context.user_id,
+    }
+
+    if show_secrets:
+        # Only show keys, not values for security
+        info["secret_keys"] = [s.key for s in (context.secrets or [])]
+
+    # Log that debug info was accessed
+    await context.log.info(f"Debug context accessed by {context.user_id or 'unknown'}")
+
+    return info
+
+
+@app.tool
+async def process_with_progress(
+    context: Context,
+    items: Annotated[list[str], "Items to process"],
+    delay_seconds: Annotated[float, "Delay between items"] = 0.1,
+) -> Annotated[dict, "Processing results"]:
+    """Process items with progress notifications."""
+
+    results: dict[str, list] = {"processed": [], "errors": []}
+
+    # Log start
+    await context.log.info(f"Starting to process {len(items)} items")
+
+    for i, item in enumerate(items):
+        try:
+            # Simulate processing
+            import asyncio
+
+            await asyncio.sleep(delay_seconds)
+
+            # Report progress (current, total, message)
+            await context.progress.report(i + 1, len(items), f"Processing: {item}")
+            await context.log.debug(f"Processing item {i + 1}/{len(items)}: {item}")
+
+            results["processed"].append(item.upper())
+
+        except Exception as e:
+            await context.log.error(f"Failed to process {item}: {e}")
+            results["errors"].append({"item": item, "error": str(e)})
+
+    # Log completion
+    await context.log.info(
+        f"Processing complete: {len(results['processed'])} succeeded, "
+        f"{len(results['errors'])} failed"
+    )
+
+    return results
+
+
+# The Context provides at runtime (via TDK wrapper):
+# - context.user_id: ID of the user making the request
+# - context.get_secret(key): Retrieve a secret value (raises if missing)
+# - context.log.<level>(msg): Send log messages to the client (debug/info/warning/error)
+# - context.progress.report(progress, total=None, message=None): Progress updates
+
+if __name__ == "__main__":
+    # Check if stdio transport was requested
+    transport = "stdio" if len(sys.argv) > 1 and sys.argv[1] == "stdio" else "http"
+
+    print(f"Starting {app.name} v{app.version}")
+    print(f"Transport: {transport}")
+
+    # Run the server
+    app.run(transport=transport, host="127.0.0.1", port=8000)
 ```
+
+### Run your MCP server
+
+<Tabs
+  items={["HTTP transport (default)", "stdio transport (for Claude Desktop)"]}
+  storageKey="preferredTransport"
+>
+  <Tabs.Tab>
+
+```bash
+uv run server.py
+```
+
+For HTTP transport, view your server's API docs at [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
+
+</Tabs.Tab>
+<Tabs.Tab>
+
+```bash
+uv run server.py stdio
+```
+
+</Tabs.Tab>
+
+</Tabs>
 
 ## Key Concepts
 
