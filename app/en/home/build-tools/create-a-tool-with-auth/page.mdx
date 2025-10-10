@@ -1,122 +1,133 @@
 ---
-title: "Adding user authorization to your tools"
-description: "Learn how to build custom tools that require user authorization using Arcade"
+title: "Add user authorization to your MCP tools"
+description: "Learn how to build custom MCP tools that require user authorization using Arcade, auth providers, and OAuth."
 ---
 
 import { Steps, Tabs, Callout } from "nextra/components";
 
-# Adding user authorization to your tools
+# Add user authorization to your MCP tools
 
 <GuideOverview>
 <GuideOverview.Outcomes>
 
-Create a tool that sends a message on behalf of a user via Slack.
+Create and use an MCP tool that requires OAuth to access Reddit, prompting users to authorize the action when called.
 
 </GuideOverview.Outcomes>
 
 <GuideOverview.Prerequisites>
 
-- An [Arcade account](https://api.arcade.dev/signup)
-- For this guide, we'll use [uv](https://docs.astral.sh/uv/getting-started/installation/) as our package manager.
-- [Set up Arcade CLI](/home/quickstart)
-- [Understand Tool Context](/home/build-tools/tool-context)
+- [Arcade account](https://api.arcade.dev/signup)
+- [uv package manager](https://docs.astral.sh/uv/getting-started/installation/)
+- [Arcade CLI](/home/quickstart)
 
 </GuideOverview.Prerequisites>
 
 <GuideOverview.YouWillLearn>
 
+- How auth providers work.
 - How to add user authorization to your custom tools with Arcade.
-- How to use the `ToolContext` class to make authenticated requests to external APIs.
-- How to use the `Slack` auth provider to authorize your tool.
+- How to use the Context to make authenticated requests to external APIs.
+- How to use the Reddit auth provider to authorize your tool.
 
 </GuideOverview.YouWillLearn>
 </GuideOverview>
 
+An auth provider is the service that issues and manages the OAuth token your tool uses. It is the identity “source of truth” your tool integrates with to request permissions and obtain OAuth tokens.
+
+When you create a tool with `requires_auth`, you specify which provider to use. In this example, **`arcade_mcp_server.auth.Reddit` specifies the Reddit auth provider.**
+
+## How auth providers work during execution
+
+1. The user authenticates once with Arcade.
+2. When the tool runs, Arcade performs the provider-specific OAuth flow for the requested scopes.
+3. The provider issues a token, and Arcade securely injects it into the tool’s Context.
+4. Your tool uses that token to call the provider’s API (e.g., `https://oauth.reddit.com`), without the LLM or client ever seeing the token.
+
+The auth provider defines where the identity lives, what permissions are available (scopes), and how tokens are issued and refreshed. In code, it’s the class you pass to `requires_auth` (e.g., `Reddit(scopes=“read”])`) that encodes the OAuth details for that service.
+
+## Add user authorization to your MCP tools
+
 <Steps>
 
-## Install Arcade and Slack SDK
+### Import the necessary modules
 
-<Tabs items={["uv", "pip"]}>
-  <Tabs.Tab>
+Create a new Python file, e.g., `auth_tools.py`, and import the necessary modules:
 
-```bash
-uv pip install arcade-ai slack_sdk
-```
-
-</Tabs.Tab>
-  <Tabs.Tab>
-
-```bash
-pip install arcade-ai slack_sdk
-```
-
-</Tabs.Tab>
-
-</Tabs>
-
-### Define your authorized tool
-
-Create a new Python file, e.g., `slack_tools.py`, and import the necessary modules:
-
-```python
+```python showLineNumbers filename="auth_tools.py"
+import sys
 from typing import Annotated
 
-from arcade_tdk import ToolContext, tool
-from arcade_tdk.auth import Slack
-from arcade_tdk.errors import RetryableToolError
-from slack_sdk import WebClient
+import httpx
+from arcade_mcp_server import Context, MCPApp
+from arcade_mcp_server.auth import Reddit
 ```
 
-Now, define your tool using the `@tool` decorator and specify the required authorization, in this case, by using the built-in `Slack` auth provider:
+### Create the MCP Server
 
-```python
-@tool(
-    requires_auth=Slack(
-        scopes=[
-            "chat:write",
-            "im:write",
-            "users.profile:read",
-            "users:read",
-        ],
-    )
+Create an instance of the `MCPApp` class:
+
+```python filename="auth_tools.py"
+app = MCPApp(name="auth_example", version="1.0.0", log_level="DEBUG")
+```
+
+### Define your MCP tool
+
+Now, define your tool using the `@app.tool` decorator and specify the required authorization, in this case, by using [Arcade's Reddit auth provider](/home/auth-providers/reddit).
+
+Specifying the `requires_auth` parameter in the `@app.tool` decorator indicates that the tool needs user authorization. In this example, we're using the `Reddit` auth provider with the `read` scope:
+
+```python showLineNumbers filename="auth_tools.py" {1-5}
+@app.tool(
+  requires_auth=Reddit(
+    scopes=["read"]
+   )
 )
-def send_dm_to_user(
-    context: ToolContext,
-    user_name: Annotated[str, "The Slack username of the person you want to message"],
-    message: Annotated[str, "The message you want to send"],
-) -> Annotated[str, "A confirmation message that the DM was sent"]:
-    """Send a direct message to a user in Slack."""
-    slack_client = WebClient(token=context.authorization.token)
+async def get_posts_in_subreddit(
+    context: Context, subreddit: Annotated[str, "The name of the subreddit"]
+) -> dict:
+    """Get posts from a specific subreddit"""
+    # Normalize the subreddit name
+    subreddit = subreddit.lower().replace("r/", "").replace(" ", "")
 
-    # Retrieve the user ID based on username
-    user_list_response = slack_client.users_list()
-    user_id = None
-    for user in user_list_response["members"]:
-        if user["name"].lower() == user_name.lower():
-            user_id = user["id"]
-            break
-    if not user_id:
-        raise RetryableToolError(
-            "User not found",
-            developer_message=f"User with username '{user_name}' not found."
-        )
+    # Prepare the httpx request
+    # OAuth token is injected into the context at runtime.
+    # LLMs and MCP clients cannot see or access your OAuth tokens.
+    oauth_token = context.get_auth_token_or_empty()
+    headers = {
+        "Authorization": f"Bearer {oauth_token}",
+        "User-Agent": "mcp_server-mcp-server",
+    }
+    params = {"limit": 5}
+    url = f"https://oauth.reddit.com/r/{subreddit}/hot"
 
-    # Open a conversation and send the message
-    im_response = slack_client.conversations_open(users=[user_id])
-    dm_channel_id = im_response["channel"]["id"]
-    slack_client.chat_postMessage(channel=dm_channel_id, text=message)
+    # Make the request
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url, headers=headers, params=params)
+        response.raise_for_status()
 
-    return "DM sent successfully"
+        # Return the response
+        return response.json()
 ```
+
+<Callout type="warning">
+
+To use this tool, you need to install the Arcade CLI and run 'arcade login' to authenticate:
+
+```bash
+uv pip install arcade-mcp
+arcade login
+```
+
+</Callout>
 
 Arcade offers a number of [built-in auth providers](/home/auth-providers), including Slack, Google, and GitHub. You can also require authorization with a custom auth provider, using the `OAuth2` class, a subclass of the `ToolAuthorization` class:
 
 ```python
-@tool(
-    requires_auth=OAuth2(
-        id="your-oauth-provider-id",
-        scopes=["scope1", "scope2"],
-    )
+@app.tool(
+  requires_auth=OAuth2(
+    id="your-oauth-provider-id",
+    scopes=["scope1", "scope2"],
+  )
 )
 ```
 
@@ -165,8 +176,6 @@ Your application should guide the user through this process.
 </Steps>
 
 ### How it works
-
-By specifying the `requires_auth` parameter in the `@tool` decorator, you indicate that the tool needs user authorization.
 
 Arcade manages the OAuth flow, and provides the token in `context.authorization.token` when the tool is executed. Arcade also remembers the user's authorization tokens, so they won't have to go through the authorization process again until the auth expires or is revoked.
 
