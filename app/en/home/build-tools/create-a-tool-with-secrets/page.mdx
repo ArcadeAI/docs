@@ -1,25 +1,47 @@
 ---
-title: "Create a tool with secrets"
-description: "Learn how to build custom tools that require secrets using Arcade"
+title: "Create an MCP tool with secrets"
+description: "Learn how to build custom MCP tools that require secrets using Arcade"
 ---
 
 import { Steps, Tabs, Callout } from "nextra/components";
 
-# Create a tool with secrets
+# Create an MCP tool with secrets
 
-In this guide, you'll learn how to use secrets in your custom Arcade tools.
+<GuideOverview>
+<GuideOverview.Outcomes>
 
-Secrets are sensitive strings like passwords, api-keys, or other tokens that grant access to a protected resource or API. Although you could use secrets to transfer any static information to your tool, such as a parameter needed to call a remote API.
+Build an MCP tool that can read a secret from Context and return a masked confirmation string. Jump to [Example Code](#example-code) to see the complete code.
+
+</GuideOverview.Outcomes>
+
+<GuideOverview.Prerequisites>
+
+- [Arcade account](https://api.arcade.dev/signup)
+- [Arcade CLI](/home/quickstart)
+- [An MCP Server](/home/build-tools/create-a-mcp-server)
+- [uv package manager](https://docs.astral.sh/uv/getting-started/installation/)
+
+</GuideOverview.Prerequisites>
+
+<GuideOverview.YouWillLearn>
+
+- How to read secrets from environment and `.env` files securely using a tool's Context.
+
+</GuideOverview.YouWillLearn>
+</GuideOverview>
+
+Secrets are sensitive strings like passwords, api-keys, or other tokens that grant access to a protected resource or API. Although you could use secrets to transfer any static information to your tool, such as a parameter needed to call a remote API. In this guide, you'll learn how to use secrets in your custom Arcade tools.
 
 <Steps>
 
-### Prerequisites
+## Store your secret
 
-- [Set up Arcade](/home/quickstart)
-- [Create a MCP Server](/home/build-tools/create-a-mcp-server)
-- [Understand Tool Context](/home/build-tools/tool-context)
+There are two ways to store your secret:
 
-### Set the secret in the Arcade Dashboard
+1. In the Arcade Dashboard
+2. In an `.env` file
+
+**Option 1: Set the secret in the Arcade Dashboard**
 
 Go to the [Auth > Secrets section](https://api.arcade.dev/dashboard/auth/secrets) in the Arcade Dashboard.
 
@@ -27,25 +49,137 @@ Go to the [Auth > Secrets section](https://api.arcade.dev/dashboard/auth/secrets
 
 In the top-right corner, click the **+ Add Secret** button and enter:
 
-- **ID**: `MY_SECRET_INFO`
-- **Secret Value**: `my-secret-value`
+- **ID**: `SECRET_KEY`
+- **Secret Value**: `supersecret`
 - **Description**: optionally add a description
 
 Click **Submit** to save the secret.
 
-### Define your tool and access the secret
+**Option 2: Set the secret in an `.env` file**
 
-Use the `@tool` decorator to define the secret requirement. The `context` object has a `get_secret` method that you can use to access the secret value.
+Secrets can be provided via environment variables. Create a `.env` file in the root of your project and add your secret:
 
-```python
-from arcade_tdk import ToolContext, tool
-
-@tool(requires_secrets=["MY_SECRET_INFO"])
-def my_tool_using_secret(context: ToolContext) -> str:
-    secret_value = context.get_secret("MY_SECRET_INFO")
-    return f"The secret value is {secret_value}"
+```env filename=".env"
+SECRET_KEY="my-secret-value"
 ```
 
-When your tool is executed, it will return: `"The secret value is my-secret-value"`. In a real world application, you would use this secret to connect to a remote database, API, etc.
+### Define your tool and access the secret
+
+In your [MCP Server](/home/build-tools/create-a-mcp-server), create a new tool that uses the secret:
+
+- Use the `requires_secrets` parameter to declare which secrets your tool needs (`"SECRET_KEY"` in this example).
+- The tool's Context object has `get_secret` and `use_secret` methods that you can use to access the secret value.
+
+```python filename="secrets.py" showLineNumbers highlightLines={2,4,7}
+@app.tool(
+    requires_secrets=["SECRET_KEY"],  # declare we need SECRET_KEY
+)
+def use_secret(context: Context) -> str:
+    """Read SECRET_KEY from context and return a masked confirmation string."""
+    try:
+        value = context.get_secret("SECRET_KEY")
+        masked = value[:2] + "***" if len(value) >= 2 else "***"
+        return f"Got SECRET_KEY of length {len(value)} -> {masked}"
+    except Exception as e:
+        return f"Error getting secret: {e}"
+```
+
+When your tool is executed, it will return: `"Got SECRET_KEY of length..."`. In a real world application, you would use this secret to connect to a remote database, API, etc.
 
 </Steps>
+
+<Callout type="warning">
+
+**Security Best Practices**
+
+- **Never log secret values** Always mask or truncate when displaying
+- **Declare requirements** Use `requires_secrets` to document dependencies
+- **Handle missing secrets** Use try/except when accessing secrets
+- **Use descriptive names** Make it clear what each secret is for
+
+</Callout>
+
+## Key Concepts
+
+- **Secure Access** Secrets are accessed through context, not imported directly
+- **Environment Integration** Works with both environment variables and .env files
+- **Error Handling** Always handle the case where a secret might be missing
+- **Masking** Never expose full secret values in logs or return values
+- **Declaration** Use `requires_secrets` to make dependencies explicit
+
+## Example Code
+
+### Environment Variables
+
+```env
+SECRET_KEY="supersecret"
+```
+
+<Callout type="warning">
+
+For the code to work, you must define your environment variables in a `.env` file.
+
+</Callout>
+
+```python filename="secrets.py"
+#!/usr/bin/env python3
+import sys
+
+from arcade_mcp_server import Context, MCPApp
+
+# Create the MCP application
+app = MCPApp(
+    name="secrets_example",
+    version="1.0.0",
+    instructions="Example server demonstrating secrets usage",
+)
+
+
+@app.tool(
+    requires_secrets=["SECRET_KEY"],  # declare we need SECRET_KEY
+)
+def use_secret(context: Context) -> str:
+    """Read SECRET_KEY from context and return a masked confirmation string."""
+    try:
+        value = context.get_secret("SECRET_KEY")
+        masked = value[:2] + "***" if len(value) >= 2 else "***"
+        return f"Got SECRET_KEY of length {len(value)} -> {masked}"
+    except Exception as e:
+        return f"Error getting secret: {e}"
+
+
+if __name__ == "__main__":
+    # Check if stdio transport was requested
+    transport = "stdio" if len(sys.argv) > 1 and sys.argv[1] == "stdio" else "http"
+
+    print(f"Starting {app.name} v{app.version}")
+    print(f"Transport: {transport}")
+
+    # Run the server
+    app.run(transport=transport, host="127.0.0.1", port=8000)
+```
+
+### Run your MCP server
+
+<Tabs
+  items={["HTTP transport (default)", "stdio transport (for Claude Desktop)"]}
+  storageKey="preferredTransport"
+>
+  <Tabs.Tab>
+
+```bash
+uv run secrets.py http
+```
+
+For HTTP transport, view your server's API docs at [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
+
+</Tabs.Tab>
+<Tabs.Tab>
+
+```bash
+uv run secrets.py stdio
+```
+
+</Tabs.Tab>
+
+</Tabs>
