@@ -12,6 +12,9 @@ export const meta: MetaRecord = {
   index: {
     title: "Reference Index",
   },
+  api: {
+    title: "API",
+  },
   mcp: {
     title: "Arcade MCP",
   },
