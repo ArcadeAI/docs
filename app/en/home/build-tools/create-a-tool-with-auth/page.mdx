@@ -39,9 +39,11 @@ When you create a tool with `requires_auth`, you specify which provider to use. 
 ## How auth providers work during execution
 
 1. The user authenticates once with Arcade.
-2. When the tool runs, Arcade performs the provider-specific OAuth flow for the requested scopes.
-3. The provider issues a token, and Arcade securely injects it into the tool’s Context.
-4. Your tool uses that token to call the provider’s API (e.g., `https://oauth.reddit.com`), without the LLM or client ever seeing the token.
+2. When the tool is invoked, Arcade checks whether if the user has a connection to the provider with the required scopes.
+3. If the user does not meet the requirements, Arcade initiates the provider-specific OAuth flow for the requested scopes.
+4. The user is presented with an OAuth challenge, and authorizes Arcade to access a token with the specified scopes.
+5. The provider issues the token, and Arcade securely injects it into the tool’s Context.
+6. Your tool is executed, and uses that token to call the provider’s API (e.g., `https://oauth.reddit.com`), without the LLM or client ever seeing the token.
 
 The auth provider defines where the identity lives, what permissions are available (scopes), and how tokens are issued and refreshed. In code, it’s the class you pass to `requires_auth` (e.g., `Reddit(scopes=“read”])`) that encodes the OAuth details for that service.
 
