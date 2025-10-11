@@ -30,7 +30,7 @@ export default function APIReferencePage() {
                 asChild
                 className="bg-primary text-white hover:bg-primary/90"
               >
-                <Link href="/home/reference/api">View API Reference</Link>
+                <Link href="/references/api">View API Reference</Link>
               </Button>
             </div>
           </div>
