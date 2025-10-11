@@ -30,7 +30,7 @@ export default {
     goBack: "Volver",
     needHelp: "¿Necesitas ayuda? Prueba estas páginas populares:",
     quickstart: "Inicio rápido",
-    toolkits: "Toolkits",
-    createToolkit: "Crear un toolkit",
+    mcpServers: "MCP Servers",
+    createMcpServer: "Crear un MCP Server",
   },
 } satisfies Dictionary;
