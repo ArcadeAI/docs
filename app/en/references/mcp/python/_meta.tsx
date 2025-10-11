@@ -12,6 +12,9 @@ const meta: MetaRecord = {
   overview: {
     title: "Overview",
   },
+  clients: {
+    title: "Clients",
+  },
   transports: {
     title: "Transports",
   },
