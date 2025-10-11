@@ -10,7 +10,7 @@ export const meta: MetaRecord = {
     },
   },
   index: {
-    display: "hidden",
+    title: "Reference Index",
   },
   mcp: {
     title: "Arcade MCP",

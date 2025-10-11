@@ -18,7 +18,7 @@ const meta: MetaRecord = {
   },
   references: {
     type: "page",
-    title: "References",
+    title: "Reference",
     href: "/references",
   },
 };
