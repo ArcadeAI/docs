@@ -12,6 +12,9 @@ export const meta: MetaRecord = {
   index: {
     display: "hidden",
   },
+  mcp: {
+    title: "Arcade MCP",
+  },
 };
 
 export default meta;
