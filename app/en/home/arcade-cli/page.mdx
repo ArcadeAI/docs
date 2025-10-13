@@ -54,28 +54,36 @@ Now that your python virtual environment is activated, you can install the Arcad
 ```bash
  Usage: arcade [OPTIONS] COMMAND [ARGS]...
 
-╭─ Options ───────────────────────────────────────────────────────────────────────────╮
-│ --version  -v        Print version and exit.                                        │
-│ --help               Show this message and exit.                                    │
-╰─────────────────────────────────────────────────────────────────────────────────────╯
-╭─ User ──────────────────────────────────────────────────────────────────────────────╮
-│ login      Log in to Arcade Cloud                                                   │
-│ logout     Log out of Arcade Cloud                                                  │
-│ dashboard  Open the Arcade Dashboard in a web browser                               │
-╰─────────────────────────────────────────────────────────────────────────────────────╯
-╭─ Tool Development ──────────────────────────────────────────────────────────────────╮
-│ new    Create a new toolkit package directory                                       │
-│ show   Show the installed toolkits or details of a specific tool                    │
-│ chat   Start a chat with a model in the terminal to test tools                      │
-│ evals  Run tool calling evaluations                                                 │
-╰─────────────────────────────────────────────────────────────────────────────────────╯
-╭─ Launch ────────────────────────────────────────────────────────────────────────────╮
-│ serve  Start tool server worker with locally installed tools                        │
-╰─────────────────────────────────────────────────────────────────────────────────────╯
-╭─ Deployment ────────────────────────────────────────────────────────────────────────╮
-│ deploy  Deploy toolkits to Arcade Cloud                                             │
-│ worker  Manage deployments of tool servers (logs, list, etc)                        │
-╰─────────────────────────────────────────────────────────────────────────────────────╯
+ Arcade CLI - Build, deploy, and manage MCP servers and AI tools. Create
+ new projects, run servers with multiple transports, configure clients, and
+ deploy to Arcade Cloud.
+
+╭─ Options ────────────────────────────────────────────────────────────────╮
+│ --version  -v        Print version and exit.                             │
+│ --help     -h        Show this message and exit.                         │
+╰──────────────────────────────────────────────────────────────────────────╯
+╭─ User ───────────────────────────────────────────────────────────────────╮
+│ login      Log in to Arcade Cloud                                        │
+│ logout     Log out of Arcade Cloud                                       │
+│ dashboard  Open the Arcade Dashboard in a web browser                    │
+╰──────────────────────────────────────────────────────────────────────────╯
+╭─ Build ──────────────────────────────────────────────────────────────────╮
+│ new    Create a new server package directory. Example usage: arcade new  │
+│        my_mcp_server                                                     │
+│ show   Show the installed tools or details of a specific tool            │
+│ evals  Run tool calling evaluations                                      │
+╰──────────────────────────────────────────────────────────────────────────╯
+╭─ Run ────────────────────────────────────────────────────────────────────╮
+│ mcp     Run MCP servers with different transports                        │
+│ deploy  Deploy MCP servers to Arcade                                     │
+╰──────────────────────────────────────────────────────────────────────────╯
+╭─ Manage ─────────────────────────────────────────────────────────────────╮
+│ configure  Configure MCP clients to connect to your server               │
+│ server     Manage deployments of tool servers (logs, list, etc)          │
+│ secret     Manage tool secrets in the cloud (set, unset, list)           │
+╰──────────────────────────────────────────────────────────────────────────╯
+
+ Pro tip: use --help after any command to see command-specific options.
 ```
 
 You can learn more about any of the commands by running `arcade <command> --help`, e.g. `arcade new --help`.
@@ -87,64 +95,82 @@ You can learn more about any of the commands by running `arcade <command> --help
 
  Log in to Arcade Cloud
 
-╭─ Options ─────────────────────────────────────────────────────────────────────────╮
-│ --host  -h      TEXT     The Arcade Cloud host to log in to.                      │
-│                          [default: cloud.arcade.dev]                              │
-│ --port  -p      INTEGER  The port of the Arcade Cloud host (if running locally).  │
-│                          [default: None]                                          │
-│ --help                   Show this message and exit.                              │
-╰───────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────╮
+│ --host           -h      TEXT     The Arcade Cloud host to log in to.    │
+│                                   [default: cloud.arcade.dev]            │
+│ --port           -p      INTEGER  The port of the Arcade Cloud host (if  │
+│                                   running locally).                      │
+│                                   [default: None]                        │
+│ --callback-host          TEXT     The host to use to complete the auth   │
+│                                   flow - this should be the same as the  │
+│                                   host that the CLI is running on.       │
+│                                   Include the port if needed.            │
+│                                   [default: None]                        │
+│ --debug          -d               Show debug information                 │
+│ --help                            Show this message and exit.            │
+╰──────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `arcade logout`
 
 ```bash
- Usage: arcade logout [OPTIONS]
+  Usage: arcade logout [OPTIONS]
 
  Log out of Arcade Cloud
 
-╭─ Options ─────────────────────────────────────────────────────────────────────────╮
-│ --help          Show this message and exit.                                       │
-╰───────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────╮
+│ --debug  -d        Show debug information                                │
+│ --help   -h        Show this message and exit.                           │
+╰──────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `arcade dashboard`
 
 ```bash
+
  Usage: arcade dashboard [OPTIONS]
 
  Open the Arcade Dashboard in a web browser
 
-╭─ Options ─────────────────────────────────────────────────────────────────────────╮
-│ --host    -h      TEXT     The Arcade Engine host that serves the dashboard.      │
-│                            [default: api.arcade.dev]                              │
-│ --port    -p      INTEGER  The port of the Arcade Engine.                         │
-│                            [default: None]                                        │
-│ --local   -l               Open the local dashboard instead of the default remote │
-│                            dashboard.                                             │
-│ --tls                      Whether to force TLS for the connection to the Arcade  │
-│                            Engine.                                                │
-│ --no-tls                   Whether to disable TLS for the connection to the       │
-│                            Arcade Engine.                                         │
-│ --help                     Show this message and exit.                            │
-╰───────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────╮
+│ --host    -h      TEXT     The Arcade Engine host that serves the        │
+│                            dashboard.                                    │
+│                            [default: api.arcade.dev]                     │
+│ --port    -p      INTEGER  The port of the Arcade Engine.                │
+│                            [default: None]                               │
+│ --local   -l               Open the local dashboard instead of the       │
+│                            default remote dashboard.                     │
+│ --tls                      Whether to force TLS for the connection to    │
+│                            the Arcade Engine.                            │
+│ --no-tls                   Whether to disable TLS for the connection to  │
+│                            the Arcade Engine.                            │
+│ --debug   -d               Show debug information                        │
+│ --help                     Show this message and exit.                   │
+╰──────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `arcade new`
 
 ```bash
- Usage: arcade new [OPTIONS] TOOLKIT_NAME
+ Usage: arcade new [OPTIONS] SERVER_NAME
 
- Create a new toolkit package directory. Example: arcade new my_toolkit
+ Create a new server package directory. Example usage: arcade new
+ my_mcp_server
 
-╭─ Arguments ──────────────────────────────────────────────────────────────────────╮
-│ *    toolkit_name      TEXT  The name of the toolkit to create [required]        │
-╰───────────────────────────────────────────────────────────────────────────────────╯
-╭─ Options ─────────────────────────────────────────────────────────────────────────╮
-│ --dir         TEXT  tools directory path                                          │
-│                     [default: current directory]                                  │
-│ --help              Show this message and exit.                                   │
-╰───────────────────────────────────────────────────────────────────────────────────╯
+╭─ Arguments ──────────────────────────────────────────────────────────────╮
+│ *    server_name      TEXT  The name of the server to create             │
+│                             [default: None]                              │
+│                             [required]                                   │
+╰──────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────╮
+│ --dir            TEXT  tools directory path                              │
+│                        [default:                                         │
+│                        /Users/mateo/Arcade/pg/testing-new-arcade/arcade… │
+│ --debug  -d            Show debug information                            │
+│ --full   -f            Create a starter MCP server (pyproject.toml,      │
+│                        server.py, .env.example)                          │
+│ --help   -h            Show this message and exit.                       │
+╰──────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `arcade show`
@@ -152,112 +178,110 @@ You can learn more about any of the commands by running `arcade <command> --help
 ```bash
  Usage: arcade show [OPTIONS]
 
- Show the installed toolkits or details of a specific tool
+ Show the installed tools or details of a specific tool
 
-╭─ Options ─────────────────────────────────────────────────────────────────────────╮
-│ --toolkit  -T      TEXT     The toolkit to show the tools of                      │
-│                             [default: None]                                       │
-│ --tool     -t      TEXT     The specific tool to show details for                 │
-│                             [default: None]                                       │
-│ --host     -h      TEXT     The Arcade Engine address to show the tools/toolkits  │
-│                             of.                                                   │
-│                             [default: api.arcade.dev]                             │
-│ --local    -l               Show the local environment's catalog instead of an    │
-│                             Arcade Engine's catalog.                              │
-│ --port     -p      INTEGER  The port of the Arcade Engine.                        │
-│                             [default: None]                                       │
-│ --tls                       Whether to force TLS for the connection to the Arcade │
-│                             Engine. If not specified, the connection will use TLS │
-│                             if the engine URL uses a 'https' scheme.              │
-│ --no-tls                    Whether to disable TLS for the connection to the      │
-│                             Arcade Engine.                                        │
-│ --debug    -d               Show debug information                                │
-│ --help                      Show this message and exit.                           │
-╰───────────────────────────────────────────────────────────────────────────────────╯
-```
-
-## `arcade chat`
-
-```bash
- Usage: arcade chat [OPTIONS]
-
- Start a chat with a model in the terminal to test tools
-
-╭─ Options ───────────────────────────────────────────────────────────────────────────╮
-│ --model   -m      TEXT     The model to use for prediction.                         │
-│                            [default: gpt-4o]                                        │
-│ --stream  -s               Stream the tool output.                                  │
-│ --prompt          TEXT     The system prompt to use for the chat.                   │
-│                            [default: None]                                          │
-│ --debug   -d               Show debug information                                   │
-│ --host    -h      TEXT     The Arcade Engine address to send chat requests to.      │
-│                            [default: api.arcade.dev]                                │
-│ --port    -p      INTEGER  The port of the Arcade Engine.                           │
-│                            [default: None]                                          │
-│ --tls                      Whether to force TLS for the connection to the Arcade    │
-│                            Engine. If not specified, the connection will use TLS if │
-│                            the engine URL uses a 'https' scheme.                    │
-│ --no-tls                   Whether to disable TLS for the connection to the Arcade  │
-│                            Engine.                                                  │
-│ --help                     Show this message and exit.                              │
-╰─────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────╮
+│ --server  -T      TEXT     The server to show the tools of               │
+│                            [default: None]                               │
+│ --tool    -t      TEXT     The specific tool to show details for         │
+│                            [default: None]                               │
+│ --host    -h      TEXT     The Arcade Engine address to show the         │
+│                            tools/servers of.                             │
+│                            [default: api.arcade.dev]                     │
+│ --local   -l               Show the local environment's catalog instead  │
+│                            of an Arcade Engine's catalog.                │
+│ --port    -p      INTEGER  The port of the Arcade Engine.                │
+│                            [default: None]                               │
+│ --tls                      Whether to force TLS for the connection to    │
+│                            the Arcade Engine. If not specified, the      │
+│                            connection will use TLS if the engine URL     │
+│                            uses a 'https' scheme.                        │
+│ --no-tls                   Whether to disable TLS for the connection to  │
+│                            the Arcade Engine.                            │
+│ --full    -f               Show full server response structure including │
+│                            error, logs, and authorization fields (only   │
+│                            applies when used with -t/--tool).            │
+│ --debug   -d               Show debug information                        │
+│ --help                     Show this message and exit.                   │
+╰──────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `arcade evals`
 
 ```bash
+ Usage: arcade evals [OPTIONS] [DIRECTORY]
+
  Run tool calling evaluations
 
-╭─ Arguments ─────────────────────────────────────────────────────────────────────────╮
-│   directory      [DIRECTORY]  Directory containing evaluation files                 │
-│                               [default: .]                                          │
-╰─────────────────────────────────────────────────────────────────────────────────────╯
-╭─ Options ───────────────────────────────────────────────────────────────────────────╮
-│ --details         -d               Show detailed results                            │
-│ --max-concurrent  -c      INTEGER  Maximum number of concurrent evaluations         │
-│                                    (default: 1)                                     │
-│                                    [default: 1]                                     │
-│ --models          -m      TEXT     The models to use for evaluation (default:       │
-│                                    gpt-4o). Use commas to separate multiple models. │
-│                                    [default: gpt-4o]                                │
-│ --host            -h      TEXT     The Arcade Engine address to send chat requests  │
-│                                    to.                                              │
-│                                    [default: localhost]                             │
-│ --cloud                            Whether to run evaluations against the Arcade    │
-│                                    Cloud Engine. Overrides the 'host' option.       │
-│ --port            -p      INTEGER  The port of the Arcade Engine.                   │
-│                                    [default: None]                                  │
-│ --tls                              Whether to force TLS for the connection to the   │
-│                                    Arcade Engine. If not specified, the connection  │
-│                                    will use TLS if the engine URL uses a 'https'    │
-│                                    scheme.                                          │
-│ --no-tls                           Whether to disable TLS for the connection to the │
-│                                    Arcade Engine.                                   │
-│ --help                             Show this message and exit.                      │
-╰─────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Arguments ──────────────────────────────────────────────────────────────╮
+│   directory      [DIRECTORY]  Directory containing evaluation files      │
+│                               [default: .]                               │
+╰──────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────╮
+│ --details           -d                Show detailed results              │
+│ --max-concurrent    -c      INTEGER   Maximum number of concurrent       │
+│                                       evaluations (default: 1)           │
+│                                       [default: 1]                       │
+│ --models            -m      TEXT      The models to use for evaluation   │
+│                                       (default: gpt-4o). Use commas to   │
+│                                       separate multiple models. All      │
+│                                       models must belong to the same     │
+│                                       provider.                          │
+│                                       [default: gpt-4o]                  │
+│ --provider          -p      [openai]  The provider of the models to use  │
+│                                       for evaluation.                    │
+│                                       [default: openai]                  │
+│ --provider-api-key  -k      TEXT      The model provider API key. If not │
+│                                       provided, will look for the        │
+│                                       appropriate environment variable   │
+│                                       based on the provider (e.g.,       │
+│                                       OPENAI_API_KEY for openai          │
+│                                       provider), first in the current    │
+│                                       environment, then in the current   │
+│                                       working directory's .env file.     │
+│                                       [default: None]                    │
+│ --debug                               Show debug information             │
+│ --help              -h                Show this message and exit.        │
+╰──────────────────────────────────────────────────────────────────────────╯
 ```
 
-## `arcade serve`
+## `arcade mcp`
 
 ```bash
- Usage: arcade serve [OPTIONS]
+Usage: arcade mcp [OPTIONS] [TRANSPORT]
 
- Start tool server worker with locally installed tools
+ Run MCP servers with different transports
 
-╭─ Options ───────────────────────────────────────────────────────────────────────────╮
-│ --host                 TEXT     Host for the app, from settings by default.         │
-│                                 [default: 127.0.0.1]                                │
-│ --port         -p      INTEGER  Port for the app, defaults to                       │
-│                                 [default: 8002]                                     │
-│ --no-auth                       Disable authentication for the worker. Not          │
-│                                 recommended for production.                         |
-| --reload                        Enable auto-reloading when toolkit or server files  |
-|                                 change.                                             │
-│ --otel-enable                   Send logs to OpenTelemetry                          │
-│ --mcp                           Run as a local MCP server over stdio                │
-│ --debug        -d               Show debug information                              │
-│ --help                          Show this message and exit.                         │
-╰─────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Arguments ────────────────────────────────────────────────────────────────────────╮
+│   transport      [TRANSPORT]  Transport type: stdio, http                          │
+│                               [default: http]                                      │
+╰────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ──────────────────────────────────────────────────────────────────────────╮
+│ --host                              TEXT     Host to bind to (HTTP mode only)      │
+│                                              [default: 127.0.0.1]                  │
+│ --port                              INTEGER  Port to bind to (HTTP mode only)      │
+│                                              [default: 8000]                       │
+│ --tool-package,--package    -p      TEXT     Specific tool package to load (e.g.,  │
+│                                              'github' for arcade-github)           │
+│                                              [default: None]                       │
+│ --discover-installed,--all                   Discover all installed arcade tool    │
+│                                              packages                              │
+│ --show-packages                              Show loaded packages during discovery │
+│ --reload                                     Enable auto-reload on code changes    │
+│                                              (HTTP mode only)                      │
+│ --debug                                      Enable debug mode with verbose        │
+│                                              logging                               │
+│ --otel-enable                                Send logs to OpenTelemetry            │
+│ --env-file                          TEXT     Path to environment file              │
+│                                              [default: None]                       │
+│ --name                              TEXT     Server name                           │
+│                                              [default: None]                       │
+│ --version                           TEXT     Server version                        │
+│                                              [default: None]                       │
+│ --cwd                               TEXT     Working directory to run from         │
+│                                              [default: None]                       │
+│ --help                      -h               Show this message and exit.           │
+╰────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `arcade deploy`
@@ -265,49 +289,94 @@ You can learn more about any of the commands by running `arcade <command> --help
 ```bash
  Usage: arcade deploy [OPTIONS]
 
- Deploy toolkits to Arcade Cloud
+ Deploy MCP servers to Arcade
 
-╭─ Options ───────────────────────────────────────────────────────────────────────────╮
-│ --deployment-file  -d      TEXT     The deployment file to deploy.                  │
-│                                     [default: worker.toml]                          │
-│ --host             -h      TEXT     The Arcade Engine host to register the worker   │
-│                                     to.                                             │
-│                                     [default: api.arcade.dev]                       │
-│ --port             -p      INTEGER  The port of the Arcade Engine host.             │
-│                                     [default: None]                                 │
-│ --tls                               Whether to force TLS for the connection to the  │
-│                                     Arcade Engine. If not specified, the connection │
-│                                     will use TLS if the engine URL uses a 'https'   │
-│                                     scheme.                                         │
-│ --no-tls                            Whether to disable TLS for the connection to    │
-│                                     the Arcade Engine.                              │
-│ --help                              Show this message and exit.                     │
-╰─────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────╮
+│ --entrypoint  -e      TEXT  Relative path to the Python file that runs   │
+│                             the MCPApp instance (relative to project     │
+│                             root)                                        │
+│                             [default: server.py]                         │
+│ --debug       -d            Show debug information                       │
+│ --help                      Show this message and exit.                  │
+╰──────────────────────────────────────────────────────────────────────────╯
 ```
 
-## `arcade worker`
+## `arcade configure`
 
 ```bash
- Usage: arcade worker [OPTIONS] COMMAND [ARGS]...
+Usage: arcade configure [OPTIONS] CLIENT
+
+ Configure MCP clients to connect to your server
+
+╭─ Arguments ────────────────────────────────────────────────────────────────────────╮
+│ *    client      TEXT  The MCP client to configure (claude, cursor, vscode)        │
+│                        [default: None]                                             │
+│                        [required]                                                  │
+╰────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ──────────────────────────────────────────────────────────────────────────╮
+│ --server       -s      TEXT     Name of the server to connect to (defaults to      │
+│                                 current directory name)                            │
+│                                 [default: None]                                    │
+│ --from-local                    Connect to a local MCP server                      │
+│ --from-arcade                   Connect to an Arcade Cloud MCP server              │
+│ --port         -p      INTEGER  Port for local servers                             │
+│                                 [default: 8000]                                    │
+│ --path         -f      PATH     Optional path to a specific MCP client config file │
+│                                 (overrides default path)                           │
+│                                 [default: None]                                    │
+│ --debug        -d               Show debug information                             │
+│ --help         -h               Show this message and exit.                        │
+╰────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+## `arcade server`
+
+```bash
+Usage: arcade server [OPTIONS] COMMAND [ARGS]...
 
  Manage deployments of tool servers (logs, list, etc)
 
-╭─ Options ───────────────────────────────────────────────────────────────────────────╮
-│ --host    -h      TEXT     The Arcade Engine host.                                  │
-│                            [default: api.arcade.dev]                                │
-│ --port    -p      INTEGER  The port of the Arcade Engine host.                      │
-│                            [default: None]                                          │
-│ --tls                      Whether to force TLS for the connection to the Arcade    │
-│                            Engine.                                                  │
-│ --no-tls                   Whether to disable TLS for the connection to the Arcade  │
-│                            Engine.                                                  │
-│ --help                     Show this message and exit.                              │
-╰─────────────────────────────────────────────────────────────────────────────────────╯
-╭─ Commands ──────────────────────────────────────────────────────────────────────────╮
-│ list     List all workers                                                           │
-│ enable   Enable a worker                                                            │
-│ disable  Disable a worker                                                           │
-│ rm       Remove a worker                                                            │
-│ logs     Get logs for a worker                                                      │
-╰─────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ──────────────────────────────────────────────────────────────────────────╮
+│ --host    -h      TEXT     The Arcade Engine host.                                 │
+│                            [default: api.arcade.dev]                               │
+│ --port    -p      INTEGER  The port of the Arcade Engine host.                     │
+│                            [default: None]                                         │
+│ --tls                      Whether to force TLS for the connection to the Arcade   │
+│                            Engine.                                                 │
+│ --no-tls                   Whether to disable TLS for the connection to the Arcade │
+│                            Engine.                                                 │
+│ --help                     Show this message and exit.                             │
+╰────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ─────────────────────────────────────────────────────────────────────────╮
+│ list     List all workers                                                          │
+│ enable   Enable a worker                                                           │
+│ disable  Disable a worker                                                          │
+│ rm       Remove a worker                                                           │
+│ logs     Get logs for a worker                                                     │
+╰────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+## `arcade secret`
+
+```bash
+Usage: arcade secret [OPTIONS] COMMAND [ARGS]...
+
+ Manage tool secrets in the cloud (set, unset, list)
+
+╭─ Options ──────────────────────────────────────────────────────────────────────────╮
+│ --host    -h      TEXT     The Arcade Engine host.                                 │
+│                            [default: api.arcade.dev]                               │
+│ --port    -p      INTEGER  The port of the Arcade Engine host.                     │
+│                            [default: None]                                         │
+│ --tls                      Whether to force TLS for the connection to the Arcade   │
+│                            Engine.                                                 │
+│ --no-tls                   Whether to disable TLS for the connection to the Arcade │
+│                            Engine.                                                 │
+│ --help                     Show this message and exit.                             │
+╰────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ─────────────────────────────────────────────────────────────────────────╮
+│ set    Set tool secret(s) using KEY=VALUE pairs or from .env file                  │
+│ list   List all tool secrets in Arcade Cloud                                       │
+│ unset  Delete tool secret(s) by key names                                          │
+╰────────────────────────────────────────────────────────────────────────────────────╯
 ```

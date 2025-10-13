@@ -15,48 +15,27 @@ This guide shows you how to deploy your MCP Server with Arcade Deploy.
 - **Python 3.10** or higher <br/> Verify your Python version by running `python --version` or `python3 --version` in your terminal.
 - **Arcade Account**: Sign up for an <SignupLink linkLocation="docs:custom-tools">Arcade account</SignupLink> if you haven't already.
 - **Arcade CLI**: Install the Arcade CLI
+
 <Tabs items={["uv", "pip"]}>
 <Tabs.Tab>
 
 ```bash
-uv pip install arcade-ai
+uv pip install arcade-mcp
 ```
 
 </Tabs.Tab>
 <Tabs.Tab>
 ```bash
-pip install arcade-ai
+pip install arcade-mcp
 ```
 </Tabs.Tab>
 </Tabs>
 
 <Steps>
 
-## Create your deployment config
+## Deploy your MCP Server
 
-Create a `worker.toml` file in your project directory:
-
-```yaml
-### Worker 1
-[[worker]]
-
-[worker.config]
-id = "my-worker"
-secret = <your secret> # Replace with your own secret
-
-[worker.local_source]
-packages = ["./<your-mcp-server-directory>"] # Replace with the path to your MCP Server directory
-```
-
-<Callout type="info">
-  For more information on the `worker.toml` file, see the [Arcade Deploy
-  documentation](/home/deployment/engine-configuration).
-</Callout>
----
-
-## Deploy your worker
-
-Run the deploy command in the directory containing your `worker.toml` file:
+Run the deploy command in the directory containing your `server.py` file:
 
 ```bash
 arcade deploy
@@ -65,39 +44,49 @@ arcade deploy
 You should see output like the following:
 
 ```bash
-Deploying 'my-worker...'                                                                                                                                                                                                                                                                                                                 main.py:589
-⠏ Deploying 1 workers
-┏━━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━┓
-┃        Added   ┃ Removed ┃ Updated ┃ No Changes ┃
-┡━━━━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━┩
-│  custom-tools  │        │         │           │
-└─────────────────┴─────────┴─────────┴────────────┘
-✅ Worker 'my-worker' deployed successfully.
+
+Verifying server and extracting metadata...
+✓ Server is healthy
+✓ Found server: ArcadeMCP v0.1.0
+ArcadeMCP v0.1.0 has 3 tools
+
+Discovered 1 required secret(s)
+
+Required secrets: MY_SECRET_KEY
+✓ Secret 'MY_SECRET_KEY' uploaded
+
+Creating deployment package...
+✓ Package created (1.8 KB)
+
+Deploying to Arcade Engine...
+✓ Server deployed successfully
 ```
 
----
+## List your MCP servers
 
-## List your workers
-
-Run the following command to list your workers:
+Run the following command to list your MCP servers:
 
 ```bash
-arcade worker list
+arcade server list
 ```
 
 You should see output like the following:
 
 ```bash
-                                                     Workers
-┏━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
-┃ ID        ┃ Cloud Deployed ┃ Engine Registered ┃ Enabled ┃ Host                                                ┃ Toolkits      ┃
-┡━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
-│ my-worker │ True           │ True              │ True    │ https://4bdfrgfdgftlu0ahyko56gdsr.server.arcade.dev │ CustomMCP Tools │
-└───────────┴────────────────┴───────────────────┴─────────┴─────────────────────────────────────────────────────┴───────────────┘
+┌----------┳----------┳-------------┳---------┳------------┳------------------┓
+|          | Cloud    | Engine      |         |            |                  |
+| ID       | Deployed | Registered  | Enabled | Host       | Toolkits         |
+├----------╇----------╇-------------╇---------╇------------╇------------------┤
+| main     | False    | True        | True    | http://wo… | SlackApi, Asana, |
+|          |          |             |         |            | BoxApi, Clickup, |
+|          |          |             |         |            | ...              |
+|          |          |             |         |            | Zendesk, Zoom    |
+| mcp_demo | False    | True        | True    |            | Demo             |
+└----------┴----------┴-------------┴---------┴------------┴------------------┘
 ```
 
 </Steps>
 
-Your worker and MCP Servers are now deployed and registered with the engine and ready to use!
+Your MCP Servers are now deployed and registered with the engine and ready to use!
 
-You can go to the [dashboard](https://api.arcade.dev/dashboard/workers) to see your worker and its details.
+You can go to the [dashboard](https://api.arcade.dev/dashboard/servers) to see your server and its details.
