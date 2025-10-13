@@ -9,6 +9,15 @@ export const meta: MetaRecord = {
       copyPage: false,
     },
   },
+  index: {
+    title: "Reference Index",
+  },
+  api: {
+    title: "API",
+  },
+  mcp: {
+    title: "Arcade MCP",
+  },
 };
 
 export default meta;

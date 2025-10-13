@@ -87,7 +87,7 @@ const CustomPre: React.FC<CustomPreProps> = ({
           {/* Code content with syntax highlighting preserved */}
           <div className="overflow-x-auto">
             <Pre
-              className={`p-4 text-gray-100 text-sm ${className || ""}`}
+              className={`text-gray-100 text-sm ${className || ""}`}
               style={{ margin: 0, borderRadius: 0, background: "transparent" }}
               {...props}
             >
@@ -113,7 +113,7 @@ const CustomPre: React.FC<CustomPreProps> = ({
         {/* Code content with syntax highlighting preserved */}
         <div className="overflow-x-auto">
           <Pre
-            className={`bg-white p-4 text-sm dark:bg-gray-950 ${className || ""}`}
+            className={`bg-white text-sm dark:bg-gray-950 ${className || ""}`}
             style={{ margin: 0, borderRadius: 0 }}
             {...props}
           >

@@ -17,22 +17,20 @@ export default function APIReferencePage() {
           {/* Engine API Section */}
           <div className="rounded-lg border border-gray-200 bg-white p-8 shadow-sm transition-all hover:border-[#ee175e]/30 hover:shadow-md dark:border-gray-800 dark:bg-[rgba(17,17,17,0.8)]">
             <h3 className="mb-4 font-bold text-2xl text-gray-900 dark:text-white">
-              Engine API
+              API
             </h3>
             <p className="mb-6 text-gray-600 leading-relaxed dark:text-gray-300">
-              The Engine API is Arcade's REST API for orchestrating tools,
-              managing authentication, and controlling agent workflows at
-              runtime. Use this API to integrate Arcade's tool execution and
-              permission management into your agent applications.
+              Arcade's REST API is for orchestrating tools, managing
+              authentication, and controlling agent workflows at runtime. Use
+              this API to integrate Arcade's tool execution and permission
+              management into your agent applications.
             </p>
             <div className="flex flex-wrap gap-3">
               <Button
                 asChild
                 className="bg-primary text-white hover:bg-primary/90"
               >
-                <Link href="https://reference.arcade.dev/">
-                  View API Reference
-                </Link>
+                <Link href="/references/api">View API Reference</Link>
               </Button>
             </div>
           </div>
@@ -40,19 +38,19 @@ export default function APIReferencePage() {
           {/* MCP Server SDK Section */}
           <div className="rounded-lg border border-gray-200 bg-white p-8 shadow-sm transition-all hover:border-[#ee175e]/30 hover:shadow-md dark:border-gray-800 dark:bg-[rgba(17,17,17,0.8)]">
             <h3 className="mb-4 font-bold text-2xl text-gray-900 dark:text-white">
-              MCP Server SDK
+              Arcade MCP (MCP Server SDK)
             </h3>
             <p className="mb-6 text-gray-600 leading-relaxed dark:text-gray-300">
-              Arcade's MCP SDK provides a FastAPI-like interface for building
-              custom Model Context Protocol servers. Use this SDK to create your
-              own tools and expose them through the standardized MCP protocol.
+              Arcade MCP provides a FastAPI-like interface for building custom
+              Model Context Protocol servers. Use this SDK to create your own
+              tools and expose them through the standardized MCP protocol.
             </p>
             <div className="flex flex-wrap gap-3">
               <Button
                 asChild
                 className="bg-primary text-white hover:bg-primary/90"
               >
-                <Link href="https://reference.arcade.dev/mcp">
+                <Link href="/references/mcp/python/overview">
                   View SDK Reference
                 </Link>
               </Button>
