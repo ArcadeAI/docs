@@ -15,7 +15,7 @@ const withNextra = nextra({
 });
 
 const nextConfig: NextConfig = withLlmsTxt({
-  enabled: process.env.OPENAI_API_KEY !== undefined,
+  enabled: false, // disabled for now, we will recreate this every week
 })(
   withNextra({
     headers: async () => [

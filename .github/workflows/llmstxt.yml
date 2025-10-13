@@ -1,0 +1,60 @@
+name: Generate LLMs.txt
+
+on:
+  schedule:
+    - cron: "0 0 * * 0" # Run at 00:00 every Sunday
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  llmstxt:
+    name: Generate LLMSTXT
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Install dependencies
+        run: npm install -g pnpm
+
+      - name: Install pnpm
+        run: pnpm install
+
+      - name: generate LLMs.txt
+        run: pnpm llmstxt
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+      # commit the changes and make a PR (branch protection)
+      - name: Create Pull Request
+        id: cpr
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.DOCS_PUBLISHABLE_GH_TOKEN }}
+          commit-message: Regenerate LLMs.txt and related files
+          branch: auto-update-llms-txt
+          delete-branch: true
+          title: "🤖 Regenerate LLMs.txt"
+          reviewers: >
+            evantahler
+            torresmateo
+
+      - name: Enable Pull Request Automerge
+        run: gh pr merge --squash --auto ${{ steps.cpr.outputs.pull-request-number }}
+        env:
+          GH_TOKEN: ${{ secrets.DOCS_PUBLISHABLE_GH_TOKEN }}
