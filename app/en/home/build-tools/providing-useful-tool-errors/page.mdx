@@ -26,7 +26,7 @@ For tools using `httpx` or `requests`, error adaptation happens automatically:
 
 ```python
 from typing import Annotated
-from arcade_tdk import tool
+from arcade_mcp_server import tool
 import httpx
 
 @tool
@@ -47,7 +47,7 @@ For tools using specific SDKs, you can specify error adapters explicitly:
 ```python
 import googleapiclient
 from typing import Annotated
-from arcade_tdk import tool
+from arcade_mcp_server import tool
 from arcade_tdk.error_adapters import GoogleErrorAdapter
 
 @tool(
@@ -78,7 +78,7 @@ Use when the LLM can retry the tool call with more context to improve the tool c
 
 ```python
 from typing import Annotated
-from arcade_tdk import tool
+from arcade_mcp_server import tool
 from arcade_tdk.errors import RetryableToolError
 
 @tool(requires_auth=Reddit(scopes=["read"]))
@@ -105,7 +105,7 @@ Use when additional context from the user or orchestrator is needed before the t
 ```python
 from os import path
 from typing import Annotated
-from arcade_tdk import tool
+from arcade_mcp_server import tool
 from arcade_tdk.errors import ContextRequiredToolError
 
 @tool
@@ -125,7 +125,7 @@ Use for unrecoverable, but known, errors when you want to provide specific error
 
 ```python
 from typing import Annotated
-from arcade_tdk import tool
+from arcade_mcp_server import tool
 from arcade_tdk.errors import ToolExecutionError
 
 @tool
@@ -143,7 +143,7 @@ def process_data(data_id: Annotated[str, "The ID of the data to process"]) -> An
 Use for custom handling of upstream service errors:
 
 ```python
-from arcade_tdk import tool
+from arcade_mcp_server import tool
 from arcade_tdk.errors import UpstreamError
 import httpx
 
@@ -177,7 +177,7 @@ These errors occur when your tool has invalid definitions and are caught when th
 #### Invalid input parameter types
 
 ```python
-from arcade_tdk import tool
+from arcade_mcp_server import tool
 
 @tool
 def invalid_tool(data: tuple[str, str, str]) -> str:  # ❌ Tuples not supported
@@ -188,7 +188,7 @@ def invalid_tool(data: tuple[str, str, str]) -> str:  # ❌ Tuples not supported
 #### Missing return type annotation
 
 ```python
-from arcade_tdk import tool
+from arcade_mcp_server import tool
 
 @tool
 def invalid_tool(name: str):  # ❌ Missing return type
@@ -200,7 +200,7 @@ def invalid_tool(name: str):  # ❌ Missing return type
 
 ```python
 from typing import Annotated
-from arcade_tdk import tool
+from arcade_mcp_server import tool
 
 @tool
 def invalid_tool(name: Annotated[str, "desc1", "desc2", "extra"]) -> str:  # ❌ Too many annotations
@@ -216,7 +216,7 @@ These errors occur during tool execution:
 
 ```python
 from typing import Annotated
-from arcade_tdk import tool
+from arcade_mcp_server import tool
 
 @tool
 def invalid_output(name: Annotated[str, "Name to greet"]) -> str:
