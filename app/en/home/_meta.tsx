@@ -93,6 +93,9 @@ export const meta: MetaRecord = {
   auth: {
     title: "Authorization",
   },
+  "mcp-gateways": {
+    title: "MCP Gateways",
+  },
   "arcade-cli": {
     title: "Arcade CLI",
   },
