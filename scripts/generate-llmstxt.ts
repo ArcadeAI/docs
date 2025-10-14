@@ -27,6 +27,8 @@ const APP_EN_PREFIX_REGEX = /^app\/en\//;
 const PAGE_MDX_SUFFIX_REGEX = /\/page\.mdx$/;
 const MDX_SUFFIX_REGEX = /\.mdx$/;
 const TITLE_H1_REGEX = /^#\s+(.+)$/m;
+const EN_LOCALE_PREFIX_REGEX = /^en\//;
+const MD_EXTENSION_REGEX = /\.md$/;
 
 // Constants for content processing
 const MAX_CONTENT_LENGTH = 4000;
@@ -54,13 +56,14 @@ async function discoverPages(): Promise<PageMetadata[]> {
     const fullPath = path.join(process.cwd(), filePath);
     const content = await fs.readFile(fullPath, "utf-8");
 
-    // Convert file path to URL
+    // Convert file path to URL (with .md extension for raw markdown access)
     const relativePath = filePath
       .replace(APP_EN_PREFIX_REGEX, "")
       .replace(PAGE_MDX_SUFFIX_REGEX, "")
       .replace(MDX_SUFFIX_REGEX, "");
 
-    const url = `${BASE_URL}/${relativePath}`;
+    // Add locale prefix and .md extension for raw markdown access
+    const url = `${BASE_URL}/en/${relativePath}.md`;
 
     pages.push({
       path: filePath,
@@ -136,8 +139,11 @@ function organizeSections(
   const sectionMap = new Map<string, Section>();
 
   for (const page of pages) {
-    // Determine section from URL path
-    const urlPath = page.url.replace(`${BASE_URL}/`, "");
+    // Determine section from URL path (strip base URL, locale, and .md extension)
+    const urlPath = page.url
+      .replace(`${BASE_URL}/`, "")
+      .replace(EN_LOCALE_PREFIX_REGEX, "")
+      .replace(MD_EXTENSION_REGEX, "");
     const parts = urlPath.split("/");
 
     let sectionName: string;

@@ -2,6 +2,9 @@ import { type NextRequest, NextResponse } from "next/server";
 
 const SUPPORTED_LOCALES = ["en", "es", "pt-BR"];
 
+// Regex pattern for removing .md extension
+const MD_EXTENSION_REGEX = /\.md$/;
+
 /**
  * Parse Accept-Language header and normalize locale codes
  */
@@ -59,6 +62,21 @@ function pathnameIsMissingLocale(pathname: string): boolean {
 
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+
+  // Handle .md requests without locale - redirect to add locale first
+  if (pathname.endsWith(".md") && pathnameIsMissingLocale(pathname)) {
+    const locale = getPreferredLocale(request);
+    const pathWithoutMd = pathname.replace(MD_EXTENSION_REGEX, "");
+    const redirectPath = `/${locale}${pathWithoutMd}.md`;
+    return NextResponse.redirect(new URL(redirectPath, request.url));
+  }
+
+  // Rewrite .md requests (with locale) to the markdown API route
+  if (pathname.endsWith(".md") && !pathname.startsWith("/api/")) {
+    const url = request.nextUrl.clone();
+    url.pathname = `/api/markdown${pathname}`;
+    return NextResponse.rewrite(url);
+  }
 
   // Redirect if there is no locale
   if (pathnameIsMissingLocale(pathname)) {
