@@ -8,6 +8,8 @@ import { SignupLink } from "@/app/_components/analytics";
 
 # Deploying to the cloud with Arcade Deploy
 
+Running your MCP servers locally is very convenient during development and testing. Once your MCP server is mature, however, you may want to access it from any MCP client, or to facilitate multi-user support. Doing all that from your computer comes with the complexity of running and maintaining a server, handling auth and high availability for all your users and all the integrations you want to support. Arcade Deploy takes care of all that for you.
+
 This guide shows you how to deploy your MCP Server with Arcade Deploy.
 
 ## Requirements
@@ -33,13 +35,32 @@ pip install arcade-mcp
 
 <Steps>
 
+## Create an MCP server using Arcade MCP
+
+If you have not created an MCP server, follow the steps outlined in [this guide](/home/build-tools/create-a-mcp-server).
+
 ## Deploy your MCP Server
 
-Run the deploy command in the directory containing your `server.py` file:
+Run the deploy command in the directory where you started your MCP server (containing your `pyproject.toml` file).
 
 ```bash
 arcade deploy
 ```
+
+By default, running `arcade deploy` will look for a `server.py` file as its entry point. If your MCP server uses a different script, you can use the `--entrypoint` option to point to the correct script. For example, if your `pyproject.toml` is in `~/my-app/mcp-server/`, and the script containing the `MCPApp` (or `app.run()`) is `~/my-app/mcp-server/server/my_mcp_server.py`, you would run the server with the following command:
+
+```bash
+cd ~/my-app/mcp-server
+arcade deploy --entrypoint ./server/my_mcp_server.py
+```
+
+<Callout type="info">
+  It is important that your entrypoint script executes `MCPApp.run()` (or
+  `app.run()` if `app` is of type `MCPApp`) when invoked directly.
+
+We recommend to do it inside an `if __name__ == "__main__":` statement.
+
+</Callout>
 
 You should see output like the following:
 
@@ -62,7 +83,18 @@ Deploying to Arcade Engine...
 ✓ Server deployed successfully
 ```
 
-## List your MCP servers
+## Manage your MCP servers in Arcade
+
+Navigate to the [Servers](https://api.arcade.dev/dashboard/servers) page in your Arcade dashboard. From there, you will be able to:
+
+- Monitor the health status of the server
+- Get a connection string to configure your MCP clients.
+- Delete the server
+- Test and execute all the tools
+- Manage users connected to the Auth providers
+- Create MCP Gateways
+
+## List your MCP servers on the terminal
 
 Run the following command to list your MCP servers:
 
@@ -87,6 +119,4 @@ You should see output like the following:
 
 </Steps>
 
-Your MCP Servers are now deployed and registered with the engine and ready to use!
-
-You can go to the [dashboard](https://api.arcade.dev/dashboard/servers) to see your server and its details.
+Your MCP Server is now deployed and registered with the engine and ready to use!
