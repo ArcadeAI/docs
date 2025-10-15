@@ -105,7 +105,7 @@ export default async function SharedLayout({
         )}
         <Layout
           copyPageButton={true}
-          docsRepositoryBase="https://github.com/ArcadeAI/docs"
+          docsRepositoryBase="https://github.com/ArcadeAI/docs/tree/main/"
           editLink={dictionary.editPage}
           footer={
             <NextraFooter>

@@ -150,7 +150,8 @@ To set your own credentials, set the requisite secret within the Arcade Dashboar
 graph TD
     A[Agent] --> B[Arcade Client]
     B --> C[Arcade Engine]
-    C --> D[Worker]
+    C --> D[MCP Gateway]
+    D --> E[MCP Server]
 ```
 
 ### Arcade Client
@@ -165,17 +166,15 @@ The Arcade Engine is the core of the Arcade platform. It is responsible for rout
 
 The Arcade Engine is also responsible for the OAuth flow for your agent's users. This includes granting and elevating permissions and keeping tokens fresh.
 
-### Worker
+### MCP Gateway
 
-A 'worker' is a process that runs all the tools with a MCP Server. Workers are microservices that are called by the Arcade Engine to handle tool execution requests. Workers are either [deployed to Arcade's infrastructure](/home/serve-tools/arcade-deploy) via `arcade deploy`, or run in your own infrastructure.
+MCP gateways are a feature of the Arcade Engine that allows you to add and combine multiple MCP servers in your project. The MCP gateway is responsible for routing tool execution requests to the correct MCP server, and for enforcing security and authorization decisions.  You can mix and match tools from different MCP servers in the same project, and not all tools from a MCP server need to be available to the same LLM.
 
-_Learn more about workers [here](/home/deployment/on-prem-mcp)._
+### Arcade MCP (Server Development Kit)
 
-### TDK (Tool Development Kit)
+Arcade MCP is a framework for building secure MCP servers. It is responsible for the lifecycle of tool executions, and for enforcing security and authorization decisions within the boundary of the server.
 
-The Arcade TDK is a command-line application that helps you create, test, and deploy tools.
-
-_Learn more about the TDK [here](/home/build-tools/create-a-mcp-server)._
+_Learn more about the Arcade MCP framework [here](/references)._
 
 ### Evaluations (Evals)
 
