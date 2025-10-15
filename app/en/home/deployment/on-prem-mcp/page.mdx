@@ -7,9 +7,34 @@ import { Steps, Tabs, Callout } from "nextra/components";
 
 # On-premise MCP Servers
 
+<GuideOverview>
+<GuideOverview.Outcomes>
+
 An on-premises MCP server deployment allows you to execute tools in your own environment while still leveraging Arcade's cloud Engine infrastructure. This gives you the flexibility to access private resources, maintain data security, and customize your environment while leveraging Arcade's MCP server management and federation capabilities.
 
+</GuideOverview.Outcomes>
+
+<GuideOverview.Prerequisites>
+
+- [Arcade account](https://api.arcade.dev/signup)
+- [Arcade CLI](/home/quickstart)
+- [uv package manager](https://docs.astral.sh/uv/getting-started/installation/)
+
+</GuideOverview.Prerequisites>
+
+<GuideOverview.YouWillLearn>
+
+- How to run your MCP server with HTTP transport
+- How to create a secure tunnel to expose it publicly
+- How to register your server in Arcade
+- How to test your server with the Arcade Playground
+
+</GuideOverview.YouWillLearn>
+</GuideOverview>
+
 ## How on-premises MCP servers work
+
+You can make your MCP server accessible to others by exposing it through a secure tunnel and registering it with Arcade. This allows remote users and services to interact with your tools without deploying to a cloud platform.
 
 The on-premises MCP server model uses a bidirectional connection between your local environment and Arcade's cloud engine:
 
@@ -64,55 +89,179 @@ ARCADE_USER_ID=<your-user-id>
 </Tabs.Tab>
 </Tabs>
 
-Run your Arcade MCP Server locally with a secret that you generate in a secure way:
+Start your MCP server with HTTP transport:
 
 ```bash
-cd <your-mcp-server-directory>
-arcade mcp
+# Navigate to your server directory
+cd my_server
+
+# Run with HTTP transport (default)
+uv run server.py
+uv run server.py http
 ```
 
-Your MCP server is running on http://127.0.0.1:8000
+Your server will start on `http://localhost:8000`. Keep this terminal running.
 
-### Create a public URL
+## Create a Secure Tunnel
 
-To allow the Arcade cloud engine to connect to your locally running MCP Server, you need a public URL. Here are a few options:
+Open a **separate terminal** and create a tunnel using one of these options:
 
-<Tabs items={["ngrok", "Cloudflare", "Tailscale"]}>
-<Tabs.Tab>
+- [ngrok](https://ngrok.com) is easy to set up and works across all platforms.
+- [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/) provides persistent URLs and advanced features.
+- [Tailscale Funnel](https://tailscale.com/kb/1223/tailscale-funnel) is ideal for sharing within a team or organization.
 
-```bash
-ngrok http 8000
-```
+<Tabs
+  items={["ngrok (Recommended for Getting Started)", "Cloudflare Tunnel", "Tailscale Funnel"]}
+>
+  <Tabs.Tab>
+  [ngrok](https://ngrok.com) is easy to set up and works across all platforms.
+
+1. **Install ngrok:**
+
+   ```bash
+   # macOS
+   brew install ngrok
+
+   # Or download from https://ngrok.com/download
+   ```
+
+2. **Create a tunnel:**
+
+   ```bash
+   ngrok http 8000
+   ```
+
+3. **Copy your URL:**
+   Look for the "Forwarding" line in the ngrok output:
+
+   ```
+   Forwarding  https://abc123.ngrok-free.app -> http://localhost:8000
+   ```
+
+   Copy the `https://abc123.ngrok-free.app` URL - this is your public URL.
+
+**Pros:**
+
+- Quick setup, no account required for basic use
+- Automatic HTTPS
+- Web dashboard to inspect requests
+
+**Cons:**
+
+- Free tier URLs change on each restart
+- May show interstitial page for free tier
 
 </Tabs.Tab>
 
 <Tabs.Tab>
 
-```bash
-cloudflared tunnel --url http://localhost:8000
-```
+[Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/) provides persistent URLs and advanced features.
+
+1. **Install cloudflared:**
+
+   ```bash
+   # macOS
+   brew install cloudflare/cloudflare/cloudflared
+
+   # Or download from https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/install-and-setup/
+   ```
+
+2. **Create a tunnel:**
+
+   ```bash
+   cloudflared tunnel --url http://localhost:8000
+   ```
+
+3. **Copy your URL:**
+   Look for the "Your quick Tunnel has been created" message with your URL.
+
+**Pros:**
+
+- Free tier includes persistent URLs (with setup)
+- Built-in DDoS protection
+- Access control features
+
+**Cons:**
+
+- Requires Cloudflare account for persistent URLs
+- More complex setup for advanced features
 
 </Tabs.Tab>
 
 <Tabs.Tab>
 
-```bash
-tailscale funnel 8000
-```
+[Tailscale Funnel](https://tailscale.com/kb/1223/tailscale-funnel) is ideal for sharing within a team or organization.
+
+1. **Install Tailscale:**
+
+   ```bash
+   # macOS
+   brew install tailscale
+
+   # Or download from https://tailscale.com/download
+   ```
+
+2. **Authenticate:**
+
+   ```bash
+   tailscale up
+   ```
+
+3. **Create a funnel:**
+
+   ```bash
+   tailscale funnel 8000
+   ```
+
+4. **Get your URL:**
+   Tailscale will display your funnel URL (e.g., `https://my-machine.tail-scale.ts.net`)
+
+**Pros:**
+
+- Persistent URLs tied to your machine
+- Private by default (only shared with specified users)
+- No bandwidth limits
+
+**Cons:**
+
+- Requires Tailscale account
+- Best for team/organization use cases
 
 </Tabs.Tab>
 </Tabs>
 
 ### Register your MCP Server in Arcade
 
-1. Navigate to the [Servers](https://api.arcade.dev/dashboard/servers) page in your Arcade dashboard
-1. Click **Add Server**
-1. Fill in the form:
-   - **ID**: Choose a unique identifier (e.g., `my-server`)
-   - **Server Type**: Select `MCP`
-   - **URL**: Enter your public URL from Step 3, and add `/mcp` to the end
-   - **Timeout** and **Retry**: Configure as needed for your use case
-1. Click **Create**
+Once you have a public URL, register your MCP server in the Arcade dashboard to make it accessible through the Arcade API.
+
+1. **Navigate to the MCP Servers page** in your [Arcade dashboard](https://api.arcade.dev/dashboard/servers)
+
+2. **Click "Add Server"**
+
+3. **Fill in the registration form:**
+
+   - **ID**: Choose a unique identifier (e.g., `my-mcp-server`)
+   - **Server Type**: Select "HTTP/SSE"
+   - **URL**: Enter your public tunnel URL from Step 2 with `/mcp` appended
+     - Example: `https://abc123.ngrok-free.app/mcp`
+     - Example: `https://my-tunnel.trycloudflare.com/mcp`
+     - Example: `https://my-machine.tail-scale.ts.net/mcp`
+   - **Secret**: Enter a secret for your server (or use `dev` for testing)
+   - **Timeout**: Configure request timeout (default: 30s)
+   - **Retry**: Configure retry attempts (default: 3)
+
+4. **Click "Create"**
+
+Here's an example of a configuration:
+
+```yaml
+ID: my-mcp-server
+Server Type: HTTP/SSE
+URL: https://abc123.ngrok-free.app
+Secret: my-secure-secret-123
+Timeout: 30s
+Retry: 3
+```
 
 ### Test the connection to your MCP Server
 
@@ -121,9 +270,18 @@ You can now test your MCP Server by making requests using the Playground, or an 
 <Tabs items={["Playground", "MCP Client"]}>
 <Tabs.Tab>
 
-1. Go to the [Playground](https://api.arcade.dev/dashboard/playground)
-1. Select a tool from your MCP Server and execute it
-1. Verify that the response is correct and you see request logs in your MCP Server
+1. **Go to the [Arcade Playground](https://api.arcade.dev/dashboard/playground/chat)**
+
+2. **Select your MCP server** from the dropdown
+
+3. **Choose a tool** from your server
+
+4. **Execute the tool** with test parameters
+
+5. **Verify the response:**
+   - Check that the response is correct
+   - View request logs in your local server terminal
+   - Inspect the tunnel dashboard for request details
 
 </Tabs.Tab>
 <Tabs.Tab>
@@ -139,6 +297,13 @@ You can now test your MCP Server by making requests using the Playground, or an 
 </Tabs>
 
 </Steps>
+
+## Key Concepts
+
+- **HTTP Transport** Run your server with HTTP transport to expose your tools via a REST/SSE API
+- **Secure Tunnels** Create a secure tunnel to expose your server publicly
+- **Arcade Registration** Register your server in Arcade to make it accessible through the Arcade API
+- **Playground Testing** Test your server with the Arcade Playground
 
 ## Best practices
 
