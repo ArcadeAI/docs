@@ -1,0 +1,122 @@
+---
+title: "Call tools from MCP clients"
+description: "Learn how to call tools from MCP clients"
+---
+
+import { Steps, Tabs, Callout } from "nextra/components";
+
+# Call tools from MCP clients
+
+In this guide, you'll learn how to call tools from MCP clients.
+
+## Prerequisites
+
+1. Create an [MCP Server](/home/build-tools/create-a-mcp-server)
+
+<Steps>
+
+## Run the MCP Server
+
+From the root directory of your MCP Server, run the following command:
+
+<Tabs
+  items={["HTTP transport (default)", "stdio transport (for Claude Desktop)"]}
+  storageKey="preferredTransport"
+>
+
+<Tabs.Tab>
+
+```bash
+uv run server.py http
+```
+
+For HTTP transport, view your server's API docs at [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
+
+</Tabs.Tab>
+<Tabs.Tab>
+
+```bash
+uv run server.py stdio
+```
+
+</Tabs.Tab>
+</Tabs>
+
+You should see output like this in your terminal:
+
+```bash
+INFO | Starting server v1.0.0 (my_server)
+INFO | Added tool: greet
+INFO | Starting MCP server on http://127.0.0.1:8000
+```
+
+## Configure your MCP Client(s)
+
+Now you can connect your MCP server to apps that support MCP Clients, like AI assistants and IDEs. :
+
+<Tabs
+  items={["Cursor IDE", "VS Code", "Claude Desktop", "Other MCP Clients"]}
+  storageKey="preferredAgent"
+>
+  <Tabs.Tab>
+
+    ```bash
+    arcade configure cursor --from-local
+    ```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+    ```bash
+    arcade configure vscode --from-local
+    ```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+    ```bash
+    arcade configure claude --from-local
+    ```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+    If your MCP client is not supported by the `arcade configure` command, you can manually add the MCP server to your client's configuration file. First, determine the transport type.
+
+    <Tabs
+      items={["Streamable HTTP", "stdio"]}
+    >
+      <Tabs.Tab>
+
+    ```json
+    {
+      "mcpServers": {
+        "my_server": {
+          "url": "http://127.0.0.1:8000",
+          "transport": "http"
+        }
+      }
+    }
+    ```
+    </Tabs.Tab>
+    <Tabs.Tab>
+
+    ```json
+    {
+      "mcpServers": {
+        "my_server": {
+          "command": "arcade",
+          "args": ["mcp", "stdio"],
+          "cwd": "/path/to/your/project"
+        }
+      }
+    }
+    ```
+    </Tabs.Tab>
+
+  </Tabs>
+
+  </Tabs.Tab>
+</Tabs>
+
+</Steps>
