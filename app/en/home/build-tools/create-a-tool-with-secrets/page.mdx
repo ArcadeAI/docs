@@ -26,31 +26,101 @@ Build an MCP tool that can read a secret from Context and return a masked confir
 <GuideOverview.YouWillLearn>
 
 - How to read secrets from environment and `.env` files securely using a tool's Context.
+- How to configure secrets in the Arcade Dashboard.
 
 </GuideOverview.YouWillLearn>
 </GuideOverview>
 
-Secrets are sensitive strings like passwords, api-keys, or other tokens that grant access to a protected resource or API. Although you could use secrets to transfer any static information to your tool, such as a parameter needed to call a remote API. In this guide, you'll learn how to use secrets in your custom Arcade tools.
+Secrets are sensitive strings like passwords, api-keys, or other tokens that grant access to a protected resource or API. Although you could use secrets to transfer any static information to your tool, such as a parameter needed to call a remote API.
+
+## Why use secrets in your tools?
+
+Secrets enable you to securely deploy a function that requires sensitive information at runtime. And while these can be consumed directly from the runtime environment inside your tool function, this becomes very inconvenient, expensive, hard to maintain, and insecure when deploying at scale.
+
+For example, if your tool requires an API key to use an external service, but only _after_ doing some computationally expensive work, you need to ensure that the API key is present _before_ the computationally expensive work is done. The function below would fail if the API key is not present.
+
+```python
+import os
+
+def my_tool(task: str) -> str:
+    result = expensive_computation(task)
+
+    API_KEY = os.getenv("API_KEY")
+
+    # The line below will fail if the API key is not present
+    success = upload_result_to_service(result, API_KEY)
+
+    if success:
+        return "Result uploaded successfully"
+    else:
+        return "Failed to upload result"
+```
+
+We can work around this by carefully checking for the API key before doing the computationally expensive work, of course, but this is error prone and difficult to maintain, and you may only become aware of the issue after deploying multiple instances of your server.
+
+Arcade provides a way to securely store and access secrets inside your tools in a way that is easy to manage across multiple instances of your servers, and that will prevent the tool from running if the secret is not provided. In this guide, you'll learn how to use secrets in your custom Arcade tools.
 
 <Steps>
 
 ## Store your secret
 
-Secrets can be provided via environment variables.
+Depending on where you're running your server, you can store your secret in a few different ways.
 
-You can set the environment variable in your terminal like so:
-
-```bash
-export SECRET_KEY="my-secret-value"
-```
-
-Or you can create a `.env` file in the root of your project and add your secret:
+<Tabs items={["Environment Variable", "Arcade Dashboard", "Terminal"]}>
+<Tabs.Tab>
+You can create a `.env` file in the root of your project and add your secret:
 
 ```env filename=".env"
-SECRET_KEY="my-secret-value"
+MY_SECRET_KEY="my-secret-value"
 ```
 
+The project includes a `.env.example` file with the secret key name and example value.
+You can rename it to `.env` to start using it.
+
+```bash
+mv .env.example .env
+```
+
+<Callout type="info">
+  Using environment variables is ok for local development, but you should use
+  the Arcade Dashboard for production deployments.
+</Callout>
+
+</Tabs.Tab>
+<Tabs.Tab>
+You can store your secret in the Arcade Dashboard by:
+
+- Navigating to the "Secrets" section of the Arcade Dashboard
+- Clicking the "Add Secret" button
+- Entering the secret ID and value
+- Clicking the "Create" button
+
+This will make the secret available to your MCP server, when deployed to Arcade.
+
+</Tabs.Tab>
+<Tabs.Tab>
+You can set the environment variable in your terminal directly with this command:
+
+```bash
+export MY_SECRET_KEY="my-secret-value"
+```
+
+<Callout type="info">
+  Using environment variables is ok for local development, but you should use
+  the Arcade Dashboard for production deployments.
+</Callout>
+
+</Tabs.Tab>
+</Tabs>
+
 ### Define your tool and access the secret
+
+<Callout type="info">
+  This is only an illustrative example of how Arcade will ensure that the secret
+  is present before the tool is executed. In a real world application, you would
+  use this secret to store sensitive information like API keys, database
+  credentials, etc, and not to simply print a confirmation string.
+</Callout>
 
 In your [MCP Server](/home/build-tools/create-a-mcp-server), create a new tool that uses the secret:
 
@@ -98,7 +168,7 @@ When your tool is executed, it will return: `"Got SECRET_KEY of length..."`. In 
 
 ### Environment Variables
 
-```env
+```env filename=".env"
 SECRET_KEY="supersecret"
 ```
 
