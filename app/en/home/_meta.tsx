@@ -40,7 +40,7 @@ export const meta: MetaRecord = {
     title: "Using Arcade",
   },
   quickstart: {
-    title: "Quickstart",
+    title: "Hosted Tools Quickstart",
   },
   "api-keys": {
     title: "Get an API key",
