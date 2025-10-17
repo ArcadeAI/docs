@@ -42,6 +42,9 @@ export const meta: MetaRecord = {
   quickstart: {
     title: "Hosted Tools Quickstart",
   },
+  "custom-mcp-server-quickstart": {
+    title: "Build MCP Server QuickStart",
+  },
   "api-keys": {
     title: "Get an API key",
   },
