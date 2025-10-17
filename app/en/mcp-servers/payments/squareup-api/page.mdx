@@ -1,0 +1,3554 @@
+# SquareupApi
+import StarterToolInfo from "@/app/_components/starter-tool-info";
+import ToolInfo from "@/app/_components/tool-info";
+import Badges from "@/app/_components/badges";
+import TabbedCodeBlock from "@/app/_components/tabbed-code-block";
+import TableOfContents from "@/app/_components/table-of-contents";
+import ToolFooter from "@/app/_components/tool-footer";
+import { Callout } from "nextra/components";
+
+<ToolInfo
+  description="Tools that enable LLMs to interact directly with the squareup API."
+  author="Arcade"
+  authType="OAuth2"
+  versions={["0.1.0"]}
+/>
+
+<Badges repo="arcadeai/arcade_squareup_api" />
+
+<StarterToolInfo toolkitName="SquareupApi" />
+
+The SquareupApi MCP Server provides a comprehensive set of tools for interacting with Square’s APIs. These tools enable building agents and apps to:
+
+- Manage authentication and token status.
+- Access and manage bank accounts, cards, payouts, and payment/refund records.
+- Create, retrieve, cancel, and manage payments, payouts, refunds, and disputes (including dispute evidence).
+- Work with the Catalog, inventory, invoices, orders, and related custom attributes.
+- Manage customers, customer groups/segments, loyalty programs, promotions, rewards, and customer-specific custom attributes.
+- Manage locations, location settings, devices, device codes, and merchant-level settings and custom attributes.
+- List and manage bookings, booking profiles, appointments custom attributes, and booking-related actions.
+- Manage subscriptions, scheduled actions, and subscription events.
+- Retrieve and manage terminal actions, checkouts, and terminal refunds (including cancel/dismiss actions).
+- Manage gift cards and gift card activities.
+- Manage employees, jobs, timecards, shifts, wages, break types, and related labor data.
+- List and manage webhooks (event types, subscriptions) and control event searchability.
+- Retrieve Square Online site snippets and manage payment links.
+- Retrieve vendor, merchant, and seller details and custom attributes.
+
+Use these endpoints to query, list, retrieve detailed records, delete or cancel resources, and manage custom attributes across Square entities.
+
+## Available Tools
+
+<TableOfContents
+  headers={["Tool Name", "Description"]}
+  data={
+    [
+      ["SquareupApi.RetrieveTokenStatus", "Retrieve the status of an OAuth or personal access token."],
+      ["SquareupApi.ListBankAccounts", "Fetch a list of bank accounts linked to a Square account."],
+      ["SquareupApi.GetBankAccountDetailsById", "Retrieve bank account details using V1 ID."],
+      ["SquareupApi.GetBankAccountDetails", "Retrieve details of a Square account's bank account."],
+      ["SquareupApi.GetBookingList", "Retrieve a collection of bookings."],
+      ["SquareupApi.GetBusinessBookingProfile", "Retrieve seller's booking profile details."],
+      ["SquareupApi.GetBookingCustomAttributes", "Retrieve all custom attribute definitions for bookings."],
+      ["SquareupApi.DeleteBookingCustomAttributeDefinition", "Deletes a bookings custom attribute definition."],
+      ["SquareupApi.RetrieveBookingCustomAttributeDefinition", "Retrieve a booking's custom attribute definition."],
+      ["SquareupApi.ListLocationBookingProfiles", "Lists location booking profiles of a seller."],
+      ["SquareupApi.RetrieveLocationBookingProfile", "Retrieve a seller's location booking profile."],
+      ["SquareupApi.ListTeamMemberBookingProfiles", "Lists booking profiles for team members."],
+      ["SquareupApi.RetrieveTeamMemberBookingProfile", "Retrieve a team member's booking profile details."],
+      ["SquareupApi.RetrieveBooking", "Retrieve details of a specific booking."],
+      ["SquareupApi.ListBookingCustomAttributes", "Lists custom attributes for a specific booking."],
+      ["SquareupApi.DeleteBookingCustomAttribute", "Deletes a custom attribute from a booking."],
+      ["SquareupApi.GetBookingCustomAttribute", "Retrieve a custom attribute for a specific booking."],
+      ["SquareupApi.RetrieveCardList", "Retrieve a list of cards owned by the account."],
+      ["SquareupApi.RetrieveCardDetails", "Retrieve details for a specific card using its ID."],
+      ["SquareupApi.DisablePaymentCard", "Disable a payment card to prevent charges."],
+      ["SquareupApi.ListCashDrawerShifts", "Retrieve cash drawer shift details for a location and date range."],
+      ["SquareupApi.GetCashDrawerShiftDetails", "Get summary details for a specific cash drawer shift."],
+      ["SquareupApi.ListCashDrawerShiftEvents", "Retrieve events for a specific cash drawer shift."],
+      ["SquareupApi.RetrieveCatalogInfo", "Retrieve Square Catalog API details and batch size limits."],
+      ["SquareupApi.ListCatalogItems", "Retrieve a list of catalog objects by type."],
+      ["SquareupApi.DeleteCatalogObject", "Deletes a catalog object and its children by ID."],
+      ["SquareupApi.RetrieveCatalogItem", "Fetch detailed catalog item information by ID."],
+      ["SquareupApi.ListSquareCustomers", "Retrieve customer profiles from a Square account."],
+      ["SquareupApi.ListCustomerCustomAttributeDefinitions", "Retrieve customer custom attribute definitions for a Square seller."],
+      ["SquareupApi.DeleteCustomerCustomAttributeDefinition", "Delete a customer custom attribute definition for a seller account."],
+      ["SquareupApi.GetCustomerCustomAttributeDefinition", "Retrieve a customer's custom attribute definition from Square."],
+      ["SquareupApi.ListCustomerGroups", "Retrieve the list of customer groups for a business."],
+      ["SquareupApi.DeleteCustomerGroup", "Deletes a specified customer group by ID."],
+      ["SquareupApi.RetrieveCustomerGroup", "Retrieve details of a specific customer group using its ID."],
+      ["SquareupApi.ListCustomerSegments", "Retrieve the list of customer segments for a business."],
+      ["SquareupApi.RetrieveCustomerSegment", "Retrieve details of a specific customer segment."],
+      ["SquareupApi.DeleteCustomerProfile", "Deletes a customer profile from a business."],
+      ["SquareupApi.GetCustomerDetails", "Retrieve details for a specific customer."],
+      ["SquareupApi.ListCustomerCustomAttributes", "Retrieve custom attributes for a customer profile."],
+      ["SquareupApi.DeleteCustomerCustomAttribute", "Delete a custom attribute from a customer profile."],
+      ["SquareupApi.RetrieveCustomerCustomAttribute", "Retrieve a custom attribute for a customer profile."],
+      ["SquareupApi.RemoveGroupFromCustomer", "Removes a group membership from a customer."],
+      ["SquareupApi.AddGroupToCustomer", "Add a customer to a specific group."],
+      ["SquareupApi.ListMerchantDevices", "Retrieve a list of merchant's connected devices."],
+      ["SquareupApi.ListDeviceCodes", "Retrieve all device codes for the merchant."],
+      ["SquareupApi.RetrieveDeviceCode", "Retrieve device code details by ID."],
+      ["SquareupApi.RetrieveDeviceInfo", "Retrieve device information using a device ID."],
+      ["SquareupApi.GetAccountDisputes", "Fetches disputes associated with an account."],
+      ["SquareupApi.RetrieveDisputeDetails", "Retrieve details about a specific dispute."],
+      ["SquareupApi.AcceptDispute", "Accepts the loss on a dispute, updating the state to ACCEPTED."],
+      ["SquareupApi.ListDisputeEvidence", "Retrieve evidence related to a specific dispute."],
+      ["SquareupApi.RemoveDisputeEvidence", "Removes specified evidence from a dispute."],
+      ["SquareupApi.GetDisputeEvidenceMetadata", "Retrieve metadata for specified dispute evidence."],
+      ["SquareupApi.SubmitDisputeEvidence", "Submit evidence to a cardholder's bank for a dispute."],
+      ["SquareupApi.DisableEventsSearch", "Disable events to prevent them from being searchable."],
+      ["SquareupApi.EnableEventsForSearch", "Enable events to make them searchable."],
+      ["SquareupApi.ListEventTypes", "Retrieve all event types available for webhooks and querying."],
+      ["SquareupApi.ListGiftCards", "Retrieve a list of all gift cards, with optional filters."],
+      ["SquareupApi.ListGiftCardActivities", "Retrieve and filter gift card activities for a seller."],
+      ["SquareupApi.GetGiftCardDetails", "Retrieve details of a gift card using its ID."],
+      ["SquareupApi.GetInventoryAdjustment", "Retrieve detailed information on an inventory adjustment."],
+      ["SquareupApi.RetrieveInventoryPhysicalCount", "Retrieve the inventory physical count by its ID."],
+      ["SquareupApi.GetInventoryTransfer", "Retrieve details of an Inventory Transfer using its ID."],
+      ["SquareupApi.RetrieveInventoryCount", "Get the current stock count for an item."],
+      ["SquareupApi.ListInvoices", "Retrieve a list of invoices for a specified location."],
+      ["SquareupApi.DeleteDraftInvoice", "Deletes a specified draft invoice."],
+      ["SquareupApi.RetrieveInvoiceById", "Retrieve details of an invoice using its ID."],
+      ["SquareupApi.RemoveInvoiceAttachment", "Remove an attachment from an invoice and delete the file."],
+      ["SquareupApi.ListBusinessBreakTypes", "Retrieve a list of BreakType instances for a business."],
+      ["SquareupApi.DeleteBreakType", "Deletes an existing break type."],
+      ["SquareupApi.RetrieveBreakType", "Retrieve details of a specific break type by ID."],
+      ["SquareupApi.GetScheduledShift", "Retrieve details of a scheduled shift by ID."],
+      ["SquareupApi.ListTeamMemberWages", "Retrieve paginated team member wages for a business."],
+      ["SquareupApi.GetTeamMemberWage", "Retrieve wage details for a specified team member."],
+      ["SquareupApi.DeleteTimecard", "Deletes a specified timecard."],
+      ["SquareupApi.RetrieveTimecard", "Retrieve a specific timecard using its ID."],
+      ["SquareupApi.ListWorkweekConfigurations", "Retrieve workweek configurations for a business."],
+      ["SquareupApi.ListSellerLocations", "Retrieve details of all seller locations from Square."],
+      ["SquareupApi.ListLocationCustomAttributeDefinitions", "Retrieve location custom attribute definitions for a Square account."],
+      ["SquareupApi.DeleteLocationCustomAttribute", "Delete a location-related custom attribute definition."],
+      ["SquareupApi.RetrieveLocationCustomAttributeDefinition", "Retrieve location-related custom attribute definitions."],
+      ["SquareupApi.RetrieveLocationDetails", "Retrieve detailed information about a specific location."],
+      ["SquareupApi.ListLocationCustomAttributes", "Fetch custom attributes for a specific location."],
+      ["SquareupApi.RemoveLocationCustomAttribute", "Deletes a custom attribute from a specified location."],
+      ["SquareupApi.GetLocationCustomAttribute", "Retrieve a custom attribute for a specified location."],
+      ["SquareupApi.RetrieveLoyaltyAccount", "Retrieve information about a loyalty account."],
+      ["SquareupApi.RetrieveLoyaltyProgram", "Retrieve details of a seller's loyalty program."],
+      ["SquareupApi.ListLoyaltyPromotions", "Fetches loyalty promotions for a specific program."],
+      ["SquareupApi.RetrieveLoyaltyPromotion", "Retrieve details of a specific loyalty promotion."],
+      ["SquareupApi.CancelLoyaltyPromotion", "Cancel an active or scheduled loyalty promotion early."],
+      ["SquareupApi.DeleteLoyaltyReward", "Delete a loyalty reward and restore loyalty points."],
+      ["SquareupApi.RetrieveLoyaltyReward", "Retrieve details of a loyalty reward."],
+      ["SquareupApi.GetMerchantDetails", "Retrieve merchant details using an access token."],
+      ["SquareupApi.ListMerchantCustomAttributeDefinitions", "Retrieve custom attribute definitions for a Square seller account."],
+      ["SquareupApi.DeleteMerchantCustomAttribute", "Delete a custom attribute definition from a merchant account."],
+      ["SquareupApi.RetrieveMerchantCustomAttribute", "Retrieve a merchant's custom attribute definition."],
+      ["SquareupApi.RetrieveMerchantInfo", "Retrieve details of a specific merchant using merchant ID."],
+      ["SquareupApi.ListMerchantCustomAttributes", "Retrieve custom attributes for a specified merchant."],
+      ["SquareupApi.RemoveMerchantCustomAttribute", "Deletes a custom attribute from a merchant."],
+      ["SquareupApi.GetMerchantCustomAttribute", "Retrieve a custom attribute for a specific merchant."],
+      ["SquareupApi.RetrieveCheckoutLocationSettings", "Retrieve location-level settings for a Square checkout page."],
+      ["SquareupApi.GetSquareMerchantSettings", "Retrieve merchant settings for Square checkout pages."],
+      ["SquareupApi.ListPaymentLinks", "Retrieve all available payment links from Squareup."],
+      ["SquareupApi.DeletePaymentLink", "Deletes a specified payment link."],
+      ["SquareupApi.RetrievePaymentLink", "Retrieve details of a specified payment link."],
+      ["SquareupApi.ListOrderCustomAttributeDefinitions", "Retrieve order-related custom attribute definitions for a Square seller."],
+      ["SquareupApi.DeleteOrderCustomAttributeDefinition", "Delete an order-related custom attribute definition."],
+      ["SquareupApi.RetrieveOrderCustomAttributeDefinition", "Retrieve custom attribute definition for a Square order."],
+      ["SquareupApi.RetrieveOrderById", "Retrieve order details by Order ID."],
+      ["SquareupApi.ListOrderCustomAttributes", "Retrieve custom attributes linked to a specific order."],
+      ["SquareupApi.DeleteOrderCustomAttribute", "Delete a custom attribute from an order."],
+      ["SquareupApi.RetrieveOrderCustomAttribute", "Retrieve a custom attribute associated with an order."],
+      ["SquareupApi.FetchPaymentList", "Retrieve a list of payments for an account."],
+      ["SquareupApi.GetPaymentDetails", "Retrieve specific payment details by payment ID."],
+      ["SquareupApi.CancelApprovedPayment", "Cancel an approved payment transaction."],
+      ["SquareupApi.GetPayoutList", "Retrieve a list of all payouts for the default location."],
+      ["SquareupApi.GetPayoutDetails", "Retrieve details of a specific payout by payout ID."],
+      ["SquareupApi.ListPayoutEntries", "Retrieve all payout entries for a specific payout."],
+      ["SquareupApi.ListPaymentRefunds", "Retrieve a list of payment refunds for the account."],
+      ["SquareupApi.FetchSpecificRefund", "Retrieve details of a specific refund using its ID."],
+      ["SquareupApi.ListSquareOnlineSites", "Retrieve a list of Square Online sites for a seller."],
+      ["SquareupApi.RemoveSquareOnlineSnippet", "Delete a snippet from a Square Online site."],
+      ["SquareupApi.RetrieveSiteSnippet", "Retrieve snippets from a Square Online site."],
+      ["SquareupApi.RetrieveSubscription", "Retrieve details of a specific subscription."],
+      ["SquareupApi.DeleteSubscriptionAction", "Delete a scheduled action from a subscription."],
+      ["SquareupApi.CancelSubscription", "Schedule cancellation of an active subscription."],
+      ["SquareupApi.ListSubscriptionEvents", "Retrieve events for a specific subscription."],
+      ["SquareupApi.ListJobsForSeller", "Retrieve a list of jobs in a seller account."],
+      ["SquareupApi.RetrieveJobDetails", "Retrieve details of a specified job by ID."],
+      ["SquareupApi.RetrieveTeamMemberDetails", "Retrieve details of a team member by ID."],
+      ["SquareupApi.RetrieveTeamMemberWageSetting", "Retrieve wage setting details for a specific team member."],
+      ["SquareupApi.GetTerminalAction", "Retrieve details of a terminal action request by ID."],
+      ["SquareupApi.CancelTerminalAction", "Cancel a terminal action request if permitted."],
+      ["SquareupApi.DismissTerminalAction", "Dismiss a Square Terminal action request."],
+      ["SquareupApi.RetrieveTerminalCheckout", "Retrieve a Terminal checkout request by ID."],
+      ["SquareupApi.CancelTerminalCheckout", "Cancel a Terminal checkout request if feasible."],
+      ["SquareupApi.DismissTerminalCheckout", "Dismiss a Terminal checkout request if permitted."],
+      ["SquareupApi.GetTerminalRefund", "Fetch Interac Terminal refund details by ID."],
+      ["SquareupApi.CancelTerminalRefund", "Cancel a terminal refund request if allowed."],
+      ["SquareupApi.DismissTerminalRefund", "Dismiss a Terminal refund request if permissible."],
+      ["SquareupApi.RetrieveVendorInfo", "Retrieve detailed information about a vendor by ID."],
+      ["SquareupApi.ListWebhookEventTypes", "Retrieves all available webhook event types for subscription."],
+      ["SquareupApi.ListWebhookSubscriptions", "Lists all webhook subscriptions for your application."],
+      ["SquareupApi.DeleteWebhookSubscription", "Deletes a webhook subscription to stop receiving events."],
+      ["SquareupApi.RetrieveWebhookSubscription", "Retrieve details of a specific webhook subscription by ID."],
+    ]
+  }
+/>
+
+<Callout>
+  If you need to perform an action that's not listed here, you can [get in touch
+  with us](mailto:contact@arcade.dev) to request a new tool, or [create your
+  own tools](/home/build-tools/create-a-mcp-server).
+</Callout>
+
+## SquareupApi.RetrieveTokenStatus
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_token_status_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_token_status_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve the status of an OAuth or personal access token.
+
+**Parameters**
+
+This tool does not take any parameters.
+
+## SquareupApi.ListBankAccounts
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_bank_accounts_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_bank_accounts_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Fetch a list of bank accounts linked to a Square account.
+
+**Parameters**
+
+- **pagination_cursor** (`string`, optional) The pagination cursor from a previous call to fetch the next set of bank account results.
+- **max_bank_accounts_limit** (`integer`, optional) Specify the maximum number of bank accounts to return. The largest supported limit is 1000.
+- **location_id_filter** (`string`, optional) Optional filter to retrieve bank accounts for a specified location ID only.
+
+
+## SquareupApi.GetBankAccountDetailsById
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/get_bank_account_details_by_id_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/get_bank_account_details_by_id_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve bank account details using V1 ID.
+
+**Parameters**
+
+- **v1_bank_account_id** (`string`, required) Connect V1 ID of the desired BankAccount. A unique string identifier to retrieve specific bank account details.
+
+
+## SquareupApi.GetBankAccountDetails
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/get_bank_account_details_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/get_bank_account_details_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a Square account's bank account.
+
+**Parameters**
+
+- **bank_account_identifier** (`string`, required) Square-issued ID of the specific bank account to retrieve details for.
+
+
+## SquareupApi.GetBookingList
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/get_booking_list_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/get_booking_list_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve a collection of bookings.
+
+**Parameters**
+
+- **results_per_page_limit** (`integer`, optional) The maximum number of results to display per page in the response. Accepts an integer value.
+- **pagination_cursor** (`string`, optional) The pagination cursor from the previous response for fetching the next page of results. Leave unset for the first page.
+- **specific_customer_id** (`string`, optional) The specific customer for whom to retrieve bookings. If not set, retrieves bookings for all customers.
+- **team_member_id** (`string`, optional) Specify the team member ID to retrieve bookings for. If not set, retrieves bookings for all team members.
+- **specific_location_id** (`string`, optional) Specify the location ID to retrieve bookings for that location only. If not set, bookings for all locations are retrieved.
+- **earliest_start_time** (`string`, optional) The RFC 3339 timestamp for the earliest booking start time. Defaults to current time if not set.
+- **latest_start_time** (`string`, optional) The RFC 3339 timestamp for the latest acceptable start time of bookings. Defaults to 31 days after `start_at_min` if not set.
+
+
+## SquareupApi.GetBusinessBookingProfile
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/get_business_booking_profile_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/get_business_booking_profile_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve seller's booking profile details.
+
+**Parameters**
+
+This tool does not take any parameters.
+
+## SquareupApi.GetBookingCustomAttributes
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/get_booking_custom_attributes_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/get_booking_custom_attributes_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve all custom attribute definitions for bookings.
+
+**Parameters**
+
+- **maximum_results_per_page** (`integer`, optional) Advisory maximum results per page. Minimum is 1, maximum is 100, default is 20.
+- **pagination_cursor** (`string`, optional) Cursor for retrieving the next page of results from a previous response.
+
+
+## SquareupApi.DeleteBookingCustomAttributeDefinition
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/delete_booking_custom_attribute_definition_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/delete_booking_custom_attribute_definition_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Deletes a bookings custom attribute definition.
+
+**Parameters**
+
+- **custom_attribute_definition_key** (`string`, required) The unique key of the custom attribute definition to be deleted.
+
+
+## SquareupApi.RetrieveBookingCustomAttributeDefinition
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_booking_custom_attribute_definition_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_booking_custom_attribute_definition_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve a booking's custom attribute definition.
+
+**Parameters**
+
+- **custom_attribute_key** (`string`, required) The key of the custom attribute definition to retrieve. If not the definition owner, use the qualified key.
+- **custom_attribute_version** (`integer`, optional) The version of the custom attribute definition for consistent reads. If the version is too high, a `BAD_REQUEST` error occurs.
+
+
+## SquareupApi.ListLocationBookingProfiles
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_location_booking_profiles_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_location_booking_profiles_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Lists location booking profiles of a seller.
+
+**Parameters**
+
+- **maximum_results_per_page** (`integer`, optional) The maximum number of booking profiles to retrieve in one page of the response.
+- **pagination_cursor** (`string`, optional) Use this to provide the pagination cursor from the previous response to get the next set of results. Leave unset for the first page.
+
+
+## SquareupApi.RetrieveLocationBookingProfile
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_location_booking_profile_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_location_booking_profile_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve a seller's location booking profile.
+
+**Parameters**
+
+- **location_id** (`string`, required) The unique ID of the location whose booking profile is to be retrieved.
+
+
+## SquareupApi.ListTeamMemberBookingProfiles
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_team_member_booking_profiles_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_team_member_booking_profiles_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Lists booking profiles for team members.
+
+**Parameters**
+
+- **max_results_per_page** (`integer`, optional) The maximum number of results to return in a paged response. Useful for controlling pagination size.
+- **pagination_cursor** (`string`, optional) The pagination cursor for returning the next page of results. Leave empty to get the first page.
+- **filter_by_location_id** (`string`, optional) Specify the location ID to filter team members enabled at that location.
+- **include_only_bookable_team_members** (`boolean`, optional) Set to true to include only bookable team members in the result; false to include all members.
+
+
+## SquareupApi.RetrieveTeamMemberBookingProfile
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_team_member_booking_profile_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_team_member_booking_profile_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve a team member's booking profile details.
+
+**Parameters**
+
+- **team_member_id** (`string`, required) The unique ID of the team member whose booking profile you want to retrieve. Must be a valid string identifier.
+
+
+## SquareupApi.RetrieveBooking
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_booking_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_booking_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a specific booking.
+
+**Parameters**
+
+- **booking_id** (`string`, required) The unique identifier for the booking to retrieve details.
+
+
+## SquareupApi.ListBookingCustomAttributes
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_booking_custom_attributes_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_booking_custom_attributes_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Lists custom attributes for a specific booking.
+
+**Parameters**
+
+- **booking_identifier** (`string`, required) The unique identifier for the target booking whose custom attributes you want to list.
+- **maximum_results_per_page** (`integer`, optional) The maximum number of results to return per page, between 1 and 100. Default is 20.
+- **pagination_cursor** (`string`, optional) Cursor for retrieving the next page of results from a previous call to the endpoint.
+- **include_custom_attribute_definitions** (`boolean`, optional) Set to true to include custom attribute definition details, such as name and data type, in the response. Default is false.
+
+
+## SquareupApi.DeleteBookingCustomAttribute
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/delete_booking_custom_attribute_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/delete_booking_custom_attribute_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Deletes a custom attribute from a booking.
+
+**Parameters**
+
+- **booking_id** (`string`, required) The ID of the target booking from which the custom attribute will be deleted.
+- **custom_attribute_key** (`string`, required) The key of the custom attribute to delete. It must match the key of a custom attribute definition in the Square seller account. Use the qualified key if not the definition owner.
+
+
+## SquareupApi.GetBookingCustomAttribute
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/get_booking_custom_attribute_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/get_booking_custom_attribute_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve a custom attribute for a specific booking.
+
+**Parameters**
+
+- **target_booking_id** (`string`, required) The ID of the target booking to retrieve its custom attribute.
+- **custom_attribute_key** (`string`, required) The key of the custom attribute to retrieve, matching the custom attribute definition in the Square seller account. Use the qualified key if not the definition owner.
+- **custom_attribute_version** (`integer`, optional) The current version of the custom attribute for consistent reads. An integer value required to ensure up-to-date data.
+- **include_custom_attribute_definition** (`boolean`, optional) Set to true to include the custom attribute's definition, such as name and data type, in the response. Defaults to false.
+
+
+## SquareupApi.RetrieveCardList
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_card_list_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_card_list_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of cards owned by the account.
+
+**Parameters**
+
+- **pagination_cursor** (`string`, optional) A string value representing a pagination cursor to retrieve the next set of results. Use this to continue from the last retrieved set.
+- **filter_by_customer_id** (`string`, optional) Limit results to cards associated with the specified customer. By default, all merchant-owned cards are returned.
+- **filter_by_reference_id** (`string`, optional) Filter results to include only cards associated with the specified reference ID.
+- **card_sort_order** (`string`, optional) Defines the sort order for the card creation date. Use 'ASC' for ascending or 'DESC' for descending. Defaults to 'ASC'.
+- **include_disabled_cards** (`boolean`, optional) Set to true to include disabled cards in the results. By default, only enabled cards are returned.
+
+
+## SquareupApi.RetrieveCardDetails
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_card_details_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_card_details_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve details for a specific card using its ID.
+
+**Parameters**
+
+- **card_identifier** (`string`, required) Unique ID for the card to retrieve its details.
+
+
+## SquareupApi.DisablePaymentCard
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/disable_payment_card_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/disable_payment_card_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Disable a payment card to prevent charges.
+
+**Parameters**
+
+- **payment_card_id** (`string`, required) Unique ID for the card to be disabled.
+
+
+## SquareupApi.ListCashDrawerShifts
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_cash_drawer_shifts_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_cash_drawer_shifts_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve cash drawer shift details for a location and date range.
+
+**Parameters**
+
+- **location_identifier** (`string`, required) The unique identifier for the location to query for cash drawer shifts.
+- **sort_order_for_listing** (`string`, optional) Specifies the order for listing cash drawer shifts by their opened_at field. Use 'ASC' for ascending or 'DESC' for descending. Defaults to 'ASC'.
+- **query_start_time** (`string`, optional) The inclusive start time for the query on opened_at, in ISO 8601 format.
+- **exclusive_end_date** (`string`, optional) The exclusive end time of the query on opened_at, specified in ISO 8601 format, to define the endpoint for the cash drawer shift search.
+- **result_limit** (`integer`, optional) Specifies the number of cash drawer shift events per results page. Defaults to 200, with a maximum of 1000.
+- **next_page_cursor** (`string`, optional) Opaque cursor for fetching the next page of results, used for pagination.
+
+
+## SquareupApi.GetCashDrawerShiftDetails
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/get_cash_drawer_shift_details_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/get_cash_drawer_shift_details_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Get summary details for a specific cash drawer shift.
+
+**Parameters**
+
+- **location_identifier** (`string`, required) The unique identifier for the location to retrieve cash drawer shifts from. Ensure this matches the location set up in Squareup.
+- **cash_drawer_shift_id** (`string`, required) The unique identifier for the cash drawer shift to retrieve details for.
+
+
+## SquareupApi.ListCashDrawerShiftEvents
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_cash_drawer_shift_events_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_cash_drawer_shift_events_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve events for a specific cash drawer shift.
+
+**Parameters**
+
+- **location_identifier** (`string`, required) The ID of the location to list cash drawer shifts for. This should be a valid location ID registered within the system.
+- **cash_drawer_shift_id** (`string`, required) The unique ID of the cash drawer shift for which events are to be retrieved.
+- **page_size_limit** (`integer`, optional) Number of events to return per page, default is 200, maximum is 1000.
+- **pagination_cursor** (`string`, optional) Opaque string to fetch the next page of results for cash drawer shift events.
+
+
+## SquareupApi.RetrieveCatalogInfo
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_catalog_info_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_catalog_info_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve Square Catalog API details and batch size limits.
+
+**Parameters**
+
+This tool does not take any parameters.
+
+## SquareupApi.ListCatalogItems
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_catalog_items_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_catalog_items_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of catalog objects by type.
+
+**Parameters**
+
+- **pagination_cursor** (`string`, optional) The pagination cursor from the previous response. Leave empty for the initial request. Defaults to a page size of 100 results.
+- **catalog_object_types** (`string`, optional) A comma-separated list of catalog object types to retrieve. Defaults to returning top-level types if unspecified.
+- **catalog_version** (`integer`, optional) Specify the version of the catalog objects to retrieve. Use to access historical versions. Default retrieves the current version.
+
+
+## SquareupApi.DeleteCatalogObject
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/delete_catalog_object_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/delete_catalog_object_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Deletes a catalog object and its children by ID.
+
+**Parameters**
+
+- **catalog_object_id** (`string`, required) The ID of the catalog object, including its child objects, to be deleted. This is a cascading deletion.
+
+
+## SquareupApi.RetrieveCatalogItem
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_catalog_item_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_catalog_item_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Fetch detailed catalog item information by ID.
+
+**Parameters**
+
+- **catalog_object_id** (`string`, required) The ID of the catalog object to retrieve. Use a unique string to specify the object.
+- **catalog_version** (`integer`, optional) Specify the version number of the catalog to retrieve objects from a specific historical catalog version. If omitted, retrieves the current version.
+- **include_related_objects** (`boolean`, optional) Include additional objects related to the requested items in the response if set to `true`. This helps in displaying complete information for immediate use.
+- **include_category_path_to_root** (`boolean`, optional) Set to 'true' to include the `path_to_root` list for each returned category instance. This path starts with the immediate parent category and ends with the root category. If the category is top-level, the `path_to_root` list is empty and not returned.
+
+
+## SquareupApi.ListSquareCustomers
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_square_customers_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_square_customers_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve customer profiles from a Square account.
+
+**Parameters**
+
+- **pagination_cursor** (`string`, optional) A pagination cursor to retrieve the next set of customer profiles. Use a cursor from a previous query call to fetch subsequent results.
+- **maximum_results_per_page** (`integer`, optional) Specify the maximum number of customer profiles to return in a single page. Must be between 1 and 100, inclusive.
+- **customer_sorting_field** (`string`, optional) Specify how customer profiles should be sorted. Options are `DEFAULT` or `CREATED_AT`. Default is `DEFAULT`.
+- **customer_sort_order** (`string`, optional) Specifies whether to sort customers in ascending ('ASC') or descending ('DESC') order. Default is 'ASC'.
+- **include_total_customer_count** (`boolean`, optional) Set to true to include the total count of customers in the response. The default is false.
+
+
+## SquareupApi.ListCustomerCustomAttributeDefinitions
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_customer_custom_attribute_definitions_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_customer_custom_attribute_definitions_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve customer custom attribute definitions for a Square seller.
+
+**Parameters**
+
+- **maximum_results_per_page** (`integer`, optional) The maximum number of results to return in a paged response. Accepts values from 1 to 100, with a default of 20.
+- **pagination_cursor** (`string`, optional) Cursor for retrieving the next page of results. Obtain this from a previous response.
+
+
+## SquareupApi.DeleteCustomerCustomAttributeDefinition
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/delete_customer_custom_attribute_definition_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/delete_customer_custom_attribute_definition_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Delete a customer custom attribute definition for a seller account.
+
+**Parameters**
+
+- **custom_attribute_key** (`string`, required) The unique key of the custom attribute definition you wish to delete from the seller account.
+
+
+## SquareupApi.GetCustomerCustomAttributeDefinition
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/get_customer_custom_attribute_definition_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/get_customer_custom_attribute_definition_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve a customer's custom attribute definition from Square.
+
+**Parameters**
+
+- **custom_attribute_key** (`string`, required) The key of the custom attribute definition to retrieve. Use the qualified key if not the definition owner.
+- **custom_attribute_version** (`integer`, optional) Current version of the attribute definition for consistent reads. Returns specified or higher version data. Error if version is too high.
+
+
+## SquareupApi.ListCustomerGroups
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_customer_groups_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_customer_groups_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve the list of customer groups for a business.
+
+**Parameters**
+
+- **pagination_cursor** (`string`, optional) A pagination cursor to retrieve the next set of customer groups. Used to continue from the last retrieved page.
+- **maximum_results_per_page** (`integer`, optional) The maximum number of results to return per page, between 1 and 50. Defaults to 50.
+
+
+## SquareupApi.DeleteCustomerGroup
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/delete_customer_group_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/delete_customer_group_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Deletes a specified customer group by ID.
+
+**Parameters**
+
+- **customer_group_id** (`string`, required) The ID of the customer group to delete.
+
+
+## SquareupApi.RetrieveCustomerGroup
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_customer_group_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_customer_group_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a specific customer group using its ID.
+
+**Parameters**
+
+- **customer_group_id** (`string`, required) The ID of the customer group you want to retrieve details for.
+
+
+## SquareupApi.ListCustomerSegments
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_customer_segments_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_customer_segments_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve the list of customer segments for a business.
+
+**Parameters**
+
+- **pagination_cursor** (`string`, optional) A pagination cursor for retrieving the next set of customer segment results.
+- **max_results_per_page** (`integer`, optional) Maximum number of results to return per page. Must be between 1 and 50. Default is 50. If outside this range, an error is returned.
+
+
+## SquareupApi.RetrieveCustomerSegment
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_customer_segment_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_customer_segment_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a specific customer segment.
+
+**Parameters**
+
+- **customer_segment_id** (`string`, required) The Square-issued ID of the customer segment to retrieve.
+
+
+## SquareupApi.DeleteCustomerProfile
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/delete_customer_profile_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/delete_customer_profile_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Deletes a customer profile from a business.
+
+**Parameters**
+
+- **customer_identifier** (`string`, required) The unique identifier of the customer to be deleted.
+- **customer_profile_version** (`integer`, optional) The current version of the customer profile. Used for optimistic concurrency control.
+
+
+## SquareupApi.GetCustomerDetails
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/get_customer_details_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/get_customer_details_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve details for a specific customer.
+
+**Parameters**
+
+- **customer_id** (`string`, required) The unique ID of the customer to retrieve details for. Used to access specific customer information.
+
+
+## SquareupApi.ListCustomerCustomAttributes
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_customer_custom_attributes_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_customer_custom_attributes_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve custom attributes for a customer profile.
+
+**Parameters**
+
+- **customer_profile_id** (`string`, required) The ID of the customer profile for which to list custom attributes.
+- **result_limit** (`integer`, optional) Maximum number of results for a single response. Accepts values 1-100, with a default of 20.
+- **pagination_cursor** (`string`, optional) The pagination cursor from the previous response to continue retrieving results.
+- **include_custom_attribute_definitions** (`boolean`, optional) Indicate whether to include custom attribute definitions such as name, description, and data type details in the response. Default is false.
+
+
+## SquareupApi.DeleteCustomerCustomAttribute
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/delete_customer_custom_attribute_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/delete_customer_custom_attribute_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Delete a custom attribute from a customer profile.
+
+**Parameters**
+
+- **customer_profile_id** (`string`, required) The ID of the target customer profile for which the custom attribute will be deleted.
+- **custom_attribute_key** (`string`, required) The key identifying the custom attribute to delete, matching the definition in the Square account. Use the qualified key if the application isn't the definition owner.
+
+
+## SquareupApi.RetrieveCustomerCustomAttribute
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_customer_custom_attribute_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_customer_custom_attribute_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve a custom attribute for a customer profile.
+
+**Parameters**
+
+- **customer_profile_id** (`string`, required) The ID of the target customer profile you want to retrieve a custom attribute for.
+- **custom_attribute_key** (`string`, required) The unique key of the custom attribute to retrieve, matching the definition in the Square seller account. Use the qualified key if the app is not the definition owner.
+- **custom_attribute_version** (`integer`, optional) The current version of the custom attribute for consistent reads. If higher than available, returns an error.
+- **include_custom_attribute_definition** (`boolean`, optional) Set to true to include the custom attribute definition in the response, including details like name, description, and data type.
+
+
+## SquareupApi.RemoveGroupFromCustomer
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/remove_group_from_customer_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/remove_group_from_customer_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Removes a group membership from a customer.
+
+**Parameters**
+
+- **customer_id** (`string`, required) The unique ID of the customer to remove from the specified group. Provide as a string.
+- **customer_group_id** (`string`, required) The ID of the customer group from which the customer will be removed.
+
+
+## SquareupApi.AddGroupToCustomer
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/add_group_to_customer_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/add_group_to_customer_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Add a customer to a specific group.
+
+**Parameters**
+
+- **customer_id** (`string`, required) The unique identifier for the customer to be added to a group. It must match an existing customer ID.
+- **customer_group_id** (`string`, required) The ID of the customer group to which the customer will be added. This should be a valid group ID.
+
+
+## SquareupApi.ListMerchantDevices
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_merchant_devices_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_merchant_devices_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of merchant's connected devices.
+
+**Parameters**
+
+- **pagination_cursor** (`string`, optional) A pagination cursor from a previous call to retrieve the next set of results.
+- **result_sort_order** (`string`, optional) Specifies whether to list results from oldest to newest ('ASC') or newest to oldest ('DESC'). Default is 'DESC'.
+- **results_per_page** (`integer`, optional) The number of device results to return in a single API call.
+- **filter_by_location_id** (`string`, optional) Return devices only at the specified location.
+
+
+## SquareupApi.ListDeviceCodes
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_device_codes_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_device_codes_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve all device codes for the merchant.
+
+**Parameters**
+
+- **pagination_cursor** (`string`, optional) A pagination cursor from a previous call, used to retrieve the next set of results.
+- **filter_by_location_id** (`string`, optional) Specify a location to return only its DeviceCodes. Leave empty to return codes from all locations.
+- **filter_by_product_type** (`string`, optional) Specify a product type to target specific DeviceCodes. Use 'TERMINAL_API' or leave empty for all types.
+- **device_code_status** (`string`, optional) Specifies the status of DeviceCodes to return. Options: UNKNOWN, UNPAIRED, PAIRED, EXPIRED. Returns PAIRED and UNPAIRED if empty.
+
+
+## SquareupApi.RetrieveDeviceCode
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_device_code_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_device_code_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve device code details by ID.
+
+**Parameters**
+
+- **device_code_id** (`string`, required) The unique identifier for the device code to retrieve details from Squareup.
+
+
+## SquareupApi.RetrieveDeviceInfo
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_device_info_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_device_info_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve device information using a device ID.
+
+**Parameters**
+
+- **device_unique_id** (`string`, required) The unique identifier for the device you want to retrieve details for.
+
+
+## SquareupApi.GetAccountDisputes
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/get_account_disputes_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/get_account_disputes_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Fetches disputes associated with an account.
+
+**Parameters**
+
+- **pagination_cursor** (`string`, optional) A cursor for retrieving the next set of dispute results from a previous query.
+- **dispute_states_filter** (`string`, optional) Filter disputes by their states. Options include 'INQUIRY_EVIDENCE_REQUIRED', 'INQUIRY_PROCESSING', 'INQUIRY_CLOSED', 'EVIDENCE_REQUIRED', 'PROCESSING', 'WON', 'LOST', 'ACCEPTED'.
+- **location_identifier** (`string`, optional) The ID of the location to return a list of disputes for. If not provided, returns disputes for all locations.
+
+
+## SquareupApi.RetrieveDisputeDetails
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_dispute_details_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_dispute_details_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve details about a specific dispute.
+
+**Parameters**
+
+- **dispute_id** (`string`, required) The unique ID of the dispute to retrieve details for.
+
+
+## SquareupApi.AcceptDispute
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/accept_dispute_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/accept_dispute_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Accepts the loss on a dispute, updating the state to ACCEPTED.
+
+**Parameters**
+
+- **dispute_id** (`string`, required) The unique identifier for the dispute that needs to be accepted. This must match the ID given by Square for the specific dispute.
+
+
+## SquareupApi.ListDisputeEvidence
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_dispute_evidence_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_dispute_evidence_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve evidence related to a specific dispute.
+
+**Parameters**
+
+- **dispute_id** (`string`, required) The unique identifier of the dispute for which evidence is being requested.
+- **pagination_cursor** (`string`, optional) A pagination cursor to retrieve the next set of results for the original query.
+
+
+## SquareupApi.RemoveDisputeEvidence
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/remove_dispute_evidence_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/remove_dispute_evidence_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Removes specified evidence from a dispute.
+
+**Parameters**
+
+- **dispute_id** (`string`, required) The unique identifier of the dispute from which evidence should be removed.
+- **evidence_id_to_remove** (`string`, required) The ID of the evidence you want to remove from the dispute.
+
+
+## SquareupApi.GetDisputeEvidenceMetadata
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/get_dispute_evidence_metadata_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/get_dispute_evidence_metadata_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve metadata for specified dispute evidence.
+
+**Parameters**
+
+- **dispute_id** (`string`, required) The unique ID of the dispute to retrieve its evidence metadata.
+- **evidence_id** (`string`, required) The ID of the evidence you wish to retrieve metadata for. Ensure correct ID is provided to access the specific evidence details.
+
+
+## SquareupApi.SubmitDisputeEvidence
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/submit_dispute_evidence_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/submit_dispute_evidence_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Submit evidence to a cardholder's bank for a dispute.
+
+**Parameters**
+
+- **dispute_id** (`string`, required) The unique identifier for the dispute to which you are submitting evidence. You need this ID to ensure the evidence is attached to the correct dispute case.
+
+
+## SquareupApi.DisableEventsSearch
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/disable_events_search_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/disable_events_search_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Disable events to prevent them from being searchable.
+
+**Parameters**
+
+This tool does not take any parameters.
+
+## SquareupApi.EnableEventsForSearch
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/enable_events_for_search_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/enable_events_for_search_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Enable events to make them searchable.
+
+**Parameters**
+
+This tool does not take any parameters.
+
+## SquareupApi.ListEventTypes
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_event_types_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_event_types_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve all event types available for webhooks and querying.
+
+**Parameters**
+
+- **api_version** (`string`, optional) Specify the API version to list event types. This overrides the default application version.
+
+
+## SquareupApi.ListGiftCards
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_gift_cards_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_gift_cards_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of all gift cards, with optional filters.
+
+**Parameters**
+
+- **gift_card_type** (`string`, optional) Specifies the type of gift cards to retrieve. If not provided, all types are returned.
+- **gift_card_state** (`string`, optional) Specifies the state of gift cards to return. Leave empty to get all states.
+- **results_per_page_limit** (`integer`, optional) The number of gift card results per page. Maximum is 200, default is 30.
+- **pagination_cursor** (`string`, optional) A string used to retrieve the next set of results for pagination from a previous call.
+- **customer_id** (`string`, optional) A unique identifier for a customer to retrieve gift cards linked to them.
+
+
+## SquareupApi.ListGiftCardActivities
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_gift_card_activities_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_gift_card_activities_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve and filter gift card activities for a seller.
+
+**Parameters**
+
+- **gift_card_id** (`string`, optional) Specify a gift card ID to return activities related to that gift card. Leave empty to return all gift card activities for the seller.
+- **activity_type** (`string`, optional) Filter gift card activities by specifying a particular activity type. If not provided, returns all activity types.
+- **location_id** (`string`, optional) Specify the location ID to filter gift card activities for a particular location. Leave empty to return activities for all locations.
+- **reporting_start_time** (`string`, optional) The starting timestamp for the reporting period, in RFC 3339 format. Includes this date and time. Defaults to one year prior from now if not specified.
+- **end_time** (`string`, optional) The inclusive end timestamp for the reporting period in RFC 3339 format. Defaults to current time.
+- **result_limit** (`integer`, optional) Specify the maximum number of results per page. Default is 50, maximum allowed is 100.
+- **pagination_cursor** (`string`, optional) A pagination cursor from a previous call to get the next set of results. If not provided, the first page is returned.
+- **activities_sort_order** (`string`, optional) Defines the order of gift card activities based on creation date. Use 'ASC' for oldest to newest, or 'DESC' for newest to oldest (default).
+
+
+## SquareupApi.GetGiftCardDetails
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/get_gift_card_details_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/get_gift_card_details_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a gift card using its ID.
+
+**Parameters**
+
+- **gift_card_id** (`string`, required) The ID of the gift card to retrieve details for.
+
+
+## SquareupApi.GetInventoryAdjustment
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/get_inventory_adjustment_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/get_inventory_adjustment_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve detailed information on an inventory adjustment.
+
+**Parameters**
+
+- **inventory_adjustment_id** (`string`, required) The unique ID of the inventory adjustment to retrieve details for.
+
+
+## SquareupApi.RetrieveInventoryPhysicalCount
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_inventory_physical_count_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_inventory_physical_count_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve the inventory physical count by its ID.
+
+**Parameters**
+
+- **inventory_physical_count_id** (`string`, required) ID of the InventoryPhysicalCount to retrieve.
+
+
+## SquareupApi.GetInventoryTransfer
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/get_inventory_transfer_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/get_inventory_transfer_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of an Inventory Transfer using its ID.
+
+**Parameters**
+
+- **inventory_transfer_id** (`string`, required) The unique ID of the InventoryTransfer to retrieve details for.
+
+
+## SquareupApi.RetrieveInventoryCount
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_inventory_count_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_inventory_count_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Get the current stock count for an item.
+
+**Parameters**
+
+- **catalog_object_id** (`string`, required) ID of the CatalogObject to retrieve the inventory count for. Required for specifying which item to query.
+- **location_ids** (`string`, optional) Comma-separated list of Location IDs to query. Use empty to query all locations.
+- **pagination_cursor** (`string`, optional) A pagination cursor to retrieve the next set of results for an ongoing query.
+
+
+## SquareupApi.ListInvoices
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_invoices_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_invoices_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of invoices for a specified location.
+
+**Parameters**
+
+- **location_id** (`string`, required) The ID of the location for which to list invoices.
+- **pagination_cursor** (`string`, optional) A string value used to fetch the next set of paginated results for invoices. This is returned from a previous call to the list invoices endpoint.
+- **maximum_invoices_to_return** (`integer`, optional) The maximum number of invoices to return, up to 200. Defaults to 100 if not specified.
+
+
+## SquareupApi.DeleteDraftInvoice
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/delete_draft_invoice_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/delete_draft_invoice_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Deletes a specified draft invoice.
+
+**Parameters**
+
+- **invoice_id_to_delete** (`string`, required) The ID of the draft invoice to be deleted.
+- **invoice_version_to_delete** (`integer`, optional) The version number of the draft invoice to delete. Retrieve this using GetInvoice or ListInvoices if unknown.
+
+
+## SquareupApi.RetrieveInvoiceById
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_invoice_by_id_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_invoice_by_id_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of an invoice using its ID.
+
+**Parameters**
+
+- **invoice_id** (`string`, required) The unique ID of the invoice to retrieve information for.
+
+
+## SquareupApi.RemoveInvoiceAttachment
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/remove_invoice_attachment_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/remove_invoice_attachment_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Remove an attachment from an invoice and delete the file.
+
+**Parameters**
+
+- **invoice_id** (`string`, required) The unique identifier of the invoice to remove the attachment from. Applicable for invoices in specific states (DRAFT, SCHEDULED, UNPAID, PARTIALLY_PAID).
+- **attachment_id** (`string`, required) The unique identifier of the attachment to delete from the invoice. It should be a string corresponding to the attachment's ID.
+
+
+## SquareupApi.ListBusinessBreakTypes
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_business_break_types_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_business_break_types_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of BreakType instances for a business.
+
+**Parameters**
+
+- **filter_by_location_id** (`string`, optional) Filter results to only include BreakTypes associated with a specific location.
+- **max_results_per_page** (`integer`, optional) The maximum number of BreakType results to return per page, between 1 and 200. Default is 200.
+- **pagination_cursor** (`string`, optional) A pointer to the next page of BreakType results for retrieval.
+
+
+## SquareupApi.DeleteBreakType
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/delete_break_type_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/delete_break_type_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Deletes an existing break type.
+
+**Parameters**
+
+- **break_type_uuid** (`string`, required) The UUID of the BreakType to delete. Ensure it is a valid UUID format.
+
+
+## SquareupApi.RetrieveBreakType
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_break_type_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_break_type_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a specific break type by ID.
+
+**Parameters**
+
+- **break_type_id** (`string`, required) The unique identifier (UUID) for the BreakType to be retrieved.
+
+
+## SquareupApi.GetScheduledShift
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/get_scheduled_shift_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/get_scheduled_shift_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a scheduled shift by ID.
+
+**Parameters**
+
+- **scheduled_shift_id** (`string`, required) The unique ID of the scheduled shift to retrieve details for.
+
+
+## SquareupApi.ListTeamMemberWages
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_team_member_wages_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_team_member_wages_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve paginated team member wages for a business.
+
+**Parameters**
+
+- **filter_by_team_member_id** (`string`, optional) Filter wages by specifying the team member's ID. Only wages for this team member will be returned.
+- **results_per_page** (`integer`, optional) Specifies the maximum number of team member wages to return per page, ranging from 1 to 200. Default is 200.
+- **next_page_cursor** (`string`, optional) A token used to fetch the next page of team member wage results.
+
+
+## SquareupApi.GetTeamMemberWage
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/get_team_member_wage_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/get_team_member_wage_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve wage details for a specified team member.
+
+**Parameters**
+
+- **team_member_wage_id** (`string`, required) The unique UUID for retrieving the specified team member's wage.
+
+
+## SquareupApi.DeleteTimecard
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/delete_timecard_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/delete_timecard_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Deletes a specified timecard.
+
+**Parameters**
+
+- **timecard_id** (`string`, required) The UUID for the timecard to be deleted.
+
+
+## SquareupApi.RetrieveTimecard
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_timecard_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_timecard_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve a specific timecard using its ID.
+
+**Parameters**
+
+- **timecard_uuid** (`string`, required) The unique identifier (UUID) for the Timecard to be retrieved.
+
+
+## SquareupApi.ListWorkweekConfigurations
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_workweek_configurations_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_workweek_configurations_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve workweek configurations for a business.
+
+**Parameters**
+
+- **max_results_per_page** (`integer`, optional) The maximum number of workweek configurations to return per page.
+- **page_cursor** (`string`, optional) A string that acts as a pointer to fetch the next page of workweek configuration results.
+
+
+## SquareupApi.ListSellerLocations
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_seller_locations_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_seller_locations_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of all seller locations from Square.
+
+**Parameters**
+
+This tool does not take any parameters.
+
+## SquareupApi.ListLocationCustomAttributeDefinitions
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_location_custom_attribute_definitions_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_location_custom_attribute_definitions_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve location custom attribute definitions for a Square account.
+
+**Parameters**
+
+- **filter_by_visibility** (`string`, optional) Filter the results by visibility values: ALL, READ, or READ_WRITE.
+- **maximum_results_per_page** (`integer`, optional) Maximum number of results to return per page. Minimum is 1, maximum is 100, default is 20. Advisory only, may vary.
+- **pagination_cursor** (`string`, optional) The cursor for retrieving the next page of results from a previous call. Use this for pagination handling.
+
+
+## SquareupApi.DeleteLocationCustomAttribute
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/delete_location_custom_attribute_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/delete_location_custom_attribute_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Delete a location-related custom attribute definition.
+
+**Parameters**
+
+- **custom_attribute_key** (`string`, required) The unique key identifying the custom attribute definition to be deleted from the seller account.
+
+
+## SquareupApi.RetrieveLocationCustomAttributeDefinition
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_location_custom_attribute_definition_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_location_custom_attribute_definition_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve location-related custom attribute definitions.
+
+**Parameters**
+
+- **custom_attribute_definition_key** (`string`, required) The key of the custom attribute definition to retrieve, requiring a qualified key if not the owner.
+- **custom_attribute_definition_version** (`integer`, optional) The version of the custom attribute definition for consistent reads. Must be equal to or less than the latest version to avoid errors.
+
+
+## SquareupApi.RetrieveLocationDetails
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_location_details_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_location_details_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve detailed information about a specific location.
+
+**Parameters**
+
+- **location_id** (`string`, required) The ID of the location to retrieve. Use "main" for the main location.
+
+
+## SquareupApi.ListLocationCustomAttributes
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_location_custom_attributes_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_location_custom_attributes_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Fetch custom attributes for a specific location.
+
+**Parameters**
+
+- **location_id** (`string`, required) The ID of the target location for which to fetch custom attributes.
+- **visibility_filter** (`string`, optional) Filters custom attribute results based on their visibility values (ALL, READ, READ_WRITE).
+- **max_results_per_page** (`integer`, optional) The maximum number of results to fetch per page. Minimum is 1, maximum is 100, default is 20.
+- **pagination_cursor** (`string`, optional) String value of the cursor from previous response, used for paginating results.
+- **include_custom_attribute_definitions** (`boolean`, optional) Set to true to include custom attribute definitions with each custom attribute. Default is false.
+
+
+## SquareupApi.RemoveLocationCustomAttribute
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/remove_location_custom_attribute_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/remove_location_custom_attribute_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Deletes a custom attribute from a specified location.
+
+**Parameters**
+
+- **location_id** (`string`, required) The ID of the target location for which the custom attribute will be deleted.
+- **custom_attribute_key** (`string`, required) The key for the custom attribute to delete. Use the qualified key if not the definition owner.
+
+
+## SquareupApi.GetLocationCustomAttribute
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/get_location_custom_attribute_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/get_location_custom_attribute_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve a custom attribute for a specified location.
+
+**Parameters**
+
+- **location_id** (`string`, required) The ID of the location for which the custom attribute is being retrieved. This is required to identify the specific location in the Square account.
+- **custom_attribute_key** (`string`, required) The key of the custom attribute to retrieve. Must match a custom attribute definition key in the Square seller account. Use the qualified key if not the definition owner.
+- **custom_attribute_version** (`integer`, optional) Specify the version of the custom attribute for consistent reads. If a higher version exists, it is returned. If higher than the current version, an error occurs.
+- **include_definition** (`boolean`, optional) Set to true to include the custom attribute's definition, providing name, description, and data type.
+
+
+## SquareupApi.RetrieveLoyaltyAccount
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_loyalty_account_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_loyalty_account_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve information about a loyalty account.
+
+**Parameters**
+
+- **loyalty_account_id** (`string`, required) The unique identifier of the loyalty account to retrieve.
+
+
+## SquareupApi.RetrieveLoyaltyProgram
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_loyalty_program_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_loyalty_program_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a seller's loyalty program.
+
+**Parameters**
+
+- **loyalty_program_identifier** (`string`, required) The ID of the loyalty program or the keyword 'main' to retrieve the program details.
+
+
+## SquareupApi.ListLoyaltyPromotions
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_loyalty_promotions_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_loyalty_promotions_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Fetches loyalty promotions for a specific program.
+
+**Parameters**
+
+- **loyalty_program_id** (`string`, required) The ID of the base loyalty program. Use the 'RetrieveLoyaltyProgram' API with 'main' to get this ID.
+- **filter_by_status** (`string`, optional) Filter loyalty promotions by status. Options: ACTIVE, ENDED, CANCELED, SCHEDULED.
+- **pagination_cursor** (`string`, optional) The cursor for retrieving the next page of loyalty promotions. Obtain this from the previous response to continue pagination.
+- **max_results_per_page** (`integer`, optional) Specifies the maximum number of loyalty promotions to return per page. Must be between 1 and 30. Default is 30.
+
+
+## SquareupApi.RetrieveLoyaltyPromotion
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_loyalty_promotion_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_loyalty_promotion_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a specific loyalty promotion.
+
+**Parameters**
+
+- **loyalty_promotion_id** (`string`, required) The unique identifier for the loyalty promotion to retrieve.
+- **loyalty_program_id** (`string`, required) The ID of the base loyalty program. Retrieve it by calling RetrieveLoyaltyProgram with the 'main' keyword.
+
+
+## SquareupApi.CancelLoyaltyPromotion
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/cancel_loyalty_promotion_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/cancel_loyalty_promotion_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Cancel an active or scheduled loyalty promotion early.
+
+**Parameters**
+
+- **loyalty_promotion_id** (`string`, required) The unique identifier of the loyalty promotion to be canceled. Applicable for promotions with an 'ACTIVE' or 'SCHEDULED' status.
+- **loyalty_program_id** (`string`, required) The unique ID of the base loyalty program to be canceled.
+
+
+## SquareupApi.DeleteLoyaltyReward
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/delete_loyalty_reward_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/delete_loyalty_reward_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Delete a loyalty reward and restore loyalty points.
+
+**Parameters**
+
+- **reward_id** (`string`, required) The ID of the loyalty reward to delete. This is required to identify which reward to remove and restore points for.
+
+
+## SquareupApi.RetrieveLoyaltyReward
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_loyalty_reward_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_loyalty_reward_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a loyalty reward.
+
+**Parameters**
+
+- **loyalty_reward_id** (`string`, required) The unique ID of the loyalty reward to retrieve.
+
+
+## SquareupApi.GetMerchantDetails
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/get_merchant_details_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/get_merchant_details_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve merchant details using an access token.
+
+**Parameters**
+
+- **previous_response_cursor** (`integer`, optional) The cursor generated by the previous response. Use this to fetch the next set of merchant details if needed.
+
+
+## SquareupApi.ListMerchantCustomAttributeDefinitions
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_merchant_custom_attribute_definitions_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_merchant_custom_attribute_definitions_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve custom attribute definitions for a Square seller account.
+
+**Parameters**
+
+- **filter_by_visibility** (`string`, optional) Specify the visibility to filter custom attribute definitions. Options: 'ALL', 'READ', 'READ_WRITE'.
+- **max_results_per_page** (`integer`, optional) Specifies the maximum number of results to return per page. Valid values are between 1 and 100. Defaults to 20.
+- **pagination_cursor** (`string`, optional) Cursor to retrieve the next page of results from a previous API call response.
+
+
+## SquareupApi.DeleteMerchantCustomAttribute
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/delete_merchant_custom_attribute_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/delete_merchant_custom_attribute_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Delete a custom attribute definition from a merchant account.
+
+**Parameters**
+
+- **attribute_key_to_delete** (`string`, required) The key of the custom attribute definition to delete from the merchant account.
+
+
+## SquareupApi.RetrieveMerchantCustomAttribute
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_merchant_custom_attribute_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_merchant_custom_attribute_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve a merchant's custom attribute definition.
+
+**Parameters**
+
+- **custom_attribute_key** (`string`, required) The key of the custom attribute definition to retrieve. Use the qualified key if not the definition owner.
+- **custom_attribute_version** (`integer`, optional) The version of the custom attribute definition required for consistent reads. It returns the specified or a higher version if available, or an error if higher than the current version.
+
+
+## SquareupApi.RetrieveMerchantInfo
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_merchant_info_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_merchant_info_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a specific merchant using merchant ID.
+
+**Parameters**
+
+- **merchant_id** (`string`, required) The unique ID of the merchant to retrieve. Use 'me' to access the current accessible merchant.
+
+
+## SquareupApi.ListMerchantCustomAttributes
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_merchant_custom_attributes_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_merchant_custom_attributes_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve custom attributes for a specified merchant.
+
+**Parameters**
+
+- **merchant_id** (`string`, required) The ID of the target merchant. Use this to specify which merchant's custom attributes you want to retrieve.
+- **filter_by_visibility** (`string`, optional) Specify how to filter custom attribute definitions by visibility. Options: 'ALL', 'READ', 'READ_WRITE'.
+- **max_results_per_page** (`integer`, optional) Maximum number of results per single paged response. Value must be between 1 and 100, with a default of 20.
+- **pagination_cursor** (`string`, optional) The cursor from the previous response to retrieve the next page of results.
+- **include_custom_attribute_definitions** (`boolean`, optional) Set to `true` to include custom attribute definitions, including their name, description, and data type. Default is `false`.
+
+
+## SquareupApi.RemoveMerchantCustomAttribute
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/remove_merchant_custom_attribute_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/remove_merchant_custom_attribute_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Deletes a custom attribute from a merchant.
+
+**Parameters**
+
+- **merchant_identifier** (`string`, required) The unique identifier of the target merchant whose custom attribute will be deleted.
+- **custom_attribute_key** (`string`, required) The key of the custom attribute to delete. It must match a custom attribute definition in the Square seller account. Use a qualified key if not the definition owner.
+
+
+## SquareupApi.GetMerchantCustomAttribute
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/get_merchant_custom_attribute_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/get_merchant_custom_attribute_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve a custom attribute for a specific merchant.
+
+**Parameters**
+
+- **merchant_id** (`string`, required) The unique identifier for the target merchant whose custom attribute is to be retrieved.
+- **custom_attribute_key** (`string`, required) The key of the custom attribute to retrieve. Must match the `key` of a custom attribute definition in the Square seller account.
+- **custom_attribute_version** (`integer`, optional) Specifies the version of the custom attribute for consistent reads. If higher than current, returns an error.
+- **include_definition** (`boolean`, optional) Set to true to include the custom attribute definition, providing additional details such as name, description, and data type.
+
+
+## SquareupApi.RetrieveCheckoutLocationSettings
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_checkout_location_settings_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_checkout_location_settings_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve location-level settings for a Square checkout page.
+
+**Parameters**
+
+- **location_id** (`string`, required) The unique identifier for the location to retrieve settings for.
+
+
+## SquareupApi.GetSquareMerchantSettings
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/get_square_merchant_settings_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/get_square_merchant_settings_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve merchant settings for Square checkout pages.
+
+**Parameters**
+
+This tool does not take any parameters.
+
+## SquareupApi.ListPaymentLinks
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_payment_links_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_payment_links_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve all available payment links from Squareup.
+
+**Parameters**
+
+- **pagination_cursor** (`string`, optional) A string cursor for paginating results. Use it to fetch the next set of results from a previous query. Leave blank to get the first page.
+- **results_per_page_limit** (`integer`, optional) Sets the maximum number of payment links to return per page. Defaults to 100, ignored if negative or exceeds 1000.
+
+
+## SquareupApi.DeletePaymentLink
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/delete_payment_link_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/delete_payment_link_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Deletes a specified payment link.
+
+**Parameters**
+
+- **payment_link_id** (`string`, required) The ID of the payment link you want to delete. Provide the specific link ID to proceed with deletion.
+
+
+## SquareupApi.RetrievePaymentLink
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_payment_link_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_payment_link_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a specified payment link.
+
+**Parameters**
+
+- **payment_link_id** (`string`, required) The unique ID of the payment link to retrieve details for.
+
+
+## SquareupApi.ListOrderCustomAttributeDefinitions
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_order_custom_attribute_definitions_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_order_custom_attribute_definitions_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve order-related custom attribute definitions for a Square seller.
+
+**Parameters**
+
+- **custom_attribute_visibility_filter** (`string`, optional) Specifies which custom attributes to return: all, read-only, or read-write.
+- **pagination_cursor** (`string`, optional) The cursor from the previous response to get the next page of results. See [Pagination](https://developer.squareup.com/docs/working-with-apis/pagination).
+- **maximum_results_per_page** (`integer`, optional) The maximum number of results to return in a single paged response. Minimum is 1, maximum is 100. Default is 20.
+
+
+## SquareupApi.DeleteOrderCustomAttributeDefinition
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/delete_order_custom_attribute_definition_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/delete_order_custom_attribute_definition_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Delete an order-related custom attribute definition.
+
+**Parameters**
+
+- **custom_attribute_key** (`string`, required) The key identifying the custom attribute definition to be deleted from the seller's account.
+
+
+## SquareupApi.RetrieveOrderCustomAttributeDefinition
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_order_custom_attribute_definition_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_order_custom_attribute_definition_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve custom attribute definition for a Square order.
+
+**Parameters**
+
+- **custom_attribute_key** (`string`, required) The key of the custom attribute definition to retrieve for an order.
+- **current_version_of_custom_attribute** (`integer`, optional) Specify the current version of the custom attribute for optimistic concurrency control. Optional.
+
+
+## SquareupApi.RetrieveOrderById
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_order_by_id_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_order_by_id_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve order details by Order ID.
+
+**Parameters**
+
+- **order_id** (`string`, required) The unique identifier for the order to retrieve details for.
+
+
+## SquareupApi.ListOrderCustomAttributes
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_order_custom_attributes_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_order_custom_attributes_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve custom attributes linked to a specific order.
+
+**Parameters**
+
+- **target_order_id** (`string`, required) The ID of the specific order for which to retrieve custom attributes.
+- **attribute_visibility_filter** (`string`, optional) Select which custom attributes to return: 'ALL' for all, 'READ' for read-only, 'READ_WRITE' for read-write attributes.
+- **pagination_cursor** (`string`, optional) The pagination cursor from the previous response to retrieve the next page of results.
+- **max_results_per_page** (`integer`, optional) The maximum number of results to return in a single paged response. Accepts an integer between 1 and 100. Default is 20.
+- **include_custom_attribute_definitions** (`boolean`, optional) Set to true to include custom attribute definitions with the order attributes. Default is false.
+
+
+## SquareupApi.DeleteOrderCustomAttribute
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/delete_order_custom_attribute_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/delete_order_custom_attribute_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Delete a custom attribute from an order.
+
+**Parameters**
+
+- **order_id** (`string`, required) The unique identifier for the target order from which the custom attribute will be deleted. This ID is crucial for locating the correct order.
+- **custom_attribute_key** (`string`, required) Specifies the key of the custom attribute to be deleted. It must match an existing custom attribute definition's key.
+
+
+## SquareupApi.RetrieveOrderCustomAttribute
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_order_custom_attribute_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_order_custom_attribute_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve a custom attribute associated with an order.
+
+**Parameters**
+
+- **order_id** (`string`, required) The ID of the target order to retrieve the custom attribute for.
+- **custom_attribute_key** (`string`, required) The key for retrieving the custom attribute associated with the order. Must match an existing definition key.
+- **current_version** (`integer`, optional) Specify the current version of the custom attribute for optimistic concurrency control. This is an optional integer value.
+- **include_custom_attribute_definition** (`boolean`, optional) Set to true to include the custom attribute definition details in the response, such as name, description, and data type.
+
+
+## SquareupApi.FetchPaymentList
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/fetch_payment_list_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/fetch_payment_list_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of payments for an account.
+
+**Parameters**
+
+- **start_time_for_payment_retrieval** (`string`, optional) The start time for retrieving payments, in RFC 3339 format, using the `created_at` field. Default is current time minus one year.
+- **payment_retrieval_end_time** (`string`, optional) The end of the time range to retrieve payments, in RFC 3339 format. Defaults to the current time.
+- **order_results_by** (`string`, optional) Specify the order of payment results: 'ASC' for oldest to newest, 'DESC' for newest to oldest (default).
+- **pagination_cursor** (`string`, optional) A cursor from a previous call for fetching the next set of payment results. Use it for pagination.
+- **limit_results_by_location** (`string`, optional) Specify the location ID to limit payment results to that location. Defaults to the main seller location if not provided.
+- **exact_payment_amount** (`integer`, optional) The exact amount of the payment in the total_money field. Provide as an integer value.
+- **payment_card_last_four_digits** (`string`, optional) The last four digits of a payment card to filter specific payments.
+- **payment_card_brand** (`string`, optional) The brand of the payment card to filter payments by (e.g., VISA, MasterCard).
+- **max_results_per_page** (`integer`, optional) Specify the maximum number of payment records to return per page, up to 100. Values over 100 are ignored.
+- **offline_payment_start_time** (`string`, optional) Indicate the start of the time range for retrieving offline payments in RFC 3339 format. Defaults to the current time.
+- **offline_payment_end_time** (`string`, optional) End time in RFC 3339 format to retrieve offline payments, based on `client_created_at`. Defaults to current time.
+- **updated_at_start_time** (`string`, optional) Start time in RFC 3339 format to retrieve payments using the `updated_at` field.
+- **end_time_for_update_retrieval** (`string`, optional) The end time in RFC 3339 format to filter payments by the `updated_at` field.
+- **sort_results_by_field** (`string`, optional) Specify the field to sort the payment results by. Options are 'CREATED_AT', 'OFFLINE_CREATED_AT', or 'UPDATED_AT'. Default is 'CREATED_AT'.
+- **include_offline_payments** (`boolean`, optional) Set to true to include payments taken offline. False excludes them.
+
+
+## SquareupApi.GetPaymentDetails
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/get_payment_details_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/get_payment_details_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve specific payment details by payment ID.
+
+**Parameters**
+
+- **payment_id** (`string`, required) A unique ID for the desired payment to retrieve specific payment details.
+
+
+## SquareupApi.CancelApprovedPayment
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/cancel_approved_payment_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/cancel_approved_payment_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Cancel an approved payment transaction.
+
+**Parameters**
+
+- **payment_identifier** (`string`, required) The unique ID of the payment to cancel. This ID must correspond to a payment with an APPROVED status.
+
+
+## SquareupApi.GetPayoutList
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/get_payout_list_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/get_payout_list_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of all payouts for the default location.
+
+**Parameters**
+
+- **location_id** (`string`, optional) ID of the location to list payouts. Defaults to the main location if not specified.
+- **payout_status_filter** (`string`, optional) Filter payouts by status: 'SENT', 'FAILED', or 'PAID'.
+- **start_time_for_payouts** (`string`, optional) RFC 3339 formatted timestamp for the beginning of payout creation. Defaults to one year ago.
+- **end_time** (`string`, optional) The timestamp for the end of the payout creation time, in RFC 3339 format. Defaults to the current time if not provided.
+- **sort_order** (`string`, optional) Determines if the list of payouts is sorted in ascending ('ASC') or descending ('DESC') order.
+- **pagination_cursor** (`string`, optional) A pagination cursor from a previous call, used to retrieve the next set of results.
+- **max_results_per_page** (`integer`, optional) The maximum number of results to return per page. Must be 100 or fewer; defaults to 100 if a higher value is provided.
+
+
+## SquareupApi.GetPayoutDetails
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/get_payout_details_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/get_payout_details_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a specific payout by payout ID.
+
+**Parameters**
+
+- **payout_id** (`string`, required) The unique identifier of the payout to retrieve details for.
+
+
+## SquareupApi.ListPayoutEntries
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_payout_entries_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_payout_entries_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve all payout entries for a specific payout.
+
+**Parameters**
+
+- **payout_id** (`string`, required) The unique ID of the payout to retrieve entries for. Essential for identifying the payout for which entries are needed.
+- **payout_entries_sort_order** (`string`, optional) Specifies the order in which payout entries are listed. Use 'DESC' for descending or 'ASC' for ascending order.
+- **pagination_cursor** (`string`, optional) Provide this cursor to retrieve the next set of results for the original query. A pagination cursor from a previous call.
+- **max_results_per_page** (`integer`, optional) Sets the maximum number of results to retrieve per page, up to 100. Defaults to 100 if the value exceeds this limit.
+
+
+## SquareupApi.ListPaymentRefunds
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_payment_refunds_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_payment_refunds_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of payment refunds for the account.
+
+**Parameters**
+
+- **start_time_for_refund_retrieval** (`string`, optional) Start of the time range for retrieving PaymentRefund in RFC 3339 format, based on the created_at field. Defaults to one year ago.
+- **refund_end_time** (`string`, optional) Specifies the end date and time for the refund retrieval range in RFC 3339 format, defaulting to the current time if not specified.
+- **results_sort_order** (`string`, optional) Set the order for listing results by `PaymentRefund.created_at`. Use 'ASC' for oldest to newest, 'DESC' for newest to oldest (default).
+- **pagination_cursor** (`string`, optional) A pagination cursor from a previous call to retrieve the next set of results.
+- **limit_results_to_location** (`string`, optional) Specify the location ID to filter results for that location. Defaults to all seller-associated locations.
+- **refund_status_filter** (`string`, optional) Filter refunds by specific status. Uses status values defined in PaymentRefund entity. If omitted, all statuses are included.
+- **payment_source_type** (`string`, optional) Specify the source type of payments to filter refunds. Options: CARD, BANK_ACCOUNT, WALLET, CASH, EXTERNAL. If omitted, all source types are included.
+- **max_results_per_page** (`integer`, optional) Specify the maximum number of refund results per page, up to a maximum of 100.
+- **updated_at_start_time** (`string`, optional) The start of the time range for retrieving refunds, based on the `updated_at` field, in RFC 3339 format. Defaults to `begin_time` if omitted.
+- **updated_at_end_time** (`string`, optional) Indicates the end of the time range to retrieve each `PaymentRefund` for, in RFC 3339 format. Defaults to the current time.
+- **sort_results_by_field** (`string`, optional) Specifies the field to sort refund results by. Options are 'CREATED_AT' or 'UPDATED_AT'.
+
+
+## SquareupApi.FetchSpecificRefund
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/fetch_specific_refund_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/fetch_specific_refund_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a specific refund using its ID.
+
+**Parameters**
+
+- **specific_refund_id** (`string`, required) The unique ID for the specific PaymentRefund to retrieve.
+
+
+## SquareupApi.ListSquareOnlineSites
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_square_online_sites_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_square_online_sites_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of Square Online sites for a seller.
+
+**Parameters**
+
+This tool does not take any parameters.
+
+## SquareupApi.RemoveSquareOnlineSnippet
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/remove_square_online_snippet_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/remove_square_online_snippet_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Delete a snippet from a Square Online site.
+
+**Parameters**
+
+- **site_id_for_snippet_removal** (`string`, required) The unique ID of the Square Online site containing the snippet to remove.
+
+
+## SquareupApi.RetrieveSiteSnippet
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_site_snippet_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_site_snippet_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve snippets from a Square Online site.
+
+**Parameters**
+
+- **site_identifier** (`string`, required) The unique ID of the Square Online site containing your application's snippet.
+
+
+## SquareupApi.RetrieveSubscription
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_subscription_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_subscription_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a specific subscription.
+
+**Parameters**
+
+- **subscription_id** (`string`, required) The ID of the subscription to retrieve.
+- **include_related_info** (`string`, optional) Specify related info to include in the response, such as 'actions' for scheduled actions.
+
+
+## SquareupApi.DeleteSubscriptionAction
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/delete_subscription_action_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/delete_subscription_action_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Delete a scheduled action from a subscription.
+
+**Parameters**
+
+- **subscription_id** (`string`, required) The ID of the subscription for which the action is to be deleted. This ID is required to identify the specific subscription being targeted.
+- **action_id** (`string`, required) The ID of the specific action to be deleted from a subscription.
+
+
+## SquareupApi.CancelSubscription
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/cancel_subscription_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/cancel_subscription_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Schedule cancellation of an active subscription.
+
+**Parameters**
+
+- **subscription_identifier** (`string`, required) The unique identifier of the subscription to be canceled. Required to schedule the cancellation.
+
+
+## SquareupApi.ListSubscriptionEvents
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_subscription_events_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_subscription_events_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve events for a specific subscription.
+
+**Parameters**
+
+- **subscription_id** (`string`, required) The unique ID of the subscription to retrieve events for. Use this to specify which subscription's events to list.
+- **pagination_cursor** (`string`, optional) Specify the cursor to fetch the next set of subscription events if results exceed the limit. Leave unset for the last page.
+- **max_events_per_page** (`integer`, optional) The maximum number of subscription events to return in a single response page.
+
+
+## SquareupApi.ListJobsForSeller
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_jobs_for_seller_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_jobs_for_seller_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of jobs in a seller account.
+
+**Parameters**
+
+- **pagination_cursor** (`string`, optional) The cursor for pagination to retrieve the next page of job results. Obtain this from the previous response.
+
+
+## SquareupApi.RetrieveJobDetails
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_job_details_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_job_details_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a specified job by ID.
+
+**Parameters**
+
+- **job_identifier** (`string`, required) The unique ID of the job to retrieve. This is required to fetch the job details.
+
+
+## SquareupApi.RetrieveTeamMemberDetails
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_team_member_details_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_team_member_details_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a team member by ID.
+
+**Parameters**
+
+- **team_member_id** (`string`, required) The unique identifier of the team member whose details you want to retrieve. This ID is required to access specific team member information.
+
+
+## SquareupApi.RetrieveTeamMemberWageSetting
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_team_member_wage_setting_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_team_member_wage_setting_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve wage setting details for a specific team member.
+
+**Parameters**
+
+- **team_member_id** (`string`, required) The unique identifier for the team member whose wage setting is to be retrieved.
+
+
+## SquareupApi.GetTerminalAction
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/get_terminal_action_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/get_terminal_action_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a terminal action request by ID.
+
+**Parameters**
+
+- **terminal_action_id** (`string`, required) Unique ID of the terminal action to retrieve. Must be provided to access the TerminalAction details.
+
+
+## SquareupApi.CancelTerminalAction
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/cancel_terminal_action_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/cancel_terminal_action_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Cancel a terminal action request if permitted.
+
+**Parameters**
+
+- **terminal_action_id** (`string`, required) Unique ID for the TerminalAction you want to cancel.
+
+
+## SquareupApi.DismissTerminalAction
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/dismiss_terminal_action_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/dismiss_terminal_action_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Dismiss a Square Terminal action request.
+
+**Parameters**
+
+- **terminal_action_id** (`string`, required) Unique ID for the TerminalAction associated with the action to be dismissed.
+
+
+## SquareupApi.RetrieveTerminalCheckout
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_terminal_checkout_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_terminal_checkout_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve a Terminal checkout request by ID.
+
+**Parameters**
+
+- **terminal_checkout_id** (`string`, required) The unique ID used to retrieve details of a Terminal checkout request. Valid for 30 days.
+
+
+## SquareupApi.CancelTerminalCheckout
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/cancel_terminal_checkout_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/cancel_terminal_checkout_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Cancel a Terminal checkout request if feasible.
+
+**Parameters**
+
+- **terminal_checkout_id** (`string`, required) The unique ID of the TerminalCheckout to be canceled.
+
+
+## SquareupApi.DismissTerminalCheckout
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/dismiss_terminal_checkout_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/dismiss_terminal_checkout_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Dismiss a Terminal checkout request if permitted.
+
+**Parameters**
+
+- **terminal_checkout_id** (`string`, required) Unique ID for the TerminalCheckout to be dismissed.
+
+
+## SquareupApi.GetTerminalRefund
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/get_terminal_refund_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/get_terminal_refund_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Fetch Interac Terminal refund details by ID.
+
+**Parameters**
+
+- **terminal_refund_id** (`string`, required) The unique ID of the Interac Terminal refund to retrieve. Must be used within 30 days of creation.
+
+
+## SquareupApi.CancelTerminalRefund
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/cancel_terminal_refund_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/cancel_terminal_refund_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Cancel a terminal refund request if allowed.
+
+**Parameters**
+
+- **terminal_refund_id** (`string`, required) The unique ID for the desired TerminalRefund to cancel.
+
+
+## SquareupApi.DismissTerminalRefund
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/dismiss_terminal_refund_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/dismiss_terminal_refund_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Dismiss a Terminal refund request if permissible.
+
+**Parameters**
+
+- **terminal_refund_unique_id** (`string`, required) The unique identifier for the `TerminalRefund` that is associated with the refund to be dismissed.
+
+
+## SquareupApi.RetrieveVendorInfo
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_vendor_info_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_vendor_info_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve detailed information about a vendor by ID.
+
+**Parameters**
+
+- **vendor_id** (`string`, required) The ID of the vendor whose information you want to retrieve. This should be a unique string identifier.
+
+
+## SquareupApi.ListWebhookEventTypes
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_webhook_event_types_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_webhook_event_types_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieves all available webhook event types for subscription.
+
+**Parameters**
+
+- **api_version** (`string`, optional) Specify the API version to list event types. Overrides the default version if set.
+
+
+## SquareupApi.ListWebhookSubscriptions
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/list_webhook_subscriptions_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/list_webhook_subscriptions_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Lists all webhook subscriptions for your application.
+
+**Parameters**
+
+- **pagination_cursor** (`string`, optional) A cursor for pagination to retrieve the next set of results from a previous query.
+- **sort_order** (`string`, optional) Sorts the webhook subscriptions by creation date. Options are 'ASC' for ascending or 'DESC' for descending. Defaults to 'ASC'.
+- **max_results_per_page** (`integer`, optional) The maximum number of webhook subscription results to return in a single page (max: 100).
+- **include_disabled_subscriptions** (`boolean`, optional) Set to true to include disabled subscriptions in the results. By default, only enabled subscriptions are returned.
+
+
+## SquareupApi.DeleteWebhookSubscription
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/delete_webhook_subscription_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/delete_webhook_subscription_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Deletes a webhook subscription to stop receiving events.
+
+**Parameters**
+
+- **webhook_subscription_id** (`string`, required) The unique identifier for the webhook subscription to be deleted. This ID is required to identify the specific subscription.
+
+
+## SquareupApi.RetrieveWebhookSubscription
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/squareup_api/retrieve_webhook_subscription_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/squareup_api/retrieve_webhook_subscription_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a specific webhook subscription by ID.
+
+**Parameters**
+
+- **webhook_subscription_id** (`string`, required) The unique identifier of the webhook subscription to be retrieved. This is a required parameter.
+
+
+
+
+<ToolFooter pipPackageName="arcade_squareup_api" />
