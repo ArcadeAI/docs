@@ -1,0 +1,219 @@
+---
+title: "Build MCP Server QuickStart"
+description: "Create your custom MCP Server with Arcade MCP"
+---
+
+import { Steps, Tabs, Callout } from "nextra/components";
+import { SignupLink } from "@/app/_components/analytics";
+import { GuideOverview } from "@/app/_components/guide-overview";
+
+# Build MCP Server QuickStart
+
+<GuideOverview>
+<GuideOverview.Outcomes>
+
+Most AI apps are stuck in read-only mode. Arcade gives your AI the power to act — send Gmail, update Notion, message in Slack, and more.
+
+</GuideOverview.Outcomes>
+
+<GuideOverview.Prerequisites>
+
+- Python 3.10 or higher
+- For this guide, we'll use [uv](https://docs.astral.sh/uv/getting-started/installation/) as our package manager.
+
+</GuideOverview.Prerequisites>
+
+<GuideOverview.YouWillLearn>
+
+- Install the Arcade MCP Framework
+- Start your MCP server and connect to it from your favorite MCP client
+- Call a simple tool
+- Call a tool that requires a secret
+- Create an Arcade account
+- Call a tool that requires authentication
+
+</GuideOverview.YouWillLearn>
+</GuideOverview>
+
+<Steps>
+
+## Create your virtual environment
+
+In your terminal, run the following command to create and activate a virtual environment:
+
+```bash
+uv venv
+source .venv/bin/activate
+```
+
+## Install the Arcade CLI
+
+In your terminal, run the following command to install the `arcade-mcp` package:
+
+```bash
+uv pip install arcade-mcp
+```
+
+This package includes the CLI tools and the `arcade-mcp-server` library.
+
+## Create Your Server
+
+In your terminal, run the following command to scaffold a new MCP Server called `my_server`:
+
+```bash
+arcade new my_server
+cd my_server
+```
+
+This generates a complete project with:
+
+- **server.py** Main server file with MCPApp and example tools
+- **pyproject.toml** Dependencies and project configuration
+- **.env.example** Example `.env` file containing a secret required by one of the generated tools in `server.py`
+
+`server.py` includes proper structure with command-line argument handling. It creates an `MCPApp` with three sample tools:
+
+- **`greet`**: This tool has a single argument, the name of the person to greet. It requires no secrets or auth
+- **`whisper_secret`**: This tool requires no arguments, and will output the last 4 characters of a `MY_SECRET_KEY` secret.
+- **`get_posts_in_subreddit`**: This tool has a single argument, a subreddit, and will return the latest posts on that subreddit, it requires the user to authenticate their reddit account.
+
+> If you're having issues with the `arcade` command, please see the [Troubleshooting](#troubleshooting) section.
+
+## Setup the secrets in your environment
+
+Secrets are sensitive strings like passwords, api-keys, or other tokens that grant access to a protected resource or API. Arcade includes the "whisper_secret" tool that requires a secret key to be set in your environment. If the secret is not set, the tool will return an error.
+
+<Tabs items={["Environment Variable", "Terminal"]}>
+<Tabs.Tab>
+You can create a `.env` file in the root of your project and add your secret:
+
+```env filename=".env"
+MY_SECRET_KEY="my-secret-value"
+```
+
+The project includes a `.env.example` file with the secret key name and example value.
+You can rename it to `.env` to start using it.
+
+```bash
+mv .env.example .env
+```
+
+</Tabs.Tab>
+<Tabs.Tab>
+You can set the environment variable in your terminal directly with this command:
+
+```bash
+export MY_SECRET_KEY="my-secret-value"
+```
+
+</Tabs.Tab>
+</Tabs>
+
+## Connect to Arcade to enable authenticated tool calling
+
+Since the Reddit tool accesses information only available to your Reddit account, you'll need to authorize it. For this, you'll need to create an Arcade account and connect to it from the terminal, run:
+
+```bash
+arcade login
+```
+
+Follow the instructions in your browser, and once you've finished, your terminal will be connected to your Arcade account.
+
+## Run your MCP Server
+
+Run your MCP Server using one of the with the following commands in your terminal:
+
+<Tabs
+  items={["HTTP transport (default)", "stdio transport (for Claude Desktop)"]}
+  storageKey="preferredTransport"
+>
+
+<Tabs.Tab>
+
+```bash
+uv run server.py http
+```
+
+For HTTP transport, view your server's API docs at [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
+
+</Tabs.Tab>
+<Tabs.Tab>
+
+```bash
+uv run server.py stdio
+```
+
+</Tabs.Tab>
+</Tabs>
+
+You should see output like this in your terminal:
+
+```bash
+INFO | Starting server v1.0.0 (my_server)
+INFO | Added tool: greet
+INFO | Starting MCP server on http://127.0.0.1:8000
+```
+
+## Configure your MCP Client(s)
+
+Now you can connect your MCP server to apps that support MCP Clients, like AI assistants and IDEs. :
+
+<Tabs
+  items={["Cursor IDE", "VS Code", "Claude Desktop"]}
+  storageKey="preferredAgent"
+>
+  <Tabs.Tab>
+
+    ```bash
+    arcade configure cursor --from-local
+    ```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+    ```bash
+    arcade configure vscode --from-local
+    ```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+    ```bash
+    arcade configure claude --from-local
+    ```
+
+  </Tabs.Tab>
+</Tabs>
+
+## Try it out!
+
+Try calling your tool inside your assistant.
+
+Here's some prompts you can try:
+
+- "What's the latest post on r/mcp?"
+- "What's the last 4 characters of my secret key?"
+- "Greet me as Supreme MCP Master"
+
+</Steps>
+
+## Troubleshooting
+
+### `arcade` command not found or not working
+
+If you're getting issues with the `arcade` command, please make sure you did not install it outside of your virtual environment. For example, if your system-wide Python installation older than 3.10, you may need to uninstall arcade from that Python installation in order to the terminal to recognize the `arcade` command installed in your virtual environment.
+
+### The Reddit tool is not working
+
+Ensure you run `arcade login` and follow the instructions in your browser to connect to your Arcade account.
+
+### The Whisper Secret tool is not working
+
+Ensure you have set the environment variable in your terminal or `.env` file, and that it matches the secret key defined in the `@app.tool` decorator.
+
+## Next Steps
+
+- Try some of our [prebuilt MCP Servers](/mcp-servers) and get MCP tools that work with your favorite integrations
+- Learn more about the [Tool Context](/home/build-tools/tool-context) and building MCP tools with Arcade
+- Learn how to [evaluate tools](/home/evaluate-tools/why-evaluate-tools) to ensure they're working correctly
+- [Deploy](/home/serve-tools/arcade-deploy) your MCP server
