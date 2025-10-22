@@ -1,4 +1,5 @@
 # WeaviateApi
+
 import StarterToolInfo from "@/app/_components/starter-tool-info";
 import ToolInfo from "@/app/_components/tool-info";
 import Badges from "@/app/_components/badges";
@@ -20,102 +21,345 @@ import { Callout } from "nextra/components";
 
 The WeaviateApi MCP Server offers a comprehensive suite of tools for managing and interacting with Weaviate, a vector search engine. Users can perform a variety of actions, including:
 
+## Authentication
+
+The Arcade Weaviate API MCP Server requires two environment variables to authenticate with your Weaviate instance:
+
+- `WEAVIATE_API_KEY`
+- `WEAVIATE_SERVER_URL`
+
+**How to obtain your credentials:**
+
+1. Log in to your [Weaviate Console](https://console.weaviate.cloud/)
+2. Select your Weaviate cluster
+3. Navigate to **Details** or **API Keys** section
+4. Click **Create API Key** or use an existing key
+5. Copy your **API Key**
+6. Copy your **Cluster URL** (this is your server URL and must include `https://`)
+
+**Note:** The `WEAVIATE_SERVER_URL` must include the full URL with the `https://` protocol (e.g., `https://your-cluster.weaviate.network`).
+
+For more details, see the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication).
+
 ## Available Tools
 
 <TableOfContents
   headers={["Tool Name", "Description"]}
-  data={
+  data={[
     [
-      ["WeaviateApi.DiscoverApiEndpoints", "Retrieve links to available REST API endpoints."],
-      ["WeaviateApi.CheckWeaviateLiveness", "Check if the Weaviate instance is running properly."],
-      ["WeaviateApi.CheckWeaviateReadiness", "Check if the Weaviate instance is ready to accept traffic."],
-      ["WeaviateApi.GetOidcDiscovery", "Fetches OIDC discovery details for Weaviate authentication."],
-      ["WeaviateApi.ReplicateShardReplica", "Initiates replication of a shard replica to a target node."],
-      ["WeaviateApi.DeleteAllReplications", "Schedule deletion of all replication operations across the system."],
-      ["WeaviateApi.ForceDeleteReplications", "Forcefully delete replication operations with caution."],
-      ["WeaviateApi.FetchReplicationStatus", "Retrieve the status of a specific replication operation."],
-      ["WeaviateApi.CancelReplicationOperation", "Cancel an active replication operation."],
-      ["WeaviateApi.ListReplicationStatus", "Retrieve registered replication operations and details."],
-      ["WeaviateApi.CancelReplication", "Cancel an active replication operation by ID."],
-      ["WeaviateApi.FetchShardingState", "Fetch the current sharding state and replica details for collections."],
-      ["WeaviateApi.GetAuthenticatedUserInfo", "Retrieve details about the authenticated user and their roles."],
-      ["WeaviateApi.ListDbUsers", "Retrieve all database users and their roles and statuses."],
-      ["WeaviateApi.GetDatabaseUserInfo", "Retrieve information about a specific database user."],
-      ["WeaviateApi.CreateDatabaseUser", "Create a new database user and obtain an API key."],
-      ["WeaviateApi.DeleteDatabaseUser", "Delete a specific database user."],
-      ["WeaviateApi.RotateUserApiKey", "Revoke and regenerate the API key for a database user."],
-      ["WeaviateApi.ActivateDatabaseUser", "Activate a deactivated database user account."],
-      ["WeaviateApi.DeactivateDatabaseUser", "Deactivate a database user account."],
-      ["WeaviateApi.GetRolesAndPermissions", "Retrieve all roles and their assigned permissions."],
-      ["WeaviateApi.CreateRoleWithPermissions", "Create a new role with specified permissions."],
-      ["WeaviateApi.AddPermissionsToRole", "Add new permissions to a role without affecting existing ones."],
-      ["WeaviateApi.RevokeRolePermissions", "Revoke permissions from a specified role."],
-      ["WeaviateApi.FetchRoleByName", "Fetch role details using its name."],
-      ["WeaviateApi.DeleteRole", "Delete a role and revoke its permissions system-wide."],
-      ["WeaviateApi.CheckRolePermission", "Check if a role has specific permissions in the system."],
-      ["WeaviateApi.GetUsersByRole", "Retrieve users with a specific role assignment."],
-      ["WeaviateApi.GetGroupsForRole", "Retrieve groups assigned to a specific role."],
-      ["WeaviateApi.GetUserRoles", "Retrieve all roles assigned to a specific user."],
-      ["WeaviateApi.AssignRolesToUser", "Assign roles to a user in the system."],
-      ["WeaviateApi.RevokeUserRole", "Remove roles from a specified user in the system."],
-      ["WeaviateApi.AssignRoleToGroup", "Assign roles to a specific group."],
-      ["WeaviateApi.RevokeRoleFromGroup", "Revoke roles from a specified group to manage permissions."],
-      ["WeaviateApi.GetRolesForGroup", "Retrieve roles assigned to a specific group."],
-      ["WeaviateApi.RetrieveGroupNames", "Retrieve available group names for a specified type."],
-      ["WeaviateApi.ListDataObjects", "Retrieve a list of data objects from a specified collection."],
-      ["WeaviateApi.CreateObjectInWeaviate", "Create a new data object in Weaviate."],
-      ["WeaviateApi.GetDataObject", "Retrieve a data object using collection name and UUID."],
-      ["WeaviateApi.UpdateObjectProperties", "Replace properties of a data object using its class and ID."],
-      ["WeaviateApi.DeleteDataObject", "Delete a data object from a specified collection using its UUID."],
-      ["WeaviateApi.UpdateDataObject", "Update specific properties of a data object."],
-      ["WeaviateApi.ReplaceObjectReferences", "Replace existing references for an object in Weaviate."],
-      ["WeaviateApi.AddReferenceToObject", "Add a reference to an object's property."],
-      ["WeaviateApi.DeleteReferenceFromObject", "Delete a specific reference from an object's property."],
-      ["WeaviateApi.ValidateDataObjectStructure", "Validate a data object's structure against the schema."],
-      ["WeaviateApi.BatchRegisterObjects", "Register multiple data objects in a single request."],
-      ["WeaviateApi.DeleteMultipleObjects", "Deletes multiple data objects using specified filter criteria."],
-      ["WeaviateApi.BatchCreateReferences", "Batch create cross-references between items in a collection."],
-      ["WeaviateApi.ExecuteGraphqlQuery", "Executes a GraphQL query on Weaviate."],
-      ["WeaviateApi.ExecuteGraphqlBatchQueries", "Execute multiple GraphQL queries in a single request."],
-      ["WeaviateApi.GetWeaviateInstanceMeta", "Get meta-information about a Weaviate instance."],
-      ["WeaviateApi.RetrieveDatabaseSchema", "Retrieve definitions of all classes in the database schema."],
-      ["WeaviateApi.CreateSchemaObject", "Create a new collection (class) in Weaviate."],
-      ["WeaviateApi.RetrieveCollectionSchema", "Retrieve the schema of a specified collection."],
-      ["WeaviateApi.UpdateCollectionSettings", "Update settings of an existing collection."],
-      ["WeaviateApi.DeleteSchemaCollection", "Permanently delete a collection from the schema."],
-      ["WeaviateApi.AddPropertyToCollection", "Add a new property to an existing collection schema."],
-      ["WeaviateApi.GetCollectionShardStatus", "Retrieves status of shards for a specified collection."],
-      ["WeaviateApi.UpdateShardStatus", "Update the status of a specific shard in a collection."],
-      ["WeaviateApi.GetCollectionTenants", "Retrieve tenants for a specified collection."],
-      ["WeaviateApi.UpdateTenantStatus", "Update the activity status of specified tenants."],
-      ["WeaviateApi.CreateTenants", "Create new tenants in a specified collection."],
-      ["WeaviateApi.DeleteTenants", "Permanently delete specified tenants from a collection."],
-      ["WeaviateApi.GetTenantDetails", "Retrieve details about a specific tenant's status."],
-      ["WeaviateApi.RetrieveAliases", "Retrieve all aliases from the system."],
-      ["WeaviateApi.CreateAliasMapping", "Create a new alias for a collection in Weaviate."],
-      ["WeaviateApi.RetrieveAliasDetails", "Retrieve details about a specific alias by its name."],
-      ["WeaviateApi.UpdateCollectionAlias", "Redirect an alias to a different collection."],
-      ["WeaviateApi.DeleteAlias", "Delete an existing alias from the system."],
-      ["WeaviateApi.ListBackups", "Retrieve all backup IDs and their statuses."],
-      ["WeaviateApi.CreateBackup", "Initiates backup creation for specified collections."],
-      ["WeaviateApi.CheckBackupStatus", "Get the current status of a backup creation process."],
-      ["WeaviateApi.CancelBackup", "Cancel a backup by its ID from a specified backend storage."],
-      ["WeaviateApi.CheckBackupRestoreStatus", "Check the status of a backup restoration process."],
-      ["WeaviateApi.RestoreBackup", "Restore collections from a specified backup."],
-      ["WeaviateApi.GetWeaviateClusterStatistics", "Get Weaviate cluster Raft protocol statistics."],
-      ["WeaviateApi.GetClusterNodeStatus", "Retrieve status information about all nodes in a cluster."],
-      ["WeaviateApi.GetShardHostNodesStatus", "Retrieve status of nodes hosting shards for a collection."],
-      ["WeaviateApi.ListDistributedTasks", "Retrieve all distributed tasks in the cluster."],
-      ["WeaviateApi.InitiateClassificationTask", "Initiate a classification task in the background."],
-      ["WeaviateApi.GetClassificationStatus", "Retrieve status and results of a classification task."],
-    ]
-  }
+      "WeaviateApi.DiscoverApiEndpoints",
+      "Retrieve links to available REST API endpoints.",
+    ],
+    [
+      "WeaviateApi.CheckWeaviateLiveness",
+      "Check if the Weaviate instance is running properly.",
+    ],
+    [
+      "WeaviateApi.CheckWeaviateReadiness",
+      "Check if the Weaviate instance is ready to accept traffic.",
+    ],
+    [
+      "WeaviateApi.GetOidcDiscovery",
+      "Fetches OIDC discovery details for Weaviate authentication.",
+    ],
+    [
+      "WeaviateApi.ReplicateShardReplica",
+      "Initiates replication of a shard replica to a target node.",
+    ],
+    [
+      "WeaviateApi.DeleteAllReplications",
+      "Schedule deletion of all replication operations across the system.",
+    ],
+    [
+      "WeaviateApi.ForceDeleteReplications",
+      "Forcefully delete replication operations with caution.",
+    ],
+    [
+      "WeaviateApi.FetchReplicationStatus",
+      "Retrieve the status of a specific replication operation.",
+    ],
+    [
+      "WeaviateApi.CancelReplicationOperation",
+      "Cancel an active replication operation.",
+    ],
+    [
+      "WeaviateApi.ListReplicationStatus",
+      "Retrieve registered replication operations and details.",
+    ],
+    [
+      "WeaviateApi.CancelReplication",
+      "Cancel an active replication operation by ID.",
+    ],
+    [
+      "WeaviateApi.FetchShardingState",
+      "Fetch the current sharding state and replica details for collections.",
+    ],
+    [
+      "WeaviateApi.GetAuthenticatedUserInfo",
+      "Retrieve details about the authenticated user and their roles.",
+    ],
+    [
+      "WeaviateApi.ListDbUsers",
+      "Retrieve all database users and their roles and statuses.",
+    ],
+    [
+      "WeaviateApi.GetDatabaseUserInfo",
+      "Retrieve information about a specific database user.",
+    ],
+    [
+      "WeaviateApi.CreateDatabaseUser",
+      "Create a new database user and obtain an API key.",
+    ],
+    ["WeaviateApi.DeleteDatabaseUser", "Delete a specific database user."],
+    [
+      "WeaviateApi.RotateUserApiKey",
+      "Revoke and regenerate the API key for a database user.",
+    ],
+    [
+      "WeaviateApi.ActivateDatabaseUser",
+      "Activate a deactivated database user account.",
+    ],
+    [
+      "WeaviateApi.DeactivateDatabaseUser",
+      "Deactivate a database user account.",
+    ],
+    [
+      "WeaviateApi.GetRolesAndPermissions",
+      "Retrieve all roles and their assigned permissions.",
+    ],
+    [
+      "WeaviateApi.CreateRoleWithPermissions",
+      "Create a new role with specified permissions.",
+    ],
+    [
+      "WeaviateApi.AddPermissionsToRole",
+      "Add new permissions to a role without affecting existing ones.",
+    ],
+    [
+      "WeaviateApi.RevokeRolePermissions",
+      "Revoke permissions from a specified role.",
+    ],
+    ["WeaviateApi.FetchRoleByName", "Fetch role details using its name."],
+    [
+      "WeaviateApi.DeleteRole",
+      "Delete a role and revoke its permissions system-wide.",
+    ],
+    [
+      "WeaviateApi.CheckRolePermission",
+      "Check if a role has specific permissions in the system.",
+    ],
+    [
+      "WeaviateApi.GetUsersByRole",
+      "Retrieve users with a specific role assignment.",
+    ],
+    [
+      "WeaviateApi.GetGroupsForRole",
+      "Retrieve groups assigned to a specific role.",
+    ],
+    [
+      "WeaviateApi.GetUserRoles",
+      "Retrieve all roles assigned to a specific user.",
+    ],
+    ["WeaviateApi.AssignRolesToUser", "Assign roles to a user in the system."],
+    [
+      "WeaviateApi.RevokeUserRole",
+      "Remove roles from a specified user in the system.",
+    ],
+    ["WeaviateApi.AssignRoleToGroup", "Assign roles to a specific group."],
+    [
+      "WeaviateApi.RevokeRoleFromGroup",
+      "Revoke roles from a specified group to manage permissions.",
+    ],
+    [
+      "WeaviateApi.GetRolesForGroup",
+      "Retrieve roles assigned to a specific group.",
+    ],
+    [
+      "WeaviateApi.RetrieveGroupNames",
+      "Retrieve available group names for a specified type.",
+    ],
+    [
+      "WeaviateApi.ListDataObjects",
+      "Retrieve a list of data objects from a specified collection.",
+    ],
+    [
+      "WeaviateApi.CreateObjectInWeaviate",
+      "Create a new data object in Weaviate.",
+    ],
+    [
+      "WeaviateApi.GetDataObject",
+      "Retrieve a data object using collection name and UUID.",
+    ],
+    [
+      "WeaviateApi.UpdateObjectProperties",
+      "Replace properties of a data object using its class and ID.",
+    ],
+    [
+      "WeaviateApi.DeleteDataObject",
+      "Delete a data object from a specified collection using its UUID.",
+    ],
+    [
+      "WeaviateApi.UpdateDataObject",
+      "Update specific properties of a data object.",
+    ],
+    [
+      "WeaviateApi.ReplaceObjectReferences",
+      "Replace existing references for an object in Weaviate.",
+    ],
+    [
+      "WeaviateApi.AddReferenceToObject",
+      "Add a reference to an object's property.",
+    ],
+    [
+      "WeaviateApi.DeleteReferenceFromObject",
+      "Delete a specific reference from an object's property.",
+    ],
+    [
+      "WeaviateApi.ValidateDataObjectStructure",
+      "Validate a data object's structure against the schema.",
+    ],
+    [
+      "WeaviateApi.BatchRegisterObjects",
+      "Register multiple data objects in a single request.",
+    ],
+    [
+      "WeaviateApi.DeleteMultipleObjects",
+      "Deletes multiple data objects using specified filter criteria.",
+    ],
+    [
+      "WeaviateApi.BatchCreateReferences",
+      "Batch create cross-references between items in a collection.",
+    ],
+    [
+      "WeaviateApi.ExecuteGraphqlQuery",
+      "Executes a GraphQL query on Weaviate.",
+    ],
+    [
+      "WeaviateApi.ExecuteGraphqlBatchQueries",
+      "Execute multiple GraphQL queries in a single request.",
+    ],
+    [
+      "WeaviateApi.GetWeaviateInstanceMeta",
+      "Get meta-information about a Weaviate instance.",
+    ],
+    [
+      "WeaviateApi.RetrieveDatabaseSchema",
+      "Retrieve definitions of all classes in the database schema.",
+    ],
+    [
+      "WeaviateApi.CreateSchemaObject",
+      "Create a new collection (class) in Weaviate.",
+    ],
+    [
+      "WeaviateApi.RetrieveCollectionSchema",
+      "Retrieve the schema of a specified collection.",
+    ],
+    [
+      "WeaviateApi.UpdateCollectionSettings",
+      "Update settings of an existing collection.",
+    ],
+    [
+      "WeaviateApi.DeleteSchemaCollection",
+      "Permanently delete a collection from the schema.",
+    ],
+    [
+      "WeaviateApi.AddPropertyToCollection",
+      "Add a new property to an existing collection schema.",
+    ],
+    [
+      "WeaviateApi.GetCollectionShardStatus",
+      "Retrieves status of shards for a specified collection.",
+    ],
+    [
+      "WeaviateApi.UpdateShardStatus",
+      "Update the status of a specific shard in a collection.",
+    ],
+    [
+      "WeaviateApi.GetCollectionTenants",
+      "Retrieve tenants for a specified collection.",
+    ],
+    [
+      "WeaviateApi.UpdateTenantStatus",
+      "Update the activity status of specified tenants.",
+    ],
+    [
+      "WeaviateApi.CreateTenants",
+      "Create new tenants in a specified collection.",
+    ],
+    [
+      "WeaviateApi.DeleteTenants",
+      "Permanently delete specified tenants from a collection.",
+    ],
+    [
+      "WeaviateApi.GetTenantDetails",
+      "Retrieve details about a specific tenant's status.",
+    ],
+    ["WeaviateApi.RetrieveAliases", "Retrieve all aliases from the system."],
+    [
+      "WeaviateApi.CreateAliasMapping",
+      "Create a new alias for a collection in Weaviate.",
+    ],
+    [
+      "WeaviateApi.RetrieveAliasDetails",
+      "Retrieve details about a specific alias by its name.",
+    ],
+    [
+      "WeaviateApi.UpdateCollectionAlias",
+      "Redirect an alias to a different collection.",
+    ],
+    ["WeaviateApi.DeleteAlias", "Delete an existing alias from the system."],
+    ["WeaviateApi.ListBackups", "Retrieve all backup IDs and their statuses."],
+    [
+      "WeaviateApi.CreateBackup",
+      "Initiates backup creation for specified collections.",
+    ],
+    [
+      "WeaviateApi.CheckBackupStatus",
+      "Get the current status of a backup creation process.",
+    ],
+    [
+      "WeaviateApi.CancelBackup",
+      "Cancel a backup by its ID from a specified backend storage.",
+    ],
+    [
+      "WeaviateApi.CheckBackupRestoreStatus",
+      "Check the status of a backup restoration process.",
+    ],
+    [
+      "WeaviateApi.RestoreBackup",
+      "Restore collections from a specified backup.",
+    ],
+    [
+      "WeaviateApi.GetWeaviateClusterStatistics",
+      "Get Weaviate cluster Raft protocol statistics.",
+    ],
+    [
+      "WeaviateApi.GetClusterNodeStatus",
+      "Retrieve status information about all nodes in a cluster.",
+    ],
+    [
+      "WeaviateApi.GetShardHostNodesStatus",
+      "Retrieve status of nodes hosting shards for a collection.",
+    ],
+    [
+      "WeaviateApi.ListDistributedTasks",
+      "Retrieve all distributed tasks in the cluster.",
+    ],
+    [
+      "WeaviateApi.InitiateClassificationTask",
+      "Initiate a classification task in the background.",
+    ],
+    [
+      "WeaviateApi.GetClassificationStatus",
+      "Retrieve status and results of a classification task.",
+    ],
+  ]}
 />
 
 <Callout>
   If you need to perform an action that's not listed here, you can [get in touch
-  with us](mailto:contact@arcade.dev) to request a new tool, or [create your
-  own tools](/home/build-tools/create-a-mcp-server).
+  with us](mailto:contact@arcade.dev) to request a new tool, or [create your own
+  tools](/home/build-tools/create-a-mcp-server).
 </Callout>
 
 ## WeaviateApi.DiscoverApiEndpoints
@@ -126,8 +370,12 @@ The WeaviateApi MCP Server offers a comprehensive suite of tools for managing an
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/discover_api_endpoints_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/discover_api_endpoints_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/discover_api_endpoints_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/discover_api_endpoints_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -140,7 +388,7 @@ Retrieve links to available REST API endpoints.
 This tool does not take any parameters.
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.CheckWeaviateLiveness
 
@@ -150,8 +398,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/check_weaviate_liveness_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/check_weaviate_liveness_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/check_weaviate_liveness_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/check_weaviate_liveness_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -164,7 +416,7 @@ Check if the Weaviate instance is running properly.
 This tool does not take any parameters.
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.CheckWeaviateReadiness
 
@@ -174,8 +426,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/check_weaviate_readiness_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/check_weaviate_readiness_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/check_weaviate_readiness_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/check_weaviate_readiness_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -188,7 +444,7 @@ Check if the Weaviate instance is ready to accept traffic.
 This tool does not take any parameters.
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.GetOidcDiscovery
 
@@ -198,8 +454,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/get_oidc_discovery_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/get_oidc_discovery_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/get_oidc_discovery_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/get_oidc_discovery_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -212,7 +472,7 @@ Fetches OIDC discovery details for Weaviate authentication.
 This tool does not take any parameters.
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.ReplicateShardReplica
 
@@ -222,8 +482,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/replicate_shard_replica_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/replicate_shard_replica_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/replicate_shard_replica_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/replicate_shard_replica_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -241,7 +505,7 @@ Initiates replication of a shard replica to a target node.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.DeleteAllReplications
 
@@ -251,8 +515,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/delete_all_replications_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/delete_all_replications_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/delete_all_replications_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/delete_all_replications_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -265,7 +533,7 @@ Schedule deletion of all replication operations across the system.
 This tool does not take any parameters.
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.ForceDeleteReplications
 
@@ -275,8 +543,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/force_delete_replications_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/force_delete_replications_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/force_delete_replications_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/force_delete_replications_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -294,7 +566,7 @@ Forcefully delete replication operations with caution.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.FetchReplicationStatus
 
@@ -304,8 +576,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/fetch_replication_status_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/fetch_replication_status_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/fetch_replication_status_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/fetch_replication_status_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -320,7 +596,7 @@ Retrieve the status of a specific replication operation.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.CancelReplicationOperation
 
@@ -330,8 +606,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/cancel_replication_operation_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/cancel_replication_operation_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/cancel_replication_operation_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/cancel_replication_operation_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -345,7 +625,7 @@ Cancel an active replication operation.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.ListReplicationStatus
 
@@ -355,8 +635,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/list_replication_status_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/list_replication_status_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/list_replication_status_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/list_replication_status_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -373,7 +657,7 @@ Retrieve registered replication operations and details.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.CancelReplication
 
@@ -383,8 +667,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/cancel_replication_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/cancel_replication_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/cancel_replication_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/cancel_replication_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -398,7 +686,7 @@ Cancel an active replication operation by ID.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.FetchShardingState
 
@@ -408,8 +696,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/fetch_sharding_state_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/fetch_sharding_state_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/fetch_sharding_state_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/fetch_sharding_state_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -424,7 +716,7 @@ Fetch the current sharding state and replica details for collections.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.GetAuthenticatedUserInfo
 
@@ -434,8 +726,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/get_authenticated_user_info_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/get_authenticated_user_info_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/get_authenticated_user_info_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/get_authenticated_user_info_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -448,7 +744,7 @@ Retrieve details about the authenticated user and their roles.
 This tool does not take any parameters.
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.ListDbUsers
 
@@ -458,8 +754,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/list_db_users_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/list_db_users_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/list_db_users_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/list_db_users_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -473,7 +773,7 @@ Retrieve all database users and their roles and statuses.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.GetDatabaseUserInfo
 
@@ -483,8 +783,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/get_database_user_info_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/get_database_user_info_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/get_database_user_info_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/get_database_user_info_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -499,7 +803,7 @@ Retrieve information about a specific database user.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.CreateDatabaseUser
 
@@ -509,8 +813,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/create_database_user_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/create_database_user_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/create_database_user_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/create_database_user_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -526,7 +834,7 @@ Create a new database user and obtain an API key.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.DeleteDatabaseUser
 
@@ -536,8 +844,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/delete_database_user_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/delete_database_user_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/delete_database_user_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/delete_database_user_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -551,7 +863,7 @@ Delete a specific database user.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.RotateUserApiKey
 
@@ -561,8 +873,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/rotate_user_api_key_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/rotate_user_api_key_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/rotate_user_api_key_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/rotate_user_api_key_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -576,7 +892,7 @@ Revoke and regenerate the API key for a database user.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.ActivateDatabaseUser
 
@@ -586,8 +902,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/activate_database_user_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/activate_database_user_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/activate_database_user_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/activate_database_user_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -601,7 +921,7 @@ Activate a deactivated database user account.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.DeactivateDatabaseUser
 
@@ -611,8 +931,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/deactivate_database_user_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/deactivate_database_user_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/deactivate_database_user_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/deactivate_database_user_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -627,7 +951,7 @@ Deactivate a database user account.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.GetRolesAndPermissions
 
@@ -637,8 +961,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/get_roles_and_permissions_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/get_roles_and_permissions_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/get_roles_and_permissions_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/get_roles_and_permissions_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -651,7 +979,7 @@ Retrieve all roles and their assigned permissions.
 This tool does not take any parameters.
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.CreateRoleWithPermissions
 
@@ -661,8 +989,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/create_role_with_permissions_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/create_role_with_permissions_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/create_role_with_permissions_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/create_role_with_permissions_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -677,7 +1009,7 @@ Create a new role with specified permissions.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.AddPermissionsToRole
 
@@ -687,8 +1019,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/add_permissions_to_role_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/add_permissions_to_role_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/add_permissions_to_role_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/add_permissions_to_role_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -699,12 +1035,12 @@ Add new permissions to a role without affecting existing ones.
 **Parameters**
 
 - **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
-- **role_id** (`string`, optional) The ID of the role to which new permissions will be added.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **role_id** (`string`, optional) The ID of the role to which new permissions will be added. Required when mode is 'execute', ignored when mode is 'get_request_schema'.
 - **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.RevokeRolePermissions
 
@@ -714,8 +1050,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/revoke_role_permissions_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/revoke_role_permissions_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/revoke_role_permissions_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/revoke_role_permissions_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -726,12 +1066,12 @@ Revoke permissions from a specified role.
 **Parameters**
 
 - **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
-- **role_name** (`string`, optional) The name of the role from which permissions are being revoked. Removing all permissions will delete the role.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **role_name** (`string`, optional) The name of the role from which permissions are being revoked. Removing all permissions will delete the role. Required when mode is 'execute', ignored when mode is 'get_request_schema'.
 - **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.FetchRoleByName
 
@@ -741,8 +1081,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/fetch_role_by_name_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/fetch_role_by_name_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/fetch_role_by_name_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/fetch_role_by_name_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -756,7 +1100,7 @@ Fetch role details using its name.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.DeleteRole
 
@@ -766,8 +1110,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/delete_role_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/delete_role_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/delete_role_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/delete_role_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -781,7 +1129,7 @@ Delete a role and revoke its permissions system-wide.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.CheckRolePermission
 
@@ -791,8 +1139,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/check_role_permission_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/check_role_permission_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/check_role_permission_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/check_role_permission_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -803,12 +1155,12 @@ Check if a role has specific permissions in the system.
 **Parameters**
 
 - **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
-- **role_name** (`string`, optional) The name of the role to check permissions for.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **role_name** (`string`, optional) The name of the role to check permissions for. Required when mode is 'execute', ignored when mode is 'get_request_schema'.
 - **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.GetUsersByRole
 
@@ -818,8 +1170,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/get_users_by_role_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/get_users_by_role_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/get_users_by_role_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/get_users_by_role_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -833,7 +1189,7 @@ Retrieve users with a specific role assignment.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.GetGroupsForRole
 
@@ -843,8 +1199,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/get_groups_for_role_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/get_groups_for_role_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/get_groups_for_role_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/get_groups_for_role_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -858,7 +1218,7 @@ Retrieve groups assigned to a specific role.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.GetUserRoles
 
@@ -868,8 +1228,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/get_user_roles_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/get_user_roles_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/get_user_roles_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/get_user_roles_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -885,7 +1249,7 @@ Retrieve all roles assigned to a specific user.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.AssignRolesToUser
 
@@ -895,8 +1259,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/assign_roles_to_user_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/assign_roles_to_user_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/assign_roles_to_user_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/assign_roles_to_user_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -912,7 +1280,7 @@ Assign roles to a user in the system.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.RevokeUserRole
 
@@ -922,8 +1290,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/revoke_user_role_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/revoke_user_role_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/revoke_user_role_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/revoke_user_role_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -939,7 +1311,7 @@ Remove roles from a specified user in the system.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.AssignRoleToGroup
 
@@ -949,8 +1321,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/assign_role_to_group_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/assign_role_to_group_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/assign_role_to_group_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/assign_role_to_group_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -966,7 +1342,7 @@ Assign roles to a specific group.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.RevokeRoleFromGroup
 
@@ -976,8 +1352,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/revoke_role_from_group_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/revoke_role_from_group_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/revoke_role_from_group_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/revoke_role_from_group_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -993,7 +1373,7 @@ Revoke roles from a specified group to manage permissions.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.GetRolesForGroup
 
@@ -1003,8 +1383,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/get_roles_for_group_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/get_roles_for_group_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/get_roles_for_group_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/get_roles_for_group_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -1020,7 +1404,7 @@ Retrieve roles assigned to a specific group.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.RetrieveGroupNames
 
@@ -1030,8 +1414,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/retrieve_group_names_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/retrieve_group_names_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/retrieve_group_names_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/retrieve_group_names_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -1045,7 +1433,7 @@ Retrieve available group names for a specified type.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.ListDataObjects
 
@@ -1055,8 +1443,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/list_data_objects_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/list_data_objects_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/list_data_objects_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/list_data_objects_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -1077,7 +1469,7 @@ Retrieve a list of data objects from a specified collection.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.CreateObjectInWeaviate
 
@@ -1087,8 +1479,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/create_object_in_weaviate_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/create_object_in_weaviate_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/create_object_in_weaviate_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/create_object_in_weaviate_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -1099,12 +1495,12 @@ Create a new data object in Weaviate.
 **Parameters**
 
 - **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
-- **consistency_level_replica_acknowledgement** (`string`, optional) Specifies the number of replicas that must confirm the request for it to be successful.  Only used when mode is 'execute'.
+- **consistency_level_replica_acknowledgement** (`string`, optional) Specifies the number of replicas that must confirm the request for it to be successful. Only used when mode is 'execute'.
 - **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.GetDataObject
 
@@ -1114,8 +1510,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/get_data_object_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/get_data_object_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/get_data_object_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/get_data_object_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -1134,7 +1534,7 @@ Retrieve a data object using collection name and UUID.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.UpdateObjectProperties
 
@@ -1144,8 +1544,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/update_object_properties_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/update_object_properties_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/update_object_properties_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/update_object_properties_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -1156,14 +1560,14 @@ Replace properties of a data object using its class and ID.
 **Parameters**
 
 - **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
-- **collection_name** (`string`, optional) The name of the class (collection) to which the object belongs.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
-- **object_uuid** (`string`, optional) Unique UUID of the object to be replaced.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
-- **required_replica_acknowledgement** (`string`, optional) Specifies how many replicas must acknowledge a request for it to be successful.  Only used when mode is 'execute'.
+- **collection_name** (`string`, optional) The name of the class (collection) to which the object belongs. Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **object_uuid** (`string`, optional) Unique UUID of the object to be replaced. Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **required_replica_acknowledgement** (`string`, optional) Specifies how many replicas must acknowledge a request for it to be successful. Only used when mode is 'execute'.
 - **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.DeleteDataObject
 
@@ -1173,8 +1577,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/delete_data_object_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/delete_data_object_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/delete_data_object_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/delete_data_object_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -1191,7 +1599,7 @@ Delete a data object from a specified collection using its UUID.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.UpdateDataObject
 
@@ -1201,8 +1609,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/update_data_object_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/update_data_object_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/update_data_object_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/update_data_object_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -1213,14 +1625,14 @@ Update specific properties of a data object.
 **Parameters**
 
 - **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
-- **collection_name** (`string`, optional) Specifies the name of the collection or class the object belongs to. This identifies where the object is stored.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
-- **object_uuid** (`string`, optional) Unique UUID of the object to be patched within the specified collection.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
-- **consistency_level** (`string`, optional) Specify the number of replicas that must acknowledge the request for success.  Only used when mode is 'execute'.
+- **collection_name** (`string`, optional) Specifies the name of the collection or class the object belongs to. This identifies where the object is stored. Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **object_uuid** (`string`, optional) Unique UUID of the object to be patched within the specified collection. Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **consistency_level** (`string`, optional) Specify the number of replicas that must acknowledge the request for success. Only used when mode is 'execute'.
 - **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.ReplaceObjectReferences
 
@@ -1230,8 +1642,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/replace_object_references_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/replace_object_references_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/replace_object_references_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/replace_object_references_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -1242,16 +1658,16 @@ Replace existing references for an object in Weaviate.
 **Parameters**
 
 - **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
-- **collection_name** (`string`, optional) Name of the collection the source object belongs to.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
-- **source_object_uuid** (`string`, optional) Unique UUID of the source object to identify it for reference replacement.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
-- **reference_property_name** (`string`, optional) Unique name of the reference property for the source object to update.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
-- **consistency_level** (`string`, optional) Defines the required number of replica acknowledgements for request success.  Only used when mode is 'execute'.
-- **tenant_identifier** (`string`, optional) Specifies the tenant in a request targeting a multi-tenant collection (class).  Only used when mode is 'execute'.
+- **collection_name** (`string`, optional) Name of the collection the source object belongs to. Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **source_object_uuid** (`string`, optional) Unique UUID of the source object to identify it for reference replacement. Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **reference_property_name** (`string`, optional) Unique name of the reference property for the source object to update. Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **consistency_level** (`string`, optional) Defines the required number of replica acknowledgements for request success. Only used when mode is 'execute'.
+- **tenant_identifier** (`string`, optional) Specifies the tenant in a request targeting a multi-tenant collection (class). Only used when mode is 'execute'.
 - **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.AddReferenceToObject
 
@@ -1261,8 +1677,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/add_reference_to_object_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/add_reference_to_object_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/add_reference_to_object_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/add_reference_to_object_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -1273,16 +1693,16 @@ Add a reference to an object's property.
 **Parameters**
 
 - **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
-- **source_class_name** (`string`, optional) Name of the collection (class) the source object belongs to.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
-- **source_object_uuid** (`string`, optional) Unique UUID identifying the source object to which the reference will be added.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
-- **reference_property_name** (`string`, optional) Unique name of the reference property of the source object to which the reference will be added.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
-- **required_consistency_level** (`string`, optional) Specifies the number of replicas that must acknowledge a request for it to be successful.  Only used when mode is 'execute'.
-- **tenant_identifier** (`string`, optional) Specifies the tenant for multi-tenant collection requests in a Weaviate class.  Only used when mode is 'execute'.
+- **source_class_name** (`string`, optional) Name of the collection (class) the source object belongs to. Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **source_object_uuid** (`string`, optional) Unique UUID identifying the source object to which the reference will be added. Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **reference_property_name** (`string`, optional) Unique name of the reference property of the source object to which the reference will be added. Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **required_consistency_level** (`string`, optional) Specifies the number of replicas that must acknowledge a request for it to be successful. Only used when mode is 'execute'.
+- **tenant_identifier** (`string`, optional) Specifies the tenant for multi-tenant collection requests in a Weaviate class. Only used when mode is 'execute'.
 - **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.DeleteReferenceFromObject
 
@@ -1292,8 +1712,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/delete_reference_from_object_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/delete_reference_from_object_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/delete_reference_from_object_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/delete_reference_from_object_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -1304,16 +1728,16 @@ Delete a specific reference from an object's property.
 **Parameters**
 
 - **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
-- **collection_name** (`string`, optional) Name of the collection (class) the source object belongs to. This identifies where the object is located.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
-- **source_object_uuid** (`string`, optional) Unique UUID of the source object from which the reference will be deleted.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
-- **reference_property_name** (`string`, optional) Unique name of the reference property of the source object from which to delete the reference.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
-- **required_consistency_level** (`string`, optional) Specifies how many replicas must acknowledge the request for success.  Only used when mode is 'execute'.
-- **tenant_identifier** (`string`, optional) Specifies the tenant in a request targeting a multi-tenant collection (class).  Only used when mode is 'execute'.
+- **collection_name** (`string`, optional) Name of the collection (class) the source object belongs to. This identifies where the object is located. Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **source_object_uuid** (`string`, optional) Unique UUID of the source object from which the reference will be deleted. Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **reference_property_name** (`string`, optional) Unique name of the reference property of the source object from which to delete the reference. Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **required_consistency_level** (`string`, optional) Specifies how many replicas must acknowledge the request for success. Only used when mode is 'execute'.
+- **tenant_identifier** (`string`, optional) Specifies the tenant in a request targeting a multi-tenant collection (class). Only used when mode is 'execute'.
 - **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.ValidateDataObjectStructure
 
@@ -1323,8 +1747,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/validate_data_object_structure_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/validate_data_object_structure_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/validate_data_object_structure_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/validate_data_object_structure_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -1339,7 +1767,7 @@ Validate a data object's structure against the schema.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.BatchRegisterObjects
 
@@ -1349,8 +1777,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/batch_register_objects_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/batch_register_objects_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/batch_register_objects_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/batch_register_objects_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -1361,12 +1793,12 @@ Register multiple data objects in a single request.
 **Parameters**
 
 - **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
-- **consistency_level** (`string`, optional) Specifies how many replicas must confirm a request for it to be successful.  Only used when mode is 'execute'.
+- **consistency_level** (`string`, optional) Specifies how many replicas must confirm a request for it to be successful. Only used when mode is 'execute'.
 - **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.DeleteMultipleObjects
 
@@ -1376,8 +1808,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/delete_multiple_objects_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/delete_multiple_objects_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/delete_multiple_objects_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/delete_multiple_objects_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -1388,13 +1824,13 @@ Deletes multiple data objects using specified filter criteria.
 **Parameters**
 
 - **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
-- **replica_acknowledgement_level** (`string`, optional) Specifies the number of replicas that must confirm the request for it to be deemed successful.  Only used when mode is 'execute'.
-- **target_tenant** (`string`, optional) Specifies the tenant when targeting a multi-tenant collection. Use the tenant's unique identifier.  Only used when mode is 'execute'.
+- **replica_acknowledgement_level** (`string`, optional) Specifies the number of replicas that must confirm the request for it to be deemed successful. Only used when mode is 'execute'.
+- **target_tenant** (`string`, optional) Specifies the tenant when targeting a multi-tenant collection. Use the tenant's unique identifier. Only used when mode is 'execute'.
 - **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.BatchCreateReferences
 
@@ -1404,8 +1840,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/batch_create_references_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/batch_create_references_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/batch_create_references_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/batch_create_references_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -1416,12 +1856,12 @@ Batch create cross-references between items in a collection.
 **Parameters**
 
 - **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
-- **consistency_level** (`string`, optional) Specifies the number of replicas needed to acknowledge a request for it to be deemed successful.  Only used when mode is 'execute'.
+- **consistency_level** (`string`, optional) Specifies the number of replicas needed to acknowledge a request for it to be deemed successful. Only used when mode is 'execute'.
 - **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.ExecuteGraphqlQuery
 
@@ -1431,8 +1871,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/execute_graphql_query_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/execute_graphql_query_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/execute_graphql_query_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/execute_graphql_query_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -1448,7 +1892,7 @@ Executes a GraphQL query on Weaviate.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.ExecuteGraphqlBatchQueries
 
@@ -1458,8 +1902,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/execute_graphql_batch_queries_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/execute_graphql_batch_queries_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/execute_graphql_batch_queries_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/execute_graphql_batch_queries_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -1474,7 +1922,7 @@ Execute multiple GraphQL queries in a single request.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.GetWeaviateInstanceMeta
 
@@ -1484,8 +1932,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/get_weaviate_instance_meta_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/get_weaviate_instance_meta_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/get_weaviate_instance_meta_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/get_weaviate_instance_meta_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -1498,7 +1950,7 @@ Get meta-information about a Weaviate instance.
 This tool does not take any parameters.
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.RetrieveDatabaseSchema
 
@@ -1508,8 +1960,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/retrieve_database_schema_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/retrieve_database_schema_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/retrieve_database_schema_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/retrieve_database_schema_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -1522,7 +1978,7 @@ Retrieve definitions of all classes in the database schema.
 This tool does not take any parameters.
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.CreateSchemaObject
 
@@ -1532,8 +1988,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/create_schema_object_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/create_schema_object_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/create_schema_object_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/create_schema_object_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -1548,7 +2008,7 @@ Create a new collection (class) in Weaviate.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.RetrieveCollectionSchema
 
@@ -1558,8 +2018,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/retrieve_collection_schema_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/retrieve_collection_schema_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/retrieve_collection_schema_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/retrieve_collection_schema_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -1573,7 +2037,7 @@ Retrieve the schema of a specified collection.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.UpdateCollectionSettings
 
@@ -1583,8 +2047,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/update_collection_settings_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/update_collection_settings_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/update_collection_settings_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/update_collection_settings_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -1595,12 +2063,12 @@ Update settings of an existing collection.
 **Parameters**
 
 - **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
-- **collection_name_to_update** (`string`, optional) The name of the collection to be updated. Specify the collection's class name.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **collection_name_to_update** (`string`, optional) The name of the collection to be updated. Specify the collection's class name. Required when mode is 'execute', ignored when mode is 'get_request_schema'.
 - **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.DeleteSchemaCollection
 
@@ -1610,8 +2078,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/delete_schema_collection_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/delete_schema_collection_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/delete_schema_collection_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/delete_schema_collection_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -1625,7 +2097,7 @@ Permanently delete a collection from the schema.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.AddPropertyToCollection
 
@@ -1635,8 +2107,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/add_property_to_collection_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/add_property_to_collection_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/add_property_to_collection_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/add_property_to_collection_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -1647,12 +2123,12 @@ Add a new property to an existing collection schema.
 **Parameters**
 
 - **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
-- **collection_name** (`string`, optional) The name of the collection (class) to which the property will be added.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **collection_name** (`string`, optional) The name of the collection (class) to which the property will be added. Required when mode is 'execute', ignored when mode is 'get_request_schema'.
 - **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.GetCollectionShardStatus
 
@@ -1662,8 +2138,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/get_collection_shard_status_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/get_collection_shard_status_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/get_collection_shard_status_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/get_collection_shard_status_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -1678,7 +2158,7 @@ Retrieves status of shards for a specified collection.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.UpdateShardStatus
 
@@ -1688,8 +2168,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/update_shard_status_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/update_shard_status_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/update_shard_status_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/update_shard_status_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -1705,7 +2189,7 @@ Update the status of a specific shard in a collection.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.GetCollectionTenants
 
@@ -1715,8 +2199,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/get_collection_tenants_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/get_collection_tenants_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/get_collection_tenants_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/get_collection_tenants_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -1730,7 +2218,7 @@ Retrieve tenants for a specified collection.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.UpdateTenantStatus
 
@@ -1740,8 +2228,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/update_tenant_status_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/update_tenant_status_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/update_tenant_status_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/update_tenant_status_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -1752,12 +2244,12 @@ Update the activity status of specified tenants.
 **Parameters**
 
 - **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
-- **collection_name** (`string`, optional) The name of the collection (class) containing the tenants whose status is to be updated.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **collection_name** (`string`, optional) The name of the collection (class) containing the tenants whose status is to be updated. Required when mode is 'execute', ignored when mode is 'get_request_schema'.
 - **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.CreateTenants
 
@@ -1767,8 +2259,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/create_tenants_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/create_tenants_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/create_tenants_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/create_tenants_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -1779,12 +2275,12 @@ Create new tenants in a specified collection.
 **Parameters**
 
 - **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
-- **collection_name** (`string`, optional) The name of the multi-tenant enabled collection for creating tenants.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **collection_name** (`string`, optional) The name of the multi-tenant enabled collection for creating tenants. Required when mode is 'execute', ignored when mode is 'get_request_schema'.
 - **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.DeleteTenants
 
@@ -1794,8 +2290,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/delete_tenants_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/delete_tenants_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/delete_tenants_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/delete_tenants_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -1810,7 +2310,7 @@ Permanently delete specified tenants from a collection.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.GetTenantDetails
 
@@ -1820,8 +2320,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/get_tenant_details_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/get_tenant_details_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/get_tenant_details_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/get_tenant_details_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -1836,7 +2340,7 @@ Retrieve details about a specific tenant's status.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.RetrieveAliases
 
@@ -1846,8 +2350,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/retrieve_aliases_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/retrieve_aliases_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/retrieve_aliases_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/retrieve_aliases_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -1861,7 +2369,7 @@ Retrieve all aliases from the system.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.CreateAliasMapping
 
@@ -1871,8 +2379,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/create_alias_mapping_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/create_alias_mapping_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/create_alias_mapping_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/create_alias_mapping_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -1887,7 +2399,7 @@ Create a new alias for a collection in Weaviate.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.RetrieveAliasDetails
 
@@ -1897,8 +2409,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/retrieve_alias_details_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/retrieve_alias_details_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/retrieve_alias_details_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/retrieve_alias_details_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -1912,7 +2428,7 @@ Retrieve details about a specific alias by its name.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.UpdateCollectionAlias
 
@@ -1922,8 +2438,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/update_collection_alias_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/update_collection_alias_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/update_collection_alias_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/update_collection_alias_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -1938,7 +2458,7 @@ Redirect an alias to a different collection.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.DeleteAlias
 
@@ -1948,8 +2468,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/delete_alias_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/delete_alias_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/delete_alias_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/delete_alias_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -1963,7 +2487,7 @@ Delete an existing alias from the system.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.ListBackups
 
@@ -1973,8 +2497,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/list_backups_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/list_backups_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/list_backups_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/list_backups_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -1988,7 +2516,7 @@ Retrieve all backup IDs and their statuses.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.CreateBackup
 
@@ -1998,8 +2526,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/create_backup_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/create_backup_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/create_backup_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/create_backup_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -2022,7 +2554,7 @@ Initiates backup creation for specified collections.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.CheckBackupStatus
 
@@ -2032,8 +2564,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/check_backup_status_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/check_backup_status_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/check_backup_status_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/check_backup_status_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -2050,7 +2586,7 @@ Get the current status of a backup creation process.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.CancelBackup
 
@@ -2060,8 +2596,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/cancel_backup_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/cancel_backup_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/cancel_backup_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/cancel_backup_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -2078,7 +2618,7 @@ Cancel a backup by its ID from a specified backend storage.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.CheckBackupRestoreStatus
 
@@ -2088,8 +2628,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/check_backup_restore_status_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/check_backup_restore_status_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/check_backup_restore_status_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/check_backup_restore_status_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -2106,7 +2650,7 @@ Check the status of a backup restoration process.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.RestoreBackup
 
@@ -2116,8 +2660,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/restore_backup_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/restore_backup_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/restore_backup_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/restore_backup_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -2128,13 +2676,13 @@ Restore collections from a specified backup.
 **Parameters**
 
 - **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
-- **backup_backend_storage** (`string`, optional) Specifies the backend storage system where the backup resides, such as `filesystem`, `gcs`, `s3`, or `azure`.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
-- **backup_identifier** (`string`, optional) The unique identifier for the backup to restore. It must be URL-safe and compatible with filesystem paths, using only lowercase letters, numbers, underscores, and minus characters.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **backup_backend_storage** (`string`, optional) Specifies the backend storage system where the backup resides, such as `filesystem`, `gcs`, `s3`, or `azure`. Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **backup_identifier** (`string`, optional) The unique identifier for the backup to restore. It must be URL-safe and compatible with filesystem paths, using only lowercase letters, numbers, underscores, and minus characters. Required when mode is 'execute', ignored when mode is 'get_request_schema'.
 - **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.GetWeaviateClusterStatistics
 
@@ -2144,8 +2692,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/get_weaviate_cluster_statistics_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/get_weaviate_cluster_statistics_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/get_weaviate_cluster_statistics_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/get_weaviate_cluster_statistics_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -2158,7 +2710,7 @@ Get Weaviate cluster Raft protocol statistics.
 This tool does not take any parameters.
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.GetClusterNodeStatus
 
@@ -2168,8 +2720,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/get_cluster_node_status_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/get_cluster_node_status_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/get_cluster_node_status_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/get_cluster_node_status_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -2183,7 +2739,7 @@ Retrieve status information about all nodes in a cluster.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.GetShardHostNodesStatus
 
@@ -2193,8 +2749,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/get_shard_host_nodes_status_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/get_shard_host_nodes_status_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/get_shard_host_nodes_status_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/get_shard_host_nodes_status_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -2210,7 +2770,7 @@ Retrieve status of nodes hosting shards for a collection.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.ListDistributedTasks
 
@@ -2220,8 +2780,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/list_distributed_tasks_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/list_distributed_tasks_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/list_distributed_tasks_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/list_distributed_tasks_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -2234,7 +2798,7 @@ Retrieve all distributed tasks in the cluster.
 This tool does not take any parameters.
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.InitiateClassificationTask
 
@@ -2244,8 +2808,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/initiate_classification_task_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/initiate_classification_task_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/initiate_classification_task_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/initiate_classification_task_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -2260,7 +2828,7 @@ Initiate a classification task in the background.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## WeaviateApi.GetClassificationStatus
 
@@ -2270,8 +2838,12 @@ This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_U
     {
       label: "Call the Tool Directly",
       content: {
-        Python: ["/examples/integrations/mcp-servers/weaviate_api/get_classification_status_example_call_tool.py"],
-        JavaScript: ["/examples/integrations/mcp-servers/weaviate_api/get_classification_status_example_call_tool.js"],
+        Python: [
+          "/examples/integrations/mcp-servers/weaviate_api/get_classification_status_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/weaviate_api/get_classification_status_example_call_tool.js",
+        ],
       },
     },
   ]}
@@ -2285,8 +2857,7 @@ Retrieve status and results of a classification task.
 
 **Secrets**
 
-This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
-
+This tool requires the following secrets: `WEAVIATE_API_KEY`, `WEAVIATE_SERVER_URL`. You can obtain these from your [Weaviate Console](https://console.weaviate.cloud/). Note that `WEAVIATE_SERVER_URL` must include the `https://` protocol. See the [Authentication section](#authentication) above for detailed instructions and the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication) for more information.
 
 ## Reference
 
@@ -2296,7 +2867,5 @@ Below is a reference of enumerations used by some of the tools in the WeaviateAp
 
 - **GET_REQUEST_SCHEMA**: `get_request_schema`
 - **EXECUTE**: `execute`
-
-
 
 <ToolFooter pipPackageName="arcade_weaviate_api" />
