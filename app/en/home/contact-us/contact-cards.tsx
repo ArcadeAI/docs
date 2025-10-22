@@ -1,7 +1,7 @@
 "use client";
 
 import { Discord, Github } from "@arcadeai/design-system";
-import { ChartGantt, Mail, Shield, Users } from "lucide-react";
+import { HeartPulse, Mail, Shield, Users } from "lucide-react";
 import { QuickStartCard } from "../../../_components/quick-start-card";
 
 export function ContactCards() {
@@ -40,7 +40,7 @@ export function ContactCards() {
       <QuickStartCard
         description="Check the current status of Arcade's services, view incident history, and subscribe to updates."
         href="https://status.arcade.dev"
-        icon={ChartGantt}
+        icon={HeartPulse}
         title="System Status"
       />
     </div>
