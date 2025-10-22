@@ -18,6 +18,9 @@ test: ## Run the tests
 run: ## Run the docs site locally
 	@pnpm dev
 
+docs: ## Generate documentation for a server (interactive)
+	@cd make_docs && uv run python -c "from __init__ import run_command; run_command()"
+
 ruin:
 	@echo "\033[31m\033[1m💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️💀☠️\033[0m"
 	@echo "\033[31m\033[1m👻                                          👻\033[0m"
