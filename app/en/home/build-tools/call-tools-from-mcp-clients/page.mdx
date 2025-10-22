@@ -19,10 +19,16 @@ If you haven't already, create an [MCP Server](/home/build-tools/create-a-mcp-se
 From the root directory of your MCP Server, run the following command:
 
 <Tabs
-  items={["HTTP transport (default)", "stdio transport (for Claude Desktop)"]}
+  items={["stdio transport (default)", "http transport"]}
   storageKey="preferredTransport"
 >
+<Tabs.Tab>
 
+```bash
+uv run server.py stdio
+```
+
+</Tabs.Tab>
 <Tabs.Tab>
 
 ```bash
@@ -30,13 +36,6 @@ uv run server.py http
 ```
 
 For HTTP transport, view your server's API docs at [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
-
-</Tabs.Tab>
-<Tabs.Tab>
-
-```bash
-uv run server.py stdio
-```
 
 </Tabs.Tab>
 </Tabs>
@@ -83,9 +82,56 @@ Now you can connect your MCP server to apps that support MCP Clients, like AI as
     If your MCP client is not supported by the `arcade configure` command, you can manually add the MCP server to your client's configuration file. First, determine the transport type.
 
     <Tabs
-      items={["Streamable HTTP", "stdio"]}
+      items={["stdio (default)", "Streamable HTTP"]}
     >
-      <Tabs.Tab>
+    <Tabs.Tab>
+
+    When configuring your MCP client using the stdio transport, you need to ensure that the MCP server is called using the right version of python and within the correct working directory. For example, let's pretend this is your setup:
+
+    - Your virtual environment is located at `/path/to/your/project/.venv`
+    - Your project is located at `/path/to/your/project`
+    - The entrypoint to your MCP server is `server.py`
+    - One of your tools requires the `MY_SECRET_KEY` environment variable to be set.
+
+    Then, your MCP client's configuration file should look like this:
+
+    ```json
+    {
+      "mcpServers": {
+        "my_server": {
+          "command": "/path/to/your/project/.venv/bin/python",
+          "args": ["/path/to/your/project/server.py", "stdio"],
+          "env": {
+            "MY_SECRET_KEY": "my-secret-value"
+          }
+        }
+      }
+    }
+    ```
+
+    This will ensure that the command used by the MCP client to start the MCP server is the correct version of python and that the environment variables are set correctly.
+    </Tabs.Tab>
+    <Tabs.Tab>
+
+    When configuring your MCP client using the http transport, ensure the MCP server is started on the correct port and from the correct working directory. For example, if your setup is:
+
+    - Your virtual environment is located at `/path/to/your/project/.venv`
+    - Your MCP server is located at `/path/to/your/project/server.py`
+    - Your secrets are stored in the `.env` file
+
+    Activate the virtual environment:
+
+    ```bash
+    source /path/to/your/project/.venv/bin/activate
+    ```
+
+    run the MCP server using the http transport. The secrets will be loaded from the `.env` file:
+
+    ```bash
+    uv run server.py http
+    ```
+
+    Then, your MCP client's configuration file should look like this:
 
     ```json
     {
@@ -97,23 +143,18 @@ Now you can connect your MCP server to apps that support MCP Clients, like AI as
       }
     }
     ```
-    </Tabs.Tab>
-    <Tabs.Tab>
 
-    ```json
-    {
-      "mcpServers": {
-        "my_server": {
-          "command": "arcade",
-          "args": ["mcp", "stdio"],
-          "cwd": "/path/to/your/project"
-        }
-      }
-    }
-    ```
-    </Tabs.Tab>
+    <Callout type="info">
+      For security reasons, Local HTTP servers do not currently support managed
+      authorization and secrets. If you need to use authorization or secrets, you
+      should use the stdio transport and configure the Arcade API key and secrets in
+      your MCP connection settings. If you intend to expose your HTTP MCP server to
+      the public internet, please follow the [on-prem MCP server](/home/deployment/on-prem-mcp)
+      guide for secure remote deployment.
+    </Callout>
 
-  </Tabs>
+    </Tabs.Tab>
+    </Tabs>
 
   </Tabs.Tab>
 </Tabs>
