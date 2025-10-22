@@ -125,6 +125,9 @@ export const meta: MetaRecord = {
   faq: {
     title: "FAQ",
   },
+  "compare-server-types": {
+    title: "Compare Server Types",
+  },
   "agentic-development": {
     title: "Agentic Development",
   },
