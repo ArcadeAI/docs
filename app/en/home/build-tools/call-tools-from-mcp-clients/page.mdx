@@ -7,158 +7,303 @@ import { Steps, Tabs, Callout } from "nextra/components";
 
 # Call tools from MCP clients
 
-In this guide, you'll learn how to call tools from MCP clients.
+<GuideOverview>
+<GuideOverview.Outcomes>
 
-<Steps>
-## Create an MCP Server
+Configure your MCP clients to call tools from your MCP server.
 
-If you haven't already, create an [MCP Server](/home/build-tools/create-a-mcp-server)
+</GuideOverview.Outcomes>
 
-## Run the MCP Server
+<GuideOverview.Prerequisites>
 
-From the root directory of your MCP Server, run the following command:
+- [Arcade account](https://api.arcade.dev/signup)
+- [Arcade CLI](/home/quickstart)
+- [An MCP Server](/home/build-tools/create-a-mcp-server)
+- [uv package manager](https://docs.astral.sh/uv/getting-started/installation/)
 
-<Tabs
-  items={["stdio transport (default)", "http transport"]}
-  storageKey="preferredTransport"
->
-<Tabs.Tab>
+</GuideOverview.Prerequisites>
 
-```bash
-uv run server.py stdio
-```
+<GuideOverview.YouWillLearn>
 
-</Tabs.Tab>
-<Tabs.Tab>
+- How to configure your MCP clients depending on the transport type.
+- How to set the secrets for your MCP server in your client's configuration file.
 
-```bash
-uv run server.py http
-```
+</GuideOverview.YouWillLearn>
+</GuideOverview>
 
-For HTTP transport, view your server's API docs at [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
+## Using the `arcade configure` command
 
-</Tabs.Tab>
-</Tabs>
-
-You should see output like this in your terminal:
-
-```bash
-INFO | Starting server v1.0.0 (my_server)
-INFO | Added tool: greet
-INFO | Starting MCP server on http://127.0.0.1:8000
-```
-
-## Configure your MCP Client(s)
-
-Now you can connect your MCP server to apps that support MCP Clients, like AI assistants and IDEs. :
+For popular MCP clients, you can use the `arcade configure` command to configure your MCP client to call your MCP server. This will automatically add the MCP server to your client's configuration file. By default, it will use the stdio transport.
 
 <Tabs
-  items={["Cursor IDE", "VS Code", "Claude Desktop", "Other MCP Clients"]}
+  items={["Cursor IDE", "VS Code", "Claude Desktop"]}
   storageKey="preferredAgent"
 >
   <Tabs.Tab>
 
     ```bash
-    arcade configure cursor --from-local
+    arcade configure cursor
     ```
 
   </Tabs.Tab>
   <Tabs.Tab>
 
     ```bash
-    arcade configure vscode --from-local
+    arcade configure vscode
     ```
 
   </Tabs.Tab>
   <Tabs.Tab>
 
     ```bash
-    arcade configure claude --from-local
+    arcade configure claude
     ```
-
-  </Tabs.Tab>
-  <Tabs.Tab>
-
-    If your MCP client is not supported by the `arcade configure` command, you can manually add the MCP server to your client's configuration file.
-
-    Each MCP client has a different way of configuring MCP servers. This section covers the most common ways of configuring MCP servers adopted by the most popular MCP clients. However, you may find inconsistencies such as the need to specify the MCP server's type as its transport, or as "local" and "remote". Some MCP clients will use "env" to pass environment variables, while others may use "environment" or "inputs". Use this guide as a conceptual reference, but always refer to your MCP client's documentation for the most up-to-date information.
-
-    <Tabs
-      items={["stdio (default)", "Streamable HTTP"]}
-    >
-    <Tabs.Tab>
-
-    When configuring your MCP client using the stdio transport, you need to ensure that the MCP server is called using the right version of python and within the correct working directory. For example, let's pretend this is your setup:
-
-    - Your virtual environment is located at `/path/to/your/project/.venv`
-    - Your project is located at `/path/to/your/project`
-    - The entrypoint to your MCP server is `server.py`
-    - One of your tools requires the `MY_SECRET_KEY` environment variable to be set.
-
-    Then, your MCP client's configuration file should look like this:
-
-    ```json
-    {
-      "mcpServers": {
-        "my_server": {
-          "command": "/path/to/your/project/.venv/bin/python",
-          "args": ["/path/to/your/project/server.py", "stdio"],
-          "env": {
-            "MY_SECRET_KEY": "my-secret-value"
-          }
-        }
-      }
-    }
-    ```
-
-    This will ensure that the command used by the MCP client to start the MCP server is the correct version of python and that the environment variables are set correctly.
-    </Tabs.Tab>
-    <Tabs.Tab>
-
-    When configuring your MCP client using the http transport, ensure the MCP server is started on the correct port and from the correct working directory. For example, if your setup is:
-
-    - Your virtual environment is located at `/path/to/your/project/.venv`
-    - Your MCP server is located at `/path/to/your/project/server.py`
-    - Your secrets are stored in the `.env` file
-
-    Activate the virtual environment:
-
-    ```bash
-    source /path/to/your/project/.venv/bin/activate
-    ```
-
-    run the MCP server using the http transport. The secrets will be loaded from the `.env` file:
-
-    ```bash
-    uv run server.py http
-    ```
-
-    Then, your MCP client's configuration file should look like this:
-
-    ```json
-    {
-      "mcpServers": {
-        "my_server": {
-          "url": "http://127.0.0.1:8000",
-          "transport": "http"
-        }
-      }
-    }
-    ```
-
-    <Callout type="info">
-      For security reasons, Local HTTP servers do not currently support managed
-      authorization and secrets. If you need to use authorization or secrets, you
-      should use the stdio transport and configure the Arcade API key and secrets in
-      your MCP connection settings. If you intend to expose your HTTP MCP server to
-      the public internet, please follow the [on-prem MCP server](/home/deployment/on-prem-mcp)
-      guide for secure remote deployment.
-    </Callout>
-
-    </Tabs.Tab>
-    </Tabs>
 
   </Tabs.Tab>
 </Tabs>
 
-</Steps>
+You can customize a lot of the configuration passing options to `arcade configure`. For example, to change the transport type to http, you can pass the `--transport` (or `-t`) option:
+
+<Tabs
+  items={["Cursor IDE", "VS Code", "Claude Desktop"]}
+  storageKey="preferredAgent"
+>
+  <Tabs.Tab>
+
+    ```bash
+    arcade configure cursor --transport http
+    ```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+    ```bash
+    arcade configure vscode --transport http
+    ```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+    ```bash
+    arcade configure claude --transport http
+    ```
+
+  </Tabs.Tab>
+</Tabs>
+
+### stdio specific configuration
+
+If you are using the stdio transport, `arcade configure` will assume the entrypoint to your MCP server is `server.py` and will set the working directory to the root of your project. You can override this with the `--entrypoint` (or `-e`) option:
+
+<Tabs
+  items={["Cursor IDE", "VS Code", "Claude Desktop"]}
+  storageKey="preferredAgent"
+>
+  <Tabs.Tab>
+
+    ```bash
+    arcade configure cursor --entrypoint my_server.py
+    ```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+    ```bash
+    arcade configure vscode --entrypoint my_server.py
+    ```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+    ```bash
+    arcade configure claude --entrypoint my_server.py
+    ```
+
+  </Tabs.Tab>
+</Tabs>
+
+### http specific configuration
+
+If you are using the streamable HTTP transport, `arcade configure` will assume the MCP server is running on the default port `8000` and that the MCP server is running locally (in localhost). You can override this with the `--host` (or `-h`) and `--port` (or `-p`) options:
+
+<Tabs
+  items={["Cursor IDE", "VS Code", "Claude Desktop"]}
+  storageKey="preferredAgent"
+>
+  <Tabs.Tab>
+
+    Run from a different port:
+
+    ```bash
+    arcade configure cursor -t http --port 8000
+    ```
+
+    If you want to configure an MCP server running on the Arcade Cloud, you can use the `--host` option:
+
+    ```bash
+    arcade configure cursor -t http --host arcade
+    ```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+    Run from a different port:
+
+    ```bash
+    arcade configure vscode -t http --port 8000
+    ```
+
+    If you want to configure an MCP server running on the Arcade Cloud, you can use the `--host` option:
+
+    ```bash
+    arcade configure vscode -t http --host arcade
+    ```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+Claude Desktop does not currently support the http transport.
+
+  </Tabs.Tab>
+</Tabs>
+
+### other configuration options
+
+If you have modified the default configuration of your MCP client, you can pass the `--config` (or `-c`) option to `arcade configure` to use your custom configuration file:
+
+<Tabs
+  items={["Cursor IDE", "VS Code", "Claude Desktop"]}
+  storageKey="preferredAgent"
+>
+  <Tabs.Tab>
+
+    ```bash
+    arcade configure cursor --config /path/to/your/config.json
+    ```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+    ```bash
+    arcade configure vscode --config /path/to/your/config.json
+    ```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+    ```bash
+    arcade configure claude --config /path/to/your/config.json
+    ```
+
+  </Tabs.Tab>
+</Tabs>
+
+By default, `arcade configure` will use the current directory as the name of the MCP server. You can override this with the `--name` (or `-n`) option:
+
+<Tabs
+  items={["Cursor IDE", "VS Code", "Claude Desktop"]}
+  storageKey="preferredAgent"
+>
+  <Tabs.Tab>
+
+    ```bash
+    arcade configure cursor --name my_server
+    ```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+    ```bash
+    arcade configure vscode --name my_server
+    ```
+
+  </Tabs.Tab>
+  <Tabs.Tab>
+
+    ```bash
+    arcade configure claude --name my_server
+    ```
+
+  </Tabs.Tab>
+</Tabs>
+## Manually configuring your MCP client
+
+If your MCP client is not supported by the `arcade configure` command, you can manually add the MCP server to your client's configuration file.
+
+Each MCP client has a different way of configuring MCP servers. This section covers the most common ways of configuring MCP servers adopted by the most popular MCP clients. However, you may find inconsistencies such as the need to specify the MCP server's type as its transport, or as "local" and "remote". Some MCP clients will use "env" to pass environment variables, while others may use "environment" or "inputs". Use this guide as a conceptual reference, but always refer to your MCP client's documentation for the most up-to-date information.
+
+<Tabs
+  items={["stdio (default)", "Streamable HTTP"]}
+>
+<Tabs.Tab>
+
+When configuring your MCP client using the stdio transport, you need to ensure that the MCP server is called using the right version of python and within the correct working directory. For example, let's pretend this is your setup:
+
+- Your virtual environment is located at `/path/to/your/project/.venv`
+- Your project is located at `/path/to/your/project`
+- The entrypoint to your MCP server is `server.py`
+- One of your tools requires the `MY_SECRET_KEY` environment variable to be set.
+
+Then, your MCP client's configuration file should look like this:
+
+```json
+{
+  "mcpServers": {
+    "my_server": {
+      "command": "/path/to/your/project/.venv/bin/python",
+      "args": ["/path/to/your/project/server.py", "stdio"],
+      "env": {
+        "MY_SECRET_KEY": "my-secret-value"
+      }
+    }
+  }
+}
+```
+
+This will ensure that the command used by the MCP client to start the MCP server is the correct version of python and that the environment variables are set correctly.
+
+</Tabs.Tab>
+<Tabs.Tab>
+
+When configuring your MCP client using the Streamable HTTP transport, ensure the MCP server is started on the correct port and from the correct working directory. For example, if your setup is:
+
+- Your virtual environment is located at `/path/to/your/project/.venv`
+- Your MCP server is located at `/path/to/your/project/server.py`
+- Your secrets are stored in the `.env` file
+
+Activate the virtual environment:
+
+```bash
+source /path/to/your/project/.venv/bin/activate
+```
+
+run the MCP server using the http transport. The secrets will be loaded from the `.env` file:
+
+```bash
+uv run server.py http
+```
+
+Then, your MCP client's configuration file should look like this:
+
+```json
+{
+  "mcpServers": {
+    "my_server": {
+      "url": "http://127.0.0.1:8000",
+      "transport": "http"
+    }
+  }
+}
+```
+
+<Callout type="info">
+  For security reasons, Local HTTP servers do not currently support managed
+  authorization and secrets. If you need to use authorization or secrets, you
+  should use the stdio transport and configure the Arcade API key and secrets in
+  your MCP connection settings. If you intend to expose your HTTP MCP server to
+  the public internet, please follow the [on-prem MCP
+  server](/home/deployment/on-prem-mcp) guide for secure remote deployment.
+</Callout>
+
+</Tabs.Tab>
+</Tabs>
