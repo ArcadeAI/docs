@@ -27,7 +27,7 @@ from utils import (
 console = Console()
 
 
-def run_command() -> None:
+def run() -> None:
     """Interactive command to generate documentation for a server."""
     console.print("\n[bold cyan]📚 Arcade Documentation Generator[/bold cyan]\n")
 
@@ -210,3 +210,7 @@ def generate_mcp_server_docs(
     print_debug(f"Done generating docs for {toolkit_name}")
 
     return True
+
+
+if __name__ == "__main__":
+    run()
