@@ -47,3 +47,9 @@ We use Nextra's built-in Callout component for callouts in MDX:
   to learn more. (Hint: it always has a link!)
 </Callout>
 ```
+
+## Generate documentation for a MCP Server toolkit
+
+Run `make toolkit-docs` and follow the instructions in the terminal. This command
+will automatically generate documentation for the tools in a specified Arcade MCP
+Server Python package.
