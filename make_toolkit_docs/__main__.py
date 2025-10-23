@@ -182,7 +182,7 @@ def get_toolkits_dir() -> str:
             # Multiple found, let user choose
             toolkits_dir = inquirer.select(
                 message="Multiple toolkits directories found. Select one:",
-                choices=discovered + ["Enter path manually"],
+                choices=[*discovered, "Enter path manually"],
             ).execute()
 
             if toolkits_dir != "Enter path manually":
@@ -309,7 +309,7 @@ def run() -> None:
         return
 
     # Validate installation by checking if tools can be loaded
-    console.print(f"[cyan]Verifying installation...[/cyan]")
+    console.print("[cyan]Verifying installation...[/cyan]")
     try:
         tools = get_list_of_tools(server_name)
         if not tools:
