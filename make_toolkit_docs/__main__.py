@@ -1,5 +1,6 @@
 import asyncio
 import importlib.metadata
+import logging
 import os
 import subprocess
 import sys
@@ -53,24 +54,152 @@ def save_toolkits_dir(toolkits_dir: str) -> None:
             f.write(f"{key}={value}\n")
 
 
+def find_toolkits_directories(max_depth: int = 5) -> list[str]:
+    """Scan the filesystem starting from home directory to find 'toolkits' directories.
+
+    Uses arcade_core.discovery to validate that directories contain actual tools.
+
+    Args:
+        max_depth: Maximum depth to search (default: 5 levels from home)
+
+    Returns:
+        List of valid toolkits directory paths.
+    """
+    try:
+        from loguru import logger
+        logger.disable("arcade_core.discovery")
+    except ImportError:
+        logging.getLogger("arcade_core.discovery").setLevel(logging.WARNING)
+
+    from arcade_core.discovery import analyze_files_for_tools
+
+    home = Path.home()
+    candidates = []
+
+    console.print("🔍 Scanning for toolkits directories...", style="cyan")
+
+    # Walk the filesystem up to max_depth levels
+    def walk_directory(path: Path, current_depth: int):
+        if current_depth > max_depth:
+            return
+
+        try:
+            for entry in path.iterdir():
+                # Skip hidden directories and common large directories
+                if entry.name.startswith(".") or entry.name in {
+                    "node_modules",
+                    "venv",
+                    ".venv",
+                    "__pycache__",
+                    "Library",
+                    "Applications",
+                }:
+                    continue
+
+                if entry.is_dir():
+                    # Check if this directory is named "toolkits"
+                    if entry.name.lower() == "toolkits":
+                        # Check each subdirectory within toolkits for tools
+                        has_any_tools = False
+                        try:
+                            for toolkit_subdir in entry.iterdir():
+                                if not toolkit_subdir.is_dir() or toolkit_subdir.name.startswith("."):
+                                    continue
+
+                                # Search for Python files with @tool decorator up to 3 levels deep
+                                tool_files_found = []
+
+                                def find_tool_files_recursive(search_path: Path, depth: int = 0, max_depth: int = 3):
+                                    """Recursively find Python files up to max_depth."""
+                                    if depth > max_depth:
+                                        return
+
+                                    try:
+                                        for item in search_path.iterdir():
+                                            if item.name.startswith(".") or item.name in {"__pycache__", "venv", ".venv"}:
+                                                continue
+
+                                            if item.is_file() and item.suffix == ".py":
+                                                tool_files_found.append(item)
+                                            elif item.is_dir():
+                                                find_tool_files_recursive(item, depth + 1, max_depth)
+                                    except (PermissionError, OSError):
+                                        pass
+
+                                find_tool_files_recursive(toolkit_subdir)
+
+                                if tool_files_found:
+                                    tools_found = analyze_files_for_tools(tool_files_found)
+                                    if tools_found:
+                                        has_any_tools = True
+                                        break  # Found at least one toolkit with tools
+                        except (PermissionError, OSError):
+                            pass
+
+                        if has_any_tools:
+                            candidates.append(str(entry))
+                            console.print(
+                                f"  ✓ Found: {entry}",
+                                style="green",
+                            )
+                    else:
+                        # Continue searching subdirectories
+                        walk_directory(entry, current_depth + 1)
+        except (PermissionError, OSError):
+            # Skip directories we can't access
+            pass
+
+    walk_directory(home, 1)
+
+    return candidates
+
+
 def get_toolkits_dir() -> str:
     """Get or prompt for the toolkits directory path.
+
+    First tries to use saved directory, then auto-discovers, then prompts manually.
 
     Returns:
         Path to the toolkits directory.
     """
     toolkits_dir = os.getenv("TOOLKITS_DIR")
 
+    # Try using saved directory
     if toolkits_dir and os.path.isdir(toolkits_dir):
         use_saved = inquirer.confirm(
             message=f"Use saved toolkits directory: {toolkits_dir}?",
             default=True,
         ).execute()
 
-        if not use_saved:
-            toolkits_dir = None
+        if use_saved:
+            return toolkits_dir
 
-    while not toolkits_dir:
+    # Try auto-discovery
+    console.print("\n[cyan]Searching for toolkits directories...[/cyan]")
+    discovered = find_toolkits_directories()
+
+    if discovered:
+        if len(discovered) == 1:
+            # Only one found, use it directly
+            toolkits_dir = discovered[0]
+            console.print(f"\n✓ Using discovered directory: {toolkits_dir}", style="green")
+            save_toolkits_dir(toolkits_dir)
+            return toolkits_dir
+        else:
+            # Multiple found, let user choose
+            toolkits_dir = inquirer.select(
+                message="Multiple toolkits directories found. Select one:",
+                choices=discovered + ["Enter path manually"],
+            ).execute()
+
+            if toolkits_dir != "Enter path manually":
+                save_toolkits_dir(toolkits_dir)
+                return toolkits_dir
+
+    # Fall back to manual entry
+    console.print("\n[yellow]No toolkits directories found automatically.[/yellow]")
+
+    while True:
         toolkits_dir = inquirer.filepath(
             message="Path to toolkits directory:",
             validate=lambda x: os.path.isdir(x),
@@ -84,11 +213,9 @@ def get_toolkits_dir() -> str:
                 "A valid toolkit must contain at least one Python file with the @tool decorator.",
                 style="bold red",
             )
-            toolkits_dir = None
         else:
             save_toolkits_dir(toolkits_dir)
-
-    return toolkits_dir
+            return toolkits_dir
 
 
 def get_available_toolkits(toolkits_dir: str) -> list[str]:
@@ -143,10 +270,11 @@ def get_selected_toolkit(console: Console) -> tuple[str, str] | None:
         console.print(f"❌ No valid toolkits found in {toolkits_dir}", style="bold red")
         return None
 
-    # Ask user to select a toolkit
-    selected_toolkit = inquirer.select(
-        message="Select a toolkit:",
+    # Ask user to select a toolkit with fuzzy search
+    selected_toolkit = inquirer.fuzzy(
+        message="Select a toolkit (type to filter):",
         choices=sorted(available_toolkits),
+        max_height="70%",
     ).execute()
 
     toolkits_path = Path(toolkits_dir)
