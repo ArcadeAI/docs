@@ -78,14 +78,12 @@ def find_toolkits_directories(max_depth: int = 5) -> list[str]:
 
     console.print("🔍 Scanning for toolkits directories...", style="cyan")
 
-    # Walk the filesystem up to max_depth levels
     def walk_directory(path: Path, current_depth: int):
         if current_depth > max_depth:
             return
 
         try:
             for entry in path.iterdir():
-                # Skip hidden directories and common large directories
                 if entry.name.startswith(".") or entry.name in {
                     "node_modules",
                     "venv",
@@ -97,16 +95,13 @@ def find_toolkits_directories(max_depth: int = 5) -> list[str]:
                     continue
 
                 if entry.is_dir():
-                    # Check if this directory is named "toolkits"
                     if entry.name.lower() == "toolkits":
-                        # Check each subdirectory within toolkits for tools
                         has_any_tools = False
                         try:
                             for toolkit_subdir in entry.iterdir():
                                 if not toolkit_subdir.is_dir() or toolkit_subdir.name.startswith("."):
                                     continue
 
-                                # Search for Python files with @tool decorator up to 3 levels deep
                                 tool_files_found = []
 
                                 def find_tool_files_recursive(search_path: Path, depth: int = 0, max_depth: int = 3):
@@ -132,7 +127,7 @@ def find_toolkits_directories(max_depth: int = 5) -> list[str]:
                                     tools_found = analyze_files_for_tools(tool_files_found)
                                     if tools_found:
                                         has_any_tools = True
-                                        break  # Found at least one toolkit with tools
+                                        break
                         except (PermissionError, OSError):
                             pass
 
@@ -143,10 +138,8 @@ def find_toolkits_directories(max_depth: int = 5) -> list[str]:
                                 style="green",
                             )
                     else:
-                        # Continue searching subdirectories
                         walk_directory(entry, current_depth + 1)
         except (PermissionError, OSError):
-            # Skip directories we can't access
             pass
 
     walk_directory(home, 1)
@@ -305,19 +298,31 @@ def run() -> None:
             text=True,
         )
 
-        # Clear the importlib.metadata cache so it picks up newly installed packages
-        if hasattr(importlib.metadata, '_cache'):
-            importlib.metadata._cache.clear()
-
-        # Also clear sys.meta_path caches if they exist
-        for finder in sys.meta_path:
-            if hasattr(finder, 'invalidate_caches'):
-                finder.invalidate_caches()
+        reload_cache()
 
         console.print("[green]✓[/green] Server installed successfully\n")
     except subprocess.CalledProcessError as e:
         console.print(
             f"❌ Failed to install server: {e.stderr}",
+            style="bold red",
+        )
+        return
+
+    # Validate installation by checking if tools can be loaded
+    console.print(f"[cyan]Verifying installation...[/cyan]")
+    try:
+        tools = get_list_of_tools(server_name)
+        if not tools:
+            console.print(
+                f"❌ No tools found for toolkit '{server_name}'. The installation may be incomplete.",
+                style="bold red",
+            )
+            return
+        console.print(f"[green]✓[/green] Found {len(tools)} tools\n")
+    except Exception as e:
+        console.print(
+            f"❌ Failed to load tools for '{server_name}': {e}\n"
+            "The package may need time to be recognized. Try running the command again.",
             style="bold red",
         )
         return
@@ -382,6 +387,7 @@ def run() -> None:
             tool_call_examples=not skip_tool_call_examples,
             debug=True,
             max_concurrency=max_concurrency,
+            tools=tools,
         )
     except Exception as error:
         import traceback
@@ -404,6 +410,34 @@ def run() -> None:
         )
 
 
+def reload_cache() -> None:
+    """Reload the import cache to pick up newly installed packages."""
+    # Clear all import caches to pick up newly installed packages
+    if hasattr(importlib.metadata, '_cache'):
+        importlib.metadata._cache.clear()
+
+    # Clear distributions cache
+    try:
+        importlib.metadata.distributions.cache_clear()
+    except AttributeError:
+        pass
+
+    # Clear entry points cache
+    try:
+        importlib.metadata.entry_points.cache_clear()
+    except AttributeError:
+        pass
+
+    # Also clear sys.meta_path caches if they exist
+    for finder in sys.meta_path:
+        if hasattr(finder, 'invalidate_caches'):
+            finder.invalidate_caches()
+
+    # Force reload of sys.path to pick up new .egg-link or .pth files
+    import site
+    importlib.reload(site)
+
+
 def generate_mcp_server_docs(
     console: Console,
     toolkit_name: str,
@@ -415,6 +449,7 @@ def generate_mcp_server_docs(
     tool_call_examples: bool = True,
     debug: bool = False,
     max_concurrency: int = 5,
+    tools: list | None = None,
 ) -> bool:
     openai.api_key = resolve_api_key(openai_api_key, "OPENAI_API_KEY")
 
@@ -434,8 +469,10 @@ def generate_mcp_server_docs(
     print_debug("Reading server metadata")
     pip_package_name = read_toolkit_metadata(toolkit_dir)
 
-    print_debug(f"Getting list of tools for {toolkit_name} from the local Python environment")
-    tools = get_list_of_tools(toolkit_name)
+    # Use provided tools or fetch them
+    if tools is None:
+        print_debug(f"Getting list of tools for {toolkit_name} from the local Python environment")
+        tools = get_list_of_tools(toolkit_name)
 
     print_debug(f"Found {len(tools)} tools")
 
