@@ -221,26 +221,29 @@ def build_footer(
     well_known_provider_config_template: str = WELL_KNOWN_PROVIDER_CONFIG,
     generic_provider_config_template: str = GENERIC_PROVIDER_CONFIG,
 ) -> str:
-    if authorization and authorization.provider_type == "oauth2" and authorization.provider_id:
-        is_well_known = is_well_known_provider(
-            provider_id=authorization.provider_id,
-            auth_module=auth_module,
-        )
-        config_template = (
-            well_known_provider_config_template
-            if is_well_known
-            else generic_provider_config_template
-        )
-        provider_configuration = config_template.format(
-            toolkit_name=toolkit_name,
-            provider_id=authorization.provider_id,
-            provider_name=authorization.provider_id.capitalize(),
-        )
+    if authorization and authorization.provider_type == "oauth2":
+        effective_provider_id = authorization.provider_id or authorization.id
 
-        return oauth2_footer_template.format(
-            pip_package_name=pip_package_name,
-            provider_configuration=provider_configuration,
-        )
+        if effective_provider_id:
+            is_well_known = is_well_known_provider(
+                provider_id=effective_provider_id,
+                auth_module=auth_module,
+            )
+            config_template = (
+                well_known_provider_config_template
+                if is_well_known
+                else generic_provider_config_template
+            )
+            provider_configuration = config_template.format(
+                toolkit_name=toolkit_name,
+                provider_id=effective_provider_id,
+                provider_name=effective_provider_id.capitalize(),
+            )
+
+            return oauth2_footer_template.format(
+                pip_package_name=pip_package_name,
+                provider_configuration=provider_configuration,
+            )
     return footer_template.format(toolkit_name=toolkit_name, pip_package_name=pip_package_name)
 
 
