@@ -12,13 +12,13 @@ from dotenv import load_dotenv
 from InquirerPy import inquirer
 from rich.console import Console
 
-from make_toolkit_docs.docs_builder import (
+from docs_builder import (
     build_example_path,
     build_examples,
     build_toolkit_mdx,
     build_toolkit_mdx_file_path,
 )
-from make_toolkit_docs.utils import (
+from utils import (
     get_all_enumerations,
     get_list_of_tools,
     has_wrapper_tools_directory,

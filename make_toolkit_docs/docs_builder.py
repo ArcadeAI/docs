@@ -17,7 +17,7 @@ from arcade_core.schema import (
 )
 from rich.console import Console
 
-from make_toolkit_docs.templates import (
+from templates import (
     ENUM_ITEM,
     ENUM_MDX,
     ENUM_VALUE,
@@ -38,7 +38,7 @@ from make_toolkit_docs.templates import (
     TOOLKIT_PAGE,
     WELL_KNOWN_PROVIDER_CONFIG,
 )
-from make_toolkit_docs.utils import (
+from utils import (
     clean_fully_qualified_name,
     find_enum_by_options,
     find_pyproject_toml,
