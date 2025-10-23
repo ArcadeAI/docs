@@ -1,6 +1,8 @@
 import asyncio
+import importlib.metadata
 import os
 import subprocess
+import sys
 from functools import partial
 from pathlib import Path
 
@@ -51,14 +53,12 @@ def save_toolkits_dir(toolkits_dir: str) -> None:
             f.write(f"{key}={value}\n")
 
 
-def run() -> None:
-    """Interactive command to generate documentation for a server."""
-    # Load environment variables from .env file
-    load_dotenv(ENV_FILE)
+def get_toolkits_dir() -> str:
+    """Get or prompt for the toolkits directory path.
 
-    console.print("\n[bold cyan]📚 Arcade Documentation Generator[/bold cyan]\n")
-
-    # Ask for toolkits directory path
+    Returns:
+        Path to the toolkits directory.
+    """
     toolkits_dir = os.getenv("TOOLKITS_DIR")
 
     if toolkits_dir and os.path.isdir(toolkits_dir):
@@ -70,26 +70,78 @@ def run() -> None:
         if not use_saved:
             toolkits_dir = None
 
-    if not toolkits_dir:
+    while not toolkits_dir:
         toolkits_dir = inquirer.filepath(
             message="Path to toolkits directory:",
             validate=lambda x: os.path.isdir(x),
             only_directories=True,
         ).execute()
 
-        # Save the new path
-        save_toolkits_dir(toolkits_dir)
+        available_toolkits = get_available_toolkits(toolkits_dir)
+        if not available_toolkits:
+            console.print(
+                f"❌ No valid toolkits found in {toolkits_dir}. "
+                "A valid toolkit must contain at least one Python file with the @tool decorator.",
+                style="bold red",
+            )
+            toolkits_dir = None
+        else:
+            save_toolkits_dir(toolkits_dir)
+
+    return toolkits_dir
+
+
+def get_available_toolkits(toolkits_dir: str) -> list[str]:
+    """Get list of valid toolkits in the toolkits directory.
+
+    A valid toolkit is a directory that contains at least one Python file
+    with the @tool decorator.
+
+    Args:
+        toolkits_dir: Path to the toolkits directory.
+
+    Returns:
+        List of toolkit names (directory names).
+    """
+    toolkits_path = Path(toolkits_dir)
+    available_toolkits = []
+
+    for directory in toolkits_path.iterdir():
+        if not directory.is_dir() or directory.name.startswith("."):
+            continue
+
+        # Check if this directory contains any Python files with @tool decorator
+        has_tool = False
+        for py_file in directory.rglob("*.py"):
+            try:
+                content = py_file.read_text(encoding="utf-8")
+                if "@tool" in content:
+                    has_tool = True
+                    break
+            except Exception:
+                # Skip files that can't be read
+                continue
+
+        if has_tool:
+            available_toolkits.append(directory.name)
+
+    return available_toolkits
+
+
+def get_selected_toolkit(console: Console) -> tuple[str, str] | None:
+    """Prompt user to select a toolkit from the configured toolkits directory.
+
+    Returns:
+        Tuple of (toolkit_dir, toolkit_name) if successful, None otherwise.
+    """
+    toolkits_dir = get_toolkits_dir()
 
     # Get list of available toolkits in the directory
-    toolkits_path = Path(toolkits_dir)
-    available_toolkits = [
-        d.name for d in toolkits_path.iterdir()
-        if d.is_dir() and not d.name.startswith(".")
-    ]
+    available_toolkits = get_available_toolkits(toolkits_dir)
 
     if not available_toolkits:
-        console.print(f"❌ No toolkits found in {toolkits_dir}", style="bold red")
-        return
+        console.print(f"❌ No valid toolkits found in {toolkits_dir}", style="bold red")
+        return None
 
     # Ask user to select a toolkit
     selected_toolkit = inquirer.select(
@@ -97,16 +149,27 @@ def run() -> None:
         choices=sorted(available_toolkits),
     ).execute()
 
+    toolkits_path = Path(toolkits_dir)
     server_dir = str(toolkits_path / selected_toolkit)
     server_name = selected_toolkit
 
-    # Install the server package in editable mode using uv pip with --python flag
+    return (server_dir, server_name)
+
+
+def run() -> None:
+    """Interactive command to generate documentation for a server."""
+    load_dotenv(ENV_FILE)
+
+    console.print("\n[bold cyan]📚 Arcade Documentation Generator[/bold cyan]\n")
+
+    result = get_selected_toolkit(console)
+    if result is None:
+        return
+
+    server_dir, server_name = result
+
     console.print(f"\n[cyan]Installing server from {server_dir}...[/cyan]")
     try:
-        import sys
-        import importlib.metadata
-
-        # Use uv pip with --python to target the current virtual environment
         subprocess.run(
             ["uv", "pip", "install", "--python", sys.executable, "-e", server_dir],
             check=True,
@@ -283,4 +346,8 @@ def generate_mcp_server_docs(
 
 
 if __name__ == "__main__":
-    run()
+    try:
+        run()
+    except KeyboardInterrupt:
+        console.print("\n\n❌ Cancelled by user", style="bold red")
+        sys.exit(1)
