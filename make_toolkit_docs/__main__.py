@@ -357,12 +357,16 @@ def run() -> None:
         default=True,
     ).execute()
 
-    max_concurrency = int(inquirer.number(
-        message="Max concurrency for OpenAI API requests:",
-        default=5,
-        min_allowed=1,
-        max_allowed=20,
-    ).execute())
+    # Only ask for max concurrency if we're generating examples
+    if not skip_tool_call_examples:
+        max_concurrency = int(inquirer.number(
+            message="Max concurrency for OpenAI API requests:",
+            default=5,
+            min_allowed=1,
+            max_allowed=20,
+        ).execute())
+    else:
+        max_concurrency = 5  # Default value, won't be used
 
     console.print("\n[bold green]✓[/bold green] Starting documentation generation...\n")
 
