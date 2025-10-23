@@ -7,6 +7,7 @@ from enum import Enum
 from typing import Any, cast
 
 import openai
+from openai import AsyncOpenAI
 from arcade_core import auth as auth_module
 from arcade_core.schema import (
     ToolAuthRequirement,
@@ -16,7 +17,7 @@ from arcade_core.schema import (
 )
 from rich.console import Console
 
-from templates import (
+from make_toolkit_docs.templates import (
     ENUM_ITEM,
     ENUM_MDX,
     ENUM_VALUE,
@@ -37,7 +38,7 @@ from templates import (
     TOOLKIT_PAGE,
     WELL_KNOWN_PROVIDER_CONFIG,
 )
-from utils import (
+from make_toolkit_docs.utils import (
     clean_fully_qualified_name,
     find_enum_by_options,
     find_pyproject_toml,
@@ -629,8 +630,10 @@ async def async_request_openai_generation(
     max_tokens: int,
     messages: list[dict[str, Any]],
 ) -> str:
+    client = AsyncOpenAI(api_key=openai.api_key)
+
     if model.startswith("gpt-5"):
-        response = await openai.responses.create(
+        response = await client.responses.create(
             model=model,
             input=messages,
             max_output_tokens=max_tokens,
@@ -644,7 +647,7 @@ async def async_request_openai_generation(
         response_str = cast(str, response.output_text)
 
     elif model.startswith("gpt-4o"):
-        response = await openai.chat.completions.create(
+        response = await client.chat.completions.create(
             model=model,
             messages=messages,
             temperature=0.0,

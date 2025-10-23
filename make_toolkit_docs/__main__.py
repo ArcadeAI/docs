@@ -2,18 +2,20 @@ import asyncio
 import os
 import subprocess
 from functools import partial
+from pathlib import Path
 
 import openai
+from dotenv import load_dotenv
 from InquirerPy import inquirer
 from rich.console import Console
 
-from docs_builder import (
+from make_toolkit_docs.docs_builder import (
     build_example_path,
     build_examples,
     build_toolkit_mdx,
     build_toolkit_mdx_file_path,
 )
-from utils import (
+from make_toolkit_docs.utils import (
     get_all_enumerations,
     get_list_of_tools,
     has_wrapper_tools_directory,
@@ -25,27 +27,85 @@ from utils import (
 )
 
 console = Console()
+ENV_FILE = Path(__file__).parent / ".env"
+
+
+def save_toolkits_dir(toolkits_dir: str) -> None:
+    """Save toolkits directory to .env file."""
+    # Read existing .env content
+    existing_content = {}
+    if ENV_FILE.exists():
+        with open(ENV_FILE) as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    key, value = line.split("=", 1)
+                    existing_content[key] = value
+
+    # Update or add TOOLKITS_DIR
+    existing_content["TOOLKITS_DIR"] = toolkits_dir
+
+    # Write back to .env
+    with open(ENV_FILE, "w") as f:
+        for key, value in existing_content.items():
+            f.write(f"{key}={value}\n")
 
 
 def run() -> None:
     """Interactive command to generate documentation for a server."""
+    # Load environment variables from .env file
+    load_dotenv(ENV_FILE)
+
     console.print("\n[bold cyan]📚 Arcade Documentation Generator[/bold cyan]\n")
 
-    server_name = inquirer.text(
-        message="Server name:",
-        validate=lambda x: len(x) > 0,
+    # Ask for toolkits directory path
+    toolkits_dir = os.getenv("TOOLKITS_DIR")
+
+    if toolkits_dir and os.path.isdir(toolkits_dir):
+        use_saved = inquirer.confirm(
+            message=f"Use saved toolkits directory: {toolkits_dir}?",
+            default=True,
+        ).execute()
+
+        if not use_saved:
+            toolkits_dir = None
+
+    if not toolkits_dir:
+        toolkits_dir = inquirer.filepath(
+            message="Path to toolkits directory:",
+            validate=lambda x: os.path.isdir(x),
+            only_directories=True,
+        ).execute()
+
+        # Save the new path
+        save_toolkits_dir(toolkits_dir)
+
+    # Get list of available toolkits in the directory
+    toolkits_path = Path(toolkits_dir)
+    available_toolkits = [
+        d.name for d in toolkits_path.iterdir()
+        if d.is_dir() and not d.name.startswith(".")
+    ]
+
+    if not available_toolkits:
+        console.print(f"❌ No toolkits found in {toolkits_dir}", style="bold red")
+        return
+
+    # Ask user to select a toolkit
+    selected_toolkit = inquirer.select(
+        message="Select a toolkit:",
+        choices=sorted(available_toolkits),
     ).execute()
 
-    server_dir = inquirer.filepath(
-        message="Server directory path:",
-        validate=lambda x: os.path.isdir(x),
-        only_directories=True,
-    ).execute()
+    server_dir = str(toolkits_path / selected_toolkit)
+    server_name = selected_toolkit
 
     # Install the server package in editable mode using uv pip with --python flag
     console.print(f"\n[cyan]Installing server from {server_dir}...[/cyan]")
     try:
         import sys
+        import importlib.metadata
+
         # Use uv pip with --python to target the current virtual environment
         subprocess.run(
             ["uv", "pip", "install", "--python", sys.executable, "-e", server_dir],
@@ -53,6 +113,16 @@ def run() -> None:
             capture_output=True,
             text=True,
         )
+
+        # Clear the importlib.metadata cache so it picks up newly installed packages
+        if hasattr(importlib.metadata, '_cache'):
+            importlib.metadata._cache.clear()
+
+        # Also clear sys.meta_path caches if they exist
+        for finder in sys.meta_path:
+            if hasattr(finder, 'invalidate_caches'):
+                finder.invalidate_caches()
+
         console.print("[green]✓[/green] Server installed successfully\n")
     except subprocess.CalledProcessError as e:
         console.print(
