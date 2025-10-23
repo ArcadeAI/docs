@@ -4,10 +4,12 @@ import CustomLayout from "@/app/_components/custom-layout";
 import { Footer } from "@/app/_components/footer";
 import { Logo } from "@/app/_components/logo";
 import NavBarButton from "@/app/_components/nav-bar-button";
+import { SidebarController } from "@/app/_components/sidebar-controller";
 import { TranslationBanner } from "@/app/_components/translation-banner";
 import "@/app/globals.css";
 import { Discord, Github } from "@arcadeai/design-system";
 import { GoogleTagManager } from "@next/third-parties/google";
+import { headers } from "next/headers";
 import Link from "next/link";
 import Script from "next/script";
 import { Head } from "nextra/components";
@@ -79,6 +81,11 @@ export default async function SharedLayout({
   const dictionary = await getDictionary(lang);
   const pageMap = await getPageMap(`/${lang}`);
 
+  // Get the current pathname to determine initial sidebar state
+  const headersList = await headers();
+  const pathname = headersList.get("x-pathname") || "";
+  const isHomePage = pathname.endsWith("/home");
+
   return (
     <html dir="ltr" lang={lang} suppressHydrationWarning>
       <Head
@@ -147,6 +154,7 @@ export default async function SharedLayout({
           sidebar={{
             defaultMenuCollapseLevel: 1,
             autoCollapse: true,
+            defaultOpen: !isHomePage,
           }}
           themeSwitch={{
             dark: dictionary.dark,
@@ -166,7 +174,9 @@ export default async function SharedLayout({
             src="https://status.arcade.dev/embed/script.js"
             strategy="afterInteractive"
           />
+
           <PostHog>
+            <SidebarController />
             <CustomLayout>{children}</CustomLayout>
           </PostHog>
         </Layout>
