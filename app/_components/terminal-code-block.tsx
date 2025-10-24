@@ -55,7 +55,7 @@ const TerminalCodeBlock: React.FC<TerminalCodeBlockProps> = ({
 
       {/* Code Content */}
       <div className="overflow-x-auto">
-        <pre className={`text-gray-100 text-sm ${className}`}>
+        <pre className={`p-4 text-gray-100 text-sm ${className}`}>
           <code>{children}</code>
         </pre>
       </div>

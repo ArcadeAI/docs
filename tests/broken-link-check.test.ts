@@ -6,7 +6,12 @@ import { expect, test } from "vitest";
 
 const TIMEOUT = 30_000;
 
-const staticFiles = ["/llms.txt", "/robots.txt", "/sitemap.xml"];
+const staticFiles = [
+  "/llms.txt",
+  "/llms-full.txt",
+  "/robots.txt",
+  "/sitemap.xml",
+];
 
 // Function to validate anchor fragments by checking file content
 function validateAnchorFragment(filePath: string, fragment: string): boolean {

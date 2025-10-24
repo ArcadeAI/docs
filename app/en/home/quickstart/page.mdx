@@ -1,88 +1,76 @@
 ---
-title: "Start using Arcade's Hosted Tools"
-description: "Learn how to get started with Arcade's Hosted Tools"
+title: "Start using Arcade"
+description: "Learn how to get started with Arcade"
 ---
 
 import { Steps, Tabs, Callout } from "nextra/components";
 import { SignupLink } from "@/app/_components/analytics";
 
-# Arcade's Hosted Tools Quickstart
+# Arcade Quickstart
 
-Arcade gives your AI agents the power to act. With Arcade's Hosted Tools, your AI can send Gmail, update Notion, message in Slack, and more.
+<div className="grid grid-cols-1 md:grid-cols-[4fr_3fr] gap-8">
+  <div>
+<strong>Build AI agents that actually take action.</strong>
 
-<GuideOverview>
-<GuideOverview.Outcomes>
+Most AI apps are stuck in read-only mode. Arcade gives your AI the power to act — send Gmail, update Notion, message in Slack, and more.
 
-Build and run an MCP Server with tools that you define.
-
-</GuideOverview.Outcomes>
-
-<GuideOverview.Prerequisites>
-
-- An <SignupLink linkLocation="docs:call-tools-directly">Arcade account</SignupLink>
-- An [Arcade API key](/home/api-keys)
-- The [`uv` package manager](https://docs.astral.sh/uv/getting-started/installation/)
-
-</GuideOverview.Prerequisites>
-
-<GuideOverview.YouWillLearn>
+In this quickstart, you'll:
 
 - Install the Arcade client
 - Authenticate your first real-world tool
 - Run your first tool call using the arcade client
 
-</GuideOverview.YouWillLearn>
-</GuideOverview>
+This it's the foundation to build full agents. Real tools. Real actions. Real fast.
+Ready to start? Follow the Quickstart below.
+
+  </div>
+  <iframe
+   className="aspect-video w-full max-w-[900px] rounded-xl shadow-2xl"
+   src="https://www.youtube.com/embed/USoqJOOUP6c?si=ontrjjatjmqMfTHN"
+   title="Arcade Quickstart"
+   allow="fullscreen; accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+   referrerPolicy="strict-origin-when-cross-origin"
+   ></iframe>
+</div>
 
 <Steps>
 
+### Prerequisites
+
+1. Create an <SignupLink linkLocation="docs:call-tools-directly">Arcade account</SignupLink>
+1. Get an [Arcade API key](/home/api-keys) and take note, you'll need it in the next steps.
+
 ### Install the Arcade client
 
-In your terminal, run the following command to install the `arcade-mcp` package:
-
 <Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
-
   <Tabs.Tab>
-
-```bash
-uv pip install arcadepy
-```
-
+  ```python
+  pip install arcadepy
+  ```
   </Tabs.Tab>
-
   <Tabs.Tab>
-
-```bash
-npm install @arcadeai/arcadejs
-```
-
+  ```javascript
+  npm install @arcadeai/arcadejs
+  ```
   </Tabs.Tab>
-
 </Tabs>
 
 ### Instantiate and use the client
 
 <Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
-
 <Tabs.Tab>
-
 Create a new script called `example.py`:
-
-```python filename="example.py"
+```python
 from arcadepy import Arcade
 
 # You can also set the `ARCADE_API_KEY` environment variable instead of passing it as a parameter.
-
 client = Arcade(api_key="{arcade_api_key}")
 
 # Arcade needs a unique identifier for your application user (this could be an email address, a UUID, etc).
-
 # In this example, use the email you used to sign up for Arcade.dev:
-
 user_id = "{arcade_user_id}"
 
 # Let's use the `Math.Sqrt` tool from the Arcade Math MCP Server to get the square root of a number.
-
 response = client.tools.execute(
     tool_name="Math.Sqrt",
     input={"a": '625'},
@@ -92,14 +80,14 @@ response = client.tools.execute(
 print(f"The square root of 625 is {response.output.value}")
 
 # Now, let's use a tool that requires authentication to star a GitHub repository
-
 auth_response = client.tools.authorize(
 tool_name="GitHub.SetStarred",
 user_id=user_id,
 )
 
 if auth_response.status != "completed":
-    print(f"Click this link to authorize: `{auth_response.url}`. The process will continue once you have authorized the app." ) # Wait for the user to authorize the app
+    print(f"Click this link to authorize: `{auth_response.url}`.  The process will continue once you have authorized the app." )
+    # Wait for the user to authorize the app
     client.auth.wait_for_completion(auth_response.id);
 
 response = client.tools.execute(
@@ -113,16 +101,11 @@ response = client.tools.execute(
 )
 
 print(response.output.value)
-
 ```
-
 </Tabs.Tab>
-
 <Tabs.Tab>
-
 Create a new script called `example.mjs`:
-
-```javascript filename="example.mjs"
+```javascript
 import Arcade from "@arcadeai/arcadejs";
 
 // You can also set the `ARCADE_API_KEY` environment variable instead of passing it as a parameter.
@@ -152,7 +135,7 @@ const authResponse = await client.tools.authorize({
 
 if (authResponse.status !== "completed") {
   console.log(
-    `Click this link to authorize: \`${authResponse.url}\`. The process will continue once you have authorized the app.`
+    `Click this link to authorize: \`${authResponse.url}\`.  The process will continue once you have authorized the app.`,
   );
   // Wait for the user to authorize the app
   await client.auth.waitForCompletion(authResponse.id);
@@ -170,31 +153,25 @@ const response_github = await client.tools.execute({
 
 console.log(response_github.output.value);
 ```
-
 </Tabs.Tab>
-
 </Tabs>
 
 ### Run the code
 
 <Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
-
   <Tabs.Tab>
-
-```bash
-python3 example.py
-> The square root of 625 is 25
-> Successfully starred the repository ArcadeAI/arcade-ai
-
-  </Tabs.Tab>
-  <Tabs.Tab>
-
     ```bash
-    node example.mjs 
-    > The square root of 625 is 25 
+    python3 example.py
+    > The square root of 625 is 25
     > Successfully starred the repository ArcadeAI/arcade-ai
     ```
-
+  </Tabs.Tab>
+  <Tabs.Tab>
+    ```bash
+    node example.mjs
+    > The square root of 625 is 25
+    > Successfully starred the repository ArcadeAI/arcade-ai
+    ```
   </Tabs.Tab>
 </Tabs>
 

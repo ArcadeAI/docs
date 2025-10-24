@@ -1,4 +1,4 @@
-import { BadgeHelp, Globe, HeartPulse, Home, Shield } from "lucide-react";
+import { BadgeHelp, Globe, HeartPulse, Home } from "lucide-react";
 import type { MetaRecord } from "nextra";
 
 function TitleWithIcon({
@@ -40,10 +40,7 @@ export const meta: MetaRecord = {
     title: "Using Arcade",
   },
   quickstart: {
-    title: "Hosted Tools Quickstart",
-  },
-  "custom-mcp-server-quickstart": {
-    title: "Build MCP Server QuickStart",
+    title: "Quickstart",
   },
   "api-keys": {
     title: "Get an API key",
@@ -96,9 +93,6 @@ export const meta: MetaRecord = {
   auth: {
     title: "Authorization",
   },
-  "mcp-gateways": {
-    title: "MCP Gateways",
-  },
   "arcade-cli": {
     title: "Arcade CLI",
   },
@@ -125,9 +119,6 @@ export const meta: MetaRecord = {
   faq: {
     title: "FAQ",
   },
-  "compare-server-types": {
-    title: "Compare Server Types",
-  },
   "agentic-development": {
     title: "Agentic Development",
   },
@@ -147,9 +138,7 @@ export const meta: MetaRecord = {
   },
   "contact-us": {
     title: <TitleWithIcon icon={BadgeHelp}>Contact us</TitleWithIcon>,
-  },
-  security: {
-    title: <TitleWithIcon icon={Shield}>Security</TitleWithIcon>,
+    href: "/contact-us",
   },
   status: {
     title: <TitleWithIcon icon={HeartPulse}>Status</TitleWithIcon>,

@@ -90,7 +90,7 @@ const EnhancedCodeBlock: React.FC<EnhancedCodeBlockProps> = ({
 
       {/* Code Content */}
       <div className="overflow-x-auto">
-        <pre className={`bg-white text-sm dark:bg-gray-950 ${className}`}>
+        <pre className={`bg-white p-4 text-sm dark:bg-gray-950 ${className}`}>
           <code>{children}</code>
         </pre>
       </div>

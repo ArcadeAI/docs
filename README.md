@@ -10,26 +10,6 @@ First, run `pnpm install` to install the dependencies.
 
 Then, run `pnpm dev` to start the development server and visit localhost:3000.
 
-### Environment Variables
-
-Copy `.env.example` to `.env.local` and fill in the required values:
-
-```bash
-cp .env.example .env.local
-```
-
-- `OPENAI_API_KEY` - Required for generating the llms.txt file with AI-powered summaries
-
-## llms.txt Generation
-
-The project includes a Next.js plugin that automatically generates an `llms.txt` file following the [llms.txt specification](https://llmstxt.org/). This file helps LLMs understand and navigate the documentation.
-
-**Automatic generation**: Runs during production builds (`pnpm build`)
-
-**Manual generation**: Run `pnpm llmstxt` to regenerate the file
-
-See [`scripts/README-llmstxt.md`](./scripts/README-llmstxt.md) for detailed documentation.
-
 ## Styling
 
 We use Nextra's built-in Callout component for callouts in MDX:
@@ -47,9 +27,3 @@ We use Nextra's built-in Callout component for callouts in MDX:
   to learn more. (Hint: it always has a link!)
 </Callout>
 ```
-
-## Generate documentation for a MCP Server toolkit
-
-Run `make toolkit-docs` and follow the instructions in the terminal. This command
-will automatically generate documentation for the tools in a specified Arcade MCP
-Server Python package.
