@@ -8,7 +8,7 @@ import { SignupLink } from "@/app/_components/analytics";
 
 # Deploying to the cloud with Arcade Deploy
 
-Running your MCP servers locally is very convenient during development and testing. Once your MCP server is mature, however, you may want to access it from any MCP client, or to facilitate multi-user support. Doing all that from your computer comes with the complexity of running and maintaining a server, handling auth and high availability for all your users and all the integrations you want to support. Arcade Deploy takes care of all that for you. Your MCP server will be accessible to any MCP client. Also, all the tools you create will be available in the larger tool catalog that you can use when building MCP gateways.
+Running your MCP servers locally is very convenient during development and testing. Once your MCP server is mature, however, you may want to access it from any MCP client, or to facilitate multi-user support. Doing all that from your computer comes with the complexity of running and maintaining a server, handling auth and high availability for all your users and all the integrations you want to support. Arcade Deploy takes care of all that for you. Your MCP server will be registered to Arcade, adding all the tools you created to the larger tool catalog. From there, you can create MCP Gateways to pick and choose which tools you want to use in you MCP clients, which can be from any connected MCP server.
 
 This guide shows you how to deploy your MCP Server with Arcade Deploy.
 
@@ -71,8 +71,7 @@ arcade deploy --entrypoint server/my_mcp_server.py
 ```
 
 <Callout type="info">
-  It is important that your entrypoint script executes `MCPApp.run()` (or
-  `app.run()` if `app` is of type `MCPApp`) when invoked directly.
+It is important that your entrypoint script executes `MCPApp.run()` (or `app.run()` if `app` is of type `MCPApp`) when invoked directly.
 
 We recommend to do it inside an `if __name__ == "__main__":` statement.
 
@@ -81,22 +80,43 @@ We recommend to do it inside an `if __name__ == "__main__":` statement.
 You should see output like the following:
 
 ```bash
+Validating user is logged in...
+✓ {arcade_user_id} is logged in
 
-Verifying server and extracting metadata...
+Validating pyproject.toml exists in current directory...
+✓ pyproject.toml found at /path/to/your/project/pyproject.toml
+
+Loading .env file from current directory if it exists...
+✓ Loaded environment from /path/to/your/project/.env
+
+Validating server is healthy and extracting metadata before deploying...
+✓ Server started on port 8519
 ✓ Server is healthy
-✓ Found server: ArcadeMCP v0.1.0
-ArcadeMCP v0.1.0 has 3 tools
+✓ Found server name: arcade_server
+✓ Found server version: 1.0.0
+✓ Found 3 tools
+✓ Found 1 required secret(s)
 
-Discovered 1 required secret(s)
-
-Required secrets: MY_SECRET_KEY
+Uploading 1 required secret(s) to Arcade...
+✓ Uploading 'MY_SECRET_KEY' with value ending in ...ime!
 ✓ Secret 'MY_SECRET_KEY' uploaded
 
 Creating deployment package...
 ✓ Package created (1.8 KB)
 
 Deploying to Arcade Engine...
-✓ Server deployed successfully
+✓ Server 'arcade_server' v1.0.0 deployed successfully
+
+Deployment Details:
+  • Server ID: arcade_server
+  • Server URI: https://example.run.arcade.dev
+  • Server Secret: example-secret
+
+⚠ Note: Your server is now starting up...
+
+  This process may take a few minutes. Your server will be available at the URI above once ready.
+
+View and manage your servers: https://api.arcade.dev/dashboard/
 ```
 
 ## Manage your MCP servers in Arcade
@@ -110,29 +130,10 @@ Navigate to the [Servers](https://api.arcade.dev/dashboard/servers) page in your
 - Manage users connected to the Auth providers
 - Create MCP Gateways
 
-## List your MCP servers on the terminal
-
-Run the following command to list your MCP servers:
-
-```bash
-arcade server list
-```
-
-You should see output like the following:
-
-```bash
-┌----------┳----------┳-------------┳---------┳------------┳------------------┓
-|          | Cloud    | Engine      |         |            |                  |
-| ID       | Deployed | Registered  | Enabled | Host       | Toolkits         |
-├----------╇----------╇-------------╇---------╇------------╇------------------┤
-| main     | False    | True        | True    | http://wo… | SlackApi, Asana, |
-|          |          |             |         |            | BoxApi, Clickup, |
-|          |          |             |         |            | ...              |
-|          |          |             |         |            | Zendesk, Zoom    |
-| mcp_demo | False    | True        | True    |            | Demo             |
-└----------┴----------┴-------------┴---------┴------------┴------------------┘
-```
-
 </Steps>
 
-Your MCP Server is now deployed and registered with the engine and ready to use!
+Your MCP Server is now deployed and registered with Arcade, and ready to be used in your MCP clients!
+
+## Next steps
+
+- Configure an MCP Gateway to get a connection string to your MCP Server
