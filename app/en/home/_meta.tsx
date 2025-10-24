@@ -1,4 +1,4 @@
-import { BadgeHelp, Globe, HeartPulse, Home } from "lucide-react";
+import { BadgeHelp, Globe, HeartPulse, Home, Shield } from "lucide-react";
 import type { MetaRecord } from "nextra";
 
 function TitleWithIcon({
@@ -125,6 +125,9 @@ export const meta: MetaRecord = {
   faq: {
     title: "FAQ",
   },
+  "compare-server-types": {
+    title: "Compare Server Types",
+  },
   "agentic-development": {
     title: "Agentic Development",
   },
@@ -144,7 +147,9 @@ export const meta: MetaRecord = {
   },
   "contact-us": {
     title: <TitleWithIcon icon={BadgeHelp}>Contact us</TitleWithIcon>,
-    href: "/contact-us",
+  },
+  security: {
+    title: <TitleWithIcon icon={Shield}>Security</TitleWithIcon>,
   },
   status: {
     title: <TitleWithIcon icon={HeartPulse}>Status</TitleWithIcon>,
