@@ -1,5 +1,5 @@
 export default {
-  "create-a-mcp-server": "Create a MCP Server",
+  "create-a-mcp-server": "Create an MCP Server",
   "tool-context": "Tools and Context",
   "create-a-tool-with-auth": "Create a tool with auth",
   "create-a-tool-with-secrets": "Create a tool with secrets",
