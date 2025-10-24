@@ -27,6 +27,14 @@ _Learn more about [context](/home/build-tools/tool-context)._
 
 A 'MCP Server' is a collection of tools that can be used by an agent, grouped logically together by a common theme or provider, and the running remote process that serves and executes the tools. MCP Servers are the unit of deployment for tools within Arcade.
 
+#### Protected MCP Servers
+
+A protected server implements [MCP authorization](https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization) and requires the MCP client to provide a token identifying the user when calling the MCP server. Examples: servers that require sign-in, deal with private info, call APIs on your behalf
+
+#### Unprotected MCP Servers
+
+An unprotected (anonymous) MCP server can be used by any MCP client on the network. Because it is anonymous, it can't identify the user who is using the server. Examples: servers that return static info, weather APIs, etc
+
 ### Tool
 
 A 'tool' is a function that can be called by an agent which performs some action - commonly via an API, filesystem, database, etc. Tools are written in Python and deployed by running a worker which contains the MCP Server's code. Tools are defined by the `@tool()` decorator and will be passed `ToolContext` as the first argument. If a tool has dependencies that are not met (a secret is not provided, for example), the tool will fail to execute.
@@ -50,6 +58,16 @@ Understand why [LLMs usually perform poorly](/home/use-tools/types-of-tools#why-
 'Tool context' is an object that is passed to a tool as a parameter when the tool is executed. It contains information about the tool call, the user for which the tool is being called, and any secrets the tool requires to run.
 
 _Learn more about [tool context](/home/build-tools/tool-context)._
+
+### Transport Modes
+
+MCP servers can communicate with clients through different transport mechanisms. Each transport is optimized for specific use cases and client types.
+
+The stdio (standard input/output) transport is used for direct client connections. It is ideal for desktop applications (Claude, VS Code, Cursor) and command-line tools.
+
+The HTTP transport provides REST/SSE endpoints for web-based clients. It is the default transport mode and is used for most clients.
+
+_Learn more about [transport modes in the MCP Protocol documentation](https://modelcontextprotocol.info/docs/concepts/transports/)._
 
 ### MCP (Model Context Protocol)
 
@@ -140,7 +158,8 @@ To set your own credentials, set the requisite secret within the Arcade Dashboar
 graph TD
     A[Agent] --> B[Arcade Client]
     B --> C[Arcade Engine]
-    C --> D[Worker]
+    C --> D[MCP Gateway]
+    D --> E[MCP Server]
 ```
 
 ### Arcade Client
@@ -155,17 +174,15 @@ The Arcade Engine is the core of the Arcade platform. It is responsible for rout
 
 The Arcade Engine is also responsible for the OAuth flow for your agent's users. This includes granting and elevating permissions and keeping tokens fresh.
 
-### Worker
+### MCP Gateway
 
-A 'worker' is a process that runs all the tools with a MCP Server. Workers are microservices that are called by the Arcade Engine to handle tool execution requests. Workers are either [deployed to Arcade's infrastructure](/home/serve-tools/arcade-deploy) via `arcade deploy`, or run in your own infrastructure.
+MCP gateways are a feature of the Arcade Engine that allows you to add and combine multiple MCP servers in your project. The MCP gateway is responsible for routing tool execution requests to the correct MCP server, and for enforcing security and authorization decisions. You can mix and match tools from different MCP servers in the same project, and not all tools from a MCP server need to be available to the same LLM.
 
-_Learn more about workers [here](/home/deployment/on-prem-mcp)._
+### Arcade MCP (Server Development Kit)
 
-### TDK (Tool Development Kit)
+Arcade MCP is a framework for building secure MCP servers. It is responsible for the lifecycle of tool executions, and for enforcing security and authorization decisions within the boundary of the server.
 
-The Arcade TDK is a command-line application that helps you create, test, and deploy tools.
-
-_Learn more about the TDK [here](/home/build-tools/create-a-mcp-server)._
+_Learn more about the Arcade MCP framework [here](/references)._
 
 ### Evaluations (Evals)
 

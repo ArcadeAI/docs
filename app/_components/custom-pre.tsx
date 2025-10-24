@@ -70,9 +70,9 @@ const CustomPre: React.FC<CustomPreProps> = ({
     if (isTerminalLanguage) {
       // Terminal styling
       return (
-        <div className="my-4 overflow-hidden rounded-lg border border-gray-300 bg-gray-900 dark:border-gray-700">
+        <div className="my-4 overflow-hidden rounded-lg border border-gray-300 bg-gray-100 dark:border-gray-700 dark:bg-gray-900">
           {/* Terminal Header */}
-          <div className="flex items-center justify-between bg-gray-800 px-4 py-2 text-gray-300">
+          <div className="flex items-center justify-between bg-gray-200 px-4 py-2 text-gray-700 dark:bg-gray-800 dark:text-gray-300">
             <div className="flex items-center gap-2">
               <Terminal className="h-4 w-4" />
               <span className="font-medium text-sm">Terminal</span>
@@ -87,7 +87,7 @@ const CustomPre: React.FC<CustomPreProps> = ({
           {/* Code content with syntax highlighting preserved */}
           <div className="overflow-x-auto">
             <Pre
-              className={`p-4 text-gray-100 text-sm ${className || ""}`}
+              className={`text-gray-800 text-sm dark:text-gray-100 ${className || ""}`}
               style={{ margin: 0, borderRadius: 0, background: "transparent" }}
               {...props}
             >
@@ -113,7 +113,7 @@ const CustomPre: React.FC<CustomPreProps> = ({
         {/* Code content with syntax highlighting preserved */}
         <div className="overflow-x-auto">
           <Pre
-            className={`bg-white p-4 text-sm dark:bg-gray-950 ${className || ""}`}
+            className={`bg-white text-sm dark:bg-gray-950 ${className || ""}`}
             style={{ margin: 0, borderRadius: 0 }}
             {...props}
           >

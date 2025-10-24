@@ -49,6 +49,7 @@ from langchain_openai import ChatOpenAI
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, START, MessagesState, StateGraph
 from langgraph.prebuilt import ToolNode
+from langchain_core.runnables import RunnableConfig
 
 arcade_api_key = os.environ["ARCADE_API_KEY"]
 
@@ -150,7 +151,10 @@ def should_continue(state: MessagesState):
 
 
 # Function to handle authorization for tools that require it
-def authorize(state: MessagesState, config: dict):
+def authorize(state: MessagesState, config: RunnableConfig | None = None):
+    if config is None:
+        raise ValueError("Config is required for authorization")
+
     user_id = config["configurable"].get("user_id")
     for tool_call in state["messages"][-1].tool_calls:
         tool_name = tool_call["name"]
@@ -166,7 +170,7 @@ def authorize(state: MessagesState, config: dict):
             tool_manager.wait_for_auth(auth_response.id)
             if not tool_manager.is_authorized(auth_response.id):
                 # This stops execution if authorization fails
-                raise ValueError("Authorization failed")
+                raise ValueError("Authorization failed.")
 
     return {"messages": []}
 ```
@@ -318,7 +322,7 @@ inputs = {
     "messages": [
         {
             "role": "user",
-            "content": "Check and see if I have any important emails in my inbox",
+            "content": "Check and see if I have any emails in my inbox",
         }
     ],
 }

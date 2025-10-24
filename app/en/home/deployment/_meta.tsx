@@ -9,7 +9,7 @@ const meta: MetaRecord = {
     },
   },
   "on-prem-mcp": {
-    title: "On-premise MCP servers",
+    title: "On-premises MCP servers",
   },
   "engine-configuration": {
     title: "Engine configuration",

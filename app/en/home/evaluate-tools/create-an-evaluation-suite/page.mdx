@@ -5,9 +5,9 @@ description: "Learn how to evaluate your tools using Arcade"
 
 # Evaluate tools
 
-In this guide, you'll learn how to evaluate your custom tools to ensure they function correctly with the AI assistant, including defining evaluation cases and using different critics.
+In this guide, you'll learn how to evaluate your tools to ensure they are selected and used correctly by an AI model. You'll define evaluation cases and use different critics to assess the outcome of your evaluations.
 
-We'll create evaluation cases to test our `greet` tool and measure its performance.
+We'll create evaluation cases to test the `greet` tool and measure its performance.
 
 import { Steps, Tabs, Callout } from "nextra/components";
 
@@ -124,21 +124,22 @@ This command executes your evaluation suite and provides a report.
 
 ### How it works
 
-The evaluation framework in Arcade allows you to define test cases (`EvalCase`) with expected tool calls and use critics to assess the AI's performance.
+The evaluation framework in Arcade allows you to define test cases (`EvalCase`) with expected tool calls and use critics to assess an AI model's performance.
 
-By running the evaluation suite, you can measure how well the AI assistant is using your tools.
+Similar to how a unit test suite measures the validity and performance of a function, an eval suite measures how well an AI model understands and uses your tools.
 
 ### Next steps
 
-Explore different types of critics and evaluation criteria to thoroughly test your tools.
-
-[Learn more about Critic classes](#critic-classes)
+- Explore [different types of critics](#critic-classes) and [more complex evaluation cases](#advanced-evaluation-cases) to thoroughly test your tools.
+- Understand [how to specify options for your evaluation runs](/home/evaluate-tools/run-evaluations).
 
 </Steps>
 
 ## Critic classes
 
-Arcade provides several critic classes to evaluate different aspects of tool usage.
+Critics are used to evaluate the correctness of tool calls. For simple tools, "correct" might be binary: is it exactly what we expected? For more complex tools, we might need to evaluate the similarity between expected and actual values, or measure numeric values within an acceptable range.
+
+Arcade's evaluation framework provides several critic classes to help you evaluate both exact and "fuzzy" matches between expected and actual values when a model predicts the parameters of a tool call.
 
 ### BinaryCritic
 
@@ -183,13 +184,20 @@ DatetimeCritic(critic_field="start_time", tolerance=timedelta(seconds=10), weigh
 
 You can add more evaluation cases to test different scenarios.
 
+<Callout type="info">
+  Ensure that your `greet` tool and evaluation cases are updated accordingly and
+  that you rerun `arcade evals .` to test your changes.
+
+  If your evals fail, use `--details` to see the detailed feedback from each critic. See [Run evaluations](/home/evaluate-tools/run-evaluations) to understand the options available in `arcade evals`.
+</Callout>
+
+
 ### Example: Greeting with emotion
 
 Modify your `hello` tool to accept an `emotion` parameter:
 
 ```python
-from arcade_mcp_server import tool
-from typing import Annotated
+from enum import Enum
 
 class Emotion(str, Enum):
     HAPPY = "happy"
@@ -197,13 +205,15 @@ class Emotion(str, Enum):
     SAD = "sad"
     SLIGHTLY_SAD = "slightly sad"
 
-@tool
+@app.tool
 def greet(
-    name: Annotated[str, "The name of the person to greet"] = "there",
-    emotion: Annotated[Emotion, "The emotion to convey"] = Emotion.HAPPY
+    name: Annotated[str, "The name of the person to greet"],
+    emotion: Annotated[
+        Emotion, "The emotion to convey. Defaults to happy if omitted."
+    ] = Emotion.HAPPY,
 ) -> Annotated[str, "A greeting to the user"]:
     """
-    Say hello to the user with a specific emotion.
+    Greet a person by name, optionally with a specific emotion.
     """
     return f"Hello {name}! I'm feeling {emotion.value} today."
 ```
@@ -211,6 +221,11 @@ def greet(
 Add an evaluation case for this new parameter:
 
 ```python
+# At the top of the file:
+from server import Emotion
+from arcade_evals import SimilarityCritic
+
+# Inside hello_eval_suite():
 suite.add_case(
     name="Greeting with Emotion",
     user_message="Say hello to Bob sadly",
@@ -234,7 +249,7 @@ Add an evaluation case with additional conversation context:
 
 ```python
 suite.add_case(
-    name="Greeting with Emotion",
+    name="Greeting with Emotion from Context",
     user_message="Say hello to Bob based on my current mood.",
     expected_tool_calls=[
         ExpectedToolCall(
@@ -264,7 +279,7 @@ Add an evaluation case with multiple expected tool calls:
 
 ```python
 suite.add_case(
-    name="Greeting with Emotion",
+    name="Multiple Greetings with Emotion from Context",
     user_message="Say hello to Bob based on my current mood. And then say hello to Alice with slightly less of that emotion.",
     expected_tool_calls=[
         ExpectedToolCall(
@@ -297,9 +312,3 @@ suite.add_case(
 )
 ```
 
----
-
-<Callout type="info">
-  Ensure that your `greet` tool and evaluation cases are updated accordingly and
-  that you rerun `arcade evals .` to test your changes.
-</Callout>
