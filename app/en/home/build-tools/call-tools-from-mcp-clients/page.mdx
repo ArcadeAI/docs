@@ -17,7 +17,7 @@ Configure your MCP clients to call tools from your MCP server.
 <GuideOverview.Prerequisites>
 
 - [Arcade account](https://api.arcade.dev/signup)
-- [Arcade CLI](/home/quickstart)
+- [Arcade CLI](/home/arcade-cli)
 - [An MCP Server](/home/build-tools/create-a-mcp-server)
 - [uv package manager](https://docs.astral.sh/uv/getting-started/installation/)
 
@@ -91,7 +91,17 @@ Claude Desktop does not currently support the http transport.
 
 ### stdio specific configuration
 
-If you are using the stdio transport, `arcade configure` will assume the entrypoint to your MCP server is `server.py` and will set the working directory to the root of your project. You can override this with the `--entrypoint` (or `-e`) option:
+If you are using the stdio transport, `arcade configure` will assume the entrypoint (the script that contains the `MCPApp` instance and calls `app.run()`) to your MCP server is `server.py` and will set the working directory to the root of your project. You can override this with the `--entrypoint` (or `-e`) option:
+
+<Callout type="info">
+  Note that the `--entrypoint` determines only the filename of the entrypoint
+  script, not the path to the script.
+</Callout>
+<Callout type="info">
+  When using the stdio transport, `arcade configure` will automatically load the
+  secrets from the `.env` file in the root of your project into the appropriate
+  configuration file for your MCP client.
+</Callout>
 
 <Tabs
   items={["Cursor IDE", "VS Code", "Claude Desktop"]}
@@ -224,6 +234,7 @@ By default, `arcade configure` will use the current directory as the name of the
 
   </Tabs.Tab>
 </Tabs>
+
 ## Manually configuring your MCP client
 
 If your MCP client is not supported by the `arcade configure` command, you can manually add the MCP server to your client's configuration file.
@@ -241,6 +252,7 @@ When configuring your MCP client using the stdio transport, you need to ensure t
 - Your project is located at `/path/to/your/project`
 - The entrypoint to your MCP server is `server.py`
 - One of your tools requires the `MY_SECRET_KEY` environment variable to be set.
+- Your secrets are stored in the `/path/to/your/project/.env` file
 
 Then, your MCP client's configuration file should look like this:
 
