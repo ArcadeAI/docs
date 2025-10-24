@@ -7,4 +7,5 @@ export default {
   "organize-mcp-server-tools": "Organize MCP server tools",
   "providing-useful-tool-errors": "Providing useful tool errors",
   "retry-tools-with-improved-prompt": "Retry tools with improved prompt",
+  "call-tools-from-mcp-clients": "Call tools from MCP clients",
 };
