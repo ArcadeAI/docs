@@ -8,6 +8,9 @@ const meta: MetaRecord = {
       copyPage: true,
     },
   },
+  "arcade-cloud-infra": {
+    title: "Arcade Cloud Infrastructure",
+  },
   "on-prem-mcp": {
     title: "On-premises MCP servers",
   },
