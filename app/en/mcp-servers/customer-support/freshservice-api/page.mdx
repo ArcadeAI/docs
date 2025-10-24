@@ -1,0 +1,4773 @@
+# FreshserviceApi
+
+import StarterToolInfo from "@/app/_components/starter-tool-info";
+import ToolInfo from "@/app/_components/tool-info";
+import Badges from "@/app/_components/badges";
+import TabbedCodeBlock from "@/app/_components/tabbed-code-block";
+import TableOfContents from "@/app/_components/table-of-contents";
+import ToolFooter from "@/app/_components/tool-footer";
+import { Callout } from "nextra/components";
+
+<ToolInfo
+  description="Tools that enable LLMs to interact directly with the Freshservice API."
+  author="Arcade"
+  authType="API Key"
+  versions={["0.1.0"]}
+/>
+
+<Badges repo="arcadeai/arcade_freshservice_api" />
+
+<StarterToolInfo toolkitName="FreshserviceApi" />
+
+The FreshserviceApi MCP Server offers a comprehensive set of tools for interacting with Freshservice programmatically. Build agents and AI apps to:
+
+- Manage organizational data: list, view, create/ delete, and inspect departments/locations/vendors/products/agent groups.
+- Manage assets and inventory: list asset types, assets, components, installed software, contracts, and asset-related fields; add/update/delete components.
+- Manage software & licenses: list software, application details, installations, and licenses.
+- Manage service catalog & knowledge base: list and view service items, catalog fields, solution articles/folders/categories; create/update/delete solution content and folders.
+- Manage users & agents: list, view, convert, merge, and delete requesters and agents; access requester/agent fields and onboarding requests.
+- Manage tickets & related data: list tickets, fetch ticket details, conversations, tasks, time entries, and remove/restore tickets or conversations.
+- Manage changes, problems, releases, and projects: list and retrieve change/problem/release/project records; manage notes, tasks, time entries, and delete/archive/restore items.
+- Manage CSAT, canned responses, announcements, and purchase orders: list/view/activate/deactivate/delete surveys; manage canned responses and folders; list announcements and purchase orders.
+- Retrieve configuration & metadata: fetch business hours, form fields (change/release), asset/component fields, requester/agent fields, departments/locations/products structure and more.
+
+Use these endpoints to automate administration, asset lifecycle, ITSM workflows, reporting, and knowledge/cataglog maintenance within Freshservice.
+
+## Available Tools
+
+<TableOfContents
+  headers={["Tool Name", "Description"]}
+  data={[
+    [
+      "FreshserviceApi.GetFreshserviceDepartments",
+      "Retrieve all departments from Freshservice.",
+    ],
+    [
+      "FreshserviceApi.RetrieveDepartmentDetails",
+      "Retrieve department details using department ID.",
+    ],
+    [
+      "FreshserviceApi.DeleteDepartment",
+      "Delete a department from Freshservice by ID.",
+    ],
+    [
+      "FreshserviceApi.GetDepartmentFields",
+      "Retrieve department or company fields from Freshservice.",
+    ],
+    [
+      "FreshserviceApi.ListFreshserviceAgentGroups",
+      "Retrieve a list of all Agent Groups in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.GetAgentGroupInfo",
+      "Retrieve details of a Freshservice agent group by ID.",
+    ],
+    [
+      "FreshserviceApi.DeleteAgentGroup",
+      "Delete an agent group in Freshservice by ID.",
+    ],
+    [
+      "FreshserviceApi.ListAllProducts",
+      "Retrieve a comprehensive list of products from Freshservice.",
+    ],
+    [
+      "FreshserviceApi.GetProductDetails",
+      "Retrieve a specific Product from the Product Catalog.",
+    ],
+    [
+      "FreshserviceApi.DeleteProduct",
+      "Delete a product from the Freshservice catalog.",
+    ],
+    [
+      "FreshserviceApi.GetBusinessHoursConfigs",
+      "Retrieve a list of all Business Hours configurations from Freshservice.",
+    ],
+    [
+      "FreshserviceApi.GetBusinessHoursConfig",
+      "Retrieve Freshservice Business Hours configuration by ID.",
+    ],
+    [
+      "FreshserviceApi.GetAllLocations",
+      "Retrieve a list of all locations in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.FetchLocationDetails",
+      "Retrieve details of a specific location by ID.",
+    ],
+    [
+      "FreshserviceApi.DeleteExistingLocation",
+      "Deletes an existing location from Freshservice.",
+    ],
+    [
+      "FreshserviceApi.FetchAllVendors",
+      "Retrieve and list all vendors from Freshservice.",
+    ],
+    [
+      "FreshserviceApi.GetVendorDetails",
+      "Retrieve details of a specific vendor by ID.",
+    ],
+    [
+      "FreshserviceApi.DeleteExistingVendor",
+      "Delete an existing vendor in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.GetAssetTypes",
+      "Retrieve all asset types from Freshservice.",
+    ],
+    [
+      "FreshserviceApi.RetrieveAssetType",
+      "Retrieve details of a specific asset type by ID.",
+    ],
+    [
+      "FreshserviceApi.DeleteAssetType",
+      "Delete an existing asset type in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.GetAssetFields",
+      "Retrieve asset fields for a specific asset type.",
+    ],
+    [
+      "FreshserviceApi.GetComponentTypes",
+      "Retrieve all component types in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.GetAssetList",
+      "Retrieve a list of all assets from Freshservice.",
+    ],
+    [
+      "FreshserviceApi.GetAssetDetails",
+      "Retrieve details of a specific asset by ID.",
+    ],
+    [
+      "FreshserviceApi.DeleteAsset",
+      "Delete an existing asset in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.ListInstalledSoftware",
+      "Retrieve all software installed on a specific device.",
+    ],
+    [
+      "FreshserviceApi.ListAssetRequests",
+      "Retrieve all requests linked to a specific asset.",
+    ],
+    [
+      "FreshserviceApi.GetAssetContracts",
+      "Retrieve all contracts linked to a specific asset.",
+    ],
+    [
+      "FreshserviceApi.GetDeviceComponents",
+      "Retrieve all components of a specified device.",
+    ],
+    [
+      "FreshserviceApi.AddAssetComponent",
+      "Add a new component to an existing asset.",
+    ],
+    ["FreshserviceApi.UpdateAssetComponent", "Update a component in an asset."],
+    [
+      "FreshserviceApi.DeleteAssetComponent",
+      "Delete a specific component from an asset.",
+    ],
+    [
+      "FreshserviceApi.GetSoftwareList",
+      "Retrieve all software applications in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.RetrieveSoftwareApplication",
+      "Retrieve a specific software application from Freshservice.",
+    ],
+    [
+      "FreshserviceApi.GetSoftwareInstallationList",
+      "Retrieve a list of devices where specified software is installed.",
+    ],
+    [
+      "FreshserviceApi.GetApplicationLicenses",
+      "Retrieve licenses linked to a specific software application.",
+    ],
+    [
+      "FreshserviceApi.GetAllCsatSurveys",
+      "Retrieve a list of all CSAT surveys in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.GetCsatSurvey",
+      "Retrieve a CSAT survey by its ID from Freshservice.",
+    ],
+    [
+      "FreshserviceApi.DeleteSurvey",
+      "Delete a survey and its responses from Freshservice.",
+    ],
+    [
+      "FreshserviceApi.ActivateCsatSurvey",
+      "Activate a CSAT survey in Freshservice using its ID.",
+    ],
+    [
+      "FreshserviceApi.DeactivateCsatSurvey",
+      "Deactivate a specified CSAT Survey in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.ViewServiceItem",
+      "Retrieve details of a specific service item.",
+    ],
+    [
+      "FreshserviceApi.GetServiceItemsList",
+      "Retrieve a list of all Service Items in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.GetCatalogItemFields",
+      "Retrieve all fields for a specific service catalog item.",
+    ],
+    [
+      "FreshserviceApi.GetSolutionArticles",
+      "Retrieve a list of Solution articles from Freshservice.",
+    ],
+    [
+      "FreshserviceApi.ViewSolutionArticle",
+      "Retrieve details of a Freshservice solution article.",
+    ],
+    [
+      "FreshserviceApi.DeleteSolutionArticle",
+      "Delete a solution article from Freshservice by ID.",
+    ],
+    [
+      "FreshserviceApi.ListSolutionFolders",
+      "Retrieve all Solution Folders from Freshservice.",
+    ],
+    [
+      "FreshserviceApi.ViewSolutionFolder",
+      "Retrieve details of a specific solution folder.",
+    ],
+    [
+      "FreshserviceApi.DeleteSolutionFolder",
+      "Delete a solution folder in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.GetSolutionCategories",
+      "Retrieve a list of all solution categories in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.ViewSolutionCategory",
+      "Retrieve details of a specific solution category.",
+    ],
+    [
+      "FreshserviceApi.DeleteSolutionCategory",
+      "Delete a solution category by its ID from Freshservice.",
+    ],
+    [
+      "FreshserviceApi.GetAllFreshserviceRequesters",
+      "Retrieve a list of all requesters in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.GetFreshserviceRequester",
+      "Retrieve a requester by ID from Freshservice.",
+    ],
+    [
+      "FreshserviceApi.DeleteRequesterFromFreshservice",
+      "Delete a requester by ID from Freshservice.",
+    ],
+    [
+      "FreshserviceApi.DeleteRequesterAndTickets",
+      "Permanently delete a requester and their tickets.",
+    ],
+    [
+      "FreshserviceApi.ConvertRequesterToAgent",
+      "Convert a requester into an occasional agent.",
+    ],
+    [
+      "FreshserviceApi.MergeRequesters",
+      "Merge secondary requesters into a primary requester.",
+    ],
+    [
+      "FreshserviceApi.GetRequesterFields",
+      "Retrieve all requester fields from Freshservice.",
+    ],
+    [
+      "FreshserviceApi.GetFreshserviceAgents",
+      "Retrieve a list of all Agents in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.RetrieveFreshserviceAgent",
+      "Retrieve details of a Freshservice agent by ID.",
+    ],
+    [
+      "FreshserviceApi.ConvertAgentToRequester",
+      "Convert an agent into a requester in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.DeleteAgentAndTickets",
+      "Permanently deletes an agent and their tickets.",
+    ],
+    [
+      "FreshserviceApi.RetrieveAgentFields",
+      "Retrieve a list of all Agent Fields in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.FetchTicketList",
+      "Fetches the list of all support tickets in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.FetchTicketDetails",
+      "Retrieve details of a FreshService ticket using its ID.",
+    ],
+    [
+      "FreshserviceApi.RemoveFreshserviceTicket",
+      "Remove a Freshservice support ticket by ID.",
+    ],
+    [
+      "FreshserviceApi.RestoreDeletedTicket",
+      "Restore a deleted Freshservice ticket.",
+    ],
+    [
+      "FreshserviceApi.GetTicketConversations",
+      "Fetches all conversations for a specific Freshservice ticket.",
+    ],
+    [
+      "FreshserviceApi.RemoveTicketConversation",
+      "Remove a conversation from a Freshservice ticket.",
+    ],
+    [
+      "FreshserviceApi.GetTicketTasks",
+      "Retrieve tasks for a specific Freshservice ticket.",
+    ],
+    [
+      "FreshserviceApi.RetrieveTicketTask",
+      "Retrieve details of a task from a ticket in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.DeleteTicketTask",
+      "Deletes a task from a specified ticket in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.GetTicketTimeEntries",
+      "Retrieve time entries for a given ticket ID.",
+    ],
+    [
+      "FreshserviceApi.GetTicketTimeEntry",
+      "Retrieve a time entry for a specific ticket in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.DeleteTicketTimeEntry",
+      "Deletes a time entry from a Freshservice ticket.",
+    ],
+    [
+      "FreshserviceApi.ListFreshserviceChanges",
+      "Retrieve all changes from Freshservice.",
+    ],
+    [
+      "FreshserviceApi.RetrieveChangeRequest",
+      "Fetch a Change request by ID from Freshservice.",
+    ],
+    [
+      "FreshserviceApi.DeleteFreshserviceChange",
+      "Deletes a specified change request from Freshservice.",
+    ],
+    [
+      "FreshserviceApi.RetrieveChangeNotes",
+      "Retrieve notes from a specific change request.",
+    ],
+    [
+      "FreshserviceApi.RetrieveChangeNote",
+      "Retrieve a specific note from a change request in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.DeleteChangeNote",
+      "Delete a note from a Change request in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.RetrieveChangeTasks",
+      "Retrieve tasks for a specific Change request in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.RetrieveChangeTaskInfo",
+      "Retrieve details of a task in a change request.",
+    ],
+    [
+      "FreshserviceApi.RemoveChangeTask",
+      "Delete a task from a change request in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.GetChangeTimeEntries",
+      "Retrieve time entries for a specific Change request.",
+    ],
+    [
+      "FreshserviceApi.RetrieveChangeRequestTimeEntry",
+      "Retrieve a time entry from a Change request by ID.",
+    ],
+    [
+      "FreshserviceApi.DeleteChangeTimeEntryFreshservice",
+      "Delete a time entry from a Change request in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.RetrieveAllProjects",
+      "Retrieve a list of all projects in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.RetrieveFreshserviceProject",
+      "Retrieve project details from Freshservice by ID.",
+    ],
+    [
+      "FreshserviceApi.DeleteFreshserviceProject",
+      "Deletes a project in Freshservice by ID.",
+    ],
+    [
+      "FreshserviceApi.ArchiveProject",
+      "Archive an existing project in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.RestoreArchivedProject",
+      "Restores an archived project in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.ListProjectTasks",
+      "Retrieve a list of all project tasks in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.GetProjectTaskDetails",
+      "Retrieve detailed information about a project task in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.DeleteProjectTask",
+      "Deletes a specified project task in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.GetChangeFormFields",
+      "Retrieve all fields in the Change Object of Freshservice.",
+    ],
+    [
+      "FreshserviceApi.GetReleaseFormFields",
+      "Retrieve all fields of the release object form.",
+    ],
+    [
+      "FreshserviceApi.GetFreshserviceAnnouncements",
+      "Retrieve all announcements from Freshservice.",
+    ],
+    [
+      "FreshserviceApi.FetchAnnouncementDetails",
+      "Retrieve specific announcement details from Freshservice.",
+    ],
+    [
+      "FreshserviceApi.DeleteFreshserviceAnnouncement",
+      "Delete a specific announcement from Freshservice.",
+    ],
+    [
+      "FreshserviceApi.RetrieveFreshserviceProblems",
+      "Retrieve all problems from Freshservice.",
+    ],
+    [
+      "FreshserviceApi.RetrieveFreshserviceProblem",
+      "Retrieve a specific problem in Freshservice by ID.",
+    ],
+    [
+      "FreshserviceApi.DeleteProblem",
+      "Delete a problem using its ID from Freshservice.",
+    ],
+    [
+      "FreshserviceApi.GetProblemNotes",
+      "Retrieve notes for a specific problem ID in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.RetrieveProblemNote",
+      "Retrieve a specific note from a problem in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.DeleteProblemNote",
+      "Delete a note from a specific problem in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.GetProblemTasks",
+      "Retrieve tasks for a specific problem from Freshservice.",
+    ],
+    [
+      "FreshserviceApi.RetrieveProblemTask",
+      "Retrieve details of a specific task from a problem in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.DeleteProblemTask",
+      "Delete a task from a problem in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.GetProblemTimeEntries",
+      "Retrieve time entries for a specific problem by ID.",
+    ],
+    [
+      "FreshserviceApi.GetProblemTimeEntry",
+      "Retrieve time entry details for a specific problem.",
+    ],
+    [
+      "FreshserviceApi.DeleteProblemTimeEntry",
+      "Delete a time entry from a specified problem in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.GetUserOnboardingRequests",
+      "Retrieve onboarding requests for a user.",
+    ],
+    [
+      "FreshserviceApi.RetrieveOnboardingRequest",
+      "Retrieve details of a specific onboarding request.",
+    ],
+    [
+      "FreshserviceApi.GetOnboardingRequestTickets",
+      "Retrieve FreshService Tickets for a specific Onboarding Request.",
+    ],
+    [
+      "FreshserviceApi.GetCannedResponses",
+      "Retrieve all canned responses from Freshservice.",
+    ],
+    [
+      "FreshserviceApi.GetCannedResponse",
+      "Retrieve a specific Canned Response by ID from Freshservice.",
+    ],
+    [
+      "FreshserviceApi.DeleteCannedResponse",
+      "Delete a specific canned response from Freshservice.",
+    ],
+    [
+      "FreshserviceApi.GetFreshserviceCannedResponseFolders",
+      "Retrieve all canned response folders from Freshservice.",
+    ],
+    [
+      "FreshserviceApi.GetCannedResponseFolder",
+      "Retrieve a specific canned response folder from Freshservice.",
+    ],
+    [
+      "FreshserviceApi.DeleteCannedResponseFolder",
+      "Delete a Canned Response Folder in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.ListCannedResponses",
+      "Retrieve all canned responses from a specified folder.",
+    ],
+    [
+      "FreshserviceApi.GetReleasesList",
+      "Retrieve a list of all Releases in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.GetReleaseDetails",
+      "Retrieve details of a specific release by ID in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.DeleteFreshserviceRelease",
+      "Delete a specific release in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.GetReleaseNotes",
+      "Retrieve release notes from Freshservice using a release ID.",
+    ],
+    [
+      "FreshserviceApi.FetchReleaseNote",
+      "Retrieve a note on a release by ID from Freshservice.",
+    ],
+    [
+      "FreshserviceApi.DeleteReleaseNoteFreshservice",
+      "Deletes a note from a specified release in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.RetrieveReleaseTasks",
+      "Retrieve tasks for a specified release in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.RetrieveReleaseTask",
+      "Retrieve a specific task from a release in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.DeleteReleaseTask",
+      "Delete a task from a specified release in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.GetReleaseTimeEntries",
+      "Retrieve time entries for a specific release in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.FetchReleaseTimeEntry",
+      "Retrieve details of a release time entry by ID.",
+    ],
+    [
+      "FreshserviceApi.DeleteReleaseTimeEntry",
+      "Delete a time entry from a release in Freshservice.",
+    ],
+    [
+      "FreshserviceApi.ListPurchaseOrders",
+      "Retrieve a list of all Purchase Orders from Freshservice.",
+    ],
+    [
+      "FreshserviceApi.GetPurchaseOrder",
+      "Retrieve details of an existing purchase order by ID.",
+    ],
+    [
+      "FreshserviceApi.DeletePurchaseOrder",
+      "Delete a specified purchase order in Freshservice.",
+    ],
+  ]}
+/>
+
+<Callout>
+  If you need to perform an action that's not listed here, you can [get in touch
+  with us](mailto:contact@arcade.dev) to request a new tool, or [create your own
+  tools](/home/build-tools/create-a-mcp-server).
+</Callout>
+
+## FreshserviceApi.GetFreshserviceDepartments
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_freshservice_departments_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_freshservice_departments_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve all departments from Freshservice.
+
+**Parameters**
+
+- **entries_per_page** (`integer`, optional) The number of entries to retrieve per page in a paginated list.
+- **page_number** (`integer`, optional) The specific page number of departments to retrieve from Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.RetrieveDepartmentDetails
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_department_details_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_department_details_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve department details using department ID.
+
+**Parameters**
+
+- **department_id** (`integer`, required) The ID of the department to retrieve from Freshservice. Use only integer values.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.DeleteDepartment
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_department_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_department_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Delete a department from Freshservice by ID.
+
+**Parameters**
+
+- **department_id** (`integer`, required) The unique ID of the department to delete from Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetDepartmentFields
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_department_fields_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_department_fields_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve department or company fields from Freshservice.
+
+**Parameters**
+
+This tool does not take any parameters.
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.ListFreshserviceAgentGroups
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/list_freshservice_agent_groups_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/list_freshservice_agent_groups_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of all Agent Groups in Freshservice.
+
+**Parameters**
+
+- **entries_per_page** (`integer`, optional) Specify the number of entries to retrieve in each page of the list.
+- **page_number_to_retrieve** (`integer`, optional) The specific page number to retrieve from a paginated list of agent groups.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetAgentGroupInfo
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_agent_group_info_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_agent_group_info_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a Freshservice agent group by ID.
+
+**Parameters**
+
+- **agent_group_identifier** (`integer`, required) The unique integer ID of the Freshservice agent group to retrieve.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.DeleteAgentGroup
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_agent_group_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_agent_group_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Delete an agent group in Freshservice by ID.
+
+**Parameters**
+
+- **agent_group_id_to_delete** (`integer`, required) The unique integer ID of the agent group to be deleted in Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.ListAllProducts
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/list_all_products_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/list_all_products_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a comprehensive list of products from Freshservice.
+
+**Parameters**
+
+- **entries_per_page** (`integer`, optional) Specify the number of entries to retrieve in each page of the product list.
+- **page_number** (`integer`, optional) Specify the page number to retrieve from the paginated list of products.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetProductDetails
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_product_details_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_product_details_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a specific Product from the Product Catalog.
+
+**Parameters**
+
+- **product_id** (`integer`, required) The unique identifier for the product in the Freshservice Product Catalog to retrieve details.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.DeleteProduct
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_product_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_product_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Delete a product from the Freshservice catalog.
+
+**Parameters**
+
+- **product_identifier** (`integer`, required) The unique ID of the product to be deleted from the Freshservice catalog.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetBusinessHoursConfigs
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_business_hours_configs_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_business_hours_configs_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of all Business Hours configurations from Freshservice.
+
+**Parameters**
+
+- **entries_per_page** (`integer`, optional) The number of Business Hours configurations to retrieve per page in the paginated list.
+- **requested_page_number** (`integer`, optional) Specify the page number of results you want to retrieve.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetBusinessHoursConfig
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_business_hours_config_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_business_hours_config_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve Freshservice Business Hours configuration by ID.
+
+**Parameters**
+
+- **business_hours_configuration_id** (`integer`, required) The ID of the Business Hours configuration to retrieve from Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetAllLocations
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_all_locations_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_all_locations_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of all locations in Freshservice.
+
+**Parameters**
+
+- **entries_per_page** (`integer`, optional) The number of entries to retrieve per page when listing locations. Typically an integer value.
+- **page_number_to_retrieve** (`integer`, optional) The page number of locations to retrieve from Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.FetchLocationDetails
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/fetch_location_details_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/fetch_location_details_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a specific location by ID.
+
+**Parameters**
+
+- **location_identifier** (`integer`, required) The ID of the location to be retrieved. It should be an integer representing a specific location in the Freshservice system.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.DeleteExistingLocation
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_existing_location_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_existing_location_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Deletes an existing location from Freshservice.
+
+**Parameters**
+
+- **location_id** (`integer`, required) The unique identifier of the location to be deleted. Provide the numeric ID corresponding to the location you wish to remove from Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.FetchAllVendors
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/fetch_all_vendors_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/fetch_all_vendors_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve and list all vendors from Freshservice.
+
+**Parameters**
+
+- **entries_per_page** (`integer`, optional) Specify the number of vendor entries to retrieve for each page when listing vendors.
+- **page_number** (`integer`, optional) Specify the page number to retrieve from the paginated list of vendors.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetVendorDetails
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_vendor_details_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_vendor_details_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a specific vendor by ID.
+
+**Parameters**
+
+- **vendor_identifier** (`integer`, required) The unique ID of the vendor to retrieve. This ID is an integer and identifies the vendor in the Freshservice system.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.DeleteExistingVendor
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_existing_vendor_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_existing_vendor_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Delete an existing vendor in Freshservice.
+
+**Parameters**
+
+- **vendor_id** (`integer`, required) The unique identifier of the vendor to be deleted. It should be an integer value.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetAssetTypes
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_asset_types_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_asset_types_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve all asset types from Freshservice.
+
+**Parameters**
+
+- **entries_per_page** (`integer`, optional) The number of asset type entries to retrieve per page in the paginated list.
+- **page_number** (`integer`, optional) The page number to retrieve from the list of asset types.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.RetrieveAssetType
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_asset_type_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_asset_type_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a specific asset type by ID.
+
+**Parameters**
+
+- **asset_type_id** (`integer`, required) The unique integer identifier for the asset type to retrieve from Freshservice. Required for querying specific asset type details.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.DeleteAssetType
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_asset_type_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_asset_type_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Delete an existing asset type in Freshservice.
+
+**Parameters**
+
+- **asset_type_id** (`integer`, required) The unique integer ID of the asset type to be deleted. This ID identifies which asset type should be removed from the Freshservice database.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetAssetFields
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_asset_fields_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_asset_fields_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve asset fields for a specific asset type.
+
+**Parameters**
+
+- **asset_type_identifier** (`integer`, required) The unique identifier for the asset type to retrieve its fields in Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetComponentTypes
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_component_types_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_component_types_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve all component types in Freshservice.
+
+**Parameters**
+
+- **entries_per_page** (`integer`, optional) The number of component type entries to retrieve per page in a paginated list. Specify an integer value.
+- **page_number** (`integer`, optional) The specific page number of component types to retrieve from Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetAssetList
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_asset_list_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_asset_list_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of all assets from Freshservice.
+
+**Parameters**
+
+- **entries_per_page** (`integer`, optional) Specify the number of entries to retrieve per page for pagination. Not applicable with search or filter queries.
+- **page_number** (`integer`, optional) The page number to retrieve for paginated asset lists.
+- **include_asset_type_fields** (`string`, optional) Specify asset type fields to include in the response. Use this to get additional data about each asset type.
+- **apply_asset_filter** (`string`, optional) A URL-encoded string to filter the asset list. Supports parameters like asset_type_id, department_id, and more.
+- **asset_search_query** (`string`, optional) A simple query to search assets by name, asset_tag, or serial_number. Formulate queries like "name:'dell monitor'".
+- **include_trashed_assets** (`boolean`, optional) Set to true to list assets in trash.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetAssetDetails
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_asset_details_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_asset_details_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a specific asset by ID.
+
+**Parameters**
+
+- **asset_display_id** (`integer`, required) The unique display ID of the asset to retrieve details from Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.DeleteAsset
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_asset_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_asset_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Delete an existing asset in Freshservice.
+
+**Parameters**
+
+- **asset_display_id** (`integer`, required) The unique integer identifier of the asset to be deleted. Required to specify which asset to remove from Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.ListInstalledSoftware
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/list_installed_software_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/list_installed_software_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve all software installed on a specific device.
+
+**Parameters**
+
+- **device_display_id** (`integer`, required) The unique integer identifier for the device whose installed software applications are to be retrieved.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.ListAssetRequests
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/list_asset_requests_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/list_asset_requests_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve all requests linked to a specific asset.
+
+**Parameters**
+
+- **asset_display_id** (`integer`, required) The display ID of the asset for which to retrieve associated requests.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetAssetContracts
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_asset_contracts_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_asset_contracts_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve all contracts linked to a specific asset.
+
+**Parameters**
+
+- **asset_display_id** (`integer`, required) The unique display ID of the asset to retrieve contracts for.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetDeviceComponents
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_device_components_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_device_components_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve all components of a specified device.
+
+**Parameters**
+
+- **device_display_id** (`integer`, required) The integer ID of the device whose components you want to list.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.AddAssetComponent
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/add_asset_component_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/add_asset_component_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Add a new component to an existing asset.
+
+**Parameters**
+
+- **asset_display_id** (`integer`, required) The unique identifier of the asset to which the new component will be added. This should be an integer value.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.UpdateAssetComponent
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/update_asset_component_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/update_asset_component_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Update a component in an asset.
+
+**Parameters**
+
+- **asset_display_id** (`integer`, required) The numeric identifier of the asset to be updated in Freshservice.
+- **component_identifier** (`integer`, required) The unique identifier of the component to be updated, as an integer.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.DeleteAssetComponent
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_asset_component_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_asset_component_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Delete a specific component from an asset.
+
+**Parameters**
+
+- **asset_display_id** (`integer`, required) The display ID of the asset from which the component will be deleted. This ID uniquely identifies the asset in the Freshservice system.
+- **component_id** (`integer`, required) The unique identifier of the component to be deleted. This is required to specify which component will be removed from the asset.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetSoftwareList
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_software_list_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_software_list_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve all software applications in Freshservice.
+
+**Parameters**
+
+- **entries_per_page** (`integer`, optional) Number of software entries to retrieve per page for pagination.
+- **page_number** (`integer`, optional) The page number of the software list to retrieve. Used for pagination.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.RetrieveSoftwareApplication
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_software_application_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_software_application_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a specific software application from Freshservice.
+
+**Parameters**
+
+- **application_id** (`integer`, required) The unique identifier for the specific software application in Freshservice to be retrieved. It must be an integer.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetSoftwareInstallationList
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_software_installation_list_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_software_installation_list_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of devices where specified software is installed.
+
+**Parameters**
+
+- **software_application_id** (`integer`, required) The unique identifier of the software application to fetch the installation list.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetApplicationLicenses
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_application_licenses_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_application_licenses_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve licenses linked to a specific software application.
+
+**Parameters**
+
+- **application_id** (`integer`, required) The unique identifier for the software application to retrieve licenses for. Provide as an integer.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetAllCsatSurveys
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_all_csat_surveys_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_all_csat_surveys_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of all CSAT surveys in Freshservice.
+
+**Parameters**
+
+- **filter_active_surveys** (`integer`, optional) Filter surveys by activity status. Use 1 for active and 0 for inactive.
+- **entries_per_page** (`integer`, optional) The number of entries to retrieve per page in a paginated list. Specify an integer value.
+- **survey_page_number** (`integer`, optional) The page number of CSAT surveys to retrieve for pagination.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetCsatSurvey
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_csat_survey_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_csat_survey_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a CSAT survey by its ID from Freshservice.
+
+**Parameters**
+
+- **csat_survey_id** (`integer`, required) The ID of the CSAT survey to retrieve from Freshservice. It should be an integer value.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.DeleteSurvey
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_survey_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_survey_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Delete a survey and its responses from Freshservice.
+
+**Parameters**
+
+- **survey_id_to_delete** (`integer`, required) The ID of the survey you wish to delete from Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.ActivateCsatSurvey
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/activate_csat_survey_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/activate_csat_survey_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Activate a CSAT survey in Freshservice using its ID.
+
+**Parameters**
+
+- **csat_survey_id** (`integer`, required) The ID of the CSAT survey to activate in Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.DeactivateCsatSurvey
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/deactivate_csat_survey_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/deactivate_csat_survey_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Deactivate a specified CSAT Survey in Freshservice.
+
+**Parameters**
+
+- **survey_id** (`integer`, required) The ID of the CSAT survey you wish to deactivate in Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.ViewServiceItem
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/view_service_item_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/view_service_item_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a specific service item.
+
+**Parameters**
+
+- **service_item_id** (`integer`, required) The ID of the service item you want to retrieve.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetServiceItemsList
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_service_items_list_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_service_items_list_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of all Service Items in Freshservice.
+
+**Parameters**
+
+- **entries_per_page** (`integer`, optional) The number of service items to retrieve per page in a paginated list.
+- **page_number_to_retrieve** (`integer`, optional) The page number to retrieve for paginated service items.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetCatalogItemFields
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_catalog_item_fields_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_catalog_item_fields_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve all fields for a specific service catalog item.
+
+**Parameters**
+
+- **service_item_id** (`integer`, required) The ID of the service item to retrieve. Use an integer value representing the specific catalog item.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetSolutionArticles
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_solution_articles_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_solution_articles_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of Solution articles from Freshservice.
+
+**Parameters**
+
+- **entries_per_page** (`integer`, optional) Specify the number of solution articles to retrieve per page in the paginated results.
+- **page_number** (`integer`, optional) The page number of the solution articles to retrieve from Freshservice.
+- **folder_identifier** (`integer`, optional) The numeric ID of the folder to list solution articles from.
+- **solution_category_id** (`integer`, optional) Specify the ID of the category whose solution articles are to be retrieved.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.ViewSolutionArticle
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/view_solution_article_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/view_solution_article_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a Freshservice solution article.
+
+**Parameters**
+
+- **solution_article_id** (`integer`, required) The unique integer ID of the solution article to retrieve.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.DeleteSolutionArticle
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_solution_article_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_solution_article_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Delete a solution article from Freshservice by ID.
+
+**Parameters**
+
+- **solution_article_id** (`integer`, required) ID of the solution article to be deleted from Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.ListSolutionFolders
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/list_solution_folders_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/list_solution_folders_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve all Solution Folders from Freshservice.
+
+**Parameters**
+
+- **solution_category_id** (`integer`, optional) ID of the solution category where the folders reside.
+- **per_page_count** (`integer`, optional) Specifies the number of solution folders to retrieve per page for pagination.
+- **page_number_to_retrieve** (`integer`, optional) Specify the page number to retrieve from the paginated solution folders list.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.ViewSolutionFolder
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/view_solution_folder_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/view_solution_folder_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a specific solution folder.
+
+**Parameters**
+
+- **solution_folder_id** (`integer`, required) The unique ID of the solution folder to retrieve details.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.DeleteSolutionFolder
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_solution_folder_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_solution_folder_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Delete a solution folder in Freshservice.
+
+**Parameters**
+
+- **solution_folder_id** (`integer`, required) ID of the solution folder to be deleted from Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetSolutionCategories
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_solution_categories_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_solution_categories_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of all solution categories in Freshservice.
+
+**Parameters**
+
+- **entries_per_page** (`integer`, optional) The number of entries to retrieve per page in the paginated list.
+- **page_number_to_retrieve** (`integer`, optional) The page number to retrieve in the paginated list of solution categories.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.ViewSolutionCategory
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/view_solution_category_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/view_solution_category_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a specific solution category.
+
+**Parameters**
+
+- **solution_category_id** (`integer`, required) ID of the solution category to retrieve details for.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.DeleteSolutionCategory
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_solution_category_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_solution_category_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Delete a solution category by its ID from Freshservice.
+
+**Parameters**
+
+- **solution_category_id** (`integer`, required) The unique ID of the solution category to be deleted from Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetAllFreshserviceRequesters
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_all_freshservice_requesters_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_all_freshservice_requesters_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of all requesters in Freshservice.
+
+**Parameters**
+
+- **entries_per_page** (`integer`, optional) Number of entries to retrieve in each page of the paginated list.
+- **page_number_to_retrieve** (`integer`, optional) The page number to retrieve from the list of Freshservice requesters.
+- **requester_email** (`string`, optional) The email address to find the corresponding requester.
+- **filter_by_mobile_phone_number** (`string`, optional) Filter requesters by their mobile phone number to return matching entries.
+- **work_phone_number_for_requesters** (`string`, optional) The work phone number to filter requesters with that specific number in Freshservice.
+- **query_filter** (`string`, optional) URL-encoded query filter to apply to the list of requesters. Supports first_name, last_name, job_title, primary_email, and more.
+- **filter_active_accounts** (`boolean`, optional) Include only active user accounts if true. If false, include only deactivated accounts. Leaving unspecified returns both.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetFreshserviceRequester
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_freshservice_requester_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_freshservice_requester_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a requester by ID from Freshservice.
+
+**Parameters**
+
+- **requester_id** (`integer`, required) The unique integer ID of the requester to retrieve from Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.DeleteRequesterFromFreshservice
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_requester_from_freshservice_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_requester_from_freshservice_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Delete a requester by ID from Freshservice.
+
+**Parameters**
+
+- **requester_id_to_delete** (`integer`, required) The ID of the requester to be deleted from Freshservice. This should be an integer.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.DeleteRequesterAndTickets
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_requester_and_tickets_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_requester_and_tickets_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Permanently delete a requester and their tickets.
+
+**Parameters**
+
+- **requester_id_to_delete** (`integer`, required) The ID of the requester to permanently delete along with their tickets.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.ConvertRequesterToAgent
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/convert_requester_to_agent_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/convert_requester_to_agent_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Convert a requester into an occasional agent.
+
+**Parameters**
+
+- **requester_identifier** (`integer`, required) The integer ID of the requester to convert into an occasional agent.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.MergeRequesters
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/merge_requesters_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/merge_requesters_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Merge secondary requesters into a primary requester.
+
+**Parameters**
+
+- **secondary_requester_ids** (`array[integer]`, required) List of IDs for the secondary requesters to merge into the primary.
+- **primary_requester_id** (`integer`, required) Specify the ID of the primary requester to merge secondary requesters into.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetRequesterFields
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_requester_fields_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_requester_fields_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve all requester fields from Freshservice.
+
+**Parameters**
+
+- **entries_per_page** (`integer`, optional) The number of entries to retrieve per page in a paginated list for requester fields.
+- **page_number_to_retrieve** (`integer`, optional) Specify the page number of requester fields to retrieve from Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetFreshserviceAgents
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_freshservice_agents_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_freshservice_agents_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of all Agents in Freshservice.
+
+**Parameters**
+
+- **entries_per_page** (`integer`, optional) The number of agent entries to retrieve in each page of a paginated list. Useful for controlling the size of paginated results.
+- **page_number_to_retrieve** (`integer`, optional) The specific page number of the agent list to retrieve.
+- **requester_email** (`string`, optional) The email address of the requester for which the corresponding agent needs to be listed.
+- **filter_by_mobile_phone_number** (`string`, optional) Filter agents by a specific mobile phone number to list the corresponding requesters.
+- **filter_by_work_phone_number** (`string`, optional) Work phone number to filter the list of agents by their corresponding requesters.
+- **agent_type** (`string`, optional) Filter agents by employment type: 'fulltime' or 'occasional'.
+- **agent_query_filter** (`string`, optional) URL-encoded string for filtering agents. Supports parameters like first_name, last_name, job_title, email, etc.
+- **filter_active_users** (`boolean`, optional) Set to true to list active accounts, false to list deactivated ones, or omit to include both.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.RetrieveFreshserviceAgent
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_freshservice_agent_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_freshservice_agent_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a Freshservice agent by ID.
+
+**Parameters**
+
+- **agent_id** (`integer`, required) The unique integer ID of the Freshservice agent to retrieve details for.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.ConvertAgentToRequester
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/convert_agent_to_requester_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/convert_agent_to_requester_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Convert an agent into a requester in Freshservice.
+
+**Parameters**
+
+- **agent_id_for_conversion** (`integer`, required) The ID of the agent to be converted into a requester. This must be a valid integer representing the agent's ID in Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.DeleteAgentAndTickets
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_agent_and_tickets_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_agent_and_tickets_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Permanently deletes an agent and their tickets.
+
+**Parameters**
+
+- **agent_id_to_delete** (`integer`, required) The ID of the agent to permanently delete along with their tickets. This is irreversible.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.RetrieveAgentFields
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_agent_fields_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_agent_fields_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of all Agent Fields in Freshservice.
+
+**Parameters**
+
+- **entries_per_page** (`integer`, optional) The number of entries to retrieve per page in a paginated list.
+- **page_number_to_retrieve** (`integer`, optional) The page number to retrieve for paginated results.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.FetchTicketList
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/fetch_ticket_list_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/fetch_ticket_list_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Fetches the list of all support tickets in Freshservice.
+
+**Parameters**
+
+- **ticket_filter_type** (`string`, optional) Apply pre-defined filters to fetch specific ticket sets. Options: 'new_and_my_open', 'watching', 'spam', 'deleted'.
+- **requester_email_filter** (`string`, optional) Filter tickets by the requester's email ID to retrieve specific ticket data.
+- **filter_by_requester_id** (`integer`, optional) Filter tickets created by a specific requester using their ID.
+- **filter_by_updated_since** (`string`, optional) Specify the ISO 8601 date-time to filter tickets updated since that time. Example: '2015-01-19T02:00:00Z'.
+- **fields_to_include_in_response** (`string`, optional) Specify which additional fields to include in the ticket response. Options are 'stats' and 'requester'.
+- **sort_order** (`string`, optional) Order to sort the ticket list. Supported values: 'asc' for ascending and 'desc' for descending. Default is 'desc'.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.FetchTicketDetails
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/fetch_ticket_details_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/fetch_ticket_details_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a FreshService ticket using its ID.
+
+**Parameters**
+
+- **ticket_id** (`integer`, required) ID of the Freshservice ticket to be retrieved.
+- **include_fields_in_ticket_response** (`string`, optional) Specify fields to include in the ticket response, such as 'stats', 'requester', 'conversations', etc.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.RemoveFreshserviceTicket
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/remove_freshservice_ticket_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/remove_freshservice_ticket_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Remove a Freshservice support ticket by ID.
+
+**Parameters**
+
+- **ticket_id_to_delete** (`integer`, required) ID of the Freshservice support ticket to delete.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.RestoreDeletedTicket
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/restore_deleted_ticket_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/restore_deleted_ticket_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Restore a deleted Freshservice ticket.
+
+**Parameters**
+
+- **ticket_id_to_restore** (`integer`, required) The ID of the Freshservice ticket to be restored. This must be an integer.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetTicketConversations
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_ticket_conversations_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_ticket_conversations_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Fetches all conversations for a specific Freshservice ticket.
+
+**Parameters**
+
+- **ticket_id** (`integer`, required) The ID of the Freshservice ticket for which conversations need to be fetched. This should be an integer.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.RemoveTicketConversation
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/remove_ticket_conversation_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/remove_ticket_conversation_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Remove a conversation from a Freshservice ticket.
+
+**Parameters**
+
+- **conversation_ticket_id** (`integer`, required) The ID of the ticket from which the conversation should be removed.
+- **conversation_id_to_remove** (`integer`, required) The ID of the specific reply or note to delete from a Freshservice ticket.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetTicketTasks
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_ticket_tasks_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_ticket_tasks_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve tasks for a specific Freshservice ticket.
+
+**Parameters**
+
+- **ticket_request_id** (`integer`, required) ID of the Freshservice ticket for which tasks are to be retrieved.
+- **tasks_per_page** (`integer`, optional) Specify the number of tasks to retrieve per page in the paginated list.
+- **page_number** (`integer`, optional) The specific page number to retrieve from the paginated list of tasks.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.RetrieveTicketTask
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_ticket_task_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_ticket_task_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a task from a ticket in Freshservice.
+
+**Parameters**
+
+- **ticket_request_id** (`integer`, required) The ID of the ticket request to retrieve the specific task from Freshservice.
+- **task_identifier** (`integer`, required) The unique identifier for the task to be retrieved. Provide this to get task details from a ticket.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.DeleteTicketTask
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_ticket_task_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_ticket_task_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Deletes a task from a specified ticket in Freshservice.
+
+**Parameters**
+
+- **ticket_id** (`integer`, required) The unique ID of the ticket from which you want to delete a task.
+- **task_id** (`integer`, required) The unique identifier for the task to be deleted from the ticket.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetTicketTimeEntries
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_ticket_time_entries_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_ticket_time_entries_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve time entries for a given ticket ID.
+
+**Parameters**
+
+- **ticket_request_id** (`integer`, required) The unique ID of the ticket request to retrieve time entries for.
+- **number_of_entries_per_page** (`integer`, optional) The number of time entries to retrieve in each page of a paginated list.
+- **page_number** (`integer`, optional) The page number to retrieve from the paginated list of time entries.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetTicketTimeEntry
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_ticket_time_entry_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_ticket_time_entry_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a time entry for a specific ticket in Freshservice.
+
+**Parameters**
+
+- **ticket_request_id** (`integer`, required) The ID of the specific ticket request for which you want to retrieve the time entry. It must be an integer.
+- **time_entry_id** (`integer`, required) Provide the ID of the time entry to retrieve specific details from a ticket in Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.DeleteTicketTimeEntry
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_ticket_time_entry_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_ticket_time_entry_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Deletes a time entry from a Freshservice ticket.
+
+**Parameters**
+
+- **ticket_id** (`integer`, required) The unique identifier for the Freshservice ticket from which the time entry will be deleted. This must be an integer.
+- **time_entry_id** (`integer`, required) The unique integer ID of the time entry to be deleted from the Freshservice ticket.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.ListFreshserviceChanges
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/list_freshservice_changes_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/list_freshservice_changes_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve all changes from Freshservice.
+
+**Parameters**
+
+- **change_filter_name** (`string`, optional) Specify the filter name to retrieve changes. Possible values: 'my_open', 'unassigned', 'closed', 'release_requested', 'deleted', 'all'.
+- **requester_id** (`string`, optional) ID of the person who requested the changes to filter results.
+- **requester_email** (`string`, optional) Retrieve changes by the requester's email address in Freshservice.
+- **updated_since** (`string`, optional) Retrieve changes updated after a specified date. Date format should be YYYY-MM-DD.
+- **page_size** (`integer`, optional) Specify the number of changes to retrieve per page in a paginated list.
+- **page_number** (`integer`, optional) The specific page number to retrieve in a paginated list of changes.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.RetrieveChangeRequest
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_change_request_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_change_request_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Fetch a Change request by ID from Freshservice.
+
+**Parameters**
+
+- **change_request_id** (`integer`, required) ID of the Change request to retrieve from Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.DeleteFreshserviceChange
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_freshservice_change_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_freshservice_change_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Deletes a specified change request from Freshservice.
+
+**Parameters**
+
+- **change_request_id** (`integer`, required) The ID of the change request to delete from Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.RetrieveChangeNotes
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_change_notes_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_change_notes_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve notes from a specific change request.
+
+**Parameters**
+
+- **change_request_id** (`integer`, required) ID of the change request for which notes are to be retrieved. This is an integer value.
+- **notes_per_page** (`integer`, optional) The number of notes to retrieve per page in a paginated list.
+- **page_number_to_retrieve** (`integer`, optional) The specific page number of notes to retrieve for pagination.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.RetrieveChangeNote
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_change_note_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_change_note_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a specific note from a change request in Freshservice.
+
+**Parameters**
+
+- **change_request_id** (`integer`, required) ID of the change request to retrieve its specific note.
+- **note_identifier** (`integer`, required) The unique identifier for the note to be retrieved from a change request in Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.DeleteChangeNote
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_change_note_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_change_note_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Delete a note from a Change request in Freshservice.
+
+**Parameters**
+
+- **change_request_id** (`integer`, required) The unique ID of the Change request from which the note will be deleted.
+- **note_id** (`integer`, required) The unique identifier of the note to delete from a Change request in Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.RetrieveChangeTasks
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_change_tasks_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_change_tasks_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve tasks for a specific Change request in Freshservice.
+
+**Parameters**
+
+- **change_request_id** (`integer`, required) ID of the Change request for retrieving associated tasks from Freshservice.
+- **tasks_per_page** (`integer`, optional) Specify the number of tasks to retrieve per page in the paginated list.
+- **page_number** (`integer`, optional) Specify the page number of tasks to retrieve for the Change request.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.RetrieveChangeTaskInfo
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_change_task_info_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_change_task_info_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a task in a change request.
+
+**Parameters**
+
+- **change_request_id** (`integer`, required) ID of the change request to retrieve the corresponding task details.
+- **task_identifier** (`integer`, required) Provide the integer ID of the task to retrieve its details.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.RemoveChangeTask
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/remove_change_task_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/remove_change_task_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Delete a task from a change request in Freshservice.
+
+**Parameters**
+
+- **change_request_id** (`integer`, required) The unique identifier for the change request from which a task will be deleted. This should be an integer.
+- **task_identifier** (`integer`, required) The unique integer ID of the task to delete from a change request in Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetChangeTimeEntries
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_change_time_entries_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_change_time_entries_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve time entries for a specific Change request.
+
+**Parameters**
+
+- **change_request_id** (`integer`, required) ID of the change request for which time entries should be retrieved. This is necessary to specify which change request's time entries are needed.
+- **time_entries_per_page** (`integer`, optional) Specify the number of time entries to retrieve per page. Helps in paginated responses.
+- **page_number_to_retrieve** (`integer`, optional) The page number to retrieve from the paginated list of time entries.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.RetrieveChangeRequestTimeEntry
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_change_request_time_entry_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_change_request_time_entry_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a time entry from a Change request by ID.
+
+**Parameters**
+
+- **change_request_id** (`integer`, required) The ID of the Change request to retrieve the time entry from. This must be an integer.
+- **time_entry_id** (`integer`, required) The numeric ID of the time entry to retrieve details for from a Change request.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.DeleteChangeTimeEntryFreshservice
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_change_time_entry_freshservice_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_change_time_entry_freshservice_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Delete a time entry from a Change request in Freshservice.
+
+**Parameters**
+
+- **change_request_id** (`integer`, required) The unique identifier of the Change request from which the time entry will be deleted. This integer ID specifies the specific change.
+- **time_entry_id** (`integer`, required) ID of the time entry to be deleted from the Change request in Freshservice. Integer value expected.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.RetrieveAllProjects
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_all_projects_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_all_projects_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of all projects in Freshservice.
+
+**Parameters**
+
+- **entries_per_page** (`integer`, optional) Specify the number of project entries to retrieve per page for pagination.
+- **page_number** (`integer`, optional) Specify the page number to retrieve in a paginated list of projects.
+- **project_status_filter** (`string`, optional) Filter projects by status: 'all', 'open', 'in_progress', or 'completed'.
+- **filter_archived_projects** (`boolean`, optional) If true, filter for archived projects; if false, filter for active projects.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.RetrieveFreshserviceProject
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_freshservice_project_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_freshservice_project_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve project details from Freshservice by ID.
+
+**Parameters**
+
+- **project_id** (`integer`, required) The unique integer ID of the project to retrieve from Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.DeleteFreshserviceProject
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_freshservice_project_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_freshservice_project_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Deletes a project in Freshservice by ID.
+
+**Parameters**
+
+- **project_id** (`integer`, required) The ID of the project in Freshservice to delete. This should be an integer representing the specific project you wish to remove.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.ArchiveProject
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/archive_project_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/archive_project_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Archive an existing project in Freshservice.
+
+**Parameters**
+
+- **project_id** (`integer`, required) The unique ID of the project to be archived in Freshservice. Provide a valid integer.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.RestoreArchivedProject
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/restore_archived_project_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/restore_archived_project_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Restores an archived project in Freshservice.
+
+**Parameters**
+
+- **project_id** (`integer`, required) The identifier of the archived project to be restored in Freshservice. It should be an integer value.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.ListProjectTasks
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/list_project_tasks_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/list_project_tasks_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of all project tasks in Freshservice.
+
+**Parameters**
+
+- **project_id** (`integer`, required) The ID of the project for which you want to retrieve tasks.
+- **entries_per_page** (`integer`, optional) The number of entries to retrieve in each page for pagination.
+- **page_number** (`integer`, optional) The specific page number of the task list to retrieve.
+- **task_filter** (`string`, optional) Filter tasks by status. Options: all, open, in_progress, completed, overdue, unassigned.
+- **task_parent_id** (`integer`, optional) Filter tasks by parent ID for specific task hierarchy or relationships.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetProjectTaskDetails
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_project_task_details_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_project_task_details_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve detailed information about a project task in Freshservice.
+
+**Parameters**
+
+- **task_id** (`integer`, required) The unique identifier for the task to retrieve details.
+- **project_id** (`integer`, required) The unique identifier for the project to which the task belongs.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.DeleteProjectTask
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_project_task_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_project_task_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Deletes a specified project task in Freshservice.
+
+**Parameters**
+
+- **project_identifier** (`integer`, required) The unique identifier for the project containing the task to be deleted. This is required to specify which project's task needs to be removed.
+- **task_id_to_delete** (`integer`, required) ID of the task to be deleted from a project in Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetChangeFormFields
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_change_form_fields_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_change_form_fields_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve all fields in the Change Object of Freshservice.
+
+**Parameters**
+
+This tool does not take any parameters.
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetReleaseFormFields
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_release_form_fields_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_release_form_fields_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve all fields of the release object form.
+
+**Parameters**
+
+This tool does not take any parameters.
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetFreshserviceAnnouncements
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_freshservice_announcements_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_freshservice_announcements_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve all announcements from Freshservice.
+
+**Parameters**
+
+- **announcement_state** (`string`, optional) Specify the state of the announcements to retrieve: archived, active, scheduled, or unread.
+- **announcements_per_page** (`integer`, optional) Specify the number of announcements to retrieve per page for pagination.
+- **retrieve_page_number** (`integer`, optional) Specify the page number of announcements to retrieve. Useful for navigating through paginated results.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.FetchAnnouncementDetails
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/fetch_announcement_details_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/fetch_announcement_details_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve specific announcement details from Freshservice.
+
+**Parameters**
+
+- **announcement_id** (`integer`, required) The unique integer ID of the announcement to retrieve from Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.DeleteFreshserviceAnnouncement
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_freshservice_announcement_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_freshservice_announcement_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Delete a specific announcement from Freshservice.
+
+**Parameters**
+
+- **announcement_id_to_delete** (`integer`, required) The ID of the announcement to delete from Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.RetrieveFreshserviceProblems
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_freshservice_problems_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_freshservice_problems_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve all problems from Freshservice.
+
+**Parameters**
+
+- **updated_since** (`string`, optional) Retrieve problems updated since the specified date. Format: YYYY-MM-DD.
+- **problems_per_page** (`integer`, optional) The number of problems to retrieve per page in a paginated list from Freshservice.
+- **page_number_to_retrieve** (`integer`, optional) The page number of the problems list to retrieve from Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.RetrieveFreshserviceProblem
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_freshservice_problem_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_freshservice_problem_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a specific problem in Freshservice by ID.
+
+**Parameters**
+
+- **problem_identifier** (`integer`, required) The unique ID of the problem in Freshservice to retrieve details for.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.DeleteProblem
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_problem_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_problem_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Delete a problem using its ID from Freshservice.
+
+**Parameters**
+
+- **problem_id** (`integer`, required) The unique ID of the problem to delete from Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetProblemNotes
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_problem_notes_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_problem_notes_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve notes for a specific problem ID in Freshservice.
+
+**Parameters**
+
+- **problem_id** (`integer`, required) The unique integer ID of the problem for which you want to retrieve notes from Freshservice.
+- **notes_per_page** (`integer`, optional) The number of notes to retrieve per page in the paginated results.
+- **page_number** (`integer`, optional) The page number of the notes to retrieve for pagination purposes.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.RetrieveProblemNote
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_problem_note_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_problem_note_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a specific note from a problem in Freshservice.
+
+**Parameters**
+
+- **problem_identifier** (`integer`, required) The unique ID of the problem to retrieve the note from. Must be an integer.
+- **note_id** (`integer`, required) The unique identifier for the note to be retrieved.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.DeleteProblemNote
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_problem_note_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_problem_note_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Delete a note from a specific problem in Freshservice.
+
+**Parameters**
+
+- **problem_id** (`integer`, required) The unique identifier for the problem from which the note will be deleted. This should be an integer corresponding to the specific problem in Freshservice.
+- **note_id** (`integer`, required) The unique identifier for the note to be deleted from a problem in Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetProblemTasks
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_problem_tasks_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_problem_tasks_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve tasks for a specific problem from Freshservice.
+
+**Parameters**
+
+- **problem_id** (`integer`, required) The ID of the problem for which tasks need to be retrieved from Freshservice.
+- **tasks_per_page** (`integer`, optional) Specify the number of tasks to retrieve per page for pagination.
+- **page_number** (`integer`, optional) The specific page number of tasks to retrieve.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.RetrieveProblemTask
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_problem_task_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_problem_task_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a specific task from a problem in Freshservice.
+
+**Parameters**
+
+- **problem_id** (`integer`, required) The unique integer ID of the problem to retrieve the task from in Freshservice.
+- **task_id** (`integer`, required) The unique identifier for the task to retrieve from the specified problem.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.DeleteProblemTask
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_problem_task_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_problem_task_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Delete a task from a problem in Freshservice.
+
+**Parameters**
+
+- **problem_id** (`integer`, required) The unique ID of the problem from which the task will be deleted.
+- **task_id** (`integer`, required) The unique identifier of the task to be deleted in Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetProblemTimeEntries
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_problem_time_entries_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_problem_time_entries_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve time entries for a specific problem by ID.
+
+**Parameters**
+
+- **problem_id** (`integer`, required) ID of the problem for which time entries need to be retrieved. This is an integer value.
+- **entries_per_page** (`integer`, optional) The number of time entries to retrieve per page in a paginated list.
+- **page_number_to_retrieve** (`integer`, optional) The page number to retrieve in the paginated list of time entries.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetProblemTimeEntry
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_problem_time_entry_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_problem_time_entry_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve time entry details for a specific problem.
+
+**Parameters**
+
+- **problem_id** (`integer`, required) The unique identifier for the problem to retrieve a time entry from in Freshservice.
+- **time_entry_id** (`integer`, required) The unique integer ID of the time entry to be retrieved.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.DeleteProblemTimeEntry
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_problem_time_entry_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_problem_time_entry_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Delete a time entry from a specified problem in Freshservice.
+
+**Parameters**
+
+- **problem_identifier** (`integer`, required) The unique ID representing the problem from which you want to delete a time entry.
+- **time_entry_id** (`integer`, required) The unique identifier for the time entry to be deleted from the specified problem.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetUserOnboardingRequests
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_user_onboarding_requests_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_user_onboarding_requests_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve onboarding requests for a user.
+
+**Parameters**
+
+This tool does not take any parameters.
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.RetrieveOnboardingRequest
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_onboarding_request_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_onboarding_request_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a specific onboarding request.
+
+**Parameters**
+
+- **onboarding_request_id** (`integer`, required) The unique display ID of the onboarding request to retrieve details for.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetOnboardingRequestTickets
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_onboarding_request_tickets_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_onboarding_request_tickets_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve FreshService Tickets for a specific Onboarding Request.
+
+**Parameters**
+
+This tool does not take any parameters.
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetCannedResponses
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_canned_responses_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_canned_responses_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve all canned responses from Freshservice.
+
+**Parameters**
+
+This tool does not take any parameters.
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetCannedResponse
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_canned_response_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_canned_response_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a specific Canned Response by ID from Freshservice.
+
+**Parameters**
+
+- **canned_response_id** (`integer`, required) The unique ID of the Canned Response you want to retrieve from Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.DeleteCannedResponse
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_canned_response_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_canned_response_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Delete a specific canned response from Freshservice.
+
+**Parameters**
+
+- **canned_response_id** (`integer`, required) The unique integer ID of the canned response to delete from Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetFreshserviceCannedResponseFolders
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_freshservice_canned_response_folders_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_freshservice_canned_response_folders_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve all canned response folders from Freshservice.
+
+**Parameters**
+
+This tool does not take any parameters.
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetCannedResponseFolder
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_canned_response_folder_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_canned_response_folder_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a specific canned response folder from Freshservice.
+
+**Parameters**
+
+- **canned_response_folder_id** (`integer`, required) The ID of the canned response folder to retrieve from Freshservice. It should be an integer.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.DeleteCannedResponseFolder
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_canned_response_folder_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_canned_response_folder_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Delete a Canned Response Folder in Freshservice.
+
+**Parameters**
+
+- **canned_response_folder_id** (`integer`, required) ID of the canned response folder to delete. This is required to identify which folder should be removed from Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.ListCannedResponses
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/list_canned_responses_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/list_canned_responses_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve all canned responses from a specified folder.
+
+**Parameters**
+
+- **canned_response_folder_id** (`integer`, required) ID of the canned response folder to retrieve responses from.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetReleasesList
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_releases_list_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_releases_list_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of all Releases in Freshservice.
+
+**Parameters**
+
+- **fetch_releases_updated_since** (`string`, optional) Retrieve releases updated since a specific date in YYYY-MM-DD format.
+- **releases_per_page** (`integer`, optional) The number of releases to retrieve per page in the paginated list.
+- **page_number_to_retrieve** (`integer`, optional) Specify the page number of release data to retrieve for pagination.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetReleaseDetails
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_release_details_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_release_details_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a specific release by ID in Freshservice.
+
+**Parameters**
+
+- **release_identifier** (`integer`, required) The ID of the release you want to retrieve from Freshservice. Provide the specific release ID as an integer to get its details.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.DeleteFreshserviceRelease
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_freshservice_release_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_freshservice_release_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Delete a specific release in Freshservice.
+
+**Parameters**
+
+- **release_id_for_deletion** (`integer`, required) The unique integer ID of the release to delete from Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetReleaseNotes
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_release_notes_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_release_notes_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve release notes from Freshservice using a release ID.
+
+**Parameters**
+
+- **release_id** (`integer`, required) The ID of the release for which notes are to be retrieved.
+- **notes_per_page** (`integer`, optional) The number of release notes to retrieve in each page.
+- **retrieve_page_number** (`integer`, optional) The specific page number of release notes to retrieve. Useful for paginated results.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.FetchReleaseNote
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/fetch_release_note_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/fetch_release_note_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a note on a release by ID from Freshservice.
+
+**Parameters**
+
+- **release_id** (`integer`, required) The unique integer ID representing the release in Freshservice to retrieve the note from.
+- **note_id** (`integer`, required) The unique identifier for the note to be retrieved. It must be an integer.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.DeleteReleaseNoteFreshservice
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_release_note_freshservice_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_release_note_freshservice_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Deletes a note from a specified release in Freshservice.
+
+**Parameters**
+
+- **release_id** (`integer`, required) The numeric ID of the release from which the note will be deleted. This ID is required to identify the specific release in Freshservice.
+- **note_id** (`integer`, required) The integer ID of the note to be deleted from the release in Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.RetrieveReleaseTasks
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_release_tasks_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_release_tasks_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve tasks for a specified release in Freshservice.
+
+**Parameters**
+
+- **release_id** (`integer`, required) ID of the release for which tasks are to be retrieved in Freshservice.
+- **tasks_per_page** (`integer`, optional) Number of tasks to retrieve per page in a paginated list.
+- **page_number** (`integer`, optional) The page number to retrieve tasks from. Use for paginated results.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.RetrieveReleaseTask
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_release_task_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/retrieve_release_task_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a specific task from a release in Freshservice.
+
+**Parameters**
+
+- **release_id** (`integer`, required) The unique identifier for the release to retrieve a specific task from. This is an integer value.
+- **task_id** (`integer`, required) The unique ID of the task you want to retrieve within a release.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.DeleteReleaseTask
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_release_task_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_release_task_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Delete a task from a specified release in Freshservice.
+
+**Parameters**
+
+- **release_id** (`integer`, required) ID of the release from which the task will be deleted. This must be a valid integer.
+- **task_id_integer** (`integer`, required) The integer ID of the task to be deleted from the release.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetReleaseTimeEntries
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_release_time_entries_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_release_time_entries_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve time entries for a specific release in Freshservice.
+
+**Parameters**
+
+- **release_id** (`integer`, required) The unique ID of the release for which time entries are to be retrieved in Freshservice.
+- **entries_per_page** (`integer`, optional) The number of time entries to retrieve per page in the paginated list.
+- **page_number_to_retrieve** (`integer`, optional) The page number to retrieve in the paginated list of time entries.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.FetchReleaseTimeEntry
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/fetch_release_time_entry_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/fetch_release_time_entry_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a release time entry by ID.
+
+**Parameters**
+
+- **release_id** (`integer`, required) The unique integer ID of the release for which you want to fetch the time entry details. This identifies the specific release in Freshservice.
+- **time_entry_id** (`integer`, required) The integer ID of the specific time entry you want to retrieve from a release.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.DeleteReleaseTimeEntry
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_release_time_entry_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_release_time_entry_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Delete a time entry from a release in Freshservice.
+
+**Parameters**
+
+- **release_id** (`integer`, required) The unique integer ID of the release from which to delete the time entry.
+- **time_entry_id** (`integer`, required) ID of the time entry to be deleted from the release in Freshservice.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.ListPurchaseOrders
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/list_purchase_orders_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/list_purchase_orders_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of all Purchase Orders from Freshservice.
+
+**Parameters**
+
+- **entries_per_page** (`integer`, optional) Specify the number of entries to retrieve per page.
+- **page_number** (`integer`, optional) Specify the page number to retrieve from the list of purchase orders. Useful for navigating paginated results.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.GetPurchaseOrder
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_purchase_order_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/get_purchase_order_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of an existing purchase order by ID.
+
+**Parameters**
+
+- **purchase_order_id** (`integer`, required) The unique identifier for the purchase order you wish to retrieve. This must be an integer.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+## FreshserviceApi.DeletePurchaseOrder
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_purchase_order_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/freshservice_api/delete_purchase_order_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Delete a specified purchase order in Freshservice.
+
+**Parameters**
+
+- **purchase_order_id** (`integer`, required) The unique ID of the purchase order to delete from Freshservice. This ID identifies the specific order to be removed.
+
+**Secrets**
+
+This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_SUBDOMAIN` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+
+<ToolFooter pipPackageName="arcade_freshservice_api" />
