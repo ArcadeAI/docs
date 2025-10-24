@@ -290,41 +290,87 @@ Usage: arcade mcp [OPTIONS] [TRANSPORT]
 
  Deploy MCP servers to Arcade
 
-╭─ Options ────────────────────────────────────────────────────────────────╮
-│ --entrypoint  -e      TEXT  Relative path to the Python file that runs   │
-│                             the MCPApp instance (relative to project     │
-│                             root)                                        │
-│                             [default: server.py]                         │
-│ --debug       -d            Show debug information                       │
-│ --help                      Show this message and exit.                  │
-╰──────────────────────────────────────────────────────────────────────────╯
+╭─ Options ──────────────────────────────────────────────────────────────────────────╮
+│ --entrypoint  -e      TEXT  Relative path to the Python file that runs the MCPApp  │
+│                             instance (relative to project root). This file must    │
+│                             execute the run() method on your MCPApp instance when  │
+│                             invoked directly.                                      │
+│                             [default: server.py]                                   │
+│ --debug       -d            Show debug information                                 │
+│ --help                      Show this message and exit.                            │
+╰────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Advanced ─────────────────────────────────────────────────────────────────────────╮
+│ --skip-validate,--yolo                           Skip running the server locally   │
+│                                                  for health/metadata checks. When  │
+│                                                  set, you must provide             │
+│                                                  --server-name and                 │
+│                                                  --server-version. Secret handling │
+│                                                  is controlled by --secrets.       │
+│ --server-name           -n      TEXT             Explicit server name to use when  │
+│                                                  --skip-validate is set. Only used │
+│                                                  when --skip-validate is set.      │
+│                                                  [default: None]                   │
+│ --server-version        -v      TEXT             Explicit server version to use    │
+│                                                  when --skip-validate is set. Only │
+│                                                  used when --skip-validate is set. │
+│                                                  [default: None]                   │
+│ --secrets               -s      [auto|all|skip]  How to upsert secrets before      │
+│                                                  deploy: auto (default): During    │
+│                                                  validation, discover required     │
+│                                                  secret KEYS and upsert only       │
+│                                                  those. If --skip-validate is set, │
+│                                                  auto becomes skip. all: Upsert    │
+│                                                  every key/value pair from your    │
+│                                                  server's .env file regardless of  │
+│                                                  what the server needs. skip: Do   │
+│                                                  not upsert any secrets (assumes   │
+│                                                  they are already present in       │
+│                                                  Arcade).                          │
+│                                                  [default: auto]                   │
+╰────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## `arcade configure`
 
 ```bash
-Usage: arcade configure [OPTIONS] CLIENT
+ Usage: arcade configure [OPTIONS] CLIENT:{claude|cursor|vscode}
 
  Configure MCP clients to connect to your server
 
 ╭─ Arguments ────────────────────────────────────────────────────────────────────────╮
-│ *    client      TEXT  The MCP client to configure (claude, cursor, vscode)        │
-│                        [default: None]                                             │
-│                        [required]                                                  │
+│ *    client      CLIENT:{claude|cursor|vscode}  The MCP client to configure        │
+│                                                 (claude, cursor, vscode)           │
+│                                                 [default: None]                    │
+│                                                 [required]                         │
 ╰────────────────────────────────────────────────────────────────────────────────────╯
 ╭─ Options ──────────────────────────────────────────────────────────────────────────╮
-│ --server       -s      TEXT     Name of the server to connect to (defaults to      │
-│                                 current directory name)                            │
-│                                 [default: None]                                    │
-│ --from-local                    Connect to a local MCP server                      │
-│ --from-arcade                   Connect to an Arcade Cloud MCP server              │
-│ --port         -p      INTEGER  Port for local servers                             │
+│ --transport  -t      [stdio|http]  The transport to use for the MCP server         │
+│                                    configuration                                   │
+│                                    [default: stdio]                                │
+│ --debug      -d                    Show debug information                          │
+│ --help                             Show this message and exit.                     │
+╰────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Stdio Options ────────────────────────────────────────────────────────────────────╮
+│ --entrypoint  -e      TEXT  The name of the Python file in the current directory   │
+│                             that runs the server. This file must run the server    │
+│                             when invoked directly. Only used for stdio servers.    │
+│                             [default: server.py]                                   │
+╰────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Configuration File Options ───────────────────────────────────────────────────────╮
+│ --name    -n      TEXT  Optional name of the server to set in the configuration    │
+│                         file (defaults to the name of the current directory)       │
+│                         [default: None]                                            │
+│ --config  -c      PATH  Optional path to a specific MCP client config file         │
+│                         (overrides default path)                                   │
+│                         [default: None]                                            │
+╰────────────────────────────────────────────────────────────────────────────────────╯
+╭─ HTTP Options ─────────────────────────────────────────────────────────────────────╮
+│ --host  -h      [local|arcade]  The host of the HTTP server to configure. Use      │
+│                                 'local' to connect to a local MCP server or        │
+│                                 'arcade' to connect to an Arcade Cloud MCP server. │
+│                                 [default: local]                                   │
+│ --port  -p      INTEGER         Port for local HTTP servers                        │
 │                                 [default: 8000]                                    │
-│ --path         -f      PATH     Optional path to a specific MCP client config file │
-│                                 (overrides default path)                           │
-│                                 [default: None]                                    │
-│ --debug        -d               Show debug information                             │
-│ --help         -h               Show this message and exit.                        │
 ╰────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
