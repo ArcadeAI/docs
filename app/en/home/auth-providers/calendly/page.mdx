@@ -5,9 +5,9 @@ import { Tabs, Callout, Steps } from "nextra/components";
 The Calendly auth provider enables tools and agents to call [Calendly APIs](https://developer.calendly.com/api-docs) on behalf of a user using OAuth 2.0 authentication.
 
 <Callout>
-  Want to quickly get started with Calendly in your agent or AI app? The pre-built
-  [Arcade Calendly MCP Server](/mcp-servers/productivity/calendly-api) is what you
-  want!
+  Want to quickly get started with Calendly in your agent or AI app? The
+  pre-built [Arcade Calendly MCP Server](/mcp-servers/productivity/calendly-api)
+  is what you want!
 </Callout>
 
 ### What's documented here
@@ -48,9 +48,8 @@ To integrate with Calendly's API, you'll need to create a developer account and 
 
 #### Register a new OAuth application
 
-1. Once logged in, go to your [Developer Dashboard](https://developer.calendly.com/dashboard)
-2. Click on **Create New App** or **Register an App**
-3. Fill in the required details:
+1. Click on **Create New App** or **Register an App**
+2. Fill in the required details:
    - **Application Name**: Choose a descriptive name for your application
    - **Type**: Select **Web** or **Native** based on your application type
    - **Environment**: Choose **Sandbox** (for testing) or **Production**
@@ -147,14 +146,12 @@ auth:
       client_id: ${env:CALENDLY_CLIENT_ID}
       client_secret: ${env:CALENDLY_CLIENT_SECRET}
       oauth2:
-        scope_delimiter: " "
         authorize_request:
           endpoint: "https://auth.calendly.com/oauth/authorize"
           params:
             response_type: code
             client_id: "{{client_id}}"
             redirect_uri: "{{redirect_uri}}"
-            scope: "{{scopes}}"
             state: "{{state}}"
         token_request:
           endpoint: "https://auth.calendly.com/oauth/token"
@@ -192,8 +189,7 @@ user_id = "{arcade_user_id}"
 # Start the authorization process
 auth_response = client.auth.start(
     user_id=user_id,
-    provider="arcade-calendly",
-    scopes=["default"]
+    provider="arcade-calendly"
 )
 
 if auth_response.status != "completed":
@@ -219,11 +215,7 @@ const client = new Arcade();
 const userId = "{arcade_user_id}";
 
 // Start the authorization process
-const authResponse = await client.auth.start(
-  userId,
-  "arcade-calendly",
-  ["default"]
-);
+const authResponse = await client.auth.start(userId, "arcade-calendly");
 
 if (authResponse.status !== "completed") {
   console.log("Please complete the authorization challenge in your browser:");
@@ -258,10 +250,7 @@ from arcade_tdk.auth import OAuth2
 
 
 @tool(
-    requires_auth=OAuth2(
-        provider_id="arcade-calendly",
-        scopes=["default"]
-    )
+    requires_auth=OAuth2(provider_id="arcade-calendly")
 )
 async def get_user_info(
     context: ToolContext,
@@ -280,9 +269,4 @@ async def get_user_info(
         return dict(response.json())
 ```
 
-## Available Scopes
-
-Calendly uses a simplified OAuth scope system. When requesting access, use the `default` scope which grants access to all available API endpoints based on the user's permissions.
-
-For more details about Calendly's authentication and available permissions, refer to the [Calendly Authentication documentation](https://developer.calendly.com/how-to-guides/authentication).
-
+For more details about Calendly's authentication, refer to the [Calendly Authentication documentation](https://developer.calendly.com/how-to-guides/authentication).
