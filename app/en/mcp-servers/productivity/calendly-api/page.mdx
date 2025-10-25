@@ -1,0 +1,1326 @@
+# CalendlyApi
+import StarterToolInfo from "@/app/_components/starter-tool-info";
+import ToolInfo from "@/app/_components/tool-info";
+import Badges from "@/app/_components/badges";
+import TabbedCodeBlock from "@/app/_components/tabbed-code-block";
+import TableOfContents from "@/app/_components/table-of-contents";
+import ToolFooter from "@/app/_components/tool-footer";
+import { Callout } from "nextra/components";
+
+<ToolInfo
+  description="Tools that enable LLMs to interact directly with the calendly API."
+  author="Arcade"
+  authType="OAuth2"
+  versions={["2.0.0"]}
+/>
+
+<Badges repo="arcadeai/arcade_calendly_api" />
+
+<StarterToolInfo toolkitName="CalendlyApi" />
+
+The CalendlyApi MCP Server offers a comprehensive suite of tools for managing scheduling and event-related tasks within Calendly. Users can easily build agents and applications that can:
+
+## Available Tools
+
+<TableOfContents
+  headers={["Tool Name", "Description"]}
+  data={
+    [
+      ["CalendlyApi.ListEventInvitees", "Retrieve a list of invitees for a given event."],
+      ["CalendlyApi.ListScheduledEvents", "Retrieve a list of scheduled events from Calendly."],
+      ["CalendlyApi.ListEventTypes", "Fetches event types for a specified user or organization."],
+      ["CalendlyApi.CreateEventType", "Create a new one-on-one event type in Calendly."],
+      ["CalendlyApi.GetCalendlyUserInfo", "Retrieve user information from Calendly."],
+      ["CalendlyApi.GetUserAccountInfo", "Retrieve basic information about the current Calendly user."],
+      ["CalendlyApi.GetEventInviteeInfo", "Fetch information about a specific event invitee."],
+      ["CalendlyApi.CreateEventInvitee", "Create a new event invitee on Calendly."],
+      ["CalendlyApi.GetEventDetails", "Retrieve information about a specified scheduled event."],
+      ["CalendlyApi.GetEventTypeInfo", "Retrieve information about a specified event type on Calendly."],
+      ["CalendlyApi.UpdateEventType", "Update details of an existing event type with Calendly."],
+      ["CalendlyApi.ListOrganizationInvitations", "Retrieve organization invitations sent to members."],
+      ["CalendlyApi.InviteUserToOrganization", "Invite a user to join an organization."],
+      ["CalendlyApi.RevokeOrganizationInvitation", "Revoke an organization invitation in Calendly."],
+      ["CalendlyApi.GetOrganizationInvitation", "Fetches details of an organization's invitation."],
+      ["CalendlyApi.GetOrganizationMembershipInfo", "Retrieve details about a user's organization membership in Calendly."],
+      ["CalendlyApi.RemoveUserFromOrganization", "Remove a user from an organization with admin rights."],
+      ["CalendlyApi.GetOrganizationMemberships", "Retrieve organization memberships and related details."],
+      ["CalendlyApi.CreateWebhookSubscription", "Create a webhook subscription for events in Calendly."],
+      ["CalendlyApi.ListWebhookSubscriptions", "Retrieve webhook subscriptions for an organization or user."],
+      ["CalendlyApi.GetWebhookSubscription", "Retrieve details of a specific webhook subscription."],
+      ["CalendlyApi.DeleteWebhookSubscription", "Delete a webhook subscription on Calendly."],
+      ["CalendlyApi.CreateSchedulingLink", "Creates a single-use scheduling link for appointments."],
+      ["CalendlyApi.DeleteInviteeData", "Request removal of invitee data from all booked events."],
+      ["CalendlyApi.GetInviteeNoShowDetails", "Fetch details of a specified invitee no-show."],
+      ["CalendlyApi.UndoInviteeNoShowStatus", "Undo the no-show status for a Calendly invitee."],
+      ["CalendlyApi.MarkInviteeNoShow", "Mark an invitee as a no show in Calendly."],
+      ["CalendlyApi.GetGroupInfo", "Retrieve information about a specified group in Calendly."],
+      ["CalendlyApi.ListGroupRelationships", "Retrieve a list of group relationships for a given owner."],
+      ["CalendlyApi.GetGroupRelationshipByUuid", "Retrieve group relationship details using a UUID."],
+      ["CalendlyApi.GetOrganizationDetails", "Retrieve details of a specified organization using UUID."],
+      ["CalendlyApi.CancelScheduledEvent", "Cancels a specified scheduled event on Calendly."],
+      ["CalendlyApi.ListRoutingForms", "Retrieve routing forms for a specified organization."],
+      ["CalendlyApi.GetRoutingForm", "Retrieve details of a specified routing form."],
+      ["CalendlyApi.ListRoutingFormSubmissions", "Get a list of Routing Form Submissions for a specified form."],
+      ["CalendlyApi.GetRoutingFormSubmission", "Retrieve a specified Routing Form Submission by UUID."],
+      ["CalendlyApi.ListAvailableEventTimes", "Retrieve available times for an event type within a date range."],
+      ["CalendlyApi.ListActivityLogEntries", "Fetch a list of activity log entries."],
+      ["CalendlyApi.CreateCustomShareLink", "Create a shareable link for a customized event."],
+      ["CalendlyApi.ListUserBusyTimes", "Retrieve user's scheduled events within a specific date range."],
+      ["CalendlyApi.GetUserAvailabilitySchedules", "Fetch a user's availability schedules."],
+      ["CalendlyApi.GetUserAvailabilitySchedule", "Retrieve a user's availability schedule using their UUID."],
+      ["CalendlyApi.DeleteScheduledEventsData", "Delete scheduled events data within a past time range."],
+      ["CalendlyApi.FetchEventTypeHosts", "Fetches a list of event type hosts from Calendly."],
+      ["CalendlyApi.CreateOneOffEvent", "Create a one-off event type in Calendly."],
+      ["CalendlyApi.GetSampleWebhookData", "Retrieve sample webhook data for testing integrations."],
+      ["CalendlyApi.FetchOutgoingCommunications", "Retrieve outgoing SMS and email communications."],
+      ["CalendlyApi.GetGroupList", "Retrieve a list of groups from Calendly."],
+      ["CalendlyApi.GetUserLocationInfo", "Retrieve configured location details for a specific user."],
+      ["CalendlyApi.GetEventAvailability", "Retrieve availability for a specific event type."],
+      ["CalendlyApi.UpdateEventAvailability", "Update an event type availability schedule."],
+    ]
+  }
+/>
+
+<Callout>
+  If you need to perform an action that's not listed here, you can [get in touch
+  with us](mailto:contact@arcade.dev) to request a new tool, or [create your
+  own tools](/home/build-tools/create-a-mcp-server).
+</Callout>
+
+## CalendlyApi.ListEventInvitees
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/list_event_invitees_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/list_event_invitees_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of invitees for a given event.
+
+**Parameters**
+
+- **event_uuid** (`string`, required) The unique identifier for the event whose invitees are being retrieved.
+- **filter_by_email** (`string`, optional) Specify an email address to filter invitees by email.
+- **invitee_status** (`string`, optional) Filter invitees by their status: 'active' for current invitees or 'canceled' for those who have canceled.
+- **number_of_invitees_to_return** (`number`, optional) Specifies the number of invitee rows to return in the response.
+- **pagination_token** (`string`, optional) A token to retrieve the next or previous page of invitees. Useful for paginated responses.
+- **sort_order_by_created_at** (`string`, optional) Specify the order of results based on the creation date as 'asc' for ascending or 'desc' for descending.
+
+
+## CalendlyApi.ListScheduledEvents
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/list_scheduled_events_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/list_scheduled_events_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of scheduled events from Calendly.
+
+**Parameters**
+
+- **event_status** (`string`, optional) Indicate if the event is 'active' or 'canceled'.
+- **events_sort_order** (`string`, optional) Specify sorting order for events. Use 'start_time:asc' or 'start_time:desc'.
+- **group_uri** (`string`, optional) URI of the group to fetch scheduled events for. Requires admin/owner or group admin privilege.
+- **invitee_email** (`string`, optional) Email address of the invitee to filter and return related scheduled events.
+- **max_start_time_utc** (`string`, optional) Include events with start times prior to this UTC time. Format: YYYY-MM-DDTHH:MM:SS.ssssssZ
+- **min_start_time** (`string`, optional) Include events starting after this UTC time. Format: "2020-01-02T03:04:05.678123Z".
+- **number_of_rows_to_return** (`number`, optional) Specify the number of event entries to retrieve.
+- **organization_uri** (`string`, optional) URI of the organization to retrieve scheduled events for. Requires admin/owner privileges.
+- **pagination_token** (`string`, optional) Token for navigating to the next or previous set of scheduled events.
+- **user_uri** (`string`, optional) URI identifying the user for whom to return scheduled events. Use alone for personal events or with 'organization' for specific user events within an organization.
+
+
+## CalendlyApi.ListEventTypes
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/list_event_types_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/list_event_types_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Fetches event types for a specified user or organization.
+
+**Parameters**
+
+- **number_of_event_types_to_return** (`number`, optional) The number of event types to return. Specify the desired count of returned rows.
+- **only_admin_managed** (`boolean`, optional) Return only admin managed event types if true, exclude them if false, or include all if omitted.
+- **organization_uri** (`string`, optional) URI to view available personal, team, and organization event types.
+- **pagination_token** (`string`, optional) Token to retrieve the next or previous set of event types in pagination.
+- **return_active_event_types_only** (`boolean`, optional) Set to true to return only active event types, false for only inactive, or omit to include all event types.
+- **sort_event_types_by** (`string`, optional) Specify field and direction to order results. Use {field}:{asc/desc}. Fields: name, position, created_at, updated_at.
+- **user_availability_schedule_filter** (`string`, optional) Filters event types by the given primary availability schedule when used with the 'user' parameter.
+- **user_uri** (`string`, optional) The user's URI to view associated personal, team, and organization event types.
+
+
+## CalendlyApi.CreateEventType
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/create_event_type_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/create_event_type_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Create a new one-on-one event type in Calendly.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## CalendlyApi.GetCalendlyUserInfo
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/get_calendly_user_info_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/get_calendly_user_info_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve user information from Calendly.
+
+**Parameters**
+
+- **user_unique_identifier** (`string`, required) The unique identifier of the user. Use 'me' to reference the caller.
+
+
+## CalendlyApi.GetUserAccountInfo
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/get_user_account_info_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/get_user_account_info_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve basic information about the current Calendly user.
+
+**Parameters**
+
+This tool does not take any parameters.
+
+## CalendlyApi.GetEventInviteeInfo
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/get_event_invitee_info_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/get_event_invitee_info_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Fetch information about a specific event invitee.
+
+**Parameters**
+
+- **event_unique_identifier** (`string`, required) The unique identifier for the specific Calendly event. Use this to specify which event's invitee details to retrieve.
+- **invitee_unique_identifier** (`string`, required) The unique identifier of the invitee for a specific event.
+
+
+## CalendlyApi.CreateEventInvitee
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/create_event_invitee_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/create_event_invitee_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Create a new event invitee on Calendly.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## CalendlyApi.GetEventDetails
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/get_event_details_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/get_event_details_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve information about a specified scheduled event.
+
+**Parameters**
+
+- **event_unique_identifier** (`string`, required) The unique identifier for the event to retrieve details.
+
+
+## CalendlyApi.GetEventTypeInfo
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/get_event_type_info_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/get_event_type_info_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve information about a specified event type on Calendly.
+
+**Parameters**
+
+- **event_type_uuid** (`string`, required) The unique identifier (UUID) for the event type to be retrieved.
+
+
+## CalendlyApi.UpdateEventType
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/update_event_type_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/update_event_type_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Update details of an existing event type with Calendly.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **event_type_uuid** (`string`, optional) The unique identifier for the event type to be updated. This is essential for specifying which one-on-one event type you intend to modify.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## CalendlyApi.ListOrganizationInvitations
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/list_organization_invitations_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/list_organization_invitations_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve organization invitations sent to members.
+
+**Parameters**
+
+- **organization_unique_identifier** (`string`, required) The unique identifier for the organization to retrieve invitations for.
+- **filter_by_email** (`string`, optional) Email address to filter the results of organization invitations.
+- **filter_by_status** (`string`, optional) Filter results by invitation status: 'pending', 'accepted', or 'declined'.
+- **pagination_token** (`string`, optional) Token for fetching the next or previous set of organization invitations.
+- **rows_to_return** (`number`, optional) Specify the number of organization invitation records to retrieve in the request.
+- **sort_order** (`string`, optional) Specify the field and direction (ascending or descending) for sorting results. Use a comma-separated list for multiple criteria.
+
+
+## CalendlyApi.InviteUserToOrganization
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/invite_user_to_organization_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/invite_user_to_organization_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Invite a user to join an organization.
+
+**Parameters**
+
+- **organization_unique_identifier** (`string`, required) The unique identifier for the organization to which the user is being invited.
+- **user_email** (`string`, required) The email address of the user to be invited to the organization.
+
+
+## CalendlyApi.RevokeOrganizationInvitation
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/revoke_organization_invitation_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/revoke_organization_invitation_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Revoke an organization invitation in Calendly.
+
+**Parameters**
+
+- **invitation_unique_identifier** (`string`, required) The unique identifier for the organization invitation to be revoked.
+- **organization_unique_identifier** (`string`, required) The organization's unique identifier required to revoke the invitation.
+
+
+## CalendlyApi.GetOrganizationInvitation
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/get_organization_invitation_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/get_organization_invitation_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Fetches details of an organization's invitation.
+
+**Parameters**
+
+- **organization_invitation_uuid** (`string`, required) The unique identifier of the organization's invitation. Provide this to retrieve specific invitation details.
+- **organization_unique_id** (`string`, required) The unique identifier for the organization.
+
+
+## CalendlyApi.GetOrganizationMembershipInfo
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/get_organization_membership_info_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/get_organization_membership_info_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve details about a user's organization membership in Calendly.
+
+**Parameters**
+
+- **organization_membership_uuid** (`string`, required) The unique identifier for the organization's membership to retrieve details for a user.
+
+
+## CalendlyApi.RemoveUserFromOrganization
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/remove_user_from_organization_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/remove_user_from_organization_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Remove a user from an organization with admin rights.
+
+**Parameters**
+
+- **organization_membership_unique_id** (`string`, required) The unique identifier for the organization membership to be removed.
+
+
+## CalendlyApi.GetOrganizationMemberships
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/get_organization_memberships_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/get_organization_memberships_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve organization memberships and related details.
+
+**Parameters**
+
+- **filter_by_email** (`string`, optional) A specific email address to filter the organization memberships by. Only memberships associated with this email will be returned.
+- **filter_by_organization** (`string`, optional) Filter the results by organization. Provide the organization's unique identifier or name to retrieve specific memberships.
+- **filter_by_role** (`string`, optional) Filter the results by role. Options: 'owner', 'admin', 'user'.
+- **filter_by_user** (`string`, optional) Filter the results by a specific user. Provide the user's identifier to narrow the search.
+- **next_page_token** (`string`, optional) Token used to retrieve the next or previous set of results for paginated data.
+- **number_of_rows_to_return** (`number`, optional) Specify the number of rows to return in the response.
+
+
+## CalendlyApi.CreateWebhookSubscription
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/create_webhook_subscription_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/create_webhook_subscription_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Create a webhook subscription for events in Calendly.
+
+**Parameters**
+
+- **callback_url** (`string`, required) The endpoint URL to receive POST requests for subscribed events in Calendly.
+- **event_subscriptions** (`array[string]`, required) List of user events to subscribe to. Examples include 'invitee.created', 'invitee.canceled', etc.
+- **organization_reference** (`string`, required) The unique reference identifier for the organization associated with the webhook.
+- **webhook_subscription_scope** (`string`, required) Specifies the scope of the webhook subscription: "organization", "user", or "group".
+- **group_reference** (`string`, optional) The unique reference to the group that the webhook will be tied to.
+- **user_reference** (`string`, optional) The unique reference or ID of the user for whom the webhook will be tied.
+- **webhook_signing_key** (`string`, optional) Optional secret key shared between your application and Calendly for verifying webhook signatures. Useful for ensuring webhook messages' authenticity.
+
+
+## CalendlyApi.ListWebhookSubscriptions
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/list_webhook_subscriptions_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/list_webhook_subscriptions_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve webhook subscriptions for an organization or user.
+
+**Parameters**
+
+- **filter_scope** (`string`, required) Filter the list by organization, user, or group. Acceptable values are 'organization', 'user', or 'group'.
+- **organization_id** (`string`, required) The ID of the organization that owns the subscriptions being returned. This field is always required.
+- **filter_by_group** (`string`, optional) Optional; filters the results by group when scope is set to 'group'.
+- **filter_by_user** (`string`, optional) Filter results by user when 'scope' is set to 'user'.
+- **number_of_rows_to_return** (`number`, optional) Specify the number of rows to be returned in the result set.
+- **pagination_token** (`string`, optional) The token to retrieve the next or previous portion of the collection.
+- **sort_by_field_and_direction** (`string`, optional) Specify the field and direction to order results. Use 'created_at:asc' or 'created_at:desc'.
+
+
+## CalendlyApi.GetWebhookSubscription
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/get_webhook_subscription_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/get_webhook_subscription_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a specific webhook subscription.
+
+**Parameters**
+
+- **webhook_identifier** (`string`, required) The unique identifier of the webhook subscription to retrieve.
+
+
+## CalendlyApi.DeleteWebhookSubscription
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/delete_webhook_subscription_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/delete_webhook_subscription_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Delete a webhook subscription on Calendly.
+
+**Parameters**
+
+- **webhook_uuid** (`string`, required) The unique identifier for the webhook subscription to be deleted. This is required to specify which subscription will be removed.
+
+
+## CalendlyApi.CreateSchedulingLink
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/create_scheduling_link_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/create_scheduling_link_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Creates a single-use scheduling link for appointments.
+
+**Parameters**
+
+- **maximum_event_count** (`number`, required) The maximum number of events that can be scheduled using this link. Currently, only '1' is supported.
+- **resource_owner_link** (`string`, required) A link to the resource owning this scheduling link, typically an Event Type URL.
+- **resource_type** (`string`, required) Resource type for the scheduling link. This is always 'EventType'.
+
+
+## CalendlyApi.DeleteInviteeData
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/delete_invitee_data_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/delete_invitee_data_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Request removal of invitee data from all booked events.
+
+**Parameters**
+
+- **invitee_email_list** (`array[string]`, required) A list of invitee emails to remove data for from all booked events. Each entry should be a valid email address.
+
+
+## CalendlyApi.GetInviteeNoShowDetails
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/get_invitee_no_show_details_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/get_invitee_no_show_details_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Fetch details of a specified invitee no-show.
+
+**Parameters**
+
+- **invitee_uuid** (`string`, required) The unique identifier for the invitee whose no-show information is being requested.
+
+
+## CalendlyApi.UndoInviteeNoShowStatus
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/undo_invitee_no_show_status_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/undo_invitee_no_show_status_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Undo the no-show status for a Calendly invitee.
+
+**Parameters**
+
+- **invitee_unique_id** (`string`, required) The unique identifier for the invitee whose no-show status is to be undone.
+
+
+## CalendlyApi.MarkInviteeNoShow
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/mark_invitee_no_show_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/mark_invitee_no_show_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Mark an invitee as a no show in Calendly.
+
+**Parameters**
+
+- **invitee_id** (`string`, optional) The unique identifier for the invitee to be marked as a no show. This is required to specify which invitee did not attend.
+
+
+## CalendlyApi.GetGroupInfo
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/get_group_info_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/get_group_info_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve information about a specified group in Calendly.
+
+**Parameters**
+
+- **group_unique_identifier** (`string`, required) A unique identifier for the group whose information is to be retrieved from Calendly.
+
+
+## CalendlyApi.ListGroupRelationships
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/list_group_relationships_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/list_group_relationships_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of group relationships for a given owner.
+
+**Parameters**
+
+- **filter_by_group** (`string`, optional) Filter results by a specific group using a group identifier.
+- **filter_by_organization** (`string`, optional) Filter results by organization. Provide the organization ID or URI to narrow down the list of group relationships.
+- **filter_by_owner_uri** (`string`, optional) The URI to filter results by owner, either an Organization Membership URI or Organization Invitation URI.
+- **number_of_rows** (`number`, optional) Specify the number of rows to return in the response.
+- **pagination_token** (`string`, optional) Token to navigate to the next or previous portion of the collection.
+
+
+## CalendlyApi.GetGroupRelationshipByUuid
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/get_group_relationship_by_uuid_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/get_group_relationship_by_uuid_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve group relationship details using a UUID.
+
+**Parameters**
+
+- **group_relationship_uuid** (`string`, required) The unique identifier (UUID) of the group relationship to retrieve details for. Use this to specify which relationship to fetch.
+
+
+## CalendlyApi.GetOrganizationDetails
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/get_organization_details_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/get_organization_details_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a specified organization using UUID.
+
+**Parameters**
+
+- **organization_uuid** (`string`, required) The unique identifier for the organization to retrieve details.
+
+
+## CalendlyApi.CancelScheduledEvent
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/cancel_scheduled_event_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/cancel_scheduled_event_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Cancels a specified scheduled event on Calendly.
+
+**Parameters**
+
+- **event_unique_identifier** (`string`, required) The unique identifier for the event to be canceled.
+- **cancellation_reason** (`string`, optional) The reason for canceling the event. Provide a clear and concise explanation.
+
+
+## CalendlyApi.ListRoutingForms
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/list_routing_forms_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/list_routing_forms_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve routing forms for a specified organization.
+
+**Parameters**
+
+- **organization_uri** (`string`, required) The URI of the organization to view its routing forms. It should be a valid string representing the organization's endpoint.
+- **number_of_rows** (`number`, optional) The number of routing form entries to return for the request.
+- **pagination_token** (`string`, optional) Token for fetching the next or previous portion of the routing forms collection.
+- **sort_order** (`string`, optional) Specify the order of results using field and direction. Supports 'created_at' with 'asc' or 'desc'. Use comma for multiple fields.
+
+
+## CalendlyApi.GetRoutingForm
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/get_routing_form_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/get_routing_form_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a specified routing form.
+
+**Parameters**
+
+- **routing_form_uuid** (`string`, required) A unique identifier for the routing form to be retrieved.
+
+
+## CalendlyApi.ListRoutingFormSubmissions
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/list_routing_form_submissions_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/list_routing_form_submissions_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Get a list of Routing Form Submissions for a specified form.
+
+**Parameters**
+
+- **routing_form_uri** (`string`, required) The URI of the routing form to view its submissions. This specifies which form's submissions to retrieve.
+- **number_of_rows_to_return** (`number`, optional) Specify the number of routing form submissions to return.
+- **pagination_token** (`string`, optional) Token for retrieving the next or previous set of form submissions.
+- **sort_order** (`string`, optional) Specify field and direction to sort results (e.g., 'created_at:asc').
+
+
+## CalendlyApi.GetRoutingFormSubmission
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/get_routing_form_submission_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/get_routing_form_submission_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve a specified Routing Form Submission by UUID.
+
+**Parameters**
+
+- **submission_uuid** (`string`, required) Unique identifier for the routing form submission to be retrieved.
+
+
+## CalendlyApi.ListAvailableEventTimes
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/list_available_event_times_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/list_available_event_times_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve available times for an event type within a date range.
+
+**Parameters**
+
+- **availability_end_time** (`string`, required) End time for the availability range, must be after the start time.
+- **availability_start_time** (`string`, required) The start time for the availability range. Must be a future date, not in the past.
+- **event_type_uri** (`string`, required) The URI associated with the event type to retrieve its available times.
+
+
+## CalendlyApi.ListActivityLogEntries
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/list_activity_log_entries_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/list_activity_log_entries_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Fetch a list of activity log entries.
+
+**Parameters**
+
+- **organization_uri** (`string`, required) URI of the organization to filter activity log entries.
+- **actions** (`array[string]`, optional) Specify one or more actions associated with the log entries. Accepts an array of strings.
+- **entry_categories** (`array[string]`, optional) Specify the categories of log entries to filter the results. This is an array of strings, each representing a category.
+- **filter_by_search_term** (`string`, optional) Filters entries using supported operators: `|`, `+`, `"`, `-`, `()`, `*`. For example, `this | that` or `(email) + (signup)`.
+- **include_entries_after** (`string`, optional) Include entries that occurred after this time. Use format: "YYYY-MM-DDTHH:MM:SS.sssZ" (UTC).
+- **max_occurred_at_time** (`string`, optional) Include entries that occurred prior to this UTC time in the format "YYYY-MM-DDTHH:MM:SS.SSSZ".
+- **number_of_rows_to_return** (`integer`, optional) Specifies the number of activity log entries to return in the response.
+- **pagination_token** (`string`, optional) Token to get the next portion of the activity log collection.
+- **sort_order** (`array[string]`, optional) Specify the field and direction to sort results. Use format {field}:{direction}.
+- **user_associated_uris** (`array[string]`, optional) Return entries from the user(s) associated with the provided URIs. This should be an array of strings representing the URIs of users.
+
+
+## CalendlyApi.CreateCustomShareLink
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/create_custom_share_link_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/create_custom_share_link_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Create a shareable link for a customized event.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## CalendlyApi.ListUserBusyTimes
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/list_user_busy_times_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/list_user_busy_times_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve user's scheduled events within a specific date range.
+
+**Parameters**
+
+- **availability_start_time** (`string`, required) Start time for the availability range. The date must not be in the past.
+- **end_time** (`string`, required) End time for the requested availability range, must be after the start_time.
+- **user_uri** (`string`, required) The URI associated with the user to retrieve busy times for.
+
+
+## CalendlyApi.GetUserAvailabilitySchedules
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/get_user_availability_schedules_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/get_user_availability_schedules_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Fetch a user's availability schedules.
+
+**Parameters**
+
+- **user_uri_reference** (`string`, required) A URI reference to the specified user whose availability schedules are to be retrieved.
+
+
+## CalendlyApi.GetUserAvailabilitySchedule
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/get_user_availability_schedule_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/get_user_availability_schedule_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve a user's availability schedule using their UUID.
+
+**Parameters**
+
+- **user_uuid** (`string`, required) The UUID of the availability schedule you want to retrieve.
+
+
+## CalendlyApi.DeleteScheduledEventsData
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/delete_scheduled_events_data_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/delete_scheduled_events_data_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Delete scheduled events data within a past time range.
+
+**Parameters**
+
+- **deletion_start_time_utc** (`string`, required) The UTC timestamp to start deleting scheduled events data. Must be in the past and not older than 24 months.
+- **end_time_utc** (`string`, required) The UTC timestamp marking the end of the time range for data deletion, in the past, no greater than 24 months ago.
+
+
+## CalendlyApi.FetchEventTypeHosts
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/fetch_event_type_hosts_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/fetch_event_type_hosts_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Fetches a list of event type hosts from Calendly.
+
+**Parameters**
+
+- **event_type_uri** (`string`, required) The URI associated with the event type to identify the hosts.
+- **number_of_rows_to_return** (`number`, optional) Specify the number of rows to fetch from the list of event type hosts. This determines the size of the dataset returned.
+- **pagination_token** (`string`, optional) Token for fetching the next or previous portion of the event type host list.
+
+
+## CalendlyApi.CreateOneOffEvent
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/create_one_off_event_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/create_one_off_event_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Create a one-off event type in Calendly.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## CalendlyApi.GetSampleWebhookData
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/get_sample_webhook_data_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/get_sample_webhook_data_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve sample webhook data for testing integrations.
+
+**Parameters**
+
+- **organization_identifier** (`string`, required) The unique identifier for the organization. It specifies which organization the sample webhook data belongs to.
+- **webhook_event_type** (`string`, required) Specify the type of webhook event to simulate, such as 'invitee.created' or 'invitee.canceled'.
+- **webhook_scope** (`string`, required) Specify the scope for the sample webhook data. Options are 'user', 'organization', or 'group'.
+- **user_identifier** (`string`, optional) The unique identifier for a user in Calendly whose webhook data you want to test.
+- **webhook_event_group** (`string`, optional) Specify the group for the webhook event to categorize and filter data. Typically used for organizing related webhooks.
+
+
+## CalendlyApi.FetchOutgoingCommunications
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/fetch_outgoing_communications_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/fetch_outgoing_communications_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve outgoing SMS and email communications.
+
+**Parameters**
+
+- **organization_uri** (`string`, required) Return outgoing communications from the organization associated with this URI. This should be a valid URI string.
+- **created_before** (`string`, optional) Include outgoing communications created before this time in UTC format (e.g., "2020-01-02T03:04:05.678Z").
+- **number_of_records_to_return** (`integer`, optional) The maximum number of outgoing communications records to retrieve.
+- **pagination_token** (`string`, optional) Token for fetching the next set of outgoing communications.
+- **start_time_utc** (`string`, optional) Include communications created after this UTC time (e.g. "2020-01-02T03:04:05.678Z").
+
+
+## CalendlyApi.GetGroupList
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/get_group_list_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/get_group_list_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of groups from Calendly.
+
+**Parameters**
+
+- **organization_uri** (`string`, required) URI for the organization to return associated groups from Calendly.
+- **number_of_rows** (`number`, optional) Specify the number of rows (groups) to return from the query. Used to limit results.
+- **pagination_token** (`string`, optional) Token for retrieving the next or previous set of groups in the list.
+
+
+## CalendlyApi.GetUserLocationInfo
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/get_user_location_info_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/get_user_location_info_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve configured location details for a specific user.
+
+**Parameters**
+
+- **user_uri** (`string`, required) The URI identifying the specific user to retrieve location information for.
+
+
+## CalendlyApi.GetEventAvailability
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/get_event_availability_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/get_event_availability_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve availability for a specific event type.
+
+**Parameters**
+
+- **event_type_uri** (`string`, required) The URI associated with the specific event type to retrieve availability.
+
+
+## CalendlyApi.UpdateEventAvailability
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/calendly_api/update_event_availability_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/calendly_api/update_event_availability_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Update an event type availability schedule.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **event_type_uri** (`string`, optional) URI of the event type to update the availability schedule for.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+
+## Reference
+
+Below is a reference of enumerations used by some of the tools in the CalendlyApi MCP Server:
+
+### ToolMode
+
+- **GET_REQUEST_SCHEMA**: `get_request_schema`
+- **EXECUTE**: `execute`
+
+
+---
+
+## Auth
+
+The Arcade Calendly MCP Server uses the [Calendly auth provider](/home/auth-providers/calendly) to connect to users' Calendly accounts.
+
+With the Arcade Cloud Platform, there's nothing to configure. Your users will see `Arcade` as the name of the application that's requesting permission.
+
+With a self-hosted installation of Arcade, you need to [configure the Calendly auth provider](/home/auth-providers/calendly#configuring-calendly-auth) with your own Calendly app credentials.
+
+<ToolFooter pipPackageName="arcade_calendly_api" />
