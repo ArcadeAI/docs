@@ -1,0 +1,33 @@
+import json
+from arcadepy import Arcade
+
+client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
+
+USER_ID = "{arcade_user_id}"
+TOOL_NAME = "TrelloApi.UpdateChecklistItemTrello"
+
+auth_response = client.tools.authorize(
+    tool_name=TOOL_NAME,
+    user_id=USER_ID,
+)
+
+if auth_response.status != "completed":
+    print(f"Click this link to authorize: {auth_response.url}")
+
+# Wait for the authorization to complete
+client.auth.wait_for_completion(auth_response)
+
+tool_input = {
+    'card_id': '1234567890abcdef',
+    'checkitem_id': 'abcdef1234567890',
+    'checklist_item_new_name': 'Updated Checklist Item',
+    'checklist_item_due_date': '2023-12-31T23:59:59Z',
+    'completion_state': 'complete'
+}
+
+response = client.tools.execute(
+    tool_name=TOOL_NAME,
+    input=tool_input,
+    user_id=USER_ID,
+)
+print(json.dumps(response.output.value, indent=2))
