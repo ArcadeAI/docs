@@ -124,10 +124,26 @@ Follow the instructions in your browser, and once you've finished, your terminal
 Run your MCP Server using one of the with the following commands in your terminal:
 
 <Tabs
-  items={["HTTP transport (default)", "stdio transport (for Claude Desktop)"]}
+  items={["stdio transport (default)", "http transport"]}
   storageKey="preferredTransport"
 >
 
+<Tabs.Tab>
+
+```bash
+uv run server.py stdio
+```
+
+<Callout type="info">
+  When using the stdio transport, it is common that the MCP client will start
+  the MCP server for you on a different environment, so you the MCP sever may
+  not be able to access the secrets you have defined in your .env file. Please
+  refer to the [create a tool with
+  secrets](/home/build-tools/create-a-tool-with-secrets) guide for more
+  information.
+</Callout>
+
+</Tabs.Tab>
 <Tabs.Tab>
 
 ```bash
@@ -136,12 +152,14 @@ uv run server.py http
 
 For HTTP transport, view your server's API docs at [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
 
-</Tabs.Tab>
-<Tabs.Tab>
-
-```bash
-uv run server.py stdio
-```
+<Callout type="info">
+  For security reasons, Local HTTP servers do not currently support managed
+  authorization and secrets. If you need to use authorization or secrets, you
+  should use the stdio transport and configure the Arcade API key and secrets in
+  your MCP connection settings. If you intend to expose your HTTP MCP server to
+  the public internet, please follow the [on-prem MCP
+  server](/home/deployment/on-prem-mcp) guide for secure remote deployment.
+</Callout>
 
 </Tabs.Tab>
 </Tabs>
