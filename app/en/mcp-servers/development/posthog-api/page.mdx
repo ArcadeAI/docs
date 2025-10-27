@@ -21,32 +21,40 @@ import { Callout } from "nextra/components";
 
 The PosthogApi MCP Server offers a comprehensive suite of tools for managing and analyzing data within the PostHog platform. Users can leverage these tools to:
 
-## Authentication
+## Configuration
 
-The Arcade PostHog API MCP Server requires two environment variables to authenticate with your PostHog instance:
+**Secrets**
 
-- `POSTHOG_PERSONAL_API_KEY`
-- `POSTHOG_SERVER_URL`
+This tool requires the following secrets: `POSTHOG_SERVER_URL`, `POSTHOG_PERSONAL_API_KEY` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
+The PosthogApi MCP Server requires two secrets to authenticate with your PostHog instance:
 
-**How to obtain your credentials:**
+### Getting Your PostHog Server URL
 
-1. **Get your Personal API Key:**
+The server URL depends on your PostHog deployment:
 
-   - Log in to your [PostHog account](https://app.posthog.com/)
-   - Click on your profile icon in the top-right corner
-   - Select **Personal API Keys** from the dropdown menu
-   - Click **+ Create a personal API Key**
-   - Provide a descriptive label for the key
-   - Choose the necessary scopes (it's recommended to select only the scopes required for your intended use)
-   - Click **Create** to generate the key
-   - **Important**: Copy and store the key securely - you won't be able to view it again after leaving the page
+- **PostHog Cloud (US Region)**: `https://us.posthog.com`
+- **PostHog Cloud (EU Region)**: `https://eu.posthog.com`
+- **Self-Hosted**: Use your instance's base URL (e.g., `https://analytics.yourdomain.com`)
 
-2. **Determine your Server URL:**
-   - **For PostHog Cloud users**: Your server URL will be `https://app.posthog.com` (or `https://eu.posthog.com` for EU cloud)
-   - **For self-hosted users**: Use your PostHog instance domain with the `https://` protocol (e.g., `https://posthog.yourcompany.com`)
-   - **Note**: The server URL must include the `https://` protocol
+You can verify your server URL by checking your PostHog account settings or the URL you use to access PostHog.
 
-For more details, refer to the [PostHog API documentation](https://posthog.com/docs/api).
+### Getting Your Personal API Key
+
+To generate a PostHog personal API key:
+
+1. Log in to your PostHog account
+2. Click your avatar in the bottom-left corner
+3. Select the gear icon to open "Account settings"
+4. Navigate to the "Personal API Keys" section
+5. Click "+ Create a personal API key"
+6. Provide a descriptive label for the key
+7. Select the necessary scopes (choose only the scopes required for your use case)
+8. Click "Create key"
+9. **Copy and securely store the key immediately** - it won't be shown again
+
+For more details on authentication and API usage, refer to the [PostHog API documentation](https://posthog.com/docs/api).
+
+Once you have both values, configure them as secrets when using the PosthogApi MCP Server. Learn more about [configuring secrets](/home/build-tools/create-a-tool-with-secrets).
 
 ## Available Tools
 
@@ -2847,7 +2855,7 @@ For more details, refer to the [PostHog API documentation](https://posthog.com/d
     ],
     [
       "PosthogApi.AppendTaskRunLogs",
-      "Append log entries to a specific task run log array. ",
+      "Append log entries to a specific task run log array.",
     ],
     [
       "PosthogApi.UpdateTaskRunOutput",
@@ -26457,7 +26465,7 @@ Update the status of a web experiment.
 - **experiment_name** (`string`, optional) The name of the web experiment to be updated. This should be a descriptive string identifying the specific experiment within the project.
 - **feature_flag_key** (`string`, optional) A string representing the feature flag key associated with the web experiment. It uniquely identifies the feature toggle you want to update.
 - **web_experiment_id** (`integer`, optional) A unique integer identifying the web experiment.
-- **web_experiment_variants** (`string`, optional) JSON string defining the variants for the web experiment. Include text, HTML, selector, conditions, and rollout percentage for each variant. Example: { "control": { "transforms": [ { "text": "Here comes Superman!", "html": "", "selector": "#page > #body > .header h1" } ], "conditions": "None", "rollout_percentage": 50 } }
+- **web_experiment_variants** (`string`, optional) JSON string defining the variants for the web experiment. Include text, HTML, selector, conditions, and rollout percentage for each variant. Example: `{ "control": { "transforms": [ { "text": "Here comes Superman!", "html": "", "selector": "#page > #body > .header h1" } ], "conditions": "None", "rollout_percentage": 50 } }`
 
 **Secrets**
 
@@ -26851,10 +26859,6 @@ Retrieve a user's two-factor authentication setup status.
 **Parameters**
 
 - **user_identifier** (`string`, required) A unique identifier for the user whose two-factor authentication setup status is being retrieved. This is typically a UUID string.
-
-**Secrets**
-
-This tool requires the following secrets: `POSTHOG_SERVER_URL`, `POSTHOG_PERSONAL_API_KEY` (learn how to [configure secrets](/home/build-tools/create-a-tool-with-secrets))
 
 ## PosthogApi.Retrieve2faStatus
 
