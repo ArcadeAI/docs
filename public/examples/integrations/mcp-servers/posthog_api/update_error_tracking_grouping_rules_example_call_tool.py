@@ -1,0 +1,34 @@
+import json
+from arcadepy import Arcade
+
+client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
+
+USER_ID = "{arcade_user_id}"
+TOOL_NAME = "PosthogApi.UpdateErrorTrackingGroupingRules"
+
+auth_response = client.tools.authorize(
+    tool_name=TOOL_NAME,
+    user_id=USER_ID,
+)
+
+if auth_response.status != "completed":
+    print(f"Click this link to authorize: {auth_response.url}")
+
+# Wait for the authorization to complete
+client.auth.wait_for_completion(auth_response)
+
+tool_input = {
+    'assignee_user_id': 'user_12345',
+    'filters_for_grouping_rules': 'error_type:critical,severity:high',
+    'grouping_rule_id': 'uuid-1234-5678-90ab-cdef12345678',
+    'priority_order_key': 1,
+    'project_id': 'project_98765',
+    'rule_id': 'rule_abcde'
+}
+
+response = client.tools.execute(
+    tool_name=TOOL_NAME,
+    input=tool_input,
+    user_id=USER_ID,
+)
+print(json.dumps(response.output.value, indent=2))

@@ -3,4 +3,5 @@ export default {
   github: "GitHub",
   firecrawl: "Firecrawl",
   "vercel-api": "Vercel API",
+  "posthog-api": "PostHog API",
 };
