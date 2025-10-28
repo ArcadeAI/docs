@@ -28,7 +28,7 @@ There are 4 possible types of changes, which each have an emoji associated with 
 The steps to follow are:
 1. Load the changelog file and note the date of the most recent entry.
 2. Load all new commits since the most recent entry in the changelog file from the provided Github repositories.
-3. Append the changes to the changelog file. Do not alter the older entries in the changelog - ONLY APPEND NEW ENTRIES. Do not ask the user for confirmation. The changelog should be in the same format as the changelog file.  Do not include any other text in the changelog file.  Do not combine multiple changes into a single entry EXCEPT when there are changes in the docs repo that relate to another repo - those should be combined into a single entry for the non-docs repo.
+3. Append the changes to the changelog file. Do not alter the older entries in the changelog - ONLY APPEND NEW ENTRIES. Do not ask the user for confirmation. The changelog should be in the same format as the changelog file. Do not include any other text in the changelog file. Do not combine multiple changes into a single entry EXCEPT when there are changes in the docs repo that relate to another repo - those should be combined into a single entry for the non-docs repo.
 
 When updating the changelog, follow these rules:
   - The date to use for the changelog is always the most recent Friday.
