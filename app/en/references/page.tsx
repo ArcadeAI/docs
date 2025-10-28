@@ -130,6 +130,54 @@ export default function APIReferencePage() {
                   Learn more about the Go Client
                 </a>
               </div>
+
+              {/* C# Client */}
+              <div>
+                <h4 className="mb-2 font-semibold text-gray-900 text-lg dark:text-white">
+                  C# Client
+                </h4>
+                <p className="mb-2 text-gray-600 text-sm dark:text-gray-300">
+                  Install with:
+                </p>
+                <code className="mb-3 block rounded bg-gray-100 px-3 py-2 font-mono text-sm dark:bg-gray-900">
+                  git clone git@github.com:ArcadeAI/arcade-csharp.git dotnet add
+                  reference arcade-csharp/src/ArcadeEngine
+                </code>
+                <a
+                  className="text-primary text-sm hover:underline"
+                  href="https://github.com/ArcadeAI/arcade-csharp"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  Learn more about the C# Client
+                </a>
+              </div>
+
+              {/* Java Client */}
+              <div>
+                <h4 className="mb-2 font-semibold text-gray-900 text-lg dark:text-white">
+                  Java Client
+                </h4>
+                <p className="mb-2 text-gray-600 text-sm dark:text-gray-300">
+                  Install following{" "}
+                  <a
+                    className="text-primary text-sm hover:underline"
+                    href="https://github.com/ArcadeAI/arcade-java/blob/main/README.md"
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    these instructions
+                  </a>
+                </p>
+                <a
+                  className="text-primary text-sm hover:underline"
+                  href="https://github.com/ArcadeAI/arcade-java"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  Learn more about the Java Client
+                </a>
+              </div>
             </div>
 
             <p className="mt-6 text-gray-500 text-sm italic dark:text-gray-400">
