@@ -3,4 +3,144 @@ title: "Cloud deployments with Arcade Deploy"
 description: "Learn how to deploy a worker with Arcade Deploy"
 ---
 
-Coming soon! We're reworking the `arcade deploy` command to be more user-friendly and powerful. In the meantime, you can deploy [on-premises MCP servers](/home/deployment/on-prem-mcp) to make your tools accessible to others.
+import { Steps, Tabs, Callout } from "nextra/components";
+import { SignupLink } from "@/app/_components/analytics";
+
+# Deploying to the cloud with Arcade Deploy
+
+Running your MCP servers locally is very convenient during development and testing. Once your MCP server is mature, however, you may want to access it from any MCP client, or to facilitate multi-user support. Doing all that from your computer comes with the complexity of running and maintaining a server, handling auth and high availability for all your users and all the integrations you want to support. Arcade Deploy takes care of all that for you. Your MCP server will be registered to Arcade, adding all the tools you created to the larger tool catalog. From there, you can create MCP Gateways to pick and choose which tools you want to use in you MCP clients, which can be from any connected MCP server.
+
+This guide shows you how to deploy your MCP Server with Arcade Deploy.
+
+## Requirements
+
+- **Python 3.10** or higher <br/> Verify your Python version by running `python --version` or `python3 --version` in your terminal.
+- **Arcade Account**: Sign up for an <SignupLink linkLocation="docs:custom-tools">Arcade account</SignupLink> if you haven't already.
+- **Arcade CLI**: Install the Arcade CLI
+
+<Tabs items={["uv", "pip"]}>
+<Tabs.Tab>
+
+```bash
+uv pip install arcade-mcp
+```
+
+</Tabs.Tab>
+<Tabs.Tab>
+```bash
+pip install arcade-mcp
+```
+</Tabs.Tab>
+</Tabs>
+
+<Steps>
+
+## Create an MCP server using Arcade MCP
+
+If you have not created an MCP server yet, then follow the steps outlined in [this guide](/home/build-tools/create-a-mcp-server) before deploying.
+
+## Deploy your MCP Server
+
+Run the deploy command in the directory where you started your MCP server (containing your `pyproject.toml` file).
+
+```bash
+arcade deploy
+```
+
+By default, running `arcade deploy` looks for a file named `server.py` as the entry point to your MCP server.
+
+An entry point file is considered valid if it executes the `run()` method on your `MCPApp` instance when invoked directly - for example, running `uv run your_entrypoint_file.py` should result in your MCP server starting. A minimal valid entry point looks like this:
+
+```py
+from arcade_mcp_server import MCPApp
+
+app = MCPApp()
+
+@app.tool
+def echo(phrase: Annotated[str, "The phrase to echo"]) -> str:
+    return phrase
+
+if __name__ == "__main__":
+    app.run()
+```
+
+If your MCP server uses a different script name or location, specify it with the --entrypoint option. For example, if your `pyproject.toml` is in `~/my-app/mcp-server/` and your entry point file is `~/my-app/mcp-server/server/my_mcp_server.py`, start the deployment with:
+
+```bash
+arcade deploy --entrypoint server/my_mcp_server.py
+```
+
+<Callout type="info">
+It is important that your entrypoint script executes `MCPApp.run()` (or `app.run()` if `app` is of type `MCPApp`) when invoked directly.
+
+We recommend to do it inside an `if __name__ == "__main__":` statement.
+
+</Callout>
+
+You should see output like the following:
+
+```bash
+Validating user is logged in...
+✓ {arcade_user_id} is logged in
+
+Validating pyproject.toml exists in current directory...
+✓ pyproject.toml found at /path/to/your/project/pyproject.toml
+
+Loading .env file from current directory if it exists...
+✓ Loaded environment from /path/to/your/project/.env
+
+Validating server is healthy and extracting metadata before deploying...
+✓ Server started on port 8001
+✓ Server is healthy
+✓ Found server name: my_server
+✓ Found server version: 1.0.0
+✓ Found 3 tools
+✓ Found 1 required secret(s)
+
+Uploading 1 required secret(s) to Arcade...
+✓ Uploading 'MY_SECRET_KEY' with value ending in ...ime!
+✓ Secret 'MY_SECRET_KEY' uploaded
+
+Creating deployment package...
+✓ Package created (1.8 KB)
+
+
+⠧ Deployment in progress (this may take a few minutes)...
+
+Recent logs:
+  data: {"Timestamp":"2025-10-27T16:03:45.429460682Z","Line":"Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details."}
+  data: {"Timestamp":"2025-10-27T16:03:45.429466232Z","Line":"[GIN-debug] Listening and serving HTTP on :8002"}
+  data: {"Timestamp":"2025-10-27T16:03:47.577492621Z","Line":"[GIN] 2025/10/27 - 16:03:47 | 200 |    2.888808ms |   10.30.253.232 | GET      \"/worker/health\""}
+  data: {"Timestamp":"2025-10-27T16:03:48.230570179Z","Line":"INFO:     127.0.0.1:53384 - \"GET /worker/health HTTP/1.1\" 200 OK"}
+  data: {"Timestamp":"2025-10-27T16:03:48.231072632Z","Line":"[GIN] 2025/10/27 - 16:03:48 | 200 |    4.526797ms |   10.30.253.232 | GET      \"/worker/health\""}
+
+
+You can safely exit with Ctrl+C at any time. The deployment will continue normally.
+
+✓ Deployment successful! Server is running.
+```
+
+## Manage your MCP servers in Arcade
+
+Navigate to the [Servers](https://api.arcade.dev/dashboard/servers) page in your Arcade dashboard. From there, you will be able to:
+
+- Monitor the health status of the server
+- Delete the server
+- Test and execute all the tools
+- Manage users connected to the Auth providers
+- Manage the secrets for the server
+- Create [MCP Gateways](/home/mcp-gateways)
+
+## Create an MCP Gateway to call the tools in your MCP Server
+
+Once the MCP server is deployed to Arcade, all the tools in the server will be available in the [tool catalog](https://api.arcade.dev/dashboard/tools) page in your Arcade dashboard. To call the tools from an MCP client, you first need to [create an MCP Gateway](/home/mcp-gateways) to pick and choose which tools you want to use in you MCP clients.
+
+When creating an MCP gateway, you can select the tools you want to include in the Gateway from any MCP Servers available to the project, including the one you just deployed.
+
+## Use Arcade clients to call the tools in your MCP Server
+
+You can use any of the available [Arcade clients](/references) to call the tools in your MCP Server. When using the clients, you are not required to create an MCP Gateway, as the client will handle the connection to all tools in your Arcade project directly.
+
+</Steps>
+
+Your MCP Server is now deployed and registered with Arcade, and ready to be used in your MCP clients!
