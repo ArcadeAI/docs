@@ -1,5 +1,6 @@
 export default {
   "create-a-mcp-server": "Create an MCP Server",
+  "migrate-from-toolkits": "Migrate from toolkits",
   "tool-context": "Tools and Context",
   "create-a-tool-with-auth": "Create a tool with auth",
   "create-a-tool-with-secrets": "Create a tool with secrets",
