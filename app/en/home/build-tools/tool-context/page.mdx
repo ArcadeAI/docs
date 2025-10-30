@@ -18,15 +18,15 @@ import { Callout, Tabs } from "nextra/components";
 <Callout type="notice">
 
 Some authorization providers may also include additional structured user
-information in the `ToolContext`.
+information in the `Context`. You can access this information via `context.authorization.user_info`.
 
 </Callout>
 
 ## How `Context` Works
 
-When you invoke a tool that requires authorization, Arcade's Tool SDK automatically:
+When a tool that requires authorization is invoked, the MCP server automatically:
 
-1. Creates a `Context` object
+1. Creates an instance of `Context`
 2. Passes this object to your tool
 
 You can then use the `Context` object to make authenticated requests to external APIs.
@@ -48,6 +48,7 @@ await context.log.debug("Debug message")
 await context.log.info("Information message")
 await context.log.warning("Warning message")
 await context.log.error("Error message")
+await context.log.log("info", "Info message") # equivalent to await context.log.info("Info message")
 ```
 
 ### Secrets Management
@@ -88,7 +89,7 @@ async def my_tool(context: Context, ...):
 
 ## Example Code
 
-The following is an example shows how tools can access runtime features through
+The following is an example that shows how tools can access runtime features through
 `Context`, including logging, secrets, and progress reporting.
 
 ### Environment Variables
@@ -100,7 +101,7 @@ DATABASE_URL="postgresql://localhost/mydb"
 
 <Callout type="warning">
 
-For the code to work, you must define your environment variables in a `.env` file.
+For the code to work, you must define your environment variables in a `.env` file at the same directory as your entrypoint file.
 
 </Callout>
 
