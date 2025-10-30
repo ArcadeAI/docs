@@ -11,6 +11,9 @@ const meta: MetaRecord = {
   python: {
     title: "Python",
   },
+  telemetry: {
+    title: "Telemetry",
+  },
 };
 
 export default meta;
