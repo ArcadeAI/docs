@@ -42,7 +42,7 @@ export default function NotFound() {
         <Card className="gap-4 border-2 border-stone-900 py-6 shadow-2xl shadow-black/10 dark:shadow-black/25">
           <CardHeader className="text-center">
             {/* Illustration */}
-            <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-gradient-to-br from-orange-100 to-orange-50 ring-1 ring-orange-200/50 dark:from-orange-900/30 dark:to-orange-800/20 dark:ring-orange-800/30">
+            <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-linear-to-br from-orange-100 to-orange-50 ring-1 ring-orange-200/50 dark:from-orange-900/30 dark:to-orange-800/20 dark:ring-orange-800/30">
               <SearchX className="size-9 text-orange-600 dark:text-orange-400" />
             </div>
           </CardHeader>

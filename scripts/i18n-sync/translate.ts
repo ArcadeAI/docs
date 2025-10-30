@@ -65,9 +65,6 @@ export function detectType(file: string): FileType {
   if (trackedMetaFiles.has(path.basename(file))) {
     return "meta";
   }
-  if (file === "layout.tsx") {
-    return "layout";
-  }
   const ext = path.extname(file);
   return ext === ".mdx" ? "mdx" : "tsx";
 }
@@ -167,11 +164,11 @@ export async function translateLocale(
             cache.data[locale] = cache.data[locale] || {};
             cache.data[locale][entry.rel] = entry.hash;
           }
-          ok++;
+          ok += 1;
           spinner.text = `(${locale}) batch ${batchNum}/${totalBatches} | ${batch.length - (ok + failed - i)} in progress | ${ok + failed}/${entries.length} done`;
           return { entry, success: true };
         } catch (error) {
-          failed++;
+          failed += 1;
           spinner.text = `(${locale}) batch ${batchNum}/${totalBatches} | ${batch.length - (ok + failed - i)} in progress | ${ok + failed}/${entries.length} done`;
           return { entry, success: false, error };
         }
@@ -228,7 +225,7 @@ export async function cleanupDeleted(
           try {
             await fs.unlink(abs);
             deletedFiles.push(`${locale}/${rel}`);
-            totalDeleted++;
+            totalDeleted += 1;
           } catch {
             // Ignore deletion errors
           }

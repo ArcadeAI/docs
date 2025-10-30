@@ -117,28 +117,8 @@ Examples:
 Return raw TypeScript/TSX code ONLY - NO wrappers.`;
 }
 
-function buildLayoutSystemPrompt(locale: string): string {
-  const { arcadeContext } = buildCommonPromptContext(locale);
-  const localeCode = locale === "pt-BR" ? "pt-BR" : "es";
-  return `Translate Next.js layout for ${localeCode} locale.
-
-${arcadeContext}
-
-!!!CRITICAL - ABSOLUTELY NO ADDITIONS!!!
-- DO NOT wrap in code fences (\`\`\`tsx, \`\`\`, etc.)
-- DO NOT add ANY formatting or wrapper
-- First character MUST be the start of the actual file
-- Return ONLY raw TypeScript code
-
-Change ONLY: lang attribute from "en" to "${localeCode}"
-Preserve: ALL other code exactly as-is
-
-Return raw TSX file content - NO wrappers.`;
-}
-
 export const FILE_TYPE_PROMPTS: Record<FileType, (locale: string) => string> = {
   mdx: buildMdxSystemPrompt,
   meta: buildMetaSystemPrompt,
   tsx: buildTsxSystemPrompt,
-  layout: buildLayoutSystemPrompt,
 };

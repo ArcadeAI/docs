@@ -15,7 +15,7 @@ test(
       const content = readFileSync(file, "utf-8");
       const lines = content.split("\n");
 
-      for (let i = 0; i < lines.length; i++) {
+      for (let i = 0; i < lines.length; i += 1) {
         const matches = lines[i].match(absoluteLinkRegex);
         if (matches) {
           for (const match of matches) {
