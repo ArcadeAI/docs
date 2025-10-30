@@ -1,4 +1,4 @@
-export type FileType = "mdx" | "meta" | "tsx" | "layout";
+export type FileType = "mdx" | "meta" | "tsx";
 
 export type CacheMetadata = {
   version: string;

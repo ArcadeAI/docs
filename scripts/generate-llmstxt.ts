@@ -289,7 +289,7 @@ async function main() {
       const batch = pages.slice(i, i + batchSize);
       const batchResults = await Promise.all(batch.map(summarizePage));
 
-      for (let j = 0; j < batch.length; j++) {
+      for (let j = 0; j < batch.length; j += 1) {
         summarizedPages.push({
           ...batch[j],
           ...batchResults[j],
