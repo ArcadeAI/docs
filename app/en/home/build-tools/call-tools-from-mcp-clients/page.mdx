@@ -33,7 +33,7 @@ Configure your MCP clients to call tools from your MCP server.
 
 ## Using the `arcade configure` command
 
-For popular MCP clients, you can use the `arcade configure` command to configure your MCP client to call your MCP server. This will automatically add the MCP server to your client's configuration file. By default, it will use the stdio transport.
+For popular MCP clients, you can use the `arcade configure` command to configure your MCP client to call your MCP server. This will automatically add the MCP server to your client's configuration file. By default, it will use the stdio transport. You must run this command from the directory of your entrypoint file.
 
 <Tabs
   items={["Cursor IDE", "VS Code", "Claude Desktop"]}
@@ -91,7 +91,7 @@ Claude Desktop does not currently support the http transport.
 
 ### stdio specific configuration
 
-If you are using the stdio transport, `arcade configure` will assume the entrypoint (the script that contains the `MCPApp` instance and calls `app.run()`) to your MCP server is `server.py` and will set the working directory to the root of your project. You can override this with the `--entrypoint` (or `-e`) option:
+If you are using the stdio transport, `arcade configure` will assume the entrypoint (the script that contains the `MCPApp` instance and calls `app.run()`) to your MCP server is `server.py` and will set the working directory to the path of your entrypoint file. You can override this with the `--entrypoint` (or `-e`) option:
 
 <Callout type="info">
   Note that the `--entrypoint` determines only the filename of the entrypoint
@@ -99,7 +99,7 @@ If you are using the stdio transport, `arcade configure` will assume the entrypo
 </Callout>
 <Callout type="info">
   When using the stdio transport, `arcade configure` will automatically load the
-  secrets from the `.env` file in the root of your project into the appropriate
+  secrets from the `.env` file at the directory of your entrypoint file into the appropriate
   configuration file for your MCP client.
 </Callout>
 
@@ -170,14 +170,14 @@ If you are using the streamable HTTP transport, `arcade configure` will assume t
   </Tabs.Tab>
   <Tabs.Tab>
 
-Claude Desktop does not currently support the http transport.
+Claude Desktop does not currently support the http transport via JSON configuration files.
 
   </Tabs.Tab>
 </Tabs>
 
 ### Other configuration options
 
-If you have modified the default configuration of your MCP client, you can pass the `--config` (or `-c`) option to `arcade configure` to use your custom configuration file:
+If you have modified the default configuration of your MCP client, or want to use a profile/workspace specific configuration file, then you can pass the `--config` (or `-c`) option to `arcade configure` to use your custom configuration file:
 
 <Tabs
   items={["Cursor IDE", "VS Code", "Claude Desktop"]}
@@ -250,7 +250,7 @@ When configuring your MCP client using the stdio transport, you need to ensure t
 
 - Your virtual environment is located at `/path/to/your/project/.venv`
 - Your project is located at `/path/to/your/project`
-- The entrypoint to your MCP server is `server.py`
+- The entrypoint to your MCP server is located at `/path/to/your/server.py`
 - One of your tools requires the `MY_SECRET_KEY` environment variable to be set.
 - Your secrets are stored in the `/path/to/your/project/.env` file
 
@@ -279,7 +279,7 @@ When configuring your MCP client using the Streamable HTTP transport, ensure the
 
 - Your virtual environment is located at `/path/to/your/project/.venv`
 - Your MCP server is located at `/path/to/your/project/server.py`
-- Your secrets are stored in the `.env` file
+- Your secrets are stored in the `/path/to/your/project/.env` file
 
 Activate the virtual environment:
 
@@ -287,7 +287,7 @@ Activate the virtual environment:
 source /path/to/your/project/.venv/bin/activate
 ```
 
-run the MCP server using the http transport. The secrets will be loaded from the `.env` file:
+run the MCP server using the http transport. The secrets will be loaded from the `.env` file that is located at the directory of your entrypoint file:
 
 ```bash
 uv run server.py http
