@@ -63,7 +63,7 @@ def build_toolkit_mdx_dir_path(
         "en",
         "mcp-servers",
         docs_section,
-        f"{toolkit_name.lower().replace('_', '-')}",
+        f"{toolkit_name.lower().replace('-', '_')}",
     )
 
     if ensure_exists:
