@@ -15,9 +15,6 @@ const meta: MetaRecord = {
   transports: {
     title: "Transports",
   },
-  sharing: {
-    title: "Sharing",
-  },
   server: {
     title: "Server",
   },
