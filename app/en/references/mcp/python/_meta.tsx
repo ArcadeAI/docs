@@ -12,14 +12,8 @@ const meta: MetaRecord = {
   overview: {
     title: "Overview",
   },
-  clients: {
-    title: "Clients",
-  },
   transports: {
     title: "Transports",
-  },
-  sharing: {
-    title: "Sharing",
   },
   server: {
     title: "Server",
