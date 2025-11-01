@@ -29,6 +29,11 @@ export function remarkGlossary(options: RemarkGlossaryOptions) {
       return;
     }
 
+    // don't process the many MCP tool pages
+    if (file.history?.[0]?.includes("/mcp-servers/")) {
+      return;
+    }
+
     // Lazy-load and cache glossary terms
     if (!cachedTerms || cachedGlossaryPath !== glossaryPath) {
       cachedTerms = sortTermsByLength(parseGlossary(glossaryPath));
