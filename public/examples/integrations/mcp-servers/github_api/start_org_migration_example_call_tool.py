@@ -1,0 +1,34 @@
+import json
+from arcadepy import Arcade
+
+client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
+
+USER_ID = "{arcade_user_id}"
+TOOL_NAME = "GithubApi.StartOrgMigration"
+
+auth_response = client.tools.authorize(
+    tool_name=TOOL_NAME,
+    user_id=USER_ID,
+)
+
+if auth_response.status != "completed":
+    print(f"Click this link to authorize: {auth_response.url}")
+
+# Wait for the authorization to complete
+client.auth.wait_for_completion(auth_response)
+
+tool_input = {
+    'organization_name': 'example-org',
+    'repositories_to_migrate': ['repo1', 'repo2'],
+    'exclude_attachments': False,
+    'exclude_git_data': True,
+    'exclude_items': ['repositories'],
+    'lock_repositories': True
+}
+
+response = client.tools.execute(
+    tool_name=TOOL_NAME,
+    input=tool_input,
+    user_id=USER_ID,
+)
+print(json.dumps(response.output.value, indent=2))

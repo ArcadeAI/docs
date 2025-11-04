@@ -1,0 +1,35 @@
+import json
+from arcadepy import Arcade
+
+client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
+
+USER_ID = "{arcade_user_id}"
+TOOL_NAME = "ClickupApi.CreateWorkspaceGoal"
+
+auth_response = client.tools.authorize(
+    tool_name=TOOL_NAME,
+    user_id=USER_ID,
+)
+
+if auth_response.status != "completed":
+    print(f"Click this link to authorize: {auth_response.url}")
+
+# Wait for the authorization to complete
+client.auth.wait_for_completion(auth_response)
+
+tool_input = {
+    'allow_multiple_owners': True,
+    'due_date_timestamp': 1699996800000,
+    'goal_color': '#FF5733',
+    'goal_description': 'Increase user engagement by 20% in Q4.',
+    'goal_name': 'User Engagement Improvement',
+    'goal_owners': [101, 102],
+    'workspace_id': 5
+}
+
+response = client.tools.execute(
+    tool_name=TOOL_NAME,
+    input=tool_input,
+    user_id=USER_ID,
+)
+print(json.dumps(response.output.value, indent=2))

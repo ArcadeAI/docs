@@ -1,0 +1,38 @@
+import { Arcade } from "@arcadeai/arcadejs";
+
+const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
+
+const USER_ID = "{arcade_user_id}";
+const TOOL_NAME = "GithubApi.ListGithubActionsCaches";
+
+// Start the authorization process
+const authResponse = await client.tools.authorize({
+  tool_name: TOOL_NAME,
+  user_id: USER_ID,
+});
+
+if (authResponse.status !== "completed") {
+  console.log(`Click this link to authorize: ${authResponse.url}`);
+}
+
+// Wait for the authorization to complete
+await client.auth.waitForCompletion(authResponse);
+
+const toolInput = {
+  "repository_name": "example-repo",
+  "repository_owner": "example-owner",
+  "cache_key_or_prefix": "my-cache",
+  "git_reference": "refs/heads/main",
+  "results_page_number": 1,
+  "results_per_page": 50,
+  "sort_by_property": "created_at",
+  "sort_direction": "asc"
+};
+
+const response = await client.tools.execute({
+  tool_name: TOOL_NAME,
+  input: toolInput,
+  user_id: USER_ID,
+});
+
+console.log(JSON.stringify(response.output.value, null, 2));
