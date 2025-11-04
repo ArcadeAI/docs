@@ -393,11 +393,13 @@ function determinePagesToSummarize(
 ): {
   pagesToSummarize: PageMetadata[];
   pagesToKeep: Array<PageMetadata & { title: string; description: string }>;
+  hasChanges: boolean;
 } {
   const pagesToSummarize: PageMetadata[] = [];
   const pagesToKeep: Array<
     PageMetadata & { title: string; description: string }
   > = [];
+  let hasChanges = false;
 
   if (previousMetadata && previousMetadata.gitSha !== "unknown") {
     // Get changed files since last generation
@@ -417,6 +419,7 @@ function determinePagesToSummarize(
     );
 
     if (deletedPageUrls.length > 0) {
+      hasChanges = true;
       console.log(
         pc.yellow(
           `\n🗑️  Found ${deletedPageUrls.length} deleted pages (will be removed from output)`
@@ -435,6 +438,7 @@ function determinePagesToSummarize(
       if (isChanged || !existingSummary) {
         // Need to summarize this page
         pagesToSummarize.push(page);
+        hasChanges = true;
       } else {
         // Keep existing summary
         pagesToKeep.push({
@@ -456,9 +460,10 @@ function determinePagesToSummarize(
       pc.yellow("⚠ No previous generation found, summarizing all pages")
     );
     pagesToSummarize.push(...pages);
+    hasChanges = true; // Always regenerate if no previous metadata
   }
 
-  return { pagesToSummarize, pagesToKeep };
+  return { pagesToSummarize, pagesToKeep, hasChanges };
 }
 
 /**
@@ -537,11 +542,8 @@ async function main() {
     const pages = await discoverPages();
 
     // Step 2: Determine which pages need summarization and identify deleted pages
-    const { pagesToSummarize, pagesToKeep } = determinePagesToSummarize(
-      pages,
-      previousMetadata,
-      existingSummaries
-    );
+    const { pagesToSummarize, pagesToKeep, hasChanges } =
+      determinePagesToSummarize(pages, previousMetadata, existingSummaries);
 
     // Step 3: Summarize changed/new pages using OpenAI
     const summarizedPages = await summarizePagesInBatches(
@@ -556,16 +558,29 @@ async function main() {
 
     // Step 5: Generate llms.txt content
     console.log(pc.blue("\n✍️  Generating llms.txt content..."));
-    const generationDate = new Date().toISOString();
-    const metadata: LlmsTxtMetadata = {
-      gitSha: currentSha,
-      generationDate,
-    };
+    // Only update metadata if there are changes, otherwise keep previous metadata
+    const metadata: LlmsTxtMetadata = hasChanges
+      ? {
+          gitSha: currentSha,
+          generationDate: new Date().toISOString(),
+        }
+      : previousMetadata || {
+          gitSha: currentSha,
+          generationDate: new Date().toISOString(),
+        };
     const content = generateLlmsTxt(sections, metadata);
 
     // Step 6: Write to file
     await fs.writeFile(OUTPUT_PATH, content, "utf-8");
-    console.log(pc.green(`✓ Generated llms.txt at ${OUTPUT_PATH}`));
+    if (hasChanges) {
+      console.log(pc.green(`✓ Generated llms.txt at ${OUTPUT_PATH}`));
+    } else {
+      console.log(
+        pc.gray(
+          "✓ No changes detected, llms.txt unchanged (SHA and date preserved)"
+        )
+      );
+    }
 
     console.log(pc.bold(pc.green("\n✨ Done!\n")));
   } catch (error) {
