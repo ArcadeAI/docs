@@ -23,9 +23,28 @@ A 'Context' is an object that is passed to a tool as a parameter when the tool i
 
 _Learn more about [context](/home/build-tools/tool-context)._
 
+### Entrypoint File
+
+An 'Entrypoint file' is necessary when building your own MCP servers with Arcade. An entrypoint file creates and runs an `MCPApp` when invoked directly.
+
+The following is a minimal example of an entrypoint file:
+```python filename="server.py" showLineNumbers
+from arcade_mcp_server import MCPApp
+
+app = MCPApp()
+
+@app.tool
+def echo(phrase: Annotated[str, "The phrase to echo"]) -> str:
+    """Echo a phrase"""
+    return phrase
+
+if __name__ == "__main__":
+    app.run()
+```
+
 ### MCP Server
 
-A 'MCP Server' is a collection of tools that can be used by an agent, grouped logically together by a common theme or provider, and the running remote process that serves and executes the tools. MCP Servers are the unit of deployment for tools within Arcade.
+An 'MCP Server' is a collection of tools that can be used by an agent, grouped logically together by a common theme or provider, and the running remote process that serves and executes the tools. MCP Servers are the unit of deployment for tools within Arcade.
 
 #### Protected MCP Servers
 
