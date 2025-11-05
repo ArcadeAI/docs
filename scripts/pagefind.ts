@@ -2,10 +2,71 @@ import fs from "node:fs/promises";
 import path, { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import glob from "fast-glob";
+import { marked } from "marked";
 import { createIndex } from "pagefind";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+// Regex patterns for cleaning MDX content
+const FRONTMATTER_REGEX = /^---\n[\s\S]*?\n---\n?/m;
+const IMPORT_REGEX = /^import\s+.*?from\s+['"].*?['"];?\n?/gm;
+const EXPORT_REGEX = /^export\s+(?:const|function|class|default|{).*?;?\n?/gm;
+const JSX_SELF_CLOSING_REGEX = /<[A-Z]\w*(?:\s+[^>]*)?\/>/g;
+const JSX_COMPONENT_REGEX = /<[A-Z]\w*(?:\s+[^>]*)?>[\s\S]*?<\/[A-Z]\w*>/g;
+const JSX_CUSTOM_COMPONENT_REGEX =
+  /<[A-Z][\w.]*(?:\s+[^>]*)?>[\s\S]*?<\/[A-Z][\w.]*>/g;
+
+/**
+ * Converts MDX content to simple HTML by stripping MDX-specific syntax
+ * and converting markdown to HTML. Skips what can't be rendered.
+ */
+function markdownToHtml(mdxContent: string): string {
+  try {
+    let content = mdxContent;
+
+    // Remove frontmatter (---\n...\n---)
+    content = content.replace(FRONTMATTER_REGEX, "");
+
+    // Remove import statements
+    content = content.replace(IMPORT_REGEX, "");
+
+    // Remove export statements (but keep default exports that might be content)
+    content = content.replace(EXPORT_REGEX, "");
+
+    // Remove JSX components (both self-closing and with children)
+    // This regex matches <Component /> and <Component>...</Component>
+    content = content.replace(JSX_SELF_CLOSING_REGEX, "");
+    content = content.replace(JSX_COMPONENT_REGEX, "");
+
+    // Remove remaining JSX-like tags that might be custom components
+    content = content.replace(JSX_CUSTOM_COMPONENT_REGEX, "");
+
+    // Convert markdown to HTML using marked
+    // Configure marked to be lenient and skip what it can't render
+    const html = marked(content, {
+      breaks: false,
+      gfm: true,
+    }) as string;
+
+    return html;
+  } catch (error) {
+    // If markdown parsing fails, return the cleaned content as plain text
+    // This ensures we still index the content even if HTML conversion fails
+    console.warn(
+      `Warning: Failed to convert markdown to HTML, using plain text: ${error}`
+    );
+    // Return the cleaned content (without MDX syntax) as fallback
+    let cleaned = mdxContent;
+    cleaned = cleaned.replace(FRONTMATTER_REGEX, "");
+    cleaned = cleaned.replace(IMPORT_REGEX, "");
+    cleaned = cleaned.replace(EXPORT_REGEX, "");
+    cleaned = cleaned.replace(JSX_SELF_CLOSING_REGEX, "");
+    cleaned = cleaned.replace(JSX_COMPONENT_REGEX, "");
+    cleaned = cleaned.replace(JSX_CUSTOM_COMPONENT_REGEX, "");
+    return cleaned;
+  }
+}
 
 const { index } = await createIndex();
 if (!index) {
@@ -40,16 +101,23 @@ for (const language of languages) {
   for (const entry of glob.sync("**/*.mdx", { cwd: searchPath })) {
     const filePath = path.join(searchPath, entry);
     const url = `/${language}/${entry.split("/page.mdx")[0]}`;
-    console.log(`Adding page: ${url}`);
-    const content = await fs.readFile(filePath, "utf-8");
-    await index.addCustomRecord({
+    const mdxContent = await fs.readFile(filePath, "utf-8");
+    const htmlContent = markdownToHtml(mdxContent);
+
+    const { errors, file } = await index.addHTMLFile({
       url,
-      content,
-      language,
-      sort: {
-        weight: filePath.includes("mcp-servers") ? "10" : "50",
-      },
+      content: `<html lang='${language}'><body>${htmlContent}</body></html>`,
     });
+
+    const fileInfo = file
+      ? ` (${file.uniqueWords} words${file.meta?.title ? `, title: ${file.meta.title}` : ""})`
+      : "";
+    console.log(`Adding page: ${url}${fileInfo}`);
+
+    if (errors.length > 0) {
+      console.error(`Error adding page: ${url}`);
+      console.error(errors);
+    }
 
     page_count += 1;
   }
