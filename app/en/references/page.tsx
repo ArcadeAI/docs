@@ -41,9 +41,9 @@ export default function APIReferencePage() {
               Arcade MCP (MCP Server SDK)
             </h3>
             <p className="mb-6 text-gray-600 leading-relaxed dark:text-gray-300">
-              Arcade MCP provides a FastAPI-like interface for building custom
-              Model Context Protocol servers. Use this SDK to create your own
-              tools and expose them through the standardized MCP protocol.
+              Arcade MCP, the secure framework for building MCP servers,
+              provides a FastAPI-like interface for creating custom tools and
+              exposing them through the standardized MCP protocol.
             </p>
             <div className="flex flex-wrap gap-3">
               <Button
