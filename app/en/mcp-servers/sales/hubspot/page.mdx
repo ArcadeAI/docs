@@ -15,7 +15,7 @@ import { Callout } from "nextra/components";
   description="Enable agents to interact with Hubspot"
   author="Arcade"
   authType="OAuth2"
-  versions={["2.0.0"]}
+  versions={["3.0.0"]}
 />
 
 <Badges repo="arcadeai/arcade_hubspot" />
@@ -56,7 +56,27 @@ Use these tools to automate CRM updates, log interactions, link records, and que
     ],
     [
       "Hubspot.CreateCommunicationActivity",
-      "Create a communication activity for logging communications that are not done via",
+      "Create a communication activity for logging communications that are not done via email, call, or meeting.",
+    ],
+    [
+      "Hubspot.UpdateNoteActivity",
+      "Update a note activity by ID or list matching notes when searching by keywords.",
+    ],
+    [
+      "Hubspot.UpdateCallActivity",
+      "Update a call activity by ID or list matching calls when searching by keywords.",
+    ],
+    [
+      "Hubspot.UpdateEmailActivity",
+      "Update an email activity by ID or list matching emails when searching by keywords.",
+    ],
+    [
+      "Hubspot.UpdateMeetingActivity",
+      "Update a meeting activity by ID or list matching meetings when searching by keywords.",
+    ],
+    [
+      "Hubspot.UpdateCommunicationActivity",
+      "Update a communication activity by ID or list matching communications when searching by keywords.",
     ],
     [
       "Hubspot.AssociateActivityToDeal",
@@ -68,6 +88,10 @@ Use these tools to automate CRM updates, log interactions, link records, and que
     ],
     ["Hubspot.CreateContact", "Create a contact associated with a company."],
     [
+      "Hubspot.UpdateContact",
+      "Update a contact by ID or list matching contacts when searching by keywords.",
+    ],
+    [
       "Hubspot.ListContacts",
       "List contacts with optional filtering by company ID or deal ID, with pagination support.",
     ],
@@ -76,6 +100,10 @@ Use these tools to automate CRM updates, log interactions, link records, and que
       "Retrieve deal data with associated contacts, companies, calls, emails,",
     ],
     ["Hubspot.CreateDeal", "Create a new deal in HubSpot."],
+    [
+      "Hubspot.UpdateDeal",
+      "Update a deal by ID or list matching deals when searching by keywords.",
+    ],
     [
       "Hubspot.UpdateDealCloseDate",
       "Update the expected close date of an existing deal in HubSpot.",
@@ -122,6 +150,10 @@ Use these tools to automate CRM updates, log interactions, link records, and que
       "Retrieve company data with associated contacts, deals, calls, emails,",
     ],
     ["Hubspot.CreateCompany", "Create a new company in HubSpot."],
+    [
+      "Hubspot.UpdateCompany",
+      "Update a company by ID or list matching companies when searching by keywords.",
+    ],
     ["Hubspot.ListCompanies", "List companies with pagination support."],
     [
       "Hubspot.GetAvailableIndustryTypes",
@@ -401,6 +433,12 @@ Create a meeting with essential fields including separate date and time.
 />
 
 Create a communication activity for logging communications that are not done via
+email, call, or meeting.
+
+This includes SMS, WhatsApp, LinkedIn messages, physical mail, and custom channel
+conversations.
+Must be associated with at least one of: contact, company, or deal.
+The communication will be assigned to the current user.
 
 **Parameters**
 
@@ -437,6 +475,175 @@ Associate a single activity object to a deal using HubSpot standard association 
 - **activity_type** (`Enum` [HubspotActivityType](/mcp-servers/sales/hubspot/reference#HubspotActivityType), required) Engagement activity type.
 - **activity_id** (`integer`, required) The activity object ID
 - **deal_id** (`integer`, required) The deal ID to associate to
+
+## Hubspot.UpdateNoteActivity
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/hubspot/update_note_activity_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/hubspot/update_note_activity_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Update a note activity directly by ID or list matching notes when searching by keywords.
+
+When using keywords, the tool will return a list of matching notes. Review the matches and call the tool again with the specific note_id to continue with the update.
+
+**Parameters**
+
+- **note_id** (`integer`, optional) The note ID to update. Provide either note_id or keywords, not both.
+- **keywords** (`string`, optional) Keywords to search for the note content. Provide when note_id is not known.
+- **body** (`string`, optional) Updated note content.
+- **when_occurred** (`string`, optional) Updated creation timestamp (ISO format: YYYY-MM-DDTHH:MM:SS).
+- **matches_limit** (`integer`, optional) Maximum number of notes to return when searching by keywords. Defaults to 5. Max is 20.
+
+## Hubspot.UpdateCallActivity
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/hubspot/update_call_activity_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/hubspot/update_call_activity_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Update a call activity directly by ID or list matching calls when searching by keywords.
+
+When using keywords, the tool will return a list of matching calls. Review the matches and call the tool again with the specific call_id to continue with the update.
+
+**Parameters**
+
+- **call_id** (`integer`, optional) The call activity ID to update. Provide either call_id or keywords, not both.
+- **keywords** (`string`, optional) Keywords to search for call summaries or titles. Provide when call_id is not known.
+- **title** (`string`, optional) Updated call title.
+- **direction** (`Enum` [HubspotCallDirection](/mcp-servers/sales/hubspot/reference#HubspotCallDirection), optional) Updated call direction.
+- **summary** (`string`, optional) Updated call summary.
+- **duration** (`integer`, optional) Updated call duration in seconds.
+- **to_number** (`string`, optional) Updated number called to.
+- **from_number** (`string`, optional) Updated number called from.
+- **when_occurred** (`string`, optional) Updated call timestamp (ISO format: YYYY-MM-DDTHH:MM:SS).
+- **matches_limit** (`integer`, optional) Maximum number of calls to return when searching by keywords. Defaults to 5. Max is 20.
+
+## Hubspot.UpdateEmailActivity
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/hubspot/update_email_activity_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/hubspot/update_email_activity_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Update an email activity directly by ID or list matching emails when searching by keywords.
+
+When using keywords, the tool will return a list of matching emails. Review the matches and call the tool again with the specific email_id to continue with the update.
+
+**Parameters**
+
+- **email_id** (`integer`, optional) The email activity ID to update. Provide either email_id or keywords, not both.
+- **keywords** (`string`, optional) Keywords to search for email subjects or body text. Provide when email_id is not known.
+- **subject** (`string`, optional) Updated email subject.
+- **direction** (`Enum` [HubspotEmailDirection](/mcp-servers/sales/hubspot/reference#HubspotEmailDirection), optional) Updated email direction.
+- **status** (`Enum` [HubspotEmailStatus](/mcp-servers/sales/hubspot/reference#HubspotEmailStatus), optional) Updated email status.
+- **body_text** (`string`, optional) Updated plain-text body.
+- **body_html** (`string`, optional) Updated HTML body.
+- **when_occurred** (`string`, optional) Updated email timestamp (ISO format: YYYY-MM-DDTHH:MM:SS).
+- **matches_limit** (`integer`, optional) Maximum number of emails to return when searching by keywords. Defaults to 5. Max is 20.
+
+## Hubspot.UpdateMeetingActivity
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/hubspot/update_meeting_activity_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/hubspot/update_meeting_activity_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Update a meeting activity directly by ID or list matching meetings when searching by keywords.
+
+When using keywords, the tool will return a list of matching meetings. Review the matches and call the tool again with the specific meeting_id to continue with the update.
+
+**Parameters**
+
+- **meeting_id** (`integer`, optional) The meeting activity ID to update. Provide either meeting_id or keywords, not both.
+- **keywords** (`string`, optional) Keywords to search for meeting titles. Provide when meeting_id is not known.
+- **title** (`string`, optional) Updated meeting title.
+- **start_date** (`string`, optional) Updated start date (YYYY-MM-DD).
+- **start_time** (`string`, optional) Updated start time (HH:MM or HH:MM:SS).
+- **duration** (`string`, optional) Updated duration in HH:MM format.
+- **location** (`string`, optional) Updated meeting location.
+- **outcome** (`Enum` [HubspotMeetingOutcome](/mcp-servers/sales/hubspot/reference#HubspotMeetingOutcome), optional) Updated meeting outcome.
+- **matches_limit** (`integer`, optional) Maximum number of meetings to return when searching by keywords. Defaults to 5. Max is 20.
+
+## Hubspot.UpdateCommunicationActivity
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/hubspot/update_communication_activity_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/hubspot/update_communication_activity_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Update a communication activity by ID or list matching communications when searching by keywords.
+
+When using keywords, the tool will return a list of matching communications. Review the matches and call the tool again with the specific communication_id to continue with the update.
+
+**Parameters**
+
+- **communication_id** (`integer`, optional) The communication activity ID to update. Provide either communication_id or keywords, not both.
+- **keywords** (`string`, optional) Keywords to search for communication body text. Provide when communication_id is not known.
+- **channel** (`Enum` [HubspotCommunicationChannel](/mcp-servers/sales/hubspot/reference#HubspotCommunicationChannel), optional) Updated communication channel.
+- **body_text** (`string`, optional) Updated message body.
+- **when_occurred** (`string`, optional) Updated timestamp (ISO format: YYYY-MM-DDTHH:MM:SS).
+- **matches_limit** (`integer`, optional) Maximum number of communications to return when searching by keywords. Defaults to 5. Max is 20.
 
 ## Hubspot.GetContactDataByKeywords
 
@@ -495,6 +702,41 @@ Create a contact associated with a company.
 - **phone** (`string`, optional) The phone number of the contact.
 - **mobile_phone** (`string`, optional) The mobile phone number of the contact.
 - **job_title** (`string`, optional) The job title of the contact.
+
+## Hubspot.UpdateContact
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/hubspot/update_contact_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/hubspot/update_contact_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Update a contact directly by ID or list matching contacts when searching by keywords.
+
+When using keywords, the tool will return a list of matching contacts. Review the matches and call the tool again with the specific contact_id to continue with the update.
+
+**Parameters**
+
+- **contact_id** (`integer`, optional) The ID of the contact to update. Provide either contact_id or keywords, not both.
+- **keywords** (`string`, optional) Keywords to search for the contact (name, email, phone). Provide when contact_id is not known.
+- **first_name** (`string`, optional) The first name of the contact.
+- **last_name** (`string`, optional) The last name of the contact.
+- **email** (`string`, optional) The email address of the contact.
+- **phone** (`string`, optional) The phone number of the contact.
+- **mobile_phone** (`string`, optional) The mobile phone number of the contact.
+- **job_title** (`string`, optional) The job title of the contact.
+- **matches_limit** (`integer`, optional) The maximum number of contacts to return when searching by keywords. Defaults to 5. Max is 20.
 
 ## Hubspot.ListContacts
 
@@ -584,6 +826,43 @@ Create a new deal in HubSpot.
 - **deal_owner** (`string`, optional) The deal owner user ID
 - **priority_level** (`Enum` [HubspotDealPriority](/mcp-servers/sales/hubspot/reference#HubspotDealPriority), optional) Priority level.
 - **deal_description** (`string`, optional) The deal description
+
+## Hubspot.UpdateDeal
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/hubspot/update_deal_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/hubspot/update_deal_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Update a deal directly by ID or list matching deals when searching by keywords.
+
+When using keywords, the tool will return a list of matching deals. Review the matches and call the tool again with the specific deal_id to continue with the update.
+
+**Parameters**
+
+- **deal_id** (`integer`, optional) The ID of the deal to update. Provide either deal_id or keywords, not both.
+- **keywords** (`string`, optional) Keywords to search for the deal (name, description). Provide when deal_id is not known.
+- **deal_name** (`string`, optional) The deal name.
+- **deal_amount** (`number`, optional) The deal amount/value.
+- **deal_stage** (`string`, optional) The deal stage ID.
+- **deal_type** (`string`, optional) The deal type. Accepts enum values as strings (e.g., 'newbusiness', 'existingbusiness').
+- **expected_close_date** (`string`, optional) Expected close date in YYYY-MM-DD format.
+- **deal_owner** (`string`, optional) The deal owner user ID.
+- **priority_level** (`string`, optional) Priority level. Accepts enum values as strings (e.g., 'low', 'medium', 'high').
+- **deal_description** (`string`, optional) The deal description.
+- **matches_limit** (`integer`, optional) The maximum number of deals to return when searching by keywords. Defaults to 5. Max is 20.
 
 ## Hubspot.UpdateDealCloseDate
 
@@ -945,6 +1224,43 @@ Create a new company in HubSpot.
 - **company_country** (`string`, optional) The company country
 - **phone_number** (`string`, optional) The company main phone number
 - **website_url** (`string`, optional) The company website URL
+
+## Hubspot.UpdateCompany
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/hubspot/update_company_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/hubspot/update_company_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Update a company directly by ID or list matching companies when searching by keywords.
+
+When using keywords, the tool will return a list of matching companies. Review the matches and call the tool again with the specific company_id to continue with the update.
+
+**Parameters**
+
+- **company_id** (`integer`, optional) The ID of the company to update. Provide either company_id or keywords, not both.
+- **keywords** (`string`, optional) Keywords to search for the company (name, domain, website). Provide when company_id is not known.
+- **company_name** (`string`, optional) The company name.
+- **web_domain** (`string`, optional) The company web domain (e.g., example.com).
+- **industry_type** (`string`, optional) The company industry type (case-insensitive).
+- **company_city** (`string`, optional) The company city location.
+- **company_state** (`string`, optional) The company state or province.
+- **company_country** (`string`, optional) The company country.
+- **phone_number** (`string`, optional) The company main phone number.
+- **website_url** (`string`, optional) The company website URL.
+- **matches_limit** (`integer`, optional) The maximum number of companies to return when searching by keywords. Defaults to 5. Max is 20.
 
 ## Hubspot.ListCompanies
 
