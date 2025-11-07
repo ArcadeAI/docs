@@ -4,11 +4,11 @@ from arcadepy import Arcade
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
 USER_ID = "{arcade_user_id}"
-TOOL_NAME = "EngineApi.GetSwaggerSpecification"
+TOOL_NAME = "Hubspot.UpdateContact"
 
 auth_response = client.tools.authorize(
     tool_name=TOOL_NAME,
-    user_id=USER_ID,
+    user_id=USER_ID
 )
 
 if auth_response.status != "completed":
@@ -18,7 +18,10 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    
+    'contact_id': 12345,
+    'email': 'newemail@example.com',
+    'phone': '555-9876',
+    'job_title': 'Senior Manager'
 }
 
 response = client.tools.execute(
@@ -27,3 +30,4 @@ response = client.tools.execute(
     user_id=USER_ID,
 )
 print(json.dumps(response.output.value, indent=2))
+

@@ -4,11 +4,11 @@ from arcadepy import Arcade
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
 USER_ID = "{arcade_user_id}"
-TOOL_NAME = "EngineApi.GetSessionVerificationSettings"
+TOOL_NAME = "Hubspot.UpdateCompany"
 
 auth_response = client.tools.authorize(
     tool_name=TOOL_NAME,
-    user_id=USER_ID,
+    user_id=USER_ID
 )
 
 if auth_response.status != "completed":
@@ -18,7 +18,10 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    
+    'company_id': 12345,
+    'company_name': 'Updated Company Name Inc.',
+    'phone_number': '555-1234',
+    'website_url': 'https://www.updatedcompany.com'
 }
 
 response = client.tools.execute(
@@ -27,3 +30,4 @@ response = client.tools.execute(
     user_id=USER_ID,
 )
 print(json.dumps(response.output.value, indent=2))
+

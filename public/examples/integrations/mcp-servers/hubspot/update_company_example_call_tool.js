@@ -3,12 +3,12 @@ import { Arcade } from "@arcadeai/arcadejs";
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
 const USER_ID = "{arcade_user_id}";
-const TOOL_NAME = "EngineApi.CreateAuthProvider";
+const TOOL_NAME = "Hubspot.UpdateCompany";
 
 // Start the authorization process
 const authResponse = await client.tools.authorize({
-  tool_name: TOOL_NAME,
-  user_id: USER_ID,
+    tool_name: TOOL_NAME,
+    user_id: USER_ID
 });
 
 if (authResponse.status !== "completed") {
@@ -19,8 +19,10 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "mode": "execute",
-  "request_body": "{\"providerName\":\"MyAuthProvider\",\"providerType\":\"OAuth2\",\"clientId\":\"abc123\",\"clientSecret\":\"secret\"}"
+  "company_id": 12345,
+  "company_name": "Updated Company Name Inc.",
+  "phone_number": "555-1234",
+  "website_url": "https://www.updatedcompany.com"
 };
 
 const response = await client.tools.execute({
@@ -30,3 +32,4 @@ const response = await client.tools.execute({
 });
 
 console.log(JSON.stringify(response.output.value, null, 2));
+

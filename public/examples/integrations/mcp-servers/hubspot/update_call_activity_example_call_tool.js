@@ -3,12 +3,12 @@ import { Arcade } from "@arcadeai/arcadejs";
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
 const USER_ID = "{arcade_user_id}";
-const TOOL_NAME = "EngineApi.GetSwaggerSpecification";
+const TOOL_NAME = "Hubspot.UpdateCallActivity";
 
 // Start the authorization process
 const authResponse = await client.tools.authorize({
-  tool_name: TOOL_NAME,
-  user_id: USER_ID,
+    tool_name: TOOL_NAME,
+    user_id: USER_ID
 });
 
 if (authResponse.status !== "completed") {
@@ -18,7 +18,12 @@ if (authResponse.status !== "completed") {
 // Wait for the authorization to complete
 await client.auth.waitForCompletion(authResponse);
 
-const toolInput = {};
+const toolInput = {
+  "call_id": 12345,
+  "title": "Follow-up call with updated agenda",
+  "summary": "Discussed pricing and next steps. Customer requested proposal.",
+  "duration": 600
+};
 
 const response = await client.tools.execute({
   tool_name: TOOL_NAME,
@@ -27,3 +32,4 @@ const response = await client.tools.execute({
 });
 
 console.log(JSON.stringify(response.output.value, null, 2));
+

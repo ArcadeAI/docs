@@ -3,7 +3,7 @@ from arcadepy import Arcade
 
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
-TOOL_NAME = "EngineApi.CheckArcadeEngineHealth"
+TOOL_NAME = "EngineApi.GetOpenAPISpecification"
 
 tool_input = {
     
