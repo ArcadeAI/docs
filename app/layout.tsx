@@ -131,7 +131,7 @@ export default async function RootLayout({
               projectIcon={
                 <Github className="size-5.5 transition-colors duration-150 ease-in-out [&>path]:fill-current" />
               }
-              projectLink="https://github.com/ArcadeAI/docs"
+              projectLink="https://github.com/ArcadeAI/arcade-mcp"
             >
               <SignupLink linkLocation="docs:navbar">
                 <NavBarButton
