@@ -48,7 +48,7 @@ export function QuickStartCard({
     </>
   );
 
-  let wrapper: JSX.Element | null = null;
+  let wrapper: React.ReactElement | null = null;
   if (onClick) {
     wrapper = (
       <button
