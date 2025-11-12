@@ -61,6 +61,12 @@ export const meta: MetaRecord = {
   "serve-tools": {
     title: "Serve tools",
   },
+  "server-authentication": {
+    title: "Server Authentication",
+  },
+  "server-auth-integrations": {
+    title: "Server Auth Integrations",
+  },
   "-- Agent Frameworks and MCP": {
     type: "separator",
     title: "Agent Frameworks and MCP",
