@@ -3,7 +3,7 @@ from arcadepy import Arcade
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
 USER_ID = "{arcade_user_id}"
-TOOL_NAME = "Github.CreateIssue"
+TOOL_NAME = "Github.ListProjectItems"
 
 auth_response = client.tools.authorize(
     tool_name=TOOL_NAME,
@@ -17,12 +17,13 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    "owner": "your-org",
-    "repo": "your-repo",
-    "title": "Bug: Login button not working",
-    "body": "## Description\nThe login button on the main page doesn't respond to clicks.\n\n## Steps to Reproduce\n1. Go to homepage\n2. Click login button\n3. Nothing happens\n\n## Expected Behavior\nShould redirect to login page",
-    "labels": ["bug", "high-priority"],
-    "assignees": ["developer1"],
+    "project_search_mode": "number",
+    "project_identifier": "1",
+    "scope_target": "organization",
+    "scope_identifier": "your-org",
+    "filter_status": "In Progress",
+    "filter_assignee": "@me",
+    "per_page": 50,
 }
 
 response = client.tools.execute(
@@ -31,3 +32,4 @@ response = client.tools.execute(
     user_id=USER_ID,
 )
 print(response)
+

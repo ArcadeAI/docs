@@ -3,7 +3,7 @@ from arcadepy import Arcade
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
 USER_ID = "{arcade_user_id}"
-TOOL_NAME = "Github.CreateIssue"
+TOOL_NAME = "Github.CreatePullRequest"
 
 auth_response = client.tools.authorize(
     tool_name=TOOL_NAME,
@@ -19,10 +19,12 @@ client.auth.wait_for_completion(auth_response)
 tool_input = {
     "owner": "your-org",
     "repo": "your-repo",
-    "title": "Bug: Login button not working",
-    "body": "## Description\nThe login button on the main page doesn't respond to clicks.\n\n## Steps to Reproduce\n1. Go to homepage\n2. Click login button\n3. Nothing happens\n\n## Expected Behavior\nShould redirect to login page",
-    "labels": ["bug", "high-priority"],
-    "assignees": ["developer1"],
+    "title": "Add new authentication feature",
+    "head": "feature/auth",
+    "base": "main",
+    "body": "This PR implements OAuth2 authentication with the following changes:\n\n- Added OAuth2 provider\n- Updated login flow\n- Added tests",
+    "draft": False,
+    "reviewers": ["teammate1", "teammate2"],
 }
 
 response = client.tools.execute(
@@ -31,3 +33,4 @@ response = client.tools.execute(
     user_id=USER_ID,
 )
 print(response)
+

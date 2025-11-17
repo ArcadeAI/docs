@@ -3,7 +3,7 @@ import { Arcade } from "@arcadeai/arcadejs";
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
 const USER_ID = "{arcade_user_id}";
-const TOOL_NAME = "Github.CreateIssue";
+const TOOL_NAME = "Github.CreatePullRequest";
 
 // Start the authorization process
 const authResponse = await client.tools.authorize({
@@ -21,10 +21,12 @@ await client.auth.waitForCompletion(authResponse);
 const toolInput = {
     owner: "your-org",
     repo: "your-repo",
-    title: "Bug: Login button not working",
-    body: "## Description\nThe login button on the main page doesn't respond to clicks.\n\n## Steps to Reproduce\n1. Go to homepage\n2. Click login button\n3. Nothing happens\n\n## Expected Behavior\nShould redirect to login page",
-    labels: ["bug", "high-priority"],
-    assignees: ["developer1"],
+    title: "Add new authentication feature",
+    head: "feature/auth",
+    base: "main",
+    body: "This PR implements OAuth2 authentication with the following changes:\n\n- Added OAuth2 provider\n- Updated login flow\n- Added tests",
+    draft: false,
+    reviewers: ["teammate1", "teammate2"],
 };
 
 const response = await client.tools.execute({
@@ -33,4 +35,5 @@ const response = await client.tools.execute({
     user_id: USER_ID,
 });
 
-console.log(response); 
+console.log(response);
+
