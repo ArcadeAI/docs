@@ -18,7 +18,7 @@ const meta: MetaRecord = {
   },
   references: {
     type: "page",
-    title: "Reference",
+    title: "API & SDKs",
     href: "/references",
   },
 };
