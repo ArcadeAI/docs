@@ -34,21 +34,22 @@ Arcade's security team selected **GitHub Apps** over OAuth Apps for the GitHub t
 3. **🏢 Enterprise Control**: Admins can approve exact permissions and see all app installations. OAuth Apps bypass organizational oversight.
 
 <Callout type="info">
-  **Important**: When creating your GitHub integration with Arcade, you must use a **GitHub App** (not an OAuth App). 
-  GitHub Apps provide the security and permission model required for production use.
+  **Important**: When creating your GitHub integration with Arcade, you must use
+  a **GitHub App** (not an OAuth App). GitHub Apps provide the security and
+  permission model required for production use.
 </Callout>
 
 ### Quick Comparison
 
-| Aspect | 🏆 GitHub Apps (Required) | OAuth Apps (Not Supported) |
-|--------|---------------------------|----------------------------|
-| **Permissions** | Fine-grained (e.g., "Read contents") | Broad scopes (e.g., `repo` = full access) |
-| **Installation** | Per repository/org (admin approval) | Per user (no approval) |
-| **Access** | Only installed repositories | All user repositories |
-| **Tokens** | Scoped, short-lived | Broad, long-lived |
-| **Identity** | Acts as app | Acts as user |
-| **Security** | ⭐⭐⭐⭐⭐ Highest | ⭐⭐⭐ Good |
-| **Best For** | Production, CI/CD, Enterprise | Personal, Prototypes |
+| Aspect           | 🏆 GitHub Apps (Required)            | OAuth Apps (Not Supported)                |
+| ---------------- | ------------------------------------ | ----------------------------------------- |
+| **Permissions**  | Fine-grained (e.g., "Read contents") | Broad scopes (e.g., `repo` = full access) |
+| **Installation** | Per repository/org (admin approval)  | Per user (no approval)                    |
+| **Access**       | Only installed repositories          | All user repositories                     |
+| **Tokens**       | Scoped, short-lived                  | Broad, long-lived                         |
+| **Identity**     | Acts as app                          | Acts as user                              |
+| **Security**     | ⭐⭐⭐⭐⭐ Highest                   | ⭐⭐⭐ Good                               |
+| **Best For**     | Production, CI/CD, Enterprise        | Personal, Prototypes                      |
 
 ### Why Enterprises Choose GitHub Apps
 
@@ -61,31 +62,45 @@ Arcade's security team selected **GitHub Apps** over OAuth Apps for the GitHub t
 </tr>
 
 <tr>
-<td><strong>🏢 Installation</strong></td>
-<td>
-<strong>Centralized control.</strong> IT/security teams see all app installations, enforce policies, prevent shadow IT. Admin approval ensures integrations are vetted and documented.
-</td>
+  <td>
+    <strong>🏢 Installation</strong>
+  </td>
+  <td>
+    <strong>Centralized control.</strong> IT/security teams see all app
+    installations, enforce policies, prevent shadow IT. Admin approval ensures
+    integrations are vetted and documented.
+  </td>
 </tr>
 
 <tr>
-<td><strong>🎯 Access Scope</strong></td>
-<td>
-<strong>Reduced attack surface.</strong> Apps only access explicitly installed repositories. Critical for organizations with repositories at different sensitivity levels.
-</td>
+  <td>
+    <strong>🎯 Access Scope</strong>
+  </td>
+  <td>
+    <strong>Reduced attack surface.</strong> Apps only access explicitly
+    installed repositories. Critical for organizations with repositories at
+    different sensitivity levels.
+  </td>
 </tr>
 
 <tr>
-<td><strong>🔑 Token Type</strong></td>
-<td>
-<strong>Better security posture.</strong> Tokens are scoped and revocable instantly. Long-lived OAuth tokens remain valid for months if compromised.
-</td>
+  <td>
+    <strong>🔑 Token Type</strong>
+  </td>
+  <td>
+    <strong>Better security posture.</strong> Tokens are scoped and revocable
+    instantly. Long-lived OAuth tokens remain valid for months if compromised.
+  </td>
 </tr>
 
 <tr>
-<td><strong>👤 Identity</strong></td>
-<td>
-<strong>Clear accountability.</strong> Actions attributed to app, not users. Essential for compliance audits and security investigations.
-</td>
+  <td>
+    <strong>👤 Identity</strong>
+  </td>
+  <td>
+    <strong>Clear accountability.</strong> Actions attributed to app, not users.
+    Essential for compliance audits and security investigations.
+  </td>
 </tr>
 
 <tr>
@@ -101,8 +116,9 @@ Arcade's security team selected **GitHub Apps** over OAuth Apps for the GitHub t
 ## Creating a GitHub App
 
 <Callout type="warning">
-  You **must** create a GitHub App (not an OAuth App). The "OAuth App" option in GitHub does not provide 
-  the fine-grained permissions model required for secure production use.
+  You **must** create a GitHub App (not an OAuth App). The "OAuth App" option in
+  GitHub does not provide the fine-grained permissions model required for secure
+  production use.
 </Callout>
 
 <Steps>
@@ -127,6 +143,7 @@ Fill in the following fields:
 - **Webhook secret**: Leave blank unless you need webhooks
 
 **Important settings:**
+
 - Leave "Expire user authorization tokens" **checked** ✅
 - Leave "Request user authorization (OAuth) during installation" **unchecked** ❌
 - Leave "Setup URL" blank and "Redirect on update" **unchecked** ❌
@@ -137,6 +154,7 @@ Fill in the following fields:
 Configure permissions based on your needs. At minimum:
 
 **Repository Permissions:**
+
 - **Contents**: Read (required for most tools)
 - **Issues**: Read & Write (for issue management)
 - **Metadata**: Read (automatically selected)
@@ -144,15 +162,18 @@ Configure permissions based on your needs. At minimum:
 - **Statuses**: Read (for CI/CD status checks)
 
 **Organization Permissions:**
+
 - **Members**: Read (for collaborators, teams, org projects)
 - **Projects**: Read & Write (for Projects V2 management)
 
 **User Permissions:**
+
 - **Email addresses**: Read (minimum required)
 - **Read user profile**: Read (for user context tools)
 
 <Callout type="info">
-  See the [Complete Permissions Reference](#tool-permissions-reference) below for detailed permissions needed by each tool.
+  See the [Complete Permissions Reference](#tool-permissions-reference) below
+  for detailed permissions needed by each tool.
 </Callout>
 
 ### Set Installation Options
@@ -171,6 +192,7 @@ Configure permissions based on your needs. At minimum:
 After creating the app:
 
 1. **Generate Private Key**:
+
    - Scroll to **Private keys** section
    - Click **Generate a private key**
    - Save the `.pem` file securely (you cannot download it again!)
@@ -182,7 +204,8 @@ After creating the app:
    - **Private Key**: Contents of the `.pem` file you downloaded
 
 <Callout type="warning">
-  Store all credentials securely! Treat them like passwords. You cannot retrieve them again.
+  Store all credentials securely! Treat them like passwords. You cannot retrieve
+  them again.
 </Callout>
 
 ### Install the App
@@ -201,6 +224,7 @@ After creating the app:
 ### Get Installation ID
 
 After installation:
+
 - You'll be redirected to the installation settings page
 - Look at the URL: `https://github.com/settings/installations/{INSTALLATION_ID}`
 - Copy the **Installation ID** from the URL
@@ -220,9 +244,11 @@ If you need to access private repositories in an organization:
 ## Configuring GitHub Auth in Arcade
 
 <Callout type="info">
-  When using your own app credentials, make sure you configure your project to use a 
-  [custom user verifier](/home/auth/secure-auth-production#build-a-custom-user-verifier).
-  Without this, your end-users will not be able to use your app or agent in production.
+  When using your own app credentials, make sure you configure your project to
+  use a [custom user
+  verifier](/home/auth/secure-auth-production#build-a-custom-user-verifier).
+  Without this, your end-users will not be able to use your app or agent in
+  production.
 </Callout>
 
 <Tabs items={["Dashboard GUI"]}>
@@ -257,7 +283,7 @@ Click **Create** button. The provider is now ready to use.
 
 </Steps>
 
-When you use tools requiring GitHub auth with your Arcade account, Arcade automatically uses this provider. 
+When you use tools requiring GitHub auth with your Arcade account, Arcade automatically uses this provider.
 For multiple providers, see [using multiple auth providers](/home/auth-providers#using-multiple-providers-of-the-same-type).
 
 </Tabs.Tab>
@@ -424,15 +450,15 @@ This section lists the GitHub App permissions required by tools in the Arcade Gi
 
 ### Summary Table
 
-| Tool Category | Required Permissions |
-|---------------|---------------------|
-| **Issues** | Contents (Read), Issues (Read/Write), Metadata (Read) |
-| **Pull Requests** | Contents (Read), Pull requests (Read/Write), Metadata (Read) |
-| **Projects** | Contents (Read), Metadata (Read), Projects (Read/Write), Members (Read) |
-| **Repositories** | Contents (Read), Metadata (Read), Members (Read for org repos) |
-| **Reviews** | Contents (Read), Pull requests (Read/Write), Metadata (Read) |
-| **User Context** | Read user profile, Members (Read for orgs) |
-| **Notifications** | ⚠️ Classic PAT with `notifications` scope (GitHub Apps limitation) |
+| Tool Category     | Required Permissions                                                    |
+| ----------------- | ----------------------------------------------------------------------- |
+| **Issues**        | Contents (Read), Issues (Read/Write), Metadata (Read)                   |
+| **Pull Requests** | Contents (Read), Pull requests (Read/Write), Metadata (Read)            |
+| **Projects**      | Contents (Read), Metadata (Read), Projects (Read/Write), Members (Read) |
+| **Repositories**  | Contents (Read), Metadata (Read), Members (Read for org repos)          |
+| **Reviews**       | Contents (Read), Pull requests (Read/Write), Metadata (Read)            |
+| **User Context**  | Read user profile, Members (Read for orgs)                              |
+| **Notifications** | ⚠️ Classic PAT with `notifications` scope (GitHub Apps limitation)      |
 
 ### Detailed Permissions by Category
 
@@ -440,9 +466,11 @@ This section lists the GitHub App permissions required by tools in the Arcade Gi
 <Tabs.Tab>
 
 **Issues Tools** (5 tools):
+
 - `create_issue`, `update_issue`, `create_issue_comment`, `list_issues`, `get_issue`
 
 **Required:**
+
 - Repository: Contents (Read), Issues (Read/Write), Metadata (Read)
 - Organization: Projects (Read/Write) - only for `create_issue` when adding to org project
 
@@ -452,16 +480,19 @@ This section lists the GitHub App permissions required by tools in the Arcade Gi
 **Pull Request Tools** (14 tools):
 
 **Read-only tools:**
+
 - `list_pull_requests`, `get_pull_request`, `list_pull_request_commits`, `list_review_comments_on_pull_request`
 - Required: Contents (Read), Pull requests (Read), Metadata (Read)
 
 **Write tools:**
-- `update_pull_request`, `create_pull_request`, `merge_pull_request`, `submit_pull_request_review`, 
+
+- `update_pull_request`, `create_pull_request`, `merge_pull_request`, `submit_pull_request_review`,
   `manage_pull_request`, `manage_pull_request_reviewers`, `create_reply_for_review_comment`, `create_review_comment`
 - Required: Contents (Read), Pull requests (Write), Metadata (Read)
 - `merge_pull_request` also needs: Contents (Read & Write)
 
 **Special:**
+
 - `assign_pull_request_user`: Needs Issues (Write) + Members (Read)
 - `check_pull_request_merge_status`: Needs Statuses (Read)
 
@@ -469,9 +500,11 @@ This section lists the GitHub App permissions required by tools in the Arcade Gi
 <Tabs.Tab>
 
 **Projects Tools** (5 tools):
+
 - `list_projects`, `list_project_items`, `search_project_item`, `list_project_fields`, `update_project_item`
 
 **Required:**
+
 - Repository: Contents (Read), Metadata (Read)
 - Organization: Projects (Read/Write), Members (Read)
 
@@ -481,14 +514,17 @@ This section lists the GitHub App permissions required by tools in the Arcade Gi
 **Repository Tools** (7 tools):
 
 **Basic:**
+
 - `count_stargazers`, `get_repository`, `list_repository_activities`, `set_starred`, `list_stargazers`
 - Required: Contents (Read), Metadata (Read)
 
 **Organization:**
+
 - `list_org_repositories`, `search_my_repos`, `list_repository_collaborators`
 - Required: Contents (Read), Metadata (Read), Members (Read)
 
 **Reviews:**
+
 - `list_review_comments_in_a_repository`
 - Required: Contents (Read), Pull requests (Read), Metadata (Read)
 
@@ -509,6 +545,7 @@ This section lists the GitHub App permissions required by tools in the Arcade Gi
 GitHub Apps **cannot** access the notifications API. This is a platform limitation.
 
 **Workaround:**
+
 - Tools: `get_notification_summary`, `list_notifications`
 - **Required**: Classic Personal Access Token with `notifications` scope
 - **Create at**: https://github.com/settings/tokens
@@ -517,6 +554,7 @@ GitHub Apps **cannot** access the notifications API. This is a platform limitati
 **User-on-Behalf-of Actions:**
 
 Some actions (starring repos, user notifications) require special permission:
+
 - Enable in app settings: **User permissions** → "Act on behalf of user"
 - These actions act as the user, not as the app
 
@@ -528,7 +566,8 @@ Some actions (starring repos, user notifications) require special permission:
 ## Important Gotchas
 
 <Callout type="warning">
-  These are common issues users encounter. Read this section to avoid frustration!
+  These are common issues users encounter. Read this section to avoid
+  frustration!
 </Callout>
 
 ### Permission Changes Require Reauthorization
@@ -560,6 +599,7 @@ After creating app and installing on one repo, it's hard to find how to install 
 ### Personal vs Organization GitHub Apps
 
 **Functionally the same**, but:
+
 - **Personal account app**: You own and manage it
 - **Organization app**: Org owns it, can be managed by org admins
 - Both can be installed on any account if "Any account" is selected
@@ -570,29 +610,32 @@ After creating app and installing on one repo, it's hard to find how to install 
 
 ### Common Errors
 
-| Error | Cause | Solution |
-|-------|-------|----------|
-| **"Resource not accessible by integration"** | Missing permissions or not installed on repo | Verify permissions and installation |
-| **"Installation not found"** | Wrong Installation ID | Check Installation ID in URL |
-| **"403 Forbidden"** | Missing permissions, not installed, or rate limited | Review permissions, check installation |
-| **"404 Not Found" on existing repo** | Permissions not approved by admin | Check app settings → verify permissions approved |
-| **Notifications not working** | GitHub Apps can't access notifications | Use classic PAT with `notifications` scope |
-| **Can't star repositories** | Missing "Act on behalf of user" permission | Enable in User permissions settings |
+| Error                                        | Cause                                               | Solution                                         |
+| -------------------------------------------- | --------------------------------------------------- | ------------------------------------------------ |
+| **"Resource not accessible by integration"** | Missing permissions or not installed on repo        | Verify permissions and installation              |
+| **"Installation not found"**                 | Wrong Installation ID                               | Check Installation ID in URL                     |
+| **"403 Forbidden"**                          | Missing permissions, not installed, or rate limited | Review permissions, check installation           |
+| **"404 Not Found" on existing repo**         | Permissions not approved by admin                   | Check app settings → verify permissions approved |
+| **Notifications not working**                | GitHub Apps can't access notifications              | Use classic PAT with `notifications` scope       |
+| **Can't star repositories**                  | Missing "Act on behalf of user" permission          | Enable in User permissions settings              |
 
 ### Debugging Steps
 
 1. **Verify Installation**
+
    - Go to Settings → Applications → Installed GitHub Apps
    - Confirm app is installed on target repository
    - Check Installation ID matches your configuration
 
 2. **Check Permissions**
+
    - Review app settings → Permissions & events
    - Ensure all required permissions are granted
    - Verify organization approval (if applicable)
    - **After changing permissions**: Revoke and reauthorize
 
 3. **Test Credentials**
+
    - Verify App ID, Client ID/Secret are correct
    - Ensure private key is complete (including header/footer)
    - Check Installation ID matches the target installation
@@ -608,57 +651,60 @@ After creating app and installing on one repo, it's hard to find how to install 
 
 ### General
 
-**Q: Is GitHub Apps free?**  
+**Q: Is GitHub Apps free?**
 A: Yes! Free GitHub accounts support GitHub Apps. No paid plan needed.
 
-**Q: Can I use one app for multiple projects?**  
+**Q: Can I use one app for multiple projects?**
 A: Yes! Install the same app on multiple repositories. Each gets a unique Installation ID.
 
-**Q: What if I lose my private key?**  
+**Q: What if I lose my private key?**
 A: Generate a new one from app settings. The old key will be invalidated. You cannot recover lost keys.
 
 ### Installation
 
-**Q: Do I need to be an org owner?**  
+**Q: Do I need to be an org owner?**
 A: To **create** an app: No. To **install** on org: Yes (or need owner approval).
 
-**Q: How do I install the app on additional repositories?**  
+**Q: How do I install the app on additional repositories?**
 A: Settings → Applications → Installed GitHub Apps → Click your app → Configure → Select additional repositories.
 
-**Q: Can I change permissions later?**  
+**Q: Can I change permissions later?**
 A: Yes, anytime. After changing:
+
 - Organization installs require admin approval
 - **Users must reauthorize** for new permissions to take effect
 - Best practice: Revoke old authorization in Arcade and reauthorize
 
 ### Usage
 
-**Q: Which tools need org permissions?**  
+**Q: Which tools need org permissions?**
 A: Project management, collaborators listing, org repo listing, and user search within org context.
 
-**Q: What's the rate limit?**  
+**Q: What's the rate limit?**
 A: GitHub Apps: 5,000/hour per installation + 12,500/hour for user endpoints. OAuth: 5,000/hour total.
 
-**Q: Can I use with GitHub Enterprise?**  
+**Q: Can I use with GitHub Enterprise?**
 A: Yes! Works with GitHub Enterprise Server 2.22+. Just set the API URL to your Enterprise instance.
 
-**Q: Why can't I star repositories or access notifications?**  
+**Q: Why can't I star repositories or access notifications?**
 A: These require "Act on behalf of user" permission:
+
 - Enable in app settings → User permissions
 - These actions act as the user, not as the app
 - Notifications specifically require a classic PAT (GitHub Apps limitation)
 
 ### Security
 
-**Q: What if my credentials are compromised?**  
+**Q: What if my credentials are compromised?**
 A: Immediately:
+
 1. Revoke credentials in GitHub app settings
 2. Generate new ones
 3. Update your application
 4. Review audit logs
 5. Uninstall/reinstall if needed
 
-**Q: Why can't the app access all my repositories?**  
+**Q: Why can't the app access all my repositories?**
 A: Security by design. Apps only access repositories they're explicitly installed on. This limits blast radius if compromised.
 
 ---
@@ -690,4 +736,4 @@ Use this checklist to ensure proper setup:
 
 ---
 
-*💡 Remember: Always use GitHub Apps (not OAuth Apps), store credentials securely, and rotate them regularly!*
+_💡 Remember: Always use GitHub Apps (not OAuth Apps), store credentials securely, and rotate them regularly!_
