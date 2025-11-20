@@ -21,11 +21,16 @@ import { Callout, Tabs } from "nextra/components";
 
 <Badges repo="arcadeai/arcade_github" />
 
-The Arcade GitHub MCP Server provides a pre-built set of tools for interacting with GitHub. These tools make it easy to build agents and AI apps that can:
+The Arcade GitHub MCP Server provides a pre-built set of tools for interacting with GitHub. This server is optimized for LLM usage and user experience, featuring fuzzy matching, smart defaults, and streamlined output. It is enterprise-ready and can be configured for both GitHub.com and GitHub Enterprise Server.
+
+These tools make it easy to build agents and AI apps that can:
 
 - Access private repositories (with the user's permission)
 - Get info about repositories, issues, pull requests, and more
 - Post issues, comments, and replies as the user
+- Perform fuzzy searches for repositories, users, and labels
+- Use intelligent defaults for user context and repository settings
+- Interact with Projects V2 (modern GitHub Projects)
 
 <Callout type="warning">
   **Critical**: This MCP Server is built for **GitHub Apps**, not OAuth Apps.
@@ -76,9 +81,10 @@ When creating your GitHub App, you'll need to grant specific permissions. Here's
 
 | Permission | Level | Required For |
 |------------|-------|--------------|
-| **Contents** | Read | All repository and pull request tools |
-| **Issues** | Read & Write | Issue management, PR assignments |
-| **Pull requests** | Read & Write | Pull request management, reviews |
+| **Contents** | Read | All repository and pull request tools, getting file contents |
+| **Contents** | Write | Creating/updating files, creating branches, merging PRs |
+| **Issues** | Read & Write | Issue management, PR assignments, managing labels (Issues) |
+| **Pull requests** | Read & Write | Pull request management, reviews, managing labels (PRs) |
 | **Metadata** | Read | All tools (automatically granted) |
 | **Statuses** | Read | `CheckPullRequestMergeStatus` |
 
@@ -99,23 +105,35 @@ When creating your GitHub App, you'll need to grant specific permissions. Here's
 ### Tools by Permission Requirements
 
 <details>
-<summary><b>Basic Repository Access</b> (Contents + Metadata only)</summary>
+<summary><b>Basic Repository Access</b> (Contents Read + Metadata)</summary>
 
 - `GetRepository`
 - `CountStargazers`
 - `ListStargazers`
 - `ListRepositoryActivities`
+- `GetFileContents`
 
 </details>
 
 <details>
-<summary><b>Issue Management</b> (Contents + Issues + Metadata)</summary>
+<summary><b>Repository Write</b> (Contents Write + Metadata)</summary>
+
+- `CreateBranch`
+- `CreateOrUpdateFile`
+- `UpdateFileLines`
+
+</details>
+
+<details>
+<summary><b>Issue Management</b> (Contents Read + Issues + Metadata)</summary>
 
 - `CreateIssue`
 - `UpdateIssue`
 - `GetIssue`
 - `ListIssues`
 - `CreateIssueComment`
+- `ListRepositoryLabels`
+- `ManageLabels` (for issues)
 
 </details>
 
@@ -131,7 +149,7 @@ When creating your GitHub App, you'll need to grant specific permissions. Here's
 </details>
 
 <details>
-<summary><b>Pull Request Write</b> (Contents + Pull requests Write + Metadata)</summary>
+<summary><b>Pull Request Write</b> (Contents Read + Pull requests Write + Metadata)</summary>
 
 - `UpdatePullRequest`
 - `CreatePullRequest`
@@ -140,6 +158,7 @@ When creating your GitHub App, you'll need to grant specific permissions. Here's
 - `ManagePullRequestReviewers`
 - `CreateReviewComment`
 - `CreateReplyForReviewComment`
+- `ManageLabels` (for pull requests)
 - `MergePullRequest` (+ Contents Write)
 
 </details>
@@ -227,6 +246,12 @@ These tools are currently available in the Arcade GitHub MCP Sever.
     ["Github.CountStargazers", "Count the number of stargazers for a repository."],
     ["Github.ListStargazers", "List the stargazers of a GitHub repository."],
     ["Github.SetStarred", "Star or unstar a GitHub repository."],
+    ["Github.CreateBranch", "Create a new branch in a repository."],
+    ["Github.GetFileContents", "Get the contents of a file in a repository."],
+    ["Github.CreateOrUpdateFile", "Create or update a file in a repository."],
+    ["Github.UpdateFileLines", "Replace a block of lines within a file."],
+    ["Github.ListRepositoryLabels", "List all labels defined in a repository."],
+    ["Github.ManageLabels", "Add or remove labels from an issue or pull request."],
     ["Github.WhoAmI", "Get information about the authenticated user."],
     ["Github.GetUserRecentActivity", "Get user's recently created PRs and issues."],
     ["Github.GetUserOpenItems", "Get user's currently open PRs and issues."],
@@ -345,7 +370,9 @@ Create an issue in a GitHub repository.
 - **`assignees`** _(array of strings, optional)_ Logins for Users to assign to this issue.
 - **`milestone`** _(integer, optional)_ The number of the milestone to associate this issue with.
 - **`labels`** _(array of strings, optional)_ Labels to associate with this issue.
-- **`include_extra_data`** _(boolean, optional, Defaults to `false`)_ If true, return all the data available about the issue. This is a large payload and may impact performance - use with caution.
+- **`add_to_project_number`** _(integer, optional)_ Project number to add this issue to.
+- **`add_to_project_scope`** _(enum ([ProjectScopeTarget](#projectscopetarget)), optional)_ Project scope (organization or user) if adding to a project.
+- **`add_to_project_owner`** _(string, optional)_ Project owner (defaults to issue owner if not specified).
 
 ---
 
@@ -380,7 +407,6 @@ Create a comment on an issue in a GitHub repository.
 - **`repo`** _(string, required)_ The name of the repository without the .git extension. The name is not case sensitive.
 - **`issue_number`** _(integer, required)_ The number that identifies the issue.
 - **`body`** _(string, required)_ The contents of the comment.
-- **`include_extra_data`** _(boolean, optional, Defaults to `false`)_ If true, return all the data available about the comment. This is a large payload and may impact performance - use with caution.
 
 ---
 
@@ -492,6 +518,7 @@ List issues in a GitHub repository with filtering and pagination.
 - **`since`** _(string, optional)_ Only show issues updated after this time (ISO 8601 format).
 - **`per_page`** _(integer, optional, Defaults to `30`)_ The number of results per page (max 100).
 - **`page`** _(integer, optional, Defaults to `1`)_ Page number of results to fetch.
+- **`search_org_wide`** _(boolean, optional, Defaults to `false`)_ Search across all organization repositories instead of just one repository.
 
 ---
 
@@ -531,7 +558,7 @@ List pull requests in a GitHub repository.
 - **`direction`** _(enum ([SortDirection](#sortdirection)), optional)_ The direction of the sort.
 - **`per_page`** _(integer, optional, Defaults to `30`)_ The number of results per page (max 100).
 - **`page`** _(integer, optional, Defaults to `1`)_ The page number of the results to fetch.
-- **`include_extra_data`** _(boolean, optional, Defaults to `false`)_ If true, return all the data available about the pull requests. This is a large payload and may impact performance - use with caution.
+- **`search_org_wide`** _(boolean, optional, Defaults to `false`)_ Search across all organization repositories instead of just one repository.
 
 ---
 
@@ -566,7 +593,6 @@ Get details of a pull request in a GitHub repository.
 - **`repo`** _(string, required)_ The name of the repository without the .git extension. The name is not case sensitive.
 - **`pull_number`** _(integer, required)_ The number that identifies the pull request.
 - **`include_diff_content`** _(boolean, optional, Defaults to `false`)_ If true, return the diff content of the pull request.
-- **`include_extra_data`** _(boolean, optional, Defaults to `false`)_ If true, return all the data available about the pull requests. This is a large payload and may impact performance - use with caution.
 
 ---
 
@@ -640,7 +666,6 @@ List commits (from oldest to newest) on a pull request in a GitHub repository.
 - **`pull_number`** _(integer, required)_ The number that identifies the pull request.
 - **`per_page`** _(integer, optional, Defaults to `30`)_ The number of results per page (max 100).
 - **`page`** _(integer, optional, Defaults to `1`)_ The page number of the results to fetch.
-- **`include_extra_data`** _(boolean, optional, Defaults to `false`)_ If true, return all the data available about the pull requests. This is a large payload and may impact performance - use with caution.
 
 ---
 
@@ -764,7 +789,6 @@ If the subject_type is not 'file', then the start_line and end_line parameters a
 - **`side`** _(enum ([DiffSide](#diffside)), optional, Defaults to `'RIGHT'`)_ The side of the diff that the pull request's changes appear on. Use LEFT for deletions that appear in red. Use RIGHT for additions that appear in green or unchanged lines that appear in white and are shown for context.
 - **`start_side`** _(string, optional)_ The starting side of the diff that the comment applies to.
 - **`subject_type`** _(enum ([ReviewCommentSubjectType](#reviewcommentsubjecttype)), optional, Defaults to `'FILE'`)_ The type of subject that the comment applies to. Can be one of: file, hunk, or line.
-- **`include_extra_data`** _(boolean, optional, Defaults to `false`)_ If true, return all the data available about the review comment. This is a large payload and may impact performance - use with caution.
 
 ---
 
@@ -833,7 +857,6 @@ List repositories for the specified GitHub organization.
 - **`sort_direction`** _(enum ([SortDirection](#sortdirection)), optional, Defaults to `'ASC'`)_ The order to sort by.
 - **`per_page`** _(integer, optional, Defaults to `30`)_ The number of results per page.
 - **`page`** _(integer, optional, Defaults to `1`)_ The page number of the results to fetch.
-- **`include_extra_data`** _(boolean, optional, Defaults to `false`)_ If true, return all the data available about the repositories. This is a large payload and may impact performance - use with caution.
 
 ---
 
@@ -866,7 +889,6 @@ Get detailed information about a GitHub repository.
 
 - **`owner`** _(string, required)_ The account owner of the repository. The name is not case sensitive.
 - **`repo`** _(string, required)_ The name of the repository without the .git extension. The name is not case sensitive.
-- **`include_extra_data`** _(boolean, optional, Defaults to `false`)_ If true, return all the data available about the repository. This is a large payload and may impact performance - use with caution.
 
 ---
 
@@ -907,7 +929,6 @@ List repository activities such as pushes, merges, force pushes, and branch chan
 - **`actor`** _(string, optional)_ The GitHub username to filter by the actor who performed the activity.
 - **`time_period`** _(enum ([RepoTimePeriod](#repotimeperiod)), optional)_ The time period to filter by.
 - **`activity_type`** _(enum ([ActivityType](#activitytype)), optional)_ The activity type to filter by.
-- **`include_extra_data`** _(boolean, optional, Defaults to `false`)_ If true, return all the data available about the activities. This is a large payload and may impact performance - use with caution.
 
 ---
 
@@ -1474,6 +1495,221 @@ Search repositories accessible to the authenticated user with fuzzy matching.
 - **`auto_accept_matches`** _(boolean, optional, Defaults to `false`)_ Auto-accept fuzzy matches above 0.9 confidence.
 - **`include_recent_branches`** _(integer, optional, Defaults to `10`)_ Include up to this many recent branches per repository (0-30).
 
+
+---
+
+## Github.CreateBranch
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/github/create_branch_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/github/create_branch_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Create a new branch in a repository.
+
+<Callout type="info">
+  **GitHub App Permissions**: Repository → Contents (Write), Metadata (Read)
+</Callout>
+
+**Parameters**
+
+- **`owner`** _(string, required)_ The account owner of the repository.
+- **`repo`** _(string, required)_ The name of the repository.
+- **`branch`** _(string, required)_ The name of the new branch.
+- **`from_branch`** _(string, optional)_ The name of the branch to branch off of. Default: repository default branch.
+
+---
+
+## Github.GetFileContents
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/github/get_file_contents_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/github/get_file_contents_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get the contents of a file in a repository.
+
+<Callout type="info">
+  **GitHub App Permissions**: Repository → Contents (Read), Metadata (Read)
+</Callout>
+
+**Parameters**
+
+- **`owner`** _(string, required)_ The account owner of the repository.
+- **`repo`** _(string, required)_ The name of the repository.
+- **`path`** _(string, required)_ The content path.
+- **`ref`** _(string, optional)_ The name of the commit/branch/tag. Default: the repository's default branch.
+
+---
+
+## Github.CreateOrUpdateFile
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/github/create_or_update_file_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/github/create_or_update_file_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Create or update a file in a repository.
+
+<Callout type="info">
+  **GitHub App Permissions**: Repository → Contents (Write), Metadata (Read)
+</Callout>
+
+**Parameters**
+
+- **`owner`** _(string, required)_ The account owner of the repository.
+- **`repo`** _(string, required)_ The name of the repository.
+- **`path`** _(string, required)_ The content path.
+- **`content`** _(string, required)_ The new content of the file.
+- **`message`** _(string, required)_ The commit message.
+- **`branch`** _(string, required)_ The branch name.
+- **`sha`** _(string, optional)_ The blob SHA of the file being replaced. Required if updating.
+
+---
+
+## Github.UpdateFileLines
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/github/update_file_lines_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/github/update_file_lines_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Replace a block of lines within a file (1-indexed, inclusive).
+
+<Callout type="info">
+  **GitHub App Permissions**: Repository → Contents (Write), Metadata (Read)
+</Callout>
+
+**Parameters**
+
+- **`owner`** _(string, required)_ The account owner of the repository.
+- **`repo`** _(string, required)_ The name of the repository.
+- **`path`** _(string, required)_ The content path.
+- **`branch`** _(string, required)_ The branch to update.
+- **`start_line`** _(integer, required)_ The first (1-indexed) line number to replace. Must be &lt;= end_line.
+- **`end_line`** _(integer, required)_ The last (1-indexed) line number to replace. Must exist in the file.
+- **`new_content`** _(string, required)_ The replacement lines (no need to include trailing newline).
+- **`message`** _(string, required)_ The commit message describing the change.
+
+---
+
+## Github.ListRepositoryLabels
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/github/list_repository_labels_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/github/list_repository_labels_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+List all labels defined in a repository.
+
+<Callout type="info">
+  **GitHub App Permissions**: Repository → Issues (Read), Metadata (Read)
+</Callout>
+
+**Parameters**
+
+- **`owner`** _(string, required)_ The account owner of the repository.
+- **`repo`** _(string, required)_ The name of the repository.
+- **`per_page`** _(integer, optional, Defaults to `100`)_ The number of results per page (max 100).
+- **`page`** _(integer, optional, Defaults to `1`)_ The page number of the results to fetch.
+
+---
+
+## Github.ManageLabels
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/github/manage_labels_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/github/manage_labels_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Add or remove labels from an issue or pull request. Supports fuzzy matching for typo tolerance.
+
+<Callout type="info">
+  **GitHub App Permissions**: Repository → Issues (Write) or Pull requests (Write), Metadata (Read)
+</Callout>
+
+**Parameters**
+
+- **`owner`** _(string, required)_ The account owner of the repository.
+- **`repo`** _(string, required)_ The name of the repository.
+- **`number`** _(integer, required)_ The number that identifies the issue or pull request.
+- **`entity_type`** _(enum ([LabelEntityType](#labelentitytype)), required)_ The type of entity (issue or pull_request).
+- **`add_labels`** _(array of strings, optional)_ List of label names to add. Supports fuzzy matching.
+- **`remove_labels`** _(array of strings, optional)_ List of label names to remove. Supports fuzzy matching.
+- **`auto_accept_matches`** _(boolean, optional, Defaults to `false`)_ Auto-accept fuzzy matches above 0.9 confidence.
+
 ---
 
 ## Github.WhoAmI
@@ -1923,5 +2159,12 @@ Project state filter:
 - **`OPEN`**: `open` - Open projects only
 - **`CLOSED`**: `closed` - Closed projects only
 - **`ALL`**: `all` - All projects
+
+### LabelEntityType
+
+Entity type for label management:
+
+- **`ISSUE`**: `issue` - Issue
+- **`PULL_REQUEST`**: `pull_request` - Pull Request
 
 <ToolFooter pipPackageName="arcade_github" />
