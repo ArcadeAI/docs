@@ -19,10 +19,12 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-    owner: "ArcadeAI",
-    repo: "example",
-    title: "Example Issue",
-    body: "This is an example issue.",
+    owner: "your-org",
+    repo: "your-repo",
+    title: "Bug: Login button not working",
+    body: "## Description\nThe login button on the main page doesn't respond to clicks.\n\n## Steps to Reproduce\n1. Go to homepage\n2. Click login button\n3. Nothing happens\n\n## Expected Behavior\nShould redirect to login page",
+    labels: ["bug", "high-priority"],
+    assignees: ["developer1"],
 };
 
 const response = await client.tools.execute({
