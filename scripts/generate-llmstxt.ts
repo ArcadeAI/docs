@@ -223,12 +223,14 @@ function generateLlmsTxt(sections: Section[]): string {
   // Header
   lines.push("# Arcade");
   lines.push("");
+  lines.push("> Arcade is the only runtime for MCP");
+  lines.push("");
   lines.push(
-    "> Arcade is an AI Tool-calling Platform. For the first time, AI can securely act on behalf of users through Arcade's authenticated integrations, or \"tools\" in AI lingo. Connect AI to email, files, calendars, and APIs to build assistants that don't just chat - they get work done. Start building in minutes with our pre-built connectors or custom SDK."
+    "As the MCP runtime, Arcade is the only one able to deliver secure agent authorization, high-accuracy tools, and centralized governance. Deploy multi-user AI agents that take actions across any system with granular permissions and complete visibility. No complex infrastructure required. Ship faster and scale with control."
   );
   lines.push("");
   lines.push(
-    "Arcade enables your AI agent to securely take real-world actions through user-specific permissions, pre-built MCP Servers for Gmail, Slack, GitHub, and more. You can also build your own agentic tools and MCP servers with our authoring and testing suite. Arcade is your tool engine, registry, and runtime."
+    "Arcade delivers three core capabilities: Deploy agents even your security team will love with authorization-first architecture. Unlock highest accuracy actions across all MCP tools with agent-optimized integrations and the Arcade TDK. Maintain centralized control over production MCP without slowing down AI development. Access 1000s of pre-built MCP servers or bring your own, with unified governance across all tools."
   );
   lines.push("");
 
