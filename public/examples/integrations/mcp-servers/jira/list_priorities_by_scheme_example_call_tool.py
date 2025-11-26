@@ -4,7 +4,7 @@ from arcadepy import Arcade
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
 USER_ID = "{arcade_user_id}"  # Unique identifier for your user (email, UUID, etc.)
-TOOL_NAME = "Jira.ListProjectsAssociatedWithAPriorityScheme"
+TOOL_NAME = "Jira.ListPrioritiesByScheme"
 
 auth_response = client.tools.authorize(tool_name=TOOL_NAME, user_id=USER_ID)
 
@@ -16,9 +16,7 @@ client.auth.wait_for_completion(auth_response)
 
 tool_input = {
     "scheme_id": "12345",
-    "project": "proj-001",
     "limit": 10,
-    "offset": 0,
     # Important: about the atlassian_cloud_id argument, please refer to the documentation at
     # https://docs.arcade.dev/mcp-servers/productivity/jira#handling-multiple-atlassian-clouds
     "atlassian_cloud_id": "13516a07-1725-4dc0-9ae7-13b5749dd747"
