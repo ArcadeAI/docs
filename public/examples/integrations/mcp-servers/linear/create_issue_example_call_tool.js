@@ -3,7 +3,7 @@ import { Arcade } from "@arcadeai/arcadejs";
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
 const USER_ID = "{arcade_user_id}";  // Unique identifier for your user (email, UUID, etc.)
-const TOOL_NAME = "Linear.ListTeams";
+const TOOL_NAME = "Linear.CreateIssue";
 
 // Start the authorization process
 const authResponse = await client.tools.authorize({tool_name: TOOL_NAME, user_id: USER_ID});
@@ -16,9 +16,12 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "keywords": "Backend",
-  "include_archived": false,
-  "limit": 20
+  "team": "Engineering",
+  "title": "Implement new authentication flow",
+  "description": "Add OAuth2 support for third-party integrations",
+  "priority": "high",
+  "labels_to_add": ["feature", "security"],
+  "due_date": "2025-02-15"
 };
 
 const response = await client.tools.execute({

@@ -4,7 +4,7 @@ from arcadepy import Arcade
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
 USER_ID = "{arcade_user_id}"  # Unique identifier for your user (email, UUID, etc.)
-TOOL_NAME = "Linear.ListTeams"
+TOOL_NAME = "Linear.WhoAmI"
 
 auth_response = client.tools.authorize(tool_name=TOOL_NAME, user_id=USER_ID)
 
@@ -14,11 +14,7 @@ if auth_response.status != "completed":
 # Wait for the authorization to complete
 client.auth.wait_for_completion(auth_response)
 
-tool_input = {
-    "keywords": "Backend",
-    "include_archived": False,
-    "limit": 20
-}
+tool_input = {}  # No parameters required
 
 response = client.tools.execute(
     tool_name=TOOL_NAME,
@@ -26,3 +22,4 @@ response = client.tools.execute(
     user_id=USER_ID,
 )
 print(json.dumps(response.output.value, indent=2))
+

@@ -16,7 +16,11 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "issue": "PROJ-123"
+  "issue_id": "PROJ-123",
+  "include_comments": true,
+  "include_attachments": true,
+  "include_relations": true,
+  "include_children": true
 };
 
 const response = await client.tools.execute({
