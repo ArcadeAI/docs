@@ -1,0 +1,15 @@
+# Securing Arcade MCP Deployments
+
+You may have noticed that when you connected to the MCP serer you created with `arcade-mcp`, you could immediately call your tools from local MCP Clients and agents, like Claude and Cursor. This is because the `arcade-mcp` server is *not* secured by any mechanism by default.  This is because most use-cases for MCP servers today are local development or local to a single machine, and we optimize for that use-case.
+
+However, you can secure your MCP server by deploying it to Arcade (available today) or using OAuth (coming soon).
+
+## Arcade Deploy
+When you `arcade deploy` your MCP server, it will be secured behind the Arcade platform.
+
+Under the hood, we disable the MCP routes provided by `arcaed-mcp`, and use the Arcade Engine, which has a number of additional features. Arcade will create a randomized secure secret for your MCP server (via the `ARCADE_WORKER_SECRET` environment variable) so that your server is protected from unauthorized access, as well as being isolated from direct access from outside of the Arcade platform. Servers managed by Arcade (servers that are `arcade deploy`ed) serve `/worker` endpoints that are protected by this secret. The worker endpoints are `worker/health`, `/worker/tools`, and `/worker/tools/invoke`. The health endpoint is not protected by this secret, but the listing tools and tool invocations are.
+
+Learn more about how to deploy your MCP server to Arcade [here](/home/serve-tools/arcade-deploy).
+
+## OAuth (Coming soon)
+Coming soon, you will be able to secure your MCP server's `/mcp` endpoints with a OAuth Authorization Server (AS) - either using Dynamic Client Registration (DCR) or Client ID Metadata Documents (CIMD).  Learn more about how MCP integrates with OAuth [here](https://blog.modelcontextprotocol.io/posts/client_registration/).
