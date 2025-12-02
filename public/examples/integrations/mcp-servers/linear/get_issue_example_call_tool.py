@@ -15,7 +15,11 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    "issue": "PROJ-123"
+    "issue_id": "PROJ-123",
+    "include_comments": True,
+    "include_attachments": True,
+    "include_relations": True,
+    "include_children": True
 }
 
 response = client.tools.execute(
