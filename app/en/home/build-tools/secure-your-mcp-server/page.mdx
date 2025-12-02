@@ -1,0 +1,469 @@
+---
+title: "Adding Resource Server Authentication"
+description: "Secure your HTTP MCP server with OAuth 2.1 Resource Server authentication"
+---
+
+import { Steps, Tabs, Callout } from "nextra/components";
+
+# Adding Resource Server Authentication to Your MCP Server
+
+Resource Server authentication enables your HTTP MCP server to act as an OAuth 2.1 Protected Resource (compliant with [MCP's specification for Authorization](https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization)), validating Bearer tokens on every request. This unlocks support for tool-level authorization and secrets on HTTP servers, allowing you to host secure MCP servers anywhere (local, on-premise, or third-party hosted).
+
+<GuideOverview>
+<GuideOverview.Outcomes>
+
+Add [MCP compliant OAuth 2.1 front-door authentication](https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization) to your HTTP MCP server to enable tool-level authorization and secrets.
+
+</GuideOverview.Outcomes>
+
+<GuideOverview.Prerequisites>
+
+- An existing MCP server created with `arcade new` (see [Create an MCP Server](/home/build-tools/create-a-mcp-server))
+- Understanding of [MCP Authorization](https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization)
+- An OAuth 2.1 compliant authorization server (e.g., WorkOS AuthKit, Auth0, Descope, etc.)
+- Authorization server's JWKS endpoint URL
+
+</GuideOverview.Prerequisites>
+
+<GuideOverview.YouWillLearn>
+
+- What Resource Server authentication is and why it's needed
+- How to configure your MCP server to validate OAuth tokens
+- How to support multiple authorization servers
+- How to use environment variables for production deployments
+
+</GuideOverview.YouWillLearn>
+</GuideOverview>
+
+## Understanding Resource Server Authentication
+
+### What is it?
+
+Resource Server authentication turns your MCP server into an [OAuth 2.1 Protected Resource](https://www.ietf.org/archive/id/draft-ietf-oauth-v2-1-13.html#name-roles) that validates Bearer tokens on every HTTP request. Your MCP server trusts one or more [Authorization Servers](https://www.ietf.org/archive/id/draft-ietf-oauth-v2-1-13.html#name-roles) to issue valid tokens for accessing your MCP server.
+
+### Why is it needed?
+
+By default, HTTP MCP servers cannot use tools that require authorization or secrets for security reasons.
+
+Resource Server authentication solves this by:
+
+1. **Authenticating every request** - Validates the Bearer token before processing any MCP messages
+2. **Extracting user identity** - The token's `sub` claim becomes the `context.user_id` for tool execution
+3. **Enabling secure tools** - Tools requiring authorization or secrets can now safely execute over HTTP
+4. **Supporting OAuth discovery** - MCP clients can automatically discover your authentication requirements
+
+<Callout type="info">
+**Resource Server auth vs Tool-level auth**: Resource Server authentication secures _access to your MCP server_, while tool-level authorization secures _access to third-party APIs that your tools use_. They work together: Resource Server auth identifies _who_ is calling your server, and tool-level auth enables tools to act _on behalf of that user_.
+</Callout>
+
+<Steps>
+
+## Choose Your Configuration Approach
+
+The `arcade_mcp_server.resource_server` module provides two validators:
+
+<Tabs items={["ResourceServer (Recommended)", "JWKSTokenValidator (Simple)"]}>
+<Tabs.Tab>
+
+**`ResourceServer`** - Full-featured OAuth 2.1 Resource Server with:
+- Support for multiple authorization servers (multi-IdP, regional endpoints)
+- OAuth discovery metadata endpoint
+- Environment variable configuration
+- Best for production deployments
+
+</Tabs.Tab>
+<Tabs.Tab>
+
+**`JWKSTokenValidator`** - Direct JWKS-based validation with:
+- Simple setup for single authorization server
+- No OAuth discovery endpoint
+- Requires explicit configuration
+- Best for development or simple use cases
+
+</Tabs.Tab>
+</Tabs>
+
+## Configure Your Authorization Server
+
+First, gather these details from your authorization server:
+
+- **Authorization Server URL** - The base URL of your authorization server (e.g., `https://your-app.authkit.app`)
+- **Issuer** - The expected `iss` claim in tokens (usually same as authorization server URL)
+- **JWKS URI** - Where to fetch public keys for token verification (e.g., `https://your-app.authkit.app/oauth2/jwks`)
+- **Canonical URL** - Your MCP server's public URL (e.g., `http://127.0.0.1:8000/mcp` if running locally)
+
+<Callout type="warning">
+The **Canonical URL** must match the `aud` (audience) claim in tokens issued by your authorization server. Configure your authorization server to issue tokens with your MCP server's URL as the audience.
+</Callout>
+
+## Add Authentication to Your Server
+
+Update your `server.py` to add the `auth` parameter to `MCPApp`:
+
+<Tabs items={["ResourceServer", "Multiple Auth Servers", "Environment Variables", "JWKSTokenValidator"]}>
+<Tabs.Tab>
+
+```python filename="server.py" {5-9,11-26,32} showLineNumbers
+#!/usr/bin/env python3
+"""my_server MCP server"""
+
+from arcade_mcp_server import MCPApp
+from arcade_mcp_server.resource_server import (
+    AccessTokenValidationOptions,
+    AuthorizationServerEntry,
+    ResourceServer,
+)
+
+# Setup your resource server that trusts a single Authkit authorization server
+resource_server = ResourceServer(
+    canonical_url="http://127.0.0.1:8000/mcp",
+    authorization_servers=[
+        AuthorizationServerEntry(
+            authorization_server_url="https://your-workos.authkit.app",
+            issuer="https://your-workos.authkit.app",
+            jwks_uri="https://your-workos.authkit.app/oauth2/jwks",
+            algorithm="RS256",
+            # Authkit doesn't set the aud claim as the MCP server's canonical URL
+            validation_options=AccessTokenValidationOptions(
+                verify_aud=False,
+            ),
+        )
+    ],
+)
+
+# Pass the resource_server to MCPApp
+app = MCPApp(
+    name="my_server",
+    version="1.0.0",
+    auth=resource_server  # Enable Resource Server authentication
+)
+
+# Your tools here...
+@app.tool
+def greet(name: Annotated[str, "The name of the person to greet"]) -> str:
+    """Greet a person by name."""
+    return f"Hello, {name}!"
+
+if __name__ == "__main__":
+    app.run(transport="http", host="127.0.0.1", port=8000)
+```
+
+</Tabs.Tab>
+<Tabs.Tab>
+
+```python filename="server.py" {10-29} showLineNumbers
+#!/usr/bin/env python3
+"""my_server MCP server"""
+
+from arcade_mcp_server import MCPApp
+from arcade_mcp_server.resource_server import (
+    ResourceServer,
+    AuthorizationServerEntry,
+)
+
+# Support multiple authorization servers (multi-IdP)
+resource_server = ResourceServer(
+    canonical_url="http://127.0.0.1:8000/mcp",
+    authorization_servers=[
+        AuthorizationServerEntry(
+            authorization_server_url="https://your-workos.authkit.app",
+            issuer="https://your-workos.authkit.app",
+            jwks_uri="https://your-workos.authkit.app/oauth2/jwks",
+            # Authkit doesn't set the aud claim as the MCP server's canonical URL
+            validation_options=AccessTokenValidationOptions(
+                verify_aud=False,
+            ),
+        ),
+        AuthorizationServerEntry(
+            authorization_server_url="https://your-github.com/login/oauth",
+            issuer="https://github.com",
+            jwks_uri="https://your-github.com/token.actions.githubusercontent.com/.well-known/jwks",
+        ),
+    ],
+)
+
+app = MCPApp(name="my_server", version="1.0.0", auth=resource_server)
+```
+
+<Callout type="info">
+Multiple authorization servers enable scenarios like:
+- **Multi-IdP**: Accept tokens from WorkOS _and_ GitHub
+- **Regional endpoints**: Multiple authorization server URLs with shared keys
+- **Migration**: Smoothly transition between authorization servers
+</Callout>
+
+</Tabs.Tab>
+<Tabs.Tab>
+
+```python filename="server.py" {5,8-9} showLineNumbers
+#!/usr/bin/env python3
+"""my_server MCP server"""
+
+from arcade_mcp_server import MCPApp
+from arcade_mcp_server.resource_server import ResourceServer
+
+# Configuration loaded from environment variables
+# No parameters needed!
+resource_server = ResourceServer()
+
+app = MCPApp(name="my_server", version="1.0.0", auth=resource_server)
+```
+
+Create a `.env` file:
+
+```bash filename=".env"
+MCP_SERVER_AUTH_CANONICAL_URL=http://127.0.0.1:8000/mcp
+MCP_SERVER_AUTH_AUTHORIZATION_SERVERS='[
+  {
+    "authorization_server_url": "https://your-workos.authkit.app",
+    "issuer": "https://your-workos.authkit.app",
+    "jwks_uri": "https://your-workos.authkit.app/oauth2/jwks",
+    "algorithm": "RS256",
+    "verify_options": {
+      "verify_aud": false
+    }
+  }
+]'
+```
+
+<Callout type="info">
+Environment variable configuration is **recommended for production** as it separates auth configuration from your code and allows deployment-time configuration.
+</Callout>
+
+</Tabs.Tab>
+<Tabs.Tab>
+
+```python filename="server.py" {5,7-12,15} showLineNumbers
+#!/usr/bin/env python3
+"""my_server MCP server"""
+
+from arcade_mcp_server import MCPApp
+from arcade_mcp_server.resource_server import JWKSTokenValidator
+
+# Configure JWKS token validation
+validator = JWKSTokenValidator(
+    jwks_uri="https://your-workos.authkit.app/oauth2/jwks",
+    issuer="https://your-workos.authkit.app",
+    audience="http://127.0.0.1:8000/mcp",
+)
+
+app = MCPApp(
+    name="my_server",
+    version="1.0.0",
+    auth=validator
+)
+
+# Your tools here...
+```
+
+</Tabs.Tab>
+</Tabs>
+
+## Run Your Authenticated Server
+
+Start your server with HTTP transport:
+
+```bash
+uv run server.py
+```
+
+Your server now requires valid Bearer tokens for all requests. You should see output like:
+
+```bash
+INFO     | 14:23:45 | Starting my_server v1.0.0 with 3 tools
+INFO     | 14:23:45 | Resource Server authentication enabled: True
+INFO     | 14:23:45 | Accepted authorization server(s): https://your-app.authkit.app
+```
+
+## OAuth Discovery
+Now that your server is protected, you can see that your server exposes an OAuth discovery endpoint at `http://127.0.0.1:8000/mcp/.well-known/oauth-protected-resource`. This endpoint is used by MCP clients to discover the authorization servers that are trusted by your server.
+
+```bash
+curl http://127.0.0.1:8000/.well-known/oauth-protected-resource
+```
+
+You should see a response like:
+
+```http
+{
+  "resource":"http://127.0.0.1:8000/mcp",
+  "authorization_servers":["https://your-workos.authkit.app"]
+}
+```
+
+<Callout type="info">
+MCP clients can use this endpoint to automatically discover which authorization servers issue valid tokens for your server.
+</Callout>
+
+## Verify Your Server is Protected
+
+Try calling your server without a token:
+
+```bash
+curl -i http://127.0.0.1:8000/mcp/
+```
+
+You should receive a 401 response with `WWW-Authenticate` header:
+
+```http {4}
+HTTP/1.1 401 Unauthorized
+date: Tue, 02 Dec 2025 01:00:54 GMT
+server: uvicorn
+www-authenticate: Bearer, resource_metadata="http://127.0.0.1:8000/mcp/.well-known/oauth-protected-resource"
+access-control-allow-origin: *
+access-control-allow-methods: GET, POST, DELETE
+access-control-allow-headers: Content-Type, Authorization, Mcp-Session-Id
+access-control-expose-headers: WWW-Authenticate, Mcp-Session-Id
+content-length: 12
+
+Unauthorized
+```
+
+### Test Your Server with a Valid Token
+
+The easiest way to test your secure server by using the [MCP Inspector](https://modelcontextprotocol.io/docs/tools/inspector) as your client & connecting to your server from it.
+
+TODO: INSERT VIDEO HERE
+
+</Steps>
+
+## Advanced Configuration
+
+### Custom Token Validation Options
+
+Disable specific validations when needed:
+
+```python
+from arcade_mcp_server.resource_server import (
+    ResourceServer,
+    AuthorizationServerEntry,
+    AccessTokenValidationOptions,
+)
+
+resource_server = ResourceServer(
+    canonical_url="http://127.0.0.1:8000/mcp",
+    authorization_servers=[
+        AuthorizationServerEntry(
+            authorization_server_url="https://your-app.authkit.app",
+            issuer="https://your-app.authkit.app",
+            jwks_uri="https://your-app.authkit.app/oauth2/jwks",
+            validation_options=AccessTokenValidationOptions(
+                verify_aud=False,  # Disable audience validation
+                verify_exp=True,   # Still verify expiration (default)
+                verify_iat=True,   # Still verify issued-at (default)
+                verify_iss=True,   # Still verify issuer (default)
+            ),
+        )
+    ],
+)
+```
+
+<Callout type="warning">
+**Security Note**: Token signature verification is always enabled and cannot be disabled. Additionally, the `sub` claim must always be present. Only disable other validations if your authorization server doesn't comply with MCP and you accept the risk of not validating all claims in the token.
+</Callout>
+
+### Different JWT Algorithms
+
+```python
+AuthorizationServerEntry(
+    authorization_server_url="https://auth.example.com",
+    issuer="https://auth.example.com",
+    jwks_uri="https://auth.example.com/jwks",
+    algorithm="ES256",  # Use ECDSA instead of RSA
+)
+```
+
+Supported algorithms: `RS256`, `RS384`, `RS512`, `ES256`, `ES384`, `ES512`, `PS256`, `PS384`, `PS512`
+
+### Regional Authorization Servers with Shared Keys
+
+```python
+resource_server = ResourceServer(
+    canonical_url="https://mcp.example.com",
+    authorization_servers=[
+        AuthorizationServerEntry(
+            authorization_server_url="https://auth-us.example.com",
+            issuer="https://auth.example.com",  # Same issuer
+            jwks_uri="https://auth.example.com/jwks",  # Shared JWKS
+        ),
+        AuthorizationServerEntry(
+            authorization_server_url="https://auth-eu.example.com",
+            issuer="https://auth.example.com",  # Same issuer
+            jwks_uri="https://auth.example.com/jwks",  # Shared JWKS
+        ),
+    ],
+)
+```
+
+## How It Works
+
+1. **Client makes request** with `Authorization: Bearer <token>` header
+2. **Middleware intercepts** every HTTP request before MCP processing
+3. **Token validation** occurs:
+   - Fetches JWKS from authorization server
+   - Verifies token signature
+   - Checks expiration, issuer, and audience
+   - Extracts `sub` claim as user ID
+4. **Resource owner stored** in request context
+5. **MCP processing continues** with authenticated user
+6. **Tools execute** with `context.user_id` set from token's `sub` claim
+
+### Security Features
+
+- ✅ **No token caching** - Every request validates the token fresh (per MCP spec)
+- ✅ **JWKS caching** - Public keys cached for performance (default 1 hour)
+- ✅ **Algorithm enforcement** - Prevents algorithm confusion attacks
+- ✅ **Signature verification** - Always enabled, cannot be disabled
+- ✅ **RFC 6750 compliant** - Standard OAuth 2.0 Bearer token usage
+- ✅ **RFC 9728 compliant** - OAuth 2.0 Protected Resource Metadata
+
+## Common Authorization Server Configurations
+
+### WorkOS AuthKit
+
+```python
+AuthorizationServerEntry(
+    authorization_server_url="https://your-app.authkit.app",
+    issuer="https://your-app.authkit.app",
+    jwks_uri="https://your-app.authkit.app/oauth2/jwks",
+    validation_options=AccessTokenValidationOptions(
+        verify_aud=False,  # AuthKit may not set aud claim
+    ),
+)
+```
+
+### Auth0
+
+```python
+AuthorizationServerEntry(
+    authorization_server_url="https://your-tenant.auth0.com",
+    issuer="https://your-tenant.auth0.com/",
+    jwks_uri="https://your-tenant.auth0.com/.well-known/jwks.json",
+)
+```
+
+### Descope
+
+```python
+AuthorizationServerEntry(
+    authorization_server_url="https://api.descope.com",
+    issuer="https://api.descope.com/{project-id}",
+    jwks_uri="https://api.descope.com/{project-id}/.well-known/jwks.json",
+)
+```
+
+### GitHub Actions
+
+```python
+AuthorizationServerEntry(
+    authorization_server_url="https://github.com/login/oauth",
+    issuer="https://token.actions.githubusercontent.com",
+    jwks_uri="https://token.actions.githubusercontent.com/.well-known/jwks",
+)
+```
+
+## Next Steps
+
+- **Let Arcade secure your server instead**: [Learn about `arcade deploy`](/home/serve-tools/arcade-deploy)
+- **Build tools with authorization**: [Create tools that use OAuth](/home/build-tools/create-a-tool-with-auth)
+- **Use secrets securely**: [Create tools with secrets](/home/build-tools/create-a-tool-with-secrets)
