@@ -15,7 +15,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    "keywords": "Backend",
+    "keywords": "Engineering",
     "include_archived": False,
     "limit": 20
 }
@@ -26,3 +26,4 @@ response = client.tools.execute(
     user_id=USER_ID,
 )
 print(json.dumps(response.output.value, indent=2))
+

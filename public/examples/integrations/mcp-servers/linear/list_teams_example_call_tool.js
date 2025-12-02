@@ -16,7 +16,7 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "keywords": "Backend",
+  "keywords": "Engineering",
   "include_archived": false,
   "limit": 20
 };
