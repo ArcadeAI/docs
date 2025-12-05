@@ -24,23 +24,19 @@ This auth provider is used by:
 
 If you're using the [Arcade Figma MCP Server](/mcp-servers/development/figma), you'll need to configure these scopes based on which tools you plan to use:
 
-**Core File Operations:**
-- `file_content:read` - Required for file structure, pages, nodes, and image exports
+- `file_content:read` - File structure, pages, nodes, and image exports
+- `library_content:read` - Published components, styles, and component sets from files
+- `team_library_content:read` - Team library content
+- `library_assets:read` - Individual component, style, and component set metadata
+- `file_comments:read` / `file_comments:write` - Reading and creating comments
+- `current_user:read` - User profile information
+- `projects:read` - Team projects and files (**requires private OAuth app**)
 
-**Library and Components:**
-- `library_content:read` - For accessing published components, styles, and component sets from files
-- `team_library_content:read` - For accessing team library content
-- `library_assets:read` - For individual component, style, and component set metadata
+<Callout type="warning">
+The `projects:read` scope is **only available in private Figma OAuth apps**. If you need to access team projects and files, you must create a private OAuth app through your Figma organization.
+</Callout>
 
-**Comments:**
-- `file_comments:read` - For reading comments
-- `file_comments:write` - For creating comments and replies
-
-**User and Navigation:**
-- `current_user:read` - For user profile information
-- `projects:read` - For team projects and files (**requires private OAuth app**)
-
-See the [Available Scopes](#available-scopes) section for detailed descriptions.
+For detailed descriptions of all available Figma OAuth scopes, refer to the [Figma OAuth Scopes documentation](https://developers.figma.com/docs/rest-api/scopes/).
 
 ## Configuring Figma auth
 
@@ -89,7 +85,7 @@ Navigate to the [Figma Developer Portal](https://www.figma.com/developers/) and 
    - `current_user:read` - Read access to user profile
    - `projects:read` - Read access to team projects (private apps only)
    
-See the [Available Scopes](#available-scopes) section for a complete list
+For a complete list of available scopes, refer to the [Figma OAuth Scopes documentation](https://developers.figma.com/docs/rest-api/scopes/)
 
 </Steps>
 
@@ -207,7 +203,7 @@ auth:
 ```
 
 <Callout type="warning">
-**Note on `projects:read` scope:** If you need access to the `projects:read` scope for team projects and files navigation, you must create a **private Figma OAuth app**. This scope is not available in public OAuth apps. See the [Available Scopes](#available-scopes) section for more details.
+**Note on `projects:read` scope:** If you need access to the `projects:read` scope for team projects and files navigation, you must create a **private Figma OAuth app**. This scope is not available in public OAuth apps. Learn more in the [Figma OAuth Scopes documentation](https://developers.figma.com/docs/rest-api/scopes/).
 </Callout>
 
 </Steps>
@@ -319,35 +315,4 @@ async def get_figma_file(
         return dict(response.json())
 ```
 
-## Available Scopes
-
-Figma supports various OAuth scopes that determine the level of access your application has. Here are the scopes used by the Arcade Figma MCP Server:
-
-### File and Content Access
-- `file_content:read` - Read access to file structure and content (required for most file operations)
-- `file_dev_resources:read` - Read access to dev resources
-- `file_dev_resources:write` - Write access to dev resources
-- `file_variables:read` - Read access to variables
-- `file_variables:write` - Write access to variables
-
-### Library Access
-- `library_content:read` - Read access to published library content in files
-- `team_library_content:read` - Read access to team library content
-- `library_assets:read` - Read access to individual library assets (components, styles, component sets)
-
-### Comments
-- `file_comments:read` - Read access to file comments
-- `file_comments:write` - Write access to create and reply to file comments
-
-### User and Projects
-- `current_user:read` - Read access to the authenticated user's profile
-- `projects:read` - Read access to team projects and files (**Private OAuth apps only**)
-
-### Other Scopes
-- `webhooks:write` - Write access to webhooks
-
-<Callout type="warning">
-The `projects:read` scope is **only available in private Figma OAuth apps**. If you need to access team projects and files, you must create a private OAuth app through your Figma organization.
-</Callout>
-
-For a complete list of available scopes and their descriptions, refer to the [Figma OAuth Scopes documentation](https://developers.figma.com/docs/rest-api/scopes/).
+For a complete list of available Figma OAuth scopes and their descriptions, refer to the [Figma OAuth Scopes documentation](https://developers.figma.com/docs/rest-api/scopes/).
