@@ -6,16 +6,19 @@ const meta: MetaRecord = {
       copyPage: false,
     },
   },
+  // 1.0 Home Section
   home: {
     type: "page",
     title: "Home",
-    href: "/get-started",
+    href: "/home",
   },
+  // MCP Servers Section
   "mcp-servers": {
     type: "page",
     title: "MCP Servers",
     href: "/mcp-servers",
   },
+  // API & SDKs Section
   references: {
     type: "page",
     title: "API & SDKs",
