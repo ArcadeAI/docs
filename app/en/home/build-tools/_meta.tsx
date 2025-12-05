@@ -7,5 +7,7 @@ export default {
   "providing-useful-tool-errors": "Providing useful tool errors",
   "retry-tools-with-improved-prompt": "Retry tools with improved prompt",
   "call-tools-from-mcp-clients": "Call tools from MCP clients",
+  "secure-your-mcp-server": "Secure Your MCP Server with OAuth",
+  "server-level-vs-tool-level-auth": "Server-Level vs Tool-Level Authorization",
   "migrate-from-toolkits": "Migrate from toolkits",
 };
