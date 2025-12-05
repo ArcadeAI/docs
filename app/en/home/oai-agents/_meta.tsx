@@ -1,5 +1,4 @@
 export default {
-  overview: "Overview",
-  "use-arcade-tools": "Using Arcade tools",
-  "user-auth-interrupts": "Managing user authorization",
+  "quickstart-python": "Quickstart (Python)",
+  "quickstart-typescript": "Quickstart (Typescript)",
 };
