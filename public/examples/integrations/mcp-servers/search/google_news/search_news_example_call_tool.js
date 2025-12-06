@@ -3,10 +3,10 @@ import { Arcade } from "@arcadeai/arcadejs";
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
 const USER_ID = "{arcade_user_id}";
-const TOOL_NAME = "GoogleNews.SearchNews";
+const TOOL_NAME = "GoogleNews.SearchNewsStories";
 
 const toolInput = {
-	query: "Apple's new iPhone",
+	keywords: "Apple's new iPhone",
 };
 
 const response = await client.tools.execute({
