@@ -14,8 +14,8 @@ Your goal is to load all the new git commits and pull requests from provided Git
 
 There are 5 possible categories of changes:
 - Frameworks
-- MCP Servers
-- CLI and TDK
+- Arcade MCP Servers
+- Arcade CLI
 - Platform and Engine
 - Misc
 
