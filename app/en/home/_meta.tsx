@@ -61,12 +61,16 @@ export const meta: MetaRecord = {
   "serve-tools": {
     title: "Serve tools",
   },
-  "-- Agent Frameworks and MCP": {
+  "-- Tool Calling in Apps": {
     type: "separator",
-    title: "Agent Frameworks and MCP",
+    title: "Tool Calling in Apps",
   },
   "mcp-clients": {
     title: "MCP Clients",
+  },
+  "-- Agent Frameworks": {
+    type: "separator",
+    title: "Agent Frameworks",
   },
   langchain: {
     title: "LangChain",
