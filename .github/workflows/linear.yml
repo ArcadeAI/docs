@@ -1,0 +1,94 @@
+name: Create Linear ticket on review assignment
+
+on:
+  pull_request:
+    types:
+      - assigned
+      - review_requested
+      - review_request_removed
+
+jobs:
+  create-linear-issue:
+    if: github.event.action == 'assigned' || github.event.action == 'review_requested'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Extract PR info
+        id: pr
+        run: |
+          echo "title=${{ github.event.pull_request.title }}" >> $GITHUB_OUTPUT
+          echo "number=${{ github.event.pull_request.number }}" >> $GITHUB_OUTPUT
+          echo "url=${{ github.event.pull_request.html_url }}" >> $GITHUB_OUTPUT
+          echo "repo=${{ github.repository }}" >> $GITHUB_OUTPUT
+
+      - name: Create Linear issue
+        id: linear
+        env:
+          LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+          LINEAR_TEAM_ID: ${{ secrets.LINEAR_TEAM_ID }}
+          LINEAR_PROJECT_ID: ${{ secrets.LINEAR_PROJECT_ID }}
+          GITHUB_ASSIGNEE: ${{ github.event.assignee.login }}
+          GITHUB_REVIEWER: ${{ github.event.requested_reviewer.login }}
+        run: |
+          # Pick whoever got assigned / requested
+          ASSIGNEE="${GITHUB_ASSIGNEE:-$GITHUB_REVIEWER}"
+
+          # Simple mapping GitHub username -> Linear user ID (adjust to your team)
+          case "$ASSIGNEE" in
+            "nearestnabors") LINEAR_ASSIGNEE_ID="nearestnabors" ;;
+            "torresmateo")   LINEAR_ASSIGNEE_ID="mateo" ;;
+            "vfanelle")     LINEAR_ASSIGNEE_ID="valerie" ;;
+            "avoguru")     LINEAR_ASSIGNEE_ID="guru" ;;
+            *)         LINEAR_ASSIGNEE_ID="" ;;
+          esac
+
+          TITLE="Review PR: ${{ steps.pr.outputs.title }}"
+          DESCRIPTION="GitHub PR: ${{ steps.pr.outputs.url }}\nRepository: ${{ steps.pr.outputs.repo }}\nPR #${{ steps.pr.outputs.number }}"
+
+          QUERY='mutation IssueCreate($input: IssueCreateInput!) {
+            issueCreate(input: $input) {
+              issue {
+                id
+                identifier
+                url
+              }
+            }
+          }'
+
+          INPUT=$(jq -n \
+            --arg title "$TITLE" \
+            --arg desc "$DESCRIPTION" \
+            --arg teamId "$LINEAR_TEAM_ID" \
+            --arg projId "$LINEAR_PROJECT_ID" \
+            --arg assigneeId "$LINEAR_ASSIGNEE_ID" \
+            '{
+              query: $ENV.QUERY,
+              variables: {
+                input: {
+                  title: $title,
+                  description: $desc,
+                  teamId: $teamId,
+                  projectId: ($projId | select(. != "")),
+                  assigneeId: ($assigneeId | select(. != ""))
+                }
+              }
+            }'
+          )
+
+          RESPONSE=$(curl -s \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $LINEAR_API_KEY" \
+            -d "$INPUT" \
+            https://api.linear.app/graphql)
+
+          echo "response=$RESPONSE" >> $GITHUB_OUTPUT
+
+      - name: Comment on PR with Linear issue
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          ISSUE_URL=$(echo '${{ steps.linear.outputs.response }}' | jq -r '.data.issueCreate.issue.url // empty')
+          if [ -n "$ISSUE_URL" ]; then
+            gh pr comment ${{ steps.pr.outputs.number }} --body "Created Linear issue: $ISSUE_URL"
+          fi
