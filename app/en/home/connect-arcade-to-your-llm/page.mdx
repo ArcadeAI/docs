@@ -296,3 +296,154 @@ With the selection of tools above, you should be able to get the agent to effect
 
 - Learn more about using Arcade with frameworks like [LangChain](/home/langchain/use-arcade-tools) or [Mastra](/home/mastra/overview).
 - Learn more about how to [build your own MCP Servers](/home/build-tools/create-a-mcp-server).
+
+## Example code
+
+```python filename="main.py"
+from arcadepy import Arcade
+from dotenv import load_dotenv
+from openai import OpenAI
+import json
+import os
+
+load_dotenv()
+
+arcade = Arcade()
+arcade_user_id = os.getenv("ARCADE_USER_ID")
+llm_client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=os.getenv("OPENROUTER_API_KEY"),
+)
+
+# We define here the tools that we want to use in the agent
+tool_catalog = [
+    "Gmail.ListEmails",
+    "Gmail.SendEmail",
+    "Slack.SendMessage",
+    "Slack.WhoAmI"
+]
+
+# We get the tool definitions from the Arcade API, so that we can expose them to the LLM
+tool_definitions = []
+for tool in tool_catalog:
+    tool_definitions.append(arcade.tools.formatted.get(name=tool, format="openai"))
+
+
+# Helper function to authorize and run any tool
+def authorize_and_run_tool(tool_name: str, input: str):
+    # Start the authorization process
+    auth_response = arcade.tools.authorize(
+        tool_name=tool_name,
+        user_id=arcade_user_id,
+    )
+
+    # If the authorization is not completed, print the authorization URL and wait for the user to authorize the app.
+    # Tools that do not require authorization will have the status "completed" already.
+    if auth_response.status != "completed":
+        print(f"Click this link to authorize {tool_name}: {auth_response.url}. The process will continue once you have authorized the app.")
+        arcade.auth.wait_for_completion(auth_response.id)
+
+    # Parse the input
+    input_json = json.loads(input)
+
+    # Run the tool
+    result = arcade.tools.execute(
+        tool_name=tool_name,
+        input=input_json,
+        user_id=arcade_user_id,
+    )
+
+    # Return the tool output to the caller as a JSON string
+    return json.dumps(result.output.value)
+
+
+def invoke_llm(
+    history: list[dict],
+    model: str = "google/gemini-2.5-flash",
+    max_turns: int = 5,
+    tools: list[dict] = None,
+    tool_choice: str = "auto",
+) -> list[dict]:
+    """
+    Multi-turn LLM invocation that processes the conversation until
+    the assistant provides a final response (no tool calls).
+
+    Returns the updated conversation history.
+    """
+    turns = 0
+
+    while turns < max_turns:
+        turns += 1
+
+        response = llm_client.chat.completions.create(
+            model=model,
+            messages=history,
+            tools=tools,
+            tool_choice=tool_choice,
+        )
+
+        assistant_message = response.choices[0].message
+
+        if assistant_message.tool_calls:
+            for tool_call in assistant_message.tool_calls:
+                tool_name = tool_call.function.name
+                tool_args = tool_call.function.arguments
+                print(f"🛠️ Harness: Calling {tool_name} with input {tool_args}")
+                tool_result = authorize_and_run_tool(tool_name, tool_args)
+                print(f"🛠️ Harness: Tool call {tool_name} completed")
+                history.append({
+                    "role": "tool",
+                    "tool_call_id": tool_call.id,
+                    "content": tool_result,
+                })
+
+            continue
+
+        else:
+            history.append({
+                "role": "assistant",
+                "content": assistant_message.content,
+            })
+
+        break
+
+    return history
+
+
+def chat():
+    """Interactive multi-turn chat session."""
+    print("Chat started. Type 'quit' or 'exit' to end the session.\n")
+
+    history: list[dict] = [
+        {"role": "system", "content": "You are a helpful assistant."}
+    ]
+
+    while True:
+        try:
+            user_input = input("😎 You: ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print("\nGoodbye!")
+            break
+
+        if not user_input:
+            continue
+
+        if user_input.lower() in ("quit", "exit"):
+            print("Goodbye!")
+            break
+
+        # Add user message to history
+        history.append({"role": "user", "content": user_input})
+
+        # Get LLM response
+        history = invoke_llm(
+            history, tools=tool_definitions)
+
+        # Print the latest assistant response
+        assistant_response = history[-1]["content"]
+        print(f"\n🤖 Assistant: {assistant_response}\n")
+
+
+if __name__ == "__main__":
+    chat()
+```
