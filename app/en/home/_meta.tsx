@@ -26,6 +26,43 @@ export const meta: MetaRecord = {
       copyPage: false,
     },
   },
+  "-- Get Started": {
+    type: "separator",
+    title: "Get Started",
+  },
+  "about-arcade": "About Arcade",
+  setup: "Setup",
+  quickstarts: "Quickstarts",
+  "common-use-cases": "Common Use Cases",
+  glossary: "Glossary",
+  faq: "FAQ",
+  "-- Example agents": {
+    type: "separator",
+    title: "Example agents",
+  },
+  "confluence-jira-example":
+    "Turn Confluence into Jira Tickets/Turn Google doc into Linear Tickets",
+  "daily-digest-example":
+    "Daily Digest: Summarize your Google Calendar / Email stuffs",
+  "-- Guides": {
+    type: "separator",
+    title: "Guides",
+  },
+  "configure-arcade-section": "Configure Arcade",
+  "calling-tools": "Calling tools",
+  "creating-tools": "Creating tools",
+  "agent-frameworks": "Agent Frameworks",
+  "sharing-with-end-users": "Sharing your agent with end-users",
+  "observability-platforms": "Observability Platforms",
+  "deployment-hosting": "Deployment and Hosting",
+  "security-section": "Security and Compliance",
+  "-- Learn": {
+    type: "separator",
+    title: "Learn",
+  },
+  "what-is-agent": "What's an agent?",
+  "auth-and-secrets": "How do auth and secrets work?",
+  "agentic-architecture": "Agentic Architectures & Workflows",
   "-- Updates": {
     type: "separator",
     title: "Updates",
@@ -33,45 +70,13 @@ export const meta: MetaRecord = {
   "status-page": "Status",
   "changelog-page": "Changelog",
   blog: "Blog",
-  "-- Get Started": {
-    type: "separator",
-    title: "Get Started",
-  },
-  setup: "Setup",
-  quickstarts: "Quickstarts",
-  "-- Build": {
-    type: "separator",
-    title: "Build",
-  },
-  "using-tools": "Using tools",
-  "creating-tools": "Creating tools",
-  orchestrators: "Orchestrators",
-  scaling: "Scaling",
-  "agentic-architecture": "Agentic Architecture & Workflows",
-  examples: "Examples (tutorials and sample code)",
-  "deployment-hosting": "Deployment and Hosting",
-  security: "Security",
-  "-- Learn": {
-    type: "separator",
-    title: "Learn",
-  },
-  "what-is-agent": "What's an agent?",
-  "why-agents-call-tools": "Why and how do agents call tools?",
-  "auth-and-secrets": "How do auth and secrets work?",
   "-- APIs & SDKs": {
     type: "separator",
     title: "APIs & SDKs",
   },
   api: "API",
-  "arcade-mcp": "Arcade MCP",
+  "arcade-mcp": "Arcade MCP (MCP Server SDK)",
   "arcade-clients": "Arcade Clients",
-  "-- Resources": {
-    type: "separator",
-    title: "Resources",
-  },
-  glossary: "Glossary",
-  faq: "FAQ",
-  concepts: "Concepts",
   // Hide auto-discovered directories
   "api-keys": {
     display: "hidden",
@@ -79,13 +84,7 @@ export const meta: MetaRecord = {
   "auth-providers": {
     display: "hidden",
   },
-  "calling-tools-custom-apps": {
-    display: "hidden",
-  },
   changelog: {
-    display: "hidden",
-  },
-  "configure-arcade-section": {
     display: "hidden",
   },
   "contact-us": {
@@ -127,9 +126,6 @@ export const meta: MetaRecord = {
   "oai-agents": {
     display: "hidden",
   },
-  "observability-platforms": {
-    display: "hidden",
-  },
   "open-agents": {
     display: "hidden",
   },
@@ -140,12 +136,6 @@ export const meta: MetaRecord = {
     display: "hidden",
   },
   "sample-agents": {
-    display: "hidden",
-  },
-  "security-section": {
-    display: "hidden",
-  },
-  "third-party-apps": {
     display: "hidden",
   },
   "tool-calling-intro": {
@@ -164,6 +154,27 @@ export const meta: MetaRecord = {
     display: "hidden",
   },
   guides: {
+    display: "hidden",
+  },
+  "add-external-mcp": {
+    display: "hidden",
+  },
+  "build-custom-mcp": {
+    display: "hidden",
+  },
+  concepts: {
+    display: "hidden",
+  },
+  examples: {
+    display: "hidden",
+  },
+  security: {
+    display: "hidden",
+  },
+  "turn-api-to-mcp": {
+    display: "hidden",
+  },
+  "why-agents-call-tools": {
     display: "hidden",
   },
 };

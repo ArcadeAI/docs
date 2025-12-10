@@ -1,5 +1,5 @@
 export default {
-  "spin-up-server": "Spin up a server",
-  "call-tool-easy": "Call a tool (easiest possible)",
-  "call-tool-personal-agent": "Call a tool from your personal agent",
+  "call-tool-easy": "Call a tool in your agent",
+  "call-tool-personal-agent":
+    "Call a tool in your IDEs, MCP clients, or agents",
 };
