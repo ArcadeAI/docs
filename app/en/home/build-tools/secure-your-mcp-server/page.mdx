@@ -7,6 +7,12 @@ import { Steps, Tabs, Callout } from "nextra/components";
 
 # Adding Resource Server Auth to Your MCP Server
 
+You've built an MCP server with tools that require authorization or secrets. Now you want to deploy it over HTTP so others can use it. But how do you secure it so only authorized users can access your tools?
+
+<Callout type="info">
+**Want Arcade to handle this for you?** Use [`arcade deploy`](/home/serve-tools/arcade-deploy) to deploy your MCP server to Arcade. We'll secure it automatically with no OAuth configuration on your end required. This guide is for self-hosted deployments where you manage your own authorization server.
+</Callout>
+
 Resource Server auth enables your HTTP MCP server to act as an OAuth 2.1 Protected Resource (compliant with [MCP's specification for Authorization](https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization)), validating Bearer tokens on every request. This unlocks support for tool-level authorization and secrets on HTTP servers, allowing you to host secure MCP servers anywhere (local, on-premise, or third-party hosted).
 
 <GuideOverview>
@@ -49,7 +55,7 @@ Resource Server auth solves this by:
 
 1. **Authenticating every request** - Validates the Bearer token before processing any MCP messages
 2. **Extracting user identity** - The token's `sub` claim becomes the `context.user_id` for tool execution
-3. **Enabling secure tools** - Tools requiring authorization or secrets can now safely execute over HTTP
+3. **Enabling secure tools** - Tools requiring authorization or secrets can now safely execute over HTTP, but tools with tool-level auth will still require authenticating to the downstream service
 4. **Supporting OAuth discovery** - MCP clients can automatically discover your authentication requirements
 
 <Callout type="info">
