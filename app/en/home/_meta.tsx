@@ -41,6 +41,7 @@ export const meta: MetaRecord = {
   },
   glossary: "Glossary",
   faq: "FAQ",
+  "changelog-page": "Changelog",
   "-- Guides": {
     type: "separator",
     title: "Guides",
@@ -60,19 +61,6 @@ export const meta: MetaRecord = {
   "what-is-agent": "What's an agent?",
   "auth-and-secrets": "How do auth and secrets work?",
   "agentic-architecture": "Agentic Architectures & Workflows",
-  "-- Updates": {
-    type: "separator",
-    title: "Updates",
-  },
-  "status-page": {
-    title: "Status",
-    href: "https://status.arcade.dev",
-  },
-  "changelog-page": "Changelog",
-  blog: {
-    title: "Blog",
-    href: "https://blog.arcade.dev",
-  },
   "-- API Reference": {
     type: "separator",
     title: "API Reference",
