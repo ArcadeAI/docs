@@ -1,7 +1,154 @@
-# Quickstart (Typescript)
+---
+title: "Use Arcade tools with Vercel AI SDK"
+description: "Integrate Arcade tools into your Vercel AI applications"
+---
 
-Documentation coming soon.
+import { Steps, Tabs, Callout } from "nextra/components";
 
-## Overview
+## Use Arcade with Vercel AI SDK
 
-This section will contain detailed information about using Vercel AI with TypeScript.
+The [Vercel AI SDK](https://sdk.vercel.ai/) is an open-source library that simplifies the process of building AI-powered applications. It provides a consistent interface for working with various AI providers and includes several useful features:
+
+- Streaming AI responses for real-time interactions
+- Framework-agnostic support for React, Next.js, Vue, Nuxt, and SvelteKit.
+- Easy switching between AI providers with a single line of code
+
+Let's supercharge your Vercel AI SDK applications with Arcade's tools. You'll get instant access to production-ready tools for working with Google, Slack, GitHub, LinkedIn, and many other popular services, all with built-in authentication. Browse our [complete MCP Server catalog](/mcp-servers) to discover what you can build.
+
+In this guide, we'll show you how to use Arcade's Gmail MCP Server to create an AI agent that can read and summarize emails. You can find the complete code in our [GitHub repository](https://github.com/ArcadeAI/arcade-ai/tree/main/examples/ai-sdk) or follow along below.
+
+## Getting started
+
+<Steps>
+
+### Install the required dependencies
+
+We'll use the `@ai-sdk/openai` package in this example, but you can use any AI provider supported by the Vercel AI SDK. See the [full list of providers](https://ai-sdk.dev/docs/foundations/providers-and-models#ai-sdk-providers).
+
+<Tabs items={["pnpm", "npm", "yarn"]}>
+
+<Tabs.Tab>
+
+```bash
+pnpm add ai @ai-sdk/openai @arcadeai/arcadejs
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```bash
+npm install ai @ai-sdk/openai @arcadeai/arcadejs
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```bash
+yarn install ai @ai-sdk/openai @arcadeai/arcadejs
+```
+
+</Tabs.Tab>
+
+</Tabs>
+
+### Get your API keys and set up environment variables
+
+You'll need two API keys:
+
+- **OpenAI API key** from [OpenAI dashboard](https://platform.openai.com/api-keys)
+- **Arcade API key** from our [Getting your API key guide](/home/api-keys)
+
+Add them to your environment:
+
+```bash
+OPENAI_API_KEY=<YOUR_OPENAI_API_KEY>
+ARCADE_API_KEY=<YOUR_ARCADE_API_KEY>
+```
+
+### Import Libraries and Initialize Arcade
+
+```ts
+import { openai } from "@ai-sdk/openai";
+import { generateText } from "ai";
+import { Arcade } from "@arcadeai/arcadejs";
+import {
+  toZodToolSet,
+  executeOrAuthorizeZodTool,
+} from "@arcadeai/arcadejs/lib";
+
+const arcade = new Arcade();
+```
+
+### Get tools from Arcade's Gmail MCP Server and convert them to Zod
+
+Arcade offers methods to convert tools into Zod schemas, which is essential since the Vercel AI SDK defines tools using Zod. The `toZodToolSet` method is particularly useful, as it simplifies this integration and makes it easier to use Arcade's tools with the Vercel AI SDK. Learn more about Arcade's Zod integration options [here](/home/use-tools/get-tool-definitions#get-zod-tool-definitions).
+
+```ts
+// Get Arcade's gmail MCP Server
+const googleToolkit = await arcade.tools.list({ toolkit: "gmail", limit: 30 });
+const googleTools = toZodToolSet({
+  tools: googleToolkit.items,
+  client: arcade,
+  userId: "<YOUR_USER_ID>", // Your app's internal ID for the user (an email, UUID, etc). It's used internally to identify your user in Arcade
+  executeFactory: executeOrAuthorizeZodTool, // Checks if tool is authorized and executes it, or returns authorization URL if needed
+});
+```
+
+### Generate text with the tools
+
+```ts
+const result = await generateText({
+  model: openai("gpt-4o-mini"),
+  prompt: "Read my last email and summarize it in a few sentences",
+  tools: googleTools,
+  maxSteps: 5,
+});
+
+console.log(result.text);
+```
+
+<Callout type="info">
+On your first run, you'll get an authorization message with a link to connect your Google account. Open it in your browser to complete the setup. That's all you need to do! Arcade will remember your approval for future requests.
+</Callout>
+</Steps>
+
+You can see the full code in our [GitHub repository](https://github.com/ArcadeAI/arcade-ai/blob/main/examples/ai-sdk/generateText.js).
+
+## Stream the response
+
+Vercel AI SDK supports streaming responses. This creates a more engaging, chat-like experience as the responses appear progressively instead of waiting for the complete answer.
+
+To enable streaming, make these key changes:
+
+1. Import `streamText` instead of `generateText`
+2. Use `streamText` to create a streamable response
+3. Process the response chunk by chunk
+
+```ts
+import { streamText } from "ai";
+
+const { textStream } = streamText({
+  model: openai("gpt-4o-mini"),
+  prompt: "Read my last email and summarize it in a few sentences",
+  tools: googleTools,
+  maxSteps: 5,
+});
+
+for await (const chunk of textStream) {
+  process.stdout.write(chunk);
+}
+```
+
+You can see the full code in our [GitHub repository](https://github.com/ArcadeAI/arcade-ai/blob/main/examples/ai-sdk/index.js).
+
+## How to use other MCP Servers
+
+You just need to change the MCP Server parameter in the `list` method. For example, to use Slack MCP Server:
+
+```ts
+const slackToolkit = await arcade.tools.list({ toolkit: "Slack", limit: 30 });
+```
+
+Browse our [complete MCP Server catalog](/mcp-servers) to see all available MCP Servers and their capabilities. Each MCP Server comes with pre-built tools that are ready to use with your AI applications. Arcade also is the best way to create your own custom tools and MCP Servers - learn more [here](/home/build-tools/create-a-mcp-server).

@@ -1,7 +1,217 @@
-# run-evaluations-2
+---
+title: "Run evaluations"
+description: "Learn how to run evaluations using Arcade"
+---
 
-Documentation coming soon.
+# Run evaluations with the Arcade CLI
 
-## Overview
+The Arcade Evaluation Framework allows you to run evaluations of your tool-enabled language models conveniently using the Arcade CLI. This enables you to execute your evaluation suites, gather results, and analyze the performance of your models in an efficient and streamlined manner.
 
-This section will contain detailed information about run-evaluations-2.
+<GuideOverview>
+<GuideOverview.Outcomes>
+
+Run evaluations of your tool-enabled language models using the Arcade CLI.
+
+</GuideOverview.Outcomes>
+
+<GuideOverview.Prerequisites>
+
+- [Arcade CLI](/home/arcade-cli)
+- [An MCP Server](/home/build-tools/create-a-mcp-server)
+- [Create an evaluation suite](/home/evaluate-tools/create-an-evaluation-suite)
+
+</GuideOverview.Prerequisites>
+
+<GuideOverview.YouWillLearn>
+
+- How to use the `arcade evals` CLI command to run evaluations.
+
+</GuideOverview.YouWillLearn>
+</GuideOverview>
+
+### Using the `arcade evals` Command
+
+To run evaluations, use the `arcade evals` command provided by the Arcade CLI. This command searches for evaluation files in the specified directory, executes any functions decorated with `@tool_eval`, and displays the results.
+
+#### Basic Usage
+
+```bash
+arcade evals <directory>
+```
+
+- `<directory>`: The directory containing your evaluation files. By default, it searches the current directory (`.`).
+
+For example, to run evaluations in the current directory:
+
+```bash
+arcade evals
+```
+
+#### Evaluation File Naming Convention
+
+The `arcade evals` command looks for Python files that start with `eval_` and end with `.py` (e.g., `eval_math_tools.py`, `eval_slack_messaging.py`). These files should contain your evaluation suites.
+
+#### Command Options
+
+The `arcade evals` command supports several options to customize the evaluation process:
+
+- `--details`, `-d`: Show detailed results for each evaluation case, including critic feedback.
+
+  Example:
+
+  ```bash
+  arcade evals --details .
+  ```
+
+- `--models`, `-m`: Specify the models to use for evaluation. Provide a comma-separated list of model names.
+
+  Example:
+
+  ```bash
+  arcade evals --models gpt-4o,gpt-5 .
+  ```
+
+- `--max-concurrent`, `-c`: Set the maximum number of concurrent evaluations to run in parallel.
+
+  Example:
+
+  ```bash
+  arcade evals --max-concurrent 4 .
+  ```
+
+- `--provider`, `-p`: The provider of the models to use for evaluation. Uses OpenAI by default.
+
+  Example:
+
+  ```bash
+  arcade evals --provider openai .
+  ```
+
+- `--provider-api-key`, `-k`: The model provider API key. If not provided, will look for the appropriate environment variable based on the provider (e.g., OPENAI_API_KEY for openai provider), first in the current environment, then in the current working directory's .env file.
+
+  Example:
+
+  ```bash
+  arcade evals --provider-api-key my-api-key .
+  ```
+
+- `--debug`: Show debug information in the CLI.
+
+  Example:
+
+  ```bash
+  arcade evals --debug .
+  ```
+
+- `--help`: Show help information and exit.
+
+  Example:
+
+  ```bash
+  arcade evals --help
+  ```
+
+#### Example Command
+
+Running evaluations in the `arcade_my_tools/evals` directory, showing detailed results, using the `gpt-5` model:
+
+```bash
+arcade evals arcade_my_tools/evals --details --models gpt-5 -k my-openai-api-key
+```
+
+### Execution Process
+
+When you run the `arcade evals` command, the following steps occur:
+
+1. **Preparation**: The CLI loads the evaluation suites from the specified directory, looking for files that match the naming convention.
+
+2. **Execution**: The evaluation suites are executed asynchronously. Each suite's evaluation function, decorated with `@tool_eval`, is called with the appropriate configuration, including the model and concurrency settings.
+
+3. **Concurrency**: Evaluations can run concurrently based on the `--max-concurrent` setting, improving efficiency.
+
+4. **Result Aggregation**: Results from all evaluation cases and models are collected and aggregated.
+
+### Displaying Results
+
+After the evaluations are complete, the results are displayed in a concise and informative format, similar to testing frameworks like `pytest`. The output includes:
+
+- **Summary**: Shows the total number of cases, how many passed, failed, or issued warnings.
+
+  Example:
+
+  ```
+  Summary -- Total: 5 -- Passed: 4 -- Failed: 1
+  ```
+
+- **Detailed Case Results**: For each evaluation case, the status (PASSED, FAILED, WARNED), the case name, and the score are displayed.
+
+  Example:
+
+  ```
+  PASSED Add two large numbers -- Score: 1.00
+  FAILED Send DM with ambiguous username -- Score: 0.75
+  ```
+
+- **Critic Feedback**: If the `--details` flag is used, detailed feedback from each critic is provided, highlighting matches, mismatches, and scores for each evaluated field.
+
+  Example:
+
+  ```
+  Details:
+  user_name:
+    Match: False, Score: 0.00/0.50
+    Expected: johndoe
+    Actual: john_doe
+  message:
+    Match: True, Score: 0.50/0.50
+  ```
+
+### Interpreting the Results
+
+- **Passed**: The evaluation case met or exceeded the fail threshold specified in the rubric.
+
+- **Failed**: The evaluation case did not meet the fail threshold.
+
+- **Warnings**: If the score is between the warn threshold and the fail threshold, a warning is issued.
+
+Use the detailed feedback to understand where the model's performance can be improved, particularly focusing on mismatches identified by critics.
+
+### Customizing Evaluations
+
+You can customize the evaluation process by adjusting:
+
+- **Rubrics**: Modify fail and warn thresholds, and adjust weights to emphasize different aspects of evaluation.
+
+- **Critics**: Add or modify critics in your evaluation cases to target specific arguments or behaviors.
+
+- **Concurrency**: Adjust the `--max-concurrent` option to optimize performance based on your environment.
+
+### Handling Multiple Models
+
+You can evaluate multiple models in a single run by specifying them in the `--models` option as a comma-separated list. This allows you to compare the performance of different models across the same evaluation suites.
+
+Example:
+
+```bash
+arcade evals . --models gpt-4o,gpt-5
+```
+
+### Considerations
+
+- **Evaluation Files**: Ensure your evaluation files are correctly named and contain the evaluation suites decorated with `@tool_eval`.
+
+- **Provider API Keys**: If you are using a different provider, you will need to set the appropriate API key in an environment variable, or use the `--provider-api-key` option.
+
+- **Tool Catalog**: Ensure your tool catalog is correctly defined and includes all the tools you want to evaluate.
+
+- **Weight distribution**: Ensure your weight distribution reflects the importance of each critic and that the sum of the weights is `1.0`.
+
+## Conclusion
+
+Running evaluations using the Arcade CLI provides a powerful and convenient way to assess the tool-calling capabilities of your language models. By leveraging the `arcade evals` command, you can efficiently execute your evaluation suites, analyze results, and iterate on your models and tools.
+
+Integrating this evaluation process into your development workflow helps ensure that your models interact with tools as expected, enhances reliability, and builds confidence in deploying actionable language models in production environments.
+
+## Next steps
+
+- **See an example MCP server with evaluations**: [Source code of a server with evaluations](https://github.com/ArcadeAI/arcade-mcp/tree/139cc2e54db0e5815f1c79dbe9e3285b4fe2bd66/examples/mcp_servers/server_with_evaluations)

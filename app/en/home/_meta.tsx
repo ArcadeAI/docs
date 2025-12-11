@@ -67,9 +67,15 @@ export const meta: MetaRecord = {
     type: "separator",
     title: "Updates",
   },
-  "status-page": "Status",
+  "status-page": {
+    title: "Status",
+    href: "https://status.arcade.dev",
+  },
   "changelog-page": "Changelog",
-  blog: "Blog",
+  blog: {
+    title: "Blog",
+    href: "https://blog.arcade.dev",
+  },
   "-- APIs & SDKs": {
     type: "separator",
     title: "APIs & SDKs",
@@ -90,43 +96,13 @@ export const meta: MetaRecord = {
   "contact-us": {
     display: "hidden",
   },
-  crewai: {
-    display: "hidden",
-  },
-  "custom-apps": {
-    display: "hidden",
-  },
-  "google-adk": {
-    display: "hidden",
-  },
   "hosting-overview": {
-    display: "hidden",
-  },
-  "improve-performance": {
-    display: "hidden",
-  },
-  langchain: {
-    display: "hidden",
-  },
-  mastra: {
     display: "hidden",
   },
   "mcp-clients": {
     display: "hidden",
   },
   "mcp-gateway-quickstart": {
-    display: "hidden",
-  },
-  "new-functionality": {
-    display: "hidden",
-  },
-  "newest-models": {
-    display: "hidden",
-  },
-  "oai-agents": {
-    display: "hidden",
-  },
-  "open-agents": {
     display: "hidden",
   },
   "python-quickstart": {
@@ -139,18 +115,6 @@ export const meta: MetaRecord = {
     display: "hidden",
   },
   "tool-calling-intro": {
-    display: "hidden",
-  },
-  "tool-writing-basics": {
-    display: "hidden",
-  },
-  "tool-writing-reference": {
-    display: "hidden",
-  },
-  "triggers-section": {
-    display: "hidden",
-  },
-  vercelai: {
     display: "hidden",
   },
   guides: {
