@@ -34,16 +34,9 @@ export const meta: MetaRecord = {
   setup: "Setup",
   quickstarts: "Quickstarts",
   "common-use-cases": "Common Use Cases",
+  "example-agents": "Example Agents",
   glossary: "Glossary",
   faq: "FAQ",
-  "-- Example agents": {
-    type: "separator",
-    title: "Example agents",
-  },
-  "confluence-jira-example":
-    "Turn Confluence into Jira Tickets/Turn Google doc into Linear Tickets",
-  "daily-digest-example":
-    "Daily Digest: Summarize your Google Calendar / Email stuffs",
   "-- Guides": {
     type: "separator",
     title: "Guides",
