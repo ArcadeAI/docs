@@ -1,0 +1,42 @@
+import { Steps, Callout } from "nextra/components";
+import { SignupLink } from "@/app/_components/analytics";
+
+# Use Arcade in Visual Studio Code
+
+In this guide, you'll learn how to connect Visual Studio Code to an Arcade MCP Gateway.
+
+<Steps>
+
+### Prerequisites
+
+1. Create an <SignupLink linkLocation="docs:claude-desktop-client">Arcade account</SignupLink>
+2. Get an [Arcade API key](/home/api-keys)
+3. Create an [Arcade MCP Gateway](/home/mcp-gateways) and select the tools you want to use
+
+### Set up Visual Studio Code
+
+3. Download and open [Visual Studio Code](https://code.visualstudio.com/download) (version 1.100.0 or higher)
+4. Open the command palette and select **MCP: Add Server...**
+5. Choose **HTTP**
+6. Paste the URL of your MCP Gateway. You may see a warning about Dynamic Client Registration. You can ignore this.
+7. Give your MCP server a name, like `mcp-arcade`
+8. Add the API key as the bearer token within the `Authorization` header, and the email address that you used to sign up for the Arcade account as the `Arcade-User-ID` header
+
+Visual Studio Code will update your `mcp.json` file, but you will manually need to add the headers above:
+
+```json
+{
+  "servers": {
+    "mcp-arcade": {
+      "url": "https://api.arcade.dev/mcp/<YOUR-GATEWAY-SLUG>",
+      "type": "http",
+      "headers": {
+        "Authorization": "Bearer {arcade_api_key}",
+        "Arcade-User-ID": "{arcade_user_id}"
+      }
+    }
+  }
+}
+```
+
+</Steps>

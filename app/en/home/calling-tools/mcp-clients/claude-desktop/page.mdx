@@ -1,0 +1,42 @@
+import { Steps, Tabs, Callout } from "nextra/components";
+import { SignupLink } from "@/app/_components/analytics";
+
+# Use Arcade with Claude Desktop
+
+In this guide, you'll learn how to connect Claude Desktop to a local Arcade server.
+
+<Steps>
+
+### Prerequisites
+
+1. Create an <SignupLink linkLocation="docs:claude-desktop-client">Arcade account</SignupLink>
+2. Get an [Arcade API key](/home/api-keys)
+3. Create an [Arcade MCP Gateway](/home/mcp-gateways) and select the tools you want to use
+
+### Set up Claude Desktop
+
+1. Download and open [Claude Desktop](https://claude.ai/download)
+2. Claude Menu --> "Settings" --> "Developer" --> "Edit Config"
+3. Follow the guide [here](https://support.claude.com/en/articles/11175166-getting-started-with-custom-connectors-using-remote-mcp)
+4. Open the configuration file and replace the file contents with this:
+    * Give your MCP server a name, like `mcp-arcade`
+    * Use the the URL of your MCP Gateway.
+    * Add the API key as the bearer token within the `Authorization` header, and the email address that you used to sign up for the Arcade account as the `Arcade-User-ID` header
+
+```json
+{
+  "mcpServers": {
+    "arcade-mcp": {
+      "url": "https://api.arcade.dev/mcp/<YOUR-GATEWAY-SLUG>",
+      "headers": {
+        "Authorization": "Bearer {arcade_api_key}",
+        "Arcade-User-ID": "{arcade_user_id}"
+      }
+    }
+  }
+}
+```
+
+5. Restart Claude Desktop. Upon restarting, you should have access to the Arcade tools you installed.
+
+</Steps>

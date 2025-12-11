@@ -1,4 +1,4 @@
-import { BadgeHelp, Globe, HeartPulse, Home, Shield } from "lucide-react";
+import { Home } from "lucide-react";
 import type { MetaRecord } from "nextra";
 
 function TitleWithIcon({
@@ -17,11 +17,6 @@ function TitleWithIcon({
 }
 
 export const meta: MetaRecord = {
-  "*": {
-    theme: {
-      copyPage: true,
-    },
-  },
   index: {
     title: <TitleWithIcon icon={Home}>Home</TitleWithIcon>,
     theme: {
@@ -31,129 +26,120 @@ export const meta: MetaRecord = {
       copyPage: false,
     },
   },
-  arcade: {
-    title: <TitleWithIcon icon={Globe}>Arcade.dev</TitleWithIcon>,
-    href: "https://arcade.dev",
-  },
-  "-- Getting Started": {
+  "-- Get Started": {
     type: "separator",
-    title: "Using Arcade",
+    title: "Get Started",
   },
-  quickstart: {
-    title: "Hosted Tools Quickstart",
-  },
-  "custom-mcp-server-quickstart": {
-    title: "Build MCP Server QuickStart",
-  },
-  "api-keys": {
-    title: "Get an API key",
-  },
-  "-- Authoring Tools": {
+  "about-arcade": "About Arcade",
+  setup: "Setup",
+  quickstarts: "Quickstarts",
+  "common-use-cases": "Common Use Cases",
+  glossary: "Glossary",
+  faq: "FAQ",
+  "-- Example agents": {
     type: "separator",
-    title: "Authoring Tools",
+    title: "Example agents",
   },
-  "build-tools": {
-    title: "Build tools",
-  },
-  "evaluate-tools": {
-    title: "Evaluate tools",
-  },
-  "serve-tools": {
-    title: "Serve tools",
-  },
-  "-- Agent Frameworks and MCP": {
-    type: "separator",
-    title: "Agent Frameworks and MCP",
-  },
-  "mcp-clients": {
-    title: "MCP Clients",
-  },
-  langchain: {
-    title: "LangChain",
-  },
-  crewai: {
-    title: "CrewAI",
-  },
-  "google-adk": {
-    title: "Google ADK",
-  },
-  mastra: {
-    title: "Mastra",
-  },
-  "oai-agents": {
-    title: "OpenAI Agents",
-  },
-  vercelai: {
-    title: "Vercel AI",
-  },
-  "-- Core Concepts": {
-    type: "separator",
-    title: "Core Concepts",
-  },
-  "use-tools": {
-    title: "Tool Calling",
-  },
-  auth: {
-    title: "Authorization",
-  },
-  "mcp-gateways": {
-    title: "MCP Gateways",
-  },
-  "arcade-cli": {
-    title: "Arcade CLI",
-  },
-  "-- Hosting options": {
-    type: "separator",
-    title: "Hosting options",
-  },
-  "hosting-overview": {
-    title: "Overview",
-  },
-  deployment: {
-    title: "Deployment",
-  },
-  "auth-providers": {
-    title: "Customizing Auth",
-  },
+  "confluence-jira-example":
+    "Turn Confluence into Jira Tickets/Turn Google doc into Linear Tickets",
+  "daily-digest-example":
+    "Daily Digest: Summarize your Google Calendar / Email stuffs",
   "-- Guides": {
     type: "separator",
     title: "Guides",
   },
-  glossary: {
-    title: "Glossary",
+  "configure-arcade-section": "Configure Arcade",
+  "calling-tools": "Calling tools",
+  "creating-tools": "Creating tools",
+  "agent-frameworks": "Agent Frameworks",
+  "sharing-with-end-users": "Sharing your agent with end-users",
+  "observability-platforms": "Observability Platforms",
+  "deployment-hosting": "Deployment and Hosting",
+  "security-section": "Security and Compliance",
+  "-- Learn": {
+    type: "separator",
+    title: "Learn",
   },
-  faq: {
-    title: "FAQ",
+  "what-is-agent": "What's an agent?",
+  "auth-and-secrets": "How do auth and secrets work?",
+  "agentic-architecture": "Agentic Architectures & Workflows",
+  "-- Updates": {
+    type: "separator",
+    title: "Updates",
   },
-  "compare-server-types": {
-    title: "Compare Server Types",
+  "status-page": {
+    title: "Status",
+    href: "https://status.arcade.dev",
   },
-  "agentic-development": {
-    title: "Agentic Development",
+  "changelog-page": "Changelog",
+  blog: {
+    title: "Blog",
+    href: "https://blog.arcade.dev",
+  },
+  "-- APIs & SDKs": {
+    type: "separator",
+    title: "APIs & SDKs",
+  },
+  api: "API",
+  "arcade-mcp": "Arcade MCP (MCP Server SDK)",
+  "arcade-clients": "Arcade Clients",
+  // Hide auto-discovered directories
+  "api-keys": {
+    display: "hidden",
+  },
+  "auth-providers": {
+    display: "hidden",
   },
   changelog: {
-    title: "Changelog",
-  },
-  "-- Registry": {
-    type: "separator",
-    title: "Registry",
-  },
-  "registry-early-access": {
-    title: "Registry Early Access",
-  },
-  "-- Resources": {
-    type: "separator",
-    title: "Resources",
+    display: "hidden",
   },
   "contact-us": {
-    title: <TitleWithIcon icon={BadgeHelp}>Contact us</TitleWithIcon>,
+    display: "hidden",
+  },
+  "hosting-overview": {
+    display: "hidden",
+  },
+  "mcp-clients": {
+    display: "hidden",
+  },
+  "mcp-gateway-quickstart": {
+    display: "hidden",
+  },
+  "python-quickstart": {
+    display: "hidden",
+  },
+  "registry-early-access": {
+    display: "hidden",
+  },
+  "sample-agents": {
+    display: "hidden",
+  },
+  "tool-calling-intro": {
+    display: "hidden",
+  },
+  guides: {
+    display: "hidden",
+  },
+  "add-external-mcp": {
+    display: "hidden",
+  },
+  "build-custom-mcp": {
+    display: "hidden",
+  },
+  concepts: {
+    display: "hidden",
+  },
+  examples: {
+    display: "hidden",
   },
   security: {
-    title: <TitleWithIcon icon={Shield}>Security</TitleWithIcon>,
+    display: "hidden",
   },
-  status: {
-    title: <TitleWithIcon icon={HeartPulse}>Status</TitleWithIcon>,
-    href: "https://status.arcade.dev/",
+  "turn-api-to-mcp": {
+    display: "hidden",
+  },
+  "why-agents-call-tools": {
+    display: "hidden",
   },
 };
 
