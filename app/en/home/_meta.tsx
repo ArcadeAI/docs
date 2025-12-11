@@ -69,9 +69,9 @@ export const meta: MetaRecord = {
     title: "Blog",
     href: "https://blog.arcade.dev",
   },
-  "-- APIs": {
+  "-- API Reference": {
     type: "separator",
-    title: "APIs",
+    title: "API Reference",
   },
   api: "API",
   "arcade-mcp": "Arcade MCP (MCP Server SDK)",
