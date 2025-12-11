@@ -35,6 +35,10 @@ export const meta: MetaRecord = {
   quickstarts: "Quickstarts",
   "common-use-cases": "Common Use Cases",
   "example-agents": "Example Agents",
+  toolkits: {
+    title: "Toolkits",
+    href: "/en/mcp-servers",
+  },
   glossary: "Glossary",
   faq: "FAQ",
   "-- Guides": {
