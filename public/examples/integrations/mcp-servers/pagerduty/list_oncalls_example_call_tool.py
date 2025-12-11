@@ -1,0 +1,29 @@
+import json
+from arcadepy import Arcade
+
+client = Arcade()
+USER_ID = "{arcade_user_id}"
+TOOL_NAME = "PagerDuty.ListOnCalls"
+
+auth_response = client.tools.authorize(tool_name=TOOL_NAME, user_id=USER_ID)
+if auth_response.status != "completed":
+    print(f"Authorize here: {auth_response.url}")
+client.auth.wait_for_completion(auth_response)
+
+tool_input = {
+    "schedule_ids": None,
+    "escalation_policy_ids": None,
+    "team_ids": None,
+    "time_zone": None,
+    "since": None,
+    "until": None,
+    "limit": 10,
+    "offset": None,
+}
+
+response = client.tools.execute(
+    tool_name=TOOL_NAME,
+    input=tool_input,
+    user_id=USER_ID,
+)
+print(json.dumps(response.output.value, indent=2))
