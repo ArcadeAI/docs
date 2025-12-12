@@ -3,7 +3,7 @@ import { Arcade } from "@arcadeai/arcadejs";
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
 const USER_ID = "{arcade_user_id}";
-const TOOL_NAME = "GoogleDrive.GetFileTreeStructure";
+const TOOL_NAME = "GoogleDrive.CreateFolder";
 
 // Start the authorization process
 const authResponse = await client.tools.authorize({tool_name: TOOL_NAME, user_id: USER_ID});
@@ -16,9 +16,8 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  "include_shared_drives": true,
-  "order_by": ["name"],
-  "limit": 100
+  "folder_name": "My New Folder",
+  "parent_folder_path_or_id": "Projects/2024"
 };
 
 const response = await client.tools.execute({
@@ -28,3 +27,4 @@ const response = await client.tools.execute({
 });
 
 console.log(JSON.stringify(response.output.value, null, 2));
+

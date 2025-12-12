@@ -19,10 +19,7 @@ const toolInput = {
   "query": "project report",
   "include_shared_drives": true,
   "limit": 10,
-  "file_types": [
-    "document",
-    "spreadsheet"
-  ]
+  "file_types": ["document", "spreadsheet"]
 };
 
 const response = await client.tools.execute({
