@@ -1,7 +1,7 @@
 export default {
   vanilla: "Vanilla",
   langchain: "LangGraph",
-  "oai-agents": "OpenAI Agents",
+  "oai-agents": "OpenAI agents",
   crewai: "CrewAI",
   "open-agents": "OpenAgents",
   "google-adk": "Google ADK",

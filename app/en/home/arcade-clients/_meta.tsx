@@ -1,6 +1,6 @@
 export default {
-  "python-client": "Python Client",
-  "javascript-typescript-client": "JavaScript / TypeScript Client",
-  "go-client": "Go Client",
-  "java-client": "Java Client",
+  "python-client": "Python client",
+  "javascript-typescript-client": "JavaScript / TypeScript client",
+  "go-client": "Go client",
+  "java-client": "Java client",
 };

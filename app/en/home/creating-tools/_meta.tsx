@@ -6,5 +6,5 @@ export default {
     "Build tools with agent functionality that doesn't exist",
   "newest-models": "Ensure tools work with the newest models",
   "error-handling": "Handle errors",
-  "registry-early-access": "Registry Early Access",
+  "registry-early-access": "Registry early access",
 };

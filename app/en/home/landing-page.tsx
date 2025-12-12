@@ -57,7 +57,7 @@ export function LandingPage() {
             initial={{ opacity: 0, y: 20 }}
             transition={{ duration: ANIMATION_DURATION }}
           >
-            Welcome to Arcade!
+            Ship AI agents that take action
           </motion.h1>
           <motion.p
             animate={{ opacity: 1, y: 0 }}
@@ -81,18 +81,26 @@ export function LandingPage() {
             }}
           >
             <p className="pt-8 text-left text-gray-700 dark:text-gray-200">
-              Arcade enables your AI agent to securely take real-world actions
-              through user-specific permissions, pre-built MCP Servers for
-              Gmail, Slack, GitHub, and more. You can also build your own
-              agentic tools and MCP servers with our authoring and testing
-              suite. Arcade is your tool{" "}
-              <span className="font-bold text-primary">engine</span>,{" "}
-              <span className="font-bold text-primary">registry</span>, and{" "}
-              <span className="font-bold text-primary">runtime</span>.
+              Give your agents the ability to send emails, update calendars,
+              manage files, and interact with any system—not just answer
+              questions. Arcade handles authentication, permissions, and API
+              integrations so your agents can work on behalf of real users,
+              securely.
             </p>
-            <p className="pt-8 text-left text-gray-700 dark:text-gray-200">
-              Get started with a 5-minute quickstart.
-            </p>
+            <ul>
+              <li>
+                <strong>Pre-built integrations</strong> Gmail, Slack, GitHub,
+                and 50+ tools
+              </li>
+              <li>
+                <strong>Custom tools</strong> Build and deploy your own with our
+                SDK
+              </li>
+              <li>
+                <strong>Built on MCP</strong> Model Context Protocol for
+                universal agent compatibility
+              </li>
+            </ul>
           </motion.div>
           <motion.div
             animate={{ opacity: 1, y: 0 }}
@@ -108,7 +116,7 @@ export function LandingPage() {
               className="h-12 bg-primary px-6 text-white hover:bg-primary/90"
               size="lg"
             >
-              <Link href="/home/quickstart">
+              <Link href="/home/quickstarts/call-tool-easy">
                 <Rocket className="mr-2 h-5 w-5" />
                 Get Started
               </Link>
@@ -119,9 +127,9 @@ export function LandingPage() {
               size="lg"
               variant="outline"
             >
-              <Link href="/home/build-tools/create-a-mcp-server">
+              <Link href="/mcp-servers">
                 <Wrench className="mr-2 h-5 w-5" />
-                Build a tool
+                Browse the tools
               </Link>
             </Button>
           </motion.div>
@@ -135,13 +143,13 @@ export function LandingPage() {
             }}
           >
             <div className="rounded-lg border border-gray-300 bg-gray-50/50 p-4 text-gray-700 italic backdrop-blur-sm dark:border-white dark:bg-gray-900/50 dark:text-white">
-              Don't write code yourself - let your AI IDE do it for you! <br />
+              Arcade works with your AI IDE:
+              <br />
               <Link
                 className="text-primary hover:underline"
-                href="/home/agentic-development"
+                href="/home/setup/connect-arcade-docs"
               >
-                Learn how to give your coding agents access to Arcade.dev's
-                documentation
+                Give your coding agent access to Arcade.dev's documentation
               </Link>
             </div>
           </motion.div>
@@ -337,28 +345,28 @@ export function LandingPage() {
           </div>
           <div className="mt-16 grid gap-8 md:grid-cols-2">
             <QuickStartCard
-              description="The Arcade engine is your MCP Server and Agentic tool provider.  It allows you to write your tools once and serve them across any LLM or orchestration framework, no matter the protocol.  The engine manages agent authentication, tool registration, and tool execution."
+              description="Users grant permissions once, agents inherit scoped access."
               href="#"
               icon={Rocket}
               title="Arcade Engine"
             />
             <QuickStartCard
-              description="The Arcade Dashboard is how you manage your tools, users, and deployments from a single place.  No matter how large your deployment or organization gets, the Dashboard will scale with you."
-              href="#"
+              description="Discover pre-built integrations and custom tools."
+              href="/mcp-servers"
               icon={Users}
-              title="Dashboard"
+              title="Tool Registry"
             />
             <QuickStartCard
-              description="Arcade makes it easy to develop custom tools that just work with Agents.  Our SDKs and framework integrations make it easy to get started.  When you are ready, it's easy to run your tools either on-prem or in our cloud."
+              description="Built on Model Context Protocol (MCP) for compatibility with Claude, GPT, and other LLMs."
               href="#"
               icon={Cloud}
-              title="Public and Private Tools"
+              title="MCP native"
             />
             <QuickStartCard
-              description="The Arcade Engine is the only way to combine MCP servers with your Agentic tools. Regardless of where your tool is hosted, you can serve and manage access to it via the Engine.  You easily can mix our public tools with your own private tools in your agents."
+              description="Your agent calls tools, we handle the rest."
               href="#"
               icon={Wrench}
-              title="Tools and MCP Servers Together"
+              title="Execution Runtime"
             />
           </div>
         </div>

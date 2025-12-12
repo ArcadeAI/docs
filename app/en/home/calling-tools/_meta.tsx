@@ -8,7 +8,7 @@ export default {
   "third-party-apps": "Call a tool in your IDEs, MCP clients, or agents",
   "mcp-clients": "Connect to a MCP client",
   "evaluation-suite": "Create an evaluation suite to test tools",
-  "mcp-gateway-auth": "Add authentication to your MCP Gateway",
+  "mcp-gateway-auth": "Add authentication to your MCP gateway",
   "-- In custom applications": {
     type: "separator",
     title: "In custom applications",
@@ -29,5 +29,5 @@ export default {
     type: "separator",
     title: "Reference",
   },
-  "direct-api-call": "Direct Third-Party API Call",
+  "direct-api-call": "Direct third-party API call",
 };
