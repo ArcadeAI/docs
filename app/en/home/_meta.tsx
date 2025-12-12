@@ -119,6 +119,9 @@ export const meta: MetaRecord = {
     type: "separator",
     title: "Guides",
   },
+  "connect-arcade-to-your-llm": {
+    title: "Integrate Arcade tools into your LLM application",
+  },
   glossary: {
     title: "Glossary",
   },
