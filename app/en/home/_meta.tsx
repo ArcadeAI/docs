@@ -1,4 +1,4 @@
-import { BadgeHelp, Globe, HeartPulse, Home, Shield } from "lucide-react";
+import { BadgeHelp, Globe, Home, Shield } from "lucide-react";
 import type { MetaRecord } from "nextra";
 
 function TitleWithIcon({
@@ -150,10 +150,6 @@ export const meta: MetaRecord = {
   },
   security: {
     title: <TitleWithIcon icon={Shield}>Security</TitleWithIcon>,
-  },
-  status: {
-    title: <TitleWithIcon icon={HeartPulse}>Status</TitleWithIcon>,
-    href: "https://status.arcade.dev/",
   },
 };
 
