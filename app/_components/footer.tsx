@@ -110,6 +110,11 @@ const Footer: React.FC = () => {
       title: "GitHub Container Registry",
       external: true,
     },
+    {
+      url: "https://status.arcade.dev/",
+      title: "Status",
+      external: true,
+    },
   ];
 
   const resources: Resource[] = [
