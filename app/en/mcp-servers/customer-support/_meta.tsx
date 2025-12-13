@@ -11,6 +11,9 @@ const meta: MetaRecord = {
   zendesk: {
     title: "Zendesk",
   },
+  pylon: {
+    title: "Pylon",
+  },
 };
 
 export default meta;

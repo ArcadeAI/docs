@@ -1,0 +1,518 @@
+# Pylon
+
+import ToolInfo from "@/app/_components/tool-info";
+import Badges from "@/app/_components/badges";
+import TabbedCodeBlock from "@/app/_components/tabbed-code-block";
+import TableOfContents from "@/app/_components/table-of-contents";
+import ToolFooter from "@/app/_components/tool-footer";
+import { Callout } from "nextra/components";
+
+<ToolInfo
+  description="Enable agents to interact with Pylon issues, contacts, users, and teams"
+  author="Arcade"
+  authType="API Token"
+  versions={["1.0.0"]}
+/>
+
+<Badges repo="arcadeai/arcade_pylon" />
+
+The Pylon MCP Server lets agents work with Pylon’s issue management features—list and search issues, assign owners, add messages, browse contacts, users, and teams. There is **no OAuth** for Pylon; you must provide an **admin-generated API token**.
+
+- **Issues**: list, search (BM25), fetch details, assign owners, update status, add messages
+- **Contacts**: list and search by name or email
+- **Users & Teams**: list/search users, list teams, get team details with members
+- **User context**: fetch the API token owner profile (service account)
+
+<Callout type="warning" title="Admin token required">
+  Pylon API tokens are admin-scoped and created in Pylon by an org admin. Store
+  the token as `PYLON_API_TOKEN` in Arcade secrets. There is no user OAuth.
+</Callout>
+
+## Available tools
+
+<TableOfContents
+  headers={["Tool Name", "Description"]}
+  data={[
+    ["Pylon.WhoAmI", "Get the API token owner's profile (service account)"],
+    [
+      "Pylon.ListIssues",
+      "List issues with filters (state, assignee, team, tags, date range)",
+    ],
+    ["Pylon.GetIssue", "Get detailed issue info by ID or keyword search"],
+    ["Pylon.SearchIssues", "Keyword search across recent issues (BM25)"],
+    ["Pylon.AssignIssue", "Assign an issue to a user (ID or fuzzy name)"],
+    ["Pylon.UpdateIssueStatus", "Change issue state"],
+    ["Pylon.AddMessage", "Add an internal note to an issue"],
+    ["Pylon.ListContacts", "List contacts with pagination"],
+    ["Pylon.SearchContacts", "Search contacts by name or email"],
+    ["Pylon.ListUsers", "List users in the workspace"],
+    ["Pylon.SearchUsers", "Search users by name (fuzzy)"],
+    ["Pylon.ListTeams", "List teams"],
+    [
+      "Pylon.GetTeamAndAssignment",
+      "Get team details and members by ID or name",
+    ],
+  ]}
+/>
+
+<Callout>
+  If you need a tool that isn't listed, [contact us](mailto:contact@arcade.dev)
+  or [build your own](/home/build-tools/create-a-mcp-server).
+</Callout>
+
+<Callout type="info" title="MCP behavior hints">
+  - `readOnlyHint` — reads data only - `openWorldHint` — calls Pylon’s external
+  API - `destructiveHint` — flags irreversible or hidden changes -
+  `idempotentHint` — repeating the same call has no extra effect
+</Callout>
+
+---
+
+## User context
+
+### Pylon.WhoAmI
+
+Get the API token owner (service account) profile.
+
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/pylon/who_am_i_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/pylon/who_am_i_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Returns name, email, and org info for the token owner.
+
+**Parameters**
+
+This tool takes no parameters.
+
+<Callout type="info" title="MCP behavior hints">
+  - `readOnlyHint: true` - `openWorldHint: true`
+</Callout>
+
+<Callout type="info" title="API calls">
+  GET `/me`
+</Callout>
+
+---
+
+## Issue tools
+
+### Pylon.ListIssues
+
+List issues with optional filters.
+
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/pylon/list_issues_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/pylon/list_issues_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+**Parameters**
+
+- **state** (`enum`, _optional_) Filter by state.
+- **assignee_id** (`string`, _optional_) Filter by assignee ID.
+- **team_id** (`string`, _optional_) Filter by team ID.
+- **tags** (`array`, _optional_) Issues must include all provided tags.
+- **start_time** (`string`, _optional_) RFC3339 start time. Default: 7 days ago.
+- **end_time** (`string`, _optional_) RFC3339 end time. Default: now.
+- **cursor** (`string`, _optional_) Pagination cursor.
+
+<Callout type="info" title="API calls">
+  GET `/issues`
+</Callout>
+
+---
+
+### Pylon.GetIssue
+
+Get detailed issue info by ID or keyword search (BM25).
+
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/pylon/get_issue_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/pylon/get_issue_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+**Parameters**
+
+- **lookup_by** (`enum`, **required**) `id` or `search`.
+- **value** (`string`, **required**) Issue ID/number or search keywords.
+- **auto_accept_matches** (`boolean`, _optional_) Auto-accept search matches above confidence threshold. Default: `false`.
+
+<Callout type="info" title="API calls">
+  GET `/issues/{id}` or GET `/issues` (search)
+</Callout>
+
+---
+
+### Pylon.SearchIssues
+
+Keyword search across recent issues (BM25).
+
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/pylon/search_issues_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/pylon/search_issues_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+**Parameters**
+
+- **query** (`string`, **required**) Keywords (supports AND/OR/NOT).
+- **auto_accept_matches** (`boolean`, _optional_) Auto-accept high-confidence matches. Default: `false`.
+
+<Callout type="info" title="API calls">
+  GET `/issues` (fetch recent issues for ranking)
+</Callout>
+
+---
+
+### Pylon.AssignIssue
+
+Assign an issue to a user (ID or fuzzy name).
+
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/pylon/assign_issue_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/pylon/assign_issue_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+**Parameters**
+
+- **issue_lookup_by** (`enum`, **required**) `id` or `search`.
+- **issue_value** (`string`, **required**) Issue ID/number or search keywords.
+- **user_lookup_by** (`enum`, **required**) `id` or `name`.
+- **user_value** (`string`, **required**) User ID or name (fuzzy match).
+- **auto_accept_matches** (`boolean`, _optional_) Auto-accept fuzzy/BM25 matches. Default: `false`.
+
+<Callout type="info" title="API calls">
+  GET `/issues/{id}`, GET `/issues`, GET `/users`, PATCH `/issues/{id}`
+</Callout>
+
+---
+
+### Pylon.UpdateIssueStatus
+
+Change the state of an issue.
+
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/pylon/update_issue_status_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/pylon/update_issue_status_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+**Parameters**
+
+- **state** (`enum`, **required**) New state.
+- **lookup_by** (`enum`, **required**) `id` or `search`.
+- **value** (`string`, **required**) Issue ID/number or keywords.
+- **auto_accept_matches** (`boolean`, _optional_) Auto-accept search matches. Default: `false`.
+
+<Callout type="info" title="API calls">
+  GET `/issues/{id}`, GET `/issues`, PATCH `/issues/{id}`
+</Callout>
+
+---
+
+### Pylon.AddMessage
+
+Add an internal note to an issue.
+
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/pylon/add_message_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/pylon/add_message_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+**Parameters**
+
+- **issue_id** (`string`, **required**) Issue ID or number.
+- **body** (`string`, **required**) Message content.
+- **as_html** (`boolean`, _optional_) Body is pre-formatted HTML. Default: `false`.
+
+<Callout type="info" title="API calls">
+  POST `/issues/{id}/note`
+</Callout>
+
+---
+
+## Contact tools
+
+### Pylon.ListContacts
+
+List contacts with pagination.
+
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/pylon/list_contacts_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/pylon/list_contacts_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+**Parameters**
+
+- **cursor** (`string`, _optional_) Pagination cursor.
+
+<Callout type="info" title="API calls">
+  GET `/contacts`
+</Callout>
+
+---
+
+### Pylon.SearchContacts
+
+Search contacts by name or email.
+
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/pylon/search_contacts_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/pylon/search_contacts_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+**Parameters**
+
+- **query** (`string`, **required**) Name or email.
+- **auto_accept_matches** (`boolean`, _optional_) Auto-accept matches above confidence threshold. Default: `false`.
+
+<Callout type="info" title="API calls">
+  POST `/contacts/search`, GET `/contacts`
+</Callout>
+
+---
+
+## User tools
+
+### Pylon.ListUsers
+
+List users in the workspace.
+
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/pylon/list_users_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/pylon/list_users_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+**Parameters**
+
+- **cursor** (`string`, _optional_) Pagination cursor.
+- **limit** (`integer`, _optional_) Items per page. Default: 20.
+
+<Callout type="info" title="API calls">
+  GET `/users`
+</Callout>
+
+---
+
+### Pylon.SearchUsers
+
+Search users by name (fuzzy).
+
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/pylon/search_users_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/pylon/search_users_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+**Parameters**
+
+- **query** (`string`, **required**) Name or partial name.
+- **auto_accept_matches** (`boolean`, _optional_) Auto-accept matches above confidence threshold. Default: `false`.
+
+<Callout type="info" title="API calls">
+  GET `/users`
+</Callout>
+
+---
+
+## Team tools
+
+### Pylon.ListTeams
+
+List teams in the workspace.
+
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/pylon/list_teams_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/pylon/list_teams_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+**Parameters**
+
+- **cursor** (`string`, _optional_) Pagination cursor.
+
+<Callout type="info" title="API calls">
+  GET `/teams`
+</Callout>
+
+---
+
+### Pylon.GetTeamAndAssignment
+
+Get team details (with members) by ID or fuzzy name.
+
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/pylon/get_team_and_assignment_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/pylon/get_team_and_assignment_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+**Parameters**
+
+- **lookup_by** (`enum`, **required**) `id` or `name`.
+- **value** (`string`, **required**) Team ID or name.
+- **auto_accept_matches** (`boolean`, _optional_) Auto-accept fuzzy matches. Default: `false`.
+
+<Callout type="info" title="API calls">
+  GET `/teams`, GET `/teams/{id}`
+</Callout>
+
+---
+
+## Auth
+
+Pylon uses Bearer tokens created by an org admin. There is **no OAuth flow**. Generate an API token in the Pylon dashboard and store it as the secret `PYLON_API_TOKEN` in Arcade. All tools require this secret.
+
+**Auth header**
+
+```
+Authorization: Bearer <token>
+```
+
+<Callout type="warning" title="Admin-only token">
+  Pylon tokens are generated by admins in the Pylon UI and grant org-level
+  access. Rotate tokens regularly and scope storage to your Arcade project’s
+  secrets.
+</Callout>
+
+Refer to Pylon’s authentication docs: [Pylon API Authentication](https://docs.usepylon.com/pylon-docs/developer/api/authentication).
+
+<ToolFooter pipPackageName="arcade_pylon" />
