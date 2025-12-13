@@ -17,21 +17,22 @@ In this guide, you'll learn how to connect Claude Desktop to a local Arcade serv
 
 1. Download and open [Claude Desktop](https://claude.ai/download)
 2. Claude Menu --> "Settings" --> "Developer" --> "Edit Config"
-3. Follow the guide [here](https://support.claude.com/en/articles/11175166-getting-started-with-custom-connectors-using-remote-mcp)
+3. This will create a configuration file at:
+   - On Mac: `~/Library/Application Support/Claude/claude_desktop_config.json`
+   - On Windows: `%APPDATA%\Claude\claude_desktop_config.json`
 4. Open the configuration file and replace the file contents with this:
-    * Give your MCP server a name, like `mcp-arcade`
-    * Use the the URL of your MCP Gateway.
-    * Add the API key as the bearer token within the `Authorization` header, and the email address that you used to sign up for the Arcade account as the `Arcade-User-ID` header
+
+Replace `YOUR_ARCADE_API_KEY_HERE` with your actual Arcade API key and `/path/to/python` with the path to your Python interpreter and `/path/to/arcade` with the path to the Arcade package.
 
 ```json
 {
   "mcpServers": {
-    "arcade-mcp": {
-      "url": "https://api.arcade.dev/mcp/<YOUR-GATEWAY-SLUG>",
-      "headers": {
-        "Authorization": "Bearer {arcade_api_key}",
-        "Arcade-User-ID": "{arcade_user_id}"
-      }
+    "arcade-stdio": {
+      "command": "bash",
+      "args": [
+        "-c",
+        "export ARCADE_API_KEY=YOUR_ARCADE_API_KEY_HERE && /path/to/python /path/to/arcade serve --mcp"
+      ]
     }
   }
 }
