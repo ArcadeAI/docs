@@ -3,7 +3,7 @@ from arcadepy import Arcade
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
 USER_ID = "{arcade_user_id}"
-TOOL_NAME = "GoogleContacts.SearchContactsByName"
+TOOL_NAME = "GoogleContacts.SearchContactsByPhoneNumber"
 
 auth_response = client.tools.authorize(
     tool_name=TOOL_NAME,
@@ -17,7 +17,7 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    "name": "John Doe",
+    "phone_number": "+1234567890",
     "limit": 30,
 }
 
