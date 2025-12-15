@@ -30,7 +30,7 @@ export function GuideOverview({ children, className }: GuideOverviewProps) {
   return (
     <div
       className={cn(
-        "my-6 rounded-lg border border-border bg-card p-6",
+        "guide-overview my-6 rounded-lg border border-border bg-card p-6",
         className
       )}
     >
