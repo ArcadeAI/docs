@@ -3,7 +3,7 @@ import { Arcade } from "@arcadeai/arcadejs";
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
 const USER_ID = "{arcade_user_id}";
-const TOOL_NAME = "GoogleContacts.CreateContact";
+const TOOL_NAME = "GoogleContacts.SearchContactsByPhoneNumber";
 
 // Start the authorization process
 const authResponse = await client.tools.authorize({
@@ -19,10 +19,8 @@ if (authResponse.status !== "completed") {
 await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
-  given_name: "John",
-  family_name: "Doe",
-  email: "john.doe@example.com",
-  phone_number: "+1234567890"
+  phone_number: "+1234567890",
+  limit: 30,
 };
 
 const response = await client.tools.execute({
