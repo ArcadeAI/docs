@@ -11,7 +11,7 @@ import { SignupLink } from "@/app/_components/analytics";
 <GuideOverview>
 <GuideOverview.Outcomes>
 
-Integrate Arcade tool-calling capabilities into an application that uses an LLM in Python.
+Integrate Arcade's tool-calling capabilities into an application that uses an LLM in Python.
 
 </GuideOverview.Outcomes>
 
@@ -77,7 +77,7 @@ arcade-llm-example/
 
 Create a new file called `.env` and add your Arcade API key, as well as your OpenAI API key:
 
-```bash
+```text filename=".env"
 ARCADE_API_KEY=YOUR_ARCADE_API_KEY
 ARCADE_USER_ID=YOUR_ARCADE_USER_ID
 OPENROUTER_API_KEY=YOUR_OPENROUTER_API_KEY
@@ -113,7 +113,7 @@ llm_client = OpenAI(
 
 ### Select and retrieve the tools from Arcade
 
-In this example, we're implementing a simple agent that can retrieve and send emails, as well as send messages to Slack. In a harness like this one, where the entire catalog of tools is exposed to the LLM, you will want to choose only the tools that are relevant to the task at hand to avoid overwhelming the LLM with too many options, and to make your agent more token efficient.
+In this example, we're implementing a multi-tool agent that can retrieve and send emails, as well as send messages to Slack. In a harness like this one the entire catalog of tools is exposed to the LLM. To make your agent more efficient, choose only the tools that are relevant to the task at hand to avoid overwhelming the LLM and to make your agent more token efficient.
 
 ```python filename="main.py"
 # We define here the tools that we want to use in the agent
@@ -124,7 +124,7 @@ tool_catalog = [
     "Slack.WhoAmI"
 ]
 
-# We get the tool definitions from the Arcade API, so that we can expose them to the LLM
+# Get the tool definitions from the Arcade API 
 tool_definitions = []
 for tool in tool_catalog:
     tool_definitions.append(arcade.tools.formatted.get(name=tool, format="openai"))
@@ -132,7 +132,9 @@ for tool in tool_catalog:
 
 ### Write a helper function that handles tool authorization and execution
 
-The LLM may choose to call any of the tools in our catalog, and we need to handle different scenarios, such as when the tool requires authorization. There are many approaches to this, but a good pattern is to handle interruptions like this outside of the agentic context if we can do so. As a rule of thumb, you should evaluate whether it is relevant for the LLM to be aware of the authorization process, or if it's better to handle it in the harness, and keep the context as if the tool was already authorized. The latter option optimizes for token efficiency, and we will implement it in this example.
+The LLM may choose to call any of the tools in its catalog, some of which may require authorization, interrupting the process. 
+
+One way to handle interruptions like this is to evaluate whether the LLM needs to be aware of the authorization process or if it's better to handle it in the harness, keeping the context as if the tool were already authorized. The latter option optimizes for token efficiency, so is used in the following example:
 
 ```python filename="main.py"
 # Helper function to authorize and run any tool
@@ -163,13 +165,13 @@ def authorize_and_run_tool(tool_name: str, input: str):
     return json.dumps(result.output.value)
 ```
 
-That helper function adapts to any tool in the catalog, and will make sure that the authorization requirements are met before executing the tool. For more complex agentic patterns, this is generally the best place to handle interruptions that may require user interaction, such as when the tool requires a user to approve a request, or to provide additional context.
+This helper function adapts to any tool in the catalog and will make sure that the authorization requirements are met before executing the tool. For more complex agentic patterns, this is generally the best place to handle interruptions that may require user interaction, such as when the tool requires a user to approve a request, or to provide additional context.
 
 ### Write a helper function that handles the LLM's invocation
 
 There are many orchestration patterns that can be used to handle the LLM invocation. A common pattern is a ReAct architecture, where the user prompt will result in a loop of messages between the LLM and the tools, until the LLM provides a final response (no tool calls). This is the pattern we will implement in this example.
 
-To avoid the risk of infinite loops, we will limit the number of turns to a maximum of 5. This is a parameter that you can tune to your needs, and it's a good idea to set it to a value that is high enough to allow the LLM to complete the task it's designed to do, but low enough to prevent infinite loops.
+To avoid the risk of infinite loops, limit the number of turns (in this case, a maximum of 5). This is a parameter that you can tune to your needs. Set it to a value that is high enough to allow the LLM to complete its task but low enough to prevent infinite loops.
 
 ```python filename="main.py"
 def invoke_llm(
@@ -225,14 +227,14 @@ def invoke_llm(
     return history
 ```
 
-In combination, these two helper functions will form the core of our agentic loop. You will notice that the authorization is handled outside of the agentic context, and the tool execution is passed back to the LLM in every case. Depending on your needs, you may want to handle tool orchestration within the harness, and pass only the final result of multiple tool calls to the LLM.
+These two helper functions form the core of your agentic loop. Notice that authorization is handled outside the agentic context, and the tool execution is passed back to the LLM in every case. Depending on your needs, you may want to handle tool orchestration within the harness and pass only the final result of multiple tool calls to the LLM.
 
 ### Write the main agentic loop
 
-Now that we've written the helper functions, we can write a very simple agentic loop that interacts with the user. The core pieces of this loop are:
+Now that you've written the helper functions, write a very simple agentic loop that interacts with the user. The core pieces of this loop are:
 
 1. Initialize the conversation history with the system prompt
-2. Get the user input, and add it to the conversation history
+2. Get the user input and add it to the conversation history
 3. Invoke the LLM with the conversation history, tools, and tool choice
 4. Repeat from step 2 until the user decides to stop the conversation
 
