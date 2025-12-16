@@ -42,6 +42,9 @@ export const meta: MetaRecord = {
   quickstart: {
     title: "Hosted Tools Quickstart",
   },
+  "mcp-gateway-quickstart": {
+    title: "Call a tool in your IDE/MCP Client",
+  },
   "custom-mcp-server-quickstart": {
     title: "Build MCP Server QuickStart",
   },
