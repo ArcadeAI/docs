@@ -54,7 +54,7 @@ export function FiltersBar({ resultsCount }: FiltersBarProps) {
         <div className="flex flex-wrap items-center justify-between gap-3">
           {/* Search */}
           <div className="relative w-full flex-1 sm:min-w-[200px] sm:max-w-md">
-            <Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-gray-500 dark:text-gray-400" />
+            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
             <Input
               className="pr-9 pl-9"
               onChange={handleSearchChange}
@@ -65,7 +65,7 @@ export function FiltersBar({ resultsCount }: FiltersBarProps) {
             {searchQuery && (
               <button
                 aria-label="Clear search"
-                className="-translate-y-1/2 absolute top-1/2 right-3 text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                 onClick={() => setSearchQuery("")}
                 type="button"
               >
