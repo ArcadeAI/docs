@@ -40,7 +40,7 @@ export const meta: MetaRecord = {
     title: "Using Arcade",
   },
   quickstart: {
-    title: "Hosted Tools Quickstart",
+    title: "Calling tools in your agent",
   },
   "mcp-gateway-quickstart": {
     title: "Call a tool in your IDE/MCP Client",
