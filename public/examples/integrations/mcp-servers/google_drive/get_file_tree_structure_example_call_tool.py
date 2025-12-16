@@ -15,10 +15,9 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'include_shared_drives': True,
-    'restrict_to_shared_drive_id': 'abc123',
-    'order_by': ['name'],
-    'limit': 10
+    "include_shared_drives": True,
+    "order_by": ["name"],
+    "limit": 100
 }
 
 response = client.tools.execute(

@@ -20,6 +20,7 @@ tool_input = {
     "given_name": "John",
     "family_name": "Doe",
     "email": "john.doe@example.com",
+    "phone_number": "+1234567890"
 }
 
 response = client.tools.execute(

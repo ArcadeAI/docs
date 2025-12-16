@@ -17,11 +17,8 @@ await client.auth.waitForCompletion(authResponse);
 
 const toolInput = {
   "include_shared_drives": true,
-  "restrict_to_shared_drive_id": "abc123",
-  "order_by": [
-    "name"
-  ],
-  "limit": 10
+  "order_by": ["name"],
+  "limit": 100
 };
 
 const response = await client.tools.execute({

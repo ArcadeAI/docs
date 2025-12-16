@@ -22,6 +22,7 @@ const toolInput = {
   given_name: "John",
   family_name: "Doe",
   email: "john.doe@example.com",
+  phone_number: "+1234567890"
 };
 
 const response = await client.tools.execute({
