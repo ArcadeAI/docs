@@ -32,7 +32,7 @@ Install and use the Arcade client to call Arcade Hosted Tools.
 - Build a simple workflow that uses tools to:
   - search for news with Google News
   - Create a Google Doc with the news
-  - Send a link to the Google Doc to a Slack User
+  - Email a link to the Google Doc to the user
 - Present an OAuth URL to the user when the tool requires authorization
 
 </GuideOverview.YouWillLearn>
@@ -73,6 +73,8 @@ npm install @arcadeai/arcadejs
 Create a new script called `example.py`:
 
 ```python filename="example.py"
+from arcadepy import Arcade
+
 # You can also set the `ARCADE_API_KEY` environment variable instead of passing it as a parameter.
 client = Arcade(api_key="{arcade_api_key}")
 
@@ -87,7 +89,7 @@ user_id = "{arcade_user_id}"
 
 Create a new script called `example.mjs`:
 
-```javascript filename="example.mjs"
+```javascript filename="example.ts"
 import Arcade from "@arcadeai/arcadejs";
 
 // You can also set the `ARCADE_API_KEY` environment variable instead of passing it as a parameter.
@@ -135,7 +137,7 @@ def authorize_and_run_tool(tool_name, input, user_id):
 
 <Tabs.Tab>
 
-```javascript filename="example.mjs"
+```javascript filename="example.ts"
 // Helper function to authorize and run any tool
 async function authorize_and_run_tool({
   tool_name,
@@ -204,7 +206,7 @@ news = response_search.output.value["news_results"]
 output = "latest news about MCP URL mode elicitation:\n"
 for search_result in news:
     output += f"{search_result['source']} - {search_result['title']}\n"
-    output += f"{search_result['snippet']}\n"
+    output += f"{search_result['link']}\n\n"
 
 # Create a Google Doc with the news results
 # If the user has not previously authorized the Google Docs tool, they will be prompted to authorize the tool call.
@@ -260,7 +262,7 @@ let output = "latest news about MCP URL mode elicitation:\n";
 for (const search_result of news) {
   output += "--------------------------------\n";
   output += `${search_result.source} - ${search_result.title}\n`;
-  output += `${search_result.snippet ?? ""}\n`;
+  output += `${search_result.link ?? ""}\n`;
 }
 
 // Create a Google Doc with the news results
@@ -306,17 +308,60 @@ console.log(respose_send_email.output?.value);
 
     ```bash
     uv run example.py
-    > The square root of 625 is 25
-    > Successfully starred the repository ArcadeAI/arcade-mcp
+    > latest news about MCP URL mode elicitation:
+    > ----------------------------
+    > InfoWorld - Visual Studio Code adds multi-agent orchestration
+    > https://www.infoworld.com/article/4105879/visual-studio-code-adds-multi-agent-orchestration.html
+    > ----------------------------
+    > Visual Studio Magazine - VS Code 1.107 (November 2025 Update) Expands Multi-Agent Orchestration, Model Management
+    > https://visualstudiomagazine.com/articles/2025/12/12/vs-code-1-107-november-2025-update-expands-multi-agent-orchestration-model-management.aspx
+    > ----------------------------
+    > SD Times - Several new updates make their way into the MCP specification
+    > https://sdtimes.com/ai/several-new-updates-make-their-way-into-the-mcp-specification/
+    > ----------------------------
+    > AI News - How the MCP spec update boosts security as infrastructure scales
+    > https://www.artificialintelligence-news.com/news/how-the-mcp-spec-update-boosts-security-as-infrastructure-scales/
+    >
+    > {'body': '', 'cc': '', 'date': '', 'from': '', 'header_message_id': '', 'history_id': '', 'id': '19b....', 'in_reply_to': '', 'label_ids': ['UNREAD', 'SENT', 'INBOX'], 'references': '', 'reply_to': '', 'snippet': '', 'subject': '', 'thread_id': '19b....', 'to': '', 'url': 'https://mail.google.com/mail/u/0/#sent/19b....'}
     ```
 
   </Tabs.Tab>
   <Tabs.Tab>
 
     ```bash
-    node example.mjs
-    > The square root of 625 is 25
-    > Successfully starred the repository ArcadeAI/arcade-mcp
+    node example.ts
+    > latest news about MCP URL mode elicitation:
+    > --------------------------------
+    > InfoWorld - Visual Studio Code adds multi-agent orchestration
+    > https://www.infoworld.com/article/4105879/visual-studio-code-adds-multi-agent-orchestration.html
+    > --------------------------------
+    > Visual Studio Magazine - VS Code 1.107 (November 2025 Update) Expands Multi-Agent Orchestration, Model Management
+    > https://visualstudiomagazine.com/articles/2025/12/12/vs-code-1-107-november-2025-update-expands-multi-agent-orchestration-model-management.aspx
+    > --------------------------------
+    > SD Times - Several new updates make their way into the MCP specification
+    > https://sdtimes.com/ai/several-new-updates-make-their-way-into-the-mcp-specification/
+    > --------------------------------
+    > AI News - How the MCP spec update boosts security as infrastructure scales
+    > https://www.artificialintelligence-news.com/news/how-the-mcp-spec-update-boosts-security-as-infrastructure-scales/
+    >
+    > {
+    >   body: "",
+    >   cc: "",
+    >   date: "",
+    >   from: "",
+    >   header_message_id: "",
+    >   history_id: "",
+    >   id: "19b...",
+    >   in_reply_to: "",
+    >   label_ids: [ "UNREAD", "SENT", "INBOX" ],
+    >   references: "",
+    >   reply_to: "",
+    >   snippet: "",
+    >   subject: "",
+    >   thread_id: "19b...",
+    >   to: "",
+    >   url: "https://mail.google.com/mail/u/0/#sent/19b...",
+    > }
     ```
 
   </Tabs.Tab>
@@ -378,8 +423,9 @@ news = response_search.output.value["news_results"]
 # Format the news results into a string
 output = "latest news about MCP URL mode elicitation:\n"
 for search_result in news:
+    output += "----------------------------\n"
     output += f"{search_result['source']} - {search_result['title']}\n"
-    output += f"{search_result['snippet']}\n"
+    output += f"{search_result['link']}\n"
 
 # Create a Google Doc with the news results
 # If the user has not previously authorized the Google Docs tool, they will be prompted to authorize the tool call.
@@ -482,7 +528,7 @@ let output = "latest news about MCP URL mode elicitation:\n";
 for (const search_result of news) {
   output += "--------------------------------\n";
   output += `${search_result.source} - ${search_result.title}\n`;
-  output += `${search_result.snippet ?? ""}\n`;
+  output += `${search_result.link ?? ""}\n`;
 }
 
 // Create a Google Doc with the news results
