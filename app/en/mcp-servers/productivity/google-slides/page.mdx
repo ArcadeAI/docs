@@ -5,6 +5,7 @@ import Badges from "@/app/_components/badges";
 import TabbedCodeBlock from "@/app/_components/tabbed-code-block";
 import TableOfContents from "@/app/_components/table-of-contents";
 import ToolFooter from "@/app/_components/tool-footer";
+import ScopePicker from "@/app/_components/scope-picker";
 import { Callout } from "nextra/components";
 
 <ToolInfo
@@ -69,6 +70,38 @@ The GoogleSlides MCP Server provides a set of tools for interacting with Google 
   tools](/home/build-tools/create-a-mcp-server).
 </Callout>
 
+Each tool requires specific Google OAuth scopes to function. You'll find the required scopes listed in a blue info box at the end of each tool's documentation below. For more information about configuring OAuth and tips for moving to production, see the [Google auth provider documentation](/home/auth-providers/google).
+
+<Callout type="warning">
+  The `drive.file` scope only grants access to files that were created or opened by your application. If you need broader access to a user's Google Drive presentations (e.g., to access presentations created by other applications), you'll need to create your own Google OAuth provider and request the `drive.readonly` or `drive` scope. Note that these broader scopes are **not supported** by Arcade's default Google OAuth provider.
+</Callout>
+
+## Find required scopes
+
+Select the tools you plan to use to see the OAuth scopes your application needs:
+
+<ScopePicker
+  tools={[
+    { name: "CommentOnPresentation", scopes: ["https://www.googleapis.com/auth/drive.file"] },
+    { name: "ListPresentationComments", scopes: ["https://www.googleapis.com/auth/drive.file"] },
+    { name: "CreatePresentation", scopes: ["https://www.googleapis.com/auth/drive.file"] },
+    { name: "CreateSlide", scopes: ["https://www.googleapis.com/auth/drive.file"] },
+    { name: "SearchPresentations", scopes: ["https://www.googleapis.com/auth/drive.file"] },
+    { name: "GenerateGoogleFilePickerUrl", scopes: [] },
+    { name: "GetPresentationAsMarkdown", scopes: ["https://www.googleapis.com/auth/drive.file"] },
+    {
+      name: "WhoAmI",
+      scopes: [
+        "https://www.googleapis.com/auth/drive.file",
+        "https://www.googleapis.com/auth/userinfo.profile",
+        "https://www.googleapis.com/auth/userinfo.email",
+      ],
+    },
+  ]}
+/>
+
+---
+
 ## GoogleSlides.CommentOnPresentation
 
 <br />
@@ -94,6 +127,12 @@ Comment on a specific slide by its index in a Google Slides presentation.
 
 - **presentation_id** (`string`, required) The ID of the presentation to comment on
 - **comment_text** (`string`, required) The comment to add to the slide
+
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/drive.file`
+</Callout>
+
+---
 
 ## GoogleSlides.ListPresentationComments
 
@@ -121,6 +160,12 @@ List all comments on the specified Google Slides presentation.
 - **presentation_id** (`string`, required) The ID of the presentation to list comments for
 - **include_deleted** (`boolean`, optional) Whether to include deleted comments in the results. Defaults to False.
 
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/drive.file`
+</Callout>
+
+---
+
 ## GoogleSlides.CreatePresentation
 
 <br />
@@ -146,6 +191,12 @@ Create a new Google Slides presentation
 
 - **title** (`string`, required) The title of the presentation to create
 - **subtitle** (`string`, optional) The subtitle of the presentation to create
+
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/drive.file`
+</Callout>
+
+---
 
 ## GoogleSlides.CreateSlide
 
@@ -173,6 +224,12 @@ Create a new slide at the end of the specified presentation
 - **presentation_id** (`string`, required) The ID of the presentation to create the slide in
 - **slide_title** (`string`, required) The title of the slide to create
 - **slide_body** (`string`, required) The body (text) of the slide to create
+
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/drive.file`
+</Callout>
+
+---
 
 ## GoogleSlides.SearchPresentations
 
@@ -206,6 +263,12 @@ Searches for presentations in the user's Google Drive.
 - **limit** (`integer`, optional) The number of presentations to list
 - **pagination_token** (`string`, optional) The pagination token to continue a previous request
 
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/drive.file`
+</Callout>
+
+---
+
 ## GoogleSlides.WhoAmI
 
 <br />
@@ -230,6 +293,14 @@ Get comprehensive user profile and Google Slides environment information.
 **Parameters**
 
 This tool does not take any parameters.
+
+<Callout type="info" title="This tool requires the following scopes">
+- `https://www.googleapis.com/auth/drive.file`
+- `https://www.googleapis.com/auth/userinfo.profile`
+- `https://www.googleapis.com/auth/userinfo.email`
+</Callout>
+
+---
 
 ## GoogleSlides.GenerateGoogleFilePickerUrl
 
@@ -256,6 +327,12 @@ Generate a Google File Picker URL for user-driven file selection and authorizati
 
 This tool does not take any parameters.
 
+<Callout type="info" title="This tool requires the following scope">
+No additional scopes required (uses basic Google authentication).
+</Callout>
+
+---
+
 ## GoogleSlides.GetPresentationAsMarkdown
 
 <br />
@@ -280,6 +357,12 @@ Get the specified Google Slides presentation and convert it to markdown.
 **Parameters**
 
 - **presentation_id** (`string`, required) The ID of the presentation to retrieve.
+
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/drive.file`
+</Callout>
+
+---
 
 ## Auth
 

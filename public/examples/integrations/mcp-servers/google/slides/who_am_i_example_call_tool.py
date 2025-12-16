@@ -1,5 +1,9 @@
 import json
 from arcadepy import Arcade
+# Required Google OAuth scopes:
+# - https://www.googleapis.com/auth/drive.file
+# - https://www.googleapis.com/auth/userinfo.profile
+# - https://www.googleapis.com/auth/userinfo.email
 
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 

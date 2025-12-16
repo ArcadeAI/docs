@@ -1,4 +1,6 @@
 import { Arcade } from "@arcadeai/arcadejs";
+// Required Google OAuth scopes:
+// - https://www.googleapis.com/auth/gmail.send
 
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
