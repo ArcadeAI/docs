@@ -8,6 +8,8 @@ import { SignupLink } from "@/app/_components/analytics";
 
 # Connect Arcade to your LLM
 
+Arcade tools are designed to be used with LLMs. This requires you to implement a harness that orchestrates the interaction between the LLM, the tools, and the user. While typically this is abstracted away by agentic frameworks, this guide will show you how to implement a simple harness from scratch, so that the underlying mechanics are clear.
+
 <GuideOverview>
 <GuideOverview.Outcomes>
 
@@ -85,10 +87,19 @@ OPENROUTER_MODEL=YOUR_OPENROUTER_MODEL
 ```
 
 <Callout type="info">
+  The `ARCADE_USER_ID` is the email address you used to sign up for Arcade. When
+  your app is ready for production, you can set this dynamically based on your
+  app's auth system. Learn more about how to achieve secure auth in production
+  [here](/home/auth/secure-auth-production).
+</Callout>
+
+<Callout type="info">
   In this example, we're using OpenRouter to access the model, as it makes it
   very easy to use any model from multiple providers with a single API.
-  OpenRouter is compliant with the OpenAI API specification, so you can use it
-  with any OpenAI-compatible library.
+
+OpenRouter is compliant with the OpenAI API specification, so you can use it
+with any OpenAI-compatible library.
+
 </Callout>
 
 Open the `main.py` file in your editor of choice, and replace replace the contents with the following:
@@ -124,7 +135,7 @@ tool_catalog = [
     "Slack.WhoAmI"
 ]
 
-# Get the tool definitions from the Arcade API 
+# Get the tool definitions from the Arcade API
 tool_definitions = []
 for tool in tool_catalog:
     tool_definitions.append(arcade.tools.formatted.get(name=tool, format="openai"))
@@ -132,7 +143,7 @@ for tool in tool_catalog:
 
 ### Write a helper function that handles tool authorization and execution
 
-The LLM may choose to call any of the tools in its catalog, some of which may require authorization, interrupting the process. 
+The LLM may choose to call any of the tools in its catalog, some of which may require authorization, interrupting the process.
 
 One way to handle interruptions like this is to evaluate whether the LLM needs to be aware of the authorization process or if it's better to handle it in the harness, keeping the context as if the tool were already authorized. The latter option optimizes for token efficiency, so is used in the following example:
 
