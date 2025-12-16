@@ -9,6 +9,7 @@ import Badges from "@/app/_components/badges";
 import TabbedCodeBlock from "@/app/_components/tabbed-code-block";
 import TableOfContents from "@/app/_components/table-of-contents";
 import ToolFooter from "@/app/_components/tool-footer";
+import ScopePicker from "@/app/_components/scope-picker";
 import { Callout } from "nextra/components";
 
 <ToolInfo
@@ -63,6 +64,41 @@ The Google Drive MCP Server provides a set of tools for interacting with Google 
   tools](/home/build-tools/create-a-mcp-server).
 </Callout>
 
+Each tool requires specific Google OAuth scopes to function. You'll find the required scopes listed in a blue info box at the end of each tool's documentation below. For more information about configuring OAuth and tips for moving to production, see the [Google auth provider documentation](/home/auth-providers/google).
+
+<Callout type="warning">
+  The `drive.file` scope only grants access to files that were created or opened by your application. If you need broader access to a user's Google Drive (e.g., to access files created by other applications), you'll need to create your own Google OAuth provider and request the `drive.readonly` or `drive` scope. Note that these broader scopes are **not supported** by Arcade's default Google OAuth provider.
+</Callout>
+
+## Find required scopes
+
+Select the tools you plan to use to see the OAuth scopes your application needs:
+
+<ScopePicker
+  tools={[
+    { name: "GetFileTreeStructure", scopes: ["https://www.googleapis.com/auth/drive.file"] },
+    { name: "GenerateGoogleFilePickerUrl", scopes: [] },
+    { name: "SearchFiles", scopes: ["https://www.googleapis.com/auth/drive.file"] },
+    { name: "CreateFolder", scopes: ["https://www.googleapis.com/auth/drive.file"] },
+    { name: "RenameFile", scopes: ["https://www.googleapis.com/auth/drive.file"] },
+    { name: "MoveFile", scopes: ["https://www.googleapis.com/auth/drive.file"] },
+    { name: "DownloadFile", scopes: ["https://www.googleapis.com/auth/drive.file"] },
+    { name: "DownloadFileChunk", scopes: ["https://www.googleapis.com/auth/drive.file"] },
+    { name: "UploadFile", scopes: ["https://www.googleapis.com/auth/drive.file"] },
+    { name: "ShareFile", scopes: ["https://www.googleapis.com/auth/drive.file"] },
+    {
+      name: "WhoAmI",
+      scopes: [
+        "https://www.googleapis.com/auth/drive.file",
+        "https://www.googleapis.com/auth/userinfo.profile",
+        "https://www.googleapis.com/auth/userinfo.email",
+      ],
+    },
+  ]}
+/>
+
+---
+
 ## GoogleDrive.WhoAmI
 
 <br />
@@ -87,6 +123,12 @@ Get comprehensive user profile and Google Drive environment information. This to
 **Parameters**
 
 This tool does not take any parameters.
+
+<Callout type="info" title="This tool requires the following scopes">
+- `https://www.googleapis.com/auth/drive.file`
+- `https://www.googleapis.com/auth/userinfo.profile`
+- `https://www.googleapis.com/auth/userinfo.email`
+</Callout>
 
 ---
 
@@ -119,6 +161,10 @@ Get the file/folder tree structure of the user's Google Drive. This operation ca
 - **order_by** (`Enum` [OrderBy](/mcp-servers/productivity/google-drive/reference#OrderBy), optional): Sort order. Defaults to listing the most recently modified documents first.
 - **limit** (`integer`, optional): The number of files and folders to list. Defaults to None, which will list all files and folders.
 
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/drive.file`
+</Callout>
+
 ---
 
 ## GoogleDrive.GenerateGoogleFilePickerUrl
@@ -147,6 +193,10 @@ This is particularly useful when prior tools encountered failures due to file no
 **Parameters**
 
 This tool does not take any parameters.
+
+<Callout type="info" title="This tool requires the following scope">
+No additional scopes required (uses basic Google authentication).
+</Callout>
 
 ---
 
@@ -182,6 +232,10 @@ Search for files in Google Drive. The provided query should only contain the sea
 - **limit** (`integer`, optional): The maximum number of search results to return. Defaults to 50.
 - **file_types** (`Enum` [GoogleDriveFileType](/mcp-servers/productivity/google-drive/reference#GoogleDriveFileType), optional): Filter by specific file types. Defaults to None, which includes all file types.
 
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/drive.file`
+</Callout>
+
 ---
 
 ## GoogleDrive.CreateFolder
@@ -210,6 +264,10 @@ Create a new folder in Google Drive. By default, parent folder paths are resolve
 - **folder_name** (`string`, required): The name of the new folder to create.
 - **parent_folder_path_or_id** (`string`, optional): The parent folder path like `folder/subfolder` or folder ID where to create. If None, creates at the root of My Drive. If providing a path, it will be resolved within My Drive by default. Do not include the folder to create in this path. Defaults to None.
 - **shared_drive_id** (`string`, optional): If creating in a shared drive and using a parent folder path, provide the shared drive ID. Not needed when using folder IDs or creating in My Drive. Defaults to None.
+
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/drive.file`
+</Callout>
 
 ---
 
@@ -240,6 +298,10 @@ Rename a file or folder in Google Drive. By default, paths are resolved in My Dr
 - **new_filename** (`string`, required): The new name for the file.
 - **shared_drive_id** (`string`, optional): If the file is in a shared drive and you're using a path (not ID), provide the shared drive ID to resolve the path within that drive. Not needed when using file IDs. Defaults to None (searches My Drive).
 
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/drive.file`
+</Callout>
+
 ---
 
 ## GoogleDrive.MoveFile
@@ -269,6 +331,10 @@ Move a file or folder to a different folder within the same Google Drive. Can mo
 - **destination_folder_path_or_id** (`string`, required): The path to the file's parent folder (exclude the file to be moved) or parent folder ID to move the file into.
 - **new_filename** (`string`, optional): Optional new name for the file after moving. If None, keeps the original name. Defaults to None.
 - **shared_drive_id** (`string`, optional): If working with paths in a shared drive, provide the shared drive ID. Not needed when using IDs. Defaults to None (uses My Drive).
+
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/drive.file`
+</Callout>
 
 ---
 
@@ -304,6 +370,10 @@ Download a blob file (non-workspace file) from Google Drive as base64 encoded co
 
 - **file_path_or_id** (`string`, required): The file path like `folder/subfolder/filename` or the file ID of the file to download. Folders NOT supported. If providing a path, it will be resolved within My Drive by default.
 - **shared_drive_id** (`string`, optional): If the file is in a shared drive and using a path, provide the shared drive ID. Not needed when using file IDs. Defaults to None (uses My Drive).
+
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/drive.file`
+</Callout>
 
 ---
 
@@ -345,6 +415,10 @@ Returns the chunk content as base64, along with progress information including w
 - **chunk_size** (`integer`, optional): The size of the chunk to download in bytes. Max 5MB (5242880). Defaults to 5MB (5242880).
 - **shared_drive_id** (`string`, optional): If the file is in a shared drive and using a path, provide the shared drive ID. Not needed when using file IDs. Defaults to None (uses My Drive).
 
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/drive.file`
+</Callout>
+
 ---
 
 ## GoogleDrive.UploadFile
@@ -380,6 +454,10 @@ Upload a file to Google Drive from a URL. Fetches the file content from the prov
 - **destination_folder_path_or_id** (`string`, optional): The folder path like `folder/subfolder` or folder ID where to upload. If None, uploads to the root of My Drive. If providing a path, it will be resolved within My Drive by default. Defaults to None.
 - **shared_drive_id** (`string`, optional): If uploading to a folder in a shared drive using a path, provide the shared drive ID. Not needed when using folder IDs or uploading to My Drive. Defaults to None (My Drive).
 
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/drive.file`
+</Callout>
+
 ---
 
 ## GoogleDrive.ShareFile
@@ -411,6 +489,12 @@ Share a file or folder in Google Drive with specific people by granting them per
 - **send_notification_email** (`boolean`, optional): Whether to send an email notification to the recipients. Defaults to True.
 - **message** (`string`, optional): Optional message to include in the notification email. Defaults to None.
 - **shared_drive_id** (`string`, optional): If the file is in a shared drive and using a path, provide the shared drive ID. Not needed when using file IDs. Defaults to None (uses My Drive).
+
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/drive.file`
+</Callout>
+
+---
 
 ## Auth
 
