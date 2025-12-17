@@ -1,3 +1,3 @@
 export default {
-  "quickstart-python": "Quickstart (Python)",
+  "set-up-python": "Set up with Python",
 };

@@ -8,11 +8,11 @@ const meta: MetaRecord = {
       copyPage: true,
     },
   },
-  "quickstart-python": {
-    title: "Quickstart (Python)",
+  "set-up-python": {
+    title: "Set up with Python",
   },
-  "quickstart-typescript": {
-    title: "Quickstart (Typescript)",
+  "set-up-typescript": {
+    title: "Set up with TypeScript",
   },
   "custom-auth-flow": {
     title: "Custom auth flow",

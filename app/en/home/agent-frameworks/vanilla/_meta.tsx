@@ -1,4 +1,4 @@
 export default {
-  "python-quickstart": "Python Quickstart",
-  "typescript-quickstart": "Typescript Quickstart",
+  "set-up-python": "Set up with Python",
+  "set-up-typescript": "Set up with TypeScript",
 };

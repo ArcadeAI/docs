@@ -8,8 +8,8 @@ const meta: MetaRecord = {
       copyPage: true,
     },
   },
-  "quickstart-typescript": {
-    title: "Quickstart (Typescript)",
+  "set-up-typescript": {
+    title: "Set up with TypeScript",
   },
 };
 

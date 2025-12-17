@@ -51,7 +51,7 @@ export const meta: MetaRecord = {
   "creating-tools": "Create tools",
   "agent-frameworks": "Agent frameworks",
   "sharing-with-end-users": "Share your agent with end-users",
-  "observability-platforms": "Observability platforms",
+  observability: "Observability",
   "deployment-hosting": "Deployment and hosting",
   "security-section": "Security and compliance",
   "-- Learn": {
@@ -61,18 +61,16 @@ export const meta: MetaRecord = {
   "what-is-agent": "What's an agent",
   "auth-and-secrets": "How do auth and secrets work",
   "agentic-architecture": "Agentic architectures & workflows",
-  "-- API Reference": {
+  "-- Reference": {
     type: "separator",
-    title: "API Reference",
+    title: "Reference",
   },
   api: "API",
   "arcade-mcp": "Arcade MCP (MCP server SDK)",
   "arcade-clients": "Arcade clients",
+  "auth-providers": "Auth Providers",
   // Hide auto-discovered directories
   "api-keys": {
-    display: "hidden",
-  },
-  "auth-providers": {
     display: "hidden",
   },
   changelog: {

@@ -1,3 +1,3 @@
 export default {
-  "quickstart-typescript": "Quickstart (Typescript)",
+  "set-up-typescript": "Set up with TypeScript",
 };
