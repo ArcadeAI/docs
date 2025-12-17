@@ -9,13 +9,13 @@ const meta: MetaRecord = {
   // 1.0 Home Section
   home: {
     type: "page",
-    title: "Home",
+    title: "Docs",
     href: "/home",
   },
   // MCP Servers Section
   "mcp-servers": {
     type: "page",
-    title: "MCP Servers",
+    title: "Integrations",
     href: "/mcp-servers",
   },
   // API & SDKs Section
