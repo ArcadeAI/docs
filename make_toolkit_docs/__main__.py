@@ -6,13 +6,11 @@ import subprocess
 import sys
 from functools import partial
 from pathlib import Path
-from typing import Optional, Tuple
 
 import openai
 from dotenv import load_dotenv
 from InquirerPy import inquirer
 from rich.console import Console
-import typer
 
 from discovery import find_toolkits_directories
 from docs_builder import (
@@ -57,33 +55,18 @@ def save_toolkits_dir(toolkits_dir: str) -> None:
             f.write(f"{key}={value}\n")
 
 
-def get_toolkits_dir(provided_dir: Optional[str] = None, interactive: bool = True) -> str:
+def get_toolkits_dir() -> str:
     """Get or prompt for the toolkits directory path.
 
     First tries to use saved directory, then auto-discovers, then prompts manually.
 
-    Args:
-        provided_dir: If provided, use this directory directly.
-        interactive: Whether to use interactive prompts.
-
     Returns:
         Path to the toolkits directory.
     """
-    # If directory is provided via CLI, use it directly
-    if provided_dir:
-        if os.path.isdir(provided_dir):
-            return provided_dir
-        else:
-            console.print(f"❌ Provided directory does not exist: {provided_dir}", style="bold red")
-            sys.exit(1)
-
     toolkits_dir = os.getenv("TOOLKITS_DIR")
 
     # Try using saved directory
     if toolkits_dir and os.path.isdir(toolkits_dir):
-        if not interactive:
-            return toolkits_dir
-
         use_saved = inquirer.confirm(
             message=f"Use saved toolkits directory: {toolkits_dir}?",
             default=True,
@@ -115,10 +98,6 @@ def get_toolkits_dir(provided_dir: Optional[str] = None, interactive: bool = Tru
                 return toolkits_dir
 
     # Fall back to manual entry
-    if not interactive:
-        console.print(f"❌ No toolkits directories found. Please provide --toolkits-dir or set TOOLKITS_DIR environment variable.", style="bold red")
-        sys.exit(1)
-
     console.print("\n[yellow]No toolkits directories found automatically.[/yellow]")
 
     while True:
@@ -177,36 +156,13 @@ def get_available_toolkits(toolkits_dir: str) -> list[str]:
     return available_toolkits
 
 
-def get_selected_toolkit(
-    console: Console,
-    toolkit_path: Optional[str] = None,
-    toolkit_name: Optional[str] = None,
-    toolkits_dir: Optional[str] = None,
-    interactive: bool = True,
-) -> Optional[Tuple[str, str]]:
+def get_selected_toolkit(console: Console) -> tuple[str, str] | None:
     """Prompt user to select a toolkit from the configured toolkits directory.
-
-    Args:
-        console: Rich console for output.
-        toolkit_path: Direct path to a specific toolkit (if provided, use this).
-        toolkit_name: Name of the toolkit (if provided with toolkits_dir, use this).
-        toolkits_dir: Parent directory containing toolkits.
-        interactive: Whether to use interactive prompts.
 
     Returns:
         Tuple of (toolkit_dir, toolkit_name) if successful, None otherwise.
     """
-    # If toolkit_path is provided directly, use it
-    if toolkit_path:
-        if not os.path.isdir(toolkit_path):
-            console.print(f"❌ Toolkit path does not exist: {toolkit_path}", style="bold red")
-            return None
-        toolkit_name_from_path = Path(toolkit_path).name
-        return (toolkit_path, toolkit_name_from_path)
-
-    # Otherwise, get toolkits directory
-    if not toolkits_dir:
-        toolkits_dir = get_toolkits_dir(interactive=interactive)
+    toolkits_dir = get_toolkits_dir()
 
     # Get list of available toolkits in the directory
     available_toolkits = get_available_toolkits(toolkits_dir)
@@ -215,29 +171,12 @@ def get_selected_toolkit(
         console.print(f"❌ No valid toolkits found in {toolkits_dir}", style="bold red")
         return None
 
-    # If toolkit_name is provided, use it directly
-    if toolkit_name:
-        if toolkit_name not in available_toolkits:
-            console.print(
-                f"❌ Toolkit '{toolkit_name}' not found in {toolkits_dir}. "
-                f"Available toolkits: {', '.join(sorted(available_toolkits))}",
-                style="bold red",
-            )
-            return None
-        selected_toolkit = toolkit_name
-    elif interactive:
-        # Ask user to select a toolkit with fuzzy search
-        selected_toolkit = inquirer.fuzzy(
-            message="Select a toolkit (type to filter):",
-            choices=sorted(available_toolkits),
-            max_height="70%",
-        ).execute()
-    else:
-        console.print(
-            f"❌ Must provide --toolkit-name or --toolkit-path when running non-interactively",
-            style="bold red",
-        )
-        return None
+    # Ask user to select a toolkit with fuzzy search
+    selected_toolkit = inquirer.fuzzy(
+        message="Select a toolkit (type to filter):",
+        choices=sorted(available_toolkits),
+        max_height="70%",
+    ).execute()
 
     toolkits_path = Path(toolkits_dir)
     server_dir = str(toolkits_path / selected_toolkit)
@@ -246,30 +185,13 @@ def get_selected_toolkit(
     return (server_dir, server_name)
 
 
-def run(
-    toolkit_path: Optional[str] = typer.Option(None, "--toolkit-path", "-p", help="Direct path to the toolkit directory"),
-    toolkit_name: Optional[str] = typer.Option(None, "--toolkit-name", "-n", help="Name of the toolkit (requires --toolkits-dir)"),
-    toolkits_dir: Optional[str] = typer.Option(None, "--toolkits-dir", "-d", help="Path to directory containing multiple toolkits"),
-    docs_section: Optional[str] = typer.Option(None, "--docs-section", "-s", help="Documentation section (e.g., 'productivity', 'development')"),
-    openai_api_key: Optional[str] = typer.Option(None, "--openai-api-key", "-k", help="OpenAI API key (or set OPENAI_API_KEY env var)"),
-    skip_examples: bool = typer.Option(False, "--skip-examples", help="Skip generating tool call examples"),
-    max_concurrency: int = typer.Option(5, "--max-concurrency", "-c", help="Max concurrency for OpenAI API requests"),
-) -> None:
+def run() -> None:
     """Interactive command to generate documentation for a server."""
     load_dotenv(ENV_FILE)
 
-    # Determine if we're running interactively
-    interactive = not any([toolkit_path, toolkit_name, toolkits_dir, docs_section])
-
     console.print("\n[bold cyan]📚 Arcade Documentation Generator[/bold cyan]\n")
 
-    result = get_selected_toolkit(
-        console=console,
-        toolkit_path=toolkit_path,
-        toolkit_name=toolkit_name,
-        toolkits_dir=toolkits_dir,
-        interactive=interactive,
-    )
+    result = get_selected_toolkit(console)
     if result is None:
         return
 
@@ -277,86 +199,41 @@ def run(
 
     console.print(f"\n[cyan]Installing server from {server_dir}...[/cyan]")
     try:
-        # First try normal installation
-        result = subprocess.run(
+        subprocess.run(
             ["uv", "pip", "install", "--python", sys.executable, "-e", server_dir],
-            check=False,
+            check=True,
             capture_output=True,
             text=True,
         )
-
-        if result.returncode != 0:
-            # If that fails, try installing without dependencies first, then install deps from PyPI
-            console.print("[yellow]Standard installation failed (likely due to local path dependencies), trying alternative method...[/yellow]")
-            # Try installing with --no-deps first
-            subprocess.run(
-                ["uv", "pip", "install", "--python", sys.executable, "--no-deps", "-e", server_dir],
-                check=True,
-                capture_output=True,
-                text=True,
-            )
-            # Install common dependencies from PyPI
-            console.print("[cyan]Installing dependencies from PyPI...[/cyan]")
-            common_deps = [
-                "arcade-tdk>=3.0.0,<4.0.0",
-                "arcade-core>=3.0.0,<4.0.0",  # Needed for toolkit discovery
-                "httpx[http2]>=0.27.2,<1.0.0",
-                "jsonschema>=4.0.0,<5.0.0",
-            ]
-            subprocess.run(
-                ["uv", "pip", "install", "--python", sys.executable] + common_deps,
-                check=False,  # Don't fail if some deps can't be installed
-                capture_output=True,
-                text=True,
-            )
 
         reload_cache()
 
         console.print("[green]✓[/green] Server installed successfully\n")
     except subprocess.CalledProcessError as e:
         console.print(
-            f"❌ Failed to install server: {e.stderr}\n"
-            f"Note: If the server has local path dependencies, you may need to install them separately.",
+            f"❌ Failed to install server: {e.stderr}",
             style="bold red",
         )
         return
 
-    # Get the actual toolkit name from entry points
-    try:
-        _, entry_point_toolkit_name = read_toolkit_metadata(server_dir)
-        actual_toolkit_name = entry_point_toolkit_name if entry_point_toolkit_name else server_name
-    except Exception:
-        actual_toolkit_name = server_name
-
     # Validate installation by checking if tools can be loaded
     console.print("[cyan]Verifying installation...[/cyan]")
-
-    # Try multiple possible toolkit names
-    toolkit_names_to_try = [actual_toolkit_name, server_name]
-    if actual_toolkit_name != server_name:
-        toolkit_names_to_try.append(server_name)
-
-    tools = None
-    successful_toolkit_name = None
-    for toolkit_name_attempt in toolkit_names_to_try:
-        try:
-            tools = get_list_of_tools(toolkit_name_attempt, toolkit_dir=server_dir)
-            if tools:
-                successful_toolkit_name = toolkit_name_attempt
-                break
-        except Exception as e:
-            console.print(f"[dim]Tried '{toolkit_name_attempt}': {e}[/dim]")
-            continue
-
-    if not tools:
+    try:
+        tools = get_list_of_tools(server_name)
+        if not tools:
+            console.print(
+                f"❌ No tools found for toolkit '{server_name}'. The installation may be incomplete.",
+                style="bold red",
+            )
+            return
+        console.print(f"[green]✓[/green] Found {len(tools)} tools\n")
+    except Exception as e:
         console.print(
-            f"❌ No tools found for toolkit. Tried: {', '.join(toolkit_names_to_try)}\n"
+            f"❌ Failed to load tools for '{server_name}': {e}\n"
             "The package may need time to be recognized. Try running the command again.",
             style="bold red",
         )
         return
-
-    console.print(f"[green]✓[/green] Found {len(tools)} tools using toolkit name '{successful_toolkit_name}'\n")
 
     docs_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -372,56 +249,37 @@ def run(
         console.print(f"❌ No sections found in {mcp_servers_path}", style="bold red")
         return
 
-    # Get docs section
-    if not docs_section:
-        if interactive:
-            docs_section = inquirer.select(
-                message="Docs section:",
-                choices=available_sections,
-            ).execute()
-        else:
-            console.print(
-                f"❌ Must provide --docs-section when running non-interactively. "
-                f"Available sections: {', '.join(sorted(available_sections))}",
-                style="bold red",
-            )
-            return
-    elif docs_section not in available_sections:
-        console.print(
-            f"❌ Invalid docs section: {docs_section}. "
-            f"Available sections: {', '.join(sorted(available_sections))}",
-            style="bold red",
-        )
-        return
+    docs_section = inquirer.select(
+        message="Docs section:",
+        choices=available_sections,
+    ).execute()
 
     if not docs_section:
         console.print("❌ No section selected", style="bold red")
         return
 
-    # Get OpenAI API key
+    openai_api_key = os.environ.get("OPENAI_API_KEY")
     if not openai_api_key:
-        openai_api_key = os.environ.get("OPENAI_API_KEY")
-        if not openai_api_key and interactive:
-            openai_api_key = inquirer.secret(
-                message="OpenAI API key:",
-                validate=lambda x: len(x) > 0,
-            ).execute()
-
-    skip_tool_call_examples = skip_examples
-    if interactive and not skip_examples:
-        skip_tool_call_examples = not inquirer.confirm(
-            message="Generate tool call examples in Python and JavaScript?",
-            default=True,
+        openai_api_key = inquirer.secret(
+            message="OpenAI API key:",
+            validate=lambda x: len(x) > 0,
         ).execute()
 
-    # Only ask for max concurrency if we're generating examples and interactive
-    if interactive and not skip_tool_call_examples:
+    skip_tool_call_examples = not inquirer.confirm(
+        message="Generate tool call examples in Python and JavaScript?",
+        default=True,
+    ).execute()
+
+    # Only ask for max concurrency if we're generating examples
+    if not skip_tool_call_examples:
         max_concurrency = int(inquirer.number(
             message="Max concurrency for OpenAI API requests:",
-            default=max_concurrency,
+            default=5,
             min_allowed=1,
             max_allowed=20,
         ).execute())
+    else:
+        max_concurrency = 5  # Default value, won't be used
 
     console.print("\n[bold green]✓[/bold green] Starting documentation generation...\n")
 
@@ -495,11 +353,11 @@ def generate_mcp_server_docs(
     docs_section: str,
     docs_dir: str,
     openai_model: str,
-    openai_api_key: Optional[str] = None,
+    openai_api_key: str | None = None,
     tool_call_examples: bool = True,
     debug: bool = False,
     max_concurrency: int = 5,
-    tools: Optional[list] = None,
+    tools: list | None = None,
 ) -> bool:
     openai.api_key = resolve_api_key(openai_api_key, "OPENAI_API_KEY")
 
@@ -517,14 +375,12 @@ def generate_mcp_server_docs(
     is_wrapper_toolkit = has_wrapper_tools_directory(toolkit_dir)
 
     print_debug("Reading server metadata")
-    pip_package_name, entry_point_toolkit_name = read_toolkit_metadata(toolkit_dir)
-    # Use entry point toolkit name if available, otherwise fall back to provided toolkit_name
-    actual_toolkit_name = entry_point_toolkit_name if entry_point_toolkit_name else toolkit_name
+    pip_package_name = read_toolkit_metadata(toolkit_dir)
 
     # Use provided tools or fetch them
     if tools is None:
-        print_debug(f"Getting list of tools for {actual_toolkit_name} from the local Python environment")
-        tools = get_list_of_tools(actual_toolkit_name, toolkit_dir=toolkit_dir)
+        print_debug(f"Getting list of tools for {toolkit_name} from the local Python environment")
+        tools = get_list_of_tools(toolkit_name)
 
     print_debug(f"Found {len(tools)} tools")
 
@@ -567,11 +423,8 @@ def generate_mcp_server_docs(
 
 
 if __name__ == "__main__":
-    app = typer.Typer()
-    app.command()(run)
-
     try:
-        app()
+        run()
     except KeyboardInterrupt:
         console.print("\n\n❌ Cancelled by user", style="bold red")
         sys.exit(1)

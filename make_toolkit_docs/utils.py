@@ -1,13 +1,11 @@
 import importlib
 import inspect
-import logging
 import os
 import re
 import sys
 from enum import Enum
 from pathlib import Path
 from types import ModuleType
-from typing import Optional
 
 if sys.version_info >= (3, 11):
     import tomllib
@@ -48,56 +46,24 @@ def write_file(path: str, content: str) -> None:
         f.write(content)
 
 
-def read_toolkit_metadata(toolkit_dir: str) -> tuple[str, str]:
-    """Read toolkit metadata from pyproject.toml.
-    
-    Returns:
-        Tuple of (package_name, toolkit_name) where toolkit_name is from entry points.
-    """
+def read_toolkit_metadata(toolkit_dir: str) -> str:
     pyproject_path = os.path.join(toolkit_dir, "pyproject.toml")
 
     if tomllib is not None:
         with open(pyproject_path, "rb") as f:
             data = tomllib.load(f)
-            package_name = None
-            toolkit_name = None
-            
             if "project" in data and "name" in data["project"]:
-                package_name = data["project"]["name"]
-            
-            # Try to get toolkit name from entry points
-            if "project" in data and "entry-points" in data["project"]:
-                entry_points = data["project"]["entry-points"]
-                if "arcade_toolkits" in entry_points:
-                    toolkit_name = entry_points["arcade_toolkits"].get("toolkit_name")
-            
-            if package_name:
-                return (package_name, toolkit_name or package_name)
+                return data["project"]["name"]
     else:
         # Fallback to regex for Python < 3.11
         with open(pyproject_path) as f:
             content = f.read()
-            package_name = None
-            toolkit_name = None
-            
-            # Get package name
             project_section_match = re.search(r"\[project\](.*?)(?=\n\[|$)", content, re.DOTALL)
             if project_section_match:
                 project_content = project_section_match.group(1)
                 name_match = re.search(r'name\s*=\s*["\']([^"\']+)["\']', project_content)
                 if name_match:
-                    package_name = name_match.group(1).strip()
-            
-            # Try to get toolkit name from entry points
-            entry_points_match = re.search(r'\[project\.entry-points\.arcade_toolkits\](.*?)(?=\n\[|$)', content, re.DOTALL)
-            if entry_points_match:
-                entry_points_content = entry_points_match.group(1)
-                toolkit_name_match = re.search(r'toolkit_name\s*=\s*["\']([^"\']+)["\']', entry_points_content)
-                if toolkit_name_match:
-                    toolkit_name = toolkit_name_match.group(1).strip()
-            
-            if package_name:
-                return (package_name, toolkit_name or package_name)
+                    return name_match.group(1).strip()
 
     raise ValueError(f"Could not find package name in '{pyproject_path}'")
 
@@ -106,113 +72,20 @@ def pascal_to_snake_case(text: str) -> str:
     return re.sub(r"(?<!^)(?=[A-Z])", "_", text).lower()
 
 
-def get_list_of_tools(toolkit_name: str, toolkit_dir: Optional[str] = None) -> list[ToolDefinition]:
-    """Get list of tools for a toolkit.
-    
-    Args:
-        toolkit_name: Name of the toolkit to load tools for.
-        toolkit_dir: Optional directory path to the toolkit. If provided and entry point
-                     discovery fails, will try to load tools directly from source.
-    """
+def get_list_of_tools(toolkit_name: str) -> list[ToolDefinition]:
     tools = []
     toolkits = discover_toolkits()
 
     for toolkit in toolkits:
         if toolkit.name.casefold() == toolkit_name.casefold():
             for module_name, module_tools in toolkit.tools.items():
-                try:
-                    module = importlib.import_module(module_name)
-                    for tool_name in module_tools:
-                        try:
-                            tool_func = getattr(module, tool_name)
-                            tool = ToolCatalog.create_tool_definition(
-                                tool_func, toolkit.name, toolkit.version, toolkit.description
-                            )
-                            tools.append(tool)
-                        except Exception as e:
-                            # Skip individual tool errors but continue with others
-                            logging.warning(f"Failed to load tool '{tool_name}' from '{module_name}': {e}")
-                            continue
-                except Exception as e:
-                    # Skip module import errors but continue with other modules
-                    logging.warning(f"Failed to import module '{module_name}' for toolkit '{toolkit_name}': {e}")
-                    continue
-
-    # If no tools found and toolkit_dir is provided, try loading directly from source
-    if not tools and toolkit_dir:
-        try:
-            from arcade_core.discovery import analyze_files_for_tools
-            
-            toolkit_path = Path(toolkit_dir)
-            # Find all Python files with @tool decorator, excluding template files and venv
-            tool_files = []
-            exclude_dirs = {".venv", "venv", "__pycache__", ".git", "node_modules"}
-            exclude_patterns = ["{{", "template", "eval_"]
-            
-            for py_file in toolkit_path.rglob("*.py"):
-                # Skip files in excluded directories
-                if any(excluded in str(py_file) for excluded in exclude_dirs):
-                    continue
-                
-                # Skip template files
-                if any(pattern in py_file.name for pattern in exclude_patterns):
-                    continue
-                
-                try:
-                    content = py_file.read_text(encoding="utf-8")
-                    # Skip files with template syntax
-                    if "{{" in content or "}}" in content:
-                        continue
-                    if "@tool" in content:
-                        tool_files.append(py_file)
-                except Exception:
-                    continue
-            
-            if tool_files:
-                # Filter to only files in the actual package directory (not in .venv or site-packages)
-                package_tool_files = [
-                    f for f in tool_files 
-                    if ".venv" not in str(f) and "site-packages" not in str(f)
-                ]
-                
-                if package_tool_files:
-                    try:
-                        if analyze_files_for_tools(package_tool_files):
-                            # Add toolkit directory to sys.path temporarily
-                            toolkit_parent = str(toolkit_path.parent)
-                            if toolkit_parent not in sys.path:
-                                sys.path.insert(0, toolkit_parent)
-                            
-                            # Try to reload toolkit discovery after adding to path
-                            logging.info(f"Found tools in source files, retrying toolkit discovery for {toolkit_name}")
-                            # Force a reload of the toolkit discovery
-                            if 'arcade_cli.utils' in sys.modules:
-                                importlib.reload(sys.modules['arcade_cli.utils'])
-                            
-                            # Try discovery again
-                            toolkits = discover_toolkits()
-                            for toolkit in toolkits:
-                                if toolkit.name.casefold() == toolkit_name.casefold():
-                                    for module_name, module_tools in toolkit.tools.items():
-                                        try:
-                                            module = importlib.import_module(module_name)
-                                            for tool_name in module_tools:
-                                                try:
-                                                    tool_func = getattr(module, tool_name)
-                                                    tool = ToolCatalog.create_tool_definition(
-                                                        tool_func, toolkit.name, toolkit.version, toolkit.description
-                                                    )
-                                                    tools.append(tool)
-                                                except Exception as e:
-                                                    logging.warning(f"Failed to load tool '{tool_name}' from '{module_name}': {e}")
-                                                    continue
-                                        except Exception as e:
-                                            logging.warning(f"Failed to import module '{module_name}' for toolkit '{toolkit_name}': {e}")
-                                            continue
-                    except Exception as e:
-                        logging.warning(f"Failed to analyze files for tools: {e}")
-        except Exception as e:
-            logging.warning(f"Failed to load tools directly from source: {e}")
+                module = importlib.import_module(module_name)
+                for tool_name in module_tools:
+                    tool_func = getattr(module, tool_name)
+                    tool = ToolCatalog.create_tool_definition(
+                        tool_func, toolkit.name, toolkit.version, toolkit.description
+                    )
+                    tools.append(tool)
 
     if not tools:
         raise ValueError(
