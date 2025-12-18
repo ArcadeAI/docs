@@ -9,6 +9,7 @@ import Badges from "@/app/_components/badges";
 import TabbedCodeBlock from "@/app/_components/tabbed-code-block";
 import TableOfContents from "@/app/_components/table-of-contents";
 import ToolFooter from "@/app/_components/tool-footer";
+import ScopePicker from "@/app/_components/scope-picker";
 import { Callout } from "nextra/components";
 
 <ToolInfo
@@ -95,6 +96,42 @@ These tools are currently available in the Arcade Google Docs MCP Sever.
   provider](/home/auth-providers/google#using-google-auth-in-custom-tools).
 </Callout>
 
+Each tool requires specific Google OAuth scopes to function. You'll find the required scopes listed in a blue info box at the end of each tool's documentation below. For more information about configuring OAuth and tips for moving to production, see the [Google auth provider documentation](/home/auth-providers/google).
+
+<Callout type="warning">
+  The `drive.file` scope only grants access to files that were created or opened by your application. If you need broader access to a user's Google Drive documents (e.g., to access documents created by other applications), you'll need to create your own Google OAuth provider and request the `drive.readonly` or `drive` scope. Note that these broader scopes are **not supported** by Arcade's default Google OAuth provider.
+</Callout>
+
+## Find required scopes
+
+Select the tools you plan to use to see the OAuth scopes your application needs:
+
+<ScopePicker
+  tools={[
+    { name: "GetDocumentById", scopes: ["https://www.googleapis.com/auth/drive.file"] },
+    { name: "GetDocumentAsDocMD", scopes: ["https://www.googleapis.com/auth/drive.file"] },
+    { name: "GetDocumentMetadata", scopes: ["https://www.googleapis.com/auth/drive.file"] },
+    { name: "EditDocument", scopes: ["https://www.googleapis.com/auth/drive.file"] },
+    { name: "InsertTextAtEndOfDocument", scopes: ["https://www.googleapis.com/auth/drive.file"] },
+    { name: "CreateBlankDocument", scopes: ["https://www.googleapis.com/auth/drive.file"] },
+    { name: "CreateDocumentFromText", scopes: ["https://www.googleapis.com/auth/drive.file"] },
+    { name: "SearchDocuments", scopes: ["https://www.googleapis.com/auth/drive.file"] },
+    { name: "SearchAndRetrieveDocuments", scopes: ["https://www.googleapis.com/auth/drive.file"] },
+    { name: "ListDocumentComments", scopes: ["https://www.googleapis.com/auth/drive.file"] },
+    { name: "CommentOnDocument", scopes: ["https://www.googleapis.com/auth/drive.file"] },
+    {
+      name: "WhoAmI",
+      scopes: [
+        "https://www.googleapis.com/auth/drive.file",
+        "https://www.googleapis.com/auth/userinfo.profile",
+        "https://www.googleapis.com/auth/userinfo.email",
+      ],
+    },
+  ]}
+/>
+
+---
+
 ## GoogleDocs.WhoAmI
 
 <br />
@@ -119,6 +156,12 @@ Get comprehensive user profile and Google Docs environment information.
 **Parameters**
 
 This tool does not take any parameters.
+
+<Callout type="info" title="This tool requires the following scopes">
+- `https://www.googleapis.com/auth/drive.file`
+- `https://www.googleapis.com/auth/userinfo.profile`
+- `https://www.googleapis.com/auth/userinfo.email`
+</Callout>
 
 ---
 
@@ -147,6 +190,10 @@ Get the latest version of the specified Google Docs document.
 
 - **`document_id`** _(string, required)_ The ID of the document to retrieve.
 
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/drive.file`
+</Callout>
+
 ---
 
 ## GoogleDocs.GetDocumentAsDocMD
@@ -174,6 +221,10 @@ Get the latest version of the specified Google Docs document in DocMD format. Th
 
 - **`document_id`** _(string, required)_ The ID of the document to retrieve.
 - **`tab_id`** _(string, optional)_ The ID of a specific tab to retrieve. If provided, returns only content from that tab. If omitted, returns all tabs in sequential depth-first order.
+
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/drive.file`
+</Callout>
 
 ---
 
@@ -226,6 +277,10 @@ The response includes the following fields:
   **Note on Approximate Counts**: The character and word counts are approximate and may differ slightly from the exact counts shown in Google Docs. The counts are calculated by parsing the document structure and may not include all formatting or hidden content.
 </Callout>
 
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/drive.file`
+</Callout>
+
 ---
 
 ## GoogleDocs.EditDocument
@@ -257,6 +312,10 @@ Note that this tool is agentic, and requires the secret OPENAI_API_KEY to be set
 - **`edit_requests`** _(list[str], required)_ A list of natural language descriptions of the desired changes to the document. Each entry should be a single, self-contained edit request that can be fully understood independently. Note: Each request may result in zero, one, or multiple actual edits depending on what changes are needed (e.g., a request might be ignored if the change already exists in the document).
 - **`reasoning_effort`** _(enum ([ReasoningEffort](#reasoningeffort)), optional)_ The effort to put into reasoning about the edits. Defaults to medium.
 
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/drive.file`
+</Callout>
+
 ---
 
 ## GoogleDocs.InsertTextAtEndOfDocument
@@ -285,6 +344,10 @@ Insert text at the end of an existing Google Docs document.
 - **`document_id`** _(string, required)_ The ID of the document to update.
 - **`text_content`** _(string, required)_ The text content to insert into the document.
 
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/drive.file`
+</Callout>
+
 ---
 
 ## GoogleDocs.CreateBlankDocument
@@ -311,6 +374,10 @@ Create a blank Google Docs document with the specified title.
 **Parameters**
 
 - **`title`** _(string, required)_ The title of the blank document to create.
+
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/drive.file`
+</Callout>
 
 ---
 
@@ -339,6 +406,10 @@ Create a Google Docs document with the specified title and text content.
 
 - **`title`** _(string, required)_ The title of the document to create.
 - **`text_content`** _(string, required)_ The text content to insert into the document.
+
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/drive.file`
+</Callout>
 
 ---
 
@@ -374,6 +445,12 @@ Search Google documents in the user's Google Drive. Excludes documents that are 
 - **`limit`** _(int, optional)_ The number of documents to list. Defaults to `50`.
 - **`pagination_token`** _(str, optional)_ The pagination token to continue a previous request
 
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/drive.file`
+</Callout>
+
+---
+
 ## GoogleDocs.SearchAndRetrieveDocuments
 
 <br />
@@ -407,6 +484,10 @@ Searches for documents in the user's Google Drive and returns a list of document
 - **`limit`** _(int, optional)_ The number of documents to list. Defaults to `50`.
 - **`pagination_token`** _(str, optional)_ The pagination token to continue a previous request
 
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/drive.file`
+</Callout>
+
 ---
 
 ## GoogleDocs.ListDocumentComments
@@ -435,6 +516,10 @@ List all comments on the specified Google Docs document.
 - **`document_id`** _(string, required)_ The ID of the document to list comments for.
 - **`include_deleted`** _(bool, optional)_ Whether to include deleted comments in the results. Defaults to False.
 
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/drive.file`
+</Callout>
+
 ---
 
 ## GoogleDocs.CommentOnDocument
@@ -462,6 +547,10 @@ Comment on a specific document by its ID.
 
 - **`document_id`** _(string, required)_ The ID of the document to comment on.
 - **`comment_text`** _(string, required)_ The comment to add to the document.
+
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/drive.file`
+</Callout>
 
 ---
 

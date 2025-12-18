@@ -8,11 +8,11 @@ description: "How to secure and brand your auth flows in production"
 To keep your users safe, Arcade.dev performs a user verification check when a tool is authorized for the first time. This check verifies that the user who is authorizing the tool is the same user who started the authorization flow, which helps prevent phishing attacks.
 
 There are two ways to secure your auth flows with Arcade.dev:
+
 - Use the **Arcade user verifier** for development (enabled by default)
 - Implement a **custom user verifier** for production
 
 This setting is configured in the [Auth > Settings section](https://api.arcade.dev/dashboard/auth/settings) of the Arcade Dashboard.
-
 
 ## Use the Arcade user verifier
 
@@ -20,7 +20,12 @@ If you're building a proof-of-concept app or a solo project, use the Arcade user
 
 This setting is configured in the [Auth > Settings section](https://api.arcade.dev/dashboard/auth/settings) of the Arcade Dashboard:
 
-<img src="/images/docs/auth/dashboard-arcade-verifier.png" alt="An image showing how to pick the Arcade user verifier option in the Arcade Dashboard" className="rounded-sm shadow-md" width="600" />
+<img
+  src="/images/docs/auth/dashboard-arcade-verifier.png"
+  alt="An image showing how to pick the Arcade user verifier option in the Arcade Dashboard"
+  className="rounded-sm shadow-md"
+  width="600"
+/>
 
 When you authorize a tool, you'll be prompted to sign in to your Arcade.dev account. If you are already signed in (to the Arcade Dashboard, for example), this verification will succeed silently.
 
@@ -28,8 +33,10 @@ The Arcade.dev user verifier helps keep your auth flows secure while you are bui
 
 <Callout type="info">
   Arcade's default OAuth apps can *only* be used with the Arcade user verifier.
-  If you are building a multi-user production app, you must obtain your own OAuth app credentials and add them to Arcade.
-  For example, see our docs on [configuring Google auth in the Arcade Dashboard](/home/auth-providers/google#access-the-arcade-dashboard).
+  If you are building a multi-user production app, you must obtain your own
+  OAuth app credentials and add them to Arcade. For example, see our docs on
+  [configuring Google auth in the Arcade
+  Dashboard](/home/auth-providers/google#access-the-arcade-dashboard).
 </Callout>
 
 ## Build a custom user verifier
@@ -55,26 +62,27 @@ The route must gather the following information:
 
 How the user's unique ID is retrieved varies depending on how your app is built, but it is typically retrieved from a session cookie or other secure storage. It **must** match the user ID that your code specified at the start of the authorization flow.
 
-
 ### Verify the user's identity
 
 Use the Arcade SDK (or our REST API) to verify the user's identity.
 
 <Callout type="warning">
-  Because this request uses your Arcade API key, it *must not* be made from the client side (a browser or desktop app). This code must be run on a server.
+  Because this request uses your Arcade API key, it *must not* be made from the
+  client side (a browser or desktop app). This code must be run on a server.
 </Callout>
 
 <Tabs items={["JavaScript","Python","REST"]} storageKey="preferredLanguage">
 <Tabs.Tab>
+
 ```ts {13-16}
-import { Arcade } from '@arcadeai/arcadejs';
+import { Arcade } from "@arcadeai/arcadejs";
 
 const client = new Arcade(); // Looks for process.env.ARCADE_API_KEY by default
 
 // Within a server GET handler:
 // Validate required parameters
 if (!flow_id) {
-    throw new Error('Missing required parameters: flow_id');
+  throw new Error("Missing required parameters: flow_id");
 }
 
 // Confirm the user's identity
@@ -84,16 +92,24 @@ try {
     user_id: user_id_from_your_app_session, // Replace with the user's ID
   });
 } catch (error) {
-  console.error('Error during verification', 'status code:', error.status, 'data:', error.data);
+  console.error(
+    "Error during verification",
+    "status code:",
+    error.status,
+    "data:",
+    error.data
+  );
   throw error;
 }
 ```
+
 </Tabs.Tab>
 <Tabs.Tab>
+
 ```python {12-15}
 from arcadepy import AsyncArcade
 
-client = AsyncArcade()  # Looks for ARCADE_API_KEY environment variable by default
+client = AsyncArcade() # Looks for ARCADE_API_KEY environment variable by default
 
 # Within a server GET handler:
 # Validate required parameters
@@ -104,14 +120,16 @@ if not flow_id:
 try:
     result = await client.auth.confirm_user(
         flow_id=flow_id,
-        user_id=user_id_from_your_app_session,  # Replace with the user's ID
+        user_id=user_id_from_your_app_session, # Replace with the user's ID
     )
 except Exception as error:
     print("Error during verification:", error)
     raise Exception("Failed to verify the request")
 ```
+
 </Tabs.Tab>
 <Tabs.Tab>
+
 ```text
 POST https://cloud.arcade.dev/api/v1/oauth/confirm_user
 Authorization: Bearer <arcade_api_key>
@@ -121,7 +139,9 @@ Content-Type: application/json
   "flow_id": "<flow_id from the query string>",
   "user_id": "<the current user's ID>"
 }
+
 ```
+
 </Tabs.Tab>
 </Tabs>
 
@@ -133,9 +153,9 @@ If the user's ID matches the ID specified at the start of the authorization flow
 - Redirect to a different route in your application
 - Look up the auth flow's status in the Arcade API and render a success page
 
-
 <Tabs items={["JavaScript","Python","REST"]} storageKey="preferredLanguage">
 <Tabs.Tab>
+
 ```ts
 // Either redirect to result.next_uri, or render a success page:
 const authResponse = await client.auth.waitForCompletion(result.auth_id);
@@ -146,8 +166,10 @@ if (authResponse.status === "completed") {
   return "Something went wrong. Please try again.";
 }
 ```
+
 </Tabs.Tab>
 <Tabs.Tab>
+
 ```python
 # Either redirect to result.next_uri, or render a success page:
 auth_response = await client.auth.wait_for_completion(result.auth_id)
@@ -157,8 +179,10 @@ if auth_response.status == "completed":
 else:
     return "Something went wrong. Please try again."
 ```
+
 </Tabs.Tab>
 <Tabs.Tab>
+
 ```text
 HTTP 200 OK
 Content-Type: application/json
@@ -170,10 +194,11 @@ Content-Type: application/json
   // Optional: URL to redirect the user to after the authorization flow is complete
   "next_uri": "https://..."
 }
+
 ```
+
 </Tabs.Tab>
 </Tabs>
-
 
 **Invalid Response**
 
@@ -181,18 +206,29 @@ If the user's ID does not match the ID specified at the start of the authorizati
 
 <Tabs items={["JavaScript","Python","REST"]} storageKey="preferredLanguage">
 <Tabs.Tab>
+
 ```ts
-console.error('Error during verification', 'status code:', error.status, 'data:', error.data);
+console.error(
+  "Error during verification",
+  "status code:",
+  error.status,
+  "data:",
+  error.data
+);
 throw error;
 ```
+
 </Tabs.Tab>
 <Tabs.Tab>
+
 ```python
 print("Error during verification:", error)
 raise Exception("Failed to verify the request")
 ```
+
 </Tabs.Tab>
 <Tabs.Tab>
+
 ```text
 HTTP 400 Bad Request
 Content-Type: application/json
@@ -202,6 +238,7 @@ Content-Type: application/json
   "msg": "An error occurred during verification"
 }
 ```
+
 </Tabs.Tab>
 </Tabs>
 
@@ -209,11 +246,17 @@ Content-Type: application/json
 
 In the [Auth > Settings section](https://api.arcade.dev/dashboard/auth/settings) of the Arcade Dashboard, pick the **Custom verifier** option and add the URL of your verifier route.
 
-<img src="/images/docs/auth/dashboard-custom-verifier.png" alt="An image showing how to pick the custom verifier option in the Arcade Dashboard" className="rounded-sm shadow-md" width="600" />
+<img
+  src="/images/docs/auth/dashboard-custom-verifier.png"
+  alt="An image showing how to pick the custom verifier option in the Arcade Dashboard"
+  className="rounded-sm shadow-md"
+  width="600"
+/>
 
 <Callout type="info">
   Arcade's default OAuth apps *only* support the Arcade user verifier.
-  Authorization flows using Arcade's default OAuth apps will use the Arcade user verifier even if you have a custom verifier route set up.
+  Authorization flows using Arcade's default OAuth apps will use the Arcade user
+  verifier even if you have a custom verifier route set up.
 </Callout>
 
 </Steps>

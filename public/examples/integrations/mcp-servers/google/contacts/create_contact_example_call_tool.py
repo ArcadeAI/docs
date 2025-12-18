@@ -1,4 +1,6 @@
 from arcadepy import Arcade
+# Required Google OAuth scopes:
+# - https://www.googleapis.com/auth/contacts
 
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
@@ -20,6 +22,7 @@ tool_input = {
     "given_name": "John",
     "family_name": "Doe",
     "email": "john.doe@example.com",
+    "phone_number": "+1234567890"
 }
 
 response = client.tools.execute(

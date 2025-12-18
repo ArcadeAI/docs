@@ -1,5 +1,7 @@
 import json
 from arcadepy import Arcade
+# Required Google OAuth scopes:
+# - https://www.googleapis.com/auth/drive.file
 
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
@@ -15,10 +17,10 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    'query': 'project report',
-    'include_shared_drives': True,
-    'limit': 10,
-    'file_types': ['document', 'spreadsheet']
+    "query": "project report",
+    "include_shared_drives": True,
+    "limit": 10,
+    "file_types": ["document", "spreadsheet"]
 }
 
 response = client.tools.execute(

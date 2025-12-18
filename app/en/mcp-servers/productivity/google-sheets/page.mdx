@@ -9,6 +9,7 @@ import Badges from "@/app/_components/badges";
 import TabbedCodeBlock from "@/app/_components/tabbed-code-block";
 import TableOfContents from "@/app/_components/table-of-contents";
 import ToolFooter from "@/app/_components/tool-footer";
+import ScopePicker from "@/app/_components/scope-picker";
 import { Callout } from "nextra/components";
 
 <ToolInfo
@@ -79,6 +80,65 @@ The Arcade GoogleSheets MCP Server provides a pre-built set of tools for working
   tools](/home/build-tools/create-a-mcp-server).
 </Callout>
 
+Each tool requires specific Google OAuth scopes to function. You'll find the required scopes listed in a blue info box at the end of each tool's documentation below. For more information about configuring OAuth and tips for moving to production, see the [Google auth provider documentation](/home/auth-providers/google).
+
+<Callout type="warning">
+  The `drive.file` scope only grants access to files that were created or opened
+  by your application. If you need broader access to a user's Google Drive
+  spreadsheets (e.g., to access spreadsheets created by other applications),
+  you'll need to create your own Google OAuth provider and request the
+  `drive.readonly` or `drive` scope. Note that these broader scopes are **not
+  supported** by Arcade's default Google OAuth provider.
+</Callout>
+
+## Find required scopes
+
+Select the tools you plan to use to see the OAuth scopes your application needs:
+
+<ScopePicker
+  tools={[
+    {
+      name: "CreateSpreadsheet",
+      scopes: ["https://www.googleapis.com/auth/drive.file"],
+    },
+    {
+      name: "WriteToCell",
+      scopes: ["https://www.googleapis.com/auth/drive.file"],
+    },
+    {
+      name: "UpdateCells",
+      scopes: ["https://www.googleapis.com/auth/drive.file"],
+    },
+    {
+      name: "AddNoteToCell",
+      scopes: ["https://www.googleapis.com/auth/drive.file"],
+    },
+    {
+      name: "SearchSpreadsheets",
+      scopes: ["https://www.googleapis.com/auth/drive.file"],
+    },
+    { name: "GenerateGoogleFilePickerUrl", scopes: [] },
+    {
+      name: "GetSpreadsheet",
+      scopes: ["https://www.googleapis.com/auth/drive.file"],
+    },
+    {
+      name: "GetSpreadsheetMetadata",
+      scopes: ["https://www.googleapis.com/auth/drive.file"],
+    },
+    {
+      name: "WhoAmI",
+      scopes: [
+        "https://www.googleapis.com/auth/drive.file",
+        "https://www.googleapis.com/auth/userinfo.profile",
+        "https://www.googleapis.com/auth/userinfo.email",
+      ],
+    },
+  ]}
+/>
+
+---
+
 ## GoogleSheets.CreateSpreadsheet
 
 <br />
@@ -104,6 +164,12 @@ Create a new spreadsheet with the provided title and data in its first sheet
 
 - **title** (`string`, optional) The title of the new spreadsheet
 - **data** (`string`, optional) The data to write to the spreadsheet. A JSON string (property names enclosed in double quotes) representing a dictionary that maps row numbers to dictionaries that map column letters to cell values. For example, data[23]['C'] would be the value of the cell in row 23, column C. Type hint: dict[int, dict[str, Union[int, float, str, bool]]]
+
+<Callout type="info" title="This tool requires the following scope">
+  `https://www.googleapis.com/auth/drive.file`
+</Callout>
+
+---
 
 ## GoogleSheets.WriteToCell
 
@@ -134,6 +200,12 @@ Write a value to a single cell in a spreadsheet.
 - **value** (`string`, required) The value to write to the cell
 - **sheet_name** (`string`, optional) The name of the sheet to write to. Defaults to 'Sheet1'
 
+<Callout type="info" title="This tool requires the following scope">
+  `https://www.googleapis.com/auth/drive.file`
+</Callout>
+
+---
+
 ## GoogleSheets.UpdateCells
 
 <br />
@@ -161,6 +233,12 @@ Write values to a Google Sheet using a flexible data format.
 - **data** (`string`, required) The data to write. A JSON string (property names enclosed in double quotes) representing a dictionary that maps row numbers to dictionaries that map column letters to cell values. For example, data[23]['C'] is the value for cell C23. This is the same format accepted by create_spreadsheet. Type hint: dict[int, dict[str, int | float | str | bool]]
 - **sheet_position** (`integer`, optional) The position/tab of the sheet in the spreadsheet to write to. A value of 1 represents the first (leftmost/Sheet1) sheet. Defaults to 1.
 - **sheet_id_or_name** (`string`, optional) The id or name of the sheet to write to. If provided, takes precedence over sheet_position.
+
+<Callout type="info" title="This tool requires the following scope">
+  `https://www.googleapis.com/auth/drive.file`
+</Callout>
+
+---
 
 ## GoogleSheets.AddNoteToCell
 
@@ -191,6 +269,12 @@ Add a note to a specific cell in a spreadsheet. A note is a small
 - **note_text** (`string`, required) The text for the note to add
 - **sheet_position** (`integer`, optional) The position/tab of the sheet in the spreadsheet to write to. A value of 1 represents the first (leftmost/Sheet1) sheet. Defaults to 1.
 - **sheet_id_or_name** (`string`, optional) The id or name of the sheet to write to. If provided, takes precedence over sheet_position.
+
+<Callout type="info" title="This tool requires the following scope">
+  `https://www.googleapis.com/auth/drive.file`
+</Callout>
+
+---
 
 ## GoogleSheets.SearchSpreadsheets
 
@@ -224,6 +308,12 @@ Searches for spreadsheets in the user's Google Drive based on the titles and con
 - **limit** (`integer`, optional) The maximum number of spreadsheets to list. Defaults to 10. Max is 50
 - **pagination_token** (`string`, optional) The pagination token to continue a previous request
 
+<Callout type="info" title="This tool requires the following scope">
+  `https://www.googleapis.com/auth/drive.file`
+</Callout>
+
+---
+
 ## GoogleSheets.WhoAmI
 
 <br />
@@ -249,6 +339,14 @@ Get comprehensive user profile and Google Sheets environment information.
 
 This tool does not take any parameters.
 
+<Callout type="info" title="This tool requires the following scopes">
+  - `https://www.googleapis.com/auth/drive.file`
+  - `https://www.googleapis.com/auth/userinfo.profile`
+  - `https://www.googleapis.com/auth/userinfo.email`
+</Callout>
+
+---
+
 ## GoogleSheets.GenerateGoogleFilePickerUrl
 
 <br />
@@ -273,6 +371,12 @@ Generate a Google File Picker URL for user-driven file selection and authorizati
 **Parameters**
 
 This tool does not take any parameters.
+
+<Callout type="info" title="This tool requires the following scope">
+  No additional scopes required (uses basic Google authentication).
+</Callout>
+
+---
 
 ## GoogleSheets.GetSpreadsheet
 
@@ -305,6 +409,12 @@ Gets the specified range of cells from a single sheet in the spreadsheet.
 - **max_rows** (`integer`, optional) Maximum number of rows to fetch for each sheet in the spreadsheet. Must be between 1 and 1000. Defaults to 1000.
 - **max_cols** (`integer`, optional) Maximum number of columns to fetch for each sheet in the spreadsheet. Must be between 1 and 100. Defaults to 100.
 
+<Callout type="info" title="This tool requires the following scope">
+  `https://www.googleapis.com/auth/drive.file`
+</Callout>
+
+---
+
 ## GoogleSheets.GetSpreadsheetMetadata
 
 <br />
@@ -329,6 +439,12 @@ Gets the metadata for a spreadsheet including the metadata for the sheets in the
 **Parameters**
 
 - **spreadsheet_id** (`string`, required) The id of the spreadsheet to get metadata for
+
+<Callout type="info" title="This tool requires the following scope">
+  `https://www.googleapis.com/auth/drive.file`
+</Callout>
+
+---
 
 ## Auth
 
