@@ -4,17 +4,19 @@ import { cn } from "@arcadeai/design-system/lib/utils";
 import Link from "next/link";
 import type React from "react";
 
-type FrameworkCardProps = {
+type PlatformCardProps = {
   name: string;
   icon: string;
   link: string;
+  type: "Agent Framework" | "MCP Client";
   languages?: Array<"TypeScript" | "Python">;
 };
 
-export const FrameworkCard: React.FC<FrameworkCardProps> = ({
+export const PlatformCard: React.FC<PlatformCardProps> = ({
   name,
   icon,
   link,
+  type,
   languages = [],
 }) => {
   const showLanguageBadges = languages.length > 0;
@@ -35,7 +37,7 @@ export const FrameworkCard: React.FC<FrameworkCardProps> = ({
               {name}
             </CardTitle>
             <div className="text-gray-600 text-xs dark:text-gray-400">
-              Agent Framework
+              {type}
             </div>
           </div>
         </div>
