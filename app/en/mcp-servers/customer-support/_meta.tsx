@@ -14,6 +14,9 @@ const meta: MetaRecord = {
   pylon: {
     title: "Pylon",
   },
+  pagerduty: {
+    title: "PagerDuty",
+  },
 };
 
 export default meta;
