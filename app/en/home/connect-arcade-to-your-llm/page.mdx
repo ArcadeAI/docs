@@ -8,7 +8,7 @@ import { SignupLink } from "@/app/_components/analytics";
 
 # Connect Arcade to your LLM
 
-Arcade tools are designed to be used with LLMs. This requires you to implement a harness that orchestrates the interaction between the LLM, the tools, and the user. While typically this is abstracted away by agentic frameworks, this guide will show you how to implement a simple harness from scratch, so that the underlying mechanics are clear.
+Arcade tools are meant to be used alongside an LLM. To make that work, you need a small piece of glue code called a “harness.” The harness orchestrates the back-and-forth between the user, the model, and the tools. In this guide, we’ll build a simple one so you can wire Arcade into your LLM-powered app.
 
 <GuideOverview>
 <GuideOverview.Outcomes>
@@ -124,7 +124,7 @@ llm_client = OpenAI(
 
 ### Select and retrieve the tools from Arcade
 
-In this example, we're implementing a multi-tool agent that can retrieve and send emails, as well as send messages to Slack. In a harness like this one the entire catalog of tools is exposed to the LLM. To make your agent more efficient, choose only the tools that are relevant to the task at hand to avoid overwhelming the LLM and to make your agent more token efficient.
+In this example, we're implementing a multi-tool agent that can retrieve and send emails, as well as send messages to Slack. While a harness can expose a broad catalog of tools to the LLM, it’s best to limit that set to what’s relevant for the task to keep the model efficient.
 
 ```python filename="main.py"
 # Define the tools for the agent to use
@@ -143,9 +143,8 @@ for tool in tool_catalog:
 
 ### Write a helper function that handles tool authorization and execution
 
-The LLM may choose to call any of the tools in its catalog, some of which may require authorization, interrupting the process.
+The model can use any tool you give it, and some tools require permission before they work. When this happens, you can either involve the model in the permission step or handle it behind the scenes and continue as if the tool were already authorized. In this guide, authorization is handled outside the model so it can act as if the tool is already available. It’s like ordering a coffee: after you place your order, the barista handles payment behind the counter instead of explaining every step of card verification and receipts. The customer—and the model—gets the result without having to think about any of the intermediate steps.
 
-One way to handle interruptions like this is to evaluate whether the LLM needs to be aware of the authorization process or if it's better to handle it in the harness, keeping the context as if the tool were already authorized. The latter option optimizes for token efficiency, so is used in the following example:
 
 ```python filename="main.py"
 # Helper function to authorize and run any tool
