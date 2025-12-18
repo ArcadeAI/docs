@@ -1,6 +1,7 @@
 export default {
   overview: "Overview",
   "error-handling": "Handle errors",
+  "scheduled-executions": "Schedule tool executions",
   "-- In 3rd party applications": {
     type: "separator",
     title: "In 3rd party applications",
@@ -19,12 +20,6 @@ export default {
   "tool-formats": "Tool formats",
   "connect-arcade-llm": "Connect Arcade tools to your LLM",
   "ensure-consistent-evals": "Ensure consistent tool calls with evals",
-  "-- Trigger tool calls": {
-    type: "separator",
-    title: "Trigger tool calls",
-  },
-  "background-agents": "Set up a background agent using events",
-  "scheduled-executions": "Set up scheduled tool executions",
   "-- Reference": {
     type: "separator",
     title: "Reference",

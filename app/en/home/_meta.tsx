@@ -35,10 +35,7 @@ export const meta: MetaRecord = {
   quickstarts: "Quickstarts",
   "common-use-cases": "Common use cases",
   "example-agents": "Example agents",
-  toolkits: {
-    title: "Toolkits",
-    href: "/en/mcp-servers",
-  },
+  tools: "Tools",
   glossary: "Glossary",
   faq: "FAQ",
   changelog: "Changelog",
@@ -50,7 +47,7 @@ export const meta: MetaRecord = {
   "calling-tools": "Call tools",
   "creating-tools": "Create tools",
   "agent-frameworks": "Agent frameworks",
-  "sharing-with-end-users": "Share your agent with end-users",
+  "sharing-with-end-users": "User-facing agents",
   observability: "Observability",
   "deployment-hosting": "Deployment and hosting",
   "security-section": "Security and compliance",
@@ -68,6 +65,7 @@ export const meta: MetaRecord = {
   api: "API",
   "arcade-mcp": "Arcade MCP (MCP server SDK)",
   "arcade-clients": "Arcade clients",
+  "arcade-cli": "Arcade CLI",
   "auth-providers": "Auth Providers",
   // Hide auto-discovered directories
   "api-keys": {
