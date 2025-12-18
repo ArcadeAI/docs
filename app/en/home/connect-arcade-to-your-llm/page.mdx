@@ -113,7 +113,7 @@ import os
 
 load_dotenv()
 
-client = Arcade()
+arcade_client = Arcade()
 arcade_user_id = os.getenv("ARCADE_USER_ID")
 llm_client = OpenAI(
     api_key=os.getenv("OPENROUTER_API_KEY"),
@@ -138,7 +138,7 @@ tool_catalog = [
 # Get the tool definitions from the Arcade API
 tool_definitions = []
 for tool in tool_catalog:
-    tool_definitions.append(arcade.tools.formatted.get(name=tool, format="openai"))
+    tool_definitions.append(arcade_client.tools.formatted.get(name=tool, format="openai"))
 ```
 
 ### Write a helper function that handles tool authorization and execution
@@ -151,7 +151,7 @@ One way to handle interruptions like this is to evaluate whether the LLM needs t
 # Helper function to authorize and run any tool
 def authorize_and_run_tool(tool_name: str, input: str):
     # Start the authorization process
-    auth_response = arcade.tools.authorize(
+    auth_response = arcade_client.tools.authorize(
         tool_name=tool_name,
         user_id=arcade_user_id,
     )
@@ -160,13 +160,13 @@ def authorize_and_run_tool(tool_name: str, input: str):
     # Tools that do not require authorization will have the status "completed" already.
     if auth_response.status != "completed":
         print(f"Click this link to authorize {tool_name}: {auth_response.url}. The process will continue once you have authorized the app.")
-        arcade.auth.wait_for_completion(auth_response.id)
+        arcade_client.auth.wait_for_completion(auth_response.id)
 
     # Parse the input
     input_json = json.loads(input)
 
     # Run the tool
-    result = arcade.tools.execute(
+    result = arcade_client.tools.execute(
         tool_name=tool_name,
         input=input_json,
         user_id=arcade_user_id,
@@ -321,7 +321,7 @@ import os
 
 load_dotenv()
 
-arcade = Arcade()
+arcade_client = Arcade()
 arcade_user_id = os.getenv("ARCADE_USER_ID")
 llm_client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
@@ -339,13 +339,13 @@ tool_catalog = [
 # We get the tool definitions from the Arcade API, so that we can expose them to the LLM
 tool_definitions = []
 for tool in tool_catalog:
-    tool_definitions.append(arcade.tools.formatted.get(name=tool, format="openai"))
+    tool_definitions.append(arcade_client.tools.formatted.get(name=tool, format="openai"))
 
 
 # Helper function to authorize and run any tool
 def authorize_and_run_tool(tool_name: str, input: str):
     # Start the authorization process
-    auth_response = arcade.tools.authorize(
+    auth_response = arcade_client.tools.authorize(
         tool_name=tool_name,
         user_id=arcade_user_id,
     )
@@ -354,13 +354,13 @@ def authorize_and_run_tool(tool_name: str, input: str):
     # Tools that do not require authorization will have the status "completed" already.
     if auth_response.status != "completed":
         print(f"Click this link to authorize {tool_name}: {auth_response.url}. The process will continue once you have authorized the app.")
-        arcade.auth.wait_for_completion(auth_response.id)
+        arcade_client.auth.wait_for_completion(auth_response.id)
 
     # Parse the input
     input_json = json.loads(input)
 
     # Run the tool
-    result = arcade.tools.execute(
+    result = arcade_client.tools.execute(
         tool_name=tool_name,
         input=input_json,
         user_id=arcade_user_id,
