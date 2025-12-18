@@ -41,7 +41,7 @@ export const meta: MetaRecord = {
   },
   glossary: "Glossary",
   faq: "FAQ",
-  "changelog-page": "Changelog",
+  changelog: "Changelog",
   "-- Guides": {
     type: "separator",
     title: "Guides",
@@ -71,9 +71,6 @@ export const meta: MetaRecord = {
   "auth-providers": "Auth Providers",
   // Hide auto-discovered directories
   "api-keys": {
-    display: "hidden",
-  },
-  changelog: {
     display: "hidden",
   },
   "contact-us": {
