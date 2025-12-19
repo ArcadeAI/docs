@@ -1,5 +1,5 @@
 "use client";
-import { Badge, Card, CardHeader, CardTitle } from "@arcadeai/design-system";
+import { Card, CardHeader, CardTitle } from "@arcadeai/design-system";
 import { cn } from "@arcadeai/design-system/lib/utils";
 import Link from "next/link";
 import type React from "react";
@@ -9,7 +9,6 @@ type PlatformCardProps = {
   icon: string;
   link: string;
   type: "Agent Framework" | "MCP Client";
-  languages?: Array<"TypeScript" | "Python">;
 };
 
 export const PlatformCard: React.FC<PlatformCardProps> = ({
@@ -17,10 +16,7 @@ export const PlatformCard: React.FC<PlatformCardProps> = ({
   icon,
   link,
   type,
-  languages = [],
 }) => {
-  const showLanguageBadges = languages.length > 0;
-
   const cardContent = (
     <Card
       className={cn(
@@ -28,7 +24,7 @@ export const PlatformCard: React.FC<PlatformCardProps> = ({
       )}
     >
       <CardHeader>
-        <div className="mb-3 flex items-center space-x-5">
+        <div className="flex items-center space-x-5">
           <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg">
             <img alt={`${name} logo`} className="size-9" src={icon} />
           </div>
@@ -41,19 +37,6 @@ export const PlatformCard: React.FC<PlatformCardProps> = ({
             </div>
           </div>
         </div>
-        {showLanguageBadges && (
-          <div className="flex items-center gap-1.5">
-            {languages.map((language) => (
-              <Badge
-                className="inline-flex w-fit shrink-0 cursor-pointer items-center justify-center gap-1.5 overflow-hidden whitespace-nowrap rounded-md border-0 border-transparent bg-gradient-to-br from-emerald-600 to-emerald-800 px-2 py-0.5 font-semibold text-[0.725rem] text-white uppercase leading-4 tracking-wide shadow-md focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:pointer-events-none [&>svg]:size-3 [&>svg]:h-3 [&>svg]:w-3"
-                key={language}
-                variant="outline"
-              >
-                {language}
-              </Badge>
-            ))}
-          </div>
-        )}
       </CardHeader>
     </Card>
   );
