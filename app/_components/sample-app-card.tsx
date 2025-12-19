@@ -9,6 +9,7 @@ type SampleAppCardProps = {
   href: string;
   blank?: boolean;
   tags?: string[];
+  date?: string;
 };
 
 export function SampleAppCard({
@@ -18,15 +19,23 @@ export function SampleAppCard({
   href,
   blank = false,
   tags = [],
+  date,
 }: SampleAppCardProps) {
   return (
     <Link href={href} target={blank ? "_blank" : undefined}>
       <Card className="flex h-full flex-col gap-1.5 border border-gray-600/20 bg-white/90 py-3 backdrop-blur-sm transition-all duration-300 hover:border-primary hover:bg-gray-600/[0.03] hover:shadow-lg dark:bg-gray-900/80">
         <CardContent className="p-0">
           <div className="space-y-2 p-6">
-            <h3 className="font-semibold text-gray-900 text-xl tracking-tight dark:text-white">
-              {title}
-            </h3>
+            <div className="flex items-start justify-between gap-2">
+              <h3 className="font-semibold text-gray-900 text-xl tracking-tight dark:text-white">
+                {title}
+              </h3>
+              {date && (
+                <span className="whitespace-nowrap font-medium text-gray-500 text-xs dark:text-gray-400">
+                  {date}
+                </span>
+              )}
+            </div>
             <p className="text-gray-600 text-sm leading-relaxed dark:text-gray-300">
               {description}
             </p>
