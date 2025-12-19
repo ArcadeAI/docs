@@ -9,6 +9,7 @@ import Badges from "@/app/_components/badges";
 import TabbedCodeBlock from "@/app/_components/tabbed-code-block";
 import TableOfContents from "@/app/_components/table-of-contents";
 import ToolFooter from "@/app/_components/tool-footer";
+import ScopePicker from "@/app/_components/scope-picker";
 import { Callout } from "nextra/components";
 
 <ToolInfo
@@ -66,6 +67,60 @@ These tools are currently available in the Arcade Google Calendar MCP Sever.
   provider](/home/auth-providers/google#using-google-auth-in-custom-tools).
 </Callout>
 
+Each tool requires specific Google OAuth scopes to function. You'll find the required scopes listed in a blue info box at the end of each tool's documentation below. For more information about configuring OAuth and tips for moving to production, see the [Google auth provider documentation](/home/auth-providers/google).
+
+## Find required scopes
+
+Select the tools you plan to use to see the OAuth scopes your application needs:
+
+<ScopePicker
+  tools={[
+    {
+      name: "ListCalendars",
+      scopes: [
+        "https://www.googleapis.com/auth/calendar.readonly",
+        "https://www.googleapis.com/auth/calendar.events",
+      ],
+    },
+    {
+      name: "CreateEvent",
+      scopes: [
+        "https://www.googleapis.com/auth/calendar.readonly",
+        "https://www.googleapis.com/auth/calendar.events",
+      ],
+    },
+    {
+      name: "ListEvents",
+      scopes: [
+        "https://www.googleapis.com/auth/calendar.readonly",
+        "https://www.googleapis.com/auth/calendar.events",
+      ],
+    },
+    {
+      name: "UpdateEvent",
+      scopes: ["https://www.googleapis.com/auth/calendar.events"],
+    },
+    {
+      name: "DeleteEvent",
+      scopes: ["https://www.googleapis.com/auth/calendar.events"],
+    },
+    {
+      name: "FindTimeSlotsWhenEveryoneIsFree",
+      scopes: ["https://www.googleapis.com/auth/calendar.readonly"],
+    },
+    {
+      name: "WhoAmI",
+      scopes: [
+        "https://www.googleapis.com/auth/calendar.readonly",
+        "https://www.googleapis.com/auth/userinfo.profile",
+        "https://www.googleapis.com/auth/userinfo.email",
+      ],
+    },
+  ]}
+/>
+
+---
+
 ## GoogleCalendar.ListCalendars
 
 <br />
@@ -93,6 +148,13 @@ List all calendars accessible by the user.
 - **`show_deleted`** (`boolean`, optional) Whether to show deleted calendars. Defaults to False
 - **`show_hidden`** (`boolean`, optional) Whether to show hidden calendars. Defaults to False
 - **`next_page_token`** (`string`, optional) The token to retrieve the next page of calendars. Optional.
+
+<Callout type="info" title="This tool requires the following scopes">
+- `https://www.googleapis.com/auth/calendar.readonly`
+- `https://www.googleapis.com/auth/calendar.events`
+</Callout>
+
+---
 
 ## GoogleCalendar.CreateEvent
 
@@ -128,6 +190,13 @@ Create a new event/meeting/sync/meetup in the specified calendar.
 - **`send_notifications_to_attendees`** (`Enum` [SendUpdatesOptions](/mcp-servers/productivity/google-calendar/reference#SendUpdatesOptions), optional) Should attendees be notified by email of the invitation? (none, all, external_only)
 - **`add_google_meet`** (`boolean`, optional) Whether to add a Google Meet link to the event. Defaults to False.
 
+<Callout type="info" title="This tool requires the following scopes">
+- `https://www.googleapis.com/auth/calendar.readonly`
+- `https://www.googleapis.com/auth/calendar.events`
+</Callout>
+
+---
+
 ## GoogleCalendar.ListEvents
 
 <br />
@@ -162,6 +231,13 @@ For example: If min_end_datetime is set to 2024-09-15T09:00:00 and max_start_dat
 - **`max_start_datetime`** (`string`, required) Filter by events that start before this datetime in ISO 8601 format, e.g., '2024-09-16T17:00:00'.
 - **`calendar_id`** (`string`, optional) The ID of the calendar to list events from
 - **`max_results`** (`integer`, optional) The maximum number of events to return
+
+<Callout type="info" title="This tool requires the following scopes">
+- `https://www.googleapis.com/auth/calendar.readonly`
+- `https://www.googleapis.com/auth/calendar.events`
+</Callout>
+
+---
 
 ## GoogleCalendar.UpdateEvent
 
@@ -201,6 +277,12 @@ Update an existing event in the specified calendar with the provided details. On
 - **`send_notifications_to_attendees`** (`Enum` [SendUpdatesOptions](/mcp-servers/productivity/google-calendar/reference#SendUpdatesOptions), optional) Should attendees be notified of the update? (none, all, external_only)
 - **`update_google_meet`** (`Enum` [UpdateGoogleMeetOptions](/mcp-servers/productivity/google-calendar/reference#UpdateGoogleMeetOptions), optional) Whether to update the Google Meet link to the event. (none, add, remove)
 
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/calendar.events`
+</Callout>
+
+---
+
 ## GoogleCalendar.DeleteEvent
 
 <br />
@@ -227,6 +309,12 @@ Delete an event from Google Calendar.
 - **`event_id`** (`string`, required) The ID of the event to delete
 - **`calendar_id`** (`string`, optional) The ID of the calendar containing the event
 - **`send_updates`** (`Enum` [SendUpdatesOptions](/mcp-servers/productivity/google-calendar/reference#SendUpdatesOptions), optional) Specifies which attendees to notify about the deletion
+
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/calendar.events`
+</Callout>
+
+---
 
 ## GoogleCalendar.FindTimeSlotsWhenEveryoneIsFree
 
@@ -257,6 +345,12 @@ Provides time slots when everyone is free within a given date range and time bou
 - **`start_time_boundary`** (`string`, optional) Will return free slots in any given day starting from this time in the format 'HH:MM'. Defaults to '08:00', which is a usual business hour start time.
 - **`end_time_boundary`** (`string`, optional) Will return free slots in any given day until this time in the format 'HH:MM'. Defaults to '18:00', which is a usual business hour end time.
 
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/calendar.readonly`
+</Callout>
+
+---
+
 ## GoogleCalendar.WhoAmI
 
 <br />
@@ -281,6 +375,12 @@ Get comprehensive user profile and Google Calendar environment information.
 **Parameters**
 
 This tool does not take any parameters.
+
+<Callout type="info" title="This tool requires the following scopes">
+- `https://www.googleapis.com/auth/calendar.readonly`
+- `https://www.googleapis.com/auth/userinfo.profile`
+- `https://www.googleapis.com/auth/userinfo.email`
+</Callout>
 
 ---
 

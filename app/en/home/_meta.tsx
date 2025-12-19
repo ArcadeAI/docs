@@ -40,7 +40,10 @@ export const meta: MetaRecord = {
     title: "Using Arcade",
   },
   quickstart: {
-    title: "Hosted Tools Quickstart",
+    title: "Calling tools in your agent",
+  },
+  "mcp-gateway-quickstart": {
+    title: "Call a tool in your IDE/MCP Client",
   },
   "custom-mcp-server-quickstart": {
     title: "Build MCP Server QuickStart",
@@ -64,6 +67,9 @@ export const meta: MetaRecord = {
   "-- Agent Frameworks and MCP": {
     type: "separator",
     title: "Agent Frameworks and MCP",
+  },
+  "agent-frameworks-overview": {
+    title: "Overview",
   },
   "mcp-clients": {
     title: "MCP Clients",

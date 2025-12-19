@@ -1,3 +1,4 @@
+import { execSync } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
 import glob from "fast-glob";
@@ -19,6 +20,11 @@ type Section = {
   }>;
 };
 
+type LlmsTxtMetadata = {
+  gitSha: string;
+  generationDate: string;
+};
+
 const BASE_URL = "https://docs.arcade.dev";
 const OUTPUT_PATH = path.join(process.cwd(), "public", "llms.txt");
 
@@ -29,15 +35,122 @@ const MDX_SUFFIX_REGEX = /\.mdx$/;
 const TITLE_H1_REGEX = /^#\s+(.+)$/m;
 const EN_LOCALE_PREFIX_REGEX = /^en\//;
 const MD_EXTENSION_REGEX = /\.md$/;
+const METADATA_REGEX =
+  /^<!--\s*git-sha:\s*([^\s]+)\s+generation-date:\s*([^\s]+)\s*-->/;
+const LINK_REGEX = /- \[([^\]]+)\]\(([^)]+)\):\s*(.+)$/gm;
 
 // Constants for content processing
 const MAX_CONTENT_LENGTH = 4000;
 const BATCH_DELAY_MS = 1000;
+const SHA_SHORT_LENGTH = 7;
 
 // Initialize OpenAI client
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
+
+/**
+ * Gets the current git SHA
+ */
+function getCurrentGitSha(): string {
+  try {
+    return execSync("git rev-parse HEAD", { encoding: "utf-8" }).trim();
+  } catch (_error) {
+    console.error(
+      pc.red("✗ Could not get git SHA. Make sure you're in a git repository.")
+    );
+    throw new Error("Failed to get git SHA");
+  }
+}
+
+/**
+ * Parses metadata from existing llms.txt file
+ */
+async function parseLlmsTxtMetadata(): Promise<LlmsTxtMetadata | null> {
+  try {
+    const content = await fs.readFile(OUTPUT_PATH, "utf-8");
+    const metadataMatch = content.match(METADATA_REGEX);
+    if (metadataMatch) {
+      return {
+        gitSha: metadataMatch[1],
+        generationDate: metadataMatch[2],
+      };
+    }
+  } catch (_error) {
+    // File doesn't exist or can't be read - that's okay
+  }
+  return null;
+}
+
+/**
+ * Gets changed files since the last git SHA
+ */
+function getChangedFilesSince(lastSha: string): Set<string> {
+  try {
+    // Get files that were added, modified, or deleted
+    const added = execSync(
+      `git diff --name-only --diff-filter=A ${lastSha} HEAD`,
+      {
+        encoding: "utf-8",
+      }
+    )
+      .trim()
+      .split("\n")
+      .filter((line) => line.length > 0);
+
+    const modified = execSync(
+      `git diff --name-only --diff-filter=M ${lastSha} HEAD`,
+      { encoding: "utf-8" }
+    )
+      .trim()
+      .split("\n")
+      .filter((line) => line.length > 0);
+
+    const deleted = execSync(
+      `git diff --name-only --diff-filter=D ${lastSha} HEAD`,
+      {
+        encoding: "utf-8",
+      }
+    )
+      .trim()
+      .split("\n")
+      .filter((line) => line.length > 0);
+
+    const allChanged = new Set([...added, ...modified, ...deleted]);
+    return allChanged;
+  } catch (_error) {
+    console.warn(
+      pc.yellow(
+        `⚠ Could not get changed files since ${lastSha}, processing all files`
+      )
+    );
+    return new Set();
+  }
+}
+
+/**
+ * Extracts existing page summaries from llms.txt
+ */
+async function extractExistingSummaries(): Promise<
+  Map<string, { title: string; description: string }>
+> {
+  const summaries = new Map<string, { title: string; description: string }>();
+  try {
+    const content = await fs.readFile(OUTPUT_PATH, "utf-8");
+    // Match markdown links with descriptions: - [title](url): description
+    let match: RegExpExecArray | null;
+    // biome-ignore lint/suspicious/noAssignInExpressions: needed for regex.exec loop
+    while ((match = LINK_REGEX.exec(content)) !== null) {
+      const title = match[1];
+      const url = match[2];
+      const description = match[3].trim();
+      summaries.set(url, { title, description });
+    }
+  } catch (_error) {
+    // File doesn't exist or can't be read - that's okay
+  }
+  return summaries;
+}
 
 /**
  * Discovers all MDX pages in the documentation
@@ -217,8 +330,17 @@ function formatSectionName(segment: string): string {
 /**
  * Generates the llms.txt file content
  */
-function generateLlmsTxt(sections: Section[]): string {
+function generateLlmsTxt(
+  sections: Section[],
+  metadata: LlmsTxtMetadata
+): string {
   const lines: string[] = [];
+
+  // Metadata comment (hidden in markdown but parseable)
+  lines.push(
+    `<!-- git-sha: ${metadata.gitSha} generation-date: ${metadata.generationDate} -->`
+  );
+  lines.push("");
 
   // Header
   lines.push("# Arcade");
@@ -264,6 +386,134 @@ function generateLlmsTxt(sections: Section[]): string {
 }
 
 /**
+ * Determines which pages need summarization based on changes
+ */
+function determinePagesToSummarize(
+  pages: PageMetadata[],
+  previousMetadata: LlmsTxtMetadata | null,
+  existingSummaries: Map<string, { title: string; description: string }>
+): {
+  pagesToSummarize: PageMetadata[];
+  pagesToKeep: Array<PageMetadata & { title: string; description: string }>;
+  hasChanges: boolean;
+} {
+  const pagesToSummarize: PageMetadata[] = [];
+  const pagesToKeep: Array<
+    PageMetadata & { title: string; description: string }
+  > = [];
+  let hasChanges = false;
+
+  if (previousMetadata && previousMetadata.gitSha !== "unknown") {
+    // Get changed files since last generation
+    const changedFiles = getChangedFilesSince(previousMetadata.gitSha);
+    console.log(
+      pc.blue(
+        `\n📊 Found ${changedFiles.size} changed files since last generation`
+      )
+    );
+
+    // Create a set of current page URLs for quick lookup
+    const currentPageUrls = new Set(pages.map((page) => page.url));
+
+    // Identify deleted pages (pages that exist in previous llms.txt but not in current filesystem)
+    const deletedPageUrls = Array.from(existingSummaries.keys()).filter(
+      (url) => !currentPageUrls.has(url)
+    );
+
+    if (deletedPageUrls.length > 0) {
+      hasChanges = true;
+      console.log(
+        pc.yellow(
+          `\n🗑️  Found ${deletedPageUrls.length} deleted pages (will be removed from output)`
+        )
+      );
+    }
+
+    // Filter pages based on changes
+    for (const page of pages) {
+      const url = page.url;
+      const existingSummary = existingSummaries.get(url);
+
+      // Check if this page's file was changed
+      const isChanged = changedFiles.has(page.path);
+
+      if (isChanged || !existingSummary) {
+        // Need to summarize this page
+        pagesToSummarize.push(page);
+        hasChanges = true;
+      } else {
+        // Keep existing summary
+        pagesToKeep.push({
+          ...page,
+          title: existingSummary.title,
+          description: existingSummary.description,
+        });
+      }
+    }
+
+    console.log(
+      pc.green(
+        `✓ ${pagesToKeep.length} pages unchanged, ${pagesToSummarize.length} pages to summarize${deletedPageUrls.length > 0 ? `, ${deletedPageUrls.length} pages deleted` : ""}`
+      )
+    );
+  } else {
+    // No previous generation or can't determine, summarize all pages
+    console.log(
+      pc.yellow("⚠ No previous generation found, summarizing all pages")
+    );
+    pagesToSummarize.push(...pages);
+    hasChanges = true; // Always regenerate if no previous metadata
+  }
+
+  return { pagesToSummarize, pagesToKeep, hasChanges };
+}
+
+/**
+ * Summarizes pages in batches
+ */
+async function summarizePagesInBatches(
+  pagesToSummarize: PageMetadata[],
+  pagesToKeep: Array<PageMetadata & { title: string; description: string }>
+): Promise<Array<PageMetadata & { title: string; description: string }>> {
+  const summarizedPages: Array<
+    PageMetadata & { title: string; description: string }
+  > = [...pagesToKeep];
+
+  if (pagesToSummarize.length === 0) {
+    return summarizedPages;
+  }
+
+  console.log(pc.blue("\n📝 Summarizing pages with OpenAI..."));
+  // Process in batches to avoid rate limits
+  const batchSize = 5;
+  for (let i = 0; i < pagesToSummarize.length; i += batchSize) {
+    const batch = pagesToSummarize.slice(i, i + batchSize);
+    const batchResults = await Promise.all(batch.map(summarizePage));
+
+    for (let j = 0; j < batch.length; j += 1) {
+      summarizedPages.push({
+        ...batch[j],
+        ...batchResults[j],
+      });
+    }
+
+    console.log(
+      pc.gray(
+        `  Processed ${Math.min(i + batchSize, pagesToSummarize.length)}/${pagesToSummarize.length} pages`
+      )
+    );
+
+    // Add a small delay between batches
+    if (i + batchSize < pagesToSummarize.length) {
+      await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY_MS));
+    }
+  }
+
+  console.log(pc.green(`✓ Summarized ${pagesToSummarize.length} pages`));
+  return summarizedPages;
+}
+
+/**
  * Main execution function
  */
 async function main() {
@@ -276,54 +526,63 @@ async function main() {
   }
 
   try {
+    // Step 0: Get current git SHA and check for previous generation
+    const currentSha = getCurrentGitSha();
+    const previousMetadata = await parseLlmsTxtMetadata();
+    const existingSummaries = await extractExistingSummaries();
+
+    console.log(pc.blue(`📌 Current git SHA: ${currentSha}`));
+    if (previousMetadata) {
+      console.log(
+        pc.gray(
+          `   Previous generation: ${previousMetadata.generationDate} (SHA: ${previousMetadata.gitSha.substring(0, SHA_SHORT_LENGTH)})`
+        )
+      );
+    }
+
     // Step 1: Discover all pages
     const pages = await discoverPages();
 
-    // Step 2: Summarize each page using OpenAI
-    console.log(pc.blue("\n📝 Summarizing pages with OpenAI..."));
-    const summarizedPages: Array<
-      PageMetadata & { title: string; description: string }
-    > = [];
+    // Step 2: Determine which pages need summarization and identify deleted pages
+    const { pagesToSummarize, pagesToKeep, hasChanges } =
+      determinePagesToSummarize(pages, previousMetadata, existingSummaries);
 
-    // Process in batches to avoid rate limits
-    const batchSize = 5;
-    for (let i = 0; i < pages.length; i += batchSize) {
-      const batch = pages.slice(i, i + batchSize);
-      const batchResults = await Promise.all(batch.map(summarizePage));
+    // Step 3: Summarize changed/new pages using OpenAI
+    const summarizedPages = await summarizePagesInBatches(
+      pagesToSummarize,
+      pagesToKeep
+    );
 
-      for (let j = 0; j < batch.length; j += 1) {
-        summarizedPages.push({
-          ...batch[j],
-          ...batchResults[j],
-        });
-      }
-
-      console.log(
-        pc.gray(
-          `  Processed ${Math.min(i + batchSize, pages.length)}/${pages.length} pages`
-        )
-      );
-
-      // Add a small delay between batches
-      if (i + batchSize < pages.length) {
-        await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY_MS));
-      }
-    }
-
-    console.log(pc.green(`✓ Summarized ${summarizedPages.length} pages`));
-
-    // Step 3: Organize into sections
+    // Step 4: Organize into sections
     console.log(pc.blue("\n📂 Organizing sections..."));
     const sections = organizeSections(summarizedPages);
     console.log(pc.green(`✓ Created ${sections.length} sections`));
 
-    // Step 4: Generate llms.txt content
+    // Step 5: Generate llms.txt content
     console.log(pc.blue("\n✍️  Generating llms.txt content..."));
-    const content = generateLlmsTxt(sections);
+    // Only update metadata if there are changes, otherwise keep previous metadata
+    const metadata: LlmsTxtMetadata = hasChanges
+      ? {
+          gitSha: currentSha,
+          generationDate: new Date().toISOString(),
+        }
+      : previousMetadata || {
+          gitSha: currentSha,
+          generationDate: new Date().toISOString(),
+        };
+    const content = generateLlmsTxt(sections, metadata);
 
-    // Step 5: Write to file
+    // Step 6: Write to file
     await fs.writeFile(OUTPUT_PATH, content, "utf-8");
-    console.log(pc.green(`✓ Generated llms.txt at ${OUTPUT_PATH}`));
+    if (hasChanges) {
+      console.log(pc.green(`✓ Generated llms.txt at ${OUTPUT_PATH}`));
+    } else {
+      console.log(
+        pc.gray(
+          "✓ No changes detected, llms.txt unchanged (SHA and date preserved)"
+        )
+      );
+    }
 
     console.log(pc.bold(pc.green("\n✨ Done!\n")));
   } catch (error) {
