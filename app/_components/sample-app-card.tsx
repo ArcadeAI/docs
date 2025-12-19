@@ -1,7 +1,5 @@
 "use client";
 import { Card, CardContent } from "@arcadeai/design-system";
-import { motion } from "motion/react";
-import Image from "next/image";
 import Link from "next/link";
 
 type SampleAppCardProps = {
@@ -10,6 +8,7 @@ type SampleAppCardProps = {
   image: string;
   href: string;
   blank?: boolean;
+  tags?: string[];
 };
 
 export function SampleAppCard({
@@ -18,38 +17,79 @@ export function SampleAppCard({
   image,
   href,
   blank = false,
+  tags = [],
 }: SampleAppCardProps) {
   return (
-    <motion.div
-      whileHover={{
-        scale: 1.02,
-        boxShadow: "0 0 20px 0 rgba(238, 23, 94, 0.1)",
-      }}
-      whileTap={{ scale: 0.98 }}
-    >
-      <Link href={href} target={blank ? "_blank" : undefined}>
-        <Card className="group h-full overflow-hidden border-gray-200 bg-white/90 backdrop-blur-xs transition-all hover:border-[#ee175e]/30 dark:border-gray-800 dark:bg-[rgba(17,17,17,0.8)]">
-          <CardContent className="p-0">
-            <div className="relative aspect-video overflow-hidden bg-gray-100 dark:bg-zinc-900">
-              <Image
-                alt={title}
-                className="scale-110 object-cover transition-transform duration-300"
-                fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                src={image}
-              />
-            </div>
-            <div className="space-y-2 p-6">
-              <h3 className="font-semibold text-gray-900 text-xl tracking-tight transition-colors group-hover:text-[#ee175e] dark:text-white">
-                {title}
-              </h3>
-              <p className="text-gray-600 text-sm leading-relaxed dark:text-gray-300">
-                {description}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      </Link>
-    </motion.div>
+    <Link href={href} target={blank ? "_blank" : undefined}>
+      <Card className="flex h-full flex-col gap-1.5 border border-gray-600/20 bg-white/90 py-3 backdrop-blur-sm transition-all duration-300 hover:border-primary hover:bg-gray-600/[0.03] hover:shadow-lg dark:bg-gray-900/80">
+        <CardContent className="p-0">
+          <div className="space-y-2 p-6">
+            <h3 className="font-semibold text-gray-900 text-xl tracking-tight dark:text-white">
+              {title}
+            </h3>
+            <p className="text-gray-600 text-sm leading-relaxed dark:text-gray-300">
+              {description}
+            </p>
+            {tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 pt-2">
+                {tags.map((tag, index) => {
+                  const getTagColor = (tag: string) => {
+                    const languages = [
+                      "JavaScript",
+                      "Python",
+                      "TypeScript",
+                      "Java",
+                      "Go",
+                      "Rust",
+                    ];
+                    const frameworks = [
+                      "Langchain",
+                      "mastra",
+                      "CrewAI",
+                      "LangGraph",
+                      "OpenAI",
+                      "Anthropic",
+                      "Next.js",
+                    ];
+                    const integrations = [
+                      "Slack",
+                      "GitHub",
+                      "Gmail",
+                      "Discord",
+                      "Notion",
+                      "Linear",
+                      "Jira",
+                      "Weaviate",
+                      "Email",
+                      "Stytch",
+                    ];
+
+                    if (languages.includes(tag)) {
+                      return "bg-gradient-to-br from-emerald-600 to-emerald-800";
+                    }
+                    if (frameworks.includes(tag)) {
+                      return "bg-gradient-to-br from-blue-600 to-blue-800";
+                    }
+                    if (integrations.includes(tag)) {
+                      return "bg-gradient-to-br from-yellow-600 to-yellow-800";
+                    }
+                    return "bg-gradient-to-br from-gray-600 to-gray-800";
+                  };
+
+                  return (
+                    <span
+                      className={`inline-flex w-fit shrink-0 items-center justify-center overflow-hidden whitespace-nowrap rounded-md border-0 border-transparent px-2 py-1 font-semibold text-[0.725rem] text-white uppercase leading-4 tracking-wide shadow-md ${getTagColor(tag)}`}
+                      key={index}
+                    >
+                      {tag}
+                    </span>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
   );
 }
