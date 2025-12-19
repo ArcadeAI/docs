@@ -52,7 +52,7 @@ export const meta: MetaRecord = {
     title: "Get an API key",
   },
   examples: {
-    title: "Example apps",
+    title: "Example agents",
   },
   "-- Authoring Tools": {
     type: "separator",
