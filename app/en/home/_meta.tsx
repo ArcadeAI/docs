@@ -51,6 +51,9 @@ export const meta: MetaRecord = {
   "api-keys": {
     title: "Get an API key",
   },
+  examples: {
+    title: "Example apps",
+  },
   "-- Authoring Tools": {
     type: "separator",
     title: "Authoring Tools",
