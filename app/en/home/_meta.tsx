@@ -68,6 +68,9 @@ export const meta: MetaRecord = {
     type: "separator",
     title: "Agent Frameworks and MCP",
   },
+  "agent-frameworks-overview": {
+    title: "Overview",
+  },
   "mcp-clients": {
     title: "MCP Clients",
   },
