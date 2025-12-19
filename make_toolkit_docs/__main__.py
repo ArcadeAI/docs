@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 from InquirerPy import inquirer
 from rich.console import Console
 
+from discovery import find_toolkits_directories
 from docs_builder import (
     build_example_path,
     build_examples,
@@ -54,99 +55,6 @@ def save_toolkits_dir(toolkits_dir: str) -> None:
             f.write(f"{key}={value}\n")
 
 
-def find_toolkits_directories(max_depth: int = 5) -> list[str]:
-    """Scan the filesystem starting from home directory to find 'toolkits' directories.
-
-    Uses arcade_core.discovery to validate that directories contain actual tools.
-
-    Args:
-        max_depth: Maximum depth to search (default: 5 levels from home)
-
-    Returns:
-        List of valid toolkits directory paths.
-    """
-    try:
-        from loguru import logger
-        logger.disable("arcade_core.discovery")
-    except ImportError:
-        logging.getLogger("arcade_core.discovery").setLevel(logging.WARNING)
-
-    from arcade_core.discovery import analyze_files_for_tools
-
-    home = Path.home()
-    candidates = []
-
-    console.print("🔍 Scanning for toolkits directories...", style="cyan")
-
-    def walk_directory(path: Path, current_depth: int):
-        if current_depth > max_depth:
-            return
-
-        try:
-            for entry in path.iterdir():
-                if entry.name.startswith(".") or entry.name in {
-                    "node_modules",
-                    "venv",
-                    ".venv",
-                    "__pycache__",
-                    "Library",
-                    "Applications",
-                }:
-                    continue
-
-                if entry.is_dir():
-                    if entry.name.lower() == "toolkits":
-                        has_any_tools = False
-                        try:
-                            for toolkit_subdir in entry.iterdir():
-                                if not toolkit_subdir.is_dir() or toolkit_subdir.name.startswith("."):
-                                    continue
-
-                                tool_files_found = []
-
-                                def find_tool_files_recursive(search_path: Path, depth: int = 0, max_depth: int = 3):
-                                    """Recursively find Python files up to max_depth."""
-                                    if depth > max_depth:
-                                        return
-
-                                    try:
-                                        for item in search_path.iterdir():
-                                            if item.name.startswith(".") or item.name in {"__pycache__", "venv", ".venv"}:
-                                                continue
-
-                                            if item.is_file() and item.suffix == ".py":
-                                                tool_files_found.append(item)
-                                            elif item.is_dir():
-                                                find_tool_files_recursive(item, depth + 1, max_depth)
-                                    except (PermissionError, OSError):
-                                        pass
-
-                                find_tool_files_recursive(toolkit_subdir)
-
-                                if tool_files_found:
-                                    tools_found = analyze_files_for_tools(tool_files_found)
-                                    if tools_found:
-                                        has_any_tools = True
-                                        break
-                        except (PermissionError, OSError):
-                            pass
-
-                        if has_any_tools:
-                            candidates.append(str(entry))
-                            console.print(
-                                f"  ✓ Found: {entry}",
-                                style="green",
-                            )
-                    else:
-                        walk_directory(entry, current_depth + 1)
-        except (PermissionError, OSError):
-            pass
-
-    walk_directory(home, 1)
-
-    return candidates
-
-
 def get_toolkits_dir() -> str:
     """Get or prompt for the toolkits directory path.
 
@@ -169,7 +77,7 @@ def get_toolkits_dir() -> str:
 
     # Try auto-discovery
     console.print("\n[cyan]Searching for toolkits directories...[/cyan]")
-    discovered = find_toolkits_directories()
+    discovered = find_toolkits_directories(console)
 
     if discovered:
         if len(discovered) == 1:

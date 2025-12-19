@@ -4,7 +4,7 @@ from arcadepy import Arcade
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 
 USER_ID = "{arcade_user_id}"  # Unique identifier for your user (email, UUID, etc.)
-TOOL_NAME = "Linear.GetTeams"
+TOOL_NAME = "Linear.ListTeams"
 
 auth_response = client.tools.authorize(tool_name=TOOL_NAME, user_id=USER_ID)
 
@@ -15,8 +15,9 @@ if auth_response.status != "completed":
 client.auth.wait_for_completion(auth_response)
 
 tool_input = {
-    "team_name": "Backend",
-    "created_after": "December 21, 2012"
+    "keywords": "Backend",
+    "include_archived": False,
+    "limit": 20
 }
 
 response = client.tools.execute(

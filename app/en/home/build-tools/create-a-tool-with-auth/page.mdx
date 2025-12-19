@@ -18,7 +18,7 @@ Create and use an MCP tool that requires OAuth to access Reddit, prompting users
 
 - [Arcade account](https://api.arcade.dev/signup)
 - [uv package manager](https://docs.astral.sh/uv/getting-started/installation/)
-- [Arcade CLI](/home/quickstart)
+- [Create an MCP Server](/home/build-tools/create-a-mcp-server)
 
 </GuideOverview.Prerequisites>
 
@@ -38,14 +38,16 @@ When you create a tool with `requires_auth`, you specify which provider to use. 
 
 ## How auth providers work during execution
 
-1. The user authenticates once with Arcade.
-2. When the tool is invoked, Arcade checks whether if the user has a connection to the provider with the required scopes.
-3. If the user does not meet the requirements, Arcade initiates the provider-specific OAuth flow for the requested scopes.
-4. The user is presented with an OAuth challenge, and authorizes Arcade to access a token with the specified scopes.
-5. The provider issues the token, and Arcade securely injects it into the tool’s Context.
-6. Your tool is executed, and uses that token to call the provider’s API (e.g., `https://oauth.reddit.com`), without the LLM or client ever seeing the token.
+1. When the tool is invoked, Arcade checks if the user has already authorized the scopes required by the tool.
+2. If the tool's requirements are not met, Arcade initiates the provider-specific OAuth flow for the requested scopes.
+    > 2a). The user is presented with a URL to complete the OAuth challenge. The user will need to visit this URL and log in and explicitly grant consent for the action to be performed on their behalf. This is the "OAuth challenge".
 
-The auth provider defines where the identity lives, what permissions are available (scopes), and how tokens are issued and refreshed. In code, it’s the class you pass to `requires_auth` (e.g., `Reddit(scopes=“read”])`) that encodes the OAuth details for that service.
+    > 2b). The provider issues the token, and Arcade will securely inject it into the tool's [`Context`](/home/build-tools/tool-context) on its next invocation. The client and the LLM will never see the token.
+
+    > 2c). The tool needs to be re-invoked - this time its requirements will be met.
+3. The tool is executed, and uses the token injected into its `Context` to call the provider's API (e.g., `https://oauth.reddit.com`), without the LLM or client ever seeing the token.
+
+The auth provider defines where the identity lives, what permissions are available (scopes), and how tokens are issued and refreshed. In code, it's the class you pass to `requires_auth` (e.g., `Reddit(scopes=["read"])`) that encodes the OAuth details for that service.
 
 ## Add user authorization to your MCP tools
 
@@ -53,7 +55,7 @@ The auth provider defines where the identity lives, what permissions are availab
 
 ### Import the necessary modules
 
-Create a new Python file, e.g., `auth_tools.py`, and import the necessary modules:
+Create a new Python file, e.g., `auth_tools.py`, and import the necessary modules and classes:
 
 ```python showLineNumbers filename="auth_tools.py"
 import sys
@@ -78,7 +80,7 @@ Now, define your tool using the `@app.tool` decorator and specify the required a
 
 Specifying the `requires_auth` parameter in the `@app.tool` decorator indicates that the tool needs user authorization. In this example, we're using the `Reddit` auth provider with the `read` scope:
 
-```python showLineNumbers filename="auth_tools.py" {1-5}
+```python showLineNumbers filename="auth_tools.py" {1-5} {16}
 @app.tool(
   requires_auth=Reddit(
     scopes=["read"]
@@ -116,11 +118,9 @@ async def get_posts_in_subreddit(
 To use this tool, you need to install the Arcade CLI and run 'arcade login' to authenticate:
 
 ```bash
-uv pip install arcade-mcp
+uv tool install arcade-mcp
 arcade login
 ```
-
-Or add your `ARCADE_API_KEY` and `ARCADE_USER_ID` as environment variables or an `.env` file at the root of your project.
 
 </Callout>
 
@@ -155,49 +155,33 @@ async def identity_tool(context: Context) -> dict:
     pass
 ```
 
+<Callout type="warning">
+Scopes are defined by the auth provider, and they vary between providers. Each service exposes its own set of scopes that determine what your tools can access. You'll need to review the provider's documentation to see which scopes are available and what permissions each one grants.
+</Callout>
+
 ### Run the MCP Server
 
 ```python showLineNumbers filename="auth_tools.py"
 if __name__ == "__main__":
-    # Get transport from command line argument, default to "http"
-    transport = sys.argv[1] if len(sys.argv) > 1 else "http"
+    # Get transport from command line argument, default to "stdio"
+    transport = sys.argv[1] if len(sys.argv) > 1 else "stdio"
 
     print(f"Starting auth example server with {transport} transport")
     print("Prerequisites:")
-    print("  1. Install: uv pip install arcade-mcp")
-    print("  2. Login: arcade login")
-    print("")
+    print("  1. Install: uv tool install arcade-mcp")
+    print("  2. Login: arcade login\n")
 
     # Run the server
-    # - "http" (default): HTTP streaming for Cursor, VS Code, etc.
-    # - "stdio": Standard I/O for Claude Desktop, CLI tools, etc.
+    # - "stdio" (default): Standard I/O transport
+    # - "http": HTTP streamable transport
     app.run(transport=transport, host="127.0.0.1", port=8000)
 ```
 
-Run your MCP Server using one of the with the following commands in your terminal:
-
-<Tabs
-  items={["HTTP transport (default)", "stdio transport (for Claude Desktop)"]}
-  storageKey="preferredTransport"
->
-
-<Tabs.Tab>
-
-```bash
-uv run auth_tools.py http
-```
-
-For HTTP transport, view your server's API docs at [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
-
-</Tabs.Tab>
-<Tabs.Tab>
+Verify your MCP Server can run successfully by executing the following command in your terminal:
 
 ```bash
 uv run auth_tools.py stdio
 ```
-
-</Tabs.Tab>
-</Tabs>
 
 ## Configure your MCP Client(s)
 
@@ -210,41 +194,37 @@ Now you can connect your MCP server to apps that support MCP Clients, like AI as
   <Tabs.Tab>
 
     ```bash
-    arcade configure claude --host local
+    arcade configure claude
     ```
 
   </Tabs.Tab>
   <Tabs.Tab>
 
     ```bash
-    arcade configure cursor --host local
+    arcade configure cursor
     ```
 
   </Tabs.Tab>
   <Tabs.Tab>
 
     ```bash
-    arcade configure vscode --host local
+    arcade configure vscode
     ```
 
   </Tabs.Tab>
 </Tabs>
 
-Try calling your tool inside your assistant.
+Now restart your MCP Client and try calling your tool.
 
 ### Handle authorization
 
-Since your tool requires authorization, the first time you use it, the user (identified by `user_id`) needs to authorize access.
-
-Arcade handles the authorization flow, prompting the user to visit a URL to grant permissions.
-
-Your application should guide the user through this process.
+Since the tool requires authorization, the first time a user uses it, the user will go through an OAuth flow to authorize the tool to act on their behalf. Once the user has completed the OAuth flow, the tool will need to be re-invoked. See the [how auth providers work during execution](#how-auth-providers-work-during-execution) section for more details.
 
 </Steps>
 
 ## How it works
 
-Arcade manages the OAuth flow, and provides the token via `context.get_auth_token_or_empty()`. Arcade also remembers the user's authorization tokens, so they won't have to go through the authorization process again until the auth expires or is revoked.
+Arcade manages the OAuth flow, and provides the token via `context.get_auth_token_or_empty()`. Arcade also remembers the user's authorization tokens, so they won't have to go through the authorization process again until the token is revoked by the user.
 
 ### Accessing OAuth tokens
 
@@ -284,11 +264,11 @@ async with httpx.AsyncClient() as client:
 
 ## Key takeaways
 
-- **OAuth Integration** Arcade handles OAuth flows and token management
-- **Secure Token Injection** Tokens are injected into context at runtime
-- **Scope Management** Specify exactly which permissions your tool needs
-- **Provider Support** Multiple OAuth providers available out of the box
-- **User Privacy** LLMs and MCP clients never see OAuth tokens
+- **OAuth Support:** Arcade handles OAuth flows and token management
+- **Secure Token Injection:** Tokens are injected into context at runtime
+- **Scope Management:** Specify exactly which permissions your tool needs
+- **Provider Support:** Multiple OAuth providers available out of the box
+- **User Privacy:** LLMs and MCP clients never see OAuth tokens
 
 ## Next steps
 
@@ -341,45 +321,18 @@ async def get_posts_in_subreddit(
         return response.json()
 
 
-# Run with specific transport
 if __name__ == "__main__":
-    # Get transport from command line argument, default to "http"
-    transport = sys.argv[1] if len(sys.argv) > 1 else "http"
+    # Get transport from command line argument, default to "stdio"
+    transport = sys.argv[1] if len(sys.argv) > 1 else "stdio"
 
     print(f"Starting auth example server with {transport} transport")
     print("Prerequisites:")
-    print("  1. Install: uv pip install arcade-mcp")
-    print("  2. Login: arcade login")
-    print("")
+    print("  1. Install: uv tool install arcade-mcp")
+    print("  2. Login: arcade login\n")
 
     # Run the server
-    # - "http" (default): HTTP streaming for Cursor, VS Code, etc.
-    # - "stdio": Standard I/O for Claude Desktop, CLI tools, etc.
+    # - "stdio" (default): Standard I/O transport
+    # - "http": HTTP streamable transport
     app.run(transport=transport, host="127.0.0.1", port=8000)
 
 ```
-
-### Run your MCP server
-
-<Tabs
-  items={["HTTP transport (default)", "stdio transport (for Claude Desktop)"]}
-  storageKey="preferredTransport"
->
-  <Tabs.Tab>
-
-```bash
-uv run auth_tools.py http
-```
-
-For HTTP transport, view your server's API docs at [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
-
-</Tabs.Tab>
-<Tabs.Tab>
-
-```bash
-uv run auth_tools.py stdio
-```
-
-</Tabs.Tab>
-
-</Tabs>

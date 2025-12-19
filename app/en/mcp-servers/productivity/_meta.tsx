@@ -50,6 +50,9 @@ const meta: MetaRecord = {
   linear: {
     title: "Linear",
   },
+  "mailchimp-marketing-api": {
+    title: "Mailchimp Marketing API",
+  },
   notion: {
     title: "Notion",
   },

@@ -80,12 +80,14 @@ from tools.text_tools import capitalize_string, word_count
 You could also import specific tools from Arcade PyPI packages:
 
 ```python filename="server.py"
+# This is a prebuilt Arcade server - `pip install arcade-gmail`
 from arcade_gmail.tools import list_emails
 ```
 
 You can also import whole modules that contain tools like this:
 
 ```python filename="server.py"
+# This is a prebuilt Arcade server - `pip install arcade-reddit`
 import arcade_reddit
 ```
 
@@ -115,13 +117,14 @@ from typing import Annotated
 
 from arcade_mcp_server import MCPApp
 
-# Import tools from our 'mock' other_files module
+# Import tools from our mock 'tools' directory
 # In a real project, these could come from actual separate files
-from tools_math import add, multiply
-from tools_text import capitalize_string, word_count
+from tools.math_tools import add, multiply
+from tools.text_tools import capitalize_string, word_count
 
-# In a real project, you could also import from Arcade PyPI packages:
-# from arcade_gmail.tools import list_emails
+# In a real project, you could import from Arcade PyPI packages -
+# e.g. `pip install arcade-gmail`
+# import arcade_gmail
 
 # Create the MCP application
 app = MCPApp(
@@ -135,6 +138,7 @@ app.add_tool(add)
 app.add_tool(multiply)
 app.add_tool(capitalize_string)
 app.add_tool(word_count)
+# app.add_tools_from_module(arcade_gmail)
 
 
 # Method 2: Define tools directly on the app
@@ -166,7 +170,7 @@ def combine_results(
 
 if __name__ == "__main__":
     # Check if stdio transport was requested
-    transport = "stdio" if len(sys.argv) > 1 and sys.argv[1] == "stdio" else "http"
+    transport = sys.argv[1] if len(sys.argv) > 1 else "stdio"
 
     print(f"Starting {app.name} v{app.version}")
     print(f"Transport: {transport}")
@@ -181,23 +185,23 @@ if __name__ == "__main__":
 ### Run your MCP server
 
 <Tabs
-  items={["HTTP transport (default)", "stdio transport (for Claude Desktop)"]}
+  items={["stdio transport (default)", "HTTP transport"]}
   storageKey="preferredTransport"
 >
   <Tabs.Tab>
+
+```bash
+uv run server.py
+```
+
+</Tabs.Tab>
+<Tabs.Tab>
 
 ```bash
 uv run server.py http
 ```
 
 For HTTP transport, view your server's API docs at [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
-
-</Tabs.Tab>
-<Tabs.Tab>
-
-```bash
-uv run server.py stdio
-```
 
 </Tabs.Tab>
 

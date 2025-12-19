@@ -1,0 +1,223 @@
+---
+title: "Server-Level vs Tool-Level Authorization"
+description: "Understanding the difference between Resource Server auth and tool-level authorization in Arcade MCP servers"
+---
+
+import { Callout } from "nextra/components";
+
+# Server-Level vs Tool-Level Authorization
+
+Arcade MCP servers support two distinct layers of authorization that work together to provide comprehensive security. Understanding the difference is crucial for building secure, production-ready MCP servers.
+
+<Callout type="info">
+**Using `arcade deploy`?** If you deploy your MCP server with [`arcade deploy`](/home/serve-tools/arcade-deploy), Arcade handles server-level security for you automatically.
+</Callout>
+
+## Quick Comparison
+
+| Aspect | [Resource Server Auth (Front-Door)](/home/build-tools/secure-your-mcp-server) | [Tool-Level Authorization](/home/build-tools/create-a-tool-with-auth) |
+|--------|-----------------------------------|--------------------------|
+| **What it secures** | Access to your MCP server | Access to third-party APIs |
+| **Who authenticates** | The user calling your server | The user's access to external services |
+| **When it happens** | Every HTTP request to your server | When a tool calls an external API |
+| **Token source** | Authorization Server (e.g., WorkOS, Auth0) | Arcade authorization platform |
+| **Required for** | HTTP servers in production | Tools that access user data from APIs |
+| **Configuration** | `MCPApp(auth=resource_server)` | `@app.tool(requires_auth=GitHub(...))` |
+
+## Resource Server Auth (Server-Level)
+
+Resource Server auth (also called "front-door auth") validates Bearer tokens on **every HTTP request** to your MCP server. The end user only needs to go through the OAuth flow once. Afterwards, the MCP client will send the token in the Authorization header for every request to your MCP server. Your MCP server acts as an OAuth 2.1 Protected Resource.
+
+Resource Server auth ensures every request identifies the caller. It blocks unauthenticated requests at the door, so only users with valid tokens can access your MCP server. This security lets you run tools that require authorization or secrets over HTTP.
+
+### When You Need It
+
+✅ **You need Resource Server auth if:**
+- You've determined that [arcade deploy](/home/serve-tools/arcade-deploy) is not a good fit for your use case
+- You're running an HTTP MCP server in production
+- Your server has tools that require authorization or secrets
+- You need to identify which user is calling your server
+- You want to control who can access your MCP server
+
+❌ **You don't need it if:**
+- You're using [arcade deploy](/home/serve-tools/arcade-deploy) to secure your server
+- You're using stdio transport
+- Your server only has public tools (no auth/secrets required)
+- You're doing local development only
+
+### Example
+
+```python filename="server.py" showLineNumbers
+from arcade_mcp_server import MCPApp
+from arcade_mcp_server.resource_server import ResourceServerAuth, AuthorizationServerEntry
+
+# Configure who can access your MCP server
+resource_server_auth = ResourceServerAuth(
+    canonical_url="http://127.0.0.1:8000/mcp",
+    authorization_servers=[
+        AuthorizationServerEntry(
+            authorization_server_url="https://auth.example.com",
+            issuer="https://auth.example.com",
+            jwks_uri="https://auth.example.com/jwks",
+        )
+    ],
+)
+
+app = MCPApp(name="my_server", version="1.0.0", auth=resource_server_auth)
+```
+
+<Callout type="info">
+**Result**: Only users with valid tokens from `https://auth.example.com` can call ANY tools on your server.
+</Callout>
+
+## Tool-Level Authorization
+
+Tool-level authorization enables individual tools to access third-party APIs on behalf of the authenticated user. Arcade manages the OAuth flow and token storage.
+
+Tool-level authorization lets your tools authenticate to external APIs using OAuth tokens for services like Gmail or GitHub. Each tool acts on behalf of the user by using their connected accounts, and requests only the scopes it needs. Arcade manages the entire OAuth flow, including token refresh and secure storage, so you don't have to handle these details yourself.
+
+### When You Need It
+
+✅ **You need tool-level auth if:**
+- Your tool calls external APIs (Gmail, GitHub, Slack, etc.) that require user-specific OAuth tokens
+- You want to access user data from third-party services
+- The tool needs to act on behalf of the user
+
+❌ **You don't need it if:**
+- Your tool doesn't call external APIs
+- The API uses API keys instead of OAuth
+- The tool accesses public data only
+
+### Example
+
+```python filename="server.py" showLineNumbers
+from typing import Annotated
+
+from arcade_mcp_server import Context, MCPApp
+from arcade_mcp_server.auth import GitHub
+import httpx
+
+app = MCPApp(name="my_server", version="1.0.0")
+
+# This tool requires GitHub auth
+@app.tool(requires_auth=GitHub(scopes=["repo", "read:user"]))
+async def create_github_issue(
+    context: Context,
+    repo: Annotated[str, "The repository to create the issue in"],
+    title: Annotated[str, "The title of the issue"],
+    body: Annotated[str, "The body of the issue"],
+) -> Annotated[dict, "The created issue"]:
+    """Create a GitHub issue"""
+    # Arcade provides the OAuth token for this user in the context
+    token = context.get_auth_token_or_empty()
+
+    headers = {"Authorization": f"Bearer {token}"}
+    url = f"https://api.github.com/repos/{repo}/issues"
+
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            url,
+            headers=headers,
+            json={"title": title, "body": body}
+        )
+        return response.json()
+
+if __name__ == "__main__":
+    app.run(transport="stdio")
+```
+
+<Callout type="info">
+**stdio transport doesn't need Resource Server auth** because the connection is local and doesn't go over the network.
+</Callout>
+
+## How They Work Together
+
+The two authorization layers complement each other. Below is an example of a
+protected HTTP server with both server-level and tool-level authorization.
+
+```python filename="server.py" {9-18, 20, 24, 33, 48} showLineNumbers
+from typing import Annotated
+
+import httpx
+from arcade_mcp_server import Context, MCPApp
+from arcade_mcp_server.auth import GitHub
+from arcade_mcp_server.resource_server import AuthorizationServerEntry, ResourceServerAuth
+
+# Configure who can access your MCP server
+resource_server_auth = ResourceServerAuth(
+    canonical_url="http://127.0.0.1:8000/mcp",
+    authorization_servers=[
+        AuthorizationServerEntry(
+            authorization_server_url="https://auth.example.com",
+            issuer="https://auth.example.com",
+            jwks_uri="https://auth.example.com/jwks",
+        )
+    ],
+)
+
+app = MCPApp(name="my_server", version="1.0.0", auth=resource_server_auth)
+
+
+# This tool requires GitHub auth
+@app.tool(requires_auth=GitHub(scopes=["repo", "read:user"]))
+async def create_github_issue(
+    context: Context,
+    repo: Annotated[str, "The repository to create the issue in"],
+    title: Annotated[str, "The title of the issue"],
+    body: Annotated[str, "The body of the issue"],
+) -> Annotated[dict, "The created issue"]:
+    """Create a GitHub issue"""
+    # Arcade provides the OAuth token for this user in the context
+    token = context.get_auth_token_or_empty()
+
+    headers = {"Authorization": f"Bearer {token}"}
+    url = f"https://api.github.com/repos/{repo}/issues"
+
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+          url,
+          headers=headers,
+          json={"title": title, "body": body},
+        )
+        return response.json()
+
+
+if __name__ == "__main__":
+    app.run(transport="http")
+
+```
+
+**Flow:**
+1. MCP client sends request with Bearer token to `http://127.0.0.1:8000/mcp`
+2. Resource Server middleware validates token → extracts `user_id` from `sub` claim
+3. MCP processes tool call with authenticated user context
+4. Tool requests GitHub token from Arcade for this `user_id`
+5. Tool uses GitHub token to call GitHub API
+6. Response returns to MCP client
+
+## Common Questions
+
+### Q: Can I use tool-level auth without Resource Server auth?
+
+**A:** Yes, but only for stdio transport or when using [arcade deploy](/home/serve-tools/arcade-deploy) (Arcade will protect your MCP server for you).
+
+### Q: Do I need Resource Server auth for local development?
+
+**A:** No, you can use stdio transport for local development. Resource Server auth is primarily for production HTTP servers.
+
+### Q: Does Resource Server auth replace tool-level auth?
+
+**A:** No, they serve different purposes. Resource Server auth secures _your server_, tool-level auth secures _external APIs_.
+
+### Q: Can I have different authorization servers for different tools in the same server?
+
+**A:** No. Resource Server auth applies to the entire server. However, you can accept tokens from multiple authorization servers (multi-IdP).
+
+## Key Takeaways
+
+- **Resource Server auth secures your MCP server** - Controls who can call your tools
+- **Tool-level auth secures external APIs** - Controls what your tools can access
+- **They work together** - Resource Server provides user identity, tool-level provides API access
+- **HTTP requires Resource Server auth** - For tools with auth/secrets in production
+- **stdio doesn't need Resource Server auth** - Local connections are already secure
+- **Choose based on transport and requirements** - Different scenarios need different combinations

@@ -1,4 +1,6 @@
 import { Arcade } from "@arcadeai/arcadejs";
+// Required Google OAuth scopes:
+// - https://www.googleapis.com/auth/drive.file
 
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
@@ -19,10 +21,7 @@ const toolInput = {
   "query": "project report",
   "include_shared_drives": true,
   "limit": 10,
-  "file_types": [
-    "document",
-    "spreadsheet"
-  ]
+  "file_types": ["document", "spreadsheet"]
 };
 
 const response = await client.tools.execute({

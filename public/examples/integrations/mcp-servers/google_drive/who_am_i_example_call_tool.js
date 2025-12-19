@@ -1,4 +1,8 @@
 import { Arcade } from "@arcadeai/arcadejs";
+// Required Google OAuth scopes:
+// - https://www.googleapis.com/auth/drive.file
+// - https://www.googleapis.com/auth/userinfo.profile
+// - https://www.googleapis.com/auth/userinfo.email
 
 const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
 
@@ -6,7 +10,7 @@ const USER_ID = "{arcade_user_id}";
 const TOOL_NAME = "GoogleDrive.WhoAmI";
 
 // Start the authorization process
-const authResponse = await client.tools.authorize({tool_name: TOOL_NAME});
+const authResponse = await client.tools.authorize({tool_name: TOOL_NAME, user_id: USER_ID});
 
 if (authResponse.status !== "completed") {
   console.log(`Click this link to authorize: ${authResponse.url}`);

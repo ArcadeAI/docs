@@ -7,37 +7,81 @@ import { Callout, Tabs } from "nextra/components";
 
 # Understanding `Context` and tools
 
-`Context` is a class in Arcade that manages authorization and user information for tools requiring authentication. `Context` provides access to the following runtime features:
+The `Context` class is used by tools for both runtime capabilities and tool-specific data access. Tools receive a populated `Context` instance as a parameter. Tools should not create `Context` instances directly.
 
-- Logging via `context.log`
-- Secrets via `context.get_secret`
-- User Context via `context.user_id`—this is the user ID of the user invoking the tool
-- Progress reporting via `context.progress.report`
-- Tool Decorator options
+<GuideOverview>
+<GuideOverview.Outcomes>
 
-<Callout type="notice">
+Understand how to use the `Context` object to access runtime capabilities and tool-specific data.
 
-Some authorization providers may also include additional structured user
-information in the `Context`. You can access this information via `context.authorization.user_info`.
+</GuideOverview.Outcomes>
 
-</Callout>
+<GuideOverview.YouWillLearn>
+
+1. Tool-specific data that can be accessed using the `Context` object:
+    - Access OAuth token via `context.get_auth_token_or_empty`
+    - Access secrets via `context.get_secret`
+    - Access user_id via `context.user_id`
+1. Runtime capabilities that can be accessed using the `Context` object:
+    - Log messages via `context.log`
+    - Request LLM sampling via `context.sampling`
+    - Request user elicitation via `context.ui.elicit`
+    - Report progress via `context.progress.report`
+</GuideOverview.YouWillLearn>
+</GuideOverview>
 
 ## How `Context` Works
 
 When a tool that requires authorization is invoked, the MCP server automatically:
 
-1. Creates an instance of `Context`
-2. Passes this object to your tool
+1. Creates an instance of `Context` and populates it with the runtime capabilities and tool-specific data
+2. Passes this object to your tool's first parameter named "context"
 
-You can then use the `Context` object to make authenticated requests to external APIs.
+You can then use the `Context` object to make requests to external APIs that require an OAuth token.
 
 Let's walk through an example (or skip to [the full code](#example-code)).
 
 ## Context Features
 
-`Context` provides access to runtime features:
+### Tool-Specific Data
 
-### Logging
+#### Tool secrets
+
+Specify required secrets using the `requires_secrets` argument of the `@tool` decorator and access them securely using the `get_secret` method:
+
+```python
+@tool(requires_secrets=["DATABASE_URL", "API_KEY"])
+async def my_tool(context: Context) -> str:
+  try:
+      api_key = context.get_secret("API_KEY")
+  except ValueError:
+      # Handle missing secret
+  return "Do something interesting with the secret"
+```
+
+#### OAuth token
+
+Specify required authorization using the `requires_auth` argument of the `@tool` decorator and access the OAuth token securely using the `get_auth_token_or_empty` method:
+
+```python
+@tool(requires_auth=ClickUp())
+async def my_tool(context: Context) -> str:
+  oauth_token = context.get_auth_token_or_empty()
+
+  return "Do something interesting with the OAuth token"
+```
+
+#### User Info
+
+Access information about the user that authorized the tool using the `authorization.user_info` attribute. Note that this is only available if the tool's auth provider supports it (e.g., the LinkedIn auth provider provides the user ID):
+
+```python
+user_info = context.authorization.user_info
+```
+
+### Runtime Capabilities
+
+#### Logging
 
 [Logging in MCP](https://modelcontextprotocol.io/specification/2025-06-18/server/utilities/logging) provides a standardized channel for servers to emit structured, leveled messages to clients. Logging is useful for observability, debugging, and user feedback during tool execution.
 
@@ -51,40 +95,30 @@ await context.log.error("Error message")
 await context.log.log("info", "Info message") # equivalent to await context.log.info("Info message")
 ```
 
-### Secrets Management
+#### Sampling
 
-Access environment variables securely using the `get_secret` method:
-
-```python
-try:
-    api_key = context.get_secret("API_KEY")
-except ValueError:
-    # Handle missing secret
-```
-
-### User Context
-
-Access information about the current user using the `user_id` attribute:
+[Sampling in MCP](https://modelcontextprotocol.io/specification/2025-06-18/client/sampling) is a way for servers to request LLM sampling (“completions” or “generations”) from language models via clients. This flow allows clients to maintain control over model access, selection, and permissions while enabling servers to leverage AI capabilities—with no server API keys necessary.
 
 ```python
-user_id = context.user_id or "anonymous"
+await context.sampling.create_message(messages, system_prompt)
 ```
 
-### Progress Reporting
+#### Elicitation
 
-Report progress for long-running operations using the `progress` attribute:
+[Elicitation in MCP](https://modelcontextprotocol.io/specification/2025-06-18/client/elicitation) is a way for servers to request additional information from users through the client during interactions. This flow allows clients to maintain control over user interactions and data sharing while enabling servers to gather necessary information dynamically.
+
+```python
+elicitation_schema = {"type": "object", "properties": {"nickname": {"type": "string"}}}
+
+await context.ui.elicit("What is your nickname?", elicitation_schema)
+```
+
+#### Progress Reporting
+
+[Progress reporting in MCP](https://modelcontextprotocol.io/specification/2025-06-18/basic/utilities/progress) is a way for servers to report progress for long-running operations to clients.
 
 ```python
 await context.progress.report(current, total, "Processing...")
-```
-
-### Tool Decorator Options
-
-Specify required secrets using the `requires_secrets` decorator:
-
-```python
-@tool(requires_secrets=["DATABASE_URL", "API_KEY"])
-async def my_tool(context: Context, ...):
 ```
 
 ## Example Code
@@ -109,7 +143,7 @@ For the code to work, you must define your environment variables in a `.env` fil
 #!/usr/bin/env python3
 
 import sys
-from typing import Annotated, Any
+from typing import Annotated
 
 from arcade_mcp_server import Context, MCPApp
 
@@ -121,7 +155,7 @@ app = MCPApp(
 )
 
 
-@app.tool
+@app.tool(requires_secrets=["API_KEY"])
 async def secure_api_call(
     context: Context,
     endpoint: Annotated[str, "API endpoint to call"],
@@ -139,7 +173,7 @@ async def secure_api_call(
     # Log the API call
     await context.log.info(f"Making {method} request to {endpoint}")
 
-    # Simulate API call (in real code, use httpx or aiohttp)
+    # Simulate API call (in real code, use httpx)
     return f"Successfully called {endpoint} with API key: {api_key[:4]}..."
 
 
@@ -156,93 +190,68 @@ async def database_info(
     except ValueError:
         db_url = "Not configured"
 
-    # Log at different levels
-    if db_url == "Not configured":
-        await context.log.warning("DATABASE_URL not set")
-    else:
-        await context.log.debug(f"Checking database: {db_url.split('@')[-1]}")
-
-    # Get user info
-    user_info = f"User: {context.user_id or 'anonymous'}"
-
     if table_name:
-        return f"{user_info}\nDatabase: {db_url}\nChecking table: {table_name}"
-    else:
-        return f"{user_info}\nDatabase: {db_url}"
+        return f"Database: {db_url}\nChecking table: {table_name}"
 
-
-@app.tool
-async def debug_context(
-    context: Context,
-    show_secrets: Annotated[bool, "Whether to show secret keys (not values)"] = False,
-) -> Annotated[dict, "Current context information"]:
-    """Debug tool to inspect the current context."""
-
-    info: dict[str, Any] = {
-        "user_id": context.user_id,
-    }
-
-    if show_secrets:
-        # Only show keys, not values for security
-        info["secret_keys"] = [s.key for s in (context.secrets or [])]
-
-    # Log that debug info was accessed
-    await context.log.info(f"Debug context accessed by {context.user_id or 'unknown'}")
-
-    return info
-
+    return f"Database: {db_url}"
 
 @app.tool
-async def process_with_progress(
-    context: Context,
-    items: Annotated[list[str], "Items to process"],
-    delay_seconds: Annotated[float, "Delay between items"] = 0.1,
-) -> Annotated[dict, "Processing results"]:
-    """Process items with progress notifications."""
+async def logging_tool(context: Context, message: Annotated[str, "The message to log"]) -> str:
+    """Log a message at varying levels."""
+    await context.log.log("debug", f"Debug via log.log: {message}")
+    await context.log.debug(f"Debug via log.debug: {message}")
+    await context.log.info(f"Info via log.info: {message}")
+    await context.log.warning(f"Warning via log.warning: {message}")
+    await context.log.error(f"Error via log.error: {message}")
 
-    results: dict[str, list] = {"processed": [], "errors": []}
+    return "Logged!"
 
-    # Log start
-    await context.log.info(f"Starting to process {len(items)} items")
+@app.tool
+async def reporting_progress(context: Context) -> str:
+    """Report progress back to the client"""
+    total = 5
 
-    for i, item in enumerate(items):
-        try:
-            # Simulate processing
-            import asyncio
+    for i in range(total):
+        await context.progress.report(i + 1, total=total, message=f"Step {i + 1} of {total}")
 
-            await asyncio.sleep(delay_seconds)
+    return "All progress reported successfully"
 
-            # Report progress (current, total, message)
-            await context.progress.report(i + 1, len(items), f"Processing: {item}")
-            await context.log.debug(f"Processing item {i + 1}/{len(items)}: {item}")
+@app.tool
+async def sampling(
+    context: Context, text: Annotated[str, "The text to be summarized by the client's model"]
+) -> str:
+    """Summarize the text using the client's model."""
+    result = await context.sampling.create_message(
+        messages=text,
+        system_prompt=(
+            "You are a helpful assistant that summarizes text. "
+            "Given a text, you should summarize it in a few sentences."
+        ),
+    )
+    return result.text
 
-            results["processed"].append(item.upper())
-
-        except Exception as e:
-            await context.log.error(f"Failed to process {item}: {e}")
-            results["errors"].append({"item": item, "error": str(e)})
-
-    # Log completion
-    await context.log.info(
-        f"Processing complete: {len(results['processed'])} succeeded, "
-        f"{len(results['errors'])} failed"
+@app.tool
+async def elicit_nickname(context: Context) -> str:
+    """Ask the end user for their nickname, and then use it to greet them."""
+    elicitation_schema = {"type": "object", "properties": {"nickname": {"type": "string"}}}
+    result = await context.ui.elicit(
+        "What is your nickname?",
+        schema=elicitation_schema,
     )
 
-    return results
+    if result.action == "accept":
+        return f"Hello, {result.content['nickname']}!"
+    elif result.action == "decline":
+        return "User declined to provide a nickname."
+    elif result.action == "cancel":
+        return "User cancelled the elicitation."
 
+    return "Unknown response from client"
 
-# The Context provides at runtime:
-# - context.user_id: ID of the user making the request
-# - context.get_secret(key): Retrieve a secret value (raises if missing)
-# - context.log.<level>(msg): Send log messages to the client (debug/info/warning/error)
-# - context.progress.report(progress, total=None, message=None): Progress updates
 
 if __name__ == "__main__":
     # Check if stdio transport was requested
-    transport = "stdio" if len(sys.argv) > 1 and sys.argv[1] == "stdio" else "http"
-
-    print(f"Starting {app.name} v{app.version}")
-    print(f"Transport: {transport}")
+    transport = sys.argv[1] if len(sys.argv) > 1 else "stdio"
 
     # Run the server
     app.run(transport=transport, host="127.0.0.1", port=8000)
@@ -251,7 +260,7 @@ if __name__ == "__main__":
 ### Run your MCP server
 
 <Tabs
-  items={["HTTP transport (default)", "stdio transport (for Claude Desktop)"]}
+  items={["stdio transport (default)", "HTTP transport"]}
   storageKey="preferredTransport"
 >
   <Tabs.Tab>
@@ -260,14 +269,14 @@ if __name__ == "__main__":
 uv run server.py
 ```
 
-For HTTP transport, view your server's API docs at [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
-
 </Tabs.Tab>
 <Tabs.Tab>
 
 ```bash
-uv run server.py stdio
+uv run server.py http
 ```
+
+For HTTP transport, view your server's API docs at [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
 
 </Tabs.Tab>
 
@@ -275,8 +284,8 @@ uv run server.py stdio
 
 ## Key Concepts
 
-- **Context Parameter** Tools receive a `Context` as their first parameter
-- **Async Functions** Use `async def` for tools that use context features
+- **Context Parameter** Tools can receive a populated `Context` as their first parameter
+- **Async Functions** Use `async def` for tools that use runtime context features
 - **Secure Secrets** Secrets are accessed through context, not hardcoded
 - **Structured Logging** Log at appropriate levels for debugging
 - **Progress Updates** Keep users informed during long operations

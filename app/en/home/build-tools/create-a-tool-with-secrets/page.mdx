@@ -31,7 +31,7 @@ Build an MCP tool that can read a secret from Context and return a masked confir
 </GuideOverview.YouWillLearn>
 </GuideOverview>
 
-Secrets are sensitive strings like passwords, api-keys, or other tokens that grant access to a protected resource or API. Although you could use secrets to transfer any static information to your tool, such as a parameter needed to call a remote API.
+Secrets are sensitive strings like passwords, API keys, or other tokens that grant access to a protected resource or API. You can also use secrets to provide other static configuration values your tool needs, such as parameters for calling a remote API.
 
 ## Why use secrets in your tools?
 
@@ -66,9 +66,9 @@ Arcade provides a way to securely store and access secrets inside your tools in 
 
 Depending on where you're running your server, you can store your secret in a few different ways.
 
-<Tabs items={["Environment Variable", "Arcade Dashboard", "Terminal"]}>
+<Tabs items={[".env file", "Arcade Dashboard", "Arcade CLI", "Environment Variable"]}>
 <Tabs.Tab>
-You can create a `.env` file in the root of your project and add your secret:
+You can create a `.env` file in the same directory as your entrypoint file (typically `server.py` by default) and add your secret:
 
 ```env filename=".env"
 MY_SECRET_KEY="my-secret-value"
@@ -82,8 +82,8 @@ mv .env.example .env
 ```
 
 <Callout type="info">
-  Using environment variables is ok for local development, but you should use
-  the Arcade Dashboard for production deployments.
+  Using a `.env` file is okay for local development, but you should use
+  the Arcade Dashboard or Arcade CLI for production deployments.
 </Callout>
 
 </Tabs.Tab>
@@ -97,6 +97,22 @@ You can store your secret in the Arcade Dashboard by:
 
 This will make the secret available to your MCP server, when deployed to Arcade.
 
+<Callout type="info">
+  The Arcade Dashboard will make the secret available to your MCP server when it is deployed. Secrets set in the Arcade Dashboard are not available to your MCP server when it is running locally.
+</Callout>
+
+</Tabs.Tab>
+<Tabs.Tab>
+You can set the secret in your terminal directly with this command:
+
+```bash
+arcade secret set MY_SECRET_KEY="my-secret-value"
+```
+
+<Callout type="info">
+  The Arcade CLI will make the secret available to your MCP server when it is deployed, because it upserts the secret into the Arcade Cloud. Secrets set in the Arcade CLI are not available to your MCP server when it is running locally.
+</Callout>
+
 </Tabs.Tab>
 <Tabs.Tab>
 You can set the environment variable in your terminal directly with this command:
@@ -106,8 +122,8 @@ export MY_SECRET_KEY="my-secret-value"
 ```
 
 <Callout type="info">
-  Using environment variables is ok for local development, but you should use
-  the Arcade Dashboard for production deployments.
+  Using environment variables is okay for local development, but you should use
+  the Arcade Dashboard or Arcade CLI for production deployments.
 </Callout>
 
 </Tabs.Tab>
@@ -115,25 +131,31 @@ export MY_SECRET_KEY="my-secret-value"
 
 ### Using secrets with stdio transport
 
-When using the stdio transport, it is common that the MCP client will start
-the MCP server for you on a different environment, so your MCP sever may
-not be able to access the secrets you have defined in your `.env` file.
+When using the stdio transport, MCP clients typically launch the MCP server as a subprocess. Because of this, the server may run in a different environment and not have access to secrets defined in your local `.env` file or your terminal environment variables.
 
-In this cases, you should check your MCP client's documentation to see how to configure the secrets for your MCP server. This is usually done by setting the secrets in the MCP client's configuration JSON entry. For example:
+To ensure your stdio MCP server has access to the secrets, you can either
+1. Utilize the [`arcade configure` CLI command](/home/arcade-cli#arcade-configure) to configure your MCP client to pass the secrets to your MCP server, or
+2. Manually configure your MCP client to pass the secrets to your MCP server. For example, if you are using Cursor IDE, you can add the following to your `mcp.json` file:
 
-```json
-{
-  "mcpServers": {
-    "my-server": {
-      "command": "python",
-      "args": ["server.py", "stdio"],
-      "env": {
-        "MY_SECRET_KEY": "my-secret-value"
+    ```json
+    {
+      "mcpServers": {
+        "simple": {
+          "command": "uv",
+          "args": [
+            "run",
+            "--directory",
+            "/absoulute/path/to/your/entrypoint/file/parent/directory",
+            "python",
+            "server.py"
+          ],
+          "env": {
+            "MY_SECRET_KEY": "my-secret-value"
+          }
+        }
       }
     }
-  }
-}
-```
+    ```
 
 This will make the secret available to your MCP server when the MCP client starts the subprocess.
 Note that the specific key name may vary depending on the MCP client you are using.
@@ -150,7 +172,7 @@ Note that the specific key name may vary depending on the MCP client you are usi
 In your [MCP Server](/home/build-tools/create-a-mcp-server), create a new tool that uses the secret:
 
 - Use the `requires_secrets` parameter to declare which secrets your tool needs (`"SECRET_KEY"` in this example).
-- The tool's Context object has `get_secret` and `use_secret` methods that you can use to access the secret value.
+- The tool's Context object has a `get_secret` method that you can use to access the secret value.
 
 ```python filename="secrets.py" showLineNumbers highlightLines={2,4,7}
 @app.tool(
@@ -162,7 +184,7 @@ def use_secret(context: Context) -> str:
         value = context.get_secret("SECRET_KEY")
         masked = value[:2] + "***" if len(value) >= 2 else "***"
         return f"Got SECRET_KEY of length {len(value)} -> {masked}"
-    except Exception as e:
+    except ValueError as e:
         return f"Error getting secret: {e}"
 ```
 
@@ -174,20 +196,20 @@ When your tool is executed, it will return: `"Got SECRET_KEY of length..."`. In 
 
 **Security Best Practices**
 
-- **Never log secret values** Always mask or truncate when displaying
-- **Declare requirements** Use `requires_secrets` to document dependencies
-- **Handle missing secrets** Use try/except when accessing secrets
-- **Use descriptive names** Make it clear what each secret is for
+- **Never log secret values:** Always mask or truncate when displaying
+- **Declare requirements:** Use `requires_secrets` to document dependencies
+- **Handle missing secrets:** Use try/except when accessing secrets
+- **Use descriptive names:** Make it clear what each secret is for
 
 </Callout>
 
 ## Key Concepts
 
-- **Secure Access** Secrets are accessed through context, not imported directly
-- **Environment Integration** Works with both environment variables and .env files
-- **Error Handling** Always handle the case where a secret might be missing
-- **Masking** Never expose full secret values in logs or return values
-- **Declaration** Use `requires_secrets` to make dependencies explicit
+- **Secure Access:** Secrets are accessed through context, not imported directly
+- **Environment Integration:** Works with both environment variables and .env files
+- **Error Handling:** Always handle the case where a secret might be missing
+- **Masking:** Never expose full secret values in logs or return values
+- **Declaration:** Use `requires_secrets` to make dependencies explicit
 
 ## Example Code
 
@@ -226,16 +248,13 @@ def use_secret(context: Context) -> str:
         value = context.get_secret("SECRET_KEY")
         masked = value[:2] + "***" if len(value) >= 2 else "***"
         return f"Got SECRET_KEY of length {len(value)} -> {masked}"
-    except Exception as e:
+    except ValueError as e:
         return f"Error getting secret: {e}"
 
 
 if __name__ == "__main__":
-    # Check if stdio transport was requested
-    transport = "stdio" if len(sys.argv) > 1 and sys.argv[1] == "stdio" else "http"
-
-    print(f"Starting {app.name} v{app.version}")
-    print(f"Transport: {transport}")
+    # Get transport from command line argument, default to "stdio"
+    transport = sys.argv[1] if len(sys.argv) > 1 else "stdio"
 
     # Run the server
     app.run(transport=transport, host="127.0.0.1", port=8000)
@@ -244,7 +263,7 @@ if __name__ == "__main__":
 ### Run your MCP server
 
 <Tabs
-  items={["stdio transport (default)", "http transport"]}
+  items={["stdio transport (default)", "HTTP transport"]}
   storageKey="preferredTransport"
 >
   <Tabs.Tab>
@@ -263,15 +282,12 @@ uv run secrets.py http
 For HTTP transport, view your server's API docs at [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
 
 <Callout type="info">
-  For security reasons, Local HTTP servers do not currently support managed
-  authorization and secrets. If you need to use authorization or secrets, you
+  For security reasons, Local HTTP servers do not currently support tool-level
+  authorization and secrets. If you need to use tool-level authorization or secrets locally, you
   should use the stdio transport and configure the Arcade API key and secrets in
-  your MCP connection settings. If you need authorization and tool secrets for
-  an HTTP server that you intend to expose to the public internet, please follow
-  the [on-prem MCP server](/home/deployment/on-prem-mcp) guide for secure remote
-  deployment. If you are deploying your MCP server to Arcade, you can use
-  [Arcade Deploy](/home/serve-tools/arcade-deploy) to deploy your MCP server and
-  manage the secrets for your MCP server from the Arcade dashboard.
+  your MCP connection settings. Otherwise, if you intend to expose your HTTP MCP server to
+  the public internet with tool-level authorization and secrets, please follow the [deploying to the cloud with Arcade Deploy](/home/serve-tools/arcade-deploy) guide or the [on-prem MCP
+  server](/home/deployment/on-prem-mcp) guide for secure remote deployment.
 </Callout>
 
 </Tabs.Tab>

@@ -616,7 +616,6 @@ def request_openai_generation(
             messages=messages,
             temperature=0.0,
             max_completion_tokens=max_tokens,
-            stop=["\n\n"],
         )
         response_str = cast(str, response.choices[0].message.content)
 
@@ -655,7 +654,6 @@ async def async_request_openai_generation(
             messages=messages,
             temperature=0.0,
             max_completion_tokens=max_tokens,
-            stop=["\n\n"],
         )
         response_str = cast(str, response.choices[0].message.content)
 

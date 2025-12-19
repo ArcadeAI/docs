@@ -18,7 +18,7 @@ test: ## Run the tests
 run: ## Run the docs site locally
 	@pnpm dev
 
-toolkit-docs: ## Generate documentation for an MCP Server toolkit
+mcp-server-docs: ## Generate documentation for an MCP Server toolkit
 	@cd make_toolkit_docs && uv sync && uv run python __main__.py
 
 ruin:
