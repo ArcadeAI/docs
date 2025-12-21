@@ -3,6 +3,8 @@ title: "Errors - Arcade MCP Python Reference"
 description: "Domain-specific error types raised by the MCP server and components"
 ---
 
+import { Callout } from "nextra/components";
+
 # Errors
 
 Domain-specific error types raised by the MCP server and components.
@@ -103,35 +105,162 @@ Error in session management.
 
 Error in transport layer (stdio, HTTP, etc).
 
+## `arcade_core.errors`
+
+Tool execution errors with retry semantics. Re-exported via `arcade_mcp_server.exceptions`.
+
+### `RetryableToolError`
+
+**Bases:** `ToolExecutionError`
+
+The operation failed but can be retried.
+
+```python
+from arcade_mcp_server.exceptions import RetryableToolError
+
+# Simple retry
+raise RetryableToolError("Service temporarily unavailable")
+
+# With retry delay
+raise RetryableToolError(
+    "Rate limited",
+    retry_after_ms=5000
+)
+
+# With guidance for the AI
+raise RetryableToolError(
+    "Search returned no results",
+    additional_prompt_content="Try broader search terms or check spelling."
+)
+```
+
+### `FatalToolError`
+
+**Bases:** `ToolExecutionError`
+
+Unrecoverable error — the AI should not retry.
+
+```python
+from arcade_mcp_server.exceptions import FatalToolError
+
+raise FatalToolError("Account has been permanently deleted")
+
+# With developer-only details
+raise FatalToolError(
+    "Configuration error",
+    developer_message="Missing required API key in environment"
+)
+```
+
+### `ContextRequiredToolError`
+
+**Bases:** `ToolExecutionError`
+
+The operation needs additional context from the user before it can proceed.
+
+```python
+from arcade_mcp_server.exceptions import ContextRequiredToolError
+
+raise ContextRequiredToolError(
+    "Multiple users found matching 'John'",
+    additional_prompt_content="Please specify: John Smith (john@work.com) or John Doe (john@home.com)"
+)
+```
+
+### `UpstreamError`
+
+**Bases:** `ToolExecutionError`
+
+Error from an external API or service.
+
+```python
+from arcade_mcp_server.exceptions import UpstreamError
+
+raise UpstreamError(
+    "Slack API error: channel_not_found",
+    status_code=404
+)
+```
+
+### `UpstreamRateLimitError`
+
+**Bases:** `UpstreamError`
+
+Rate limit from an external API. Includes retry information.
+
+```python
+from arcade_mcp_server.exceptions import UpstreamRateLimitError
+
+raise UpstreamRateLimitError(
+    "Rate limited by Slack",
+    retry_after_ms=60_000
+)
+```
+
+<Callout type="info">
+  You rarely throw `UpstreamError` manually. Use [error adapters](/references/mcp/python/types#error-adapters) to automatically translate SDK errors.
+</Callout>
+
+## Error Hierarchy
+
+```text
+MCPError (base)
+├── MCPContextError (user/input caused the error)
+│   ├── AuthorizationError
+│   ├── NotFoundError
+│   ├── PromptError
+│   └── ResourceError
+└── MCPRuntimeError (server/infrastructure caused the error)
+    ├── ProtocolError
+    ├── TransportError
+    └── ServerError
+        ├── RequestError
+        │   └── ServerRequestError
+        ├── ResponseError
+        ├── SessionError
+        └── LifespanError
+
+ToolkitError (base for tool errors)
+└── ToolError
+    └── ToolRuntimeError
+        └── ToolExecutionError
+            ├── RetryableToolError (can retry)
+            ├── FatalToolError (do not retry)
+            ├── ContextRequiredToolError (needs user input)
+            └── UpstreamError (external API failure)
+                └── UpstreamRateLimitError
+```
+
 ## Examples
 
 ### Raising exceptions for common error scenarios
 
 ```python
 from arcade_mcp_server.exceptions import (
-    MCPError,
     NotFoundError,
-    ValidationError,
-    ToolError,
+    RetryableToolError,
+    FatalToolError,
 )
 
-# Raising a not-found when a resource is missing
+# Resource not found
 async def read_resource_or_fail(uri: str) -> str:
     if not await exists(uri):
         raise NotFoundError(f"Resource not found: {uri}")
     return await read(uri)
 
-# Validating input
-def validate_age(age: int) -> None:
-    if age < 0:
-        raise ValidationError("age must be non-negative")
-
-# Handling tool execution errors in middleware or handlers
-async def call_tool_safely(call):
+# Retryable failure
+async def fetch_data(url: str):
     try:
-        return await call()
-    except ToolError as e:
-        # Convert to an error result or re-raise
-        raise MCPError(f"Tool failed: {e}")
+        return await http_client.get(url)
+    except ConnectionError as e:
+        raise RetryableToolError(
+            "Failed to connect. Please try again.",
+            developer_message=str(e)
+        )
+
+# Unrecoverable failure
+def validate_config(config: dict):
+    if "api_key" not in config:
+        raise FatalToolError("Missing required configuration: api_key")
 ```
 
