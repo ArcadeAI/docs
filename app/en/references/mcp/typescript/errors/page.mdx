@@ -1,0 +1,424 @@
+---
+title: "Errors - Arcade MCP TypeScript Reference"
+description: "Error types for MCP servers"
+---
+
+import { Callout } from "nextra/components";
+
+# Errors
+
+The SDK provides specific error types for different failure scenarios. Use these in your tools to return meaningful errors to AI clients.
+
+## Common Errors
+
+These are the errors you'll use most often in your tools:
+
+### `NotFoundError`
+
+Requested resource doesn't exist.
+
+```typescript
+import { MCPApp, NotFoundError } from 'arcade-mcp';
+import { z } from 'zod';
+
+const app = new MCPApp({ name: 'user-service' });
+
+app.tool('getUser', {
+  input: z.object({ id: z.string() }),
+  handler: async ({ input }) => {
+    const user = await db.findUser(input.id);
+    if (!user) {
+      throw new NotFoundError(`User ${input.id} not found`);
+    }
+    return user;
+  },
+});
+```
+
+### `AuthorizationError`
+
+User lacks permission for the requested action.
+
+```typescript
+import { MCPApp, AuthorizationError } from 'arcade-mcp';
+import { Google } from 'arcade-mcp/auth';
+import { z } from 'zod';
+
+const app = new MCPApp({ name: 'project-service' });
+
+app.tool('deleteProject', {
+  input: z.object({ projectId: z.string() }),
+  requiresAuth: Google({ scopes: ['profile'] }),
+  handler: async ({ input, authorization }) => {
+    const project = await db.findProject(input.projectId);
+    const userEmail = await fetchUserEmail(authorization.token);
+
+    if (project.ownerEmail !== userEmail) {
+      throw new AuthorizationError('Only the owner can delete this project');
+    }
+
+    await db.deleteProject(input.projectId);
+    return { deleted: true };
+  },
+});
+```
+
+### `ToolExecutionError`
+
+Base class for tool execution errors. Use one of the specific subclasses:
+
+- `RetryableToolError` — can be retried
+- `FatalToolError` — unrecoverable, don't retry
+- `ContextRequiredToolError` — needs user input before retry
+- `UpstreamError` — external API failure
+
+See [Retry-Aware Errors](#retry-aware-errors) below.
+
+### `ResourceError`
+
+Error in resource management.
+
+```typescript
+import { MCPApp, ResourceError } from 'arcade-mcp';
+import { z } from 'zod';
+
+const app = new MCPApp({ name: 'file-service' });
+
+app.tool('readFile', {
+  input: z.object({ path: z.string() }),
+  handler: async ({ input }) => {
+    try {
+      return await Bun.file(input.path).text();
+    } catch {
+      throw new ResourceError(`Cannot read file: ${input.path}`);
+    }
+  },
+});
+```
+
+### `PromptError`
+
+Error in prompt management.
+
+```typescript
+import { PromptError } from 'arcade-mcp';
+
+// Thrown when a prompt is not found or invalid
+throw new PromptError('Prompt template not found: greeting');
+```
+
+### `UpstreamError`
+
+External API or service failure. Typically thrown by error adapters.
+
+```typescript
+import { UpstreamError } from 'arcade-mcp';
+
+throw new UpstreamError('Slack API error: channel_not_found', {
+  statusCode: 404,  // required
+});
+```
+
+### `UpstreamRateLimitError`
+
+Rate limit from an external API. Includes retry information.
+
+```typescript
+import { UpstreamRateLimitError } from 'arcade-mcp';
+
+throw new UpstreamRateLimitError('Rate limited by Slack', {
+  retryAfterMs: 60_000,  // required
+});
+```
+
+<Callout type="info">
+  You rarely throw `UpstreamError` manually. Use [error adapters](/references/mcp/typescript/types#error-adapter-types) to automatically translate SDK errors.
+</Callout>
+
+## Retry-Aware Errors
+
+These errors include metadata that helps AI orchestrators decide whether and how to retry.
+
+### `RetryableToolError`
+
+The operation failed but can be retried, optionally with guidance for the AI.
+
+```typescript
+import { RetryableToolError } from 'arcade-mcp';
+
+// Simple retry
+throw new RetryableToolError('Service temporarily unavailable');
+
+// With retry delay
+throw new RetryableToolError('Rate limited', {
+  retryAfterMs: 5000,
+});
+
+// With guidance for the AI on how to retry differently
+throw new RetryableToolError('Search returned no results', {
+  additionalPromptContent: 'Try broader search terms or check spelling.',
+});
+```
+
+### `FatalToolError`
+
+Unrecoverable error — the AI should not retry this operation.
+
+```typescript
+import { FatalToolError } from 'arcade-mcp';
+
+throw new FatalToolError('Account has been permanently deleted');
+
+// With developer-only details (not shown to AI)
+throw new FatalToolError('Configuration error', {
+  developerMessage: 'Missing required API key in environment',
+});
+```
+
+### `ContextRequiredToolError`
+
+The operation needs additional context from the user before it can proceed.
+
+```typescript
+import { ContextRequiredToolError } from 'arcade-mcp';
+
+throw new ContextRequiredToolError('Multiple users found matching "John"', {
+  additionalPromptContent: 'Please specify: John Smith (john@work.com) or John Doe (john@home.com)',  // required
+});
+```
+
+<Callout type="info">
+  For most tool errors, use `RetryableToolError` (transient failures) or `FatalToolError` (unrecoverable).
+  Use `ContextRequiredToolError` when the AI needs to ask the user for clarification.
+</Callout>
+
+## Constructor Signatures
+
+All tool errors use an options object pattern. Required fields are marked.
+
+```typescript
+// RetryableToolError — all options are optional
+new RetryableToolError(message: string, options?: {
+  developerMessage?: string;
+  additionalPromptContent?: string;
+  retryAfterMs?: number;
+  extra?: Record<string, unknown>;
+  cause?: unknown;
+});
+
+// FatalToolError — all options are optional
+new FatalToolError(message: string, options?: {
+  developerMessage?: string;
+  extra?: Record<string, unknown>;
+  cause?: unknown;
+});
+
+// ContextRequiredToolError — additionalPromptContent is REQUIRED
+new ContextRequiredToolError(message: string, options: {
+  additionalPromptContent: string;  // required
+  developerMessage?: string;
+  extra?: Record<string, unknown>;
+  cause?: unknown;
+});
+
+// UpstreamError — statusCode is REQUIRED
+new UpstreamError(message: string, options: {
+  statusCode: number;  // required
+  developerMessage?: string;
+  extra?: Record<string, unknown>;
+  cause?: unknown;
+});
+
+// UpstreamRateLimitError — retryAfterMs is REQUIRED
+new UpstreamRateLimitError(message: string, options: {
+  retryAfterMs: number;  // required
+  developerMessage?: string;
+  extra?: Record<string, unknown>;
+  cause?: unknown;
+});
+```
+
+| Option | Purpose |
+|--------|---------|
+| `developerMessage` | Debug info (not shown to AI) |
+| `extra` | Structured metadata for telemetry/adapters |
+| `cause` | ES2022 error chaining for stack traces |
+
+## Error Hierarchy
+
+All errors extend from `MCPError`:
+
+```text
+MCPError (base)
+├── MCPContextError (user/input caused the error)
+│   ├── AuthorizationError
+│   ├── NotFoundError
+│   ├── PromptError
+│   └── ResourceError
+└── MCPRuntimeError (server/infrastructure caused the error)
+    ├── ProtocolError
+    ├── TransportError
+    └── ServerError
+        ├── RequestError
+        │   └── ServerRequestError (server-to-client requests)
+        ├── ResponseError
+        ├── SessionError
+        └── LifespanError
+
+ToolkitError (base for tool errors)
+└── ToolError
+    └── ToolRuntimeError
+        └── ToolExecutionError
+            ├── RetryableToolError (can retry)
+            ├── FatalToolError (do not retry)
+            ├── ContextRequiredToolError (needs user input)
+            └── UpstreamError (external API failure)
+                └── UpstreamRateLimitError
+```
+
+### When to Use Each Category
+
+| Error Type | Use when... | HTTP Analogy |
+|------------|-------------|--------------|
+| `MCPContextError` | User/input caused the error | 4xx errors |
+| `MCPRuntimeError` | Server/infrastructure caused the error | 5xx errors |
+
+## Creating Custom Errors
+
+Extend `ToolExecutionError` for domain-specific tool errors:
+
+```typescript
+import { ToolExecutionError } from 'arcade-mcp';
+
+interface QuotaExceededOptions {
+  limitType: string;
+  developerMessage?: string;
+  extra?: Record<string, unknown>;
+}
+
+class QuotaExceededError extends ToolExecutionError {
+  readonly limitType: string;
+
+  constructor(message: string, options: QuotaExceededOptions) {
+    super(message, options);
+    this.name = 'QuotaExceededError';
+    this.limitType = options.limitType;
+  }
+}
+
+// Usage
+throw new QuotaExceededError('Monthly API quota exceeded', {
+  limitType: 'api_calls',
+  extra: { currentUsage: 10000, limit: 10000 },
+});
+```
+
+For MCP-level errors (resources, prompts), extend `MCPContextError`:
+
+```typescript
+import { MCPContextError } from 'arcade-mcp';
+
+class InvalidResourceFormatError extends MCPContextError {
+  constructor(uri: string) {
+    super(`Invalid resource format: ${uri}`);
+    this.name = 'InvalidResourceFormatError';
+  }
+}
+```
+
+## Best Practices
+
+<Callout type="warning">
+  Never expose internal error details to clients. The SDK's `ErrorHandlingMiddleware`
+  masks stack traces by default. In development, set `maskErrorDetails: false` to debug.
+</Callout>
+
+### Do: Use Specific Error Types
+
+```typescript
+// ✅ Good: Specific error type
+throw new NotFoundError('User not found');
+
+// ✅ Good: Retryable with guidance
+throw new RetryableToolError('Search returned no results', {
+  additionalPromptContent: 'Try broader search terms.',
+});
+```
+
+### Don't: Expose Internals
+
+```typescript
+// ❌ Bad: Leaks implementation details
+throw new Error(`Database error: ${dbError.stack}`);
+
+// ❌ Bad: Leaks SQL
+throw new Error(`Query failed: SELECT * FROM users WHERE...`);
+```
+
+### Error Messages for AI Clients
+
+Write actionable messages that help AI clients understand what went wrong:
+
+```typescript
+// ❌ Vague
+throw new RetryableToolError('Invalid input');
+
+// ✅ Actionable with context
+throw new RetryableToolError(`Invalid email: "${input.email}"`, {
+  additionalPromptContent: 'Use format: user@domain.com',
+});
+```
+
+### Wrapping External Errors
+
+When calling external services, wrap their errors with cause chaining for debugging:
+
+```typescript
+import { RetryableToolError } from 'arcade-mcp';
+import { z } from 'zod';
+
+app.tool('fetchWeather', {
+  input: z.object({ city: z.string() }),
+  handler: async ({ input }) => {
+    try {
+      return await weatherApi.get(input.city);
+    } catch (error) {
+      // Wrap with context and preserve the original error for debugging
+      throw new RetryableToolError(
+        `Failed to fetch weather for ${input.city}. Please try again.`,
+        { cause: error }  // Preserves stack trace for debugging
+      );
+    }
+  },
+});
+```
+
+## Error Handling in Middleware
+
+```typescript
+import {
+  Middleware,
+  MCPError,
+  type MiddlewareContext,
+  type CallNext,
+} from 'arcade-mcp';
+
+class ErrorEnrichmentMiddleware extends Middleware {
+  async onCallTool(context: MiddlewareContext, next: CallNext) {
+    try {
+      return await next(context);
+    } catch (error) {
+      if (error instanceof MCPError) {
+        // Log structured error info
+        console.error({
+          type: error.name,
+          message: error.message,
+          tool: context.message.params?.name,
+          session: context.session?.id,
+        });
+      }
+      throw error;  // Re-throw for ErrorHandlingMiddleware
+    }
+  }
+}
+```

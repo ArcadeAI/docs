@@ -1,0 +1,335 @@
+---
+title: "Settings - Arcade MCP TypeScript Reference"
+description: "Configuration options for MCP servers"
+---
+
+import { Callout } from "nextra/components";
+
+# Settings
+
+Configure your MCP server via constructor options or environment variables.
+
+<Callout type="info">
+  For most users, pass options directly to `MCPApp`. Use `MCPSettings` only when you need
+  to share configuration across multiple servers or load from a config file.
+</Callout>
+
+## Quick Start
+
+```typescript
+import { MCPApp } from 'arcade-mcp';
+
+const app = new MCPApp({
+  name: 'my-server',
+  version: '1.0.0',
+  logLevel: 'DEBUG',
+});
+```
+
+## Environment Variables
+
+The SDK reads these environment variables as defaults. Constructor options take precedence.
+
+| Variable | Maps to | Example |
+|----------|---------|---------|
+| `MCP_SERVER_NAME` | `name` | `"My Server"` |
+| `MCP_SERVER_VERSION` | `version` | `"1.0.0"` |
+| `MCP_LOG_LEVEL` | `logLevel` | `DEBUG`, `INFO`, `WARNING`, `ERROR` |
+| `MCP_DEBUG` | `debug` | `true`, `false` |
+| `MCP_HTTP_HOST` | `host` | `0.0.0.0` |
+| `MCP_HTTP_PORT` | `port` | `8080` |
+| `ARCADE_API_KEY` | `arcadeApiKey` | `arc_...` |
+| `ARCADE_API_URL` | `arcadeApiUrl` | `https://api.arcade.dev` |
+
+Access environment variables with `Bun.env`:
+
+```typescript
+const debug = Bun.env.MCP_DEBUG === 'true';
+const port = Number(Bun.env.MCP_HTTP_PORT) || 8000;
+```
+
+## MCPSettings
+
+For advanced configuration, use the `MCPSettings` class:
+
+```typescript
+import { MCPSettings } from 'arcade-mcp';
+
+// Load from environment variables
+const settings = MCPSettings.fromEnv();
+```
+
+Or construct with explicit options:
+
+```typescript
+import { MCPSettings } from 'arcade-mcp';
+
+const settings = new MCPSettings({
+  debug: true,
+  server: {
+    name: 'My MCP Server',
+    version: '1.0.0',
+    title: 'My Tools',
+    instructions: 'Use these tools to manage documents.',
+  },
+  middleware: {
+    enableLogging: true,
+    logLevel: 'DEBUG',
+    maskErrorDetails: false,
+  },
+  transport: {
+    type: 'http',
+    httpHost: '0.0.0.0',
+    httpPort: 8000,
+  },
+  arcade: {
+    apiKey: Bun.env.ARCADE_API_KEY,
+    apiUrl: 'https://api.arcade.dev',
+  },
+  notifications: {
+    enabled: true,
+  },
+  toolEnvironment: {
+    // Additional secrets available to tools
+    DATABASE_URL: Bun.env.DATABASE_URL,
+    REDIS_URL: Bun.env.REDIS_URL,
+  },
+});
+```
+
+### Using with MCPServer
+
+```typescript
+import { MCPServer, MCPSettings, ToolCatalog } from 'arcade-mcp';
+
+const settings = MCPSettings.fromEnv();
+
+const server = new MCPServer({
+  catalog: new ToolCatalog(),
+  settings,
+});
+```
+
+### Getting Tool Secrets
+
+```typescript
+const settings = MCPSettings.fromEnv();
+
+// Get all secrets available to tools
+const secrets = settings.toolSecrets();
+// => { DATABASE_URL: '...', REDIS_URL: '...', ... }
+```
+
+## Settings Reference
+
+### MCPSettings
+
+```typescript
+interface MCPSettings {
+  /** Enable debug mode (verbose logging, stack traces) */
+  debug?: boolean;
+
+  /** Server configuration */
+  server?: ServerSettings;
+
+  /** Middleware configuration */
+  middleware?: MiddlewareSettings;
+
+  /** Transport configuration */
+  transport?: TransportSettings;
+
+  /** Arcade API configuration */
+  arcade?: ArcadeSettings;
+
+  /** Notification settings */
+  notifications?: NotificationSettings;
+
+  /** Tool environment / secrets */
+  toolEnvironment?: ToolEnvironmentSettings;
+}
+```
+
+### ServerSettings
+
+```typescript
+interface ServerSettings {
+  /** Server name shown to AI clients */
+  name: string;
+
+  /** Server version */
+  version: string;
+
+  /** Human-readable title */
+  title?: string;
+
+  /** Usage instructions for AI clients */
+  instructions?: string;
+}
+```
+
+### MiddlewareSettings
+
+```typescript
+interface MiddlewareSettings {
+  /** Enable request logging */
+  enableLogging: boolean;
+
+  /** Log level */
+  logLevel: 'DEBUG' | 'INFO' | 'WARNING' | 'ERROR';
+
+  /** Hide stack traces in error responses (always true in production) */
+  maskErrorDetails: boolean;
+}
+```
+
+### TransportSettings
+
+```typescript
+interface TransportSettings {
+  /** Transport type */
+  type: 'stdio' | 'http';
+
+  /** HTTP host (only for http transport) */
+  httpHost: string;
+
+  /** HTTP port (only for http transport) */
+  httpPort: number;
+}
+```
+
+### ArcadeSettings
+
+```typescript
+interface ArcadeSettings {
+  /** Arcade API key for auth and tool hosting */
+  apiKey?: string;
+
+  /** Arcade API URL (defaults to production) */
+  apiUrl?: string;
+}
+```
+
+### NotificationSettings
+
+```typescript
+interface NotificationSettings {
+  /** Enable notifications to clients */
+  enabled: boolean;
+
+  /** Notification timeout in milliseconds */
+  timeoutMs?: number;
+}
+```
+
+### ToolEnvironmentSettings
+
+Environment variables available as secrets to tools:
+
+```typescript
+interface ToolEnvironmentSettings {
+  /** Key-value pairs of secrets */
+  [key: string]: string | undefined;
+}
+```
+
+<Callout type="info">
+  Any environment variable not prefixed with `MCP_` or `ARCADE_` is automatically
+  available as a tool secret via `getSecret()`.
+</Callout>
+
+## Configuration Precedence
+
+Settings are resolved in this order (first wins):
+
+1. Constructor options
+2. `MCPSettings` object
+3. Environment variables
+4. Default values
+
+## Configuration Patterns
+
+### Development vs Production
+
+```typescript
+import { MCPApp } from 'arcade-mcp';
+
+const isDev = Bun.env.NODE_ENV !== 'production';
+
+const app = new MCPApp({
+  name: 'my-server',
+  logLevel: isDev ? 'DEBUG' : 'INFO',
+  // In development, show full error details
+  // ErrorHandlingMiddleware reads this internally
+});
+
+app.run({
+  host: isDev ? '127.0.0.1' : '0.0.0.0',
+  port: Number(Bun.env.PORT) || 8000,
+  reload: isDev,
+});
+```
+
+### Loading from Config File
+
+```typescript
+import { MCPSettings } from 'arcade-mcp';
+
+// Load from JSON file
+const configFile = Bun.file('./config.json');
+const config = await configFile.json();
+
+const settings = new MCPSettings(config);
+```
+
+### Sharing Configuration
+
+```typescript
+import { MCPSettings, MCPServer, ToolCatalog } from 'arcade-mcp';
+
+// Shared settings across multiple servers
+const baseSettings = MCPSettings.fromEnv();
+
+const serverA = new MCPServer({
+  catalog: catalogA,
+  settings: baseSettings,
+  name: 'server-a',
+});
+
+const serverB = new MCPServer({
+  catalog: catalogB,
+  settings: baseSettings,
+  name: 'server-b',
+});
+```
+
+### Validating Configuration at Startup
+
+```typescript
+import { MCPApp, FatalToolError } from 'arcade-mcp';
+
+const requiredEnvVars = ['ARCADE_API_KEY', 'DATABASE_URL'];
+
+for (const envVar of requiredEnvVars) {
+  if (!Bun.env[envVar]) {
+    throw new FatalToolError(`Missing required environment variable: ${envVar}`);
+  }
+}
+
+const app = new MCPApp({ name: 'my-server' });
+```
+
+## Type-Safe Configuration
+
+Use TypeScript's `satisfies` for type-checked config objects:
+
+```typescript
+import type { MCPAppOptions } from 'arcade-mcp';
+
+const config = {
+  name: 'my-server',
+  version: '1.0.0',
+  logLevel: 'DEBUG',
+} satisfies MCPAppOptions;
+
+const app = new MCPApp(config);
+```

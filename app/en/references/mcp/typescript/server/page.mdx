@@ -1,0 +1,273 @@
+---
+title: "Server - Arcade MCP TypeScript Reference"
+description: "Reference documentation for the low-level Arcade MCP Server class"
+---
+
+import { Callout } from "nextra/components";
+
+# Server
+
+<Callout type="info">
+  Most users should use `MCPApp` from the [Overview](/references/mcp/typescript/overview).
+  Use `MCPServer` only when you need low-level control over the server lifecycle,
+  custom transports, or advanced middleware composition.
+</Callout>
+
+## `MCPServer`
+
+**`arcade-mcp.MCPServer`**
+
+Low-level MCP server with middleware and context support.
+
+This server provides:
+
+- Middleware chain for request/response processing
+- Context injection for tools
+- Component managers for tools, resources, and prompts
+- Direct control over server lifecycle
+- Bidirectional communication with MCP clients
+
+### Constructor
+
+```typescript
+new MCPServer(options: MCPServerOptions)
+```
+
+```typescript
+interface MCPServerOptions {
+  /** Collection of tools to serve */
+  catalog: ToolCatalog;
+
+  /** Server name */
+  name?: string;
+
+  /** Server version */
+  version?: string;
+
+  /** Human-readable title */
+  title?: string;
+
+  /** Usage instructions for AI clients */
+  instructions?: string;
+
+  /** Configuration object */
+  settings?: MCPSettings;
+
+  /** Request/response middleware */
+  middleware?: Middleware[];
+
+  /** Lifecycle manager for startup/shutdown */
+  lifespan?: LifespanManager;
+
+  /** Disable auth (development only, never in production) */
+  authDisabled?: boolean;
+
+  /** Arcade API key */
+  arcadeApiKey?: string;
+
+  /** Arcade API URL */
+  arcadeApiUrl?: string;
+}
+```
+
+**Defaults:**
+
+| Option | Default | Notes |
+|--------|---------|-------|
+| `name` | `'ArcadeMCP'` | |
+| `version` | `'1.0.0'` | |
+| `arcadeApiKey` | `Bun.env.ARCADE_API_KEY` | |
+| `arcadeApiUrl` | `'https://api.arcade.dev'` | |
+| `authDisabled` | `false` | ⚠️ Never enable in production |
+
+### Methods
+
+#### `start()`
+
+```typescript
+async start(): Promise<void>
+```
+
+Initialize the server. Call before running a transport.
+
+#### `stop()`
+
+```typescript
+async stop(): Promise<void>
+```
+
+Gracefully shut down the server. Waits for in-flight requests to complete.
+
+#### `handleMessage()`
+
+```typescript
+async handleMessage(
+  message: MCPMessage,
+  session?: ServerSession
+): Promise<MCPMessage | undefined>
+```
+
+Handle a single MCP message. Used internally by transports.
+
+#### `runConnection()`
+
+```typescript
+async runConnection(
+  readStream: ReadableStream,
+  writeStream: WritableStream,
+  initOptions?: Record<string, unknown>
+): Promise<void>
+```
+
+Run a single MCP connection. Used for custom transport implementations.
+
+### Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `tools` | `ToolManager` | Runtime tool operations (add, remove, list) |
+| `resources` | `ResourceManager` | Runtime resource operations |
+| `prompts` | `PromptManager` | Runtime prompt operations |
+
+### Examples
+
+#### stdio Transport
+
+```typescript
+import { MCPServer, ToolCatalog, StdioTransport } from 'arcade-mcp';
+
+const catalog = new ToolCatalog();
+// catalog.add(...) to register tools
+
+const server = new MCPServer({
+  catalog,
+  name: 'example',
+  version: '1.0.0',
+});
+
+await server.start();
+try {
+  const transport = new StdioTransport();
+  await transport.run(server);
+} finally {
+  await server.stop();
+}
+```
+
+#### HTTP Transport
+
+```typescript
+import { MCPServer, ToolCatalog, HTTPTransport } from 'arcade-mcp';
+
+const catalog = new ToolCatalog();
+
+const server = new MCPServer({
+  catalog,
+  name: 'example',
+  version: '1.0.0',
+});
+
+await server.start();
+try {
+  const transport = new HTTPTransport({ host: '0.0.0.0', port: 8000 });
+  await transport.run(server);
+} finally {
+  await server.stop();
+}
+```
+
+#### With Middleware
+
+```typescript
+import {
+  MCPServer,
+  ToolCatalog,
+  LoggingMiddleware,
+  ErrorHandlingMiddleware,
+} from 'arcade-mcp';
+
+const server = new MCPServer({
+  catalog: new ToolCatalog(),
+  middleware: [
+    new ErrorHandlingMiddleware({ maskErrorDetails: true }),
+    new LoggingMiddleware({ logLevel: 'DEBUG' }),
+  ],
+});
+```
+
+<Callout type="info">
+  Middleware runs in order. `ErrorHandlingMiddleware` first means it catches errors
+  from all subsequent middleware.
+</Callout>
+
+#### With Lifespan Manager
+
+```typescript
+import { MCPServer, ToolCatalog, createLifespan } from 'arcade-mcp';
+
+const lifespan = createLifespan({
+  async onStart(server) {
+    await db.connect();
+  },
+  async onStop(server) {
+    await db.disconnect();
+  },
+});
+
+const server = new MCPServer({
+  catalog: new ToolCatalog(),
+  lifespan,
+});
+```
+
+#### Runtime Tool Management
+
+Use `tool()` to create tool objects for runtime registration:
+
+```typescript
+import { MCPServer, ToolCatalog, tool } from 'arcade-mcp';
+import { z } from 'zod';
+
+const server = new MCPServer({ catalog: new ToolCatalog() });
+
+await server.start();
+
+// Create a tool object
+const dynamicTool = tool({
+  name: 'dynamic-tool',  // required for runtime registration
+  description: 'Added at runtime',
+  input: z.object({ value: z.string() }),
+  handler: ({ input }) => `Got: ${input.value}`,
+});
+
+// Add it to the running server
+await server.tools.add(dynamicTool);
+
+// List all tools
+const tools = await server.tools.list();
+console.error(`Server has ${tools.length} tools`);
+
+// Remove a tool
+await server.tools.remove('dynamic-tool');
+```
+
+`tool()` takes the same options as `app.tool()` and returns a `MaterializedTool` object suitable for the runtime APIs.
+
+#### Custom Transport
+
+For WebSocket or other custom transports, implement a class that calls `server.runConnection()`:
+
+```typescript
+import { MCPServer, ToolCatalog } from 'arcade-mcp';
+
+// Pseudocode - implement stream adapters for your transport
+class CustomTransport {
+  async run(server: MCPServer) {
+    // Accept connections, create readable/writable streams
+    const { readable, writable } = await acceptConnection();
+    await server.runConnection(readable, writable);
+  }
+}
+```
+
+See the SDK source for `StdioTransport` and `HTTPTransport` as reference implementations.

@@ -1,0 +1,324 @@
+---
+title: "Transport Modes - Arcade MCP TypeScript Reference"
+description: "stdio and HTTP transport modes for MCP servers"
+---
+
+import { Callout } from "nextra/components";
+
+# Transport Modes
+
+Transports define how your MCP server communicates with AI clients. Choose based on your deployment:
+
+| Transport | Use case |
+|-----------|----------|
+| **stdio** | Claude Desktop, VS Code, local tools |
+| **HTTP** | Web deployments, cloud hosting, multiple clients |
+
+<Callout type="info">
+  stdio is the default. Use `transport: 'http'` for web deployments.
+</Callout>
+
+## stdio Transport
+
+Communicates via standard input/output. Claude Desktop spawns your server as a subprocess.
+
+### When to Use
+
+- Claude Desktop integration
+- VS Code extensions
+- Command-line tools
+- Local development
+
+### Usage
+
+```typescript
+import { MCPApp } from 'arcade-mcp';
+import { z } from 'zod';
+
+const app = new MCPApp({ name: 'my-server' });
+
+app.tool('ping', {
+  input: z.object({}),
+  handler: () => 'pong',
+});
+
+app.run({ transport: 'stdio' });
+```
+
+```bash
+bun run server.ts
+```
+
+### Claude Desktop Configuration
+
+**Recommended: Use the Arcade CLI**
+
+```bash
+arcade configure claude --host local
+```
+
+This configures Claude Desktop to run your server as a stdio subprocess.
+
+**Manual configuration:**
+
+Edit Claude Desktop's config file:
+
+| Platform | Path |
+|----------|------|
+| **macOS** | `~/Library/Application Support/Claude/claude_desktop_config.json` |
+| **Windows** | `%APPDATA%\Claude\claude_desktop_config.json` |
+| **Linux** | `~/.config/Claude/claude_desktop_config.json` |
+
+```json
+{
+  "mcpServers": {
+    "my-tools": {
+      "command": "bun",
+      "args": ["run", "/path/to/server.ts"],
+      "cwd": "/path/to/your/tools"
+    }
+  }
+}
+```
+
+<Callout type="warning">
+  With stdio, all `stdout` is protocol data. Use `console.error()` for logging, never `console.log()`.
+</Callout>
+
+## HTTP Transport
+
+REST API with Server-Sent Events (SSE) for streaming. Built on Elysia.
+
+### When to Use
+
+- Web applications
+- Cloud deployments (Railway, Fly.io, etc.)
+- Multiple concurrent clients
+- Behind load balancers
+
+### Usage
+
+```typescript
+import { MCPApp } from 'arcade-mcp';
+import { z } from 'zod';
+
+const app = new MCPApp({ name: 'my-server' });
+
+app.tool('ping', {
+  input: z.object({}),
+  handler: () => 'pong',
+});
+
+app.run({ transport: 'http', host: '0.0.0.0', port: 8080 });
+```
+
+### Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/worker/health` | GET | Health check (returns 200 OK) |
+| `/mcp` | GET | SSE stream for server-initiated messages |
+| `/mcp` | POST | Send JSON-RPC message |
+| `/mcp` | DELETE | Terminate session (when using session IDs) |
+
+<Callout type="info">
+  **Response modes:** POST requests may receive either `application/json` (single response) or
+  `text/event-stream` (SSE stream). The SDK handles both automatically. Clients should include
+  `Accept: application/json, text/event-stream` in requests.
+</Callout>
+
+### API Documentation (Optional)
+
+Add Elysia's OpenAPI plugin for interactive API docs:
+
+```bash
+bun add @elysiajs/openapi
+```
+
+```typescript
+import { openapi } from '@elysiajs/openapi';
+
+// Add before app.run()
+app.elysia.use(openapi({ path: '/docs' }));
+```
+
+Scalar UI will be available at `/docs`. See the [Elysia OpenAPI docs](https://elysiajs.com/plugins/openapi).
+
+### Development Mode
+
+Enable hot reload for faster development:
+
+```typescript
+app.run({
+  transport: 'http',
+  host: '127.0.0.1',
+  port: 8000,
+  reload: true,
+});
+```
+
+When `reload: true`, the server restarts automatically when you save files.
+
+### TLS / HTTPS
+
+For production, use a reverse proxy (nginx, Caddy) for TLS termination. This is the recommended approach:
+
+```nginx
+# nginx example
+server {
+    listen 443 ssl;
+    ssl_certificate /path/to/cert.pem;
+    ssl_certificate_key /path/to/key.pem;
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+    }
+}
+```
+
+For advanced TLS configuration, see [Server](./server).
+
+### Docker
+
+```dockerfile
+FROM oven/bun:1
+WORKDIR /app
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile
+COPY . .
+EXPOSE 8000
+CMD ["bun", "run", "server.ts"]
+```
+
+```bash
+docker build -t my-mcp-server .
+docker run -p 8000:8000 -e ARCADE_API_KEY=arc_... my-mcp-server
+```
+
+## Environment Variables
+
+```bash
+MCP_SERVER_NAME="My MCP Server"
+MCP_SERVER_VERSION="1.0.0"
+MCP_LOG_LEVEL=DEBUG
+MCP_HTTP_HOST=0.0.0.0
+MCP_HTTP_PORT=8080
+```
+
+Access with `Bun.env`:
+
+```typescript
+const port = Number(Bun.env.MCP_HTTP_PORT) || 8000;
+```
+
+## Security
+
+### stdio
+
+- Runs in the security context of the parent process
+- No network exposure
+- Safe for local use
+
+### HTTP
+
+<Callout type="warning">
+  HTTP transport exposes network endpoints. For production:
+</Callout>
+
+| Requirement | Solution |
+|-------------|----------|
+| **Use HTTPS** | Configure TLS or use a reverse proxy |
+| **Enable authentication** | Use Arcade auth or custom middleware |
+| **Rate limiting** | Add rate limiting middleware |
+| **Firewall** | Never bind to `0.0.0.0` without firewall rules |
+
+### CORS
+
+For browser clients, add the Elysia CORS plugin:
+
+```bash
+bun add @elysiajs/cors
+```
+
+```typescript
+import { MCPApp } from 'arcade-mcp';
+import { cors } from '@elysiajs/cors';
+
+const app = new MCPApp({ name: 'my-server' });
+
+app.elysia.use(cors({
+  origin: ['https://myapp.com'],
+  credentials: true,
+}));
+```
+
+See the [Elysia CORS docs](https://elysiajs.com/plugins/cors) for all options.
+
+## Advanced Transport Features
+
+### Custom Middleware (HTTP)
+
+Add custom middleware to HTTP transports via the underlying Elysia instance:
+
+```typescript
+import { MCPApp } from 'arcade-mcp';
+
+const app = new MCPApp({ name: 'my-server' });
+
+// Add custom response headers
+app.elysia.onAfterHandle(({ set }) => {
+  set.headers['X-Custom-Header'] = 'value';
+});
+
+// Log all requests
+app.elysia.onRequest(({ request }) => {
+  console.log(`${request.method} ${request.url}`);
+});
+```
+
+### Transport Events
+
+Listen to transport lifecycle events:
+
+```typescript
+app.elysia.onStart(({ server }) => {
+  console.log(`Server running at ${server?.url}`);
+});
+
+app.elysia.onStop(() => {
+  console.log('Server shutting down...');
+});
+```
+
+## Transport Selection
+
+Select transport based on environment or CLI args:
+
+```typescript
+import { MCPApp } from 'arcade-mcp';
+import { z } from 'zod';
+
+const app = new MCPApp({ name: 'my-server' });
+
+app.tool('ping', {
+  input: z.object({}),
+  handler: () => 'pong',
+});
+
+// Check command line args
+const transport = Bun.argv[2] === 'stdio' ? 'stdio' : 'http';
+
+app.run({
+  transport,
+  host: '0.0.0.0',
+  port: 8000,
+});
+```
+
+```bash
+# Run with HTTP
+bun run server.ts
+
+# Run with stdio (for Claude Desktop)
+bun run server.ts stdio
+```

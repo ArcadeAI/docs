@@ -11,6 +11,9 @@ const meta: MetaRecord = {
   python: {
     title: "Python",
   },
+  typescript: {
+    title: "TypeScript",
+  },
   telemetry: {
     title: "Telemetry",
   },

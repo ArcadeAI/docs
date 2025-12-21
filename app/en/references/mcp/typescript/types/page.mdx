@@ -1,0 +1,484 @@
+---
+title: "Types - Arcade MCP TypeScript Reference"
+description: "Core types and interfaces for the MCP protocol"
+---
+
+import { Callout } from "nextra/components";
+
+# Types
+
+Core TypeScript types used in the SDK.
+
+<Callout type="info">
+  Most users only need `ToolContext`. The other types are for advanced use cases
+  like custom transports or protocol-level work.
+</Callout>
+
+## Common Types
+
+### `ToolContext<TInput, TSecrets, TAuth>`
+
+Context passed to your tool handlers. Destructure what you need:
+
+```typescript
+interface AuthInfo {
+  token: string;
+  provider: string;
+}
+
+interface ToolContext<
+  TInput,
+  TSecrets extends string = string,
+  TAuth extends boolean = false
+> {
+  /** Validated input matching your Zod schema */
+  input: TInput;
+
+  /** OAuth token and provider — non-optional when requiresAuth is set */
+  authorization: TAuth extends true ? AuthInfo : AuthInfo | undefined;
+
+  /**
+   * Get a secret value. Only keys declared in requiresSecrets are allowed.
+   * Validated at startup — guaranteed to exist at runtime.
+   */
+  getSecret(key: TSecrets): string;
+
+  /** Metadata from the client (if requiresMetadata was set) */
+  metadata: Record<string, unknown>;
+}
+```
+
+**Example — Type-safe authorization:**
+
+```typescript
+import { z } from 'zod';
+import { Google } from 'arcade-mcp/auth';
+
+// Without requiresAuth: authorization is optional
+app.tool('publicTool', {
+  input: z.object({ query: z.string() }),
+  handler: ({ authorization }) => {
+    authorization?.token;  // Must use optional chaining
+  },
+});
+
+// With requiresAuth: authorization is guaranteed
+app.tool('privateTool', {
+  input: z.object({ query: z.string() }),
+  requiresAuth: Google({ scopes: ['profile'] }),
+  handler: ({ authorization }) => {
+    authorization.token;  // ✅ No optional chaining needed
+  },
+});
+```
+
+**Example — Type-safe secrets:**
+
+```typescript
+app.tool('search', {
+  input: z.object({ query: z.string() }),
+  requiresSecrets: ['API_KEY'] as const,
+  handler: ({ getSecret }) => {
+    getSecret('API_KEY');  // ✅ Autocomplete works
+    // getSecret('OTHER'); // ❌ TypeScript error
+  },
+});
+```
+
+Secrets are validated at startup. Missing secrets fail fast with a clear error.
+
+### Type Inference with Zod
+
+The SDK fully leverages Zod's type inference. Your handler receives typed input automatically:
+
+```typescript
+import { z } from 'zod';
+
+const searchInput = z.object({
+  query: z.string(),
+  limit: z.number().int().min(1).max(100).default(10),
+  filters: z.object({
+    category: z.enum(['all', 'docs', 'code']).optional(),
+    after: z.coerce.date().optional(),  // Coerces ISO strings to Date
+  }).optional(),
+});
+
+app.tool('search', {
+  input: searchInput,
+  handler: ({ input }) => {
+    // TypeScript knows:
+    // - input.query is string
+    // - input.limit is number (default applied)
+    // - input.filters?.category is 'all' | 'docs' | 'code' | undefined
+    // - input.filters?.after is Date | undefined
+    return search(input);
+  },
+});
+```
+
+## Tool Response Types
+
+Handlers can return any value. The SDK auto-wraps:
+
+| Return type | Becomes |
+|-------------|---------|
+| `string` | `{ content: [{ type: 'text', text }] }` |
+| `object` | `{ content: [{ type: 'text', text: JSON.stringify(obj) }] }` |
+| `{ content: [...] }` | Passed through unchanged |
+
+### `ContentItem`
+
+For full control over responses, return content items directly:
+
+```typescript
+type ContentItem = TextContent | ImageContent | ResourceContent;
+
+interface TextContent {
+  type: 'text';
+  text: string;
+}
+
+interface ImageContent {
+  type: 'image';
+  data: string;      // Base64 encoded
+  mimeType: string;  // e.g., 'image/png'
+}
+
+interface ResourceContent {
+  type: 'resource';
+  uri: string;
+  mimeType?: string;
+  text?: string;
+  blob?: string;  // Base64 encoded
+}
+```
+
+**Example:**
+
+```typescript
+import { z } from 'zod';
+
+app.tool('screenshot', {
+  input: z.object({}),
+  handler: async () => {
+    const screenshot = await captureScreen();
+    return {
+      content: [{
+        type: 'image',
+        data: screenshot.toBase64(),
+        mimeType: 'image/png',
+      }],
+    };
+  },
+});
+```
+
+### `CallToolResult`
+
+The complete tool result structure:
+
+```typescript
+interface CallToolResult {
+  /** Content items to return to the client */
+  content: ContentItem[];
+
+  /** Optional structured data (for programmatic access) */
+  structuredContent?: Record<string, unknown>;
+
+  /** Whether this result represents an error */
+  isError?: boolean;
+}
+```
+
+## Schema Types
+
+The SDK uses Zod 4 for input validation.
+
+### Converting Schemas to JSON Schema
+
+Use `z.toJSONSchema()` to convert Zod schemas for AI clients:
+
+```typescript
+import { z } from 'zod';
+
+const schema = z.object({
+  firstName: z.string().describe('Your first name'),
+  lastName: z.string().meta({ title: 'last_name' }),
+  age: z.number().meta({ examples: [12, 99] }),
+});
+
+z.toJSONSchema(schema);
+// => {
+//   type: 'object',
+//   properties: {
+//     firstName: { type: 'string', description: 'Your first name' },
+//     lastName: { type: 'string', title: 'last_name' },
+//     age: { type: 'number', examples: [12, 99] }
+//   },
+//   required: ['firstName', 'lastName', 'age']
+// }
+```
+
+### Adding Metadata
+
+Use `.describe()` for simple descriptions or `.meta()` for richer metadata:
+
+```typescript
+// Simple description (Zod 3 compatible)
+z.string().describe('User email address');
+
+// Rich metadata (Zod 4)
+z.string().meta({
+  id: 'email_address',
+  title: 'Email',
+  description: 'User email address',
+  examples: ['user@example.com'],
+});
+
+// .describe() is shorthand for .meta({ description: ... })
+z.string().describe('An email');
+// equivalent to:
+z.string().meta({ description: 'An email' });
+```
+
+Both are preserved in JSON Schema output.
+
+### Extracting TypeScript Types
+
+Use `z.infer` to extract TypeScript types from schemas:
+
+```typescript
+import { z } from 'zod';
+
+const userSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  email: z.string().email(),
+  role: z.enum(['admin', 'user', 'guest']),
+});
+
+// Extract the type
+type User = z.infer<typeof userSchema>;
+
+// Use in your code
+function processUser(user: User) {
+  // user.id is string
+  // user.role is 'admin' | 'user' | 'guest'
+}
+```
+
+## Protocol Types
+
+These are low-level types for custom transports or debugging.
+
+### `MCPMessage`
+
+Base type for all MCP protocol messages:
+
+```typescript
+type MCPMessage = JSONRPCRequest | JSONRPCResponse | JSONRPCNotification;
+
+interface JSONRPCRequest {
+  jsonrpc: '2.0';
+  id: string | number;
+  method: string;
+  params?: Record<string, unknown>;
+}
+
+interface JSONRPCResponse {
+  jsonrpc: '2.0';
+  id: string | number;
+  result?: unknown;
+  error?: {
+    code: number;
+    message: string;
+    data?: unknown;
+  };
+}
+
+interface JSONRPCNotification {
+  jsonrpc: '2.0';
+  method: string;
+  params?: Record<string, unknown>;
+}
+```
+
+### `ServerSession`
+
+```typescript
+interface ServerSession {
+  /** Unique session identifier */
+  id: string;
+
+  /** Client information (if provided during initialization) */
+  clientInfo?: {
+    name: string;
+    version: string;
+  };
+
+  /** Client capabilities (tools, resources, prompts support) */
+  capabilities?: Record<string, unknown>;
+}
+```
+
+### `SessionMessage`
+
+```typescript
+interface SessionMessage {
+  message: MCPMessage;
+  session: ServerSession;
+}
+```
+
+## Auth Types
+
+### `AuthProvider`
+
+```typescript
+interface AuthProvider {
+  /** Provider identifier (e.g., 'google', 'github') */
+  provider: string;
+
+  /** OAuth scopes required */
+  scopes: readonly string[];
+}
+```
+
+### Creating Auth Providers
+
+```typescript
+import { Google, GitHub, Slack } from 'arcade-mcp/auth';
+
+// Google with specific scopes
+Google({ scopes: ['profile', 'email'] })
+
+// GitHub with repo access
+GitHub({ scopes: ['repo', 'user'] })
+
+// Slack
+Slack({ scopes: ['chat:write', 'users:read'] })
+```
+
+## Error Adapter Types
+
+### `ErrorAdapter`
+
+Translates vendor-specific exceptions into Arcade errors:
+
+```typescript
+interface ErrorAdapter {
+  /** Identifier for logging/metrics */
+  slug: string;
+
+  /** Translate an exception into an Arcade error, or null if not handled */
+  fromException(error: unknown): MCPError | null;
+}
+```
+
+### Built-in Adapters
+
+```typescript
+import {
+  SlackErrorAdapter,
+  GoogleErrorAdapter,
+  MicrosoftGraphErrorAdapter,
+  HTTPErrorAdapter,
+  GraphQLErrorAdapter,
+} from 'arcade-mcp/adapters';
+
+app.tool('sendMessage', {
+  input: z.object({ channel: z.string(), text: z.string() }),
+  adapters: [new SlackErrorAdapter()],
+  handler: async ({ input }) => {
+    // SlackApiError → UpstreamError automatically
+    await slack.chat.postMessage(input);
+    return 'Sent!';
+  },
+});
+```
+
+| Adapter | Handles |
+|---------|---------|
+| `SlackErrorAdapter` | Slack SDK errors |
+| `GoogleErrorAdapter` | Google API Client errors |
+| `MicrosoftGraphErrorAdapter` | Microsoft Graph SDK errors |
+| `HTTPErrorAdapter` | fetch/HTTP library errors |
+| `GraphQLErrorAdapter` | GraphQL client errors |
+
+Adapters are tried in order. First match wins. `HTTPErrorAdapter` is always added as fallback.
+
+## Utility Types
+
+### `MaterializedTool`
+
+A tool object ready for registration. Created via `tool()`:
+
+```typescript
+import { tool } from 'arcade-mcp';
+import { z } from 'zod';
+
+const myTool = tool({
+  name: 'my-tool',  // required for runtime registration
+  description: 'Does something',
+  input: z.object({ value: z.string() }),
+  handler: ({ input }) => `Got: ${input.value}`,
+});
+
+// Use with runtime APIs
+await app.tools.add(myTool);
+await server.tools.add(myTool);
+```
+
+### `ToolOptions`
+
+Complete tool configuration type:
+
+```typescript
+interface ToolOptions<
+  TInput,
+  TSecrets extends string = string,
+  TAuth extends AuthProvider | undefined = undefined
+> {
+  description?: string;
+  input: z.ZodType<TInput>;
+  handler: (
+    context: ToolContext<TInput, TSecrets, TAuth extends AuthProvider ? true : false>
+  ) => unknown | Promise<unknown>;
+  requiresAuth?: TAuth;
+  requiresSecrets?: readonly TSecrets[];
+  requiresMetadata?: string[];
+  adapters?: ErrorAdapter[];
+}
+```
+
+The `TAuth` type parameter enables conditional typing: when `requiresAuth` is set, `authorization` becomes non-optional in the handler context.
+
+### `MCPAppOptions`
+
+```typescript
+interface MCPAppOptions {
+  name?: string;
+  version?: string;
+  title?: string;
+  instructions?: string;
+  logLevel?: 'DEBUG' | 'INFO' | 'WARNING' | 'ERROR';
+  transport?: 'stdio' | 'http';
+  host?: string;
+  port?: number;
+  reload?: boolean;
+  cors?: CorsOptions;
+}
+```
+
+### `CorsOptions`
+
+```typescript
+interface CorsOptions {
+  origin?: string | string[] | boolean;
+  methods?: string[];
+  allowedHeaders?: string[];
+  exposedHeaders?: string[];
+  credentials?: boolean;
+  maxAge?: number;
+}
+```
