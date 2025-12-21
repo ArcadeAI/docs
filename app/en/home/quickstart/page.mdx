@@ -22,7 +22,7 @@ Install and use the Arcade client to call Arcade Hosted Tools.
 - An <SignupLink linkLocation="docs:call-tools-directly">Arcade account</SignupLink>
 - An [Arcade API key](/home/api-keys)
 - The [`uv` package manager](https://docs.astral.sh/uv/getting-started/installation/) if you are using Python
-- The [`npm` package manager](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) if you are using JavaScript or TypeScript
+- The [`bun` runtime](https://bun.com/) if you are using TypeScript
 
 </GuideOverview.Prerequisites>
 
@@ -42,7 +42,7 @@ Install and use the Arcade client to call Arcade Hosted Tools.
 
 ### Install the Arcade client
 
-<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs items={["Python", "TypeScript"]} storageKey="preferredLanguage">
 
   <Tabs.Tab>
   In your terminal, run the following command to install the Python client package `arcadepy`:
@@ -57,7 +57,7 @@ uv pip install arcadepy
   In your terminal, run the following command to install the JavaScript client package `@arcadeai/arcadejs`:
 
 ```bash
-npm install @arcadeai/arcadejs
+bun install @arcadeai/arcadejs
 ```
 
   </Tabs.Tab>
@@ -66,7 +66,7 @@ npm install @arcadeai/arcadejs
 
 ### Setup the client
 
-<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs items={["Python", "TypeScript"]} storageKey="preferredLanguage">
 
 <Tabs.Tab>
 
@@ -87,9 +87,9 @@ user_id = "{arcade_user_id}"
 
 <Tabs.Tab>
 
-Create a new script called `example.mjs`:
+Create a new script called `example.ts`:
 
-```javascript filename="example.ts"
+```typescript filename="example.ts"
 import Arcade from "@arcadeai/arcadejs";
 
 // You can also set the `ARCADE_API_KEY` environment variable instead of passing it as a parameter.
@@ -137,16 +137,16 @@ def authorize_and_run_tool(tool_name, input, user_id):
 
 <Tabs.Tab>
 
-```javascript filename="example.ts"
+```typescript filename="example.ts"
 // Helper function to authorize and run any tool
 async function authorize_and_run_tool({
   tool_name,
   input,
   user_id,
 }: {
-  tool_name: string,
-  input: any,
-  user_id: string,
+  tool_name: string;
+  input: any;
+  user_id: string;
 }) {
   // Start the authorization process
   const authResponse = await client.tools.authorize({
@@ -184,7 +184,7 @@ In this example workflow, we:
 - Create a Google Doc with the news
 - Send a link to the Google Doc to the user
 
-<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs items={["Python", "TypeScript"]} storageKey="preferredLanguage">
 
 <Tabs.Tab>
 
@@ -243,7 +243,7 @@ print(response_send_email.output.value)
 
 <Tabs.Tab>
 
-```javascript filename="example.mjs"
+```typescript filename="example.ts"
 // This tool does not require authorization, so it will return the results
 // without prompting the user to authorize the app.
 const response_search = await authorize_and_run_tool({
@@ -302,66 +302,71 @@ console.log(respose_send_email.output?.value);
 
 ### Run the code
 
-<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs items={["Python", "TypeScript"]} storageKey="preferredLanguage">
 
   <Tabs.Tab>
 
     ```bash
     uv run example.py
-    > latest news about MCP URL mode elicitation:
-    > ----------------------------
-    > InfoWorld - Visual Studio Code adds multi-agent orchestration
-    > https://www.infoworld.com/article/4105879/visual-studio-code-adds-multi-agent-orchestration.html
-    > ----------------------------
-    > Visual Studio Magazine - VS Code 1.107 (November 2025 Update) Expands Multi-Agent Orchestration, Model Management
-    > https://visualstudiomagazine.com/articles/2025/12/12/vs-code-1-107-november-2025-update-expands-multi-agent-orchestration-model-management.aspx
-    > ----------------------------
-    > SD Times - Several new updates make their way into the MCP specification
-    > https://sdtimes.com/ai/several-new-updates-make-their-way-into-the-mcp-specification/
-    > ----------------------------
-    > AI News - How the MCP spec update boosts security as infrastructure scales
-    > https://www.artificialintelligence-news.com/news/how-the-mcp-spec-update-boosts-security-as-infrastructure-scales/
-    >
-    > {'body': '', 'cc': '', 'date': '', 'from': '', 'header_message_id': '', 'history_id': '', 'id': '19b....', 'in_reply_to': '', 'label_ids': ['UNREAD', 'SENT', 'INBOX'], 'references': '', 'reply_to': '', 'snippet': '', 'subject': '', 'thread_id': '19b....', 'to': '', 'url': 'https://mail.google.com/mail/u/0/#sent/19b....'}
+    ```
+    ```text
+    latest news about MCP URL mode elicitation:
+    ----------------------------
+    InfoWorld - Visual Studio Code adds multi-agent orchestration
+    https://www.infoworld.com/article/4105879/visual-studio-code-adds-multi-agent-orchestration.html
+    ----------------------------
+    Visual Studio Magazine - VS Code 1.107 (November 2025 Update) Expands Multi-Agent Orchestration, Model Management
+    https://visualstudiomagazine.com/articles/2025/12/12/vs-code-1-107-november-2025-update-expands-multi-agent-orchestration-model-management.aspx
+    ----------------------------
+    SD Times - Several new updates make their way into the MCP specification
+    https://sdtimes.com/ai/several-new-updates-make-their-way-into-the-mcp-specification/
+    ----------------------------
+    AI News - How the MCP spec update boosts security as infrastructure scales
+    https://www.artificialintelligence-news.com/news/how-the-mcp-spec-update-boosts-security-as-infrastructure-scales/
+
+    {'body': '', 'cc': '', 'date': '', 'from': '', 'header_message_id': '', 'history_id': '', 'id': '19b....', 'in_reply_to': '', 'label_ids': ['UNREAD', 'SENT', 'INBOX'], 'references': '', 'reply_to': '', 'snippet': '', 'subject': '', 'thread_id': '19b....', 'to': '', 'url': 'https://mail.google.com/mail/u/0/#sent/19b....'}
     ```
 
   </Tabs.Tab>
   <Tabs.Tab>
 
     ```bash
-    node example.ts
-    > latest news about MCP URL mode elicitation:
-    > --------------------------------
-    > InfoWorld - Visual Studio Code adds multi-agent orchestration
-    > https://www.infoworld.com/article/4105879/visual-studio-code-adds-multi-agent-orchestration.html
-    > --------------------------------
-    > Visual Studio Magazine - VS Code 1.107 (November 2025 Update) Expands Multi-Agent Orchestration, Model Management
-    > https://visualstudiomagazine.com/articles/2025/12/12/vs-code-1-107-november-2025-update-expands-multi-agent-orchestration-model-management.aspx
-    > --------------------------------
-    > SD Times - Several new updates make their way into the MCP specification
-    > https://sdtimes.com/ai/several-new-updates-make-their-way-into-the-mcp-specification/
-    > --------------------------------
-    > AI News - How the MCP spec update boosts security as infrastructure scales
-    > https://www.artificialintelligence-news.com/news/how-the-mcp-spec-update-boosts-security-as-infrastructure-scales/
-    >
-    > {
-    >   body: "",
-    >   cc: "",
-    >   date: "",
-    >   from: "",
-    >   header_message_id: "",
-    >   history_id: "",
-    >   id: "19b...",
-    >   in_reply_to: "",
-    >   label_ids: [ "UNREAD", "SENT", "INBOX" ],
-    >   references: "",
-    >   reply_to: "",
-    >   snippet: "",
-    >   subject: "",
-    >   thread_id: "19b...",
-    >   to: "",
-    >   url: "https://mail.google.com/mail/u/0/#sent/19b...",
-    > }
+    bun run example.ts
+    ```
+
+    ```text
+    latest news about MCP URL mode elicitation:
+    --------------------------------
+    InfoWorld - Visual Studio Code adds multi-agent orchestration
+    https://www.infoworld.com/article/4105879/visual-studio-code-adds-multi-agent-orchestration.html
+    --------------------------------
+    Visual Studio Magazine - VS Code 1.107 (November 2025 Update) Expands Multi-Agent Orchestration, Model Management
+    https://visualstudiomagazine.com/articles/2025/12/12/vs-code-1-107-november-2025-update-expands-multi-agent-orchestration-model-management.aspx
+    --------------------------------
+    SD Times - Several new updates make their way into the MCP specification
+    https://sdtimes.com/ai/several-new-updates-make-their-way-into-the-mcp-specification/
+    --------------------------------
+    AI News - How the MCP spec update boosts security as infrastructure scales
+    https://www.artificialintelligence-news.com/news/how-the-mcp-spec-update-boosts-security-as-infrastructure-scales/
+
+    {
+      body: "",
+      cc: "",
+      date: "",
+      from: "",
+      header_message_id: "",
+      history_id: "",
+      id: "19b...",
+      in_reply_to: "",
+      label_ids: [ "UNREAD", "SENT", "INBOX" ],
+      references: "",
+      reply_to: "",
+      snippet: "",
+      subject: "",
+      thread_id: "19b...",
+      to: "",
+      url: "https://mail.google.com/mail/u/0/#sent/19b...",
+    }
     ```
 
   </Tabs.Tab>
@@ -375,7 +380,7 @@ In this simple example, we call the tool methods directly. In your real applicat
 
 ## Example Code
 
-<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs items={["Python", "TypeScript"]} storageKey="preferredLanguage">
 
   <Tabs.Tab>
 
@@ -461,7 +466,7 @@ print(response_send_email.output.value)
   </Tabs.Tab>
   <Tabs.Tab>
 
-```javascript filename="example.mjs"
+```typescript filename="example.ts"
 import Arcade from "@arcadeai/arcadejs";
 
 // You can also set the `ARCADE_API_KEY` environment variable instead of passing it as a parameter.
