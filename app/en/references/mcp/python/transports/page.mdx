@@ -103,10 +103,19 @@ app.run(transport="http", host="0.0.0.0", port=8080)
 
 When running in HTTP mode, the server provides:
 
-- `GET /worker/health` - Health check endpoint
-- `GET /mcp` - SSE endpoint for MCP protocol
-- `GET /docs` - Swagger UI documentation (debug mode)
-- `GET /redoc` - ReDoc documentation (debug mode)
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/worker/health` | GET | Health check (returns 200 OK) |
+| `/mcp` | GET | SSE stream for server-initiated messages |
+| `/mcp` | POST | Send JSON-RPC message |
+| `/mcp` | DELETE | Terminate session (when using session IDs) |
+| `/docs` | GET | Swagger UI documentation (debug mode) |
+| `/redoc` | GET | ReDoc documentation (debug mode) |
+
+<Callout type="info">
+  POST requests may return `application/json` (single response) or `text/event-stream` (SSE stream).
+  Clients should include `Accept: application/json, text/event-stream` in requests.
+</Callout>
 
 ### Development Features
 

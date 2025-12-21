@@ -1,3 +1,8 @@
+---
+title: "Types - Arcade MCP Python Reference"
+description: "Core types, models, and error adapters for MCP servers"
+---
+
 # Types
 
 Core Pydantic models and enums for the MCP protocol shapes.
@@ -53,4 +58,56 @@ result = CallToolResult(
     isError=False
 )
 ```
+
+## Error Adapters
+
+Error adapters translate vendor-specific exceptions into Arcade errors automatically.
+
+### `arcade_tdk.error_adapters`
+
+#### `ErrorAdapter`
+
+**Type:** Protocol
+
+Base interface for error adapters.
+
+```python
+class ErrorAdapter(Protocol):
+    slug: str
+    def from_exception(self, error: Exception) -> MCPError | None: ...
+```
+
+### Built-in Adapters
+
+| Adapter | Handles |
+|---------|---------|
+| `SlackErrorAdapter` | Slack SDK errors |
+| `GoogleErrorAdapter` | Google API Client errors |
+| `MicrosoftGraphErrorAdapter` | Microsoft Graph SDK errors |
+| `HTTPErrorAdapter` | fetch/HTTP library errors |
+| `GraphQLErrorAdapter` | GraphQL client errors |
+
+### Using Error Adapters
+
+Pass adapters to `@app.tool` to automatically translate exceptions:
+
+```python
+from arcade_mcp_server import MCPApp
+from arcade_tdk.error_adapters import SlackErrorAdapter
+from typing import Annotated
+
+app = MCPApp(name="slack_bot")
+
+@app.tool(adapters=[SlackErrorAdapter()])
+def send_message(
+    channel: Annotated[str, "Slack channel ID"],
+    text: Annotated[str, "Message text"]
+) -> str:
+    """Send a message to Slack."""
+    # SlackApiError → UpstreamError automatically
+    slack_client.chat_postMessage(channel=channel, text=text)
+    return "Sent!"
+```
+
+Adapters are tried in order. First match wins. `HTTPErrorAdapter` is always added as fallback.
 

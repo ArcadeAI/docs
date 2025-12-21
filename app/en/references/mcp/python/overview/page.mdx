@@ -139,6 +139,84 @@ Decorator for adding tools with optional parameters.
 
 #### Examples
 
+##### With OAuth Authentication
+
+Use `requires_auth` when your tool needs to act on behalf of a user. Add a `context: Context` parameter to access the authorization token.
+
+```python
+from arcade_mcp_server import MCPApp, Context
+from arcade_mcp_server.auth import Google
+from typing import Annotated
+
+app = MCPApp(name="my_server")
+
+@app.tool(requires_auth=Google(scopes=["profile", "email"]))
+async def get_profile(
+    user_id: Annotated[str, "The user ID to look up"],
+    context: Context,
+) -> dict:
+    """Get user profile from Google."""
+    token = context.authorization.token  # OAuth access token
+    # Use token to call Google APIs...
+    return {"user_id": user_id}
+```
+
+Available auth providers:
+
+```python
+from arcade_mcp_server.auth import (
+    Google,
+    GitHub,
+    Slack,
+    Microsoft,
+    Discord,
+    LinkedIn,
+    Dropbox,
+    # ... and more
+)
+```
+
+##### With Secrets
+
+Use `requires_secrets` for API keys your server needs. Add a `context: Context` parameter to access secrets.
+
+```python
+from arcade_mcp_server import MCPApp, Context
+from typing import Annotated
+
+app = MCPApp(name="my_server")
+
+@app.tool(requires_secrets=["API_KEY"])
+async def call_external_api(
+    query: Annotated[str, "Search query"],
+    context: Context,
+) -> str:
+    """Call an external API."""
+    api_key = context.get_secret("API_KEY")
+    # Use api_key to call external service...
+    return f"Results for: {query}"
+```
+
+##### With Lifecycle Hooks
+
+Use `@app.on_event` for startup/shutdown logic.
+
+```python
+from arcade_mcp_server import MCPApp
+
+app = MCPApp(name="my_server")
+
+@app.on_event("startup")
+async def on_startup():
+    await db.connect()
+
+@app.on_event("shutdown")
+async def on_shutdown():
+    await db.disconnect()
+```
+
+##### Full Example
+
 ```python
 # --- server.py ---
 # Programmatic server creation with a simple tool and HTTP transport
