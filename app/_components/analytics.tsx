@@ -25,7 +25,7 @@ export const SignupLink = ({
   return (
     <Link
       className={cn("text-primary", className)}
-      href={"https://api.arcade.dev/signup"}
+      href={"https://api.arcade.dev/dashboard/register"}
       onClick={() => trackSignupClick(linkLocation)}
     >
       {children}
