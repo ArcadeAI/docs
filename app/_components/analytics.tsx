@@ -2,6 +2,7 @@
 import { cn } from "@arcadeai/design-system/lib/utils";
 import Link from "next/link";
 import { usePostHog } from "posthog-js/react";
+import { getDashboardUrl } from "./dashboard-link";
 
 export type LinkClickedProps = {
   linkLocation: string;
@@ -25,7 +26,7 @@ export const SignupLink = ({
   return (
     <Link
       className={cn("text-primary", className)}
-      href={"https://api.arcade.dev/dashboard/register"}
+      href={getDashboardUrl("register")}
       onClick={() => trackSignupClick(linkLocation)}
     >
       {children}
