@@ -62,8 +62,12 @@ export const meta: MetaRecord = {
     type: "separator",
     title: "Reference",
   },
+  references: {
+    title: "References Overview",
+    href: "/references",
+  },
   api: "API",
-  "arcade-mcp": "Arcade MCP (MCP server SDK)",
+  mcp: "Arcade MCP (MCP server SDK)",
   "arcade-clients": "Arcade clients",
   "arcade-cli": "Arcade CLI",
   "auth-providers": "Auth Providers",

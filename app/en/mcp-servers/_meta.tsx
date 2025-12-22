@@ -1,4 +1,20 @@
+import { Home } from "lucide-react";
 import type { MetaRecord } from "nextra";
+
+function TitleWithIcon({
+  icon: Icon,
+  children,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  children: React.ReactNode;
+}) {
+  return (
+    <span className="flex items-center gap-2 font-medium">
+      <Icon className="size-4" />
+      {children}
+    </span>
+  );
+}
 
 const meta: MetaRecord = {
   "*": {
@@ -7,6 +23,14 @@ const meta: MetaRecord = {
       toc: true,
       copyPage: true,
     },
+  },
+  home: {
+    title: <TitleWithIcon icon={Home}>Home</TitleWithIcon>,
+    href: "/home",
+  },
+  "-- Overview": {
+    type: "separator",
+    title: "Overview",
   },
   index: {
     title: "Overview",
