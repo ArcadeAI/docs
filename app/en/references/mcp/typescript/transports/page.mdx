@@ -7,37 +7,31 @@ import { Callout } from "nextra/components";
 
 # Transport Modes
 
-Transports define how your MCP server communicates with AI clients. Choose based on your deployment:
+Transports define how your MCP server talks to AI clients. Pick based on how you're deploying:
 
-| Transport | Use case |
-|-----------|----------|
-| **stdio** | Claude Desktop, VS Code, local tools |
-| **HTTP** | Web deployments, cloud hosting, multiple clients |
+| Transport | How it works | Use for |
+|-----------|--------------|---------|
+| **stdio** | Client spawns your server as a subprocess, communicates via stdin/stdout | Claude Desktop, VS Code, Cursor, CLI tools |
+| **HTTP** | Your server runs standalone, clients connect via HTTP + SSE | Cloud deployments, multiple clients, load balancers |
 
 <Callout type="info">
-  stdio is the default. Use `transport: 'http'` for web deployments.
+  **Rule of thumb:** Use stdio for desktop apps (they spawn your server). Use HTTP when your server runs independently.
 </Callout>
 
 ## stdio Transport
 
-Communicates via standard input/output. Claude Desktop spawns your server as a subprocess.
-
-### When to Use
-
-- Claude Desktop integration
-- VS Code extensions
-- Command-line tools
-- Local development
+Communicates via standard input/output. The AI client spawns your server as a subprocess and pipes JSON-RPC messages through stdin/stdout.
 
 ### Usage
 
 ```typescript
-import { MCPApp } from 'arcade-mcp';
+import { ArcadeMCP } from 'arcade-mcp-server';
 import { z } from 'zod';
 
-const app = new MCPApp({ name: 'my-server' });
+const app = new ArcadeMCP({ name: 'my-server', version: '1.0.0' });
 
 app.tool('ping', {
+  description: 'Health check',
   input: z.object({}),
   handler: () => 'pong',
 });
@@ -53,8 +47,11 @@ bun run server.ts
 
 **Recommended: Use the Arcade CLI**
 
+Install the Arcade CLI, then configure Claude Desktop:
+
 ```bash
-arcade configure claude --host local
+pip install arcade-cli  # requires Python
+arcade configure claude
 ```
 
 This configures Claude Desktop to run your server as a stdio subprocess.
@@ -66,7 +63,7 @@ Edit Claude Desktop's config file:
 | Platform | Path |
 |----------|------|
 | **macOS** | `~/Library/Application Support/Claude/claude_desktop_config.json` |
-| **Windows** | `%APPDATA%\Claude\claude_desktop_config.json` |
+| **Windows** | `C:\Users\<you>\AppData\Roaming\Claude\claude_desktop_config.json` |
 | **Linux** | `~/.config/Claude/claude_desktop_config.json` |
 
 ```json
@@ -87,24 +84,18 @@ Edit Claude Desktop's config file:
 
 ## HTTP Transport
 
-REST API with Server-Sent Events (SSE) for streaming. Built on Elysia.
-
-### When to Use
-
-- Web applications
-- Cloud deployments (Railway, Fly.io, etc.)
-- Multiple concurrent clients
-- Behind load balancers
+REST API with Server-Sent Events (SSE) for streaming. Built on [Elysia](https://elysiajs.com/).
 
 ### Usage
 
 ```typescript
-import { MCPApp } from 'arcade-mcp';
+import { ArcadeMCP } from 'arcade-mcp-server';
 import { z } from 'zod';
 
-const app = new MCPApp({ name: 'my-server' });
+const app = new ArcadeMCP({ name: 'my-server', version: '1.0.0' });
 
 app.tool('ping', {
+  description: 'Health check',
   input: z.object({}),
   handler: () => 'pong',
 });
@@ -112,37 +103,52 @@ app.tool('ping', {
 app.run({ transport: 'http', host: '0.0.0.0', port: 8080 });
 ```
 
+### How HTTP Transport Works
+
+The client-server flow:
+
+1. **Request/Response:** Client POSTs JSON-RPC to `/mcp`, gets a JSON response. This works independently — no SSE connection required.
+2. **Real-time updates (optional):** For progress updates or logs during long-running tools, clients open an SSE stream via `GET /mcp` *before* making POST requests. The SDK routes `progress.report()` and `log.info()` calls to this stream.
+3. **Session cleanup:** Client can DELETE `/mcp` to end a session (for multi-client scenarios with session tracking)
+
+You just write handlers and return values. The SDK handles protocol wiring.
+
+### SSE and Progress Updates
+
+When you call `progress.report()` or `log.info()` in your tool handler, the SDK automatically streams those updates to the client via SSE:
+
+```typescript
+app.tool('processData', {
+  description: 'Process a list of items with progress updates',
+  input: z.object({ items: z.array(z.string()) }),
+  handler: async ({ input, progress, log }) => {
+    await log.info('Starting processing...');
+
+    for (let i = 0; i < input.items.length; i++) {
+      await processItem(input.items[i]);
+      await progress.report(i + 1, input.items.length);  // Sent via SSE
+    }
+
+    return { processed: input.items.length };
+  },
+});
+```
+
+The client receives these updates in real-time over the SSE stream. You don't need to manage the streaming — just call the context methods and the SDK routes them to the right connection.
+
 ### Endpoints
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/worker/health` | GET | Health check (returns 200 OK) |
-| `/mcp` | GET | SSE stream for server-initiated messages |
-| `/mcp` | POST | Send JSON-RPC message |
-| `/mcp` | DELETE | Terminate session (when using session IDs) |
+| `/mcp` | GET | Opens an SSE stream for server-initiated messages (progress updates, logs). Clients keep this open to receive real-time updates during tool execution. |
+| `/mcp` | POST | Client sends JSON-RPC requests (tool calls, list requests). Returns JSON response. |
+| `/mcp` | DELETE | Ends a client session. Use when your client tracks session IDs across requests (e.g., cleanup when a browser tab closes). Most stdio clients don't use this. |
 
 <Callout type="info">
-  **Response modes:** POST requests may receive either `application/json` (single response) or
-  `text/event-stream` (SSE stream). The SDK handles both automatically. Clients should include
-  `Accept: application/json, text/event-stream` in requests.
+  MCP clients should include `Accept: application/json, text/event-stream` on POST requests.
+  The SDK returns JSON for immediate responses and streams via SSE when needed.
 </Callout>
-
-### API Documentation (Optional)
-
-Add Elysia's OpenAPI plugin for interactive API docs:
-
-```bash
-bun add @elysiajs/openapi
-```
-
-```typescript
-import { openapi } from '@elysiajs/openapi';
-
-// Add before app.run()
-app.elysia.use(openapi({ path: '/docs' }));
-```
-
-Scalar UI will be available at `/docs`. See the [Elysia OpenAPI docs](https://elysiajs.com/plugins/openapi).
 
 ### Development Mode
 
@@ -157,7 +163,7 @@ app.run({
 });
 ```
 
-When `reload: true`, the server restarts automatically when you save files.
+When `reload: true`, the SDK watches for file changes in your current working directory and restarts the server automatically when you save TypeScript, JavaScript, or `.env` files.
 
 ### TLS / HTTPS
 
@@ -176,7 +182,7 @@ server {
 }
 ```
 
-For advanced TLS configuration, see [Server](./server).
+For native TLS in Bun, see the [Bun.serve TLS docs](https://bun.sh/docs/api/http#tls).
 
 ### Docker
 
@@ -187,6 +193,8 @@ COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
 COPY . .
 EXPOSE 8000
+HEALTHCHECK --interval=30s --timeout=3s \
+  CMD bun -e "fetch('http://localhost:8000/worker/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 CMD ["bun", "run", "server.ts"]
 ```
 
@@ -198,121 +206,127 @@ docker run -p 8000:8000 -e ARCADE_API_KEY=arc_... my-mcp-server
 ## Environment Variables
 
 ```bash
+# Server identity
 MCP_SERVER_NAME="My MCP Server"
 MCP_SERVER_VERSION="1.0.0"
-MCP_LOG_LEVEL=DEBUG
-MCP_HTTP_HOST=0.0.0.0
-MCP_HTTP_PORT=8080
+
+# Logging
+MCP_MIDDLEWARE_LOG_LEVEL=DEBUG
+
+# Runtime overrides (override app.run() options)
+ARCADE_SERVER_TRANSPORT=http
+ARCADE_SERVER_HOST=0.0.0.0
+ARCADE_SERVER_PORT=8080
+ARCADE_SERVER_RELOAD=false
 ```
 
-Access with `Bun.env`:
+Access with `Bun.env` or `process.env`:
 
 ```typescript
-const port = Number(Bun.env.MCP_HTTP_PORT) || 8000;
+const port = Number(process.env.ARCADE_SERVER_PORT) || 8000;
 ```
+
+## Production Checklist
+
+Before deploying an HTTP server to production, verify each item:
+
+### Security
+
+- [ ] **HTTPS enabled** — Use a reverse proxy (nginx, Caddy) or native TLS
+- [ ] **Authentication** — Require API keys or tokens via Arcade or custom middleware
+- [ ] **Rate limiting** — Add rate limiting middleware to prevent abuse
+- [ ] **Bind address** — Use `127.0.0.1` for local-only, or firewall rules for public
+
+### Reliability
+
+- [ ] **Error handling** — Use specific error types (`RetryableToolError`, `FatalToolError`) — see [Errors](/references/mcp/typescript/errors)
+- [ ] **Lifecycle hooks** — Add `onStart`/`onStop` for database connections, cleanup
+- [ ] **Health endpoint** — Verify `/worker/health` returns 200 OK
+
+### Observability
+
+- [ ] **Logging** — Set `MCP_MIDDLEWARE_LOG_LEVEL=INFO` (or `DEBUG` for troubleshooting)
+- [ ] **Metrics** — Add middleware to track request counts, latencies
+- [ ] **Error tracking** — Integrate with Sentry, Datadog, or similar
+
+### Deployment
+
+- [ ] **Environment variables** — Store secrets in env vars, not code
+- [ ] **Container health checks** — Docker `HEALTHCHECK` or Kubernetes probes
+- [ ] **Graceful shutdown** — Server waits for in-flight requests on SIGTERM
+
+<Callout type="info">
+  For a complete production example, see [Examples](/references/mcp/typescript/examples).
+</Callout>
 
 ## Security
 
 ### stdio
 
-- Runs in the security context of the parent process
-- No network exposure
-- Safe for local use
+- Runs in the same process security context as the parent (Claude Desktop, etc.)
+- No network ports opened
+- No additional auth needed — the parent process already trusts you
 
 ### HTTP
 
 <Callout type="warning">
-  HTTP transport exposes network endpoints. For production:
+  HTTP transport opens network endpoints. Lock it down before deploying to production.
 </Callout>
 
-| Requirement | Solution |
-|-------------|----------|
-| **Use HTTPS** | Configure TLS or use a reverse proxy |
-| **Enable authentication** | Use Arcade auth or custom middleware |
-| **Rate limiting** | Add rate limiting middleware |
-| **Firewall** | Never bind to `0.0.0.0` without firewall rules |
+| Risk | Mitigation |
+|------|------------|
+| **Unencrypted traffic** | Use HTTPS (reverse proxy or TLS config) |
+| **Unauthorized access** | Require auth tokens via Arcade or custom middleware |
+| **Abuse/DoS** | Add rate limiting middleware |
+| **Open to the internet** | Bind to `127.0.0.1` for local-only, or use firewall rules |
 
-### CORS
+## Lifecycle Hooks
 
-For browser clients, add the Elysia CORS plugin:
-
-```bash
-bun add @elysiajs/cors
-```
+Hook into server startup, shutdown, and HTTP requests:
 
 ```typescript
-import { MCPApp } from 'arcade-mcp';
-import { cors } from '@elysiajs/cors';
-
-const app = new MCPApp({ name: 'my-server' });
-
-app.elysia.use(cors({
-  origin: ['https://myapp.com'],
-  credentials: true,
-}));
-```
-
-See the [Elysia CORS docs](https://elysiajs.com/plugins/cors) for all options.
-
-## Advanced Transport Features
-
-### Custom Middleware (HTTP)
-
-Add custom middleware to HTTP transports via the underlying Elysia instance:
-
-```typescript
-import { MCPApp } from 'arcade-mcp';
-
-const app = new MCPApp({ name: 'my-server' });
-
-// Add custom response headers
-app.elysia.onAfterHandle(({ set }) => {
-  set.headers['X-Custom-Header'] = 'value';
+app.onStart(async () => {
+  await db.connect();
+  console.error('Server ready');
 });
 
-// Log all requests
-app.elysia.onRequest(({ request }) => {
-  console.log(`${request.method} ${request.url}`);
+app.onStop(async () => {
+  await db.disconnect();
+  console.error('Server stopped');
+});
+
+// HTTP request logging (HTTP transport only)
+app.onRequest(({ request }) => {
+  console.error(`${request.method} ${request.url}`);
 });
 ```
 
-### Transport Events
-
-Listen to transport lifecycle events:
-
-```typescript
-app.elysia.onStart(({ server }) => {
-  console.log(`Server running at ${server?.url}`);
-});
-
-app.elysia.onStop(() => {
-  console.log('Server shutting down...');
-});
-```
+| Hook | When it runs | Transport |
+|------|--------------|-----------|
+| `onStart` | Before server accepts connections | Both |
+| `onStop` | During graceful shutdown | Both |
+| `onRequest` | Every HTTP request | HTTP only |
 
 ## Transport Selection
 
 Select transport based on environment or CLI args:
 
 ```typescript
-import { MCPApp } from 'arcade-mcp';
+import { ArcadeMCP } from 'arcade-mcp-server';
 import { z } from 'zod';
 
-const app = new MCPApp({ name: 'my-server' });
+const app = new ArcadeMCP({ name: 'my-server', version: '1.0.0' });
 
 app.tool('ping', {
+  description: 'Health check',
   input: z.object({}),
   handler: () => 'pong',
 });
 
 // Check command line args
-const transport = Bun.argv[2] === 'stdio' ? 'stdio' : 'http';
+const transport = process.argv[2] === 'stdio' ? 'stdio' : 'http';
 
-app.run({
-  transport,
-  host: '0.0.0.0',
-  port: 8000,
-});
+app.run({ transport, port: 8000 });
 ```
 
 ```bash

@@ -8,42 +8,34 @@ import { Callout } from "nextra/components";
 # Middleware
 
 <Callout type="info">
-  Most users don't need custom middleware. The SDK includes logging and error handling by default.
-  Use middleware when you need request/response interception, custom authentication, or metrics.
+  Most users don't need custom middleware. The SDK includes logging and error
+  handling by default. Use middleware when you need request validation, custom
+  authentication, rate limiting, or metrics.
 </Callout>
 
 Middleware intercepts MCP messages before they reach your tools and after responses are generated.
 
-## Built-in Middleware
+## MCP Middleware vs HTTP Hooks
 
-### `LoggingMiddleware`
+The SDK has two extension points. Pick the right one:
 
-Logs all MCP messages with timing. Enabled by default.
+| Layer | What it intercepts | Use for |
+|-------|-------------------|---------|
+| **MCP Middleware** | MCP JSON-RPC messages (`tools/call`, `resources/read`, etc.) | Auth on tool calls, rate limiting, tool call logging, metrics |
+| **HTTP Hooks** (`app.onRequest`) | Raw HTTP requests (HTTP transport only) | Request logging, custom headers |
 
-```typescript
-import { LoggingMiddleware } from 'arcade-mcp';
+**Rule of thumb:** If you're inspecting tool names or arguments, use MCP middleware. If you're inspecting HTTP headers or request paths, use `app.onRequest()`.
 
-new LoggingMiddleware({ logLevel: 'INFO' })
-```
-
-### `ErrorHandlingMiddleware`
-
-Catches errors and returns safe error responses. Enabled by default.
-
-```typescript
-import { ErrorHandlingMiddleware } from 'arcade-mcp';
-
-new ErrorHandlingMiddleware({ maskErrorDetails: true })
-```
-
-Set `maskErrorDetails: false` in development to see full stack traces.
-
-## Custom Middleware
+## Quick Start
 
 Extend the `Middleware` class and override handler methods:
 
 ```typescript
-import { Middleware, type MiddlewareContext, type CallNext } from 'arcade-mcp';
+import {
+  Middleware,
+  type MiddlewareContext,
+  type CallNext,
+} from 'arcade-mcp-server';
 
 class TimingMiddleware extends Middleware {
   async onMessage(context: MiddlewareContext, next: CallNext) {
@@ -56,28 +48,72 @@ class TimingMiddleware extends Middleware {
 }
 ```
 
+Add it to your server:
+
+```typescript
+import { MCPServer, ToolCatalog } from 'arcade-mcp-server';
+
+const server = new MCPServer({
+  catalog: new ToolCatalog(),
+  middleware: [new TimingMiddleware()],
+});
+```
+
 <Callout type="warning">
-  With stdio transport, use `console.error()` for logging. All `stdout` is protocol data.
+  With stdio transport, use `console.error()` for logging. All `stdout` is
+  reserved for protocol data.
 </Callout>
 
-### Available Hooks
+## How Middleware Executes
 
-| Hook | When it runs |
-|------|--------------|
-| `onMessage` | Every message (use for logging, timing) |
-| `onRequest` | All request messages |
-| `onNotification` | All notification messages |
-| `onCallTool` | Tool invocations |
-| `onListTools` | Tool listing requests |
-| `onListResources` | Resource listing requests |
-| `onReadResource` | Resource read requests |
+Middleware wraps your handlers like an onion. Each middleware can run code before and after calling `next()`:
+
+```text
+Request enters
+     ↓
+┌─────────────────────────────────────────────┐
+│ ErrorHandling (catches all errors)          │
+│  ┌─────────────────────────────────────┐    │
+│  │ Logging (logs all requests)         │    │
+│  │  ┌─────────────────────────────┐    │    │
+│  │  │ Your Middleware             │    │    │
+│  │  │       ↓                     │    │    │
+│  │  │     Handler                 │    │    │
+│  │  │       ↓                     │    │    │
+│  │  └─────────────────────────────┘    │    │
+│  └─────────────────────────────────────┘    │
+└─────────────────────────────────────────────┘
+     ↓
+Response exits
+```
+
+The outermost middleware (`ErrorHandling`) runs first on request and last on response. This means:
+
+- If your middleware throws an error, `ErrorHandling` catches it
+- If auth fails, the error is logged and formatted safely
+
+**Middleware array order = outside-in.** First in array wraps everything.
+
+## Available Hooks
+
+Override these methods to intercept specific message types:
+
+| Hook                      | When it runs                       |
+| ------------------------- | ---------------------------------- |
+| `onMessage`               | Every message (requests + notifications) |
+| `onRequest`               | Request messages only (expects response) |
+| `onNotification`          | Notification messages only (no response) |
+| `onCallTool`              | Tool invocations                   |
+| `onListTools`             | Tool listing requests              |
+| `onListResources`         | Resource listing requests          |
+| `onReadResource`          | Resource read requests             |
 | `onListResourceTemplates` | Resource template listing requests |
-| `onListPrompts` | Prompt listing requests |
-| `onGetPrompt` | Prompt retrieval requests |
+| `onListPrompts`           | Prompt listing requests            |
+| `onGetPrompt`             | Prompt retrieval requests          |
 
-### Hook Signatures
+Within each middleware, hooks run in order: `onMessage` → `onRequest`/`onNotification` → method-specific hook.
 
-All hooks follow the same pattern:
+All hooks follow this pattern:
 
 ```typescript
 async onHookName(
@@ -87,95 +123,222 @@ async onHookName(
 ```
 
 - Call `next(context)` to continue the chain
-- Modify `context.message` before calling `next` to alter the request
 - Modify the result after calling `next` to alter the response
 - Throw an error to abort processing
 - Return early (without calling `next`) to short-circuit
 
+## Built-in Middleware
+
+The SDK includes two middleware enabled by default:
+
+**`LoggingMiddleware`** — Logs all MCP messages with timing.
+
+**`ErrorHandlingMiddleware`** — Catches errors and returns safe error responses.
+
+You don't need to add these manually. Use `middlewareOptions` to configure them:
+
+```typescript
+const server = new MCPServer({
+  catalog: new ToolCatalog(),
+  middlewareOptions: {
+    logLevel: 'DEBUG',         // More verbose logging
+    maskErrorDetails: false,   // Show full errors in development
+  },
+});
+```
+
+| Option                | Type                                        | Default  | Description                 |
+| --------------------- | ------------------------------------------- | -------- | --------------------------- |
+| `enableLogging`       | `boolean`                                   | `true`   | Enable logging middleware   |
+| `logLevel`            | `'DEBUG' \| 'INFO' \| 'WARNING' \| 'ERROR'` | `'INFO'` | Log level                   |
+| `enableErrorHandling` | `boolean`                                   | `true`   | Enable error handling       |
+| `maskErrorDetails`    | `boolean`                                   | `true`   | Hide error details (secure) |
+
+<Callout type="warning">
+  In production, keep `maskErrorDetails: true` (the default) to avoid leaking
+  internal details. Set to `false` only in development.
+</Callout>
+
+**Note:** `middlewareOptions` configures built-in middleware. The `middleware` array is for your custom middleware only—built-in middleware is never added there.
+
+### Environment Variables
+
+You can also configure via environment:
+
+| Variable                               | Default | Description               |
+| -------------------------------------- | ------- | ------------------------- |
+| `MCP_MIDDLEWARE_ENABLE_LOGGING`        | `true`  | Enable logging middleware |
+| `MCP_MIDDLEWARE_LOG_LEVEL`             | `INFO`  | Log level                 |
+| `MCP_MIDDLEWARE_ENABLE_ERROR_HANDLING` | `true`  | Enable error handling     |
+| `MCP_MIDDLEWARE_MASK_ERROR_DETAILS`    | `true`  | Mask error details        |
+
+```typescript
+import { MCPServer, middlewareOptionsFromEnv, ToolCatalog } from 'arcade-mcp-server';
+
+const server = new MCPServer({
+  catalog: new ToolCatalog(),
+  middlewareOptions: middlewareOptionsFromEnv(),
+});
+```
+
+See [Settings](/references/mcp/typescript/settings) for the complete configuration reference.
+
+### Using a Custom Error Handler
+
+To replace the built-in error handler:
+
+```typescript
+const server = new MCPServer({
+  catalog: new ToolCatalog(),
+  middlewareOptions: { enableErrorHandling: false },
+  middleware: [new MyCustomErrorHandler()],
+});
+```
+
 ## Composing Middleware
 
-Combine multiple middleware into a single handler:
+Use `composeMiddleware` to group related middleware into reusable units:
+
+```typescript
+import { composeMiddleware } from 'arcade-mcp-server';
+
+// Group auth-related middleware
+const authStack = composeMiddleware(
+  new AuthMiddleware(),
+  new AuditMiddleware()
+);
+
+const server = new MCPServer({
+  catalog: new ToolCatalog(),
+  middleware: [authStack, new MetricsMiddleware()],
+});
+```
+
+This is equivalent to passing them in order:
+
+```typescript
+const server = new MCPServer({
+  // ...
+  middleware: [new AuthMiddleware(), new AuditMiddleware(), new MetricsMiddleware()],
+});
+```
+
+Use composition when you want to reuse the same middleware group across multiple servers or share it as a package.
+
+## Example: Auth Middleware
+
+Validate an API key passed via `context.metadata`:
 
 ```typescript
 import {
-  composeMiddleware,
-  LoggingMiddleware,
-  ErrorHandlingMiddleware,
-} from 'arcade-mcp';
+  Middleware,
+  AuthorizationError,
+  type MiddlewareContext,
+  type CallNext,
+} from 'arcade-mcp-server';
 
-const composed = composeMiddleware(
-  new ErrorHandlingMiddleware({ maskErrorDetails: false }),
-  new LoggingMiddleware({ logLevel: 'DEBUG' }),
-  new TimingMiddleware()
-);
-```
+class ApiKeyAuthMiddleware extends Middleware {
+  constructor(private validKeys: Set<string>) {
+    super();
+  }
 
-Pass middleware directly to `MCPServer`:
+  async onCallTool(context: MiddlewareContext, next: CallNext) {
+    const apiKey = context.metadata.apiKey as string | undefined;
 
-```typescript
-import { MCPServer, ToolCatalog } from 'arcade-mcp';
+    if (!apiKey || !this.validKeys.has(apiKey)) {
+      throw new AuthorizationError('Invalid API key');
+    }
 
-const server = new MCPServer({
-  catalog: new ToolCatalog(),
-  middleware: [
-    new ErrorHandlingMiddleware({ maskErrorDetails: false }),
-    new LoggingMiddleware({ logLevel: 'DEBUG' }),
-  ],
-});
-```
-
-Use `composeMiddleware` when you need to combine middleware into reusable units:
-
-```typescript
-const authAndLogging = composeMiddleware(
-  new AuthMiddleware(),
-  new LoggingMiddleware()
-);
-
-const server = new MCPServer({
-  catalog: new ToolCatalog(),
-  middleware: [authAndLogging, new MetricsMiddleware()],
-});
+    return next(context);
+  }
+}
 ```
 
 <Callout type="info">
-  Middleware runs in order. The first wraps the second, which wraps the third.
-  `ErrorHandlingMiddleware` first means it catches errors from all subsequent middleware.
+  How `apiKey` gets into `metadata` depends on your transport and session setup. For Arcade-managed auth, use `requiresAuth` on your tools instead — see [Overview](/references/mcp/typescript/overview#adding-oauth).
 </Callout>
 
-## MiddlewareContext
+## Example: Rate Limiting
+
+```typescript
+import {
+  Middleware,
+  RetryableToolError,
+  type MiddlewareContext,
+  type CallNext,
+} from 'arcade-mcp-server';
+
+class RateLimitMiddleware extends Middleware {
+  private requests = new Map<string, number[]>();
+
+  constructor(
+    private maxRequests = 100,
+    private windowMs = 60_000
+  ) {
+    super();
+  }
+
+  async onCallTool(context: MiddlewareContext, next: CallNext) {
+    const clientId = context.sessionId ?? 'anonymous';
+    const now = Date.now();
+    const recent = (this.requests.get(clientId) ?? []).filter(
+      (t) => t > now - this.windowMs
+    );
+
+    if (recent.length >= this.maxRequests) {
+      throw new RetryableToolError('Rate limit exceeded. Try again later.', {
+        retryAfterMs: this.windowMs,
+      });
+    }
+
+    this.requests.set(clientId, [...recent, now]);
+    return next(context);
+  }
+}
+```
+
+## Lifecycle Hooks
+
+For server startup, shutdown, and HTTP request hooks, use `app.onStart()`, `app.onStop()`, and `app.onRequest()`.
+
+See [Transports](/references/mcp/typescript/transports#lifecycle-hooks) for the full reference. For low-level control with `MCPServer`, use the `lifespan` option — see [Server](/references/mcp/typescript/server#with-lifespan-manager).
+
+---
+
+## Advanced: MiddlewareContext
 
 Context passed to all middleware handlers:
 
 ```typescript
 interface MiddlewareContext<T = MCPMessage> {
-  /** The MCP message being processed */
-  message: T;
-
-  /** Mutable metadata to pass between middleware */
-  metadata: Record<string, unknown>;
-
-  /** Client session info (if available) */
-  session?: ServerSession;
+  readonly message: T;                // The MCP message being processed
+  readonly source: 'client' | 'server';
+  readonly type: 'request' | 'notification';
+  readonly method: string | null;     // e.g., "tools/call", "resources/read"
+  readonly timestamp: Date;
+  readonly requestId: string | null;
+  readonly sessionId: string | null;
+  readonly mcpContext: Context | null;  // Advanced: MCP runtime access
+  metadata: Record<string, unknown>;    // Mutable: pass data between middleware
 }
 ```
 
 ### Sharing Data Between Middleware
 
-Use `metadata` to pass data between middleware:
+Use `metadata` to pass data down the chain:
 
 ```typescript
 class AuthMiddleware extends Middleware {
   async onMessage(context: MiddlewareContext, next: CallNext) {
     const userId = await validateToken(context.message);
-    context.metadata.userId = userId;  // Available to subsequent middleware
+    context.metadata.userId = userId;
     return next(context);
   }
 }
 
 class AuditMiddleware extends Middleware {
   async onCallTool(context: MiddlewareContext, next: CallNext) {
-    const userId = context.metadata.userId;  // From AuthMiddleware
+    const userId = context.metadata.userId; // From AuthMiddleware
     await logToolCall(userId, context.message);
     return next(context);
   }
@@ -198,91 +361,22 @@ class TransformMiddleware extends Middleware {
 }
 ```
 
-## Example: Auth Middleware
+### MCP Runtime Access (Advanced)
 
-```typescript
-import {
-  Middleware,
-  AuthorizationError,
-  type MiddlewareContext,
-  type CallNext,
-} from 'arcade-mcp';
+The `mcpContext` field provides access to MCP protocol capabilities:
 
-class ApiKeyAuthMiddleware extends Middleware {
-  constructor(private validKeys: Set<string>) {
-    super();
-  }
-
-  async onCallTool(context: MiddlewareContext, next: CallNext) {
-    const apiKey = context.metadata.apiKey as string | undefined;
-
-    if (!apiKey || !this.validKeys.has(apiKey)) {
-      throw new AuthorizationError('Invalid API key');
-    }
-
-    return next(context);
-  }
-}
-
-// Usage
-const auth = new ApiKeyAuthMiddleware(new Set(['key1', 'key2']));
-```
-
-## Example: Rate Limiting Middleware
-
-```typescript
-import { Middleware, RetryableToolError, type MiddlewareContext, type CallNext } from 'arcade-mcp';
-
-class RateLimitMiddleware extends Middleware {
-  private requests = new Map<string, number[]>();
-
-  constructor(private maxRequests = 100, private windowMs = 60_000) {
-    super();
-  }
-
-  async onCallTool(context: MiddlewareContext, next: CallNext) {
-    const clientId = context.session?.id ?? 'anonymous';
-    const now = Date.now();
-    const recent = (this.requests.get(clientId) ?? [])
-      .filter((t) => t > now - this.windowMs);
-
-    if (recent.length >= this.maxRequests) {
-      throw new RetryableToolError('Rate limit exceeded. Try again later.', {
-        retryAfterMs: this.windowMs,
-      });
-    }
-
-    this.requests.set(clientId, [...recent, now]);
-    return next(context);
-  }
-}
-```
-
-## HTTP-Level Hooks
-
-For HTTP-level customization, access the underlying Elysia instance via `app.elysia`:
-
-```typescript
-import { MCPApp } from 'arcade-mcp';
-
-const app = new MCPApp({ name: 'my-server' });
-
-// Log requests
-app.elysia.onRequest(({ request }) => {
-  console.error(`${request.method} ${new URL(request.url).pathname}`);
-});
-
-// Add response headers
-app.elysia.onAfterHandle(({ set }) => {
-  set.headers['X-Powered-By'] = 'Arcade MCP';
-});
-
-app.run({ transport: 'http', port: 8000 });
-```
+| Property        | Purpose                                     |
+| --------------- | ------------------------------------------- |
+| `log`           | Send logs via MCP protocol                  |
+| `progress`      | Report progress for long-running operations |
+| `resources`     | Read MCP resources                          |
+| `tools`         | Call other tools programmatically           |
+| `prompts`       | Access MCP prompts                          |
+| `sampling`      | Create messages using the client's model    |
+| `ui`            | Elicit input from the user                  |
+| `notifications` | Send notifications to the client            |
 
 <Callout type="info">
-  `app.elysia` gives you the underlying Elysia instance with full access to all lifecycle hooks.
-  See the [Elysia lifecycle docs](https://elysiajs.com/essential/life-cycle) for available hooks.
+  Most middleware won't need `mcpContext`. Use `console.error()` for logging
+  and `metadata` for passing data between middleware.
 </Callout>
-
-For most use cases, MCP middleware (the `Middleware` class) is sufficient. HTTP-level auth can use Elysia's `derive` pattern; see the [Elysia docs](https://elysiajs.com/patterns/extends-context). CORS is configured via the `cors` option.

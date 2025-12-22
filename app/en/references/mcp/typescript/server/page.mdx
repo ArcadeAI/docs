@@ -8,14 +8,19 @@ import { Callout } from "nextra/components";
 # Server
 
 <Callout type="info">
-  Most users should use `MCPApp` from the [Overview](/references/mcp/typescript/overview).
-  Use `MCPServer` only when you need low-level control over the server lifecycle,
-  custom transports, or advanced middleware composition.
+  **Most users should use [`ArcadeMCP`](/references/mcp/typescript/overview)** — it handles transport and provides a simpler API. This page covers `MCPServer`, the low-level core for advanced use cases.
 </Callout>
+
+## When to Use `MCPServer`
+
+- **Embedding** — Add MCP endpoints to an existing HTTP server
+- **Custom transports** — WebSocket, IPC, or other non-standard transports
+- **Multi-tenant** — Isolated server instances with different tools/auth
+- **Testing** — Instantiate without starting a transport
 
 ## `MCPServer`
 
-**`arcade-mcp.MCPServer`**
+**`arcade-mcp-server.MCPServer`**
 
 Low-level MCP server with middleware and context support.
 
@@ -76,7 +81,7 @@ interface MCPServerOptions {
 |--------|---------|-------|
 | `name` | `'ArcadeMCP'` | |
 | `version` | `'1.0.0'` | |
-| `arcadeApiKey` | `Bun.env.ARCADE_API_KEY` | |
+| `arcadeApiKey` | `process.env.ARCADE_API_KEY` | |
 | `arcadeApiUrl` | `'https://api.arcade.dev'` | |
 | `authDisabled` | `false` | ⚠️ Never enable in production |
 
@@ -119,7 +124,7 @@ async runConnection(
 ): Promise<void>
 ```
 
-Run a single MCP connection. Used for custom transport implementations.
+Run a single MCP connection using [WHATWG Streams](https://developer.mozilla.org/en-US/docs/Web/API/Streams_API) (not Node.js streams).
 
 ### Properties
 
@@ -129,15 +134,20 @@ Run a single MCP connection. Used for custom transport implementations.
 | `resources` | `ResourceManager` | Runtime resource operations |
 | `prompts` | `PromptManager` | Runtime prompt operations |
 
-### Examples
+## Examples
 
-#### stdio Transport
+### stdio Transport
 
 ```typescript
-import { MCPServer, ToolCatalog, StdioTransport } from 'arcade-mcp';
+import { MCPServer, ToolCatalog, StdioTransport } from 'arcade-mcp-server';
+import { z } from 'zod';
 
 const catalog = new ToolCatalog();
-// catalog.add(...) to register tools
+catalog.add('ping', {
+  description: 'Health check',
+  input: z.object({}),
+  handler: () => 'pong',
+});
 
 const server = new MCPServer({
   catalog,
@@ -154,12 +164,22 @@ try {
 }
 ```
 
-#### HTTP Transport
+<Callout type="info">
+  `catalog.add()` is the low-level API for `MCPServer`. It's equivalent to `app.tool()` on `ArcadeMCP` — both use name as first argument, options second.
+</Callout>
+
+### HTTP Transport
 
 ```typescript
-import { MCPServer, ToolCatalog, HTTPTransport } from 'arcade-mcp';
+import { MCPServer, ToolCatalog, HTTPTransport } from 'arcade-mcp-server';
+import { z } from 'zod';
 
 const catalog = new ToolCatalog();
+catalog.add('ping', {
+  description: 'Health check',
+  input: z.object({}),
+  handler: () => 'pong',
+});
 
 const server = new MCPServer({
   catalog,
@@ -176,7 +196,7 @@ try {
 }
 ```
 
-#### With Middleware
+### With Middleware
 
 ```typescript
 import {
@@ -184,7 +204,7 @@ import {
   ToolCatalog,
   LoggingMiddleware,
   ErrorHandlingMiddleware,
-} from 'arcade-mcp';
+} from 'arcade-mcp-server';
 
 const server = new MCPServer({
   catalog: new ToolCatalog(),
@@ -200,10 +220,10 @@ const server = new MCPServer({
   from all subsequent middleware.
 </Callout>
 
-#### With Lifespan Manager
+### With Lifespan Manager
 
 ```typescript
-import { MCPServer, ToolCatalog, createLifespan } from 'arcade-mcp';
+import { MCPServer, ToolCatalog, createLifespan } from 'arcade-mcp-server';
 
 const lifespan = createLifespan({
   async onStart(server) {
@@ -220,54 +240,54 @@ const server = new MCPServer({
 });
 ```
 
-#### Runtime Tool Management
+### Runtime Tool Management
 
-Use `tool()` to create tool objects for runtime registration:
+Add and remove tools from a running server:
 
 ```typescript
-import { MCPServer, ToolCatalog, tool } from 'arcade-mcp';
+import { MCPServer, ToolCatalog, tool } from 'arcade-mcp-server';
 import { z } from 'zod';
 
 const server = new MCPServer({ catalog: new ToolCatalog() });
 
 await server.start();
 
-// Create a tool object
+// Create a tool object (tool() provides type inference)
 const dynamicTool = tool({
-  name: 'dynamic-tool',  // required for runtime registration
   description: 'Added at runtime',
   input: z.object({ value: z.string() }),
   handler: ({ input }) => `Got: ${input.value}`,
 });
 
-// Add it to the running server
-await server.tools.add(dynamicTool);
+// Add it to the running server — name is first arg
+await server.tools.add('dynamic-tool', dynamicTool);
 
 // List all tools
 const tools = await server.tools.list();
 console.error(`Server has ${tools.length} tools`);
 
-// Remove a tool
+// Remove a tool by name
 await server.tools.remove('dynamic-tool');
 ```
 
-`tool()` takes the same options as `app.tool()` and returns a `MaterializedTool` object suitable for the runtime APIs.
+### Custom Transport
 
-#### Custom Transport
-
-For WebSocket or other custom transports, implement a class that calls `server.runConnection()`:
+For WebSocket or other custom transports, implement a class that calls `server.runConnection()` with readable/writable Web Streams:
 
 ```typescript
-import { MCPServer, ToolCatalog } from 'arcade-mcp';
+import { MCPServer } from 'arcade-mcp-server';
 
-// Pseudocode - implement stream adapters for your transport
 class CustomTransport {
   async run(server: MCPServer) {
-    // Accept connections, create readable/writable streams
-    const { readable, writable } = await acceptConnection();
-    await server.runConnection(readable, writable);
+    // Your transport creates read/write streams for each connection
+    // then passes them to the server:
+    //
+    //   await server.runConnection(readableStream, writableStream);
+    //
+    // The server handles MCP message parsing and routing.
+    // Your transport handles I/O (WebSocket frames, TCP packets, etc.)
   }
 }
 ```
 
-See the SDK source for `StdioTransport` and `HTTPTransport` as reference implementations.
+See the SDK source for `StdioTransport` and `HTTPTransport` as complete reference implementations.

@@ -5,64 +5,82 @@ description: "Build MCP servers with TypeScript, Bun, Elysia, and Zod 4"
 
 import { Callout } from "nextra/components";
 
-# Arcade MCP (MCP Server SDK) - TypeScript Overview
+# Arcade MCP TypeScript SDK
 
-`arcade-mcp`, the secure framework for building MCP servers, provides a clean, minimal API to build MCP servers programmatically. It handles tool collection, server configuration, and transport setup with a developer-friendly interface.
+## What is MCP?
+
+The [Model Context Protocol](https://modelcontextprotocol.io/) (MCP) is an open standard that lets AI assistants call external tools and access data. When you ask Claude to "search my docs" or "send a Slack message," MCP makes it happen.
+
+An **MCP server** exposes **tools** (functions the AI can call), **resources** (data the AI can read), and **prompts** (reusable templates). The AI client connects to your server and discovers what's available.
+
+## What is Arcade MCP?
+
+`arcade-mcp-server` is a TypeScript SDK for building MCP servers. It works standalone — no account required — for tools that use API keys or no auth at all.
+
+When your tools need to act on behalf of users (sending emails, accessing files, posting to Slack), connect to [Arcade](https://arcade.dev). Arcade manages OAuth consent flows, token storage, and refresh — so you don't build auth UIs or store credentials.
+
+- **Clean API** — Register tools with Zod schemas, get type-safe handlers
+- **Transport flexibility** — stdio for Claude Desktop, HTTP for web deployments
+- **Secrets from env vars** — Type-safe access, validated at startup
+- **OAuth via Arcade** — Add `requiresAuth` to let tools act as the user (Google, GitHub, Slack, etc.)
+
+<Callout type="info">
+  Works without Arcade. Need user OAuth? [Sign up →](https://api.arcade.dev/signup)
+</Callout>
 
 ## Installation
 
+### Bun (recommended)
+
 ```bash
-bun add arcade-mcp
+bun add arcade-mcp-server
 ```
 
-<Callout type="info">
-  **tsconfig:** Run `bun init` to generate one, or ensure yours has these essentials:
+Requires Bun 1.3+ with `strict: true` and `moduleResolution: bundler` in tsconfig. Bun runs TypeScript directly — just `bun run server.ts`. See [Bun TypeScript docs](https://bun.sh/docs/typescript).
 
-  ```json
-  {
-    "compilerOptions": {
-      "strict": true,
-      "moduleResolution": "bundler",
-      "target": "ESNext",
-      "module": "Preserve"
-    }
-  }
-  ```
+### Node.js
 
-  See [Bun TypeScript docs](https://bun.sh/docs/typescript) for the complete recommended config.
-</Callout>
+The SDK uses Elysia for HTTP transport. Elysia supports Node.js via the [`@elysiajs/node`](https://elysiajs.com/integrations/node) adapter.
 
-## Imports
+```bash
+npm install arcade-mcp-server @elysiajs/node
+```
 
 ```typescript
-// Main exports
-import { MCPApp, tool } from 'arcade-mcp';
-import { NotFoundError, RetryableToolError, FatalToolError } from 'arcade-mcp';
+import { ArcadeMCP } from 'arcade-mcp-server';
+import { node } from '@elysiajs/node';
 
-// Auth providers
-import { Google, GitHub, Slack } from 'arcade-mcp/auth';
-
-// Error adapters
-import { SlackErrorAdapter, GoogleErrorAdapter } from 'arcade-mcp/adapters';
+const app = new ArcadeMCP({
+  name: 'my-server',
+  version: '1.0.0',
+  adapter: node(),  // Enable Node.js runtime
+});
 ```
+
+Requires Node.js 18+ and `"type": "module"` in package.json. Use [tsx](https://github.com/privatenumber/tsx) to run TypeScript directly: `npx tsx server.ts`.
+
+<Callout type="info">
+  Bun offers faster startup and native TypeScript. Node.js works via Elysia's adapter with the same API. Choose based on your deployment environment.
+</Callout>
 
 ## Quick Start
 
 ```typescript
 // server.ts
-import { MCPApp } from 'arcade-mcp';
+import { ArcadeMCP } from 'arcade-mcp-server';
 import { z } from 'zod';
 
-const app = new MCPApp({ name: 'my-server', version: '1.0.0' });
+const app = new ArcadeMCP({ name: 'my-server', version: '1.0.0' });
 
 app.tool('greet', {
   description: 'Greet a person by name',
   input: z.object({
-    name: z.string().describe('The name of the person to greet'),
+    name: z.string().describe('The name to greet'),
   }),
   handler: ({ input }) => `Hello, ${input.name}!`,
 });
 
+// reload: true restarts on file changes (dev only)
 app.run({ transport: 'http', port: 8000, reload: true });
 ```
 
@@ -70,168 +88,97 @@ app.run({ transport: 'http', port: 8000, reload: true });
 bun run server.ts
 ```
 
-Test it works:
+Test it:
 
 ```bash
+# List all tools your server exposes (JSON-RPC format)
 curl -X POST http://localhost:8000/mcp \
   -H "Content-Type: application/json" \
   -H "Accept: application/json, text/event-stream" \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
 ```
 
-When Claude (or another AI) calls your `greet` tool with `{ name: "Alex" }`, your handler runs and returns the greeting.
+## Adding OAuth
 
-<Callout type="info">
-  **Transport auto-detection:** stdio for Claude Desktop, HTTP when you specify host/port.
-  The `reload: true` option enables hot reload during development.
-</Callout>
-
-## API Reference
-
-### `MCPApp`
-
-**`arcade-mcp.MCPApp`**
-
-A type-safe, developer-friendly interface for building MCP servers. Handles tool registration, configuration, and transport.
-
-### Constructor
+When your tool needs to act on behalf of a user, use `requiresAuth`. Arcade handles the OAuth consent flow, token refresh, and secure storage.
 
 ```typescript
-new MCPApp(options?: MCPAppOptions)
+import { ArcadeMCP } from 'arcade-mcp-server';
+import { Google } from 'arcade-mcp-server/auth';
+import { z } from 'zod';
+
+const app = new ArcadeMCP({ name: 'my-server', version: '1.0.0' });
+
+app.tool('getProfile', {
+  description: 'Get the current user profile from Google',
+  input: z.object({}),
+  requiresAuth: Google({ scopes: ['https://www.googleapis.com/auth/userinfo.profile'] }),
+  handler: async ({ authorization }) => {
+    const response = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+      headers: { Authorization: `Bearer ${authorization.token}` },
+    });
+    return response.json();
+  },
+});
+
+app.run({ transport: 'http', port: 8000 });
 ```
+
+When you add `requiresAuth`, the handler receives an `authorization` object with the user's OAuth token. The AI never sees the token — it stays server-side.
+
+## Adding Secrets
+
+For API keys your server needs (not user OAuth tokens), use `requiresSecrets`:
 
 ```typescript
-interface MCPAppOptions {
-  /** Server name shown to AI clients */
-  name?: string;
+app.tool('analyze', {
+  description: 'Analyze text with AI',
+  input: z.object({ text: z.string() }),
+  requiresSecrets: ['OPENAI_API_KEY'] as const,
+  handler: async ({ input, getSecret }) => {
+    const apiKey = getSecret('OPENAI_API_KEY');  // Type-safe, validated at startup
 
-  /** Server version */
-  version?: string;
-
-  /** Human-readable title */
-  title?: string;
-
-  /** Usage instructions for AI clients */
-  instructions?: string;
-
-  /** Logging level */
-  logLevel?: 'DEBUG' | 'INFO' | 'WARNING' | 'ERROR';
-
-  /** Transport type: 'stdio' for Claude Desktop, 'http' for web */
-  transport?: 'stdio' | 'http';
-
-  /** HTTP host (auto-selects HTTP transport if set) */
-  host?: string;
-
-  /** HTTP port (auto-selects HTTP transport if set) */
-  port?: number;
-
-  /** Hot reload on file changes (development only) */
-  reload?: boolean;
-}
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini',
+        messages: [{ role: 'user', content: input.text }],
+      }),
+    });
+    return response.json();
+  },
+});
 ```
 
-**Defaults:**
+Secrets are read from environment variables and validated at startup.
 
-| Option | Default | Notes |
-|--------|---------|-------|
-| `name` | `'ArcadeMCP'` | |
-| `version` | `'1.0.0'` | |
-| `logLevel` | `'INFO'` | |
-| `transport` | `'stdio'` | Auto-switches to `'http'` if host/port set |
-| `host` | `'127.0.0.1'` | |
-| `port` | `8000` | |
+## Organizing Tools
 
-### `app.tool()`
+Tools are always registered with `app.tool('name', options)`. The name is the first argument.
 
-Register a tool that AI clients can call.
+### Inline (most projects)
+
+Define tools directly — `app.tool()` provides full type inference:
 
 ```typescript
-app.tool(name: string, options: ToolOptions): void
+app.tool('greet', {
+  description: 'Greet someone',
+  input: z.object({ name: z.string() }),
+  handler: ({ input }) => `Hello, ${input.name}!`,
+});
 ```
 
-```typescript
-interface ToolOptions<
-  TInput,
-  TSecrets extends string = string,
-  TAuth extends AuthProvider | undefined = undefined
-> {
-  /** Tool description for AI clients */
-  description?: string;
+### Multi-file (larger projects)
 
-  /** Zod schema for input validation */
-  input: z.ZodType<TInput>;
-
-  /** Tool handler function — authorization is non-optional when requiresAuth is set */
-  handler: (
-    context: ToolContext<TInput, TSecrets, TAuth extends AuthProvider ? true : false>
-  ) => unknown | Promise<unknown>;
-
-  /** OAuth provider for user authentication */
-  requiresAuth?: TAuth;
-
-  /** Secret keys required by this tool (use `as const` for type safety) */
-  requiresSecrets?: readonly TSecrets[];
-
-  /** Metadata keys required from the client */
-  requiresMetadata?: string[];
-
-  /** Error adapters for translating upstream errors (e.g., Slack, Google APIs) */
-  adapters?: ErrorAdapter[];
-}
-```
-
-**Handler context (destructure what you need):**
-
-```typescript
-handler: ({ input, authorization, getSecret, getMetadata }) => {
-  // input         — Validated input matching your Zod schema
-  // authorization — OAuth token/provider (TypeScript narrows to non-optional when requiresAuth is set)
-  // getSecret     — Retrieve secrets (type-safe with `as const`)
-  // getMetadata   — Retrieve metadata from the client
-}
-```
-
-**Return values are auto-wrapped:**
-
-| Return type | Becomes |
-|-------------|---------|
-| `string` | `{ content: [{ type: 'text', text: '...' }] }` |
-| `object` | `{ content: [{ type: 'text', text: JSON.stringify(...) }] }` |
-| `{ content: [...] }` | Passed through unchanged |
-
-### `app.run()`
-
-Start the server.
-
-```typescript
-app.run(options?: RunOptions): Promise<void>
-```
-
-```typescript
-interface RunOptions {
-  transport?: 'stdio' | 'http';
-  host?: string;
-  port?: number;
-  reload?: boolean;
-}
-```
-
-### `app.addToolsFromModule()`
-
-Add all tools from a module at once.
-
-<Callout type="info">
-  **`app.tool()` vs `tool()`:**
-  - `app.tool('name', { ... })` — Register a tool directly
-  - `tool({ ... })` — Create a tool for `addToolsFromModule()` or runtime `app.tools.add()`
-</Callout>
-
-Use the standalone `tool()` function to define exportable tools, then `addToolsFromModule()` discovers and registers them:
+For tools defined in separate files, use `tool()` to preserve type inference, then register with `app.tool()`:
 
 ```typescript
 // tools/math.ts
-import { tool } from 'arcade-mcp';
+import { tool } from 'arcade-mcp-server';
 import { z } from 'zod';
 
 export const add = tool({
@@ -239,253 +186,98 @@ export const add = tool({
   input: z.object({ a: z.number(), b: z.number() }),
   handler: ({ input }) => input.a + input.b,
 });
-
-export const multiply = tool({
-  description: 'Multiply two numbers',
-  input: z.object({ a: z.number(), b: z.number() }),
-  handler: ({ input }) => input.a * input.b,
-});
 ```
 
 ```typescript
 // server.ts
-import * as mathTools from './tools/math';
+import { ArcadeMCP } from 'arcade-mcp-server';
+import { add } from './tools/math';
 
-app.addToolsFromModule(mathTools);
-```
-
-Tool names are inferred from export names (`add`, `multiply`). Override with explicit `name` if needed:
-
-```typescript
-export const calculator = tool({
-  name: 'basic-calculator',  // explicit name overrides 'calculator'
-  description: 'Basic arithmetic',
-  input: z.object({
-    operation: z.enum(['add', 'subtract', 'multiply', 'divide']),
-    a: z.number(),
-    b: z.number(),
-  }),
-  handler: ({ input }) => {
-    const { operation, a, b } = input;
-    switch (operation) {
-      case 'add': return a + b;
-      case 'subtract': return a - b;
-      case 'multiply': return a * b;
-      case 'divide': return a / b;
-    }
-  },
-});
-```
-
-### Runtime APIs
-
-After the server starts, you can modify tools, prompts, and resources at runtime:
-
-```typescript
-import { tool } from 'arcade-mcp';
-import { z } from 'zod';
-
-// Create and add a tool at runtime
-const dynamicTool = tool({
-  name: 'dynamic-tool',  // name required for runtime registration
-  description: 'Added at runtime',
-  input: z.object({ value: z.string() }),
-  handler: ({ input }) => `Got: ${input.value}`,
-});
-
-await app.tools.add(dynamicTool);
-
-// Remove a tool
-await app.tools.remove('dynamic-tool');
-
-// List all tools
-const tools = await app.tools.list();
-```
-
-```typescript
-// Add a prompt (reusable message templates for AI clients)
-await app.prompts.add(prompt, handler);
-
-// Add a resource (files, data, or content the AI can read)
-await app.resources.add(resource);
+const app = new ArcadeMCP({ name: 'my-server', version: '1.0.0' });
+app.tool('add', add);  // Name provided at registration
+app.run({ transport: 'http', port: 8000 });
 ```
 
 <Callout type="info">
-  **MCP primitives:** Tools are functions AI can call. Prompts are reusable message templates (like "summarize this"). Resources are data the AI can read (files, database records, API responses).
+  **Why `tool()`?** Exporting a plain object loses the schema→handler type connection. The `tool()` wrapper preserves it.
 </Callout>
 
-See the [Server reference](/references/mcp/typescript/server) for full prompts and resources API.
+## Runtime Capabilities
 
-## Examples
-
-### Simple Tool
+Tool handlers receive a context object. Destructure what you need:
 
 ```typescript
-import { MCPApp } from 'arcade-mcp';
-import { z } from 'zod';
-
-const app = new MCPApp({ name: 'example-server' });
-
-app.tool('echo', {
-  description: 'Echo the text back',
-  input: z.object({
-    text: z.string().describe('The text to echo'),
-  }),
-  handler: ({ input }) => `Echo: ${input.text}`,
-});
-
-app.run({ transport: 'http', host: '0.0.0.0', port: 8000 });
-```
-
-### With OAuth and Secrets
-
-Use `requiresAuth` when your tool needs to act on behalf of a user (e.g., access their Google account). Use `requiresSecrets` for API keys your server needs.
-
-```typescript
-import { MCPApp } from 'arcade-mcp';
-import { Google } from 'arcade-mcp/auth';
-import { z } from 'zod';
-
-const app = new MCPApp({ name: 'my-server' });
-
-app.tool('getProfile', {
-  description: 'Get user profile from Google',
-  input: z.object({
-    userId: z.string(),
-  }),
-  requiresAuth: Google({ scopes: ['profile'] }),
-  requiresSecrets: ['API_KEY'] as const,  // as const enables type-safe getSecret()
-  handler: async ({ input, authorization, getSecret }) => {
-    const token = authorization.token;      // User's OAuth token
-    const apiKey = getSecret('API_KEY');    // ✅ Type-safe, autocomplete works
-    // getSecret('OTHER');                  // ❌ TypeScript error: not in requiresSecrets
-    return { userId: input.userId };
+app.tool('processData', {
+  description: 'Process data from a resource',
+  input: z.object({ uri: z.string() }),
+  handler: async ({ input, log, progress, resources }) => {
+    await log.info('Starting...');
+    const data = await resources.get(input.uri);
+    await progress.report(1, 2);
+    // ... process data ...
+    await progress.report(2, 2, 'Done');
+    return data;
   },
 });
-
-app.run();
 ```
+
+**Common context fields:**
+
+| Field | Description |
+|-------|-------------|
+| `input` | Validated input matching your Zod schema |
+| `authorization` | OAuth token (when `requiresAuth` is set) |
+| `getSecret` | Get secret values (when `requiresSecrets` is set) |
+| `log` | Send logs to the client (`log.info()`, `log.error()`, etc.) |
+| `progress` | Report progress for long-running operations |
+| `resources` | Read resources exposed by the server |
+| `tools` | Call other tools by name |
+
+See [Types](/references/mcp/typescript/types) for the complete `ToolContext` reference including `prompts`, `sampling`, `ui`, and `notifications`.
+
+## Lifecycle Hooks
+
+Hook into server startup, shutdown, and HTTP requests:
+
+```typescript
+const app = new ArcadeMCP({ name: 'my-server', version: '1.0.0' });
+
+app.onStart(async () => {
+  await db.connect();
+});
+
+app.onStop(async () => {
+  await db.disconnect();
+});
+
+app.onRequest(({ request }) => {
+  console.error(`${request.method} ${request.url}`);
+});
+
+app.run({ transport: 'http', port: 8000 });
+```
+
+See [Transports](/references/mcp/typescript/transports#lifecycle-hooks) for the full reference.
+
+## ArcadeMCP vs MCPServer
+
+| Class | Description |
+|-------|-------------|
+| **`ArcadeMCP`** | High-level. Manages transport, lifecycle, provides `app.tool()`. |
+| **`MCPServer`** | Low-level. No transport — you wire it yourself. |
+
+Start with `ArcadeMCP`. Use `MCPServer` when embedding MCP in an existing app, building custom transports, or testing without network. See [Server](/references/mcp/typescript/server) for details.
 
 <Callout type="info">
-  **Auth & Secrets:**
-  - **OAuth:** Arcade coordinates user consent. Tokens are passed to your handler automatically.
-  - **Secrets:** Loaded from environment variables. Never log or return them.
+  Python SDK has the same pattern: [`MCPApp`](/references/mcp/python/overview) (high-level) wraps [`MCPServer`](/references/mcp/python/server) (low-level).
 </Callout>
 
-### With Required Metadata
+## Next Steps
 
-Request metadata from the client:
-
-```typescript
-app.tool('contextAware', {
-  description: 'A tool that uses client context',
-  input: z.object({ query: z.string() }),
-  requiresMetadata: ['sessionId', 'userAgent'],
-  handler: ({ input, getMetadata }) => {
-    const sessionId = getMetadata('sessionId');  // string | undefined
-    return `Processing ${input.query} for session ${sessionId}`;
-  },
-});
-```
-
-### Schema Metadata for AI Clients
-
-Use `.describe()` for simple descriptions. Use `.meta()` for richer metadata:
-
-```typescript
-app.tool('search', {
-  description: 'Search the knowledge base',
-  input: z.object({
-    query: z.string().describe('Search query'),
-    limit: z.number()
-      .int()
-      .min(1)
-      .max(100)
-      .default(10)
-      .meta({
-        title: 'Result limit',
-        examples: [10, 25, 50],
-      }),
-  }),
-  handler: ({ input }) => searchKnowledgeBase(input.query, input.limit),
-});
-```
-
-Both `.describe()` and `.meta()` are preserved in the JSON Schema that AI clients receive.
-
-### Async Tool with Error Handling
-
-```typescript
-import { MCPApp, NotFoundError } from 'arcade-mcp';
-import { z } from 'zod';
-
-const app = new MCPApp({ name: 'api-server' });
-
-app.tool('getUser', {
-  description: 'Fetch a user by ID',
-  input: z.object({
-    id: z.string().uuid().describe('User ID'),
-  }),
-  handler: async ({ input }) => {
-    const user = await db.users.find(input.id);
-
-    if (!user) {
-      throw new NotFoundError(`User ${input.id} not found`);
-    }
-
-    return user;
-  },
-});
-```
-
-### Full Example with All Features
-
-```typescript
-import { MCPApp } from 'arcade-mcp';
-import { Google } from 'arcade-mcp/auth';
-import { z } from 'zod';
-
-const app = new MCPApp({
-  name: 'full-example',
-  version: '1.0.0',
-  instructions: 'Use these tools to manage documents.',
-  logLevel: 'DEBUG',
-});
-
-// Simple tool
-app.tool('ping', {
-  description: 'Health check',
-  input: z.object({}),
-  handler: () => 'pong',
-});
-
-// Complex tool with auth and secrets
-app.tool('createDocument', {
-  description: 'Create a new document in Google Drive',
-  input: z.object({
-    title: z.string().min(1).describe('Document title'),
-    content: z.string().describe('Document content'),
-    folder: z.string().optional().describe('Parent folder ID'),
-  }),
-  requiresAuth: Google({ scopes: ['drive.file'] }),
-  requiresSecrets: ['DRIVE_API_KEY'] as const,
-  handler: async ({ input, authorization, getSecret }) => {
-    const response = await createDriveDocument({
-      token: authorization.token,
-      apiKey: getSecret('DRIVE_API_KEY'),
-      ...input,
-    });
-    return { documentId: response.id, url: response.webViewLink };
-  },
-});
-
-// Start server
-if (import.meta.main) {
-  app.run({ transport: 'http', host: '0.0.0.0', port: 8000 });
-}
-```
-
-```bash
-bun run server.ts
-```
-
+- [**Examples**](/references/mcp/typescript/examples) — Complete, runnable example servers
+- [**Transports**](/references/mcp/typescript/transports) — stdio for Claude Desktop, HTTP for web
+- [**Server**](/references/mcp/typescript/server) — Low-level APIs, prompts, resources
+- [**Middleware**](/references/mcp/typescript/middleware) — Request/response interception
+- [**Errors**](/references/mcp/typescript/errors) — Error types and handling
+- [**Settings**](/references/mcp/typescript/settings) — Configuration and environment variables
+- [**Types**](/references/mcp/typescript/types) — TypeScript interfaces and schemas

@@ -9,19 +9,19 @@ import { Callout } from "nextra/components";
 
 The SDK provides specific error types for different failure scenarios. Use these in your tools to return meaningful errors to AI clients.
 
-## Common Errors
+## Context Errors
 
-These are the errors you'll use most often in your tools:
+Errors caused by user input or missing resources. Extend `MCPContextError`.
 
 ### `NotFoundError`
 
 Requested resource doesn't exist.
 
 ```typescript
-import { MCPApp, NotFoundError } from 'arcade-mcp';
+import { ArcadeMCP, NotFoundError } from 'arcade-mcp-server';
 import { z } from 'zod';
 
-const app = new MCPApp({ name: 'user-service' });
+const app = new ArcadeMCP({ name: 'user-service' });
 
 app.tool('getUser', {
   input: z.object({ id: z.string() }),
@@ -40,111 +40,48 @@ app.tool('getUser', {
 User lacks permission for the requested action.
 
 ```typescript
-import { MCPApp, AuthorizationError } from 'arcade-mcp';
-import { Google } from 'arcade-mcp/auth';
-import { z } from 'zod';
+import { AuthorizationError } from 'arcade-mcp-server';
 
-const app = new MCPApp({ name: 'project-service' });
-
-app.tool('deleteProject', {
-  input: z.object({ projectId: z.string() }),
-  requiresAuth: Google({ scopes: ['profile'] }),
-  handler: async ({ input, authorization }) => {
-    const project = await db.findProject(input.projectId);
-    const userEmail = await fetchUserEmail(authorization.token);
-
-    if (project.ownerEmail !== userEmail) {
-      throw new AuthorizationError('Only the owner can delete this project');
-    }
-
-    await db.deleteProject(input.projectId);
-    return { deleted: true };
-  },
-});
+// In your tool handler:
+if (project.ownerEmail !== userEmail) {
+  throw new AuthorizationError('Only the owner can delete this project');
+}
 ```
-
-### `ToolExecutionError`
-
-Base class for tool execution errors. Use one of the specific subclasses:
-
-- `RetryableToolError` — can be retried
-- `FatalToolError` — unrecoverable, don't retry
-- `ContextRequiredToolError` — needs user input before retry
-- `UpstreamError` — external API failure
-
-See [Retry-Aware Errors](#retry-aware-errors) below.
 
 ### `ResourceError`
 
-Error in resource management.
+Error in resource management (MCP resources, not tool execution).
 
 ```typescript
-import { MCPApp, ResourceError } from 'arcade-mcp';
-import { z } from 'zod';
+import { ResourceError } from 'arcade-mcp-server';
 
-const app = new MCPApp({ name: 'file-service' });
-
-app.tool('readFile', {
-  input: z.object({ path: z.string() }),
-  handler: async ({ input }) => {
-    try {
-      return await Bun.file(input.path).text();
-    } catch {
-      throw new ResourceError(`Cannot read file: ${input.path}`);
-    }
-  },
-});
+throw new ResourceError('Cannot read resource: config://settings');
 ```
 
 ### `PromptError`
 
-Error in prompt management.
+Error in prompt management (MCP prompts, not tool execution).
 
 ```typescript
-import { PromptError } from 'arcade-mcp';
+import { PromptError } from 'arcade-mcp-server';
 
-// Thrown when a prompt is not found or invalid
 throw new PromptError('Prompt template not found: greeting');
 ```
-
-### `UpstreamError`
-
-External API or service failure. Typically thrown by error adapters.
-
-```typescript
-import { UpstreamError } from 'arcade-mcp';
-
-throw new UpstreamError('Slack API error: channel_not_found', {
-  statusCode: 404,  // required
-});
-```
-
-### `UpstreamRateLimitError`
-
-Rate limit from an external API. Includes retry information.
-
-```typescript
-import { UpstreamRateLimitError } from 'arcade-mcp';
-
-throw new UpstreamRateLimitError('Rate limited by Slack', {
-  retryAfterMs: 60_000,  // required
-});
-```
-
-<Callout type="info">
-  You rarely throw `UpstreamError` manually. Use [error adapters](/references/mcp/typescript/types#error-adapter-types) to automatically translate SDK errors.
-</Callout>
 
 ## Retry-Aware Errors
 
 These errors include metadata that helps AI orchestrators decide whether and how to retry.
+
+<Callout type="info">
+  Don't use `ToolExecutionError` directly — always use a specific subclass.
+</Callout>
 
 ### `RetryableToolError`
 
 The operation failed but can be retried, optionally with guidance for the AI.
 
 ```typescript
-import { RetryableToolError } from 'arcade-mcp';
+import { RetryableToolError } from 'arcade-mcp-server';
 
 // Simple retry
 throw new RetryableToolError('Service temporarily unavailable');
@@ -165,7 +102,7 @@ throw new RetryableToolError('Search returned no results', {
 Unrecoverable error — the AI should not retry this operation.
 
 ```typescript
-import { FatalToolError } from 'arcade-mcp';
+import { FatalToolError } from 'arcade-mcp-server';
 
 throw new FatalToolError('Account has been permanently deleted');
 
@@ -180,7 +117,7 @@ throw new FatalToolError('Configuration error', {
 The operation needs additional context from the user before it can proceed.
 
 ```typescript
-import { ContextRequiredToolError } from 'arcade-mcp';
+import { ContextRequiredToolError } from 'arcade-mcp-server';
 
 throw new ContextRequiredToolError('Multiple users found matching "John"', {
   additionalPromptContent: 'Please specify: John Smith (john@work.com) or John Doe (john@home.com)',  // required
@@ -190,6 +127,34 @@ throw new ContextRequiredToolError('Multiple users found matching "John"', {
 <Callout type="info">
   For most tool errors, use `RetryableToolError` (transient failures) or `FatalToolError` (unrecoverable).
   Use `ContextRequiredToolError` when the AI needs to ask the user for clarification.
+</Callout>
+
+### `UpstreamError`
+
+External API or service failure. `canRetry` is true for 5xx and 429, false otherwise.
+
+```typescript
+import { UpstreamError } from 'arcade-mcp-server';
+
+throw new UpstreamError('Slack API error: channel_not_found', {
+  statusCode: 404,  // required
+});
+```
+
+### `UpstreamRateLimitError`
+
+Rate limit from an external API. Extends `UpstreamError` with `statusCode: 429` auto-set.
+
+```typescript
+import { UpstreamRateLimitError } from 'arcade-mcp-server';
+
+throw new UpstreamRateLimitError('Rate limited by Slack', {
+  retryAfterMs: 60_000,  // required — milliseconds until retry
+});
+```
+
+<Callout type="info">
+  You rarely throw these manually. Use [error adapters](/references/mcp/typescript/types#error-adapter-types) to automatically translate SDK errors.
 </Callout>
 
 ## Constructor Signatures
@@ -244,6 +209,30 @@ new UpstreamRateLimitError(message: string, options: {
 | `extra` | Structured metadata for telemetry/adapters |
 | `cause` | ES2022 error chaining for stack traces |
 
+All tool errors also expose these read-only properties:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `canRetry` | `boolean` | Whether this error is retryable |
+| `kind` | `ErrorKind` | Classification for telemetry |
+| `statusCode` | `number \| undefined` | HTTP status code equivalent |
+
+## SDK-Internal Errors
+
+<Callout type="info">
+  These errors are thrown by the SDK, not by user code. They appear in error messages and logs
+  to help you debug. You don't need to import or throw them directly.
+</Callout>
+
+| Error | When Thrown |
+|-------|-------------|
+| `ToolDefinitionError` | Tool definition is invalid |
+| `ToolInputSchemaError` | Input schema is malformed |
+| `ToolOutputSchemaError` | Output schema is malformed |
+| `ToolInputError` | Input doesn't match schema at runtime |
+| `ToolOutputError` | Output can't be serialized |
+| `ToolkitLoadError` | Toolkit fails to import (missing deps, syntax error) |
+
 ## Error Hierarchy
 
 All errors extend from `MCPError`:
@@ -260,7 +249,7 @@ MCPError (base)
     ├── TransportError
     └── ServerError
         ├── RequestError
-        │   └── ServerRequestError (server-to-client requests)
+        │   └── ServerRequestError
         ├── ResponseError
         ├── SessionError
         └── LifespanError
@@ -268,13 +257,17 @@ MCPError (base)
 ToolkitError (base for tool errors)
 └── ToolError
     └── ToolRuntimeError
-        └── ToolExecutionError
-            ├── RetryableToolError (can retry)
-            ├── FatalToolError (do not retry)
-            ├── ContextRequiredToolError (needs user input)
-            └── UpstreamError (external API failure)
-                └── UpstreamRateLimitError
+        ├── RetryableToolError (canRetry: true)
+        ├── FatalToolError (canRetry: false)
+        ├── ContextRequiredToolError (canRetry: false)
+        └── UpstreamError (canRetry: true for 5xx/429)
+            └── UpstreamRateLimitError (canRetry: true)
 ```
+
+<Callout type="info">
+  SDK-internal errors (`ToolDefinitionError`, `ToolInputError`, etc.) are omitted.
+  See [SDK-Internal Errors](#sdk-internal-errors) for the full list.
+</Callout>
 
 ### When to Use Each Category
 
@@ -283,48 +276,40 @@ ToolkitError (base for tool errors)
 | `MCPContextError` | User/input caused the error | 4xx errors |
 | `MCPRuntimeError` | Server/infrastructure caused the error | 5xx errors |
 
+## ErrorKind
+
+Each error has a `kind` property for telemetry and logging:
+
+```typescript
+import { ErrorKind } from 'arcade-mcp-server';
+
+// Example: log errors by kind
+console.log(error.kind); // e.g., ErrorKind.TOOL_RUNTIME_RETRY
+```
+
+`UpstreamError` auto-sets `kind` from `statusCode` (401/403 → `AUTH_ERROR`, 404 → `NOT_FOUND`, 429 → `RATE_LIMIT`, 5xx → `SERVER_ERROR`).
+
 ## Creating Custom Errors
 
-Extend `ToolExecutionError` for domain-specific tool errors:
+Extend a specific error type — not `ToolExecutionError` directly:
 
 ```typescript
-import { ToolExecutionError } from 'arcade-mcp';
+import { FatalToolError } from 'arcade-mcp-server';
 
-interface QuotaExceededOptions {
-  limitType: string;
-  developerMessage?: string;
-  extra?: Record<string, unknown>;
-}
-
-class QuotaExceededError extends ToolExecutionError {
+class QuotaExceededError extends FatalToolError {
   readonly limitType: string;
 
-  constructor(message: string, options: QuotaExceededOptions) {
-    super(message, options);
+  constructor(message: string, limitType: string) {
+    super(message, { extra: { limitType } });
     this.name = 'QuotaExceededError';
-    this.limitType = options.limitType;
+    this.limitType = limitType;
   }
 }
 
-// Usage
-throw new QuotaExceededError('Monthly API quota exceeded', {
-  limitType: 'api_calls',
-  extra: { currentUsage: 10000, limit: 10000 },
-});
+throw new QuotaExceededError('Monthly API quota exceeded', 'api_calls');
 ```
 
-For MCP-level errors (resources, prompts), extend `MCPContextError`:
-
-```typescript
-import { MCPContextError } from 'arcade-mcp';
-
-class InvalidResourceFormatError extends MCPContextError {
-  constructor(uri: string) {
-    super(`Invalid resource format: ${uri}`);
-    this.name = 'InvalidResourceFormatError';
-  }
-}
-```
+For retryable errors, extend `RetryableToolError`. For MCP-level errors, extend `MCPContextError`.
 
 ## Best Practices
 
@@ -374,48 +359,33 @@ throw new RetryableToolError(`Invalid email: "${input.email}"`, {
 When calling external services, wrap their errors with cause chaining for debugging:
 
 ```typescript
-import { RetryableToolError } from 'arcade-mcp';
-import { z } from 'zod';
+import { RetryableToolError } from 'arcade-mcp-server';
 
-app.tool('fetchWeather', {
-  input: z.object({ city: z.string() }),
-  handler: async ({ input }) => {
-    try {
-      return await weatherApi.get(input.city);
-    } catch (error) {
-      // Wrap with context and preserve the original error for debugging
-      throw new RetryableToolError(
-        `Failed to fetch weather for ${input.city}. Please try again.`,
-        { cause: error }  // Preserves stack trace for debugging
-      );
-    }
-  },
-});
+// In your tool handler:
+try {
+  return await weatherApi.get(input.city);
+} catch (error) {
+  throw new RetryableToolError(
+    `Failed to fetch weather for ${input.city}. Please try again.`,
+    { cause: error }  // Preserves stack trace for debugging
+  );
+}
 ```
 
 ## Error Handling in Middleware
 
-```typescript
-import {
-  Middleware,
-  MCPError,
-  type MiddlewareContext,
-  type CallNext,
-} from 'arcade-mcp';
+Use middleware to log, enrich, or transform errors before they reach the client:
 
-class ErrorEnrichmentMiddleware extends Middleware {
+```typescript
+import { Middleware, MCPError, type MiddlewareContext, type CallNext } from 'arcade-mcp-server';
+
+class ErrorLoggingMiddleware extends Middleware {
   async onCallTool(context: MiddlewareContext, next: CallNext) {
     try {
       return await next(context);
     } catch (error) {
       if (error instanceof MCPError) {
-        // Log structured error info
-        console.error({
-          type: error.name,
-          message: error.message,
-          tool: context.message.params?.name,
-          session: context.session?.id,
-        });
+        console.error({ type: error.name, message: error.message });
       }
       throw error;  // Re-throw for ErrorHandlingMiddleware
     }

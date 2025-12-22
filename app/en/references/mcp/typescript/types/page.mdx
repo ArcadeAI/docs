@@ -14,16 +14,22 @@ Core TypeScript types used in the SDK.
   like custom transports or protocol-level work.
 </Callout>
 
+<Callout type="warning">
+  Types marked with 📘 are not yet documented in the Python SDK reference (though
+  most exist in the Python implementation). This helps track documentation parity.
+</Callout>
+
 ## Common Types
 
-### `ToolContext<TInput, TSecrets, TAuth>`
+### `ToolContext<TInput, TSecrets, TAuth>` 📘
 
 Context passed to your tool handlers. Destructure what you need:
 
 ```typescript
 interface AuthInfo {
   token: string;
-  provider: string;
+  /** Provider-specific user data (e.g., sub, email, name). Shape depends on provider and scopes. */
+  userInfo: Record<string, unknown>;
 }
 
 interface ToolContext<
@@ -34,7 +40,7 @@ interface ToolContext<
   /** Validated input matching your Zod schema */
   input: TInput;
 
-  /** OAuth token and provider — non-optional when requiresAuth is set */
+  /** OAuth token and user info — non-optional when requiresAuth is set */
   authorization: TAuth extends true ? AuthInfo : AuthInfo | undefined;
 
   /**
@@ -43,8 +49,225 @@ interface ToolContext<
    */
   getSecret(key: TSecrets): string;
 
-  /** Metadata from the client (if requiresMetadata was set) */
+  /** Metadata from Arcade auth (e.g., client_id, coordinator_url) */
   metadata: Record<string, unknown>;
+
+  /** User identifier for this request (from auth, config, or session) */
+  userId: string | null;
+
+  /** Unique identifier for this MCP session (null for stdio without session management) */
+  sessionId: string | null;
+
+  /** Unique identifier for this specific request */
+  requestId: string | null;
+
+  // ─── Runtime Capabilities ─────────────────────────────────────────
+
+  /** MCP protocol logging — sent to the AI client, not console */
+  log: {
+    debug(message: string): Promise<void>;
+    info(message: string): Promise<void>;
+    warning(message: string): Promise<void>;
+    error(message: string): Promise<void>;
+  };
+
+  /** Progress reporting for long-running operations */
+  progress: {
+    report(progress: number, total?: number, message?: string): Promise<void>;
+  };
+
+  /** Read resources exposed by the server */
+  resources: {
+    /** Read a resource, returns array (may have multiple parts) */
+    read(uri: string): Promise<ResourceContents[]>;
+    /** Convenience: read and return first content item, throws if not found */
+    get(uri: string): Promise<ResourceContents>;
+    /** List available resources */
+    list(): Promise<Resource[]>;
+    /** List URI templates for dynamic resources */
+    listTemplates(): Promise<ResourceTemplate[]>;
+    /** List client roots (directories the client has shared) */
+    listRoots(): Promise<Root[]>;
+  };
+
+  /** Call other tools from within a tool handler */
+  tools: {
+    /** Execute a tool and get raw result */
+    call(name: string, args?: Record<string, unknown>): Promise<CallToolResult>;
+    /** List available tools */
+    list(): Promise<Tool[]>;
+  };
+
+  /** Access prompts exposed by the server */
+  prompts: {
+    get(name: string, args?: Record<string, string>): Promise<GetPromptResult>;
+    list(): Promise<Prompt[]>;
+  };
+
+  /** Request LLM completions from the client (if supported) */
+  sampling: {
+    createMessage(request: CreateMessageRequest): Promise<CreateMessageResult>;
+  };
+
+  /** Create rich UI elements (elicitation, forms) */
+  ui: {
+    /**
+     * Request structured input from the user.
+     * Schema must be an object with primitive properties only
+     * (string, number, integer, boolean). String formats: email, uri, date, date-time.
+     */
+    elicit<T extends z.ZodObject<any>>(
+      message: string,
+      schema: T,
+      options?: { timeout?: number }
+    ): Promise<ElicitResult<z.infer<T>>>;
+  };
+
+  /** Notify client when server capabilities change */
+  notifications: {
+    tools: { listChanged(): Promise<void> };
+    resources: { listChanged(): Promise<void> };
+    prompts: { listChanged(): Promise<void> };
+  };
+}
+
+// ─── Supporting Types ───────────────────────────────────────────────
+
+/** Content returned when reading a resource */
+interface ResourceContents {
+  uri: string;
+  mimeType?: string;
+  text?: string;
+  blob?: string;  // Base64-encoded binary
+}
+
+/** Resource metadata */
+interface Resource {
+  uri: string;
+  name: string;
+  description?: string;
+  mimeType?: string;
+}
+
+/** URI template for dynamic resources */
+interface ResourceTemplate {
+  uriTemplate: string;
+  name: string;
+  description?: string;
+  mimeType?: string;
+}
+
+/** Client root directory */
+interface Root {
+  uri: string;
+  name?: string;
+}
+
+/** Tool metadata */
+interface Tool {
+  name: string;
+  description?: string;
+  inputSchema: JsonSchema;
+}
+
+/** Prompt metadata */
+interface Prompt {
+  name: string;
+  description?: string;
+  arguments?: PromptArgument[];
+}
+
+/** Result from getting a prompt */
+interface GetPromptResult {
+  description?: string;
+  messages: PromptMessage[];
+}
+
+/** Request for LLM sampling */
+interface CreateMessageRequest {
+  messages: SamplingMessage[];
+  systemPrompt?: string;
+  maxTokens: number;
+  temperature?: number;
+  stopSequences?: string[];
+}
+
+/** Message for/from sampling */
+interface SamplingMessage {
+  role: 'user' | 'assistant';
+  content: TextContent | ImageContent | AudioContent;
+}
+
+/** Result from sampling.createMessage */
+interface CreateMessageResult {
+  role: 'assistant';
+  content: TextContent | ImageContent | AudioContent;
+  model: string;
+  stopReason?: 'endTurn' | 'stopSequence' | 'maxTokens';
+}
+
+/** Result from tools.call */
+interface CallToolResult {
+  content: ContentItem[];
+  structuredContent?: Record<string, unknown>;
+  isError?: boolean;
+}
+
+/** Result from elicitation UI */
+interface ElicitResult<T> {
+  action: 'accept' | 'decline' | 'cancel';
+  content?: T;
+}
+
+/** JSON Schema (subset used by MCP) */
+type JsonSchema = Record<string, unknown>;
+
+/** Prompt argument definition */
+interface PromptArgument {
+  name: string;
+  description?: string;
+  required?: boolean;
+}
+
+/** Message in a prompt */
+interface PromptMessage {
+  role: 'user' | 'assistant';
+  content: TextContent | ImageContent | AudioContent | EmbeddedResource | ResourceLink;
+}
+
+/** Text content block */
+interface TextContent {
+  type: 'text';
+  text: string;
+}
+
+/** Image content block */
+interface ImageContent {
+  type: 'image';
+  data: string;      // Base64 encoded
+  mimeType: string;
+}
+
+/** Audio content block */
+interface AudioContent {
+  type: 'audio';
+  data: string;      // Base64 encoded
+  mimeType: string;
+}
+
+/** Embedded resource content */
+interface EmbeddedResource {
+  type: 'resource';
+  resource: ResourceContents;
+}
+
+/** Link to a resource by URI */
+interface ResourceLink {
+  type: 'resource_link';
+  uri: string;
+  name: string;
+  description?: string;
+  mimeType?: string;
 }
 ```
 
@@ -52,7 +275,7 @@ interface ToolContext<
 
 ```typescript
 import { z } from 'zod';
-import { Google } from 'arcade-mcp/auth';
+import { Google } from 'arcade-mcp-server/auth';
 
 // Without requiresAuth: authorization is optional
 app.tool('publicTool', {
@@ -77,7 +300,7 @@ app.tool('privateTool', {
 ```typescript
 app.tool('search', {
   input: z.object({ query: z.string() }),
-  requiresSecrets: ['API_KEY'] as const,
+  requiresSecrets: ['API_KEY'] as const,  // as const is required!
   handler: ({ getSecret }) => {
     getSecret('API_KEY');  // ✅ Autocomplete works
     // getSecret('OTHER'); // ❌ TypeScript error
@@ -85,9 +308,80 @@ app.tool('search', {
 });
 ```
 
+<Callout type="info">
+  **Why `as const`?** Without it, TypeScript infers `string[]` instead of the literal tuple `['API_KEY']`. The `as const` preserves the exact strings so `getSecret()` can type-check against them.
+</Callout>
+
 Secrets are validated at startup. Missing secrets fail fast with a clear error.
 
-### Type Inference with Zod
+### Runtime Capabilities 📘
+
+Tools have access to 8 runtime capabilities via the context object. Destructure what you need:
+
+```typescript
+app.tool('processData', {
+  input: z.object({ uri: z.string() }),
+  handler: async ({
+    input,
+    log,          // MCP protocol logging
+    progress,     // Progress reporting
+    resources,    // Read server resources
+    tools,        // Call other tools
+    prompts,      // Access prompts
+    sampling,     // Request LLM completions
+    ui,           // Elicitation / forms
+    notifications // Notify list changes
+  }) => {
+    // Log progress to the client
+    await log.info('Starting...');
+    await progress.report(0, 3);
+
+    // Read a resource (get() returns single item, read() returns array)
+    const content = await resources.get(input.uri);
+    await progress.report(1, 3);
+
+    // Call another tool (returns CallToolResult)
+    const result = await tools.call('analyze', { data: content.text });
+    if (result.isError) throw new Error('Analysis failed');
+    await progress.report(2, 3);
+
+    // Ask user for confirmation via elicitation
+    const confirm = await ui.elicit('Proceed?', z.object({
+      confirmed: z.boolean(),
+    }));
+
+    if (confirm.action !== 'accept' || !confirm.content?.confirmed) {
+      return 'Cancelled by user';
+    }
+
+    await progress.report(3, 3, 'Done');
+    return result.structuredContent ?? result.content;
+  },
+});
+```
+
+| Capability | Description |
+|------------|-------------|
+| `log` | Send debug/info/warning/error messages to the client |
+| `progress` | Report progress for long-running operations |
+| `resources` | Read resources exposed by the server |
+| `tools` | Call other tools from within a tool handler |
+| `prompts` | Access prompt templates defined on the server |
+| `sampling` | Request LLM completions from the client |
+| `ui` | Create elicitation forms for user input |
+| `notifications` | Notify client when tools/resources/prompts change |
+
+<Callout type="info">
+Not all clients support all capabilities. `sampling` and `ui.elicit` depend on client support.
+</Callout>
+
+<Callout type="warning">
+**Elicitation Schema Restrictions**: MCP limits elicitation schemas to object types with primitive
+properties only (`string`, `number`, `integer`, `boolean`). String properties support formats:
+`email`, `uri`, `date`, `date-time`. Nested objects and arrays are not allowed.
+</Callout>
+
+### Type Inference with Zod 📘
 
 The SDK fully leverages Zod's type inference. Your handler receives typed input automatically:
 
@@ -116,7 +410,7 @@ app.tool('search', {
 });
 ```
 
-## Tool Response Types
+## Tool Response Types 📘
 
 Handlers can return any value. The SDK auto-wraps:
 
@@ -126,32 +420,20 @@ Handlers can return any value. The SDK auto-wraps:
 | `object` | `{ content: [{ type: 'text', text: JSON.stringify(obj) }] }` |
 | `{ content: [...] }` | Passed through unchanged |
 
-### `ContentItem`
+### `ContentItem` 📘
 
 For full control over responses, return content items directly:
 
 ```typescript
-type ContentItem = TextContent | ImageContent | ResourceContent;
-
-interface TextContent {
-  type: 'text';
-  text: string;
-}
-
-interface ImageContent {
-  type: 'image';
-  data: string;      // Base64 encoded
-  mimeType: string;  // e.g., 'image/png'
-}
-
-interface ResourceContent {
-  type: 'resource';
-  uri: string;
-  mimeType?: string;
-  text?: string;
-  blob?: string;  // Base64 encoded
-}
+type ContentItem =
+  | TextContent
+  | ImageContent
+  | AudioContent
+  | EmbeddedResource
+  | ResourceLink;
 ```
+
+Individual content types (`TextContent`, `ImageContent`, etc.) are defined in the `ToolContext` section above.
 
 **Example:**
 
@@ -190,11 +472,38 @@ interface CallToolResult {
 }
 ```
 
-## Schema Types
+<Callout type="warning">
+  **Important:** When `isError: true`, the AI client knows the tool failed and can decide whether to retry. Always set this flag when returning error information — don't just return an error message as regular content.
+</Callout>
+
+**Returning errors correctly:**
+
+```typescript
+app.tool('fetchUser', {
+  input: z.object({ id: z.string() }),
+  handler: async ({ input }) => {
+    const user = await db.findUser(input.id);
+
+    if (!user) {
+      // ✅ Correct: Set isError so AI knows this failed
+      return {
+        content: [{ type: 'text', text: `User ${input.id} not found` }],
+        isError: true,
+      };
+    }
+
+    return user;
+  },
+});
+```
+
+For most error cases, throw specific error types instead — see [Errors](/references/mcp/typescript/errors).
+
+## Schema Types 📘
 
 The SDK uses Zod 4 for input validation.
 
-### Converting Schemas to JSON Schema
+### Converting Schemas to JSON Schema 📘
 
 Use `z.toJSONSchema()` to convert Zod schemas for AI clients:
 
@@ -219,7 +528,7 @@ z.toJSONSchema(schema);
 // }
 ```
 
-### Adding Metadata
+### Adding Metadata 📘
 
 Use `.describe()` for simple descriptions or `.meta()` for richer metadata:
 
@@ -243,7 +552,7 @@ z.string().meta({ description: 'An email' });
 
 Both are preserved in JSON Schema output.
 
-### Extracting TypeScript Types
+### Extracting TypeScript Types 📘
 
 Use `z.infer` to extract TypeScript types from schemas:
 
@@ -267,11 +576,11 @@ function processUser(user: User) {
 }
 ```
 
-## Protocol Types
+## Protocol Types 📘
 
 These are low-level types for custom transports or debugging.
 
-### `MCPMessage`
+### `MCPMessage` 📘
 
 Base type for all MCP protocol messages:
 
@@ -303,7 +612,7 @@ interface JSONRPCNotification {
 }
 ```
 
-### `ServerSession`
+### `ServerSession` 📘
 
 ```typescript
 interface ServerSession {
@@ -323,6 +632,8 @@ interface ServerSession {
 
 ### `SessionMessage`
 
+<small>*Also documented in Python SDK*</small>
+
 ```typescript
 interface SessionMessage {
   message: MCPMessage;
@@ -330,9 +641,9 @@ interface SessionMessage {
 }
 ```
 
-## Auth Types
+## Auth Types 📘
 
-### `AuthProvider`
+### `AuthProvider` 📘
 
 ```typescript
 interface AuthProvider {
@@ -344,10 +655,10 @@ interface AuthProvider {
 }
 ```
 
-### Creating Auth Providers
+### Creating Auth Providers 📘
 
 ```typescript
-import { Google, GitHub, Slack } from 'arcade-mcp/auth';
+import { Google, GitHub, Slack } from 'arcade-mcp-server/auth';
 
 // Google with specific scopes
 Google({ scopes: ['profile', 'email'] })
@@ -359,9 +670,9 @@ GitHub({ scopes: ['repo', 'user'] })
 Slack({ scopes: ['chat:write', 'users:read'] })
 ```
 
-## Error Adapter Types
+## Error Adapter Types 📘
 
-### `ErrorAdapter`
+### `ErrorAdapter` 📘
 
 Translates vendor-specific exceptions into Arcade errors:
 
@@ -370,12 +681,30 @@ interface ErrorAdapter {
   /** Identifier for logging/metrics */
   slug: string;
 
-  /** Translate an exception into an Arcade error, or null if not handled */
-  fromException(error: unknown): MCPError | null;
+  /** Translate an exception into an Arcade tool error, or null if not handled */
+  fromException(error: unknown): ToolError | null;
+}
+
+/** Base class for tool execution errors */
+class ToolError extends Error {
+  canRetry: boolean;
+  statusCode?: number;
+  developerMessage?: string;
+}
+
+/** Error from an upstream service (API, database, etc.) */
+class UpstreamError extends ToolError {}
+
+/** Error that should not be retried */
+class FatalToolError extends ToolError {}
+
+/** Error that can be retried */
+class RetryableToolError extends ToolError {
+  retryAfterMs?: number;
 }
 ```
 
-### Built-in Adapters
+### Built-in Adapters 📘
 
 ```typescript
 import {
@@ -384,7 +713,7 @@ import {
   MicrosoftGraphErrorAdapter,
   HTTPErrorAdapter,
   GraphQLErrorAdapter,
-} from 'arcade-mcp/adapters';
+} from 'arcade-mcp-server/adapters';
 
 app.tool('sendMessage', {
   input: z.object({ channel: z.string(), text: z.string() }),
@@ -407,29 +736,28 @@ app.tool('sendMessage', {
 
 Adapters are tried in order. First match wins. `HTTPErrorAdapter` is always added as fallback.
 
-## Utility Types
+## Utility Types 📘
 
-### `MaterializedTool`
+### `MaterializedTool` 📘
 
-A tool object ready for registration. Created via `tool()`:
+A tool object with type inference. Created via `tool()`:
 
 ```typescript
-import { tool } from 'arcade-mcp';
+import { tool } from 'arcade-mcp-server';
 import { z } from 'zod';
 
 const myTool = tool({
-  name: 'my-tool',  // required for runtime registration
   description: 'Does something',
   input: z.object({ value: z.string() }),
-  handler: ({ input }) => `Got: ${input.value}`,
+  handler: ({ input }) => `Got: ${input.value}`,  // input is typed
 });
 
-// Use with runtime APIs
-await app.tools.add(myTool);
-await server.tools.add(myTool);
+// Register with app.tool() or runtime APIs — name is always first arg
+app.tool('my-tool', myTool);
+await server.tools.add('my-tool', myTool);
 ```
 
-### `ToolOptions`
+### `ToolOptions` 📘
 
 Complete tool configuration type:
 
@@ -453,10 +781,10 @@ interface ToolOptions<
 
 The `TAuth` type parameter enables conditional typing: when `requiresAuth` is set, `authorization` becomes non-optional in the handler context.
 
-### `MCPAppOptions`
+### `ArcadeMCPOptions` 📘
 
 ```typescript
-interface MCPAppOptions {
+interface ArcadeMCPOptions {
   name?: string;
   version?: string;
   title?: string;
@@ -466,19 +794,6 @@ interface MCPAppOptions {
   host?: string;
   port?: number;
   reload?: boolean;
-  cors?: CorsOptions;
-}
-```
-
-### `CorsOptions`
-
-```typescript
-interface CorsOptions {
-  origin?: string | string[] | boolean;
-  methods?: string[];
-  allowedHeaders?: string[];
-  exposedHeaders?: string[];
-  credentials?: boolean;
-  maxAge?: number;
+  adapter?: object;  // For Node.js: node() from @elysiajs/node
 }
 ```

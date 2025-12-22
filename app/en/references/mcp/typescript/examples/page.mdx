@@ -1,0 +1,663 @@
+---
+title: "Examples - Arcade MCP TypeScript Reference"
+description: "Complete example servers for common use cases"
+---
+
+import { Callout } from "nextra/components";
+
+# Examples
+
+Complete, runnable examples for common MCP server patterns.
+
+## Simple Server
+
+A minimal server with one tool. Start here.
+
+```typescript
+// examples/simple/server.ts
+import { ArcadeMCP } from 'arcade-mcp-server';
+import { z } from 'zod';
+
+const app = new ArcadeMCP({ name: 'simple-server', version: '1.0.0' });
+
+app.tool('echo', {
+  description: 'Echo the input back',
+  input: z.object({
+    message: z.string().describe('Message to echo'),
+  }),
+  handler: ({ input }) => input.message,
+});
+
+// Run with: bun run server.ts
+// Or for stdio: bun run server.ts stdio
+const transport = process.argv[2] === 'stdio' ? 'stdio' : 'http';
+app.run({ transport, port: 8000 });
+```
+
+Test it:
+
+```bash
+curl -X POST http://localhost:8000/mcp \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"echo","arguments":{"message":"hello"}}}'
+```
+
+## OAuth Server
+
+A server with Google OAuth. Arcade handles token management.
+
+```typescript
+// examples/oauth/server.ts
+import { ArcadeMCP } from 'arcade-mcp-server';
+import { Google } from 'arcade-mcp-server/auth';
+import { z } from 'zod';
+
+const app = new ArcadeMCP({ name: 'oauth-server', version: '1.0.0' });
+
+app.tool('listDriveFiles', {
+  description: 'List files in Google Drive',
+  input: z.object({
+    maxResults: z.number().default(10).describe('Maximum files to return'),
+  }),
+  requiresAuth: Google({
+    scopes: ['https://www.googleapis.com/auth/drive.readonly'],
+  }),
+  handler: async ({ input, authorization }) => {
+    const response = await fetch(
+      `https://www.googleapis.com/drive/v3/files?pageSize=${input.maxResults}`,
+      {
+        headers: { Authorization: `Bearer ${authorization.token}` },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Drive API error: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.files.map((f: { name: string; id: string }) => ({
+      name: f.name,
+      id: f.id,
+    }));
+  },
+});
+
+app.tool('getProfile', {
+  description: 'Get the authenticated user profile',
+  input: z.object({}),
+  requiresAuth: Google({
+    scopes: ['https://www.googleapis.com/auth/userinfo.profile'],
+  }),
+  handler: async ({ authorization }) => {
+    const response = await fetch(
+      'https://www.googleapis.com/oauth2/v2/userinfo',
+      {
+        headers: { Authorization: `Bearer ${authorization.token}` },
+      }
+    );
+    return response.json();
+  },
+});
+
+app.run({ transport: 'http', port: 8000 });
+```
+
+<Callout type="info">
+  OAuth requires an Arcade account. Set `ARCADE_API_KEY` in your environment.
+  [Create an Arcade account](https://api.arcade.dev/signup) to get started.
+</Callout>
+
+## Logging Server
+
+Demonstrates MCP protocol logging (sent to the AI client, not just console).
+
+```typescript
+// examples/logging/server.ts
+import { ArcadeMCP } from 'arcade-mcp-server';
+import { z } from 'zod';
+
+const app = new ArcadeMCP({ name: 'logging-server', version: '1.0.0' });
+
+app.tool('processData', {
+  description: 'Process data with verbose logging',
+  input: z.object({
+    data: z.string().describe('Data to process'),
+  }),
+  handler: async ({ input, log }) => {
+    // These logs are sent to the MCP client (Claude, etc.)
+    await log.debug(`Starting to process: ${input.data}`);
+    await log.info('Processing step 1...');
+
+    // Simulate work
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    await log.info('Processing step 2...');
+    await log.warning('This step took longer than expected');
+
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    await log.info('Processing complete');
+
+    return `Processed: ${input.data.toUpperCase()}`;
+  },
+});
+
+app.run({ transport: 'http', port: 8000 });
+```
+
+<Callout type="warning">
+  With stdio transport, use `console.error()` for local debugging. MCP protocol
+  logs via the `log` handler parameter go to the AI client.
+</Callout>
+
+## Progress Reporting
+
+Long-running operations with progress updates.
+
+```typescript
+// examples/progress/server.ts
+import { ArcadeMCP } from 'arcade-mcp-server';
+import { z } from 'zod';
+
+const app = new ArcadeMCP({ name: 'progress-server', version: '1.0.0' });
+
+app.tool('analyzeFiles', {
+  description: 'Analyze multiple files with progress reporting',
+  input: z.object({
+    fileCount: z.number().min(1).max(100).describe('Number of files to analyze'),
+  }),
+  handler: async ({ input, progress }) => {
+    const results: string[] = [];
+
+    for (let i = 0; i < input.fileCount; i++) {
+      // Report progress to the client
+      await progress.report(i, input.fileCount, `Analyzing file ${i + 1} of ${input.fileCount}`);
+
+      // Simulate file analysis
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      results.push(`file_${i + 1}: OK`);
+    }
+
+    await progress.report(input.fileCount, input.fileCount, 'Analysis complete');
+
+    return { analyzed: input.fileCount, results };
+  },
+});
+
+app.run({ transport: 'http', port: 8000 });
+```
+
+## Production Server
+
+A production-ready server with middleware, rate limiting, and organized tools.
+
+```typescript
+// examples/production/server.ts
+import { ArcadeMCP } from 'arcade-mcp-server';
+
+import { add, multiply } from './tools/calculator';
+import { getWeather } from './tools/weather';
+import { RateLimitMiddleware } from './middleware/rate-limit';
+import { AuditMiddleware } from './middleware/audit';
+
+const app = new ArcadeMCP({
+  name: 'production-server',
+  version: '1.0.0',
+  instructions: 'A production MCP server with calculator and weather tools.',
+});
+
+// HTTP request logging
+app.onRequest(({ request }) => {
+  console.error(`[HTTP] ${request.method} ${new URL(request.url).pathname}`);
+});
+
+// Register tools — name is always first arg
+app.tool('calculator_add', add);
+app.tool('calculator_multiply', multiply);
+app.tool('weather', getWeather);
+
+const port = Number(process.env.PORT) || 8000;
+const host = process.env.HOST || '0.0.0.0';
+
+// Run with middleware (passed to underlying MCPServer)
+app.run({
+  transport: 'http',
+  host,
+  port,
+  middleware: [
+    new RateLimitMiddleware({ maxRequests: 100, windowMs: 60_000 }),
+    new AuditMiddleware({ logFile: './audit.log' }),
+  ],
+});
+```
+
+```typescript
+// examples/production/tools/calculator.ts
+import { tool } from 'arcade-mcp-server';
+import { z } from 'zod';
+
+export const add = tool({
+  description: 'Add two numbers',
+  input: z.object({
+    a: z.number().describe('First number'),
+    b: z.number().describe('Second number'),
+  }),
+  handler: ({ input }) => input.a + input.b,
+});
+
+export const multiply = tool({
+  description: 'Multiply two numbers',
+  input: z.object({
+    a: z.number().describe('First number'),
+    b: z.number().describe('Second number'),
+  }),
+  handler: ({ input }) => input.a * input.b,
+});
+```
+
+```typescript
+// examples/production/tools/weather.ts
+import { tool } from 'arcade-mcp-server';
+import { z } from 'zod';
+
+export const getWeather = tool({
+  description: 'Get current weather for a city',
+  input: z.object({
+    city: z.string().describe('City name'),
+  }),
+  requiresSecrets: ['WEATHER_API_KEY'] as const,
+  handler: async ({ input, getSecret }) => {
+    const apiKey = getSecret('WEATHER_API_KEY');
+
+    const response = await fetch(
+      `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${encodeURIComponent(input.city)}`
+    );
+
+    if (!response.ok) {
+      throw new Error(`Weather API error: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return {
+      city: data.location.name,
+      temp_c: data.current.temp_c,
+      condition: data.current.condition.text,
+    };
+  },
+});
+```
+
+```typescript
+// examples/production/middleware/rate-limit.ts
+import {
+  Middleware,
+  RetryableToolError,
+  type MiddlewareContext,
+  type CallNext,
+} from 'arcade-mcp-server';
+
+interface RateLimitOptions {
+  maxRequests: number;
+  windowMs: number;
+}
+
+export class RateLimitMiddleware extends Middleware {
+  private requests = new Map<string, number[]>();
+  private maxRequests: number;
+  private windowMs: number;
+
+  constructor(options: RateLimitOptions) {
+    super();
+    this.maxRequests = options.maxRequests;
+    this.windowMs = options.windowMs;
+  }
+
+  async onCallTool(context: MiddlewareContext, next: CallNext) {
+    const clientId = context.sessionId ?? 'anonymous';
+    const now = Date.now();
+
+    const recent = (this.requests.get(clientId) ?? []).filter(
+      (t) => t > now - this.windowMs
+    );
+
+    if (recent.length >= this.maxRequests) {
+      throw new RetryableToolError('Rate limit exceeded. Try again later.', {
+        retryAfterMs: this.windowMs,
+      });
+    }
+
+    this.requests.set(clientId, [...recent, now]);
+    return next(context);
+  }
+}
+```
+
+```typescript
+// examples/production/middleware/audit.ts
+import {
+  Middleware,
+  type MiddlewareContext,
+  type CallNext,
+} from 'arcade-mcp-server';
+import { appendFile } from 'node:fs/promises';
+
+interface AuditOptions {
+  logFile: string;
+}
+
+export class AuditMiddleware extends Middleware {
+  private logFile: string;
+
+  constructor(options: AuditOptions) {
+    super();
+    this.logFile = options.logFile;
+  }
+
+  async onCallTool(context: MiddlewareContext, next: CallNext) {
+    const start = performance.now();
+    const result = await next(context);
+    const elapsed = performance.now() - start;
+
+    const entry = {
+      timestamp: new Date().toISOString(),
+      sessionId: context.sessionId,
+      method: context.method,
+      elapsedMs: elapsed.toFixed(2),
+    };
+
+    // Fire and forget - don't block the response
+    appendFile(this.logFile, JSON.stringify(entry) + '\n').catch(console.error);
+
+    return result;
+  }
+}
+```
+
+### Dockerfile
+
+```dockerfile
+# examples/production/Dockerfile
+FROM oven/bun:1
+
+WORKDIR /app
+
+# Install dependencies
+COPY package.json bun.lock ./
+RUN bun install --frozen-lockfile
+
+# Copy source
+COPY . .
+
+# Runtime configuration
+ENV HOST=0.0.0.0
+ENV PORT=8000
+EXPOSE 8000
+
+CMD ["bun", "run", "server.ts"]
+```
+
+```bash
+# Build and run
+docker build -t my-mcp-server .
+docker run -p 8000:8000 \
+  -e ARCADE_API_KEY=arc_... \
+  -e WEATHER_API_KEY=... \
+  -e ALLOWED_ORIGINS=https://myapp.com \
+  my-mcp-server
+```
+
+## Tool Chaining & Resources
+
+Advanced example demonstrating tool-to-tool calls, resource access, and user elicitation.
+
+```typescript
+// examples/advanced/server.ts
+import { ArcadeMCP } from 'arcade-mcp-server';
+import { z } from 'zod';
+
+const app = new ArcadeMCP({
+  name: 'advanced-server',
+  version: '1.0.0',
+});
+
+// Expose a resource (e.g., config file)
+app.resource('config://settings', {
+  description: 'Application settings',
+  mimeType: 'application/json',
+  handler: async () => JSON.stringify({
+    maxRetries: 3,
+    timeout: 5000,
+  }),
+});
+
+// A helper tool that can be called by other tools
+app.tool('validate', {
+  description: 'Validate data against a pattern',
+  input: z.object({
+    data: z.string(),
+    pattern: z.string(),
+  }),
+  handler: ({ input }) => {
+    const regex = new RegExp(input.pattern);
+    return { valid: regex.test(input.data), data: input.data };
+  },
+});
+
+// Main tool that uses resources, calls other tools, and elicits user input
+app.tool('processWithApproval', {
+  description: 'Process data with validation and user approval',
+  input: z.object({
+    data: z.string().describe('Data to process'),
+  }),
+  handler: async ({ input, log, resources, tools, ui }) => {
+    // 1. Read configuration from resource (get() returns single item)
+    await log.info('Loading configuration...');
+    const config = await resources.get('config://settings');
+    const settings = JSON.parse(config.text ?? '{}');
+
+    // 2. Call another tool for validation
+    await log.info('Validating input...');
+    const result = await tools.call('validate', {
+      data: input.data,
+      pattern: '^[a-zA-Z]+$',
+    });
+
+    // tools.call returns CallToolResult with content array
+    if (result.isError) {
+      return { error: 'Validation failed', data: input.data };
+    }
+
+    // Parse structured content from the result
+    const validation = result.structuredContent as { valid: boolean } | undefined;
+    if (!validation?.valid) {
+      return { error: 'Validation failed', data: input.data };
+    }
+
+    // 3. Ask user for confirmation via elicitation
+    await log.info('Requesting user approval...');
+    const approval = await ui.elicit('Approve processing?', z.object({
+      approved: z.boolean().describe('Approve this operation'),
+      notes: z.string().optional().describe('Optional notes'),
+    }));
+
+    if (approval.action !== 'accept' || !approval.content?.approved) {
+      return { cancelled: true, reason: 'User declined' };
+    }
+
+    // 4. Process with configured settings
+    await log.info(`Processing with timeout: ${settings.timeout}ms`);
+    return {
+      processed: input.data.toUpperCase(),
+      settings,
+      notes: approval.content?.notes,
+    };
+  },
+});
+
+app.run({ transport: 'http', port: 8000 });
+```
+
+<Callout type="info">
+  `ui.elicit` requires client support. Claude Desktop and many MCP clients support it.
+  Always handle the `decline` and `cancel` cases.
+</Callout>
+
+## Multi-Provider OAuth
+
+A server supporting multiple OAuth providers.
+
+```typescript
+// examples/multi-oauth/server.ts
+import { ArcadeMCP } from 'arcade-mcp-server';
+import { Google, GitHub, Slack } from 'arcade-mcp-server/auth';
+import { z } from 'zod';
+
+const app = new ArcadeMCP({ name: 'multi-oauth-server', version: '1.0.0' });
+
+app.tool('getGoogleProfile', {
+  description: 'Get Google user profile',
+  input: z.object({}),
+  requiresAuth: Google({
+    scopes: ['https://www.googleapis.com/auth/userinfo.profile'],
+  }),
+  handler: async ({ authorization }) => {
+    const res = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+      headers: { Authorization: `Bearer ${authorization.token}` },
+    });
+    return res.json();
+  },
+});
+
+app.tool('listGitHubRepos', {
+  description: 'List GitHub repositories for the authenticated user',
+  input: z.object({
+    visibility: z.enum(['all', 'public', 'private']).default('all'),
+  }),
+  requiresAuth: GitHub({ scopes: ['repo'] }),
+  handler: async ({ input, authorization }) => {
+    const res = await fetch(
+      `https://api.github.com/user/repos?visibility=${input.visibility}`,
+      {
+        headers: {
+          Authorization: `Bearer ${authorization.token}`,
+          Accept: 'application/vnd.github+json',
+        },
+      }
+    );
+    const repos = await res.json();
+    return repos.map((r: { name: string; html_url: string }) => ({
+      name: r.name,
+      url: r.html_url,
+    }));
+  },
+});
+
+app.tool('sendSlackMessage', {
+  description: 'Send a message to a Slack channel',
+  input: z.object({
+    channel: z.string().describe('Channel ID (e.g., C01234567)'),
+    text: z.string().describe('Message text'),
+  }),
+  requiresAuth: Slack({ scopes: ['chat:write'] }),
+  handler: async ({ input, authorization }) => {
+    const res = await fetch('https://slack.com/api/chat.postMessage', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${authorization.token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        channel: input.channel,
+        text: input.text,
+      }),
+    });
+
+    const data = await res.json();
+    if (!data.ok) {
+      throw new Error(`Slack API error: ${data.error}`);
+    }
+
+    return { sent: true, ts: data.ts };
+  },
+});
+
+app.run({ transport: 'http', port: 8000 });
+```
+
+## Testing Tools
+
+Unit testing tools without running a full server.
+
+```typescript
+// examples/testing/calculator.test.ts
+import { describe, expect, test } from 'bun:test';
+import { add, multiply } from './tools/calculator';
+
+describe('calculator tools', () => {
+  test('add returns correct sum', async () => {
+    // Call handler directly with minimal mock context
+    const result = await add.handler({
+      input: { a: 2, b: 3 },
+    });
+
+    expect(result).toBe(5);
+  });
+
+  test('multiply returns correct product', async () => {
+    const result = await multiply.handler({
+      input: { a: 4, b: 5 },
+    });
+
+    expect(result).toBe(20);
+  });
+});
+```
+
+For tools that need secrets or auth, provide mocks:
+
+```typescript
+// examples/testing/weather.test.ts
+import { describe, expect, test, mock } from 'bun:test';
+import { getWeather } from './tools/weather';
+
+describe('weather tool', () => {
+  test('fetches weather with API key', async () => {
+    // Mock fetch
+    globalThis.fetch = mock(() =>
+      Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({
+          location: { name: 'Seattle' },
+          current: { temp_c: 12, condition: { text: 'Cloudy' } },
+        }),
+      })
+    ) as typeof fetch;
+
+    const result = await getWeather.handler({
+      input: { city: 'Seattle' },
+      getSecret: (key: string) => key === 'WEATHER_API_KEY' ? 'test-key' : '',
+    });
+
+    expect(result).toEqual({
+      city: 'Seattle',
+      temp_c: 12,
+      condition: 'Cloudy',
+    });
+  });
+});
+```
+
+Run tests:
+
+```bash
+bun test
+```
+
+## Next Steps
+
+- [**Overview**](/references/mcp/typescript/overview) — Core concepts and API
+- [**Transports**](/references/mcp/typescript/transports) — stdio and HTTP configuration
+- [**Middleware**](/references/mcp/typescript/middleware) — Request/response interception
+- [**Types**](/references/mcp/typescript/types) — TypeScript interfaces and schemas
+
