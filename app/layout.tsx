@@ -1,6 +1,7 @@
 import { getDictionary } from "@/_dictionaries/get-dictionary";
 import { SignupLink } from "@/app/_components/analytics";
 import CustomLayout from "@/app/_components/custom-layout";
+import { getDashboardUrl } from "@/app/_components/dashboard-link";
 import { Footer } from "@/app/_components/footer";
 import { Logo } from "@/app/_components/logo";
 import NavBarButton from "@/app/_components/nav-bar-button";
@@ -139,7 +140,7 @@ export default async function RootLayout({
                   text="Sign Up"
                 />
               </SignupLink>
-              <Link href="https://api.arcade.dev/dashboard/playground/chat">
+              <Link href={getDashboardUrl("playground/chat")}>
                 <NavBarButton text="Dashboard" variant="outline" />
               </Link>
             </Navbar>
