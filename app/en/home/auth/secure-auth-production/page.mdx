@@ -1,24 +1,26 @@
 ---
-title: "Secure Auth in Production"
-description: "How to secure and brand your auth flows in production"
+title: "Verify your users"
+description: "How to verify your users and prevent phishing attacks"
 ---
-
-# Secure and Brand the Auth Flow in Production
 
 To keep your users safe, Arcade.dev performs a user verification check when a tool is authorized for the first time. This check verifies that the user who is authorizing the tool is the same user who started the authorization flow, which helps prevent phishing attacks.
 
-There are two ways to secure your auth flows with Arcade.dev:
+<Callout type="info">
+  Interested in branding your auth flow? Check out our docs on [branding your auth flow](/home/auth-providers/branding-auth).
+</Callout>
 
-- Use the **Arcade user verifier** for development (enabled by default)
-- Implement a **custom user verifier** for production
+## Prevent phishing attacks by verifying your users
 
-This setting is configured in the [Auth > Settings section](https://api.arcade.dev/dashboard/auth/settings) of the Arcade Dashboard.
+There are two ways to verify your users with Arcade.dev:
 
-## Use the Arcade user verifier
+- Use the **Arcade user verifier** for development. This is enabled by default when you create a new Arcade.dev account and works well with internal apps, solo projects, and proof-of-concept apps.
+- Implement a **custom user verifier** for production. This is required for multi-user apps and agents, as it doesn't require your users to sign in to Arcade.dev and lets you fully control the design of the auth flow in your own application.
 
-If you're building a proof-of-concept app or a solo project, use the Arcade user verifier. This option requires no custom development and is on by default when you create a new Arcade.dev account.
+You can configure this in the [Auth > Settings section](https://api.arcade.dev/dashboard/auth/settings) of the Arcade Dashboard.
 
-This setting is configured in the [Auth > Settings section](https://api.arcade.dev/dashboard/auth/settings) of the Arcade Dashboard:
+## How to use Arcade's default user verifier
+
+This option requires no custom development and is enabled by default when you create a new Arcade.dev account.
 
 <img
   src="/images/docs/auth/dashboard-arcade-verifier.png"
@@ -27,9 +29,7 @@ This setting is configured in the [Auth > Settings section](https://api.arcade.d
   width="600"
 />
 
-When you authorize a tool, you'll be prompted to sign in to your Arcade.dev account. If you are already signed in (to the Arcade Dashboard, for example), this verification will succeed silently.
-
-The Arcade.dev user verifier helps keep your auth flows secure while you are building and testing your agent or app. When you're ready to share your work with others, implement a [custom user verifier](#build-a-custom-user-verifier) so your users don't need to sign in to Arcade.dev.
+When a user authorizes a tool, they'll be prompted to sign in to their own Arcade.dev account. If they are already signed in (to the Arcade Dashboard, for example), this verification will succeed silently.
 
 <Callout type="info">
   Arcade's default OAuth apps can *only* be used with the Arcade user verifier.
@@ -39,13 +39,13 @@ The Arcade.dev user verifier helps keep your auth flows secure while you are bui
   Dashboard](/home/auth-providers/google#access-the-arcade-dashboard).
 </Callout>
 
-## Build a custom user verifier
+## How to build a custom user verifier
 
-In a production application or agent, end-users are verified by your code, not Arcade.dev. This allows you to fully control the user experience of the auth flow. To enable this, build a custom verifier route and add the URL to the Arcade Dashboard.
+With a custom user verifier, users are verified by your verifier, not Arcade's.
 
-When your users authorize a tool, Arcade.dev will redirect the user's browser to your verifier route with some information in the query string. Your custom verifier route must send a response back to Arcade.dev to confirm the user's ID.
+When a user authorizes a tool, Arcade.dev will redirect the user's browser to your verifier route with some information in the query string. Your custom verifier route must send a response back to Arcade.dev to confirm the user's ID.
 
-If you need help, join the [Implementing a custom user verifier](https://github.com/ArcadeAI/arcade-ai/discussions/486) GitHub discussion and we'll be happy to assist.
+This allows you to fully control the user experience of the auth flow in your own application. To enable this, you will need to build a custom verifier route and add the URL to the [Auth > Settings section](https://api.arcade.dev/dashboard/auth/settings) of the Arcade Dashboard.
 
 import { Steps, Tabs, Callout } from "nextra/components";
 
