@@ -72,6 +72,22 @@ Initialize MCP server.
 | `arcade_api_key` | `str \| None` | Arcade API key (overrides settings) | `None` |
 | `arcade_api_url` | `str \| None` | Arcade API URL (overrides settings) | `None` |
 
+#### `start`
+
+```python
+async start()
+```
+
+Initialize the server. Call before running a transport.
+
+#### `stop`
+
+```python
+async stop()
+```
+
+Gracefully shut down the server.
+
 #### `handle_message`
 
 ```python
@@ -122,13 +138,13 @@ from arcade_mcp_server.transports.stdio import StdioTransport
 async def main():
     catalog = ToolCatalog()
     server = MCPServer(catalog=catalog, name="example", version="1.0.0")
-    await server._start()
+    await server.start()
     try:
         # Run stdio transport loop
         transport = StdioTransport()
         await transport.run(server)
     finally:
-        await server._stop()
+        await server.stop()
 
 if __name__ == "__main__":
     asyncio.run(main())
@@ -145,12 +161,12 @@ from arcade_mcp_server.transports.http_streamable import HTTPStreamableTransport
 async def run_http():
     catalog = ToolCatalog()
     server = MCPServer(catalog=catalog)
-    await server._start()
+    await server.start()
     try:
         transport = HTTPStreamableTransport(host="0.0.0.0", port=8000)
         await transport.run(server)
     finally:
-        await server._stop()
+        await server.stop()
 
 asyncio.run(run_http())
 ```
