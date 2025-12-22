@@ -1,9 +1,9 @@
 name: Generate LLMs.txt
 
 on:
-  schedule:
-    - cron: "0 0 * * 0" # Run at 00:00 every Sunday
   workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: write
@@ -27,7 +27,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ github.event.pull_request.head.ref || github.ref }}
+          token: ${{ secrets.DOCS_PUBLISHABLE_GH_TOKEN }}
 
       - name: Install dependencies
         run: npm install -g pnpm
@@ -40,8 +41,26 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
-      # commit the changes and make a PR (branch protection)
-      - name: Create Pull Request
+      - name: Check for changes
+        id: check-changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit changes to PR
+        if: steps.check-changes.outputs.has_changes == 'true' && github.event_name == 'pull_request'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/llms.txt
+          git commit -m "🤖 Regenerate LLMs.txt"
+          git push
+
+      - name: Create Pull Request (for scheduled/manual runs)
+        if: steps.check-changes.outputs.has_changes == 'true' && github.event_name != 'pull_request'
         id: cpr
         uses: peter-evans/create-pull-request@v7
         with:
@@ -55,6 +74,7 @@ jobs:
             torresmateo
 
       - name: Enable Pull Request Automerge
+        if: steps.check-changes.outputs.has_changes == 'true' && github.event_name != 'pull_request'
         run: gh pr merge --squash --auto ${{ steps.cpr.outputs.pull-request-number }}
         env:
           GH_TOKEN: ${{ secrets.DOCS_PUBLISHABLE_GH_TOKEN }}
