@@ -30,6 +30,10 @@ const app = new ArcadeMCP({
 
 The SDK reads these environment variables as defaults. Constructor options take precedence.
 
+<Callout type="info">
+  **Naming convention:** `MCP_*` vars configure the SDK (server identity, middleware, sessions). `ARCADE_*` vars configure Arcade platform integration and runtime overrides typically set by deploy scripts.
+</Callout>
+
 ### Server Configuration
 
 | Variable | Maps to | Example |
@@ -172,6 +176,10 @@ const settings = MCPSettings.fromEnv();
 const secrets = settings.toolSecrets();
 // => { DATABASE_URL: '...', REDIS_URL: '...', ... }
 ```
+
+<Callout type="info">
+  `toolSecrets()` returns the **pool** of available secrets. When a tool declares `requiresSecrets: ['API_KEY']`, the SDK pulls that key from this pool and injects it into the handler. Missing secrets are validated at startup.
+</Callout>
 
 ## Settings Reference
 
@@ -355,10 +363,24 @@ app.run({
 
 ### Loading from Config File
 
+**config.json:**
+
+```json
+{
+  "debug": true,
+  "server": {
+    "name": "my-server",
+    "version": "1.0.0"
+  },
+  "middleware": {
+    "logLevel": "DEBUG"
+  }
+}
+```
+
 ```typescript
 import { MCPSettings } from 'arcade-mcp-server';
 
-// Load from JSON file
 const configFile = Bun.file('./config.json');
 const config = await configFile.json();
 

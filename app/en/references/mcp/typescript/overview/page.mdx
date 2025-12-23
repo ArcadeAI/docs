@@ -17,7 +17,7 @@ An **MCP server** exposes **tools** (functions the AI can call), **resources** (
 
 `arcade-mcp-server` is a TypeScript SDK for building MCP servers. It works standalone — no account required — for tools that use API keys or no auth at all.
 
-When your tools need to act on behalf of users (sending emails, accessing files, posting to Slack), connect to [Arcade](https://arcade.dev). Arcade manages OAuth consent flows, token storage, and refresh — so you don't build auth UIs or store credentials.
+When your tools need to act on behalf of users (sending emails, accessing files, posting to Slack), connect to [Arcade](https://arcade.dev). Arcade is a hosted auth service that manages OAuth consent flows, token storage, and refresh — so you don't build auth UIs or store credentials.
 
 - **Clean API** — Register tools with Zod schemas, get type-safe handlers
 - **Transport flexibility** — stdio for Claude Desktop, HTTP for web deployments
@@ -80,7 +80,7 @@ app.tool('greet', {
   handler: ({ input }) => `Hello, ${input.name}!`,
 });
 
-// reload: true restarts on file changes (dev only)
+// reload: true watches for file changes and restarts (dev only)
 app.run({ transport: 'http', port: 8000, reload: true });
 ```
 
@@ -160,9 +160,7 @@ Secrets are read from environment variables and validated at startup.
 
 Tools are always registered with `app.tool('name', options)`. The name is the first argument.
 
-### Inline (most projects)
-
-Define tools directly — `app.tool()` provides full type inference:
+For most projects, define tools inline — `app.tool()` provides full type inference:
 
 ```typescript
 app.tool('greet', {
@@ -172,35 +170,7 @@ app.tool('greet', {
 });
 ```
 
-### Multi-file (larger projects)
-
-For tools defined in separate files, use `tool()` to preserve type inference, then register with `app.tool()`:
-
-```typescript
-// tools/math.ts
-import { tool } from 'arcade-mcp-server';
-import { z } from 'zod';
-
-export const add = tool({
-  description: 'Add two numbers',
-  input: z.object({ a: z.number(), b: z.number() }),
-  handler: ({ input }) => input.a + input.b,
-});
-```
-
-```typescript
-// server.ts
-import { ArcadeMCP } from 'arcade-mcp-server';
-import { add } from './tools/math';
-
-const app = new ArcadeMCP({ name: 'my-server', version: '1.0.0' });
-app.tool('add', add);  // Name provided at registration
-app.run({ transport: 'http', port: 8000 });
-```
-
-<Callout type="info">
-  **Why `tool()`?** Exporting a plain object loses the schema→handler type connection. The `tool()` wrapper preserves it.
-</Callout>
+For larger projects with tools in separate files, see [the `tool()` wrapper](/references/mcp/typescript/types#materializedtool) in Types.
 
 ## Runtime Capabilities
 
