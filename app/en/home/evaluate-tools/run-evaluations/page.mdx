@@ -3,215 +3,386 @@ title: "Run evaluations"
 description: "Learn how to run evaluations using Arcade"
 ---
 
-# Run evaluations with the Arcade CLI
+# Run evaluations
 
-The Arcade Evaluation Framework allows you to run evaluations of your tool-enabled language models conveniently using the Arcade CLI. This enables you to execute your evaluation suites, gather results, and analyze the performance of your models in an efficient and streamlined manner.
+The `arcade evals` command discovers and executes evaluation suites with support for multiple providers, models, and output formats.
 
-<GuideOverview>
-<GuideOverview.Outcomes>
+import { Callout } from "nextra/components";
 
-Run evaluations of your tool-enabled language models using the Arcade CLI.
+## Basic usage
 
-</GuideOverview.Outcomes>
-
-<GuideOverview.Prerequisites>
-
-- [Arcade CLI](/home/arcade-cli)
-- [An MCP Server](/home/build-tools/create-a-mcp-server)
-- [Create an evaluation suite](/home/evaluate-tools/create-an-evaluation-suite)
-
-</GuideOverview.Prerequisites>
-
-<GuideOverview.YouWillLearn>
-
-- How to use the `arcade evals` CLI command to run evaluations.
-
-</GuideOverview.YouWillLearn>
-</GuideOverview>
-
-### Using the `arcade evals` Command
-
-To run evaluations, use the `arcade evals` command provided by the Arcade CLI. This command searches for evaluation files in the specified directory, executes any functions decorated with `@tool_eval`, and displays the results.
-
-#### Basic Usage
+Run all evaluations in the current directory:
 
 ```bash
-arcade evals <directory>
+arcade evals .
 ```
 
-- `<directory>`: The directory containing your evaluation files. By default, it searches the current directory (`.`).
+The command searches for files starting with `eval_` and ending with `.py`.
 
-For example, to run evaluations in the current directory:
+Show detailed results with critic feedback:
 
 ```bash
-arcade evals
+arcade evals . --details
 ```
 
-#### Evaluation File Naming Convention
-
-The `arcade evals` command looks for Python files that start with `eval_` and end with `.py` (e.g., `eval_math_tools.py`, `eval_slack_messaging.py`). These files should contain your evaluation suites.
-
-#### Command Options
-
-The `arcade evals` command supports several options to customize the evaluation process:
-
-- `--details`, `-d`: Show detailed results for each evaluation case, including critic feedback.
-
-  Example:
-
-  ```bash
-  arcade evals --details .
-  ```
-
-- `--models`, `-m`: Specify the models to use for evaluation. Provide a comma-separated list of model names.
-
-  Example:
-
-  ```bash
-  arcade evals --models gpt-4o,gpt-5 .
-  ```
-
-- `--max-concurrent`, `-c`: Set the maximum number of concurrent evaluations to run in parallel.
-
-  Example:
-
-  ```bash
-  arcade evals --max-concurrent 4 .
-  ```
-
-- `--provider`, `-p`: The provider of the models to use for evaluation. Uses OpenAI by default.
-
-  Example:
-
-  ```bash
-  arcade evals --provider openai .
-  ```
-
-- `--provider-api-key`, `-k`: The model provider API key. If not provided, will look for the appropriate environment variable based on the provider (e.g., OPENAI_API_KEY for openai provider), first in the current environment, then in the current working directory's .env file.
-
-  Example:
-
-  ```bash
-  arcade evals --provider-api-key my-api-key .
-  ```
-
-- `--debug`: Show debug information in the CLI.
-
-  Example:
-
-  ```bash
-  arcade evals --debug .
-  ```
-
-- `--help`: Show help information and exit.
-
-  Example:
-
-  ```bash
-  arcade evals --help
-  ```
-
-#### Example Command
-
-Running evaluations in the `arcade_my_tools/evals` directory, showing detailed results, using the `gpt-5` model:
+Filter to show only failures:
 
 ```bash
-arcade evals arcade_my_tools/evals --details --models gpt-5 -k my-openai-api-key
+arcade evals . --failed-only
 ```
 
-### Execution Process
+## Multi-provider support
 
-When you run the `arcade evals` command, the following steps occur:
+### Single provider with default model
 
-1. **Preparation**: The CLI loads the evaluation suites from the specified directory, looking for files that match the naming convention.
-
-2. **Execution**: The evaluation suites are executed asynchronously. Each suite's evaluation function, decorated with `@tool_eval`, is called with the appropriate configuration, including the model and concurrency settings.
-
-3. **Concurrency**: Evaluations can run concurrently based on the `--max-concurrent` setting, improving efficiency.
-
-4. **Result Aggregation**: Results from all evaluation cases and models are collected and aggregated.
-
-### Displaying Results
-
-After the evaluations are complete, the results are displayed in a concise and informative format, similar to testing frameworks like `pytest`. The output includes:
-
-- **Summary**: Shows the total number of cases, how many passed, failed, or issued warnings.
-
-  Example:
-
-  ```
-  Summary -- Total: 5 -- Passed: 4 -- Failed: 1
-  ```
-
-- **Detailed Case Results**: For each evaluation case, the status (PASSED, FAILED, WARNED), the case name, and the score are displayed.
-
-  Example:
-
-  ```
-  PASSED Add two large numbers -- Score: 1.00
-  FAILED Send DM with ambiguous username -- Score: 0.75
-  ```
-
-- **Critic Feedback**: If the `--details` flag is used, detailed feedback from each critic is provided, highlighting matches, mismatches, and scores for each evaluated field.
-
-  Example:
-
-  ```
-  Details:
-  user_name:
-    Match: False, Score: 0.00/0.50
-    Expected: johndoe
-    Actual: john_doe
-  message:
-    Match: True, Score: 0.50/0.50
-  ```
-
-### Interpreting the Results
-
-- **Passed**: The evaluation case met or exceeded the fail threshold specified in the rubric.
-
-- **Failed**: The evaluation case did not meet the fail threshold.
-
-- **Warnings**: If the score is between the warn threshold and the fail threshold, a warning is issued.
-
-Use the detailed feedback to understand where the model's performance can be improved, particularly focusing on mismatches identified by critics.
-
-### Customizing Evaluations
-
-You can customize the evaluation process by adjusting:
-
-- **Rubrics**: Modify fail and warn thresholds, and adjust weights to emphasize different aspects of evaluation.
-
-- **Critics**: Add or modify critics in your evaluation cases to target specific arguments or behaviors.
-
-- **Concurrency**: Adjust the `--max-concurrent` option to optimize performance based on your environment.
-
-### Handling Multiple Models
-
-You can evaluate multiple models in a single run by specifying them in the `--models` option as a comma-separated list. This allows you to compare the performance of different models across the same evaluation suites.
-
-Example:
+Use OpenAI with default model (`gpt-4o`):
 
 ```bash
-arcade evals . --models gpt-4o,gpt-5
+export OPENAI_API_KEY=sk-...
+arcade evals .
 ```
 
-### Considerations
+Use Anthropic with default model (`claude-sonnet-4-5-20250929`):
 
-- **Evaluation Files**: Ensure your evaluation files are correctly named and contain the evaluation suites decorated with `@tool_eval`.
+```bash
+export ANTHROPIC_API_KEY=sk-ant-...
+arcade evals . --use-provider anthropic
+```
 
-- **Provider API Keys**: If you are using a different provider, you will need to set the appropriate API key in an environment variable, or use the `--provider-api-key` option.
+### Specific models
 
-- **Tool Catalog**: Ensure your tool catalog is correctly defined and includes all the tools you want to evaluate.
+Specify one or more models for a provider:
 
-- **Weight distribution**: Ensure your weight distribution reflects the importance of each critic and that the sum of the weights is `1.0`.
+```bash
+arcade evals . --use-provider openai:gpt-4o,gpt-4o-mini
+```
 
-## Conclusion
+### Multiple providers
 
-Running evaluations using the Arcade CLI provides a powerful and convenient way to assess the tool-calling capabilities of your language models. By leveraging the `arcade evals` command, you can efficiently execute your evaluation suites, analyze results, and iterate on your models and tools.
+Compare performance across providers:
 
-Integrating this evaluation process into your development workflow helps ensure that your models interact with tools as expected, enhances reliability, and builds confidence in deploying actionable language models in production environments.
+```bash
+arcade evals . \
+  --use-provider openai:gpt-4o \
+  --use-provider anthropic:claude-sonnet-4-5-20250929 \
+  --openai-key sk-... \
+  --anthropic-key sk-ant-...
+```
+
+When you specify multiple models, results show side-by-side comparisons.
+
+## API keys
+
+API keys are resolved in the following order:
+
+| Priority | OpenAI | Anthropic |
+|----------|--------|-----------|
+| 1. Explicit flag | `--openai-key` | `--anthropic-key` |
+| 2. Environment | `OPENAI_API_KEY` | `ANTHROPIC_API_KEY` |
+| 3. `.env` file | `OPENAI_API_KEY=...` | `ANTHROPIC_API_KEY=...` |
+
+<Callout type="info">
+Create a `.env` file in your project directory to avoid setting keys in every terminal session.
+</Callout>
+
+## Capture mode
+
+Record tool calls without scoring to bootstrap test expectations:
+
+```bash
+arcade evals . --capture --file captures/baseline --format json
+```
+
+Include conversation context in captured output:
+
+```bash
+arcade evals . --capture --add-context --file captures/detailed
+```
+
+Capture mode is useful for:
+- Creating initial test expectations
+- Debugging model behavior
+- Understanding tool call patterns
+
+See [Capture mode](/home/evaluate-tools/capture-mode) for details.
+
+## Output formats
+
+### Save results to files
+
+Save results in one or more formats:
+
+```bash
+arcade evals . --file results/out --format md,html
+```
+
+Save in all formats:
+
+```bash
+arcade evals . --file results/out --format all
+```
+
+### Available formats
+
+| Format | Extension | Description |
+|--------|-----------|-------------|
+| `txt` | `.txt` | Plain text, pytest-style output |
+| `md` | `.md` | Markdown with tables and collapsible sections |
+| `html` | `.html` | Interactive HTML report |
+| `json` | `.json` | Structured JSON for programmatic use |
+
+Multiple formats generate separate files:
+- `results/out.txt`
+- `results/out.md`
+- `results/out.html`
+- `results/out.json`
+
+## Command options
+
+### Quick reference
+
+| Flag | Purpose | Example |
+|------|---------|---------|
+| `--use-provider` | Select provider/model | `--use-provider openai:gpt-4o` |
+| `--capture` | Record without scoring | `--capture --file out` |
+| `--details` | Show critic feedback | `--details` |
+| `--failed-only` | Filter failures | `--failed-only` |
+| `--format` | Output format(s) | `--format md,html,json` |
+| `--max-concurrent` | Parallel limit | `--max-concurrent 10` |
+
+### `--use-provider`
+
+Specify which provider(s) and model(s) to use:
+
+```bash
+--use-provider <provider>[:<model1>,<model2>,...]
+```
+
+**Supported providers:**
+- `openai` (default: `gpt-4o`)
+- `anthropic` (default: `claude-sonnet-4-5-20250929`)
+
+<Callout type="info">
+Anthropic model names include date stamps. Check [Anthropic's model documentation](https://docs.anthropic.com/en/docs/about-claude/models) for the latest model versions.
+</Callout>
+
+**Examples:**
+
+```bash
+# Default model for provider
+arcade evals . --use-provider anthropic
+
+# Specific model
+arcade evals . --use-provider openai:gpt-4o-mini
+
+# Multiple models from same provider
+arcade evals . --use-provider openai:gpt-4o,gpt-4o-mini
+
+# Multiple providers
+arcade evals . \
+  --use-provider openai:gpt-4o \
+  --use-provider anthropic:claude-sonnet-4-5-20250929
+```
+
+### `--openai-key`, `--anthropic-key`
+
+Provide API keys explicitly:
+
+```bash
+arcade evals . --use-provider openai --openai-key sk-...
+```
+
+### `--capture`
+
+Enable capture mode to record tool calls without scoring:
+
+```bash
+arcade evals . --capture
+```
+
+### `--add-context`
+
+Include system messages and conversation history in output:
+
+```bash
+arcade evals . --add-context --file out --format md
+```
+
+### `--file`
+
+Specify output file base name:
+
+```bash
+arcade evals . --file results/evaluation
+```
+
+### `--format`
+
+Choose output format(s):
+
+```bash
+arcade evals . --format md,html,json
+```
+
+Use `all` for all formats:
+
+```bash
+arcade evals . --format all
+```
+
+### `--details`, `-d`
+
+Show detailed results including critic feedback:
+
+```bash
+arcade evals . --details
+```
+
+### `--failed-only`
+
+Show only failed test cases:
+
+```bash
+arcade evals . --failed-only
+```
+
+### `--max-concurrent`, `-c`
+
+Set maximum concurrent evaluations:
+
+```bash
+arcade evals . --max-concurrent 10
+```
+
+Default is 5 concurrent evaluations.
+
+### `--arcade-url`
+
+Override Arcade gateway URL for testing:
+
+```bash
+arcade evals . --arcade-url https://staging.arcade.dev
+```
+
+## Understanding results
+
+### Summary format
+
+Results show overall performance:
+
+```
+Summary -- Total: 5 -- Passed: 4 -- Failed: 1
+```
+
+### Case results
+
+Each case displays status and score:
+
+```
+PASSED Get weather for city -- Score: 1.00
+FAILED Weather with invalid city -- Score: 0.65
+```
+
+### Detailed feedback
+
+Use `--details` to see critic-level analysis:
+
+```
+Details:
+  location:
+    Match: False, Score: 0.00/0.70
+    Expected: Seattle
+    Actual: Seatle
+  units:
+    Match: True, Score: 0.30/0.30
+```
+
+### Multi-model results
+
+When using multiple models, results show comparison tables:
+
+```
+Case: Get weather for city
+  Model: gpt-4o -- Score: 1.00 -- PASSED
+  Model: gpt-4o-mini -- Score: 0.95 -- WARNED
+```
+
+## Advanced usage
+
+### Test against staging gateway
+
+Point to a staging Arcade gateway:
+
+```bash
+export ARCADE_API_KEY=...
+export ARCADE_USER_ID=...
+
+arcade evals . \
+  --arcade-url https://staging.arcade.dev \
+  --use-provider openai
+```
+
+### High concurrency for fast execution
+
+Increase concurrent evaluations:
+
+```bash
+arcade evals . --max-concurrent 20
+```
+
+<Callout type="warning">
+High concurrency may hit API rate limits. Start with default (5) and increase gradually.
+</Callout>
+
+### Save comprehensive results
+
+Generate all formats with full details:
+
+```bash
+arcade evals . \
+  --details \
+  --add-context \
+  --file results/full-report \
+  --format all
+```
+
+## Troubleshooting
+
+### Missing dependencies
+
+If you see `ImportError: MCP SDK is required`, install the full package:
+
+```bash
+pip install 'arcade-mcp[evals]'
+```
+
+For Anthropic support:
+
+```bash
+pip install anthropic
+```
+
+### Tool name mismatches
+
+Tool names are normalized (dots become underscores). If you see unexpected tool names, check [Provider compatibility](/home/evaluate-tools/provider-compatibility).
+
+### API rate limits
+
+Reduce `--max-concurrent` value:
+
+```bash
+arcade evals . --max-concurrent 2
+```
+
+### No evaluation files found
+
+Ensure your evaluation files:
+- Start with `eval_`
+- End with `.py`
+- Contain functions decorated with `@tool_eval()`
 
 ## Next steps
 
-- **See an example MCP server with evaluations**: [Source code of a server with evaluations](https://github.com/ArcadeAI/arcade-mcp/tree/139cc2e54db0e5815f1c79dbe9e3285b4fe2bd66/examples/mcp_servers/server_with_evaluations)
+- Explore [capture mode](/home/evaluate-tools/capture-mode) for recording tool calls
+- Learn about [comparative evaluations](/home/evaluate-tools/comparative-evaluations) for comparing tool sources
+- Understand [provider compatibility](/home/evaluate-tools/provider-compatibility) and schema differences

@@ -7,12 +7,12 @@ description: "Learn why evaluating your tools is important"
 
 <div className="grid grid-cols-1 md:grid-cols-[4fr_3fr] gap-8">
   <div>
-    When deploying language models with tool-calling capabilities in production environments, it's essential to ensure their effectiveness and reliability. This evaluation process goes beyond traditional testing and focuses on two key aspects:
+    Tool evaluations ensure AI models use your tools correctly in production. Unlike traditional testing, evaluations measure two key aspects:
 
-    1. **Tool Utilization**: Assessing how efficiently the language model uses the available tools.
-    2. **Intent Understanding**: Evaluating the language model's ability to comprehend user intents and select the appropriate tools to fulfill those intents.
+    1. **Tool selection**: Does the model choose the right tools for the task?
+    2. **Parameter accuracy**: Does the model provide correct arguments?
 
-    Arcade's Evaluation Framework provides a comprehensive approach to assess and validate the tool-calling capabilities of language models, ensuring they meet the high standards required for real-world applications.
+    Arcade's evaluation framework helps you validate tool-calling capabilities before deployment, ensuring reliability in real-world applications.
   </div>
   <iframe
    className="aspect-video w-full max-w-[900px] rounded-xl shadow-2xl"
@@ -23,143 +23,326 @@ description: "Learn why evaluating your tools is important"
    ></iframe>
 </div>
 
-## Why Evaluate Tool Calling by Task?
+## What can go wrong?
 
-Language models augmented with tool-use capabilities can perform complex tasks by invoking external tools or APIs. However, without proper evaluation, these models might:
+Without proper evaluation, AI models might:
 
-- **Misinterpret user intents**, leading to incorrect tool selection.
-- **Provide incorrect arguments** to tools, causing failures or undesired outcomes.
-- **Fail to execute the necessary sequence of tool calls**, especially in tasks requiring multiple steps.
+- **Misinterpret user intents**, selecting the wrong tools
+- **Provide incorrect arguments**, causing failures or unexpected behavior
+- **Skip necessary tool calls**, missing steps in multi-step tasks
+- **Make incorrect assumptions** about parameter defaults or formats
 
-Evaluating tool calling by task ensures that the language model can handle specific scenarios reliably, providing confidence in its performance in production settings.
+## How evaluation works
 
-## Evaluation Scoring
+Evaluations compare the model's actual tool calls with expected tool calls for each test case.
 
-Scoring in the evaluation framework is based on comparing the model's actual tool calls with the expected ones for each evaluation case. The total score for a case depends on:
+### Scoring components
 
-1. **Tool Selection**: Whether the model selected the correct tools for the task.
-2. **Tool Call Arguments**: The correctness of the arguments provided to the tools, evaluated by critics.
-3. **Evaluation Rubric**: Each aspect of the evaluation is weighted according to the rubric, affecting its impact on the final score.
+1. **Tool selection**: Did the model choose the correct tool?
+2. **Parameter evaluation**: Are the arguments correct? (evaluated by critics)
+3. **Weighted scoring**: Each aspect has a weight that affects the final score
 
-The evaluation result includes:
+### Evaluation results
 
-- **Score**: A normalized value between 0.0 and 1.0.
-- **Result**:
-  - _Passed_: Score is above the fail threshold.
-  - _Failed_: Score is below the fail threshold.
-  - _Warned_: Score is between the warning and fail thresholds.
+Each test case receives:
 
-## Critics: Types and Usage
+- **Score**: A value between 0.0 and 1.0
+- **Status**:
+  - **Passed**: Score meets or exceeds fail threshold (default: 0.8)
+  - **Failed**: Score falls below fail threshold
+  - **Warned**: Score is between warn and fail thresholds (default: 0.9)
 
-Critics are essential for evaluating the correctness of tool call arguments. Different types of critics serve various evaluation needs:
+Example output:
+
+```
+PASSED Get weather for city -- Score: 1.00
+WARNED Send message with typo -- Score: 0.85
+FAILED Wrong tool selected -- Score: 0.50
+```
+
+## Critics: Validating parameters
+
+Critics evaluate the correctness of tool call arguments. Choose the right critic for your validation needs.
 
 ### BinaryCritic
 
-`BinaryCritic`s check for exact matches between expected and actual values after casting.
+Checks for exact matches after type casting.
 
-- **Use Case**: When exact values are required (e.g., specific numeric parameters).
-- **Example**: Ensuring the model provides the exact user ID in a function call.
+**Use case**: Exact values required (user IDs, commands, enum values)
 
-### NumericCritic
+```python
+from arcade_evals import BinaryCritic
 
-`NumericCritic` evaluates numeric values within a specified range, allowing for acceptable deviations.
-
-- **Use Case**: When values can be approximate but should be within a certain threshold.
-- **Example**: Accepting approximate results in mathematical computations due to floating-point precision.
+BinaryCritic(critic_field="user_id", weight=1.0)
+```
 
 ### SimilarityCritic
 
-`SimilarityCritic` measures the similarity between expected and actual string values using metrics like cosine similarity.
+Measures textual similarity using cosine similarity.
 
-- **Use Case**: When the exact wording isn't critical, but the content should be similar.
-- **Example**: Evaluating if the message content in a communication tool is similar to the expected message.
-
-### DatetimeCritic
-
-`DatetimeCritic` evaluates the closeness of datetime values within a specified tolerance.
-
-- **Use Case**: When datetime values should be within a certain range of the expected time.
-- **Example**: Verifying if a scheduled event time is close enough to the intended time.
-
-### Choosing the Right Critic
-
-- **Exact Matches Needed**: Use **BinaryCritic** for strict equality.
-- **Numeric Ranges**: Use **NumericCritic** when a tolerance is acceptable.
-- **Textual Similarity**: Use **SimilarityCritic** for comparing messages or descriptions.
-- **Datetime Tolerance**: Use **DatetimeCritic** when a tolerance is acceptable for datetime comparisons.
-
-Critics are defined with fields such as `critic_field`, `weight`, and parameters specific to their types (e.g., `similarity_threshold` for `SimilarityCritic`).
-
-## Rubrics and Setting Thresholds
-
-An **EvalRubric** defines the evaluation criteria and thresholds for determining pass/fail outcomes. Key components include:
-
-- **Fail Threshold**: The minimum score required to pass the evaluation.
-- **Warn Threshold**: The score threshold for issuing a warning.
-- **Weights**: Assigns importance to different aspects of the evaluation (e.g., tool selection, argument correctness).
-
-### Setting Up a Rubric
-
-- **Define Fail and Warn Thresholds**: Choose values between 0.0 and 1.0 to represent acceptable performance levels.
-- **Assign Weights**: Allocate weights to tool selection and critics to reflect their importance in the overall evaluation.
-- **Configure Failure Conditions**: Set flags like `fail_on_tool_selection` to enforce strict criteria.
-
-### Example Rubric Configuration:
-
-A rubric that requires a score of at least 0.85 to pass and issues a warning if the score is between 0.85 and 0.95:
-
-- Fail Threshold: 0.85
-- Warn Threshold: 0.95
-- Fail on Tool Selection: True
-- Tool Selection Weight: 1.0
+**Use case**: Content should be similar but exact wording isn't critical (messages, descriptions)
 
 ```python
-rubric = EvalRubric(
-    fail_threshold=0.85,
-    warn_threshold=0.95,
-    fail_on_tool_selection=True,
-    tool_selection_weight=1.0,
+from arcade_evals import SimilarityCritic
+
+SimilarityCritic(
+    critic_field="message",
+    weight=0.8,
+    similarity_threshold=0.85
 )
 ```
 
-## Building an Evaluation Suite
+### NumericCritic
 
-An **EvalSuite** orchestrates the running of multiple evaluation cases. Here's how to build one:
+Evaluates numeric values within a tolerance range.
 
-1. **Initialize EvalSuite**: Provide a name, system message, tool catalog, and rubric.
-2. **Add Evaluation Cases**: Use `add_case` or `extend_case` to include various scenarios.
-3. **Specify Expected Tool Calls**: Define the tools and arguments expected for each case.
-4. **Assign Critics**: Attach critics relevant to each case to evaluate specific arguments.
-5. **Run the Suite**: Execute the suite using the Arcade CLI to collect results.
+**Use case**: Approximate values acceptable (temperatures, measurements)
 
-### Example: Math Tools Evaluation Suite
+```python
+from arcade_evals import NumericCritic
 
-An evaluation suite for math tools might include cases such as:
+NumericCritic(
+    critic_field="temperature",
+    tolerance=2.0,
+    weight=0.5
+)
+```
 
-- **Adding Two Large Numbers**:
-  - **User Message**: "Add 12345 and 987654321"
-  - **Expected Tool Call**: `add(a=12345, b=987654321)`
-  - **Critics**:
-    - `BinaryCritic` for arguments `a` and `b`
-- **Calculating Square Roots**:
-  - **User Message**: "What is the square root of 3224990521?"
-  - **Expected Tool Call**: `sqrt(a=3224990521)`
-  - **Critics**:
-    - `BinaryCritic` for argument `a`
+### DatetimeCritic
 
-### Example: Slack Messaging Tools Evaluation Suite
+Checks datetime values within a time window.
 
-An evaluation suite for Slack messaging tools might include cases such as:
+**Use case**: Times should be close to expected (scheduled events, deadlines)
 
-- **Sending a Direct Message**:
-  - **User Message**: "Send a direct message to johndoe saying 'Hello, can we meet at 3 PM?'"
-  - **Expected Tool Call**: `send_dm_to_user(user_name='johndoe', message='Hello, can we meet at 3 PM?')`
-  - **Critics**:
-    - `BinaryCritic` for `user_name`
-    - `SimilarityCritic` for `message`
-- **Posting a Message to a Channel**:
-  - **User Message**: "Post 'The new feature is now live!' in the #announcements channel"
-  - **Expected Tool Call**: `send_message_to_channel(channel_name='announcements', message='The new feature is now live!')`
-  - **Critics**:
-    - `BinaryCritic` for `channel_name`
-    - `SimilarityCritic` for `message`
+```python
+from datetime import timedelta
+from arcade_evals import DatetimeCritic
+
+DatetimeCritic(
+    critic_field="due_date",
+    tolerance=timedelta(hours=1),
+    weight=0.6
+)
+```
+
+## Setting thresholds with rubrics
+
+An `EvalRubric` defines pass/fail criteria:
+
+```python
+from arcade_evals import EvalRubric
+
+rubric = EvalRubric(
+    fail_threshold=0.85,  # Minimum score to pass
+    warn_threshold=0.95,  # Score for warnings
+)
+```
+
+**Default thresholds:**
+- Fail threshold: 0.8
+- Warn threshold: 0.9
+
+### Example scenarios
+
+**Strict evaluation** (critical production systems):
+
+```python
+rubric = EvalRubric(
+    fail_threshold=0.95,
+    warn_threshold=0.98,
+)
+```
+
+**Lenient evaluation** (exploratory testing):
+
+```python
+rubric = EvalRubric(
+    fail_threshold=0.6,
+    warn_threshold=0.8,
+)
+```
+
+## Building effective evaluation suites
+
+A comprehensive evaluation suite includes:
+
+### 1. Common cases
+
+Test typical user requests:
+
+```python
+suite.add_case(
+    name="Get weather for city",
+    user_message="What's the weather in Seattle?",
+    expected_tool_calls=[
+        ExpectedMCPToolCall("Weather_GetCurrent", {"location": "Seattle"})
+    ],
+)
+```
+
+### 2. Edge cases
+
+Test unusual or boundary conditions:
+
+```python
+suite.add_case(
+    name="Weather with ambiguous location",
+    user_message="What's the weather in Portland?",  # Portland, OR or ME?
+    expected_tool_calls=[
+        ExpectedMCPToolCall(
+            "Weather_GetCurrent",
+            {"location": "Portland", "state": "OR"}
+        )
+    ],
+)
+```
+
+### 3. Multi-step cases
+
+Test sequences requiring multiple tool calls:
+
+```python
+suite.add_case(
+    name="Compare weather in two cities",
+    user_message="Compare the weather in Seattle and Portland",
+    expected_tool_calls=[
+        ExpectedMCPToolCall("Weather_GetCurrent", {"location": "Seattle"}),
+        ExpectedMCPToolCall("Weather_GetCurrent", {"location": "Portland"}),
+    ],
+)
+```
+
+### 4. Context-dependent cases
+
+Test with conversation history:
+
+```python
+suite.add_case(
+    name="Weather from previous context",
+    user_message="What about the weather there?",
+    expected_tool_calls=[
+        ExpectedMCPToolCall("Weather_GetCurrent", {"location": "Tokyo"})
+    ],
+    additional_messages=[
+        {"role": "user", "content": "I'm traveling to Tokyo next week."},
+        {"role": "assistant", "content": "Tokyo is a great destination!"},
+    ],
+)
+```
+
+## Example evaluation suites
+
+### Weather tools
+
+```python
+@tool_eval()
+async def weather_eval_suite():
+    suite = EvalSuite(
+        name="Weather Tools",
+        system_message="You are a weather assistant.",
+    )
+    
+    await suite.add_mcp_stdio_server(["python", "weather_server.py"])
+    
+    suite.add_case(
+        name="Current weather",
+        user_message="What's the weather in Seattle?",
+        expected_tool_calls=[
+            ExpectedMCPToolCall("GetWeather", {"city": "Seattle", "type": "current"})
+        ],
+        critics=[
+            BinaryCritic(critic_field="city", weight=0.7),
+            BinaryCritic(critic_field="type", weight=0.3),
+        ],
+    )
+    
+    return suite
+```
+
+### Communication tools
+
+```python
+@tool_eval()
+async def slack_eval_suite():
+    suite = EvalSuite(
+        name="Slack Messaging",
+        system_message="You are a Slack assistant.",
+    )
+    
+    await suite.add_arcade_gateway(gateway_slug="slack-gateway")
+    
+    suite.add_case(
+        name="Send direct message",
+        user_message="Send a DM to @alice saying 'Meeting at 3 PM'",
+        expected_tool_calls=[
+            ExpectedMCPToolCall(
+                "send_dm",
+                {"username": "alice", "message": "Meeting at 3 PM"}
+            )
+        ],
+        critics=[
+            BinaryCritic(critic_field="username", weight=0.4),
+            SimilarityCritic(critic_field="message", weight=0.6),
+        ],
+    )
+    
+    return suite
+```
+
+## Best practices
+
+### Start simple
+
+Begin with straightforward cases and add complexity gradually:
+
+1. Single tool call with exact parameters
+2. Single tool call with flexible parameters
+3. Multiple tool calls
+4. Context-dependent calls
+
+### Weight critics appropriately
+
+Assign weights based on importance:
+
+```python
+critics=[
+    BinaryCritic(critic_field="user_id", weight=0.7),    # Critical
+    SimilarityCritic(critic_field="message", weight=0.3), # Less critical
+]
+```
+
+Or use fuzzy weights:
+
+```python
+from arcade_evals.weights import FuzzyWeight
+
+critics=[
+    BinaryCritic(critic_field="user_id", weight=FuzzyWeight.CRITICAL),
+    SimilarityCritic(critic_field="message", weight=FuzzyWeight.MEDIUM),
+]
+```
+
+### Test with multiple models
+
+Compare performance across models:
+
+```bash
+arcade evals . \
+  --use-provider openai:gpt-4o,gpt-4o-mini \
+  --use-provider anthropic:claude-sonnet-4-5-20250929
+```
+
+### Iterate based on results
+
+Use evaluation results to:
+1. Identify common failure patterns
+2. Improve tool descriptions
+3. Refine parameter validation
+4. Add missing test cases
+
+## Next steps
+
+- [Create an evaluation suite](/home/evaluate-tools/create-an-evaluation-suite) to start testing your tools
+- [Run evaluations](/home/evaluate-tools/run-evaluations) with multiple providers
+- Explore [capture mode](/home/evaluate-tools/capture-mode) to bootstrap test expectations
+- Compare tool sources with [comparative evaluations](/home/evaluate-tools/comparative-evaluations)
