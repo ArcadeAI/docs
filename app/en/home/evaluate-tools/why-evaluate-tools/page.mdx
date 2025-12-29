@@ -3,6 +3,8 @@ title: "Why evaluate tools?"
 description: "Learn why evaluating your tools is important"
 ---
 
+import { Callout } from "nextra/components";
+
 # Why evaluate tools?
 
 <div className="grid grid-cols-1 md:grid-cols-[4fr_3fr] gap-8">
@@ -12,7 +14,8 @@ description: "Learn why evaluating your tools is important"
     1. **Tool selection**: Does the model choose the right tools for the task?
     2. **Parameter accuracy**: Does the model provide correct arguments?
 
-    Arcade's evaluation framework helps you validate tool-calling capabilities before deployment, ensuring reliability in real-world applications.
+    Arcade's evaluation framework helps you validate tool-calling capabilities before deployment, ensuring reliability in real-world applications. You can evaluate tools from MCP servers, Arcade Gateways, or custom implementations.
+
   </div>
   <iframe
    className="aspect-video w-full max-w-[900px] rounded-xl shadow-2xl"
@@ -46,7 +49,7 @@ Evaluations compare the model's actual tool calls with expected tool calls for e
 
 Each test case receives:
 
-- **Score**: A value between 0.0 and 1.0
+- **Score**: Calculated from weighted critic scores, normalized proportionally (weights can be any positive value)
 - **Status**:
   - **Passed**: Score meets or exceeds fail threshold (default: 0.8)
   - **Failed**: Score falls below fail threshold
@@ -60,289 +63,25 @@ WARNED Send message with typo -- Score: 0.85
 FAILED Wrong tool selected -- Score: 0.50
 ```
 
-## Critics: Validating parameters
-
-Critics evaluate the correctness of tool call arguments. Choose the right critic for your validation needs.
-
-### BinaryCritic
-
-Checks for exact matches after type casting.
-
-**Use case**: Exact values required (user IDs, commands, enum values)
-
-```python
-from arcade_evals import BinaryCritic
-
-BinaryCritic(critic_field="user_id", weight=1.0)
-```
-
-### SimilarityCritic
-
-Measures textual similarity using cosine similarity.
-
-**Use case**: Content should be similar but exact wording isn't critical (messages, descriptions)
-
-```python
-from arcade_evals import SimilarityCritic
-
-SimilarityCritic(
-    critic_field="message",
-    weight=0.8,
-    similarity_threshold=0.85
-)
-```
-
-### NumericCritic
-
-Evaluates numeric values within a tolerance range.
-
-**Use case**: Approximate values acceptable (temperatures, measurements)
-
-```python
-from arcade_evals import NumericCritic
-
-NumericCritic(
-    critic_field="temperature",
-    tolerance=2.0,
-    weight=0.5
-)
-```
-
-### DatetimeCritic
-
-Checks datetime values within a time window.
-
-**Use case**: Times should be close to expected (scheduled events, deadlines)
-
-```python
-from datetime import timedelta
-from arcade_evals import DatetimeCritic
-
-DatetimeCritic(
-    critic_field="due_date",
-    tolerance=timedelta(hours=1),
-    weight=0.6
-)
-```
-
-## Setting thresholds with rubrics
-
-An `EvalRubric` defines pass/fail criteria:
-
-```python
-from arcade_evals import EvalRubric
-
-rubric = EvalRubric(
-    fail_threshold=0.85,  # Minimum score to pass
-    warn_threshold=0.95,  # Score for warnings
-)
-```
-
-**Default thresholds:**
-- Fail threshold: 0.8
-- Warn threshold: 0.9
-
-### Example scenarios
-
-**Strict evaluation** (critical production systems):
-
-```python
-rubric = EvalRubric(
-    fail_threshold=0.95,
-    warn_threshold=0.98,
-)
-```
-
-**Lenient evaluation** (exploratory testing):
-
-```python
-rubric = EvalRubric(
-    fail_threshold=0.6,
-    warn_threshold=0.8,
-)
-```
-
-## Building effective evaluation suites
-
-A comprehensive evaluation suite includes:
-
-### 1. Common cases
-
-Test typical user requests:
-
-```python
-suite.add_case(
-    name="Get weather for city",
-    user_message="What's the weather in Seattle?",
-    expected_tool_calls=[
-        ExpectedMCPToolCall("Weather_GetCurrent", {"location": "Seattle"})
-    ],
-)
-```
-
-### 2. Edge cases
-
-Test unusual or boundary conditions:
-
-```python
-suite.add_case(
-    name="Weather with ambiguous location",
-    user_message="What's the weather in Portland?",  # Portland, OR or ME?
-    expected_tool_calls=[
-        ExpectedMCPToolCall(
-            "Weather_GetCurrent",
-            {"location": "Portland", "state": "OR"}
-        )
-    ],
-)
-```
-
-### 3. Multi-step cases
-
-Test sequences requiring multiple tool calls:
-
-```python
-suite.add_case(
-    name="Compare weather in two cities",
-    user_message="Compare the weather in Seattle and Portland",
-    expected_tool_calls=[
-        ExpectedMCPToolCall("Weather_GetCurrent", {"location": "Seattle"}),
-        ExpectedMCPToolCall("Weather_GetCurrent", {"location": "Portland"}),
-    ],
-)
-```
-
-### 4. Context-dependent cases
-
-Test with conversation history:
-
-```python
-suite.add_case(
-    name="Weather from previous context",
-    user_message="What about the weather there?",
-    expected_tool_calls=[
-        ExpectedMCPToolCall("Weather_GetCurrent", {"location": "Tokyo"})
-    ],
-    additional_messages=[
-        {"role": "user", "content": "I'm traveling to Tokyo next week."},
-        {"role": "assistant", "content": "Tokyo is a great destination!"},
-    ],
-)
-```
-
-## Example evaluation suites
-
-### Weather tools
-
-```python
-@tool_eval()
-async def weather_eval_suite():
-    suite = EvalSuite(
-        name="Weather Tools",
-        system_message="You are a weather assistant.",
-    )
-    
-    await suite.add_mcp_stdio_server(["python", "weather_server.py"])
-    
-    suite.add_case(
-        name="Current weather",
-        user_message="What's the weather in Seattle?",
-        expected_tool_calls=[
-            ExpectedMCPToolCall("GetWeather", {"city": "Seattle", "type": "current"})
-        ],
-        critics=[
-            BinaryCritic(critic_field="city", weight=0.7),
-            BinaryCritic(critic_field="type", weight=0.3),
-        ],
-    )
-    
-    return suite
-```
-
-### Communication tools
-
-```python
-@tool_eval()
-async def slack_eval_suite():
-    suite = EvalSuite(
-        name="Slack Messaging",
-        system_message="You are a Slack assistant.",
-    )
-    
-    await suite.add_arcade_gateway(gateway_slug="slack-gateway")
-    
-    suite.add_case(
-        name="Send direct message",
-        user_message="Send a DM to @alice saying 'Meeting at 3 PM'",
-        expected_tool_calls=[
-            ExpectedMCPToolCall(
-                "send_dm",
-                {"username": "alice", "message": "Meeting at 3 PM"}
-            )
-        ],
-        critics=[
-            BinaryCritic(critic_field="username", weight=0.4),
-            SimilarityCritic(critic_field="message", weight=0.6),
-        ],
-    )
-    
-    return suite
-```
-
-## Best practices
-
-### Start simple
-
-Begin with straightforward cases and add complexity gradually:
-
-1. Single tool call with exact parameters
-2. Single tool call with flexible parameters
-3. Multiple tool calls
-4. Context-dependent calls
-
-### Weight critics appropriately
-
-Assign weights based on importance:
-
-```python
-critics=[
-    BinaryCritic(critic_field="user_id", weight=0.7),    # Critical
-    SimilarityCritic(critic_field="message", weight=0.3), # Less critical
-]
-```
-
-Or use fuzzy weights:
-
-```python
-from arcade_evals.weights import FuzzyWeight
-
-critics=[
-    BinaryCritic(critic_field="user_id", weight=FuzzyWeight.CRITICAL),
-    SimilarityCritic(critic_field="message", weight=FuzzyWeight.MEDIUM),
-]
-```
-
-### Test with multiple models
-
-Compare performance across models:
-
-```bash
-arcade evals . \
-  --use-provider openai:gpt-4o,gpt-4o-mini \
-  --use-provider anthropic:claude-sonnet-4-5-20250929
-```
-
-### Iterate based on results
-
-Use evaluation results to:
-1. Identify common failure patterns
-2. Improve tool descriptions
-3. Refine parameter validation
-4. Add missing test cases
-
 ## Next steps
 
 - [Create an evaluation suite](/home/evaluate-tools/create-an-evaluation-suite) to start testing your tools
 - [Run evaluations](/home/evaluate-tools/run-evaluations) with multiple providers
 - Explore [capture mode](/home/evaluate-tools/capture-mode) to bootstrap test expectations
 - Compare tool sources with [comparative evaluations](/home/evaluate-tools/comparative-evaluations)
+
+## Advanced features
+
+Once you're comfortable with basic evaluations, explore these advanced capabilities:
+
+### Capture mode
+
+Record tool calls without scoring to discover what models actually call. Useful for bootstrapping test expectations and debugging. [Learn more →](/home/evaluate-tools/capture-mode)
+
+### Comparative evaluations
+
+Test the same cases against different tool sources (tracks) with isolated registries. Compare how models perform with different tool implementations. [Learn more →](/home/evaluate-tools/comparative-evaluations)
+
+### Output formats
+
+Save results in multiple formats (txt, md, html, json) for reporting and analysis. Mix formats with `--format md,html,json` or use `--format all`. [Learn more →](/home/evaluate-tools/run-evaluations#output-formats)

@@ -15,7 +15,7 @@ import { Steps, Tabs, Callout } from "nextra/components";
 
 Install Arcade with evaluation support:
 
-<Tabs items={["uv", "pip"]}>
+<Tabs items={["uv", "pip"]} storageKey="packageManager">
   <Tabs.Tab>
 
 ```bash
@@ -43,7 +43,8 @@ touch eval_server.py
 ```
 
 <Callout type="info">
-Evaluation files must start with `eval_` and use the `.py` extension. The CLI automatically discovers these files.
+  Evaluation files must start with `eval_` and use the `.py` extension. The CLI
+  automatically discovers these files.
 </Callout>
 
 ### Define your evaluation suite
@@ -65,12 +66,12 @@ async def weather_eval_suite() -> EvalSuite:
         name="Weather Tools",
         system_message="You are a helpful weather assistant.",
     )
-    
+
     # Load tools from your MCP server
     await suite.add_mcp_stdio_server(
         command=["python", "server.py"],
     )
-    
+
     # Add a test case
     suite.add_case(
         name="Get weather for city",
@@ -86,7 +87,7 @@ async def weather_eval_suite() -> EvalSuite:
             BinaryCritic(critic_field="units", weight=0.3),
         ],
     )
-    
+
     return suite
 ```
 
@@ -99,11 +100,23 @@ export OPENAI_API_KEY=<your_api_key>
 arcade evals .
 ```
 
-The command discovers all `eval_*.py` files and executes them.
+The command discovers all `eval_*.py` files and executes them using OpenAI's `gpt-4o` model by default.
 
-<Callout type="info">
-By default, evaluations use OpenAI's `gpt-4o` model. To use Anthropic or different models, see [Run evaluations](/home/evaluate-tools/run-evaluations).
-</Callout>
+**Using different providers:**
+
+```bash
+# Anthropic
+export ANTHROPIC_API_KEY=<your_api_key>
+arcade evals . --use-provider anthropic
+
+# Or specify API key directly
+arcade evals . --use-provider anthropic --anthropic-key <your_api_key>
+
+# Multiple models
+arcade evals . --use-provider openai:gpt-4o,gpt-4o-mini
+```
+
+See [Run evaluations](/home/evaluate-tools/run-evaluations) for all available options.
 
 ### Understand the results
 
@@ -119,7 +132,7 @@ Example output:
 Suite: Weather Tools
   Model: gpt-4o
     PASSED Get weather for city -- Score: 1.00
-    
+
 Summary -- Total: 1 -- Passed: 1 -- Failed: 0
 ```
 
@@ -144,11 +157,7 @@ PASSED Get weather for city -- Score: 1.00
 
 ## Loading tools
 
-You can load tools from different sources depending on your setup.
-
-<Callout type="info">
-All tool loading methods are async and must be awaited. Ensure your evaluation function is decorated with `@tool_eval()` and defined as `async`.
-</Callout>
+You can load tools from different sources. All methods are async and must be awaited in your `@tool_eval()` decorated function.
 
 ### From MCP HTTP server
 
@@ -157,20 +166,23 @@ Load tools from an HTTP or SSE MCP server:
 ```python
 await suite.add_mcp_server(
     url="http://localhost:8000",
-    headers={"Authorization": "Bearer token"},
+    headers={"Authorization": "Bearer token"},  # Optional
+    timeout=10,                                  # Optional: Connection timeout (default: 10)
+    use_sse=False,                              # Optional: Use SSE transport (default: False)
 )
 ```
 
-The loader automatically appends `/mcp` to the URL if not present.
+The URL is automatically normalized (appends `/mcp` if not present).
 
 ### From MCP stdio server
 
-Load tools from a stdio MCP server:
+Load tools from a stdio MCP server process:
 
 ```python
 await suite.add_mcp_stdio_server(
     command=["python", "server.py"],
-    env={"API_KEY": "secret"},
+    env={"API_KEY": "secret"},  # Optional: Environment variables
+    timeout=10,                  # Optional: Connection timeout (default: 10)
 )
 ```
 
@@ -181,26 +193,18 @@ Load tools from an Arcade MCP Gateway:
 ```python
 await suite.add_arcade_gateway(
     gateway_slug="my-gateway",
-    arcade_api_key="your-api-key",
-    arcade_user_id="user-id",
+    arcade_api_key="your-api-key",  # Optional: Defaults to ARCADE_API_KEY env var
+    arcade_user_id="user-id",       # Optional: Defaults to ARCADE_USER_ID env var
+    base_url=None,                   # Optional: Override gateway URL
+    timeout=10,                      # Optional: Connection timeout (default: 10)
 )
 ```
-
-<Callout type="info">
-Tool loading results are cached automatically to avoid redundant connections. If you update your MCP server, use `clear_tools_cache()` to reload:
-
-```python
-from arcade_evals import clear_tools_cache
-
-clear_tools_cache()
-```
-</Callout>
 
 ### Manual tool definitions
 
 Define tools manually using MCP format:
 
-```python
+````python
 suite.add_tool_definitions([
     {
         "name": "Weather.GetCurrent",
@@ -219,7 +223,21 @@ suite.add_tool_definitions([
         },
     }
 ])
-```
+
+### Mixing tool sources
+
+You can load tools from multiple sources into the same suite:
+
+```python
+# Load from multiple MCP servers
+await suite.add_mcp_server("http://server1.example")
+await suite.add_mcp_server("http://server2.example")
+
+# Mix with manual definitions
+suite.add_tool_definitions([{"name": "CustomTool", ...}])
+````
+
+All tools are accumulated in the suite's registry and available to the model.
 
 ## Expected tool calls
 
@@ -233,113 +251,36 @@ ExpectedMCPToolCall(
 ```
 
 <Callout type="warning">
-Tool names are normalized for provider compatibility. Dots (`.`) become underscores (`_`). For example, `Weather.GetCurrent` becomes `Weather_GetCurrent`. See [Provider compatibility](/home/evaluate-tools/provider-compatibility) for details.
+  Tool names are normalized for compatibility with model tool calling. Dots
+  (`.`) become underscores (`_`). For example, `Weather.GetCurrent` becomes
+  `Weather_GetCurrent`.
 </Callout>
 
 ## Critics
 
-Critics evaluate specific parameters of tool calls. Choose the right critic for your validation needs.
+Critics validate tool call parameters. Each critic type handles different validation needs:
 
-| Critic Type | Use When | Example Field |
-|-------------|----------|---------------|
-| BinaryCritic | Need exact match | user_id, city, status |
-| SimilarityCritic | Semantic match OK | message, description |
-| NumericCritic | Range acceptable | temperature, price |
-| DatetimeCritic | Time window OK | deadline, start_time |
-
-### BinaryCritic
-
-Checks for exact matches after type casting:
-
-```python
-from arcade_evals import BinaryCritic
-
-# Perfect for IDs, locations, and enum values
-BinaryCritic(critic_field="location", weight=0.7)
-```
-
-### SimilarityCritic
-
-Evaluates textual similarity using cosine similarity:
-
-```python
-from arcade_evals import SimilarityCritic
-
-SimilarityCritic(
-    critic_field="message",
-    weight=0.5,
-    similarity_threshold=0.8
-)
-```
-
-### NumericCritic
-
-Assesses numeric values within tolerance:
-
-```python
-from arcade_evals import NumericCritic
-
-NumericCritic(
-    critic_field="temperature",
-    tolerance=2.0,
-    weight=0.3
-)
-```
-
-### DatetimeCritic
-
-Evaluates datetime values within a time window:
-
-```python
-from datetime import timedelta
-from arcade_evals import DatetimeCritic
-
-DatetimeCritic(
-    critic_field="scheduled_time",
-    tolerance=timedelta(minutes=5),
-    weight=0.4
-)
-```
-
-## Fuzzy weights
-
-Use fuzzy weights when you want qualitative importance levels instead of precise numbers:
+| Critic             | Use case        | Example                                                            |
+| ------------------ | --------------- | ------------------------------------------------------------------ |
+| `BinaryCritic`     | Exact match     | `BinaryCritic(critic_field="user_id", weight=1.0)`                 |
+| `SimilarityCritic` | Text similarity | `SimilarityCritic(critic_field="message", weight=0.8)`             |
+| `NumericCritic`    | Numeric range   | `NumericCritic(critic_field="temp", tolerance=2.0)`                |
+| `DatetimeCritic`   | Time window     | `DatetimeCritic(critic_field="due", tolerance=timedelta(hours=1))` |
 
 ```python
 from arcade_evals import BinaryCritic, SimilarityCritic
-from arcade_evals.weights import FuzzyWeight
 
-critics = [
-    BinaryCritic(
-        critic_field="user_id",
-        weight=FuzzyWeight.CRITICAL
-    ),
-    SimilarityCritic(
-        critic_field="message",
-        weight=FuzzyWeight.MEDIUM
-    ),
-    BinaryCritic(
-        critic_field="priority",
-        weight=FuzzyWeight.LOW
-    ),
+critics=[
+    BinaryCritic(critic_field="location", weight=0.7),
+    SimilarityCritic(critic_field="message", weight=0.3),
 ]
 ```
 
-Fuzzy weights are automatically normalized:
-
-| Weight | Value | Normalized (example above) |
-|--------|-------|----------------------------|
-| MINIMAL | 1 | - |
-| VERY_LOW | 2 | - |
-| LOW | 3 | 21.4% |
-| MEDIUM | 4 | 28.6% |
-| HIGH | 5 | - |
-| VERY_HIGH | 6 | - |
-| CRITICAL | 7 | 50.0% |
+All weights are normalized proportionally to sum to 1.0. Use numeric values or `FuzzyWeight` (`CRITICAL`, `HIGH`, `MEDIUM`, `LOW`).
 
 ## Multiple tool calls
 
-Test cases with multiple expected tool calls:
+Test cases can include multiple expected tool calls:
 
 ```python
 suite.add_case(
@@ -348,9 +289,6 @@ suite.add_case(
     expected_tool_calls=[
         ExpectedMCPToolCall("Weather_GetCurrent", {"location": "Seattle"}),
         ExpectedMCPToolCall("Weather_GetCurrent", {"location": "Portland"}),
-    ],
-    critics=[
-        BinaryCritic(critic_field="location", weight=1.0),
     ],
 )
 ```
@@ -366,9 +304,6 @@ suite.add_case(
     expected_tool_calls=[
         ExpectedMCPToolCall("Weather_GetCurrent", {"location": "Tokyo"}),
     ],
-    critics=[
-        BinaryCritic(critic_field="location", weight=1.0),
-    ],
     additional_messages=[
         {"role": "user", "content": "I'm planning to visit Tokyo next week."},
         {"role": "assistant", "content": "That sounds exciting! What would you like to know about Tokyo?"},
@@ -376,32 +311,26 @@ suite.add_case(
 )
 ```
 
-## Rubrics and thresholds
+Use OpenAI message format for `additional_messages`. Arcade converts it automatically for Anthropic.
 
-Customize evaluation thresholds using an `EvalRubric`:
+## Rubrics
+
+Customize pass/fail thresholds with `EvalRubric`. Default: fail at 0.8, warn at 0.9.
 
 ```python
 from arcade_evals import EvalRubric
 
-rubric = EvalRubric(
-    fail_threshold=0.85,
-    warn_threshold=0.95,
-)
-
 suite = EvalSuite(
-    name="Strict Weather Evaluation",
-    system_message="You are a weather assistant.",
-    rubric=rubric,
+    name="Strict Evaluation",
+    system_message="You are helpful.",
+    rubric=EvalRubric(fail_threshold=0.85, warn_threshold=0.95),
 )
 ```
 
-Default thresholds:
-- **Fail threshold**: 0.8
-- **Warn threshold**: 0.9
+If you want stricter suites, increase thresholds (for example `fail_threshold=0.95`). For exploratory testing, lower them (for example `fail_threshold=0.6`).
 
 ## Next steps
 
 - Learn how to [run evaluations with different providers](/home/evaluate-tools/run-evaluations)
 - Explore [capture mode](/home/evaluate-tools/capture-mode) to record tool calls
 - Compare tool sources with [comparative evaluations](/home/evaluate-tools/comparative-evaluations)
-- Understand [provider compatibility](/home/evaluate-tools/provider-compatibility)

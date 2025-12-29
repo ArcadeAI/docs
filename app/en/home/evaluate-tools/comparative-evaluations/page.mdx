@@ -5,33 +5,56 @@ description: "Compare different tool implementations with the same test cases"
 
 # Comparative evaluations
 
-Comparative evaluations let you run the same test cases against different tool implementations. Use tracks to compare tool sources side-by-side.
+Comparative evaluations let you test how well AI models select and use tools from different, isolated tool sources. Each "track" represents a separate tool registry, allowing you to compare implementations side-by-side.
 
 import { Callout, Steps } from "nextra/components";
 
 ## What are tracks?
 
-Tracks are isolated tool registries within a single evaluation suite. Each track represents a different source of tools.
+**Tracks are isolated tool registries** within a single evaluation suite. Each track has its own set of tools that are **not shared** with other tracks. This isolation lets you test how models perform when given different tool options for the same task.
+
+**Key concept**: Comparative evaluations test tool **selection** across different tool sets. Each track provides a different context (set of tools) to the model.
 
 **Common use cases:**
 
 - **Compare tool providers**: Test Google Weather vs OpenWeather API
-- **Version testing**: Compare API v1 vs API v2
-- **Implementation comparison**: Test different MCP servers for the same functionality
+- **Implementation comparison**: Test different MCP servers offering similar functionality
 - **A/B testing**: Evaluate alternative tool designs
 
 ### When to use comparative evaluations
 
 Use **comparative evaluations** when:
+
 - ✅ Testing multiple implementations of the same functionality
-- ✅ Comparing different API versions
-- ✅ Evaluating tool providers side-by-side
-- ✅ A/B testing tool designs
+- ✅ Comparing different tool providers
+- ✅ Evaluating how models choose between different tool sets
 
 Use **regular evaluations** when:
+
 - ✅ Testing a single tool implementation
-- ✅ Validating tool behavior
+- ✅ Testing mixed tools from multiple sources in the same context
 - ✅ Regression testing
+
+### Testing mixed tool sources
+
+To test how multiple MCP servers work **together** in the same context (not isolated), use a regular evaluation and load multiple sources:
+
+```python
+@tool_eval()
+async def mixed_tools_eval():
+    suite = EvalSuite(name="Mixed Tools", system_message="You are helpful.")
+
+    # All tools available to the model in the same context
+    await suite.add_mcp_server("http://server1.example")
+    await suite.add_mcp_server("http://server2.example")
+    suite.add_tool_definitions([{"name": "CustomTool", ...}])
+
+    # Model can use any tool from any source
+    suite.add_case(...)
+    return suite
+```
+
+Alternatively, use an Arcade Gateway which aggregates tools from multiple sources.
 
 ## Basic comparative evaluation
 
@@ -50,19 +73,19 @@ async def weather_comparison():
         name="Weather API Comparison",
         system_message="You are a weather assistant.",
     )
-    
+
     # Track A: Weather API v1
     await suite.add_mcp_server(
         "http://weather-v1.example/mcp",
         track="Weather v1"
     )
-    
+
     # Track B: Weather API v2
     await suite.add_mcp_server(
         "http://weather-v2.example/mcp",
         track="Weather v2"
     )
-    
+
     return suite
 ```
 
@@ -164,7 +187,8 @@ suite.add_tool_definitions(
 ```
 
 <Callout type="info">
-Tools must be registered before creating comparative cases that reference their tracks.
+  Tools must be registered before creating comparative cases that reference
+  their tracks.
 </Callout>
 
 ## Comparative case builder
@@ -203,9 +227,28 @@ suite.add_comparative_case(
 ).for_track("Weather v1", ...).for_track("Weather v2", ...)
 ```
 
+**Bias-aware message design:**
+
+Design `additional_messages` to avoid leading the model. Keep them neutral so you measure tool behavior, not prompt hints:
+
+```python
+# ✅ Good - Neutral
+additional_messages=[
+    {"role": "user", "content": "I need weather information"},
+    {"role": "assistant", "content": "I can help with that. Which location?"},
+]
+
+# ❌ Avoid - Tells the model which tool to call
+additional_messages=[
+    {"role": "user", "content": "Use the GetWeather tool for Seattle"},
+]
+```
+
+Keep messages generic so the model chooses tools naturally based on what is available in the track.
+
 ### Different expectations per track
 
-Tracks often have different tool names and parameters:
+Tracks can expose different tools and schemas. Because of that, you may need different critics per track:
 
 ```python
 suite.add_comparative_case(
@@ -222,6 +265,7 @@ suite.add_comparative_case(
     expected_tool_calls=[
         ExpectedMCPToolCall("Bing_WebSearch", {"q": "Python tutorials"})
     ],
+    # Different schema, so validate the matching field for this track
     critics=[BinaryCritic(critic_field="q", weight=1.0)],
 )
 ```
@@ -246,23 +290,34 @@ async def search_comparison():
         name="Search API Comparison",
         system_message="You are a search assistant. Use the available tools to search for information.",
     )
-    
-    # Register search providers
+
+    # Register search providers (MCP servers)
     await suite.add_mcp_server(
         "http://google-search.example/mcp",
         track="Google",
     )
-    
+
     await suite.add_mcp_server(
         "http://bing-search.example/mcp",
         track="Bing",
     )
-    
-    await suite.add_mcp_server(
-        "http://duckduckgo.example/mcp",
+
+    # Mix with manual tool definitions
+    suite.add_tool_definitions(
+        tools=[{
+            "name": "DDG_Search",
+            "description": "Search using DuckDuckGo",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string"}
+                },
+                "required": ["query"]
+            }
+        }],
         track="DuckDuckGo",
     )
-    
+
     # Simple query
     suite.add_comparative_case(
         name="basic_search",
@@ -282,11 +337,11 @@ async def search_comparison():
     ).for_track(
         "DuckDuckGo",
         expected_tool_calls=[
-            ExpectedMCPToolCall("DDG_Search", {"search_term": "Python tutorials"})
+            ExpectedMCPToolCall("DDG_Search", {"query": "Python tutorials"})
         ],
-        critics=[BinaryCritic(critic_field="search_term", weight=1.0)],
+        critics=[BinaryCritic(critic_field="query", weight=1.0)],
     )
-    
+
     # Query with filters
     suite.add_comparative_case(
         name="search_with_filters",
@@ -320,15 +375,14 @@ async def search_comparison():
         expected_tool_calls=[
             ExpectedMCPToolCall(
                 "DDG_Search",
-                {"search_term": "Python tutorials", "time": "m"}
+                {"query": "Python tutorials"}
             )
         ],
         critics=[
-            SimilarityCritic(critic_field="search_term", weight=0.7),
-            BinaryCritic(critic_field="time", weight=0.3),
+            SimilarityCritic(critic_field="query", weight=1.0),
         ],
     )
-    
+
     return suite
 ```
 
@@ -396,20 +450,20 @@ async def mixed_suite():
         name="Mixed Evaluation",
         system_message="You are helpful.",
     )
-    
+
     # Register default tools
     await suite.add_mcp_stdio_server(["python", "server.py"])
-    
+
     # Regular case (uses default tools)
     suite.add_case(
         name="regular_test",
         user_message="Do something",
         expected_tool_calls=[...],
     )
-    
+
     # Register track-specific tools
     await suite.add_mcp_server("http://api-v2.example", track="v2")
-    
+
     # Comparative case
     suite.add_comparative_case(
         name="compare_versions",
@@ -421,12 +475,12 @@ async def mixed_suite():
         "v2",  # Uses v2 tools
         expected_tool_calls=[...],
     )
-    
+
     return suite
 ```
 
 <Callout type="info">
-Use track name `"default"` to reference tools registered without a track.
+  Use track name `"default"` to reference tools registered without a track.
 </Callout>
 
 ## Capture mode with tracks
@@ -471,6 +525,7 @@ arcade evals . \
 ```
 
 Results show:
+
 - Per-track scores for each model
 - Cross-track comparisons for each model
 - Cross-model comparisons for each track
@@ -699,6 +754,4 @@ suite.add_tool_catalog(catalog_v2, track="Python v2")
 
 - [Create an evaluation suite](/home/evaluate-tools/create-an-evaluation-suite) with tracks
 - Use [capture mode](/home/evaluate-tools/capture-mode) to discover track-specific tool calls
-- Understand [provider compatibility](/home/evaluate-tools/provider-compatibility) when comparing across providers
 - [Run evaluations](/home/evaluate-tools/run-evaluations) with multiple models and tracks
-

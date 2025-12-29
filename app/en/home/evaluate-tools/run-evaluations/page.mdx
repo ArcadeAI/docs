@@ -9,6 +9,12 @@ The `arcade evals` command discovers and executes evaluation suites with support
 
 import { Callout } from "nextra/components";
 
+<Callout type="info">
+  **Backward compatibility**: All new features (multi-provider support, capture
+  mode, output formats) work with existing evaluation suites. No code changes
+  required.
+</Callout>
+
 ## Basic usage
 
 Run all evaluations in the current directory:
@@ -75,14 +81,15 @@ When you specify multiple models, results show side-by-side comparisons.
 
 API keys are resolved in the following order:
 
-| Priority | OpenAI | Anthropic |
-|----------|--------|-----------|
-| 1. Explicit flag | `--openai-key` | `--anthropic-key` |
-| 2. Environment | `OPENAI_API_KEY` | `ANTHROPIC_API_KEY` |
-| 3. `.env` file | `OPENAI_API_KEY=...` | `ANTHROPIC_API_KEY=...` |
+| Priority         | OpenAI               | Anthropic               |
+| ---------------- | -------------------- | ----------------------- |
+| 1. Explicit flag | `--openai-key`       | `--anthropic-key`       |
+| 2. Environment   | `OPENAI_API_KEY`     | `ANTHROPIC_API_KEY`     |
+| 3. `.env` file   | `OPENAI_API_KEY=...` | `ANTHROPIC_API_KEY=...` |
 
 <Callout type="info">
-Create a `.env` file in your project directory to avoid setting keys in every terminal session.
+  Create a `.env` file in your project directory to avoid setting keys in every
+  terminal session.
 </Callout>
 
 ## Capture mode
@@ -100,6 +107,7 @@ arcade evals . --capture --add-context --file captures/detailed
 ```
 
 Capture mode is useful for:
+
 - Creating initial test expectations
 - Debugging model behavior
 - Understanding tool call patterns
@@ -124,14 +132,15 @@ arcade evals . --file results/out --format all
 
 ### Available formats
 
-| Format | Extension | Description |
-|--------|-----------|-------------|
-| `txt` | `.txt` | Plain text, pytest-style output |
-| `md` | `.md` | Markdown with tables and collapsible sections |
-| `html` | `.html` | Interactive HTML report |
-| `json` | `.json` | Structured JSON for programmatic use |
+| Format | Extension | Description                                   |
+| ------ | --------- | --------------------------------------------- |
+| `txt`  | `.txt`    | Plain text, pytest-style output               |
+| `md`   | `.md`     | Markdown with tables and collapsible sections |
+| `html` | `.html`   | Interactive HTML report                       |
+| `json` | `.json`   | Structured JSON for programmatic use          |
 
 Multiple formats generate separate files:
+
 - `results/out.txt`
 - `results/out.md`
 - `results/out.html`
@@ -141,14 +150,14 @@ Multiple formats generate separate files:
 
 ### Quick reference
 
-| Flag | Purpose | Example |
-|------|---------|---------|
-| `--use-provider` | Select provider/model | `--use-provider openai:gpt-4o` |
-| `--capture` | Record without scoring | `--capture --file out` |
-| `--details` | Show critic feedback | `--details` |
-| `--failed-only` | Filter failures | `--failed-only` |
-| `--format` | Output format(s) | `--format md,html,json` |
-| `--max-concurrent` | Parallel limit | `--max-concurrent 10` |
+| Flag               | Purpose                | Example                        |
+| ------------------ | ---------------------- | ------------------------------ |
+| `--use-provider`   | Select provider/model  | `--use-provider openai:gpt-4o` |
+| `--capture`        | Record without scoring | `--capture --file out`         |
+| `--details`        | Show critic feedback   | `--details`                    |
+| `--failed-only`    | Filter failures        | `--failed-only`                |
+| `--format`         | Output format(s)       | `--format md,html,json`        |
+| `--max-concurrent` | Parallel limit         | `--max-concurrent 10`          |
 
 ### `--use-provider`
 
@@ -159,11 +168,14 @@ Specify which provider(s) and model(s) to use:
 ```
 
 **Supported providers:**
+
 - `openai` (default: `gpt-4o`)
 - `anthropic` (default: `claude-sonnet-4-5-20250929`)
 
 <Callout type="info">
-Anthropic model names include date stamps. Check [Anthropic's model documentation](https://docs.anthropic.com/en/docs/about-claude/models) for the latest model versions.
+  Anthropic model names include date stamps. Check [Anthropic's model
+  documentation](https://docs.anthropic.com/en/docs/about-claude/models) for the
+  latest model versions.
 </Callout>
 
 **Examples:**
@@ -256,15 +268,19 @@ arcade evals . --max-concurrent 10
 
 Default is 5 concurrent evaluations.
 
-### `--arcade-url`
+### `--debug`
 
-Override Arcade gateway URL for testing:
+Show debug information for troubleshooting:
 
 ```bash
-arcade evals . --arcade-url https://staging.arcade.dev
+arcade evals . --debug
 ```
 
+Displays detailed error traces and connection information.
+
 ## Understanding results
+
+Results are formatted based on evaluation type (regular, multi-model, or comparative) and selected flags.
 
 ### Summary format
 
@@ -273,6 +289,14 @@ Results show overall performance:
 ```
 Summary -- Total: 5 -- Passed: 4 -- Failed: 1
 ```
+
+**How flags affect output:**
+
+- `--details`: Adds per-critic breakdown for each case
+- `--failed-only`: Filters to show only failed cases (summary shows original totals)
+- `--add-context`: Includes system messages and conversation history
+- Multiple models: Switches to comparison table format
+- Comparative tracks: Shows side-by-side track comparison
 
 ### Case results
 
@@ -309,19 +333,6 @@ Case: Get weather for city
 
 ## Advanced usage
 
-### Test against staging gateway
-
-Point to a staging Arcade gateway:
-
-```bash
-export ARCADE_API_KEY=...
-export ARCADE_USER_ID=...
-
-arcade evals . \
-  --arcade-url https://staging.arcade.dev \
-  --use-provider openai
-```
-
 ### High concurrency for fast execution
 
 Increase concurrent evaluations:
@@ -331,7 +342,8 @@ arcade evals . --max-concurrent 20
 ```
 
 <Callout type="warning">
-High concurrency may hit API rate limits. Start with default (5) and increase gradually.
+  High concurrency may hit API rate limits. Start with default (5) and increase
+  gradually.
 </Callout>
 
 ### Save comprehensive results
@@ -364,7 +376,7 @@ pip install anthropic
 
 ### Tool name mismatches
 
-Tool names are normalized (dots become underscores). If you see unexpected tool names, check [Provider compatibility](/home/evaluate-tools/provider-compatibility).
+Tool names are normalized (dots become underscores). If you see unexpected tool names, check your tool definitions and your expected tool calls.
 
 ### API rate limits
 
@@ -377,6 +389,7 @@ arcade evals . --max-concurrent 2
 ### No evaluation files found
 
 Ensure your evaluation files:
+
 - Start with `eval_`
 - End with `.py`
 - Contain functions decorated with `@tool_eval()`
@@ -385,4 +398,3 @@ Ensure your evaluation files:
 
 - Explore [capture mode](/home/evaluate-tools/capture-mode) for recording tool calls
 - Learn about [comparative evaluations](/home/evaluate-tools/comparative-evaluations) for comparing tool sources
-- Understand [provider compatibility](/home/evaluate-tools/provider-compatibility) and schema differences

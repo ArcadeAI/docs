@@ -3,11 +3,17 @@ title: "Capture mode"
 description: "Record tool calls without scoring to bootstrap test expectations"
 ---
 
+import { Callout, Steps } from "nextra/components";
+
 # Capture mode
 
 Capture mode records tool calls without evaluating them. Use it to bootstrap test expectations or debug model behavior.
 
-import { Callout, Steps } from "nextra/components";
+<Callout type="info">
+  **Backward compatibility**: Capture mode works with existing evaluation
+  suites. Simply add the `--capture` flag to any `arcade evals` command. No code
+  changes needed.
+</Callout>
 
 ## When to use capture mode
 
@@ -52,22 +58,22 @@ async def capture_weather_suite():
         name="Weather Capture",
         system_message="You are a weather assistant.",
     )
-    
+
     await suite.add_mcp_stdio_server(["python", "weather_server.py"])
-    
+
     # Add cases without expected tool calls
     suite.add_case(
         name="Simple weather query",
         user_message="What's the weather in Seattle?",
         expected_tool_calls=[],  # Empty for capture
     )
-    
+
     suite.add_case(
         name="Multi-city comparison",
         user_message="Compare the weather in Seattle and Portland",
         expected_tool_calls=[],
     )
-    
+
     return suite
 ```
 
@@ -186,6 +192,7 @@ Markdown format is more readable for quick review:
 **Input:** What's the weather in Seattle?
 
 **Tool Calls:**
+
 - `Weather_GetCurrent`
   - location: Seattle
   - units: fahrenheit
@@ -202,95 +209,6 @@ arcade evals . --capture \
   --file captures/comparison --format json
 ```
 
-## Programmatic capture
-
-Use capture mode from Python code:
-
-```python
-import asyncio
-from openai import AsyncOpenAI
-from arcade_evals import EvalSuite
-
-async def capture_tool_calls():
-    suite = EvalSuite(name="Weather", system_message="You are helpful.")
-    await suite.add_mcp_stdio_server(["python", "server.py"])
-    
-    suite.add_case(
-        name="weather_query",
-        user_message="What's the weather in Seattle?",
-        expected_tool_calls=[],
-    )
-    
-    client = AsyncOpenAI(api_key="sk-...")
-    
-    result = await suite.capture(
-        client=client,
-        model="gpt-4o",
-        provider="openai",
-        include_context=True,
-    )
-    
-    # Access captured data
-    for case in result.captured_cases:
-        print(f"Case: {case.case_name}")
-        for tool_call in case.tool_calls:
-            print(f"  Tool: {tool_call.name}")
-            print(f"  Args: {tool_call.args}")
-    
-    # Save to file
-    result.write_to_file("captures/output.json", include_context=True)
-    
-    return result
-
-asyncio.run(capture_tool_calls())
-```
-
-## Capture result structure
-
-### CaptureResult
-
-Top-level capture result:
-
-```python
-@dataclass
-class CaptureResult:
-    suite_name: str
-    model: str
-    provider: str
-    captured_cases: list[CapturedCase]
-```
-
-Methods:
-- `to_dict(include_context=False)` → dict
-- `to_json(include_context=False, indent=2)` → JSON string
-- `write_to_file(file_path, include_context=False, indent=2)` → None
-
-### CapturedCase
-
-Individual test case result:
-
-```python
-@dataclass
-class CapturedCase:
-    case_name: str
-    user_message: str
-    tool_calls: list[CapturedToolCall]
-    system_message: str | None = None
-    additional_messages: list[dict] | None = None
-    track_name: str | None = None
-```
-
-### CapturedToolCall
-
-Individual tool call:
-
-```python
-@dataclass
-class CapturedToolCall:
-    name: str
-    args: dict[str, Any]
-```
-
 ## Capture with comparative tracks
 
 Capture from multiple tool sources to see how different implementations behave:
@@ -302,25 +220,25 @@ async def capture_comparative():
         name="Weather Comparison",
         system_message="You are a weather assistant.",
     )
-    
+
     # Register different tool sources
     await suite.add_mcp_server(
         "http://weather-api-1.example/mcp",
         track="Weather API v1"
     )
-    
+
     await suite.add_mcp_server(
         "http://weather-api-2.example/mcp",
         track="Weather API v2"
     )
-    
+
     # Capture will run against each track
     suite.add_case(
         name="get_weather",
         user_message="What's the weather in Seattle?",
         expected_tool_calls=[],
     )
-    
+
     return suite
 ```
 
@@ -432,16 +350,9 @@ ExpectedMCPToolCall("GetWeather", {"location": "Seattle", "units": "fahrenheit"}
 ExpectedMCPToolCall("GetWeather", {"location": "Tokyo", "units": "celsius"})
 ```
 
-### Step 3: Add appropriate critics
+### Step 3: Add critics
 
-Choose critics based on parameter importance:
-
-```python
-critics=[
-    BinaryCritic(critic_field="location", weight=0.8),  # Critical
-    BinaryCritic(critic_field="units", weight=0.2),     # Less critical
-]
-```
+Add critics to validate parameters. See [Critics](/home/evaluate-tools/create-an-evaluation-suite#critics) for options.
 
 ### Step 4: Run evaluations
 
@@ -454,6 +365,7 @@ arcade evals . --details
 ### Step 5: Iterate
 
 Use failures to refine:
+
 - Adjust expected values
 - Change critic weights
 - Modify tool descriptions
@@ -466,6 +378,7 @@ Use failures to refine:
 **Symptom:** Empty `tool_calls` arrays
 
 **Possible causes:**
+
 1. Model didn't call any tools
 2. Tools not properly registered
 3. System message doesn't encourage tool use
@@ -478,20 +391,6 @@ suite = EvalSuite(
     system_message="You are a weather assistant. Use the available weather tools to answer questions.",
 )
 ```
-
-### Unexpected tool names
-
-**Symptom:** Tool names have underscores instead of dots
-
-**Explanation:** Tool names are normalized for provider compatibility. `Weather.GetCurrent` becomes `Weather_GetCurrent`.
-
-**Solution:** Use normalized names in expectations:
-
-```python
-ExpectedMCPToolCall("Weather_GetCurrent", {...})
-```
-
-See [Provider compatibility](/home/evaluate-tools/provider-compatibility) for details.
 
 ### Missing parameters
 
@@ -509,104 +408,7 @@ See [Provider compatibility](/home/evaluate-tools/provider-compatibility) for de
 
 **Solution:** This is expected. Use captures to understand provider-specific behavior, then create provider-agnostic tests.
 
-## Example workflow
-
-Here's a complete workflow from capture to evaluation:
-
-<Steps>
-
-### Create capture suite
-
-```python
-@tool_eval()
-async def initial_capture():
-    suite = EvalSuite(name="Slack Tools", system_message="You are a Slack assistant.")
-    await suite.add_arcade_gateway(gateway_slug="slack")
-    
-    suite.add_case(
-        name="send_message",
-        user_message="Send a message to #general saying 'Hello team'",
-        expected_tool_calls=[],
-    )
-    
-    suite.add_case(
-        name="send_dm",
-        user_message="Send a DM to alice saying 'Meeting at 3'",
-        expected_tool_calls=[],
-    )
-    
-    return suite
-```
-
-### Capture with multiple models
-
-```bash
-arcade evals . --capture \
-  --use-provider openai:gpt-4o,gpt-4o-mini \
-  --file captures/slack --format json,md
-```
-
-### Review markdown output
-
-```markdown
-## Slack Tools
-
-### Model: gpt-4o
-
-#### Case: send_message
-**Tool Calls:**
-- `send_message_to_channel`
-  - channel: general
-  - message: Hello team
-
-#### Case: send_dm
-**Tool Calls:**
-- `send_dm_to_user`
-  - user: alice
-  - message: Meeting at 3
-```
-
-### Create evaluation suite
-
-```python
-@tool_eval()
-async def slack_eval():
-    suite = EvalSuite(name="Slack Tools", system_message="You are a Slack assistant.")
-    await suite.add_arcade_gateway(gateway_slug="slack")
-    
-    suite.add_case(
-        name="send_message",
-        user_message="Send a message to #general saying 'Hello team'",
-        expected_tool_calls=[
-            ExpectedMCPToolCall(
-                "send_message_to_channel",
-                {"channel": "general", "message": "Hello team"}
-            )
-        ],
-        critics=[
-            BinaryCritic(critic_field="channel", weight=0.4),
-            SimilarityCritic(critic_field="message", weight=0.6),
-        ],
-    )
-    
-    return suite
-```
-
-### Run evaluations
-
-```bash
-arcade evals . --details
-```
-
-### Iterate based on results
-
-Refine expectations and critics based on evaluation results.
-
-</Steps>
-
 ## Next steps
 
 - Learn about [comparative evaluations](/home/evaluate-tools/comparative-evaluations) to compare tool sources
-- Understand [provider compatibility](/home/evaluate-tools/provider-compatibility) for cross-provider testing
 - [Create evaluation suites](/home/evaluate-tools/create-an-evaluation-suite) with expectations
-
