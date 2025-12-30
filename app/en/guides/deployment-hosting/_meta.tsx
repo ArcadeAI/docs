@@ -8,14 +8,20 @@ const meta: MetaRecord = {
       copyPage: true,
     },
   },
-  "arcade-cloud-infra": {
-    title: "Arcade Cloud Infrastructure",
+  index: {
+    title: "Overview",
   },
-  "on-prem-mcp": {
+  "arcade-cloud": {
+    title: "Arcade Cloud",
+  },
+  "on-prem": {
     title: "On-premises MCP servers",
   },
-  "engine-configuration": {
-    title: "Engine configuration",
+  "configure-engine": {
+    title: "Configure Arcade's engine",
+  },
+  "arcade-deploy": {
+    title: "Arcade Deploy",
   },
 };
 

@@ -9,7 +9,10 @@ const withNextra = nextra({
   codeHighlight: true,
   mdxOptions: {
     remarkPlugins: [
-      [remarkGlossary, { glossaryPath: "./app/en/home/glossary/page.mdx" }],
+      [
+        remarkGlossary,
+        { glossaryPath: "./app/en/resources/glossary/page.mdx" },
+      ],
     ],
   },
 });

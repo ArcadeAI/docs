@@ -11,15 +11,12 @@ const meta: MetaRecord = {
   index: {
     title: "Overview",
     theme: {
-      breadcrumb: false,
-      layout: "full",
       toc: false,
       copyPage: false,
     },
   },
-  "-- Categories": {
-    type: "separator",
-    title: "Categories",
+  "contribute-a-server": {
+    title: "Contribute a Server",
   },
   productivity: {
     title: "Productivity & Docs",
@@ -51,9 +48,6 @@ const meta: MetaRecord = {
   "-- Submit your Server": {
     type: "separator",
     title: "Submit your Server",
-  },
-  "contribute-a-server": {
-    title: "Contribute a Server",
   },
 };
 
