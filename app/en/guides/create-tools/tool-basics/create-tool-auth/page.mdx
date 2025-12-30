@@ -18,7 +18,7 @@ Create and use an MCP tool that requires OAuth to access Reddit, prompting users
 
 - <DashboardLink path="register" />
 - [uv package manager](https://docs.astral.sh/uv/getting-started/installation/)
-- [Create an MCP Server](/home/build-tools/create-a-mcp-server)
+- [Create an MCP Server](/guides/create-tools/tool-basics/build-mcp-server)
 
 </GuideOverview.Prerequisites>
 
@@ -42,7 +42,7 @@ When you create a tool with `requires_auth`, you specify which provider to use. 
 2. If the tool's requirements are not met, Arcade initiates the provider-specific OAuth flow for the requested scopes.
     > 2a). The user is presented with a URL to complete the OAuth challenge. The user will need to visit this URL and log in and explicitly grant consent for the action to be performed on their behalf. This is the "OAuth challenge".
 
-    > 2b). The provider issues the token, and Arcade will securely inject it into the tool's [`Context`](/home/build-tools/tool-context) on its next invocation. The client and the LLM will never see the token.
+    > 2b). The provider issues the token, and Arcade will securely inject it into the tool's [`Context`](/guides/create-tools/tool-basics/runtime-data-access) on its next invocation. The client and the LLM will never see the token.
 
     > 2c). The tool needs to be re-invoked - this time its requirements will be met.
 3. The tool is executed, and uses the token injected into its `Context` to call the provider's API (e.g., `https://oauth.reddit.com`), without the LLM or client ever seeing the token.
@@ -124,7 +124,7 @@ arcade login
 
 </Callout>
 
-Arcade offers a number of [built-in auth providers](/home/auth-providers), including Slack, Google, and GitHub. You can also require authorization with a custom auth provider, using the `OAuth2` class, a subclass of the `ToolAuthorization` class:
+Arcade offers a number of [built-in auth providers](/references/auth-providers/), including Slack, Google, and GitHub. You can also require authorization with a custom auth provider, using the `OAuth2` class, a subclass of the `ToolAuthorization` class:
 
 ```python
 @app.tool(
@@ -274,7 +274,7 @@ async with httpx.AsyncClient() as client:
 
 - Try adding more authorized tools
 - Explore how to handle different authorization providers and scopes
-- Learn how to [build a tool with secrets](/home/build-tools/create-a-tool-with-secrets)
+- Learn how to [build a tool with secrets](/guides/create-tools/tool-basics/create-tool-secrets)
 
 ## Example Code
 

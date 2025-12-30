@@ -108,7 +108,7 @@ export function LandingPage() {
               className="h-12 bg-primary px-6 text-white hover:bg-primary/90"
               size="lg"
             >
-              <Link href="/home/quickstart">
+              <Link href="/get-started/quickstarts/call-tool-agent">
                 <Rocket className="mr-2 h-5 w-5" />
                 Get Started
               </Link>
@@ -119,7 +119,7 @@ export function LandingPage() {
               size="lg"
               variant="outline"
             >
-              <Link href="/home/build-tools/create-a-mcp-server">
+              <Link href="/guides/create-tools/tool-basics/build-mcp-server">
                 <Wrench className="mr-2 h-5 w-5" />
                 Build a tool
               </Link>
@@ -138,7 +138,7 @@ export function LandingPage() {
               Don't write code yourself - let your AI IDE do it for you! <br />
               <Link
                 className="text-primary hover:underline"
-                href="/home/agentic-development"
+                href="/get-started/setup/connect-arcade-docs"
               >
                 Learn how to give your coding agents access to Arcade.dev's
                 documentation
@@ -175,13 +175,13 @@ export function LandingPage() {
               icon={Rocket}
               title="Quick Start Guide"
               description="Start using Arcade in minutes with our quick start guide. We'll show you how to equip LLMs with the ability to take action."
-              href="/home/quickstart"
+              href="/get-started/quickstarts/call-tool-agent"
             />
             <QuickStartCard
               icon={Puzzle}
               title="Browse Integrations"
               description="Explore our library of integrations for popular services. Find the perfect integration for your needs."
-              href="/mcp-servers"
+              href="/resources/integrations"
             />
             <QuickStartCard
               icon={Wrench}
@@ -193,7 +193,7 @@ export function LandingPage() {
               icon={Cloud}
               title="Deploy Arcade"
               description="Run Arcade locally, in Docker, or in the cloud. We'll show you how to get started with each option."
-              href="/home/hosting-overview"
+              href="/guides/deployment-hosting/"
             />
           </div>
         </div>

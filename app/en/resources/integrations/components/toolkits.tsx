@@ -75,7 +75,7 @@ export default function Toolkits() {
                         buttonVariants({ variant: "default", size: "sm" }),
                         "bg-blue-600 hover:bg-blue-700 active:bg-blue-700 dark:bg-blue-500 dark:active:bg-blue-600 dark:hover:bg-blue-600"
                       )}
-                      href="/home/build-tools/create-a-mcp-server"
+                      href="/guides/create-tools/tool-basics/build-mcp-server"
                     >
                       Learn how to build a MCP Server
                     </Link>
