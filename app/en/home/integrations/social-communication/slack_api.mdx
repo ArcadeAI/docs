@@ -1,0 +1,2319 @@
+# SlackApi
+
+import StarterToolInfo from "@/components/StarterToolInfo";
+import ToolInfo from "@/app/_components/tool-info";
+import Badges from "@/app/_components/badges";
+import TabbedCodeBlock from "@/app/_components/tabbed-code-block";
+import TableOfContents from "@/app/_components/table-of-contents";
+import ToolFooter from "@/app/_components/tool-footer";
+import { Callout } from "nextra/components";
+
+<ToolInfo
+  description="Enable agents to interact with SlackApi"
+  author="Arcade"
+  authType="OAuth2"
+  versions={["0.1.0"]}
+/>
+
+<Badges repo="arcadeai/arcade_slack_api" />
+
+<StarterToolInfo toolkit_name="SlackApi" />
+
+The SlackApi MCP Server offers a comprehensive set of tools for administering Slack workspaces, automating messaging, managing channels, calls, files, emojis, user groups, invites, and user/team data. Key capabilities include:
+
+- Workspace & team management: create/update team name/description, fetch team info, settings, preferences, integration logs, billable users, and list/inspect teams in an Enterprise org.
+- User and identity operations: list workspace/team users, find users by email, get user profiles, presence, identity, and manage profile photos.
+- Channels & conversations: create/join conversations, get conversation info and members, list channels/conversations accessible to a user, open/resume DMs, invite users, set read cursors, and manage shared channel invites.
+- Messaging & scheduling: send messages (regular and ephemeral), schedule/delete scheduled messages, list scheduled messages, get message permalinks, and search messages/files.
+- Calls: register calls, get call info, add/remove participants.
+- Files & sharing: obtain external upload URLs, fetch remote file info, share remote files to channels, enable public sharing.
+- Bookmarks, pins & reactions: add/edit/remove bookmarks, pin/list pinned items, add/remove reactions.
+- Emoji management: list custom emojis, rename emojis, and add emoji aliases (Enterprise).
+- User groups: create, enable/disable, list, update user groups and their membership.
+- Invite/workflow management: list pending/approved/denied workspace invites, accept/approve/deny shared channel invites, and list shared invites.
+- Admin tools & verification: fetch workspace settings, owners, channels for org usergroups, list enterprise emojis/teams, revoke tokens, verify API calling code, and retrieve integration logs.
+- Custom behavior: provide custom unfurling for URLs.
+
+This MCP Server is designed for admins and apps requiring broad Slack API access (admin, invites, calls, chat, files, usergroups, reactions, users scopes).
+
+## Available Tools
+
+<TableOfContents
+  headers={["Tool Name", "Description"]}
+  data={[
+    [
+      "SlackApi.AddSlackEmojiAlias",
+      "Add an emoji alias in a Slack Enterprise organization.",
+    ],
+    [
+      "SlackApi.ListSlackEnterpriseEmojis",
+      "Retrieve emojis for a Slack Enterprise organization.",
+    ],
+    [
+      "SlackApi.RenameSlackEmoji",
+      "Rename an emoji in a Slack Enterprise organization.",
+    ],
+    [
+      "SlackApi.ListApprovedWorkspaceInviteRequests",
+      "Retrieve all approved workspace invite requests from Slack.",
+    ],
+    [
+      "SlackApi.ListDeniedSlackInviteRequests",
+      "Retrieve denied Slack workspace invite requests.",
+    ],
+    [
+      "SlackApi.ListPendingWorkspaceInvites",
+      "Retrieve all pending workspace invite requests from Slack.",
+    ],
+    [
+      "SlackApi.ListTeamsInEnterprise",
+      "Retrieve all teams in an Enterprise organization on Slack.",
+    ],
+    [
+      "SlackApi.ListSlackWorkspaceOwners",
+      "Retrieve all owners in a Slack workspace.",
+    ],
+    [
+      "SlackApi.FetchWorkspaceSettingsInfo",
+      "Retrieve settings information for a Slack workspace.",
+    ],
+    [
+      "SlackApi.SetWorkspaceDescription",
+      "Update the description of a Slack workspace.",
+    ],
+    ["SlackApi.SetSlackWorkspaceName", "Update the name of a Slack workspace."],
+    [
+      "SlackApi.ListChannelsForUsergroup",
+      "Retrieve channels linked to an org-level user group in Slack.",
+    ],
+    [
+      "SlackApi.ListWorkspaceUsers",
+      "Retrieve a list of users from a Slack workspace.",
+    ],
+    [
+      "SlackApi.CheckApiCallingCode",
+      "Verify the correctness of API calling code for Slack.",
+    ],
+    ["SlackApi.RevokeSlackToken", "Revoke a Slack authentication token."],
+    [
+      "SlackApi.EditSlackBookmark",
+      "Edit an existing bookmark in a Slack channel.",
+    ],
+    ["SlackApi.RemoveSlackBookmark", "Remove a bookmark from a Slack channel."],
+    ["SlackApi.GetSlackBotInfo", "Retrieve details about a Slack bot user."],
+    ["SlackApi.RegisterSlackCall", "Registers a new call on Slack."],
+    [
+      "SlackApi.GetCallInformation",
+      "Retrieve detailed information about a specific call in Slack.",
+    ],
+    ["SlackApi.AddCallParticipants", "Add new participants to a Slack call."],
+    [
+      "SlackApi.RemoveCallParticipants",
+      "Remove participants from a Slack call.",
+    ],
+    [
+      "SlackApi.DeleteScheduledSlackMessage",
+      "Delete a pending scheduled message from Slack queue.",
+    ],
+    [
+      "SlackApi.GetSlackMessagePermalink",
+      "Retrieve a permalink URL for a specific Slack message.",
+    ],
+    [
+      "SlackApi.SendEphemeralMessageSlack",
+      "Send an ephemeral message to a user in a Slack channel.",
+    ],
+    ["SlackApi.SendSlackMessage", "Sends a message to a Slack channel."],
+    [
+      "SlackApi.ListScheduledMessages",
+      "Retrieve scheduled messages from Slack.",
+    ],
+    [
+      "SlackApi.ScheduleSlackMessage",
+      "Schedule a message to be sent later in Slack.",
+    ],
+    [
+      "SlackApi.CustomUnfurlSlackUrls",
+      "Provide custom unfurl behavior for user-posted URLs on Slack.",
+    ],
+    [
+      "SlackApi.AcceptSlackInvite",
+      "Accept invitations to a Slack Connect channel.",
+    ],
+    [
+      "SlackApi.ApproveSlackChannelInvitation",
+      "Approve an invitation to a Slack Connect channel.",
+    ],
+    [
+      "SlackApi.CreateSlackConversation",
+      "Create a new public or private Slack conversation.",
+    ],
+    [
+      "SlackApi.GetConversationInfo",
+      "Fetches information about a Slack conversation.",
+    ],
+    ["SlackApi.InviteUserToSlackChannel", "Invite users to a Slack channel."],
+    [
+      "SlackApi.JoinSlackConversation",
+      "Join an existing conversation in Slack.",
+    ],
+    [
+      "SlackApi.ListSlackChannels",
+      "Retrieve a list of all channels in a Slack team.",
+    ],
+    [
+      "SlackApi.ListSharedChannelInvites",
+      "Retrieve unapproved shared channel invites from Slack.",
+    ],
+    [
+      "SlackApi.SetSlackChannelReadCursor",
+      "Update the read cursor in a Slack channel.",
+    ],
+    [
+      "SlackApi.GetSlackConversationMembers",
+      "Retrieve members from a specified Slack conversation.",
+    ],
+    [
+      "SlackApi.OpenOrResumeSlackConversation",
+      "Open or resume a direct or multi-person message in Slack.",
+    ],
+    [
+      "SlackApi.GetSlackThreadMessages",
+      "Retrieve messages from a Slack conversation thread.",
+    ],
+    [
+      "SlackApi.DenySharedInviteRequest",
+      "Denies an external user invitation to a Slack channel.",
+    ],
+    [
+      "SlackApi.ListCustomEmojiForTeam",
+      "Retrieve a list of custom emojis for a specific team.",
+    ],
+    [
+      "SlackApi.GetExternalFileUploadUrl",
+      "Retrieve a URL to upload an external file to Slack.",
+    ],
+    [
+      "SlackApi.GetRemoteFileInfoSlack",
+      "Retrieve details about a remote file from Slack.",
+    ],
+    [
+      "SlackApi.GetSlackRemoteFilesInfo",
+      "Retrieve information about remote files added to Slack.",
+    ],
+    [
+      "SlackApi.ShareRemoteFileInChannel",
+      "Share a remote file into a Slack channel.",
+    ],
+    [
+      "SlackApi.EnableSlackFileSharing",
+      "Enable a Slack file for public sharing.",
+    ],
+    ["SlackApi.PinItemToSlackChannel", "Pin an item to a Slack channel."],
+    ["SlackApi.ListPinnedItems", "Retrieve items pinned to a Slack channel."],
+    ["SlackApi.AddSlackReaction", "Add a reaction to a Slack item."],
+    ["SlackApi.RemoveReactionFromItem", "Remove a reaction from a Slack item."],
+    ["SlackApi.SearchFilesInSlack", "Search for files in Slack using a query."],
+    ["SlackApi.SearchSlackMessages", "Search Slack messages based on a query."],
+    [
+      "SlackApi.GetTeamBillableUsersInfo",
+      "Retrieves billable users info for the current Slack team.",
+    ],
+    [
+      "SlackApi.GetCurrentSlackTeamInfo",
+      "Retrieve information about the current Slack team.",
+    ],
+    [
+      "SlackApi.GetIntegrationLogs",
+      "Retrieve integration logs for the current Slack team.",
+    ],
+    [
+      "SlackApi.GetSlackTeamPreferences",
+      "Retrieve a list of a workspace's team preferences.",
+    ],
+    [
+      "SlackApi.GetTeamProfile",
+      "Retrieve a team's profile information from Slack.",
+    ],
+    ["SlackApi.CreateSlackUserGroup", "Creates a new user group in Slack."],
+    ["SlackApi.DisableUserGroup", "Disable an existing Slack User Group."],
+    ["SlackApi.EnableSlackUserGroup", "Enable a user group in Slack."],
+    [
+      "SlackApi.ListSlackUserGroups",
+      "Retrieve all user groups for a Slack team.",
+    ],
+    [
+      "SlackApi.UpdateSlackUserGroup",
+      "Update an existing User Group in Slack.",
+    ],
+    [
+      "SlackApi.UpdateSlackUsergroupUsers",
+      "Update the list of users in a Slack user group.",
+    ],
+    [
+      "SlackApi.ListAccessibleSlackConversations",
+      "Retrieve a list of conversations the user can access on Slack.",
+    ],
+    [
+      "SlackApi.CheckSlackDiscoverability",
+      "Check if an email is discoverable on Slack.",
+    ],
+    [
+      "SlackApi.GetSlackUserPresence",
+      "Retrieve user presence information from Slack.",
+    ],
+    [
+      "SlackApi.GetUserIdentity",
+      "Retrieve a user's identity information from Slack.",
+    ],
+    [
+      "SlackApi.ListSlackTeamUsers",
+      "Fetches a list of all users in a Slack team.",
+    ],
+    [
+      "SlackApi.FindSlackUserByEmail",
+      "Find a Slack user using their email address.",
+    ],
+    [
+      "SlackApi.GetSlackUserProfile",
+      "Retrieve Slack user profile information and custom status.",
+    ],
+    ["SlackApi.SetSlackProfilePhoto", "Set the user's profile photo on Slack."],
+  ]}
+/>
+
+<Callout type="info">
+  If you need to perform an action that's not listed here, you can [get in touch
+  with us](mailto:contact@arcade.dev) to request a new tool, or [create your own
+  tools](/home/build-tools/create-a-mcp-server).
+</Callout>
+
+## SlackApi.AddSlackEmojiAlias
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/add_slack_emoji_alias_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/add_slack_emoji_alias_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Add an emoji alias in a Slack Enterprise organization.
+
+**Parameters**
+
+- **emoji_alias_name** (`string`, required) The new alias for the specified emoji. Whitespace or colons will be automatically trimmed.
+- **target_emoji_name** (`string`, required) The name of the existing emoji to which the new alias is being added. Remove any surrounding whitespace or colons.
+
+## SlackApi.ListSlackEnterpriseEmojis
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/list_slack_enterprise_emojis_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/list_slack_enterprise_emojis_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve emojis for a Slack Enterprise organization.
+
+**Parameters**
+
+- **pagination_cursor** (`string`, optional) Cursor for fetching the next page of emojis. Use 'next_cursor' from the previous response.
+- **max_items_to_return** (`integer`, optional) The maximum number of emojis to return, between 1 and 1000 inclusive. (default: '100')
+
+## SlackApi.RenameSlackEmoji
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/rename_slack_emoji_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/rename_slack_emoji_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Rename an emoji in a Slack Enterprise organization.
+
+**Parameters**
+
+- **current_emoji_name** (`string`, required) The current name of the emoji to be renamed. Colons (:myemoji:) around the value are optional.
+- **new_emoji_name** (`string`, required) The new name to assign to the emoji in the Slack Enterprise organization.
+
+## SlackApi.ListApprovedWorkspaceInviteRequests
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/list_approved_workspace_invite_requests_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/list_approved_workspace_invite_requests_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve all approved workspace invite requests from Slack.
+
+**Parameters**
+
+- **workspace_id** (`string`, optional) ID for the Slack workspace where the invite requests were made. Required if the Enterprise org has more than one workspace.
+- **pagination_cursor** (`string`, optional) Value of the `next_cursor` from the previous API response for paginating results.
+- **result_limit** (`integer`, optional) Specify the number of results to return, between 1 and 1000 inclusive. (default: '100')
+
+## SlackApi.ListDeniedSlackInviteRequests
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/list_denied_slack_invite_requests_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/list_denied_slack_invite_requests_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve denied Slack workspace invite requests.
+
+**Parameters**
+
+- **workspace_team_id** (`string`, optional) ID of the workspace where the invite requests were made. Required if the Enterprise org has multiple workspaces.
+- **pagination_cursor** (`string`, optional) The cursor value from the previous API response to fetch the next set of results. Use this for pagination.
+- **result_limit** (`integer`, optional) Specify the number of denied invite request results to return, between 1 and 1000 inclusive. (default: '100')
+
+## SlackApi.ListPendingWorkspaceInvites
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/list_pending_workspace_invites_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/list_pending_workspace_invites_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve all pending workspace invite requests from Slack.
+
+**Parameters**
+
+- **workspace_id** (`string`, optional) The ID of the workspace to list pending invite requests from. Required for multi-workspace enterprises.
+- **pagination_cursor** (`string`, optional) The cursor value for fetching the next set of invite requests. Use the `next_cursor` from the previous response if available.
+- **result_limit** (`integer`, optional) The number of invite requests to return per call, must be between 1 and 1000. (default: '100')
+
+## SlackApi.ListTeamsInEnterprise
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/list_teams_in_enterprise_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/list_teams_in_enterprise_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve all teams in an Enterprise organization on Slack.
+
+**Parameters**
+
+- **maximum_items_to_return** (`integer`, optional) Specify the maximum number of teams to retrieve. Must be a positive integer, up to 1000. (default: '100')
+- **pagination_cursor** (`string`, optional) Use this to retrieve the next page of results by setting it to the `next_cursor` from the previous response.
+
+## SlackApi.ListSlackWorkspaceOwners
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/list_slack_workspace_owners_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/list_slack_workspace_owners_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve all owners in a Slack workspace.
+
+**Parameters**
+
+- **workspace_id** (`string`, required) The unique identifier of the Slack workspace for which to list the owners.
+- **maximum_items_to_return** (`integer`, optional) Specifies the maximum number of owners to return, ranging from 1 to 1000. (default: '100')
+- **pagination_cursor** (`string`, optional) The cursor from the previous response used to fetch the next page of owners. Leave empty for the first page.
+
+## SlackApi.FetchWorkspaceSettingsInfo
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/fetch_workspace_settings_info_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/fetch_workspace_settings_info_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve settings information for a Slack workspace.
+
+**Parameters**
+
+- **slack_team_id** (`string`, required) The unique identifier of the Slack workspace (team) for which to fetch the settings information.
+
+## SlackApi.SetWorkspaceDescription
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/set_workspace_description_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/set_workspace_description_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Update the description of a Slack workspace.
+
+**Parameters**
+
+- **workspace_id** (`string`, required) The unique identifier for the Slack workspace where the description will be updated.
+- **workspace_description** (`string`, required) The new description to set for the Slack workspace. Provide a clear and concise text.
+
+## SlackApi.SetSlackWorkspaceName
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/set_slack_workspace_name_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/set_slack_workspace_name_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Update the name of a Slack workspace.
+
+**Parameters**
+
+- **workspace_id** (`string`, required) Unique identifier for the Slack workspace whose name you want to update.
+- **new_workspace_name** (`string`, required) The desired new name for the Slack workspace. This replaces the existing name.
+
+## SlackApi.ListChannelsForUsergroup
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/list_channels_for_usergroup_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/list_channels_for_usergroup_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve channels linked to an org-level user group in Slack.
+
+**Parameters**
+
+- **usergroup_id** (`string`, required) The ID of the IDP group to list channels for. It identifies which organizational group to retrieve the default channels from.
+- **workspace_id** (`string`, optional) The unique identifier for the Slack workspace.
+- **include_member_count_in_channels** (`boolean`, optional) Set to true to include the count of members for each channel, otherwise set to false.
+
+## SlackApi.ListWorkspaceUsers
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/list_workspace_users_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/list_workspace_users_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of users from a Slack workspace.
+
+**Parameters**
+
+- **workspace_team_id** (`string`, optional) The ID of the Slack workspace (e.g., T1234) to filter users from. Only users from this workspace will be listed.
+- **pagination_cursor** (`string`, optional) Use this to navigate through paginated results by setting it to the `next_cursor` from a previous response.
+- **user_retrieval_limit** (`integer`, optional) Maximum number of users to retrieve per page from the Slack workspace. (default: '100')
+- **return_only_active_users** (`boolean`, optional) Return only active users if true; return only deactivated users if false. Default is true.
+- **include_deactivated_user_workspaces** (`boolean`, optional) Include workspaces for users even if they are deactivated. Only applies with org token and no team_id. Default is false.
+- **return_only_guest_users** (`boolean`, optional) If true, returns only guests and their expiration dates that belong to the specified team_id.
+
+## SlackApi.CheckApiCallingCode
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/check_api_calling_code_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/check_api_calling_code_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Verify the correctness of API calling code for Slack.
+
+**Parameters**
+
+- **simulate_error_response** (`string`, optional) Specify an error code to simulate an error response for testing API calls. Useful for testing error handling.
+
+## SlackApi.RevokeSlackToken
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/revoke_slack_token_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/revoke_slack_token_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Revoke a Slack authentication token.
+
+**Parameters**
+
+- **trigger_testing_mode** (`boolean`, optional) Set to true to trigger testing mode where the token will not be revoked. Useful for testing.
+
+## SlackApi.EditSlackBookmark
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/edit_slack_bookmark_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/edit_slack_bookmark_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Edit an existing bookmark in a Slack channel.
+
+**Parameters**
+
+- **slack_channel_id** (`string`, required) The ID of the Slack channel where the bookmark will be updated.
+- **target_bookmark_id** (`string`, required) The unique identifier of the bookmark you want to update.
+- **bookmark_title** (`string`, optional) The new title for the bookmark to update.
+- **bookmark_link** (`string`, optional) URL of the bookmark to be edited. Ensure it is a valid format starting with http or https.
+- **emoji_tag** (`string`, optional) The emoji tag to apply to the bookmark link. It should be a valid emoji code (e.g., :smile:).
+
+## SlackApi.RemoveSlackBookmark
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/remove_slack_bookmark_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/remove_slack_bookmark_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Remove a bookmark from a Slack channel.
+
+**Parameters**
+
+- **slack_channel_id_to_remove_bookmark** (`string`, required) The ID of the Slack channel from which the bookmark should be removed. This ID specifies the target channel and is required to locate and delete the bookmark.
+- **bookmark_id_to_remove** (`string`, required) The ID of the bookmark to be removed from a Slack channel. Ensure it is specified correctly to delete the correct bookmark.
+- **quip_section_id** (`string`, optional) The ID of the Quip section to unbookmark. This is required to specify which section's bookmark should be removed.
+
+## SlackApi.GetSlackBotInfo
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/get_slack_bot_info_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/get_slack_bot_info_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve details about a Slack bot user.
+
+**Parameters**
+
+- **target_bot_id** (`string`, optional) The unique bot ID for which information is requested. This ID is specific to each workspace the bot is in.
+- **team_id_for_org_token_use** (`string`, optional) Encoded team or enterprise ID where the bot exists. Required if using an organization token. Ignored if using a workspace-level token.
+
+## SlackApi.RegisterSlackCall
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/register_slack_call_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/register_slack_call_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Registers a new call on Slack.
+
+**Parameters**
+
+- **unique_call_id** (`string`, required) A unique ID for the Call, provided by the 3rd-party Call provider. Ensure it is unique across all calls from your service.
+- **call_join_url** (`string`, required) The URL required for a client to join the Call on Slack.
+- **optional_human_readable_display_id** (`string`, optional) An optional, human-readable ID for the call, supplied by the third-party provider. This ID will be displayed in the Call object if given.
+- **desktop_app_join_url** (`string`, optional) The URL used to directly launch the 3rd-party Call from Slack clients, if provided.
+- **call_start_timestamp** (`integer`, optional) Unix timestamp indicating when the call is scheduled to start.
+- **call_title** (`string`, optional) The name of the Call to be registered on Slack. This title will be used to identify the Call within Slack.
+- **call_creator_user_id** (`string`, optional) The valid Slack user ID of the creator of this call. Optional if using a user token, which defaults to the authed user.
+- **participants_info** (`array[string]`, optional) A list of participants to register for the call, including 'slack_id', 'external_id', 'display_name', and 'avatar_url' for each user.
+
+## SlackApi.GetCallInformation
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/get_call_information_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/get_call_information_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve detailed information about a specific call in Slack.
+
+**Parameters**
+
+- **call_id** (`string`, required) The unique identifier of the call as returned by the `calls.add` method. This ID is necessary to retrieve detailed call information.
+
+## SlackApi.AddCallParticipants
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/add_call_participants_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/add_call_participants_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Add new participants to a Slack call.
+
+**Parameters**
+
+- **call_id** (`string`, required) The unique identifier for the call, as returned by the `calls.add` method. This ID specifies which call the participants will be added to.
+- **participant_users** (`array[string]`, required) List of users to add, specified by `slack_id` or `external_id`. Include optional `display_name` and `avatar_url` for each user.
+
+## SlackApi.RemoveCallParticipants
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/remove_call_participants_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/remove_call_participants_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Remove participants from a Slack call.
+
+**Parameters**
+
+- **call_id** (`string`, required) The unique identifier for the call from which participants are to be removed. This `id` is obtained from the `calls.add` method.
+- **users_to_remove** (`array[string]`, required) A list of user IDs to remove as participants from the call. Refer to Slack's documentation for specifying user IDs.
+
+## SlackApi.DeleteScheduledSlackMessage
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/delete_scheduled_slack_message_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/delete_scheduled_slack_message_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Delete a pending scheduled message from Slack queue.
+
+**Parameters**
+
+- **channel_id** (`string`, required) The ID of the channel where the scheduled message is set to post. Required to identify the correct message to delete.
+- **scheduled_message_id** (`string`, required) The ID of the scheduled message to be deleted. This ID is obtained from the `chat.scheduleMessage` response.
+- **delete_as_authenticated_user** (`boolean`, optional) Set to true to delete the message as the authenticated user with `chat:write:user` scope. Bot users are considered authenticated users. If false, the message will be deleted with `chat:write:bot` scope.
+
+## SlackApi.GetSlackMessagePermalink
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/get_slack_message_permalink_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/get_slack_message_permalink_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a permalink URL for a specific Slack message.
+
+**Parameters**
+
+- **channel_id** (`string`, required) The unique identifier of the Slack conversation or channel containing the message.
+- **message_timestamp** (`string`, required) The unique timestamp of the message to retrieve the permalink for. It identifies the message within the Slack channel.
+
+## SlackApi.SendEphemeralMessageSlack
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/send_ephemeral_message_slack_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/send_ephemeral_message_slack_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Send an ephemeral message to a user in a Slack channel.
+
+**Parameters**
+
+- **target_channel** (`string`, required) The channel, private group, or IM channel where the ephemeral message will be sent. Accepts an encoded ID or the channel's name.
+- **recipient_user_id** (`string`, required) The ID of the user who will receive the ephemeral message. Must be in the specified channel.
+- **structured_attachments** (`array[string]`, optional) A JSON-encoded array of structured attachments for the message. Presented as a URL-encoded string.
+- **structured_blocks** (`array[string]`, optional) A URL-encoded JSON array of structured Slack block elements. Use for rich message formatting.
+- **message_icon_emoji** (`string`, optional) Emoji to display as the message icon, overriding icon_url. Specify using the emoji name like :smile:.
+- **message_icon_url** (`string`, optional) URL for the image to be used as the icon for the message. It overrides the icon_emoji if provided.
+- **message_markdown_text** (`string`, optional) The main text formatted in markdown to be sent as an ephemeral message. Do not use with `blocks` or `text`. Character limit: 12,000.
+- **message_parse_mode** (`string`, optional) Specifies how the message text is interpreted. Options are: 'none', 'full', 'mrkdwn', or 'false'. Defaults to 'none'. (default: 'none')
+- **ephemeral_message_text** (`string`, optional) The main text of the ephemeral message for Slack. It acts as a fallback when using blocks; can be formatted as plain text or markdown. Limit to a few thousand bytes.
+- **parent_message_timestamp** (`string`, optional) The timestamp of the parent message to post this ephemeral message in its thread. Ensure there is already an active thread.
+- **bot_username** (`string`, optional) The username for the bot sending the ephemeral message. This sets the display name in the Slack message.
+- **link_names_auto_link** (`boolean`, optional) Set to true to automatically find and link channel names and usernames.
+
+## SlackApi.SendSlackMessage
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/send_slack_message_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/send_slack_message_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Sends a message to a Slack channel.
+
+**Parameters**
+
+- **target_channel_id_or_name** (`string`, required) The encoded ID or name of the channel, private group, or IM where the message will be sent. Retrieve using Slack's conversations.list API.
+- **message_attachments** (`array[string]`, optional) A JSON array of structured attachment objects for the message, provided as a URL-encoded string. Example: `[{"pretext": "pre-hello", "text": "text-world"}]`.
+- **structured_blocks** (`array[string]`, optional) A JSON-based array of structured blocks for constructing messages using Block Kit. Provide as a URL-encoded string. Include fallback text if necessary.
+- **emoji_icon_for_message** (`string`, optional) Emoji to display as the icon for the Slack message. Overrides any image URL icon.
+- **message_icon_url** (`string`, optional) URL to an image to use as the icon for the message. Overrides any specified icon emoji.
+- **message_markdown** (`string`, optional) The message text formatted using markdown, up to 12,000 characters. Cannot be used with `blocks` or `text`.
+- **message_metadata** (`string`, optional) A JSON object with 'event_type' and 'event_payload' fields, URL-encoded, providing additional metadata for the message.
+- **parse_mode** (`string`, optional) Specifies how the message content should be treated. Options are 'none' to remove hyperlinks or 'full' to ignore markdown formatting.
+- **message_text** (`string`, optional) The main text of the message. Acts as the primary message or a fallback for notifications when using blocks. Supports plain text or markdown.
+- **thread_timestamp** (`string`, optional) Timestamp of the parent message to which this message will be a reply. Use the parent's `ts` value, not a reply's.
+- **bot_username** (`string`, optional) The display name to use for the bot when sending the message to Slack.
+- **post_as_authenticated_user** (`boolean`, optional) Set to true to post the message as the authenticated user instead of as a bot. Only applicable for classic apps.
+- **link_user_groups** (`boolean`, optional) Enable linking of user groups in the message. Individual user linking is not supported.
+- **enable_slack_markup_parsing** (`boolean`, optional) Set to true to enable Slack markup parsing in the message. Default is enabled.
+- **broadcast_reply_to_channel** (`boolean`, optional) Set to true to make the reply visible to everyone in the channel when responding to a thread. Use with 'thread_ts'. Default is false.
+- **enable_unfurling_text_content** (`boolean`, optional) Set to true to enable unfurling of primarily text-based content in Slack messages.
+- **disable_media_unfurling** (`boolean`, optional) Set to false to enable media unfurling and true to disable it. (default: 'false')
+
+## SlackApi.ListScheduledMessages
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/list_scheduled_messages_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/list_scheduled_messages_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve scheduled messages from Slack.
+
+**Parameters**
+
+- **channel_id** (`string`, optional) The ID of the Slack channel from which to retrieve scheduled messages.
+- **pagination_cursor** (`string`, optional) Cursor value for pagination to specify the starting point of the list from a previous call.
+- **latest_timestamp** (`string`, optional) A Unix timestamp marking the latest point in the time range for fetching scheduled messages. Ensure it is greater than the `oldest` timestamp if both are set.
+- **max_number_of_entries** (`integer`, optional) Specify the maximum number of scheduled messages to return from Slack.
+- **oldest_timestamp** (`string`, optional) A Unix timestamp representing the start of the time range for scheduled messages. It must be less than the `latest_timestamp` if both are specified.
+- **team_id** (`string`, optional) Encoded team ID to specify which team's channels to list. Required if using an org-level token; ignore for workspace-level tokens.
+
+## SlackApi.ScheduleSlackMessage
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/schedule_slack_message_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/schedule_slack_message_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Schedule a message to be sent later in Slack.
+
+**Parameters**
+
+- **slack_channel_id_or_name** (`string`, required) Specify the target Slack channel, private group, or DM. Use an encoded ID or the channel name. Retrieve channel ID via `conversations.list`.
+- **schedule_time_unix_timestamp** (`integer`, required) Unix timestamp for when the message should be posted to Slack. Must be within 120 days and not exceed 30 messages per 5-minute window.
+- **attachments_json** (`string`, optional) A JSON array of structured attachments as a URL-encoded string for the Slack message.
+- **structured_blocks_json** (`string`, optional) A URL-encoded string of a JSON-based array containing structured blocks for message formatting.
+- **message_markdown** (`string`, optional) Message text in markdown format. Avoid using with 'blocks' or 'text'. Maximum 12,000 characters.
+- **message_parsing_mode** (`string`, optional) Specifies how the message content should be parsed and interpreted when sending to Slack. For more details, refer to chat.postMessage documentation.
+- **message_text** (`string`, optional) The main body of the Slack message or a fallback text when using blocks. Can be plain text or formatted with mrkdwn.
+- **parent_message_timestamp** (`string`, optional) Timestamp of the parent message to which this message is a reply. Use the original message's timestamp, not a reply's timestamp.
+- **metadata_json** (`string`, optional) JSON object containing 'event_type' and 'event_payload' fields. Must be URL-encoded. Note: using this will prevent scheduled messages from posting.
+- **enable_group_linking** (`boolean`, optional) Set to true to link user groups in the message. Linking individual users is not supported; use mention syntax instead.
+- **make_reply_visible_to_everyone** (`boolean`, optional) Set to true to make the reply visible to everyone in the channel or conversation. Use with `thread_ts`. Defaults to false.
+- **enable_link_unfurling** (`boolean`, optional) Pass true to enable unfurling of primarily text-based content.
+- **disable_unfurling_of_media_content** (`boolean`, optional) Set to true to disable unfurling of media content. Defaults to false.
+
+## SlackApi.CustomUnfurlSlackUrls
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/custom_unfurl_slack_urls_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/custom_unfurl_slack_urls_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Provide custom unfurl behavior for user-posted URLs on Slack.
+
+**Parameters**
+
+- **channel_id** (`string`, required) ID of the Slack channel where the message is posted. Required with 'ts' for custom unfurl or with 'unfurl_id' and 'source'.
+- **message_timestamp** (`string`, required) Timestamp of the message to which unfurl behavior will be added. Ensure it corresponds to a message in the specified channel containing a fully-qualified URL registered with your Slack app.
+- **unfurl_url_map** (`string`, required) A URL-encoded JSON map with URLs as keys and their corresponding unfurl data as values. Each URL should point to a single attachment, like message buttons.
+- **authentication_invitation_message** (`string`, optional) A simple formatted string sent as an ephemeral message inviting the user to authenticate for full unfurl behavior. Supports Slack's _bold_, _italics_, and linking formatting. If provided, this takes precedence over `authentication_invitation_url`.
+- **custom_authentication_url** (`string`, optional) A URL to redirect users for app authentication to enable full URL unfurling, requires URL encoding.
+- **user_authentication_blocks** (`array[string]`, optional) A URL-encoded JSON array of structured blocks to send as an ephemeral message for user authentication invitation.
+- **unfurl_link_id** (`string`, optional) The ID of the link to unfurl. Must be used with 'source'.
+- **link_source** (`string`, optional) Specify the source of the link to unfurl as either 'composer' for links inside the message composer or 'conversations_history' for links posted to a conversation. Must be used with 'unfurl_id', or alternatively with 'channel' and 'ts'.
+- **require_user_authentication** (`boolean`, optional) Set to true if the user must install your Slack app to trigger unfurls for this domain.
+
+## SlackApi.AcceptSlackInvite
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/accept_slack_invite_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/accept_slack_invite_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Accept invitations to a Slack Connect channel.
+
+**Parameters**
+
+- **channel_name** (`string`, required) Provide the desired name for the Slack Connect channel. If the channel doesn't exist in your workspace, this name will be assigned to it.
+- **invite_id** (`string`, optional) ID of the invitation you want to accept. Must provide either this or channel_id.
+- **slack_channel_id_to_accept** (`string`, optional) The ID of the channel you would like to accept the invitation for. Either this or `invite_id` is required.
+- **workspace_id** (`string`, optional) The ID of the workspace where the channel should be accepted. Required if using an org-level token.
+- **is_channel_private** (`boolean`, optional) True to make the channel private; false to make it public.
+- **use_free_trial** (`boolean`, optional) Set to 'True' to use your workspace's free trial to start using Slack Connect.
+
+## SlackApi.ApproveSlackChannelInvitation
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/approve_slack_channel_invitation_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/approve_slack_channel_invitation_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Approve an invitation to a Slack Connect channel.
+
+**Parameters**
+
+- **shared_channel_invite_id** (`string`, required) The ID of the shared channel invitation you want to approve. It is required to specifically identify which invitation is being approved for the Slack Connect channel.
+- **other_party_team_id** (`string`, optional) The team or enterprise ID of the other party involved in the Slack Connect invitation you are approving.
+
+## SlackApi.CreateSlackConversation
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/create_slack_conversation_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/create_slack_conversation_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Create a new public or private Slack conversation.
+
+**Parameters**
+
+- **channel_name** (`string`, required) The name of the new Slack channel to create. It must contain only lowercase letters, numbers, hyphens, and underscores, and be 80 characters or less.
+- **encoded_team_id** (`string`, optional) The encoded team ID where the channel will be created. Required when using an organization-level token. Ignored if using a workspace-level token.
+- **create_private_channel** (`boolean`, optional) Set to true to create a private channel instead of a public one.
+
+## SlackApi.GetConversationInfo
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/get_conversation_info_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/get_conversation_info_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Fetches information about a Slack conversation.
+
+**Parameters**
+
+- **conversation_id** (`string`, required) The unique ID of the Slack conversation to retrieve information for.
+- **include_locale** (`boolean`, optional) Set to `true` to receive the locale for this conversation. Defaults to `false`.
+- **include_member_count** (`boolean`, optional) Set to true to include the member count for the specified conversation. Defaults to false.
+
+## SlackApi.InviteUserToSlackChannel
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/invite_user_to_slack_channel_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/invite_user_to_slack_channel_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Invite users to a Slack channel.
+
+**Parameters**
+
+- **slack_channel_id** (`string`, required) The ID of the Slack channel to invite users to. It can be a public or private channel ID.
+- **user_ids_list** (`string`, required) A list of up to 100 user IDs to invite, separated by commas.
+- **continue_with_valid_users** (`boolean`, optional) Set to true to invite valid users while ignoring invalid IDs when multiple user IDs are provided. Default is false.
+
+## SlackApi.JoinSlackConversation
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/join_slack_conversation_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/join_slack_conversation_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Join an existing conversation in Slack.
+
+**Parameters**
+
+- **conversation_id** (`string`, required) The ID of the conversation or channel you want to join in Slack.
+
+## SlackApi.ListSlackChannels
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/list_slack_channels_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/list_slack_channels_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of all channels in a Slack team.
+
+**Parameters**
+
+- **pagination_cursor** (`string`, optional) The cursor used to paginate through data collections. Use the `next_cursor` from a previous response to continue; omit for the first page.
+- **maximum_number_of_channels** (`integer`, optional) Specify the maximum number of channels to return. Must be an integer under 1000. Note that fewer channels than requested may be returned. (default: '100')
+- **team_id_for_org_app** (`string`, optional) Encoded team ID to list channels. Required for org-level tokens; ignored for workspace-level tokens.
+- **channel_types** (`string`, optional) Comma-separated list of channel types to include, e.g., 'public_channel', 'private_channel', 'mpim', 'im'. (default: 'public_channel')
+- **exclude_archived_channels** (`boolean`, optional) Set to true to exclude archived channels from the list of Slack channels. Default is false.
+
+## SlackApi.ListSharedChannelInvites
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/list_shared_channel_invites_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/list_shared_channel_invites_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve unapproved shared channel invites from Slack.
+
+**Parameters**
+
+- **workspace_team_id** (`string`, optional) The encoded team ID for the workspace to retrieve invites from. Required when using an organization token.
+- **maximum_invites_to_return** (`integer`, optional) Specify the maximum number of unapproved shared channel invites to retrieve. (default: '100')
+- **pagination_cursor** (`string`, optional) The cursor for paginating through results, obtained from a previous call's next_cursor.
+
+## SlackApi.SetSlackChannelReadCursor
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/set_slack_channel_read_cursor_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/set_slack_channel_read_cursor_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Update the read cursor in a Slack channel.
+
+**Parameters**
+
+- **channel_id** (`string`, required) The ID of the Slack channel or conversation where you want to set the read cursor. This should be a valid Slack channel ID.
+- **timestamp_of_message_to_mark_as_read** (`string`, required) The unique identifier (timestamp) of the message you want to mark as most recently seen in the conversation.
+
+## SlackApi.GetSlackConversationMembers
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/get_slack_conversation_members_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/get_slack_conversation_members_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve members from a specified Slack conversation.
+
+**Parameters**
+
+- **conversation_id** (`string`, required) The ID of the Slack conversation to retrieve members from. This can be a channel, group, or direct message.
+- **pagination_cursor** (`string`, optional) Cursor for pagination, set to the `next_cursor` value from a previous response to continue retrieving members from a conversation.
+- **max_items_to_return** (`integer`, optional) The maximum number of conversation members to return. Recommended to specify a value under 1000, with no more than 200 results at a time for optimal pagination. (default: '100')
+
+## SlackApi.OpenOrResumeSlackConversation
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/open_or_resume_slack_conversation_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/open_or_resume_slack_conversation_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Open or resume a direct or multi-person message in Slack.
+
+**Parameters**
+
+- **conversation_channel_id** (`string`, optional) The ID of an existing direct or multi-person message channel to resume. Alternatively, provide the `users` field to start a new conversation.
+- **target_user_ids** (`string`, optional) A comma-separated list of user IDs to open or resume a conversation. Provide 1 to 8 IDs. Supplying 1 ID opens a 1:1 DM, while more than 1 ID opens a multi-person DM. Do not include the caller's ID.
+- **return_full_im_channel_definition** (`boolean`, optional) Set to true to receive the entire IM channel definition; false returns only the conversation ID.
+- **prevent_creation** (`boolean`, optional) If true, does not create a new conversation and instead checks for an existing DM or MPDM.
+
+## SlackApi.GetSlackThreadMessages
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/get_slack_thread_messages_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/get_slack_thread_messages_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve messages from a Slack conversation thread.
+
+**Parameters**
+
+- **conversation_id** (`string`, required) The ID of the Slack conversation from which to fetch the message thread.
+- **thread_message_timestamp** (`string`, required) Unique identifier of a parent message or a thread message (timestamp). Fetches the thread or the single message.
+- **pagination_cursor** (`string`, optional) Cursor for pagination. Use the `next_cursor` from a previous response to fetch the next page of data.
+- **latest_message_timestamp** (`string`, optional) Only include messages posted before this Unix timestamp in the results. (default: 'now')
+- **maximum_items_to_return** (`integer`, optional) Specify the maximum number of messages to fetch. The default and maximum are 15 for certain apps, with possible rate limits. (default: '1000')
+- **start_time_unix_timestamp** (`string`, optional) Only include messages after this Unix timestamp in results. (default: '0')
+- **include_all_message_metadata** (`boolean`, optional) Set to true to return all metadata associated with this message.
+- **include_boundary_timestamps** (`boolean`, optional) Include messages with 'oldest' or 'latest' timestamps. Ignored unless either timestamp is specified.
+
+## SlackApi.DenySharedInviteRequest
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/deny_shared_invite_request_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/deny_shared_invite_request_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Denies an external user invitation to a Slack channel.
+
+**Parameters**
+
+- **shared_channel_invite_id** (`string`, required) The ID for the shared channel invite request that you intend to deny. This is required for specifying which invite to decline.
+- **deny_invite_message** (`string`, optional) An optional message explaining why the invitation was denied. This message will be sent to the requester.
+
+## SlackApi.ListCustomEmojiForTeam
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/list_custom_emoji_for_team_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/list_custom_emoji_for_team_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of custom emojis for a specific team.
+
+**Parameters**
+
+- **include_emoji_categories** (`boolean`, optional) Set to true to include categories for Unicode emojis in the response.
+
+## SlackApi.GetExternalFileUploadUrl
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/get_external_file_upload_url_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/get_external_file_upload_url_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a URL to upload an external file to Slack.
+
+**Parameters**
+
+- **file_size_in_bytes** (`integer`, required) Specify the size of the file to be uploaded, measured in bytes. Ensure this value accurately reflects the file size.
+- **file_name** (`string`, required) The name of the file to be uploaded to Slack.
+- **snippet_syntax_type** (`string`, optional) Specify the syntax highlighting type for the snippet being uploaded, such as 'javascript', 'python', etc.
+- **alt_text_description** (`string`, optional) A description of the image for screen-readers, limited to 1000 characters.
+
+## SlackApi.GetRemoteFileInfoSlack
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/get_remote_file_info_slack_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/get_remote_file_info_slack_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve details about a remote file from Slack.
+
+**Parameters**
+
+- **file_external_identifier** (`string`, optional) The GUID defined by the creator for the remote file to retrieve its information.
+- **file_id** (`string`, optional) The unique identifier of the file to retrieve information about. Use this to specify the file in Slack.
+
+## SlackApi.GetSlackRemoteFilesInfo
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/get_slack_remote_files_info_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/get_slack_remote_files_info_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve information about remote files added to Slack.
+
+**Parameters**
+
+- **filter_by_channel_id** (`string`, optional) Filter remote files to only include those appearing in the specified Slack channel, indicated by its channel ID.
+- **pagination_cursor** (`string`, optional) A cursor for paginating through data. Use the `next_cursor` from a prior request to fetch the next set of results. Defaults to the first page if not set.
+- **maximum_items_to_return** (`integer`, optional) Specify the maximum number of remote file records to retrieve from Slack.
+- **filter_files_from_timestamp** (`string`, optional) Filter files created after this inclusive timestamp. Use a Unix timestamp format. (default: '0')
+- **timestamp_filter_end** (`string`, optional) Filter files created before this timestamp (inclusive) in Unix epoch time format. (default: 'now')
+
+## SlackApi.ShareRemoteFileInChannel
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/share_remote_file_in_channel_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/share_remote_file_in_channel_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Share a remote file into a Slack channel.
+
+**Parameters**
+
+- **target_channel_ids** (`string`, required) Comma-separated list of Slack channel IDs where the remote file will be shared. Ensure IDs are valid and the user has permission to share files in these channels.
+- **file_external_identifier** (`string`, optional) The globally unique identifier (GUID) for the file set by the app when registering with Slack. Required if 'file' is not provided.
+- **file_id** (`string`, optional) The ID of a file registered with Slack to be shared. Required if `external_id` is not provided.
+
+## SlackApi.EnableSlackFileSharing
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/enable_slack_file_sharing_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/enable_slack_file_sharing_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Enable a Slack file for public sharing.
+
+**Parameters**
+
+- **file_id_to_share** (`string`, required) The ID of the file on Slack that you want to enable for public sharing.
+
+## SlackApi.PinItemToSlackChannel
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/pin_item_to_slack_channel_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/pin_item_to_slack_channel_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Pin an item to a Slack channel.
+
+**Parameters**
+
+- **channel_id** (`string`, required) The ID of the Slack channel where the message will be pinned. A `timestamp` must also be provided.
+- **message_timestamp** (`string`, optional) The timestamp (`ts`) of the message to pin in the Slack channel. Ensure the channel is also specified.
+
+## SlackApi.ListPinnedItems
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/list_pinned_items_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/list_pinned_items_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve items pinned to a Slack channel.
+
+**Parameters**
+
+- **channel_id** (`string`, required) The ID of the Slack channel to retrieve pinned items from. This is required to specify which channel's pinned items will be listed.
+
+## SlackApi.AddSlackReaction
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/add_slack_reaction_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/add_slack_reaction_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Add a reaction to a Slack item.
+
+**Parameters**
+
+- **slack_channel_id** (`string`, required) ID of the channel where the message is posted. Use to specify the location for adding a reaction.
+- **reaction_emoji_name** (`string`, required) The name of the emoji to be used as a reaction. Include skin tone modifiers if applicable (e.g., 'thumbsup::skin-tone-2').
+- **message_timestamp** (`string`, required) The timestamp of the message to which the reaction will be added. Ensure the format matches the Slack API requirements.
+
+## SlackApi.RemoveReactionFromItem
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/remove_reaction_from_item_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/remove_reaction_from_item_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Remove a reaction from a Slack item.
+
+**Parameters**
+
+- **reaction_emoji_name** (`string`, required) The name of the emoji reaction to be removed, such as 'smile' or 'thumbsup'.
+- **target_file_id** (`string`, optional) The identifier of the file from which to remove the reaction. Specify either this, `target_file_comment_id`, or both `target_channel_id` and `target_message_timestamp`.
+- **file_comment_id** (`string`, optional) The ID of the file comment from which you want to remove the reaction. Provide this if the reaction is on a file comment.
+- **message_channel_id** (`string`, optional) Channel ID where the message to remove the reaction from was posted. Required if removing a reaction from a message. Use in combination with 'message_timestamp'.
+- **message_timestamp** (`string`, optional) The exact timestamp of the message from which to remove the reaction. Specify when targeting a message.
+
+## SlackApi.SearchFilesInSlack
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/search_files_in_slack_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/search_files_in_slack_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Search for files in Slack using a query.
+
+**Parameters**
+
+- **search_query** (`string`, required) The text string to search for in Slack files. Use keywords or phrases to narrow down results.
+- **items_per_page** (`integer`, optional) The number of file results to return per page. Maximum allowed value is 100. (default: '20')
+- **results_page_number** (`integer`, optional) The specific page number of results to retrieve, with a maximum value of 100. (default: '1')
+- **sort_files_by** (`string`, optional) Specify how to sort the search results: either by 'score' or 'timestamp'. (default: 'score')
+- **sort_direction** (`string`, optional) Change the sort direction for search results to ascending ('asc') or descending ('desc'). (default: 'desc')
+- **encoded_team_id** (`string`, optional) Encoded team ID to specify the search domain when using an org-level token. Ignored with a workspace-level token.
+- **enable_query_highlight** (`boolean`, optional) Set to true to enable highlight markers for matching query terms in the search results.
+
+## SlackApi.SearchSlackMessages
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/search_slack_messages_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/search_slack_messages_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Search Slack messages based on a query.
+
+**Parameters**
+
+- **search_query** (`string`, required) The text to search for in Slack messages. Use keywords or phrases to narrow down results.
+- **results_per_page** (`integer`, optional) The number of search results to return per page, with a maximum limit of 100. (default: '20')
+- **page_number** (`integer`, optional) The page number of search results to retrieve, maximum value of 100. (default: '1')
+- **pagination_cursor** (`string`, optional) Use '\*' for the first call to start pagination or provide the 'next_cursor' value from previous results to continue.
+- **sort_results_by** (`string`, optional) Specify the criterion for sorting the search results, either by 'score' for relevance or 'timestamp' for chronological order. (default: 'score')
+- **sort_direction** (`string`, optional) Specify the order for sorting results: use 'asc' for ascending or 'desc' for descending. (default: 'desc')
+- **team_id** (`string`, optional) The encoded team ID to search within. Required only if an organization-level token is used. Ignored for workspace-level tokens.
+- **enable_query_highlighting** (`boolean`, optional) Set to true to enable query highlight markers, marking matching terms in the results.
+
+## SlackApi.GetTeamBillableUsersInfo
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/get_team_billable_users_info_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/get_team_billable_users_info_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieves billable users info for the current Slack team.
+
+**Parameters**
+
+- **pagination_cursor** (`string`, optional) Cursor for pagination. Use the `next_cursor` from the previous response to fetch the next page of users. (default: 'fetches the first page')
+- **maximum_items_to_return** (`integer`, optional) Specifies the maximum number of billable user entries to be retrieved.
+- **specific_user_id** (`string`, optional) The ID of a specific user to retrieve billable information for. Leave empty to retrieve info for all users.
+- **encoded_team_id** (`string`, optional) Encoded team ID for retrieving billable info, required if using an org token. Ignored with workspace-level tokens.
+
+## SlackApi.GetCurrentSlackTeamInfo
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/get_current_slack_team_info_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/get_current_slack_team_info_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve information about the current Slack team.
+
+**Parameters**
+
+- **query_by_domain** (`string`, optional) Comma-separated domains to query instead of a team, used when the team is not specified. This only works for domains in the same enterprise as the querying team token.
+- **specific_team_id** (`string`, optional) The ID of the Slack team to retrieve information about. If omitted, information about the current team will be returned.
+
+## SlackApi.GetIntegrationLogs
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/get_integration_logs_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/get_integration_logs_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve integration logs for the current Slack team.
+
+**Parameters**
+
+- **filter_by_app_id** (`string`, optional) Filter integration logs to a specific Slack app. If not provided, logs for all apps are retrieved.
+- **filter_by_change_type** (`string`, optional) Specify the change type to filter logs. Options: 'added', 'removed', 'enabled', 'disabled', 'updated'. Defaults to all logs.
+- **result_count** (`string`, optional) The number of log entries to retrieve. Specify the maximum number of logs to return in a single request. (default: '100')
+- **result_page_number** (`string`, optional) The specific page number of the integration logs to retrieve. Used for pagination. (default: '1')
+- **filter_by_service_id** (`string`, optional) Specify the service ID to filter integration logs related to a specific service. If not provided, logs for all services will be retrieved.
+- **encoded_team_id** (`string`, optional) The encoded team ID to get logs from, required if using an org-level token. Ignored if using a workspace-level token.
+- **filter_by_user** (`string`, optional) Filter logs generated by a specific user's actions. Defaults to all logs if not specified.
+
+## SlackApi.GetSlackTeamPreferences
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/get_slack_team_preferences_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/get_slack_team_preferences_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of a workspace's team preferences.
+
+**Parameters**
+
+This tool does not take any parameters.
+
+## SlackApi.GetTeamProfile
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/get_team_profile_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/get_team_profile_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a team's profile information from Slack.
+
+**Parameters**
+
+- **visibility_filter** (`string`, optional) Filter the profile fields based on visibility. Options: 'all', 'visible', 'hidden'. Default is 'all'.
+
+## SlackApi.CreateSlackUserGroup
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/create_slack_user_group_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/create_slack_user_group_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Creates a new user group in Slack.
+
+**Parameters**
+
+- **user_group_name** (`string`, required) A unique name for the user group to be created, distinguishing it from other user groups.
+- **default_channel_ids** (`array[string]`, optional) A list of channel IDs to set as default for the User Group. Use comma-separated values.
+- **custom_additional_channels** (`array[string]`, optional) Comma-separated encoded channel IDs where the User Group can add members.
+- **user_group_description** (`string`, optional) A brief text describing the purpose or role of the user group in Slack.
+- **unique_mention_handle** (`string`, optional) A unique mention handle for the user group. It must not duplicate existing handles of channels, users, or other user groups.
+- **team_id_for_user_group_creation** (`string`, optional) Encoded team ID for the user group creation, required if using an org-level token.
+- **include_user_count** (`boolean`, optional) Set to true to include the number of users in each User Group.
+- **enable_display_as_sidebar_section** (`boolean`, optional) Set to true to display the user group as a sidebar section for all group members if the group has one or more default channels.
+
+## SlackApi.DisableUserGroup
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/disable_user_group_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/disable_user_group_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Disable an existing Slack User Group.
+
+**Parameters**
+
+- **user_group_id** (`string`, required) The encoded ID of the User Group to be disabled.
+- **team_id** (`string`, optional) Encoded target team ID where the user group exists. Required only if using an org-level token; ignored for workspace-level tokens.
+- **include_user_count** (`boolean`, optional) Include the number of users in the User Group. Set to true to include the count.
+
+## SlackApi.EnableSlackUserGroup
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/enable_slack_user_group_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/enable_slack_user_group_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Enable a user group in Slack.
+
+**Parameters**
+
+- **user_group_id** (`string`, required) The encoded ID of the User Group to be enabled in Slack.
+- **team_id** (`string`, optional) Provide the encoded team ID where the user group is located. Only required if using an org-level token. Ignored with workspace-level tokens.
+- **include_user_count** (`boolean`, optional) Set to true to include the number of users in the User Group.
+
+## SlackApi.ListSlackUserGroups
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/list_slack_user_groups_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/list_slack_user_groups_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve all user groups for a Slack team.
+
+**Parameters**
+
+- **team_id_for_org_token** (`string`, optional) Encoded team ID required when using an org-level token. Ignored if using a workspace-level token.
+- **include_user_count** (`boolean`, optional) Set to true to include the number of users in each User Group.
+- **include_disabled_groups** (`boolean`, optional) Set to true to include disabled user groups in the results.
+- **include_users_in_group** (`boolean`, optional) Include the list of users for each User Group in the response.
+
+## SlackApi.UpdateSlackUserGroup
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/update_slack_user_group_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/update_slack_user_group_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Update an existing User Group in Slack.
+
+**Parameters**
+
+- **user_group_id** (`string`, required) The encoded ID of the User Group to update in Slack.
+- **default_channel_ids** (`array[string]`, optional) A comma-separated list of channel IDs where the User Group is set as default. Use encoded channel IDs.
+- **additional_channel_ids** (`array[string]`, optional) Comma separated encoded channel IDs for custom additions to user group members.
+- **user_group_description** (`string`, optional) A short description of the User Group to update in Slack. This should clearly define the group's purpose or role.
+- **user_group_handle** (`string`, optional) Unique mention handle for the User Group, distinct from all channels, users, and other User Groups.
+- **user_group_name** (`string`, optional) A unique name for the User Group to update. Ensure it does not duplicate any existing User Group names.
+- **team_id_for_org_token** (`string`, optional) Encoded team ID where the user group exists, required for org-level tokens. Ignored if using a workspace-level token.
+- **include_user_count** (`boolean`, optional) Set to true to include the number of users in the User Group.
+- **enable_sidebar_section** (`boolean`, optional) Set to true to configure the user group to appear as a sidebar section for all group members. Only relevant if the group has 1 or more default channels.
+
+## SlackApi.UpdateSlackUsergroupUsers
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/update_slack_usergroup_users_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/update_slack_usergroup_users_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Update the list of users in a Slack user group.
+
+**Parameters**
+
+- **user_group_id** (`string`, required) The encoded ID of the Slack user group to update.
+- **user_ids_list** (`array[string]`, required) A comma separated string of encoded Slack user IDs representing the complete user list for the group. This replaces all current members.
+- **team_id_for_org_token** (`string`, optional) Encoded team ID where the user group exists. Required if using an organization token; ignored with workspace-level token.
+- **update_additional_channels** (`array[string]`, optional) Encoded channel IDs to add user group members to, separated by commas. These represent additional channels for custom user group member additions.
+- **include_user_count** (`boolean`, optional) Set to true to include the number of users in the user group in the response.
+- **is_shared_section** (`boolean`, optional) Indicates if the API call involves a shared section. Set to true if it does, otherwise false.
+
+## SlackApi.ListAccessibleSlackConversations
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/list_accessible_slack_conversations_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/list_accessible_slack_conversations_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of conversations the user can access on Slack.
+
+**Parameters**
+
+- **pagination_cursor** (`string`, optional) A cursor for pagination to continue listing conversations from a specific point. Use the 'next_cursor' from a previous response. Default is the first page.
+- **maximum_items_to_return** (`integer`, optional) The maximum number of conversations to return in the response. Must be an integer with a maximum value of 999. It is recommended to request no more than 200 results at a time for optimal performance. (default: '100')
+- **slack_team_id** (`string`, optional) The encoded ID of the Slack team to list conversations for. Required if using an organization-level token. Ignored if a workspace-level token is used.
+- **channel_types** (`string`, optional) Comma-separated list of channel types to filter conversations. Options: public_channel, private_channel, mpim, im. (default: 'public_channel')
+- **specific_user_id** (`string`, optional) Filter conversations by a specific user ID's membership. Only includes conversations shared with the calling user.
+- **exclude_archived_channels** (`boolean`, optional) Set to true to exclude archived channels from the retrieved list of Slack conversations. (default: false)
+
+## SlackApi.CheckSlackDiscoverability
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/check_slack_discoverability_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/check_slack_discoverability_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Check if an email is discoverable on Slack.
+
+**Parameters**
+
+- **email_to_check** (`string`, required) The email address to verify if it is associated with a discoverable Slack user.
+
+## SlackApi.GetSlackUserPresence
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/get_slack_user_presence_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/get_slack_user_presence_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve user presence information from Slack.
+
+**Parameters**
+
+- **target_user_id** (`string`, optional) The Slack user ID for which you want to retrieve presence information. (default: 'authed user')
+
+## SlackApi.GetUserIdentity
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/get_user_identity_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/get_user_identity_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a user's identity information from Slack.
+
+**Parameters**
+
+This tool does not take any parameters.
+
+## SlackApi.ListSlackTeamUsers
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/list_slack_team_users_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/list_slack_team_users_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Fetches a list of all users in a Slack team.
+
+**Parameters**
+
+- **pagination_cursor** (`string`, optional) Cursor for paginating through data. Use the `next_cursor` from a previous response to continue.
+- **maximum_items_to_return** (`integer`, optional) Maximum number of users to return (recommended max is 200 for pagination).
+- **slack_team_id** (`string`, optional) The encoded team ID to list users from, necessary if an organization-level token is used. Ignored if a workspace-level token is provided.
+- **include_user_locale** (`boolean`, optional) Set to true to receive locale information for each user. Default is false.
+
+## SlackApi.FindSlackUserByEmail
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/find_slack_user_by_email_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/find_slack_user_by_email_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Find a Slack user using their email address.
+
+**Parameters**
+
+- **user_email_address** (`string`, required) The email address of the user in the Slack workspace to search for.
+
+## SlackApi.GetSlackUserProfile
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/get_slack_user_profile_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/get_slack_user_profile_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve Slack user profile information and custom status.
+
+**Parameters**
+
+- **target_user_id** (`string`, optional) The unique identifier of the Slack user whose profile information is to be retrieved.
+- **include_labels** (`boolean`, optional) Include labels for each ID in custom profile fields. This option can heavily rate-limit requests and is not recommended. Default is false.
+
+## SlackApi.SetSlackProfilePhoto
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/slackapi/set_slack_profile_photo_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/slackapi/set_slack_profile_photo_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Set the user's profile photo on Slack.
+
+**Parameters**
+
+- **crop_box_size** (`string`, optional) The size of the square crop box for the profile photo in pixels. Specify the width and height, which are the same value for a square.
+- **crop_box_x_coordinate** (`string`, optional) X coordinate of the top-left corner of the crop box for the profile photo.
+- **crop_y_coordinate** (`string`, optional) Y coordinate of the top-left corner of the crop box for the user's profile photo on Slack. This determines where the cropping of the image will start on the vertical axis.
+- **profile_photo_image** (`string`, optional) The image file to set as the Slack profile photo. Provide image data directly with the correct content type (e.g., image/jpeg, image/png).
+
+<ToolFooter pipPackageName="arcade_slack_api" />

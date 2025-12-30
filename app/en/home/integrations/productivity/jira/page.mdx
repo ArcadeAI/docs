@@ -1,0 +1,1405 @@
+---
+asIndexPage: true
+---
+
+# Jira
+
+import ToolInfo from "@/app/_components/tool-info";
+import Badges from "@/app/_components/badges";
+import TabbedCodeBlock from "@/app/_components/tabbed-code-block";
+import TableOfContents from "@/app/_components/table-of-contents";
+import ToolFooter from "@/app/_components/tool-footer";
+import { Callout } from "nextra/components";
+
+<ToolInfo
+  description="Enable agents to interact with Jira"
+  author="Arcade"
+  authType="OAuth2"
+  versions={["2.4.0"]}
+/>
+
+<Badges repo="arcadeai/arcade_jira" />
+
+The Jira MCP Server provides a comprehensive set of tools for interacting with Jira, enabling users and AI applications to efficiently manage issues and projects. With this MCP Sever, you can:
+
+- Create, update, and search for Jira issues using various parameters.
+- Retrieve detailed information about issues, projects, users, and issue types.
+- Manage issue labels and attachments, including adding and removing them.
+- Transition issues between different statuses and manage comments on issues.
+- Browse and list available projects, priorities, and users within Jira.
+- Browse and list information of available boards and sprints within a Jira cloud.
+
+This MCP Sever streamlines the process of issue management, making it easier to integrate Jira functionalities into applications and workflows.
+
+<Callout type="warning">
+
+<h2 className="text-xl font-bold text-white pl-1.5">
+  Handling multiple Atlassian Clouds
+</h2>
+
+A Jira user may have multiple Atlassian Clouds authorized via the same OAuth grant. In such cases, the Jira tools must be called with the `atlassian_cloud_id` argument. The [`Jira.GetAvailableAtlassianClouds`](/mcp-servers/productivity/jira#jiragetavailableatlassianclouds) tool can be used to get the available Atlassian Clouds and their IDs.
+
+When a tool call does not receive a value for `atlassian_cloud_id` and the user only has a single Atlassian Cloud authorized, the tool will use that. Otherwise, an error will be raised. The error will contain an additional content listing the available Atlassian Clouds and their IDs.
+
+Your AI Agent or AI-powered chat application can use the tool referenced above (or the exception's additional content) to guide the user into selecting the correct Atlassian Cloud.
+
+When the user selects an Atlassian Cloud, it may be appropriate to keep this information in the LLM's context window for subsequent tool calls, avoiding the need to ask the user multiple times.
+
+**_It is the job of the AI Agent or chat application to:_**
+
+1. Make it clear to the chat's end user which Atlassian Cloud is being used at any moment, to avoid, for example, having a Jira Issue being created in the wrong Atlassian Cloud;
+1. Appropriately instruct the LLM and keep the relevant information in its context window, enabling it to correctly call the Jira tools, **especially in multi-turn conversations**.
+
+</Callout>
+
+## Available Tools
+
+<TableOfContents
+  headers={["Tool Name", "Description"]}
+  data={[
+    [
+      "Jira.ListIssueTypesByProject",
+      "Get the list of issue types (e.g. 'Task', 'Epic', etc.) available to a given project.",
+    ],
+    [
+      "Jira.GetIssueTypeById",
+      "Get the details of a Jira issue type by its ID.",
+    ],
+    ["Jira.GetIssueById", "Get the details of a Jira issue by its ID."],
+    [
+      "Jira.GetIssuesWithoutId",
+      "Search for Jira issues when you don't have the issue ID(s).",
+    ],
+    ["Jira.ListIssues", "Get the issues for a given project."],
+    [
+      "Jira.SearchIssuesWithoutJql",
+      "Parameterized search for Jira issues (without having to provide a JQL query).",
+    ],
+    [
+      "Jira.SearchIssuesWithJql",
+      "Search for Jira issues using a JQL (Jira Query Language) query.",
+    ],
+    ["Jira.CreateIssue", "Create a new Jira issue."],
+    ["Jira.AddLabelsToIssue", "Add labels to an existing Jira issue."],
+    [
+      "Jira.RemoveLabelsFromIssue",
+      "Remove labels from an existing Jira issue.",
+    ],
+    ["Jira.UpdateIssue", "Update an existing Jira issue."],
+    [
+      "Jira.ListSprintsForBoards",
+      "Retrieve sprints from Jira boards with filtering options for planning and tracking purposes.",
+    ],
+    [
+      "Jira.GetSprintIssues",
+      "Get all issues that are currently assigned to a specific sprint with pagination support.",
+    ],
+    ["Jira.AddIssuesToSprint", "Add a list of issues to a sprint."],
+    [
+      "Jira.MoveIssuesFromSprintToBacklog",
+      "Move issues from active or future sprints back to the board's backlog.",
+    ],
+    [
+      "Jira.ListLabels",
+      "Get the existing labels (tags) in the user's Jira instance.",
+    ],
+    ["Jira.ListUsers", "Browse users in Jira."],
+    ["Jira.GetUserById", "Get user information by their ID."],
+    [
+      "Jira.GetUsersWithoutId",
+      "Get users without their account ID, searching by display name and email address.",
+    ],
+    ["Jira.GetAvailableAtlassianClouds", "Get available Atlassian Clouds."],
+    ["Jira.AttachFileToIssue", "Add an attachment to an issue."],
+    [
+      "Jira.ListIssueAttachmentsMetadata",
+      "Get the metadata about the files attached to an issue.",
+    ],
+    ["Jira.GetAttachmentMetadata", "Get the metadata of an attachment."],
+    [
+      "Jira.DownloadAttachment",
+      "Download the contents of an attachment associated with an issue.",
+    ],
+    ["Jira.GetTransitionById", "Get a transition by its ID."],
+    [
+      "Jira.GetTransitionsAvailableForIssue",
+      "Get the transitions available for an existing Jira issue.",
+    ],
+    [
+      "Jira.GetTransitionByStatusName",
+      "Get a transition available for an issue by the transition name.",
+    ],
+    [
+      "Jira.TransitionIssueToNewStatus",
+      "Transition a Jira issue to a new status.",
+    ],
+    ["Jira.WhoAmI", "CALL THIS TOO FIRST to establish user profile context."],
+    ["Jira.ListProjects", "Browse projects available in Jira."],
+    ["Jira.SearchProjects", "Get the details of all Jira projects."],
+    [
+      "Jira.GetProjectById",
+      "Get the details of a Jira project by its ID or key.",
+    ],
+    [
+      "Jira.GetBoards",
+      "Get Jira boards, with the option to filter by a list of board names or IDs (accepts a mix of both). Supports 'offset' and 'limit' parameters.",
+    ],
+    [
+      "Jira.GetBoardBacklogIssues",
+      "Get all issues in a board's backlog. Supports 'offset' and 'limit' parameters.",
+    ],
+    ["Jira.GetPriorityById", "Get the details of a priority by its ID."],
+    [
+      "Jira.ListPrioritySchemes",
+      "Browse the priority schemes available in Jira.",
+    ],
+    [
+      "Jira.ListPrioritiesByScheme",
+      "Browse the priorities associated with a priority scheme.",
+    ],
+    [
+      "Jira.ListProjectsByScheme",
+      "Browse the projects associated with a priority scheme.",
+    ],
+    [
+      "Jira.ListPrioritiesAvailableToAProject",
+      "Browse the priorities available to be used in issues in the specified Jira project.",
+    ],
+    [
+      "Jira.ListPrioritiesAvailableToAnIssue",
+      "Browse the priorities available to be used in the specified Jira issue.",
+    ],
+    ["Jira.GetCommentById", "Get a comment by its ID."],
+    ["Jira.GetIssueComments", "Get the comments of a Jira issue by its ID."],
+    ["Jira.AddCommentToIssue", "Add a comment to a Jira issue."],
+  ]}
+/>
+
+<Callout>
+  If you need to perform an action that's not listed here, you can [get in touch
+  with us](mailto:contact@arcade.dev) to request a new tool, or [create your own
+  tools](/home/build-tools/create-a-mcp-server).
+</Callout>
+
+## Jira.ListIssueTypesByProject
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/list_issue_types_by_project_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/list_issue_types_by_project_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get the list of issue types (e.g. 'Task', 'Epic', etc.) available to a given project.
+
+**Parameters**
+
+- **project** (`string`, required) The project to get issue types for. Provide a project name, key, or ID. If a project name is provided, the tool will try to find a unique exact match among the available projects.
+- **limit** (`integer`, optional) The maximum number of issue types to retrieve. Min of 1, max of 200. Defaults to 200.
+- **offset** (`integer`, optional) The number of issue types to skip. Defaults to 0 (start from the first issue type).
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.GetIssueTypeById
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/get_issue_type_by_id_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/get_issue_type_by_id_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get the details of a Jira issue type by its ID.
+
+**Parameters**
+
+- **issue_type_id** (`string`, required) The ID of the issue type to retrieve
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.GetIssueById
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/get_issue_by_id_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/get_issue_by_id_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get the details of a Jira issue by its ID.
+
+**Parameters**
+
+- **issue** (`string`, required) The ID or key of the issue to retrieve
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.GetIssuesWithoutId
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/get_issues_without_id_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/get_issues_without_id_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Search for Jira issues when you don't have the issue ID(s).
+
+**Parameters**
+
+- **keywords** (`string`, optional) Keywords to search for issues. Matches against the issue name, description, comments, and any custom field of type text. Defaults to None (no keywords filtering).
+- **due_from** (`string`, optional) Match issues due on or after this date. Format: YYYY-MM-DD. Ex: '2025-01-01'. Defaults to None (no due date filtering).
+- **due_until** (`string`, optional) Match issues due on or before this date. Format: YYYY-MM-DD. Ex: '2025-01-01'. Defaults to None (no due date filtering).
+- **status** (`string`, optional) Match issues that are in this status. Provide a status name. Ex: 'To Do', 'In Progress', 'Done'. Defaults to None (any status).
+- **priority** (`string`, optional) Match issues that have this priority. Provide a priority name. E.g. 'Highest'. Defaults to None (any priority).
+- **assignee** (`string`, optional) Match issues that are assigned to this user. Provide the user's name or email address. Ex: 'John Doe' or 'john.doe@example.com'. Defaults to None (any assignee).
+- **project** (`string`, optional) Match issues that are associated with this project. Provide the project's name, ID, or key. If a project name is provided, the tool will try to find a unique exact match among the available projects. Defaults to None (search across all projects).
+- **issue_type** (`string`, optional) Match issues that are of this issue type. Provide an issue type name or ID. E.g. 'Task', 'Epic', '12345'. If a name is provided, the tool will try to find a unique exact match among the available issue types. Defaults to None (any issue type).
+- **labels** (`array[string]`, optional) Match issues that are in these labels. Defaults to None (any label).
+- **parent_issue** (`string`, optional) Match issues that are a child of this issue. Provide the issue's ID or key. Defaults to None (no parent issue filtering).
+- **limit** (`integer`, optional) The maximum number of issues to retrieve. Min 1, max 100, default 50.
+- **next_page_token** (`string`, optional) The token to use to get the next page of issues. Defaults to None (first page).
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.ListIssues
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/list_issues_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/list_issues_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get the issues for a given project.
+
+**Parameters**
+
+- **project** (`string`, optional) The project to get issues for. Provide a project ID, key or name. If a project is not provided and 1) the user has only one project, the tool will use that; 2) the user has multiple projects, the tool will raise an error listing the available projects to choose from.
+- **limit** (`integer`, optional) The maximum number of issues to retrieve. Min 1, max 100, default 50.
+- **next_page_token** (`string`, optional) The token to use to get the next page of issues. Defaults to None (first page).
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.SearchIssuesWithoutJql
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/search_issues_without_jql_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/search_issues_without_jql_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Parameterized search for Jira issues (without having to provide a JQL query).
+
+**Parameters**
+
+- **keywords** (`string`, optional) Keywords to search for issues. Matches against the issue name, description, comments, and any custom field of type text. Defaults to None (no keywords filtering).
+- **due_from** (`string`, optional) Match issues due on or after this date. Format: YYYY-MM-DD. Ex: '2025-01-01'. Defaults to None (no due date filtering).
+- **due_until** (`string`, optional) Match issues due on or before this date. Format: YYYY-MM-DD. Ex: '2025-01-01'. Defaults to None (no due date filtering).
+- **status** (`string`, optional) Match issues that are in this status. Provide a status name. Ex: 'To Do', 'In Progress', 'Done'. Defaults to None (any status).
+- **priority** (`string`, optional) Match issues that have this priority. Provide a priority name. E.g. 'Highest'. Defaults to None (any priority).
+- **assignee** (`string`, optional) Match issues that are assigned to this user. Provide the user's name or email address. Ex: 'John Doe' or 'john.doe@example.com'. Defaults to None (any assignee).
+- **project** (`string`, optional) Match issues that are associated with this project. Provide the project's name, ID, or key. If a project name is provided, the tool will try to find a unique exact match among the available projects. Defaults to None (search across all projects).
+- **issue_type** (`string`, optional) Match issues that are of this issue type. Provide an issue type name or ID. E.g. 'Task', 'Epic', '12345'. If a name is provided, the tool will try to find a unique exact match among the available issue types. Defaults to None (any issue type).
+- **labels** (`array[string]`, optional) Match issues that are in these labels. Defaults to None (any label).
+- **parent_issue** (`string`, optional) Match issues that are a child of this issue. Provide the issue's ID or key. Defaults to None (no parent issue filtering).
+- **limit** (`integer`, optional) The maximum number of issues to retrieve. Min 1, max 100, default 50.
+- **next_page_token** (`string`, optional) The token to use to get the next page of issues. Defaults to None (first page).
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.SearchIssuesWithJql
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/search_issues_with_jql_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/search_issues_with_jql_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Search for Jira issues using a JQL (Jira Query Language) query.
+
+**Parameters**
+
+- **jql** (`string`, required) The JQL (Jira Query Language) query to search for issues
+- **limit** (`integer`, optional) The maximum number of issues to retrieve. Min of 1, max of 100. Defaults to 50.
+- **next_page_token** (`string`, optional) The token to use to get the next page of issues. Defaults to None (first page).
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.CreateIssue
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/create_issue_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/create_issue_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Create a new Jira issue.
+
+**Parameters**
+
+- **title** (`string`, required) The title of the issue.
+- **issue_type** (`string`, required) The name or ID of the issue type. If a name is provided, the tool will try to find a unique exact match among the available issue types.
+- **project** (`string`, optional) The ID, key or name of the project to associate the issue with. If a name is provided, the tool will try to find a unique exact match among the available projects. Defaults to None (no project). If `project` and `parent_issue` are not provided, the tool will select the single project available. If the user has multiple, an error will be returned with the available projects to choose from.
+- **due_date** (`string`, optional) The due date of the issue. Format: YYYY-MM-DD. Ex: '2025-01-01'. Defaults to None (no due date).
+- **description** (`string`, optional) The description of the issue. Defaults to None (no description).
+- **environment** (`string`, optional) The environment of the issue. Defaults to None (no environment).
+- **labels** (`array[string]`, optional) The labels of the issue. Defaults to None (no labels). A label cannot contain spaces. If a label is provided with spaces, they will be trimmed and replaced by underscores.
+- **parent_issue** (`string`, optional) The ID or key of the parent issue. Defaults to None (no parent issue). Must provide at least one of `parent_issue` or `project` arguments.
+- **priority** (`string`, optional) The ID or name of the priority to use for the issue. If a name is provided, the tool will try to find a unique exact match among the available priorities. Defaults to None (the issue is created with Jira's default priority for the specified project).
+- **assignee** (`string`, optional) The name, email or ID of the user to assign the issue to. If a name or email is provided, the tool will try to find a unique exact match among the available users. Defaults to None (no assignee).
+- **reporter** (`string`, optional) The name, email or ID of the user who is the reporter of the issue. If a name or email is provided, the tool will try to find a unique exact match among the available users. Defaults to None (no reporter).
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.AddLabelsToIssue
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/add_labels_to_issue_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/add_labels_to_issue_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Add labels to an existing Jira issue.
+
+**Parameters**
+
+- **issue** (`string`, required) The ID or key of the issue to update
+- **labels** (`array[string]`, required) The labels to add to the issue. A label cannot contain spaces. If a label is provided with spaces, they will be trimmed and replaced by underscores.
+- **notify_watchers** (`boolean`, optional) Whether to notify the issue's watchers. Defaults to True (notifies watchers).
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.RemoveLabelsFromIssue
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/remove_labels_from_issue_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/remove_labels_from_issue_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Remove labels from an existing Jira issue.
+
+**Parameters**
+
+- **issue** (`string`, required) The ID or key of the issue to update
+- **labels** (`array[string]`, required) The labels to remove from the issue (case-insensitive)
+- **notify_watchers** (`boolean`, optional) Whether to notify the issue's watchers. Defaults to True (notifies watchers).
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.UpdateIssue
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/update_issue_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/update_issue_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Update an existing Jira issue.
+
+**Parameters**
+
+- **issue** (`string`, required) The key or ID of the issue to update
+- **title** (`string`, optional) The new issue title. Provide an empty string to clear the title. Defaults to None (does not change the title).
+- **description** (`string`, optional) The new issue description. Provide an empty string to clear the description. Defaults to None (does not change the description).
+- **environment** (`string`, optional) The new issue environment. Provide an empty string to clear the environment. Defaults to None (does not change the environment).
+- **due_date** (`string`, optional) The new issue due date. Format: YYYY-MM-DD. Ex: '2025-01-01'. Provide an empty string to clear the due date. Defaults to None (does not change the due date).
+- **issue_type** (`string`, optional) The new issue type name or ID. If a name is provided, the tool will try to find a unique exact match among the available issue types. Defaults to None (does not change the issue type).
+- **priority** (`string`, optional) The name or ID of the new issue priority. If a name is provided, the tool will try to find a unique exact match among the available priorities. Defaults to None (does not change the priority).
+- **parent_issue** (`string`, optional) The ID or key of the parent issue. A parent cannot be removed by providing an empty string. It is possible to change the parent issue by providing a new issue ID or key, or to leave it unchanged. Defaults to None (does not change the parent issue).
+- **assignee** (`string`, optional) The new issue assignee name, email, or ID. If a name or email is provided, the tool will try to find a unique exact match among the available users. Provide an empty string to remove the assignee. Defaults to None (does not change the assignee).
+- **reporter** (`string`, optional) The new issue reporter name, email, or ID. If a name or email is provided, the tool will try to find a unique exact match among the available users. Provide an empty string to remove the reporter. Defaults to None (does not change the reporter).
+- **labels** (`array[string]`, optional) The new issue labels. This argument will replace all labels with the new list. Providing an empty list will remove all labels. To add or remove a subset of labels, use the `Jira.AddLabelsToIssue` or the `Jira.RemoveLabelsFromIssue` tools. Defaults to None (does not change the labels). A label cannot contain spaces. If a label is provided with spaces, they will be trimmed and replaced by underscores.
+- **notify_watchers** (`boolean`, optional) Whether to notify the issue's watchers. Defaults to True (notifies watchers).
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.ListSprintsForBoards
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/list_sprints_for_boards_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/list_sprints_for_boards_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve sprints from Jira boards with filtering options for planning and tracking purposes.
+
+**Parameters**
+
+- **board_identifiers_list** (`array[string]`, optional) List of board names or numeric IDs (as strings) to retrieve sprints from. Include all mentioned boards in a single list for best performance. Maximum 25 boards per operation. Optional, defaults to None.
+- **max_sprints_per_board** (`integer`, optional) Maximum sprints per board (1-50). Latest sprints first. Optional, defaults to 50.
+- **offset** (`integer`, optional) Number of sprints to skip per board for pagination. Optional, defaults to 0.
+- **state** (`Enum` [SprintState](/mcp-servers/productivity/jira/reference#SprintState), optional) Filter by sprint state. NOTE: Date filters (start_date, end_date, specific_date) have higher priority than state filtering. Use state filtering only when no date criteria is specified. For temporal queries like 'last month' or 'next week', use date parameters instead. Optional, defaults to None (all states).
+- **start_date** (`string`, optional) Start date filter in YYYY-MM-DD format. Can combine with end_date. Optional, defaults to None.
+- **end_date** (`string`, optional) End date filter in YYYY-MM-DD format. Can combine with start_date. Optional, defaults to None.
+- **specific_date** (`string`, optional) Specific date in YYYY-MM-DD to find sprints active on that date. Cannot combine with start_date/end_date. Optional, defaults to None.
+- **atlassian_cloud_id** (`string`, optional) Atlassian Cloud ID to use. Optional, defaults to None (uses single authorized cloud).
+
+## Jira.GetSprintIssues
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/get_sprint_issues_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/get_sprint_issues_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get all issues that are currently assigned to a specific sprint with pagination support.
+
+**Parameters**
+
+- **sprint_id** (`string`, required) The numeric Jira sprint ID that identifies the sprint in Jira's API.
+- **limit** (`integer`, optional) The maximum number of issues to return. Must be between 1 and 100 inclusive. Controls pagination and determines how many issues are fetched and returned. Defaults to 50 for improved performance.
+- **offset** (`integer`, optional) The number of issues to skip before starting to return results. Used for pagination when the sprint has many issues. Must be 0 or greater. Defaults to 0.
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.AddIssuesToSprint
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/add_issues_to_sprint_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/add_issues_to_sprint_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Add a list of issues to a sprint.
+
+**Parameters**
+
+- **sprint_id** (`string`, required) The numeric Jira sprint ID that identifies the sprint in Jira's API.
+- **issue_ids** (`array[string]`, required) List of issue IDs or keys to add to the sprint. Must not be empty and cannot exceed 50 issues.
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.MoveIssuesFromSprintToBacklog
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/move_issues_from_sprint_to_backlog_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/move_issues_from_sprint_to_backlog_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Move issues from active or future sprints back to the board's backlog.
+
+**Parameters**
+
+- **sprint_id** (`string`, required) The numeric Jira sprint ID that identifies the sprint in Jira's API.
+- **issue_identifiers** (`array[string]`, required) List of issue IDs or keys to move from the sprint to the backlog. Maximum 50 issues per call. Issues will be moved back to the board's backlog.
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.ListLabels
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/list_labels_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/list_labels_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get the existing labels (tags) in the user's Jira instance.
+
+**Parameters**
+
+- **limit** (`integer`, optional) The maximum number of labels to return. Min of 1, Max of 200. Defaults to 200.
+- **offset** (`integer`, optional) The number of labels to skip. Defaults to 0 (starts from the first label)
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.ListUsers
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/list_users_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/list_users_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Browse users in Jira.
+
+**Parameters**
+
+- **account_type** (`string`, optional) The account type of the users to return. Defaults to 'atlassian'. Provide `None` to disable filtering by account type. The account type filter will be applied after retrieving users from Jira API, thus the tool may return less users than the limit and still have more users to paginate. Check the `pagination` key in the response dictionary.
+- **limit** (`integer`, optional) The maximum number of users to return. Min of 1, max of 50. Defaults to 50.
+- **offset** (`integer`, optional) The number of users to skip before starting to return users. Defaults to 0 (start from the first user).
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.GetUserById
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/get_user_by_id_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/get_user_by_id_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get user information by their ID.
+
+**Parameters**
+
+- **user_id** (`string`, required) The the user's ID.
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.GetUsersWithoutId
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/get_users_without_id_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/get_users_without_id_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get users without their account ID, searching by display name and email address.
+
+**Parameters**
+
+- **name_or_email** (`string`, required) The user's display name or email address to search for (case-insensitive). The string can match the prefix of the user's attribute. For example, a string of 'john' will match users with a display name or email address that starts with 'john', such as 'John Doe', 'Johnson', 'john@example.com', etc.
+- **enforce_exact_match** (`boolean`, optional) Whether to enforce an exact match of the name_or_email against users' display name and email attributes. Defaults to False (return all users that match the prefix). If set to True, before returning results, the tool will filter users with a display name OR email address that match exactly the value of the `name_or_email` argument.
+- **limit** (`integer`, optional) The maximum number of users to return. Min of 1, max of 50. Defaults to 50.
+- **offset** (`integer`, optional) The number of users to skip before starting to return users. Defaults to 0 (start from the first user).
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.GetAvailableAtlassianClouds
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/get_available_atlassian_clouds_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/get_available_atlassian_clouds_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get available Atlassian Clouds.
+
+**Parameters**
+
+This tool does not take any parameters.
+
+## Jira.AttachFileToIssue
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/attach_file_to_issue_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/attach_file_to_issue_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Add an attachment to an issue.
+
+**Parameters**
+
+- **issue** (`string`, required) The issue ID or key to add the attachment to
+- **filename** (`string`, required) The name of the file to add as an attachment. The filename should contain the file extension (e.g. 'test.txt', 'report.pdf'), but it is not mandatory.
+- **file_content_str** (`string`, optional) The string content of the file to attach. Use this if the file is a text file. Defaults to None.
+- **file_content_base64** (`string`, optional) The base64-encoded binary contents of the file. Use this for binary files like images or PDFs. Defaults to None.
+- **file_encoding** (`string`, optional) The encoding of the file to attach. Only used with file_content_str. Defaults to 'utf-8'.
+- **file_type** (`string`, optional) The type of the file to attach. E.g. 'application/pdf', 'text', 'image/png'. If not provided, the tool will try to infer the type from the filename. If the filename is not recognized, it will attach the file without specifying a type. Defaults to None (infer from filename or attach without type).
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.ListIssueAttachmentsMetadata
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/list_issue_attachments_metadata_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/list_issue_attachments_metadata_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get the metadata about the files attached to an issue.
+
+**Parameters**
+
+- **issue** (`string`, required) The ID or key of the issue to retrieve
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.GetAttachmentMetadata
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/get_attachment_metadata_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/get_attachment_metadata_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get the metadata of an attachment.
+
+**Parameters**
+
+- **attachment_id** (`string`, required) The ID of the attachment to retrieve
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.DownloadAttachment
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/download_attachment_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/download_attachment_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Download the contents of an attachment associated with an issue.
+
+**Parameters**
+
+- **attachment_id** (`string`, required) The ID of the attachment to download
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.GetTransitionById
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/get_transition_by_id_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/get_transition_by_id_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get a transition by its ID.
+
+**Parameters**
+
+- **issue** (`string`, required) The ID or key of the issue
+- **transition_id** (`string`, required) The ID of the transition
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.GetTransitionsAvailableForIssue
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/get_transitions_available_for_issue_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/get_transitions_available_for_issue_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get the transitions available for an existing Jira issue.
+
+**Parameters**
+
+- **issue** (`string`, required) The ID or key of the issue
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.GetTransitionByStatusName
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/get_transition_by_status_name_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/get_transition_by_status_name_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get a transition available for an issue by the transition name.
+
+**Parameters**
+
+- **issue** (`string`, required) The ID or key of the issue
+- **transition** (`string`, required) The name of the transition status
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.TransitionIssueToNewStatus
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/transition_issue_to_new_status_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/transition_issue_to_new_status_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Transition a Jira issue to a new status.
+
+**Parameters**
+
+- **issue** (`string`, required) The ID or key of the issue
+- **transition** (`string`, required) The transition to perform. Provide the transition ID or its name (case insensitive).
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.WhoAmI
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/who_am_i_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/who_am_i_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Fetches the current user's profile information.
+
+**Parameters**
+
+This tool does not take any parameters.
+
+## Jira.ListProjects
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/list_projects_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/list_projects_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Browse projects available in Jira.
+
+**Parameters**
+
+- **limit** (`integer`, optional) The maximum number of projects to return. Min of 1, Max of 50. Defaults to 50.
+- **offset** (`integer`, optional) The number of projects to skip. Defaults to 0 (starts from the first project)
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.SearchProjects
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/search_projects_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/search_projects_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get the details of all Jira projects.
+
+**Parameters**
+
+- **keywords** (`string`, optional) The keywords to search for projects. Matches against project name and key (case insensitive). Defaults to None (no keywords filter).
+- **limit** (`integer`, optional) The maximum number of projects to return. Min of 1, Max of 50. Defaults to 50.
+- **offset** (`integer`, optional) The number of projects to skip. Defaults to 0 (starts from the first project)
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.GetProjectById
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/get_project_by_id_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/get_project_by_id_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get the details of a Jira project by its ID or key.
+
+**Parameters**
+
+- **project** (`string`, required) The ID or key of the project to retrieve
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.GetBoards
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/get_boards_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/get_boards_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve Jira boards either by specifying their names or IDs, or get all
+
+**Parameters**
+
+- **board_identifiers_list** (`array[string]`, optional) List of board names or numeric IDs (as strings) to retrieve using pagination. Include all mentioned boards in a single list for best performance. Default None retrieves all boards. Maximum 50 boards returned per call.
+- **limit** (`integer`, optional) Maximum number of boards to return (1-50). Defaults to max that is 50.
+- **offset** (`integer`, optional) Number of boards to skip for pagination. Must be 0 or greater. Defaults to 0.
+- **atlassian_cloud_id** (`string`, optional) Atlassian Cloud ID to use. Defaults to None (uses single authorized cloud).
+
+## Jira.GetBoardBacklogIssues
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/get_board_backlog_issues_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/get_board_backlog_issues_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get all issues in a board's backlog with pagination support.
+
+**Parameters**
+
+- **board_id** (`string`, required) The ID of the board to retrieve backlog issues from. Must be a valid board ID that supports backlogs (typically Scrum or Kanban boards).
+- **limit** (`integer`, optional) The maximum number of issues to return. Must be between 1 and 100 inclusive. Controls pagination and determines how many issues are fetched and returned. Defaults to 50 for improved performance.
+- **offset** (`integer`, optional) The number of issues to skip before starting to return results. Used for pagination when the backlog has many issues. For example, offset=50 with limit=50 would return issues 51-100. Must be 0 or greater. Defaults to 0.
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.GetPriorityById
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/get_priority_by_id_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/get_priority_by_id_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get the details of a priority by its ID.
+
+**Parameters**
+
+- **priority_id** (`string`, required) The ID of the priority to retrieve.
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.ListPrioritySchemes
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/list_priority_schemes_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/list_priority_schemes_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Browse the priority schemes available in Jira.
+
+**Parameters**
+
+- **scheme_name** (`string`, optional) Filter by scheme name. Defaults to None (returns all scheme names).
+- **limit** (`integer`, optional) The maximum number of priority schemes to return. Min of 1, max of 50. Defaults to 50.
+- **offset** (`integer`, optional) The number of priority schemes to skip. Defaults to 0 (start from the first scheme).
+- **order_by** (`Enum` [PrioritySchemeOrderBy](/mcp-servers/productivity/jira/reference#PrioritySchemeOrderBy), optional) The order in which to return the priority schemes. Defaults to name ascending.
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.ListPrioritiesByScheme
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/list_priorities_by_scheme_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/list_priorities_by_scheme_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Browse the priorities associated with a priority scheme.
+
+**Parameters**
+
+- **scheme_id** (`string`, required) The ID of the priority scheme to retrieve priorities for.
+- **limit** (`integer`, optional) The maximum number of priority schemes to return. Min of 1, max of 50. Defaults to 50.
+- **offset** (`integer`, optional) The number of priority schemes to skip. Defaults to 0 (start from the first scheme).
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.ListProjectsByScheme
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/list_projects_by_scheme_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/list_projects_by_scheme_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Browse the projects associated with a priority scheme.
+
+**Parameters**
+
+- **scheme_id** (`string`, required) The ID of the priority scheme to retrieve projects for.
+- **project** (`string`, optional) Filter by project ID, key or name. Defaults to None (returns all projects).
+- **limit** (`integer`, optional) The maximum number of projects to return. Min of 1, max of 50. Defaults to 50.
+- **offset** (`integer`, optional) The number of projects to skip. Defaults to 0 (start from the first project).
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.ListPrioritiesAvailableToAProject
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/list_priorities_available_to_a_project_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/list_priorities_available_to_a_project_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Browse the priorities available to be used in issues in the specified Jira project.
+
+**Parameters**
+
+- **project** (`string`, required) The ID, key or name of the project to retrieve priorities for.
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.ListPrioritiesAvailableToAnIssue
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/list_priorities_available_to_an_issue_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/list_priorities_available_to_an_issue_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Browse the priorities available to be used in the specified Jira issue.
+
+**Parameters**
+
+- **issue** (`string`, required) The ID or key of the issue to retrieve priorities for.
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.GetCommentById
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/get_comment_by_id_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/get_comment_by_id_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get a comment by its ID.
+
+**Parameters**
+
+- **issue_id** (`string`, required) The ID or key of the issue to retrieve the comment from.
+- **comment_id** (`string`, required) The ID of the comment to retrieve
+- **include_adf_content** (`boolean`, optional) Whether to include the ADF (Atlassian Document Format) content of the comment in the response. Defaults to False (return only the HTML rendered content).
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.GetIssueComments
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/get_issue_comments_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/get_issue_comments_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get the comments of a Jira issue by its ID.
+
+**Parameters**
+
+- **issue** (`string`, required) The ID or key of the issue to retrieve
+- **limit** (`integer`, optional) The maximum number of comments to retrieve. Min 1, max 100, default 100.
+- **offset** (`integer`, optional) The number of comments to skip. Defaults to 0 (start from the first comment).
+- **order_by** (`Enum` [IssueCommentOrderBy](/mcp-servers/productivity/jira/reference#IssueCommentOrderBy), optional) The order in which to return the comments. Defaults to 'created_date_descending' (most recent first).
+- **include_adf_content** (`boolean`, optional) Whether to include the ADF (Atlassian Document Format) content of the comment in the response. Defaults to False (return only the HTML rendered content).
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Jira.AddCommentToIssue
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/jira/add_comment_to_issue_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/jira/add_comment_to_issue_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Add a comment to a Jira issue.
+
+**Parameters**
+
+- **issue** (`string`, required) The ID or key of the issue to comment on.
+- **body** (`string`, required) The body of the comment to add to the issue.
+- **reply_to_comment** (`string`, optional) Quote a previous comment as a reply to it. Provide the comment's ID. Must be a comment from the same issue. Defaults to None (no quoted comment).
+- **mention_users** (`array[string]`, optional) The users to mention in the comment. Provide the user display name, email address, or ID. Ex: 'John Doe' or 'john.doe@example.com'. Defaults to None (no user mentions).
+- **atlassian_cloud_id** (`string`, optional) The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.
+
+## Auth
+
+The Arcade Jira MCP Sever uses the [Atlassian auth provider](/home/auth-providers/atlassian) to connect to users' Jira accounts. Please refer to the [Atlassian auth provider](/home/auth-providers/atlassian) documentation to learn how to configure auth.
+
+<ToolFooter pipPackageName="arcade_jira" />

@@ -1,0 +1,116 @@
+# Google Flights
+
+import ToolInfo from "@/app/_components/tool-info";
+import Badges from "@/app/_components/badges";
+import TabbedCodeBlock from "@/app/_components/tabbed-code-block";
+import TableOfContents from "@/app/_components/table-of-contents";
+import ToolFooter from "@/app/_components/tool-footer";
+import { Callout } from "nextra/components";
+
+<ToolInfo
+  description="Empower your agents to search for flights using Arcade."
+  author="Arcade"
+  authType="API Key"
+  versions={["0.1.0"]}
+/>
+
+<Badges repo="arcadeai/arcade-google-flights" />
+
+The Arcade Google Flights MCP Sever lets you search for flights with ease. Use these tools to build intelligent agents and applications that:
+
+- Search for one-way flights.
+
+## Available Tools
+
+<TableOfContents
+  headers={["Tool Name", "Description"]}
+  data={[
+    [
+      "GoogleFlights.SearchOneWayFlights",
+      "Retrieve one-way flight search results using Google Flights.",
+    ],
+  ]}
+/>
+
+## GoogleFlights.SearchOneWayFlights
+
+Retrieve flight search results for a one-way flight using Google Flights.
+
+**Parameters**
+
+- **`departure_airport_code`** _(string, required)_: The departure airport code. An uppercase 3-letter code.
+- **`arrival_airport_code`** _(string, required)_: The arrival airport code. An uppercase 3-letter code.
+- **`outbound_date`** _(string, required)_: Flight departure date in YYYY-MM-DD format.
+- **`currency_code`** _(string, optional)_: Currency of the returned prices. Defaults to 'USD'.
+- **`travel_class`** _(enum ([GoogleFlightsTravelClass](#googleflightstravelclass)), optional)_: Travel class of the flight. Defaults to 'ECONOMY'.
+- **`num_adults`** _(int, optional)_: Number of adult passengers. Defaults to 1.
+- **`num_children`** _(int, optional)_: Number of child passengers. Defaults to 0.
+- **`max_stops`** _(enum ([GoogleFlightsMaxStops](#googleflightsmaxstops)), optional)_: Maximum number of stops (layovers) for the flight. Defaults to any number of stops.
+- **`sort_by`** _(enum ([GoogleFlightsSortBy](#googleflightssortby)), optional)_: The sorting order of the results. Defaults to TOP_FLIGHTS.
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool directly",
+      content: {
+        Python: [
+          "/examples/integrations/mcp-servers/search/google_flights/search_one_way_flights_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/mcp-servers/search/google_flights/search_one_way_flights_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+## Auth
+
+The Arcade Google Flights MCP Sever uses the [SerpAPI](https://serpapi.com/) to search for flights from Google Flights.
+
+- **Secret:**
+  - `SERP_API_KEY`: Your SerpAPI API key.
+
+<Callout type="info">
+  Setting the `SERP_API_KEY` secret is only required if you are
+  [self-hosting](/home/deployment/engine-configuration) Arcade. If you're
+  using Arcade Cloud, the secret is already set for you. To manage your secrets,
+  go to the [Secrets page](https://api.arcade.dev/dashboard/auth/secrets) in the
+  Arcade Dashboard.
+</Callout>
+
+---
+
+## Reference
+
+## GoogleFlightsMaxStops
+
+Defines the maximum number of stops for flights.
+
+- **`ANY`**: Any number of stops is allowed.
+- **`NONSTOP`**: Only nonstop flights are allowed.
+- **`ONE`**: Only flights with one stop are allowed.
+- **`TWO`**: Only flights with two stops are allowed.
+
+## GoogleFlightsSortBy
+
+Defines the sorting options for flight search results.
+
+- **`TOP_FLIGHTS`**: Sort by the best available flights.
+- **`PRICE`**: Sort by the lowest price.
+- **`DEPARTURE_TIME`**: Sort by the earliest departure time.
+- **`ARRIVAL_TIME`**: Sort by the earliest arrival time.
+- **`DURATION`**: Sort by the shortest flight duration.
+- **`EMISSIONS`**: Sort by the lowest carbon emissions.
+
+## GoogleFlightsTravelClass
+
+Defines the travel class options for flights.
+
+- **`ECONOMY`**: Economy class.
+- **`PREMIUM_ECONOMY`**: Premium economy class.
+- **`BUSINESS`**: Business class.
+- **`FIRST`**: First class.
+
+<ToolFooter pipPackageName="arcade_google_flights" />

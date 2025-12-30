@@ -1,0 +1,2478 @@
+# AirtableApi
+import StarterToolInfo from "@/app/_components/starter-tool-info";
+import ToolInfo from "@/app/_components/tool-info";
+import Badges from "@/app/_components/badges";
+import TabbedCodeBlock from "@/app/_components/tabbed-code-block";
+import TableOfContents from "@/app/_components/table-of-contents";
+import ToolFooter from "@/app/_components/tool-footer";
+import { Callout } from "nextra/components";
+
+<ToolInfo
+  description="Tools that enable LLMs to interact directly with the airtable API."
+  author="Arcade"
+  authType="OAuth2"
+  versions={["2.0.0"]}
+/>
+
+<Badges repo="arcadeai/arcade_airtable_api" />
+
+<StarterToolInfo toolkitName="AirtableApi" />
+
+The AirtableApi MCP Server offers a comprehensive suite of tools for managing and interacting with Airtable's features. Users can efficiently perform actions such as:
+
+## Available Tools
+
+<TableOfContents
+  headers={["Tool Name", "Description"]}
+  data={
+    [
+      ["AirtableApi.ListScimGroups", "Retrieve a list of SCIM groups from Airtable."],
+      ["AirtableApi.CreateScimGroup", "Create a new SCIM group with no members."],
+      ["AirtableApi.DeleteScimGroup", "Delete a SCIM Group from Airtable."],
+      ["AirtableApi.FetchScimGroup", "Retrieve details of a specific SCIM Group by ID."],
+      ["AirtableApi.UpdateGroupDetails", "Update group details using SCIM patch operations."],
+      ["AirtableApi.UpdateGroupAttributes", "Replace a group's attributes with new values."],
+      ["AirtableApi.ListScimUsers", "Retrieve a list of SCIM users from Airtable."],
+      ["AirtableApi.CreateScimUser", "Create a new user using SCIM protocol."],
+      ["AirtableApi.DeleteScimUser", "Delete a SCIM user from the system."],
+      ["AirtableApi.GetScimUser", "Get details of a single SCIM User by userId."],
+      ["AirtableApi.UpdateScimUserRecord", "Apply SCIM patch operations to update user details."],
+      ["AirtableApi.UpdateUserAttributes", "Replace a user's attributes with new values."],
+      ["AirtableApi.ListWebhooksForBase", "Retrieve registered webhooks and their statuses for a base."],
+      ["AirtableApi.CreateAirtableWebhook", "Create a new webhook in a specified Airtable base."],
+      ["AirtableApi.DeleteAirtableWebhook", "Deletes a webhook in Airtable with required permissions."],
+      ["AirtableApi.ToggleWebhookNotifications", "Enable or disable webhook notification pings."],
+      ["AirtableApi.ListWebhookPayloads", "Retrieve update messages for a specified Airtable webhook."],
+      ["AirtableApi.RefreshWebhookLifespan", "Extend the expiration time of an active webhook."],
+      ["AirtableApi.ListAirtableBases", "Retrieve a list of accessible Airtable bases."],
+      ["AirtableApi.CreateAirtableBase", "Create a new Airtable base with specified tables and schema."],
+      ["AirtableApi.DeleteAirtableBase", "Delete a specified Airtable base."],
+      ["AirtableApi.GetBaseCollaborators", "Retrieve information on base collaborators."],
+      ["AirtableApi.ListBaseBlockInstallations", "Retrieve basic info of block installations for a specific base."],
+      ["AirtableApi.DeleteAirtableBlockInstallation", "Delete a block installation in Airtable, recoverable later."],
+      ["AirtableApi.ManageAirtableBlockInstallation", "Manages the installation state of an Airtable block."],
+      ["AirtableApi.AddBaseCollaborator", "Add a collaborator to an Airtable base."],
+      ["AirtableApi.RemoveBaseCollaborator", "Remove a collaborator from a base."],
+      ["AirtableApi.UpdateCollaboratorPermission", "Update a collaborator's permission level on a base."],
+      ["AirtableApi.GetInterfaceInfo", "Retrieve information about a specified interface."],
+      ["AirtableApi.AddCollaboratorToAirtableInterface", "Add a collaborator to an Airtable interface."],
+      ["AirtableApi.RemoveInterfaceCollaborator", "Remove a collaborator from an interface."],
+      ["AirtableApi.UpdateCollaboratorPermissions", "Update permissions for an interface-only collaborator."],
+      ["AirtableApi.DeleteInterfaceInvite", "Delete an outstanding interface invite in Airtable."],
+      ["AirtableApi.DeleteBaseInvite", "Delete an outstanding base invite."],
+      ["AirtableApi.ListBaseShares", "Lists basic information of base shares."],
+      ["AirtableApi.DeleteAirtableShare", "Permanently delete a share from an Airtable base."],
+      ["AirtableApi.ManageAirtableSharing", "Update and manage the share state of an Airtable base."],
+      ["AirtableApi.GetAirtableBaseSchema", "Retrieve the schema of tables in an Airtable base."],
+      ["AirtableApi.CreateAirtableTable", "Create a new table in Airtable and return its schema."],
+      ["AirtableApi.UpdateAirtableTable", "Update the properties of an Airtable table."],
+      ["AirtableApi.CreateAirtableField", "Creates a new column in an Airtable table and returns its schema."],
+      ["AirtableApi.UpdateAirtableFieldDetails", "Updates the name or description of an Airtable field."],
+      ["AirtableApi.ListAirtableBaseViews", "Retrieve information on Airtable base views."],
+      ["AirtableApi.DeleteAirtableView", "Deletes a specific view in Airtable by ID."],
+      ["AirtableApi.GetAirtableViewMetadata", "Get basic information about an Airtable base view."],
+      ["AirtableApi.GetEnterpriseInfo", "Retrieve basic information about an enterprise account."],
+      ["AirtableApi.GetAuditLogEvents", "Retrieve audit log events for an enterprise."],
+      ["AirtableApi.RetrieveAuditLogRequests", "Retrieve all audit log requests for an enterprise account."],
+      ["AirtableApi.CreateAuditLogRequest", "Initiate the creation of an audit log request."],
+      ["AirtableApi.RetrieveAuditLog", "Retrieve a specific audit log request."],
+      ["AirtableApi.GetAirtableChangeEvents", "Retrieve change events for Airtable enterprise bases."],
+      ["AirtableApi.CreateDescendantEnterpriseAccount", "Create a descendant enterprise account in Airtable."],
+      ["AirtableApi.GetEdiscoveryExportsStatus", "Retrieve status and results of all eDiscovery exports."],
+      ["AirtableApi.CreateEdiscoveryExport", "Initiate an eDiscovery export request."],
+      ["AirtableApi.GetEdiscoveryExportStatus", "Retrieve the status and result of an eDiscovery export."],
+      ["AirtableApi.BatchMoveUserGroupsBetweenAccounts", "Batch move user groups between enterprise accounts."],
+      ["AirtableApi.MoveWorkspacesBetweenEnterpriseAccounts", "Move workspaces between enterprise accounts within the same organization."],
+      ["AirtableApi.DeleteUsersByEmail", "Delete multiple users identified by their email addresses."],
+      ["AirtableApi.GetAirtableUserInfo", "Fetch user details from Airtable by ID or email."],
+      ["AirtableApi.BatchManageEnterpriseUsers", "Batch manage users in enterprise accounts."],
+      ["AirtableApi.BatchManageUserMembership", "Batch manage user membership in enterprise accounts."],
+      ["AirtableApi.GrantAdminAccess", "Grant admin access to specified users."],
+      ["AirtableApi.RevokeAdminAccess", "Revoke admin access from specified users."],
+      ["AirtableApi.DeleteEnterpriseUser", "Deletes an enterprise user by ID."],
+      ["AirtableApi.GetUserInformation", "Fetch user information by ID from Airtable Enterprise."],
+      ["AirtableApi.ManageEnterpriseAccountUser", "Manage users in enterprise accounts."],
+      ["AirtableApi.LogoutEnterpriseUser", "Logs out an enterprise account user from the system."],
+      ["AirtableApi.RemoveUserFromEnterprise", "Unshare a user from all enterprise assets and revoke admin access."],
+      ["AirtableApi.GetUserGroupInfo", "Retrieve basic information about a specific user group."],
+      ["AirtableApi.RetrieveUserIdAndScopes", "Retrieve user's ID, associated scopes, and email if available."],
+      ["AirtableApi.CreateAirtableWorkspace", "Create a new workspace in Airtable."],
+      ["AirtableApi.DeleteWorkspace", "Deletes a specified Airtable workspace."],
+      ["AirtableApi.GetWorkspaceCollaborators", "Retrieve information about workspace collaborators and invites."],
+      ["AirtableApi.AddWorkspaceCollaborator", "Add a collaborator to an Airtable workspace."],
+      ["AirtableApi.RemoveWorkspaceCollaborator", "Remove a collaborator from an Airtable workspace."],
+      ["AirtableApi.UpdateWorkspaceCollaboratorPermission", "Modify a collaborator's permission level in a workspace."],
+      ["AirtableApi.DeleteWorkspaceInvite", "Delete a workspace invite."],
+      ["AirtableApi.MoveAirtableBase", "Move a base between Airtable workspaces."],
+      ["AirtableApi.UpdateWorkspaceRestrictions", "Updates sharing restrictions for an Airtable workspace."],
+      ["AirtableApi.UploadAttachmentToAirtable", "Upload attachments to an Airtable record's cell."],
+      ["AirtableApi.DeleteMultipleRecords", "Delete multiple records from an Airtable table."],
+      ["AirtableApi.ListAirtableRecords", "Retrieve records from a specified Airtable table."],
+      ["AirtableApi.UpdateAirtableRecords", "Update or upsert multiple records in an Airtable table."],
+      ["AirtableApi.CreateAirtableRecords", "Create multiple records in an Airtable base."],
+      ["AirtableApi.BulkUpdateAirtable", "Update or upsert multiple records in an Airtable table."],
+      ["AirtableApi.DeleteAirtableRecord", "Deletes a single record from an Airtable base and table."],
+      ["AirtableApi.AirtableGetRecord", "Retrieve a single record from an Airtable table."],
+      ["AirtableApi.UpdateAirtableRecord", "Update a single Airtable record with specified fields."],
+      ["AirtableApi.ModifyAirtableEntry", "Update a specific record in an Airtable table."],
+      ["AirtableApi.GetRecordComments", "Retrieve comments for a specific record in Airtable."],
+      ["AirtableApi.AddRecordComment", "Creates a comment on a specified record."],
+      ["AirtableApi.DeleteCommentFromRecord", "Delete a comment from a record in Airtable."],
+      ["AirtableApi.UpdateRecordComment", "Update a comment on a specific record."],
+      ["AirtableApi.DeleteRecordsByPrimaryKeys", "Delete records from a HyperDB table using primary keys."],
+      ["AirtableApi.ReadHyperdbTableRecords", "Retrieve records from a specified HyperDB table."],
+      ["AirtableApi.UpsertAirtableRecords", "Update or insert records in an Airtable HyperDB table."],
+    ]
+  }
+/>
+
+<Callout>
+  If you need to perform an action that's not listed here, you can [get in touch
+  with us](mailto:contact@arcade.dev) to request a new tool, or [create your
+  own tools](/home/build-tools/create-a-mcp-server).
+</Callout>
+
+## AirtableApi.ListScimGroups
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/list_scim_groups_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/list_scim_groups_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of SCIM groups from Airtable.
+
+**Parameters**
+
+- **filter_criteria** (`string`, optional) Defines a string-based filter to query specific SCIM groups in Airtable. Use SCIM filtering syntax to specify criteria.
+- **group_count** (`number`, optional) Specify the maximum number of SCIM groups to list. It is an integer that determines how many groups the API should return.
+
+
+## AirtableApi.CreateScimGroup
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/create_scim_group_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/create_scim_group_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Create a new SCIM group with no members.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.DeleteScimGroup
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/delete_scim_group_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/delete_scim_group_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Delete a SCIM Group from Airtable.
+
+**Parameters**
+
+- **group_id** (`string`, required) The unique identifier of the SCIM Group to be deleted from Airtable.
+
+
+## AirtableApi.FetchScimGroup
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/fetch_scim_group_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/fetch_scim_group_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve details of a specific SCIM Group by ID.
+
+**Parameters**
+
+- **scim_group_id** (`string`, required) The unique identifier of the SCIM Group to retrieve.
+
+
+## AirtableApi.UpdateGroupDetails
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/update_group_details_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/update_group_details_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Update group details using SCIM patch operations.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **group_id** (`string`, optional) A string representing the unique identifier of the group to be updated using SCIM patch operations.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.UpdateGroupAttributes
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/update_group_attributes_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/update_group_attributes_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Replace a group's attributes with new values.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **group_id** (`string`, optional) The unique identifier for the group whose attributes need to be replaced.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.ListScimUsers
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/list_scim_users_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/list_scim_users_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of SCIM users from Airtable.
+
+**Parameters**
+
+- **start_index** (`number`, optional) The starting index for the list of SCIM users to retrieve. Use a positive integer to specify where to start listing from.
+- **user_count_limit** (`number`, optional) The maximum number of SCIM user objects to return in the response. This should be a positive integer.
+- **user_filter** (`string`, optional) Apply a filter string to narrow down the list of SCIM users. Uses SCIM standard filtering syntax.
+
+
+## AirtableApi.CreateScimUser
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/create_scim_user_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/create_scim_user_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Create a new user using SCIM protocol.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.DeleteScimUser
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/delete_scim_user_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/delete_scim_user_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Delete a SCIM user from the system.
+
+**Parameters**
+
+- **scim_user_id** (`string`, required) Unique identifier for the SCIM user to delete. Cannot be the admin using the authentication token or the sole owner of a multi-collaborator workspace.
+
+
+## AirtableApi.GetScimUser
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/get_scim_user_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/get_scim_user_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Get details of a single SCIM User by userId.
+
+**Parameters**
+
+- **user_id** (`string`, required) The unique identifier of the SCIM User to retrieve details for.
+
+
+## AirtableApi.UpdateScimUserRecord
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/update_scim_user_record_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/update_scim_user_record_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Apply SCIM patch operations to update user details.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **user_id** (`string`, optional) The unique identifier for the user to be updated. It should match the user's existing SCIM record.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.UpdateUserAttributes
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/update_user_attributes_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/update_user_attributes_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Replace a user's attributes with new values.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **user_id** (`string`, optional) The unique identifier of the user whose attributes are to be replaced.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.ListWebhooksForBase
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/list_webhooks_for_base_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/list_webhooks_for_base_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve registered webhooks and their statuses for a base.
+
+**Parameters**
+
+- **base_identifier** (`string`, required) The unique identifier for the base whose webhooks you want to list.
+
+
+## AirtableApi.CreateAirtableWebhook
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/create_airtable_webhook_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/create_airtable_webhook_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Create a new webhook in a specified Airtable base.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **base_id** (`string`, optional) The ID of the Airtable base where the webhook will be created. It should be a string.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.DeleteAirtableWebhook
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/delete_airtable_webhook_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/delete_airtable_webhook_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Deletes a webhook in Airtable with required permissions.
+
+**Parameters**
+
+- **airtable_base_id** (`string`, required) The unique ID of the Airtable base where the webhook is to be deleted. This is required to specify the target base.
+- **webhook_id** (`string`, required) The unique identifier for the webhook to be deleted. This string is required to specify which webhook will be removed.
+
+
+## AirtableApi.ToggleWebhookNotifications
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/toggle_webhook_notifications_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/toggle_webhook_notifications_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Enable or disable webhook notification pings.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **airtable_base_id** (`string`, optional) The unique identifier for the Airtable base. This specifies which database to target for enabling or disabling webhook notifications.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **webhook_id** (`string`, optional) The unique identifier for the webhook to be modified. Required for specifying which webhook's notifications you want to enable or disable.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.ListWebhookPayloads
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/list_webhook_payloads_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/list_webhook_payloads_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve update messages for a specified Airtable webhook.
+
+**Parameters**
+
+- **base_id** (`string`, required) Identifier for the Airtable base from which to list webhook payloads.
+- **webhook_id** (`string`, required) The unique identifier for the webhook to retrieve update messages. This should be a string and should match the webhook set up in Airtable.
+- **maximum_number_of_messages** (`number`, optional) The maximum number of update messages to retrieve for the webhook.
+- **pagination_cursor** (`number`, optional) A numerical position indicating where to begin retrieving messages from the webhook payload list. Use this for pagination to continue from a previous list retrieval.
+
+
+## AirtableApi.RefreshWebhookLifespan
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/refresh_webhook_lifespan_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/refresh_webhook_lifespan_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Extend the expiration time of an active webhook.
+
+**Parameters**
+
+- **base_identifier** (`string`, required) The unique identifier for the Airtable base containing the webhook.
+- **webhook_id** (`string`, required) The unique identifier of the webhook to extend. Ensure it is an active webhook with an expiration.
+- **webhook_request_body** (`json`, optional) JSON payload required for refreshing the webhook. Include necessary fields per API documentation.
+
+
+## AirtableApi.ListAirtableBases
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/list_airtable_bases_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/list_airtable_bases_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of accessible Airtable bases.
+
+**Parameters**
+
+- **pagination_offset** (`string`, optional) A string token to fetch the next set of Airtable bases if more results are available. Use the token from the last response to continue pagination.
+
+
+## AirtableApi.CreateAirtableBase
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/create_airtable_base_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/create_airtable_base_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Create a new Airtable base with specified tables and schema.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.DeleteAirtableBase
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/delete_airtable_base_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/delete_airtable_base_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Delete a specified Airtable base.
+
+**Parameters**
+
+- **base_id** (`string`, required) The unique identifier of the base you want to delete. This ID is required to perform the deletion.
+
+
+## AirtableApi.GetBaseCollaborators
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/get_base_collaborators_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/get_base_collaborators_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve information on base collaborators.
+
+**Parameters**
+
+- **base_id** (`string`, required) The unique identifier of the Airtable base to fetch collaborators from. This is a required string value.
+- **fields_to_include** (`array[string]`, optional) A list of fields to include in the response. Specify as an array of strings such as ['email', 'name'].
+
+
+## AirtableApi.ListBaseBlockInstallations
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/list_base_block_installations_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/list_base_block_installations_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve basic info of block installations for a specific base.
+
+**Parameters**
+
+- **base_id** (`string`, required) The unique identifier for a specific Airtable base to retrieve block installations from.
+
+
+## AirtableApi.DeleteAirtableBlockInstallation
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/delete_airtable_block_installation_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/delete_airtable_block_installation_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Delete a block installation in Airtable, recoverable later.
+
+**Parameters**
+
+- **airtable_base_id** (`string`, required) The unique identifier for the Airtable base from which the block installation will be deleted.
+- **block_installation_id** (`string`, required) The unique identifier of the block installation to be deleted. This is required to specify which block installation to remove.
+
+
+## AirtableApi.ManageAirtableBlockInstallation
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/manage_airtable_block_installation_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/manage_airtable_block_installation_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Manages the installation state of an Airtable block.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **airtable_base_id** (`string`, optional) The unique identifier for the Airtable base where the block is installed. It is required to specify the base for the block installation.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **block_installation_id** (`string`, optional) The unique identifier for the block installation to be managed.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.AddBaseCollaborator
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/add_base_collaborator_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/add_base_collaborator_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Add a collaborator to an Airtable base.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **base_id** (`string`, optional) The ID of the Airtable base to which the collaborator will be added.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.RemoveBaseCollaborator
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/remove_base_collaborator_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/remove_base_collaborator_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Remove a collaborator from a base.
+
+**Parameters**
+
+- **base_id** (`string`, required) The unique identifier for the base from which the collaborator will be removed. This is a required field.
+- **collaborator_id** (`string`, required) The unique identifier for the user or group to be removed from the base.
+
+
+## AirtableApi.UpdateCollaboratorPermission
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/update_collaborator_permission_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/update_collaborator_permission_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Update a collaborator's permission level on a base.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **base_identifier** (`string`, optional) The unique identifier for the base to update permission. Required as a string.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **collaborator_id** (`string`, optional) The unique identifier for the user or group whose permission level is being updated.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.GetInterfaceInfo
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/get_interface_info_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/get_interface_info_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve information about a specified interface.
+
+**Parameters**
+
+- **airtable_base_id** (`string`, required) The unique identifier of the Airtable base. This ID specifies which base the interface information belongs to.
+- **interface_id** (`string`, required) The ID of the Airtable interface to retrieve information for. This is found in the `interfaces` object from the `get base collaborators` endpoint.
+- **include_elements** (`array[string]`, optional) Specify elements to include in the response. Provide as an array of strings representing the element names or IDs.
+
+
+## AirtableApi.AddCollaboratorToAirtableInterface
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/add_collaborator_to_airtable_interface_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/add_collaborator_to_airtable_interface_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Add a collaborator to an Airtable interface.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **airtable_base_id** (`string`, optional) The unique identifier for the Airtable base where the interface is located. This helps specify which base the collaborator will be added to.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **page_bundle_id** (`string`, optional) The unique identifier for the specific interface page bundle where the collaborator will be added.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.RemoveInterfaceCollaborator
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/remove_interface_collaborator_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/remove_interface_collaborator_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Remove a collaborator from an interface.
+
+**Parameters**
+
+- **base_id** (`string`, required) The unique identifier for the Airtable base. This is required to specify which base the collaborator will be removed from.
+- **collaborator_id** (`string`, required) The ID of the user or group to be removed as an interface collaborator. Must be a valid identifier.
+- **interface_page_bundle_id** (`string`, required) The ID of the page bundle within the interface from which the collaborator is being removed.
+
+
+## AirtableApi.UpdateCollaboratorPermissions
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/update_collaborator_permissions_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/update_collaborator_permissions_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Update permissions for an interface-only collaborator.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **base_identifier** (`string`, optional) The unique identifier for the Airtable base where the collaborator's permissions are being updated.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **interface_page_bundle_id** (`string`, optional) The unique identifier for the page bundle associated with the interface in Airtable. Required to specify which interface the permissions are being updated for.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **collaborator_id** (`string`, optional) The unique ID of the user or group whose permissions are to be updated. This is required for specifying which collaborator's access level should be modified.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.DeleteInterfaceInvite
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/delete_interface_invite_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/delete_interface_invite_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Delete an outstanding interface invite in Airtable.
+
+**Parameters**
+
+- **base_identifier** (`string`, required) The unique identifier for the Airtable base from which the invite will be deleted.
+- **invite_id** (`string`, required) The identifier of the outstanding interface invite to be deleted. Must be a valid string representing the invite ID.
+- **page_bundle_id** (`string`, required) The unique ID of the interface page bundle to identify which interface's invite to delete.
+
+
+## AirtableApi.DeleteBaseInvite
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/delete_base_invite_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/delete_base_invite_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Delete an outstanding base invite.
+
+**Parameters**
+
+- **base_id** (`string`, required) The unique identifier of the base from which the invite should be deleted.
+- **invite_id** (`string`, required) The unique identifier for the invite to be deleted. Ensure this is an outstanding invite.
+
+
+## AirtableApi.ListBaseShares
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/list_base_shares_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/list_base_shares_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Lists basic information of base shares.
+
+**Parameters**
+
+- **base_identifier** (`string`, required) The unique ID of the Airtable base to list shares for. Required to retrieve base share information.
+
+
+## AirtableApi.DeleteAirtableShare
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/delete_airtable_share_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/delete_airtable_share_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Permanently delete a share from an Airtable base.
+
+**Parameters**
+
+- **airtable_base_id** (`string`, required) The unique identifier of the Airtable base from which the share will be deleted. This value is required.
+- **share_id** (`string`, required) The unique identifier of the share to delete from an Airtable base.
+
+
+## AirtableApi.ManageAirtableSharing
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/manage_airtable_sharing_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/manage_airtable_sharing_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Update and manage the share state of an Airtable base.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **airtable_base_id** (`string`, optional) The unique identifier for the Airtable base to manage its share state.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **share_identifier** (`string`, optional) The unique identifier for the share configuration to modify in Airtable. It specifies which share state needs to be managed.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.GetAirtableBaseSchema
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/get_airtable_base_schema_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/get_airtable_base_schema_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve the schema of tables in an Airtable base.
+
+**Parameters**
+
+- **airtable_base_id** (`string`, required) The unique identifier for the Airtable base whose schema is being requested. This ID can be found in the URL of the base when accessed in Airtable.
+- **fields_to_include** (`array[string]`, optional) A list of specific fields to include in the schema response. Each field should be a string representing the field name.
+
+
+## AirtableApi.CreateAirtableTable
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/create_airtable_table_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/create_airtable_table_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Create a new table in Airtable and return its schema.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **airtable_base_id** (`string`, optional) The identifier for the Airtable base where the table will be created. Must be a string.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.UpdateAirtableTable
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/update_airtable_table_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/update_airtable_table_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Update the properties of an Airtable table.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **airtable_base_id** (`string`, optional) The unique identifier for the Airtable base containing the table to update.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **table_id_or_name** (`string`, optional) The identifier or name of the table to update in Airtable.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.CreateAirtableField
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/create_airtable_field_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/create_airtable_field_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Creates a new column in an Airtable table and returns its schema.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **airtable_base_id** (`string`, optional) The unique identifier for the Airtable base containing the table.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **table_id** (`string`, optional) The unique identifier of the table where the new column will be created.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.UpdateAirtableFieldDetails
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/update_airtable_field_details_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/update_airtable_field_details_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Updates the name or description of an Airtable field.
+
+**Parameters**
+
+- **airtable_base_id** (`string`, required) The unique ID of the Airtable base containing the field to update.
+- **airtable_table_id** (`string`, required) The ID of the table in which the field's metadata is to be updated.
+- **field_column_id** (`string`, required) The unique identifier for the field (column) to be updated in the Airtable base.
+- **new_field_description** (`string`, optional) The new description for the field. Optional, max 20,000 characters.
+- **new_field_name** (`string`, optional) The new name for the field in Airtable. This is optional but must be provided if no new description is given.
+
+
+## AirtableApi.ListAirtableBaseViews
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/list_airtable_base_views_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/list_airtable_base_views_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve information on Airtable base views.
+
+**Parameters**
+
+- **airtable_base_id** (`string`, required) The ID of the Airtable base for which you want to list views.
+- **fields_to_include** (`array[string]`, optional) A list of specific fields to include in the response. It filters the fields returned for each view.
+
+
+## AirtableApi.DeleteAirtableView
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/delete_airtable_view_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/delete_airtable_view_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Deletes a specific view in Airtable by ID.
+
+**Parameters**
+
+- **airtable_base_id** (`string`, required) The ID of the Airtable base from which the view will be deleted. Must be a valid string identifier.
+- **view_identifier** (`string`, required) The unique identifier of the Airtable view to delete. Required to specify which view to remove.
+
+
+## AirtableApi.GetAirtableViewMetadata
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/get_airtable_view_metadata_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/get_airtable_view_metadata_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Get basic information about an Airtable base view.
+
+**Parameters**
+
+- **base_identifier** (`string`, required) The unique ID of the Airtable base. This is required to retrieve view metadata.
+- **view_identifier** (`string`, required) A unique identifier for the Airtable view. Used to specify which view's metadata to retrieve.
+- **include_fields** (`array[string]`, optional) Array of field names to include in the view metadata response. Specify specific fields if required.
+
+
+## AirtableApi.GetEnterpriseInfo
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/get_enterprise_info_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/get_enterprise_info_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve basic information about an enterprise account.
+
+**Parameters**
+
+- **enterprise_account_id** (`string`, required) The unique identifier for the target enterprise account. This is required to fetch the relevant account information.
+- **fields_to_include** (`array[string]`, optional) Specify an array of field names as strings to include in the response. Leaving this empty includes all default fields.
+
+
+## AirtableApi.GetAuditLogEvents
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/get_audit_log_events_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/get_audit_log_events_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve audit log events for an enterprise.
+
+**Parameters**
+
+- **enterprise_account_id** (`string`, required) The unique identifier for the enterprise account to retrieve audit log events for.
+- **end_time** (`string`, optional) The end time for retrieving audit log events. The format is ISO 8601 (e.g., '2023-10-15T10:00:00Z').
+- **event_category** (`string`, optional) Filter audit log events by specific categories. Accepts string values like 'security', 'compliance', etc.
+- **event_type** (`string`, optional) Specify the type of event to filter the audit logs. Use a string representing the event category.
+- **filter_by_originating_user_id** (`string`, optional) Filter audit log events by the ID of the originating user.
+- **model_identifier** (`string`, optional) A string that specifies the model ID related to the audit log event.
+- **next_page_token** (`string`, optional) Token to retrieve the next page of results when paginating through a large set of audit log events.
+- **page_size** (`number`, optional) Number of log events to retrieve per page. It determines the size of the data fetched in a single API call.
+- **previous_event_marker** (`string`, optional) A string marker to paginate backwards through audit log events, indicating the last event seen.
+- **sort_order** (`string`, optional) Defines the order in which results are sorted. Use 'ascending' or 'descending'.
+- **start_time** (`string`, optional) Specify the starting point for retrieving audit logs. Use ISO 8601 format (e.g., '2023-01-01T00:00:00Z').
+
+
+## AirtableApi.RetrieveAuditLogRequests
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/retrieve_audit_log_requests_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/retrieve_audit_log_requests_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve all audit log requests for an enterprise account.
+
+**Parameters**
+
+- **enterprise_account_id** (`string`, required) The unique identifier for the enterprise account to retrieve audit log requests for.
+- **audit_log_page_size** (`number`, optional) Specify the number of audit log requests to return per page. Use this to control pagination.
+- **pagination_offset** (`number`, optional) A number indicating the starting point for retrieving audit log requests. Used for pagination.
+
+
+## AirtableApi.CreateAuditLogRequest
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/create_audit_log_request_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/create_audit_log_request_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Initiate the creation of an audit log request.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **enterprise_account_id** (`string`, optional) The ID of the enterprise account for which the audit log is being requested. Necessary to initiate the log request process.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.RetrieveAuditLog
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/retrieve_audit_log_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/retrieve_audit_log_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve a specific audit log request.
+
+**Parameters**
+
+- **audit_log_task_id** (`string`, required) The unique identifier for the specific audit log task to retrieve. This is required to fetch the log details.
+- **enterprise_account_id** (`string`, required) The unique identifier for the enterprise account. This ID is required to retrieve the specific audit log request.
+
+
+## AirtableApi.GetAirtableChangeEvents
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/get_airtable_change_events_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/get_airtable_change_events_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve change events for Airtable enterprise bases.
+
+**Parameters**
+
+- **enterprise_account_id** (`string`, required) The unique identifier for the enterprise account. This ID is required to retrieve the change events specific to the account.
+- **end_time** (`string`, optional) The end time for retrieving change events in ISO 8601 format (e.g., '2023-01-01T23:59:59Z').
+- **page_size_limit** (`number`, optional) Specifies the maximum number of change events returned in a single request. Use a number to limit the size.
+- **pagination_offset** (`string`, optional) String used to specify the starting point for the next page of results. Useful for pagination.
+- **start_time** (`string`, optional) The starting timestamp for retrieving change events. Format is ISO 8601 (e.g., '2023-10-05T12:00:00Z').
+
+
+## AirtableApi.CreateDescendantEnterpriseAccount
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/create_descendant_enterprise_account_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/create_descendant_enterprise_account_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Create a descendant enterprise account in Airtable.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **enterprise_account_id** (`string`, optional) The ID of the root enterprise account for which to create a descendant. This account must have Enterprise Hub enabled.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.GetEdiscoveryExportsStatus
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/get_ediscovery_exports_status_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/get_ediscovery_exports_status_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve status and results of all eDiscovery exports.
+
+**Parameters**
+
+- **enterprise_account_id** (`string`, required) The ID of the enterprise account for which to retrieve eDiscovery export status and results.
+- **ediscovery_export_state** (`string`, optional) Filter exports by state: 'pending', 'processing', 'error', or 'done'.
+- **pagination_offset** (`number`, optional) The number of records to skip for pagination. Useful for accessing data beyond initial pages.
+- **result_page_size** (`number`, optional) Specify the number of eDiscovery export results to return per page.
+
+
+## AirtableApi.CreateEdiscoveryExport
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/create_ediscovery_export_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/create_ediscovery_export_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Initiate an eDiscovery export request.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **enterprise_account_id** (`string`, optional) The unique identifier for the enterprise account. Required for creating an eDiscovery export.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.GetEdiscoveryExportStatus
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/get_ediscovery_export_status_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/get_ediscovery_export_status_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve the status and result of an eDiscovery export.
+
+**Parameters**
+
+- **enterprise_account_id** (`string`, required) The ID of the enterprise account for which to retrieve the eDiscovery export status and results.
+- **enterprise_task_id** (`string`, required) The unique identifier for the eDiscovery export task. Required to check the status and get results.
+
+
+## AirtableApi.BatchMoveUserGroupsBetweenAccounts
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/batch_move_user_groups_between_accounts_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/batch_move_user_groups_between_accounts_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Batch move user groups between enterprise accounts.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **target_enterprise_account_id** (`string`, optional) The ID of the target enterprise account to which user groups are being moved. Must belong to the same organization and have the Enterprise Hub feature enabled.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.MoveWorkspacesBetweenEnterpriseAccounts
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/move_workspaces_between_enterprise_accounts_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/move_workspaces_between_enterprise_accounts_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Move workspaces between enterprise accounts within the same organization.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **enterprise_account_id** (`string`, optional) The unique identifier of the enterprise account to which workspaces are being moved. Ensure it belongs to the same organization.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.DeleteUsersByEmail
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/delete_users_by_email_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/delete_users_by_email_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Delete multiple users identified by their email addresses.
+
+**Parameters**
+
+- **enterprise_account_id** (`string`, required) The unique ID of the enterprise account from which users will be deleted. Required for specifying the target enterprise.
+- **email_addresses** (`array[string]`, optional) An array of email addresses of users to be deleted. Each email must be a valid string.
+
+
+## AirtableApi.GetAirtableUserInfo
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/get_airtable_user_info_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/get_airtable_user_info_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Fetch user details from Airtable by ID or email.
+
+**Parameters**
+
+- **enterprise_account_id** (`string`, required) The ID of the enterprise account associated with the user. Used to target specific enterprise-level user data.
+- **include_fields** (`array[string]`, optional) Specify fields to include in the response. Provide an array of field names (strings).
+- **user_emails** (`array[string]`, optional) An array of user email addresses to fetch information for. Provide one or more email strings.
+- **user_ids** (`array[string]`, optional) A list of user IDs to fetch details for. Each ID should be a string.
+
+
+## AirtableApi.BatchManageEnterpriseUsers
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/batch_manage_enterprise_users_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/batch_manage_enterprise_users_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Batch manage users in enterprise accounts.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **enterprise_account_id** (`string`, optional) The unique identifier for the enterprise account to manage users within. This must be provided as a string.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.BatchManageUserMembership
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/batch_manage_user_membership_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/batch_manage_user_membership_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Batch manage user membership in enterprise accounts.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **enterprise_account_id** (`string`, optional) The unique identifier of the enterprise account in which user membership will be managed.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.GrantAdminAccess
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/grant_admin_access_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/grant_admin_access_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Grant admin access to specified users.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **enterprise_account_id** (`string`, optional) The ID of the enterprise account to which admin access will be granted. Required for processing the request.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.RevokeAdminAccess
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/revoke_admin_access_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/revoke_admin_access_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Revoke admin access from specified users.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **enterprise_account_id** (`string`, optional) The unique identifier for the enterprise account. Required to target the specific account for admin access revocation.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.DeleteEnterpriseUser
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/delete_enterprise_user_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/delete_enterprise_user_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Deletes an enterprise user by ID.
+
+**Parameters**
+
+- **enterprise_account_id** (`string`, required) The unique identifier for the enterprise account containing the user to be deleted. This is required for specifying the account context of the user.
+- **user_id** (`string`, required) The unique identifier of the user to be deleted from the enterprise account.
+
+
+## AirtableApi.GetUserInformation
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/get_user_information_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/get_user_information_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Fetch user information by ID from Airtable Enterprise.
+
+**Parameters**
+
+- **enterprise_account_id** (`string`, required) The ID of the Airtable Enterprise account associated with the user. This is required to fetch user data.
+- **user_id** (`string`, required) The unique identifier for the user whose information is to be retrieved. Provide the user ID as a string.
+- **include_fields** (`array[string]`, optional) Specify the list of fields to include in the user information response. Provide as an array of field names.
+
+
+## AirtableApi.ManageEnterpriseAccountUser
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/manage_enterprise_account_user_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/manage_enterprise_account_user_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Manage users in enterprise accounts.
+
+**Parameters**
+
+- **enterprise_account_id** (`string`, required) The unique identifier for the enterprise account. Required to manage users within the account.
+- **user_id** (`string`, required) The unique identifier for the user to be managed within the enterprise account.
+- **update_user_email** (`string`, optional) New email for the user. Ensure enterprise account owns both original and destination domains. Follow SSO steps if applicable.
+- **user_first_name** (`string`, optional) The new first name of the user in the enterprise account.
+- **user_last_name** (`string`, optional) The last name of the user to be updated in the enterprise account.
+- **user_state** (`string`, optional) Specify the user's state as 'provisioned' or 'deactivated'. Only applicable for managed users.
+
+
+## AirtableApi.LogoutEnterpriseUser
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/logout_enterprise_user_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/logout_enterprise_user_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Logs out an enterprise account user from the system.
+
+**Parameters**
+
+- **enterprise_account_id** (`string`, required) The ID of the enterprise account to log the user out from. Required for enterprise-level logout.
+- **enterprise_user_id** (`string`, required) The unique identifier of the enterprise user to log out.
+- **logout_request_body** (`json`, optional) A JSON object containing necessary details to process the logout request.
+
+
+## AirtableApi.RemoveUserFromEnterprise
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/remove_user_from_enterprise_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/remove_user_from_enterprise_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Unshare a user from all enterprise assets and revoke admin access.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **enterprise_account_id** (`string`, optional) The ID of the enterprise account from which the user will be removed. Required to specify the enterprise context for user unsharing.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **user_id** (`string`, optional) The unique identifier of the user to be removed from the enterprise. It is a required string value.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.GetUserGroupInfo
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/get_user_group_info_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/get_user_group_info_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve basic information about a specific user group.
+
+**Parameters**
+
+- **user_group_id** (`string`, required) Provide the identifier for the user group to retrieve its basic information.
+- **include_additional_info** (`array[string]`, optional) An array of strings specifying additional data to be included in the response, such as 'members' or 'permissions'.
+
+
+## AirtableApi.RetrieveUserIdAndScopes
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/retrieve_user_id_and_scopes_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/retrieve_user_id_and_scopes_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve user's ID, associated scopes, and email if available.
+
+**Parameters**
+
+This tool does not take any parameters.
+
+## AirtableApi.CreateAirtableWorkspace
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/create_airtable_workspace_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/create_airtable_workspace_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Create a new workspace in Airtable.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.DeleteWorkspace
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/delete_workspace_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/delete_workspace_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Deletes a specified Airtable workspace.
+
+**Parameters**
+
+- **workspace_id** (`string`, required) The unique identifier of the workspace to delete. Ensure no important data is lost before proceeding.
+
+
+## AirtableApi.GetWorkspaceCollaborators
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/get_workspace_collaborators_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/get_workspace_collaborators_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve information about workspace collaborators and invites.
+
+**Parameters**
+
+- **workspace_identifier** (`string`, required) The unique identifier of the workspace to retrieve collaborators and outstanding invites for. Provide the ID as a string.
+- **include_additional_information** (`array[string]`, optional) List of additional fields to include in the response. Specify field names as strings, like 'email' or 'role'.
+
+
+## AirtableApi.AddWorkspaceCollaborator
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/add_workspace_collaborator_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/add_workspace_collaborator_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Add a collaborator to an Airtable workspace.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **workspace_id** (`string`, optional) The unique identifier of the Airtable workspace where the collaborator will be added.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.RemoveWorkspaceCollaborator
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/remove_workspace_collaborator_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/remove_workspace_collaborator_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Remove a collaborator from an Airtable workspace.
+
+**Parameters**
+
+- **collaborator_identifier** (`string`, required) The ID of the user or group to be removed from the workspace.
+- **workspace_id** (`string`, required) The unique identifier of the Airtable workspace from which to remove a collaborator.
+
+
+## AirtableApi.UpdateWorkspaceCollaboratorPermission
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/update_workspace_collaborator_permission_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/update_workspace_collaborator_permission_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Modify a collaborator's permission level in a workspace.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **workspace_id** (`string`, optional) The unique identifier of the workspace where the collaborator's permissions will be updated. This is required to specify which workspace is being modified.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **collaborator_id** (`string`, optional) The identifier for the user or group whose permissions are being updated in the workspace.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.DeleteWorkspaceInvite
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/delete_workspace_invite_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/delete_workspace_invite_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Delete a workspace invite.
+
+**Parameters**
+
+- **invite_id** (`string`, required) The unique identifier of the workspace invite to delete.
+- **workspace_id** (`string`, required) The ID of the workspace from which the invite will be deleted. This is required to specify which workspace's invite is being revoked.
+
+
+## AirtableApi.MoveAirtableBase
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/move_airtable_base_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/move_airtable_base_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Move a base between Airtable workspaces.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **target_workspace_id** (`string`, optional) The ID of the target workspace where the base will be moved. It should be a valid string ID of an existing workspace within the same Airtable enterprise.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.UpdateWorkspaceRestrictions
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/update_workspace_restrictions_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/update_workspace_restrictions_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Updates sharing restrictions for an Airtable workspace.
+
+**Parameters**
+
+- **workspace_id** (`string`, required) The unique identifier for the Airtable workspace to update restrictions.
+- **invite_creation_restriction** (`string`, optional) Defines who can create invites in the workspace. Choose between 'unrestricted' or 'onlyOwners'.
+- **share_creation_restriction** (`string`, optional) Specify the sharing creation restriction. Choose between 'unrestricted' or 'onlyOwners'.
+
+
+## AirtableApi.UploadAttachmentToAirtable
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/upload_attachment_to_airtable_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/upload_attachment_to_airtable_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Upload attachments to an Airtable record's cell.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **airtable_base_id** (`string`, optional) The unique identifier of the Airtable base where the attachment will be uploaded.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **airtable_record_id** (`string`, optional) The unique string identifier for the Airtable record to which the attachment will be uploaded.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **attachment_field_id_or_name** (`string`, optional) The ID or name of the field where the attachment will be uploaded. This specifies the target field in the Airtable record.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.DeleteMultipleRecords
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/delete_multiple_records_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/delete_multiple_records_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Delete multiple records from an Airtable table.
+
+**Parameters**
+
+- **base_id** (`string`, required) The unique identifier of the Airtable base containing the records to be deleted.
+- **table_identifier** (`string`, required) The unique identifier or name of the Airtable table from which records are to be deleted.
+- **record_ids_to_delete** (`array[string]`, optional) An array of record IDs to delete from the table. Each ID should be a string.
+
+
+## AirtableApi.ListAirtableRecords
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/list_airtable_records_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/list_airtable_records_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve records from a specified Airtable table.
+
+**Parameters**
+
+- **base_id** (`string`, required) The unique identifier for the Airtable base where the table is located.
+- **table_id_or_name** (`string`, required) The ID or name of the Airtable table to retrieve records from. Using table IDs is recommended for consistency.
+- **cell_format_method** (`string`, optional) Defines how cell values are returned. Specify 'json' for unformatted or 'string' for formatted values.
+- **filter_by_formula** (`string`, optional) A formula string to filter records. Use Airtable's formula syntax where functions and operators will be applied to fields.
+- **maximum_records** (`number`, optional) Specify the maximum number of records to retrieve from the Airtable table.
+- **output_time_zone** (`string`, optional) Specifies the time zone for datetimes returned in records. Use IANA time zone format (e.g., 'America/Los_Angeles').
+- **page_size** (`number`, optional) Number of records per page to fetch. Default is 100.
+- **pagination_offset** (`string`, optional) A string used for pagination to fetch the next set of records. Use the offset provided in the previous response to continue retrieving records.
+- **record_metadata_fields** (`array[string]`, optional) An array of strings specifying which metadata fields to include for each record.
+- **return_fields_by_field_id** (`boolean`, optional) Return fields by their field ID instead of field name when set to true.
+- **sort_order** (`string`, optional) Specifies the order of records. Use a JSON string with fields and directions (asc or desc).
+- **specific_fields** (`string`, optional) Comma-separated list of field names to be included in the response. If omitted, all fields are returned.
+- **specified_view** (`string`, optional) Specifies the view in the table to be used for record retrieval. Provide the name or ID of the view.
+- **user_locale** (`string`, optional) Specify the user locale to determine the language and regional settings for the records.
+
+
+## AirtableApi.UpdateAirtableRecords
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/update_airtable_records_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/update_airtable_records_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Update or upsert multiple records in an Airtable table.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **airtable_base_id** (`string`, optional) The unique identifier for the Airtable base where the records will be updated or upserted.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **airtable_table_id_or_name** (`string`, optional) The ID or name of the Airtable table where records will be updated or upserted. Using the table ID is recommended for less disruption if the table name changes.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.CreateAirtableRecords
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/create_airtable_records_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/create_airtable_records_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Create multiple records in an Airtable base.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **base_id** (`string`, optional) The unique identifier for the Airtable base where records will be created.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **table_id_or_name** (`string`, optional) The ID or name of the Airtable table where records will be created. Using the table ID is recommended for consistency.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.BulkUpdateAirtable
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/bulk_update_airtable_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/bulk_update_airtable_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Update or upsert multiple records in an Airtable table.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **base_id** (`string`, optional) The unique ID of the Airtable base containing the records to update. This is required to specify the target base.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **table_identifier** (`string`, optional) The table ID or name in Airtable where the records will be updated. Use the table ID to avoid changes if the name changes.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.DeleteAirtableRecord
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/delete_airtable_record_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/delete_airtable_record_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Deletes a single record from an Airtable base and table.
+
+**Parameters**
+
+- **airtable_base_id** (`string`, required) The unique identifier for the Airtable base from which the record will be deleted. This ID is required to specify the correct base.
+- **record_id** (`string`, required) The unique identifier of the record to be deleted from the specified table in Airtable.
+- **table_identifier** (`string`, required) The ID or name of the Airtable table from which the record should be deleted. This specifies which table within the base to target.
+
+
+## AirtableApi.AirtableGetRecord
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/airtable_get_record_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/airtable_get_record_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve a single record from an Airtable table.
+
+**Parameters**
+
+- **airtable_base_id** (`string`, required) The unique identifier for the Airtable base containing the table from which to retrieve the record. This ID is required to locate the correct base and perform the record search.
+- **record_id** (`string`, required) The unique identifier for the record you wish to retrieve from the Airtable table. This ID should be valid and correspond to a record within the specified base.
+- **table_identifier** (`string`, required) Specify the table's ID or name from which to retrieve the record.
+- **cell_format** (`string`, optional) Specify how cell values should be formatted. Options may include 'json' or 'string'.
+- **return_fields_by_field_id** (`boolean`, optional) If true, fields are returned by Field ID instead of names.
+
+
+## AirtableApi.UpdateAirtableRecord
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/update_airtable_record_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/update_airtable_record_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Update a single Airtable record with specified fields.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **base_id** (`string`, optional) The unique identifier of the Airtable base where the record exists. This ID is required to specify which base to update.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **table_id_or_name** (`string`, optional) The identifier or name of the Airtable table where the record resides. Using table IDs is recommended for stability.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **airtable_record_id** (`string`, optional) The unique identifier for the Airtable record you want to update. It is required to specify which record to modify.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.ModifyAirtableEntry
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/modify_airtable_entry_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/modify_airtable_entry_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Update a specific record in an Airtable table.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **base_id** (`string`, optional) The unique identifier for the Airtable base. This specifies which base the record belongs to.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **table_identifier** (`string`, optional) The unique identifier or name of the Airtable table where the record resides. Prefer using table IDs to avoid changes when table names are updated.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **record_identifier** (`string`, optional) Unique identifier for the Airtable record to update.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.GetRecordComments
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/get_record_comments_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/get_record_comments_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve comments for a specific record in Airtable.
+
+**Parameters**
+
+- **base_id** (`string`, required) The unique identifier for the Airtable base containing the record.
+- **record_id** (`string`, required) Unique identifier for the record in Airtable whose comments are to be retrieved.
+- **table_identifier** (`string`, required) The unique ID or name of the table containing the record. Specify either the ID or name to locate the table.
+- **pagination_offset** (`string`, optional) A string used for pagination to fetch the next set of comments. Generally returned from a previous API call.
+- **results_page_size** (`number`, optional) Number of comments to return per page. Useful for pagination.
+
+
+## AirtableApi.AddRecordComment
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/add_record_comment_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/add_record_comment_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Creates a comment on a specified record.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **base_identifier** (`string`, optional) The unique identifier of the Airtable base where the record is located. This is required to specify which base contains the record you want to comment on.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **table_identifier** (`string`, optional) The ID or name of the table where the record is located.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **record_identifier** (`string`, optional) The unique identifier of the record where the comment will be added. This value specifies which record in Airtable will receive the comment.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.DeleteCommentFromRecord
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/delete_comment_from_record_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/delete_comment_from_record_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Delete a comment from a record in Airtable.
+
+**Parameters**
+
+- **airtable_base_id** (`string`, required) The ID of the Airtable base. This is required to identify which base the comment belongs to.
+- **comment_id_to_delete** (`string`, required) The unique identifier of the comment to be deleted. Required for deletion.
+- **record_id** (`string`, required) The unique identifier for the record from which the comment will be deleted.
+- **table_id_or_name** (`string`, required) The ID or name of the table containing the record from which the comment will be deleted.
+
+
+## AirtableApi.UpdateRecordComment
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/update_record_comment_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/update_record_comment_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Update a comment on a specific record.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **base_identifier** (`string`, optional) The unique identifier for the Airtable base containing the record.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **table_id_or_name** (`string`, optional) The ID or name of the Airtable table where the record with the comment is located.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **record_id** (`string`, optional) The unique identifier of the record whose comment you want to update.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **comment_id** (`string`, optional) The unique identifier of the comment to update. Ensure it belongs to the authorized user.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.DeleteRecordsByPrimaryKeys
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/delete_records_by_primary_keys_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/delete_records_by_primary_keys_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Delete records from a HyperDB table using primary keys.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **enterprise_account_id** (`string`, optional) The unique identifier for the enterprise account. Required to access the correct HyperDB table.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **data_table_id** (`string`, optional) The unique identifier for the target HyperDB table from which records will be deleted.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+## AirtableApi.ReadHyperdbTableRecords
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/read_hyperdb_table_records_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/read_hyperdb_table_records_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Retrieve records from a specified HyperDB table.
+
+**Parameters**
+
+- **data_table_id** (`string`, required) The identifier of the HyperDB table from which records are to be retrieved. It is required to specify the correct table ID to access the corresponding data.
+- **enterprise_account_id** (`string`, required) The unique identifier for the enterprise account. Required to access records from the specified HyperDB table.
+- **fields_to_retrieve** (`array[string]`, optional) List of field names to retrieve from the HyperDB table records. Specify as an array of strings.
+- **maximum_records_to_retrieve** (`number`, optional) The maximum number of records to retrieve from the HyperDB table. Specify an integer value to limit the number of records returned.
+- **pagination_cursor** (`string`, optional) A string representing the position within the dataset to start retrieving records from. Use for paginated data retrieval.
+- **primary_keys_to_retrieve** (`array[string]`, optional) An array of primary key strings to specify which records to retrieve from the HyperDB table.
+
+
+## AirtableApi.UpsertAirtableRecords
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: ["/examples/integrations/mcp-servers/airtable_api/upsert_airtable_records_example_call_tool.py"],
+        JavaScript: ["/examples/integrations/mcp-servers/airtable_api/upsert_airtable_records_example_call_tool.js"],
+      },
+    },
+  ]}
+/>
+
+Update or insert records in an Airtable HyperDB table.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **enterprise_account_id** (`string`, optional) The identifier for the Airtable enterprise account. Required for accessing the HyperDB table.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **data_table_id** (`string`, optional) The identifier for the HyperDB data table in Airtable. Required for targeting the specific table for upsert operations.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+
+
+## Reference
+
+Below is a reference of enumerations used by some of the tools in the AirtableApi MCP Server:
+
+### ToolMode
+
+- **GET_REQUEST_SCHEMA**: `get_request_schema`
+- **EXECUTE**: `execute`
+
+
+---
+
+## Auth
+
+The Arcade Airtable MCP Server uses the [Airtable auth provider](/home/auth-providers/airtable) to connect to users' Airtable accounts.
+
+With the Arcade Cloud Platform, there's nothing to configure. Your users will see `Arcade` as the name of the application that's requesting permission.
+
+With a self-hosted installation of Arcade, you need to [configure the Airtable auth provider](/home/auth-providers/airtable#configuring-airtable-auth) with your own Airtable app credentials.
+
+<ToolFooter pipPackageName="arcade_airtable_api" />

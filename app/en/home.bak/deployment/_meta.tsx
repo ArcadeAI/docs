@@ -1,0 +1,22 @@
+import type { MetaRecord } from "nextra";
+
+const meta: MetaRecord = {
+  "*": {
+    theme: {
+      breadcrumb: true,
+      toc: true,
+      copyPage: true,
+    },
+  },
+  "arcade-cloud-infra": {
+    title: "Arcade Cloud Infrastructure",
+  },
+  "on-prem-mcp": {
+    title: "On-premises MCP servers",
+  },
+  "engine-configuration": {
+    title: "Engine configuration",
+  },
+};
+
+export default meta;

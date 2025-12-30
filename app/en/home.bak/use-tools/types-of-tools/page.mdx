@@ -1,0 +1,63 @@
+---
+title: "Types of Tools"
+description: "Learn about Optimized and Starter tools"
+---
+
+# Types of Tools
+
+Arcade offers two types of tools:
+
+- Starter tools
+- Optimized tools
+
+The distinction is merely a matter of how they are designed. Both types of tools can be used seamlessly in the same way. There is no difference in their interfaces, the way they are called, or how you interact with them through the Arcade [Dashboard](https://api.arcade.dev/dashboard/) or the Arcade [SDK clients](/references).
+
+Before we understand the two types, let's first understand the background for why we need to differentiate between them.
+
+## Why LLMs perform poorly when calling HTTP APIs
+
+Traditionally, the HTTP APIs offered by upstream services such as GitHub, Google, Slack, etc., were designed to be consumed by human software engineers. When we expose such interfaces for LLMs to call as tools, they usually do not perform very well.
+
+One of the main reasons is that the data model of the HTTP API rarely matches the data model of an AI-powered chat interface.
+
+For instance, consider the following user prompt:
+
+> "Send a DM to John asking about a project update"
+
+The data model mismatches are:
+
+| Dimension | Chat interface                         | Slack HTTP API                          |
+| --------- | -------------------------------------- | --------------------------------------- |
+| Action    | Send message to a <b><i>person</i></b> | Send message to a <b><i>channel</i></b> |
+| Argument  | `username = "John"`                    | `channel_id = ???`                      |
+
+In order to bridge the gap in the data models, the LLM has to make multiple API calls:
+
+1. Retrieve the current user's Slack ID
+2. Browse the list of users to find John's ID
+3. Open a DM (direct message) channel between the user and John, and get this channel's ID
+4. Send the message to the channel
+
+Even the most powerful LLMs usually perform poorly when they need to reason such complex workflows on the fly, not to mention the increased cost and risk of hallucinations. As a result, AI Agents and chatbots that rely on HTTP APIs often end up being unreliable.
+
+## Optimized tools
+
+Arcade's Optimized MCP Servers are designed to match the typical data models expected in AI-powered chat interfaces and are subject to evaluation suites to ensure LLMs can safely use them.
+
+Following the example above, our Slack MCP Server offers the [`Slack.SendMessage`](/mcp-servers/social-communication/slack#slacksendmessage) tool, which accepts a `username` as argument, matching exactly both the action and argument value expected to be present in the LLM context window.
+
+When a user says "Send a DM to John asking about a project update", the LLM can directly call the `Slack.SendMessage` tool with the `username` argument, and the tool will take care of the rest.
+
+Optimized tools dramatically improve the speed, reliability and cost-effectiveness of AI Agents and chatbots.
+
+Since they require careful design and evaluation, Optimized tools take time and effort to build. We understand that your Agent or chatbot project might need capabilities not yet covered by our Optimized MCP Servers. For this reason, we also offer low-level Starter MCP Servers.
+
+## Starter tools
+
+To provide your Agent or chatbot with more freedom to interact with the upstream services, we offer Starter MCP Servers.
+
+Starter tools are heavily influenced by the original API design. Each tool mirrors one HTTP endpoint.
+
+Although we redesign the tool name and argument descriptions to make them more suitable for LLMs, Starter tools are still not optimized for LLM usage. Also, they are not subject to evaluation suites like Optimized tools. For those reasons, we recommend thoroughly evaluating each Starter tool with your Agents or chatbots before using it in production.
+
+When your Agent's needs are covered by an Optimized tool, we recommend using it instead of a Starter one. Use Starter tools as a complement. Carefully engineer your prompts to ensure your Agent can call them safely.

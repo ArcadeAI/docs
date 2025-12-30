@@ -1,4 +1,4 @@
-import { BadgeHelp, Globe, Home, Shield } from "lucide-react";
+import { BadgeHelp, Globe, Home, Shield, BookOpen, Rocket, Settings, Wrench, Bot, Users, Server, Eye, KeyRound, FileCode, Phone } from "lucide-react";
 import type { MetaRecord } from "nextra";
 
 function TitleWithIcon({
@@ -35,98 +35,33 @@ export const meta: MetaRecord = {
     title: <TitleWithIcon icon={Globe}>Arcade.dev</TitleWithIcon>,
     href: "https://arcade.dev",
   },
-  "-- Getting Started": {
+  
+  // Section 1: Get Started
+  "-- Get Started": {
     type: "separator",
-    title: "Using Arcade",
+    title: "Get Started",
   },
-  quickstart: {
-    title: "Calling tools in your agent",
+  "about-arcade": {
+    title: "About Arcade",
   },
-  "mcp-gateway-quickstart": {
-    title: "Call a tool in your IDE/MCP Client",
+  setup: {
+    title: "Setup",
   },
-  "custom-mcp-server-quickstart": {
-    title: "Build MCP Server QuickStart",
+  quickstarts: {
+    title: "Quickstarts",
   },
-  "api-keys": {
-    title: "Get an API key",
+  "common-use-cases": {
+    title: "Common use cases",
+    display: "hidden", // Coming soon
   },
   examples: {
-    title: "Example agents",
+    title: "Example Agents",
   },
-  "-- Authoring Tools": {
-    type: "separator",
-    title: "Authoring Tools",
+  integrations: {
+    title: "Integrations",
   },
-  "build-tools": {
-    title: "Build tools",
-  },
-  "evaluate-tools": {
-    title: "Evaluate tools",
-  },
-  "serve-tools": {
-    title: "Serve tools",
-  },
-  "-- Agent Frameworks and MCP": {
-    type: "separator",
-    title: "Agent Frameworks and MCP",
-  },
-  "agent-frameworks-overview": {
-    title: "Overview",
-  },
-  "mcp-clients": {
-    title: "MCP Clients",
-  },
-  langchain: {
-    title: "LangChain",
-  },
-  crewai: {
-    title: "CrewAI",
-  },
-  "google-adk": {
-    title: "Google ADK",
-  },
-  mastra: {
-    title: "Mastra",
-  },
-  "oai-agents": {
-    title: "OpenAI Agents",
-  },
-  vercelai: {
-    title: "Vercel AI",
-  },
-  "-- Core Concepts": {
-    type: "separator",
-    title: "Core Concepts",
-  },
-  "use-tools": {
-    title: "Tool Calling",
-  },
-  auth: {
-    title: "Authorization",
-  },
-  "mcp-gateways": {
-    title: "MCP Gateways",
-  },
-  "arcade-cli": {
-    title: "Arcade CLI",
-  },
-  "-- Hosting options": {
-    type: "separator",
-    title: "Hosting options",
-  },
-  "hosting-overview": {
-    title: "Overview",
-  },
-  deployment: {
-    title: "Deployment",
-  },
-  "auth-providers": {
-    title: "Customizing Auth",
-  },
-  "-- Guides": {
-    type: "separator",
-    title: "Guides",
+  tools: {
+    title: "Tools",
   },
   glossary: {
     title: "Glossary",
@@ -134,31 +69,74 @@ export const meta: MetaRecord = {
   faq: {
     title: "FAQ",
   },
-  "compare-server-types": {
-    title: "Compare Server Types",
-  },
-  "agentic-development": {
-    title: "Agentic Development",
-  },
   changelog: {
     title: "Changelog",
   },
-  "-- Registry": {
+  
+  // Section 2: Guides
+  "-- Guides": {
     type: "separator",
-    title: "Registry",
+    title: "Guides",
   },
-  "registry-early-access": {
-    title: "Registry Early Access",
+  "configure-arcade": {
+    title: "Configure Arcade",
   },
+  "tool-calling": {
+    title: "Call tools",
+  },
+  "create-tools": {
+    title: "Create tools",
+  },
+  "agent-frameworks": {
+    title: "Agent Frameworks",
+  },
+  "user-facing-agents": {
+    title: "User-facing agents",
+  },
+  observability: {
+    title: "Observability Platforms",
+  },
+  "deployment-hosting": {
+    title: "Deployment and hosting",
+  },
+  security: {
+    title: <TitleWithIcon icon={Shield}>Security & Compliance</TitleWithIcon>,
+  },
+  
+  // Section 3: Learn (placeholder)
+  "-- Learn": {
+    type: "separator",
+    title: "Learn",
+  },
+  
+  // Section 4: Reference
+  "-- Reference": {
+    type: "separator",
+    title: "Reference",
+  },
+  references: {
+    title: "Overview",
+  },
+  api: {
+    title: "API",
+  },
+  mcp: {
+    title: "Arcade MCP (MCP Server SDK)",
+  },
+  "arcade-cli": {
+    title: "Arcade CLI",
+  },
+  "auth-providers": {
+    title: "Auth providers",
+  },
+  
+  // Section 5: Resources
   "-- Resources": {
     type: "separator",
     title: "Resources",
   },
   "contact-us": {
     title: <TitleWithIcon icon={BadgeHelp}>Contact us</TitleWithIcon>,
-  },
-  security: {
-    title: <TitleWithIcon icon={Shield}>Security</TitleWithIcon>,
   },
 };
 
