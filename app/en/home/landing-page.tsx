@@ -187,7 +187,7 @@ export function LandingPage() {
               icon={Wrench}
               title="Start Building"
               description="Learn how to build and deploy your own custom tools. Use Arcade's tool SDK to create custom capabilities for your agents."
-              href="/home/custom-tools"
+              href="/guides/create-tools/tool-basics/build-mcp-server"
             />
             <QuickStartCard
               icon={Cloud}
@@ -224,7 +224,7 @@ export function LandingPage() {
                 title: "Secure User Impersonation",
                 description:
                   "Arcade lets agents securely access user-specific services like email, calendars, and documents through built-in OAuth and token management.",
-                href: "/home/auth/how-arcade-helps",
+                href: "/get-started/about-arcade",
               }}
             />
             <ChallengeSolution
@@ -239,7 +239,7 @@ export function LandingPage() {
                 title: "Tools That Scale Independently",
                 description:
                   "Arcade separates tool execution from your application, allowing each tool to run on its optimal infrastructure and scale based on its specific needs.",
-                href: "/home/use-tools/tools-overview",
+                href: "/guides/tool-calling/",
               }}
             />
             <ChallengeSolution
@@ -254,7 +254,7 @@ export function LandingPage() {
                 title: "Build Once, Run Anywhere",
                 description:
                   "Define your tool once with Arcade's SDK and it works seamlessly across OpenAI, Anthropic, and frameworks like LangChain and CrewAI without any changes.",
-                href: "/home/build-tools/create-a-mcp-server",
+                href: "/guides/create-tools/tool-basics/build-mcp-server",
               }}
             />
             <ChallengeSolution
