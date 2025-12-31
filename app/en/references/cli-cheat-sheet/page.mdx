@@ -1,0 +1,506 @@
+---
+title: Arcade CLI Cheat Sheet
+description: Quick reference for all Arcade CLI commands - perfect for printing!
+---
+
+import {
+  CheatSheetGrid,
+  CheatSheetSection,
+  CommandItem,
+  CommandList,
+  CommandBlock,
+  InfoBox
+} from '../../../_components/cheat-sheet'
+import '../../../cheat-sheet-print.css'
+
+# Arcade CLI Cheat Sheet
+
+<div className="no-print mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+  <strong>📄 Print-friendly!</strong> Use your browser's print function (Ctrl/Cmd + P) to get a landscape-oriented version perfect for events and quick reference. The layout will automatically adjust for optimal printing.
+</div>
+
+<CheatSheetGrid>
+
+  <CheatSheetSection title="Getting Started" icon="🚀" color="red">
+
+    Install Arcade CLI globally using `uv` (recommended) or `pip`.
+
+    ```bash
+    uv tool install arcade-mcp    # Recommended
+    pip install arcade-mcp        # Alternative
+    ```
+
+    Verify installation:
+
+    ```bash
+    arcade --version
+    ```
+
+    Create and run your first server:
+
+    ```bash
+    arcade new my_server
+    cd my_server
+    arcade mcp http
+    ```
+
+    Get help on any command:
+
+    ```bash
+    arcade --help
+    arcade <command> --help
+    ```
+
+    <InfoBox type="tip">Use `uv` for faster installs and better dependency management</InfoBox>
+
+  </CheatSheetSection>
+
+  <CheatSheetSection title="Authentication" icon="🔐" color="orange">
+
+    Authenticate with Arcade Cloud for deployments and secrets management.
+
+    | Command | Description |
+    |---------|-------------|
+    | `arcade login` | Opens browser for OAuth authentication |
+    | `arcade login --host <url>` | Login to custom Arcade instance |
+    | `arcade logout` | Clear local credentials |
+    | `arcade whoami` | Show logged-in user and active context |
+    | `arcade dashboard` | Open Arcade web UI in browser |
+    | `arcade dashboard --local` | Open local dashboard |
+
+    Credentials are stored in `~/.arcade/credentials.yaml`
+
+  </CheatSheetSection>
+
+  <CheatSheetSection title="Organizations & Projects" icon="🏢" color="purple">
+
+    Organizations group projects and team members. Projects contain servers, secrets, and configurations.
+
+    ```bash
+    # List all organizations
+    arcade org list
+
+    # Switch active organization
+    arcade org set <org_id>
+    ```
+
+    Switching organization also resets your active project to that org's default.
+
+    Projects contain servers, secrets, and configurations.
+
+    ```bash
+    # List projects in active org
+    arcade project list
+
+    # Switch active project
+    arcade project set <id>
+    ```
+
+    All deploy/secret commands use your active project context.
+
+    <InfoBox type="tip">
+      Use `arcade whoami` to see current org/project.
+    </InfoBox>
+
+</CheatSheetSection>
+
+<CheatSheetSection title="Create New Server" icon="✨" color="green">
+  Scaffold a new MCP server project with boilerplate code.
+
+  ### Minimal Template (Quick Start)
+
+  ```bash
+  arcade new my_server
+  ```
+  Creates **pyproject.toml**, **src/my_server/__init__.py**, **src/my_server/server.py**.
+
+  ### Full Template (Production)
+
+  ```bash
+  arcade new my_server --full
+  ```
+
+  Creates: **pyproject.toml**, **my_server/** (package with tools), **tests/**, **evals/**, **Makefile**, **.pre-commit-config.yaml**, **.ruff.toml**, **LICENSE**, **README.md**.
+
+  ### Options
+
+  | Flag | Description |
+  |------|--------------|
+  | `--dir <path>` | Output directory (default: current) |
+  | `--full`, `-f` | Create full starter project |
+
+</CheatSheetSection>
+
+<CheatSheetSection title="Run MCP Server" icon="⚡" color="cyan">
+
+  Start your server locally for development and testing.
+
+  ### Transport Types
+
+  ```bash
+  # For MCP clients (Claude, Cursor)
+  arcade mcp stdio
+
+  # For web/API testing
+  arcade mcp http
+  ```
+
+  ### Examples
+  ```bash
+  arcade mcp http --port 8080 --reload --debug
+  arcade mcp stdio --tool-package github
+  arcade mcp http --discover-installed --show-packages
+  ```
+
+  <InfoBox type="tip">Use `--reload` for faster development iteration</InfoBox>
+
+</CheatSheetSection>
+
+<CheatSheetSection title="Show & Inspect Tools" icon="🔍" color="pink">
+
+  View available tools and their schemas from local or remote servers.
+
+  ```bash
+  # List all tools
+  arcade show
+
+  # Show local tools only
+  arcade show --local
+
+  # Show tool details
+  arcade show -t <tool_name>
+
+  # Full response structure
+  arcade show -t <tool> --full
+
+  # Filter by server
+  arcade show -T <server_name>
+  ```
+
+  ### Options
+
+  | Flag | Description |
+  |------|--------------|
+  | `-t`, `--tool <name>` | Show specific tool details |
+  | `-T`, `--server <name>` | Filter by server |
+  | `--local`, `-l` | Show local catalog only |
+  | `--full`, `-f` | Show complete response (auth, logs) |
+
+</CheatSheetSection>
+
+<CheatSheetSection title="Configure Clients" icon="🔧" color="yellow">
+
+  Auto-configure MCP clients to connect to your server.
+
+  ### Supported Clients
+
+  | Client | Command |
+  |------|--------------|
+  | Claude Desktop <br />(`stdio` only) | `arcade configure claude` |
+  | Cursor IDE <br />(`stdio` or `http`) | `arcade configure cursor` |
+  | VS Code <br />(`stdio` or `http`) | `arcade configure vscode` |
+
+  <InfoBox type="tip">Claude Desktop only supports `stdio` transport via configuration file.</InfoBox>
+
+  ### Options
+
+  | Flag | Description | Default |
+  |------|-------------|--------|
+  | `--transport <type>` | `stdio` or `http` | `stdio` |
+  | `--host <target>` | `local` or `arcade` | `local` |
+  | `--port <port>` | Port for HTTP transport | `8000` |
+  | `--name <name>` | Server name in config | directory name |
+  | `--entrypoint <file>` | Entry file for stdio | `server.py` |
+
+</CheatSheetSection>
+
+<CheatSheetSection title="Deploy to Cloud" icon="☁️" color="red">
+
+  Deploy your MCP server to Arcade Cloud for production use.
+
+  ```bash
+  arcade deploy
+  ```
+
+  ### Options
+
+  | Flag | Description | Default |
+  |------|-------------|--------|
+  | `-e`, `--entrypoint <file>` | Python file that runs MCPApp | `server.py` |
+  | `--server-name <name>` | Explicit server name | auto-detected |
+  | `--server-version <ver>` | Explicit server version | auto-detected |
+  | `--skip-validate` | Skip local health checks | off |
+  | `--secrets <mode>` | Secret sync mode (see below) | `auto` |
+
+  ### Secrets Handling
+
+  | Mode | Description |
+  |------|-------------|
+  | `auto` | Sync only required secret keys (default) |
+  | `all` | Sync entire .env file |
+  | `skip` | Don't sync any secrets |
+
+  <InfoBox type="tip">Run from your project root (where `pyproject.toml` is located).</InfoBox>
+</CheatSheetSection>
+
+
+<CheatSheetSection title="Server Management" icon="🖥️" color="green">
+
+  Manage deployed servers in Arcade Cloud.
+
+  ```bash
+  # List all servers
+  arcade server list
+
+  # Get server details
+  arcade server get <name>
+
+  # Enable a server
+  arcade server enable <name>
+
+  # Disable a server
+  arcade server disable <name>
+
+  # Delete a server (permanent!)
+  arcade server delete <name>
+  ```
+
+  <InfoBox type="warning">
+    Delete is permanent and cannot be undone
+  </InfoBox>
+</CheatSheetSection>
+
+<CheatSheetSection title="Server Logs" icon="📋" color="blue">
+
+  View and stream logs from deployed servers.
+
+  ```bash
+  # View recent logs (last 1h)
+  arcade server logs <name>
+
+  # Stream live logs
+  arcade server logs <name> -f    # Stream live logs
+  ```
+
+  ### Time Range Options
+
+  | Flag | Description | Example |
+  |------|-------------|---------|
+  | `-s`, `--since <time>` | Start time (default: 1h) | `1h`, `30m`, `2d`, `2024-01-15T10:00:00Z` |
+  | `-u`, `--until <time>` | End time (default: now) | `30m`, `2024-01-15T12:00:00Z` |
+
+  ```bash
+  arcade server logs myserver --since 2h --until 30m
+  arcade server logs myserver --since 2024-01-15T10:00:00Z
+  ```
+
+</CheatSheetSection>
+
+  <CheatSheetSection title="Secrets Management" icon="🔑" color="purple">
+
+    Store API keys and sensitive configuration for your deployed servers. Secrets are encrypted and scoped to your active project.
+
+    ### List Secrets
+    ```bash
+    arcade secret list
+    ```
+    Shows: Key, Type, Description, Last accessed.
+
+    ### Set Secrets
+
+    ```bash
+    arcade secret set KEY=value
+    arcade secret set KEY1=v1 KEY2=v2
+    ```
+
+    ### From `.env` File
+
+    ```bash
+    arcade secret set --from-env
+    arcade secret set --from-env -f .env.prod
+    ```
+
+    ### Delete Secrets
+    ```bash
+    arcade secret unset KEY1 KEY2
+    ```
+
+  <InfoBox type="tip">
+    Use `arcade secret set --from-env` to sync local .env to Arcade Cloud before deploying.
+  </InfoBox>
+
+  </CheatSheetSection>
+
+<CheatSheetSection title="Evaluations" icon="📊" color="cyan">
+  Test tool-calling accuracy with evaluation suites.
+  ### Run Evaluations
+  ```bash
+  arcade evals # Current dir
+  arcade evals ./evals/ # Specific dir
+  ```
+  ### Capture Mode
+  ```bash
+  arcade evals --capture
+  ```
+### Output Options
+
+| Flag                   | Description                                       |
+| ---------------------- | ------------------------------------------------- |
+| `--details`, `-d`      | Show detailed results                             |
+| `--failed-only`, `-f`  | Show only failed evals                            |
+| `--file <path>`        | Write results to file                             |
+| `--format <fmt>`       | Output format: `txt`, `md`, `html`, `json`, `all` |
+| `--max-concurrent <n>` | Concurrent evaluations (default: 1)               |
+| `--add-context`        | Include system/additional messages
+
+</CheatSheetSection>
+
+<CheatSheetSection title="MCP Server Options" icon="⚙️" color="pink">
+  <div className="text-xs">
+    <table className="w-full">
+      <tbody>
+        <tr><td className="font-mono">--host</td><td>Bind address (127.0.0.1)</td></tr>
+        <tr><td className="font-mono">--port</td><td>Port number (8000)</td></tr>
+        <tr><td className="font-mono">--reload</td><td>Auto-reload on changes</td></tr>
+        <tr><td className="font-mono">--debug</td><td>Verbose logging</td></tr>
+        <tr><td className="font-mono">--tool-package</td><td>Load specific package</td></tr>
+        <tr><td className="font-mono">--discover-installed</td><td>Find arcade-* packages</td></tr>
+        <tr><td className="font-mono">--show-packages</td><td>List loaded packages</td></tr>
+        <tr><td className="font-mono">--env-file</td><td>Path to .env file</td></tr>
+        <tr><td className="font-mono">--name</td><td>Server name</td></tr>
+        <tr><td className="font-mono">--version</td><td>Server version</td></tr>
+        <tr><td className="font-mono">--otel-enable</td><td>Send logs to OTel</td></tr>
+      </tbody>
+    </table>
+  </div>
+</CheatSheetSection>
+
+
+<CheatSheetSection title="Global Flags" icon="🚩" color="orange">
+  Available on most commands:
+
+  | Flag | Description |
+  |------|-------------|
+  | `-h`, `--help` | Show command help |
+  | `-v`, `--version` | Show CLI version |
+  | `-d`, `--debug` | Enable debug output |
+  | `--host <url>` | Arcade Engine host |
+  | `--port <port>` | Arcade Engine port |
+  | `--tls` | Force TLS connection |
+  | `--no-tls` | Disable TLS connection |
+
+  <InfoBox type="tip">
+    Use `--debug` when troubleshooting issues
+  </InfoBox>
+</CheatSheetSection>
+
+  <CheatSheetSection title="Environment Variables" icon="🌐" color="yellow">
+    Set these in your shell or `.env` file:
+
+    | Variable | Description |
+    |----------|--------------|
+    | `OPENAI_API_KEY` | OpenAI API key (for evals) |
+    | `ANTHROPIC_API_KEY` | Anthropic API key (for evals) |
+    | `ARCADE_API_BASE_URL` | Override Arcade API URL |
+
+    ```bash
+    # In shell
+    export OPENAI_API_KEY=sk-...
+
+    # Or in .env file
+    OPENAI_API_KEY=sk-...
+    ANTHROPIC_API_KEY=sk-ant-...
+    ```
+  </CheatSheetSection>
+
+  <CheatSheetSection title="Project Structure" icon="📂" color="green">
+
+    ### Minimal Template (`arcade new my_server`)
+
+    <pre>
+    my_server/
+    ├── pyproject.toml          # Dependencies & metadata
+    └── src/my_server/
+        ├── __init__.py
+        └── server.py           # MCPApp entry point
+    </pre>
+
+    ### Full Template (`arcade new my_server --full`)
+
+    <pre>
+    my_server/
+    ├── pyproject.toml          # Dependencies & metadata
+    ├── .pre-commit-config.yaml # Git hooks
+    ├── .ruff.toml              # Linter config
+    ├── Makefile                # Common commands
+    ├── LICENSE
+    ├── README.md
+    ├── my_server/              # Package directory
+    │   ├── __init__.py
+    │   └── tools/
+    │       ├── __init__.py
+    │       └── hello.py        # Example tool
+    ├── tests/
+    │   ├── __init__.py
+    │   └── test_my_server.py
+    └── evals/
+        └── eval_my_server.py   # Evaluation suites
+    </pre>
+
+    <InfoBox type="tip">
+      Add `.env` (local secrets) and `.env.example` (template) to your project.
+    </InfoBox>
+
+  </CheatSheetSection>
+
+  <CheatSheetSection title="Troubleshooting" icon="🔧" color="red">
+    ### Common Issues
+
+    | Error | Solution |
+    |-------|-----------|
+    | "Not logged in" | Run `arcade login` |
+    | "Legacy credentials" | Run `arcade logout` then `arcade login` |
+    | "Module not found" | Run `uv pip install arcade-mcp[evals]` |
+    | "Server not healthy" | Check `arcade server logs <name> -f` |
+    | "No tools found" | Verify `--tool-package` or `--discover-installed` |
+
+    ### Debug Tips
+    ```bash
+    arcade --debug <command>      # Verbose output
+    arcade server logs <name> -f  # Stream live logs
+    arcade show --local           # Verify local tools
+    ```
+  </CheatSheetSection>
+
+  <CheatSheetSection title="Pro Tips" icon="💡" color="blue">
+
+    - Use `--reload` during development for faster iteration
+    - Use `stdio` transport for Claude Desktop and Cursor
+    - Use `http` transport for web testing and debugging
+    - Always set secrets before deploying servers
+    - Run evaluations before every deploy
+    - Use `--full` template for production projects
+    - Check logs immediately after deploying
+    - Use `--debug` flag to see detailed request info
+    - Keep `.env.example` updated for your team
+    - Use project context when working with multiple projects
+
+  </CheatSheetSection>
+
+  <CheatSheetSection title="Typical Workflow" icon="📝" color="orange">
+    Standard development cycle for building MCP servers:
+
+    1. **`arcade login`** — Authenticate with Arcade Cloud
+    2. **`arcade new my_server`** — Create project (Minimal template)
+    3. **Edit `src/my_server/server.py`** — Add your tools
+    4. **`arcade mcp http --reload`** — Run locally with hot reload
+    5. **`arcade configure cursor`** — Connect your IDE
+    6. **Test tools in IDE** — Verify functionality
+    7. **`arcade evals`** — Run evaluation suites
+    8. **`arcade secret set --from-env`** — Sync secrets
+    9. **`arcade deploy`** — Deploy to cloud (requires `server.py` entrypoint)
+    10. **`arcade server logs -f`** — Monitor logs
+  </CheatSheetSection>
+
+</CheatSheetGrid>
+
