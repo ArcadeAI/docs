@@ -22,10 +22,7 @@ export const PostHog = ({ children }: { children: React.ReactNode }) => {
         // Enable surveys for CSAT
         disable_surveys: false,
         loaded: (posthogInstance) => {
-          if (
-            process.env.NODE_ENV === "development" ||
-            process.env.NEXT_PUBLIC_POSTHOG_DEBUG
-          ) {
+          if (process.env.NEXT_PUBLIC_POSTHOG_DEBUG === "true") {
             posthogInstance.debug();
           }
         },
