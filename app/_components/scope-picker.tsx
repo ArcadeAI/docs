@@ -1,5 +1,6 @@
 "use client";
 
+import { usePostHog } from "posthog-js/react";
 import { useState } from "react";
 
 interface Tool {
@@ -13,23 +14,40 @@ interface ScopePickerProps {
 
 export default function ScopePicker({ tools }: ScopePickerProps) {
   const [selectedTools, setSelectedTools] = useState<Set<string>>(new Set());
+  const posthog = usePostHog();
+
+  const trackScopeCalculatorUsed = (action: string, toolName?: string) => {
+    posthog?.capture("scope_calculator_used", {
+      action,
+      tool_name: toolName || null,
+      selected_tools_count: selectedTools.size,
+      total_tools_available: tools.length,
+    });
+  };
 
   const toggleTool = (toolName: string) => {
     const newSelected = new Set(selectedTools);
+    const isSelecting = !newSelected.has(toolName);
     if (newSelected.has(toolName)) {
       newSelected.delete(toolName);
     } else {
       newSelected.add(toolName);
     }
     setSelectedTools(newSelected);
+    trackScopeCalculatorUsed(
+      isSelecting ? "tool_selected" : "tool_deselected",
+      toolName
+    );
   };
 
   const selectAll = () => {
     setSelectedTools(new Set(tools.map((t) => t.name)));
+    trackScopeCalculatorUsed("select_all");
   };
 
   const clearAll = () => {
     setSelectedTools(new Set());
+    trackScopeCalculatorUsed("clear_all");
   };
 
   // Get unique scopes from selected tools

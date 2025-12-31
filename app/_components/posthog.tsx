@@ -17,6 +17,10 @@ export const PostHog = ({ children }: { children: React.ReactNode }) => {
         ui_host:
           process.env.NEXT_PUBLIC_POSTHOG_UI_HOST || "https://us.posthog.com",
         disable_session_recording: true,
+        // Enable heatmaps for click tracking
+        enable_heatmaps: true,
+        // Enable surveys for CSAT
+        disable_surveys: false,
         loaded: (posthogInstance) => {
           if (
             process.env.NODE_ENV === "development" ||

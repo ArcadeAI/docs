@@ -10,6 +10,7 @@ import {
 } from "@arcadeai/design-system";
 import { cn } from "@arcadeai/design-system/lib/utils";
 import Link from "next/link";
+import { usePostHog } from "posthog-js/react";
 import type React from "react";
 import { useState } from "react";
 import { ComingSoonModal } from "./coming-soon-modal";
@@ -35,6 +36,7 @@ export const ToolCard: React.FC<ToolCardProps> = ({
   isPro = false,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const posthog = usePostHog();
   const {
     className,
     label,
@@ -43,7 +45,19 @@ export const ToolCard: React.FC<ToolCardProps> = ({
   } = TOOL_CARD_TYPE_CONFIG[type];
   const showHeaderBadges = isByoc || isPro || isComingSoon;
 
+  const trackToolCardClick = () => {
+    posthog?.capture("tool_card_clicked", {
+      tool_name: toolName,
+      tool_type: type,
+      tool_link: link,
+      is_coming_soon: isComingSoon,
+      is_byoc: isByoc,
+      is_pro: isPro,
+    });
+  };
+
   const handleCardClick = (e: React.MouseEvent | React.KeyboardEvent) => {
+    trackToolCardClick();
     if (isComingSoon) {
       e.preventDefault();
       setIsModalOpen(true);
@@ -123,7 +137,9 @@ export const ToolCard: React.FC<ToolCardProps> = ({
           {cardContent}
         </button>
       ) : (
-        <Link href={link}>{cardContent}</Link>
+        <Link href={link} onClick={trackToolCardClick}>
+          {cardContent}
+        </Link>
       )}
 
       {isComingSoon && (
