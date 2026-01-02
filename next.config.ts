@@ -65,7 +65,8 @@ const nextConfig: NextConfig = withLlmsTxt({
         },
         {
           source: "/en/home/auth/auth-tool-calling",
-          destination: "/en/guides/tool-calling/custom-apps/authorized-tool-calling",
+          destination:
+            "/en/guides/tool-calling/custom-apps/authorized-tool-calling",
           permanent: true, // 308 redirect for SEO
         },
         {
@@ -110,7 +111,8 @@ const nextConfig: NextConfig = withLlmsTxt({
         },
         {
           source: "/en/home/build-tools/create-a-tool-with-secrets",
-          destination: "/en/guides/create-tools/tool-basics/create-tool-secrets",
+          destination:
+            "/en/guides/create-tools/tool-basics/create-tool-secrets",
           permanent: true, // 308 redirect for SEO
         },
         {
@@ -125,7 +127,8 @@ const nextConfig: NextConfig = withLlmsTxt({
         },
         {
           source: "/en/home/build-tools/providing-useful-tool-errors",
-          destination: "/en/guides/create-tools/error-handling/useful-tool-errors",
+          destination:
+            "/en/guides/create-tools/error-handling/useful-tool-errors",
           permanent: true, // 308 redirect for SEO
         },
         {
@@ -135,7 +138,8 @@ const nextConfig: NextConfig = withLlmsTxt({
         },
         {
           source: "/en/home/build-tools/tool-context",
-          destination: "/en/guides/create-tools/tool-basics/runtime-data-access",
+          destination:
+            "/en/guides/create-tools/tool-basics/runtime-data-access",
           permanent: true, // 308 redirect for SEO
         },
         {
@@ -145,7 +149,8 @@ const nextConfig: NextConfig = withLlmsTxt({
         },
         {
           source: "/en/home/compare-server-types",
-          destination: "/en/guides/create-tools/tool-basics/compare-server-types",
+          destination:
+            "/en/guides/create-tools/tool-basics/compare-server-types",
           permanent: true, // 308 redirect for SEO
         },
         {
@@ -180,7 +185,8 @@ const nextConfig: NextConfig = withLlmsTxt({
         },
         {
           source: "/en/home/evaluate-tools/create-an-evaluation-suite",
-          destination: "/en/guides/create-tools/evaluate-tools/create-evaluation-suite",
+          destination:
+            "/en/guides/create-tools/evaluate-tools/create-evaluation-suite",
           permanent: true, // 308 redirect for SEO
         },
         {
@@ -224,12 +230,14 @@ const nextConfig: NextConfig = withLlmsTxt({
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/en/home/langchain/use-arcade-tools /en/home/langchain/user-auth-interrupts",
+          source:
+            "/en/home/langchain/use-arcade-tools /en/home/langchain/user-auth-interrupts",
           destination: "/en/guides/agent-frameworks/langchain/python",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/en/home/mastra/use-arcade-tools, /en/home/mastra/user-auth-interrupts",
+          source:
+            "/en/home/mastra/use-arcade-tools, /en/home/mastra/user-auth-interrupts",
           destination: "/en/guides/agent-frameworks/mastra/typescript",
           permanent: true, // 308 redirect for SEO
         },
@@ -254,7 +262,8 @@ const nextConfig: NextConfig = withLlmsTxt({
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/en/home/oai-agents/use-arcade-tools, /en/home/oai-agents/user-auth-interrupts",
+          source:
+            "/en/home/oai-agents/use-arcade-tools, /en/home/oai-agents/user-auth-interrupts",
           destination: "/en/guides/agent-frameworks/openai/python",
           permanent: true, // 308 redirect for SEO
         },
@@ -280,7 +289,8 @@ const nextConfig: NextConfig = withLlmsTxt({
         },
         {
           source: "/en/home/use-tools/get-tool-definitions",
-          destination: "/en/guides/tool-calling/custom-apps/get-tool-definitions",
+          destination:
+            "/en/guides/tool-calling/custom-apps/get-tool-definitions",
           permanent: true, // 308 redirect for SEO
         },
         {
