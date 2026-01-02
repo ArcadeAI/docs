@@ -243,17 +243,17 @@ const nextConfig: NextConfig = withLlmsTxt({
         },
         {
           source: "/en/home/mcp-clients/claude-desktop",
-          destination: "/en/guides/tool-calling/mcp-client/visual-studio-code",
+          destination: "/en/guides/tool-calling/mcp-clients/claude-desktop",
           permanent: true, // 308 redirect for SEO
         },
         {
           source: "/en/home/mcp-clients/cursor",
-          destination: "/en/guides/tool-calling/mcp-client/visual-studio-code",
+          destination: "/en/guides/tool-calling/mcp-clients/cursor",
           permanent: true, // 308 redirect for SEO
         },
         {
           source: "/en/home/mcp-clients/visual-studio-code",
-          destination: "/en/guides/tool-calling/mcp-client/visual-studio-code",
+          destination: "/en/guides/tool-calling/mcp-clients/visual-studio-code",
           permanent: true, // 308 redirect for SEO
         },
         {
@@ -327,6 +327,87 @@ const nextConfig: NextConfig = withLlmsTxt({
           source: "/en/home/use-tools/error-handling",
           destination: "/en/guides/tool-calling/error-handling",
           permanent: true, // 308 redirect for SEO
+        },
+        // Fix trailing slash issues
+        {
+          source: "/references/auth-providers/",
+          destination: "/en/references/auth-providers",
+          permanent: true,
+        },
+        {
+          source: "/references/mcp/python/",
+          destination: "/en/references/mcp/python",
+          permanent: true,
+        },
+        {
+          source: "/guides/tool-calling/",
+          destination: "/en/guides/tool-calling",
+          permanent: true,
+        },
+        // Fix missing locale prefix
+        {
+          source: "/get-started/setup/api-key",
+          destination: "/en/get-started/setup/api-key",
+          permanent: true,
+        },
+        {
+          source: "/guides/tool-calling/custom-apps/authorized-tool-calling",
+          destination:
+            "/en/guides/tool-calling/custom-apps/authorized-tool-calling",
+          permanent: true,
+        },
+        {
+          source: "/guides/user-facing-agents/brand-provider",
+          destination: "/en/guides/user-facing-agents/brand-provider",
+          permanent: true,
+        },
+        {
+          source: "/guides/tool-calling/mcp-client/visual-studio-code",
+          destination: "/en/guides/tool-calling/mcp-clients/visual-studio-code",
+          permanent: true,
+        },
+        {
+          source: "/guides/tool-calling/get-tool-definitions",
+          destination:
+            "/en/guides/tool-calling/custom-apps/get-tool-definitions",
+          permanent: true,
+        },
+        {
+          source: "/guides/deployment-hosting/engine-configuration",
+          destination: "/en/guides/deployment-hosting/configure-engine",
+          permanent: true,
+        },
+        {
+          source: "/guides/create-tools/performance/run-evaluations",
+          destination: "/en/guides/create-tools/evaluate-tools/run-evaluations",
+          permanent: true,
+        },
+        {
+          source: "/references/arcade-cliarcade-configure",
+          destination: "/en/references/arcade-cli",
+          permanent: true,
+        },
+        {
+          source: "/resources/mastra/user-auth-interrupts",
+          destination: "/en/guides/agent-frameworks/mastra",
+          permanent: true,
+        },
+        // Redirect mcp-servers to resources/integrations
+        {
+          source: "/mcp-servers/:path*",
+          destination: "/en/resources/integrations/:path*",
+          permanent: true,
+        },
+        // Fix broken resource paths
+        {
+          source: "/resources/oai-agents/overview",
+          destination: "/en/guides/agent-frameworks/openai",
+          permanent: true,
+        },
+        {
+          source: "/resources/creating-tools/:path*",
+          destination: "/en/guides/create-tools/:path*",
+          permanent: true,
         },
       ];
     },
