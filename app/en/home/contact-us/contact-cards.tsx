@@ -7,12 +7,14 @@ import {
   Github,
 } from "@arcadeai/design-system";
 import { HeartPulse, Mail, Shield, Users } from "lucide-react";
+import { usePostHog } from "posthog-js/react";
 import { useEffect, useRef, useState } from "react";
 import { QuickStartCard } from "../../../_components/quick-start-card";
 
 export function ContactCards() {
   const [isSalesModalOpen, setIsSalesModalOpen] = useState(false);
   const scriptLoadedRef = useRef(false);
+  const posthog = usePostHog();
 
   useEffect(() => {
     // Load HubSpot script once
@@ -24,6 +26,13 @@ export function ContactCards() {
       scriptLoadedRef.current = true;
     }
   }, []);
+
+  const handleContactSalesClick = () => {
+    posthog?.capture("contact_sales_modal_opened", {
+      source: "contact_us_page",
+    });
+    setIsSalesModalOpen(true);
+  };
 
   return (
     <>
@@ -37,7 +46,7 @@ export function ContactCards() {
         <QuickStartCard
           description="Discuss enterprise plans, pricing, and how Arcade can help your organization build better, safer agents."
           icon={Users}
-          onClick={() => setIsSalesModalOpen(true)}
+          onClick={handleContactSalesClick}
           title="Contact Sales"
         />
         <QuickStartCard

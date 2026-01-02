@@ -17,6 +17,7 @@ import {
 import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePostHog } from "posthog-js/react";
 // import { ChallengeSolution } from "./ChallengeSolution";
 import { QuickStartCard } from "../../_components/quick-start-card";
 import { SampleAppCard } from "../../_components/sample-app-card";
@@ -35,6 +36,22 @@ const ANIMATION_DELAYS = {
 } as const;
 
 export function LandingPage() {
+  const posthog = usePostHog();
+
+  const handleGetStartedClick = () => {
+    posthog?.capture("get_started_clicked", {
+      button_location: "landing_page_hero",
+      destination: "/home/quickstart",
+    });
+  };
+
+  const handleBuildToolClick = () => {
+    posthog?.capture("build_tool_clicked", {
+      button_location: "landing_page_hero",
+      destination: "/home/build-tools/create-a-mcp-server",
+    });
+  };
+
   return (
     <div>
       <section className="relative isolate px-6 lg:px-8">
@@ -108,7 +125,7 @@ export function LandingPage() {
               className="h-12 bg-primary px-6 text-white hover:bg-primary/90"
               size="lg"
             >
-              <Link href="/home/quickstart">
+              <Link href="/home/quickstart" onClick={handleGetStartedClick}>
                 <Rocket className="mr-2 h-5 w-5" />
                 Get Started
               </Link>
@@ -119,7 +136,10 @@ export function LandingPage() {
               size="lg"
               variant="outline"
             >
-              <Link href="/home/build-tools/create-a-mcp-server">
+              <Link
+                href="/home/build-tools/create-a-mcp-server"
+                onClick={handleBuildToolClick}
+              >
                 <Wrench className="mr-2 h-5 w-5" />
                 Build a tool
               </Link>

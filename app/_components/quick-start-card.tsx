@@ -7,6 +7,7 @@ import {
 } from "@arcadeai/design-system";
 import { motion } from "motion/react";
 import Link from "next/link";
+import { usePostHog } from "posthog-js/react";
 
 type QuickStartCardProps = {
   icon: React.ElementType;
@@ -25,6 +26,16 @@ export function QuickStartCard({
   onClick,
   code,
 }: QuickStartCardProps) {
+  const posthog = usePostHog();
+
+  const handleCardClick = () => {
+    posthog?.capture("quickstart_card_clicked", {
+      card_title: title,
+      card_href: href || null,
+      has_custom_onclick: !!onClick,
+    });
+  };
+
   const content = (
     <>
       <CardHeader className="flex flex-row items-center gap-3 p-6">
@@ -48,12 +59,17 @@ export function QuickStartCard({
     </>
   );
 
+  const handleClick = () => {
+    handleCardClick();
+    onClick?.();
+  };
+
   let wrapper: React.ReactElement | null = null;
   if (onClick) {
     wrapper = (
       <button
         className="block h-full w-full text-left"
-        onClick={onClick}
+        onClick={handleClick}
         type="button"
       >
         {content}
@@ -61,7 +77,7 @@ export function QuickStartCard({
     );
   } else if (href) {
     wrapper = (
-      <Link className="block h-full" href={href}>
+      <Link className="block h-full" href={href} onClick={handleCardClick}>
         {content}
       </Link>
     );

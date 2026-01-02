@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@arcadeai/design-system";
 import { ChevronDown } from "lucide-react";
+import { usePostHog } from "posthog-js/react";
 import React, { useMemo, useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import {
@@ -27,6 +28,7 @@ const CodeTabSwitcher = ({ tabs }: CodeTabSwitcherProps) => {
   const [activeTab, setActiveTab] = useState(0);
   const [selectedLanguage, setSelectedLanguage] = useState("Python");
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const posthog = usePostHog();
 
   // Effect to monitor theme changes
   React.useEffect(() => {
@@ -104,11 +106,19 @@ const CodeTabSwitcher = ({ tabs }: CodeTabSwitcherProps) => {
     fileName
   );
 
+  const handleExpandExample = () => {
+    setIsExpanded(true);
+    posthog?.capture("code_example_expanded", {
+      tab_count: tabs.length,
+      initial_language: selectedLanguage,
+    });
+  };
+
   if (!isExpanded) {
     return (
       <Button
         className="mt-2"
-        onClick={() => setIsExpanded(true)}
+        onClick={handleExpandExample}
         size="sm"
         variant="outline"
       >
