@@ -59,7 +59,7 @@ const ToolInfo: React.FC<ToolInfoProps> = ({
 
   const resolvedAuthDocsUrl =
     authProviderName && !authProviderDocsUrl
-      ? `/home/auth-providers/${authProviderName.toLowerCase()}`
+      ? `/references/auth-providers/${authProviderName.toLowerCase()}`
       : authProviderDocsUrl;
 
   const toolkit = findToolkitFromPath(pathname);
