@@ -315,12 +315,12 @@ const nextConfig: NextConfig = withLlmsTxt({
         },
         {
           source: "/en/references/mcp",
-          destination: "/en/references/mcp/python/overview",
+          destination: "/en/references/mcp/python",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/en/references/mcp/python",
-          destination: "/en/references/mcp/python/overview",
+          source: "/en/references/mcp/python/overview",
+          destination: "/en/references/mcp/python",
           permanent: true, // 308 redirect for SEO
         },
         {

@@ -15,9 +15,6 @@ const meta: MetaRecord = {
       copyPage: false,
     },
   },
-  "contribute-a-server": {
-    title: "Contribute a Server",
-  },
   productivity: {
     title: "Productivity & Docs",
   },
@@ -47,7 +44,10 @@ const meta: MetaRecord = {
   },
   "-- Submit your Server": {
     type: "separator",
-    title: "Submit your Server",
+    title: "Submit your server",
+  },
+  "contribute-a-server": {
+    title: "Contribute a Server",
   },
 };
 
