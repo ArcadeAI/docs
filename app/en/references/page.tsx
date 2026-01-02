@@ -57,6 +57,26 @@ export default function APIReferencePage() {
             </div>
           </div>
 
+          {/* CLI Cheat Sheet Section */}
+          <div className="rounded-lg border border-gray-200 bg-white p-8 shadow-sm transition-all hover:border-[#ee175e]/30 hover:shadow-md dark:border-gray-800 dark:bg-[rgba(17,17,17,0.8)]">
+            <h3 className="mb-4 font-bold text-2xl text-gray-900 dark:text-white">
+              CLI Cheat Sheet
+            </h3>
+            <p className="mb-6 text-gray-600 leading-relaxed dark:text-gray-300">
+              Quick reference for all Arcade CLI commands. Perfect for printing
+              and keeping handy during development. Includes commands for
+              authentication, deployment, server management, and more.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Button
+                asChild
+                className="bg-primary text-white hover:bg-primary/90"
+              >
+                <Link href="/references/cli-cheat-sheet">View Cheat Sheet</Link>
+              </Button>
+            </div>
+          </div>
+
           {/* Arcade Clients Section */}
           <div className="rounded-lg border border-gray-200 bg-white p-8 shadow-sm transition-all hover:border-[#ee175e]/30 hover:shadow-md dark:border-gray-800 dark:bg-[rgba(17,17,17,0.8)]">
             <h3 className="mb-4 font-bold text-2xl text-gray-900 dark:text-white">
