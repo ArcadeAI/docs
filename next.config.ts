@@ -314,23 +314,13 @@ const nextConfig: NextConfig = withLlmsTxt({
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/en/references",
-          destination: "/en/references",
+          source: "/en/references/mcp",
+          destination: "/en/references/mcp/python/overview",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/en/references/api",
-          destination: "/en/references/api",
-          permanent: true, // 308 redirect for SEO
-        },
-        {
-          source: "/en/references/mcp/python/overview",
-          destination: "/en/references/mcp/python/",
-          permanent: true, // 308 redirect for SEO
-        },
-        {
-          source: "/en/references/mcp/telemetry",
-          destination: "/en/references/mcp/telemetry",
+          source: "/en/references/mcp/python",
+          destination: "/en/references/mcp/python/overview",
           permanent: true, // 308 redirect for SEO
         },
         {
