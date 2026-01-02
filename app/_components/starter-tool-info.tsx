@@ -10,7 +10,7 @@ const StarterToolInfo: React.FC<StarterToolInfoProps> = ({ toolkitName }) => (
     <p>
       {toolkitName} is a{" "}
       <u>
-        <a href="/create-tools/performance/types-of-tools#starter-tools">
+        <a href="/guides/create-tools/improve/types-of-tools#starter-tools">
           Starter MCP Server
         </a>
       </u>
@@ -21,7 +21,7 @@ const StarterToolInfo: React.FC<StarterToolInfoProps> = ({ toolkitName }) => (
     <p>
       Differently from{" "}
       <u>
-        <a href="/create-tools/performance/types-of-tools#optimized-tools">
+        <a href="/guides/create-tools/improve/types-of-tools#optimized-tools">
           Optimized MCP Servers
         </a>
       </u>
@@ -29,7 +29,7 @@ const StarterToolInfo: React.FC<StarterToolInfoProps> = ({ toolkitName }) => (
       is not usually optimized for LLM usage. For this reason, we recommend
       thoroughly evaluating the tools with your Agents or chatbots before using
       it in production.{" "}
-      <a href="/create-tools/performance/types-of-tools">Read more</a> about
+      <a href="/guides/create-tools/improve/types-of-tools">Read more</a> about
       Optimized vs Starter tools.
     </p>
   </Callout>
