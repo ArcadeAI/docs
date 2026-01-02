@@ -18,6 +18,9 @@ export const meta: MetaRecord = {
   mcp: {
     title: "Arcade MCP",
   },
+  "cli-cheat-sheet": {
+    title: "CLI Cheat Sheet",
+  },
 };
 
 export default meta;
