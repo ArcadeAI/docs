@@ -16,6 +16,9 @@ export const meta: MetaRecord = {
   "arcade-cli": {
     title: "Arcade CLI",
   },
+  "cli-cheat-sheet": {
+    title: "CLI Cheat Sheet",
+  },
   "auth-providers": {
     title: "Auth Providers",
   },
