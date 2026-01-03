@@ -1,0 +1,220 @@
+# Brightdata
+
+import ToolInfo from "@/app/_components/tool-info";
+import Badges from "@/app/_components/badges";
+import TabbedCodeBlock from "@/app/_components/tabbed-code-block";
+import TableOfContents from "@/app/_components/table-of-contents";
+import ToolFooter from "@/app/_components/tool-footer";
+import { Callout } from "nextra/components";
+
+<ToolInfo
+  description="Search, Crawl and Scrape any site, at scale, without getting blocked"
+  author="Meirk-Brightdata"
+  authType="API Key"
+  versions={["0.2.0"]}
+/>
+
+<Badges repo="arcadeai/arcade_brightdata" />
+
+The Brightdata MCP Server provides tools for scraping and extracting web content and structured data at scale. Main capabilities include:
+
+- Scrape web pages and return cleaned content in Markdown (ScrapeAsMarkdown).
+- Perform advanced web searches across Google, Bing, or Yandex with customizable parameters (SearchEngine).
+- Extract structured feeds from many site types (Amazon, LinkedIn, Instagram, Facebook, YouTube, Zillow, Booking, ZoomInfo, X, etc.), including products, reviews, profiles, posts, comments, listings, and videos (WebDataFeed). Note: do not fabricate links—use the search tool first if needed.
+
+## Available Tools
+
+<TableOfContents
+  headers={["Tool Name", "Description"]}
+  data={[
+    [
+      "Brightdata.ScrapeAsMarkdown",
+      "    Scrape a webpage and return content in Markdown format using Bright Data.",
+    ],
+    [
+      "Brightdata.SearchEngine",
+      "    Search using Google, Bing, or Yandex with advanced parameters using Bright Data.",
+    ],
+    [
+      "Brightdata.WebDataFeed",
+      "Extract structured data from various websites like LinkedIn, Amazon, Instagram, etc.",
+    ],
+  ]}
+/>
+
+<Callout>
+  If you need to perform an action that's not listed here, you can [get in touch
+  with us](mailto:contact@arcade.dev) to request a new tool, or [create your own
+  tools](/guides/create-tools/tool-basics/build-mcp-server).
+</Callout>
+
+## Brightdata.ScrapeAsMarkdown
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/brightdata/scrape_as_markdown_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/brightdata/scrape_as_markdown_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+    Scrape a webpage and return content in Markdown format using Bright Data.
+
+**Parameters**
+
+- **url** (`string`, required) URL to scrape
+
+**Secrets**
+
+This tool requires the following secrets: `BRIGHTDATA_API_KEY`, `BRIGHTDATA_ZONE` (learn how to [configure secrets](/guides/create-tools/tool-basics/create-tool-secrets))
+
+## Brightdata.SearchEngine
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/brightdata/search_engine_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/brightdata/search_engine_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+    Search using Google, Bing, or Yandex with advanced parameters using Bright Data.
+
+**Parameters**
+
+- **query** (`string`, required) Search query
+- **engine** (`Enum` [SearchEngine](#SearchEngine), optional) Search engine to use
+- **language** (`string`, optional) Two-letter language code
+- **country_code** (`string`, optional) Two-letter country code
+- **search_type** (`Enum` [SearchType](#SearchType), optional) Type of search
+- **start** (`integer`, optional) Results pagination offset
+- **num_results** (`integer`, optional) Number of results to return. The default is 10
+- **location** (`string`, optional) Location for search results
+- **device** (`Enum` [DeviceType](#DeviceType), optional) Device type
+- **return_json** (`boolean`, optional) Return JSON instead of Markdown
+
+**Secrets**
+
+This tool requires the following secrets: `BRIGHTDATA_API_KEY`, `BRIGHTDATA_ZONE` (learn how to [configure secrets](/guides/create-tools/tool-basics/create-tool-secrets))
+
+## Brightdata.WebDataFeed
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/brightdata/web_data_feed_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/brightdata/web_data_feed_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Extract structured data from various websites like LinkedIn, Amazon, Instagram, etc.
+
+**Parameters**
+
+- **source_type** (`Enum` [SourceType](#SourceType), required) Type of data source
+- **url** (`string`, required) URL of the web resource to extract data from
+- **num_of_reviews** (`integer`, optional) Number of reviews to retrieve. Only applicable for facebook_company_reviews. Default is None
+- **timeout** (`integer`, optional) Maximum time in seconds to wait for data retrieval
+- **polling_interval** (`integer`, optional) Time in seconds between polling attempts
+
+**Secrets**
+
+This tool requires the following secrets: `BRIGHTDATA_API_KEY` (learn how to [configure secrets](/guides/create-tools/tool-basics/create-tool-secrets))
+
+## Secrets
+
+This tool requires the following secrets:
+
+- `BRIGHTDATA_API_KEY`
+- `BRIGHTDATA_ZONE`
+
+### Auth
+
+The Arcade Bright Data MCP Server uses [Bright Data](https://brightdata.com/) to access proxy networks and web scraping infrastructure.
+
+**Global Environment Variables:**
+
+- `BRIGHTDATA_API_KEY`: Your Bright Data API key. You can generate this from your [Bright Data dashboard](https://brightdata.com/cp/zones) under Account Settings → API Access.
+
+- `BRIGHTDATA_ZONE`: Your Bright Data zone name (e.g., `residential_proxy1`). This is the zone identifier you created in your Bright Data dashboard under Proxies & Scraping Infrastructure → Zones.
+
+**How to get your credentials:**
+
+1. **API Key**: Navigate to your [Bright Data Control Panel](https://brightdata.com/cp) → Settings → API Access → Generate API Token
+2. **Zone**: Go to Zones section in your dashboard, find your zone name in the format shown in the zone username: `brd-customer-{customer_id}-zone-{zone_name}`
+
+For more details, see the [Bright Data API Documentation](https://docs.brightdata.com/api-reference).
+
+## Reference
+
+Below is a reference of enumerations used by some of the tools in the Brightdata MCP Server:
+
+### SearchEngine
+
+- **GOOGLE**: `google`
+- **BING**: `bing`
+- **YANDEX**: `yandex`
+
+### SearchType
+
+- **IMAGES**: `images`
+- **SHOPPING**: `shopping`
+- **NEWS**: `news`
+- **JOBS**: `jobs`
+
+### DeviceType
+
+- **MOBILE**: `mobile`
+- **IOS**: `ios`
+- **IPHONE**: `iphone`
+- **IPAD**: `ipad`
+- **ANDROID**: `android`
+- **ANDROID_TABLET**: `android_tablet`
+
+### SourceType
+
+- **AMAZON_PRODUCT**: `amazon_product`
+- **AMAZON_PRODUCT_REVIEWS**: `amazon_product_reviews`
+- **LINKEDIN_PERSON_PROFILE**: `linkedin_person_profile`
+- **LINKEDIN_COMPANY_PROFILE**: `linkedin_company_profile`
+- **ZOOMINFO_COMPANY_PROFILE**: `zoominfo_company_profile`
+- **INSTAGRAM_PROFILES**: `instagram_profiles`
+- **INSTAGRAM_POSTS**: `instagram_posts`
+- **INSTAGRAM_REELS**: `instagram_reels`
+- **INSTAGRAM_COMMENTS**: `instagram_comments`
+- **FACEBOOK_POSTS**: `facebook_posts`
+- **FACEBOOK_MARKETPLACE_LISTINGS**: `facebook_marketplace_listings`
+- **FACEBOOK_COMPANY_REVIEWS**: `facebook_company_reviews`
+- **X_POSTS**: `x_posts`
+- **ZILLOW_PROPERTIES_LISTING**: `zillow_properties_listing`
+- **BOOKING_HOTEL_LISTINGS**: `booking_hotel_listings`
+- **YOUTUBE_VIDEOS**: `youtube_videos`
+
+<ToolFooter pipPackageName="arcade_brightdata" />

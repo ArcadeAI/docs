@@ -59,13 +59,16 @@ test(
         return false; // Let the normal validation handle these
       }
 
+      // Since we've updated all the links, we shouldn't need redirects anymore
+      // If we find any links that still need redirects, they should be updated in the source files
+
       // For URLs without locale prefix, check if they exist with /en/ prefix
       if (url.startsWith("/")) {
         // Split URL and anchor fragment
-        const [basePath, fragment] = url.split("#");
-        const localeUrl = `/en${basePath}`;
+        const [path, fragment] = url.split("#");
+        const localeUrl = `/en${path}`;
 
-        if (staticFiles.includes(basePath)) {
+        if (staticFiles.includes(path)) {
           return true;
         }
 
@@ -83,7 +86,7 @@ test(
             process.cwd(),
             "app",
             "en",
-            basePath.slice(1),
+            path.slice(1),
             "page.mdx"
           );
           return validateAnchorFragment(filePath, fragment);

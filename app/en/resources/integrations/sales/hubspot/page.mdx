@@ -1,0 +1,1371 @@
+---
+asIndexPage: true
+---
+
+# Hubspot
+
+import ToolInfo from "@/app/_components/tool-info";
+import Badges from "@/app/_components/badges";
+import TabbedCodeBlock from "@/app/_components/tabbed-code-block";
+import TableOfContents from "@/app/_components/table-of-contents";
+import ToolFooter from "@/app/_components/tool-footer";
+import { Callout } from "nextra/components";
+
+<ToolInfo
+  description="Enable agents to interact with Hubspot"
+  author="Arcade"
+  authType="OAuth2"
+  versions={["3.0.0"]}
+/>
+
+<Badges repo="arcadeai/arcade_hubspot" />
+
+The Hubspot MCP Sever offers pre-built tools for interacting with HubSpot CRM.
+Use these tools to automate CRM updates, log interactions, link records, and query HubSpot data for workflows and agents.
+
+## Available Tools
+
+<TableOfContents
+  headers={["Tool Name", "Description"]}
+  data={[
+    ["Hubspot.GetAllUsers", "Get all users/owners in the HubSpot portal."],
+    [
+      "Hubspot.GetUserById",
+      "Get detailed information about a specific user/owner by their ID.",
+    ],
+    ["Hubspot.WhoAmI", "Get current user information from HubSpot."],
+    [
+      "Hubspot.ToolkitEnviromentGuidance",
+      "Get guidance and considerations for using the HubSpot MCP Sever effectively.",
+    ],
+    [
+      "Hubspot.CreateNoteActivity",
+      "Create a note engagement activity with required owner and associations.",
+    ],
+    [
+      "Hubspot.CreateCallActivity",
+      "Create a call engagement activity with required owner and associations.",
+    ],
+    [
+      "Hubspot.CreateEmailActivity",
+      "Create a logged email engagement activity with essential fields including email headers.",
+    ],
+    [
+      "Hubspot.CreateMeetingActivity",
+      "Create a meeting with essential fields including separate date and time.",
+    ],
+    [
+      "Hubspot.CreateCommunicationActivity",
+      "Create a communication activity for logging communications that are not done via email, call, or meeting.",
+    ],
+    [
+      "Hubspot.UpdateNoteActivity",
+      "Update a note activity by ID or list matching notes when searching by keywords.",
+    ],
+    [
+      "Hubspot.UpdateCallActivity",
+      "Update a call activity by ID or list matching calls when searching by keywords.",
+    ],
+    [
+      "Hubspot.UpdateEmailActivity",
+      "Update an email activity by ID or list matching emails when searching by keywords.",
+    ],
+    [
+      "Hubspot.UpdateMeetingActivity",
+      "Update a meeting activity by ID or list matching meetings when searching by keywords.",
+    ],
+    [
+      "Hubspot.UpdateCommunicationActivity",
+      "Update a communication activity by ID or list matching communications when searching by keywords.",
+    ],
+    [
+      "Hubspot.AssociateActivityToDeal",
+      "Associate a single activity object to a deal using HubSpot standard association type.",
+    ],
+    [
+      "Hubspot.GetContactDataByKeywords",
+      "Retrieve contact data with associated companies, deals, calls, emails,",
+    ],
+    ["Hubspot.CreateContact", "Create a contact associated with a company."],
+    [
+      "Hubspot.UpdateContact",
+      "Update a contact by ID or list matching contacts when searching by keywords.",
+    ],
+    [
+      "Hubspot.ListContacts",
+      "List contacts with optional filtering by company ID or deal ID, with pagination support.",
+    ],
+    [
+      "Hubspot.GetDealDataByKeywords",
+      "Retrieve deal data with associated contacts, companies, calls, emails,",
+    ],
+    ["Hubspot.CreateDeal", "Create a new deal in HubSpot."],
+    [
+      "Hubspot.UpdateDeal",
+      "Update a deal by ID or list matching deals when searching by keywords.",
+    ],
+    [
+      "Hubspot.UpdateDealCloseDate",
+      "Update the expected close date of an existing deal in HubSpot.",
+    ],
+    [
+      "Hubspot.UpdateDealStage",
+      "Updates a deal's stage, validating against the current pipeline if provided",
+    ],
+    ["Hubspot.GetDealById", "Retrieve a specific deal by its ID from HubSpot."],
+    [
+      "Hubspot.AssociateContactToDeal",
+      "Associate a contact with an existing deal in HubSpot.",
+    ],
+    [
+      "Hubspot.ListDeals",
+      "List deals with optional filtering by contact ID or company ID, with pagination support.",
+    ],
+    [
+      "Hubspot.GetNoteDataByKeywords",
+      "Search for note activities by search terms in NOTE object properties.",
+    ],
+    [
+      "Hubspot.GetCallDataByKeywords",
+      "Search for call activities by search terms in CALL object properties.",
+    ],
+    [
+      "Hubspot.GetEmailDataByKeywords",
+      "Search for email activities by search terms in EMAIL object properties.",
+    ],
+    [
+      "Hubspot.GetMeetingDataByKeywords",
+      "Search for meeting activities by search terms in MEETING object properties.",
+    ],
+    [
+      "Hubspot.GetTaskDataByKeywords",
+      "Search for task activities by search terms in TASK object properties.",
+    ],
+    [
+      "Hubspot.GetCommunicationDataByKeywords",
+      "Search for communication activities by search terms in COMMUNICATION object properties.",
+    ],
+    [
+      "Hubspot.GetCompanyDataByKeywords",
+      "Retrieve company data with associated contacts, deals, calls, emails,",
+    ],
+    ["Hubspot.CreateCompany", "Create a new company in HubSpot."],
+    [
+      "Hubspot.UpdateCompany",
+      "Update a company by ID or list matching companies when searching by keywords.",
+    ],
+    ["Hubspot.ListCompanies", "List companies with pagination support."],
+    [
+      "Hubspot.GetAvailableIndustryTypes",
+      "Get all available industry types for HubSpot companies.",
+    ],
+    [
+      "Hubspot.GetDealPipelines",
+      "List HubSpot deal pipelines with their stages, optionally filtered by a search string.",
+    ],
+    [
+      "Hubspot.GetDealPipelineStages",
+      "List stages for a specific HubSpot deal pipeline.",
+    ],
+  ]}
+/>
+
+<Callout>
+  If you need to perform an action that's not listed here, you can [get in touch
+  with us](mailto:contact@arcade.dev) to request a new tool, or [create your own
+  tools](/guides/create-tools/tool-basics/build-mcp-server).
+</Callout>
+
+## Hubspot.GetAllUsers
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/get_all_users_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/get_all_users_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get all users/owners in the HubSpot portal.
+
+**Parameters**
+
+This tool does not take any parameters.
+
+## Hubspot.GetUserById
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/get_user_by_id_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/get_user_by_id_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get detailed information about a specific user/owner by their ID.
+
+**Parameters**
+
+- **owner_id** (`integer`, required) The HubSpot owner/user ID to retrieve
+
+## Hubspot.WhoAmI
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/who_am_i_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/who_am_i_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get current user information from HubSpot.
+
+**Parameters**
+
+This tool does not take any parameters.
+
+## Hubspot.ToolkitEnviromentGuidance
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/MCP Sever_enviroment_guidance_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/MCP Sever_enviroment_guidance_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get guidance and considerations for using the HubSpot MCP Sever effectively.
+
+**Parameters**
+
+This tool does not take any parameters.
+
+## Hubspot.CreateNoteActivity
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/create_note_activity_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/create_note_activity_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Create a note engagement activity with required owner and associations.
+
+**Parameters**
+
+- **body** (`string`, required) The note content/body.
+- **when_occurred** (`string`, required) When the note was created (ISO date format: YYYY-MM-DDTHH:MM:SS).
+- **associate_to_contact_id** (`integer`, optional) Contact ID to associate this note with.
+- **associate_to_company_id** (`integer`, optional) Company ID to associate this note with.
+- **associate_to_deal_id** (`integer`, optional) Deal ID to associate this note with.
+
+## Hubspot.CreateCallActivity
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/create_call_activity_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/create_call_activity_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Create a call engagement activity with required owner and associations.
+
+**Parameters**
+
+- **title** (`string`, required) Short title for the call.
+- **when_occurred** (`string`, required) When the call occurred (ISO date format: YYYY-MM-DDTHH:MM:SS).
+- **direction** (`Enum` [HubspotCallDirection](/resources/integrations/sales/hubspot/reference#HubspotCallDirection), optional) Call direction (INBOUND or OUTBOUND).
+- **summary** (`string`, optional) Short summary/notes of the call.
+- **duration** (`integer`, optional) Call duration in seconds.
+- **to_number** (`string`, optional) Phone number called to.
+- **from_number** (`string`, optional) Phone number called from.
+- **associate_to_contact_id** (`integer`, optional) Contact ID to associate this call with.
+- **associate_to_company_id** (`integer`, optional) Company ID to associate this call with.
+- **associate_to_deal_id** (`integer`, optional) Deal ID to associate this call with.
+
+## Hubspot.CreateEmailActivity
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/create_email_activity_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/create_email_activity_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Create a logged email engagement activity with essential fields including email headers.
+
+**Parameters**
+
+- **subject** (`string`, required) Email subject.
+- **when_occurred** (`string`, required) When the email occurred (ISO date format: YYYY-MM-DDTHH:MM:SS).
+- **from_email** (`string`, required) Sender email address.
+- **to_email** (`string`, required) Primary recipient email address.
+- **body_text** (`string`, optional) Email body in plain text.
+- **body_html** (`string`, optional) Email body in HTML format.
+- **from_first_name** (`string`, optional) Sender first name.
+- **from_last_name** (`string`, optional) Sender last name.
+- **to_first_name** (`string`, optional) Primary recipient first name.
+- **to_last_name** (`string`, optional) Primary recipient last name.
+- **cc_emails** (`array[string]`, optional) CC recipient email addresses.
+- **bcc_emails** (`array[string]`, optional) BCC recipient email addresses.
+- **direction** (`Enum` [HubspotEmailDirection](/resources/integrations/sales/hubspot/reference#HubspotEmailDirection), optional) Direction the email was sent (EMAIL, INCOMING_EMAIL, FORWARDED_EMAIL).
+- **status** (`Enum` [HubspotEmailStatus](/resources/integrations/sales/hubspot/reference#HubspotEmailStatus), optional) Email status indicating the state of the email.
+- **associate_to_contact_id** (`integer`, optional) Contact ID to associate this email with.
+- **associate_to_company_id** (`integer`, optional) Company ID to associate this email with.
+- **associate_to_deal_id** (`integer`, optional) Deal ID to associate this email with.
+
+## Hubspot.CreateMeetingActivity
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/create_meeting_activity_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/create_meeting_activity_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Create a meeting with essential fields including separate date and time.
+
+**Parameters**
+
+- **title** (`string`, required) Meeting title.
+- **start_date** (`string`, required) Start date (YYYY-MM-DD format).
+- **start_time** (`string`, required) Start time (HH:MM or HH:MM:SS format).
+- **duration** (`string`, optional) Meeting duration in HH:MM format (e.g., 1:30 for 1 hour 30 minutes).
+- **location** (`string`, optional) Meeting location.
+- **outcome** (`Enum` [HubspotMeetingOutcome](/resources/integrations/sales/hubspot/reference#HubspotMeetingOutcome), optional) Meeting outcome.
+- **associate_to_contact_id** (`integer`, optional) Contact ID to associate this meeting with.
+- **associate_to_company_id** (`integer`, optional) Company ID to associate this meeting with.
+- **associate_to_deal_id** (`integer`, optional) Deal ID to associate this meeting with.
+
+## Hubspot.CreateCommunicationActivity
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/create_communication_activity_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/create_communication_activity_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Create a communication activity for logging communications that are not done via
+email, call, or meeting.
+
+This includes SMS, WhatsApp, LinkedIn messages, physical mail, and custom channel
+conversations.
+Must be associated with at least one of: contact, company, or deal.
+The communication will be assigned to the current user.
+
+**Parameters**
+
+- **channel** (`Enum` [HubspotCommunicationChannel](/resources/integrations/sales/hubspot/reference#HubspotCommunicationChannel), required) Communication channel type.
+- **when_occurred** (`string`, required) When the communication occurred (ISO date format: YYYY-MM-DDTHH:MM:SS).
+- **body_text** (`string`, optional) Full message content.
+- **associate_to_contact_id** (`integer`, optional) Contact ID to associate this communication with.
+- **associate_to_company_id** (`integer`, optional) Company ID to associate this communication with.
+- **associate_to_deal_id** (`integer`, optional) Deal ID to associate this communication with.
+
+## Hubspot.AssociateActivityToDeal
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/associate_activity_to_deal_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/associate_activity_to_deal_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Associate a single activity object to a deal using HubSpot standard association type.
+
+**Parameters**
+
+- **activity_type** (`Enum` [HubspotActivityType](/resources/integrations/sales/hubspot/reference#HubspotActivityType), required) Engagement activity type.
+- **activity_id** (`integer`, required) The activity object ID
+- **deal_id** (`integer`, required) The deal ID to associate to
+
+## Hubspot.UpdateNoteActivity
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/update_note_activity_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/update_note_activity_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Update a note activity directly by ID or list matching notes when searching by keywords.
+
+When using keywords, the tool will return a list of matching notes. Review the matches and call the tool again with the specific note_id to continue with the update.
+
+**Parameters**
+
+- **note_id** (`integer`, optional) The note ID to update. Provide either note_id or keywords, not both.
+- **keywords** (`string`, optional) Keywords to search for the note content. Provide when note_id is not known.
+- **body** (`string`, optional) Updated note content.
+- **when_occurred** (`string`, optional) Updated creation timestamp (ISO format: YYYY-MM-DDTHH:MM:SS).
+- **matches_limit** (`integer`, optional) Maximum number of notes to return when searching by keywords. Defaults to 5. Max is 20.
+
+## Hubspot.UpdateCallActivity
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/update_call_activity_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/update_call_activity_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Update a call activity directly by ID or list matching calls when searching by keywords.
+
+When using keywords, the tool will return a list of matching calls. Review the matches and call the tool again with the specific call_id to continue with the update.
+
+**Parameters**
+
+- **call_id** (`integer`, optional) The call activity ID to update. Provide either call_id or keywords, not both.
+- **keywords** (`string`, optional) Keywords to search for call summaries or titles. Provide when call_id is not known.
+- **title** (`string`, optional) Updated call title.
+- **direction** (`Enum` [HubspotCallDirection](/resources/integrations/sales/hubspot/reference#HubspotCallDirection), optional) Updated call direction.
+- **summary** (`string`, optional) Updated call summary.
+- **duration** (`integer`, optional) Updated call duration in seconds.
+- **to_number** (`string`, optional) Updated number called to.
+- **from_number** (`string`, optional) Updated number called from.
+- **when_occurred** (`string`, optional) Updated call timestamp (ISO format: YYYY-MM-DDTHH:MM:SS).
+- **matches_limit** (`integer`, optional) Maximum number of calls to return when searching by keywords. Defaults to 5. Max is 20.
+
+## Hubspot.UpdateEmailActivity
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/update_email_activity_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/update_email_activity_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Update an email activity directly by ID or list matching emails when searching by keywords.
+
+When using keywords, the tool will return a list of matching emails. Review the matches and call the tool again with the specific email_id to continue with the update.
+
+**Parameters**
+
+- **email_id** (`integer`, optional) The email activity ID to update. Provide either email_id or keywords, not both.
+- **keywords** (`string`, optional) Keywords to search for email subjects or body text. Provide when email_id is not known.
+- **subject** (`string`, optional) Updated email subject.
+- **direction** (`Enum` [HubspotEmailDirection](/resources/integrations/sales/hubspot/reference#HubspotEmailDirection), optional) Updated email direction.
+- **status** (`Enum` [HubspotEmailStatus](/resources/integrations/sales/hubspot/reference#HubspotEmailStatus), optional) Updated email status.
+- **body_text** (`string`, optional) Updated plain-text body.
+- **body_html** (`string`, optional) Updated HTML body.
+- **when_occurred** (`string`, optional) Updated email timestamp (ISO format: YYYY-MM-DDTHH:MM:SS).
+- **matches_limit** (`integer`, optional) Maximum number of emails to return when searching by keywords. Defaults to 5. Max is 20.
+
+## Hubspot.UpdateMeetingActivity
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/update_meeting_activity_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/update_meeting_activity_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Update a meeting activity directly by ID or list matching meetings when searching by keywords.
+
+When using keywords, the tool will return a list of matching meetings. Review the matches and call the tool again with the specific meeting_id to continue with the update.
+
+**Parameters**
+
+- **meeting_id** (`integer`, optional) The meeting activity ID to update. Provide either meeting_id or keywords, not both.
+- **keywords** (`string`, optional) Keywords to search for meeting titles. Provide when meeting_id is not known.
+- **title** (`string`, optional) Updated meeting title.
+- **start_date** (`string`, optional) Updated start date (YYYY-MM-DD).
+- **start_time** (`string`, optional) Updated start time (HH:MM or HH:MM:SS).
+- **duration** (`string`, optional) Updated duration in HH:MM format.
+- **location** (`string`, optional) Updated meeting location.
+- **outcome** (`Enum` [HubspotMeetingOutcome](/resources/integrations/sales/hubspot/reference#HubspotMeetingOutcome), optional) Updated meeting outcome.
+- **matches_limit** (`integer`, optional) Maximum number of meetings to return when searching by keywords. Defaults to 5. Max is 20.
+
+## Hubspot.UpdateCommunicationActivity
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/update_communication_activity_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/update_communication_activity_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Update a communication activity by ID or list matching communications when searching by keywords.
+
+When using keywords, the tool will return a list of matching communications. Review the matches and call the tool again with the specific communication_id to continue with the update.
+
+**Parameters**
+
+- **communication_id** (`integer`, optional) The communication activity ID to update. Provide either communication_id or keywords, not both.
+- **keywords** (`string`, optional) Keywords to search for communication body text. Provide when communication_id is not known.
+- **channel** (`Enum` [HubspotCommunicationChannel](/resources/integrations/sales/hubspot/reference#HubspotCommunicationChannel), optional) Updated communication channel.
+- **body_text** (`string`, optional) Updated message body.
+- **when_occurred** (`string`, optional) Updated timestamp (ISO format: YYYY-MM-DDTHH:MM:SS).
+- **matches_limit** (`integer`, optional) Maximum number of communications to return when searching by keywords. Defaults to 5. Max is 20.
+
+## Hubspot.GetContactDataByKeywords
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/get_contact_data_by_keywords_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/get_contact_data_by_keywords_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve contact data with associated companies, deals, calls, emails,
+
+**Parameters**
+
+- **keywords** (`string`, required) The keywords to search for contacts. It will match against the contact's first and last name, email addresses, phone numbers, and company name.
+- **limit** (`integer`, optional) The maximum number of contacts to return. Defaults to 10. Max is 100.
+- **next_page_token** (`string`, optional) The token to get the next page of results. Defaults to None (returns first page of results)
+
+## Hubspot.CreateContact
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/create_contact_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/create_contact_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Create a contact associated with a company.
+
+**Parameters**
+
+- **company_id** (`integer`, required) The ID of the company to create the contact for.
+- **first_name** (`string`, required) The first name of the contact.
+- **last_name** (`string`, optional) The last name of the contact.
+- **email** (`string`, optional) The email address of the contact.
+- **phone** (`string`, optional) The phone number of the contact.
+- **mobile_phone** (`string`, optional) The mobile phone number of the contact.
+- **job_title** (`string`, optional) The job title of the contact.
+
+## Hubspot.UpdateContact
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/update_contact_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/update_contact_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Update a contact directly by ID or list matching contacts when searching by keywords.
+
+When using keywords, the tool will return a list of matching contacts. Review the matches and call the tool again with the specific contact_id to continue with the update.
+
+**Parameters**
+
+- **contact_id** (`integer`, optional) The ID of the contact to update. Provide either contact_id or keywords, not both.
+- **keywords** (`string`, optional) Keywords to search for the contact (name, email, phone). Provide when contact_id is not known.
+- **first_name** (`string`, optional) The first name of the contact.
+- **last_name** (`string`, optional) The last name of the contact.
+- **email** (`string`, optional) The email address of the contact.
+- **phone** (`string`, optional) The phone number of the contact.
+- **mobile_phone** (`string`, optional) The mobile phone number of the contact.
+- **job_title** (`string`, optional) The job title of the contact.
+- **matches_limit** (`integer`, optional) The maximum number of contacts to return when searching by keywords. Defaults to 5. Max is 20.
+
+## Hubspot.ListContacts
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/list_contacts_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/list_contacts_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+List contacts with optional filtering by company ID or deal ID, with pagination support.
+
+**Parameters**
+
+- **limit** (`integer`, optional) The maximum number of contacts to return. Defaults to 10. Max is 50.
+- **company_id** (`integer`, optional) Filter contacts by company ID. Defaults to None (no filtering).
+- **deal_id** (`integer`, optional) Filter contacts by deal ID. Defaults to None (no filtering).
+- **sort_order** (`Enum` [HubspotSortOrder](/resources/integrations/sales/hubspot/reference#HubspotSortOrder), optional) Sort order for results. Defaults to LATEST_MODIFIED.
+- **next_page_token** (`string`, optional) The token to get the next page of results. Defaults to None (returns first page of results)
+
+## Hubspot.GetDealDataByKeywords
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/get_deal_data_by_keywords_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/get_deal_data_by_keywords_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve deal data with associated contacts, companies, calls, emails,
+
+**Parameters**
+
+- **keywords** (`string`, required) The keywords to search for deals. It will match against the deal name and description.
+- **limit** (`integer`, optional) The maximum number of deals to return. Defaults to 10. Max is 10.
+- **next_page_token** (`string`, optional) The token to get the next page of results. Defaults to None (returns first page of results)
+
+## Hubspot.CreateDeal
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/create_deal_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/create_deal_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Create a new deal in HubSpot.
+
+**Parameters**
+
+- **deal_name** (`string`, required) The deal name (required)
+- **deal_amount** (`number`, optional) The deal amount/value
+- **deal_stage** (`string`, optional) The deal stage
+- **deal_type** (`Enum` [HubspotDealType](/resources/integrations/sales/hubspot/reference#HubspotDealType), optional) The deal type.
+- **expected_close_date** (`string`, optional) Expected close date in YYYY-MM-DD format
+- **pipeline_id** (`string`, optional) Pipeline id. Use 'default' for default pipeline or pass a pipeline id (integer)
+- **deal_owner** (`string`, optional) The deal owner user ID
+- **priority_level** (`Enum` [HubspotDealPriority](/resources/integrations/sales/hubspot/reference#HubspotDealPriority), optional) Priority level.
+- **deal_description** (`string`, optional) The deal description
+
+## Hubspot.UpdateDeal
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/update_deal_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/update_deal_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Update a deal directly by ID or list matching deals when searching by keywords.
+
+When using keywords, the tool will return a list of matching deals. Review the matches and call the tool again with the specific deal_id to continue with the update.
+
+**Parameters**
+
+- **deal_id** (`integer`, optional) The ID of the deal to update. Provide either deal_id or keywords, not both.
+- **keywords** (`string`, optional) Keywords to search for the deal (name, description). Provide when deal_id is not known.
+- **deal_name** (`string`, optional) The deal name.
+- **deal_amount** (`number`, optional) The deal amount/value.
+- **deal_stage** (`string`, optional) The deal stage ID.
+- **deal_type** (`string`, optional) The deal type. Accepts enum values as strings (e.g., 'newbusiness', 'existingbusiness').
+- **expected_close_date** (`string`, optional) Expected close date in YYYY-MM-DD format.
+- **deal_owner** (`string`, optional) The deal owner user ID.
+- **priority_level** (`string`, optional) Priority level. Accepts enum values as strings (e.g., 'low', 'medium', 'high').
+- **deal_description** (`string`, optional) The deal description.
+- **matches_limit** (`integer`, optional) The maximum number of deals to return when searching by keywords. Defaults to 5. Max is 20.
+
+## Hubspot.UpdateDealCloseDate
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/update_deal_close_date_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/update_deal_close_date_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Update the expected close date of an existing deal in HubSpot.
+
+**Parameters**
+
+- **deal_id** (`integer`, required) The ID of the deal to update
+- **expected_close_date** (`string`, required) New expected close date in YYYY-MM-DD format
+
+## Hubspot.UpdateDealStage
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/update_deal_stage_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/update_deal_stage_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Updates a deal's stage, validating against the current pipeline if provided
+
+**Parameters**
+
+- **deal_id** (`integer`, required) The ID of the deal to update
+- **deal_stage** (`string`, required) New deal stage ID
+- **current_pipeline_id** (`string`, optional) Current pipeline id for this deal, if already known (skips fetching the deal)
+- **allow_pipeline_change** (`boolean`, optional) If true, allows changing the deal's pipeline when the stage belongs to another pipeline
+
+## Hubspot.GetDealById
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/get_deal_by_id_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/get_deal_by_id_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a specific deal by its ID from HubSpot.
+
+**Parameters**
+
+- **deal_id** (`integer`, required) The ID of the deal to retrieve
+
+## Hubspot.AssociateContactToDeal
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/associate_contact_to_deal_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/associate_contact_to_deal_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Associate a contact with an existing deal in HubSpot.
+
+**Parameters**
+
+- **deal_id** (`integer`, required) The ID of the deal to associate the contact with
+- **contact_id** (`integer`, required) The ID of the contact to associate with the deal
+
+## Hubspot.ListDeals
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/list_deals_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/list_deals_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+List deals with optional filtering by contact ID or company ID, with pagination support.
+
+**Parameters**
+
+- **limit** (`integer`, optional) The maximum number of deals to return. Defaults to 10. Max is 50.
+- **contact_id** (`integer`, optional) Filter deals by contact ID. Defaults to None (no filtering).
+- **company_id** (`integer`, optional) Filter deals by company ID. Defaults to None (no filtering).
+- **sort_order** (`Enum` [HubspotSortOrder](/resources/integrations/sales/hubspot/reference#HubspotSortOrder), optional) Sort order for results. Defaults to LATEST_MODIFIED.
+- **next_page_token** (`string`, optional) The token to get the next page of results. Defaults to None (returns first page of results)
+
+## Hubspot.GetNoteDataByKeywords
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/get_note_data_by_keywords_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/get_note_data_by_keywords_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Search for note activities by search terms in NOTE object properties.
+
+**Parameters**
+
+- **search_terms** (`string`, required) Search phrase or terms to find in NOTE properties.
+- **limit** (`integer`, optional) The maximum number of notes to return. Defaults to 10. Max is 50.
+- **truncate_big_strings** (`boolean`, optional) Whether to truncate string properties longer than 100 characters. Defaults to False.
+- **next_page_token** (`string`, optional) The token to get the next page of results. Defaults to None (returns first page of results)
+
+## Hubspot.GetCallDataByKeywords
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/get_call_data_by_keywords_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/get_call_data_by_keywords_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Search for call activities by search terms in CALL object properties.
+
+**Parameters**
+
+- **search_terms** (`string`, required) Search phrase or terms to find in CALL properties.
+- **limit** (`integer`, optional) The maximum number of calls to return. Defaults to 10. Max is 50.
+- **truncate_big_strings** (`boolean`, optional) Whether to truncate string properties longer than 100 characters. Defaults to False.
+- **next_page_token** (`string`, optional) The token to get the next page of results. Defaults to None (returns first page of results)
+
+## Hubspot.GetEmailDataByKeywords
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/get_email_data_by_keywords_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/get_email_data_by_keywords_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Search for email activities by search terms in EMAIL object properties.
+
+**Parameters**
+
+- **search_terms** (`string`, required) Search phrase or terms to find in EMAIL properties.
+- **limit** (`integer`, optional) The maximum number of emails to return. Defaults to 10. Max is 50.
+- **truncate_big_strings** (`boolean`, optional) Whether to truncate string properties longer than 100 characters. Defaults to False.
+- **next_page_token** (`string`, optional) The token to get the next page of results. Defaults to None (returns first page of results)
+
+## Hubspot.GetMeetingDataByKeywords
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/get_meeting_data_by_keywords_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/get_meeting_data_by_keywords_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Search for meeting activities by search terms in MEETING object properties.
+
+**Parameters**
+
+- **search_terms** (`string`, required) Search phrase or terms to find in MEETING properties.
+- **limit** (`integer`, optional) The maximum number of meetings to return. Defaults to 10. Max is 50.
+- **truncate_big_strings** (`boolean`, optional) Whether to truncate string properties longer than 100 characters. Defaults to False.
+- **next_page_token** (`string`, optional) The token to get the next page of results. Defaults to None (returns first page of results)
+
+## Hubspot.GetTaskDataByKeywords
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/get_task_data_by_keywords_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/get_task_data_by_keywords_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Search for task activities by search terms in TASK object properties.
+
+**Parameters**
+
+- **search_terms** (`string`, required) Search phrase or terms to find in TASK properties.
+- **limit** (`integer`, optional) The maximum number of tasks to return. Defaults to 10. Max is 50.
+- **truncate_big_strings** (`boolean`, optional) Whether to truncate string properties longer than 100 characters. Defaults to False.
+- **next_page_token** (`string`, optional) The token to get the next page of results. Defaults to None (returns first page of results)
+
+## Hubspot.GetCommunicationDataByKeywords
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/get_communication_data_by_keywords_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/get_communication_data_by_keywords_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Search for communication activities by search terms in COMMUNICATION object properties.
+
+**Parameters**
+
+- **search_terms** (`string`, required) Search phrase or terms to find in COMMUNICATION properties.
+- **limit** (`integer`, optional) The maximum number of communications to return. Defaults to 10. Max is 50.
+- **truncate_big_strings** (`boolean`, optional) Whether to truncate string properties longer than 100 characters. Defaults to False.
+- **next_page_token** (`string`, optional) The token to get the next page of results. Defaults to None (returns first page of results)
+
+## Hubspot.GetCompanyDataByKeywords
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/get_company_data_by_keywords_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/get_company_data_by_keywords_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve company data with associated contacts, deals, calls, emails,
+
+**Parameters**
+
+- **keywords** (`string`, required) The keywords to search for companies. It will match against the company name, phone, and website.
+- **limit** (`integer`, optional) The maximum number of companies to return. Defaults to 10. Max is 10.
+- **next_page_token** (`string`, optional) The token to get the next page of results. Defaults to None (returns first page of results)
+
+## Hubspot.CreateCompany
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/create_company_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/create_company_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Create a new company in HubSpot.
+
+**Parameters**
+
+- **company_name** (`string`, required) The company name (required)
+- **web_domain** (`string`, optional) The company web domain (e.g., example.com)
+- **industry_type** (`string`, optional) The company industry type (case-insensitive).
+- **company_city** (`string`, optional) The company city location
+- **company_state** (`string`, optional) The company state or province
+- **company_country** (`string`, optional) The company country
+- **phone_number** (`string`, optional) The company main phone number
+- **website_url** (`string`, optional) The company website URL
+
+## Hubspot.UpdateCompany
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/update_company_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/update_company_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Update a company directly by ID or list matching companies when searching by keywords.
+
+When using keywords, the tool will return a list of matching companies. Review the matches and call the tool again with the specific company_id to continue with the update.
+
+**Parameters**
+
+- **company_id** (`integer`, optional) The ID of the company to update. Provide either company_id or keywords, not both.
+- **keywords** (`string`, optional) Keywords to search for the company (name, domain, website). Provide when company_id is not known.
+- **company_name** (`string`, optional) The company name.
+- **web_domain** (`string`, optional) The company web domain (e.g., example.com).
+- **industry_type** (`string`, optional) The company industry type (case-insensitive).
+- **company_city** (`string`, optional) The company city location.
+- **company_state** (`string`, optional) The company state or province.
+- **company_country** (`string`, optional) The company country.
+- **phone_number** (`string`, optional) The company main phone number.
+- **website_url** (`string`, optional) The company website URL.
+- **matches_limit** (`integer`, optional) The maximum number of companies to return when searching by keywords. Defaults to 5. Max is 20.
+
+## Hubspot.ListCompanies
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/list_companies_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/list_companies_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+List companies with pagination support.
+
+**Parameters**
+
+- **limit** (`integer`, optional) The maximum number of companies to return. Defaults to 10. Max is 50.
+- **sort_order** (`Enum` [HubspotSortOrder](/resources/integrations/sales/hubspot/reference#HubspotSortOrder), optional) Sort order for results. Defaults to LATEST_MODIFIED.
+- **next_page_token** (`string`, optional) The token to get the next page of results. Defaults to None (returns first page of results)
+
+## Hubspot.GetAvailableIndustryTypes
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/get_available_industry_types_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/get_available_industry_types_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get all available industry types for HubSpot companies.
+
+**Parameters**
+
+This tool does not take any parameters.
+
+## Hubspot.GetDealPipelines
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/get_deal_pipelines_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/get_deal_pipelines_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+List HubSpot deal pipelines with their stages, optionally filtered by a search string.
+
+**Parameters**
+
+- **search** (`string`, optional) Optional case-insensitive search string to filter pipelines by id or label
+
+## Hubspot.GetDealPipelineStages
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/hubspot/get_deal_pipeline_stages_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/hubspot/get_deal_pipeline_stages_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+List stages for a specific HubSpot deal pipeline.
+
+**Parameters**
+
+- **pipeline_id** (`string`, required) The pipeline id (e.g., 'default' or a pipeline GUID)
+
+## Auth
+
+The Arcade Cloud Platform offers a default [Hubspot auth provider](/references/auth-providers/hubspot). If you use it, there's nothing to configure. Your users will see `Arcade` as the name of the application requesting permission.
+
+<ToolFooter pipPackageName="arcade_hubspot" />

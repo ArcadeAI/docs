@@ -3,7 +3,7 @@
 import { AlertTriangle, Info, Lightbulb } from "lucide-react";
 import type React from "react";
 
-interface CheatSheetSectionProps {
+type CheatSheetSectionProps = {
   title: string;
   icon: string;
   color:
@@ -16,7 +16,7 @@ interface CheatSheetSectionProps {
     | "pink"
     | "yellow";
   children: React.ReactNode;
-}
+};
 
 const colorClasses = {
   red: "bg-red-500/10 border-red-500/20 dark:bg-red-500/10 dark:border-red-400/30",

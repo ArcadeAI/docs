@@ -1,0 +1,845 @@
+# Figma
+
+import ToolInfo from "@/app/_components/tool-info";
+import Badges from "@/app/_components/badges";
+import TabbedCodeBlock from "@/app/_components/tabbed-code-block";
+import TableOfContents from "@/app/_components/table-of-contents";
+import ToolFooter from "@/app/_components/tool-footer";
+import { Callout } from "nextra/components";
+
+<ToolInfo
+  description="Enable agents to interact with Figma"
+  author="Arcade"
+  authType="OAuth2"
+  versions={["1.0.0"]}
+/>
+
+<Badges repo="arcadeai/arcade_figma" />
+
+The Figma MCP Server provides a comprehensive set of tools for interacting with Figma's design files, components, and collaboration features. Built on the [Figma REST API](https://developers.figma.com/docs/rest-api/), this MCP Server enables you to:
+
+- **Files**: Access Figma file structures, pages, specific nodes, and export designs as images
+- **Components**: Browse published components, component sets (variants), and styles from files or team libraries
+- **Comments**: Read and add comments to Figma files, reply to existing discussions
+- **Navigation**: Access team projects and files (requires private OAuth app)
+- **User Context**: Get authenticated user profile information
+
+## Available tools
+
+<TableOfContents
+  headers={["Tool Name", "Description"]}
+  data={[
+    [
+      "Figma.WhoAmI",
+      "Get the authenticated user's profile",
+    ],
+    [
+      "Figma.GetFile",
+      "Get a Figma file's structure including pages and metadata",
+    ],
+    [
+      "Figma.GetPages",
+      "Get a list of pages in a Figma file",
+    ],
+    [
+      "Figma.GetFileNodes",
+      "Get specific nodes from a Figma file by their IDs",
+    ],
+    [
+      "Figma.ExportImage",
+      "Export Figma frames/nodes as images",
+    ],
+    [
+      "Figma.GetComponents",
+      "Get published components from a file or team library",
+    ],
+    [
+      "Figma.GetComponent",
+      "Get metadata for a specific component by its key",
+    ],
+    [
+      "Figma.GetStyles",
+      "Get published styles from a file or team library",
+    ],
+    [
+      "Figma.GetStyle",
+      "Get metadata for a specific style by its key",
+    ],
+    [
+      "Figma.GetComponentSets",
+      "Get published component sets from a file or team library",
+    ],
+    [
+      "Figma.GetComponentSet",
+      "Get metadata for a specific component set by its key",
+    ],
+    [
+      "Figma.GetComments",
+      "Get comments on a Figma file",
+    ],
+    [
+      "Figma.AddCommentOrReply",
+      "Add a comment to a Figma file or reply to an existing comment",
+    ],
+    [
+      "Figma.GetTeamProjects",
+      "Get all projects in a Figma team",
+    ],
+    [
+      "Figma.GetProjectFiles",
+      "Get all files in a Figma project",
+    ],
+  ]}
+/>
+
+<Callout>
+  If you need to perform an action that's not listed here, you can [get in touch
+  with us](mailto:contact@arcade.dev) to request a new tool, or [create your own
+  tools](/guides/create-tools/tool-basics/build-mcp-server).
+</Callout>
+
+<Callout type="info" title="MCP behavior hints">
+Each tool includes behavior hints as defined by the [Model Context Protocol](https://modelcontextprotocol.io/specification/2025-06-18/server/tools#tool) specification. These hints are not yet supported, but we've added them to help you understand the side effects of each tool:
+
+- `readOnlyHint` — The tool only reads data, no modifications
+- `openWorldHint` — The tool interacts with external systems (Figma's API)
+- `destructiveHint` — The tool may cause irreversible changes (e.g., deletion)
+- `idempotentHint` — Repeated calls with the same arguments have no additional effect
+</Callout>
+
+<Callout type="warning" title="Private OAuth app required for navigation tools">
+The `projects:read` scope is **ONLY available in private Figma OAuth apps**. This scope is required for:
+
+- `GetTeamProjects` — Get all projects in a Figma team
+- `GetProjectFiles` — Get all files in a Figma project
+
+If you need these navigation tools, you must create a private OAuth app in your Figma organization. All other tools work with public OAuth apps.
+
+[Learn more about Figma OAuth scopes](https://developers.figma.com/docs/rest-api/scopes/)
+</Callout>
+
+---
+
+## User context tools
+
+### Figma.WhoAmI
+
+Get the authenticated user's profile.
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/figma/who_am_i_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/figma/who_am_i_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Returns the current user's information including their name, email, and profile image.
+
+**Parameters**
+
+This tool takes no parameters.
+
+<Callout type="info" title="Required scopes">
+- `current_user:read` — Read access to the authenticated user's profile
+
+[View Figma Users API documentation](https://developers.figma.com/docs/rest-api/users/)
+</Callout>
+
+<Callout type="info" title="MCP behavior hints">
+- `readOnlyHint: true` - Only reads user profile, no modifications
+- `openWorldHint: true` - Interacts with Figma's external API
+</Callout>
+
+<Callout type="info" title="API calls">
+Makes 1 API call.
+</Callout>
+
+---
+
+## File tools
+
+### Figma.GetFile
+
+Get a Figma file's structure including pages and metadata.
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/figma/get_file_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/figma/get_file_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Returns the file name, version, thumbnail, and list of pages. Use depth parameter to limit how much of the tree is returned for large files.
+
+**Parameters**
+
+- **file_key** (`string`, **required**) File key. Can be found in Figma URL: https://www.figma.com/file/{FILE_KEY}/...
+- **depth** (`integer`, _optional_) How deep to traverse the node tree. Default traverses full depth. Use 1 for pages only, 2 for pages and top-level frames. Default is None.
+
+<Callout type="info" title="Required scopes">
+- `file_content:read` — Read access to file structure and content
+
+[View Figma Files API documentation](https://developers.figma.com/docs/rest-api/files/)
+</Callout>
+
+<Callout type="info" title="MCP behavior hints">
+- `readOnlyHint: true` - Only reads file data, no modifications
+- `openWorldHint: true` - Interacts with Figma's external API
+</Callout>
+
+<Callout type="info" title="API calls">
+Makes 1 API call.
+</Callout>
+
+---
+
+### Figma.GetPages
+
+Get a list of pages in a Figma file.
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/figma/get_pages_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/figma/get_pages_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Returns page IDs and names without the full node tree.
+
+**Parameters**
+
+- **file_key** (`string`, **required**) File key. Can be found in Figma URL: https://www.figma.com/file/{FILE_KEY}/...
+
+<Callout type="info" title="Required scopes">
+- `file_content:read` — Read access to file structure and content
+
+[View Figma Files API documentation](https://developers.figma.com/docs/rest-api/files/)
+</Callout>
+
+<Callout type="info" title="MCP behavior hints">
+- `readOnlyHint: true` - Only reads file data, no modifications
+- `openWorldHint: true` - Interacts with Figma's external API
+</Callout>
+
+<Callout type="info" title="API calls">
+Makes 1 API call.
+</Callout>
+
+---
+
+### Figma.GetFileNodes
+
+Get specific nodes from a Figma file by their IDs.
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/figma/get_file_nodes_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/figma/get_file_nodes_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Returns the requested nodes with their properties and optionally their children. Use this to fetch specific parts of a file without loading the entire document.
+
+**Parameters**
+
+- **file_key** (`string`, **required**) File key. Can be found in Figma URL: https://www.figma.com/file/{FILE_KEY}/...
+- **node_ids** (`array`, **required**) List of node IDs to retrieve. Node IDs can be found in Figma URL after ?node-id= parameter (URL encoded, e.g., '0:1' or '1-2').
+- **depth** (`integer`, _optional_) How deep to traverse from each node. Use 1 for direct children only. Default returns all descendants. Default is None.
+
+<Callout type="info" title="Required scopes">
+- `file_content:read` — Read access to file structure and content
+
+[View Figma Files API documentation](https://developers.figma.com/docs/rest-api/files/)
+</Callout>
+
+<Callout type="info" title="MCP behavior hints">
+- `readOnlyHint: true` - Only reads file data, no modifications
+- `openWorldHint: true` - Interacts with Figma's external API
+</Callout>
+
+<Callout type="info" title="API calls">
+Makes 1 API call.
+</Callout>
+
+---
+
+### Figma.ExportImage
+
+Export Figma frames/nodes as images.
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/figma/export_image_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/figma/export_image_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Returns temporary URLs to download images. URLs valid for approximately 14 days.
+
+**Parameters**
+
+- **file_key** (`string`, **required**) File key. Can be found in Figma URL: https://www.figma.com/file/{FILE_KEY}/...
+- **node_ids** (`array`, **required**) List of node IDs to export as images.
+- **image_format** (`enum`, _optional_) Image format. Options: `png`, `jpg`, `svg`, `pdf`. Default is `png`.
+- **scale** (`number`, _optional_) Scale factor (0.01 to 4.0). Only applies to PNG/JPG. Default is None (1.0).
+
+<Callout type="info" title="Required scopes">
+- `file_content:read` — Read access to file content for image export
+
+[View Figma Files API documentation](https://developers.figma.com/docs/rest-api/files/#get-image-fills)
+</Callout>
+
+<Callout type="info" title="MCP behavior hints">
+- `readOnlyHint: true` - Only exports, no modifications
+- `openWorldHint: true` - Interacts with Figma's external API
+</Callout>
+
+<Callout type="info" title="API calls">
+Makes 1 API call.
+</Callout>
+
+---
+
+## Component tools
+
+### Figma.GetComponents
+
+Get published components from a file or team library.
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/figma/get_components_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/figma/get_components_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+For file: Returns all published components in the file.
+For team: Returns paginated list of components across team library.
+
+**Parameters**
+
+- **source** (`enum`, **required**) Source type. Options: `file`, `team`.
+- **source_id** (`string`, **required**) File key (if source='file') or team ID (if source='team').
+- **page_size** (`integer`, _optional_) Number of items per page (team mode only, 1-50). Default is 10.
+- **after_cursor** (`integer`, _optional_) Cursor for next page (team mode only). Default is None.
+
+<Callout type="info" title="Required scopes">
+- `library_content:read` — Read access to published library content (file mode)
+- `team_library_content:read` — Read access to team library content (team mode)
+
+[View Figma Component Types API documentation](https://developers.figma.com/docs/rest-api/component-types/)
+</Callout>
+
+<Callout type="info" title="MCP behavior hints">
+- `readOnlyHint: true` - Only reads component data, no modifications
+- `openWorldHint: true` - Interacts with Figma's external API
+</Callout>
+
+<Callout type="info" title="API calls">
+Makes 1 API call.
+</Callout>
+
+---
+
+### Figma.GetComponent
+
+Get metadata for a specific component by its key.
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/figma/get_component_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/figma/get_component_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+**Parameters**
+
+- **component_key** (`string`, **required**) The unique component key.
+
+<Callout type="info" title="Required scopes">
+- `library_assets:read` — Read access to individual library assets
+
+[View Figma Component Types API documentation](https://developers.figma.com/docs/rest-api/component-types/)
+</Callout>
+
+<Callout type="info" title="MCP behavior hints">
+- `readOnlyHint: true` - Only reads component data, no modifications
+- `openWorldHint: true` - Interacts with Figma's external API
+</Callout>
+
+<Callout type="info" title="API calls">
+Makes 1 API call.
+</Callout>
+
+---
+
+### Figma.GetStyles
+
+Get published styles from a file or team library.
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/figma/get_styles_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/figma/get_styles_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+For file: Returns all published styles in the file.
+For team: Returns paginated list of styles across team library.
+
+**Parameters**
+
+- **source** (`enum`, **required**) Source type. Options: `file`, `team`.
+- **source_id** (`string`, **required**) File key (if source='file') or team ID (if source='team').
+- **page_size** (`integer`, _optional_) Number of items per page (team mode only, 1-50). Default is 10.
+- **after_cursor** (`integer`, _optional_) Cursor for next page (team mode only). Default is None.
+
+<Callout type="info" title="Required scopes">
+- `library_content:read` — Read access to published library content (file mode)
+- `team_library_content:read` — Read access to team library content (team mode)
+
+[View Figma Component Types API documentation](https://developers.figma.com/docs/rest-api/component-types/)
+</Callout>
+
+<Callout type="info" title="MCP behavior hints">
+- `readOnlyHint: true` - Only reads style data, no modifications
+- `openWorldHint: true` - Interacts with Figma's external API
+</Callout>
+
+<Callout type="info" title="API calls">
+Makes 1 API call.
+</Callout>
+
+---
+
+### Figma.GetStyle
+
+Get metadata for a specific style by its key.
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/figma/get_style_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/figma/get_style_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+**Parameters**
+
+- **style_key** (`string`, **required**) The unique style key.
+
+<Callout type="info" title="Required scopes">
+- `library_assets:read` — Read access to individual library assets
+
+[View Figma Component Types API documentation](https://developers.figma.com/docs/rest-api/component-types/)
+</Callout>
+
+<Callout type="info" title="MCP behavior hints">
+- `readOnlyHint: true` - Only reads style data, no modifications
+- `openWorldHint: true` - Interacts with Figma's external API
+</Callout>
+
+<Callout type="info" title="API calls">
+Makes 1 API call.
+</Callout>
+
+---
+
+### Figma.GetComponentSets
+
+Get published component sets (groups of component variants) from a file or team library.
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/figma/get_component_sets_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/figma/get_component_sets_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Component sets are groups of related component variants, like a Button with states: default, hover, pressed, disabled.
+
+For file: Returns all published component sets in the file.
+For team: Returns paginated list of component sets across team library.
+
+**Parameters**
+
+- **source** (`enum`, **required**) Source type. Options: `file`, `team`.
+- **source_id** (`string`, **required**) File key (if source='file') or team ID (if source='team').
+- **page_size** (`integer`, _optional_) Number of items per page (team mode only, 1-50). Default is 10.
+- **after_cursor** (`integer`, _optional_) Cursor for next page (team mode only). Default is None.
+
+<Callout type="info" title="Required scopes">
+- `library_content:read` — Read access to published library content (file mode)
+- `team_library_content:read` — Read access to team library content (team mode)
+
+[View Figma Component Types API documentation](https://developers.figma.com/docs/rest-api/component-types/)
+</Callout>
+
+<Callout type="info" title="MCP behavior hints">
+- `readOnlyHint: true` - Only reads component set data, no modifications
+- `openWorldHint: true` - Interacts with Figma's external API
+</Callout>
+
+<Callout type="info" title="API calls">
+Makes 1 API call.
+</Callout>
+
+---
+
+### Figma.GetComponentSet
+
+Get metadata for a specific component set by its key.
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/figma/get_component_set_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/figma/get_component_set_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+A component set is a group of related component variants.
+
+**Parameters**
+
+- **component_set_key** (`string`, **required**) The unique component set key.
+
+<Callout type="info" title="Required scopes">
+- `library_assets:read` — Read access to individual library assets
+
+[View Figma Component Types API documentation](https://developers.figma.com/docs/rest-api/component-types/)
+</Callout>
+
+<Callout type="info" title="MCP behavior hints">
+- `readOnlyHint: true` - Only reads component set data, no modifications
+- `openWorldHint: true` - Interacts with Figma's external API
+</Callout>
+
+<Callout type="info" title="API calls">
+Makes 1 API call.
+</Callout>
+
+---
+
+## Comment tools
+
+### Figma.GetComments
+
+Get comments on a Figma file.
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/figma/get_comments_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/figma/get_comments_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Returns comments with pagination support.
+
+**Parameters**
+
+- **file_key** (`string`, **required**) File key. Can be found in Figma URL: https://www.figma.com/file/{FILE_KEY}/...
+- **offset** (`integer`, _optional_) Starting offset for pagination. Default is 0.
+- **max_items** (`integer`, _optional_) Maximum number of comments to return (1-50). Default is 10.
+
+<Callout type="info" title="Required scopes">
+- `file_comments:read` — Read access to file comments
+
+[View Figma Comments API documentation](https://developers.figma.com/docs/rest-api/comments/)
+</Callout>
+
+<Callout type="info" title="MCP behavior hints">
+- `readOnlyHint: true` - Only reads comment data, no modifications
+- `openWorldHint: true` - Interacts with Figma's external API
+</Callout>
+
+<Callout type="info" title="API calls">
+Makes 1 API call.
+</Callout>
+
+---
+
+### Figma.AddCommentOrReply
+
+Add a comment to a Figma file or reply to an existing comment.
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/figma/add_comment_or_reply_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/figma/add_comment_or_reply_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+If parent_comment_id is provided, creates a reply to that comment.
+Otherwise creates a new comment (optionally attached to a node).
+
+**Parameters**
+
+- **file_key** (`string`, **required**) File key. Can be found in Figma URL: https://www.figma.com/file/{FILE_KEY}/...
+- **message** (`string`, **required**) The comment or reply text.
+- **parent_comment_id** (`string`, _optional_) Parent comment ID to reply to. If provided, creates a reply. Default is None.
+- **node_id** (`string`, _optional_) Node ID to attach the comment to. Ignored for replies. Default is None.
+- **x** (`number`, _optional_) X position offset on the node. Only used with node_id. Default is None.
+- **y** (`number`, _optional_) Y position offset on the node. Only used with node_id. Default is None.
+
+<Callout type="info" title="Required scopes">
+- `file_comments:write` — Write access to create comments and replies
+
+[View Figma Comments API documentation](https://developers.figma.com/docs/rest-api/comments/)
+</Callout>
+
+<Callout type="info" title="MCP behavior hints">
+- `readOnlyHint: false` - Creates new comment or reply
+- `destructiveHint: false` - Additive operation, creates new content
+- `idempotentHint: false` - Each call creates a new comment/reply
+- `openWorldHint: true` - Interacts with Figma's external API
+</Callout>
+
+<Callout type="info" title="API calls">
+Makes 1 API call.
+</Callout>
+
+---
+
+## Navigation tools
+
+### Figma.GetTeamProjects
+
+Get all projects in a Figma team.
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/figma/get_team_projects_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/figma/get_team_projects_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Projects are containers within a team that group related design files.
+
+**Parameters**
+
+- **team_id** (`string`, **required**) Team ID. Can be found in Figma URL: https://www.figma.com/files/team/{TEAM_ID}/...
+
+<Callout type="info" title="Required scopes">
+- `projects:read` — Read access to team projects
+
+[View Figma Projects API documentation](https://developers.figma.com/docs/rest-api/projects/)
+</Callout>
+
+<Callout type="info" title="MCP behavior hints">
+- `readOnlyHint: true` - Only reads project data, no modifications
+- `openWorldHint: true` - Interacts with Figma's external API
+</Callout>
+
+<Callout type="warning" title="Private OAuth app required">
+This tool requires the `projects:read` scope, which is **ONLY available for private Figma OAuth apps**. Public OAuth apps cannot use this scope.
+
+Learn how to configure a private OAuth app in the [Figma auth provider documentation](/references/auth-providers/figma).
+</Callout>
+
+<Callout type="info" title="API calls">
+Makes 1 API call.
+</Callout>
+
+---
+
+### Figma.GetProjectFiles
+
+Get all files in a Figma project.
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the tool directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/figma/get_project_files_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/figma/get_project_files_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Files are Figma design documents containing pages and frames.
+
+**Parameters**
+
+- **project_id** (`string`, **required**) Project ID. Can be obtained from get_team_projects.
+
+<Callout type="info" title="Required scopes">
+- `projects:read` — Read access to project files
+
+[View Figma Projects API documentation](https://developers.figma.com/docs/rest-api/projects/)
+</Callout>
+
+<Callout type="info" title="MCP behavior hints">
+- `readOnlyHint: true` - Only reads file data, no modifications
+- `openWorldHint: true` - Interacts with Figma's external API
+</Callout>
+
+<Callout type="warning" title="Private OAuth app required">
+This tool requires the `projects:read` scope, which is **ONLY available for private Figma OAuth apps**. Public OAuth apps cannot use this scope.
+
+Learn how to configure a private OAuth app in the [Figma auth provider documentation](/references/auth-providers/figma).
+</Callout>
+
+<Callout type="info" title="API calls">
+Makes 1 API call.
+</Callout>
+
+---
+
+## Auth
+
+The Arcade Figma MCP Server uses the [Figma auth provider](/references/auth-providers/figma) to connect to users' Figma accounts. Please refer to the [Figma auth provider](/references/auth-providers/figma) documentation to learn how to configure auth.
+
+<Callout type="warning" title="Private OAuth app requirement">
+The `projects:read` scope is **ONLY available in private Figma OAuth apps**. This scope is required for the navigation tools (`GetTeamProjects` and `GetProjectFiles`). 
+
+If you need these navigation tools, you must create a private OAuth app through your Figma organization settings. All other tools work with public OAuth apps.
+</Callout>
+
+<ToolFooter pipPackageName="arcade_figma" />
+

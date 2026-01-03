@@ -1,16 +1,11 @@
 import type { MetaRecord } from "nextra";
 
 export const meta: MetaRecord = {
-  "*": {
-    theme: {
-      breadcrumb: false,
-      layout: "full",
-      toc: false,
-      copyPage: false,
-    },
-  },
   index: {
-    title: "Reference Index",
+    title: "Overview",
+  },
+  changelog: {
+    title: "Changelog",
   },
   api: {
     title: "API",
@@ -18,8 +13,14 @@ export const meta: MetaRecord = {
   mcp: {
     title: "Arcade MCP",
   },
+  "arcade-cli": {
+    title: "Arcade CLI",
+  },
   "cli-cheat-sheet": {
     title: "CLI Cheat Sheet",
+  },
+  "auth-providers": {
+    title: "Auth Providers",
   },
 };
 

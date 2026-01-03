@@ -37,7 +37,7 @@ export default function NotFound() {
   const dict = use(getDictionaryClient(currentLocale));
 
   return (
-    <div className="dark flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="flex items-center justify-center py-16">
       <div className="w-full max-w-xl">
         <Card className="gap-4 border-2 border-stone-900 py-6 shadow-2xl shadow-black/10 dark:shadow-black/25">
           <CardHeader className="text-center">

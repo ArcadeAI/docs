@@ -1,0 +1,1313 @@
+# LumaApi
+
+import StarterToolInfo from "@/app/_components/starter-tool-info";
+import ToolInfo from "@/app/_components/tool-info";
+import Badges from "@/app/_components/badges";
+import TabbedCodeBlock from "@/app/_components/tabbed-code-block";
+import TableOfContents from "@/app/_components/table-of-contents";
+import ToolFooter from "@/app/_components/tool-footer";
+import { Callout } from "nextra/components";
+
+<ToolInfo
+  description="Tools that enable LLMs to interact directly with the Luma API."
+  author="Arcade"
+  authType="API Key"
+  versions={["0.1.1"]}
+/>
+
+<Badges repo="arcadeai/arcade_luma_api" />
+
+<StarterToolInfo toolkitName="LumaApi" />
+
+The LumaApi MCP Server offers a comprehensive suite of tools for managing events and calendars within the Luma platform. Users can efficiently perform actions such as:
+
+- Create, update, and manage events, including scheduling and ticketing.
+- Retrieve detailed information about events, guests, and users.
+- Manage guest statuses and send invitations via email and SMS.
+- Handle coupons and membership tiers for events and calendars.
+- Import contacts and apply tags to organize attendees effectively.
+
+This server is designed to streamline event management and enhance user engagement through its robust API capabilities.
+
+## Authentication
+
+The Arcade Luma API MCP Server requires one environment variable to authenticate with the [Luma API](https://docs.luma.com/reference/getting-started-with-your-api):
+
+- `LUMA_API_KEY`
+
+**How to obtain your credentials:**
+
+1. Navigate to your [Luma dashboard](https://lu.ma/)
+2. Click on your profile icon and go to **Settings**
+3. Navigate to **API** or **Developer Settings**
+4. Click **Generate API Key** or **Create New Key**
+5. Copy the API key and store it securely
+
+<Callout type="warning">
+  The Luma API requires a **Luma Plus** subscription. Be careful with your API
+  key since it provides full access to your Luma account.
+</Callout>
+
+For more details, see the [Luma API Getting Started guide](https://docs.luma.com/reference/getting-started-with-your-api).
+
+## Available Tools
+
+<TableOfContents
+  headers={["Tool Name", "Description"]}
+  data={[
+    [
+      "LumaApi.GetEventAdminInfo",
+      "Retrieve admin information for an accessible event.",
+    ],
+    [
+      "LumaApi.ListLumaCalendarEvents",
+      "Retrieve all events managed by your Luma Calendar.",
+    ],
+    ["LumaApi.GetEventGuest", "Retrieve event guest details using their ID."],
+    [
+      "LumaApi.GetEventGuests",
+      "Retrieve registered or invited guests for an event.",
+    ],
+    [
+      "LumaApi.GetUserInfo",
+      "Retrieve the user's personal information and profile details.",
+    ],
+    [
+      "LumaApi.ListPersonTags",
+      "Retrieve a list of tags associated with persons.",
+    ],
+    ["LumaApi.LumaEntityLookup", "Lookup an entity on Luma by its slug."],
+    [
+      "LumaApi.CheckEventExistence",
+      "Determine if an event exists on the calendar.",
+    ],
+    ["LumaApi.ListPeople", "Retrieve a list of people from the calendar."],
+    ["LumaApi.ListEventCoupons", "Retrieve all coupons created for an event."],
+    ["LumaApi.ListCalendarCoupons", "Retrieve all coupons for a calendar."],
+    [
+      "LumaApi.ListEventTicketTypes",
+      "Retrieve a list of all ticket types for an event.",
+    ],
+    ["LumaApi.GetTicketTypeById", "Retrieve event ticket type details by ID."],
+    [
+      "LumaApi.ListMembershipTiers",
+      "Retrieve available membership tiers for the calendar.",
+    ],
+    ["LumaApi.CreateEvent", "Creates and schedules a new event."],
+    ["LumaApi.UpdateEvent", "Update event details using Luma's API."],
+    ["LumaApi.UpdateGuestStatus", "Updates the status of an event guest."],
+    [
+      "LumaApi.SendGuestEventInvite",
+      "Send event invitations to guests via email and SMS.",
+    ],
+    [
+      "LumaApi.AddEventGuests",
+      "Add guests to an event with default or custom tickets.",
+    ],
+    ["LumaApi.AddEventHost", "Add a host to an event in Luma."],
+    [
+      "LumaApi.CreateEventCoupon",
+      "Create a non-editable coupon for event registration.",
+    ],
+    ["LumaApi.ModifyCoupon", "Update a coupon's details in the system."],
+    [
+      "LumaApi.GenerateEventCoupon",
+      "Create a coupon for calendar-managed events.",
+    ],
+    ["LumaApi.UpdateCoupon", "Updates a coupon in the calendar."],
+    [
+      "LumaApi.ImportPeopleToCalendar",
+      "Import people to your calendar from contact lists.",
+    ],
+    [
+      "LumaApi.CreatePersonTag",
+      "Create a new person tag in the calendar system.",
+    ],
+    [
+      "LumaApi.UpdatePersonTag",
+      "Updates a tag for a person in the calendar system.",
+    ],
+    ["LumaApi.DeletePersonTag", "Deletes a person tag from the calendar."],
+    [
+      "LumaApi.ApplyTagToCalendarMembers",
+      "Apply a tag to existing calendar members.",
+    ],
+    [
+      "LumaApi.RemoveTagFromCalendarMembers",
+      "Remove a tag from existing calendar members.",
+    ],
+    [
+      "LumaApi.AddEventToLumaCalendar",
+      "Add an existing event to the Luma calendar.",
+    ],
+    ["LumaApi.GenerateUploadUrl", "Generates a URL for image upload."],
+    ["LumaApi.CreateEventTicketType", "Create a new ticket type for an event."],
+    [
+      "LumaApi.UpdateTicketTypeConfiguration",
+      "Update an existing ticket type configuration.",
+    ],
+    [
+      "LumaApi.SoftDeleteTicketType",
+      "Soft delete a ticket type if certain conditions are met.",
+    ],
+    [
+      "LumaApi.AddUserToMembershipTier",
+      "Add a user to a specified free membership tier.",
+    ],
+    [
+      "LumaApi.UpdateMembershipStatus",
+      "Update a member's membership status and handle payments.",
+    ],
+  ]}
+/>
+
+<Callout>
+  If you need to perform an action that's not listed here, you can [get in touch
+  with us](mailto:contact@arcade.dev) to request a new tool, or [create your own
+  tools](/guides/create-tools/tool-basics/build-mcp-server).
+</Callout>
+
+## LumaApi.GetEventAdminInfo
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/luma_api/get_event_admin_info_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/luma_api/get_event_admin_info_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve admin information for an accessible event.
+
+**Parameters**
+
+- **event_api_id** (`string`, optional) Event API ID, starting with 'evt-', used to identify the event.
+- **event_id** (`string`, optional) The unique identifier for the event, usually starts with 'evt-'.
+
+**Secrets**
+
+This tool requires the following secrets: `LUMA_API_KEY`. You can obtain this from your [Luma dashboard](https://lu.ma/). See the [Authentication section](#authentication) above for detailed instructions and the [Luma API documentation](https://docs.luma.com/reference/getting-started-with-your-api) for more information.
+
+## LumaApi.ListLumaCalendarEvents
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/luma_api/list_luma_calendar_events_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/luma_api/list_luma_calendar_events_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve all events managed by your Luma Calendar.
+
+**Parameters**
+
+- **event_sort_direction** (`string`, optional) Defines the order of events. Use 'asc' or 'desc' for ascending or descending. Options 'asc nulls last' and 'desc nulls last' place nulls at the end.
+- **filter_events_before** (`string`, optional) Filter events to show only those happening before this ISO 8601 Datetime. Example: 2022-10-19T03:27:13.673Z
+- **number_of_items_to_return** (`number`, optional) The number of events to return. The server enforces a maximum limit.
+- **pagination_cursor** (`string`, optional) Use the `next_cursor` value from a previous request to continue listing events.
+- **sort_by_column** (`string`, optional) Specify the column to sort events by. For now, 'start_at' is the available option.
+- **start_date_after** (`string`, optional) Specify the starting datetime to filter events after this timestamp in ISO 8601 format (e.g., 2022-10-19T03:27:13.673Z).
+
+**Secrets**
+
+This tool requires the following secrets: `LUMA_API_KEY`. You can obtain this from your [Luma dashboard](https://lu.ma/). See the [Authentication section](#authentication) above for detailed instructions and the [Luma API documentation](https://docs.luma.com/reference/getting-started-with-your-api) for more information.
+
+## LumaApi.GetEventGuest
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/luma_api/get_event_guest_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/luma_api/get_event_guest_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve event guest details using their ID.
+
+**Parameters**
+
+- **event_api_id** (`string`, optional) Provide the unique API ID for the event to retrieve guest details.
+- **event_identifier** (`string`, optional) The ID of the event, typically starting with 'evt-'. Used to identify the specific event.
+- **guest_api_id** (`string`, optional) The unique API ID of the guest, distinct from the user ID. This is used for identifying the guest within the system.
+- **guest_email** (`string`, optional) The email address of the event guest to look up.
+- **guest_identifier** (`string`, optional) Identifier for looking up the guest, such as guest ID (gst-), ticket key, guest key (g-), or the user's email.
+- **proxy_key** (`string`, optional) Value of the `pk` parameter from the check-in QR code used to identify the guest.
+
+**Secrets**
+
+This tool requires the following secrets: `LUMA_API_KEY`. You can obtain this from your [Luma dashboard](https://lu.ma/). See the [Authentication section](#authentication) above for detailed instructions and the [Luma API documentation](https://docs.luma.com/reference/getting-started-with-your-api) for more information.
+
+## LumaApi.GetEventGuests
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/luma_api/get_event_guests_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/luma_api/get_event_guests_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve registered or invited guests for an event.
+
+**Parameters**
+
+- **event_api_id** (`string`, optional) The unique ID of the event, typically starting with 'evt-'.
+- **event_id** (`string`, optional) The unique identifier for the event, usually starts with 'evt-'.
+- **guest_approval_status** (`string`, optional) Filter guests by their approval status. Options: 'approved', 'session', 'pending_approval', 'invited', 'declined', 'waitlist'.
+- **guest_sort_column** (`string`, optional) The column to sort the guest list by. Options are 'name', 'email', 'created_at', 'registered_at', or 'checked_in_at'.
+- **items_to_return** (`number`, optional) Specify the number of guest entries to return. The server enforces a maximum limit.
+- **next_cursor_value** (`string`, optional) Value of `next_cursor` from a previous request to paginate through results.
+- **sort_order** (`string`, optional) Specify the order for sorting the list of guests. Acceptable values are 'asc', 'desc', 'asc nulls last', or 'desc nulls last'.
+
+**Secrets**
+
+This tool requires the following secrets: `LUMA_API_KEY`. You can obtain this from your [Luma dashboard](https://lu.ma/). See the [Authentication section](#authentication) above for detailed instructions and the [Luma API documentation](https://docs.luma.com/reference/getting-started-with-your-api) for more information.
+
+## LumaApi.GetUserInfo
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/luma_api/get_user_info_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/luma_api/get_user_info_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve the user's personal information and profile details.
+
+**Parameters**
+
+This tool does not take any parameters.
+**Secrets**
+
+This tool requires the following secrets: `LUMA_API_KEY`. You can obtain this from your [Luma dashboard](https://lu.ma/). See the [Authentication section](#authentication) above for detailed instructions and the [Luma API documentation](https://docs.luma.com/reference/getting-started-with-your-api) for more information.
+
+## LumaApi.ListPersonTags
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/luma_api/list_person_tags_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/luma_api/list_person_tags_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of tags associated with persons.
+
+**Parameters**
+
+- **items_to_return** (`number`, optional) Specify the number of tags to return. The server will impose a maximum limit.
+- **pagination_cursor** (`string`, optional) Use the `next_cursor` value from a previous response to paginate results.
+- **sort_by_column** (`string`, optional) Specifies the column to sort the tags by. Options are 'name', 'color', or 'created_at'.
+- **sorting_direction** (`string`, optional) Specifies the order direction of the person tags. Choose from 'asc', 'desc', 'asc nulls last', or 'desc nulls last'.
+
+**Secrets**
+
+This tool requires the following secrets: `LUMA_API_KEY`. You can obtain this from your [Luma dashboard](https://lu.ma/). See the [Authentication section](#authentication) above for detailed instructions and the [Luma API documentation](https://docs.luma.com/reference/getting-started-with-your-api) for more information.
+
+## LumaApi.LumaEntityLookup
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/luma_api/luma_entity_lookup_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/luma_api/luma_entity_lookup_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Lookup an entity on Luma by its slug.
+
+**Parameters**
+
+- **entity_slug** (`string`, required) The unique string identifier for the entity to be looked up in Luma.
+
+**Secrets**
+
+This tool requires the following secrets: `LUMA_API_KEY`. You can obtain this from your [Luma dashboard](https://lu.ma/). See the [Authentication section](#authentication) above for detailed instructions and the [Luma API documentation](https://docs.luma.com/reference/getting-started-with-your-api) for more information.
+
+## LumaApi.CheckEventExistence
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/luma_api/check_event_existence_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/luma_api/check_event_existence_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Determine if an event exists on the calendar.
+
+**Parameters**
+
+- **calendar_platform_type** (`string`, optional) Specifies the source platform of the event, either 'external' or 'luma'.
+- **event_details_url** (`string`, optional) The URL of the event page to check if it exists in the calendar.
+- **event_identifier** (`string`, optional) A unique string identifier for the event to check its existence on the calendar.
+
+**Secrets**
+
+This tool requires the following secrets: `LUMA_API_KEY`. You can obtain this from your [Luma dashboard](https://lu.ma/). See the [Authentication section](#authentication) above for detailed instructions and the [Luma API documentation](https://docs.luma.com/reference/getting-started-with-your-api) for more information.
+
+## LumaApi.ListPeople
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/luma_api/list_people_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/luma_api/list_people_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of people from the calendar.
+
+**Parameters**
+
+- **calendar_membership_status** (`string`, optional) Specify the membership status for filtering calendar members. This is only relevant for calendar memberships.
+- **calendar_membership_tier_api_id** (`string`, optional) A unique identifier for the calendar membership tier to filter people.
+- **calendar_tier_id** (`string`, optional) Unique identifier for the calendar membership tier to filter people.
+- **filter_by_tags** (`string`, optional) Comma-separated list of tag names or IDs to filter people with specified tags.
+- **items_to_return** (`number`, optional) Specify the number of items to return in the response. The server may enforce a maximum limit.
+- **pagination_next_cursor** (`string`, optional) Provide the `next_cursor` value from a previous request to continue pagination.
+- **search_query** (`string`, optional) Search for people using names or emails.
+- **sort_by_column** (`string`, optional) Sort the list of people by a specified column: created_at, event_checked_in_count, event_approved_count, name, or revenue_usd_cents.
+- **sort_order** (`string`, optional) Specifies the order for sorting results: 'asc', 'desc', 'asc nulls last', or 'desc nulls last'.
+
+**Secrets**
+
+This tool requires the following secrets: `LUMA_API_KEY`. You can obtain this from your [Luma dashboard](https://lu.ma/). See the [Authentication section](#authentication) above for detailed instructions and the [Luma API documentation](https://docs.luma.com/reference/getting-started-with-your-api) for more information.
+
+## LumaApi.ListEventCoupons
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/luma_api/list_event_coupons_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/luma_api/list_event_coupons_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve all coupons created for an event.
+
+**Parameters**
+
+- **event_api_id** (`string`, optional) The unique identifier for the event, typically starting with 'evt-'. Required to list coupons for the specified event.
+- **event_identifier** (`string`, optional) Event ID, typically starting with 'evt-'. It identifies the specific event for which to list coupons.
+- **item_return_limit** (`number`, optional) Specifies the number of items to return in the response, up to the server's maximum allowed.
+- **pagination_cursor** (`string`, optional) Value of `next_cursor` from a previous request to continue pagination.
+
+**Secrets**
+
+This tool requires the following secrets: `LUMA_API_KEY`. You can obtain this from your [Luma dashboard](https://lu.ma/). See the [Authentication section](#authentication) above for detailed instructions and the [Luma API documentation](https://docs.luma.com/reference/getting-started-with-your-api) for more information.
+
+## LumaApi.ListCalendarCoupons
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/luma_api/list_calendar_coupons_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/luma_api/list_calendar_coupons_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve all coupons for a calendar.
+
+**Parameters**
+
+- **items_to_return** (`number`, optional) The number of coupon items to retrieve. The server enforces a maximum limit.
+- **pagination_cursor** (`string`, optional) Provide the `next_cursor` value obtained from a prior request to paginate through results.
+
+**Secrets**
+
+This tool requires the following secrets: `LUMA_API_KEY`. You can obtain this from your [Luma dashboard](https://lu.ma/). See the [Authentication section](#authentication) above for detailed instructions and the [Luma API documentation](https://docs.luma.com/reference/getting-started-with-your-api) for more information.
+
+## LumaApi.ListEventTicketTypes
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/luma_api/list_event_ticket_types_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/luma_api/list_event_ticket_types_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve a list of all ticket types for an event.
+
+**Parameters**
+
+- **event_id** (`string`, optional) The unique identifier for an event, typically starting with 'evt-'.
+- **event_identifier** (`string`, optional) The unique identifier for the event, usually starting with evt-.
+- **include_hidden_ticket_types** (`string`, optional) Set to true to include hidden ticket types in the response list.
+
+**Secrets**
+
+This tool requires the following secrets: `LUMA_API_KEY`. You can obtain this from your [Luma dashboard](https://lu.ma/). See the [Authentication section](#authentication) above for detailed instructions and the [Luma API documentation](https://docs.luma.com/reference/getting-started-with-your-api) for more information.
+
+## LumaApi.GetTicketTypeById
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/luma_api/get_ticket_type_by_id_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/luma_api/get_ticket_type_by_id_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve event ticket type details by ID.
+
+**Parameters**
+
+- **event_ticket_type_api_id** (`string`, optional) The unique API ID for the event ticket type. It must be provided to retrieve ticket information.
+- **ticket_type_id** (`string`, optional) The ID of the ticket type to retrieve, typically starts with 'ett-'.
+
+**Secrets**
+
+This tool requires the following secrets: `LUMA_API_KEY`. You can obtain this from your [Luma dashboard](https://lu.ma/). See the [Authentication section](#authentication) above for detailed instructions and the [Luma API documentation](https://docs.luma.com/reference/getting-started-with-your-api) for more information.
+
+## LumaApi.ListMembershipTiers
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/luma_api/list_membership_tiers_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/luma_api/list_membership_tiers_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Retrieve available membership tiers for the calendar.
+
+**Parameters**
+
+- **items_to_return_count** (`number`, optional) Specify the number of membership tiers to return. The server may enforce a maximum limit.
+- **previous_request_next_cursor** (`string`, optional) The `next_cursor` value from a prior request for fetching subsequent data.
+
+**Secrets**
+
+This tool requires the following secrets: `LUMA_API_KEY`. You can obtain this from your [Luma dashboard](https://lu.ma/). See the [Authentication section](#authentication) above for detailed instructions and the [Luma API documentation](https://docs.luma.com/reference/getting-started-with-your-api) for more information.
+
+## LumaApi.CreateEvent
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/luma_api/create_event_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/luma_api/create_event_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Creates and schedules a new event.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+**Secrets**
+
+This tool requires the following secrets: `LUMA_API_KEY`. You can obtain this from your [Luma dashboard](https://lu.ma/). See the [Authentication section](#authentication) above for detailed instructions and the [Luma API documentation](https://docs.luma.com/reference/getting-started-with-your-api) for more information.
+
+## LumaApi.UpdateEvent
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/luma_api/update_event_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/luma_api/update_event_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Update event details using Luma's API.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+**Secrets**
+
+This tool requires the following secrets: `LUMA_API_KEY`. You can obtain this from your [Luma dashboard](https://lu.ma/). See the [Authentication section](#authentication) above for detailed instructions and the [Luma API documentation](https://docs.luma.com/reference/getting-started-with-your-api) for more information.
+
+## LumaApi.UpdateGuestStatus
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/luma_api/update_guest_status_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/luma_api/update_guest_status_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Updates the status of an event guest.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+**Secrets**
+
+This tool requires the following secrets: `LUMA_API_KEY`. You can obtain this from your [Luma dashboard](https://lu.ma/). See the [Authentication section](#authentication) above for detailed instructions and the [Luma API documentation](https://docs.luma.com/reference/getting-started-with-your-api) for more information.
+
+## LumaApi.SendGuestEventInvite
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/luma_api/send_guest_event_invite_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/luma_api/send_guest_event_invite_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Send event invitations to guests via email and SMS.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+**Secrets**
+
+This tool requires the following secrets: `LUMA_API_KEY`. You can obtain this from your [Luma dashboard](https://lu.ma/). See the [Authentication section](#authentication) above for detailed instructions and the [Luma API documentation](https://docs.luma.com/reference/getting-started-with-your-api) for more information.
+
+## LumaApi.AddEventGuests
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/luma_api/add_event_guests_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/luma_api/add_event_guests_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Add guests to an event with default or custom tickets.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+**Secrets**
+
+This tool requires the following secrets: `LUMA_API_KEY`. You can obtain this from your [Luma dashboard](https://lu.ma/). See the [Authentication section](#authentication) above for detailed instructions and the [Luma API documentation](https://docs.luma.com/reference/getting-started-with-your-api) for more information.
+
+## LumaApi.AddEventHost
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/luma_api/add_event_host_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/luma_api/add_event_host_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Add a host to an event in Luma.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+**Secrets**
+
+This tool requires the following secrets: `LUMA_API_KEY`. You can obtain this from your [Luma dashboard](https://lu.ma/). See the [Authentication section](#authentication) above for detailed instructions and the [Luma API documentation](https://docs.luma.com/reference/getting-started-with-your-api) for more information.
+
+## LumaApi.CreateEventCoupon
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/luma_api/create_event_coupon_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/luma_api/create_event_coupon_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Create a non-editable coupon for event registration.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+**Secrets**
+
+This tool requires the following secrets: `LUMA_API_KEY`. You can obtain this from your [Luma dashboard](https://lu.ma/). See the [Authentication section](#authentication) above for detailed instructions and the [Luma API documentation](https://docs.luma.com/reference/getting-started-with-your-api) for more information.
+
+## LumaApi.ModifyCoupon
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/luma_api/modify_coupon_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/luma_api/modify_coupon_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Update a coupon's details in the system.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+**Secrets**
+
+This tool requires the following secrets: `LUMA_API_KEY`. You can obtain this from your [Luma dashboard](https://lu.ma/). See the [Authentication section](#authentication) above for detailed instructions and the [Luma API documentation](https://docs.luma.com/reference/getting-started-with-your-api) for more information.
+
+## LumaApi.GenerateEventCoupon
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/luma_api/generate_event_coupon_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/luma_api/generate_event_coupon_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Create a coupon for calendar-managed events.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+**Secrets**
+
+This tool requires the following secrets: `LUMA_API_KEY`. You can obtain this from your [Luma dashboard](https://lu.ma/). See the [Authentication section](#authentication) above for detailed instructions and the [Luma API documentation](https://docs.luma.com/reference/getting-started-with-your-api) for more information.
+
+## LumaApi.UpdateCoupon
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/luma_api/update_coupon_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/luma_api/update_coupon_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Updates a coupon in the calendar.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+**Secrets**
+
+This tool requires the following secrets: `LUMA_API_KEY`. You can obtain this from your [Luma dashboard](https://lu.ma/). See the [Authentication section](#authentication) above for detailed instructions and the [Luma API documentation](https://docs.luma.com/reference/getting-started-with-your-api) for more information.
+
+## LumaApi.ImportPeopleToCalendar
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/luma_api/import_people_to_calendar_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/luma_api/import_people_to_calendar_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Import people to your calendar from contact lists.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+**Secrets**
+
+This tool requires the following secrets: `LUMA_API_KEY`. You can obtain this from your [Luma dashboard](https://lu.ma/). See the [Authentication section](#authentication) above for detailed instructions and the [Luma API documentation](https://docs.luma.com/reference/getting-started-with-your-api) for more information.
+
+## LumaApi.CreatePersonTag
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/luma_api/create_person_tag_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/luma_api/create_person_tag_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Create a new person tag in the calendar system.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+**Secrets**
+
+This tool requires the following secrets: `LUMA_API_KEY`. You can obtain this from your [Luma dashboard](https://lu.ma/). See the [Authentication section](#authentication) above for detailed instructions and the [Luma API documentation](https://docs.luma.com/reference/getting-started-with-your-api) for more information.
+
+## LumaApi.UpdatePersonTag
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/luma_api/update_person_tag_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/luma_api/update_person_tag_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Updates a tag for a person in the calendar system.
+
+**Parameters**
+
+- **person_tag_api_id** (`string`, required) The unique identifier for the tag to be updated. It is required to identify which tag needs modification.
+- **tag_color** (`string`, optional) Specify the color to be assigned to the person's tag. Choose from: cranberry, barney, red, green, blue, purple, yellow, orange.
+- **tag_name** (`string`, optional) The new name for the tag to be updated. It should be descriptive and relevant to the person's role or status.
+
+**Secrets**
+
+This tool requires the following secrets: `LUMA_API_KEY`. You can obtain this from your [Luma dashboard](https://lu.ma/). See the [Authentication section](#authentication) above for detailed instructions and the [Luma API documentation](https://docs.luma.com/reference/getting-started-with-your-api) for more information.
+
+## LumaApi.DeletePersonTag
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/luma_api/delete_person_tag_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/luma_api/delete_person_tag_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Deletes a person tag from the calendar.
+
+**Parameters**
+
+- **tag_identifier** (`string`, required) The unique identifier of the person tag to be deleted. It should match the tag's API ID.
+
+**Secrets**
+
+This tool requires the following secrets: `LUMA_API_KEY`. You can obtain this from your [Luma dashboard](https://lu.ma/). See the [Authentication section](#authentication) above for detailed instructions and the [Luma API documentation](https://docs.luma.com/reference/getting-started-with-your-api) for more information.
+
+## LumaApi.ApplyTagToCalendarMembers
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/luma_api/apply_tag_to_calendar_members_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/luma_api/apply_tag_to_calendar_members_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Apply a tag to existing calendar members.
+
+**Parameters**
+
+- **tag_identifier** (`string`, required) The Tag API ID (e.g., 'tag-123') or tag name to be applied to calendar members.
+- **email_addresses** (`array[string]`, optional) Array of email addresses to apply the tag to existing calendar members.
+- **user_api_ids_to_tag** (`array[string]`, optional) Array of user API IDs to apply the tag to. Each ID corresponds to a calendar member.
+
+**Secrets**
+
+This tool requires the following secrets: `LUMA_API_KEY`. You can obtain this from your [Luma dashboard](https://lu.ma/). See the [Authentication section](#authentication) above for detailed instructions and the [Luma API documentation](https://docs.luma.com/reference/getting-started-with-your-api) for more information.
+
+## LumaApi.RemoveTagFromCalendarMembers
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/luma_api/remove_tag_from_calendar_members_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/luma_api/remove_tag_from_calendar_members_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Remove a tag from existing calendar members.
+
+**Parameters**
+
+- **tag_identifier** (`string`, required) The ID or name of the tag to remove from calendar members, such as 'tag-123' or 'Birthday'.
+- **email_addresses_to_remove_tag** (`array[string]`, optional) Array of email addresses to remove the tag from the calendar members.
+- **user_api_ids_to_remove_tag** (`array[string]`, optional) Array of user API IDs from which to remove the specified tag.
+
+**Secrets**
+
+This tool requires the following secrets: `LUMA_API_KEY`. You can obtain this from your [Luma dashboard](https://lu.ma/). See the [Authentication section](#authentication) above for detailed instructions and the [Luma API documentation](https://docs.luma.com/reference/getting-started-with-your-api) for more information.
+
+## LumaApi.AddEventToLumaCalendar
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/luma_api/add_event_to_luma_calendar_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/luma_api/add_event_to_luma_calendar_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Add an existing event to the Luma calendar.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+**Secrets**
+
+This tool requires the following secrets: `LUMA_API_KEY`. You can obtain this from your [Luma dashboard](https://lu.ma/). See the [Authentication section](#authentication) above for detailed instructions and the [Luma API documentation](https://docs.luma.com/reference/getting-started-with-your-api) for more information.
+
+## LumaApi.GenerateUploadUrl
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/luma_api/generate_upload_url_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/luma_api/generate_upload_url_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Generates a URL for image upload.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+**Secrets**
+
+This tool requires the following secrets: `LUMA_API_KEY`. You can obtain this from your [Luma dashboard](https://lu.ma/). See the [Authentication section](#authentication) above for detailed instructions and the [Luma API documentation](https://docs.luma.com/reference/getting-started-with-your-api) for more information.
+
+## LumaApi.CreateEventTicketType
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/luma_api/create_event_ticket_type_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/luma_api/create_event_ticket_type_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Create a new ticket type for an event.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+**Secrets**
+
+This tool requires the following secrets: `LUMA_API_KEY`. You can obtain this from your [Luma dashboard](https://lu.ma/). See the [Authentication section](#authentication) above for detailed instructions and the [Luma API documentation](https://docs.luma.com/reference/getting-started-with-your-api) for more information.
+
+## LumaApi.UpdateTicketTypeConfiguration
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/luma_api/update_ticket_type_configuration_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/luma_api/update_ticket_type_configuration_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Update an existing ticket type configuration.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+**Secrets**
+
+This tool requires the following secrets: `LUMA_API_KEY`. You can obtain this from your [Luma dashboard](https://lu.ma/). See the [Authentication section](#authentication) above for detailed instructions and the [Luma API documentation](https://docs.luma.com/reference/getting-started-with-your-api) for more information.
+
+## LumaApi.SoftDeleteTicketType
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/luma_api/soft_delete_ticket_type_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/luma_api/soft_delete_ticket_type_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Soft delete a ticket type if certain conditions are met.
+
+**Parameters**
+
+- **event_ticket_type_id** (`string`, required) The ID of the event ticket type to be soft deleted. Ensure no tickets are sold, and it's not the last visible type before deletion.
+
+**Secrets**
+
+This tool requires the following secrets: `LUMA_API_KEY`. You can obtain this from your [Luma dashboard](https://lu.ma/). See the [Authentication section](#authentication) above for detailed instructions and the [Luma API documentation](https://docs.luma.com/reference/getting-started-with-your-api) for more information.
+
+## LumaApi.AddUserToMembershipTier
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/luma_api/add_user_to_membership_tier_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/luma_api/add_user_to_membership_tier_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Add a user to a specified free membership tier.
+
+**Parameters**
+
+- **mode** (`Enum` [ToolMode](#toolmode), required) Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation
+- **request_body** (`string`, optional) Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'
+
+**Secrets**
+
+This tool requires the following secrets: `LUMA_API_KEY`. You can obtain this from your [Luma dashboard](https://lu.ma/). See the [Authentication section](#authentication) above for detailed instructions and the [Luma API documentation](https://docs.luma.com/reference/getting-started-with-your-api) for more information.
+
+## LumaApi.UpdateMembershipStatus
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/luma_api/update_membership_status_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/luma_api/update_membership_status_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Update a member's membership status and handle payments.
+
+**Parameters**
+
+- **membership_status** (`string`, required) Set the membership status to either 'approved' to capture payment or 'declined' to cancel the subscription.
+- **user_identifier** (`string`, required) User ID (e.g., 'usr-xxx') or email address to identify the member whose status is to be updated.
+
+**Secrets**
+
+This tool requires the following secrets: `LUMA_API_KEY`. You can obtain this from your [Luma dashboard](https://lu.ma/). See the [Authentication section](#authentication) above for detailed instructions and the [Luma API documentation](https://docs.luma.com/reference/getting-started-with-your-api) for more information.
+
+## Reference
+
+Below is a reference of enumerations used by some of the tools in the LumaApi MCP Server:
+
+### ToolMode
+
+- **GET_REQUEST_SCHEMA**: `get_request_schema`
+- **EXECUTE**: `execute`
+
+<ToolFooter pipPackageName="arcade_luma_api" />
