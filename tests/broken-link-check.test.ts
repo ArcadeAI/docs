@@ -60,14 +60,12 @@ test(
       }
 
       // Handle known redirects
-      if (
-        url.startsWith("/mcp-servers/") ||
-        url.startsWith("/en/mcp-servers/")
-      ) {
-        // These redirect to /en/resources/integrations/*
-        const redirectedPath = url
-          .replace("/mcp-servers/", "/en/resources/integrations/")
-          .replace("/en/mcp-servers/", "/en/resources/integrations/");
+      if (url.startsWith("/mcp-servers/")) {
+        // These redirect to /resources/integrations/*
+        const redirectedPath = url.replace(
+          "/mcp-servers/",
+          "/en/resources/integrations/"
+        );
         const [basePath, fragment] = redirectedPath.split("#");
 
         // Check if the redirected path exists
@@ -92,37 +90,37 @@ test(
 
       // Handle other known redirect patterns
       const knownRedirects: Record<string, string> = {
-        "/get-started/setup/api-key": "/en/get-started/setup/api-keys",
-        "/references/auth-providers/": "/en/references/auth-providers",
-        "/references/mcp/python/": "/en/references/mcp/python",
-        "/guides/tool-calling/": "/en/guides/tool-calling",
+        "/get-started/setup/api-key": "/get-started/setup/api-keys",
+        "/references/auth-providers/": "/references/auth-providers",
+        "/references/mcp/python/": "/references/mcp/python",
+        "/guides/tool-calling/": "/guides/tool-calling",
         "/guides/tool-calling/custom-apps/authorized-tool-calling":
-          "/en/guides/tool-calling/custom-apps/auth-tool-calling",
+          "/guides/tool-calling/custom-apps/auth-tool-calling",
         "/guides/user-facing-agents/brand-provider":
-          "/en/guides/user-facing-agents/secure-auth-production",
+          "/guides/user-facing-agents/secure-auth-production",
         "/guides/tool-calling/mcp-client/visual-studio-code":
-          "/en/guides/tool-calling/mcp-clients/visual-studio-code",
+          "/guides/tool-calling/mcp-clients/visual-studio-code",
         "/guides/tool-calling/get-tool-definitions":
-          "/en/guides/tool-calling/custom-apps/get-tool-definitions",
+          "/guides/tool-calling/custom-apps/get-tool-definitions",
         "/guides/deployment-hosting/engine-configuration":
-          "/en/guides/deployment-hosting/configure-engine",
+          "/guides/deployment-hosting/configure-engine",
         "/guides/create-tools/performance/run-evaluations":
-          "/en/guides/create-tools/evaluate-tools/run-evaluations",
-        "/references/arcade-cliarcade-configure": "/en/references/arcade-cli",
+          "/guides/create-tools/evaluate-tools/run-evaluations",
+        "/references/arcade-cliarcade-configure": "/references/arcade-cli",
         "/resources/oai-agents/overview":
-          "/en/guides/agent-frameworks/openai-agents",
+          "/guides/agent-frameworks/openai-agents",
         "/resources/creating-tools/tool-basics/build-mcp-server":
-          "/en/guides/create-tools/tool-basics/build-mcp-server",
+          "/guides/create-tools/tool-basics/build-mcp-server",
         "/resources/creating-tools/new-functionality/custom-toolkit":
-          "/en/guides/create-tools/contribute/registry",
+          "/guides/create-tools/contribute/registry",
         "/resources/mastra/user-auth-interrupts":
-          "/en/guides/agent-frameworks/mastra/user-auth-interrupts",
+          "/guides/agent-frameworks/mastra/user-auth-interrupts",
       };
 
       // Check if this URL has a known redirect
       const [basePath, fragment] = url.split("#");
       if (knownRedirects[basePath]) {
-        const redirectedUrl = knownRedirects[basePath];
+        const redirectedUrl = `/en${knownRedirects[basePath]}`;
         const baseExists = scanned.urls?.has(redirectedUrl);
 
         if (!baseExists) {
