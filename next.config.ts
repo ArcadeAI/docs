@@ -65,7 +65,8 @@ const nextConfig: NextConfig = withLlmsTxt({
         },
         {
           source: "/home/auth/auth-tool-calling",
-          destination: "/guides/tool-calling/custom-apps/authorized-tool-calling",
+          destination:
+            "/guides/tool-calling/custom-apps/authorized-tool-calling",
           permanent: true, // 308 redirect for SEO
         },
         {
