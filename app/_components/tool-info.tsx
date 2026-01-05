@@ -7,8 +7,8 @@ import {
 } from "@arcadeai/design-system";
 import { usePathname } from "next/navigation";
 import type React from "react";
-import { findToolkitFromPath } from "../en/mcp-servers/components/toolkit-utils";
-import { TYPE_CONFIG } from "../en/mcp-servers/components/type-config";
+import { findToolkitFromPath } from "../en/resources/integrations/components/toolkit-utils";
+import { TYPE_CONFIG } from "../en/resources/integrations/components/type-config";
 
 type ToolInfoProps = {
   description: string;
@@ -59,7 +59,7 @@ const ToolInfo: React.FC<ToolInfoProps> = ({
 
   const resolvedAuthDocsUrl =
     authProviderName && !authProviderDocsUrl
-      ? `/home/auth-providers/${authProviderName.toLowerCase()}`
+      ? `/references/auth-providers/${authProviderName.toLowerCase()}`
       : authProviderDocsUrl;
 
   const toolkit = findToolkitFromPath(pathname);

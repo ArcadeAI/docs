@@ -1,0 +1,562 @@
+---
+asIndexPage: true
+---
+
+# Gmail
+
+import ToolInfo from "@/app/_components/tool-info";
+import Badges from "@/app/_components/badges";
+import TabbedCodeBlock from "@/app/_components/tabbed-code-block";
+import TableOfContents from "@/app/_components/table-of-contents";
+import ToolFooter from "@/app/_components/tool-footer";
+import ScopePicker from "@/app/_components/scope-picker";
+import { Callout } from "nextra/components";
+
+<ToolInfo
+  description="Enable agents to send, read, and manage emails in Gmail."
+  author="Arcade"
+  authType="oauth2"
+  authProviderName="Google"
+  versions={["3.1.0"]}
+/>
+
+<Badges repo="arcadeai/arcade_gmail" />
+
+The Arcade Gmail MCP Server provides a pre-built set of tools for interacting with Gmail. These tools make it easy to build agents and AI apps that can:
+
+- Send, read, and manage emails
+- Compose and update draft emails
+- Delete emails
+- Search for emails by header
+- List emails in the user's mailbox
+
+## Available Tools
+
+These tools are currently available in the Arcade Gmail MCP Sever.
+
+<TableOfContents
+  headers={["Tool Name", "Description"]}
+  data={[
+    ["Gmail.SendEmail", "Send an email using the Gmail API."],
+    ["Gmail.SendDraftEmail", "Send a draft email using the Gmail API."],
+    ["Gmail.WriteDraftEmail", "Compose a new email draft using the Gmail API."],
+    ["Gmail.UpdateDraftEmail", "Update an existing email draft."],
+    ["Gmail.DeleteDraftEmail", "Delete a draft email using the Gmail API."],
+    ["Gmail.TrashEmail", "Move an email to the trash folder."],
+    ["Gmail.ListDraftEmails", "List draft emails in the user's mailbox."],
+    [
+      "Gmail.ListEmailsByHeader",
+      "Search for emails by header using the Gmail API.",
+    ],
+    ["Gmail.ListEmails", "Read emails and extract plain text content."],
+    ["Gmail.SearchThreads", "Search for threads in the user's mailbox."],
+    ["Gmail.ListThreads", "List threads in the user's mailbox."],
+    ["Gmail.GetThread", "Get the specified thread by ID."],
+    [
+      "Gmail.WhoAmI",
+      "Get comprehensive user profile and Gmail account information.",
+    ],
+  ]}
+/>
+
+<Callout>
+  If you need to perform an action that's not listed here, you can [get in touch
+  with us](mailto:contact@arcade.dev) to request a new tool, or [create your own
+  tools](/guides/create-tools/tool-basics/build-mcp-server) with the [Google auth
+  provider](/references/auth-providers/google#using-google-auth-in-custom-tools).
+</Callout>
+
+Each tool requires specific Google OAuth scopes to function. You'll find the required scopes listed in a blue info box at the end of each tool's documentation below. For more information about configuring OAuth and tips for moving to production, see the [Google auth provider documentation](/references/auth-providers/google.
+
+## Find required scopes
+
+Select the tools you plan to use to see the OAuth scopes your application needs:
+
+<ScopePicker
+  tools={[
+    { name: "SendEmail", scopes: ["https://www.googleapis.com/auth/gmail.send"] },
+    { name: "SendDraftEmail", scopes: ["https://www.googleapis.com/auth/gmail.send"] },
+    { name: "WriteDraftEmail", scopes: ["https://www.googleapis.com/auth/gmail.compose"] },
+    { name: "UpdateDraftEmail", scopes: ["https://www.googleapis.com/auth/gmail.compose"] },
+    { name: "DeleteDraftEmail", scopes: ["https://www.googleapis.com/auth/gmail.compose"] },
+    { name: "TrashEmail", scopes: ["https://www.googleapis.com/auth/gmail.modify"] },
+    { name: "ListDraftEmails", scopes: ["https://www.googleapis.com/auth/gmail.readonly"] },
+    { name: "ListEmailsByHeader", scopes: ["https://www.googleapis.com/auth/gmail.readonly"] },
+    { name: "ListEmails", scopes: ["https://www.googleapis.com/auth/gmail.readonly"] },
+    { name: "SearchThreads", scopes: ["https://www.googleapis.com/auth/gmail.readonly"] },
+    { name: "ListThreads", scopes: ["https://www.googleapis.com/auth/gmail.readonly"] },
+    { name: "GetThread", scopes: ["https://www.googleapis.com/auth/gmail.readonly"] },
+    {
+      name: "WhoAmI",
+      scopes: [
+        "https://www.googleapis.com/auth/gmail.readonly",
+        "https://www.googleapis.com/auth/userinfo.profile",
+        "https://www.googleapis.com/auth/userinfo.email",
+      ],
+    },
+  ]}
+/>
+
+---
+
+## Gmail.SendEmail
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/google/gmail/send_email_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/google/gmail/send_email_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Send an email using the Gmail API.
+
+**Parameters**
+
+- **`subject`** _(string, required)_ The subject of the email.
+- **`body`** _(string, required)_ The body of the email.
+- **`recipient`** _(string, required)_ The recipient of the email.
+- **`cc`** _(array, optional, Defaults to None)_ CC recipients of the email.
+- **`bcc`** _(array, optional, Defaults to None)_ BCC recipients of the email.
+
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/gmail.send`
+</Callout>
+
+---
+
+## Gmail.SendDraftEmail
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/google/gmail/send_draft_email_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/google/gmail/send_draft_email_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Send a draft email using the Gmail API.
+
+**Parameters**
+
+- **`email_id`** _(string, required)_ The ID of the draft to send.
+
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/gmail.send`
+</Callout>
+
+---
+
+## Gmail.WriteDraftEmail
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/google/gmail/write_draft_email_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/google/gmail/write_draft_email_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Compose a new email draft using the Gmail API.
+
+**Parameters**
+
+- **`subject`** _(string, required)_ The subject of the draft email.
+- **`body`** _(string, required)_ The body of the draft email.
+- **`recipient`** _(string, required)_ The recipient of the draft email.
+- **`cc`** _(array, optional, Defaults to None)_ CC recipients of the draft email.
+- **`bcc`** _(array, optional, Defaults to None)_ BCC recipients of the draft email.
+
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/gmail.compose`
+</Callout>
+
+---
+
+## Gmail.UpdateDraftEmail
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/google/gmail/update_draft_email_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/google/gmail/update_draft_email_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Update an existing email draft.
+
+**Parameters**
+
+- **`draft_email_id`** _(string, required)_ The ID of the draft email to update.
+- **`subject`** _(string, required)_ The subject of the draft email.
+- **`body`** _(string, required)_ The body of the draft email.
+- **`recipient`** _(string, required)_ The recipient of the draft email.
+- **`cc`** _(array, optional, Defaults to None)_ CC recipients of the draft email.
+- **`bcc`** _(array, optional, Defaults to None)_ BCC recipients of the draft email.
+
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/gmail.compose`
+</Callout>
+
+---
+
+## Gmail.DeleteDraftEmail
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/google/gmail/delete_draft_email_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/google/gmail/delete_draft_email_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Delete a draft email using the Gmail API.
+
+**Parameters**
+
+- **`draft_email_id`** _(string, required)_ The ID of the draft email to delete.
+
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/gmail.compose`
+</Callout>
+
+---
+
+## Gmail.TrashEmail
+
+<Callout type="warning" emoji="⚠️">
+  The `TrashEmail` tool is currently only available on a self-hosted instance of
+  the Arcade Engine. To learn more about self-hosting, see the [self-hosting
+  documentation](http://localhost:3000/en/home/deployment/engine-configuration).
+</Callout>
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/google/gmail/trash_email_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/google/gmail/trash_email_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Move an email to the trash folder.
+
+**Parameters**
+
+- **`email_id`** _(string, required)_ The ID of the email to trash.
+
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/gmail.modify`
+</Callout>
+
+---
+
+## Gmail.ListDraftEmails
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/google/gmail/list_draft_emails_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/google/gmail/list_draft_emails_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+List draft emails in the user's mailbox.
+
+**Parameters**
+
+- **`n_drafts`** _(integer, optional, Defaults to 5)_ Number of draft emails to read.
+
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/gmail.readonly`
+</Callout>
+
+---
+
+## Gmail.ListEmailsByHeader
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/google/gmail/list_emails_by_header_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/google/gmail/list_emails_by_header_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Search for emails by header using the Gmail API.
+
+_At least one of the following parameters must be provided: `sender`, `recipient`, `subject`, `body`._
+
+**Parameters**
+
+- **`sender`** _(string, optional, Defaults to None)_ The name or email address of the sender.
+- **`recipient`** _(string, optional, Defaults to None)_ The name or email address of the recipient.
+- **`subject`** _(string, optional, Defaults to None)_ Words to find in the subject of the email.
+- **`body`** _(string, optional, Defaults to None)_ Words to find in the body of the email.
+- **`date_range`** _(string, optional, Defaults to None)_ The date range of the emails.
+- **`limit`** _(integer, optional, Defaults to 25)_ The maximum number of emails to return.
+
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/gmail.readonly`
+</Callout>
+
+---
+
+## Gmail.ListEmails
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/google/gmail/list_emails_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/google/gmail/list_emails_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Read emails from a Gmail account and extract plain text content.
+
+**Parameters**
+
+- **`n_emails`** _(integer, optional, Defaults to 5)_ Number of emails to read.
+
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/gmail.readonly`
+</Callout>
+
+---
+
+## Gmail.SearchThreads
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/google/gmail/search_threads_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/google/gmail/search_threads_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Search for threads in the user's mailbox
+
+**Parameters**
+
+- **`page_token`** _(string, optional)_ Page token to retrieve a specific page of results in the list.
+- **`max_results`** _(integer, optional, Defaults to `10`)_ The maximum number of threads to return.
+- **`include_spam_trash`** _(boolean, optional)_ Whether to include spam and trash in the results.
+- **`label_ids`** _(array, optional)_ The IDs of labels to filter by.
+- **`sender`** _(string, optional)_ The name or email address of the sender of the email.
+- **`recipient`** _(string, optional)_ The name or email address of the recipient.
+- **`subject`** _(string, optional)_ Words to find in the subject of the email.
+- **`body`** _(string, optional)_ Words to find in the body of the email.
+- **`date_range`** _(string, optional)_ The date range of the email. Valid values are 'today', 'yesterday', 'last_7_days', 'last_30_days', 'this_month', 'last_month', 'this_year'.
+
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/gmail.readonly`
+</Callout>
+
+---
+
+## Gmail.ListThreads
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/google/gmail/list_threads_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/google/gmail/list_threads_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+List threads in the user's mailbox.
+
+**Parameters**
+
+- **`page_token`** _(string, optional)_ Page token to retrieve a specific page of results in the list.
+- **`max_results`** _(integer, optional, Defaults to `10`)_ The maximum number of threads to return.
+- **`include_spam_trash`** _(boolean, optional)_ Whether to include spam and trash in the results.
+
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/gmail.readonly`
+</Callout>
+
+---
+
+## Gmail.GetThread
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool with User Authorization",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/google/gmail/get_thread_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/google/gmail/get_thread_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get the specified thread by ID.
+
+**Parameters**
+
+- **`thread_id`** _(string, required)_ The ID of the thread to retrieve.
+
+<Callout type="info" title="This tool requires the following scope">
+`https://www.googleapis.com/auth/gmail.readonly`
+</Callout>
+
+---
+
+## Gmail.WhoAmI
+
+<br />
+<TabbedCodeBlock
+  tabs={[
+    {
+      label: "Call the Tool Directly",
+      content: {
+        Python: [
+          "/examples/integrations/resources/integrations/gmail/who_am_i_example_call_tool.py",
+        ],
+        JavaScript: [
+          "/examples/integrations/resources/integrations/gmail/who_am_i_example_call_tool.js",
+        ],
+      },
+    },
+  ]}
+/>
+
+Get comprehensive user profile and Gmail account information.
+
+**Parameters**
+
+This tool does not take any parameters.
+
+<Callout type="info" title="This tool requires the following scopes">
+- `https://www.googleapis.com/auth/gmail.readonly`
+- `https://www.googleapis.com/auth/userinfo.profile`
+- `https://www.googleapis.com/auth/userinfo.email`
+</Callout>
+
+---
+
+## Auth
+
+The Arcade Gmail MCP Sever uses the [Google auth provider](/references/auth-providers/google to connect to users' Google accounts.
+
+With the Arcade Cloud Platform, there's nothing to configure. Your users will see `Arcade` as the name of the application that's requesting permission.
+
+With a self-hosted installation of Arcade, you need to [configure the Google auth provider](/references/auth-providers/google#configuring-google-auth) with your own Google app credentials.
+
+---
+
+## Reference
+
+### GmailReplyToWhom
+
+The type of recipient to reply to.
+
+- **`EVERY_RECIPIENT`**: Reply to the original sender and all recipients.
+- **`ONLY_THE_SENDER`**: Reply to the original sender only.
+
+<ToolFooter pipPackageName="arcade_gmail" />

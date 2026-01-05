@@ -1,0 +1,341 @@
+---
+title: "Create an evaluation suite"
+description: "Learn how to evaluate your tools using Arcade"
+---
+
+# Create an evaluation suite
+
+Evaluation suites help you test whether AI models use your tools correctly. This guide shows you how to create test cases that measure tool selection and parameter accuracy.
+
+import { Steps, Tabs, Callout } from "nextra/components";
+
+<Steps>
+
+### Prerequisites
+
+- [Create an MCP Server](/guides/create-tools/tool-basics/build-mcp-server)
+- Install the evaluation dependencies:
+
+<Tabs items={["uv", "pip"]} storageKey="packageManager">
+  <Tabs.Tab>
+
+```bash
+uv tool install 'arcade-mcp[evals]'
+```
+
+  </Tabs.Tab>
+
+  <Tabs.Tab>
+
+```bash
+pip install 'arcade-mcp[evals]'
+```
+
+  </Tabs.Tab>
+</Tabs>
+
+### Create an evaluation file
+
+Navigate to your MCP server directory and create a file starting with `eval_`:
+
+```bash
+cd my_server
+touch eval_server.py
+```
+
+<Callout type="info">
+  Evaluation files must start with `eval_` and use the `.py` extension. The CLI
+  automatically discovers these files.
+</Callout>
+
+### Define your evaluation suite
+
+Create an evaluation suite that loads tools from your MCP server and defines test cases:
+
+```python
+from arcade_evals import (
+    EvalSuite,
+    tool_eval,
+    ExpectedMCPToolCall,
+    BinaryCritic,
+)
+
+@tool_eval()
+async def weather_eval_suite() -> EvalSuite:
+    """Evaluate weather tool usage."""
+    suite = EvalSuite(
+        name="Weather Tools",
+        system_message="You are a helpful weather assistant.",
+    )
+
+    # Load tools from your MCP server
+    await suite.add_mcp_stdio_server(
+        command=["python", "server.py"],
+    )
+
+    # Add a test case
+    suite.add_case(
+        name="Get weather for city",
+        user_message="What's the weather in Seattle?",
+        expected_tool_calls=[
+            ExpectedMCPToolCall(
+                "Weather_GetCurrent",
+                {"location": "Seattle", "units": "celsius"}
+            )
+        ],
+        critics=[
+            BinaryCritic(critic_field="location", weight=0.7),
+            BinaryCritic(critic_field="units", weight=0.3),
+        ],
+    )
+
+    return suite
+```
+
+### Run the evaluation
+
+Set your OpenAI API key and run the evaluation:
+
+```bash
+export OPENAI_API_KEY=<your_api_key>
+arcade evals .
+```
+
+The command discovers all `eval_*.py` files and executes them using OpenAI's `gpt-4o` model by default.
+
+**Using different providers:**
+
+```bash
+# Anthropic
+export ANTHROPIC_API_KEY=<your_api_key>
+arcade evals . -p anthropic
+
+# Or specify API key directly
+arcade evals . -p anthropic -k anthropic:<your_api_key>
+
+# Multiple models
+arcade evals . -p "openai:gpt-4o,gpt-4o-mini"
+
+# Multiple providers (space-separated)
+arcade evals . -p "openai anthropic" -k openai:sk-... -k anthropic:sk-ant-...
+```
+
+See [Run evaluations](/guides/create-tools/evaluate-tools/run-evaluations) for all available options.
+
+### Understand the results
+
+Evaluation results show:
+
+- **Passed**: Score meets or exceeds the fail threshold (default: 0.8)
+- **Failed**: Score falls below the fail threshold
+- **Warned**: Score is between warn and fail thresholds (default: 0.9)
+
+Example output:
+
+```
+Suite: Weather Tools
+  Model: gpt-4o
+    PASSED Get weather for city -- Score: 1.00
+
+Summary -- Total: 1 -- Passed: 1 -- Failed: 0
+```
+
+Use `--details` to see critic feedback:
+
+```bash
+arcade evals . --details
+```
+
+Detailed output includes per-critic scores:
+
+```
+PASSED Get weather for city -- Score: 1.00
+  Details:
+    location:
+      Match: True, Score: 0.70/0.70
+    units:
+      Match: True, Score: 0.30/0.30
+```
+
+</Steps>
+
+## Loading tools
+
+You can load tools from different sources. All methods are async and must be awaited in your `@tool_eval()` decorated function.
+
+### From MCP HTTP server
+
+Load tools from an HTTP or SSE MCP server:
+
+```python
+await suite.add_mcp_server(
+    url="http://localhost:8000",
+    headers={"Authorization": "Bearer token"},  # Optional
+    timeout=10,                                  # Optional: Connection timeout (default: 10)
+    use_sse=False,                              # Optional: Use SSE transport (default: False)
+)
+```
+
+The URL is automatically normalized (appends `/mcp` if not present).
+
+### From MCP stdio server
+
+Load tools from a stdio MCP server process:
+
+```python
+await suite.add_mcp_stdio_server(
+    command=["python", "server.py"],
+    env={"API_KEY": "secret"},  # Optional: Environment variables
+    timeout=10,                  # Optional: Connection timeout (default: 10)
+)
+```
+
+### From Arcade Gateway
+
+Load tools from an Arcade MCP Gateway:
+
+```python
+await suite.add_arcade_gateway(
+    gateway_slug="my-gateway",
+    arcade_api_key="your-api-key",  # Optional: Defaults to ARCADE_API_KEY env var
+    arcade_user_id="user-id",       # Optional: Defaults to ARCADE_USER_ID env var
+    base_url=None,                   # Optional: Override gateway URL
+    timeout=10,                      # Optional: Connection timeout (default: 10)
+)
+```
+
+### Manual tool definitions
+
+Define tools manually using MCP format:
+
+```python
+suite.add_tool_definitions([
+    {
+        "name": "Weather.GetCurrent",
+        "description": "Get current weather for a location",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "location": {"type": "string"},
+                "units": {
+                    "type": "string",
+                    "enum": ["celsius", "fahrenheit"],
+                    "default": "celsius"
+                },
+            },
+            "required": ["location"],
+        },
+    }
+])
+```
+
+### Mixing tool sources
+
+You can load tools from multiple sources into the same suite:
+
+```python
+# Load from multiple MCP servers
+await suite.add_mcp_server("http://server1.example")
+await suite.add_mcp_server("http://server2.example")
+
+# Mix with manual definitions
+suite.add_tool_definitions([{"name": "CustomTool", ...}])
+```
+
+All tools are accumulated in the suite's registry and available to the model.
+
+## Expected tool calls
+
+Expected tool calls define what the model should predict. Use `ExpectedMCPToolCall` with MCP-style tool names:
+
+```python
+ExpectedMCPToolCall(
+    "Weather_GetCurrent",
+    {"location": "Seattle", "units": "celsius"}
+)
+```
+
+<Callout type="warning">
+  Tool names are normalized for compatibility with model tool calling. Dots
+  (`.`) become underscores (`_`). For example, `Weather.GetCurrent` becomes
+  `Weather_GetCurrent`.
+</Callout>
+
+## Critics
+
+Critics validate tool call parameters. Each critic type handles different validation needs:
+
+| Critic             | Use case        | Example                                                            |
+| ------------------ | --------------- | ------------------------------------------------------------------ |
+| `BinaryCritic`     | Exact match     | `BinaryCritic(critic_field="user_id", weight=1.0)`                 |
+| `SimilarityCritic` | Text similarity | `SimilarityCritic(critic_field="message", weight=0.8)`             |
+| `NumericCritic`    | Numeric range   | `NumericCritic(critic_field="temp", tolerance=2.0)`                |
+| `DatetimeCritic`   | Time window     | `DatetimeCritic(critic_field="due", tolerance=timedelta(hours=1))` |
+
+```python
+from arcade_evals import BinaryCritic, SimilarityCritic
+
+critics=[
+    BinaryCritic(critic_field="location", weight=0.7),
+    SimilarityCritic(critic_field="message", weight=0.3),
+]
+```
+
+All weights are normalized proportionally to sum to 1.0. Use numeric values or `FuzzyWeight` (`CRITICAL`, `HIGH`, `MEDIUM`, `LOW`).
+
+## Multiple tool calls
+
+Test cases can include multiple expected tool calls:
+
+```python
+suite.add_case(
+    name="Check weather in multiple cities",
+    user_message="What's the weather in Seattle and Portland?",
+    expected_tool_calls=[
+        ExpectedMCPToolCall("Weather_GetCurrent", {"location": "Seattle"}),
+        ExpectedMCPToolCall("Weather_GetCurrent", {"location": "Portland"}),
+    ],
+)
+```
+
+## Conversation context
+
+Add conversation history to test cases that require context:
+
+```python
+suite.add_case(
+    name="Weather based on previous location",
+    user_message="What about the weather there?",
+    expected_tool_calls=[
+        ExpectedMCPToolCall("Weather_GetCurrent", {"location": "Tokyo"}),
+    ],
+    additional_messages=[
+        {"role": "user", "content": "I'm planning to visit Tokyo next week."},
+        {"role": "assistant", "content": "That sounds exciting! What would you like to know about Tokyo?"},
+    ],
+)
+```
+
+Use OpenAI message format for `additional_messages`. Arcade converts it automatically for Anthropic.
+
+## Rubrics
+
+Customize pass/fail thresholds with `EvalRubric`. Default: fail at 0.8, warn at 0.9.
+
+```python
+from arcade_evals import EvalRubric
+
+suite = EvalSuite(
+    name="Strict Evaluation",
+    system_message="You are helpful.",
+    rubric=EvalRubric(fail_threshold=0.85, warn_threshold=0.95),
+)
+```
+
+If you want stricter suites, increase thresholds (for example `fail_threshold=0.95`). For exploratory testing, lower them (for example `fail_threshold=0.6`).
+
+## Next steps
+
+- Learn how to [run evaluations with different providers](/guides/create-tools/evaluate-tools/run-evaluations)
+- Explore [capture mode](/guides/create-tools/evaluate-tools/capture-mode) to record tool calls
+- Compare tool sources with [comparative evaluations](/guides/create-tools/evaluate-tools/comparative-evaluations)

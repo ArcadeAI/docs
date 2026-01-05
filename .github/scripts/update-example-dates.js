@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-const fs = require("fs");
-const path = require("path");
+const fs = require("node:fs");
+const path = require("node:path");
 
 function parseRepositoriesFromMDX(content) {
   const repositories = [];
@@ -90,7 +90,10 @@ async function updateExampleDates() {
   console.log("Parsing repositories from MDX file...");
 
   // Read the current MDX file
-  const mdxPath = path.join(__dirname, "../../app/en/home/examples/page.mdx");
+  const mdxPath = path.join(
+    __dirname,
+    "../../app/en/resources/examples/page.mdx"
+  );
   let content = fs.readFileSync(mdxPath, "utf8");
 
   // Parse repositories from the MDX file
