@@ -20,7 +20,6 @@ export const PostHog = ({ children }: { children: React.ReactNode }) => {
         disable_session_recording: false,
         session_recording: {
           maskAllInputs: true, // Privacy: mask sensitive input fields
-          maskTextContent: false, // Keep text readable for better insights
           blockClass: "ph-no-capture", // Allow opting out specific elements
           recordCrossOriginIframes: false, // Don't record third-party iframes
         },

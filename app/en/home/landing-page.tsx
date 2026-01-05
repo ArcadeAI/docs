@@ -125,7 +125,10 @@ export function LandingPage() {
               className="h-12 bg-primary px-6 text-white hover:bg-primary/90"
               size="lg"
             >
-              <Link href="/get-started/quickstarts/call-tool-agent" onClick={handleGetStartedClick}>
+              <Link
+                href="/get-started/quickstarts/call-tool-agent"
+                onClick={handleGetStartedClick}
+              >
                 <Rocket className="mr-2 h-5 w-5" />
                 Get Started
               </Link>
