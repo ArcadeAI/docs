@@ -1,0 +1,178 @@
+---
+title: "Tool Error Handling"
+description: "Learn how to handle errors when using tools with Arcade's Tool Development Kit (TDK)"
+---
+
+import { Tabs } from "nextra/components";
+import { ErrorHierarchy } from "@/app/_components/error-hierarchy";
+
+# Tool error handling
+
+When calling tools from your Agent, smart error handling is crucial for creating robust and reliable applications. This guide covers everything you need to know about handling errors from a tool user's perspective.
+
+## Error handling philosophy
+
+Arcade's error handling is designed to provide you with as much information as possible about the error that occurred. When an error occurs, Arcade's Engine will return a structured error object that you can use to understand the error and take appropriate action.
+
+<ErrorHierarchy description="Arcade uses a structured error hierarchy to categorize different types of errors."/>
+
+## Client error handling examples
+
+Here's how to handle different types of output errors when executing tools with Arcade's client libraries:
+
+<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs.Tab>
+```python
+"""
+This example demonstrates how to handle different kinds of output errors when executing a tool.
+"""
+
+from arcadepy import Arcade  # pip install arcadepy
+from arcadepy.types.execute_tool_response import OutputError
+
+
+# Requires arcadepy >= 1.8.0
+def handle_tool_error(error: OutputError) -> None:
+    """Example of how to identify different kinds of output errors."""
+    error_kind = error.kind
+    if error_kind == OutputError.Kind.TOOL_RUNTIME_BAD_INPUT_VALUE:
+        # You provided the executed tool with an invalid input value
+        print(error.message)
+    elif error_kind == OutputError.Kind.TOOL_RUNTIME_RETRY:
+        # The tool returned a retryable error. Provide the additional
+        # prompt content to the LLM and retry the tool call
+        instructions_for_llm = error.additional_prompt_content
+        print(instructions_for_llm)
+    elif error_kind == OutputError.Kind.TOOL_RUNTIME_CONTEXT_REQUIRED:
+        # The tool requires extra context from the user or orchestrator.
+        # Provide the additional prompt content to them and then retry the
+        # tool call with the new context
+        request_for_context = error.additional_prompt_content
+        print(request_for_context)
+    elif error_kind == OutputError.Kind.TOOL_RUNTIME_FATAL:
+        # The tool encountered a fatal error during execution
+        print(error.message)
+    elif error_kind == OutputError.Kind.UPSTREAM_RUNTIME_RATE_LIMIT:
+        # The tool encountered a rate limit error from an upstream service
+        # Wait for the specified amount of time and then retry the tool call
+        seconds_to_wait = error.retry_after_ms / 1000
+        print(f"Wait for {seconds_to_wait} seconds before retrying the tool call")
+    elif error_kind.startswith("UPSTREAM_"):
+        # The tool encountered an error from an upstream service
+        print(error.message)
+
+
+client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
+user_id = "{arcade_user_id}"
+tool_name = "Reddit.GetPostsInSubreddit"
+tool_input = {"subreddit": "programming", "limit": 1}
+
+# Go through the OAuth flow for the tool
+auth_response = client.tools.authorize(
+    tool_name=tool_name,
+    user_id=user_id,
+)
+if auth_response.status != "completed":
+    print(f"Click this link to authorize: {auth_response.url}")
+
+client.auth.wait_for_completion(auth_response)
+
+# Execute the tool
+response = client.tools.execute(
+    tool_name=tool_name,
+    input=tool_input,
+    user_id=user_id,
+    include_error_stacktrace=True,
+)
+if response.output.error:
+    handle_tool_error(response.output.error)
+```
+</Tabs.Tab>
+<Tabs.Tab>
+```javascript
+/**
+ * This example demonstrates how to handle different kinds of output errors when executing a tool.
+ */
+
+import { Arcade } from "@arcadeai/arcadejs"; // npm install @arcadeai/arcadejs
+
+// Requires @arcadeai/arcadejs >= 1.10.0
+function handleToolError(error) {
+  const errorKind = error.kind;
+  if (errorKind === "TOOL_RUNTIME_BAD_INPUT_VALUE") {
+    // You provided the executed tool with an invalid input value
+    console.log(error.message);
+  } else if (errorKind === "TOOL_RUNTIME_RETRY") {
+    // The tool returned a retryable error. Provide the additional
+    // prompt content to the LLM and retry the tool call
+    const instructionsForLLM = error.additional_prompt_content;
+    console.log(instructionsForLLM);
+  } else if (errorKind === "TOOL_RUNTIME_CONTEXT_REQUIRED") {
+    // The tool requires extra context from the user or orchestrator.
+    // Provide the additional prompt content to them and then retry the
+    // tool call with the new context
+    const requestForContext = error.additional_prompt_content;
+    console.log(requestForContext);
+  } else if (errorKind === "TOOL_RUNTIME_FATAL") {
+    // The tool encountered a fatal error during execution
+    console.log(error.message);
+  } else if (errorKind === "UPSTREAM_RUNTIME_RATE_LIMIT") {
+    // The tool encountered a rate limit error from an upstream service
+    // Wait for the specified amount of time and then retry the tool call
+    const secondsToWait = error.retry_after_ms / 1000;
+    console.log(`Wait for ${secondsToWait} seconds before retrying the tool call`);
+  } else if (errorKind.startsWith("UPSTREAM_")) {
+    // The tool encountered an error from an upstream service
+    console.log(error.message);
+  }
+}
+
+const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable
+const userId = "{arcade_user_id}";
+const toolName = "Reddit.GetPostsInSubreddit";
+const toolInput = { subreddit: "programming", limit: 1 };
+
+// Go through the OAuth flow for the tool
+const authResponse = await client.tools.authorize({
+  tool_name: toolName,
+  user_id: userId,
+});
+if (authResponse.status !== "completed") {
+  console.log(`Click this link to authorize: ${authResponse.url}`);
+}
+
+await client.auth.waitForCompletion(authResponse);
+
+// Execute the tool
+const response = await client.tools.execute({
+  tool_name: toolName,
+  input: toolInput,
+  user_id: userId,
+  include_error_stacktrace: true,
+});
+if (response.output.error) {
+  handleToolError(response.output.error);
+}
+```
+</Tabs.Tab>
+</Tabs>
+
+## Error types in Arcade client libraries
+
+To see the full structure of an OutputError, see [arcade-py OutputError](https://github.com/ArcadeAI/arcade-py/blob/942eb2cf41bc14b6c82f0e4acd8b11ef1978cb8d/src/arcadepy/types/execute_tool_response.py#L12) and [arcade-js OutputError](https://github.com/ArcadeAI/arcade-js/blob/902ef0ce9ff0412ca0d66a862cb4301759d3f87f/src/resources/tools/tools.ts#L166).
+
+## Error types in MCP clients
+
+As of now, MCP Clients do not return structured error information, only an error message.  Arcade will attempt to include the type of error in the error message, but it is not guaranteed.
+
+## Best practices
+
+1. **Let Arcade handle most errors**: There's no need to wrap your tool logic in try/catch blocks unless you need custom error handling.
+
+2. **Use specific error types**: When you do need to raise errors explicitly, use the most specific error type available.
+
+3. **Include additional context**: For `RetryableToolError` and `ContextRequiredToolError`, use the `additional_prompt_content` parameter to guide the LLM or user.
+
+## Building tools with error handling
+
+To learn more about how to build tools with error handling, see the [Build Tools](/guides/create-tools/error-handling/useful-tool-errors) section.

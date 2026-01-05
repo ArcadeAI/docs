@@ -3,14 +3,14 @@
 import { usePostHog } from "posthog-js/react";
 import { useState } from "react";
 
-interface Tool {
+type Tool = {
   name: string;
   scopes: string[];
-}
+};
 
-interface ScopePickerProps {
+type ScopePickerProps = {
   tools: Tool[];
-}
+};
 
 export default function ScopePicker({ tools }: ScopePickerProps) {
   const [selectedTools, setSelectedTools] = useState<Set<string>>(new Set());
