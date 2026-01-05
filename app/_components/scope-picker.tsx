@@ -16,11 +16,15 @@ export default function ScopePicker({ tools }: ScopePickerProps) {
   const [selectedTools, setSelectedTools] = useState<Set<string>>(new Set());
   const posthog = usePostHog();
 
-  const trackScopeCalculatorUsed = (action: string, toolName?: string) => {
+  const trackScopeCalculatorUsed = (
+    action: string,
+    toolName: string | undefined,
+    newSelectedCount: number
+  ) => {
     posthog?.capture("scope_calculator_used", {
       action,
       tool_name: toolName || null,
-      selected_tools_count: selectedTools.size,
+      selected_tools_count: newSelectedCount,
       total_tools_available: tools.length,
     });
   };
@@ -36,18 +40,19 @@ export default function ScopePicker({ tools }: ScopePickerProps) {
     setSelectedTools(newSelected);
     trackScopeCalculatorUsed(
       isSelecting ? "tool_selected" : "tool_deselected",
-      toolName
+      toolName,
+      newSelected.size
     );
   };
 
   const selectAll = () => {
     setSelectedTools(new Set(tools.map((t) => t.name)));
-    trackScopeCalculatorUsed("select_all");
+    trackScopeCalculatorUsed("select_all", undefined, tools.length);
   };
 
   const clearAll = () => {
     setSelectedTools(new Set());
-    trackScopeCalculatorUsed("clear_all");
+    trackScopeCalculatorUsed("clear_all", undefined, 0);
   };
 
   // Get unique scopes from selected tools
