@@ -38,19 +38,13 @@ const ANIMATION_DELAYS = {
 export function LandingPage() {
   const posthog = usePostHog();
 
-  const handleGetStartedClick = () => {
-    posthog?.capture("get_started_clicked", {
-      button_location: "landing_page_hero",
-      destination: "/home/quickstart",
-    });
-  };
-
-  const handleBuildToolClick = () => {
-    posthog?.capture("build_tool_clicked", {
-      button_location: "landing_page_hero",
-      destination: "/home/build-tools/create-a-mcp-server",
-    });
-  };
+  const trackHeroClick =
+    (eventName: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
+      posthog?.capture(eventName, {
+        button_location: "landing_page_hero",
+        destination: e.currentTarget.getAttribute("href"),
+      });
+    };
 
   return (
     <div>
@@ -127,7 +121,7 @@ export function LandingPage() {
             >
               <Link
                 href="/get-started/quickstarts/call-tool-agent"
-                onClick={handleGetStartedClick}
+                onClick={trackHeroClick("get_started_clicked")}
               >
                 <Rocket className="mr-2 h-5 w-5" />
                 Get Started
@@ -141,7 +135,7 @@ export function LandingPage() {
             >
               <Link
                 href="/guides/create-tools/tool-basics/build-mcp-server"
-                onClick={handleBuildToolClick}
+                onClick={trackHeroClick("build_tool_clicked")}
               >
                 <Wrench className="mr-2 h-5 w-5" />
                 Build a tool
