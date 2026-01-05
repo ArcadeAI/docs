@@ -108,7 +108,7 @@ export function LandingPage() {
               className="h-12 bg-primary px-6 text-white hover:bg-primary/90"
               size="lg"
             >
-              <Link href="/home/quickstart">
+              <Link href="/get-started/quickstarts/call-tool-agent">
                 <Rocket className="mr-2 h-5 w-5" />
                 Get Started
               </Link>
@@ -119,7 +119,7 @@ export function LandingPage() {
               size="lg"
               variant="outline"
             >
-              <Link href="/home/build-tools/create-a-mcp-server">
+              <Link href="/guides/create-tools/tool-basics/build-mcp-server">
                 <Wrench className="mr-2 h-5 w-5" />
                 Build a tool
               </Link>
@@ -138,7 +138,7 @@ export function LandingPage() {
               Don't write code yourself - let your AI IDE do it for you! <br />
               <Link
                 className="text-primary hover:underline"
-                href="/home/agentic-development"
+                href="/get-started/setup/connect-arcade-docs"
               >
                 Learn how to give your coding agents access to Arcade.dev's
                 documentation
@@ -175,25 +175,25 @@ export function LandingPage() {
               icon={Rocket}
               title="Quick Start Guide"
               description="Start using Arcade in minutes with our quick start guide. We'll show you how to equip LLMs with the ability to take action."
-              href="/home/quickstart"
+              href="/get-started/quickstarts/call-tool-agent"
             />
             <QuickStartCard
               icon={Puzzle}
               title="Browse Integrations"
               description="Explore our library of integrations for popular services. Find the perfect integration for your needs."
-              href="/mcp-servers"
+              href="/resources/integrations"
             />
             <QuickStartCard
               icon={Wrench}
               title="Start Building"
               description="Learn how to build and deploy your own custom tools. Use Arcade's tool SDK to create custom capabilities for your agents."
-              href="/home/custom-tools"
+              href="/guides/create-tools/tool-basics/build-mcp-server"
             />
             <QuickStartCard
               icon={Cloud}
               title="Deploy Arcade"
               description="Run Arcade locally, in Docker, or in the cloud. We'll show you how to get started with each option."
-              href="/home/hosting-overview"
+              href="/guides/deployment-hosting/"
             />
           </div>
         </div>
@@ -224,7 +224,7 @@ export function LandingPage() {
                 title: "Secure User Impersonation",
                 description:
                   "Arcade lets agents securely access user-specific services like email, calendars, and documents through built-in OAuth and token management.",
-                href: "/home/auth/how-arcade-helps",
+                href: "/get-started/about-arcade",
               }}
             />
             <ChallengeSolution
@@ -239,7 +239,7 @@ export function LandingPage() {
                 title: "Tools That Scale Independently",
                 description:
                   "Arcade separates tool execution from your application, allowing each tool to run on its optimal infrastructure and scale based on its specific needs.",
-                href: "/home/use-tools/tools-overview",
+                href: "/guides/tool-calling/",
               }}
             />
             <ChallengeSolution
@@ -254,7 +254,7 @@ export function LandingPage() {
                 title: "Build Once, Run Anywhere",
                 description:
                   "Define your tool once with Arcade's SDK and it works seamlessly across OpenAI, Anthropic, and frameworks like LangChain and CrewAI without any changes.",
-                href: "/home/build-tools/create-a-mcp-server",
+                href: "/guides/create-tools/tool-basics/build-mcp-server",
               }}
             />
             <ChallengeSolution

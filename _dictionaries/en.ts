@@ -9,7 +9,7 @@ export default {
   lastUpdated: "Last updated on",
   notFound: "This page could not be found",
   poweredBy: "Powered by",
-  editPage: "Edit this page on GitHub →",
+  editPage: "Edit this page on GitHub",
   by: "by",
   banner: {
     aiTranslation:
