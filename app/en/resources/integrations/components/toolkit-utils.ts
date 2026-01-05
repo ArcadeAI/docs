@@ -8,7 +8,7 @@ export const normalizeString = (str: string) =>
 
 /**
  * Find toolkit from pathname
- * e.g., /en/mcp-servers/productivity/gmail -> Gmail toolkit
+ * e.g., /en/resources/integrations/productivity/gmail/reference -> Gmail toolkit
  */
 export const findToolkitFromPath = (pathname: string | null) => {
   if (!pathname) {
