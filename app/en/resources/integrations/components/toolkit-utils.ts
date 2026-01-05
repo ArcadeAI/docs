@@ -16,7 +16,9 @@ export const findToolkitFromPath = (pathname: string | null) => {
   }
 
   const pathSegments = pathname.split("/").filter(Boolean);
-  const toolkitSlug = pathSegments.at(-1);
+  // URL structure: /en/resources/integrations/{category}/{toolkit}/reference
+  // The toolkit name is the second-to-last segment
+  const toolkitSlug = pathSegments.at(-2);
 
   if (!toolkitSlug) {
     return null;
