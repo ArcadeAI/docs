@@ -100,8 +100,18 @@ const nextConfig: NextConfig = withLlmsTxt({
           permanent: true, // 308 redirect for SEO
         },
         {
+          source: "/en/home/build-tools/call-tools-from-mcp-clients",
+          destination: "/en/guides/create-tools/tool-basics/call-tools-mcp",
+          permanent: true, // 308 redirect for SEO
+        },
+        {
           source: "/home/build-tools/create-a-mcp-server",
           destination: "/guides/create-tools/tool-basics/build-mcp-server",
+          permanent: true, // 308 redirect for SEO
+        },
+        {
+          source: "/en/home/build-tools/create-a-mcp-server",
+          destination: "/en/guides/create-tools/tool-basics/build-mcp-server",
           permanent: true, // 308 redirect for SEO
         },
         {
@@ -110,8 +120,19 @@ const nextConfig: NextConfig = withLlmsTxt({
           permanent: true, // 308 redirect for SEO
         },
         {
+          source: "/en/home/build-tools/create-a-tool-with-auth",
+          destination: "/en/guides/create-tools/tool-basics/create-tool-auth",
+          permanent: true, // 308 redirect for SEO
+        },
+        {
           source: "/home/build-tools/create-a-tool-with-secrets",
           destination: "/guides/create-tools/tool-basics/create-tool-secrets",
+          permanent: true, // 308 redirect for SEO
+        },
+        {
+          source: "/en/home/build-tools/create-a-tool-with-secrets",
+          destination:
+            "/en/guides/create-tools/tool-basics/create-tool-secrets",
           permanent: true, // 308 redirect for SEO
         },
         {
@@ -120,8 +141,18 @@ const nextConfig: NextConfig = withLlmsTxt({
           permanent: true, // 308 redirect for SEO
         },
         {
+          source: "/en/home/build-tools/migrate-from-toolkits",
+          destination: "/en/guides/create-tools/migrate-toolkits",
+          permanent: true, // 308 redirect for SEO
+        },
+        {
           source: "/home/build-tools/organize-mcp-server-tools",
           destination: "/guides/create-tools/tool-basics/organize-mcp-tools",
+          permanent: true, // 308 redirect for SEO
+        },
+        {
+          source: "/en/home/build-tools/organize-mcp-server-tools",
+          destination: "/en/guides/create-tools/tool-basics/organize-mcp-tools",
           permanent: true, // 308 redirect for SEO
         },
         {
@@ -130,13 +161,30 @@ const nextConfig: NextConfig = withLlmsTxt({
           permanent: true, // 308 redirect for SEO
         },
         {
+          source: "/en/home/build-tools/providing-useful-tool-errors",
+          destination:
+            "/en/guides/create-tools/error-handling/useful-tool-errors",
+          permanent: true, // 308 redirect for SEO
+        },
+        {
           source: "/home/build-tools/retry-tools-with-improved-prompt",
           destination: "/guides/create-tools/error-handling/retry-tools",
           permanent: true, // 308 redirect for SEO
         },
         {
+          source: "/en/home/build-tools/retry-tools-with-improved-prompt",
+          destination: "/en/guides/create-tools/error-handling/retry-tools",
+          permanent: true, // 308 redirect for SEO
+        },
+        {
           source: "/home/build-tools/tool-context",
           destination: "/guides/create-tools/tool-basics/runtime-data-access",
+          permanent: true, // 308 redirect for SEO
+        },
+        {
+          source: "/en/home/build-tools/tool-context",
+          destination:
+            "/en/guides/create-tools/tool-basics/runtime-data-access",
           permanent: true, // 308 redirect for SEO
         },
         {
