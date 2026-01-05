@@ -14,6 +14,21 @@ import { ToolCard } from "./tool-card";
 import { TYPE_CONFIG, TYPE_DESCRIPTIONS } from "./type-config";
 import { useFilterStore, useToolkitFilters } from "./use-toolkit-filters";
 
+// Map old MCP server paths to new integration paths
+function mapToNewIA(oldLink: string): string {
+  // Pattern: /en/mcp-servers/{category}/{tool} -> /en/resources/integrations/{category}/{tool}/reference
+  const mcpServerPattern = /^\/en\/mcp-servers\/([^/]+)\/([^/]+)$/;
+  const match = oldLink.match(mcpServerPattern);
+
+  if (match) {
+    const [, category, tool] = match;
+    return `/en/resources/integrations/${category}/${tool}/reference`;
+  }
+
+  // Return original link if it doesn't match the pattern
+  return oldLink;
+}
+
 export default function Toolkits() {
   const clearAllFilters = useFilterStore((state) => state.clearAllFilters);
 
@@ -123,7 +138,7 @@ export default function Toolkits() {
                       isComingSoon={toolkit.isComingSoon}
                       isPro={toolkit.isPro}
                       key={toolkit.id}
-                      link={toolkit.relativeDocsLink}
+                      link={mapToNewIA(toolkit.relativeDocsLink)}
                       name={toolkit.label}
                       type={toolkit.type}
                     />
