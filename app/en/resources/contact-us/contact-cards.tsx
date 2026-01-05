@@ -54,7 +54,7 @@ export function ContactCards() {
         />
         <QuickStartCard
           description="Report security vulnerabilities responsibly. Learn about our security research program and disclosure process."
-          href="/resources/security"
+          href="/guides/security/security-research-program"
           icon={Shield}
           title="Security Research"
         />
