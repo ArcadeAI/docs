@@ -25,7 +25,7 @@ export const PostHog = ({ children }: { children: React.ReactNode }) => {
         },
         // Enable heatmaps for click tracking
         enable_heatmaps: true,
-        // Enable surveys for CSAT
+        // Enable surveys for CSAT feedback
         disable_surveys: false,
         loaded: (posthogInstance) => {
           if (process.env.NEXT_PUBLIC_POSTHOG_DEBUG === "true") {
