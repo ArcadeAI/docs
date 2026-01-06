@@ -1,6 +1,7 @@
 "use client";
 import { Card, CardContent } from "@arcadeai/design-system";
 import Link from "next/link";
+import { usePostHog } from "posthog-js/react";
 
 type SampleAppCardProps = {
   title: string;
@@ -21,8 +22,23 @@ export function SampleAppCard({
   tags = [],
   date,
 }: SampleAppCardProps) {
+  const posthog = usePostHog();
+
+  const handleClick = () => {
+    posthog?.capture("sample_app_clicked", {
+      app_title: title,
+      app_href: href,
+      tags,
+      opens_in_new_tab: blank,
+    });
+  };
+
   return (
-    <Link href={href} target={blank ? "_blank" : undefined}>
+    <Link
+      href={href}
+      onClick={handleClick}
+      target={blank ? "_blank" : undefined}
+    >
       <Card className="flex h-full flex-col gap-1.5 border border-gray-600/20 bg-white/90 py-3 backdrop-blur-sm transition-all duration-300 hover:border-primary hover:bg-gray-600/[0.03] hover:shadow-lg dark:bg-gray-900/80">
         <CardContent className="p-0">
           <div className="space-y-2 p-6">
