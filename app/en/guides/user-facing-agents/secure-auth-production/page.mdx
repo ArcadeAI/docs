@@ -161,7 +161,12 @@ If the user's ID matches the ID specified at the start of the authorization flow
 const authResponse = await client.auth.waitForCompletion(result.auth_id);
 
 if (authResponse.status === "completed") {
-  return "Thanks for authorizing!";
+  return new Response(null, {
+    status: 303,
+    headers: {
+      Location: "https://your-app.com/auth/success",
+    },
+  });
 } else {
   return "Something went wrong. Please try again.";
 }
@@ -175,7 +180,10 @@ if (authResponse.status === "completed") {
 auth_response = await client.auth.wait_for_completion(result.auth_id)
 
 if auth_response.status == "completed":
-    return "Thanks for authorizing!"
+    return Response(
+        status_code=303,
+        headers={"Location": "https://your-app.com/auth/success"}
+    )
 else:
     return "Something went wrong. Please try again."
 ```
