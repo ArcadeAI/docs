@@ -24,79 +24,63 @@ const nextConfig: NextConfig = withLlmsTxt({
     async redirects() {
       return [
         {
-          source: "/home/agent-frameworks-overview",
-          destination: "/guides/agent-frameworks/",
+          source: "/en/home/agent-frameworks-overview",
+          destination: "/en/guides/agent-frameworks/",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/agentic-development",
-          destination: "/get-started/setup/connect-arcade-docs",
+          source: "/en/home/agentic-development",
+          destination: "/en/get-started/setup/connect-arcade-docs",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/api-keys",
-          destination: "/get-started/setup/api-key",
+          source: "/en/home/api-keys",
+          destination: "/en/get-started/setup/api-key",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/arcade-cli",
-          destination: "/references/arcade-cli",
+          source: "/en/home/arcade-cli",
+          destination: "/en/references/arcade-cli",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/auth-providers",
-          destination: "/references/auth-providers",
+          source: "/en/home/auth-providers",
+          destination: "/en/references/auth-providers",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/auth-providers",
-          destination: "/references/auth-providers/",
+          source: "/en/home/auth-providers/...",
+          destination: "/en/references/auth-providers/...",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/auth-providers/...",
-          destination: "/references/auth-providers/...",
+          source: "/en/home/auth-providers/airtable",
+          destination: "/en/references/auth-providers/airtable",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/auth-providers/airtable",
-          destination: "/references/auth-providers/airtable",
+          source: "/en/home/auth/auth-tool-calling",
+          destination: "/en/guides/tool-calling/custom-apps/authorized-tool-calling",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/auth/auth-tool-calling",
-          destination:
-            "/guides/tool-calling/custom-apps/authorized-tool-calling",
+          source: "/en/home/auth/call-third-party-apis-directly",
+          destination: "/en/guides/tool-calling/call-third-party-apis",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/auth/call-third-party-apis-directly",
-          destination: "/guides/tool-calling/call-third-party-apis",
+          source: "/en/home/auth/how-arcade-helps",
+          destination: "/en/get-started/about-arcade",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/auth/how-arcade-helps",
-          destination: "/get-started/about-arcade",
+          source: "/en/home/auth/secure-auth-production",
+          destination: "/en/guides/user-facing-agents/configure-oauth-provider",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/auth/secure-auth-production",
-          destination: "/guides/user-facing-agents/configure-oauth-provider",
-          permanent: true, // 308 redirect for SEO
-        },
-        {
-          source: "/home/auth/secure-auth-production",
-          destination: "/guides/user-facing-agents/brand-provider",
-          permanent: true, // 308 redirect for SEO
-        },
-        {
-          source: "/home/auth/tool-auth-status",
-          destination: "/guides/tool-calling/custom-apps/check-auth-status",
-          permanent: true, // 308 redirect for SEO
-        },
-        {
-          source: "/home/build-tools/call-tools-from-mcp-clients",
-          destination: "/guides/create-tools/tool-basics/call-tools-mcp",
+          source: "/en/home/auth/tool-auth-status",
+          destination: "/en/guides/tool-calling/custom-apps/check-auth-status",
           permanent: true, // 308 redirect for SEO
         },
         {
@@ -105,18 +89,8 @@ const nextConfig: NextConfig = withLlmsTxt({
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/build-tools/create-a-mcp-server",
-          destination: "/guides/create-tools/tool-basics/build-mcp-server",
-          permanent: true, // 308 redirect for SEO
-        },
-        {
           source: "/en/home/build-tools/create-a-mcp-server",
           destination: "/en/guides/create-tools/tool-basics/build-mcp-server",
-          permanent: true, // 308 redirect for SEO
-        },
-        {
-          source: "/home/build-tools/create-a-tool-with-auth",
-          destination: "/guides/create-tools/tool-basics/create-tool-auth",
           permanent: true, // 308 redirect for SEO
         },
         {
@@ -125,19 +99,8 @@ const nextConfig: NextConfig = withLlmsTxt({
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/build-tools/create-a-tool-with-secrets",
-          destination: "/guides/create-tools/tool-basics/create-tool-secrets",
-          permanent: true, // 308 redirect for SEO
-        },
-        {
           source: "/en/home/build-tools/create-a-tool-with-secrets",
-          destination:
-            "/en/guides/create-tools/tool-basics/create-tool-secrets",
-          permanent: true, // 308 redirect for SEO
-        },
-        {
-          source: "/home/build-tools/migrate-from-toolkits",
-          destination: "/guides/create-tools/migrate-toolkits",
+          destination: "/en/guides/create-tools/tool-basics/create-tool-secrets",
           permanent: true, // 308 redirect for SEO
         },
         {
@@ -146,29 +109,13 @@ const nextConfig: NextConfig = withLlmsTxt({
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/build-tools/organize-mcp-server-tools",
-          destination: "/guides/create-tools/tool-basics/organize-mcp-tools",
-          permanent: true, // 308 redirect for SEO
-        },
-        {
           source: "/en/home/build-tools/organize-mcp-server-tools",
           destination: "/en/guides/create-tools/tool-basics/organize-mcp-tools",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/build-tools/providing-useful-tool-errors",
-          destination: "/guides/create-tools/error-handling/useful-tool-errors",
-          permanent: true, // 308 redirect for SEO
-        },
-        {
           source: "/en/home/build-tools/providing-useful-tool-errors",
-          destination:
-            "/en/guides/create-tools/error-handling/useful-tool-errors",
-          permanent: true, // 308 redirect for SEO
-        },
-        {
-          source: "/home/build-tools/retry-tools-with-improved-prompt",
-          destination: "/guides/create-tools/error-handling/retry-tools",
+          destination: "/en/guides/create-tools/error-handling/useful-tool-errors",
           permanent: true, // 308 redirect for SEO
         },
         {
@@ -177,285 +124,259 @@ const nextConfig: NextConfig = withLlmsTxt({
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/build-tools/tool-context",
-          destination: "/guides/create-tools/tool-basics/runtime-data-access",
-          permanent: true, // 308 redirect for SEO
-        },
-        {
           source: "/en/home/build-tools/tool-context",
-          destination:
-            "/en/guides/create-tools/tool-basics/runtime-data-access",
+          destination: "/en/guides/create-tools/tool-basics/runtime-data-access",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/changelog",
-          destination: "/references/changelog",
+          source: "/en/home/changelog",
+          destination: "/en/references/changelog",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/compare-server-types",
-          destination: "/guides/create-tools/tool-basics/compare-server-types",
+          source: "/en/home/compare-server-types",
+          destination: "/en/guides/create-tools/tool-basics/compare-server-types",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/contact-us",
-          destination: "/resources/contact-us",
+          source: "/en/home/contact-us",
+          destination: "/en/resources/contact-us",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/crewai/custom-auth-flow",
-          destination: "/guides/agent-frameworks/crewai/custom-auth-flow",
+          source: "/en/home/crewai/custom-auth-flow",
+          destination: "/en/guides/agent-frameworks/crewai/custom-auth-flow",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/crewai/use-arcade-tools",
-          destination: "/guides/agent-frameworks/crewai/python",
+          source: "/en/home/crewai/use-arcade-tools",
+          destination: "/en/guides/agent-frameworks/crewai/python",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/custom-mcp-server-quickstart",
-          destination: "/get-started/quickstarts/mcp-server-quickstart",
+          source: "/en/home/custom-mcp-server-quickstart",
+          destination: "/en/get-started/quickstarts/mcp-server-quickstart",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/deployment/arcade-cloud-infra",
-          destination: "/guides/deployment-hosting/arcade-cloud",
+          source: "/en/home/deployment/arcade-cloud-infra",
+          destination: "/en/guides/deployment-hosting/arcade-cloud",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/deployment/engine-configuration",
-          destination: "/guides/deployment-hosting/configure-engine",
+          source: "/en/home/deployment/engine-configuration",
+          destination: "/en/guides/deployment-hosting/configure-engine",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/evaluate-tools/create-an-evaluation-suite",
-          destination:
-            "/guides/create-tools/evaluate-tools/create-evaluation-suite",
+          source: "/en/home/evaluate-tools/create-an-evaluation-suite",
+          destination: "/en/guides/create-tools/evaluate-tools/create-evaluation-suite",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/evaluate-tools/run-evaluations",
-          destination: "/guides/create-tools/performance/run-evaluations",
+          source: "/en/home/evaluate-tools/run-evaluations",
+          destination: "/en/guides/create-tools/performance/run-evaluations",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/evaluate-tools/why-evaluate-tools",
-          destination: "/guides/create-tools/evaluate-tools/why-evaluate",
+          source: "/en/home/evaluate-tools/why-evaluate-tools",
+          destination: "/en/guides/create-tools/evaluate-tools/why-evaluate",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/examples",
-          destination: "/resources/examples",
+          source: "/en/home/examples",
+          destination: "/en/resources/examples",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/faq",
-          destination: "/resources/faq",
+          source: "/en/home/faq",
+          destination: "/en/resources/faq",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/glossary",
-          destination: "/resources/glossary",
+          source: "/en/home/glossary",
+          destination: "/en/resources/glossary",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/google-adk/use-arcade-tools",
-          destination: "/guides/agent-frameworks/google-adk/python",
+          source: "/en/home/google-adk/use-arcade-tools",
+          destination: "/en/guides/agent-frameworks/google-adk/python",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/hosting-overview",
-          destination: "/guides/deployment-hosting/",
+          source: "/en/home/hosting-overview",
+          destination: "/en/guides/deployment-hosting/",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/langchain/auth-langchain-tools",
-          destination: "/guides/agent-frameworks/langchain/tools",
+          source: "/en/home/langchain/auth-langchain-tools",
+          destination: "/en/guides/agent-frameworks/langchain/tools",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/langchain/use-arcade-tools",
-          destination: "/guides/agent-frameworks/langchain/python",
+          source: "/en/home/langchain/use-arcade-tools",
+          destination: "/en/guides/agent-frameworks/langchain/python",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/mastra/use-arcade-tools",
-          destination: "/guides/agent-frameworks/mastra/typescript",
+          source: "/en/home/mastra/use-arcade-tools",
+          destination: "/en/guides/agent-frameworks/mastra/typescript",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/mcp-clients/claude-desktop",
-          destination: "/guides/tool-calling/mcp-clients/claude-desktop",
+          source: "/en/home/mcp-clients/claude-desktop",
+          destination: "/en/guides/tool-calling/mcp-clients/claude-desktop",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/mcp-clients/cursor",
-          destination: "/guides/tool-calling/mcp-clients/cursor",
+          source: "/en/home/mcp-clients/cursor",
+          destination: "/en/guides/tool-calling/mcp-clients/cursor",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/mcp-clients/visual-studio-code",
-          destination: "/guides/tool-calling/mcp-clients/visual-studio-code",
+          source: "/en/home/mcp-clients/visual-studio-code",
+          destination: "/en/guides/tool-calling/mcp-clients/visual-studio-code",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/mcp-gateway-quickstart",
-          destination: "/get-started/quickstarts/call-tool-client",
+          source: "/en/home/mcp-gateway-quickstart",
+          destination: "/en/get-started/quickstarts/call-tool-client",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/oai-agents/use-arcade-tools",
-          destination: "/guides/agent-frameworks/openai/python",
+          source: "/en/home/oai-agents/use-arcade-tools",
+          destination: "/en/guides/agent-frameworks/openai/python",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/quickstart",
-          destination: "/get-started/quickstarts/call-tool-agent",
+          source: "/en/home/quickstart",
+          destination: "/en/get-started/quickstarts/call-tool-agent",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/registry-early-access",
-          destination: "/guides/create-tools/contribute/registry",
+          source: "/en/home/registry-early-access",
+          destination: "/en/guides/create-tools/contribute/registry",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/serve-tools/arcade-deploy",
-          destination: "/guides/deployment-hosting/arcade-deploy",
+          source: "/en/home/serve-tools/arcade-deploy",
+          destination: "/en/guides/deployment-hosting/arcade-deploy",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/serve-tools/hybrid-worker",
-          destination: "/guides/deployment-hosting/on-prem",
+          source: "/en/home/serve-tools/hybrid-worker",
+          destination: "/en/guides/deployment-hosting/on-prem",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/use-tools/get-tool-definitions",
-          destination: "/guides/tool-calling/custom-apps/get-tool-definitions",
+          source: "/en/home/use-tools/get-tool-definitions",
+          destination: "/en/guides/tool-calling/custom-apps/get-tool-definitions",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/use-tools/tools-overview",
-          destination: "/guides/tool-calling/",
+          source: "/en/home/use-tools/tools-overview",
+          destination: "/en/guides/tool-calling/",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/use-tools/types-of-tools",
-          destination: "/guides/create-tools/improve/types-of-tools",
+          source: "/en/home/use-tools/types-of-tools",
+          destination: "/en/guides/create-tools/improve/types-of-tools",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/vercelai/using-arcade-tools",
-          destination: "/guides/agent-frameworks/vercel-ai/typescript",
+          source: "/en/home/use-tools/error-handling",
+          destination: "/en/guides/tool-calling/error-handling",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/mcp-servers",
-          destination: "/resources/integrations",
+          source: "/en/home/vercelai/using-arcade-tools",
+          destination: "/en/guides/agent-frameworks/vercel-ai/typescript",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/references/mcp",
-          destination: "/references/mcp/python",
+          source: "/en/mcp-servers",
+          destination: "/en/resources/integrations",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/references/mcp/python/overview",
-          destination: "/references/mcp/python",
+          source: "/en/references/mcp",
+          destination: "/en/references/mcp/python",
           permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/home/use-tools/error-handling",
-          destination: "/guides/tool-calling/error-handling",
+          source: "/en/references/mcp/python/overview",
+          destination: "/en/references/mcp/python",
           permanent: true, // 308 redirect for SEO
         },
-        // Fix trailing slash issues
         {
-          source: "/references/auth-providers/",
-          destination: "/references/auth-providers",
-          permanent: true,
+          source: "/en/get-started/setup/api-key",
+          destination: "/en/get-started/setup/api-keys",
+          permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/references/mcp/python/",
-          destination: "/references/mcp/python",
-          permanent: true,
+          source: "/en/guides/tool-calling/custom-apps/authorized-tool-calling",
+          destination: "/en/guides/tool-calling/custom-apps/auth-tool-calling",
+          permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/guides/tool-calling/",
-          destination: "/guides/tool-calling",
-          permanent: true,
-        },
-        // Fix missing locale prefix
-        {
-          source: "/get-started/setup/api-key",
-          destination: "/get-started/setup/api-keys",
-          permanent: true,
+          source: "/en/guides/user-facing-agents/brand-provider",
+          destination: "/en/guides/user-facing-agents/secure-auth-production",
+          permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/guides/tool-calling/custom-apps/authorized-tool-calling",
-          destination: "/guides/tool-calling/custom-apps/auth-tool-calling",
-          permanent: true,
+          source: "/en/guides/tool-calling/mcp-client/claude-desktop",
+          destination: "/en/guides/tool-calling/mcp-clients/claude-desktop",
+          permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/guides/user-facing-agents/brand-provider",
-          destination: "/guides/user-facing-agents/secure-auth-production",
-          permanent: true,
+          source: "/en/guides/tool-calling/mcp-client/cursor",
+          destination: "/en/guides/tool-calling/mcp-clients/cursor",
+          permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/guides/tool-calling/mcp-client/claude-desktop",
-          destination: "/guides/tool-calling/mcp-clients/claude-desktop",
-          permanent: true,
+          source: "/en/guides/tool-calling/mcp-client/visual-studio-code",
+          destination: "/en/guides/tool-calling/mcp-clients/visual-studio-code",
+          permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/guides/tool-calling/mcp-client/cursor",
-          destination: "/guides/tool-calling/mcp-clients/cursor",
-          permanent: true,
+          source: "/en/guides/tool-calling/get-tool-definitions",
+          destination: "/en/guides/tool-calling/custom-apps/get-tool-definitions",
+          permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/guides/tool-calling/mcp-client/visual-studio-code",
-          destination: "/guides/tool-calling/mcp-clients/visual-studio-code",
-          permanent: true,
+          source: "/en/guides/deployment-hosting/engine-configuration",
+          destination: "/en/guides/deployment-hosting/configure-engine",
+          permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/guides/tool-calling/get-tool-definitions",
-          destination: "/guides/tool-calling/custom-apps/get-tool-definitions",
-          permanent: true,
+          source: "/en/guides/create-tools/performance/run-evaluations",
+          destination: "/en/guides/create-tools/evaluate-tools/run-evaluations",
+          permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/guides/deployment-hosting/engine-configuration",
-          destination: "/guides/deployment-hosting/configure-engine",
-          permanent: true,
+          source: "/en/references/arcade-cliarcade-configure",
+          destination: "/en/references/arcade-cli",
+          permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/guides/create-tools/performance/run-evaluations",
-          destination: "/guides/create-tools/evaluate-tools/run-evaluations",
-          permanent: true,
+          source: "/en/resources/mastra/user-auth-interrupts",
+          destination: "/en/guides/agent-frameworks/mastra/user-auth-interrupts",
+          permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/references/arcade-cliarcade-configure",
-          destination: "/references/arcade-cli",
-          permanent: true,
+          source: "/en/mcp-servers/:path*",
+          destination: "/en/resources/integrations/:path*",
+          permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/resources/mastra/user-auth-interrupts",
-          destination: "/guides/agent-frameworks/mastra/user-auth-interrupts",
-          permanent: true,
-        },
-        // Redirect mcp-servers to resources/integrations
-        {
-          source: "/mcp-servers/:path*",
-          destination: "/resources/integrations/:path*",
-          permanent: true,
-        },
-        // Fix broken resource paths
-        {
-          source: "/resources/oai-agents/overview",
-          destination: "/guides/agent-frameworks/openai-agents",
-          permanent: true,
+          source: "/en/resources/oai-agents/overview",
+          destination: "/en/guides/agent-frameworks/openai-agents",
+          permanent: true, // 308 redirect for SEO
         },
         {
-          source: "/resources/creating-tools/:path*",
-          destination: "/guides/create-tools/:path*",
-          permanent: true,
+          source: "/en/resources/creating-tools/:path*",
+          destination: "/en/guides/create-tools/:path*",
+          permanent: true, // 308 redirect for SEO
         },
       ];
     },
