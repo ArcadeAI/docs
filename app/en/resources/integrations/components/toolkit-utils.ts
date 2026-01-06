@@ -8,7 +8,8 @@ export const normalizeString = (str: string) =>
 
 /**
  * Find toolkit from pathname
- * e.g., /en/mcp-servers/productivity/gmail -> Gmail toolkit
+ * e.g., /en/resources/integrations/productivity/gmail -> Gmail toolkit
+ * e.g., /en/resources/integrations/productivity/gmail/reference -> Gmail toolkit
  */
 export const findToolkitFromPath = (pathname: string | null) => {
   if (!pathname) {
@@ -16,7 +17,12 @@ export const findToolkitFromPath = (pathname: string | null) => {
   }
 
   const pathSegments = pathname.split("/").filter(Boolean);
-  const toolkitSlug = pathSegments.at(-1);
+  // URL structure can be:
+  // - /en/resources/integrations/{category}/{toolkit}
+  // - /en/resources/integrations/{category}/{toolkit}/reference
+  const lastSegment = pathSegments.at(-1);
+  const toolkitSlug =
+    lastSegment === "reference" ? pathSegments.at(-2) : lastSegment;
 
   if (!toolkitSlug) {
     return null;
