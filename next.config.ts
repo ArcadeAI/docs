@@ -25,6 +25,16 @@ const nextConfig: NextConfig = withLlmsTxt({
       return [
         // Old /home/* paths to new structure
         {
+          source: "/:locale/home/build-tools/server-level-vs-tool-level-auth",
+          destination: "/:locale/learn/server-level-vs-tool-level-auth",
+          permanent: true,
+        },
+        {
+          source: "/:locale/home/build-tools/secure-your-mcp-server",
+          destination: "/:locale/guides/security/secure-your-mcp-server",
+          permanent: true,
+        },
+        {
           source: "/:locale/home/agent-frameworks-overview",
           destination: "/:locale/guides/agent-frameworks",
           permanent: true,
