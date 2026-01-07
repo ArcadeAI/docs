@@ -16,13 +16,13 @@ import { useFilterStore, useToolkitFilters } from "./use-toolkit-filters";
 
 // Map old MCP server paths to new integration paths
 function mapToNewIA(oldLink: string): string {
-  // Pattern: /en/mcp-servers/{category}/{tool} -> /en/resources/integrations/{category}/{tool}/reference
+  // Pattern: /en/mcp-servers/{category}/{tool} -> /en/resources/integrations/{category}/{tool}
   const mcpServerPattern = /^\/en\/mcp-servers\/([^/]+)\/([^/]+)$/;
   const match = oldLink.match(mcpServerPattern);
 
   if (match) {
     const [, category, tool] = match;
-    return `/en/resources/integrations/${category}/${tool}/reference`;
+    return `/en/resources/integrations/${category}/${tool}`;
   }
 
   // Return original link if it doesn't match the pattern
