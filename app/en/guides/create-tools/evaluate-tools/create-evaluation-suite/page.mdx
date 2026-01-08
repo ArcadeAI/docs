@@ -3,11 +3,9 @@ title: "Create an evaluation suite"
 description: "Learn how to evaluate your tools using Arcade"
 ---
 
-# Evaluate tools
+# Create an evaluation suite
 
-In this guide, you'll learn how to evaluate your tools to ensure they are selected and used correctly by an AI model. You'll define evaluation cases and use different critics to assess the outcome of your evaluations.
-
-We'll create evaluation cases to test the `greet` tool and measure its performance.
+Evaluation suites help you test whether AI models use your tools correctly. This guide shows you how to create test cases that measure tool selection and parameter accuracy.
 
 import { Steps, Tabs, Callout } from "nextra/components";
 
@@ -18,85 +16,76 @@ import { Steps, Tabs, Callout } from "nextra/components";
 - [Create an MCP Server](/guides/create-tools/tool-basics/build-mcp-server)
 - Install the evaluation dependencies:
 
-<Tabs items={["uv", "pip"]}>
+<Tabs items={["uv", "pip"]} storageKey="packageManager">
   <Tabs.Tab>
 
-  ```bash
-  uv tool install 'arcade-mcp[evals]'
-  ```
+```bash
+uv tool install 'arcade-mcp[evals]'
+```
 
   </Tabs.Tab>
 
   <Tabs.Tab>
 
-  ```bash
-  pip install 'arcade-mcp[evals]'
-  ```
+```bash
+pip install 'arcade-mcp[evals]'
+```
 
   </Tabs.Tab>
 </Tabs>
 
-### Create an evaluation suite
+### Create an evaluation file
 
-Navigate to your MCP Server's directory
+Navigate to your MCP server directory and create a file starting with `eval_`:
 
 ```bash
 cd my_server
+touch eval_server.py
 ```
 
-Create a new Python file for your evaluations, e.g., `eval_server.py`.
-
 <Callout type="info">
-  For evals, the file name should start with `eval_` and be a Python script
-  (using the `.py` extension).
+  Evaluation files must start with `eval_` and use the `.py` extension. The CLI
+  automatically discovers these files.
 </Callout>
 
-### Define your evaluation cases
+### Define your evaluation suite
 
-Open `eval_server.py` and add the following code:
+Create an evaluation suite that loads tools from your MCP server and defines test cases:
 
 ```python
 from arcade_evals import (
-    EvalSuite, tool_eval, EvalRubric,
-    ExpectedToolCall, BinaryCritic
-)
-from arcade_core import ToolCatalog
-
-from server import greet
-
-# Create a catalog of tools to include in the evaluation
-catalog = ToolCatalog()
-catalog.add_tool(greet, "Greet")
-
-# Create rubric with tool calls
-rubric = EvalRubric(
-    fail_threshold=0.8,
-    warn_threshold=0.9,
+    EvalSuite,
+    tool_eval,
+    ExpectedMCPToolCall,
+    BinaryCritic,
 )
 
 @tool_eval()
-def hello_eval_suite() -> EvalSuite:
-    """Create an evaluation suite for the hello tool."""
+async def weather_eval_suite() -> EvalSuite:
+    """Evaluate weather tool usage."""
     suite = EvalSuite(
-        name="MCP Server Evaluation",
-        catalog=catalog,
-        system_message="You are a helpful assistant.",
-        rubric=rubric,
+        name="Weather Tools",
+        system_message="You are a helpful weather assistant.",
     )
 
+    # Load tools from your MCP server
+    await suite.add_mcp_stdio_server(
+        command=["python", "server.py"],
+    )
+
+    # Add a test case
     suite.add_case(
-        name="Simple Greeting",
-        user_message="Greet Alice",
+        name="Get weather for city",
+        user_message="What's the weather in Seattle?",
         expected_tool_calls=[
-            ExpectedToolCall(
-                func=greet,
-                args={
-                    "name": "Alice",
-                },
+            ExpectedMCPToolCall(
+                "Weather_GetCurrent",
+                {"location": "Seattle", "units": "celsius"}
             )
         ],
         critics=[
-            BinaryCritic(critic_field="name", weight=1.0),
+            BinaryCritic(critic_field="location", weight=0.7),
+            BinaryCritic(critic_field="units", weight=0.3),
         ],
     )
 
@@ -105,215 +94,248 @@ def hello_eval_suite() -> EvalSuite:
 
 ### Run the evaluation
 
-From the server directory, ensure you have an OpenAI API key set in the `OPENAI_API_KEY` environment variable. Then run:
+Set your OpenAI API key and run the evaluation:
 
 ```bash
-export OPENAI_API_KEY=<YOUR_OPENAI_API_KEY>
+export OPENAI_API_KEY=<your_api_key>
 arcade evals .
 ```
 
-This command executes your evaluation suite and provides a report.
+The command discovers all `eval_*.py` files and executes them using OpenAI's `gpt-4o` model by default.
 
-<Callout type="info">
-  By default, the evaluation suite will use the `gpt-4o` model. You can specify
-  a different model and provider using the `--models` and `--provider` options.
-  If you are using a different provider, you will need to set the appropriate
-  API key in an environment variable, or use the `--provider-api-key` option.
-  For more information, see the [Run
-  evaluations](/guides/create-tools/evaluate-tools/run-evaluations) guide.
-</Callout>
+**Using different providers:**
 
-### How it works
+```bash
+# Anthropic
+export ANTHROPIC_API_KEY=<your_api_key>
+arcade evals . -p anthropic
 
-The evaluation framework in Arcade allows you to define test cases (`EvalCase`) with expected tool calls and use critics to assess an AI model's performance.
+# Or specify API key directly
+arcade evals . -p anthropic -k anthropic:<your_api_key>
 
-Similar to how a unit test suite measures the validity and performance of a function, an eval suite measures how well an AI model understands and uses your tools.
+# Multiple models
+arcade evals . -p "openai:gpt-4o,gpt-4o-mini"
 
-### Next steps
+# Multiple providers (space-separated)
+arcade evals . -p "openai anthropic" -k openai:sk-... -k anthropic:sk-ant-...
+```
 
-- Explore [different types of critics](#critic-classes) and [more complex evaluation cases](#advanced-evaluation-cases) to thoroughly test your tools.
-- Understand [how to specify options for your evaluation runs](/guides/create-tools/evaluate-tools/run-evaluations).
+See [Run evaluations](/guides/create-tools/evaluate-tools/run-evaluations) for all available options.
+
+### Understand the results
+
+Evaluation results show:
+
+- **Passed**: Score meets or exceeds the fail threshold (default: 0.8)
+- **Failed**: Score falls below the fail threshold
+- **Warned**: Score is between warn and fail thresholds (default: 0.9)
+
+Example output:
+
+```
+Suite: Weather Tools
+  Model: gpt-4o
+    PASSED Get weather for city -- Score: 1.00
+
+Summary -- Total: 1 -- Passed: 1 -- Failed: 0
+```
+
+Use `--details` to see critic feedback:
+
+```bash
+arcade evals . --details
+```
+
+Detailed output includes per-critic scores:
+
+```
+PASSED Get weather for city -- Score: 1.00
+  Details:
+    location:
+      Match: True, Score: 0.70/0.70
+    units:
+      Match: True, Score: 0.30/0.30
+```
 
 </Steps>
 
-## Critic classes
+## Loading tools
 
-Critics are used to evaluate the correctness of tool calls. For simple tools, "correct" might be binary: is it exactly what we expected? For more complex tools, we might need to evaluate the similarity between expected and actual values, or measure numeric values within an acceptable range.
+You can load tools from different sources. All methods are async and must be awaited in your `@tool_eval()` decorated function.
 
-Arcade's evaluation framework provides several critic classes to help you evaluate both exact and "fuzzy" matches between expected and actual values when a model predicts the parameters of a tool call.
+### From MCP HTTP server
 
-### BinaryCritic
-
-Checks if a parameter value matches exactly.
+Load tools from an HTTP or SSE MCP server:
 
 ```python
-BinaryCritic(critic_field="name", weight=1.0)
+await suite.add_mcp_server(
+    url="http://localhost:8000",
+    headers={"Authorization": "Bearer token"},  # Optional
+    timeout=10,                                  # Optional: Connection timeout (default: 10)
+    use_sse=False,                              # Optional: Use SSE transport (default: False)
+)
 ```
 
-### SimilarityCritic
+The URL is automatically normalized (appends `/mcp` if not present).
 
-Evaluates the similarity between expected and actual values.
+### From MCP stdio server
+
+Load tools from a stdio MCP server process:
 
 ```python
-from arcade_evals import SimilarityCritic
-
-SimilarityCritic(critic_field="message", weight=1.0)
+await suite.add_mcp_stdio_server(
+    command=["python", "server.py"],
+    env={"API_KEY": "secret"},  # Optional: Environment variables
+    timeout=10,                  # Optional: Connection timeout (default: 10)
+)
 ```
 
-### NumericCritic
+### From Arcade Gateway
 
-Assesses numeric values within a specified tolerance.
+Load tools from an Arcade MCP Gateway:
 
 ```python
-from arcade_evals import NumericCritic
-
-NumericCritic(critic_field="score", tolerance=0.1, weight=1.0)
+await suite.add_arcade_gateway(
+    gateway_slug="my-gateway",
+    arcade_api_key="your-api-key",  # Optional: Defaults to ARCADE_API_KEY env var
+    arcade_user_id="user-id",       # Optional: Defaults to ARCADE_USER_ID env var
+    base_url=None,                   # Optional: Override gateway URL
+    timeout=10,                      # Optional: Connection timeout (default: 10)
+)
 ```
 
-### DatetimeCritic
+### Manual tool definitions
 
-Evaluates the closeness of datetime values within a specified tolerance.
+Define tools manually using MCP format:
 
 ```python
-from datetime import timedelta
-from arcade_evals import DatetimeCritic
-
-DatetimeCritic(critic_field="start_time", tolerance=timedelta(seconds=10), weight=1.0)
+suite.add_tool_definitions([
+    {
+        "name": "Weather.GetCurrent",
+        "description": "Get current weather for a location",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "location": {"type": "string"},
+                "units": {
+                    "type": "string",
+                    "enum": ["celsius", "fahrenheit"],
+                    "default": "celsius"
+                },
+            },
+            "required": ["location"],
+        },
+    }
+])
 ```
 
-## Advanced evaluation cases
+### Mixing tool sources
 
-You can add more evaluation cases to test different scenarios.
+You can load tools from multiple sources into the same suite:
 
-<Callout type="info">
-  Ensure that your `greet` tool and evaluation cases are updated accordingly and
-  that you rerun `arcade evals .` to test your changes.
+```python
+# Load from multiple MCP servers
+await suite.add_mcp_server("http://server1.example")
+await suite.add_mcp_server("http://server2.example")
 
-  If your evals fail, use `--details` to see the detailed feedback from each critic. See [Run evaluations](/guides/create-tools/evaluate-tools/run-evaluations) to understand the options available in `arcade evals`.
+# Mix with manual definitions
+suite.add_tool_definitions([{"name": "CustomTool", ...}])
+```
+
+All tools are accumulated in the suite's registry and available to the model.
+
+## Expected tool calls
+
+Expected tool calls define what the model should predict. Use `ExpectedMCPToolCall` with MCP-style tool names:
+
+```python
+ExpectedMCPToolCall(
+    "Weather_GetCurrent",
+    {"location": "Seattle", "units": "celsius"}
+)
+```
+
+<Callout type="warning">
+  Tool names are normalized for compatibility with model tool calling. Dots
+  (`.`) become underscores (`_`). For example, `Weather.GetCurrent` becomes
+  `Weather_GetCurrent`.
 </Callout>
 
+## Critics
 
-### Example: Greeting with emotion
+Critics validate tool call parameters. Each critic type handles different validation needs:
 
-Modify your `hello` tool to accept an `emotion` parameter:
+| Critic             | Use case        | Example                                                            |
+| ------------------ | --------------- | ------------------------------------------------------------------ |
+| `BinaryCritic`     | Exact match     | `BinaryCritic(critic_field="user_id", weight=1.0)`                 |
+| `SimilarityCritic` | Text similarity | `SimilarityCritic(critic_field="message", weight=0.8)`             |
+| `NumericCritic`    | Numeric range   | `NumericCritic(critic_field="temp", tolerance=2.0)`                |
+| `DatetimeCritic`   | Time window     | `DatetimeCritic(critic_field="due", tolerance=timedelta(hours=1))` |
 
 ```python
-from enum import Enum
+from arcade_evals import BinaryCritic, SimilarityCritic
 
-class Emotion(str, Enum):
-    HAPPY = "happy"
-    SLIGHTLY_HAPPY = "slightly happy"
-    SAD = "sad"
-    SLIGHTLY_SAD = "slightly sad"
-
-@app.tool
-def greet(
-    name: Annotated[str, "The name of the person to greet"],
-    emotion: Annotated[
-        Emotion, "The emotion to convey. Defaults to happy if omitted."
-    ] = Emotion.HAPPY,
-) -> Annotated[str, "A greeting to the user"]:
-    """
-    Greet a person by name, optionally with a specific emotion.
-    """
-    return f"Hello {name}! I'm feeling {emotion.value} today."
+critics=[
+    BinaryCritic(critic_field="location", weight=0.7),
+    SimilarityCritic(critic_field="message", weight=0.3),
+]
 ```
 
-Add an evaluation case for this new parameter:
+All weights are normalized proportionally to sum to 1.0. Use numeric values or `FuzzyWeight` (`CRITICAL`, `HIGH`, `MEDIUM`, `LOW`).
+
+## Multiple tool calls
+
+Test cases can include multiple expected tool calls:
 
 ```python
-# At the top of the file:
-from server import Emotion
-from arcade_evals import SimilarityCritic
-
-# Inside hello_eval_suite():
 suite.add_case(
-    name="Greeting with Emotion",
-    user_message="Say hello to Bob sadly",
+    name="Check weather in multiple cities",
+    user_message="What's the weather in Seattle and Portland?",
     expected_tool_calls=[
-        ExpectedToolCall(
-            func=greet,
-            args={
-                "name": "Bob",
-                "emotion": Emotion.SAD,
-            },
-        )
-    ],
-    critics=[
-        BinaryCritic(critic_field="name", weight=0.5),
-        SimilarityCritic(critic_field="emotion", weight=0.5),
+        ExpectedMCPToolCall("Weather_GetCurrent", {"location": "Seattle"}),
+        ExpectedMCPToolCall("Weather_GetCurrent", {"location": "Portland"}),
     ],
 )
 ```
 
-Add an evaluation case with additional conversation context:
+## Conversation context
+
+Add conversation history to test cases that require context:
 
 ```python
 suite.add_case(
-    name="Greeting with Emotion from Context",
-    user_message="Say hello to Bob based on my current mood.",
+    name="Weather based on previous location",
+    user_message="What about the weather there?",
     expected_tool_calls=[
-        ExpectedToolCall(
-            func=greet,
-            args={
-                "name": "Bob",
-                "emotion": Emotion.HAPPY,
-            },
-        )
+        ExpectedMCPToolCall("Weather_GetCurrent", {"location": "Tokyo"}),
     ],
-    critics=[
-        BinaryCritic(critic_field="name", weight=0.5),
-        SimilarityCritic(critic_field="emotion", weight=0.5),
+    additional_messages=[
+        {"role": "user", "content": "I'm planning to visit Tokyo next week."},
+        {"role": "assistant", "content": "That sounds exciting! What would you like to know about Tokyo?"},
     ],
-    # Add some context to the evaluation case
-    additional_messages= [
-        {"role": "user", "content": "Hi, I'm so happy!"},
-        {
-            "role": "assistant",
-            "content": "That's awesome! What's got you feeling so happy today?",
-        },
-    ]
 )
 ```
 
-Add an evaluation case with multiple expected tool calls:
+Use OpenAI message format for `additional_messages`. Arcade converts it automatically for Anthropic.
+
+## Rubrics
+
+Customize pass/fail thresholds with `EvalRubric`. Default: fail at 0.8, warn at 0.9.
 
 ```python
-suite.add_case(
-    name="Multiple Greetings with Emotion from Context",
-    user_message="Say hello to Bob based on my current mood. And then say hello to Alice with slightly less of that emotion.",
-    expected_tool_calls=[
-        ExpectedToolCall(
-            func=greet,
-            args={
-                "name": "Bob",
-                "emotion": Emotion.HAPPY,
-            },
-        ),
-        ExpectedToolCall(
-            func=greet,
-            args={
-                "name": "Alice",
-                "emotion": Emotion.SLIGHTLY_HAPPY,
-            },
-        )
-    ],
-    critics=[
-        BinaryCritic(critic_field="name", weight=0.5),
-        SimilarityCritic(critic_field="emotion", weight=0.5),
-    ],
-    # Add some context to the evaluation case
-    additional_messages= [
-        {"role": "user", "content": "Hi, I'm so happy!"},
-        {
-            "role": "assistant",
-            "content": "That's awesome! What's got you feeling so happy today?",
-        },
-    ]
+from arcade_evals import EvalRubric
+
+suite = EvalSuite(
+    name="Strict Evaluation",
+    system_message="You are helpful.",
+    rubric=EvalRubric(fail_threshold=0.85, warn_threshold=0.95),
 )
 ```
+
+If you want stricter suites, increase thresholds (for example `fail_threshold=0.95`). For exploratory testing, lower them (for example `fail_threshold=0.6`).
 
 ## Next steps
 
-- **See an example MCP server with evaluations**: [Source code of a server with evaluations](https://github.com/ArcadeAI/arcade-mcp/tree/139cc2e54db0e5815f1c79dbe9e3285b4fe2bd66/examples/mcp_servers/server_with_evaluations)
-- **Learn how to run evaluations**: [Run evaluations](/guides/create-tools/evaluate-tools/run-evaluations)
+- Learn how to [run evaluations with different providers](/guides/create-tools/evaluate-tools/run-evaluations)
+- Explore [capture mode](/guides/create-tools/evaluate-tools/capture-mode) to record tool calls
+- Compare tool sources with [comparative evaluations](/guides/create-tools/evaluate-tools/comparative-evaluations)

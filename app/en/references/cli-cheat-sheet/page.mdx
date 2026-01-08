@@ -333,25 +333,93 @@ import '../../../cheat-sheet-print.css'
 
 <CheatSheetSection title="Evaluations" icon="📊" color="cyan">
   Test tool-calling accuracy with evaluation suites.
-  ### Run Evaluations
-  ```bash
-  arcade evals # Current dir
-  arcade evals ./evals/ # Specific dir
-  ```
-  ### Capture Mode
-  ```bash
-  arcade evals --capture
-  ```
-### Output Options
 
-| Flag                   | Description                                       |
-| ---------------------- | ------------------------------------------------- |
-| `--details`, `-d`      | Show detailed results                             |
-| `--failed-only`, `-f`  | Show only failed evals                            |
-| `--file <path>`        | Write results to file                             |
-| `--format <fmt>`       | Output format: `txt`, `md`, `html`, `json`, `all` |
-| `--max-concurrent <n>` | Concurrent evaluations (default: 1)               |
-| `--add-context`        | Include system/additional messages
+  ### Basic Usage
+  ```bash
+  # Run all evals in current directory
+  arcade evals
+
+  # Run specific directory
+  arcade evals ./evals/
+
+  # Show detailed results
+  arcade evals -d
+
+  # Filter failed tests only
+  arcade evals --only-failed
+  ```
+
+  ### Capture Mode
+  Record tool calls without scoring to bootstrap test expectations:
+  ```bash
+  # Basic capture
+  arcade evals --capture
+
+  # Capture with context
+  arcade evals --capture --include-context
+
+  # Save to file
+  arcade evals --capture -o captures.json
+  ```
+
+  ### Provider Selection
+  ```bash
+  # Use specific provider
+  arcade evals -p openai
+
+  # Use specific model
+  arcade evals -p openai:gpt-4o
+
+  # Multiple providers
+  arcade evals -p openai:gpt-4o -p anthropic:claude-sonnet-4-5-20250929
+
+  # With API key
+  arcade evals -k openai:sk-...
+  ```
+
+  ### Output Formats
+  ```bash
+  # Save as JSON
+  arcade evals -o results.json
+
+  # Multiple formats
+  arcade evals -o report.html -o report.md
+
+  # All formats
+  arcade evals -o results
+  ```
+
+  ### Common Workflows
+  ```bash
+  # Debug failures
+  arcade evals --only-failed -d
+
+  # Full report with context
+  arcade evals -d --include-context -o report.html
+
+  # Parallel execution
+  arcade evals --max-concurrent 5
+
+  # Capture baseline
+  arcade evals --capture -o baseline.json
+  ```
+
+  ### Key Flags
+
+  | Flag | Short | Description |
+  |------|-------|-------------|
+  | `--details` | `-d` | Show detailed results |
+  | `--only-failed` | `-f` | Filter failed tests |
+  | `--output` | `-o` | Output file(s) |
+  | `--use-provider` | `-p` | Select provider/model |
+  | `--api-key` | `-k` | Provider API key |
+  | `--capture` | | Capture mode |
+  | `--include-context` | | Add system messages |
+  | `--max-concurrent` | `-c` | Parallel runs |
+
+  <InfoBox type="tip">
+    Use `--capture` to generate expected tool calls, then run normal evals to validate.
+  </InfoBox>
 
 </CheatSheetSection>
 
