@@ -1,6 +1,9 @@
 import type { MetaRecord } from "nextra";
 
 export const meta: MetaRecord = {
+  index: {
+    title: "Overview",
+  },
   "compare-server-types": {
     title: "Compare MCP server types",
   },
