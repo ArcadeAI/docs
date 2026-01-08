@@ -1,6 +1,7 @@
-import type { MetaRecord } from "nextra";
-
-export const meta: MetaRecord = {
+export default {
+  index: {
+    title: "Overview",
+  },
   "auth-tool-calling": {
     title: "Authorize tool calling",
   },
@@ -11,5 +12,3 @@ export const meta: MetaRecord = {
     title: "Get formatted tool definitions",
   },
 };
-
-export default meta;

@@ -1,6 +1,7 @@
-import type { MetaRecord } from "nextra";
-
-export const meta: MetaRecord = {
+export default {
+  index: {
+    title: "Overview",
+  },
   "compare-server-types": {
     title: "Compare MCP server types",
   },
@@ -23,5 +24,3 @@ export const meta: MetaRecord = {
     title: "Organize your MCP server and tools",
   },
 };
-
-export default meta;
