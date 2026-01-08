@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 interface SubpageListProps {
   basePath: string;
   meta: Record<string, any>;
@@ -17,12 +19,12 @@ export function SubpageList({ basePath, meta }: SubpageListProps) {
               : String(title);
         return (
           <li className="x:my-[.5em]" key={key}>
-            <a
+            <Link
               className="x:focus-visible:nextra-focus x:text-primary-600 x:underline x:decoration-from-font x:[text-underline-position:from-font] x:hover:no-underline"
               href={`${basePath}/${key}`}
             >
               {linkText}
-            </a>
+            </Link>
           </li>
         );
       })}
