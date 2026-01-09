@@ -11,14 +11,14 @@ const meta: MetaRecord = {
   index: {
     title: "Overview",
   },
-  "auth-tool-calling": {
-    title: "Authorize tool calling",
+  "securing-arcade-mcp": {
+    title: "Securing Arcade MCP",
   },
-  "check-auth-status": {
-    title: "Check authorization status",
+  "secure-your-mcp-server": {
+    title: "Secure your MCP server",
   },
-  "get-tool-definitions": {
-    title: "Get formatted tool definitions",
+  "security-research-program": {
+    title: "Security research program",
   },
 };
 

@@ -11,14 +11,11 @@ const meta: MetaRecord = {
   index: {
     title: "Overview",
   },
-  "auth-tool-calling": {
-    title: "Authorize tool calling",
+  "retry-tools": {
+    title: "Retry Tools with Improved Prompt",
   },
-  "check-auth-status": {
-    title: "Check authorization status",
-  },
-  "get-tool-definitions": {
-    title: "Get formatted tool definitions",
+  "useful-tool-errors": {
+    title: "Provide Useful Tool Errors",
   },
 };
 
