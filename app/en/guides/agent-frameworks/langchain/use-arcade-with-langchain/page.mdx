@@ -396,28 +396,29 @@ async function main() {
     rl.pause();
 
     try {
-      // Stream the agent response and collect any interrupts
-      const interrupts = await streamAgent(
-        agent,
-        {
-          messages: [{ role: "user", content: input }],
-        },
-        config
-      );
+      let agentInput: any = {
+        messages: [{ role: "user", content: input }],
+      };
 
-      // Handle authorization interrupts
-      const decisions: any[] = [];
-      for (const interrupt of interrupts) {
-        decisions.push(await handleAuthInterrupt(interrupt));
-      }
+      // Loop until no more interrupts
+      while (true) {
+        const interrupts = await streamAgent(agent, agentInput, config);
 
-      // Resume agent after authorization
-      if (decisions.length > 0) {
-        await streamAgent(
-          agent,
-          new Command({ resume: { decisions } }),
-          config
-        );
+        if (interrupts.length === 0) {
+          break; // No more interrupts, we're done
+        }
+
+        // Handle all interrupts
+        const decisions: any[] = [];
+        for (const interrupt of interrupts) {
+          decisions.push(await handleInterrupt(interrupt, rl));
+        }
+
+        // Resume with decisions, then loop to check for more interrupts
+        // Pass single decision directly, or array for multiple interrupts
+        agentInput = new Command({
+          resume: decisions.length === 1 ? decisions[0] : decisions,
+        });
       }
     } catch (error) {
       console.error(error);
@@ -575,7 +576,6 @@ export async function getTools({
     throw new Error("At least one tool or toolkit must be provided");
   }
 
-  // Todo(Mateo): Add pagination support
   const from_mcpServers = await Promise.all(
     mcpServers.map(async (mcpServerName) => {
       const definitions = await arcade.tools.list({
@@ -700,28 +700,29 @@ async function main() {
     rl.pause();
 
     try {
-      // Stream the agent response and collect any interrupts
-      const interrupts = await streamAgent(
-        agent,
-        {
-          messages: [{ role: "user", content: input }],
-        },
-        config
-      );
+      let agentInput: any = {
+        messages: [{ role: "user", content: input }],
+      };
 
-      // Handle authorization interrupts
-      const decisions: any[] = [];
-      for (const interrupt of interrupts) {
-        decisions.push(await handleAuthInterrupt(interrupt));
-      }
+      // Loop until no more interrupts
+      while (true) {
+        const interrupts = await streamAgent(agent, agentInput, config);
 
-      // Resume agent after authorization
-      if (decisions.length > 0) {
-        await streamAgent(
-          agent,
-          new Command({ resume: { decisions } }),
-          config
-        );
+        if (interrupts.length === 0) {
+          break; // No more interrupts, we're done
+        }
+
+        // Handle all interrupts
+        const decisions: any[] = [];
+        for (const interrupt of interrupts) {
+          decisions.push(await handleInterrupt(interrupt, rl));
+        }
+
+        // Resume with decisions, then loop to check for more interrupts
+        // Pass single decision directly, or array for multiple interrupts
+        agentInput = new Command({
+          resume: decisions.length === 1 ? decisions[0] : decisions,
+        });
       }
     } catch (error) {
       console.error(error);
