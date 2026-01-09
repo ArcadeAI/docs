@@ -37,9 +37,9 @@ Learn how to integrate Arcade tools using LangChain primitives
 
 LangChain provides multiple abstractions for building AI agents, and it's very useful to internalize how some of these primitives work, so you can understand and extend the different agentic patterns LangChain supports.
 
-- _Agents_: Most agentic frameworks, including LangChain, provide an abstraction for a ReAct agent.
-- _Interrupts_: Interrupts in LangChain are a way to control the flow of the agentic loop when something needs to be done outside of the normal ReAct flow. For example, if a tool requires authorization, you can interrupt the agent and ask the user to authorize the tool before continuing.
-- _Checkpointers_: Checkpointers are how LangChain implements persistence. A checkpointer stores the agent's state in a "checkpoint" that can be resumed later. Those checkpoints are saved to a _thread_, which can be accessed after the agent's execution, making it very simlpe for long-running agents and for handling interruptions and more sophisticated flows such as branching, time travel, and more.
+- [_Agents_](https://docs.langchain.com/oss/javascript/langchain/agents): Most agentic frameworks, including LangChain, provide an abstraction for a ReAct agent.
+- [_Interrupts_](https://docs.langchain.com/oss/javascript/langgraph/interrupts): Interrupts in LangChain are a way to control the flow of the agentic loop when something needs to be done outside of the normal ReAct flow. For example, if a tool requires authorization, you can interrupt the agent and ask the user to authorize the tool before continuing.
+- [_Checkpointers_](https://docs.langchain.com/oss/javascript/langgraph/persistence): Checkpointers are how LangChain implements persistence. A checkpointer stores the agent's state in a "checkpoint" that can be resumed later. Those checkpoints are saved to a _thread_, which can be accessed after the agent's execution, making it very simlpe for long-running agents and for handling interruptions and more sophisticated flows such as branching, time travel, and more.
 
 ## Integrate Arcade tools into a LangChain agent
 
@@ -91,8 +91,8 @@ This is quite a number of imports, let's break them down:
   - `Arcade`: This is the Arcade client, used to interact with the Arcade API.
   - `type ToolExecuteFunctionFactoryInput`: Encodes the input to execute Arcade tools.
   - `isAuthorizationRequiredError`: Checks if a tool requires authorization.
-  - `toZod`: Converts an Arcade tool definition into a [Zod](https://zod.dev) schema.
-  - `executeZodTool`: Executes an Arcade tool.
+  - `toZod`: Converts an Arcade tool definition into a [Zod](https://zod.dev) schema (Zod provides type safety and validation at runtime).
+  - `executeZodTool`: Executes an Zod-converted tool.
 - LangChain imports:
   - `createAgent`: Creates a LangChain agent using the ReAct pattern.
   - `tool`: Turns an Arcade tool definition into a LangChain tool.
@@ -115,8 +115,8 @@ const arcadeUserID = "{arcade_user_id}";
 // This determines which MCP server is providing the tools, you can customize this to make a Notion agent. All tools from the MCP servers defined in the array will be used.
 const MCPServers = ["Slack"];
 // This determines individual tools. Useful to pick specific tools when you don't need all of them.
-const individualTools = ["Gmail_ListEmails", "Gmail_SendEmail"];
-// This determines the maximum number of tool definitions Arcade will return
+const individualTools = ["Gmail_ListEmails", "Gmail_SendEmail", "Gmail_WhoAmI"];
+// This determines the maximum number of tool definitions Arcade will return per MCP server
 const toolLimit = 30;
 // This prompt defines the behavior of the agent.
 const systemPrompt =
@@ -192,7 +192,7 @@ function executeOrInterruptTool({
 
 Here you get the Arcade tools you want the agent to use, and transform them into LangChain tools. The first step is to initialize the Arcade client, and get the tools you want to use. Then, use the `toZod` function to convert the Arcade tools into a Zod schema, and pass it to the `executeOrInterruptTool` function to create a LangChain tool.
 
-The helper may seem very long at a first glance, but it is actually quite simple:
+This helper function is fairly long, here's a breakdown of what it does for clarity:
 
 - retrieve tools from all configured MCP servers (defined in the `MCPServers` variable)
 - retrieve individual tools (defined in the `individualTools` variable)
@@ -411,7 +411,7 @@ async function main() {
         // Handle all interrupts
         const decisions: any[] = [];
         for (const interrupt of interrupts) {
-          decisions.push(await handleInterrupt(interrupt, rl));
+          decisions.push(await handleAuthInterrupt(interrupt, rl));
         }
 
         // Resume with decisions, then loop to check for more interrupts
@@ -455,9 +455,9 @@ You should see the agent responding to your prompts like any model, as well as h
 
 ## Next Steps
 
-1. Try adding additional tools to the agent or modifying the tool catalog for a different use case.
-2. Try extending the interrupt handler to handle more complex flows, such as human in the loop.
-3. Try implementing a fully deterministic flow before the agent runs, use this deterministic phase to prepare the context for the agent, adding things like the current date, time, or any other information that is relevant to the task at hand.
+1. Try adding additional tools to the agent or modifying the tools in the catalog for a different use case by modifying the `MCPServers` and `individualTools` variables.
+2. Try refactoring the `handleAuthInterrupt` function to handle more complex flows, such as human-in-the-loop.
+3. Try implementing a fully deterministic flow before the agentic loop, use this deterministic phase to prepare the context for the agent, adding things like the current date, time, or any other information that is relevant to the task at hand.
 
 ## Example code
 
@@ -715,7 +715,7 @@ async function main() {
         // Handle all interrupts
         const decisions: any[] = [];
         for (const interrupt of interrupts) {
-          decisions.push(await handleInterrupt(interrupt, rl));
+          decisions.push(await handleAuthInterrupt(interrupt, rl));
         }
 
         // Resume with decisions, then loop to check for more interrupts
