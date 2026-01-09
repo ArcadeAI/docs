@@ -1,0 +1,56 @@
+---
+title: "MCP Gateways"
+description: "Comprehensive guide to using MCP Gateways"
+---
+
+import Image from "next/image";
+
+export const IMAGE_SCALE_FACTOR = 2;
+export const TOOL_FILTER_LIGHT_WIDTH = 2052;
+export const TOOL_FILTER_LIGHT_HEIGHT = 1412;
+export const TOOL_FILTER_DARK_WIDTH = 2052;
+export const TOOL_FILTER_DARK_HEIGHT = 1412;
+
+# MCP Gateways
+
+MCP Gateways are a way to connect multiple MCP Servers to your agent, application, or IDE. MCP Gateways allow you to federate the tools from multiple MCP Servers into a single collection for easier management, control, and access. You can mix and match tools from different MCP Servers in the same project, and not all tools from a MCP server need to be available to the same LLM.
+
+## Configure MCP Gateways
+
+To configure an MCP Gateway, go to the [MCP Gateways dashboard](https://api.arcade.dev/dashboard/mcp-gateways) and click on the "Create MCP Gateway" button.
+
+When configuring an MCP Gateway, you can select the tools you want to include in the Gateway from any MCP Servers available to the project:
+
+<Image
+  alt={"MCP Gateway Tool Filter"}
+  className="max-w-full dark:hidden mt-4"
+  src={"/images/mcp-gateway-tool-filter-light.png"}
+  width={TOOL_FILTER_LIGHT_WIDTH / IMAGE_SCALE_FACTOR}
+  height={TOOL_FILTER_LIGHT_HEIGHT / IMAGE_SCALE_FACTOR}
+/>
+<Image
+  alt={"MCP Gateway Tool Filter"}
+  className="hidden max-w-full dark:block mt-4"
+  src={"/images/mcp-gateway-tool-filter-dark.png"}
+  width={TOOL_FILTER_DARK_WIDTH / IMAGE_SCALE_FACTOR}
+  height={TOOL_FILTER_DARK_HEIGHT / IMAGE_SCALE_FACTOR}
+/>
+
+The options available when configuring an MCP Gateway are:
+
+- **Name**: The name of the MCP Gateway. Informative only.
+- **Description**: The description of the MCP Gateway. This is useful for humans and some MCP clients may surface this information to the user.
+- **LLM Instructions**: Optional instructions for the LLM about how to use the MCP Gateway.
+- **Slug**: The slug of the MCP Gateway. This is the URL slug that will be used to access the MCP Gateway. It must be unique.
+- **Authentication**: The authentication mode to use for the MCP Gateway. This determines how the MCP Gateway will authenticate requests to the MCP Servers. Users will still need to authenticate to the tools within the MCP Gateway as normal.
+  - **Arcade Auth**: To access the MCP Gateway, you'll need to authenticate with your Arcade account. We recommend using this authentication mode for MCP Gateways in development or testing phase, or for internal use when you know all the users will have Arcade accounts.
+  - **Arcade Headers**: To access the MCP Gateway, you'll need to authenticate with your Arcade account by passing an Arcade API key in the `Authorization` header and the user ID of your end-user in the `Arcade-User-ID` header. We recommend using this authentication mode for MCP Gateways in production when your agent or application has users without Arcade accounts.
+- **Allowed Tools**: A selection of tools in the Arcade Tool Catalog that will be available to the MCP Gateway.
+
+## How to use MCP Gateways
+
+Any MCP client that supports the Streamable HTTP transport can use an Arcade MCP Gateway. To use an Arcade MCP Gateway, you can use the `https://api.arcade.dev/mcp/<YOUR-GATEWAY-SLUG>` URL in your MCP client. Learn how to use MCP Gateways with:
+
+- [Cursor](/guides/tool-calling/mcp-clients/cursor)
+- [Claude Desktop](/guides/tool-calling/mcp-clients/claude-desktop)
+- [Visual Studio Code](/guides/tool-calling/mcp-clients/visual-studio-code)

@@ -1,0 +1,333 @@
+/* Print styles for cheat sheet */
+@media print {
+  /* Page setup for landscape A4/Letter */
+  @page {
+    size: landscape;
+    margin: 0.5in 0.4in 0.25in 0.4in;
+
+    @top-left {
+      content: "Arcade CLI Cheat Sheet";
+      font-size: 7pt;
+      font-weight: bold;
+    }
+
+    @top-center {
+      content: "Last updated Dec 31, 2024";
+      font-size: 6pt;
+      color: #666;
+    }
+
+    @top-right {
+      content: "docs.arcade.dev | github.com/ArcadeAI | discord.gg/arcade";
+      font-size: 6pt;
+      color: #666;
+    }
+  }
+
+  /* Hide navigation and other UI elements */
+  .nextra-navbar,
+  .nextra-sidebar,
+  .nextra-toc,
+  .nextra-footer,
+  .nextra-breadcrumb,
+  .nx-mt-8,
+  header,
+  footer,
+  nav,
+  aside,
+  .no-print,
+  div[class*="mt-12"][class*="mb-8"][class*="text-xs"][class*="text-end"],
+  div[class*="text-gray-600"][class*="text-end"] time {
+    display: none !important;
+  }
+
+  /* Full width content */
+  main {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+
+  .nx-container {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+
+  /* Reset dark mode styles - but be more selective */
+  .cheat-sheet-section,
+  .cheat-sheet-section * {
+    color: black !important;
+    border-color: #d1d5db !important;
+  }
+
+  /* Page title styling - hide in print */
+  h1 {
+    display: none !important;
+  }
+
+  /* Hide h2 headers in print */
+  h2 {
+    display: none !important;
+  }
+
+  /* Responsive grid layout for print - 5 columns, 2 rows per page */
+  .cheat-sheet-grid {
+    display: grid !important;
+    grid-template-columns: repeat(5, 1fr) !important;
+    grid-auto-rows: calc((100vh - 0.5in - 0.3rem) / 2) !important;
+    gap: 0.3rem !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Force page break after every 10th item (2 rows of 5) */
+  .cheat-sheet-section:nth-child(10n) {
+    page-break-after: always !important;
+    margin-bottom: 0 !important;
+  }
+
+  /* Section cards - responsive sizing */
+  .cheat-sheet-section {
+    page-break-inside: avoid !important;
+    border: 0.5pt solid #d1d5db !important;
+    background: white !important;
+    font-size: 7pt !important;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* Section headers - more compact */
+  .cheat-sheet-section > div:first-child {
+    background: #f3f4f6 !important;
+    color: black !important;
+    border-bottom: 0.5pt solid #d1d5db !important;
+    padding: 3pt 4pt !important;
+    font-weight: bold !important;
+    font-size: 7pt !important;
+  }
+
+  /* Section content - more compact and flexible */
+  .cheat-sheet-section > div:last-child {
+    padding: 4pt !important;
+    flex: 1 !important;
+    overflow: auto !important;
+    font-size: 6pt !important;
+  }
+
+  /* All headings inside sections - smaller */
+  .cheat-sheet-section h3,
+  .cheat-sheet-section strong {
+    font-size: 6pt !important;
+    margin: 2pt 0 !important;
+    font-weight: bold !important;
+  }
+
+  .cheat-sheet-section h4 {
+    font-size: 5.5pt !important;
+    margin: 2pt 0 !important;
+    font-weight: bold !important;
+  }
+
+  /* Override any markdown-generated styles */
+  .cheat-sheet-section .prose,
+  .cheat-sheet-section .markdown {
+    font-size: 5.5pt !important;
+  }
+
+  .cheat-sheet-section .prose code,
+  .cheat-sheet-section .markdown code {
+    font-size: 5.5pt !important;
+  }
+
+  /* Hide Nextra's terminal UI wrapper */
+  .my-4.overflow-hidden.rounded-lg.border > .flex.items-center.justify-between {
+    display: none !important;
+  }
+
+  /* Remove terminal wrapper styling */
+  .my-4.overflow-hidden.rounded-lg.border {
+    border: none !important;
+    background: transparent !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Remove padding from terminal overflow container */
+  .my-4.overflow-hidden.rounded-lg.border .overflow-x-auto {
+    padding: 0 !important;
+  }
+
+  /* All code elements - smaller for print with light grey background, no borders */
+  code,
+  pre,
+  .font-mono,
+  [data-rehype-pretty-code-fragment],
+  .cheat-sheet-section code,
+  .cheat-sheet-section pre,
+  .cheat-sheet-section .font-mono {
+    font-family: "Courier New", Courier, monospace !important;
+    font-size: 5.5pt !important;
+    background: #f0f0f0 !important;
+    border: none !important;
+    padding: 1pt 2pt !important;
+    margin: 1pt 0 !important;
+    line-height: 1.2 !important;
+  }
+
+  /* Pre blocks and code containers - light grey background, minimal padding */
+  pre,
+  .cheat-sheet-section pre,
+  [data-rehype-pretty-code-fragment] pre {
+    background: #eeeeee !important;
+    border: none !important;
+    padding: 2pt 3pt !important;
+    margin: 2pt 0 !important;
+  }
+
+  /* Code blocks inside pre elements */
+  pre code,
+  .cheat-sheet-section pre code,
+  [data-rehype-pretty-code-fragment] code {
+    background: transparent !important;
+    padding: 0 !important;
+  }
+
+  /* Remove padding from ALL pre elements in sections */
+  .cheat-sheet-section pre {
+    padding: 2pt 3pt !important;
+  }
+
+  /* Remove padding/margin from spans inside code blocks */
+  .cheat-sheet-section pre span,
+  .cheat-sheet-section code span,
+  .cheat-sheet-section .nextra-code span {
+    padding: 0 !important;
+    margin: 0 !important;
+    display: inline !important;
+  }
+
+  /* Remove any nextra code block decorations */
+  .nextra-code-block,
+  .nextra-code,
+  [data-theme],
+  [data-language] {
+    border: none !important;
+    background: #eeeeee !important;
+  }
+
+  /* Command items - more compact */
+  .cheat-sheet-section .space-y-1 code {
+    display: block !important;
+    padding: 1pt 2pt !important;
+    margin-bottom: 1pt !important;
+    background: #f0f0f0 !important;
+  }
+
+  /* Descriptions - smaller */
+  .text-xs {
+    font-size: 6pt !important;
+    line-height: 1.2 !important;
+  }
+
+  /* Reduce all spacing */
+  .space-y-2 {
+    gap: 2pt !important;
+  }
+
+  .space-y-3 {
+    gap: 3pt !important;
+  }
+
+  .mb-2,
+  .mt-2 {
+    margin: 2pt 0 !important;
+  }
+
+  .mb-3,
+  .mt-3 {
+    margin: 3pt 0 !important;
+  }
+
+  /* Info boxes */
+  .bg-green-50,
+  .bg-blue-50,
+  .bg-yellow-50 {
+    background: #f9fafb !important;
+    border: 0.5pt solid #d1d5db !important;
+    padding: 4pt !important;
+  }
+
+  /* Tables */
+  .cheat-sheet-section table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    font-size: 5pt !important;
+    margin: 2pt 0 !important;
+  }
+
+  .cheat-sheet-section td,
+  .cheat-sheet-section th {
+    padding: 0.5pt 1pt !important;
+    text-align: left !important;
+    border: none !important;
+    font-size: 5pt !important;
+  }
+
+  .cheat-sheet-section td:first-child {
+    font-weight: bold !important;
+    white-space: nowrap !important;
+    padding-right: 2pt !important;
+  }
+
+  .cheat-sheet-section th {
+    background: #f3f4f6 !important;
+    font-weight: bold !important;
+    border-bottom: 0.5pt solid #d1d5db !important;
+    padding: 1pt !important;
+  }
+
+  /* Links - show URL */
+  a[href]:after {
+    content: none !important;
+  }
+
+  /* Page breaks */
+  .page-break {
+    page-break-after: always !important;
+  }
+
+  /* Hide print header by default */
+  .print-header,
+  .print-only {
+    display: none !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  /* Ensure proper spacing and smaller text */
+  .cheat-sheet-section p {
+    margin: 1pt 0 !important;
+    font-size: 5.5pt !important;
+    line-height: 1.2 !important;
+  }
+
+  /* General text in sections */
+  .cheat-sheet-section {
+    font-size: 5.5pt !important;
+  }
+
+  .cheat-sheet-section ul,
+  .cheat-sheet-section ol {
+    margin: 2pt 0 !important;
+    padding-left: 10pt !important;
+    font-size: 5.5pt !important;
+  }
+
+  .cheat-sheet-section li {
+    margin: 1pt 0 !important;
+    font-size: 5.5pt !important;
+  }
+}

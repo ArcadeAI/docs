@@ -1,6 +1,7 @@
 import { getDictionary } from "@/_dictionaries/get-dictionary";
 import { SignupLink } from "@/app/_components/analytics";
 import CustomLayout from "@/app/_components/custom-layout";
+import { getDashboardUrl } from "@/app/_components/dashboard-link";
 import { Footer } from "@/app/_components/footer";
 import { Logo } from "@/app/_components/logo";
 import NavBarButton from "@/app/_components/nav-bar-button";
@@ -113,6 +114,9 @@ export default async function RootLayout({
           copyPageButton={true}
           docsRepositoryBase="https://github.com/ArcadeAI/docs/tree/main/"
           editLink={dictionary.editPage}
+          feedback={{
+            content: false,
+          }}
           footer={
             <NextraFooter>
               <Footer />
@@ -127,7 +131,7 @@ export default async function RootLayout({
               }
               chatLink="https://discord.gg/GUZEMpEZ9p"
               logo={<Logo />}
-              logoLink={`/${lang}/home`}
+              logoLink={"https://arcade.dev/"}
               projectIcon={
                 <Github className="size-5.5 transition-colors duration-150 ease-in-out [&>path]:fill-current" />
               }
@@ -135,11 +139,13 @@ export default async function RootLayout({
             >
               <SignupLink linkLocation="docs:navbar">
                 <NavBarButton
-                  hideOnPath={["/home/registry-early-access"]}
+                  hideOnPath={[
+                    "/guides/create-tools/add-tools-to-arcade-catalog",
+                  ]}
                   text="Sign Up"
                 />
               </SignupLink>
-              <Link href="https://api.arcade.dev/dashboard/playground/chat">
+              <Link href={getDashboardUrl("playground/chat")}>
                 <NavBarButton text="Dashboard" variant="outline" />
               </Link>
             </Navbar>
@@ -147,7 +153,7 @@ export default async function RootLayout({
           nextThemes={{ defaultTheme: "dark" }}
           pageMap={pageMap}
           sidebar={{
-            defaultMenuCollapseLevel: 1,
+            defaultMenuCollapseLevel: 2,
             autoCollapse: true,
           }}
           themeSwitch={{

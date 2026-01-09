@@ -9,7 +9,7 @@ const meta: MetaRecord = {
       copyPage: true,
     },
   },
-  overview: {
+  index: {
     title: "Overview",
   },
   transports: {

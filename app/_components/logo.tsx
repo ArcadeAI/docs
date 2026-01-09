@@ -1,4 +1,4 @@
-import { Arcade, Badge } from "@arcadeai/design-system";
+import { Arcade } from "@arcadeai/design-system";
 import ArcadeLogo from "@arcadeai/design-system/assets/images/arcade-logo";
 
 export function Logo() {
@@ -6,12 +6,12 @@ export function Logo() {
     <>
       <div className="mr-2 hidden w-40 flex-row lg:flex lg:items-end lg:gap-2.5">
         <ArcadeLogo className="h-7 w-auto invert dark:invert-0" />
-        <Badge
+        {/* <Badge
           className="relative top-0.5 font-medium font-mono text-xs"
           variant="outline"
         >
           Docs
-        </Badge>
+        </Badge> */}
       </div>
 
       <div className="mr-16 block w-6 lg:hidden">

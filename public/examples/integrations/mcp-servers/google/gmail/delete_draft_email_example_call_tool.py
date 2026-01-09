@@ -1,4 +1,6 @@
 from arcadepy import Arcade
+# Required Google OAuth scopes:
+# - https://www.googleapis.com/auth/gmail.compose
 
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
 

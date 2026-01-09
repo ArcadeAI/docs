@@ -17,6 +17,7 @@ import {
 import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePostHog } from "posthog-js/react";
 // import { ChallengeSolution } from "./ChallengeSolution";
 import { QuickStartCard } from "../../_components/quick-start-card";
 import { SampleAppCard } from "../../_components/sample-app-card";
@@ -35,15 +36,25 @@ const ANIMATION_DELAYS = {
 } as const;
 
 export function LandingPage() {
+  const posthog = usePostHog();
+
+  const trackHeroClick =
+    (eventName: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
+      posthog?.capture(eventName, {
+        button_location: "landing_page_hero",
+        destination: e.currentTarget.getAttribute("href"),
+      });
+    };
+
   return (
     <div>
       <section className="relative isolate px-6 lg:px-8">
         <div
           aria-hidden="true"
-          className="-top-24 -z-10 sm:-top-40 absolute inset-x-0 transform-gpu overflow-hidden blur-3xl"
+          className="absolute inset-x-0 -top-24 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-40"
         >
           <div
-            className="-translate-x-1/2 relative left-[calc(50%-11rem)] aspect-[1155/678] w-[24rem] rotate-[30deg] bg-gradient-to-tr from-[#ee175e] to-[#9089fc] opacity-20 sm:left-[calc(50%-30rem)] sm:w-[48rem]"
+            className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[24rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#ee175e] to-[#9089fc] opacity-20 sm:left-[calc(50%-30rem)] sm:w-[48rem]"
             style={{
               clipPath:
                 "polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)",
@@ -108,7 +119,10 @@ export function LandingPage() {
               className="h-12 bg-primary px-6 text-white hover:bg-primary/90"
               size="lg"
             >
-              <Link href="/home/quickstart">
+              <Link
+                href="/get-started/quickstarts/call-tool-agent"
+                onClick={trackHeroClick("get_started_clicked")}
+              >
                 <Rocket className="mr-2 h-5 w-5" />
                 Get Started
               </Link>
@@ -119,7 +133,10 @@ export function LandingPage() {
               size="lg"
               variant="outline"
             >
-              <Link href="/home/build-tools/create-a-mcp-server">
+              <Link
+                href="/guides/create-tools/tool-basics/build-mcp-server"
+                onClick={trackHeroClick("build_tool_clicked")}
+              >
                 <Wrench className="mr-2 h-5 w-5" />
                 Build a tool
               </Link>
@@ -138,7 +155,7 @@ export function LandingPage() {
               Don't write code yourself - let your AI IDE do it for you! <br />
               <Link
                 className="text-primary hover:underline"
-                href="/home/agentic-development"
+                href="/get-started/setup/connect-arcade-docs"
               >
                 Learn how to give your coding agents access to Arcade.dev's
                 documentation
@@ -148,10 +165,10 @@ export function LandingPage() {
         </div>
         <div
           aria-hidden="true"
-          className="-z-10 absolute inset-x-0 top-[calc(100%-13rem)] transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]"
+          className="absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]"
         >
           <div
-            className="-translate-x-1/2 relative left-[calc(50%+3rem)] aspect-[1155/678] w-[24rem] bg-gradient-to-tr from-[#ee175e] to-[#9089fc] opacity-20 sm:left-[calc(50%+36rem)] sm:w-[48rem]"
+            className="relative left-[calc(50%+3rem)] aspect-[1155/678] w-[24rem] -translate-x-1/2 bg-gradient-to-tr from-[#ee175e] to-[#9089fc] opacity-20 sm:left-[calc(50%+36rem)] sm:w-[48rem]"
             style={{
               clipPath:
                 "polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)",
@@ -175,25 +192,25 @@ export function LandingPage() {
               icon={Rocket}
               title="Quick Start Guide"
               description="Start using Arcade in minutes with our quick start guide. We'll show you how to equip LLMs with the ability to take action."
-              href="/home/quickstart"
+              href="/get-started/quickstarts/call-tool-agent"
             />
             <QuickStartCard
               icon={Puzzle}
               title="Browse Integrations"
               description="Explore our library of integrations for popular services. Find the perfect integration for your needs."
-              href="/mcp-servers"
+              href="/resources/integrations"
             />
             <QuickStartCard
               icon={Wrench}
               title="Start Building"
               description="Learn how to build and deploy your own custom tools. Use Arcade's tool SDK to create custom capabilities for your agents."
-              href="/home/custom-tools"
+              href="/guides/create-tools/tool-basics/build-mcp-server"
             />
             <QuickStartCard
               icon={Cloud}
               title="Deploy Arcade"
               description="Run Arcade locally, in Docker, or in the cloud. We'll show you how to get started with each option."
-              href="/home/hosting-overview"
+              href="/guides/deployment-hosting/"
             />
           </div>
         </div>
@@ -224,7 +241,7 @@ export function LandingPage() {
                 title: "Secure User Impersonation",
                 description:
                   "Arcade lets agents securely access user-specific services like email, calendars, and documents through built-in OAuth and token management.",
-                href: "/home/auth/how-arcade-helps",
+                href: "/get-started/about-arcade",
               }}
             />
             <ChallengeSolution
@@ -239,7 +256,7 @@ export function LandingPage() {
                 title: "Tools That Scale Independently",
                 description:
                   "Arcade separates tool execution from your application, allowing each tool to run on its optimal infrastructure and scale based on its specific needs.",
-                href: "/home/use-tools/tools-overview",
+                href: "/guides/tool-calling/",
               }}
             />
             <ChallengeSolution
@@ -254,7 +271,7 @@ export function LandingPage() {
                 title: "Build Once, Run Anywhere",
                 description:
                   "Define your tool once with Arcade's SDK and it works seamlessly across OpenAI, Anthropic, and frameworks like LangChain and CrewAI without any changes.",
-                href: "/home/build-tools/create-a-mcp-server",
+                href: "/guides/create-tools/tool-basics/build-mcp-server",
               }}
             />
             <ChallengeSolution

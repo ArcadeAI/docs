@@ -1,0 +1,59 @@
+name: Update Example App Dates
+
+on:
+  schedule:
+    # Run every Monday at 00:00 UTC
+    - cron: '0 0 * * 1'
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  update-dates:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+
+      - name: Update repository dates
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          node .github/scripts/update-example-dates.js
+
+      - name: Check for changes
+        id: check-changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Pull Request
+        if: steps.check-changes.outputs.changes == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: update example app dates [skip ci]"
+          title: "🤖 Update example app repository dates"
+          body: |
+            This PR contains automated updates to the example app creation/update dates.
+
+            **Generated on:** ${{ github.event_name == 'workflow_dispatch' && 'Manual trigger' || 'Scheduled run' }}
+            **Triggered by:** ${{ github.actor }}
+
+            The script has fetched the latest repository information from GitHub API and updated the dates accordingly.
+          branch: chore/update-example-dates-${{ github.run_id }}
+          delete-branch: true
+          labels: |
+            automated
+            examples
+          assignees: rachelnabors
