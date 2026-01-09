@@ -483,9 +483,11 @@ import readline from "node:readline/promises";
 // configure your own values to customize your agent
 
 // The Arcade User ID identifies who is authorizing each service.
-const arcadeUserID = "mateo@arcade.dev";
-// This determines which MCP server is providing the tools, you can customize this to make a Slack agent, or Notion agent, etc.
-const toolkit = "gmail";
+const arcadeUserID = "{arcade_user_id}";
+// This determines which MCP server is providing the tools, you can customize this to make a Notion agent. All tools from the MCP servers defined in the array will be used.
+const MCPServers = ["Slack"];
+// This determines individual tools. Useful to pick specific tools when you don't need all of them.
+const individualTools = ["Gmail_ListEmails", "Gmail_SendEmail"];
 // This determines the maximum number of tool definitions Arcade will return
 const toolLimit = 30;
 // This prompt defines the behavior of the agent.
@@ -554,26 +556,74 @@ function executeOrInterruptTool({
 // Initialize the Arcade client
 const arcade = new Arcade();
 
-// Get the Arcade tools
-const toolDefinitions = await arcade.tools.list({
-  toolkit: toolkit,
+export type GetToolsProps = {
+  arcade: Arcade;
+  mcpServers?: string[];
+  individualTools?: string[];
+  userId: string;
+  limit?: number;
+};
+
+export async function getTools({
+  arcade,
+  mcpServers = [],
+  individualTools = [],
+  userId,
+  limit = 30,
+}: GetToolsProps) {
+  if (mcpServers.length === 0 && individualTools.length === 0) {
+    throw new Error("At least one tool or toolkit must be provided");
+  }
+
+  // Todo(Mateo): Add pagination support
+  const from_mcpServers = await Promise.all(
+    mcpServers.map(async (mcpServerName) => {
+      const definitions = await arcade.tools.list({
+        toolkit: mcpServerName,
+        limit: limit,
+      });
+      return definitions.items;
+    })
+  );
+
+  const from_individualTools = await Promise.all(
+    individualTools.map(async (toolName) => {
+      return await arcade.tools.get(toolName);
+    })
+  );
+
+  const all_tools = [...from_mcpServers.flat(), ...from_individualTools];
+  const unique_tools = Array.from(
+    new Map(all_tools.map((tool) => [tool.qualified_name, tool])).values()
+  );
+
+  const arcadeTools = toZod({
+    tools: unique_tools,
+    client: arcade,
+    executeFactory: executeOrInterruptTool,
+    userId: userId,
+  });
+
+  // Convert Arcade tools to LangGraph tools
+  const langchainTools = arcadeTools.map(
+    ({ name, description, execute, parameters }) =>
+      (tool as Function)(execute, {
+        name,
+        description,
+        schema: parameters,
+      })
+  );
+
+  return langchainTools;
+}
+
+const tools = await getTools({
+  arcade,
+  mcpServers: MCPServers,
+  individualTools: individualTools,
+  userId: arcadeUserID,
   limit: toolLimit,
 });
-const arcadeTools = toZod({
-  tools: toolDefinitions.items,
-  client: arcade,
-  executeFactory: executeOrInterruptTool,
-  userId: arcadeUserID,
-});
-
-// Convert Arcade tools to LangGraph tools
-const tools = arcadeTools.map(({ name, description, execute, parameters }) =>
-  (tool as Function)(execute, {
-    name,
-    description,
-    schema: parameters,
-  })
-);
 
 async function handleAuthInterrupt(
   interrupt: Interrupt
