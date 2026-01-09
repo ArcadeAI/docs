@@ -4,6 +4,9 @@ export const meta: MetaRecord = {
   index: {
     title: "Overview",
   },
+  "setup-arcade-with-your-llm-python": {
+    title: "Setup Arcade with your LLM (Python)",
+  },
   crewai: {
     title: "CrewAI",
   },

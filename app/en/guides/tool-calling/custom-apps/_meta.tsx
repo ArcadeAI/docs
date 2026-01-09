@@ -1,9 +1,6 @@
 import type { MetaRecord } from "nextra";
 
 export const meta: MetaRecord = {
-  "connect-arcade-to-your-llm": {
-    title: "Connect Arcade to your LLM",
-  },
   "auth-tool-calling": {
     title: "Authorize tool calling",
   },
