@@ -1,4 +1,13 @@
-export default {
+import type { MetaRecord } from "nextra";
+
+const meta: MetaRecord = {
+  "*": {
+    theme: {
+      breadcrumb: true,
+      toc: true,
+      copyPage: true,
+    },
+  },
   index: {
     title: "Overview",
   },
@@ -24,3 +33,5 @@ export default {
     title: "Organize your MCP server and tools",
   },
 };
+
+export default meta;
