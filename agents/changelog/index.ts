@@ -12,7 +12,7 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const pagesDirectory = path.normalize(
-  path.join(__dirname, "..", "..", "app", "en", "home"),
+  path.join(__dirname, "..", "..", "app", "en", "references"),
 );
 
 program.version(pkg.version).name(pkg.name).description(pkg.description);
