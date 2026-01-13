@@ -35,7 +35,9 @@ export function MCPClientGrid() {
     <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 md:gap-5 lg:grid-cols-3">
       {mcpClients.map((client) => {
         const clientMeta = subpages.find(([key]) => key === client.key);
-        if (!clientMeta) return null;
+        if (!clientMeta) {
+          return null;
+        }
 
         return (
           <Link
@@ -50,7 +52,9 @@ export function MCPClientGrid() {
                       <img
                         alt={`${client.name} logo`}
                         className="size-9 object-contain"
+                        height={36}
                         src={logoSrc[client.key as keyof typeof logoSrc]}
+                        width={36}
                       />
                     </div>
                     <div>

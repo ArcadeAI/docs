@@ -3,26 +3,31 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
+// Regex patterns defined at top level for performance
+const TITLE_PATTERN = /title="([^"]+)"/;
+const HREF_PATTERN = /href="([^"]+)"/;
+const GITHUB_PATTERN = /https:\/\/github\.com\/([^/]+\/[^/]+)/;
+
 function parseRepositoriesFromMDX(content) {
   const repositories = [];
 
   // Regex to find all SampleAppCard components with title and href
   const sampleAppCardRegex = /<SampleAppCard\s+([^>]+)>/g;
 
-  let match;
-  while ((match = sampleAppCardRegex.exec(content)) !== null) {
+  let match = sampleAppCardRegex.exec(content);
+  while (match !== null) {
     const propsString = match[1];
 
     // Extract title and href from props
-    const titleMatch = propsString.match(/title="([^"]+)"/);
-    const hrefMatch = propsString.match(/href="([^"]+)"/);
+    const titleMatch = propsString.match(TITLE_PATTERN);
+    const hrefMatch = propsString.match(HREF_PATTERN);
 
     if (titleMatch && hrefMatch) {
       const title = titleMatch[1];
       const href = hrefMatch[1];
 
       // Check if it's a GitHub URL and extract repo name
-      const githubMatch = href.match(/https:\/\/github\.com\/([^/]+\/[^/]+)/);
+      const githubMatch = href.match(GITHUB_PATTERN);
 
       if (githubMatch) {
         const repoName = githubMatch[1];
@@ -33,6 +38,7 @@ function parseRepositoriesFromMDX(content) {
         });
       }
     }
+    match = sampleAppCardRegex.exec(content);
   }
 
   return repositories;
@@ -123,7 +129,7 @@ async function updateExampleDates() {
   );
 
   // Update dates for each repository
-  repoData.forEach((repo) => {
+  for (const repo of repoData) {
     // Find the SampleAppCard with this title and update its date
     const titleRegex = new RegExp(
       `(title="${repo.title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"[\\s\\S]*?)date="[^"]*"`,
@@ -139,7 +145,7 @@ async function updateExampleDates() {
     } else {
       console.warn(`Could not find or update date for "${repo.title}"`);
     }
-  });
+  }
 
   // Write the updated content back
   fs.writeFileSync(mdxPath, content, "utf8");

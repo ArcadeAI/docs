@@ -26,7 +26,13 @@ export const PlatformCard: React.FC<PlatformCardProps> = ({
       <CardHeader>
         <div className="flex items-center space-x-5">
           <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg">
-            <img alt={`${name} logo`} className="size-9" src={icon} />
+            <img
+              alt={`${name} logo`}
+              className="size-9"
+              height={36}
+              src={icon}
+              width={36}
+            />
           </div>
           <div>
             <CardTitle className="mb-0.5 text-base text-gray-900 dark:text-gray-50">

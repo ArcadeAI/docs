@@ -73,12 +73,14 @@ export default function ScopePicker({ tools }: ScopePickerProps) {
             <button
               className="rounded bg-blue-100 px-2 py-1 text-blue-700 text-xs transition-colors hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800"
               onClick={selectAll}
+              type="button"
             >
               Select all
             </button>
             <button
               className="rounded bg-gray-100 px-2 py-1 text-gray-600 text-xs transition-colors hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600"
               onClick={clearAll}
+              type="button"
             >
               Clear
             </button>
