@@ -140,15 +140,19 @@ You also define `convert_output_to_json` to convert the output of the Arcade too
 ```python filename="main.py"
 # Arcade to OpenAI agent exception classes
 class ToolError(AgentsException):
-    def __init__(self, result: ExecuteToolResponse):
-        self.result = result
-
-    @property
-    def message(self):
-        return self.result.output.error.message
+    def __init__(self, result: ExecuteToolResponse | str):
+        self.result = None
+        if isinstance(result, str):
+            self.message = result
+        else:
+            self.message = result.output.error.message
+            self.result = result
 
     def __str__(self):
-        return f"Tool {self.result.tool_name} failed with error: {self.message}"
+        if self.result:
+            return f"Tool {self.result.tool_name} failed with error: {self.message}"
+        else:
+            return self.message
 
 
 def convert_output_to_json(output: Any) -> str:
@@ -396,18 +400,21 @@ SYSTEM_PROMPT = "You are a helpful assistant that can assist with Gmail and Slac
 # This determines which LLM model will be used inside the agent
 MODEL = "gpt-4o-mini"
 
-
 # Arcade to OpenAI agent exception classes
 class ToolError(AgentsException):
-    def __init__(self, result: ExecuteToolResponse):
-        self.result = result
-
-    @property
-    def message(self):
-        return self.result.output.error.message
+    def __init__(self, result: ExecuteToolResponse | str):
+        self.result = None
+        if isinstance(result, str):
+            self.message = result
+        else:
+            self.message = result.output.error.message
+            self.result = result
 
     def __str__(self):
-        return f"Tool {self.result.tool_name} failed with error: {self.message}"
+        if self.result:
+            return f"Tool {self.result.tool_name} failed with error: {self.message}"
+        else:
+            return self.message
 
 
 def convert_output_to_json(output: Any) -> str:
