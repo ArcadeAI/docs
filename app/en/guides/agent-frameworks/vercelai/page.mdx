@@ -294,13 +294,15 @@ Create **app/page.tsx**. We'll build it step by step, starting with the imports 
 The `useChat` hook from `@ai-sdk/react` automatically connects to your `/api/chat` route and manages all chat state:
 
 ```tsx filename="app/page.tsx"
-"use client";
+"use client"; // Required for React hooks in Next.js App Router
 
+// useChat connects to /api/chat and manages conversation state
 import { useChat } from "@ai-sdk/react";
 import { useState, useRef, useEffect } from "react";
+// For rendering AI responses with formatting (bold, lists, code blocks)
 import ReactMarkdown, { Components } from "react-markdown";
 
-// Custom components for markdown rendering
+// Style overrides for markdown elements in chat bubbles
 const markdownComponents: Components = {
   p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
   ul: ({ children }) => <ul className="list-disc ml-4 mb-2">{children}</ul>,
@@ -321,25 +323,30 @@ const markdownComponents: Components = {
 When Arcade returns `authorization_required`, you need to show the user an auth button and poll for completion. This component handles that flow and calls `onAuthComplete` when done:
 
 ```tsx filename="app/page.tsx"
+// Displays authorization button and polls for completion
+// Props come from Arcade's authorization_required response
 function AuthPendingUI({
-  authUrl,
-  toolName,
-  onAuthComplete,
+  authUrl,      // URL to open for OAuth flow
+  toolName,     // e.g., "Gmail_ListEmails" - used to check auth status
+  onAuthComplete, // Called when auth succeeds (triggers message retry)
 }: {
   authUrl: string;
   toolName: string;
   onAuthComplete: () => void;
 }) {
+  // Track UI state: initial -> waiting (polling) -> completed
   const [status, setStatus] = useState<"initial" | "waiting" | "completed">("initial");
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
-  const hasCompletedRef = useRef(false);
+  const hasCompletedRef = useRef(false); // Prevent duplicate completions
 
   // Poll /api/auth/status every 2 seconds after user clicks authorize
   useEffect(() => {
+    // Only poll when user has clicked authorize and we haven't completed
     if (status !== "waiting" || !toolName || hasCompletedRef.current) return;
 
     const pollStatus = async () => {
       try {
+        // Check if user has completed OAuth in the other tab
         const res = await fetch("/api/auth/status", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -347,11 +354,12 @@ function AuthPendingUI({
         });
         const data = await res.json();
 
+        // Arcade returns "completed" when OAuth succeeds
         if (data.status === "completed" && !hasCompletedRef.current) {
           hasCompletedRef.current = true;
           if (pollingRef.current) clearInterval(pollingRef.current);
           setStatus("completed");
-          // Wait briefly to show success, then trigger retry
+          // Brief delay to show success message, then retry the original request
           setTimeout(() => onAuthComplete(), 1500);
         }
       } catch (error) {
@@ -360,16 +368,18 @@ function AuthPendingUI({
     };
 
     pollingRef.current = setInterval(pollStatus, 2000);
+    // Cleanup: stop polling when component unmounts
     return () => {
       if (pollingRef.current) clearInterval(pollingRef.current);
     };
   }, [status, toolName, onAuthComplete]);
 
+  // Extract service name from tool name (e.g., "Gmail" from "Gmail_ListEmails")
   const displayName = toolName.split("_")[0] || toolName;
 
   const handleAuthClick = () => {
-    window.open(authUrl, "_blank");
-    setStatus("waiting");
+    window.open(authUrl, "_blank"); // Open OAuth in new tab
+    setStatus("waiting"); // Start polling
   };
 
   return (
@@ -398,18 +408,24 @@ The `useChat` hook returns everything you need: `messages` (the conversation his
 
 ```tsx filename="app/page.tsx"
 export default function Chat() {
-  const [input, setInput] = useState("");
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [input, setInput] = useState(""); // Controlled input for message field
+  const messagesEndRef = useRef<HTMLDivElement>(null); // For auto-scrolling
+  const inputRef = useRef<HTMLInputElement>(null); // For refocusing after send
+
+  // useChat provides everything needed for the chat UI:
+  // - messages: array of conversation messages with parts (text + tool results)
+  // - sendMessage: sends user input to /api/chat
+  // - regenerate: retries the last request (used after OAuth completes)
+  // - status: "submitted" | "streaming" | "ready" | "error"
   const { messages, sendMessage, regenerate, status } = useChat();
   const isLoading = status === "submitted" || status === "streaming";
 
-  // Auto-scroll to bottom when messages change
+  // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, status]);
 
-  // Refocus input when loading completes
+  // Refocus input when AI finishes responding
   useEffect(() => {
     if (!isLoading) {
       inputRef.current?.focus();
@@ -426,32 +442,39 @@ Each message has `parts`—text content and tool results. Tool parts have a `typ
     <div className="flex flex-col h-screen max-w-2xl mx-auto p-4">
       <div className="flex-1 overflow-y-auto space-y-4">
         {messages.map((message) => {
-          // Check if any tool part requires authorization
+          // Check if any tool in this message needs authorization
+          // Tool parts have type like "tool-Gmail_ListEmails"
           const hasAuthRequired = message.parts?.some((part) => {
             if (part.type.startsWith("tool-")) {
               const toolPart = part as { state?: string; output?: unknown };
+              // "output-available" means the tool has returned a result
               if (toolPart.state === "output-available") {
                 const result = toolPart.output as Record<string, unknown>;
+                // Arcade sets this flag when OAuth is needed
                 return result?.authorization_required;
               }
             }
             return false;
           });
 
-          // Check if message has any visible content
+          // Determine if this message has content worth showing
+          // (skip empty messages and completed tool calls)
           const hasVisibleContent = message.parts?.some((part) => {
             if (part.type === "text" && part.text.trim()) return true;
             if (part.type.startsWith("tool-")) {
               const toolPart = part as { state?: string; output?: unknown };
               if (toolPart.state === "output-available") {
                 const result = toolPart.output as Record<string, unknown>;
+                // Only show tool results that need auth (hide successful ones)
                 return result?.authorization_required;
               }
             }
             return false;
           });
 
+          // Show loading animation for assistant messages still being generated
           const showLoading = message.role === "assistant" && !hasVisibleContent && isLoading;
+          // Skip rendering empty messages entirely
           if (!hasVisibleContent && !showLoading) return null;
 ```
 
@@ -461,19 +484,22 @@ For text parts, render with markdown. For tool parts that need authorization, sh
 
 ```tsx filename="app/page.tsx"
           return (
+            // Align user messages right, assistant messages left
             <div key={message.id} className={message.role === "user" ? "text-right" : ""}>
               <div className={`inline-block p-3 rounded-lg ${
                 message.role === "user" ? "bg-blue-600 text-white" : "bg-gray-800"
               }`}>
                 {showLoading ? (
+                  // Bouncing dots animation while AI is thinking
                   <div className="flex gap-1">
                     <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></span>
                     <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></span>
                     <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></span>
                   </div>
                 ) : (
+                  // Render each part of the message
                   message.parts?.map((part, i) => {
-                    // Render text content with markdown
+                    // Text parts: render AI response with markdown formatting
                     if (part.type === "text" && !hasAuthRequired) {
                       return (
                         <div key={i}>
@@ -484,27 +510,31 @@ For text parts, render with markdown. For tool parts that need authorization, sh
                       );
                     }
 
-                    // Handle tool results that need authorization
+                    // Tool parts: check if authorization is needed
                     if (part.type.startsWith("tool-")) {
                       const toolPart = part as { state?: string; output?: unknown };
 
                       if (toolPart.state === "output-available") {
                         const result = toolPart.output as Record<string, unknown>;
 
+                        // Show auth UI when Arcade needs user to connect their account
                         if (result?.authorization_required) {
                           const authResponse = result.authorization_response as { url?: string };
+                          // Extract tool name from part type (e.g., "tool-Gmail_ListEmails" -> "Gmail_ListEmails")
                           const toolName = part.type.replace("tool-", "");
                           return (
                             <AuthPendingUI
                               key={i}
                               authUrl={authResponse?.url || ""}
                               toolName={toolName}
+                              // regenerate() retries the original request after auth succeeds
                               onAuthComplete={() => regenerate()}
                             />
                           );
                         }
                       }
                     }
+                    // Hide successful tool results (user just sees the AI's text response)
                     return null;
                   })
                 )}
@@ -512,6 +542,7 @@ For text parts, render with markdown. For tool parts that need authorization, sh
             </div>
           );
         })}
+        {/* Invisible element at bottom for auto-scroll target */}
         <div ref={messagesEndRef} />
       </div>
 ```
@@ -521,13 +552,15 @@ For text parts, render with markdown. For tool parts that need authorization, sh
 The form calls `sendMessage` with the user's input. The hook automatically sends it to `/api/chat` and streams the response:
 
 ```tsx filename="app/page.tsx"
+      {/* Message input form */}
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          if (!input.trim()) return;
+          if (!input.trim()) return; // Don't send empty messages
+          // sendMessage sends to /api/chat and streams the response
           sendMessage({ text: input });
-          setInput("");
-          inputRef.current?.focus();
+          setInput(""); // Clear input after sending
+          inputRef.current?.focus(); // Keep focus on input
         }}
         className="flex gap-2 mt-4"
       >
@@ -537,7 +570,7 @@ The form calls `sendMessage` with the user's input. The hook automatically sends
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask about your emails or Slack..."
           className="flex-1 p-2 border rounded"
-          disabled={isLoading}
+          disabled={isLoading} // Prevent sending while AI is responding
         />
         <button
           type="submit"
@@ -588,9 +621,9 @@ yarn dev
 
 Open [http://localhost:3000](http://localhost:3000) and try prompts like:
 
-- "List my recent emails"
 - "Summarize my last 3 emails"
 - "Send a Slack DM to myself saying hello"
+- "Email me a summary of this slack channel's activity since yesterday..."
 
 On first use, you'll see an authorization button. Click it to connect your Gmail or Slack account—Arcade remembers this for future requests.
 
@@ -606,8 +639,8 @@ On first use, you'll see an authorization button. Click it to connect your Gmail
 ## Next steps
 
 1. **Add more tools**: Browse the [MCP server catalog](/resources/integrations) and add tools for GitHub, Notion, Linear, and more.
-2. **Add user authentication**: In production, get `userId` from your auth system (NextAuth, Clerk, etc.) instead of environment variables.
-3. **Customize the UI**: Add markdown rendering, better styling, or integrate with your design system.
+2. **Add user authentication**: In production, get `userId` from your auth system instead of environment variables. See [Identifying users](/guides/security#identifying-users) for best practices.
+3. **Deploy to Vercel**: Push your chatbot to GitHub and [deploy to Vercel](https://vercel.com/docs/deployments/overview) with one click. Add your environment variables in the Vercel dashboard.
 
 ## Complete code
 
