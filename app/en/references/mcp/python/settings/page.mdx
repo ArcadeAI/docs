@@ -7,6 +7,42 @@ description: Global configuration and environment-driven settings for the Arcade
 
 Global configuration and environment-driven settings.
 
+## find_env_file()
+
+```python
+arcade_mcp_server.settings.find_env_file(
+    start_dir: Path | None = None,
+    stop_at: Path | None = None,
+    filename: str = ".env"
+) -> Path | None
+```
+
+Find a `.env` file by traversing upward through parent directories.
+
+Starts at the specified directory (or current working directory) and traverses upward through parent directories until a `.env` file is found or the filesystem root (or `stop_at` directory) is reached.
+
+**Parameters:**
+- `start_dir` - Directory to start searching from. Defaults to current working directory.
+- `stop_at` - Directory to stop traversal at (inclusive). If specified, the search will not continue past this directory. The `stop_at` directory itself is still checked for the `.env` file.
+- `filename` - Name of the env file to find. Defaults to `.env`.
+
+**Returns:** Path to the `.env` file if found, `None` otherwise.
+
+**Example:**
+
+```python
+from arcade_mcp_server.settings import find_env_file
+
+# Find .env starting from current directory
+env_path = find_env_file()
+
+# Find .env starting from a specific directory
+env_path = find_env_file(start_dir=Path("/path/to/project/src"))
+
+# Find .env but don't search above project root
+env_path = find_env_file(stop_at=Path("/path/to/project"))
+```
+
 ## MCPSettings
 
 ```python
@@ -24,6 +60,10 @@ from_env() classmethod
 ```
 
 Create settings from environment variables.
+
+Automatically discovers and loads a `.env` file by traversing upward from the current directory through parent directories until a `.env` file is found or the filesystem root is reached.
+
+The `.env` file is loaded with `override=False`, meaning existing environment variables take precedence. Multiple calls are safe.
 
 ### to_dict()
 
