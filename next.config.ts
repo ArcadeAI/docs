@@ -50,6 +50,12 @@ const nextConfig: NextConfig = withLlmsTxt({
           permanent: true,
         },
         {
+          source:
+            "/:locale/guides/agent-frameworks/vercelai/using-arcade-tools",
+          destination: "/:locale/guides/agent-frameworks/vercelai",
+          permanent: true,
+        },
+        {
           source: "/:locale/home/arcade-cli",
           destination: "/:locale/references/arcade-cli",
           permanent: true,

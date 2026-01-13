@@ -1,0 +1,975 @@
+---
+title: "Build an AI Chatbot with Arcade and Vercel AI SDK"
+description: "Create a browser-based chatbot that uses Arcade tools to access Gmail and Slack"
+---
+
+import { Steps, Tabs, Callout } from "nextra/components";
+
+# Build an AI Chatbot with Arcade and Vercel AI SDK
+
+The [Vercel AI SDK](https://sdk.vercel.ai/) is a TypeScript toolkit for building AI-powered applications. It provides streaming responses, framework-agnostic support for React, Next.js, Vue, and more, plus easy switching between AI providers. This guide uses **Vercel AI SDK v6**.
+
+In this guide, you'll build a browser-based chatbot that uses Arcade's Gmail and Slack tools. Your users can read emails, send messages, and interact with Slack—all through a conversational interface with built-in authentication.
+
+<GuideOverview>
+<GuideOverview.Outcomes>
+
+Build a Next.js chatbot that integrates Arcade tools with the Vercel AI SDK
+
+</GuideOverview.Outcomes>
+
+<GuideOverview.Prerequisites>
+
+- <DashboardLink path="register" />
+- [Node.js 18+](https://nodejs.org/)
+- An [OpenAI API key](https://platform.openai.com/api-keys)
+
+</GuideOverview.Prerequisites>
+
+<GuideOverview.YouWillLearn>
+
+- How to retrieve Arcade tools and convert them to Vercel AI SDK format
+- How to build a streaming chatbot with tool calling
+- How to handle Arcade's authorization flow in a web app
+- How to combine tools from different Arcade MCP servers
+
+</GuideOverview.YouWillLearn>
+</GuideOverview>
+
+## Vercel AI SDK concepts
+
+Before diving into the code, here are the key Vercel AI SDK concepts you'll use:
+
+- [streamText](https://sdk.vercel.ai/docs/reference/ai-sdk-core/stream-text) Streams AI responses with support for tool calling. Perfect for chat interfaces where you want responses to appear progressively.
+- [useChat](https://sdk.vercel.ai/docs/reference/ai-sdk-ui/use-chat) A React hook that manages chat state, handles streaming, and renders tool results. It connects your frontend to your API route automatically.
+- [Tools](https://sdk.vercel.ai/docs/ai-sdk-core/tools-and-tool-calling) Functions the AI can call to perform actions. Vercel AI SDK uses [Zod](https://zod.dev) schemas for type-safe tool definitions—Arcade's `toZodToolSet` handles this conversion for you.
+
+## Build the chatbot
+
+<Steps>
+
+### Create a new Next.js project
+
+```bash
+npx create-next-app@latest arcade-chatbot
+cd arcade-chatbot
+```
+
+Install the required dependencies:
+
+<Tabs items={["npm", "pnpm", "yarn"]}>
+
+<Tabs.Tab>
+
+```bash
+npm install ai @ai-sdk/openai @ai-sdk/react @arcadeai/arcadejs zod react-markdown
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```bash
+pnpm add ai @ai-sdk/openai @ai-sdk/react @arcadeai/arcadejs zod react-markdown
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```bash
+yarn add ai @ai-sdk/openai @ai-sdk/react @arcadeai/arcadejs zod react-markdown
+```
+
+</Tabs.Tab>
+
+</Tabs>
+
+### Set up environment variables
+
+Create a **.env.local** file with your API keys:
+
+```env filename=".env.local"
+ARCADE_API_KEY=your_arcade_api_key
+ARCADE_USER_ID=your_user_id
+OPENAI_API_KEY=your_openai_api_key
+```
+
+The `ARCADE_USER_ID` is your app's internal identifier for the user (an email, UUID, etc.). Arcade uses this to track authorizations per user.
+
+### Create the API route
+
+Create or replace **app/api/chat/route.ts**. Start with the imports:
+
+```ts filename="app/api/chat/route.ts"
+import { openai } from "@ai-sdk/openai";
+import { streamText, convertToModelMessages, stepCountIs } from "ai";
+import { Arcade } from "@arcadeai/arcadejs";
+import {
+  toZodToolSet,
+  executeOrAuthorizeZodTool,
+} from "@arcadeai/arcadejs/lib";
+```
+
+**What these imports do:**
+
+- `streamText`: Streams AI responses with tool calling support
+- `convertToModelMessages`: Converts chat messages to the format the AI model expects
+- `stepCountIs`: Controls how many tool-calling steps the AI can take
+- `Arcade`: The Arcade client for fetching and executing tools
+- `toZodToolSet`: Converts Arcade tools to [Zod](https://zod.dev) schemas (required by Vercel AI SDK)
+- `executeOrAuthorizeZodTool`: Handles tool execution and returns authorization URLs when needed
+
+### Configure which tools to use
+
+Define which MCP servers and individual tools your chatbot can access:
+
+```ts filename="app/api/chat/route.ts"
+const config = {
+  // Get all tools from these MCP servers
+  mcpServers: ["Slack"],
+  // Add specific individual tools
+  individualTools: ["Gmail_ListEmails", "Gmail_SendEmail", "Gmail_WhoAmI"],
+  // Maximum tools to fetch per MCP server
+  toolLimit: 30,
+  // System prompt defining the assistant's behavior
+  systemPrompt: `You are a helpful assistant that can access Gmail and Slack.
+Always use the available tools to fulfill user requests. Do not tell users to authorize manually - just call the tool and the system will handle authorization if needed.
+
+IMPORTANT: When calling tools, if an argument is optional, do not set it. Never pass null for optional parameters.`,
+};
+```
+
+<Callout type="info">
+You can mix MCP servers (which give you all their tools) with individual tools. Browse the [complete MCP server catalog](/resources/integrations) to see what's available.
+</Callout>
+
+### Write the tool fetching logic
+
+This function retrieves tools from Arcade and converts them to Vercel AI SDK format. The `toVercelTools` adapter converts Arcade's tool format to match what the Vercel AI SDK expects, and `stripNullValues` prevents issues with optional parameters:
+
+```ts filename="app/api/chat/route.ts"
+// Strip null and undefined values from tool inputs
+// Some LLMs send null for optional params, which can cause tool failures
+function stripNullValues(obj: Record<string, unknown>): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (value !== null && value !== undefined) {
+      result[key] = value;
+    }
+  }
+  return result;
+}
+
+// Adapter to convert Arcade tools to Vercel AI SDK format
+function toVercelTools(arcadeTools: Record<string, any>): Record<string, any> {
+  const vercelTools: Record<string, unknown> = {};
+
+  for (const [name, tool] of Object.entries(arcadeTools)) {
+    const originalExecute = tool.execute;
+    vercelTools[name] = {
+      description: tool.description,
+      inputSchema: tool.parameters,
+      // Wrap execute to strip null values before calling
+      execute: async (input: Record<string, unknown>) => {
+        const cleanedInput = stripNullValues(input);
+        return originalExecute(cleanedInput);
+      },
+    };
+  }
+
+  return vercelTools;
+}
+
+async function getArcadeTools(userId: string) {
+  const arcade = new Arcade();
+
+  // Fetch tools from MCP servers
+  const mcpServerTools = await Promise.all(
+    config.mcpServers.map(async (serverName) => {
+      const response = await arcade.tools.list({
+        toolkit: serverName,
+        limit: config.toolLimit,
+      });
+      return response.items;
+    })
+  );
+
+  // Fetch individual tools
+  const individualToolDefs = await Promise.all(
+    config.individualTools.map((toolName) => arcade.tools.get(toolName))
+  );
+
+  // Combine and deduplicate
+  const allTools = [...mcpServerTools.flat(), ...individualToolDefs];
+  const uniqueTools = Array.from(
+    new Map(allTools.map((tool) => [tool.qualified_name, tool])).values()
+  );
+
+  // Convert to Arcade's Zod format, then adapt for Vercel AI SDK
+  const arcadeTools = toZodToolSet({
+    tools: uniqueTools,
+    client: arcade,
+    userId,
+    executeFactory: executeOrAuthorizeZodTool,
+  });
+
+  return toVercelTools(arcadeTools);
+}
+```
+
+The `executeOrAuthorizeZodTool` factory is key here—it automatically handles authorization. When a tool needs the user to authorize access (like connecting their Gmail), it returns an object with `authorization_required: true` and the URL they need to visit.
+
+### Create the POST handler
+
+Handle incoming chat requests by streaming AI responses with tools:
+
+```ts filename="app/api/chat/route.ts"
+export async function POST(req: Request) {
+  try {
+    const { messages } = await req.json();
+    const userId = process.env.ARCADE_USER_ID || "default-user";
+
+    const tools = await getArcadeTools(userId);
+
+    const result = streamText({
+      model: openai("gpt-4o-mini"),
+      system: config.systemPrompt,
+      messages: await convertToModelMessages(messages),
+      tools,
+      stopWhen: stepCountIs(5),
+    });
+
+    return result.toUIMessageStreamResponse();
+  } catch (error) {
+    console.error("Chat API error:", error);
+    return Response.json(
+      { error: "Failed to process chat request" },
+      { status: 500 }
+    );
+  }
+}
+```
+
+The `stopWhen: stepCountIs(5)` allows the AI to make multiple tool calls in a single response—useful when it needs to chain actions together.
+
+### Create the auth status endpoint
+
+To detect when a user completes OAuth authorization, create **app/api/auth/status/route.ts**:
+
+```ts filename="app/api/auth/status/route.ts"
+import { Arcade } from "@arcadeai/arcadejs";
+
+export async function POST(req: Request) {
+  const { toolName } = await req.json();
+
+  if (!toolName) {
+    return Response.json({ error: "toolName required" }, { status: 400 });
+  }
+
+  const arcade = new Arcade();
+  const userId = process.env.ARCADE_USER_ID || "default-user";
+
+  try {
+    const authResponse = await arcade.tools.authorize({
+      tool_name: toolName,
+      user_id: userId,
+    });
+    return Response.json({ status: authResponse.status });
+  } catch (error) {
+    console.error("Auth status check error:", error);
+    return Response.json({ status: "error", error: String(error) }, { status: 500 });
+  }
+}
+```
+
+This endpoint lets the frontend poll for authorization completion, creating a seamless experience where the chatbot automatically retries after the user authorizes.
+
+### Build the chat interface
+
+Create **app/page.tsx**. We'll build it step by step, starting with the imports and setup.
+
+#### Connect to the chat API
+
+The `useChat` hook from `@ai-sdk/react` automatically connects to your `/api/chat` route and manages all chat state:
+
+```tsx filename="app/page.tsx"
+"use client";
+
+import { useChat } from "@ai-sdk/react";
+import { useState, useRef, useEffect } from "react";
+import ReactMarkdown, { Components } from "react-markdown";
+
+// Custom components for markdown rendering
+const markdownComponents: Components = {
+  p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+  ul: ({ children }) => <ul className="list-disc ml-4 mb-2">{children}</ul>,
+  ol: ({ children }) => <ol className="list-decimal ml-4 mb-2">{children}</ol>,
+  li: ({ children }) => <li className="mb-1">{children}</li>,
+  strong: ({ children }) => <strong className="font-bold">{children}</strong>,
+  code: ({ children }) => (
+    <code className="bg-gray-700 px-1 py-0.5 rounded text-sm">{children}</code>
+  ),
+  pre: ({ children }) => (
+    <pre className="bg-gray-700 p-2 rounded overflow-x-auto my-2">{children}</pre>
+  ),
+};
+```
+
+#### Handle the OAuth flow
+
+When Arcade returns `authorization_required`, you need to show the user an auth button and poll for completion. This component handles that flow and calls `onAuthComplete` when done:
+
+```tsx filename="app/page.tsx"
+function AuthPendingUI({
+  authUrl,
+  toolName,
+  onAuthComplete,
+}: {
+  authUrl: string;
+  toolName: string;
+  onAuthComplete: () => void;
+}) {
+  const [status, setStatus] = useState<"initial" | "waiting" | "completed">("initial");
+  const pollingRef = useRef<NodeJS.Timeout | null>(null);
+  const hasCompletedRef = useRef(false);
+
+  // Poll /api/auth/status every 2 seconds after user clicks authorize
+  useEffect(() => {
+    if (status !== "waiting" || !toolName || hasCompletedRef.current) return;
+
+    const pollStatus = async () => {
+      try {
+        const res = await fetch("/api/auth/status", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ toolName }),
+        });
+        const data = await res.json();
+
+        if (data.status === "completed" && !hasCompletedRef.current) {
+          hasCompletedRef.current = true;
+          if (pollingRef.current) clearInterval(pollingRef.current);
+          setStatus("completed");
+          // Wait briefly to show success, then trigger retry
+          setTimeout(() => onAuthComplete(), 1500);
+        }
+      } catch (error) {
+        console.error("Polling error:", error);
+      }
+    };
+
+    pollingRef.current = setInterval(pollStatus, 2000);
+    return () => {
+      if (pollingRef.current) clearInterval(pollingRef.current);
+    };
+  }, [status, toolName, onAuthComplete]);
+
+  const displayName = toolName.split("_")[0] || toolName;
+
+  const handleAuthClick = () => {
+    window.open(authUrl, "_blank");
+    setStatus("waiting");
+  };
+
+  return (
+    <div>
+      {status === "completed" ? (
+        <p className="text-green-400">✓ {displayName} authorized</p>
+      ) : (
+        <>
+          Give Arcade Chat access to {displayName}?{" "}
+          <button
+            onClick={handleAuthClick}
+            className="ml-2 px-2 py-1 bg-teal-600 hover:bg-teal-500 rounded text-sm"
+          >
+            {status === "waiting" ? "Retry authorizing" : "Authorize now"}
+          </button>
+        </>
+      )}
+    </div>
+  );
+}
+```
+
+#### Set up the main Chat component
+
+The `useChat` hook returns everything you need: `messages` (the conversation history), `sendMessage` (to send new messages), `regenerate` (to retry the last request), and `status` (to show loading states):
+
+```tsx filename="app/page.tsx"
+export default function Chat() {
+  const [input, setInput] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const { messages, sendMessage, regenerate, status } = useChat();
+  const isLoading = status === "submitted" || status === "streaming";
+
+  // Auto-scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, status]);
+
+  // Refocus input when loading completes
+  useEffect(() => {
+    if (!isLoading) {
+      inputRef.current?.focus();
+    }
+  }, [isLoading]);
+```
+
+#### Render messages with tool results
+
+Each message has `parts`—text content and tool results. Tool parts have a `type` like `"tool-Gmail_ListEmails"` and contain the tool's output. When Arcade needs authorization, the tool output includes `authorization_required: true` and an auth URL:
+
+```tsx filename="app/page.tsx"
+  return (
+    <div className="flex flex-col h-screen max-w-2xl mx-auto p-4">
+      <div className="flex-1 overflow-y-auto space-y-4">
+        {messages.map((message) => {
+          // Check if any tool part requires authorization
+          const hasAuthRequired = message.parts?.some((part) => {
+            if (part.type.startsWith("tool-")) {
+              const toolPart = part as { state?: string; output?: unknown };
+              if (toolPart.state === "output-available") {
+                const result = toolPart.output as Record<string, unknown>;
+                return result?.authorization_required;
+              }
+            }
+            return false;
+          });
+
+          // Check if message has any visible content
+          const hasVisibleContent = message.parts?.some((part) => {
+            if (part.type === "text" && part.text.trim()) return true;
+            if (part.type.startsWith("tool-")) {
+              const toolPart = part as { state?: string; output?: unknown };
+              if (toolPart.state === "output-available") {
+                const result = toolPart.output as Record<string, unknown>;
+                return result?.authorization_required;
+              }
+            }
+            return false;
+          });
+
+          const showLoading = message.role === "assistant" && !hasVisibleContent && isLoading;
+          if (!hasVisibleContent && !showLoading) return null;
+```
+
+#### Display text and authorization prompts
+
+For text parts, render with markdown. For tool parts that need authorization, show the `AuthPendingUI` component. The key is passing `regenerate` as `onAuthComplete`—this retries the original request after the user authorizes:
+
+```tsx filename="app/page.tsx"
+          return (
+            <div key={message.id} className={message.role === "user" ? "text-right" : ""}>
+              <div className={`inline-block p-3 rounded-lg ${
+                message.role === "user" ? "bg-blue-600 text-white" : "bg-gray-800"
+              }`}>
+                {showLoading ? (
+                  <div className="flex gap-1">
+                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></span>
+                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></span>
+                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></span>
+                  </div>
+                ) : (
+                  message.parts?.map((part, i) => {
+                    // Render text content with markdown
+                    if (part.type === "text" && !hasAuthRequired) {
+                      return (
+                        <div key={i}>
+                          <ReactMarkdown components={markdownComponents}>
+                            {part.text}
+                          </ReactMarkdown>
+                        </div>
+                      );
+                    }
+
+                    // Handle tool results that need authorization
+                    if (part.type.startsWith("tool-")) {
+                      const toolPart = part as { state?: string; output?: unknown };
+
+                      if (toolPart.state === "output-available") {
+                        const result = toolPart.output as Record<string, unknown>;
+
+                        if (result?.authorization_required) {
+                          const authResponse = result.authorization_response as { url?: string };
+                          const toolName = part.type.replace("tool-", "");
+                          return (
+                            <AuthPendingUI
+                              key={i}
+                              authUrl={authResponse?.url || ""}
+                              toolName={toolName}
+                              onAuthComplete={() => regenerate()}
+                            />
+                          );
+                        }
+                      }
+                    }
+                    return null;
+                  })
+                )}
+              </div>
+            </div>
+          );
+        })}
+        <div ref={messagesEndRef} />
+      </div>
+```
+
+#### Add the input form
+
+The form calls `sendMessage` with the user's input. The hook automatically sends it to `/api/chat` and streams the response:
+
+```tsx filename="app/page.tsx"
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!input.trim()) return;
+          sendMessage({ text: input });
+          setInput("");
+          inputRef.current?.focus();
+        }}
+        className="flex gap-2 mt-4"
+      >
+        <input
+          ref={inputRef}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Ask about your emails or Slack..."
+          className="flex-1 p-2 border rounded"
+          disabled={isLoading}
+        />
+        <button
+          type="submit"
+          disabled={isLoading || !input.trim()}
+          className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
+        >
+          Send
+        </button>
+      </form>
+    </div>
+  );
+}
+```
+
+<Callout type="info">
+The full `page.tsx` file is available in the [Complete code](#complete-code) section below.
+</Callout>
+
+### Run the chatbot
+
+<Tabs items={["npm", "pnpm", "yarn"]}>
+
+<Tabs.Tab>
+
+```bash
+npm run dev
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```bash
+pnpm dev
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```bash
+yarn dev
+```
+
+</Tabs.Tab>
+
+</Tabs>
+
+Open [http://localhost:3000](http://localhost:3000) and try prompts like:
+
+- "List my recent emails"
+- "Summarize my last 3 emails"
+- "Send a Slack DM to myself saying hello"
+
+On first use, you'll see an authorization button. Click it to connect your Gmail or Slack account—Arcade remembers this for future requests.
+
+</Steps>
+
+## Key takeaways
+
+- **Arcade tools work seamlessly with Vercel AI SDK**: Use `toZodToolSet` with the `toVercelTools` adapter to convert Arcade tools to the format Vercel AI SDK expects.
+- **Authorization is automatic**: The `executeOrAuthorizeZodTool` factory handles auth flows—check for `authorization_required` in tool results and display the authorization UI.
+- **Handle null parameters**: LLMs sometimes send `null` for optional parameters. The `stripNullValues` wrapper prevents tool failures.
+- **Mix MCP servers and individual tools**: Combine entire MCP servers with specific tools to give your agent exactly the capabilities it needs.
+
+## Next steps
+
+1. **Add more tools**: Browse the [MCP server catalog](/resources/integrations) and add tools for GitHub, Notion, Linear, and more.
+2. **Add user authentication**: In production, get `userId` from your auth system (NextAuth, Clerk, etc.) instead of environment variables.
+3. **Customize the UI**: Add markdown rendering, better styling, or integrate with your design system.
+
+## Complete code
+
+Find the complete working example in our [GitHub repository](https://github.com/ArcadeAI/arcade-vercel-ai-chatbot).
+
+<details>
+<summary>**app/api/chat/route.ts** (full file)</summary>
+
+```ts filename="app/api/chat/route.ts"
+import { openai } from "@ai-sdk/openai";
+import { streamText, convertToModelMessages, stepCountIs } from "ai";
+import { Arcade } from "@arcadeai/arcadejs";
+import {
+  toZodToolSet,
+  executeOrAuthorizeZodTool,
+} from "@arcadeai/arcadejs/lib";
+
+const config = {
+  mcpServers: ["Slack"],
+  individualTools: ["Gmail_ListEmails", "Gmail_SendEmail", "Gmail_WhoAmI"],
+  toolLimit: 30,
+  systemPrompt: `You are a helpful assistant that can access Gmail and Slack.
+Always use the available tools to fulfill user requests. Do not tell users to authorize manually - just call the tool and the system will handle authorization if needed.
+
+IMPORTANT: When calling tools, if an argument is optional, do not set it. Never pass null for optional parameters.`,
+};
+
+function stripNullValues(obj: Record<string, unknown>): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (value !== null && value !== undefined) {
+      result[key] = value;
+    }
+  }
+  return result;
+}
+
+function toVercelTools(arcadeTools: Record<string, any>): Record<string, any> {
+  const vercelTools: Record<string, unknown> = {};
+
+  for (const [name, tool] of Object.entries(arcadeTools)) {
+    const originalExecute = tool.execute;
+    vercelTools[name] = {
+      description: tool.description,
+      inputSchema: tool.parameters,
+      execute: async (input: Record<string, unknown>) => {
+        const cleanedInput = stripNullValues(input);
+        return originalExecute(cleanedInput);
+      },
+    };
+  }
+
+  return vercelTools;
+}
+
+async function getArcadeTools(userId: string) {
+  const arcade = new Arcade();
+
+  const mcpServerTools = await Promise.all(
+    config.mcpServers.map(async (serverName) => {
+      const response = await arcade.tools.list({
+        toolkit: serverName,
+        limit: config.toolLimit,
+      });
+      return response.items;
+    })
+  );
+
+  const individualToolDefs = await Promise.all(
+    config.individualTools.map((toolName) => arcade.tools.get(toolName))
+  );
+
+  const allTools = [...mcpServerTools.flat(), ...individualToolDefs];
+  const uniqueTools = Array.from(
+    new Map(allTools.map((tool) => [tool.qualified_name, tool])).values()
+  );
+
+  const arcadeTools = toZodToolSet({
+    tools: uniqueTools,
+    client: arcade,
+    userId,
+    executeFactory: executeOrAuthorizeZodTool,
+  });
+
+  return toVercelTools(arcadeTools);
+}
+
+export async function POST(req: Request) {
+  try {
+    const { messages } = await req.json();
+    const userId = process.env.ARCADE_USER_ID || "default-user";
+
+    const tools = await getArcadeTools(userId);
+
+    const result = streamText({
+      model: openai("gpt-4o-mini"),
+      system: config.systemPrompt,
+      messages: await convertToModelMessages(messages),
+      tools,
+      stopWhen: stepCountIs(5),
+    });
+
+    return result.toUIMessageStreamResponse();
+  } catch (error) {
+    console.error("Chat API error:", error);
+    return Response.json(
+      { error: "Failed to process chat request" },
+      { status: 500 }
+    );
+  }
+}
+```
+
+</details>
+
+<details>
+<summary>**app/api/auth/status/route.ts** (full file)</summary>
+
+```ts filename="app/api/auth/status/route.ts"
+import { Arcade } from "@arcadeai/arcadejs";
+
+export async function POST(req: Request) {
+  const { toolName } = await req.json();
+
+  if (!toolName) {
+    return Response.json({ error: "toolName required" }, { status: 400 });
+  }
+
+  const arcade = new Arcade();
+  const userId = process.env.ARCADE_USER_ID || "default-user";
+
+  try {
+    const authResponse = await arcade.tools.authorize({
+      tool_name: toolName,
+      user_id: userId,
+    });
+    return Response.json({ status: authResponse.status });
+  } catch (error) {
+    console.error("Auth status check error:", error);
+    return Response.json({ status: "error", error: String(error) }, { status: 500 });
+  }
+}
+```
+
+</details>
+
+<details>
+<summary>**app/page.tsx** (full file)</summary>
+
+```tsx filename="app/page.tsx"
+"use client";
+
+import { useChat } from "@ai-sdk/react";
+import { useState, useRef, useEffect } from "react";
+import ReactMarkdown, { Components } from "react-markdown";
+
+// Custom components for markdown rendering
+const markdownComponents: Components = {
+  p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+  ul: ({ children }) => <ul className="list-disc ml-4 mb-2">{children}</ul>,
+  ol: ({ children }) => <ol className="list-decimal ml-4 mb-2">{children}</ol>,
+  li: ({ children }) => <li className="mb-1">{children}</li>,
+  strong: ({ children }) => <strong className="font-bold">{children}</strong>,
+  code: ({ children }) => (
+    <code className="bg-gray-700 px-1 py-0.5 rounded text-sm">{children}</code>
+  ),
+  pre: ({ children }) => (
+    <pre className="bg-gray-700 p-2 rounded overflow-x-auto my-2">{children}</pre>
+  ),
+};
+
+function AuthPendingUI({
+  authUrl,
+  toolName,
+  onAuthComplete,
+}: {
+  authUrl: string;
+  toolName: string;
+  onAuthComplete: () => void;
+}) {
+  const [status, setStatus] = useState<"initial" | "waiting" | "completed">("initial");
+  const pollingRef = useRef<NodeJS.Timeout | null>(null);
+  const hasCompletedRef = useRef(false);
+
+  useEffect(() => {
+    if (status !== "waiting" || !toolName || hasCompletedRef.current) return;
+
+    const pollStatus = async () => {
+      try {
+        const res = await fetch("/api/auth/status", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ toolName }),
+        });
+        const data = await res.json();
+
+        if (data.status === "completed" && !hasCompletedRef.current) {
+          hasCompletedRef.current = true;
+          if (pollingRef.current) clearInterval(pollingRef.current);
+          setStatus("completed");
+          setTimeout(() => onAuthComplete(), 1500);
+        }
+      } catch (error) {
+        console.error("Polling error:", error);
+      }
+    };
+
+    pollingRef.current = setInterval(pollStatus, 2000);
+    return () => {
+      if (pollingRef.current) clearInterval(pollingRef.current);
+    };
+  }, [status, toolName, onAuthComplete]);
+
+  const displayName = toolName.split("_")[0] || toolName;
+
+  const handleAuthClick = () => {
+    window.open(authUrl, "_blank");
+    setStatus("waiting");
+  };
+
+  return (
+    <div>
+      {status === "completed" ? (
+        <p className="text-green-400">✓ {displayName} authorized</p>
+      ) : (
+        <>
+          Give Arcade Chat access to {displayName}?{" "}
+          <button
+            onClick={handleAuthClick}
+            className="ml-2 px-2 py-1 bg-teal-600 hover:bg-teal-500 rounded text-sm"
+          >
+            {status === "waiting" ? "Retry authorizing" : "Authorize now"}
+          </button>
+        </>
+      )}
+    </div>
+  );
+}
+
+export default function Chat() {
+  const [input, setInput] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const { messages, sendMessage, regenerate, status } = useChat();
+  const isLoading = status === "submitted" || status === "streaming";
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, status]);
+
+  return (
+    <div className="flex flex-col h-screen max-w-2xl mx-auto p-4">
+      <div className="flex-1 overflow-y-auto space-y-4">
+        {messages.map((message) => {
+          const hasAuthRequired = message.parts?.some((part) => {
+            if (part.type.startsWith("tool-")) {
+              const toolPart = part as { state?: string; output?: unknown };
+              if (toolPart.state === "output-available") {
+                const result = toolPart.output as Record<string, unknown>;
+                return result?.authorization_required;
+              }
+            }
+            return false;
+          });
+
+          const hasVisibleContent = message.parts?.some((part) => {
+            if (part.type === "text" && part.text.trim()) return true;
+            if (part.type.startsWith("tool-")) {
+              const toolPart = part as { state?: string; output?: unknown };
+              if (toolPart.state === "output-available") {
+                const result = toolPart.output as Record<string, unknown>;
+                return result?.authorization_required;
+              }
+            }
+            return false;
+          });
+
+          const showLoading = message.role === "assistant" && !hasVisibleContent && isLoading;
+          if (!hasVisibleContent && !showLoading) return null;
+
+          return (
+            <div key={message.id} className={message.role === "user" ? "text-right" : ""}>
+              <div className={`inline-block p-3 rounded-lg ${
+                message.role === "user" ? "bg-blue-600 text-white" : "bg-gray-800"
+              }`}>
+                {showLoading ? (
+                  <div className="flex gap-1">
+                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></span>
+                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></span>
+                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></span>
+                  </div>
+                ) : (
+                  message.parts?.map((part, i) => {
+                    if (part.type === "text" && !hasAuthRequired) {
+                      return (
+                        <div key={i}>
+                          <ReactMarkdown components={markdownComponents}>
+                            {part.text}
+                          </ReactMarkdown>
+                        </div>
+                      );
+                    }
+
+                    if (part.type.startsWith("tool-")) {
+                      const toolPart = part as { state?: string; output?: unknown };
+
+                      if (toolPart.state === "output-available") {
+                        const result = toolPart.output as Record<string, unknown>;
+
+                        if (result?.authorization_required) {
+                          const authResponse = result.authorization_response as { url?: string };
+                          const toolName = part.type.replace("tool-", "");
+                          return (
+                            <AuthPendingUI
+                              key={i}
+                              authUrl={authResponse?.url || ""}
+                              toolName={toolName}
+                              onAuthComplete={() => regenerate()}
+                            />
+                          );
+                        }
+                      }
+                    }
+                    return null;
+                  })
+                )}
+              </div>
+            </div>
+          );
+        })}
+        <div ref={messagesEndRef} />
+      </div>
+
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!input.trim()) return;
+          sendMessage({ text: input });
+          setInput("");
+          inputRef.current?.focus();
+        }}
+        className="flex gap-2 mt-4"
+      >
+        <input
+          ref={inputRef}
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Ask about your emails or Slack..."
+          className="flex-1 p-2 border rounded"
+          disabled={isLoading}
+        />
+        <button
+          type="submit"
+          disabled={isLoading || !input.trim()}
+          className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
+        >
+          Send
+        </button>
+      </form>
+    </div>
+  );
+}
+```
+
+</details>
