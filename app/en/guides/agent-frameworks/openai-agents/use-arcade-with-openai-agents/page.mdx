@@ -7,556 +7,547 @@ import { Steps, Tabs, Callout } from "nextra/components";
 
 # Setup Arcade with OpenAI Agents SDK
 
-OpenAI Agents SDK is a popular library for building AI agents. It is built on top of the OpenAI API, and provides a simple interface for building agents.
+The [OpenAI Agents SDK](https://openai.github.io/openai-agents-python/) is a popular Python library for building AI agents. It is built on top of the OpenAI API, and provides a simple interface for building agents.
 
 <GuideOverview>
 <GuideOverview.Outcomes>
 
-Learn how to integrate Arcade tools using LangChain primitives
+Learn how to integrate Arcade tools using OpenAI Agents primitives. You will implement a CLI agent that can user Arcade tools to help the user with their requests. Tools that require authorization will be handled automatically by the harness, so users don't need to worry about it.
 
 </GuideOverview.Outcomes>
 
 <GuideOverview.Prerequisites>
 
 - <DashboardLink path="register" />
-- The [`bun` runtime](https://bun.com/)
+- [Obtain an Arcade API key](/get-started/setup/api-keys)
+- The [`uv` package manager](https://docs.astral.sh/uv/)
 
 </GuideOverview.Prerequisites>
 
 <GuideOverview.YouWillLearn>
 
-- How to retrieve Arcade tools and transform them into LangChain tools
-- How to build a LangChain agent
-- How to integrate Arcade tools into the agentic flow
-- How to manage Arcade tool authorization using LangChain interrupts
+- How to retrieve Arcade tools and transform them into OpenAI Agents tools
+- How to build an OpenAI Agents agent
+- How to integrate Arcade tools into the OpenAI Agents flow
+- How to implement "just in time" (JIT) tool authorization using Arcade's client
 
 </GuideOverview.YouWillLearn>
 </GuideOverview>
 
-## A primer on agents and interrupts
+## The agent architecture you will build in this guide
 
-LangChain provides multiple abstractions for building AI agents, and it's very useful to internalize how some of these primitives work, so you can understand and extend the different agentic patterns LangChain supports.
+The OpenAI Agents SDK provides an [Agent](https://openai.github.io/openai-agents-python/ref/agent/#agents.agent.Agent) class that implements a ReAct agent. It provides a simple interface for you to define the system prompt, the model, the tools, and possible sub-agents that can be used with handoffs. In this guide, you will manually keep track of the agent's history and state, and use the `run` method to invoke the agent in an agentic loop.
 
-- _Agents_: Most agentic frameworks, including LangChain, provide an abstraction for a ReAct agent. This is the most common agentic pattern, where an LLM runs in a loop, with the option to call tools to perform actions or retrieve information into its context. The initial input is a system prompt together with a user prompt. The agent may then iteratively call tools and update its context until it generates a response that does not involve a tool call.
-- _Interrupts_: Interrupts in LangChain are a way to control the flow of the agentic loop when something needs to be done outside of the normal ReAct flow. For example, if a tool requires authorization, we can interrupt the agent and ask the user to authorize the tool before continuing.
-
-## Integrate Arcade tools into a LangChain agent
+## Integrate Arcade tools into an OpenAI Agents agent
 
 <Steps>
 
 ### Create a new project
 
+Create a new directory for your project and initialize a new virtual environment:
+
 ```bash
-mkdir langchain-arcade-example
-cd langchain-arcade-example
-bun install @arcadeai/arcadejs langchain @langchain/openai @langchain/core @langchain/langgraph
+mkdir openai-agents-arcade-example
+cd openai-agents-arcade-example
+uv venv
+source .venv/bin/activate
 ```
 
-Create a new file called `.env` and add the following API keys:
+Install the necessary packages:
+
+```bash
+uv pip install openai-agents arcadepy
+```
+
+Create a new file called `.env` and add the following environment variables:
 
 ```env filename=".env"
+# Arcade API key
 ARCADE_API_KEY=YOUR_ARCADE_API_KEY
+# Arcade user ID (this is the email address you used to login to Arcade)
+ARCADE_USER_ID={arcade_user_id}
+# OpenAI API key
 OPENAI_API_KEY=YOUR_OPENAI_API_KEY
 ```
 
 ### Import the necessary packages
 
-Create a new file called `main.ts` and add the following code:
+Create a new file called `main.py` and add the following code:
 
-```ts filename="main.ts"
-"use strict";
-import { Arcade } from "@arcadeai/arcadejs";
-import {
-  type ToolExecuteFunctionFactoryInput,
-  executeZodTool,
-  isAuthorizationRequiredError,
-  toZod,
-} from "@arcadeai/arcadejs/lib";
-import { type ToolExecuteFunction } from "@arcadeai/arcadejs/lib/zod/types";
-import { createAgent, tool } from "langchain";
-import {
-  Command,
-  interrupt,
-  MemorySaver,
-  type Interrupt,
-} from "@langchain/langgraph";
-import chalk from "chalk";
-import readline from "node:readline/promises";
+```python filename="main.py"
+from agents import Agent, Runner, TResponseInputItem
+from agents.run_context import RunContextWrapper
+from agents.tool import FunctionTool
+from agents.exceptions import AgentsException
+from arcadepy import AsyncArcade
+from arcadepy.types.execute_tool_response import ExecuteToolResponse
+from dotenv import load_dotenv
+from functools import partial
+from typing import Any
+import os
+import asyncio
+import json
 ```
 
 This is quite a number of imports, let's break them down:
 
 - Arcade imports:
-  - `Arcade`: This is the Arcade client, you'll use it to interact with the Arcade API.
-  - `type ToolExecuteFunctionFactoryInput`: This type encodes the input to execute Arcade tools.
-  - `executeZodTool`: You'll use this function to execute an Arcade tool.
-  - `isAuthorizationRequiredError`: You'll use this function to check if a tool requires authorization.
-  - `toZod`: You'll use this function to convert an Arcade tool definition into a Zod schema.
-- LangChain imports:
-  - `createAgent`: This is the main function to create a LangChain agent.
-  - `tool`: You'll use this function to turn an Arcade tool definition into a LangChain tool.
-  - `Command`: You'll use this class to communicate the user's decisions to the agent's interrupts.
-  - `interrupt`: You'll use this function to interrupt the ReAct flow and ask the user for input.
-  - `MemorySaver`: This is a LangGraph construct that stores the agent's state, and is required for checkpointing and interrupts.
+  - `AsyncArcade`: The Arcade client, used to interact with the Arcade API.
+  - `ExecuteToolResponse`: The response type for the execute tool response.
+- OpenAI Agents imports:
+  - `Agent`: The OpenAI Agents agent, used to define an agent.
+  - `Runner`: The OpenAI Agents runner, used to run the agent in an agentic loop.
+  - `TResponseInputItem`: The response input item type, determines the type of message in the conversation history.
+  - `RunContextWrapper`: Wraps the run context, providing information such as the user ID, the tool name, tool arguments, and other contextual information different parts of the agent may need.
+  - `FunctionTool`: OpenAI Agents tool definition format.
+  - `AgentsException`: The OpenAI Agents exception, used to handle errors in the agentic loop.
 - Other imports:
-  - `chalk`: This is a library to colorize the console output.
-  - `readline`: This is a library to read input from the console.
+  - `load_dotenv`: Loads the environment variables from the `.env` file.
+  - `functools.partial`: Partially applies a function to a given set of arguments.
+  - `typing.Any`: A type hint for the any type.
+  - `os`: The operating system module, used to interact with the operating system.
+  - `asyncio`: The asynchronous I/O module, used to interact with the asynchronous I/O.
+  - `json`: The JSON module, used to interact with JSON data.
+
+### Configure the agent
+
+These variables are used in the rest of the code to customize the agent and manage the tools. Feel free to configure them to your liking.
+
+```python filename="main.py"
+# Load environment variables
+load_dotenv()
+
+# The Arcade User ID identifies who is authorizing each service.
+ARCADE_USER_ID = os.getenv("ARCADE_USER_ID")
+# This determines which MCP server is providing the tools, you can customize this to make a Notion agent. All tools from the MCP servers defined in the array will be used.
+MCP_SERVERS = ["Slack"]
+# This determines individual tools. Useful to pick specific tools when you don't need all of them.
+TOOLS = ["Gmail_ListEmails", "Gmail_SendEmail", "Gmail_WhoAmI"]
+# This determines the maximum number of tool definitions Arcade will return per MCP server
+TOOL_LIMIT = 30
+# This prompt defines the behavior of the agent.
+SYSTEM_PROMPT = "You are a helpful assistant that can assist with Gmail and Slack."
+# This determines which LLM model will be used inside the agent
+MODEL = "gpt-4o-mini"
+```
+
+### Write a custom error and utility functions to help with tool calls
+
+Here, you define `ToolError` to handle errors from the Arcade tools. It wraps the `AgentsException` and provides an informative error message that can be handled in the agentic loop in case anything goes wrong.
+
+You also define `convert_output_to_json` to convert the output of the Arcade tools to a JSON string. This is useful because the output of the Arcade tools is not always a JSON object, and the OpenAI Agents SDK expects a JSON string.
+
+```python filename="main.py"
+# Arcade to OpenAI agent exception classes
+class ToolError(AgentsException):
+    def __init__(self, result: ExecuteToolResponse):
+        self.result = result
+
+    @property
+    def message(self):
+        return self.result.output.error.message
+
+    def __str__(self):
+        return f"Tool {self.result.tool_name} failed with error: {self.message}"
+
+
+def convert_output_to_json(output: Any) -> str:
+    if isinstance(output, dict) or isinstance(output, list):
+        return json.dumps(output)
+    else:
+        return str(output)
+```
+
+### Write a helper function to authorize Arcade tools
+
+This helper function is how you implement "just in time" (JIT) tool authorization using Arcade's client. When the agent tries to execute a tool that requires authorization, the `result` object's `status` will be `"pending"`, and you can use the `authorize` method to get an authorization URL. You then wait for the user to complete the authorization and retry the tool call. If the user has already authorized the tool, the `status` will be `"completed"`, and the OAuth dance is skipped silently, which improves the user experience.
+
+<Callout type="info">
+  This function captures the authorization flow outside of the agent's context,
+  which is a good practice for security and context engineering. By handling
+  everything in the harness, you remove the risk of the LLM replacing the
+  authorization URL or leaking it, and you keep the context free from any
+  authorization-related traces, which reduces the risk of hallucinations.
+</Callout>
+
+```python filename="main.py"
+async def authorize_tool(client: AsyncArcade, context: RunContextWrapper, tool_name: str):
+    if not context.context.get("user_id"):
+        raise ToolError("No user ID and authorization required for tool")
+
+    result = await client.tools.authorize(
+        tool_name=tool_name,
+        user_id=context.context.get("user_id"),
+    )
+
+    if result.status != "completed":
+        print(f"{tool_name} requires authorization to run, please open the following URL to authorize: {result.url}")
+
+        await client.auth.wait_for_completion(result)
+```
 
 ### Write a helper function to execute Arcade tools
 
-```ts filename="main.ts"
-function executeOrInterruptTool({
-  zodToolSchema,
-  toolDefinition,
-  client,
-  userId,
-}: ToolExecuteFunctionFactoryInput): ToolExecuteFunction<any> {
-  const { name: toolName } = zodToolSchema;
+This helper function is how the OpenAI Agents framework invokes the Arcade tools. It handles the authorization flow, and then calls the tool using the `execute` method. It handles the conversion of the arguments from JSON to a dictionary (expected by Arcade) and the conversion of the output from the Arcade tool to a JSON string (expected by the OpenAI Agents framework). Here is where you call the helper functions defined earlier to authorize the tool and convert the output to a JSON string.
 
-  return async (input: unknown) => {
-    try {
-      // Try to execute the tool
-      const result = await executeZodTool({
-        zodToolSchema,
-        toolDefinition,
-        client,
-        userId,
-      })(input);
-      return result;
-    } catch (error) {
-      // If the tool requires authorization, we interrupt the flow and ask the user to authorize the tool
-      if (error instanceof Error && isAuthorizationRequiredError(error)) {
-        const response = await client.tools.authorize({
-          tool_name: toolName,
-          user_id: userId,
-        });
+```python filename="main.py"
+async def invoke_arcade_tool(
+    context: RunContextWrapper,
+    tool_args: str,
+    tool_name: str,
+    client: AsyncArcade,
+):
+    args = json.loads(tool_args)
+    await authorize_tool(client, context, tool_name)
 
-        // We interrupt the flow here, and pass everything the handler needs to get the user's authorization
-        const interrupt_response = interrupt({
-          authorization_required: true,
-          authorization_response: response,
-          tool_name: toolName,
-          url: response.url ?? "",
-        });
+    print(f"Invoking tool {tool_name} with args: {args}")
+    result = await client.tools.execute(
+        tool_name=tool_name,
+        input=args,
+        user_id=context.context.get("user_id"),
+    )
+    if not result.success:
+        raise ToolError(result)
 
-        // If the user authorized the tool, we retry the tool call without interrupting the flow
-        if (interrupt_response.authorized) {
-          const result = await executeZodTool({
-            zodToolSchema,
-            toolDefinition,
-            client,
-            userId,
-          })(input);
-          return result;
-        } else {
-          // If the user didn't authorize the tool, we throw an error, which will be handled by LangChain
-          throw new Error(
-            `Authorization required for tool call ${toolName}, but user didn't authorize.`
-          );
-        }
-      }
-      throw error;
-    }
-  };
-}
+    print(f"Tool {tool_name} called successfully, {MODEL} will now process the result...")
+
+    return convert_output_to_json(result.output.value)
 ```
-
-In essence, this function is a wrapper around the `executeZodTool` function. When it fails, you interrupt the flow and send the authorization request for the harness to handle (the app that is running the agent). If the user authorizes the tool, the harness will reply with an `{authorized: true}` object, and the tool call will be retried without interrupting the flow.
 
 ### Retrieve Arcade tools and transform them into LangChain tools
 
-```ts filename="main.ts"
-// Initialize the Arcade client
-const arcade = new Arcade();
+Here you get the Arcade tools you want the agent to use, and transform them into OpenAI Agents tools. The first step is to initialize the Arcade client, and get the tools you want to use. Since OpenAI is itself an inference provider, the Arcade API provides a convenient endpoint to get the tools in the OpenAI format, which is also the format expected by the OpenAI Agents framework.
 
-// Get the Arcade tools, you can customize the MCP Server (e.g. "github", "notion", "gmail", etc.)
-const googleToolkit = await arcade.tools.list({ toolkit: "gmail", limit: 30 });
-const arcadeTools = toZod({
-  tools: googleToolkit.items,
-  client: arcade,
-  executeFactory: executeOrInterruptTool,
-  userId: "{arcade_user_id}", // Replace this with your application's user ID (e.g. email address, UUID, etc.)
-});
+This helper function is fairly long, here's a breakdown of what it does for clarity:
 
-// Convert Arcade tools to LangGraph tools
-const tools = arcadeTools.map(({ name, description, execute, parameters }) =>
-  (tool as Function)(execute, {
-    name,
-    description,
-    schema: parameters,
-  })
-);
+- retrieve tools from all configured MCP servers (defined in the `MCP_SERVERS` variable)
+- retrieve individual tools (defined in the `TOOLS` variable)
+- get the Arcade tools to OpenAI-formatted tools
+- create a list of FunctionTool objects, mapping each tool to a partial function that invokes the tool via the Arcade client.
+
+```python filename="main.py"
+async def get_arcade_tools(
+    client: AsyncArcade | None = None,
+    tools: list[str] | None = None,
+    mcp_servers: list[str] | None = None,
+) -> list[FunctionTool]:
+
+    if not client:
+        client = AsyncArcade()
+
+    # if no tools or MCP servers are provided, raise an error
+    if not tools and not mcp_servers:
+        raise ValueError(
+            "No tools or MCP servers provided to retrieve tool definitions")
+
+    # Use the Arcade Client to get OpenAI-formatted tool definitions
+    tool_formats = []
+
+    # Retrieve individual tools if specified
+    if tools:
+        # OpenAI-formatted tool definition
+        tasks = [client.tools.formatted.get(name=tool_id, format="openai")
+                 for tool_id in tools]
+        responses = await asyncio.gather(*tasks)
+        for response in responses:
+            tool_formats.append(response)
+
+    # Retrieve tools from specified toolkits
+    if mcp_servers:
+        # Create a task for each toolkit to fetche the formatted tool definition concurrently.
+        tasks = [client.tools.formatted.list(toolkit=tk, format="openai")
+                 for tk in mcp_servers]
+        responses = await asyncio.gather(*tasks)
+
+        # Combine the tool definitions from each response.
+        for response in responses:
+            # Here we assume the returned response has an "items" attribute
+            # containing a list of ToolDefinition objects.
+            tool_formats.extend(response.items)
+
+
+    # Create a list of FunctionTool objects, mapping each tool to a partial function that invokes the tool via the Arcade client.
+    tool_functions = []
+    for tool in tool_formats:
+        tool_name = tool["function"]["name"]
+        tool_description = tool["function"]["description"]
+        tool_params = tool["function"]["parameters"]
+        tool_function = FunctionTool(
+            name=tool_name,
+            description=tool_description,
+            params_json_schema=tool_params,
+            on_invoke_tool=partial(
+                invoke_arcade_tool,
+                tool_name=tool_name,
+                client=client,
+            ),
+            strict_json_schema=False,
+        )
+        tool_functions.append(tool_function)
+
+    return tool_functions
 ```
 
-Here you get the Arcade tools we want to use in our agent, and transform them into LangChain tools. The first step is to initialize the Arcade client, and get the tools we want to use. Then, use the `toZod` function to convert the Arcade tools into a Zod schema, and pass it to the `executeOrInterruptTool` function to create a LangChain tool.
+### Create the main function
 
-### Write the interrupt handler
+The main function is where you:
 
-```ts filename="main.ts"
-async function handleAuthInterrupt(
-  interrupt: Interrupt
-): Promise<{ authorized: boolean }> {
-  const value = interrupt.value;
-  const authorization_required = value.authorization_required;
-  if (authorization_required) {
-    const tool_name = value.tool_name;
-    const authorization_response = value.authorization_response;
-    console.log("⚙️: Authorization required for tool call", tool_name);
-    console.log("⚙️: Authorization URL", authorization_response.url);
-    console.log("⚙️: Waiting for authorization to complete...");
-    try {
-      await arcade.auth.waitForCompletion(authorization_response.id);
-      console.log("⚙️: Authorization granted. Resuming execution...");
-      return { authorized: true };
-    } catch (error) {
-      console.error("⚙️: Error waiting for authorization to complete:", error);
-      return { authorized: false };
-    }
-  }
-  return { authorized: false };
-}
+- Get the tools from the configured MCP Servers
+- Create an agent with the configured tools
+- Initialize the conversation
+- Run the loop!
+
+The loop is a simple while loop that captures the user input, appends it to the conversation history, and then runs the agent. The agent's response is then appended to the conversation history, and the loop continues.
+
+The loop is interrupted when the agent's response contains a tool call, and the tool call is handled by the helper function you wrote earlier.
+
+```python filename="main.py"
+async def main():
+    # Get tools from the configured MCP Servers
+    tools = await get_arcade_tools(mcp_servers=MCP_SERVERS,
+                                   tools=TOOLS)
+
+    # Create an agent with the configured tools
+    agent = Agent(
+        name="Inbox Assistant",
+        instructions=SYSTEM_PROMPT,
+        model=MODEL,
+        tools=tools,
+    )
+
+    # initialize the conversation
+    history: list[TResponseInputItem] = []
+    # run the loop!
+    while True:
+        prompt = input("You: ")
+        if prompt.lower() == "exit":
+            break
+        history.append({"role": "user", "content": prompt})
+        try:
+            result = await Runner.run(
+                starting_agent=agent,
+                input=history,
+                context={"user_id": ARCADE_USER_ID},
+            )
+            history = result.to_input_list()
+            print(f"Assistant: {result.final_output}")
+        except ToolError as e:
+            # Something went wrong with the tool call, print the error message and exit the loop
+            print(e.message)
+            break
+
+# Run the main function as the entry point of the script
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
-
-This helper function receives an interrupt object and returns a decision object. In LangChain, decisions can be of any serializable type, so you can return any object you need to continue the flow. In this case, we return an object with a boolean flag indicating if the authorization was successful.
-
-It is important to note that this function captures the authorization flow outside of the agent's context, which is a good practice for security and context engineering. By handling everything in the harness, you remove the risk of the LLM replacing the authorization URL or leaking it, and you keep the context free from any authorization-related traces, which reduces the risk of hallucinations.
-
-### Create the agent
-
-```ts filename="main.ts"
-const agent = createAgent({
-  systemPrompt:
-    "You are a helpful assistant that can use GMail tools. Your main task is to help the user with anything they may need.",
-  model: "gpt-4o-mini",
-  tools: tools,
-  checkpointer: new MemorySaver(),
-});
-```
-
-Here you create the agent using the `createAgent` function. You pass the system prompt, the model, the tools, and the checkpointer. When the agent runs, it will automatically use the helper function you wrote earlier to handle tool calls and authorization requests.
-
-### Write the invoke helper
-
-```ts filename="main.ts"
-async function streamAgent(
-  agent: any,
-  input: any,
-  config: any
-): Promise<Interrupt[]> {
-  const stream = await agent.stream(input, {
-    ...config,
-    streamMode: "updates",
-  });
-  const interrupts: Interrupt[] = [];
-
-  for await (const chunk of stream) {
-    if (chunk.__interrupt__) {
-      interrupts.push(...(chunk.__interrupt__ as Interrupt[]));
-      continue;
-    }
-    for (const update of Object.values(chunk)) {
-      for (const msg of (update as any)?.messages ?? []) {
-        console.log("🤖: ", msg.toFormattedString());
-      }
-    }
-  }
-
-  return interrupts;
-}
-```
-
-This last helper function handles the streaming of the agent's response, and captures the interrupts. When an interrupt is detected, it is added to the interrupts array, and the flow is interrupted. If there are no interrupts, it will just stream the agent's to the console.
-
-### Write the main function
-
-Finally, write the main function that will call the agent and handle the user input.
-
-```ts filename="main.ts"
-async function main() {
-  const config = { configurable: { thread_id: "1" } };
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  console.log(chalk.green("Welcome to the chatbot! Type 'exit' to quit."));
-  while (true) {
-    const input = await rl.question("> ");
-    if (input.toLowerCase() === "exit") {
-      break;
-    }
-    rl.pause();
-
-    try {
-      // Stream the agent response and collect any interrupts
-      const interrupts = await streamAgent(
-        agent,
-        {
-          messages: [{ role: "user", content: input }],
-        },
-        config
-      );
-
-      // Handle authorization interrupts
-      const decisions: any[] = [];
-      for (const interrupt of interrupts) {
-        decisions.push(await handleAuthInterrupt(interrupt));
-      }
-
-      // Resume agent after authorization
-      if (decisions.length > 0) {
-        await streamAgent(
-          agent,
-          new Command({ resume: { decisions } }),
-          config
-        );
-      }
-    } catch (error) {
-      console.error(error);
-    }
-
-    rl.resume();
-  }
-  console.log(chalk.red("👋 Bye..."));
-  process.exit(0);
-}
-
-// Run the main function
-main().catch((err) => console.error(err));
-```
-
-Here the `config` object is used to configure the thread ID, which tells the agent to store the state of the conversation in a specific thread. Like any typical agent loop, you:
-
-- Capture the user input
-- Stream the agent's response
-- Handle any authorization interrupts
-- Resume the agent after authorization
-- Handle any errors
-- Exit the loop if the user wants to quit
 
 ### Run the agent
 
 ```bash
-bun run main.ts
+uv run main.py
 ```
 
 You should see the agent responding to your prompts like any model, as well as handling any tool calls and authorization requests. Here are some example prompts you can try:
 
-- "Send me an email with a random haiku about LangChain agents"
+- "Send me an email with a random haiku about OpenAI Agents"
 - "Summarize my latest 3 emails"
 
 </Steps>
 
 ## Key takeaways
 
-- Arcade tools can be integrated into any agentic framework like LangChain, all you need is to transform the Arcade tools into LangChain tools and handle the authorization flow.
+- Arcade tools can be integrated into any agentic framework like OpenAI Agents, all you need is to transform the Arcade tools into OpenAI Agents tools and handle the authorization flow.
 - Context isolation: By handling the authorization flow outside of the agent's context, you remove the risk of the LLM replacing the authorization URL or leaking it, and you keep the context free from any authorization-related traces, which reduces the risk of hallucinations.
-- You can leverage the interrupts mechanism to handle human intervention in the agent's flow, useful for authorization flows, policy enforcement, or anything else that requires input from the user.
+
+## Next Steps
+
+1. Try adding additional tools to the agent or modifying the tools in the catalog for a different use case by modifying the `MCP_SERVERS` and `TOOLS` variables.
+2. Try implementing a fully deterministic flow before the agentic loop, use this deterministic phase to prepare the context for the agent, adding things like the current date, time, or any other information that is relevant to the task at hand.
 
 ## Example code
 
-```ts filename="main.ts"
-"use strict";
-import { Arcade } from "@arcadeai/arcadejs";
-import {
-  type ToolExecuteFunctionFactoryInput,
-  executeZodTool,
-  isAuthorizationRequiredError,
-  toZod,
-} from "@arcadeai/arcadejs/lib";
-import { type ToolExecuteFunction } from "@arcadeai/arcadejs/lib/zod/types";
-import { createAgent, tool } from "langchain";
-import {
-  Command,
-  interrupt,
-  MemorySaver,
-  type Interrupt,
-} from "@langchain/langgraph";
-import chalk from "chalk";
-import readline from "node:readline/promises";
+```python filename="main.py"
+from agents import Agent, Runner, TResponseInputItem
+from agents.run_context import RunContextWrapper
+from agents.tool import FunctionTool
+from agents.exceptions import AgentsException
+from arcadepy import AsyncArcade
+from arcadepy.types.execute_tool_response import ExecuteToolResponse
+from dotenv import load_dotenv
+from functools import partial
+from typing import Any
+import os
+import asyncio
+import json
 
-function executeOrInterruptTool({
-  zodToolSchema,
-  toolDefinition,
-  client,
-  userId,
-}: ToolExecuteFunctionFactoryInput): ToolExecuteFunction<any> {
-  const { name: toolName } = zodToolSchema;
+# Load environment variables
+load_dotenv()
 
-  return async (input: unknown) => {
-    try {
-      // Try to execute the tool
-      const result = await executeZodTool({
-        zodToolSchema,
-        toolDefinition,
-        client,
-        userId,
-      })(input);
-      return result;
-    } catch (error) {
-      // If the tool requires authorization, we interrupt the flow and ask the user to authorize the tool
-      if (error instanceof Error && isAuthorizationRequiredError(error)) {
-        const response = await client.tools.authorize({
-          tool_name: toolName,
-          user_id: userId,
-        });
+# The Arcade User ID identifies who is authorizing each service.
+ARCADE_USER_ID = os.getenv("ARCADE_USER_ID")
+# This determines which MCP server is providing the tools, you can customize this to make a Notion agent. All tools from the MCP servers defined in the array will be used.
+MCP_SERVERS = ["Slack"]
+# This determines individual tools. Useful to pick specific tools when you don't need all of them.
+TOOLS = ["Gmail_ListEmails", "Gmail_SendEmail", "Gmail_WhoAmI"]
+# This determines the maximum number of tool definitions Arcade will return per MCP server
+TOOL_LIMIT = 30
+# This prompt defines the behavior of the agent.
+SYSTEM_PROMPT = "You are a helpful assistant that can assist with Gmail and Slack."
+# This determines which LLM model will be used inside the agent
+MODEL = "gpt-4o-mini"
 
-        // We interrupt the flow here, and pass everything the handler needs to get the user's authorization
-        const interrupt_response = interrupt({
-          authorization_required: true,
-          authorization_response: response,
-          tool_name: toolName,
-          url: response.url ?? "",
-        });
 
-        // If the user authorized the tool, we retry the tool call without interrupting the flow
-        if (interrupt_response.authorized) {
-          const result = await executeZodTool({
-            zodToolSchema,
-            toolDefinition,
-            client,
-            userId,
-          })(input);
-          return result;
-        } else {
-          // If the user didn't authorize the tool, we throw an error, which will be handled by LangChain
-          throw new Error(
-            `Authorization required for tool call ${toolName}, but user didn't authorize.`
-          );
-        }
-      }
-      throw error;
-    }
-  };
-}
+# Arcade to OpenAI agent exception classes
+class ToolError(AgentsException):
+    def __init__(self, result: ExecuteToolResponse):
+        self.result = result
 
-// Initialize the Arcade client
-const arcade = new Arcade();
+    @property
+    def message(self):
+        return self.result.output.error.message
 
-// Get the Arcade tools, you can customize the MCP Server (e.g. "github", "notion", "gmail", etc.)
-const googleToolkit = await arcade.tools.list({ toolkit: "gmail", limit: 30 });
-const arcadeTools = toZod({
-  tools: googleToolkit.items,
-  client: arcade,
-  executeFactory: executeOrInterruptTool,
-  userId: "{arcade_user_id}", // Replace this with your application's user ID (e.g. email address, UUID, etc.)
-});
+    def __str__(self):
+        return f"Tool {self.result.tool_name} failed with error: {self.message}"
 
-// Convert Arcade tools to LangGraph tools
-const tools = arcadeTools.map(({ name, description, execute, parameters }) =>
-  (tool as Function)(execute, {
-    name,
-    description,
-    schema: parameters,
-  })
-);
 
-async function handleAuthInterrupt(
-  interrupt: Interrupt
-): Promise<{ authorized: boolean }> {
-  const value = interrupt.value;
-  const authorization_required = value.authorization_required;
-  if (authorization_required) {
-    const tool_name = value.tool_name;
-    const authorization_response = value.authorization_response;
-    console.log("⚙️: Authorization required for tool call", tool_name);
-    console.log("⚙️: Authorization URL", authorization_response.url);
-    console.log("⚙️: Waiting for authorization to complete...");
-    try {
-      await arcade.auth.waitForCompletion(authorization_response.id);
-      console.log("⚙️: Authorization granted. Resuming execution...");
-      return { authorized: true };
-    } catch (error) {
-      console.error("⚙️: Error waiting for authorization to complete:", error);
-      return { authorized: false };
-    }
-  }
-  return { authorized: false };
-}
+def convert_output_to_json(output: Any) -> str:
+    if isinstance(output, dict) or isinstance(output, list):
+        return json.dumps(output)
+    else:
+        return str(output)
 
-const agent = createAgent({
-  systemPrompt:
-    "You are a helpful assistant that can use GMail tools. Your main task is to help the user with anything they may need.",
-  model: "gpt-4o-mini",
-  tools: tools,
-  checkpointer: new MemorySaver(),
-});
+async def authorize_tool(client: AsyncArcade, context: RunContextWrapper, tool_name: str):
+    if not context.context.get("user_id"):
+        raise ToolError("No user ID and authorization required for tool")
 
-async function streamAgent(
-  agent: any,
-  input: any,
-  config: any
-): Promise<Interrupt[]> {
-  const stream = await agent.stream(input, {
-    ...config,
-    streamMode: "updates",
-  });
-  const interrupts: Interrupt[] = [];
+    result = await client.tools.authorize(
+        tool_name=tool_name,
+        user_id=context.context.get("user_id"),
+    )
 
-  for await (const chunk of stream) {
-    if (chunk.__interrupt__) {
-      interrupts.push(...(chunk.__interrupt__ as Interrupt[]));
-      continue;
-    }
-    for (const update of Object.values(chunk)) {
-      for (const msg of (update as any)?.messages ?? []) {
-        console.log("🤖: ", msg.toFormattedString());
-      }
-    }
-  }
+    if result.status != "completed":
+        print(f"{tool_name} requires authorization to run, please open the following URL to authorize: {result.url}")
 
-  return interrupts;
-}
+        await client.auth.wait_for_completion(result)
 
-async function main() {
-  const config = { configurable: { thread_id: "1" } };
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
+async def invoke_arcade_tool(
+    context: RunContextWrapper,
+    tool_args: str,
+    tool_name: str,
+    client: AsyncArcade,
+):
+    args = json.loads(tool_args)
+    await authorize_tool(client, context, tool_name)
 
-  console.log(chalk.green("Welcome to the chatbot! Type 'exit' to quit."));
-  while (true) {
-    const input = await rl.question("> ");
-    if (input.toLowerCase() === "exit") {
-      break;
-    }
-    rl.pause();
+    print(f"Invoking tool {tool_name} with args: {args}")
+    result = await client.tools.execute(
+        tool_name=tool_name,
+        input=args,
+        user_id=context.context.get("user_id"),
+    )
+    if not result.success:
+        raise ToolError(result)
 
-    try {
-      // Stream the agent response and collect any interrupts
-      const interrupts = await streamAgent(
-        agent,
-        {
-          messages: [{ role: "user", content: input }],
-        },
-        config
-      );
+    print(f"Tool {tool_name} called successfully, {MODEL} will now process the result...")
 
-      // Handle authorization interrupts
-      const decisions: any[] = [];
-      for (const interrupt of interrupts) {
-        decisions.push(await handleAuthInterrupt(interrupt));
-      }
+    return convert_output_to_json(result.output.value)
 
-      // Resume agent after authorization
-      if (decisions.length > 0) {
-        await streamAgent(
-          agent,
-          new Command({ resume: { decisions } }),
-          config
-        );
-      }
-    } catch (error) {
-      console.error(error);
-    }
+async def get_arcade_tools(
+    client: AsyncArcade | None = None,
+    tools: list[str] | None = None,
+    mcp_servers: list[str] | None = None,
+) -> list[FunctionTool]:
 
-    rl.resume();
-  }
-  console.log(chalk.red("👋 Bye..."));
-  process.exit(0);
-}
+    if not client:
+        client = AsyncArcade()
 
-// Run the main function
-main().catch((err) => console.error(err));
+    # if no tools or MCP servers are provided, raise an error
+    if not tools and not mcp_servers:
+        raise ValueError(
+            "No tools or MCP servers provided to retrieve tool definitions")
+
+    # Use the Arcade Client to get OpenAI-formatted tool definitions
+    tool_formats = []
+
+    # Retrieve individual tools if specified
+    if tools:
+        # OpenAI-formatted tool definition
+        tasks = [client.tools.formatted.get(name=tool_id, format="openai")
+                 for tool_id in tools]
+        responses = await asyncio.gather(*tasks)
+        for response in responses:
+            tool_formats.append(response)
+
+    # Retrieve tools from specified toolkits
+    if mcp_servers:
+        # Create a task for each toolkit to fetche the formatted tool definition concurrently.
+        tasks = [client.tools.formatted.list(toolkit=tk, format="openai")
+                 for tk in mcp_servers]
+        responses = await asyncio.gather(*tasks)
+
+        # Combine the tool definitions from each response.
+        for response in responses:
+            # Here we assume the returned response has an "items" attribute
+            # containing a list of ToolDefinition objects.
+            tool_formats.extend(response.items)
+
+
+    # Create a list of FunctionTool objects, mapping each tool to a partial function that invokes the tool via the Arcade client.
+    tool_functions = []
+    for tool in tool_formats:
+        tool_name = tool["function"]["name"]
+        tool_description = tool["function"]["description"]
+        tool_params = tool["function"]["parameters"]
+        tool_function = FunctionTool(
+            name=tool_name,
+            description=tool_description,
+            params_json_schema=tool_params,
+            on_invoke_tool=partial(
+                invoke_arcade_tool,
+                tool_name=tool_name,
+                client=client,
+            ),
+            strict_json_schema=False,
+        )
+        tool_functions.append(tool_function)
+
+    return tool_functions
+
+async def main():
+    # Get tools from the configured MCP Servers
+    tools = await get_arcade_tools(mcp_servers=MCP_SERVERS,
+                                   tools=TOOLS)
+
+    # Create an agent with the configured tools
+    agent = Agent(
+        name="Inbox Assistant",
+        instructions=SYSTEM_PROMPT,
+        model=MODEL,
+        tools=tools,
+    )
+
+    # initialize the conversation
+    history: list[TResponseInputItem] = []
+    # run the loop!
+    while True:
+        prompt = input("You: ")
+        if prompt.lower() == "exit":
+            break
+        history.append({"role": "user", "content": prompt})
+        try:
+            result = await Runner.run(
+                starting_agent=agent,
+                input=history,
+                context={"user_id": ARCADE_USER_ID},
+            )
+            history = result.to_input_list()
+            print(f"Assistant: {result.final_output}")
+        except ToolError as e:
+            # Something went wrong with the tool call, print the error message and exit the loop
+            print(e.message)
+            break
+
+# Run the main function as the entry point of the script
+if __name__ == "__main__":
+    asyncio.run(main())
 ```

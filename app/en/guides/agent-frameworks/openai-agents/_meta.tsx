@@ -1,5 +1,3 @@
 export default {
-  overview: "Overview",
-  "use-arcade-tools": "Using Arcade tools",
-  "user-auth-interrupts": "Managing user authorization",
+  "use-arcade-with-openai-agents": "Setup Arcade with OpenAI Agents SDK",
 };
