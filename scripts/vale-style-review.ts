@@ -83,17 +83,14 @@ type FileWithDiff = {
 };
 
 // Parse command line args
-function parseArgs(): { prNumber: number; dryRun: boolean } {
+function parseArgs(): { prNumber: number } {
   const args = process.argv.slice(2);
   const prIndex = args.indexOf("--pr");
   if (prIndex === -1 || !args[prIndex + 1]) {
-    console.error("Usage: vale-style-review --pr <number> [--dry-run]");
+    console.error("Usage: vale-style-review --pr <number>");
     process.exit(1);
   }
-  return {
-    prNumber: Number.parseInt(args[prIndex + 1], 10),
-    dryRun: args.includes("--dry-run"),
-  };
+  return { prNumber: Number.parseInt(args[prIndex + 1], 10) };
 }
 
 // Parse a unified diff patch to extract line numbers that can receive comments
@@ -397,24 +394,9 @@ _Powered by Vale + ${providerName}_`,
   }
 }
 
-// Print suggestions in dry-run mode
-function printDryRunOutput(comments: ReviewComment[]): void {
-  console.log("\n--- DRY RUN MODE ---\n");
-  if (comments.length === 0) {
-    console.log("No suggestions to post.");
-    return;
-  }
-  console.log(`Would post ${comments.length} suggestion(s):\n`);
-  for (const comment of comments) {
-    console.log(`📄 ${comment.path}:${comment.line}`);
-    console.log(comment.body);
-    console.log("\n---\n");
-  }
-}
-
 // Main function
 async function main() {
-  const { prNumber, dryRun } = parseArgs();
+  const { prNumber } = parseArgs();
 
   // Validate environment
   const githubToken = process.env.GITHUB_TOKEN;
@@ -532,12 +514,8 @@ async function main() {
     console.log(`  → ${comments.length} actionable suggestions`);
   }
 
-  // Post review or print dry-run output
-  if (dryRun) {
-    printDryRunOutput(allComments);
-  } else {
-    await postReview(octokit, prNumber, allComments, ai.type);
-  }
+  // Post review
+  await postReview(octokit, prNumber, allComments, ai.type);
 
   console.log("Done!");
 }
