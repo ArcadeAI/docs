@@ -1,10 +1,10 @@
 #!/usr/bin/env npx tsx
 
 /**
- * Vale + Claude AI Fix Script
+ * Vale + AI Fix Script (Interactive)
  *
- * Runs Vale on specified files, then offers to fix issues using Claude.
- * Used by pre-commit hook and can be run manually.
+ * Runs Vale on specified files, then offers to fix issues one at a time
+ * with AI assistance. Supports feedback loops for iterative refinement.
  *
  * Usage:
  *   pnpm vale:fix [files...]        # Fix specific files
@@ -58,6 +58,8 @@ type ValeIssue = {
   rule: string;
 };
 
+type UserChoice = "yes" | "no" | "edit" | "feedback" | "skip";
+
 // Regex for parsing Vale line output
 const VALE_LINE_REGEX = /^(.+?):(\d+):(\d+):([^:]+):(.+)$/;
 
@@ -65,11 +67,14 @@ const VALE_LINE_REGEX = /^(.+?):(\d+):(\d+):([^:]+):(.+)$/;
 const KILOBYTE = 1024;
 const MEGABYTE = KILOBYTE * KILOBYTE;
 const MAX_BUFFER_SIZE = 10 * MEGABYTE;
-const MAX_AI_TOKENS = 8192;
+const MAX_AI_TOKENS = 4096;
 
 // Regex for stripping code fences from AI responses
 const CODE_FENCE_START_REGEX = /^```(?:mdx|markdown|md)?\n/;
 const CODE_FENCE_END_REGEX = /\n```$/;
+
+// Line number display width for diffs
+const LINE_NUM_WIDTH = 3;
 
 function getSeverity(
   rule: string,
@@ -92,7 +97,6 @@ function parseValeOutput(output: string): Map<string, ValeIssue[]> {
       continue;
     }
 
-    // Format: file:line:col:rule:message
     const match = line.match(VALE_LINE_REGEX);
     if (match) {
       const [, file, lineNum, col, rule, message] = match;
@@ -120,12 +124,11 @@ function runVale(files: string[]): Map<string, ValeIssue[]> {
     maxBuffer: MAX_BUFFER_SIZE,
   });
 
-  // Vale exits with 1 if there are issues, 0 if clean
   const output = result.stdout || "";
   return parseValeOutput(output);
 }
 
-function askUser(question: string): Promise<boolean> {
+function prompt(question: string): Promise<string> {
   const rl = createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -134,36 +137,75 @@ function askUser(question: string): Promise<boolean> {
   return new Promise((resolve) => {
     rl.question(question, (answer) => {
       rl.close();
-      resolve(answer.toLowerCase().startsWith("y"));
+      resolve(answer.trim());
     });
   });
 }
 
-function buildPrompt(filePath: string, issues: ValeIssue[]): string {
-  const content = readFileSync(filePath, "utf-8");
+function parseUserChoice(input: string): UserChoice {
+  const lower = input.toLowerCase();
+  if (lower === "y" || lower === "yes") {
+    return "yes";
+  }
+  if (lower === "n" || lower === "no") {
+    return "no";
+  }
+  if (lower === "e" || lower === "edit") {
+    return "edit";
+  }
+  if (lower === "f" || lower === "feedback") {
+    return "feedback";
+  }
+  if (lower === "s" || lower === "skip") {
+    return "skip";
+  }
+  return "no"; // default
+}
 
-  const issueList = issues
-    .map((i) => `- Line ${i.line}: [${i.rule}] ${i.message}`)
+function getContextLines(
+  content: string,
+  lineNum: number,
+  contextSize = 2
+): string {
+  const lines = content.split("\n");
+  const start = Math.max(0, lineNum - contextSize - 1);
+  const end = Math.min(lines.length, lineNum + contextSize);
+
+  return lines
+    .slice(start, end)
+    .map((line, i) => {
+      const num = start + i + 1;
+      const marker = num === lineNum ? "→" : " ";
+      return `${marker} ${num.toString().padStart(LINE_NUM_WIDTH)}: ${line}`;
+    })
     .join("\n");
+}
 
+function buildSingleIssuePrompt(
+  content: string,
+  issue: ValeIssue,
+  feedback?: string
+): string {
   const styleGuideSection = STYLE_GUIDE
     ? `\n\nSTYLE GUIDE:\n${STYLE_GUIDE}\n`
     : "";
 
-  return `You are a technical documentation editor for Arcade. Fix the following style issues in this MDX/Markdown file.
+  const feedbackSection = feedback
+    ? `\n\nUSER FEEDBACK on previous attempt:\n${feedback}\n`
+    : "";
+
+  return `You are a technical documentation editor for Arcade. Fix ONE specific style issue in this MDX/Markdown file.
+
+ISSUE TO FIX:
+- Line ${issue.line}: [${issue.rule}] ${issue.message}
 
 IMPORTANT RULES:
-1. ONLY fix the specific issues listed below - do not make other changes
+1. ONLY fix this ONE specific issue - do not change anything else
 2. Preserve all code blocks, frontmatter, and JSX components exactly as-is
 3. Maintain the original meaning and technical accuracy
-4. For passive voice: rewrite to active voice where it improves clarity, but skip if passive is clearer
-5. For toxic/harmful language (alex.* rules): these are CRITICAL - always fix these
-6. Return ONLY the corrected file content, no explanations
-7. Follow the style guide below for voice, tone, and terminology
-${styleGuideSection}
-STYLE ISSUES TO FIX:
-${issueList}
-
+4. Make minimal changes - only what's needed to address the issue
+5. Return ONLY the corrected file content, no explanations
+${styleGuideSection}${feedbackSection}
 ORIGINAL FILE CONTENT:
 \`\`\`mdx
 ${content}
@@ -172,103 +214,91 @@ ${content}
 Return the corrected file content (without the wrapping code fence):`;
 }
 
-async function fixFileWithAnthropic(
-  filePath: string,
-  issues: ValeIssue[],
-  client: Anthropic
+async function fixSingleIssueWithAI(
+  content: string,
+  issue: ValeIssue,
+  feedback?: string
 ): Promise<string | null> {
-  const prompt = buildPrompt(filePath, issues);
+  const promptText = buildSingleIssuePrompt(content, issue, feedback);
 
   try {
-    const response = await client.messages.create({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: MAX_AI_TOKENS,
-      messages: [{ role: "user", content: prompt }],
-    });
+    if (AI_PROVIDER === "anthropic") {
+      const client = new Anthropic();
+      const response = await client.messages.create({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: MAX_AI_TOKENS,
+        messages: [{ role: "user", content: promptText }],
+      });
 
-    const textBlock = response.content.find((block) => block.type === "text");
-    if (textBlock && textBlock.type === "text") {
-      let fixed = textBlock.text;
-      fixed = fixed
-        .replace(CODE_FENCE_START_REGEX, "")
-        .replace(CODE_FENCE_END_REGEX, "");
-      return fixed;
-    }
-    return null;
-  } catch (error) {
-    console.error(`Error calling Anthropic API: ${error}`);
-    return null;
-  }
-}
-
-async function fixFileWithOpenAI(
-  filePath: string,
-  issues: ValeIssue[],
-  client: OpenAI
-): Promise<string | null> {
-  const prompt = buildPrompt(filePath, issues);
-
-  try {
-    const response = await client.chat.completions.create({
-      model: "gpt-4o",
-      max_tokens: MAX_AI_TOKENS,
-      messages: [{ role: "user", content: prompt }],
-    });
-
-    const content = response.choices[0]?.message?.content;
-    if (content) {
-      let fixed = content;
-      fixed = fixed
-        .replace(CODE_FENCE_START_REGEX, "")
-        .replace(CODE_FENCE_END_REGEX, "");
-      return fixed;
-    }
-    return null;
-  } catch (error) {
-    console.error(`Error calling OpenAI API: ${error}`);
-    return null;
-  }
-}
-
-function fixFileWithAI(
-  filePath: string,
-  issues: ValeIssue[]
-): Promise<string | null> {
-  if (AI_PROVIDER === "anthropic") {
-    const client = new Anthropic();
-    return fixFileWithAnthropic(filePath, issues, client);
-  }
-  if (AI_PROVIDER === "openai") {
-    const client = new OpenAI();
-    return fixFileWithOpenAI(filePath, issues, client);
-  }
-  return Promise.resolve(null);
-}
-
-function showDiff(original: string, fixed: string, _filePath: string): void {
-  // Write temp files for diff
-  const tmpOriginal = `/tmp/vale-fix-original-${Date.now()}`;
-  const tmpFixed = `/tmp/vale-fix-fixed-${Date.now()}`;
-
-  writeFileSync(tmpOriginal, original);
-  writeFileSync(tmpFixed, fixed);
-
-  try {
-    execSync(
-      `diff --color=always -u "${tmpOriginal}" "${tmpFixed}" | head -50`,
-      {
-        stdio: "inherit",
+      const textBlock = response.content.find((block) => block.type === "text");
+      if (textBlock && textBlock.type === "text") {
+        return textBlock.text
+          .replace(CODE_FENCE_START_REGEX, "")
+          .replace(CODE_FENCE_END_REGEX, "");
       }
+    } else if (AI_PROVIDER === "openai") {
+      const client = new OpenAI();
+      const response = await client.chat.completions.create({
+        model: "gpt-4o",
+        max_tokens: MAX_AI_TOKENS,
+        messages: [{ role: "user", content: promptText }],
+      });
+
+      const text = response.choices[0]?.message?.content;
+      if (text) {
+        return text
+          .replace(CODE_FENCE_START_REGEX, "")
+          .replace(CODE_FENCE_END_REGEX, "");
+      }
+    }
+    return null;
+  } catch (error) {
+    console.error(`Error calling AI: ${error}`);
+    return null;
+  }
+}
+
+function showIssueDiff(
+  original: string,
+  fixed: string,
+  issue: ValeIssue
+): void {
+  const originalLines = original.split("\n");
+  const fixedLines = fixed.split("\n");
+
+  // Find the changed lines around the issue
+  const contextSize = 3;
+  const start = Math.max(0, issue.line - contextSize - 1);
+  const end = Math.min(
+    Math.max(originalLines.length, fixedLines.length),
+    issue.line + contextSize
+  );
+
+  console.log("\n  Original:");
+  for (let i = start; i < Math.min(end, originalLines.length); i += 1) {
+    const marker = i + 1 === issue.line ? "−" : " ";
+    console.log(
+      `  ${marker} ${(i + 1).toString().padStart(LINE_NUM_WIDTH)}: ${originalLines[i]}`
     );
-  } catch {
-    // diff exits with 1 if files differ, which is expected
   }
 
-  // Cleanup
+  console.log("\n  Proposed:");
+  for (let i = start; i < Math.min(end, fixedLines.length); i += 1) {
+    const marker = i + 1 === issue.line ? "+" : " ";
+    console.log(
+      `  ${marker} ${(i + 1).toString().padStart(LINE_NUM_WIDTH)}: ${fixedLines[i]}`
+    );
+  }
+}
+
+function openInEditor(filePath: string): void {
+  const editor = process.env.EDITOR || "code";
   try {
-    execSync(`rm "${tmpOriginal}" "${tmpFixed}"`, { stdio: "ignore" });
+    execSync(`${editor} "${filePath}"`, { stdio: "inherit" });
+    console.log(`\n   Opened ${filePath} in ${editor}`);
+    console.log("   Make your changes and save the file.");
   } catch {
-    // ignore cleanup errors
+    console.log(`\n   Could not open editor. Edit manually: ${filePath}`);
   }
 }
 
@@ -323,89 +353,164 @@ function displayIssueSummary(
   }
 }
 
-async function processFileWithAI(
-  file: string,
-  issues: ValeIssue[],
-  providerName: string,
-  isStaged: boolean
-): Promise<boolean> {
-  console.log(`\n📝 Processing ${file} with ${providerName}...`);
-
-  const original = readFileSync(file, "utf-8");
-  const fixed = await fixFileWithAI(file, issues);
-
-  if (!fixed || fixed === original) {
-    console.log("   No changes needed or fix failed");
-    return false;
-  }
-
-  console.log("\n--- Proposed changes ---");
-  showDiff(original, fixed, file);
-  console.log("------------------------\n");
-
-  const applyFix = await askUser(`Apply changes to ${file}? [y/N] `);
-
-  if (applyFix) {
-    writeFileSync(file, fixed);
-    console.log(`   ✅ Fixed ${file}`);
-    if (isStaged) {
-      execSync(`git add "${file}"`);
-    }
-    return true;
-  }
-  console.log(`   ⏭️  Skipped ${file}`);
-  return false;
-}
-
 function getProviderName(): string {
   return AI_PROVIDER === "anthropic" ? "Claude" : "GPT-4o";
 }
 
-function promptForAIFix(): Promise<boolean> {
-  if (AI_PROVIDER === null) {
-    console.log(
-      "\n💡 Tip: Set ANTHROPIC_API_KEY or OPENAI_API_KEY in .env.local to enable AI-powered fixes"
-    );
-    console.log("   See AGENTS.md for setup instructions (optional)");
-    return Promise.resolve(false);
+type ProcessIssueResult = {
+  content: string;
+  action: "fixed" | "skipped" | "skipfile";
+};
+
+type ProcessIssueOptions = {
+  file: string;
+  issue: ValeIssue;
+  issueNum: number;
+  totalIssues: number;
+  currentContent: string;
+};
+
+async function handleNoAIFix(
+  opts: ProcessIssueOptions
+): Promise<ProcessIssueResult> {
+  console.log("   ⚠️  AI couldn't suggest a fix for this issue.");
+  const skipChoice = await prompt("   [n]o change / [e]dit / [s]kip file: ");
+  const choice = parseUserChoice(skipChoice);
+  if (choice === "edit") {
+    openInEditor(opts.file);
+    await prompt("   Press Enter when done editing...");
+    return { content: readFileSync(opts.file, "utf-8"), action: "fixed" };
   }
-  return askUser(`\n🤖 Auto-fix with ${getProviderName()}? [y/N] `);
+  if (choice === "skip") {
+    return { content: opts.currentContent, action: "skipfile" };
+  }
+  return { content: opts.currentContent, action: "skipped" };
 }
 
-function checkRemainingToxicIssues(files: string[]): void {
-  const remainingIssues = runVale(files);
-  const remainingToxic = [...remainingIssues.values()]
-    .flat()
-    .filter((i) => i.rule.startsWith("alex.")).length;
-
-  if (remainingToxic > 0) {
-    console.log(
-      `\n🚨 ${remainingToxic} toxic language issues remain. Please fix manually.`
-    );
-    process.exit(1);
-  }
+async function handleEditChoice(
+  file: string,
+  fixedContent: string
+): Promise<ProcessIssueResult> {
+  writeFileSync(file, fixedContent);
+  openInEditor(file);
+  await prompt("   Press Enter when done editing...");
+  return { content: readFileSync(file, "utf-8"), action: "fixed" };
 }
 
-async function processAllFiles(
-  issuesByFile: Map<string, ValeIssue[]>,
-  isStaged: boolean
-): Promise<number> {
+async function handleFeedbackChoice(
+  currentContent: string,
+  issue: ValeIssue,
+  currentFixed: string
+): Promise<string> {
+  const feedback = await prompt("   Your feedback: ");
+  if (feedback) {
+    console.log("   🤖 Regenerating with feedback...");
+    const newFixed = await fixSingleIssueWithAI(
+      currentContent,
+      issue,
+      feedback
+    );
+    if (newFixed && newFixed !== currentContent) {
+      showIssueDiff(currentContent, newFixed, issue);
+      return newFixed;
+    }
+    console.log("   ⚠️  AI couldn't incorporate feedback.");
+  }
+  return currentFixed;
+}
+
+async function processIssue(
+  opts: ProcessIssueOptions
+): Promise<ProcessIssueResult> {
+  const { file, issue, issueNum, totalIssues, currentContent } = opts;
   const providerName = getProviderName();
-  let filesFixed = 0;
 
-  for (const [file, issues] of issuesByFile) {
-    const wasFixed = await processFileWithAI(
-      file,
-      issues,
-      providerName,
-      isStaged
+  console.log(`\n${"─".repeat(60)}`);
+  console.log(`📝 Issue ${issueNum}/${totalIssues} in ${file}`);
+  console.log(`   [${issue.rule}] ${issue.message}`);
+  console.log(`\n${getContextLines(currentContent, issue.line)}`);
+
+  console.log(`\n   🤖 Getting fix from ${providerName}...`);
+  let fixed = await fixSingleIssueWithAI(currentContent, issue);
+
+  if (!fixed || fixed === currentContent) {
+    return handleNoAIFix(opts);
+  }
+
+  showIssueDiff(currentContent, fixed, issue);
+
+  const iterating = true;
+  while (iterating) {
+    const answer = await prompt(
+      "\n   [y]es / [n]o / [e]dit / [f]eedback / [s]kip file: "
     );
-    if (wasFixed) {
-      filesFixed += 1;
+    const choice = parseUserChoice(answer);
+
+    switch (choice) {
+      case "yes":
+        return { content: fixed, action: "fixed" };
+      case "no":
+        return { content: currentContent, action: "skipped" };
+      case "edit":
+        return handleEditChoice(file, fixed);
+      case "feedback":
+        fixed = await handleFeedbackChoice(currentContent, issue, fixed);
+        break;
+      case "skip":
+        return { content: currentContent, action: "skipfile" };
+      default:
+        return { content: currentContent, action: "skipped" };
     }
   }
 
-  return filesFixed;
+  return { content: currentContent, action: "skipped" };
+}
+
+async function processFile(
+  file: string,
+  issues: ValeIssue[],
+  isStaged: boolean
+): Promise<{ fixed: number; skipped: number }> {
+  let currentContent = readFileSync(file, "utf-8");
+  const originalContent = currentContent;
+  let fixedCount = 0;
+  let skippedCount = 0;
+
+  console.log(`\n${"═".repeat(60)}`);
+  console.log(`📄 ${file} (${issues.length} issues)`);
+
+  for (let i = 0; i < issues.length; i += 1) {
+    const issue = issues[i];
+    const result = await processIssue({
+      file,
+      issue,
+      issueNum: i + 1,
+      totalIssues: issues.length,
+      currentContent,
+    });
+
+    currentContent = result.content;
+
+    if (result.action === "fixed") {
+      fixedCount += 1;
+    } else if (result.action === "skipped") {
+      skippedCount += 1;
+    } else if (result.action === "skipfile") {
+      skippedCount += issues.length - i;
+      break;
+    }
+  }
+
+  // Save if changes were made
+  if (currentContent !== originalContent) {
+    writeFileSync(file, currentContent);
+    console.log(`\n   ✅ Saved changes to ${file}`);
+    if (isStaged) {
+      execSync(`git add "${file}"`);
+    }
+  }
+
+  return { fixed: fixedCount, skipped: skippedCount };
 }
 
 async function main() {
@@ -429,24 +534,47 @@ async function main() {
   const counts = countIssues(issuesByFile);
   displayIssueSummary(issuesByFile, counts);
 
-  const shouldFix = await promptForAIFix();
-
-  if (!shouldFix) {
-    console.log("\nRun 'vale <file>' to see detailed issues.");
-    if (counts.toxic > 0) {
-      console.log(
-        "\n🚨 Toxic language issues found. Please fix manually before committing."
-      );
-      process.exit(1);
-    }
+  if (AI_PROVIDER === null) {
+    console.log(
+      "\n💡 Tip: Set ANTHROPIC_API_KEY or OPENAI_API_KEY in .env.local to enable AI-powered fixes"
+    );
+    console.log("   See AGENTS.md for setup instructions (optional)");
     process.exit(0);
   }
 
-  const filesFixed = await processAllFiles(issuesByFile, isStaged);
-  console.log(`\n✨ Done! Fixed ${filesFixed}/${issuesByFile.size} files`);
+  const startFix = await prompt(
+    `\n🤖 Fix issues interactively with ${getProviderName()}? [y/N] `
+  );
+  if (!startFix.toLowerCase().startsWith("y")) {
+    console.log("\nRun 'vale <file>' to see detailed issues.");
+    process.exit(0);
+  }
 
-  if (isStaged && counts.toxic > 0 && filesFixed < issuesByFile.size) {
-    checkRemainingToxicIssues(files);
+  let totalFixed = 0;
+  let totalSkipped = 0;
+
+  for (const [file, issues] of issuesByFile) {
+    const result = await processFile(file, issues, isStaged);
+    totalFixed += result.fixed;
+    totalSkipped += result.skipped;
+  }
+
+  console.log(`\n${"═".repeat(60)}`);
+  console.log(`✨ Done! Fixed ${totalFixed}, skipped ${totalSkipped} issues`);
+
+  // Check for remaining toxic issues
+  if (isStaged && counts.toxic > 0) {
+    const remainingIssues = runVale(files);
+    const remainingToxic = [...remainingIssues.values()]
+      .flat()
+      .filter((i) => i.rule.startsWith("alex.")).length;
+
+    if (remainingToxic > 0) {
+      console.log(
+        `\n🚨 ${remainingToxic} toxic language issues remain. Please fix manually.`
+      );
+      process.exit(1);
+    }
   }
 }
 
