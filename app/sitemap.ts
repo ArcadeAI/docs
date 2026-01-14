@@ -6,6 +6,7 @@ const SITE_URL = process.env.SITE_URL ?? "https://docs.arcade.dev";
 const APP_DIR = path.join(process.cwd(), "app");
 const SKIP_DIRS = new Set(["_meta", "_api", "_redirects", "api"]);
 const INDEX_SUFFIX_REGEX = /\/index$/;
+let cachedRoutes: Promise<MetadataRoute.Sitemap> | null = null;
 
 async function collectRoutes(dir: string): Promise<MetadataRoute.Sitemap> {
   const dirs = await fs.readdir(dir, { withFileTypes: true });
@@ -41,8 +42,13 @@ async function collectRoutes(dir: string): Promise<MetadataRoute.Sitemap> {
   return entries;
 }
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const routes = await collectRoutes(APP_DIR);
-  routes.sort((a, b) => a.url.localeCompare(b.url));
-  return routes;
+export default function sitemap(): Promise<MetadataRoute.Sitemap> {
+  if (!cachedRoutes) {
+    cachedRoutes = collectRoutes(APP_DIR).then((routes) => {
+      routes.sort((a, b) => a.url.localeCompare(b.url));
+      return routes;
+    });
+  }
+
+  return cachedRoutes;
 }
