@@ -67,7 +67,7 @@ const VALE_LINE_REGEX = /^(.+?):(\d+):(\d+):([^:]+):(.+)$/;
 const KILOBYTE = 1024;
 const MEGABYTE = KILOBYTE * KILOBYTE;
 const MAX_BUFFER_SIZE = 10 * MEGABYTE;
-const MAX_AI_TOKENS = 4096;
+const MAX_AI_TOKENS = 8192;
 
 // Regex for stripping code fences from AI responses
 const CODE_FENCE_START_REGEX = /^```(?:mdx|markdown|md)?\n/;
@@ -249,19 +249,20 @@ function buildSingleIssuePrompt(
     ? `\n\nUSER FEEDBACK on previous attempt:\n${feedback}\n`
     : "";
 
-  return `You are a technical documentation editor for Arcade. Fix ONE specific style issue in this MDX/Markdown file.
+  return `You are a technical documentation editor. Fix ONE specific style issue in this file.
 
-ISSUE TO FIX:
-- Line ${issue.line}: [${issue.rule}] ${issue.message}
+ISSUE TO FIX (Line ${issue.line}):
+[${issue.rule}] ${issue.message}
 
-IMPORTANT RULES:
-1. ONLY fix this ONE specific issue - do not change anything else
-2. Preserve all code blocks, frontmatter, and JSX components exactly as-is
-3. Maintain the original meaning and technical accuracy
-4. Make minimal changes - only what's needed to address the issue
-5. Return ONLY the corrected file content, no explanations
+Note: If the message says "Use 'X' instead of 'Y'", find 'Y' on line ${issue.line} and replace it with 'X'.
+
+CRITICAL RULES:
+1. ONLY modify line ${issue.line} to fix this ONE issue
+2. Return the COMPLETE file - do not truncate or omit any content
+3. Preserve ALL other lines exactly as they appear
+4. Do not add explanations - return only the file content
 ${styleGuideSection}${feedbackSection}
-ORIGINAL FILE CONTENT:
+FILE CONTENT:
 \`\`\`mdx
 ${content}
 \`\`\`
