@@ -3,6 +3,7 @@ import path from "node:path";
 import type { MetadataRoute } from "next";
 
 const SITE_URL = process.env.SITE_URL ?? "https://docs.arcade.dev";
+const NORMALIZED_SITE_URL = SITE_URL.replace(/\/+$/, "");
 const APP_DIR = path.join(process.cwd(), "app");
 const SKIP_DIRS = new Set(["_meta", "_api", "_redirects", "api"]);
 const INDEX_SUFFIX_REGEX = /\/index$/;
@@ -33,7 +34,7 @@ async function collectRoutes(dir: string): Promise<MetadataRoute.Sitemap> {
 
       const routePath = relativeDir ? `/${relativeDir}` : "/";
       entries.push({
-        url: `${SITE_URL}${routePath}`,
+        url: `${NORMALIZED_SITE_URL}${routePath}`,
         lastModified: stats.mtime,
       });
     }
