@@ -1,0 +1,432 @@
+#!/usr/bin/env npx tsx
+
+/**
+ * Vale Style Review for Pull Requests
+ *
+ * Runs Vale on changed files in a PR, sends issues to an LLM for fixes,
+ * and posts suggestions as GitHub PR review comments.
+ *
+ * Usage:
+ *   pnpm vale:review --pr 123
+ *   GITHUB_TOKEN=xxx ANTHROPIC_API_KEY=xxx pnpm vale:review --pr 123
+ *   GITHUB_TOKEN=xxx OPENAI_API_KEY=xxx pnpm vale:review --pr 123
+ *
+ * Prefers Anthropic (Claude) if ANTHROPIC_API_KEY is set, falls back to OpenAI.
+ */
+
+import { spawnSync } from "node:child_process";
+import { existsSync, readFileSync, statSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import Anthropic from "@anthropic-ai/sdk";
+import { Octokit } from "@octokit/rest";
+import { config } from "dotenv";
+import OpenAI from "openai";
+
+// Load environment variables
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const envPath = join(__dirname, "..", ".env.local");
+if (existsSync(envPath)) {
+  config({ path: envPath });
+}
+
+// Constants
+const KILOBYTE = 1024;
+const MEGABYTE = KILOBYTE * KILOBYTE;
+const MAX_FILE_SIZE_KB = 50;
+const MAX_FILE_SIZE = MAX_FILE_SIZE_KB * KILOBYTE;
+const MAX_BUFFER_MB = 10;
+const MAX_FILES = 10;
+const MAX_AI_TOKENS = 4096;
+const LINE_NUM_WIDTH = 4;
+const CONTENT_MATCH_PREFIX_LENGTH = 20;
+const JSON_CODE_BLOCK_REGEX = /```(?:json)?\s*([\s\S]*?)```/;
+const OWNER = "ArcadeAI";
+const REPO = "docs";
+
+// Load style guide
+const STYLE_GUIDE_PATH = join(__dirname, "..", "STYLEGUIDE.md");
+const STYLE_GUIDE = existsSync(STYLE_GUIDE_PATH)
+  ? readFileSync(STYLE_GUIDE_PATH, "utf-8")
+  : "";
+
+// Types
+type ValeIssue = {
+  line: number;
+  column: number;
+  severity: string;
+  message: string;
+  rule: string;
+};
+
+type ValeOutput = Record<string, ValeIssue[]>;
+
+type Suggestion = {
+  line: number;
+  endLine?: number;
+  original: string;
+  suggested: string;
+  reason: string;
+};
+
+type ReviewComment = {
+  path: string;
+  line: number;
+  start_line?: number;
+  body: string;
+};
+
+// Parse command line args
+function parseArgs(): { prNumber: number } {
+  const args = process.argv.slice(2);
+  const prIndex = args.indexOf("--pr");
+  if (prIndex === -1 || !args[prIndex + 1]) {
+    console.error("Usage: vale-style-review --pr <number>");
+    process.exit(1);
+  }
+  return { prNumber: Number.parseInt(args[prIndex + 1], 10) };
+}
+
+// Get changed files from PR
+async function getChangedFiles(
+  octokit: Octokit,
+  prNumber: number
+): Promise<string[]> {
+  const { data: files } = await octokit.rest.pulls.listFiles({
+    owner: OWNER,
+    repo: REPO,
+    pull_number: prNumber,
+  });
+
+  return files
+    .filter((f) => f.filename.endsWith(".md") || f.filename.endsWith(".mdx"))
+    .filter((f) => f.status !== "removed")
+    .map((f) => f.filename)
+    .slice(0, MAX_FILES);
+}
+
+// Run Vale on files and get JSON output
+function runVale(files: string[]): ValeOutput {
+  const existingFiles = files.filter((f) => existsSync(f));
+  if (existingFiles.length === 0) {
+    return {};
+  }
+
+  const result = spawnSync("vale", ["--output=JSON", ...existingFiles], {
+    encoding: "utf-8",
+    maxBuffer: MAX_BUFFER_MB * MEGABYTE,
+  });
+
+  if (result.error) {
+    console.error("Vale error:", result.error);
+    return {};
+  }
+
+  try {
+    return JSON.parse(result.stdout || "{}");
+  } catch {
+    console.error("Failed to parse Vale output");
+    return {};
+  }
+}
+
+// Add line numbers to content
+function addLineNumbers(content: string): string {
+  return content
+    .split("\n")
+    .map((line, i) => `${(i + 1).toString().padStart(LINE_NUM_WIDTH)}: ${line}`)
+    .join("\n");
+}
+
+// Build prompt for LLM
+function buildPrompt(
+  filename: string,
+  content: string,
+  issues: ValeIssue[]
+): string {
+  const numberedContent = addLineNumbers(content);
+
+  return `You are a technical documentation style editor.
+
+STYLE GUIDE:
+${STYLE_GUIDE}
+
+TASK: Fix the Vale style issues listed below for this file. Return JSON with your suggestions.
+
+RULES:
+1. Only fix the specific issues listed - do not make other changes
+2. If a message says "Use 'X' instead of 'Y'", find Y and replace with X
+3. Preserve technical accuracy - never change code or technical details
+4. For passive voice - only fix if active voice is clearer
+5. If an issue should NOT be fixed (e.g., passive voice is appropriate), omit it
+
+FILE: ${filename}
+
+VALE ISSUES:
+${JSON.stringify(issues, null, 2)}
+
+FILE CONTENT:
+${numberedContent}
+
+Return a JSON object with this exact structure:
+{
+  "suggestions": [
+    {
+      "line": <line number>,
+      "original": "<the exact original line content>",
+      "suggested": "<the corrected line content>",
+      "reason": "<brief explanation>"
+    }
+  ]
+}
+
+Only include suggestions where you have a concrete fix. Return empty suggestions array if no fixes needed.`;
+}
+
+// AI client type
+type AIClient =
+  | { type: "anthropic"; client: Anthropic }
+  | { type: "openai"; client: OpenAI };
+
+// Get suggestions using Anthropic (Claude)
+async function getSuggestionsFromAnthropic(
+  client: Anthropic,
+  prompt: string
+): Promise<Suggestion[]> {
+  const response = await client.messages.create({
+    model: "claude-sonnet-4-20250514",
+    max_tokens: MAX_AI_TOKENS,
+    messages: [{ role: "user", content: prompt }],
+  });
+
+  const textBlock = response.content.find((block) => block.type === "text");
+  if (!textBlock || textBlock.type !== "text") {
+    return [];
+  }
+
+  // Extract JSON from response (may be wrapped in markdown code blocks)
+  let jsonText = textBlock.text;
+  const jsonMatch = jsonText.match(JSON_CODE_BLOCK_REGEX);
+  if (jsonMatch) {
+    jsonText = jsonMatch[1];
+  }
+
+  const parsed = JSON.parse(jsonText);
+  return parsed.suggestions || [];
+}
+
+// Get suggestions using OpenAI
+async function getSuggestionsFromOpenAI(
+  client: OpenAI,
+  prompt: string
+): Promise<Suggestion[]> {
+  const response = await client.chat.completions.create({
+    model: "gpt-4-turbo",
+    max_tokens: MAX_AI_TOKENS,
+    messages: [{ role: "user", content: prompt }],
+    response_format: { type: "json_object" },
+  });
+
+  const text = response.choices[0]?.message?.content;
+  if (!text) {
+    return [];
+  }
+
+  const parsed = JSON.parse(text);
+  return parsed.suggestions || [];
+}
+
+// Get suggestions from LLM (supports both providers)
+async function getSuggestions(
+  ai: AIClient,
+  filename: string,
+  content: string,
+  issues: ValeIssue[]
+): Promise<Suggestion[]> {
+  const prompt = buildPrompt(filename, content, issues);
+
+  try {
+    if (ai.type === "anthropic") {
+      return await getSuggestionsFromAnthropic(ai.client, prompt);
+    }
+    return await getSuggestionsFromOpenAI(ai.client, prompt);
+  } catch (error) {
+    console.error(`Error getting suggestions for ${filename}:`, error);
+    return [];
+  }
+}
+
+// Format suggestions as GitHub review comments
+function formatReviewComments(
+  filename: string,
+  suggestions: Suggestion[],
+  fileContent: string
+): ReviewComment[] {
+  const lines = fileContent.split("\n");
+
+  return suggestions
+    .filter((s) => {
+      // Validate line number exists
+      if (s.line < 1 || s.line > lines.length) {
+        return false;
+      }
+      // Validate original content matches (loosely)
+      const actualLine = lines[s.line - 1];
+      return actualLine.includes(
+        s.original.trim().slice(0, CONTENT_MATCH_PREFIX_LENGTH)
+      );
+    })
+    .map((s) => ({
+      path: filename,
+      line: s.line,
+      body: `**Style suggestion:** ${s.reason}
+
+\`\`\`suggestion
+${s.suggested}
+\`\`\``,
+    }));
+}
+
+// Post review to PR
+async function postReview(
+  octokit: Octokit,
+  prNumber: number,
+  comments: ReviewComment[],
+  aiProvider: "anthropic" | "openai"
+): Promise<void> {
+  if (comments.length === 0) {
+    console.log("No suggestions to post");
+    return;
+  }
+
+  const providerName = aiProvider === "anthropic" ? "Claude" : "GPT-4 Turbo";
+
+  try {
+    await octokit.rest.pulls.createReview({
+      owner: OWNER,
+      repo: REPO,
+      pull_number: prNumber,
+      event: "COMMENT",
+      body: `## Style Review
+
+Found ${comments.length} style suggestion(s). Click **"Apply suggestion"** to accept individual changes.
+
+_Powered by Vale + ${providerName}_`,
+      comments: comments.map((c) => ({
+        path: c.path,
+        line: c.line,
+        body: c.body,
+      })),
+    });
+
+    console.log(`Posted review with ${comments.length} suggestions`);
+  } catch (error) {
+    console.error("Error posting review:", error);
+    throw error;
+  }
+}
+
+// Main function
+async function main() {
+  const { prNumber } = parseArgs();
+
+  // Validate environment
+  const githubToken = process.env.GITHUB_TOKEN;
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
+  const openaiKey = process.env.OPENAI_API_KEY;
+
+  if (!githubToken) {
+    console.error("GITHUB_TOKEN is required");
+    process.exit(1);
+  }
+
+  if (!(anthropicKey || openaiKey)) {
+    console.error("ANTHROPIC_API_KEY or OPENAI_API_KEY is required");
+    process.exit(1);
+  }
+
+  const octokit = new Octokit({ auth: githubToken });
+
+  // Prefer Anthropic, fall back to OpenAI
+  let ai: AIClient;
+  if (anthropicKey) {
+    ai = { type: "anthropic", client: new Anthropic({ apiKey: anthropicKey }) };
+    console.log("Using Claude (Anthropic) for suggestions");
+  } else {
+    ai = { type: "openai", client: new OpenAI({ apiKey: openaiKey }) };
+    console.log("Using GPT-4 Turbo (OpenAI) for suggestions");
+  }
+
+  console.log(`Reviewing PR #${prNumber}...`);
+
+  // Get changed files
+  const changedFiles = await getChangedFiles(octokit, prNumber);
+  if (changedFiles.length === 0) {
+    console.log("No documentation files changed in this PR");
+    return;
+  }
+
+  console.log(`Found ${changedFiles.length} doc file(s) to review`);
+
+  // Filter by file size
+  const filesToReview = changedFiles.filter((f) => {
+    if (!existsSync(f)) {
+      return false;
+    }
+    const stats = statSync(f);
+    if (stats.size > MAX_FILE_SIZE) {
+      console.log(`Skipping ${f} (too large: ${stats.size} bytes)`);
+      return false;
+    }
+    return true;
+  });
+
+  // Run Vale
+  console.log("Running Vale...");
+  const valeOutput = runVale(filesToReview);
+
+  const filesWithIssues = Object.keys(valeOutput).filter(
+    (f) => valeOutput[f].length > 0
+  );
+
+  if (filesWithIssues.length === 0) {
+    console.log("No style issues found!");
+    return;
+  }
+
+  const totalIssues = filesWithIssues.reduce(
+    (sum, f) => sum + valeOutput[f].length,
+    0
+  );
+  console.log(
+    `Found ${totalIssues} issue(s) in ${filesWithIssues.length} file(s)`
+  );
+
+  // Get suggestions for each file
+  const allComments: ReviewComment[] = [];
+
+  for (const filename of filesWithIssues) {
+    const issues = valeOutput[filename];
+    const content = readFileSync(filename, "utf-8");
+
+    console.log(
+      `Getting suggestions for ${filename} (${issues.length} issues)...`
+    );
+    const suggestions = await getSuggestions(ai, filename, content, issues);
+
+    const comments = formatReviewComments(filename, suggestions, content);
+    allComments.push(...comments);
+
+    console.log(`  → ${comments.length} actionable suggestions`);
+  }
+
+  // Post review
+  await postReview(octokit, prNumber, allComments, ai.type);
+
+  console.log("Done!");
+}
+
+main().catch((error) => {
+  console.error("Error:", error);
+  process.exit(1);
+});
