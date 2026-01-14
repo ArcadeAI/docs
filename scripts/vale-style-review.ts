@@ -83,14 +83,17 @@ type FileWithDiff = {
 };
 
 // Parse command line args
-function parseArgs(): { prNumber: number } {
+function parseArgs(): { prNumber: number; dryRun: boolean } {
   const args = process.argv.slice(2);
   const prIndex = args.indexOf("--pr");
   if (prIndex === -1 || !args[prIndex + 1]) {
-    console.error("Usage: vale-style-review --pr <number>");
+    console.error("Usage: vale-style-review --pr <number> [--dry-run]");
     process.exit(1);
   }
-  return { prNumber: Number.parseInt(args[prIndex + 1], 10) };
+  return {
+    prNumber: Number.parseInt(args[prIndex + 1], 10),
+    dryRun: args.includes("--dry-run"),
+  };
 }
 
 // Parse a unified diff patch to extract line numbers that can receive comments
@@ -266,7 +269,7 @@ async function getSuggestionsFromAnthropic(
   }
 
   const parsed = JSON.parse(jsonText);
-  return parsed.suggestions || [];
+  return Array.isArray(parsed.suggestions) ? parsed.suggestions : [];
 }
 
 // Get suggestions using OpenAI
@@ -287,7 +290,7 @@ async function getSuggestionsFromOpenAI(
   }
 
   const parsed = JSON.parse(text);
-  return parsed.suggestions || [];
+  return Array.isArray(parsed.suggestions) ? parsed.suggestions : [];
 }
 
 // Get suggestions from LLM (supports both providers)
@@ -394,9 +397,24 @@ _Powered by Vale + ${providerName}_`,
   }
 }
 
+// Print suggestions in dry-run mode
+function printDryRunOutput(comments: ReviewComment[]): void {
+  console.log("\n--- DRY RUN MODE ---\n");
+  if (comments.length === 0) {
+    console.log("No suggestions to post.");
+    return;
+  }
+  console.log(`Would post ${comments.length} suggestion(s):\n`);
+  for (const comment of comments) {
+    console.log(`📄 ${comment.path}:${comment.line}`);
+    console.log(comment.body);
+    console.log("\n---\n");
+  }
+}
+
 // Main function
 async function main() {
-  const { prNumber } = parseArgs();
+  const { prNumber, dryRun } = parseArgs();
 
   // Validate environment
   const githubToken = process.env.GITHUB_TOKEN;
@@ -514,8 +532,12 @@ async function main() {
     console.log(`  → ${comments.length} actionable suggestions`);
   }
 
-  // Post review
-  await postReview(octokit, prNumber, allComments, ai.type);
+  // Post review or print dry-run output
+  if (dryRun) {
+    printDryRunOutput(allComments);
+  } else {
+    await postReview(octokit, prNumber, allComments, ai.type);
+  }
 
   console.log("Done!");
 }
