@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { expect, test } from "vitest";
 
 test("sitemap lists expected URLs", async () => {
@@ -32,4 +34,13 @@ test("sitemap lists expected URLs", async () => {
       process.env.SITE_URL = previousSiteUrl;
     }
   }
+});
+
+test("robots.txt references the sitemap", () => {
+  const robotsPath = join(process.cwd(), "public", "robots.txt");
+  const robotsContent = readFileSync(robotsPath, "utf-8");
+
+  expect(robotsContent).toContain(
+    "Sitemap: https://docs.arcade.dev/sitemap.xml"
+  );
 });
