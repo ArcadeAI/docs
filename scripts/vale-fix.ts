@@ -294,7 +294,7 @@ async function fixSingleIssueWithAI(
     } else if (AI_PROVIDER === "openai") {
       const client = new OpenAI();
       const response = await client.chat.completions.create({
-        model: "o3-mini",
+        model: "gpt-4-turbo",
         max_tokens: MAX_AI_TOKENS,
         messages: [{ role: "user", content: promptText }],
       });
@@ -457,7 +457,7 @@ function displayIssueSummary(
 }
 
 function getProviderName(): string {
-  return AI_PROVIDER === "anthropic" ? "Claude" : "o3-mini";
+  return AI_PROVIDER === "anthropic" ? "Claude" : "GPT-4 Turbo";
 }
 
 type ProcessIssueResult = {
