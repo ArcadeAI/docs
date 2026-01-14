@@ -16,7 +16,6 @@ type SampleAppCardProps = {
 export function SampleAppCard({
   title,
   description,
-  image,
   href,
   blank = false,
   tags = [],
@@ -57,8 +56,8 @@ export function SampleAppCard({
             </p>
             {tags.length > 0 && (
               <div className="flex flex-wrap gap-2 pt-2">
-                {tags.map((tag, index) => {
-                  const getTagColor = (tag: string) => {
+                {tags.map((tag) => {
+                  const getTagColor = (tagName: string) => {
                     const languages = [
                       "JavaScript",
                       "Python",
@@ -89,13 +88,13 @@ export function SampleAppCard({
                       "Stytch",
                     ];
 
-                    if (languages.includes(tag)) {
+                    if (languages.includes(tagName)) {
                       return "bg-gradient-to-br from-emerald-600 to-emerald-800";
                     }
-                    if (frameworks.includes(tag)) {
+                    if (frameworks.includes(tagName)) {
                       return "bg-gradient-to-br from-blue-600 to-blue-800";
                     }
-                    if (integrations.includes(tag)) {
+                    if (integrations.includes(tagName)) {
                       return "bg-gradient-to-br from-yellow-600 to-yellow-800";
                     }
                     return "bg-gradient-to-br from-gray-600 to-gray-800";
@@ -104,7 +103,7 @@ export function SampleAppCard({
                   return (
                     <span
                       className={`inline-flex w-fit shrink-0 items-center justify-center overflow-hidden whitespace-nowrap rounded-md border-0 border-transparent px-2 py-1 font-semibold text-[0.725rem] text-white uppercase leading-4 tracking-wide shadow-md ${getTagColor(tag)}`}
-                      key={index}
+                      key={tag}
                     >
                       {tag}
                     </span>

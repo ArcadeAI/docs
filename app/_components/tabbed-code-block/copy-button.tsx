@@ -5,6 +5,7 @@ import { usePostHog } from "posthog-js/react";
 import { useCallback, useState } from "react";
 
 const COPY_TIMEOUT_MS = 1500;
+const CONTENT_PREVIEW_LENGTH = 100;
 
 export function CopyButton({
   content,
@@ -28,7 +29,7 @@ export function CopyButton({
       // Track code copy event
       posthog?.capture("code_copied", {
         content_length: content.length,
-        content_preview: content.substring(0, 100),
+        content_preview: content.substring(0, CONTENT_PREVIEW_LENGTH),
       });
     } catch {
       // Silent fail
