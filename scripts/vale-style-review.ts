@@ -41,6 +41,7 @@ const MAX_AI_TOKENS = 4096;
 const LINE_NUM_WIDTH = 4;
 const CONTENT_MATCH_PREFIX_LENGTH = 20;
 const JSON_CODE_BLOCK_REGEX = /```(?:json)?\s*([\s\S]*?)```/;
+const DIFF_HUNK_REGEX = /^@@ -\d+(?:,\d+)? \+(\d+)(?:,\d+)? @@/;
 const OWNER = "ArcadeAI";
 const REPO = "docs";
 
@@ -76,6 +77,11 @@ type ReviewComment = {
   body: string;
 };
 
+type FileWithDiff = {
+  filename: string;
+  commentableLines: Set<number>;
+};
+
 // Parse command line args
 function parseArgs(): { prNumber: number } {
   const args = process.argv.slice(2);
@@ -87,11 +93,55 @@ function parseArgs(): { prNumber: number } {
   return { prNumber: Number.parseInt(args[prIndex + 1], 10) };
 }
 
-// Get changed files from PR
+// Parse a unified diff patch to extract line numbers that can receive comments
+// GitHub only allows comments on lines that are part of the diff (added or context lines)
+function parseDiffForCommentableLines(patch: string | undefined): Set<number> {
+  const commentableLines = new Set<number>();
+
+  if (!patch) {
+    return commentableLines;
+  }
+
+  const lines = patch.split("\n");
+
+  let currentNewLine = 0;
+  let inHunk = false;
+
+  for (const line of lines) {
+    const hunkMatch = line.match(DIFF_HUNK_REGEX);
+
+    if (hunkMatch) {
+      // Start of a new hunk - get the starting line number in the new file
+      currentNewLine = Number.parseInt(hunkMatch[1], 10);
+      inHunk = true;
+      continue;
+    }
+
+    if (!inHunk) {
+      continue;
+    }
+
+    if (line.startsWith("-")) {
+      // Deleted line - doesn't exist in new file, don't increment
+      continue;
+    }
+
+    if (line.startsWith("+") || line.startsWith(" ")) {
+      // Added or context line - these are commentable
+      commentableLines.add(currentNewLine);
+      currentNewLine += 1;
+    }
+    // Lines starting with "\" (e.g., "\ No newline at end of file") are skipped
+  }
+
+  return commentableLines;
+}
+
+// Get changed files from PR with their commentable line numbers
 async function getChangedFiles(
   octokit: Octokit,
   prNumber: number
-): Promise<string[]> {
+): Promise<FileWithDiff[]> {
   const { data: files } = await octokit.rest.pulls.listFiles({
     owner: OWNER,
     repo: REPO,
@@ -101,8 +151,11 @@ async function getChangedFiles(
   return files
     .filter((f) => f.filename.endsWith(".md") || f.filename.endsWith(".mdx"))
     .filter((f) => f.status !== "removed")
-    .map((f) => f.filename)
-    .slice(0, MAX_FILES);
+    .slice(0, MAX_FILES)
+    .map((f) => ({
+      filename: f.filename,
+      commentableLines: parseDiffForCommentableLines(f.patch),
+    }));
 }
 
 // Run Vale on files and get JSON output
@@ -257,17 +310,31 @@ async function getSuggestions(
 }
 
 // Format suggestions as GitHub review comments
+// Only includes suggestions for lines that are in the PR diff
 function formatReviewComments(
   filename: string,
   suggestions: Suggestion[],
-  fileContent: string
+  fileContent: string,
+  commentableLines: Set<number>
 ): ReviewComment[] {
   const lines = fileContent.split("\n");
 
   return suggestions
     .filter((s) => {
-      // Validate line number exists
+      // Validate required fields exist and have correct types
+      if (
+        typeof s.line !== "number" ||
+        typeof s.original !== "string" ||
+        typeof s.suggested !== "string"
+      ) {
+        return false;
+      }
+      // Validate line number is in range
       if (s.line < 1 || s.line > lines.length) {
+        return false;
+      }
+      // Validate line is in the PR diff (GitHub API requirement)
+      if (!commentableLines.has(s.line)) {
         return false;
       }
       // Validate original content matches (loosely)
@@ -359,7 +426,7 @@ async function main() {
 
   console.log(`Reviewing PR #${prNumber}...`);
 
-  // Get changed files
+  // Get changed files with their diff info
   const changedFiles = await getChangedFiles(octokit, prNumber);
   if (changedFiles.length === 0) {
     console.log("No documentation files changed in this PR");
@@ -368,22 +435,42 @@ async function main() {
 
   console.log(`Found ${changedFiles.length} doc file(s) to review`);
 
-  // Filter by file size
+  // Filter by file size, warn about missing files
+  const missingFiles: string[] = [];
   const filesToReview = changedFiles.filter((f) => {
-    if (!existsSync(f)) {
+    if (!existsSync(f.filename)) {
+      missingFiles.push(f.filename);
       return false;
     }
-    const stats = statSync(f);
+    const stats = statSync(f.filename);
     if (stats.size > MAX_FILE_SIZE) {
-      console.log(`Skipping ${f} (too large: ${stats.size} bytes)`);
+      console.log(`Skipping ${f.filename} (too large: ${stats.size} bytes)`);
       return false;
     }
     return true;
   });
 
+  if (missingFiles.length > 0) {
+    console.warn(
+      `⚠️  Warning: ${missingFiles.length} file(s) from PR not found locally:`
+    );
+    for (const file of missingFiles) {
+      console.warn(`   - ${file}`);
+    }
+    console.warn(
+      "   This may indicate the wrong branch was checked out. Ensure the PR's head branch is checked out."
+    );
+  }
+
+  // Build a map from filename to commentable lines for quick lookup
+  const commentableLinesMap = new Map<string, Set<number>>();
+  for (const f of filesToReview) {
+    commentableLinesMap.set(f.filename, f.commentableLines);
+  }
+
   // Run Vale
   console.log("Running Vale...");
-  const valeOutput = runVale(filesToReview);
+  const valeOutput = runVale(filesToReview.map((f) => f.filename));
 
   const filesWithIssues = Object.keys(valeOutput).filter(
     (f) => valeOutput[f].length > 0
@@ -408,13 +495,19 @@ async function main() {
   for (const filename of filesWithIssues) {
     const issues = valeOutput[filename];
     const content = readFileSync(filename, "utf-8");
+    const commentableLines = commentableLinesMap.get(filename) ?? new Set();
 
     console.log(
       `Getting suggestions for ${filename} (${issues.length} issues)...`
     );
     const suggestions = await getSuggestions(ai, filename, content, issues);
 
-    const comments = formatReviewComments(filename, suggestions, content);
+    const comments = formatReviewComments(
+      filename,
+      suggestions,
+      content,
+      commentableLines
+    );
     allComments.push(...comments);
 
     console.log(`  → ${comments.length} actionable suggestions`);
