@@ -1,0 +1,49 @@
+name: Structural Editorial Review
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "Merged PR number to review"
+        required: true
+        type: number
+  pull_request:
+    types: [closed]
+    paths:
+      - "app/en/**/*.md"
+      - "app/en/**/*.mdx"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  editorial-review:
+    name: Editorial Review
+    runs-on: ubuntu-latest
+    # Only run on merged PRs, skip editorial PRs to prevent loops
+    if: |
+      (github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true) &&
+      !startsWith(github.head_ref || '', 'style/editorial-')
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run editorial review
+        run: pnpm vale:editorial --pr ${{ github.event.pull_request.number || inputs.pr_number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}

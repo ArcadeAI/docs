@@ -44,6 +44,7 @@ const JSON_CODE_BLOCK_REGEX = /```(?:json)?\s*([\s\S]*?)```/;
 const DIFF_HUNK_REGEX = /^@@ -\d+(?:,\d+)? \+(\d+)(?:,\d+)? @@/;
 const OWNER = "ArcadeAI";
 const REPO = "docs";
+const MAX_LENGTH_CHANGE_RATIO = 0.5;
 
 // Load style guide
 const STYLE_GUIDE_PATH = join(__dirname, "..", "STYLEGUIDE.md");
@@ -67,6 +68,7 @@ type Suggestion = {
   endLine?: number;
   original: string;
   suggested: string;
+  rule: string;
   reason: string;
 };
 
@@ -208,11 +210,15 @@ ${STYLE_GUIDE}
 TASK: Fix the Vale style issues listed below for this file. Return JSON with your suggestions.
 
 RULES:
-1. Only fix the specific issues listed - do not make other changes
-2. If a message says "Use 'X' instead of 'Y'", find Y and replace with X
-3. Preserve technical accuracy - never change code or technical details
-4. For passive voice - only fix if active voice is clearer
-5. If an issue should NOT be fixed (e.g., passive voice is appropriate), omit it
+1. ONLY fix the specific issues listed - do not make any other changes
+2. Make MINIMAL changes - only change the specific word or phrase mentioned in the issue
+3. NEVER delete content, rewrite sentences, or change anything beyond the flagged issue
+4. If a message says "Use 'X' instead of 'Y'", find ONLY Y and replace with X - nothing else
+5. Preserve technical accuracy - never change code or technical details
+6. For passive voice - only fix if active voice is clearer
+7. If an issue should NOT be fixed (e.g., passive voice is appropriate), omit it
+8. The "original" field must contain the EXACT full line from the file
+9. The "suggested" field must be identical to "original" EXCEPT for the specific fix
 
 FILE: ${filename}
 
@@ -229,6 +235,7 @@ Return a JSON object with this exact structure:
       "line": <line number>,
       "original": "<the exact original line content>",
       "suggested": "<the corrected line content>",
+      "rule": "<the Vale rule name from the issue, e.g. 'Arcade.WordList'>",
       "reason": "<brief explanation>"
     }
   ]
@@ -326,7 +333,8 @@ function formatReviewComments(
       if (
         typeof s.line !== "number" ||
         typeof s.original !== "string" ||
-        typeof s.suggested !== "string"
+        typeof s.suggested !== "string" ||
+        typeof s.rule !== "string"
       ) {
         return false;
       }
@@ -338,6 +346,14 @@ function formatReviewComments(
       if (!commentableLines.has(s.line)) {
         return false;
       }
+      // Reject destructive suggestions (length change > 50% of original)
+      const lengthDiff = Math.abs(s.suggested.length - s.original.length);
+      if (lengthDiff > s.original.length * MAX_LENGTH_CHANGE_RATIO) {
+        console.log(
+          `  Skipping destructive suggestion on line ${s.line} (length change: ${lengthDiff} chars)`
+        );
+        return false;
+      }
       // Validate original content matches (loosely)
       const actualLine = lines[s.line - 1];
       return actualLine.includes(
@@ -347,7 +363,7 @@ function formatReviewComments(
     .map((s) => ({
       path: filename,
       line: s.line,
-      body: `**Style suggestion:** ${s.reason}
+      body: `**\`${s.rule}\`**: ${s.reason}
 
 \`\`\`suggestion
 ${s.suggested}
@@ -377,7 +393,7 @@ async function postReview(
       event: "COMMENT",
       body: `## Style Review
 
-Found ${comments.length} style suggestion(s). Click **"Apply suggestion"** to accept individual changes.
+Found ${comments.length} style suggestion(s).
 
 _Powered by Vale + ${providerName}_`,
       comments: comments.map((c) => ({
