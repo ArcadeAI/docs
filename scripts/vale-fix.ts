@@ -76,6 +76,9 @@ const CODE_FENCE_END_REGEX = /\n```$/;
 // Line number display width for diffs
 const LINE_NUM_WIDTH = 3;
 
+// Regex for finding non-whitespace characters (word boundaries)
+const NON_WHITESPACE_REGEX = /\S/;
+
 // ANSI color codes for terminal output
 const colors = {
   reset: "\x1b[0m",
@@ -87,6 +90,9 @@ const colors = {
   cyan: "\x1b[36m",
   dim: "\x1b[2m",
   bold: "\x1b[1m",
+  underline: "\x1b[4m",
+  bgYellow: "\x1b[43m",
+  black: "\x1b[30m",
 };
 
 function getSeverity(
@@ -175,9 +181,39 @@ function parseUserChoice(input: string): UserChoice {
   return "no"; // default
 }
 
+function highlightWordAt(line: string, column: number): string {
+  // Column is 1-indexed, convert to 0-indexed
+  const col = column - 1;
+  if (col < 0 || col >= line.length) {
+    return line;
+  }
+
+  // Find word boundaries around the column
+  let wordStart = col;
+  let wordEnd = col;
+
+  // Expand backward to find word start
+  while (wordStart > 0 && NON_WHITESPACE_REGEX.test(line[wordStart - 1])) {
+    wordStart -= 1;
+  }
+
+  // Expand forward to find word end
+  while (wordEnd < line.length && NON_WHITESPACE_REGEX.test(line[wordEnd])) {
+    wordEnd += 1;
+  }
+
+  // Build highlighted line
+  const before = line.slice(0, wordStart);
+  const word = line.slice(wordStart, wordEnd);
+  const after = line.slice(wordEnd);
+
+  return `${before}${colors.bold}${colors.underline}${word}${colors.reset}${colors.magenta}${after}`;
+}
+
 function getContextLines(
   content: string,
   lineNum: number,
+  column = 0,
   contextSize = 2
 ): string {
   const lines = content.split("\n");
@@ -192,7 +228,8 @@ function getContextLines(
       const marker = isTarget ? "→" : " ";
       const lineNumStr = num.toString().padStart(LINE_NUM_WIDTH);
       if (isTarget) {
-        return `${colors.magenta}${marker} ${lineNumStr}: ${line}${colors.reset}`;
+        const highlighted = column > 0 ? highlightWordAt(line, column) : line;
+        return `${colors.magenta}${marker} ${lineNumStr}: ${highlighted}${colors.reset}`;
       }
       return `${colors.dim}${marker} ${lineNumStr}: ${line}${colors.reset}`;
     })
@@ -498,7 +535,7 @@ async function processIssue(
   console.log(
     `   ${colors.yellow}[${issue.rule}]${colors.reset} ${issue.message}`
   );
-  console.log(`\n${getContextLines(currentContent, issue.line)}`);
+  console.log(`\n${getContextLines(currentContent, issue.line, issue.column)}`);
 
   console.log(`\n   🤖 Getting fix from ${providerName}...`);
   let fixed = await fixSingleIssueWithAI(currentContent, issue);
