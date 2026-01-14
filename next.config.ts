@@ -273,6 +273,11 @@ const nextConfig: NextConfig = withLlmsTxt({
           permanent: true,
         },
         {
+          source: "/:locale/home/mcp-gateways",
+          destination: "/:locale/guides/create-tools/mcp-gateways",
+          permanent: true,
+        },
+        {
           source: "/:locale/home/oai-agents/use-arcade-tools",
           destination:
             "/:locale/guides/agent-frameworks/openai-agents/use-arcade-tools",
