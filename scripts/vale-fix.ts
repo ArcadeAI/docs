@@ -327,8 +327,38 @@ function showIssueDiff(
   }
 }
 
+function findEditor(): string | null {
+  // Check environment variables first
+  if (process.env.EDITOR) {
+    return process.env.EDITOR;
+  }
+  if (process.env.VISUAL) {
+    return process.env.VISUAL;
+  }
+
+  // Try common editors
+  const editors = ["code", "cursor", "vim", "nvim", "nano", "vi"];
+  for (const editor of editors) {
+    try {
+      execSync(`which ${editor}`, { stdio: "ignore" });
+      return editor;
+    } catch {
+      // Editor not found, try next
+    }
+  }
+  return null;
+}
+
 function openInEditor(filePath: string): void {
-  const editor = process.env.EDITOR || "code";
+  const editor = findEditor();
+  if (!editor) {
+    console.log(
+      `\n   ${colors.yellow}No editor found. Set $EDITOR or install code/vim/nano.${colors.reset}`
+    );
+    console.log(`   Edit manually: ${colors.cyan}${filePath}${colors.reset}`);
+    return;
+  }
+
   try {
     execSync(`${editor} "${filePath}"`, { stdio: "inherit" });
     console.log(`\n   Opened ${filePath} in ${editor}`);
