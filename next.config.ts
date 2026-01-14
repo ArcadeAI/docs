@@ -25,11 +25,6 @@ const nextConfig: NextConfig = withLlmsTxt({
       return [
         // Old /home/* paths to new structure
         {
-          source: "/:locale/home/mcp-gateways",
-          destination: "/:locale/resources/integrations",
-          permanent: true,
-        },
-        {
           source: "/:locale/home/build-tools/server-level-vs-tool-level-auth",
           destination: "/:locale/learn/server-level-vs-tool-level-auth",
           permanent: true,
@@ -275,6 +270,11 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/home/mcp-gateway-quickstart",
           destination: "/:locale/get-started/quickstarts/call-tool-client",
+          permanent: true,
+        },
+        {
+          source: "/:locale/home/mcp-gateways",
+          destination: "/en/:locale/create-tools/mcp-gateways",
           permanent: true,
         },
         {
