@@ -274,7 +274,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         },
         {
           source: "/:locale/home/mcp-gateways",
-          destination: "/en/:locale/create-tools/mcp-gateways",
+          destination: "/:locale/guides/create-tools/mcp-gateways",
           permanent: true,
         },
         {
