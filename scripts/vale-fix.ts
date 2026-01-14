@@ -76,6 +76,19 @@ const CODE_FENCE_END_REGEX = /\n```$/;
 // Line number display width for diffs
 const LINE_NUM_WIDTH = 3;
 
+// ANSI color codes for terminal output
+const colors = {
+  reset: "\x1b[0m",
+  red: "\x1b[31m",
+  green: "\x1b[32m",
+  yellow: "\x1b[33m",
+  blue: "\x1b[34m",
+  magenta: "\x1b[35m",
+  cyan: "\x1b[36m",
+  dim: "\x1b[2m",
+  bold: "\x1b[1m",
+};
+
 function getSeverity(
   rule: string,
   message: string
@@ -175,8 +188,13 @@ function getContextLines(
     .slice(start, end)
     .map((line, i) => {
       const num = start + i + 1;
-      const marker = num === lineNum ? "→" : " ";
-      return `${marker} ${num.toString().padStart(LINE_NUM_WIDTH)}: ${line}`;
+      const isTarget = num === lineNum;
+      const marker = isTarget ? "→" : " ";
+      const lineNumStr = num.toString().padStart(LINE_NUM_WIDTH);
+      if (isTarget) {
+        return `${colors.magenta}${marker} ${lineNumStr}: ${line}${colors.reset}`;
+      }
+      return `${colors.dim}${marker} ${lineNumStr}: ${line}${colors.reset}`;
     })
     .join("\n");
 }
@@ -274,20 +292,38 @@ function showIssueDiff(
     issue.line + contextSize
   );
 
-  console.log("\n  Original:");
+  console.log(`\n  ${colors.red}${colors.bold}Original:${colors.reset}`);
   for (let i = start; i < Math.min(end, originalLines.length); i += 1) {
-    const marker = i + 1 === issue.line ? "−" : " ";
-    console.log(
-      `  ${marker} ${(i + 1).toString().padStart(LINE_NUM_WIDTH)}: ${originalLines[i]}`
-    );
+    const isIssueLine = i + 1 === issue.line;
+    const marker = isIssueLine ? "−" : " ";
+    const lineNum = (i + 1).toString().padStart(LINE_NUM_WIDTH);
+    const lineContent = originalLines[i];
+    if (isIssueLine) {
+      console.log(
+        `  ${colors.red}${marker} ${lineNum}: ${lineContent}${colors.reset}`
+      );
+    } else {
+      console.log(
+        `  ${colors.dim}${marker} ${lineNum}: ${lineContent}${colors.reset}`
+      );
+    }
   }
 
-  console.log("\n  Proposed:");
+  console.log(`\n  ${colors.green}${colors.bold}Proposed:${colors.reset}`);
   for (let i = start; i < Math.min(end, fixedLines.length); i += 1) {
-    const marker = i + 1 === issue.line ? "+" : " ";
-    console.log(
-      `  ${marker} ${(i + 1).toString().padStart(LINE_NUM_WIDTH)}: ${fixedLines[i]}`
-    );
+    const isIssueLine = i + 1 === issue.line;
+    const marker = isIssueLine ? "+" : " ";
+    const lineNum = (i + 1).toString().padStart(LINE_NUM_WIDTH);
+    const lineContent = fixedLines[i];
+    if (isIssueLine) {
+      console.log(
+        `  ${colors.green}${marker} ${lineNum}: ${lineContent}${colors.reset}`
+      );
+    } else {
+      console.log(
+        `  ${colors.dim}${marker} ${lineNum}: ${lineContent}${colors.reset}`
+      );
+    }
   }
 }
 
@@ -425,9 +461,13 @@ async function processIssue(
   const { file, issue, issueNum, totalIssues, currentContent } = opts;
   const providerName = getProviderName();
 
-  console.log(`\n${"─".repeat(60)}`);
-  console.log(`📝 Issue ${issueNum}/${totalIssues} in ${file}`);
-  console.log(`   [${issue.rule}] ${issue.message}`);
+  console.log(`\n${colors.dim}${"─".repeat(60)}${colors.reset}`);
+  console.log(
+    `📝 ${colors.cyan}Issue ${issueNum}/${totalIssues}${colors.reset} in ${colors.bold}${file}${colors.reset}`
+  );
+  console.log(
+    `   ${colors.yellow}[${issue.rule}]${colors.reset} ${issue.message}`
+  );
   console.log(`\n${getContextLines(currentContent, issue.line)}`);
 
   console.log(`\n   🤖 Getting fix from ${providerName}...`);
@@ -442,7 +482,7 @@ async function processIssue(
   const iterating = true;
   while (iterating) {
     const answer = await prompt(
-      "\n   [y]es / [n]o / [e]dit / [f]eedback / [s]kip file: "
+      `\n   ${colors.green}[y]es${colors.reset} / ${colors.red}[n]o${colors.reset} / ${colors.blue}[e]dit${colors.reset} / ${colors.yellow}[f]eedback${colors.reset} / ${colors.dim}[s]kip file${colors.reset}: `
     );
     const choice = parseUserChoice(answer);
 
