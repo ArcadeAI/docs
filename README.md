@@ -12,13 +12,41 @@ Then, run `pnpm dev` to start the development server and visit localhost:3000.
 
 ### Environment Variables
 
-Copy `.env.example` to `.env.local` and fill in the required values:
+Copy `.env.example` to `.env.local` and fill in the values:
 
 ```bash
 cp .env.example .env.local
 ```
 
-- `OPENAI_API_KEY` - Required for generating the llms.txt file with AI-powered summaries
+| Variable | Required | Purpose |
+|----------|----------|---------|
+| `OPENAI_API_KEY` | Yes | Generates llms.txt with AI-powered summaries |
+| `ANTHROPIC_API_KEY` | No | Enables AI-powered style fixes with `pnpm vale:fix` |
+
+## Style Guide & Linting
+
+We use [Vale](https://vale.sh/) to enforce documentation style standards based on the Google Developer Documentation Style Guide.
+
+### Check for style issues
+
+```bash
+pnpm vale:check           # Check all docs
+pnpm vale app/en/path/    # Check specific path
+```
+
+### Fix style issues
+
+```bash
+pnpm vale:fix <file>      # AI-powered fixes (requires ANTHROPIC_API_KEY)
+vale <file>               # View detailed issues to fix manually
+```
+
+The AI fix is optional — if you don't have an Anthropic API key, you can always fix issues manually.
+
+### Style resources
+
+- [STYLEGUIDE.md](./STYLEGUIDE.md) - Writing standards for voice, tone, and structure
+- [AGENTS.md](./AGENTS.md) - Instructions for AI assistants working on docs
 
 ## llms.txt Generation
 
