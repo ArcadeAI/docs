@@ -149,6 +149,7 @@ async function getChangedFiles(
   });
 
   return files
+    .filter((f) => f.filename.startsWith("app/en/"))
     .filter((f) => f.filename.endsWith(".md") || f.filename.endsWith(".mdx"))
     .filter((f) => f.status !== "removed")
     .slice(0, MAX_FILES)
