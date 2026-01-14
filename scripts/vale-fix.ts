@@ -143,6 +143,14 @@ function runVale(files: string[]): Map<string, ValeIssue[]> {
     maxBuffer: MAX_BUFFER_SIZE,
   });
 
+  if (result.error) {
+    console.error("❌ Vale failed to execute:", result.error.message);
+    console.error(
+      "   Make sure Vale is installed: https://vale.sh/docs/install/"
+    );
+    process.exit(1);
+  }
+
   const output = result.stdout || "";
   return parseValeOutput(output);
 }
@@ -574,6 +582,26 @@ async function processIssue(
   return { content: currentContent, action: "skipped" };
 }
 
+/**
+ * Calculate the line count difference between two strings.
+ * Returns positive if newContent has more lines, negative if fewer.
+ */
+function calculateLineOffset(oldContent: string, newContent: string): number {
+  const oldLineCount = oldContent.split("\n").length;
+  const newLineCount = newContent.split("\n").length;
+  return newLineCount - oldLineCount;
+}
+
+/**
+ * Create an adjusted copy of an issue with updated line number.
+ */
+function adjustIssueLineNumber(issue: ValeIssue, offset: number): ValeIssue {
+  return {
+    ...issue,
+    line: issue.line + offset,
+  };
+}
+
 async function processFile(
   file: string,
   issues: ValeIssue[],
@@ -583,12 +611,17 @@ async function processFile(
   const originalContent = currentContent;
   let fixedCount = 0;
   let skippedCount = 0;
+  let cumulativeLineOffset = 0;
 
   console.log(`\n${"═".repeat(60)}`);
   console.log(`📄 ${file} (${issues.length} issues)`);
 
   for (let i = 0; i < issues.length; i += 1) {
-    const issue = issues[i];
+    const originalIssue = issues[i];
+    // Adjust issue line number based on cumulative offset from previous fixes
+    const issue = adjustIssueLineNumber(originalIssue, cumulativeLineOffset);
+
+    const contentBeforeFix = currentContent;
     const result = await processIssue({
       file,
       issue,
@@ -598,6 +631,12 @@ async function processFile(
     });
 
     currentContent = result.content;
+
+    // If content changed, update the cumulative line offset for subsequent issues
+    if (result.action === "fixed" && currentContent !== contentBeforeFix) {
+      const lineOffset = calculateLineOffset(contentBeforeFix, currentContent);
+      cumulativeLineOffset += lineOffset;
+    }
 
     if (result.action === "fixed") {
       fixedCount += 1;
