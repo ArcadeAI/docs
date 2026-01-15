@@ -43,12 +43,6 @@ const nextConfig: NextConfig = withLlmsTxt({
           permanent: true,
         },
         {
-          source: "/:locale/home/oai-agents/user-auth-interrupts",
-          destination:
-            "/:locale/guides/agent-frameworks/openai-agents/user-auth-interrupts",
-          permanent: true,
-        },
-        {
           source: "/:locale/home/mastra/user-auth-interrupts",
           destination:
             "/:locale/guides/agent-frameworks/mastra/user-auth-interrupts",
