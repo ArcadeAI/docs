@@ -42,6 +42,9 @@ const meta: MetaRecord = {
   "customer-support": {
     title: "Customer Support",
   },
+  hospitality: {
+    title: "Retail & Hospitality",
+  },
   "-- Submit your Server": {
     type: "separator",
     title: "Submit your server",
