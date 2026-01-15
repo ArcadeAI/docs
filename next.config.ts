@@ -258,12 +258,6 @@ const nextConfig: NextConfig = withLlmsTxt({
           permanent: true,
         },
         {
-          source: "/:locale/home/langchain/use-arcade-tools",
-          destination:
-            "/:locale/guides/agent-frameworks/langchain/use-arcade-tools",
-          permanent: true,
-        },
-        {
           source: "/:locale/home/mastra/use-arcade-tools",
           destination:
             "/:locale/guides/agent-frameworks/mastra/use-arcade-tools",
