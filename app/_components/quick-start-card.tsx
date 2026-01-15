@@ -7,7 +7,7 @@ import {
 } from "@arcadeai/design-system";
 import { motion } from "motion/react";
 import Link from "next/link";
-import { usePostHog } from "posthog-js/react";
+import posthog from "posthog-js";
 
 type QuickStartCardProps = {
   icon: React.ElementType;
@@ -26,10 +26,8 @@ export function QuickStartCard({
   onClick,
   code,
 }: QuickStartCardProps) {
-  const posthog = usePostHog();
-
   const handleCardClick = () => {
-    posthog?.capture("quickstart_card_clicked", {
+    posthog.capture("Quickstart card clicked", {
       card_title: title,
       card_href: href || null,
       has_custom_onclick: !!onClick,

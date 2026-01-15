@@ -7,14 +7,13 @@ import {
   Github,
 } from "@arcadeai/design-system";
 import { HeartPulse, Mail, Shield, Users } from "lucide-react";
-import { usePostHog } from "posthog-js/react";
+import posthog from "posthog-js";
 import { useEffect, useRef, useState } from "react";
 import { QuickStartCard } from "../../../_components/quick-start-card";
 
 export function ContactCards() {
   const [isSalesModalOpen, setIsSalesModalOpen] = useState(false);
   const scriptLoadedRef = useRef(false);
-  const posthog = usePostHog();
 
   useEffect(() => {
     // Load HubSpot script once
@@ -28,7 +27,7 @@ export function ContactCards() {
   }, []);
 
   const handleContactSalesClick = () => {
-    posthog?.capture("contact_sales_modal_opened", {
+    posthog.capture("Contact sales modal opened", {
       source: "contact_us_page",
     });
     setIsSalesModalOpen(true);

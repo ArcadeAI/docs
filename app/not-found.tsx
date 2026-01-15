@@ -12,7 +12,7 @@ import { cn } from "@arcadeai/design-system/lib/utils";
 import { Home, SearchX } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { usePostHog } from "posthog-js/react";
+import posthog from "posthog-js";
 import { use, useEffect, useMemo, useRef } from "react";
 import { getDictionaryClient } from "@/_dictionaries/get-dictionary-client";
 import { BackButton } from "@/app/_components/back-button";
@@ -23,7 +23,6 @@ const LOCALE_PREFIX_REGEX = /^\/[a-z]{2}(?:-[A-Z]{2})?/;
 export default function NotFound() {
   const pathname = usePathname() || "/";
   const searchParams = useSearchParams();
-  const posthog = usePostHog();
   const lastCapturedPathRef = useRef<string | null>(null);
 
   const { currentLocale, englishPath, showEnglishLink } = useMemo(() => {
@@ -50,26 +49,23 @@ export default function NotFound() {
     }
     lastCapturedPathRef.current = pathWithQuery;
 
-    posthog?.capture("page_not_found", {
+    const referrer =
+      typeof document !== "undefined" ? document.referrer || "" : "";
+    const referringDomain = referrer ? new URL(referrer).hostname : "";
+
+    posthog.capture("Page not found", {
       status_code: 404,
       pathname,
       path: pathWithQuery,
       locale: currentLocale,
       english_path: englishPath,
       show_english_link: showEnglishLink,
-      // PostHog special props (best-effort; only available in browser).
+      // Ensure special props are attached to custom 404 events for link analysis.
       $current_url: typeof window !== "undefined" ? window.location.href : null,
-      $referrer:
-        typeof document !== "undefined" ? document.referrer || null : null,
+      $referrer: referrer || null,
+      $referring_domain: referringDomain || null,
     });
-  }, [
-    currentLocale,
-    englishPath,
-    pathname,
-    posthog,
-    searchParams,
-    showEnglishLink,
-  ]);
+  }, [currentLocale, englishPath, pathname, searchParams, showEnglishLink]);
 
   return (
     <div className="flex items-center justify-center py-16">
