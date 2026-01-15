@@ -51,7 +51,14 @@ export default function NotFound() {
 
     const referrer =
       typeof document !== "undefined" ? document.referrer || "" : "";
-    const referringDomain = referrer ? new URL(referrer).hostname : "";
+    let referringDomain = "";
+    if (referrer) {
+      try {
+        referringDomain = new URL(referrer).hostname;
+      } catch {
+        referringDomain = "";
+      }
+    }
 
     posthog.capture("Page not found", {
       status_code: 404,
