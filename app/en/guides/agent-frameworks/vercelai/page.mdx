@@ -427,6 +427,14 @@ The `Conversation` component handles auto-scrolling, `Message` handles role-base
 export default function Chat() {
   const { messages, sendMessage, regenerate, status } = useChat();
   const isLoading = status === "submitted" || status === "streaming";
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  // Refocus input after response completes
+  useEffect(() => {
+    if (!isLoading && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isLoading]);
 
   return (
     <div className="flex flex-col h-screen max-w-2xl mx-auto">
@@ -499,6 +507,7 @@ export default function Chat() {
           }}
         >
           <PromptInputTextarea
+            ref={inputRef}
             placeholder="Ask about your emails or Slack..."
             disabled={isLoading}
           />
@@ -837,6 +846,14 @@ function AuthPendingUI({
 export default function Chat() {
   const { messages, sendMessage, regenerate, status } = useChat();
   const isLoading = status === "submitted" || status === "streaming";
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  // Refocus input after response completes
+  useEffect(() => {
+    if (!isLoading && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isLoading]);
 
   return (
     <div className="flex flex-col h-screen max-w-2xl mx-auto">
@@ -909,6 +926,7 @@ export default function Chat() {
           }}
         >
           <PromptInputTextarea
+            ref={inputRef}
             placeholder="Ask about your emails or Slack..."
             disabled={isLoading}
           />
