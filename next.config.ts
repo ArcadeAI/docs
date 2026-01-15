@@ -25,8 +25,33 @@ const nextConfig: NextConfig = withLlmsTxt({
       return [
         // Old /home/* paths to new structure
         {
-          source: "/:locale/home/build-tools/server-level-vs-tool-level-auth",
-          destination: "/:locale/learn/server-level-vs-tool-level-auth",
+          source: "/:locale/home/langchain/use-arcade-tools",
+          destination:
+            "/:locale/guides/agent-frameworks/langchain/use-arcade-tools",
+          permanent: true,
+        },
+        {
+          source: "/:locale/home/langchain/user-auth-interrupts",
+          destination:
+            "/:locale/guides/agent-frameworks/langchain/user-auth-interrupts",
+          permanent: true,
+        },
+        {
+          source: "/:locale/home/oai-agents/user-auth-interrupts",
+          destination:
+            "/:locale/guides/agent-frameworks/openai-agents/user-auth-interrupts",
+          permanent: true,
+        },
+        {
+          source: "/:locale/home/oai-agents/user-auth-interrupts",
+          destination:
+            "/:locale/guides/agent-frameworks/openai-agents/user-auth-interrupts",
+          permanent: true,
+        },
+        {
+          source: "/:locale/home/mastra/user-auth-interrupts",
+          destination:
+            "/:locale/guides/agent-frameworks/mastra/user-auth-interrupts",
           permanent: true,
         },
         {
