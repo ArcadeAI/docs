@@ -188,7 +188,7 @@ from arcade.sdk import tool
 
 ### Don't dumb it down.
 
-Avoid using language like "simple," "easy," "basic." It makes PhDs feel like the tool is tool dumb and inexperienced engineers lose heart when they start to struggle although "it says this is easy..." Treat the reader and the tool with the neutral respect and dignity they both deserve. Don't infantalize them.
+Avoid using language like "simple," "easy," "basic." It makes PhDs feel like the tool is too dumb and inexperienced engineers lose heart when they start to struggle although "it says this is easy..." Treat the reader and the tool with the neutral respect and dignity they both deserve. Don't infantilize them.
 
 - **Do:** "Add the decorator to your function"
 - **Don't:** "Simply add the decorator to your function"
