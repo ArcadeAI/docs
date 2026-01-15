@@ -141,7 +141,9 @@ IMPORTANT: When calling tools, if an argument is optional, do not set it. Never 
 ```
 
 <Callout type="info">
-You can mix MCP servers (which give you all their tools) with individual tools. Browse the [complete MCP server catalog](/resources/integrations) to see what's available.
+  You can mix MCP servers (which give you all their tools) with individual
+  tools. Browse the [complete MCP server catalog](/resources/integrations) to
+  see what's available.
 </Callout>
 
 ### Write the tool fetching logic
@@ -151,7 +153,9 @@ This function retrieves tools from Arcade and converts them to Vercel AI SDK for
 ```ts filename="app/api/chat/route.ts"
 // Strip null and undefined values from tool inputs
 // Some LLMs send null for optional params, which can cause tool failures
-function stripNullValues(obj: Record<string, unknown>): Record<string, unknown> {
+function stripNullValues(
+  obj: Record<string, unknown>
+): Record<string, unknown> {
   const result: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(obj)) {
     if (value !== null && value !== undefined) {
@@ -278,7 +282,10 @@ export async function POST(req: Request) {
     return Response.json({ status: authResponse.status });
   } catch (error) {
     console.error("Auth status check error:", error);
-    return Response.json({ status: "error", error: String(error) }, { status: 500 });
+    return Response.json(
+      { status: "error", error: String(error) },
+      { status: 500 }
+    );
   }
 }
 ```
@@ -313,7 +320,9 @@ const markdownComponents: Components = {
     <code className="bg-gray-700 px-1 py-0.5 rounded text-sm">{children}</code>
   ),
   pre: ({ children }) => (
-    <pre className="bg-gray-700 p-2 rounded overflow-x-auto my-2">{children}</pre>
+    <pre className="bg-gray-700 p-2 rounded overflow-x-auto my-2">
+      {children}
+    </pre>
   ),
 };
 ```
@@ -326,8 +335,8 @@ When Arcade returns `authorization_required`, you need to show the user an auth 
 // Displays authorization button and polls for completion
 // Props come from Arcade's authorization_required response
 function AuthPendingUI({
-  authUrl,      // URL to open for OAuth flow
-  toolName,     // e.g., "Gmail_ListEmails" - used to check auth status
+  authUrl, // URL to open for OAuth flow
+  toolName, // e.g., "Gmail_ListEmails" - used to check auth status
   onAuthComplete, // Called when auth succeeds (triggers message retry)
 }: {
   authUrl: string;
@@ -335,8 +344,11 @@ function AuthPendingUI({
   onAuthComplete: () => void;
 }) {
   // Track UI state: initial -> waiting (polling) -> completed
-  const [status, setStatus] = useState<"initial" | "waiting" | "completed">("initial");
+  const [status, setStatus] = useState<"initial" | "waiting" | "completed">(
+    "initial"
+  );
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null); // Track completion delay timeout
   const hasCompletedRef = useRef(false); // Prevent duplicate completions
 
   // Poll /api/auth/status every 2 seconds after user clicks authorize
@@ -360,7 +372,7 @@ function AuthPendingUI({
           if (pollingRef.current) clearInterval(pollingRef.current);
           setStatus("completed");
           // Brief delay to show success message, then retry the original request
-          setTimeout(() => onAuthComplete(), 1500);
+          timeoutRef.current = setTimeout(() => onAuthComplete(), 1500);
         }
       } catch (error) {
         console.error("Polling error:", error);
@@ -368,9 +380,10 @@ function AuthPendingUI({
     };
 
     pollingRef.current = setInterval(pollStatus, 2000);
-    // Cleanup: stop polling when component unmounts
+    // Cleanup: stop polling and cancel pending timeout when component unmounts
     return () => {
       if (pollingRef.current) clearInterval(pollingRef.current);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, [status, toolName, onAuthComplete]);
 
@@ -586,7 +599,8 @@ The form calls `sendMessage` with the user's input. The hook automatically sends
 ```
 
 <Callout type="info">
-The full `page.tsx` file is available in the [Complete code](#complete-code) section below.
+  The full `page.tsx` file is available in the [Complete code](#complete-code)
+  section below.
 </Callout>
 
 ### Run the chatbot
@@ -668,7 +682,9 @@ Always use the available tools to fulfill user requests. Do not tell users to au
 IMPORTANT: When calling tools, if an argument is optional, do not set it. Never pass null for optional parameters.`,
 };
 
-function stripNullValues(obj: Record<string, unknown>): Record<string, unknown> {
+function stripNullValues(
+  obj: Record<string, unknown>
+): Record<string, unknown> {
   const result: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(obj)) {
     if (value !== null && value !== undefined) {
@@ -780,7 +796,10 @@ export async function POST(req: Request) {
     return Response.json({ status: authResponse.status });
   } catch (error) {
     console.error("Auth status check error:", error);
-    return Response.json({ status: "error", error: String(error) }, { status: 500 });
+    return Response.json(
+      { status: "error", error: String(error) },
+      { status: 500 }
+    );
   }
 }
 ```
@@ -808,7 +827,9 @@ const markdownComponents: Components = {
     <code className="bg-gray-700 px-1 py-0.5 rounded text-sm">{children}</code>
   ),
   pre: ({ children }) => (
-    <pre className="bg-gray-700 p-2 rounded overflow-x-auto my-2">{children}</pre>
+    <pre className="bg-gray-700 p-2 rounded overflow-x-auto my-2">
+      {children}
+    </pre>
   ),
 };
 
@@ -821,8 +842,11 @@ function AuthPendingUI({
   toolName: string;
   onAuthComplete: () => void;
 }) {
-  const [status, setStatus] = useState<"initial" | "waiting" | "completed">("initial");
+  const [status, setStatus] = useState<"initial" | "waiting" | "completed">(
+    "initial"
+  );
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const hasCompletedRef = useRef(false);
 
   useEffect(() => {
@@ -841,7 +865,7 @@ function AuthPendingUI({
           hasCompletedRef.current = true;
           if (pollingRef.current) clearInterval(pollingRef.current);
           setStatus("completed");
-          setTimeout(() => onAuthComplete(), 1500);
+          timeoutRef.current = setTimeout(() => onAuthComplete(), 1500);
         }
       } catch (error) {
         console.error("Polling error:", error);
@@ -851,6 +875,7 @@ function AuthPendingUI({
     pollingRef.current = setInterval(pollStatus, 2000);
     return () => {
       if (pollingRef.current) clearInterval(pollingRef.current);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, [status, toolName, onAuthComplete]);
 
@@ -918,19 +943,36 @@ export default function Chat() {
             return false;
           });
 
-          const showLoading = message.role === "assistant" && !hasVisibleContent && isLoading;
+          const showLoading =
+            message.role === "assistant" && !hasVisibleContent && isLoading;
           if (!hasVisibleContent && !showLoading) return null;
 
           return (
-            <div key={message.id} className={message.role === "user" ? "text-right" : ""}>
-              <div className={`inline-block p-3 rounded-lg ${
-                message.role === "user" ? "bg-blue-600 text-white" : "bg-gray-800"
-              }`}>
+            <div
+              key={message.id}
+              className={message.role === "user" ? "text-right" : ""}
+            >
+              <div
+                className={`inline-block p-3 rounded-lg ${
+                  message.role === "user"
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-800"
+                }`}
+              >
                 {showLoading ? (
                   <div className="flex gap-1">
-                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></span>
-                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></span>
-                    <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></span>
+                    <span
+                      className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                      style={{ animationDelay: "0ms" }}
+                    ></span>
+                    <span
+                      className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                      style={{ animationDelay: "150ms" }}
+                    ></span>
+                    <span
+                      className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                      style={{ animationDelay: "300ms" }}
+                    ></span>
                   </div>
                 ) : (
                   message.parts?.map((part, i) => {
@@ -945,13 +987,20 @@ export default function Chat() {
                     }
 
                     if (part.type.startsWith("tool-")) {
-                      const toolPart = part as { state?: string; output?: unknown };
+                      const toolPart = part as {
+                        state?: string;
+                        output?: unknown;
+                      };
 
                       if (toolPart.state === "output-available") {
-                        const result = toolPart.output as Record<string, unknown>;
+                        const result = toolPart.output as Record<
+                          string,
+                          unknown
+                        >;
 
                         if (result?.authorization_required) {
-                          const authResponse = result.authorization_response as { url?: string };
+                          const authResponse =
+                            result.authorization_response as { url?: string };
                           const toolName = part.type.replace("tool-", "");
                           return (
                             <AuthPendingUI
