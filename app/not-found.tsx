@@ -45,7 +45,9 @@ export default function NotFound() {
     const pathWithQuery = search ? `${pathname}?${search}` : pathname;
 
     // Prevent duplicate capture if this component re-renders for the same 404 URL.
-    if (lastCapturedPathRef.current === pathWithQuery) return;
+    if (lastCapturedPathRef.current === pathWithQuery) {
+      return;
+    }
     lastCapturedPathRef.current = pathWithQuery;
 
     posthog?.capture("page_not_found", {
