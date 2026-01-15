@@ -18,6 +18,7 @@ import {
   existsSync,
   mkdtempSync,
   readFileSync,
+  rmdirSync,
   unlinkSync,
   writeFileSync,
 } from "node:fs";
@@ -110,6 +111,7 @@ function runValeOnContent(filename: string, content: string): ValeIssue[] {
   } finally {
     try {
       unlinkSync(tempFile);
+      rmdirSync(tempDir);
     } catch {
       // Ignore cleanup errors
     }
