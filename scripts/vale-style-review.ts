@@ -84,6 +84,9 @@ type FileWithDiff = {
   commentableLines: Set<number>;
 };
 
+// Regex to identify Vale-generated comments (starts with **`Rule.Name`**:)
+const VALE_COMMENT_REGEX = /^\*\*`[A-Za-z]+\.[A-Za-z]+`\*\*:/;
+
 // Parse command line args
 function parseArgs(): { prNumber: number } {
   const args = process.argv.slice(2);
@@ -159,6 +162,50 @@ async function getChangedFiles(
       filename: f.filename,
       commentableLines: parseDiffForCommentableLines(f.patch),
     }));
+}
+
+// Get existing Vale review comments on the PR to avoid duplicates
+// Returns a Set of "path:line" keys that already have Vale comments
+async function getExistingValeComments(
+  octokit: Octokit,
+  prNumber: number
+): Promise<Set<string>> {
+  const existingComments = new Set<string>();
+
+  try {
+    // Paginate through all review comments
+    const comments = await octokit.paginate(
+      octokit.rest.pulls.listReviewComments,
+      {
+        owner: OWNER,
+        repo: REPO,
+        pull_number: prNumber,
+        per_page: 100,
+      }
+    );
+
+    for (const comment of comments) {
+      // Check if this looks like a Vale comment
+      if (VALE_COMMENT_REGEX.test(comment.body.trim())) {
+        // Use the line number (prefer line, fall back to original_line for outdated comments)
+        const line = comment.line ?? comment.original_line;
+        if (line && comment.path) {
+          const key = `${comment.path}:${line}`;
+          existingComments.add(key);
+        }
+      }
+    }
+
+    if (existingComments.size > 0) {
+      console.log(
+        `Found ${existingComments.size} existing Vale comment(s) to skip`
+      );
+    }
+  } catch (error) {
+    console.warn("Warning: Could not fetch existing comments:", error);
+  }
+
+  return existingComments;
 }
 
 // Run Vale on files and get JSON output
@@ -318,17 +365,31 @@ async function getSuggestions(
 }
 
 // Format suggestions as GitHub review comments
-// Only includes suggestions for lines that are in the PR diff
-function formatReviewComments(
-  filename: string,
-  suggestions: Suggestion[],
-  fileContent: string,
-  commentableLines: Set<number>
-): ReviewComment[] {
+// Only includes suggestions for lines that are in the PR diff and don't already have Vale comments
+function formatReviewComments(options: {
+  filename: string;
+  suggestions: Suggestion[];
+  fileContent: string;
+  commentableLines: Set<number>;
+  existingComments: Set<string>;
+}): ReviewComment[] {
+  const {
+    filename,
+    suggestions,
+    fileContent,
+    commentableLines,
+    existingComments,
+  } = options;
   const lines = fileContent.split("\n");
 
   return suggestions
     .filter((s) => {
+      // Skip if there's already a Vale comment on this line
+      const commentKey = `${filename}:${s.line}`;
+      if (existingComments.has(commentKey)) {
+        console.log(`  Skipping line ${s.line} (already has Vale comment)`);
+        return false;
+      }
       // Validate required fields exist and have correct types
       if (
         typeof s.line !== "number" ||
@@ -452,6 +513,9 @@ async function main() {
 
   console.log(`Found ${changedFiles.length} doc file(s) to review`);
 
+  // Get existing Vale comments to avoid duplicates
+  const existingComments = await getExistingValeComments(octokit, prNumber);
+
   // Filter by file size, warn about missing files
   const missingFiles: string[] = [];
   const filesToReview = changedFiles.filter((f) => {
@@ -519,12 +583,13 @@ async function main() {
     );
     const suggestions = await getSuggestions(ai, filename, content, issues);
 
-    const comments = formatReviewComments(
+    const comments = formatReviewComments({
       filename,
       suggestions,
-      content,
-      commentableLines
-    );
+      fileContent: content,
+      commentableLines,
+      existingComments,
+    });
     allComments.push(...comments);
 
     console.log(`  → ${comments.length} actionable suggestions`);

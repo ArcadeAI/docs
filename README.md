@@ -39,6 +39,8 @@ Both are powered by Vale + LLM and require `ANTHROPIC_API_KEY` (or `OPENAI_API_K
 
 ### Local Development
 
+First, [install the Vale CLI](https://vale.sh/docs/install) for your platform.
+
 ```bash
 pnpm vale:check           # Check all docs for style issues
 pnpm vale app/en/path/    # Check specific path
