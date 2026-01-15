@@ -481,10 +481,11 @@ export default function Chat() {
                   ) : authPart ? (
                     // Show auth UI when Arcade needs authorization
                     (() => {
-                      const toolPart = authPart as { output?: unknown };
+                      const toolPart = authPart as { toolName?: string; output?: unknown };
                       const result = toolPart.output as Record<string, unknown>;
                       const authResponse = result?.authorization_response as { url?: string };
-                      const toolName = authPart.type.replace("tool-", "");
+                      // In Vercel AI SDK v6, toolName is a property on the part, not derived from type
+                      const toolName = toolPart.toolName || "";
                       return (
                         <AuthPendingUI
                           authUrl={authResponse?.url || ""}
@@ -876,10 +877,11 @@ export default function Chat() {
                   ) : authPart ? (
                     // Show auth UI when Arcade needs authorization
                     (() => {
-                      const toolPart = authPart as { output?: unknown };
+                      const toolPart = authPart as { toolName?: string; output?: unknown };
                       const result = toolPart.output as Record<string, unknown>;
                       const authResponse = result?.authorization_response as { url?: string };
-                      const toolName = authPart.type.replace("tool-", "");
+                      // In Vercel AI SDK v6, toolName is a property on the part, not derived from type
+                      const toolName = toolPart.toolName || "";
                       return (
                         <AuthPendingUI
                           authUrl={authResponse?.url || ""}
