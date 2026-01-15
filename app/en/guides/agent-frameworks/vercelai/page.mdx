@@ -522,65 +522,6 @@ export default function Chat() {
     </div>
   );
 }
-```.role === "assistant" && isLoading)) {
-              return null;
-            }
-
-            return (
-              <Message key={message.id} from={message.role}>
-                <MessageContent>
-                  {/* Show loader while assistant is thinking */}
-                  {message.role === "assistant" && !textContent && !authPart && isLoading ? (
-                    <Loader />
-                  ) : authPart ? (
-                    // Show auth UI when Arcade needs authorization
-                    (() => {
-                      const toolPart = authPart as { toolName?: string; output?: unknown };
-                      const result = toolPart.output as Record<string, unknown>;
-                      const authResponse = result?.authorization_response as { url?: string };
-                      // In Vercel AI SDK v6, toolName is a property on the part, not derived from type
-                      const toolName = toolPart.toolName || "";
-                      return (
-                        <AuthPendingUI
-                          authUrl={authResponse?.url || ""}
-                          toolName={toolName}
-                          onAuthComplete={() => regenerate()}
-                        />
-                      );
-                    })()
-                  ) : (
-                    <MessageResponse>{textContent}</MessageResponse>
-                  )}
-                </MessageContent>
-              </Message>
-            );
-          })}
-        </ConversationContent>
-      </Conversation>
-
-      {/* PromptInput handles the form with auto-resize textarea */}
-      <div className="p-4">
-        <PromptInput
-          onSubmit={({ text }) => {
-            if (text.trim()) {
-              sendMessage({ text });
-            }
-          }}
-        >
-          <PromptInputTextarea
-            ref={inputRef}
-            placeholder="Ask about your emails or Slack..."
-            disabled={isLoading}
-          />
-          <PromptInputFooter>
-            <div /> {/* Spacer */}
-            <PromptInputSubmit status={status} disabled={isLoading} />
-          </PromptInputFooter>
-        </PromptInput>
-      </div>
-    </div>
-  );
-}
 ```
 
 <Callout type="info">
