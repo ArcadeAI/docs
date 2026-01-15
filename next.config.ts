@@ -49,6 +49,11 @@ const nextConfig: NextConfig = withLlmsTxt({
           permanent: true,
         },
         {
+          source: "/:locale/home/build-tools/server-level-vs-tool-level-auth",
+          destination: "/:locale/learn/server-level-vs-tool-level-auth",
+          permanent: true,
+        },
+        {
           source: "/:locale/home/build-tools/secure-your-mcp-server",
           destination: "/:locale/guides/security/secure-your-mcp-server",
           permanent: true,
