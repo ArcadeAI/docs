@@ -206,17 +206,17 @@ function stripNullValues(
 }
 
 // Adapter to convert Arcade tools to Vercel AI SDK v6 format
-function toVercelTools(arcadeTools: Record<string, any>): Record<string, any> {
+function toVercelTools(arcadeTools: Record<string, unknown>): Record<string, unknown> {
   const vercelTools: Record<string, unknown> = {};
 
   for (const [name, tool] of Object.entries(arcadeTools)) {
-    const originalExecute = tool.execute;
+    const t = tool as { description: string; parameters: unknown; execute: Function };
     vercelTools[name] = {
-      description: tool.description,
-      inputSchema: tool.parameters,  // AI SDK v6 uses inputSchema, not parameters
+      description: t.description,
+      inputSchema: t.parameters,  // AI SDK v6 uses inputSchema, not parameters
       execute: async (input: Record<string, unknown>) => {
         const cleanedInput = stripNullValues(input);
-        return originalExecute(cleanedInput);
+        return t.execute(cleanedInput);
       },
     };
   }
@@ -622,17 +622,17 @@ function stripNullValues(
   return result;
 }
 
-function toVercelTools(arcadeTools: Record<string, any>): Record<string, any> {
+function toVercelTools(arcadeTools: Record<string, unknown>): Record<string, unknown> {
   const vercelTools: Record<string, unknown> = {};
 
   for (const [name, tool] of Object.entries(arcadeTools)) {
-    const originalExecute = tool.execute;
+    const t = tool as { description: string; parameters: unknown; execute: Function };
     vercelTools[name] = {
-      description: tool.description,
-      inputSchema: tool.parameters,  // AI SDK v6 uses inputSchema, not parameters
+      description: t.description,
+      inputSchema: t.parameters,  // AI SDK v6 uses inputSchema, not parameters
       execute: async (input: Record<string, unknown>) => {
         const cleanedInput = stripNullValues(input);
-        return originalExecute(cleanedInput);
+        return t.execute(cleanedInput);
       },
     };
   }
