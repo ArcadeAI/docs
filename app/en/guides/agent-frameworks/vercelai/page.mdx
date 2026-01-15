@@ -344,6 +344,12 @@ function AuthPendingUI({
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const hasCompletedRef = useRef(false);
+  const onAuthCompleteRef = useRef(onAuthComplete);
+
+  // Keep callback ref updated
+  useEffect(() => {
+    onAuthCompleteRef.current = onAuthComplete;
+  }, [onAuthComplete]);
 
   // Poll /api/auth/status every 2 seconds after user clicks authorize
   useEffect(() => {
@@ -362,7 +368,7 @@ function AuthPendingUI({
           hasCompletedRef.current = true;
           if (pollingRef.current) clearInterval(pollingRef.current);
           setStatus("completed");
-          timeoutRef.current = setTimeout(() => onAuthComplete(), 1500);
+          timeoutRef.current = setTimeout(() => onAuthCompleteRef.current(), 1500);
         }
       } catch (error) {
         console.error("Polling error:", error);
@@ -372,9 +378,8 @@ function AuthPendingUI({
     pollingRef.current = setInterval(pollStatus, 2000);
     return () => {
       if (pollingRef.current) clearInterval(pollingRef.current);
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, [status, toolName, onAuthComplete]);
+  }, [status, toolName]);
 
   const displayName = toolName.split("_")[0] || toolName;
 
@@ -751,6 +756,12 @@ function AuthPendingUI({
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const hasCompletedRef = useRef(false);
+  const onAuthCompleteRef = useRef(onAuthComplete);
+
+  // Keep callback ref updated
+  useEffect(() => {
+    onAuthCompleteRef.current = onAuthComplete;
+  }, [onAuthComplete]);
 
   // Poll for auth completion after user clicks authorize
   useEffect(() => {
@@ -769,7 +780,7 @@ function AuthPendingUI({
           hasCompletedRef.current = true;
           if (pollingRef.current) clearInterval(pollingRef.current);
           setStatus("completed");
-          timeoutRef.current = setTimeout(() => onAuthComplete(), 1500);
+          timeoutRef.current = setTimeout(() => onAuthCompleteRef.current(), 1500);
         }
       } catch (error) {
         console.error("Polling error:", error);
@@ -779,9 +790,8 @@ function AuthPendingUI({
     pollingRef.current = setInterval(pollStatus, 2000);
     return () => {
       if (pollingRef.current) clearInterval(pollingRef.current);
-      if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, [status, toolName, onAuthComplete]);
+  }, [status, toolName]);
 
   const displayName = toolName.split("_")[0] || toolName;
 
