@@ -20,6 +20,19 @@ import { BackButton } from "@/app/_components/back-button";
 const LOCALE_PATH_REGEX = /^\/([a-z]{2}(?:-[A-Z]{2})?)(?:\/.+|$)/;
 const LOCALE_PREFIX_REGEX = /^\/[a-z]{2}(?:-[A-Z]{2})?/;
 
+function getReferrerInfo(): { referrer: string; referringDomain: string } {
+  const referrer =
+    typeof document !== "undefined" ? document.referrer || "" : "";
+  if (!referrer) {
+    return { referrer: "", referringDomain: "" };
+  }
+  try {
+    return { referrer, referringDomain: new URL(referrer).hostname };
+  } catch {
+    return { referrer, referringDomain: "" };
+  }
+}
+
 export default function NotFound() {
   const pathname = usePathname() || "/";
   const searchParams = useSearchParams();
@@ -49,16 +62,7 @@ export default function NotFound() {
     }
     lastCapturedPathRef.current = pathWithQuery;
 
-    const referrer =
-      typeof document !== "undefined" ? document.referrer || "" : "";
-    let referringDomain = "";
-    if (referrer) {
-      try {
-        referringDomain = new URL(referrer).hostname;
-      } catch {
-        referringDomain = "";
-      }
-    }
+    const { referrer, referringDomain } = getReferrerInfo();
 
     posthog.capture("Page not found", {
       status_code: 404,
