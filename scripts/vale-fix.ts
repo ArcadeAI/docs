@@ -489,6 +489,7 @@ async function handleNoAIFix(
   const skipChoice = await prompt("   [n]o change / [e]dit / [s]kip file: ");
   const choice = parseUserChoice(skipChoice);
   if (choice === "edit") {
+    writeFileSync(opts.file, opts.currentContent);
     openInEditor(opts.file);
     await prompt("   Press Enter when done editing...");
     return { content: readFileSync(opts.file, "utf-8"), action: "fixed" };
