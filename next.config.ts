@@ -474,8 +474,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         },
         {
           source: "/:locale/guides/agent-frameworks/vercel-ai/typescript",
-          destination:
-            "/:locale/guides/agent-frameworks/vercelai/using-arcade-tools",
+          destination: "/:locale/guides/agent-frameworks/vercelai",
           permanent: true,
         },
         // Old resource paths
