@@ -6,7 +6,9 @@ type SubpageListProps = {
 };
 
 export function SubpageList({ basePath, meta }: SubpageListProps) {
-  const subpages = Object.entries(meta).filter(([key]) => key !== "index" && key !== "*");
+  const subpages = Object.entries(meta).filter(
+    ([key]) => key !== "index" && key !== "*"
+  );
 
   return (
     <ul className="x:ms-[1.5em] x:not-first:mt-[1.25em] x:list-disc x:[:is(ol,ul)_&]:my-[.75em]">
