@@ -10,6 +10,13 @@ import { motion } from "motion/react";
 import Link from "next/link";
 import posthog from "posthog-js";
 
+type LogoItem = {
+  src: string;
+  alt: string;
+  invertInLight?: boolean;
+  invertInDark?: boolean;
+};
+
 type QuickStartCardProps = {
   icon: React.ElementType;
   title: string;
@@ -17,6 +24,7 @@ type QuickStartCardProps = {
   href?: string;
   onClick?: () => void;
   code?: string;
+  logos?: LogoItem[];
 };
 
 export function QuickStartCard({
@@ -26,6 +34,7 @@ export function QuickStartCard({
   href,
   onClick,
   code,
+  logos,
 }: QuickStartCardProps) {
   const handleCardClick = () => {
     posthog.capture("Quickstart card clicked", {
@@ -51,6 +60,31 @@ export function QuickStartCard({
         <p className="text-gray-600 text-sm leading-relaxed dark:text-gray-300">
           {description}
         </p>
+        {logos && logos.length > 0 && (
+          <div className="mt-3 flex items-center gap-2">
+            {logos.map((logo) => {
+              const getInvertClass = () => {
+                if (logo.invertInLight) {
+                  return "invert dark:invert-0";
+                }
+                if (logo.invertInDark) {
+                  return "dark:invert";
+                }
+                return "";
+              };
+              return (
+                <img
+                  alt={logo.alt}
+                  className={`h-5 w-5 object-contain ${getInvertClass()}`}
+                  height={20}
+                  key={logo.src}
+                  src={logo.src}
+                  width={20}
+                />
+              );
+            })}
+          </div>
+        )}
         {code && (
           <pre className="mt-1 rounded-md bg-gray-100 p-1 text-gray-800 text-sm dark:bg-gray-900 dark:text-gray-300">
             <code>{code}</code>

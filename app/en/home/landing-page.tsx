@@ -318,6 +318,19 @@ export function LandingPage() {
                   description="Add tools to Cursor, VS Code, Claude Desktop, or any MCP client."
                   href="/guides/tool-calling/mcp-clients"
                   icon={Monitor}
+                  logos={[
+                    {
+                      src: "/images/icons/cursor.png",
+                      alt: "Cursor",
+                      invertInLight: true,
+                    },
+                    { src: "/images/icons/vscode.svg", alt: "VS Code" },
+                    {
+                      src: "/images/icons/claude.png",
+                      alt: "Claude Desktop",
+                      invertInLight: true,
+                    },
+                  ]}
                   title="Connect to Your IDE"
                 />
                 <QuickStartCard
