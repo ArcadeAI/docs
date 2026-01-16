@@ -5,9 +5,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@arcadeai/design-system";
+import { ArrowRight } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import posthog from "posthog-js";
+
+type LogoItem = {
+  src: string;
+  alt: string;
+  invertInLight?: boolean;
+  invertInDark?: boolean;
+};
 
 type QuickStartCardProps = {
   icon: React.ElementType;
@@ -16,6 +24,7 @@ type QuickStartCardProps = {
   href?: string;
   onClick?: () => void;
   code?: string;
+  logos?: LogoItem[];
 };
 
 export function QuickStartCard({
@@ -25,6 +34,7 @@ export function QuickStartCard({
   href,
   onClick,
   code,
+  logos,
 }: QuickStartCardProps) {
   const handleCardClick = () => {
     posthog.capture("Quickstart card clicked", {
@@ -34,9 +44,11 @@ export function QuickStartCard({
     });
   };
 
+  const isClickable = href || onClick;
+
   const content = (
     <>
-      <CardHeader className="flex flex-row items-center gap-3 p-6">
+      <CardHeader className="flex flex-row items-center gap-3 p-4 min-[1062px]:p-6">
         <div className="rounded-full bg-[#ee175e]/10 p-2">
           <Icon className="h-5 w-5 text-[#ee175e]" />
         </div>
@@ -44,14 +56,45 @@ export function QuickStartCard({
           {title}
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-6 pt-0">
+      <CardContent className="p-4 pt-0 min-[1062px]:p-6 min-[1062px]:pt-0">
         <p className="text-gray-600 text-sm leading-relaxed dark:text-gray-300">
           {description}
         </p>
+        {logos && logos.length > 0 && (
+          <div className="mt-4 flex items-center justify-center gap-4 px-2">
+            {logos.map((logo) => {
+              const getInvertClass = () => {
+                if (logo.invertInLight) {
+                  return "invert dark:invert-0";
+                }
+                if (logo.invertInDark) {
+                  return "dark:invert";
+                }
+                return "";
+              };
+              return (
+                <img
+                  alt={logo.alt}
+                  className={`h-7 w-7 object-contain ${getInvertClass()}`}
+                  height={28}
+                  key={logo.src}
+                  src={logo.src}
+                  width={28}
+                />
+              );
+            })}
+          </div>
+        )}
         {code && (
           <pre className="mt-1 rounded-md bg-gray-100 p-1 text-gray-800 text-sm dark:bg-gray-900 dark:text-gray-300">
             <code>{code}</code>
           </pre>
+        )}
+        {isClickable && (
+          <div className="mt-4 flex items-center justify-end font-medium text-[#ee175e] text-sm">
+            Learn more
+            <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
+          </div>
         )}
       </CardContent>
     </>
@@ -66,7 +109,7 @@ export function QuickStartCard({
   if (onClick) {
     wrapper = (
       <button
-        className="block h-full w-full text-left"
+        className="group block h-full w-full cursor-pointer text-left"
         onClick={handleClick}
         type="button"
       >
@@ -75,7 +118,11 @@ export function QuickStartCard({
     );
   } else if (href) {
     wrapper = (
-      <Link className="block h-full" href={href} onClick={handleCardClick}>
+      <Link
+        className="group block h-full cursor-pointer"
+        href={href}
+        onClick={handleCardClick}
+      >
         {content}
       </Link>
     );
@@ -91,7 +138,7 @@ export function QuickStartCard({
       }}
       whileTap={{ scale: 0.98 }}
     >
-      <Card className="h-full border-gray-800 bg-white/80 backdrop-blur-xs transition-all hover:border-[#ee175e]/30 dark:border-gray-800 dark:bg-[rgba(17,17,17,0.8)]">
+      <Card className="h-full border-gray-200 bg-white/80 backdrop-blur-xs transition-all hover:border-[#ee175e]/30 dark:border-gray-700 dark:bg-[rgba(17,17,17,0.8)]">
         {wrapper}
       </Card>
     </motion.div>
