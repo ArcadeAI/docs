@@ -91,7 +91,7 @@ export function QuickStartCard({
           </pre>
         )}
         {isClickable && (
-          <div className="mt-4 flex items-center font-medium text-[#ee175e] text-sm">
+          <div className="mt-4 flex items-center justify-end font-medium text-[#ee175e] text-sm">
             Learn more
             <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
           </div>
