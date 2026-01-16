@@ -3,15 +3,15 @@ import { Button } from "@arcadeai/design-system";
 import {
   ArrowRight,
   BookOpen,
-  Box,
   Code,
+  Cog,
   FileText,
   HelpCircle,
   Monitor,
   Puzzle,
   Rocket,
-  Server,
   Shield,
+  ToolCase,
   Wrench,
 } from "lucide-react";
 import { motion } from "motion/react";
@@ -473,20 +473,20 @@ export function LandingPage() {
             <QuickStartCard
               description="Your MCP server and agentic tool provider. Manages authentication, tool registration, and execution."
               href="/get-started/about-arcade"
-              icon={Server}
-              title="Engine"
+              icon={Cog}
+              title="Arcade Engine"
             />
             <QuickStartCard
               description="Catalog of pre-built tools and integrations. Browse 100+ ready-to-use MCP servers."
               href="/resources/integrations"
-              icon={Box}
-              title="Registry"
+              icon={ToolCase}
+              title="Tool Catalog"
             />
             <QuickStartCard
-              description="Secure authorization and token management. User-specific permissions for real-world actions."
-              href="/get-started/about-arcade/authorization"
+              description="Let agents act on behalf of users. Handle OAuth, API keys, and tokens for tools like Gmail and Google Drive."
+              href="/guides/tool-calling/custom-apps/auth-tool-calling"
               icon={Shield}
-              title="Runtime"
+              title="Authorized Tool Calling"
             />
           </div>
         </div>
