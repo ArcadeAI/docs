@@ -547,7 +547,7 @@ export function LandingPage() {
       <section className="py-12">
         <div className="container mx-auto px-4">
           <Link
-            className="mx-auto block max-w-2xl rounded-xl border border-[#ee175e]/20 bg-gradient-to-r from-[#ee175e]/5 to-transparent p-6 transition-all hover:border-[#ee175e]/40 hover:shadow-lg"
+            className="mx-auto block max-w-2xl rounded-xl border border-[#ee175e]/20 bg-linear-to-r from-[#ee175e]/5 to-transparent p-6 transition-all hover:border-[#ee175e]/40 hover:shadow-lg"
             href="/get-started/setup/connect-arcade-docs"
             onClick={trackClick(
               "agentic_development_clicked",
