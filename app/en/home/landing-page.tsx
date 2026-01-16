@@ -143,18 +143,18 @@ const POPULAR_INTEGRATIONS_ROW2 = [
 const FRAMEWORKS = [
   {
     name: "LangChain",
-    href: "/guides/agent-frameworks/langchain",
+    href: "/guides/agent-frameworks/langchain/use-arcade-tools",
     icon: "/images/icons/langchain.svg",
     invertInDark: true,
   },
   {
     name: "OpenAI Agents",
-    href: "/guides/agent-frameworks/openai-agents",
+    href: "/guides/agent-frameworks/openai-agents/use-arcade-tools",
     icon: "/images/icons/openai.png",
   },
   {
     name: "CrewAI",
-    href: "/guides/agent-frameworks/crewai",
+    href: "/guides/agent-frameworks/crewai/use-arcade-tools",
     icon: "https://avatars.githubusercontent.com/u/170677839?s=200&v=4",
   },
   {
@@ -165,12 +165,12 @@ const FRAMEWORKS = [
   },
   {
     name: "Google ADK",
-    href: "/guides/agent-frameworks/google-adk",
+    href: "/guides/agent-frameworks/google-adk/use-arcade-tools",
     icon: "/images/icons/google.png",
   },
   {
     name: "Mastra",
-    href: "/guides/agent-frameworks/mastra",
+    href: "/guides/agent-frameworks/mastra/use-arcade-tools",
     icon: "/images/icons/mastra.svg",
     invertInDark: true,
   },
@@ -527,16 +527,19 @@ export function LandingPage() {
               blank
               description="A chatbot that can help you with your daily tasks."
               href="https://chat.arcade.dev/"
+              image="/images/sample-apps/arcade-chat.png"
               title="Arcade Chat"
             />
             <SampleAppCard
               description="A bot for Slack that can act on your behalf."
               href="https://github.com/ArcadeAI/ArcadeSlackAgent"
+              image="/images/logo/arcade.png"
               title="Archer"
             />
             <SampleAppCard
               description="A Slack bot that extracts and summarizes YouTube transcripts."
               href="https://github.com/dforwardfeed/slack-AIpodcast-summaries"
+              image="/images/sample-apps/slack-aipodcast-summaries.jpg"
               title="YouTube Podcast Summarizer"
             />
           </div>

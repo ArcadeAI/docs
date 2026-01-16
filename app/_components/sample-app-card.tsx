@@ -1,6 +1,5 @@
 "use client";
 import { Card, CardContent } from "@arcadeai/design-system";
-import { ArrowRight, ExternalLink } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import posthog from "posthog-js";
@@ -131,19 +130,6 @@ export function SampleAppCard({
                   })}
                 </div>
               )}
-              <div className="mt-4 flex items-center font-medium text-[#ee175e] text-sm">
-                {blank ? (
-                  <>
-                    Try it out
-                    <ExternalLink className="ml-1 h-4 w-4" />
-                  </>
-                ) : (
-                  <>
-                    View project
-                    <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </>
-                )}
-              </div>
             </div>
           </CardContent>
         </Card>
