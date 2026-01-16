@@ -61,7 +61,7 @@ export function QuickStartCard({
           {description}
         </p>
         {logos && logos.length > 0 && (
-          <div className="mt-3 flex items-center gap-2">
+          <div className="mt-4 flex items-center justify-center gap-4 px-2">
             {logos.map((logo) => {
               const getInvertClass = () => {
                 if (logo.invertInLight) {
@@ -75,11 +75,11 @@ export function QuickStartCard({
               return (
                 <img
                   alt={logo.alt}
-                  className={`h-5 w-5 object-contain ${getInvertClass()}`}
-                  height={20}
+                  className={`h-7 w-7 object-contain ${getInvertClass()}`}
+                  height={28}
                   key={logo.src}
                   src={logo.src}
-                  width={20}
+                  width={28}
                 />
               );
             })}

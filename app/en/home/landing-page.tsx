@@ -309,7 +309,7 @@ export function LandingPage() {
               </div>
             </div>
             {/* Use Tools Column */}
-            <div>
+            <div className="min-[1062px]:mt-12">
               <h2 className="mb-6 text-center font-bold text-2xl text-gray-900 tracking-tight md:text-3xl min-[1062px]:text-left dark:text-white">
                 Use Arcade
               </h2>
