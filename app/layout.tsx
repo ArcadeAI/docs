@@ -20,7 +20,6 @@ import {
   Navbar,
   Footer as NextraFooter,
 } from "nextra-theme-docs";
-import { PostHog } from "./_components/posthog";
 
 const REGEX_LOCALE = /^\/([a-z]{2}(?:-[A-Z]{2})?)(?:\/|$)/;
 
@@ -171,9 +170,7 @@ export default async function RootLayout({
             src="https://status.arcade.dev/embed/script.js"
             strategy="afterInteractive"
           />
-          <PostHog>
-            <CustomLayout>{children}</CustomLayout>
-          </PostHog>
+          <CustomLayout>{children}</CustomLayout>
         </Layout>
       </body>
     </html>

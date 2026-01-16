@@ -17,7 +17,7 @@ import {
 import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePostHog } from "posthog-js/react";
+import posthog from "posthog-js";
 // import { ChallengeSolution } from "./ChallengeSolution";
 import { QuickStartCard } from "../../_components/quick-start-card";
 import { SampleAppCard } from "../../_components/sample-app-card";
@@ -36,11 +36,9 @@ const ANIMATION_DELAYS = {
 } as const;
 
 export function LandingPage() {
-  const posthog = usePostHog();
-
   const trackHeroClick =
     (eventName: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
-      posthog?.capture(eventName, {
+      posthog.capture(eventName, {
         button_location: "landing_page_hero",
         destination: e.currentTarget.getAttribute("href"),
       });
@@ -121,7 +119,7 @@ export function LandingPage() {
             >
               <Link
                 href="/get-started/quickstarts/call-tool-agent"
-                onClick={trackHeroClick("get_started_clicked")}
+                onClick={trackHeroClick("Get started clicked")}
               >
                 <Rocket className="mr-2 h-5 w-5" />
                 Get Started
@@ -135,7 +133,7 @@ export function LandingPage() {
             >
               <Link
                 href="/guides/create-tools/tool-basics/build-mcp-server"
-                onClick={trackHeroClick("build_tool_clicked")}
+                onClick={trackHeroClick("Build tool clicked")}
               >
                 <Wrench className="mr-2 h-5 w-5" />
                 Build a tool

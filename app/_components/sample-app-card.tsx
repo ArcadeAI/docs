@@ -1,7 +1,7 @@
 "use client";
 import { Card, CardContent } from "@arcadeai/design-system";
 import Link from "next/link";
-import { usePostHog } from "posthog-js/react";
+import posthog from "posthog-js";
 
 type SampleAppCardProps = {
   title: string;
@@ -21,10 +21,8 @@ export function SampleAppCard({
   tags = [],
   date,
 }: SampleAppCardProps) {
-  const posthog = usePostHog();
-
   const handleClick = () => {
-    posthog?.capture("sample_app_clicked", {
+    posthog.capture("Sample app clicked", {
       app_title: title,
       app_href: href,
       tags,

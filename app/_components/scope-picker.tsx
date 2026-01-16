@@ -1,6 +1,6 @@
 "use client";
 
-import { usePostHog } from "posthog-js/react";
+import posthog from "posthog-js";
 import { useState } from "react";
 
 type Tool = {
@@ -14,14 +14,13 @@ type ScopePickerProps = {
 
 export default function ScopePicker({ tools }: ScopePickerProps) {
   const [selectedTools, setSelectedTools] = useState<Set<string>>(new Set());
-  const posthog = usePostHog();
 
   const trackScopeCalculatorUsed = (
     action: string,
     toolName: string | undefined,
     newSelectedCount: number
   ) => {
-    posthog?.capture("scope_calculator_used", {
+    posthog.capture("Scope calculator used", {
       action,
       tool_name: toolName || null,
       selected_tools_count: newSelectedCount,
