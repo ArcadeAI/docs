@@ -18,6 +18,7 @@ type SampleAppCardProps = {
 export function SampleAppCard({
   title,
   description,
+  image,
   href,
   blank = false,
   tags = [],
@@ -48,6 +49,15 @@ export function SampleAppCard({
       >
         <Card className="h-full border-gray-200 bg-white/80 backdrop-blur-xs transition-all hover:border-[#ee175e]/30 dark:border-gray-700 dark:bg-[rgba(17,17,17,0.8)]">
           <CardContent className="p-0">
+            <div className="relative aspect-video w-full overflow-hidden rounded-t-lg bg-gray-100 dark:bg-gray-800">
+              <img
+                alt={title}
+                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                height={360}
+                src={image}
+                width={640}
+              />
+            </div>
             <div className="space-y-2 p-4 min-[1062px]:p-6">
               <div className="flex items-start justify-between gap-2">
                 <h3 className="font-semibold text-gray-900 text-xl tracking-tight dark:text-white">
