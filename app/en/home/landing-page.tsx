@@ -527,19 +527,16 @@ export function LandingPage() {
               blank
               description="A chatbot that can help you with your daily tasks."
               href="https://chat.arcade.dev/"
-              image="/images/sample-apps/arcade-chat.png"
               title="Arcade Chat"
             />
             <SampleAppCard
               description="A bot for Slack that can act on your behalf."
               href="https://github.com/ArcadeAI/ArcadeSlackAgent"
-              image="/images/logo/arcade.png"
               title="Archer"
             />
             <SampleAppCard
               description="A Slack bot that extracts and summarizes YouTube transcripts."
               href="https://github.com/dforwardfeed/slack-AIpodcast-summaries"
-              image="/images/sample-apps/slack-aipodcast-summaries.jpg"
               title="YouTube Podcast Summarizer"
             />
           </div>
