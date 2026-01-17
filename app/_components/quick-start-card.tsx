@@ -61,28 +61,39 @@ export function QuickStartCard({
           {description}
         </p>
         {logos && logos.length > 0 && (
-          <div className="mt-4 flex items-center justify-center gap-4 px-2">
-            {logos.map((logo) => {
-              const getInvertClass = () => {
-                if (logo.invertInLight) {
-                  return "invert dark:invert-0";
-                }
-                if (logo.invertInDark) {
-                  return "dark:invert";
-                }
-                return "";
-              };
-              return (
-                <img
-                  alt={logo.alt}
-                  className={`h-7 w-7 object-contain ${getInvertClass()}`}
-                  height={28}
-                  key={logo.src}
-                  src={logo.src}
-                  width={28}
-                />
-              );
-            })}
+          <div className="relative mt-4 overflow-hidden">
+            <div className="flex items-center justify-center gap-4 px-6">
+              {logos.map((logo) => {
+                const getInvertClass = () => {
+                  if (logo.invertInLight) {
+                    return "invert dark:invert-0";
+                  }
+                  if (logo.invertInDark) {
+                    return "dark:invert";
+                  }
+                  return "";
+                };
+                return (
+                  <img
+                    alt={logo.alt}
+                    className={`h-7 w-7 object-contain ${getInvertClass()}`}
+                    height={28}
+                    key={logo.src}
+                    src={logo.src}
+                    width={28}
+                  />
+                );
+              })}
+            </div>
+            {/* Side gradients */}
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-y-0 left-0 w-8 bg-linear-to-r from-white to-transparent dark:from-[rgb(17,17,17)]"
+            />
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-linear-to-l from-white to-transparent dark:from-[rgb(17,17,17)]"
+            />
           </div>
         )}
         {code && (

@@ -68,9 +68,9 @@ const POPULAR_INTEGRATIONS_ROW1 = [
     href: "/resources/integrations/productivity/google-slides",
   },
   {
-    name: "Salesforce",
-    icon: "/images/icons/salesforce.png",
-    href: "/resources/integrations/sales/salesforce",
+    name: "HubSpot",
+    icon: "/images/icons/hubspot.png",
+    href: "/resources/integrations/crm/hubspot",
   },
   {
     name: "Linear",
@@ -93,19 +93,19 @@ const POPULAR_INTEGRATIONS_ROW2 = [
     invertInLight: true,
   },
   {
-    name: "Discord",
-    icon: "/images/icons/discord.png",
-    href: "/resources/integrations/social-communication/discord",
+    name: "X",
+    icon: "/images/icons/twitter.png",
+    href: "/resources/integrations/social-communication/x",
   },
   {
-    name: "Spotify",
-    icon: "/images/icons/spotify.png",
-    href: "/resources/integrations/entertainment/spotify",
+    name: "MS Teams",
+    icon: "/images/icons/ms_teams.png",
+    href: "/resources/integrations/social-communication/microsoft-teams",
   },
   {
-    name: "Figma",
-    icon: "/images/icons/figma.svg",
-    href: "/resources/integrations/development/figma",
+    name: "Outlook",
+    icon: "/images/icons/outlook_mail.png",
+    href: "/resources/integrations/productivity/outlook-mail",
   },
   {
     name: "Stripe",
@@ -118,9 +118,9 @@ const POPULAR_INTEGRATIONS_ROW2 = [
     href: "/resources/integrations/productivity/notion",
   },
   {
-    name: "Twitch",
-    icon: "/images/icons/twitch.png",
-    href: "/resources/integrations/entertainment/twitch",
+    name: "Asana",
+    icon: "/images/icons/asana.svg",
+    href: "/resources/integrations/productivity/asana",
   },
   {
     name: "Reddit",
@@ -199,7 +199,7 @@ export function LandingPage() {
   };
 
   return (
-    <div>
+    <div className="relative">
       {/* Hero Section */}
       <section className="relative isolate px-6 lg:px-8">
         <div
@@ -222,7 +222,7 @@ export function LandingPage() {
               initial={{ opacity: 0, y: 20 }}
               transition={{ duration: ANIMATION_DURATION }}
             >
-              Authorized tools for AI agents that get things done.
+              MCP Runtime for AI agents that get things done.
             </motion.h1>
             <motion.p
               animate={{ opacity: 1, y: 0 }}
@@ -290,14 +290,43 @@ export function LandingPage() {
           <div className="mx-auto grid max-w-4xl grid-cols-1 gap-8 min-[1062px]:grid-cols-2">
             {/* Get Tools Column */}
             <div>
-              <h2 className="mb-6 text-center font-bold text-2xl text-gray-900 tracking-tight md:text-3xl min-[1062px]:text-left dark:text-white">
+              <h2 className="mb-6 text-center font-bold text-2xl text-gray-900 tracking-tight md:text-3xl dark:text-white">
                 Get Tools
               </h2>
               <div className="space-y-4">
                 <QuickStartCard
-                  description="Browse 100+ ready-to-use integrations for Gmail, Slack, GitHub, Salesforce, and more."
+                  description="Browse 100+ ready-to-use integrations for Gmail, Slack, GitHub, and more."
                   href="/resources/integrations"
                   icon={Puzzle}
+                  logos={[
+                    { src: "/images/icons/gmail.png", alt: "Gmail" },
+                    { src: "/images/icons/slack.png", alt: "Slack" },
+                    {
+                      src: "/images/icons/github.png",
+                      alt: "GitHub",
+                      invertInLight: true,
+                    },
+                    {
+                      src: "/images/icons/google_sheets.svg",
+                      alt: "Google Sheets",
+                    },
+                    { src: "/images/icons/jira.svg", alt: "Jira" },
+                    { src: "/images/icons/notion.png", alt: "Notion" },
+                    { src: "/images/icons/linear.svg", alt: "Linear" },
+                    { src: "/images/icons/hubspot.png", alt: "HubSpot" },
+                    { src: "/images/icons/stripe.svg", alt: "Stripe" },
+                    {
+                      src: "/images/icons/google_drive.png",
+                      alt: "Google Drive",
+                    },
+                    { src: "/images/icons/dropbox.png", alt: "Dropbox" },
+                    {
+                      src: "/images/icons/confluence.svg",
+                      alt: "Confluence",
+                      invertInDark: true,
+                    },
+                    { src: "/images/icons/reddit.png", alt: "Reddit" },
+                  ]}
                   title="Pre-built Integrations"
                 />
                 <QuickStartCard
@@ -309,8 +338,8 @@ export function LandingPage() {
               </div>
             </div>
             {/* Use Tools Column */}
-            <div className="min-[1062px]:mt-[100px]">
-              <h2 className="mb-6 text-center font-bold text-2xl text-gray-900 tracking-tight md:text-3xl min-[1062px]:text-left dark:text-white">
+            <div>
+              <h2 className="mb-6 text-center font-bold text-2xl text-gray-900 tracking-tight md:text-3xl dark:text-white">
                 Use Arcade
               </h2>
               <div className="space-y-4">
@@ -337,6 +366,29 @@ export function LandingPage() {
                   description="Integrate with LangChain, OpenAI Agents, CrewAI, Vercel AI, and more."
                   href="/guides/agent-frameworks"
                   icon={Code}
+                  logos={[
+                    {
+                      src: "/images/icons/langchain.svg",
+                      alt: "LangChain",
+                      invertInDark: true,
+                    },
+                    { src: "/images/icons/openai.png", alt: "OpenAI" },
+                    {
+                      src: "https://avatars.githubusercontent.com/u/170677839?s=200&v=4",
+                      alt: "CrewAI",
+                    },
+                    {
+                      src: "/images/icons/vercel.svg",
+                      alt: "Vercel AI",
+                      invertInDark: true,
+                    },
+                    { src: "/images/icons/google.png", alt: "Google ADK" },
+                    {
+                      src: "/images/icons/mastra.svg",
+                      alt: "Mastra",
+                      invertInDark: true,
+                    },
+                  ]}
                   title="Power Your Agent"
                 />
               </div>
@@ -346,7 +398,7 @@ export function LandingPage() {
       </section>
 
       {/* Popular Integrations Section */}
-      <section className="bg-gray-50/50 py-16 dark:bg-gray-900/30">
+      <section className="relative bg-gray-50/50 py-16 dark:bg-gray-900/30">
         <div className="container mx-auto px-4">
           <div className="mb-10 flex flex-col items-center text-center min-[1062px]:flex-row min-[1062px]:items-end min-[1062px]:justify-between min-[1062px]:text-left">
             <div>
@@ -395,7 +447,7 @@ export function LandingPage() {
                       width={32}
                     />
                   </div>
-                  <span className="text-center font-medium text-gray-900 text-sm dark:text-white">
+                  <span className="break-keep text-center font-medium text-gray-900 text-sm dark:text-white">
                     {integration.name}
                   </span>
                 </Link>
@@ -421,7 +473,7 @@ export function LandingPage() {
                       width={32}
                     />
                   </div>
-                  <span className="text-center font-medium text-gray-900 text-sm dark:text-white">
+                  <span className="break-keep text-center font-medium text-gray-900 text-sm dark:text-white">
                     {integration.name}
                   </span>
                 </Link>
@@ -429,6 +481,11 @@ export function LandingPage() {
             </div>
           </div>
         </div>
+        {/* Gradient overlay */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-[200px] bg-linear-to-t from-white to-transparent dark:from-[#0a0a0a]"
+        />
       </section>
 
       {/* Framework Compatibility Section */}
@@ -463,7 +520,7 @@ export function LandingPage() {
                     width={40}
                   />
                 </div>
-                <span className="text-center font-medium text-gray-900 text-sm dark:text-white">
+                <span className="break-keep text-center font-medium text-gray-900 text-sm dark:text-white">
                   {framework.name}
                 </span>
               </Link>
@@ -488,7 +545,7 @@ export function LandingPage() {
               description="Your MCP server and agentic tool provider. Manages authentication, tool registration, and execution."
               href="/get-started/about-arcade"
               icon={Cog}
-              title="Arcade Engine"
+              title="Runtime"
             />
             <QuickStartCard
               description="Catalog of pre-built tools and integrations. Browse 100+ ready-to-use MCP servers."
@@ -500,7 +557,7 @@ export function LandingPage() {
               description="Let agents act on behalf of users. Handle OAuth, API keys, and tokens for tools like Gmail and Google Drive."
               href="/guides/tool-calling/custom-apps/auth-tool-calling"
               icon={Shield}
-              title="Authorized Tool Calling"
+              title="Agent Authorization"
             />
           </div>
         </div>
@@ -540,19 +597,16 @@ export function LandingPage() {
               blank
               description="A chatbot that can help you with your daily tasks."
               href="https://chat.arcade.dev/"
-              image="/images/sample-apps/arcade-chat.png"
               title="Arcade Chat"
             />
             <SampleAppCard
               description="A bot for Slack that can act on your behalf."
               href="https://github.com/ArcadeAI/ArcadeSlackAgent"
-              image="/images/logo/arcade.png"
               title="Archer"
             />
             <SampleAppCard
               description="A Slack bot that extracts and summarizes YouTube transcripts."
               href="https://github.com/dforwardfeed/slack-AIpodcast-summaries"
-              image="/images/sample-apps/slack-aipodcast-summaries.jpg"
               title="YouTube Podcast Summarizer"
             />
           </div>
