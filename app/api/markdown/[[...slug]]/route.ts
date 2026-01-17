@@ -66,9 +66,15 @@ function dedent(text: string): string {
   // Remove the minimum indentation from each line (except code block content)
   return lines
     .map((line) => {
+      const trimmed = line.trim();
       // Don't modify empty lines or lines with less indentation than min
-      if (line.trim() === "" || line.length < minIndent) {
+      if (trimmed === "" || line.length < minIndent) {
         return line.trimStart();
+      }
+      // Preserve code block markers - just remove leading whitespace
+      // This matches the logic that ignores them when calculating minIndent
+      if (trimmed.startsWith("```")) {
+        return trimmed;
       }
       return line.slice(minIndent);
     })
