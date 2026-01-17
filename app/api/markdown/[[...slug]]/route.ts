@@ -22,14 +22,34 @@ const JSX_EXPRESSION_REGEX = /\{[^}]+\}/g;
 const EXCESSIVE_NEWLINES_REGEX = /\n{3,}/g;
 const CODE_BLOCK_PLACEHOLDER_REGEX = /__CODE_BLOCK_(\d+)__/g;
 
+// Regex for extracting frontmatter fields
+const TITLE_REGEX = /title:\s*["']?([^"'\n]+)["']?/;
+const DESCRIPTION_REGEX = /description:\s*["']?([^"'\n]+)["']?/;
+
+/**
+ * Extracts title and description from frontmatter
+ */
+function extractFrontmatterMeta(frontmatter: string): {
+  title: string;
+  description: string;
+} {
+  const titleMatch = frontmatter.match(TITLE_REGEX);
+  const descriptionMatch = frontmatter.match(DESCRIPTION_REGEX);
+  return {
+    title: titleMatch?.[1] || "Arcade Documentation",
+    description: descriptionMatch?.[1] || "",
+  };
+}
+
 /**
  * Compiles MDX content to clean markdown by:
  * - Preserving frontmatter
  * - Removing import statements
  * - Converting JSX components to their text content
  * - Preserving standard markdown
+ * - Providing fallback content for component-only pages
  */
-function compileMdxToMarkdown(content: string): string {
+function compileMdxToMarkdown(content: string, pagePath: string): string {
   let result = content;
 
   // Extract and preserve frontmatter if present
@@ -87,6 +107,18 @@ function compileMdxToMarkdown(content: string): string {
   // Trim leading/trailing whitespace
   result = result.trim();
 
+  // If content is essentially empty (component-only page), provide fallback
+  if (!result || result.length < 10) {
+    const { title, description } = extractFrontmatterMeta(frontmatter);
+    const htmlUrl = `https://docs.arcade.dev${pagePath}`;
+    return `${frontmatter}# ${title}
+
+${description}
+
+This page contains interactive content. Visit the full page at: ${htmlUrl}
+`;
+  }
+
   // Reconstruct with frontmatter
   return `${frontmatter}${result}\n`;
 }
@@ -118,7 +150,7 @@ export async function GET(
     const rawContent = await readFile(filePath, "utf-8");
 
     // Compile MDX to clean markdown
-    const content = compileMdxToMarkdown(rawContent);
+    const content = compileMdxToMarkdown(rawContent, pathWithoutMd);
 
     // Return the compiled markdown with proper headers
     return new NextResponse(content, {
