@@ -22,9 +22,58 @@ const JSX_EXPRESSION_REGEX = /\{[^}]+\}/g;
 const EXCESSIVE_NEWLINES_REGEX = /\n{3,}/g;
 const CODE_BLOCK_PLACEHOLDER_REGEX = /__CODE_BLOCK_(\d+)__/g;
 
+// Regex for detecting markdown list items and numbered lists
+const UNORDERED_LIST_REGEX = /^[-*+]\s/;
+const ORDERED_LIST_REGEX = /^\d+[.)]\s/;
+
 // Regex for extracting frontmatter fields
 const TITLE_REGEX = /title:\s*["']?([^"'\n]+)["']?/;
 const DESCRIPTION_REGEX = /description:\s*["']?([^"'\n]+)["']?/;
+
+// Regex for detecting leading whitespace on lines
+const LEADING_WHITESPACE_REGEX = /^[ \t]+/;
+
+/**
+ * Removes consistent leading indentation from all lines of text.
+ * This normalizes content that was indented inside JSX components.
+ * Code block markers (```) are ignored when calculating minimum indent
+ * since they typically start at column 0 in MDX files.
+ */
+function dedent(text: string): string {
+  const lines = text.split("\n");
+
+  // Find minimum indentation, ignoring:
+  // - Empty lines
+  // - Code block markers (lines starting with ```)
+  let minIndent = Number.POSITIVE_INFINITY;
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (trimmed === "" || trimmed.startsWith("```")) {
+      continue; // Ignore empty lines and code block markers
+    }
+    const match = line.match(LEADING_WHITESPACE_REGEX);
+    const indent = match ? match[0].length : 0;
+    if (indent < minIndent) {
+      minIndent = indent;
+    }
+  }
+
+  // If no indentation found, return as-is
+  if (minIndent === 0 || minIndent === Number.POSITIVE_INFINITY) {
+    return text;
+  }
+
+  // Remove the minimum indentation from each line (except code block content)
+  return lines
+    .map((line) => {
+      // Don't modify empty lines or lines with less indentation than min
+      if (line.trim() === "" || line.length < minIndent) {
+        return line.trimStart();
+      }
+      return line.slice(minIndent);
+    })
+    .join("\n");
+}
 
 /**
  * Extracts title and description from frontmatter
@@ -39,6 +88,41 @@ function extractFrontmatterMeta(frontmatter: string): {
     title: titleMatch?.[1] || "Arcade Documentation",
     description: descriptionMatch?.[1] || "",
   };
+}
+
+/**
+ * Normalizes indentation in the final output.
+ * Removes stray leading whitespace outside code blocks while preserving
+ * meaningful markdown indentation (nested lists, blockquotes).
+ */
+function normalizeIndentation(text: string): string {
+  const finalLines: string[] = [];
+  let inCodeBlock = false;
+
+  for (const line of text.split("\n")) {
+    if (line.trim().startsWith("```")) {
+      inCodeBlock = !inCodeBlock;
+      finalLines.push(line.trimStart()); // Code block markers should start at column 0
+    } else if (inCodeBlock) {
+      finalLines.push(line); // Preserve indentation inside code blocks
+    } else {
+      const trimmed = line.trimStart();
+      // Preserve indentation for nested list items and blockquotes
+      const isListItem =
+        UNORDERED_LIST_REGEX.test(trimmed) || ORDERED_LIST_REGEX.test(trimmed);
+      const isBlockquote = trimmed.startsWith(">");
+      if ((isListItem || isBlockquote) && line.startsWith("  ")) {
+        // Keep markdown-meaningful indentation (but normalize to 2-space increments)
+        const leadingSpaces = line.length - line.trimStart().length;
+        const normalizedIndent = "  ".repeat(Math.floor(leadingSpaces / 2));
+        finalLines.push(normalizedIndent + trimmed);
+      } else {
+        finalLines.push(trimmed); // Remove leading whitespace for other lines
+      }
+    }
+  }
+
+  return finalLines.join("\n");
 }
 
 /**
@@ -79,8 +163,9 @@ function compileMdxToMarkdown(content: string, pagePath: string): string {
   while (previousResult !== result) {
     previousResult = result;
     // Match opening tag, capture tag name (with dots), and content until matching closing tag
+    // Apply dedent to each extracted piece to normalize indentation
     result = result.replace(JSX_WITH_CHILDREN_REGEX, (_, _tag, innerContent) =>
-      innerContent.trim()
+      dedent(innerContent.trim())
     );
   }
 
@@ -100,6 +185,9 @@ function compileMdxToMarkdown(content: string, pagePath: string): string {
     CODE_BLOCK_PLACEHOLDER_REGEX,
     (_, index) => codeBlocks[Number.parseInt(index, 10)]
   );
+
+  // Normalize indentation (remove stray whitespace, preserve meaningful markdown indentation)
+  result = normalizeIndentation(result);
 
   // Clean up excessive blank lines (more than 2 consecutive)
   result = result.replace(EXCESSIVE_NEWLINES_REGEX, "\n\n");
