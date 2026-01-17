@@ -495,6 +495,28 @@ const nextConfig: NextConfig = withLlmsTxt({
           destination: "/:locale/guides/create-tools/:path*",
           permanent: true,
         },
+        // Agent frameworks moved from guides to get-started
+        {
+          source: "/:locale/guides/agent-frameworks",
+          destination: "/:locale/get-started/agent-frameworks",
+          permanent: true,
+        },
+        {
+          source: "/:locale/guides/agent-frameworks/:path*",
+          destination: "/:locale/get-started/agent-frameworks/:path*",
+          permanent: true,
+        },
+        // MCP clients moved from guides/tool-calling to get-started
+        {
+          source: "/:locale/guides/tool-calling/mcp-clients",
+          destination: "/:locale/get-started/mcp-clients",
+          permanent: true,
+        },
+        {
+          source: "/:locale/guides/tool-calling/mcp-clients/:path*",
+          destination: "/:locale/get-started/mcp-clients/:path*",
+          permanent: true,
+        },
       ];
     },
     headers: async () => [
