@@ -27,8 +27,12 @@ const UNORDERED_LIST_REGEX = /^[-*+]\s/;
 const ORDERED_LIST_REGEX = /^\d+[.)]\s/;
 
 // Regex for extracting frontmatter fields
-const TITLE_REGEX = /title:\s*["']?([^"'\n]+)["']?/;
-const DESCRIPTION_REGEX = /description:\s*["']?([^"'\n]+)["']?/;
+// Handles: "double quoted", 'single quoted', or unquoted values
+// Group 1 = double-quoted content, Group 2 = single-quoted content, Group 3 = unquoted/fallback
+// Quoted patterns require closing quote at end of line to prevent apostrophes being misread as delimiters
+const TITLE_REGEX = /title:\s*(?:"([^"]*)"\s*$|'([^']*)'\s*$|([^\n]+))/;
+const DESCRIPTION_REGEX =
+  /description:\s*(?:"([^"]*)"\s*$|'([^']*)'\s*$|([^\n]+))/;
 
 // Regex for detecting leading whitespace on lines
 const LEADING_WHITESPACE_REGEX = /^[ \t]+/;
@@ -82,7 +86,23 @@ function dedent(text: string): string {
 }
 
 /**
- * Extracts title and description from frontmatter
+ * Strips surrounding quotes from a value if present.
+ * Used for unquoted fallback values that may contain quotes due to apostrophe handling.
+ */
+function stripSurroundingQuotes(value: string): string {
+  const trimmed = value.trim();
+  if (
+    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+    (trimmed.startsWith("'") && trimmed.endsWith("'"))
+  ) {
+    return trimmed.slice(1, -1);
+  }
+  return trimmed;
+}
+
+/**
+ * Extracts title and description from frontmatter.
+ * Handles double-quoted, single-quoted, and unquoted YAML values.
  */
 function extractFrontmatterMeta(frontmatter: string): {
   title: string;
@@ -90,9 +110,22 @@ function extractFrontmatterMeta(frontmatter: string): {
 } {
   const titleMatch = frontmatter.match(TITLE_REGEX);
   const descriptionMatch = frontmatter.match(DESCRIPTION_REGEX);
+
+  // Extract from whichever capture group matched:
+  // Group 1 = double-quoted, Group 2 = single-quoted, Group 3 = unquoted/fallback
+  // For group 3 (fallback), strip surrounding quotes if present
+  const title =
+    titleMatch?.[1] ??
+    titleMatch?.[2] ??
+    stripSurroundingQuotes(titleMatch?.[3] ?? "");
+  const description =
+    descriptionMatch?.[1] ??
+    descriptionMatch?.[2] ??
+    stripSurroundingQuotes(descriptionMatch?.[3] ?? "");
+
   return {
-    title: titleMatch?.[1] || "Arcade Documentation",
-    description: descriptionMatch?.[1] || "",
+    title: title || "Arcade Documentation",
+    description,
   };
 }
 
