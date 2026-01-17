@@ -38,27 +38,45 @@ echo ""
 # Ensure we have the base branch available for comparison
 if ! git rev-parse --verify "$BASE_BRANCH" >/dev/null 2>&1; then
     echo "Fetching $BASE_BRANCH branch..."
-    git fetch origin "$BASE_BRANCH:$BASE_BRANCH" 2>/dev/null || true
+    if ! git fetch origin "$BASE_BRANCH:$BASE_BRANCH" 2>/dev/null; then
+        echo -e "${RED}ERROR: Could not fetch base branch '$BASE_BRANCH'${NC}"
+        echo "Please ensure you have network access and the branch exists."
+        exit 1
+    fi
 fi
 
-# Get list of deleted/renamed markdown files (comparing to base branch)
+# Verify base branch is now available
+if ! git rev-parse --verify "$BASE_BRANCH" >/dev/null 2>&1; then
+    echo -e "${RED}ERROR: Base branch '$BASE_BRANCH' is not available${NC}"
+    echo "Cannot compare branches. Please check your git configuration."
+    exit 1
+fi
+
+# Get list of deleted/renamed page files (comparing to base branch)
 # Include both committed changes and uncommitted working tree changes
 # D = deleted, R = renamed (old path needs redirect too)
-COMMITTED_DELETES=$(git diff --name-status "$BASE_BRANCH"...HEAD 2>/dev/null | grep -E "^D|^R" | grep -E '\.(md|mdx)' | awk '{if ($1 ~ /^R/) print $2; else print $2}' || true)
-UNCOMMITTED_DELETES=$(git diff --name-status HEAD 2>/dev/null | grep -E "^D|^R" | grep -E '\.(md|mdx)' | awk '{if ($1 ~ /^R/) print $2; else print $2}' || true)
+# Only match page.md or page.mdx files (actual routable pages in Next.js App Router)
+# Use cut with tab delimiter instead of awk for proper field separation
+COMMITTED_DELETES=$(git diff --name-status "$BASE_BRANCH"...HEAD 2>/dev/null | grep -E "^D|^R" | grep -E 'page\.(md|mdx)$' | cut -f2 || true)
+UNCOMMITTED_DELETES=$(git diff --name-status HEAD 2>/dev/null | grep -E "^D|^R" | grep -E 'page\.(md|mdx)$' | cut -f2 || true)
 
 # Combine and deduplicate
 DELETED_FILES=$(echo -e "${COMMITTED_DELETES}\n${UNCOMMITTED_DELETES}" | sort -u | grep -v '^$' || true)
 
 # Function to convert file path to URL path
 # e.g., app/en/guides/foo/page.mdx -> /:locale/guides/foo
+# e.g., app/en/page.mdx -> /:locale (root page)
 file_to_url() {
     local file_path="$1"
-    # Remove app/en/ prefix and /page.mdx or /page.md suffix
+    # Remove app/en/ prefix and page.mdx or page.md suffix (with or without leading /)
     # Using separate sed commands for portability (BSD vs GNU sed)
-    local url_path=$(echo "$file_path" | sed -E 's|^app/[a-z]{2}/||' | sed -E 's|/page\.mdx$||' | sed -E 's|/page\.md$||')
-    # Return with :locale prefix
-    echo "/:locale/$url_path"
+    local url_path=$(echo "$file_path" | sed -E 's|^app/[a-z]{2}/||' | sed -E 's|/?page\.mdx$||' | sed -E 's|/?page\.md$||')
+    # Handle root page case (empty url_path after stripping)
+    if [ -z "$url_path" ]; then
+        echo "/:locale"
+    else
+        echo "/:locale/$url_path"
+    fi
 }
 
 # Function to convert URL path to file path for validation
