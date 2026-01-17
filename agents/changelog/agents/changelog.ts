@@ -53,7 +53,7 @@ When updating the changelog, follow these rules:
     privateRepositories: string[],
   ) {
     this.logger.startSpan(
-      `Generating changelog from changes in ${repositories.join(", ")}...`,
+      `Generating changelog from changes in ${repositories.join(", ")} and ${privateRepositories.join(", ")}...`,
     );
 
     const result = await this.run(
@@ -61,6 +61,7 @@ When updating the changelog, follow these rules:
       Today is ${new Date().toISOString().split("T")[0]}.
       The full path to the changelog.md that you will be appending to is \`${changelogPath}\`.
       The Github repositories to load commits from are: ${repositories.join(", ")}
+      The Github private repositories to load commits from are: ${privateRepositories.join(", ")}
       When appending to the changelog, do not include links for the private repositories, which are: ${privateRepositories.join(", ")}
       `,
     );
