@@ -9,6 +9,7 @@ type PlatformCardProps = {
   icon: string;
   link: string;
   type: "Agent Framework" | "MCP Client";
+  invertInDark?: boolean;
 };
 
 export const PlatformCard: React.FC<PlatformCardProps> = ({
@@ -16,6 +17,7 @@ export const PlatformCard: React.FC<PlatformCardProps> = ({
   icon,
   link,
   type,
+  invertInDark,
 }) => {
   const cardContent = (
     <Card
@@ -28,7 +30,7 @@ export const PlatformCard: React.FC<PlatformCardProps> = ({
           <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg">
             <img
               alt={`${name} logo`}
-              className="size-9"
+              className={cn("size-9", invertInDark && "dark:invert")}
               height={36}
               src={icon}
               width={36}
