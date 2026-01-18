@@ -150,13 +150,19 @@ while IFS= read -r redirect_block; do
         echo -e "  ${YELLOW}Source and destination are the same!${NC}"
         INVALID_REDIRECTS+=("$source_path -> $dest_path (circular)")
         EXIT_CODE=1
-    # Check if destination exists (skip wildcards and dynamic segments)
-    elif [[ "$dest_path" != *":path*"* ]] && [[ "$dest_path" != *":path"* ]] && [[ "$dest_path" != *":"* ]]; then
-        if ! page_exists "$dest_path"; then
-            echo -e "${RED}✗ Invalid redirect: $source_path${NC}"
-            echo -e "  ${YELLOW}Destination does not exist: $dest_path${NC}"
-            INVALID_REDIRECTS+=("$source_path -> $dest_path (destination not found)")
-            EXIT_CODE=1
+    # Check if destination exists (skip wildcards and other dynamic segments)
+    # Skip paths with :path* or :path wildcards
+    # Skip paths with dynamic segments OTHER than :locale (check after stripping /:locale/)
+    elif [[ "$dest_path" != *":path*"* ]] && [[ "$dest_path" != *":path"* ]]; then
+        # Strip the /:locale/ prefix and check for remaining dynamic segments
+        dest_without_locale=$(echo "$dest_path" | sed 's|^/:locale/||')
+        if [[ "$dest_without_locale" != *":"* ]]; then
+            if ! page_exists "$dest_path"; then
+                echo -e "${RED}✗ Invalid redirect: $source_path${NC}"
+                echo -e "  ${YELLOW}Destination does not exist: $dest_path${NC}"
+                INVALID_REDIRECTS+=("$source_path -> $dest_path (destination not found)")
+                EXIT_CODE=1
+            fi
         fi
     fi
 done <<< "$REDIRECT_PAIRS"
