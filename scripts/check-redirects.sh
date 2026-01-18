@@ -56,9 +56,10 @@ fi
 # Include both committed changes and uncommitted working tree changes
 # D = deleted, R = renamed (old path needs redirect too)
 # Only match page.md or page.mdx files (actual routable pages in Next.js App Router)
-# Use cut with tab delimiter instead of awk for proper field separation
-COMMITTED_DELETES=$(git diff --name-status "$BASE_BRANCH"...HEAD 2>/dev/null | grep -E "^D|^R" | grep -E 'page\.(md|mdx)$' | cut -f2 || true)
-UNCOMMITTED_DELETES=$(git diff --name-status HEAD 2>/dev/null | grep -E "^D|^R" | grep -E 'page\.(md|mdx)$' | cut -f2 || true)
+# For renames (R100<TAB>old-path<TAB>new-path), we need to check the OLD path (field 2),
+# not the new path. Extract field 2 first, then filter for page files.
+COMMITTED_DELETES=$(git diff --name-status "$BASE_BRANCH"...HEAD 2>/dev/null | grep -E "^D|^R" | cut -f2 | grep -E 'page\.(md|mdx)$' || true)
+UNCOMMITTED_DELETES=$(git diff --name-status HEAD 2>/dev/null | grep -E "^D|^R" | cut -f2 | grep -E 'page\.(md|mdx)$' || true)
 
 # Combine and deduplicate
 DELETED_FILES=$(echo -e "${COMMITTED_DELETES}\n${UNCOMMITTED_DELETES}" | sort -u | grep -v '^$' || true)
@@ -220,37 +221,38 @@ prompt_for_destination() {
     local source_path="$1"
     local destination=""
 
-    echo ""
-    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-    echo -e "${YELLOW}Redirect needed for: $source_path${NC}"
-    echo ""
-    echo "Where should this URL redirect to?"
-    echo "  - Enter a path like: /:locale/get-started/quickstarts"
-    echo "  - Or press Enter to skip (you'll need to add it manually)"
-    echo ""
+    # All informational messages go to stderr so only the destination goes to stdout
+    echo "" >&2
+    echo -e "${BLUE}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}" >&2
+    echo -e "${YELLOW}Redirect needed for: $source_path${NC}" >&2
+    echo "" >&2
+    echo "Where should this URL redirect to?" >&2
+    echo "  - Enter a path like: /:locale/get-started/quickstarts" >&2
+    echo "  - Or press Enter to skip (you'll need to add it manually)" >&2
+    echo "" >&2
     read -p "> " destination
 
     if [ -z "$destination" ]; then
-        echo -e "${YELLOW}Skipped. You'll need to add this redirect manually.${NC}"
+        echo -e "${YELLOW}Skipped. You'll need to add this redirect manually.${NC}" >&2
         return 1
     fi
 
     # Validate the destination
     if [[ "$destination" != "/:locale/"* ]]; then
-        echo -e "${YELLOW}Note: Adding /:locale/ prefix to your path${NC}"
+        echo -e "${YELLOW}Note: Adding /:locale/ prefix to your path${NC}" >&2
         destination="/:locale/$destination"
     fi
 
     # Check if destination exists
     if ! page_exists "$destination"; then
-        echo -e "${YELLOW}Warning: Destination '$destination' does not appear to exist.${NC}"
+        echo -e "${YELLOW}Warning: Destination '$destination' does not appear to exist.${NC}" >&2
         read -p "Use it anyway? (y/n) " confirm
         if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
             return 1
         fi
     fi
 
-    # Return the destination
+    # Return the destination (only this goes to stdout for capture)
     echo "$destination"
     return 0
 }
