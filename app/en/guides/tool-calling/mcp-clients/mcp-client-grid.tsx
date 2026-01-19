@@ -19,6 +19,11 @@ const mcpClients = [
     name: "Visual Studio Code",
     description: "Microsoft's code editor with MCP extensions",
   },
+  {
+    key: "copilot-studio",
+    name: "Microsoft Copilot Studio",
+    description: "Microsoft's AI agent platform with MCP integration",
+  },
 ];
 
 // Logo mapping
@@ -26,6 +31,7 @@ const logoSrc = {
   cursor: "/images/icons/cursor.png",
   "claude-desktop": "/images/icons/claude.png",
   "visual-studio-code": "/images/icons/vscode.svg",
+  "copilot-studio": "/images/icons/microsoft-copilot-studio.png",
 };
 
 export function MCPClientGrid() {
