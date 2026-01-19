@@ -8,11 +8,13 @@ const mcpClients = [
     key: "cursor",
     name: "Cursor",
     description: "AI-powered code editor with built-in MCP support",
+    invertInLight: true,
   },
   {
     key: "claude-desktop",
     name: "Claude Desktop",
     description: "Anthropic's desktop app for Claude with MCP integration",
+    invertInLight: true,
   },
   {
     key: "visual-studio-code",
@@ -57,7 +59,7 @@ export function MCPClientGrid() {
                     <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg">
                       <img
                         alt={`${client.name} logo`}
-                        className="size-9 object-contain"
+                        className={`size-9 object-contain ${client.invertInLight ? "invert dark:invert-0" : ""}`}
                         height={36}
                         src={logoSrc[client.key as keyof typeof logoSrc]}
                         width={36}
