@@ -27,13 +27,26 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/home/langchain/use-arcade-tools",
           destination:
-            "/:locale/guides/agent-frameworks/langchain/use-arcade-tools",
+            "/:locale/guides/agent-frameworks/langchain/use-arcade-with-langchain",
+          permanent: true,
+        },
+        {
+          source: "/:locale/guides/agent-frameworks/langchain/use-arcade-tools",
+          destination:
+            "/:locale/guides/agent-frameworks/langchain/use-arcade-with-langchain",
           permanent: true,
         },
         {
           source: "/:locale/home/langchain/user-auth-interrupts",
           destination:
+            "/:locale/guides/agent-frameworks/langchain/use-arcade-with-langchain",
+          permanent: true,
+        },
+        {
+          source:
             "/:locale/guides/agent-frameworks/langchain/user-auth-interrupts",
+          destination:
+            "/:locale/guides/agent-frameworks/langchain/use-arcade-with-langchain",
           permanent: true,
         },
         {
