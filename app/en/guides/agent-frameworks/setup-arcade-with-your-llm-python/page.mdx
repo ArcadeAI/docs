@@ -8,7 +8,7 @@ import { SignupLink } from "@/app/_components/analytics";
 
 # Connect Arcade to your LLM
 
-Arcade tools are meant to be used alongside an LLM. To make that work, you need a small piece of glue code called a “harness.” The harness orchestrates the back-and-forth between the user, the model, and the tools. In this guide, we’ll build a simple one so you can wire Arcade into your LLM-powered app.
+Arcade tools work alongside an LLM. To make that work, you need a small piece of glue code called a "harness." The harness orchestrates the back-and-forth between the user, the model, and the tools. In this guide, you'll build one so you can wire Arcade into your LLM-powered app.
 
 <GuideOverview>
 <GuideOverview.Outcomes>
@@ -28,7 +28,7 @@ Integrate Arcade's tool-calling capabilities into an application that uses an LL
 
 <GuideOverview.YouWillLearn>
 
-- Setup a simple agentic loop
+- Setup an agentic loop
 - Add Arcade tools to your agentic loop
 - Implement a multi-turn conversation loop
 
@@ -94,13 +94,13 @@ OPENROUTER_MODEL=YOUR_OPENROUTER_MODEL
 </Callout>
 
 <Callout type="info">
-  In this example, we're using OpenRouter to access the model, as it makes it
-  very easy to use any model from multiple providers with a single API.
+  In this example, you're using OpenRouter to access the model, as it makes it
+  straightforward to use any model from multiple providers with a single API.
 
 OpenRouter is compliant with the OpenAI API specification, so you can use it
 with any OpenAI-compatible library.
 
-If you don't know which model to use, we recommend trying one of these:
+If you don't know which model to use, try one of these:
 
 - `anthropic/claude-haiku-4.5`
 - `deepseek/deepseek-v3.2`
@@ -132,7 +132,7 @@ llm_client = OpenAI(
 
 ### Select and retrieve the tools from Arcade
 
-In this example, we're implementing a multi-tool agent that can retrieve and send emails, as well as send messages to Slack. While a harness can expose a broad catalog of tools to the LLM, it’s best to limit that set to what’s relevant for the task to keep the model efficient.
+In this example, you're implementing a multi-tool agent that can retrieve and send emails, as well as send messages to Slack. While a harness can expose a broad catalog of tools to the LLM, it's best to limit that set to what's relevant for the task to keep the model efficient.
 
 ```python filename="main.py"
 # Define the tools for the agent to use
@@ -151,7 +151,7 @@ for tool in tool_catalog:
 
 ### Write a helper function that handles tool authorization and execution
 
-The model can use any tool you give it, and some tools require permission before they work. When this happens, you can either involve the model in the permission step or handle it behind the scenes and continue as if the tool were already authorized. In this guide, authorization is handled outside the model so it can act as if the tool is already available. It’s like ordering a coffee: after you place your order, the barista handles payment behind the counter instead of explaining every step of card verification and receipts. The customer—and the model—gets the result without having to think about any of the intermediate steps.
+The model can use any tool you give it, and some tools require permission before they work. When this happens, you can either involve the model in the permission step or handle it behind the scenes and continue as if the tool were already authorized. In this guide, authorization happens outside the model so it can act as if the tool is already available. It's like ordering a coffee: after you place your order, the barista handles payment behind the counter instead of explaining every step of card verification and receipts. The customer (and the model) gets the result without having to think about any of the intermediate steps.
 
 ```python filename="main.py"
 # Helper function to authorize and run any tool
@@ -248,7 +248,7 @@ These two helper functions form the core of your agentic loop. Notice that autho
 
 ### Write the main agentic loop
 
-Now that you've written the helper functions, write a very simple agentic loop that interacts with the user. The core pieces of this loop are:
+Now that you've written the helper functions, write an agentic loop that interacts with the user. The core pieces of this loop are:
 
 1. Initialize the conversation history with the system prompt
 2. Get the user input and add it to the conversation history
@@ -297,7 +297,7 @@ if __name__ == "__main__":
 
 ### Run the code
 
-It's time to run the code and see it in action! Run the following command to start the chat:
+It's time to run the code and see it in action. Run the following command to start the chat:
 
 ```bash
 uv run main.py
@@ -336,7 +336,7 @@ llm_client = OpenAI(
     api_key=os.getenv("OPENROUTER_API_KEY"),
 )
 
-# We define here the tools that we want to use in the agent
+# Define the tools to use in the agent
 tool_catalog = [
     "Gmail.ListEmails",
     "Gmail.SendEmail",
@@ -344,7 +344,7 @@ tool_catalog = [
     "Slack.WhoAmI"
 ]
 
-# We get the tool definitions from the Arcade API, so that we can expose them to the LLM
+# Get the tool definitions from the Arcade API to expose them to the LLM
 tool_definitions = []
 for tool in tool_catalog:
     tool_definitions.append(arcade_client.tools.formatted.get(name=tool, format="openai"))
