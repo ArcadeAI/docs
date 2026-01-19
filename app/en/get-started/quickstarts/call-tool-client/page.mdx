@@ -6,6 +6,7 @@ description: "Learn how to call a tool in your IDE/MCP Client"
 import { Steps, Tabs, Callout } from "nextra/components";
 import { SignupLink } from "@/app/_components/analytics";
 import Image from "next/image";
+import { MCPClientGrid } from "@/app/en/guides/tool-calling/mcp-clients/mcp-client-grid";
 
 export const IMAGE_SCALE_FACTOR = 2;
 export const CREATE_MCP_GATEWAY_DARK_WIDTH = 921;
@@ -73,6 +74,9 @@ Give your MCP gateway:
 - A name
 - A description
 - A slug (this is recommended so it's easy to remember and share, but will be generated if left blank)
+- Select the Authentication mode for the MCP Gateway
+  - **Arcade Auth**: To access the MCP Gateway, you'll need to authenticate with your Arcade account in an OAuth flow on a browser. For security, the token is only valid for a short time and your MCP client will need to refresh it periodically.
+  - **Arcade Headers**: To access the MCP Gateway, you'll need to authenticate with your Arcade account by passing an Arcade API key in the `Authorization` header and the user ID in the `Arcade-User-ID` header. Use this authentication mode for MCP clients that don't support browser authentication or token refresh.
 
 ### Select the tools you want to include in the gateway
 
@@ -133,40 +137,9 @@ Get the URL of your MCP Gateway by clicking the "Copy URL" button in the MCP Gat
   height={MCP_GATEWAY_URL_DARK_HEIGHT / IMAGE_SCALE_FACTOR}
 />
 
-<Tabs items={["Cursor", "VS Code"]} storageKey="preferredAgent">
-  <Tabs.Tab>
+Select the MCP client you want to use to read the instructions to connect to the MCP Gateway:
 
-    1. Open the command palette (Mac: Cmd + Shift + p / Windows: Ctrl + Shift + p) and select **Open MCP Settings**
-    1. Click on the **New MCP Server** button
-
-    Cursor will open the MCP settings file, and you can add a new entry to the `mcpServers` object:
-
-    ```json
-    {
-      "mcpServers": {
-        "mcp-arcade": {
-          "url": "https://api.arcade.dev/mcp/<YOUR-GATEWAY-SLUG>",
-          "headers": {
-            "Authorization": "Bearer {arcade_api_key}",
-            "Arcade-User-ID": "{arcade_user_id}"
-          }
-        }
-      }
-    }
-    ```
-
-  </Tabs.Tab>
-  <Tabs.Tab>
-
-    1. Open the command palette (Mac: Cmd + Shift + p / Windows: Ctrl + Shift + p) and select **MCP: Add Server...**
-    1. Choose **HTTP**
-    1. Paste the URL of your MCP Gateway.
-    1. Give your MCP server a name, like `mcp-arcade`
-    1. Visual Studio Code will update your `mcp.json` file.
-    1. Either in the `mcp.json` file or in the "Extensions" > "MCP Servers - Installed" pane, click the "Start" button next to your MCP server and follow the prompts to authenticate.
-
-  </Tabs.Tab>
-</Tabs>
+<MCPClientGrid />
 
 ### Try it out
 
@@ -180,7 +153,4 @@ As you interact with the agent, it will call the tools from the MCP Gateway. You
 ## Next Steps
 
 - Learn more about [MCP Gateways](/guides/create-tools/mcp-gateways).
-- Learn how to use MCP Gateways with:
-  - [Cursor](/guides/tool-calling/mcp-clients/cursor)
-  - [Visual Studio Code](/guides/tool-calling/mcp-clients/visual-studio-code)
 - Build your own MCP servers with [arcade-mcp](/get-started/quickstarts/mcp-server-quickstart).
