@@ -1,4 +1,4 @@
-import { Steps, Callout } from "nextra/components";
+import { Steps, Callout, Tabs } from "nextra/components";
 import { SignupLink } from "@/app/_components/analytics";
 
 # Use Arcade in Cursor
@@ -20,12 +20,34 @@ Connect Cursor to an Arcade MCP Gateway.
 
 </GuideOverview>
 
+<Callout type="info">
+  Cursor currently does not refresh the MCP OAuth tokens automatically. To set a
+  persistent connection between Cursor and your MCP Gateway, you should set the
+  `Authorization` field to "Arcade Headers" in the dashboard.
+</Callout>
+
 ### Set up Cursor
 
 1. Open the Command Palette (`Cmd + Shift + P` on macOS, `Ctrl + Shift + P` on Windows/Linux) and select **Open MCP Settings**
 1. Click on the "New MCP Server" button
 
 Cursor will open the MCP settings file, and you can add a new entry to the `mcpServers` object:
+
+<Tabs items={["Arcade Auth", "Arcade Headers"]} storageKey="preferredMCPAuthMode">
+<Tabs.Tab>
+
+```json
+{
+  "mcpServers": {
+    "mcp-arcade": {
+      "url": "https://api.arcade.dev/mcp/<YOUR-GATEWAY-SLUG>"
+    }
+  }
+}
+```
+
+</Tabs.Tab>
+<Tabs.Tab>
 
 ```json
 {
@@ -40,6 +62,9 @@ Cursor will open the MCP settings file, and you can add a new entry to the `mcpS
   }
 }
 ```
+
+</Tabs.Tab>
+</Tabs>
 
 ### Try it out
 
