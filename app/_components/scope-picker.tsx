@@ -1,6 +1,6 @@
 "use client";
 
-import { usePostHog } from "posthog-js/react";
+import posthog from "posthog-js";
 import { useState } from "react";
 
 type Tool = {
@@ -14,14 +14,13 @@ type ScopePickerProps = {
 
 export default function ScopePicker({ tools }: ScopePickerProps) {
   const [selectedTools, setSelectedTools] = useState<Set<string>>(new Set());
-  const posthog = usePostHog();
 
   const trackScopeCalculatorUsed = (
     action: string,
     toolName: string | undefined,
     newSelectedCount: number
   ) => {
-    posthog?.capture("scope_calculator_used", {
+    posthog.capture("Scope calculator used", {
       action,
       tool_name: toolName || null,
       selected_tools_count: newSelectedCount,
@@ -73,12 +72,14 @@ export default function ScopePicker({ tools }: ScopePickerProps) {
             <button
               className="rounded bg-blue-100 px-2 py-1 text-blue-700 text-xs transition-colors hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800"
               onClick={selectAll}
+              type="button"
             >
               Select all
             </button>
             <button
               className="rounded bg-gray-100 px-2 py-1 text-gray-600 text-xs transition-colors hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-400 dark:hover:bg-gray-600"
               onClick={clearAll}
+              type="button"
             >
               Clear
             </button>

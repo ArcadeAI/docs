@@ -14,7 +14,7 @@ export const meta: MetaRecord = {
     title: "Google ADK",
   },
   langchain: {
-    title: "LangGraph",
+    title: "LangChain",
   },
   mastra: {
     title: "Mastra",

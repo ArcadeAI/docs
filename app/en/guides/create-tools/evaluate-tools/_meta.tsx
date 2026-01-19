@@ -8,6 +8,9 @@ const meta: MetaRecord = {
       copyPage: true,
     },
   },
+  index: {
+    title: "Overview",
+  },
   "why-evaluate": {
     title: "Why evaluate tools?",
   },

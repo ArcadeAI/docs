@@ -1,10 +1,11 @@
 "use client";
 import { Button } from "@arcadeai/design-system";
 import { Check, Copy } from "lucide-react";
-import { usePostHog } from "posthog-js/react";
+import posthog from "posthog-js";
 import { useCallback, useState } from "react";
 
 const COPY_TIMEOUT_MS = 1500;
+const CONTENT_PREVIEW_LENGTH = 100;
 
 export function CopyButton({
   content,
@@ -14,7 +15,6 @@ export function CopyButton({
   disabled: boolean;
 }) {
   const [copied, setCopied] = useState(false);
-  const posthog = usePostHog();
 
   const handleCopy = useCallback(async () => {
     if (!content) {
@@ -26,14 +26,14 @@ export function CopyButton({
       setTimeout(() => setCopied(false), COPY_TIMEOUT_MS);
 
       // Track code copy event
-      posthog?.capture("code_copied", {
+      posthog.capture("Code copied", {
         content_length: content.length,
-        content_preview: content.substring(0, 100),
+        content_preview: content.substring(0, CONTENT_PREVIEW_LENGTH),
       });
     } catch {
       // Silent fail
     }
-  }, [content, posthog]);
+  }, [content]);
 
   return (
     <Button

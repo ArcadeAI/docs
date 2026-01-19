@@ -1,6 +1,16 @@
 import type { MetaRecord } from "nextra";
 
-export const meta: MetaRecord = {
+const meta: MetaRecord = {
+  "*": {
+    theme: {
+      breadcrumb: true,
+      toc: true,
+      copyPage: true,
+    },
+  },
+  index: {
+    title: "Overview",
+  },
   "compare-server-types": {
     title: "Compare MCP server types",
   },

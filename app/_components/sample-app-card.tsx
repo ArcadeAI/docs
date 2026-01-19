@@ -1,12 +1,13 @@
 "use client";
 import { Card, CardContent } from "@arcadeai/design-system";
+import { motion } from "motion/react";
 import Link from "next/link";
-import { usePostHog } from "posthog-js/react";
+import posthog from "posthog-js";
 
 type SampleAppCardProps = {
   title: string;
   description: string;
-  image: string;
+  image?: string;
   href: string;
   blank?: boolean;
   tags?: string[];
@@ -22,10 +23,8 @@ export function SampleAppCard({
   tags = [],
   date,
 }: SampleAppCardProps) {
-  const posthog = usePostHog();
-
   const handleClick = () => {
-    posthog?.capture("sample_app_clicked", {
+    posthog.capture("Sample app clicked", {
       app_title: title,
       app_href: href,
       tags,
@@ -34,87 +33,107 @@ export function SampleAppCard({
   };
 
   return (
-    <Link
-      href={href}
-      onClick={handleClick}
-      target={blank ? "_blank" : undefined}
+    <motion.div
+      whileHover={{
+        scale: 1.02,
+        boxShadow: "0 0 20px 0 rgba(238, 23, 94, 0.1)",
+      }}
+      whileTap={{ scale: 0.98 }}
     >
-      <Card className="flex h-full flex-col gap-1.5 border border-gray-600/20 bg-white/90 py-3 backdrop-blur-sm transition-all duration-300 hover:border-primary hover:bg-gray-600/[0.03] hover:shadow-lg dark:bg-gray-900/80">
-        <CardContent className="p-0">
-          <div className="space-y-2 p-6">
-            <div className="flex items-start justify-between gap-2">
-              <h3 className="font-semibold text-gray-900 text-xl tracking-tight dark:text-white">
-                {title}
-              </h3>
-              {date && (
-                <span className="whitespace-nowrap font-medium text-gray-500 text-xs dark:text-gray-400">
-                  {date}
-                </span>
-              )}
-            </div>
-            <p className="text-gray-600 text-sm leading-relaxed dark:text-gray-300">
-              {description}
-            </p>
-            {tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 pt-2">
-                {tags.map((tag, index) => {
-                  const getTagColor = (tag: string) => {
-                    const languages = [
-                      "JavaScript",
-                      "Python",
-                      "TypeScript",
-                      "Java",
-                      "Go",
-                      "Rust",
-                    ];
-                    const frameworks = [
-                      "Langchain",
-                      "mastra",
-                      "CrewAI",
-                      "LangGraph",
-                      "OpenAI",
-                      "Anthropic",
-                      "Next.js",
-                    ];
-                    const integrations = [
-                      "Slack",
-                      "GitHub",
-                      "Gmail",
-                      "Discord",
-                      "Notion",
-                      "Linear",
-                      "Jira",
-                      "Weaviate",
-                      "Email",
-                      "Stytch",
-                    ];
-
-                    if (languages.includes(tag)) {
-                      return "bg-gradient-to-br from-emerald-600 to-emerald-800";
-                    }
-                    if (frameworks.includes(tag)) {
-                      return "bg-gradient-to-br from-blue-600 to-blue-800";
-                    }
-                    if (integrations.includes(tag)) {
-                      return "bg-gradient-to-br from-yellow-600 to-yellow-800";
-                    }
-                    return "bg-gradient-to-br from-gray-600 to-gray-800";
-                  };
-
-                  return (
-                    <span
-                      className={`inline-flex w-fit shrink-0 items-center justify-center overflow-hidden whitespace-nowrap rounded-md border-0 border-transparent px-2 py-1 font-semibold text-[0.725rem] text-white uppercase leading-4 tracking-wide shadow-md ${getTagColor(tag)}`}
-                      key={index}
-                    >
-                      {tag}
-                    </span>
-                  );
-                })}
+      <Link
+        className="group block h-full cursor-pointer"
+        href={href}
+        onClick={handleClick}
+        target={blank ? "_blank" : undefined}
+      >
+        <Card className="h-full border-gray-200 bg-white/80 backdrop-blur-xs transition-all hover:border-[#ee175e]/30 dark:border-gray-700 dark:bg-[rgba(17,17,17,0.8)]">
+          <CardContent className="p-0">
+            {image && (
+              <div className="relative aspect-video w-full overflow-hidden rounded-t-lg bg-gray-100 dark:bg-gray-800">
+                <img
+                  alt={title}
+                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  height={360}
+                  src={image}
+                  width={640}
+                />
               </div>
             )}
-          </div>
-        </CardContent>
-      </Card>
-    </Link>
+            <div className="space-y-2 p-4 min-[1062px]:p-6">
+              <div className="flex items-start justify-between gap-2">
+                <h3 className="font-semibold text-gray-900 text-xl tracking-tight dark:text-white">
+                  {title}
+                </h3>
+                {date && (
+                  <span className="whitespace-nowrap font-medium text-gray-500 text-xs dark:text-gray-400">
+                    {date}
+                  </span>
+                )}
+              </div>
+              <p className="text-gray-600 text-sm leading-relaxed dark:text-gray-300">
+                {description}
+              </p>
+              {tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 pt-2">
+                  {tags.map((tag) => {
+                    const getTagColor = (tagName: string) => {
+                      const languages = [
+                        "JavaScript",
+                        "Python",
+                        "TypeScript",
+                        "Java",
+                        "Go",
+                        "Rust",
+                      ];
+                      const frameworks = [
+                        "Langchain",
+                        "mastra",
+                        "CrewAI",
+                        "LangGraph",
+                        "OpenAI",
+                        "Anthropic",
+                        "Next.js",
+                      ];
+                      const integrations = [
+                        "Slack",
+                        "GitHub",
+                        "Gmail",
+                        "Discord",
+                        "Notion",
+                        "Linear",
+                        "Jira",
+                        "Weaviate",
+                        "Email",
+                        "Stytch",
+                      ];
+
+                      if (languages.includes(tagName)) {
+                        return "bg-gradient-to-br from-emerald-600 to-emerald-800";
+                      }
+                      if (frameworks.includes(tagName)) {
+                        return "bg-gradient-to-br from-blue-600 to-blue-800";
+                      }
+                      if (integrations.includes(tagName)) {
+                        return "bg-gradient-to-br from-yellow-600 to-yellow-800";
+                      }
+                      return "bg-gradient-to-br from-gray-600 to-gray-800";
+                    };
+
+                    return (
+                      <span
+                        className={`inline-flex w-fit shrink-0 items-center justify-center overflow-hidden whitespace-nowrap rounded-md border-0 border-transparent px-2 py-1 font-semibold text-[0.725rem] text-white uppercase leading-4 tracking-wide shadow-md ${getTagColor(tag)}`}
+                        key={tag}
+                      >
+                        {tag}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </Link>
+    </motion.div>
   );
 }

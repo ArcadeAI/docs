@@ -14,11 +14,12 @@ import { ToolCard } from "./tool-card";
 import { TYPE_CONFIG, TYPE_DESCRIPTIONS } from "./type-config";
 import { useFilterStore, useToolkitFilters } from "./use-toolkit-filters";
 
+// Pattern: /en/mcp-servers/{category}/{tool} -> /en/resources/integrations/{category}/{tool}
+const MCP_SERVER_PATTERN = /^\/en\/mcp-servers\/([^/]+)\/([^/]+)$/;
+
 // Map old MCP server paths to new integration paths
 function mapToNewIA(oldLink: string): string {
-  // Pattern: /en/mcp-servers/{category}/{tool} -> /en/resources/integrations/{category}/{tool}
-  const mcpServerPattern = /^\/en\/mcp-servers\/([^/]+)\/([^/]+)$/;
-  const match = oldLink.match(mcpServerPattern);
+  const match = oldLink.match(MCP_SERVER_PATTERN);
 
   if (match) {
     const [, category, tool] = match;
