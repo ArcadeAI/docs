@@ -1,20 +1,40 @@
 #!/bin/bash
 #
 # Check that deleted markdown files have corresponding redirects in next.config.ts
-# Usage: ./scripts/check-redirects.sh [base_branch]
+# Usage: ./scripts/check-redirects.sh [--auto-fix] [base_branch]
 #
 # This script compares the current branch to main (or specified base branch)
 # and ensures any deleted .md/.mdx files have redirect entries.
 #
+# Options:
+#   --auto-fix   Automatically add missing redirects to next.config.ts
+#
 # Features:
 # - Detects deleted markdown files without redirects
 # - Interactive mode: prompts for redirect destinations when run in a terminal
+# - Auto-fix mode: automatically inserts redirect entries into next.config.ts
 # - Validates existing redirects for circular references and invalid destinations
 #
 
 set -e
 
-BASE_BRANCH="${1:-main}"
+# Parse arguments
+AUTO_FIX=false
+BASE_BRANCH="main"
+
+for arg in "$@"; do
+    case $arg in
+        --auto-fix)
+            AUTO_FIX=true
+            shift
+            ;;
+        *)
+            BASE_BRANCH="$arg"
+            shift
+            ;;
+    esac
+done
+
 CONFIG_FILE="next.config.ts"
 EXIT_CODE=0
 
@@ -329,35 +349,78 @@ done <<< "$DELETED_FILES"
 
 echo ""
 
-# Report results
+# Report results and optionally auto-fix
 if [ ${#MISSING_REDIRECTS[@]} -gt 0 ]; then
-    echo -e "${RED}══════════════════════════════════════════════════════════════${NC}"
-    echo -e "${RED}ERROR: Found ${#MISSING_REDIRECTS[@]} deleted file(s) without redirects!${NC}"
-    echo -e "${RED}══════════════════════════════════════════════════════════════${NC}"
-    echo ""
-    echo "When you delete a markdown file, you must add a redirect in next.config.ts"
-    echo "to prevent broken links for users who have bookmarked the old URL."
-    echo ""
-    echo -e "${YELLOW}Missing redirects for:${NC}"
-    for path in "${MISSING_REDIRECTS[@]}"; do
-        echo "  - $path"
-    done
-    echo ""
-    echo -e "${YELLOW}Add the following to the redirects array in next.config.ts:${NC}"
-    echo ""
-    for entry in "${SUGGESTED_ENTRIES[@]}"; do
-        echo "$entry"
-    done
-    echo ""
-
-    if [ "$IS_INTERACTIVE" = false ]; then
-        echo "Replace 'REPLACE_WITH_NEW_PATH' with the actual destination path."
-        echo "If the content was removed entirely, redirect to a relevant parent page."
+    if [ "$AUTO_FIX" = true ]; then
+        echo -e "${BLUE}══════════════════════════════════════════════════════════════${NC}"
+        echo -e "${BLUE}Auto-fixing: Adding ${#MISSING_REDIRECTS[@]} redirect(s) to $CONFIG_FILE${NC}"
+        echo -e "${BLUE}══════════════════════════════════════════════════════════════${NC}"
         echo ""
-    fi
 
-    if [ "$CONFIG_MODIFIED" -eq "0" ]; then
-        echo -e "${YELLOW}Note: next.config.ts was not modified in this branch.${NC}"
+        # Build the redirect entries to insert
+        REDIRECTS_TO_INSERT=""
+        for entry in "${SUGGESTED_ENTRIES[@]}"; do
+            REDIRECTS_TO_INSERT="${REDIRECTS_TO_INSERT}${entry}
+"
+        done
+
+        # Insert after "return [" in the redirects function
+        # Using perl for reliable multi-line insertion
+        perl -i -pe "
+            if (/return \[/ && !\$done) {
+                \$_ .= \"        // Auto-added redirects for deleted pages\n${REDIRECTS_TO_INSERT}\";
+                \$done = 1;
+            }
+        " "$CONFIG_FILE"
+
+        echo -e "${GREEN}✓ Added redirect entries to $CONFIG_FILE${NC}"
+        echo ""
+        echo -e "${RED}══════════════════════════════════════════════════════════════${NC}"
+        echo -e "${RED}ACTION REQUIRED: Update placeholder destinations!${NC}"
+        echo -e "${RED}══════════════════════════════════════════════════════════════${NC}"
+        echo ""
+        echo "Redirect entries were added with placeholder destinations."
+        echo "You MUST update 'REPLACE_WITH_NEW_PATH' with actual paths before committing."
+        echo ""
+        echo -e "${YELLOW}Redirects needing destinations:${NC}"
+        for path in "${MISSING_REDIRECTS[@]}"; do
+            echo "  - $path -> /:locale/REPLACE_WITH_NEW_PATH"
+        done
+        echo ""
+        echo "Open $CONFIG_FILE and search for 'REPLACE_WITH_NEW_PATH' to find them."
+        echo ""
+
+        # Keep exit code as failure - placeholders must be replaced
+        EXIT_CODE=1
+    else
+        echo -e "${RED}══════════════════════════════════════════════════════════════${NC}"
+        echo -e "${RED}ERROR: Found ${#MISSING_REDIRECTS[@]} deleted file(s) without redirects!${NC}"
+        echo -e "${RED}══════════════════════════════════════════════════════════════${NC}"
+        echo ""
+        echo "When you delete a markdown file, you must add a redirect in next.config.ts"
+        echo "to prevent broken links for users who have bookmarked the old URL."
+        echo ""
+        echo -e "${YELLOW}Missing redirects for:${NC}"
+        for path in "${MISSING_REDIRECTS[@]}"; do
+            echo "  - $path"
+        done
+        echo ""
+        echo -e "${YELLOW}Add the following to the redirects array in next.config.ts:${NC}"
+        echo ""
+        for entry in "${SUGGESTED_ENTRIES[@]}"; do
+            echo "$entry"
+        done
+        echo ""
+
+        if [ "$IS_INTERACTIVE" = false ]; then
+            echo "Replace 'REPLACE_WITH_NEW_PATH' with the actual destination path."
+            echo "If the content was removed entirely, redirect to a relevant parent page."
+            echo ""
+        fi
+
+        if [ "$CONFIG_MODIFIED" -eq "0" ]; then
+            echo -e "${YELLOW}Note: next.config.ts was not modified in this branch.${NC}"
+        fi
     fi
 fi
 
