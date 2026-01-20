@@ -46,6 +46,8 @@ const MAX_AI_TOKENS = 8192;
 const OWNER = "ArcadeAI";
 const REPO = "docs";
 const EDITORIAL_COMMENT_REGEX = /<!-- Editorial: (.+?) -->/;
+const CODE_FENCE_OPEN_REGEX = /^```(?:mdx?|markdown)?\n/;
+const CODE_FENCE_CLOSE_REGEX = /\n```$/;
 const HTTP_UNPROCESSABLE_ENTITY = 422;
 const MEGABYTE = KILOBYTE * KILOBYTE;
 const MAX_BUFFER_MB = 10;
@@ -83,6 +85,15 @@ type ValeIssue = {
 };
 
 type ValeOutput = Record<string, ValeIssue[]>;
+
+// Strip markdown code fences from the beginning and end of LLM responses
+// LLMs often wrap their output in ```mdx or ```markdown blocks
+function stripCodeFences(content: string): string {
+  let result = content.trim();
+  result = result.replace(CODE_FENCE_OPEN_REGEX, "");
+  result = result.replace(CODE_FENCE_CLOSE_REGEX, "");
+  return result;
+}
 
 // Run Vale on content and return issues
 function runValeOnContent(filename: string, content: string): ValeIssue[] {
@@ -155,7 +166,9 @@ async function fixValeIssues(
         messages: [{ role: "user", content: prompt }],
       });
       const textBlock = response.content.find((b) => b.type === "text");
-      return textBlock?.type === "text" ? textBlock.text : content;
+      return textBlock?.type === "text"
+        ? stripCodeFences(textBlock.text)
+        : content;
     }
 
     const response = await ai.client.chat.completions.create({
@@ -163,7 +176,8 @@ async function fixValeIssues(
       max_tokens: MAX_AI_TOKENS,
       messages: [{ role: "user", content: prompt }],
     });
-    return response.choices[0]?.message?.content ?? content;
+    const result = response.choices[0]?.message?.content;
+    return result ? stripCodeFences(result) : content;
   } catch (error) {
     console.error("Error fixing Vale issues:", error);
     return content;
@@ -266,7 +280,7 @@ async function getEditorialFromAnthropic(
     return null;
   }
 
-  const revisedContent = textBlock.text.trim();
+  const revisedContent = stripCodeFences(textBlock.text);
 
   if (revisedContent === "NO_CHANGES_NEEDED") {
     return null;
@@ -298,8 +312,12 @@ async function getEditorialFromOpenAI(
     messages: [{ role: "user", content: prompt }],
   });
 
-  const revisedContent = response.choices[0]?.message?.content?.trim();
-  if (!revisedContent || revisedContent === "NO_CHANGES_NEEDED") {
+  const rawContent = response.choices[0]?.message?.content;
+  if (!rawContent) {
+    return null;
+  }
+  const revisedContent = stripCodeFences(rawContent);
+  if (revisedContent === "NO_CHANGES_NEEDED") {
     return null;
   }
 
