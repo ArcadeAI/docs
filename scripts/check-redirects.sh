@@ -357,21 +357,29 @@ if [ ${#MISSING_REDIRECTS[@]} -gt 0 ]; then
         echo -e "${BLUE}══════════════════════════════════════════════════════════════${NC}"
         echo ""
 
-        # Build the redirect entries to insert
-        REDIRECTS_TO_INSERT=""
+        # Write redirect entries to a temp file
+        TEMP_REDIRECTS=$(mktemp)
+        echo "        // Auto-added redirects for deleted pages" > "$TEMP_REDIRECTS"
         for entry in "${SUGGESTED_ENTRIES[@]}"; do
-            REDIRECTS_TO_INSERT="${REDIRECTS_TO_INSERT}${entry}
-"
+            echo "$entry" >> "$TEMP_REDIRECTS"
         done
 
-        # Insert after "return [" in the redirects function
-        # Using perl for reliable multi-line insertion
-        perl -i -pe "
-            if (/return \[/ && !\$done) {
-                \$_ .= \"        // Auto-added redirects for deleted pages\n${REDIRECTS_TO_INSERT}\";
-                \$done = 1;
+        # Insert after "return [" in the redirects function using awk
+        TEMP_CONFIG=$(mktemp)
+        awk -v insertfile="$TEMP_REDIRECTS" '
+            /return \[/ && !done {
+                print
+                while ((getline line < insertfile) > 0) print line
+                close(insertfile)
+                done = 1
+                next
             }
-        " "$CONFIG_FILE"
+            { print }
+        ' "$CONFIG_FILE" > "$TEMP_CONFIG"
+
+        # Replace original with modified version
+        mv "$TEMP_CONFIG" "$CONFIG_FILE"
+        rm -f "$TEMP_REDIRECTS"
 
         echo -e "${GREEN}✓ Added redirect entries to $CONFIG_FILE${NC}"
         echo ""
