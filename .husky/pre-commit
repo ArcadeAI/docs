@@ -46,8 +46,13 @@ if [ -n "$DELETED_PAGES" ]; then
       echo "📝 Redirect entries added to next.config.ts and staged."
     fi
     echo ""
-    echo "❌ Commit blocked: Please update the placeholder destinations in next.config.ts"
-    echo "   Search for 'REPLACE_WITH_NEW_PATH' and provide actual redirect paths."
+    # Check if there are placeholders vs other errors
+    if grep -q "REPLACE_WITH_NEW_PATH" next.config.ts 2>/dev/null; then
+      echo "❌ Commit blocked: Please update the placeholder destinations in next.config.ts"
+      echo "   Search for 'REPLACE_WITH_NEW_PATH' and provide actual redirect paths."
+    else
+      echo "❌ Commit blocked: Please fix the redirect issues shown above."
+    fi
     exit 1
   fi
 fi

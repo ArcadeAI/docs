@@ -507,7 +507,11 @@ if [ ${#INVALID_REDIRECTS[@]} -gt 0 ]; then
         echo "  - $invalid"
     done
     echo ""
-    echo "Please fix these redirects before merging."
+    echo -e "${YELLOW}How to fix:${NC}"
+    echo "  1. Open next.config.ts"
+    echo "  2. Find the redirect(s) listed above"
+    echo "  3. Update the destination to a valid page path"
+    echo "     (Check that the path exists under app/en/)"
 fi
 
 if [ $EXIT_CODE -eq 0 ]; then
