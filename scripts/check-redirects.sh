@@ -52,14 +52,25 @@ if ! git rev-parse --verify "$BASE_BRANCH" >/dev/null 2>&1; then
     exit 1
 fi
 
+# Verify we can actually diff against the base branch
+# This catches cases where rev-parse succeeds but diff fails (unrelated histories, corrupted refs, etc.)
+if ! git diff --name-status "$BASE_BRANCH"...HEAD >/dev/null 2>&1; then
+    echo -e "${RED}ERROR: Cannot compare current branch to '$BASE_BRANCH'${NC}"
+    echo "The branches may have unrelated histories or the ref may be corrupted."
+    echo "Try running: git fetch origin $BASE_BRANCH:$BASE_BRANCH"
+    exit 1
+fi
+
 # Get list of deleted/renamed page files (comparing to base branch)
 # Include both committed changes and uncommitted working tree changes
 # D = deleted, R = renamed (old path needs redirect too)
 # Only match page.md or page.mdx files (actual routable pages in Next.js App Router)
 # For renames (R100<TAB>old-path<TAB>new-path), we need to check the OLD path (field 2),
 # not the new path. Extract field 2 first, then filter for page files.
-COMMITTED_DELETES=$(git diff --name-status "$BASE_BRANCH"...HEAD 2>/dev/null | grep -E "^D|^R" | cut -f2 | grep -E 'page\.(md|mdx)$' || true)
-UNCOMMITTED_DELETES=$(git diff --name-status HEAD 2>/dev/null | grep -E "^D|^R" | cut -f2 | grep -E 'page\.(md|mdx)$' || true)
+# Note: The diff command was already validated above, so failures here are from the grep/cut pipeline
+# which legitimately returns empty when no files match (hence || true is safe here)
+COMMITTED_DELETES=$(git diff --name-status "$BASE_BRANCH"...HEAD | grep -E "^D|^R" | cut -f2 | grep -E 'page\.(md|mdx)$' || true)
+UNCOMMITTED_DELETES=$(git diff --name-status HEAD | grep -E "^D|^R" | cut -f2 | grep -E 'page\.(md|mdx)$' || true)
 
 # Combine and deduplicate
 DELETED_FILES=$(echo -e "${COMMITTED_DELETES}\n${UNCOMMITTED_DELETES}" | sort -u | grep -v '^$' || true)

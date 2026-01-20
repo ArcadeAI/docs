@@ -27,25 +27,25 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/home/langchain/use-arcade-tools",
           destination:
-            "/:locale/guides/agent-frameworks/langchain/use-arcade-tools",
+            "/:locale/get-started/agent-frameworks/langchain/use-arcade-tools",
           permanent: true,
         },
         {
           source: "/:locale/home/langchain/user-auth-interrupts",
           destination:
-            "/:locale/guides/agent-frameworks/langchain/user-auth-interrupts",
+            "/:locale/get-started/agent-frameworks/langchain/user-auth-interrupts",
           permanent: true,
         },
         {
           source: "/:locale/home/oai-agents/user-auth-interrupts",
           destination:
-            "/:locale/guides/agent-frameworks/openai-agents/user-auth-interrupts",
+            "/:locale/get-started/agent-frameworks/openai-agents/user-auth-interrupts",
           permanent: true,
         },
         {
           source: "/:locale/home/mastra/user-auth-interrupts",
           destination:
-            "/:locale/guides/agent-frameworks/mastra/user-auth-interrupts",
+            "/:locale/get-started/agent-frameworks/mastra/user-auth-interrupts",
           permanent: true,
         },
         {
@@ -60,7 +60,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         },
         {
           source: "/:locale/home/agent-frameworks-overview",
-          destination: "/:locale/guides/agent-frameworks",
+          destination: "/:locale/get-started/agent-frameworks",
           permanent: true,
         },
         {
@@ -76,7 +76,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source:
             "/:locale/guides/agent-frameworks/vercelai/using-arcade-tools",
-          destination: "/:locale/guides/agent-frameworks/vercelai",
+          destination: "/:locale/get-started/agent-frameworks/vercelai",
           permanent: true,
         },
         {
@@ -194,13 +194,13 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/home/crewai/custom-auth-flow",
           destination:
-            "/:locale/guides/agent-frameworks/crewai/custom-auth-flow",
+            "/:locale/get-started/agent-frameworks/crewai/custom-auth-flow",
           permanent: true,
         },
         {
           source: "/:locale/home/crewai/use-arcade-tools",
           destination:
-            "/:locale/guides/agent-frameworks/crewai/use-arcade-tools",
+            "/:locale/get-started/agent-frameworks/crewai/use-arcade-tools",
           permanent: true,
         },
         {
@@ -254,7 +254,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/home/google-adk/use-arcade-tools",
           destination:
-            "/:locale/guides/agent-frameworks/google-adk/use-arcade-tools",
+            "/:locale/get-started/agent-frameworks/google-adk/use-arcade-tools",
           permanent: true,
         },
         {
@@ -265,30 +265,28 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/home/langchain/auth-langchain-tools",
           destination:
-            "/:locale/guides/agent-frameworks/langchain/auth-langchain-tools",
+            "/:locale/get-started/agent-frameworks/langchain/auth-langchain-tools",
           permanent: true,
         },
         {
           source: "/:locale/home/mastra/use-arcade-tools",
           destination:
-            "/:locale/guides/agent-frameworks/mastra/use-arcade-tools",
+            "/:locale/get-started/agent-frameworks/mastra/use-arcade-tools",
           permanent: true,
         },
         {
           source: "/:locale/home/mcp-clients/claude-desktop",
-          destination:
-            "/:locale/guides/tool-calling/mcp-clients/claude-desktop",
+          destination: "/:locale/get-started/mcp-clients/claude-desktop",
           permanent: true,
         },
         {
           source: "/:locale/home/mcp-clients/cursor",
-          destination: "/:locale/guides/tool-calling/mcp-clients/cursor",
+          destination: "/:locale/get-started/mcp-clients/cursor",
           permanent: true,
         },
         {
           source: "/:locale/home/mcp-clients/visual-studio-code",
-          destination:
-            "/:locale/guides/tool-calling/mcp-clients/visual-studio-code",
+          destination: "/:locale/get-started/mcp-clients/visual-studio-code",
           permanent: true,
         },
         {
@@ -304,7 +302,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/home/oai-agents/use-arcade-tools",
           destination:
-            "/:locale/guides/agent-frameworks/openai-agents/use-arcade-tools",
+            "/:locale/get-started/agent-frameworks/openai-agents/use-arcade-tools",
           permanent: true,
         },
         {
@@ -351,8 +349,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         },
         {
           source: "/:locale/home/vercelai/using-arcade-tools",
-          destination:
-            "/:locale/guides/agent-frameworks/vercelai/using-arcade-tools",
+          destination: "/:locale/get-started/agent-frameworks/vercelai",
           permanent: true,
         },
         // MCP servers to integrations
@@ -409,7 +406,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         },
         {
           source: "/:locale/guides/tool-calling/mcp-client/:client",
-          destination: "/:locale/guides/tool-calling/mcp-clients/:client",
+          destination: "/:locale/get-started/mcp-clients/:client",
           permanent: true,
         },
         {
@@ -439,55 +436,55 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/guides/agent-frameworks/crewai/python",
           destination:
-            "/:locale/guides/agent-frameworks/crewai/use-arcade-tools",
+            "/:locale/get-started/agent-frameworks/crewai/use-arcade-tools",
           permanent: true,
         },
         {
           source: "/:locale/guides/agent-frameworks/langchain/python",
           destination:
-            "/:locale/guides/agent-frameworks/langchain/use-arcade-tools",
+            "/:locale/get-started/agent-frameworks/langchain/use-arcade-tools",
           permanent: true,
         },
         {
           source: "/:locale/guides/agent-frameworks/langchain/tools",
           destination:
-            "/:locale/guides/agent-frameworks/langchain/auth-langchain-tools",
+            "/:locale/get-started/agent-frameworks/langchain/auth-langchain-tools",
           permanent: true,
         },
         {
           source: "/:locale/guides/agent-frameworks/mastra/typescript",
           destination:
-            "/:locale/guides/agent-frameworks/mastra/use-arcade-tools",
+            "/:locale/get-started/agent-frameworks/mastra/use-arcade-tools",
           permanent: true,
         },
         {
           source: "/:locale/guides/agent-frameworks/google-adk/python",
           destination:
-            "/:locale/guides/agent-frameworks/google-adk/use-arcade-tools",
+            "/:locale/get-started/agent-frameworks/google-adk/use-arcade-tools",
           permanent: true,
         },
         {
           source: "/:locale/guides/agent-frameworks/openai/python",
           destination:
-            "/:locale/guides/agent-frameworks/openai-agents/use-arcade-tools",
+            "/:locale/get-started/agent-frameworks/openai-agents/use-arcade-tools",
           permanent: true,
         },
         {
           source: "/:locale/guides/agent-frameworks/vercel-ai/typescript",
-          destination: "/:locale/guides/agent-frameworks/vercelai",
+          destination: "/:locale/get-started/agent-frameworks/vercelai",
           permanent: true,
         },
         // Old resource paths
         {
           source: "/:locale/resources/mastra/user-auth-interrupts",
           destination:
-            "/:locale/guides/agent-frameworks/mastra/user-auth-interrupts",
+            "/:locale/get-started/agent-frameworks/mastra/user-auth-interrupts",
           permanent: true,
         },
         {
           source: "/:locale/resources/oai-agents/overview",
           destination:
-            "/:locale/guides/agent-frameworks/openai-agents/overview",
+            "/:locale/get-started/agent-frameworks/openai-agents/overview",
           permanent: true,
         },
         {
