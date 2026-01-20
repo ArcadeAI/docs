@@ -147,6 +147,28 @@ page_exists() {
 # Read the config file content
 CONFIG_CONTENT=$(cat "$CONFIG_FILE" 2>/dev/null || echo "")
 
+# Extract redirect pairs using a more robust method
+# Join lines and extract source/destination pairs
+REDIRECT_PAIRS=$(cat "$CONFIG_FILE" | tr '\n' ' ' | grep -oE '\{[^}]*source:[^}]*destination:[^}]*\}' || true)
+
+# Function to find where a path redirects to (if it has a redirect)
+find_redirect_destination() {
+    local path="$1"
+    echo "$REDIRECT_PAIRS" | while read -r block; do
+        [ -z "$block" ] && continue
+        local src=$(echo "$block" | sed -n 's/.*source:[[:space:]]*"\([^"]*\)".*/\1/p')
+        if [ "$src" = "$path" ]; then
+            echo "$block" | sed -n 's/.*destination:[[:space:]]*"\([^"]*\)".*/\1/p'
+            return 0
+        fi
+    done
+}
+
+# Arrays to track redirect chains that need collapsing
+declare -a CHAIN_SOURCES=()
+declare -a CHAIN_OLD_DESTS=()
+declare -a CHAIN_NEW_DESTS=()
+
 # ============================================================
 # PART 1: Validate existing redirects in the config
 # ============================================================
@@ -154,10 +176,6 @@ echo -e "${BLUE}Validating existing redirects in $CONFIG_FILE...${NC}"
 echo ""
 
 declare -a INVALID_REDIRECTS=()
-
-# Extract redirect pairs using a more robust method
-# Join lines and extract source/destination pairs
-REDIRECT_PAIRS=$(cat "$CONFIG_FILE" | tr '\n' ' ' | grep -oE '\{[^}]*source:[^}]*destination:[^}]*\}' || true)
 
 while IFS= read -r redirect_block; do
     [ -z "$redirect_block" ] && continue
@@ -189,19 +207,66 @@ while IFS= read -r redirect_block; do
         dest_without_locale=$(echo "$dest_path" | sed 's|^/:locale/||')
         if [[ "$dest_without_locale" != *":"* ]]; then
             if ! page_exists "$dest_path"; then
-                echo -e "${RED}✗ Invalid redirect: $source_path${NC}"
-                echo -e "  ${YELLOW}Destination does not exist: $dest_path${NC}"
-                INVALID_REDIRECTS+=("$source_path -> $dest_path (destination not found)")
-                EXIT_CODE=1
+                # Check if the destination has its own redirect (chain situation)
+                final_dest=$(find_redirect_destination "$dest_path")
+                if [ -n "$final_dest" ]; then
+                    # This is a redirect chain - track it for collapsing
+                    echo -e "${YELLOW}⚠ Redirect chain detected: $source_path${NC}"
+                    echo -e "  ${BLUE}$source_path → $dest_path → $final_dest${NC}"
+                    CHAIN_SOURCES+=("$source_path")
+                    CHAIN_OLD_DESTS+=("$dest_path")
+                    CHAIN_NEW_DESTS+=("$final_dest")
+                else
+                    echo -e "${RED}✗ Invalid redirect: $source_path${NC}"
+                    echo -e "  ${YELLOW}Destination does not exist: $dest_path${NC}"
+                    INVALID_REDIRECTS+=("$source_path -> $dest_path (destination not found)")
+                    EXIT_CODE=1
+                fi
             fi
         fi
     fi
 done <<< "$REDIRECT_PAIRS"
 
-if [ ${#INVALID_REDIRECTS[@]} -eq 0 ]; then
+if [ ${#INVALID_REDIRECTS[@]} -eq 0 ] && [ ${#CHAIN_SOURCES[@]} -eq 0 ]; then
     echo -e "${GREEN}✓ All existing redirects are valid.${NC}"
 fi
 echo ""
+
+# ============================================================
+# PART 1b: Auto-fix redirect chains (collapse them)
+# ============================================================
+if [ ${#CHAIN_SOURCES[@]} -gt 0 ]; then
+    if [ "$AUTO_FIX" = true ]; then
+        echo -e "${BLUE}Collapsing ${#CHAIN_SOURCES[@]} redirect chain(s)...${NC}"
+        echo ""
+
+        for i in "${!CHAIN_SOURCES[@]}"; do
+            src="${CHAIN_SOURCES[$i]}"
+            old_dest="${CHAIN_OLD_DESTS[$i]}"
+            new_dest="${CHAIN_NEW_DESTS[$i]}"
+
+            echo -e "  ${GREEN}✓${NC} $src"
+            echo -e "    was: $old_dest"
+            echo -e "    now: $new_dest"
+
+            # Escape special characters for sed
+            old_dest_escaped=$(printf '%s\n' "$old_dest" | sed 's/[[\.*^$()+?{|/]/\\&/g')
+            new_dest_escaped=$(printf '%s\n' "$new_dest" | sed 's/[[\.*^$()+?{|/]/\\&/g')
+
+            # Replace the old destination with the new one in the config
+            sed -i.bak "s|destination: \"$old_dest_escaped\"|destination: \"$new_dest_escaped\"|g" "$CONFIG_FILE"
+            rm -f "$CONFIG_FILE.bak"
+        done
+        echo ""
+        echo -e "${GREEN}✓ Redirect chains collapsed in $CONFIG_FILE${NC}"
+        echo ""
+    else
+        echo -e "${YELLOW}Found ${#CHAIN_SOURCES[@]} redirect chain(s) that need collapsing.${NC}"
+        echo "Run with --auto-fix to collapse them automatically."
+        echo ""
+        EXIT_CODE=1
+    fi
+fi
 
 # ============================================================
 # PART 2: Check for deleted files without redirects
