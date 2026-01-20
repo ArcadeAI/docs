@@ -23,6 +23,14 @@ const nextConfig: NextConfig = withLlmsTxt({
   withNextra({
     async redirects() {
       return [
+        // Moved from guides to get-started
+        {
+          source:
+            "/:locale/guides/agent-frameworks/setup-arcade-with-your-llm-python",
+          destination:
+            "/:locale/get-started/agent-frameworks/setup-arcade-with-your-llm-python",
+          permanent: true,
+        },
         // Old /home/* paths to new structure
         {
           source: "/:locale/home/langchain/use-arcade-tools",
