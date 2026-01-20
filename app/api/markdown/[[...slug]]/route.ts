@@ -15,8 +15,17 @@ const IMPORT_DESTRUCTURE_REGEX =
   /^import\s*\{[\s\S]*?\}\s*from\s*['"].*?['"];?\s*$/gm;
 const EXPORT_REGEX =
   /^export\s+(const|let|var|function|default)\s+[\s\S]*?(?=\n(?:import|export|#|\n|$))/gm;
-const SELF_CLOSING_JSX_REGEX = /<([A-Z][a-zA-Z0-9.]*)[^>]*\/>/g;
-const JSX_WITH_CHILDREN_REGEX = /<([A-Z][a-zA-Z0-9.]*)[^>]*>([\s\S]*?)<\/\1>/g;
+// JSX attribute pattern that properly handles quoted strings containing ">" characters
+// Matches: non-quote/non-angle chars, OR complete double-quoted strings, OR complete single-quoted strings
+const JSX_ATTRS_PATTERN = "(?:[^>\"'\\n]|\"[^\"]*\"|'[^']*')*";
+const SELF_CLOSING_JSX_REGEX = new RegExp(
+  `<([A-Z][a-zA-Z0-9.]*)${JSX_ATTRS_PATTERN}\\/>`,
+  "g"
+);
+const JSX_WITH_CHILDREN_REGEX = new RegExp(
+  `<([A-Z][a-zA-Z0-9.]*)${JSX_ATTRS_PATTERN}>([\\s\\S]*?)<\\/\\1>`,
+  "g"
+);
 const CODE_BLOCK_REGEX = /```[\s\S]*?```/g;
 const JSX_EXPRESSION_REGEX = /\{[^}]+\}/g;
 const EXCESSIVE_NEWLINES_REGEX = /\n{3,}/g;
@@ -71,8 +80,11 @@ function dedent(text: string): string {
   return lines
     .map((line) => {
       const trimmed = line.trim();
+      // Calculate leading whitespace length for this line
+      const leadingMatch = line.match(LEADING_WHITESPACE_REGEX);
+      const leadingLength = leadingMatch ? leadingMatch[0].length : 0;
       // Don't modify empty lines or lines with less indentation than min
-      if (trimmed === "" || line.length < minIndent) {
+      if (trimmed === "" || leadingLength < minIndent) {
         return line.trimStart();
       }
       // Preserve code block markers - just remove leading whitespace
@@ -219,10 +231,10 @@ function compileMdxToMarkdown(content: string, pagePath: string): string {
   // Now remove JSX expressions outside code blocks
   result = result.replace(JSX_EXPRESSION_REGEX, "");
 
-  // Restore code blocks
+  // Restore code blocks (return original placeholder if index doesn't exist)
   result = result.replace(
     CODE_BLOCK_PLACEHOLDER_REGEX,
-    (_, index) => codeBlocks[Number.parseInt(index, 10)]
+    (match, index) => codeBlocks[Number.parseInt(index, 10)] ?? match
   );
 
   // Normalize indentation (remove stray whitespace, preserve meaningful markdown indentation)
