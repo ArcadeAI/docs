@@ -63,19 +63,18 @@ function pathnameIsMissingLocale(pathname: string): boolean {
 export function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
-  // Handle .md requests without locale - redirect to add locale first
-  if (pathname.endsWith(".md") && pathnameIsMissingLocale(pathname)) {
-    const locale = getPreferredLocale(request);
-    const pathWithoutMd = pathname.replace(MD_EXTENSION_REGEX, "");
-    const redirectPath = `/${locale}${pathWithoutMd}.md`;
-    return NextResponse.redirect(new URL(redirectPath, request.url));
-  }
-
-  // Rewrite .md requests (with locale) to the markdown API route
-  if (pathname.endsWith(".md") && !pathname.startsWith("/api/")) {
-    const url = request.nextUrl.clone();
-    url.pathname = `/api/markdown${pathname}`;
-    return NextResponse.rewrite(url);
+  // .md requests are served as static files from public/
+  // (generated at build time by scripts/generate-markdown.ts)
+  if (pathname.endsWith(".md")) {
+    // Add locale prefix if missing, then let Next.js serve from public/
+    if (pathnameIsMissingLocale(pathname)) {
+      const locale = getPreferredLocale(request);
+      const pathWithoutMd = pathname.replace(MD_EXTENSION_REGEX, "");
+      const redirectPath = `/${locale}${pathWithoutMd}.md`;
+      return NextResponse.redirect(new URL(redirectPath, request.url));
+    }
+    // Let Next.js serve the static file from public/
+    return NextResponse.next();
   }
 
   // Redirect if there is no locale
