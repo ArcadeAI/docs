@@ -15,9 +15,17 @@ const IMPORT_DESTRUCTURE_REGEX =
   /^import\s*\{[\s\S]*?\}\s*from\s*['"].*?['"];?\s*$/gm;
 const EXPORT_REGEX =
   /^export\s+(const|let|var|function|default)\s+[\s\S]*?(?=\n(?:import|export|#|\n|$))/gm;
-// JSX attribute pattern that properly handles quoted strings containing ">" characters
-// Matches: non-quote/non-angle chars, OR complete double-quoted strings, OR complete single-quoted strings
-const JSX_ATTRS_PATTERN = "(?:[^>\"'\\n]|\"[^\"]*\"|'[^']*')*";
+// JSX attribute pattern that properly handles:
+// - Quoted strings containing ">" characters
+// - JSX expressions in curly braces containing ">" (arrow functions, comparisons)
+// - Multiline attributes (newlines allowed between attributes)
+// - Up to 3 levels of brace nesting for style={{outer: {inner: 1}}} patterns
+// The brace pattern uses a recursive-like structure to handle nested braces
+const BRACE_CONTENT_L0 = "[^{}]*"; // Innermost: no braces
+const BRACE_CONTENT_L1 = `(?:${BRACE_CONTENT_L0}|\\{${BRACE_CONTENT_L0}\\})*`; // 1 level
+const BRACE_CONTENT_L2 = `(?:${BRACE_CONTENT_L0}|\\{${BRACE_CONTENT_L1}\\})*`; // 2 levels
+const BRACE_PATTERN = `\\{${BRACE_CONTENT_L2}\\}`; // Full brace expression (supports 3 levels)
+const JSX_ATTRS_PATTERN = `(?:[^>"'{}]|"[^"]*"|'[^']*'|${BRACE_PATTERN})*`;
 const SELF_CLOSING_JSX_REGEX = new RegExp(
   `<([A-Z][a-zA-Z0-9.]*)${JSX_ATTRS_PATTERN}\\/>`,
   "g"
