@@ -29,16 +29,17 @@ if [ -n "$STAGED_DOCS" ]; then
   fi
 fi
 
-# --- Check Redirects (when markdown pages are deleted) ---
-# If any page.md/page.mdx files are being deleted, auto-add redirect entries
+# --- Check Redirects (when markdown pages are deleted or renamed) ---
+# Detect deleted pages (D status) and renamed pages (R status - old path needs redirect)
 DELETED_PAGES=$(git diff --cached --name-status | grep -E "^D.*page\.(md|mdx)$" | cut -f2 || true)
+RENAMED_PAGES=$(git diff --cached --name-status | grep -E "^R.*page\.(md|mdx)$" | cut -f2 || true)
 
-if [ -n "$DELETED_PAGES" ]; then
-  echo "🔗 Detected deleted page(s), checking for redirects..."
+if [ -n "$DELETED_PAGES" ] || [ -n "$RENAMED_PAGES" ]; then
+  echo "🔗 Detected deleted/renamed page(s), checking for redirects..."
 
-  # Run the redirect checker with auto-fix (compares staged changes to HEAD)
+  # Run the TypeScript redirect checker with auto-fix (compares staged changes to HEAD)
   # This will add redirect entries to next.config.ts if missing
-  if ! ./scripts/check-redirects.sh --auto-fix HEAD 2>&1; then
+  if ! pnpm check-redirects --auto-fix HEAD 2>&1; then
     # Stage next.config.ts if it was modified
     if git diff --name-only next.config.ts 2>/dev/null | grep -q "next.config.ts"; then
       git add next.config.ts
@@ -62,8 +63,8 @@ fi
 if git diff --cached --name-only | grep -q "next.config.ts"; then
   echo "🔗 Updating internal links for new redirects..."
 
-  # Run the update script
-  if ./scripts/update-internal-links.sh 2>/dev/null; then
+  # Run the TypeScript update script
+  if pnpm update-links 2>/dev/null; then
     # Stage any files that were modified
     UPDATED_FILES=$(git diff --name-only -- 'app/**/*.mdx' 'app/**/*.tsx' 'app/**/*.md' 2>/dev/null || true)
     if [ -n "$UPDATED_FILES" ]; then
