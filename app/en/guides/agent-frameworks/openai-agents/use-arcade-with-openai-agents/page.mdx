@@ -7,12 +7,12 @@ import { Steps, Tabs, Callout } from "nextra/components";
 
 # Setup Arcade with OpenAI Agents SDK
 
-The [OpenAI Agents SDK](https://openai.github.io/openai-agents-python/) is a popular Python library for building AI agents. It is built on top of the OpenAI API, and provides a simple interface for building agents.
+The [OpenAI Agents SDK](https://openai.github.io/openai-agents-python/) is a popular Python library for building AI agents. It builds on top of the OpenAI API, and provides an interface for building agents.
 
 <GuideOverview>
 <GuideOverview.Outcomes>
 
-Learn how to integrate Arcade tools using OpenAI Agents primitives. You will implement a CLI agent that can user Arcade tools to help the user with their requests. Tools that require authorization will be handled automatically by the harness, so users don't need to worry about it.
+Learn how to integrate Arcade tools using OpenAI Agents primitives. You will implement a CLI agent that can user Arcade tools to help the user with their requests. The harness handles tools that require authorization automatically, so users don't need to worry about it.
 
 </GuideOverview.Outcomes>
 
@@ -36,7 +36,7 @@ Learn how to integrate Arcade tools using OpenAI Agents primitives. You will imp
 
 ## The agent architecture you will build in this guide
 
-The OpenAI Agents SDK provides an [Agent](https://openai.github.io/openai-agents-python/ref/agent/#agents.agent.Agent) class that implements a ReAct agent. It provides a simple interface for you to define the system prompt, the model, the tools, and possible sub-agents that can be used with handoffs. In this guide, you will manually keep track of the agent's history and state, and use the `run` method to invoke the agent in an agentic loop.
+The OpenAI Agents SDK provides an [Agent](https://openai.github.io/openai-agents-python/ref/agent/#agents.agent.Agent) class that implements a ReAct agent. It provides an interface for you to define the system prompt, the model, the tools, and possible sub-agents for handoffs. In this guide, you will manually keep track of the agent's history and state, and use the `run` method to invoke the agent in an agentic loop.
 
 ## Integrate Arcade tools into an OpenAI Agents agent
 
@@ -89,7 +89,7 @@ import asyncio
 import json
 ```
 
-This is quite a number of imports, let's break them down:
+This is a number of imports, here's a breakdown:
 
 - Arcade imports:
   - `AsyncArcade`: The Arcade client, used to interact with the Arcade API.
@@ -222,7 +222,7 @@ async def invoke_arcade_tool(
 
 Here you get the Arcade tools you want the agent to use, and transform them into OpenAI Agents tools. The first step is to initialize the Arcade client, and get the tools you want to use. Since OpenAI is itself an inference provider, the Arcade API provides a convenient endpoint to get the tools in the OpenAI format, which is also the format expected by the OpenAI Agents framework.
 
-This helper function is fairly long, here's a breakdown of what it does for clarity:
+This helper function is long, here's a breakdown of what it does for clarity:
 
 - retrieve tools from all configured MCP servers (defined in the `MCP_SERVERS` variable)
 - retrieve individual tools (defined in the `TOOLS` variable)
@@ -299,9 +299,9 @@ The main function is where you:
 - Get the tools from the configured MCP Servers
 - Create an agent with the configured tools
 - Initialize the conversation
-- Run the loop!
+- Run the loop
 
-The loop is a simple while loop that captures the user input, appends it to the conversation history, and then runs the agent. The agent's response is then appended to the conversation history, and the loop continues.
+The loop is a while loop that captures the user input, appends it to the conversation history, and then runs the agent. The agent's response is then appended to the conversation history, and the loop continues.
 
 The loop is interrupted when the agent's response contains a tool call, and the tool call is handled by the helper function you wrote earlier.
 
@@ -321,7 +321,7 @@ async def main():
 
     # initialize the conversation
     history: list[TResponseInputItem] = []
-    # run the loop!
+    # run the loop
     while True:
         prompt = input("You: ")
         if prompt.lower() == "exit":
@@ -535,7 +535,7 @@ async def main():
 
     # initialize the conversation
     history: list[TResponseInputItem] = []
-    # run the loop!
+    # run the loop
     while True:
         prompt = input("You: ")
         if prompt.lower() == "exit":
