@@ -219,6 +219,20 @@ def invoke_llm(
         assistant_message = response.choices[0].message
 
         if assistant_message.tool_calls:
+            # Append the assistant message with tool_calls to history first
+            history.append({
+                "role": "assistant",
+                "content": assistant_message.content,
+                "tool_calls": [
+                    {
+                        "id": tc.id,
+                        "type": "function",
+                        "function": {"name": tc.function.name, "arguments": tc.function.arguments}
+                    }
+                    for tc in assistant_message.tool_calls
+                ]
+            })
+
             for tool_call in assistant_message.tool_calls:
                 tool_name = tool_call.function.name
                 tool_args = tool_call.function.arguments
@@ -406,6 +420,20 @@ def invoke_llm(
         assistant_message = response.choices[0].message
 
         if assistant_message.tool_calls:
+            # Append the assistant message with tool_calls to history first
+            history.append({
+                "role": "assistant",
+                "content": assistant_message.content,
+                "tool_calls": [
+                    {
+                        "id": tc.id,
+                        "type": "function",
+                        "function": {"name": tc.function.name, "arguments": tc.function.arguments}
+                    }
+                    for tc in assistant_message.tool_calls
+                ]
+            })
+
             for tool_call in assistant_message.tool_calls:
                 tool_name = tool_call.function.name
                 tool_args = tool_call.function.arguments
