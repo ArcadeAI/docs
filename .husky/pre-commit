@@ -37,9 +37,9 @@ RENAMED_PAGES=$(git diff --cached --name-status | grep -E "^R.*page\.(md|mdx)$" 
 if [ -n "$DELETED_PAGES" ] || [ -n "$RENAMED_PAGES" ]; then
   echo "🔗 Detected deleted/renamed page(s), checking for redirects..."
 
-  # Run the TypeScript redirect checker with auto-fix (compares staged changes to HEAD)
+  # Run the TypeScript redirect checker with auto-fix (only checks staged changes)
   # This will add redirect entries to next.config.ts if missing
-  if ! pnpm check-redirects --auto-fix HEAD 2>&1; then
+  if ! pnpm check-redirects --auto-fix --staged-only 2>&1; then
     # Stage next.config.ts if it was modified
     if git diff --name-only next.config.ts 2>/dev/null | grep -q "next.config.ts"; then
       git add next.config.ts

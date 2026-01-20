@@ -4,13 +4,14 @@
  * Check that deleted/renamed markdown files have corresponding redirects in next.config.ts
  *
  * Usage:
- *   pnpm check-redirects [--auto-fix] [base_branch]
+ *   pnpm check-redirects [--auto-fix] [--staged-only] [base_branch]
  *
  * Features:
  * - Detects deleted AND renamed markdown files without redirects
  * - Auto-fix mode: automatically inserts redirect entries into next.config.ts
  * - Validates existing redirects for circular references and invalid destinations
  * - Collapses redirect chains automatically
+ * - --staged-only: Only check staged changes (for pre-commit hook)
  */
 
 import { execSync } from "node:child_process";
@@ -27,6 +28,7 @@ const colors = {
 // Parse command line arguments
 const args = process.argv.slice(2);
 const autoFix = args.includes("--auto-fix");
+const stagedOnly = args.includes("--staged-only");
 const baseBranch = args.find((arg) => !arg.startsWith("--")) || "main";
 
 const CONFIG_FILE = "next.config.ts";
@@ -203,37 +205,54 @@ function ensureBranchExists(branch: string): void {
 
 /**
  * Get deleted and renamed files by comparing branches
+ * @param branch - Base branch to compare against
+ * @param checkStagedOnly - If true, only check staged changes (for pre-commit hook)
  */
-function getDeletedAndRenamedFiles(branch: string): {
+function getDeletedAndRenamedFiles(
+  branch: string,
+  checkStagedOnly: boolean
+): {
   deleted: string[];
   renamedFrom: string[];
 } {
-  ensureBranchExists(branch);
-
   const deletedFiles: string[] = [];
   const renamedFromFiles: string[] = [];
 
-  // Get committed changes
-  try {
-    const committedChanges = execSync(
-      `git diff --name-status ${branch}...HEAD`,
-      {
+  if (checkStagedOnly) {
+    // Only check staged changes (for pre-commit hook)
+    try {
+      const stagedChanges = execSync("git diff --cached --name-status", {
         encoding: "utf-8",
-      }
-    );
-    parseGitDiffOutput(committedChanges, deletedFiles, renamedFromFiles);
-  } catch {
-    // Ignore errors from diff
-  }
+      });
+      parseGitDiffOutput(stagedChanges, deletedFiles, renamedFromFiles);
+    } catch {
+      // Ignore errors from diff
+    }
+  } else {
+    // Check committed changes against base branch
+    ensureBranchExists(branch);
 
-  // Get uncommitted changes
-  try {
-    const uncommittedChanges = execSync("git diff --name-status HEAD", {
-      encoding: "utf-8",
-    });
-    parseGitDiffOutput(uncommittedChanges, deletedFiles, renamedFromFiles);
-  } catch {
-    // Ignore errors from diff
+    try {
+      const committedChanges = execSync(
+        `git diff --name-status ${branch}...HEAD`,
+        {
+          encoding: "utf-8",
+        }
+      );
+      parseGitDiffOutput(committedChanges, deletedFiles, renamedFromFiles);
+    } catch {
+      // Ignore errors from diff
+    }
+
+    // Also check uncommitted changes (both staged and unstaged)
+    try {
+      const uncommittedChanges = execSync("git diff --name-status HEAD", {
+        encoding: "utf-8",
+      });
+      parseGitDiffOutput(uncommittedChanges, deletedFiles, renamedFromFiles);
+    } catch {
+      // Ignore errors from diff
+    }
   }
 
   return {
@@ -267,14 +286,31 @@ function checkWildcardMatch(path: string, redirectList: Redirect[]): boolean {
 }
 
 /**
- * Find where a path redirects to
+ * Find the final destination in a redirect chain (follows all hops)
+ * Returns null if the path doesn't redirect anywhere
  */
-function findRedirectDestination(
+function findFinalRedirectDestination(
   path: string,
   redirectList: Redirect[]
 ): string | null {
-  const redirect = redirectList.find((r) => r.source === path);
-  return redirect?.destination || null;
+  const visited = new Set<string>();
+  let current = path;
+
+  while (true) {
+    // Prevent infinite loops from circular redirects
+    if (visited.has(current)) {
+      return null;
+    }
+    visited.add(current);
+
+    const redirect = redirectList.find((r) => r.source === current);
+    if (!redirect) {
+      // No redirect found - if we've moved at all, return current destination
+      return current === path ? null : current;
+    }
+
+    current = redirect.destination;
+  }
 }
 
 /**
@@ -356,7 +392,7 @@ for (const redirect of redirects) {
   } else if (!destination.includes(":path")) {
     const destWithoutLocale = destination.replace(LOCALE_PATH_PREFIX_REGEX, "");
     if (!(destWithoutLocale.includes(":") || pageExists(destination))) {
-      const finalDest = findRedirectDestination(destination, redirects);
+      const finalDest = findFinalRedirectDestination(destination, redirects);
       if (finalDest) {
         console.log(colors.yellow(`⚠ Redirect chain detected: ${source}`));
         console.log(colors.blue(`  ${source} → ${destination} → ${finalDest}`));
@@ -422,7 +458,10 @@ if (chains.length > 0) {
 // ============================================================
 // PART 2: Check for deleted/renamed files without redirects
 // ============================================================
-const { deleted, renamedFrom } = getDeletedAndRenamedFiles(baseBranch);
+const { deleted, renamedFrom } = getDeletedAndRenamedFiles(
+  baseBranch,
+  stagedOnly
+);
 const allDeletedOrRenamed = [...deleted, ...renamedFrom].filter((f) =>
   f.startsWith("app/")
 );
