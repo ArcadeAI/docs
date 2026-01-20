@@ -346,7 +346,9 @@ function updateRedirectDestination(
 ): string {
   const escaped = oldDest.replace(SPECIAL_REGEX_CHARS_REGEX, "\\$&");
   const regex = new RegExp(`destination:\\s*["']${escaped}["']`, "g");
-  return content.replace(regex, `destination: "${newDest}"`);
+  // Using replacer function to avoid special replacement pattern interpretation
+  // (e.g., $1, $2, $& in newDest would be incorrectly expanded if using string)
+  return content.replace(regex, () => `destination: "${newDest}"`);
 }
 
 // ============================================================

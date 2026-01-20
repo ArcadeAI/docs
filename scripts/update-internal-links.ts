@@ -147,29 +147,43 @@ function updateLinksInContent(
   let updated = content;
 
   // Markdown links: [text](/old-path) -> [text](/new-path)
+  // Using replacer function to avoid special replacement pattern interpretation
+  // (e.g., $1, $2, $& in newPath would be incorrectly expanded if using string)
   const markdownLinkRegex = new RegExp(
     `(\\]\\()${escapeRegex(oldPath)}([)"#\\s])`,
     "g"
   );
-  updated = updated.replace(markdownLinkRegex, `$1${newPath}$2`);
+  updated = updated.replace(
+    markdownLinkRegex,
+    (_, p1, p2) => `${p1}${newPath}${p2}`
+  );
 
   // JSX href with double quotes: href="/old-path"
   const jsxDoubleQuoteRegex = new RegExp(
     `(href=")${escapeRegex(oldPath)}(["#])`,
     "g"
   );
-  updated = updated.replace(jsxDoubleQuoteRegex, `$1${newPath}$2`);
+  updated = updated.replace(
+    jsxDoubleQuoteRegex,
+    (_, p1, p2) => `${p1}${newPath}${p2}`
+  );
 
   // JSX href with single quotes: href='/old-path'
   const jsxSingleQuoteRegex = new RegExp(
     `(href=')${escapeRegex(oldPath)}(['#])`,
     "g"
   );
-  updated = updated.replace(jsxSingleQuoteRegex, `$1${newPath}$2`);
+  updated = updated.replace(
+    jsxSingleQuoteRegex,
+    (_, p1, p2) => `${p1}${newPath}${p2}`
+  );
 
   // Paths in backticks (code blocks showing links)
   const backtickRegex = new RegExp(`(\`)${escapeRegex(oldPath)}(\`|[#])`, "g");
-  updated = updated.replace(backtickRegex, `$1${newPath}$2`);
+  updated = updated.replace(
+    backtickRegex,
+    (_, p1, p2) => `${p1}${newPath}${p2}`
+  );
 
   return updated;
 }
