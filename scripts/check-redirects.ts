@@ -31,6 +31,9 @@ const baseBranch = args.find((arg) => !arg.startsWith("--")) || "main";
 
 const CONFIG_FILE = "next.config.ts";
 
+// Magic number constant for "return [" offset
+const RETURN_BRACKET_LENGTH = 8;
+
 // Top-level regex patterns for performance
 const APP_LOCALE_PREFIX_REGEX = /^app\/[a-z]{2}\//;
 const PAGE_FILE_SUFFIX_REGEX = /\/?page\.mdx?$/;
@@ -39,7 +42,11 @@ const PAGE_FILE_MATCH_REGEX = /page\.mdx?$/;
 const LOCALE_PATH_PREFIX_REGEX = /^\/:locale\//;
 const WILDCARD_PATH_REGEX = /\/:path\*.*$/;
 const MDX_EXTENSION_REGEX = /\.mdx$/;
-const SPECIAL_REGEX_CHARS = /[.*+?^${}()|[\]\\]/g;
+const SPECIAL_REGEX_CHARS_REGEX = /[.*+?^${}()|[\]\\]/g;
+const REDIRECT_REGEX =
+  /\{\s*source:\s*["']([^"']+)["']\s*,\s*destination:\s*["']([^"']+)["']/g;
+const REVERSED_REDIRECT_REGEX =
+  /\{\s*destination:\s*["']([^"']+)["']\s*,\s*source:\s*["']([^"']+)["']/g;
 
 type Redirect = {
   source: string;
@@ -59,8 +66,8 @@ type RedirectChain = {
  */
 function fileToUrl(filePath: string): string {
   const urlPath = filePath
-    .replace(APP_LOCALE_PREFIX_REGEX, "") // Remove app/en/ prefix
-    .replace(PAGE_FILE_SUFFIX_REGEX, ""); // Remove page.mdx suffix
+    .replace(APP_LOCALE_PREFIX_REGEX, "")
+    .replace(PAGE_FILE_SUFFIX_REGEX, "");
 
   return urlPath ? `/:locale/${urlPath}` : "/:locale";
 }
@@ -70,9 +77,9 @@ function fileToUrl(filePath: string): string {
  * e.g., /:locale/guides/foo -> app/en/guides/foo/page.mdx
  */
 function urlToFile(urlPath: string): string {
-  const urlWithoutLocale = urlPath.replace(LOCALE_PREFIX_REGEX, "");
-  return urlWithoutLocale
-    ? `app/en/${urlWithoutLocale}/page.mdx`
+  const pathWithoutLocale = urlPath.replace(LOCALE_PREFIX_REGEX, "");
+  return pathWithoutLocale
+    ? `app/en/${pathWithoutLocale}/page.mdx`
     : "app/en/page.mdx";
 }
 
@@ -80,98 +87,141 @@ function urlToFile(urlPath: string): string {
  * Check if a page exists on disk
  */
 function pageExists(urlPath: string): boolean {
-  // Wildcard destinations are valid by definition
   if (urlPath.includes(":path*") || urlPath.includes(":path")) {
     return true;
   }
 
   const filePath = urlToFile(urlPath);
-  if (existsSync(filePath)) return true;
+  if (existsSync(filePath)) {
+    return true;
+  }
 
-  // Also check .md extension
-  const mdPath = filePath.replace(/\.mdx$/, ".md");
-  if (existsSync(mdPath)) return true;
+  const mdPath = filePath.replace(MDX_EXTENSION_REGEX, ".md");
+  if (existsSync(mdPath)) {
+    return true;
+  }
 
   return false;
 }
 
 /**
+ * Execute regex and collect all matches (avoids assignment in expression)
+ */
+function collectRegexMatches(
+  regex: RegExp,
+  content: string,
+  sourceIndex: number,
+  destIndex: number
+): Array<{ source: string; destination: string }> {
+  const results: Array<{ source: string; destination: string }> = [];
+  regex.lastIndex = 0;
+
+  let match = regex.exec(content);
+  while (match !== null) {
+    results.push({
+      source: match[sourceIndex],
+      destination: match[destIndex],
+    });
+    match = regex.exec(content);
+  }
+
+  return results;
+}
+
+/**
  * Parse redirects from next.config.ts
  */
-function parseRedirects(configContent: string): Redirect[] {
-  const redirects: Redirect[] = [];
+function parseRedirects(content: string): Redirect[] {
+  const results: Redirect[] = [];
 
-  // Match redirect objects with source and destination
-  const redirectRegex =
-    /\{\s*source:\s*["']([^"']+)["']\s*,\s*destination:\s*["']([^"']+)["']/g;
-  let match;
-
-  while ((match = redirectRegex.exec(configContent)) !== null) {
-    redirects.push({
-      source: match[1],
-      destination: match[2],
-    });
+  // Collect standard format: { source: "...", destination: "..." }
+  const standardMatches = collectRegexMatches(REDIRECT_REGEX, content, 1, 2);
+  for (const m of standardMatches) {
+    results.push(m);
   }
 
-  // Also try reversed order (destination before source)
-  const reversedRegex =
-    /\{\s*destination:\s*["']([^"']+)["']\s*,\s*source:\s*["']([^"']+)["']/g;
-  while ((match = reversedRegex.exec(configContent)) !== null) {
-    redirects.push({
-      source: match[2],
-      destination: match[1],
-    });
+  // Collect reversed format: { destination: "...", source: "..." }
+  const reversedMatches = collectRegexMatches(
+    REVERSED_REDIRECT_REGEX,
+    content,
+    2,
+    1
+  );
+  for (const m of reversedMatches) {
+    results.push(m);
   }
 
-  return redirects;
+  return results;
+}
+
+/**
+ * Parse git diff output for deleted and renamed files
+ */
+function parseGitDiffOutput(
+  output: string,
+  deletedFiles: string[],
+  renamedFromFiles: string[]
+): void {
+  for (const line of output.split("\n")) {
+    if (!line) {
+      continue;
+    }
+    const parts = line.split("\t");
+    const status = parts[0];
+    const filePath = parts[1];
+
+    if (status === "D" && filePath && PAGE_FILE_MATCH_REGEX.test(filePath)) {
+      deletedFiles.push(filePath);
+    } else if (
+      status?.startsWith("R") &&
+      filePath &&
+      PAGE_FILE_MATCH_REGEX.test(filePath)
+    ) {
+      renamedFromFiles.push(filePath);
+    }
+  }
+}
+
+/**
+ * Ensure base branch exists locally
+ */
+function ensureBranchExists(branch: string): void {
+  try {
+    execSync(`git rev-parse --verify ${branch}`, { encoding: "utf-8" });
+  } catch {
+    console.log(`Fetching ${branch} branch...`);
+    try {
+      execSync(`git fetch origin ${branch}:${branch}`, { encoding: "utf-8" });
+    } catch {
+      console.error(
+        colors.red(`ERROR: Could not fetch base branch '${branch}'`)
+      );
+      process.exit(1);
+    }
+  }
 }
 
 /**
  * Get deleted and renamed files by comparing branches
  */
-function getDeletedAndRenamedFiles(baseBranch: string): {
+function getDeletedAndRenamedFiles(branch: string): {
   deleted: string[];
   renamedFrom: string[];
 } {
-  // Ensure base branch is available
-  try {
-    execSync(`git rev-parse --verify ${baseBranch}`, { encoding: "utf-8" });
-  } catch {
-    console.log(`Fetching ${baseBranch} branch...`);
-    try {
-      execSync(`git fetch origin ${baseBranch}:${baseBranch}`, {
-        encoding: "utf-8",
-      });
-    } catch {
-      console.error(
-        colors.red(`ERROR: Could not fetch base branch '${baseBranch}'`)
-      );
-      process.exit(1);
-    }
-  }
+  ensureBranchExists(branch);
 
-  const deleted: string[] = [];
-  const renamedFrom: string[] = [];
+  const deletedFiles: string[] = [];
+  const renamedFromFiles: string[] = [];
 
   // Get committed changes
   try {
     const committedChanges = execSync(
-      `git diff --name-status ${baseBranch}...HEAD`,
-      { encoding: "utf-8" }
-    );
-
-    for (const line of committedChanges.split("\n")) {
-      if (!line) continue;
-      const parts = line.split("\t");
-      const status = parts[0];
-
-      if (status === "D" && parts[1]?.match(/page\.mdx?$/)) {
-        deleted.push(parts[1]);
-      } else if (status?.startsWith("R") && parts[1]?.match(/page\.mdx?$/)) {
-        // For renames, parts[1] is old path, parts[2] is new path
-        renamedFrom.push(parts[1]);
+      `git diff --name-status ${branch}...HEAD`,
+      {
+        encoding: "utf-8",
       }
-    }
+    );
+    parseGitDiffOutput(committedChanges, deletedFiles, renamedFromFiles);
   } catch {
     // Ignore errors from diff
   }
@@ -181,43 +231,31 @@ function getDeletedAndRenamedFiles(baseBranch: string): {
     const uncommittedChanges = execSync("git diff --name-status HEAD", {
       encoding: "utf-8",
     });
-
-    for (const line of uncommittedChanges.split("\n")) {
-      if (!line) continue;
-      const parts = line.split("\t");
-      const status = parts[0];
-
-      if (status === "D" && parts[1]?.match(/page\.mdx?$/)) {
-        deleted.push(parts[1]);
-      } else if (status?.startsWith("R") && parts[1]?.match(/page\.mdx?$/)) {
-        renamedFrom.push(parts[1]);
-      }
-    }
+    parseGitDiffOutput(uncommittedChanges, deletedFiles, renamedFromFiles);
   } catch {
     // Ignore errors from diff
   }
 
-  // Deduplicate
   return {
-    deleted: [...new Set(deleted)],
-    renamedFrom: [...new Set(renamedFrom)],
+    deleted: [...new Set(deletedFiles)],
+    renamedFrom: [...new Set(renamedFromFiles)],
   };
 }
 
 /**
  * Check if a wildcard redirect covers a path
  */
-function checkWildcardMatch(path: string, redirects: Redirect[]): boolean {
-  const pathWithoutLocale = path.replace(/^\/:locale\//, "");
+function checkWildcardMatch(path: string, redirectList: Redirect[]): boolean {
+  const pathWithoutLocale = path.replace(LOCALE_PATH_PREFIX_REGEX, "");
 
-  for (const redirect of redirects) {
+  for (const redirect of redirectList) {
     if (redirect.source.includes(":path*")) {
       const prefix = redirect.source
-        .replace(/\/:path\*.*$/, "")
-        .replace(/^\/:locale\//, "");
+        .replace(WILDCARD_PATH_REGEX, "")
+        .replace(LOCALE_PATH_PREFIX_REGEX, "");
 
       if (
-        pathWithoutLocale.startsWith(prefix + "/") ||
+        pathWithoutLocale.startsWith(`${prefix}/`) ||
         pathWithoutLocale === prefix
       ) {
         return true;
@@ -233,9 +271,9 @@ function checkWildcardMatch(path: string, redirects: Redirect[]): boolean {
  */
 function findRedirectDestination(
   path: string,
-  redirects: Redirect[]
+  redirectList: Redirect[]
 ): string | null {
-  const redirect = redirects.find((r) => r.source === path);
+  const redirect = redirectList.find((r) => r.source === path);
   return redirect?.destination || null;
 }
 
@@ -243,23 +281,21 @@ function findRedirectDestination(
  * Insert redirect entries into next.config.ts
  */
 function insertRedirects(entries: string[]): void {
-  const configContent = readFileSync(CONFIG_FILE, "utf-8");
+  const content = readFileSync(CONFIG_FILE, "utf-8");
 
-  // Find the "return [" line and insert after it
-  const insertPoint = configContent.indexOf("return [");
+  const insertPoint = content.indexOf("return [");
   if (insertPoint === -1) {
     console.error(colors.red("ERROR: Could not find 'return [' in config"));
     process.exit(1);
   }
 
-  const beforeReturn = configContent.substring(0, insertPoint + 8); // "return ["
-  const afterReturn = configContent.substring(insertPoint + 8);
+  const beforeReturn = content.substring(
+    0,
+    insertPoint + RETURN_BRACKET_LENGTH
+  );
+  const afterReturn = content.substring(insertPoint + RETURN_BRACKET_LENGTH);
 
-  const newContent =
-    beforeReturn +
-    "\n        // Auto-added redirects for deleted pages\n" +
-    entries.join("\n") +
-    afterReturn;
+  const newContent = `${beforeReturn}\n        // Auto-added redirects for deleted pages\n${entries.join("\n")}${afterReturn}`;
 
   writeFileSync(CONFIG_FILE, newContent);
 }
@@ -270,12 +306,11 @@ function insertRedirects(entries: string[]): void {
 function updateRedirectDestination(
   oldDest: string,
   newDest: string,
-  configContent: string
+  content: string
 ): string {
-  // Escape special regex characters
-  const escaped = oldDest.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const escaped = oldDest.replace(SPECIAL_REGEX_CHARS_REGEX, "\\$&");
   const regex = new RegExp(`destination:\\s*["']${escaped}["']`, "g");
-  return configContent.replace(regex, `destination: "${newDest}"`);
+  return content.replace(regex, `destination: "${newDest}"`);
 }
 
 // ============================================================
@@ -302,7 +337,6 @@ console.log("");
 for (const redirect of redirects) {
   const { source, destination } = redirect;
 
-  // Check for placeholder text
   if (
     destination.includes("REPLACE_WITH") ||
     destination.includes("TODO") ||
@@ -314,19 +348,14 @@ for (const redirect of redirects) {
     );
     invalidRedirects.push(`${source} -> ${destination} (placeholder text)`);
     exitCode = 1;
-  }
-  // Check for circular redirect
-  else if (source === destination) {
+  } else if (source === destination) {
     console.log(colors.red(`✗ Circular redirect: ${source}`));
     console.log(colors.yellow("  Source and destination are the same!"));
     invalidRedirects.push(`${source} -> ${destination} (circular)`);
     exitCode = 1;
-  }
-  // Check if destination exists (skip wildcards)
-  else if (!destination.includes(":path")) {
-    const destWithoutLocale = destination.replace(/^\/:locale\//, "");
+  } else if (!destination.includes(":path")) {
+    const destWithoutLocale = destination.replace(LOCALE_PATH_PREFIX_REGEX, "");
     if (!(destWithoutLocale.includes(":") || pageExists(destination))) {
-      // Check if destination has its own redirect (chain)
       const finalDest = findRedirectDestination(destination, redirects);
       if (finalDest) {
         console.log(colors.yellow(`⚠ Redirect chain detected: ${source}`));
@@ -363,7 +392,7 @@ if (chains.length > 0) {
 
     let updatedConfig = configContent;
     for (const chain of chains) {
-      console.log(colors.green("  ✓") + ` ${chain.source}`);
+      console.log(`${colors.green("  ✓")} ${chain.source}`);
       console.log(`    was: ${chain.oldDest}`);
       console.log(`    now: ${chain.newDest}`);
 
@@ -394,8 +423,8 @@ if (chains.length > 0) {
 // PART 2: Check for deleted/renamed files without redirects
 // ============================================================
 const { deleted, renamedFrom } = getDeletedAndRenamedFiles(baseBranch);
-const allDeletedOrRenamed = [...deleted, ...renamedFrom].filter(
-  (f) => f.startsWith("app/") // Only check app directory files
+const allDeletedOrRenamed = [...deleted, ...renamedFrom].filter((f) =>
+  f.startsWith("app/")
 );
 
 if (allDeletedOrRenamed.length === 0) {
@@ -412,13 +441,11 @@ console.log("");
 const missingRedirects: string[] = [];
 const suggestedEntries: string[] = [];
 
-// Re-read config in case chains were collapsed
 const latestRedirects = parseRedirects(readFileSync(CONFIG_FILE, "utf-8"));
 
 for (const file of allDeletedOrRenamed) {
   const urlPath = fileToUrl(file);
 
-  // Check if redirect exists (exact or wildcard)
   const hasExactRedirect = latestRedirects.some((r) => r.source === urlPath);
   const hasWildcardRedirect = checkWildcardMatch(urlPath, latestRedirects);
 
@@ -490,8 +517,8 @@ if (missingRedirects.length > 0) {
     );
     console.log("");
     console.log(colors.yellow("Redirects needing destinations:"));
-    for (const path of missingRedirects) {
-      console.log(`  - ${path} -> /:locale/REPLACE_WITH_NEW_PATH`);
+    for (const p of missingRedirects) {
+      console.log(`  - ${p} -> /:locale/REPLACE_WITH_NEW_PATH`);
     }
     console.log("");
     console.log(
@@ -525,8 +552,8 @@ if (missingRedirects.length > 0) {
     );
     console.log("");
     console.log(colors.yellow("Missing redirects for:"));
-    for (const path of missingRedirects) {
-      console.log(`  - ${path}`);
+    for (const p of missingRedirects) {
+      console.log(`  - ${p}`);
     }
     console.log("");
     console.log(

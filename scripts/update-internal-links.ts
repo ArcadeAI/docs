@@ -26,61 +26,85 @@ const dryRun = process.argv.includes("--dry-run");
 
 const CONFIG_FILE = "next.config.ts";
 
-interface Redirect {
+// Top-level regex patterns
+const LOCALE_PREFIX_REGEX = /^\/:locale/;
+const SPECIAL_REGEX_CHARS_REGEX = /[.*+?^${}()|[\]\\]/g;
+const REDIRECT_REGEX =
+  /\{\s*source:\s*["']([^"']+)["']\s*,\s*destination:\s*["']([^"']+)["']/g;
+const REVERSED_REDIRECT_REGEX =
+  /\{\s*destination:\s*["']([^"']+)["']\s*,\s*source:\s*["']([^"']+)["']/g;
+
+type Redirect = {
   source: string;
   destination: string;
+};
+
+/**
+ * Execute regex and collect all matches (avoids assignment in expression)
+ */
+function collectRegexMatches(
+  regex: RegExp,
+  content: string,
+  sourceIndex: number,
+  destIndex: number
+): Array<{ source: string; destination: string }> {
+  const results: Array<{ source: string; destination: string }> = [];
+  regex.lastIndex = 0;
+
+  let match = regex.exec(content);
+  while (match !== null) {
+    results.push({
+      source: match[sourceIndex],
+      destination: match[destIndex],
+    });
+    match = regex.exec(content);
+  }
+
+  return results;
 }
 
 /**
  * Parse redirects from next.config.ts
  */
-function parseRedirects(configContent: string): Redirect[] {
-  const redirects: Redirect[] = [];
+function parseRedirects(content: string): Redirect[] {
+  const results: Redirect[] = [];
 
-  // Match redirect objects with source and destination
-  const redirectRegex =
-    /\{\s*source:\s*["']([^"']+)["']\s*,\s*destination:\s*["']([^"']+)["']/g;
-  let match;
-
-  while ((match = redirectRegex.exec(configContent)) !== null) {
-    redirects.push({
-      source: match[1],
-      destination: match[2],
-    });
+  // Collect standard format: { source: "...", destination: "..." }
+  const standardMatches = collectRegexMatches(REDIRECT_REGEX, content, 1, 2);
+  for (const m of standardMatches) {
+    results.push(m);
   }
 
-  // Also try reversed order (destination before source)
-  const reversedRegex =
-    /\{\s*destination:\s*["']([^"']+)["']\s*,\s*source:\s*["']([^"']+)["']/g;
-  while ((match = reversedRegex.exec(configContent)) !== null) {
-    redirects.push({
-      source: match[2],
-      destination: match[1],
-    });
+  // Collect reversed format: { destination: "...", source: "..." }
+  const reversedMatches = collectRegexMatches(
+    REVERSED_REDIRECT_REGEX,
+    content,
+    2,
+    1
+  );
+  for (const m of reversedMatches) {
+    results.push(m);
   }
 
-  return redirects;
+  return results;
 }
 
 /**
  * Filter redirects to only those that can be auto-updated
  */
-function getUpdatableRedirects(redirects: Redirect[]): Redirect[] {
-  return redirects.filter((r) => {
-    // Skip wildcard redirects
+function getUpdatableRedirects(redirectList: Redirect[]): Redirect[] {
+  return redirectList.filter((r) => {
     if (r.source.includes(":path*") || r.destination.includes(":path*")) {
       return false;
     }
 
-    // Skip redirects with dynamic segments (except :locale)
-    const sourceWithoutLocale = r.source.replace(/^\/:locale/, "");
-    const destWithoutLocale = r.destination.replace(/^\/:locale/, "");
+    const sourceWithoutLocale = r.source.replace(LOCALE_PREFIX_REGEX, "");
+    const destWithoutLocale = r.destination.replace(LOCALE_PREFIX_REGEX, "");
 
     if (sourceWithoutLocale.includes(":") || destWithoutLocale.includes(":")) {
       return false;
     }
 
-    // Skip placeholder destinations
     if (
       r.destination.includes("REPLACE_WITH") ||
       r.destination.includes("TODO")
@@ -100,9 +124,16 @@ function redirectToLinkPatterns(redirect: Redirect): {
   newPath: string;
 } {
   return {
-    oldPath: redirect.source.replace(/^\/:locale/, ""),
-    newPath: redirect.destination.replace(/^\/:locale/, ""),
+    oldPath: redirect.source.replace(LOCALE_PREFIX_REGEX, ""),
+    newPath: redirect.destination.replace(LOCALE_PREFIX_REGEX, ""),
   };
+}
+
+/**
+ * Escape special regex characters
+ */
+function escapeRegex(str: string): string {
+  return str.replace(SPECIAL_REGEX_CHARS_REGEX, "\\$&");
 }
 
 /**
@@ -116,8 +147,6 @@ function updateLinksInContent(
   let updated = content;
 
   // Markdown links: [text](/old-path) -> [text](/new-path)
-  // Also handles anchors: [text](/old-path#section)
-  // And titles: [text](/old-path "title")
   const markdownLinkRegex = new RegExp(
     `(\\]\\()${escapeRegex(oldPath)}([)"#\\s])`,
     "g"
@@ -138,18 +167,11 @@ function updateLinksInContent(
   );
   updated = updated.replace(jsxSingleQuoteRegex, `$1${newPath}$2`);
 
-  // Also handle paths in backticks (code blocks showing links)
+  // Paths in backticks (code blocks showing links)
   const backtickRegex = new RegExp(`(\`)${escapeRegex(oldPath)}(\`|[#])`, "g");
   updated = updated.replace(backtickRegex, `$1${newPath}$2`);
 
   return updated;
-}
-
-/**
- * Escape special regex characters
- */
-function escapeRegex(str: string): string {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 // ============================================================
@@ -193,25 +215,21 @@ for (const file of files) {
   const originalContent = readFileSync(file, "utf-8");
   let updatedContent = originalContent;
 
-  // Apply each redirect transformation
   for (const redirect of redirects) {
     const { oldPath, newPath } = redirectToLinkPatterns(redirect);
 
-    // Quick check if this file might contain the old path
     if (updatedContent.includes(oldPath)) {
       updatedContent = updateLinksInContent(updatedContent, oldPath, newPath);
     }
   }
 
-  // Check if file was modified
   if (updatedContent !== originalContent) {
     if (dryRun) {
-      console.log(colors.yellow("Would update:") + ` ${file}`);
+      console.log(`${colors.yellow("Would update:")} ${file}`);
 
-      // Show a preview of changes
       const lines = originalContent.split("\n");
       const newLines = updatedContent.split("\n");
-      for (let i = 0; i < lines.length; i++) {
+      for (let i = 0; i < lines.length; i += 1) {
         if (lines[i] !== newLines[i]) {
           console.log(colors.red(`  - ${lines[i].trim()}`));
           console.log(colors.green(`  + ${newLines[i].trim()}`));
@@ -220,9 +238,9 @@ for (const file of files) {
       console.log("");
     } else {
       writeFileSync(file, updatedContent);
-      console.log(colors.green("Updated:") + ` ${file}`);
+      console.log(`${colors.green("Updated:")} ${file}`);
     }
-    updatedCount++;
+    updatedCount += 1;
   }
 }
 
