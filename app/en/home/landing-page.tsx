@@ -345,7 +345,7 @@ export function LandingPage() {
               <div className="space-y-4">
                 <QuickStartCard
                   description="Add tools to Cursor, VS Code, Claude Desktop, or any MCP client."
-                  href="/guides/tool-calling/mcp-clients"
+                  href="/get-started/mcp-clients"
                   icon={Monitor}
                   logos={[
                     {
@@ -364,7 +364,7 @@ export function LandingPage() {
                 />
                 <QuickStartCard
                   description="Integrate with LangChain, OpenAI Agents, CrewAI, Vercel AI, and more."
-                  href="/guides/agent-frameworks"
+                  href="/get-started/agent-frameworks"
                   icon={Code}
                   logos={[
                     {
