@@ -29,6 +29,64 @@ if [ -n "$STAGED_DOCS" ]; then
   fi
 fi
 
+# --- Check Meta Keys (when _meta.tsx files are changed) ---
+STAGED_META=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '_meta\.tsx$' || true)
+
+if [ -n "$STAGED_META" ]; then
+  echo "🔍 Checking _meta.tsx keys..."
+
+  if ! pnpm check-meta --staged-only; then
+    echo ""
+    echo "❌ Commit blocked: _meta.tsx keys must match sibling directories or files."
+    exit 1
+  fi
+fi
+
+# --- Check Redirects (when markdown pages are deleted or renamed) ---
+# Detect deleted pages (D status) and renamed pages (R status - old path needs redirect)
+DELETED_PAGES=$(git diff --cached --name-status | grep -E "^D.*page\.(md|mdx)$" | cut -f2 || true)
+RENAMED_PAGES=$(git diff --cached --name-status | grep -E "^R.*page\.(md|mdx)$" | cut -f2 || true)
+
+if [ -n "$DELETED_PAGES" ] || [ -n "$RENAMED_PAGES" ]; then
+  echo "🔗 Detected deleted/renamed page(s), checking for redirects..."
+
+  # Run the TypeScript redirect checker with auto-fix (only checks staged changes)
+  # This will add redirect entries to next.config.ts if missing
+  if ! pnpm check-redirects --auto-fix --staged-only 2>&1; then
+    # Stage next.config.ts if it was modified
+    if git diff --name-only next.config.ts 2>/dev/null | grep -q "next.config.ts"; then
+      git add next.config.ts
+      echo ""
+      echo "📝 Redirect entries added to next.config.ts and staged."
+    fi
+    echo ""
+    # Check if there are placeholders vs other errors
+    if grep -q "REPLACE_WITH_NEW_PATH" next.config.ts 2>/dev/null; then
+      echo "❌ Commit blocked: Please update the placeholder destinations in next.config.ts"
+      echo "   Search for 'REPLACE_WITH_NEW_PATH' and provide actual redirect paths."
+    else
+      echo "❌ Commit blocked: Please fix the redirect issues shown above."
+    fi
+    exit 1
+  fi
+fi
+
+# --- Update Internal Links (when redirects are added) ---
+# If next.config.ts is staged, update any internal links pointing to redirected paths
+if git diff --cached --name-only | grep -q "next.config.ts"; then
+  echo "🔗 Updating internal links for new redirects..."
+
+  # Run the TypeScript update script
+  if pnpm update-links 2>/dev/null; then
+    # Stage any files that were modified
+    UPDATED_FILES=$(git diff --name-only -- 'app/**/*.mdx' 'app/**/*.tsx' 'app/**/*.md' 2>/dev/null || true)
+    if [ -n "$UPDATED_FILES" ]; then
+      echo "$UPDATED_FILES" | xargs git add
+      echo "✅ Internal links updated and staged"
+    fi
+  fi
+fi
+
 # --- Lint Staged (formatting) ---
 pnpm dlx lint-staged
 
