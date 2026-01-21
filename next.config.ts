@@ -23,6 +23,21 @@ const nextConfig: NextConfig = withLlmsTxt({
   withNextra({
     async redirects() {
       return [
+        // Removed LangChain old stuff
+        {
+          source:
+            "/:locale/get-started/agent-frameworks/langchain/use-arcade-tools",
+          destination:
+            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain",
+          permanent: true,
+        },
+        {
+          source:
+            "/:locale/get-started/agent-frameworks/langchain/user-auth-interrupts",
+          destination:
+            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain",
+          permanent: true,
+        },
         // Moved from guides to get-started
         {
           source:
@@ -463,7 +478,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/guides/agent-frameworks/langchain/python",
           destination:
-            "/:locale/get-started/agent-frameworks/langchain/use-arcade-tools",
+            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain",
           permanent: true,
         },
         {
