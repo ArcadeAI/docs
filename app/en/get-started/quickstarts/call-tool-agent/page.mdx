@@ -40,16 +40,33 @@ Install and use the Arcade client to call Arcade Hosted Tools.
 
 <Steps>
 
+
 ### Install the Arcade client
 
 <Tabs items={["Python", "TypeScript"]} storageKey="preferredLanguage">
 
   <Tabs.Tab>
-  In your terminal, run the following command to install the Python client package `arcadepy`:
+  In your terminal, run the following command to create a new `uv` project:
 
-```bash
-uv pip install arcadepy
-```
+  ```bash
+  mkdir arcade-quickstart
+  cd arcade-quickstart
+  uv init
+  ```
+
+  Then, run the following command to create and activate a new virtual environment, isolating the project dependencies from your system:
+
+
+  ```bash
+  uv venv
+  source .venv/bin/activate
+  ```
+
+  Then, run the following command to install the Python client package `arcadepy`:
+
+  ```bash
+  uv add arcadepy
+  ```
 
   </Tabs.Tab>
 
@@ -70,9 +87,9 @@ bun install @arcadeai/arcadejs
 
 <Tabs.Tab>
 
-Create a new script called `example.py`:
+Open the `main.py` file and replace the content with the following:
 
-```python filename="example.py"
+```python filename="main.py"
 from arcadepy import Arcade
 
 # You can also set the `ARCADE_API_KEY` environment variable instead of passing it as a parameter.
@@ -114,7 +131,7 @@ This helper function will check if a tool requires authorization and if so, it w
 
 <Tabs.Tab>
 
-```python filename="example.py"
+```python filename="main.py"
 # Helper function to authorize and run any tool
 def authorize_and_run_tool(tool_name, input, user_id):
     # Start the authorization process
@@ -126,7 +143,7 @@ def authorize_and_run_tool(tool_name, input, user_id):
     # If the authorization is not completed, print the authorization URL and wait for the user to authorize the app.
     # Tools that do not require authorization will have the status "completed" already.
     if auth_response.status != "completed":
-        print(f"Click this link to authorize {tool_name}: {auth_response.url}. The process will continue once you have authorized the app.")
+        print(f"Click this link to authorize {tool_name}:\n{auth_response.url}.\nThe process will continue once you have authorized the app.")
         client.auth.wait_for_completion(auth_response.id)
 
     # Run the tool
@@ -157,7 +174,7 @@ async function authorize_and_run_tool({
   // If the authorization is not completed, print the authorization URL and wait for the user to authorize the app. Tools that do not require authorization will have the status "completed" already.
   if (authResponse.status !== "completed") {
     console.log(
-      `Click this link to authorize ${tool_name}: \`${authResponse.url}\`. The process will continue once you have authorized the app.`
+      `Click this link to authorize ${tool_name}:\n${authResponse.url}.\nThe process will continue once you have authorized the app.`
     );
     // Wait for the user to authorize the app
     await client.auth.waitForCompletion(authResponse.id);
@@ -188,7 +205,7 @@ In this example workflow, we:
 
 <Tabs.Tab>
 
-```python filename="example.py"
+```python filename="main.py"
 # This tool does not require authorization, so it will return the results
 # without prompting the user to authorize the tool call.
 response_search = authorize_and_run_tool(
@@ -311,10 +328,11 @@ console.log(respose_send_email.output?.value);
   <Tabs.Tab>
 
     ```bash
-    uv run example.py
+    uv run main.py
     ```
+
     ```text
-    Success! Check your email at mateo@arcade.dev
+    Success! Check your email at {arcade_user_id}
 
     You just chained 3 tools together:
       1. Searched Google News for stories about MCP URL mode elicitation
@@ -333,7 +351,7 @@ console.log(respose_send_email.output?.value);
     ```
 
     ```text
-    Success! Check your email at mateo@arcade.dev
+    Success! Check your email at {arcade_user_id}
 
     You just chained 3 tools together:
       1. Searched Google News for stories about MCP URL mode elicitation
@@ -356,7 +374,7 @@ console.log(respose_send_email.output?.value);
 
 ## Next Steps
 
-In this simple example, we call the tool methods directly. In your real applications and agents, you'll likely be letting the LLM decide which tools to call. Learn more about using Arcade with Frameworks in the [Frameworks](/guides/agent-frameworks) section, or [how to build your own tools](/guides/create-tools/tool-basics/build-mcp-server).
+In this simple example, we call the tool methods directly. In your real applications and agents, you'll likely be letting the LLM decide which tools to call. Learn more about using Arcade with Frameworks in the [Frameworks](/get-started/agent-frameworks) section, or [how to build your own tools](/guides/create-tools/tool-basics/build-mcp-server).
 
 ## Example Code
 
@@ -364,6 +382,8 @@ In this simple example, we call the tool methods directly. In your real applicat
 
   <Tabs.Tab>
 
+<details>
+<summary>**main.py** (full file)</summary>
 ```python filename="example.py"
 from arcadepy import Arcade
 
@@ -386,7 +406,7 @@ def authorize_and_run_tool(tool_name, input, user_id):
     # If the authorization is not completed, print the authorization URL and wait for the user to authorize the app.
     # Tools that do not require authorization will have the status "completed" already.
     if auth_response.status != "completed":
-        print(f"Click this link to authorize {tool_name}: {auth_response.url}. The process will continue once you have authorized the app.")
+        print(f"Click this link to authorize {tool_name}:\n{auth_response.url}.\nThe process will continue once you have authorized the app.")
         client.auth.wait_for_completion(auth_response.id)
 
     # Run the tool
@@ -443,10 +463,13 @@ response_send_email = authorize_and_run_tool(
 print(f"Success! Check your email at {user_id}\n\nYou just chained 3 tools together:\n  1. Searched Google News for stories about MCP URL mode elicitation\n  2. Created a Google Doc with the results\n  3. Sent yourself an email with the document link\n\nEmail metadata:")
 print(response_send_email.output.value)
 ```
+</details>
 
   </Tabs.Tab>
   <Tabs.Tab>
 
+<details>
+<summary>**example.ts** (full file)</summary>
 ```typescript filename="example.ts"
 import Arcade from "@arcadeai/arcadejs";
 
@@ -481,7 +504,7 @@ async function authorize_and_run_tool({
   // If the authorization is not completed, print the authorization URL and wait for the user to authorize the app. Tools that do not require authorization will have the status "completed" already.
   if (authResponse.status !== "completed") {
     console.log(
-      `Click this link to authorize ${tool_name}: \`${authResponse.url}\`. The process will continue once you have authorized the app.`
+      `Click this link to authorize ${tool_name}:\n${authResponse.url}.\nThe process will continue once you have authorized the app.`
     );
     // Wait for the user to authorize the app
     await client.auth.waitForCompletion(authResponse.id);
@@ -550,6 +573,7 @@ console.log(
 );
 console.log(respose_send_email.output?.value);
 ```
+</details>
 
   </Tabs.Tab>
 </Tabs>
