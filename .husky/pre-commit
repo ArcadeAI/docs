@@ -29,6 +29,19 @@ if [ -n "$STAGED_DOCS" ]; then
   fi
 fi
 
+# --- Check Meta Keys (when _meta.tsx files are changed) ---
+STAGED_META=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '_meta\.tsx$' || true)
+
+if [ -n "$STAGED_META" ]; then
+  echo "🔍 Checking _meta.tsx keys..."
+
+  if ! pnpm check-meta --staged-only; then
+    echo ""
+    echo "❌ Commit blocked: _meta.tsx keys must match sibling directories or files."
+    exit 1
+  fi
+fi
+
 # --- Check Redirects (when markdown pages are deleted or renamed) ---
 # Detect deleted pages (D status) and renamed pages (R status - old path needs redirect)
 DELETED_PAGES=$(git diff --cached --name-status | grep -E "^D.*page\.(md|mdx)$" | cut -f2 || true)
