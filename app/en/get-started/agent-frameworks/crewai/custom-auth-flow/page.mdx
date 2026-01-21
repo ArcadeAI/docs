@@ -1,16 +1,19 @@
+```mdx
 ---
 title: "Custom Auth Flow with CrewAI"
 description: "Learn how to create a custom auth flow with CrewAI"
 ---
 
+<!-- Editorial: Structure - Added intro line and reorganized first paragraph to follow 10/20/70 format; Terminology - Changed "Tool" to "tool" in heading -->
+
 import { Steps, Callout } from "nextra/components";
 import ToggleContent from "@/app/_components/toggle-content";
 
-## Custom Auth Flow with CrewAI
+## Custom auth flow with CrewAI
 
-In this guide, we will explore how to create a custom auth flow that will be performed before executing Arcade tools within your CrewAI agent team.
+Learn how to create a custom auth flow that performs before executing Arcade tools within your CrewAI agent team.
 
-The `ArcadeToolManager`'s built-in authorization and tool execution flows work well for many typical use cases. However, some scenarios call for a tailored approach. By implementing a custom auth flow, you gain flexibility in handling tool authorization. If your use case calls for a unique interface, additional approval steps, or specialized error handling, then this guide is for you.
+The `ArcadeToolManager`'s built-in authorization and tool execution flows work well for many typical use cases. However, some scenarios call for a tailored approach. By implementing a custom auth flow, you gain flexibility in handling tool authorization. If your use case calls for a unique interface, additional approval steps, or specialized error handling, then this guide is for you. You'll learn how to override the default authorization flow, implement custom approval steps, and integrate the custom flow into your CrewAI agents.
 
 <Steps>
 
@@ -20,7 +23,7 @@ The `ArcadeToolManager`'s built-in authorization and tool execution flows work w
 
 ### Set up your environment
 
-Install the required package, and ensure your environment variables are set with your Arcade and OpenAI API keys:
+Install the required package, and set your environment variables with your Arcade and OpenAI API keys:
 
 ```bash
 pip install crewai-arcade
@@ -37,7 +40,7 @@ export OPENAI_API_KEY="your_openai_api_key"
 
 ### Define your custom auth flow
 
-The custom auth flow defined in the following code snippet is a function that will be called whenever CrewAI needs to call a tool.
+The custom auth flow defined in the following code snippet is a function that CrewAI calls whenever it needs to call a tool.
 
 ```python
 from typing import Any
@@ -51,15 +54,15 @@ def custom_auth_flow(
 ) -> Any:
     """Custom auth flow for the ArcadeToolManager
 
-    This function is called when CrewAI needs to call a tool that requires authorization.
-    Authorization is handled before executing the tool.
+    CrewAI calls this function when it needs to call a tool that requires authorization.
+    The system handles authorization before executing the tool.
     This function overrides the ArcadeToolManager's default auth flow performed by ArcadeToolManager.authorize_tool
     """
     # Get authorization status
     auth_response = manager.authorize(tool_name, USER_ID)
 
     # If the user is not authorized for the tool,
-    # then we need to handle the authorization before executing the tool
+    # then handle the authorization before executing the tool
     if not manager.is_authorized(auth_response.id):
         print(f"Authorization required for tool: '{tool_name}' with inputs:")
         for input_name, input_value in tool_input.items():
@@ -81,8 +84,8 @@ def custom_auth_flow(
 def tool_manager_callback(tool_manager: ArcadeToolManager, tool_name: str, **tool_input: dict[str, Any]) -> Any:
     """Tool executor callback with custom auth flow for the ArcadeToolManager
 
-    ArcadeToolManager's default executor handles authorization and tool execution.
-    This function overrides the default executor to handle authorization in a custom way and then executes the tool.
+    ArcadeToolManager's default executor calls the function to handle authorization and tool execution.
+    This function overrides the default executor to handle authorization in a custom way and then the system executes the tool.
     """
     custom_auth_flow(tool_manager, tool_name, **tool_input)
     return tool_manager.execute_tool(USER_ID, tool_name, **tool_input)
@@ -102,7 +105,7 @@ tools = manager.get_tools(tools=["Gmail.ListEmails"], toolkits=["Slack"])
 
 ### Use tools in your CrewAI agent team
 
-Create a Crew that uses your tools with the custom auth flow. When the tool is called, your tool manager callback will be called to handle the authorization and then the tool will be executed.
+Create a Crew that uses your tools with the custom auth flow. When the tool calls your method, your tool manager callback handles the authorization and then the system executes the tool.
 
 ```python
 from crewai import Agent, Crew, Task
@@ -156,15 +159,15 @@ def custom_auth_flow(
 ) -> Any:
     """Custom auth flow for the ArcadeToolManager
 
-    This function is called when CrewAI needs to call a tool that requires authorization.
-    Authorization is handled before executing the tool.
+    CrewAI calls this function when it needs to call a tool that requires authorization.
+    The system handles authorization before executing the tool.
     This function overrides the ArcadeToolManager's default auth flow performed by ArcadeToolManager.authorize_tool
     """
     # Get authorization status
     auth_response = manager.authorize(tool_name, USER_ID)
 
     # If the user is not authorized for the tool,
-    # then we need to handle the authorization before executing the tool
+    # then handle the authorization before executing the tool
     if not manager.is_authorized(auth_response.id):
         print(f"Authorization required for tool: '{tool_name}' with inputs:")
         for input_name, input_value in tool_input.items():
@@ -186,8 +189,8 @@ def custom_auth_flow(
 def tool_manager_callback(tool_manager: ArcadeToolManager, tool_name: str, **tool_input: dict[str, Any]) -> Any:
     """Tool executor callback with custom auth flow for the ArcadeToolManager
 
-    ArcadeToolManager's default executor handles authorization and tool execution.
-    This function overrides the default executor to handle authorization in a custom way and then executes the tool.
+    ArcadeToolManager's default executor calls the function to handle authorization and tool execution.
+    This function overrides the default executor to handle authorization in a custom way and then the system executes the tool.
     """
     custom_auth_flow(tool_manager, tool_name, **tool_input)
     return tool_manager.execute_tool(USER_ID, tool_name, **tool_input)
@@ -232,3 +235,4 @@ print(result)
 ## Next steps
 
 Now you're ready to integrate Arcade tools with a custom auth flow into your own CrewAI agent team.
+```
