@@ -7,9 +7,6 @@ export const meta: MetaRecord = {
   "create-tools": {
     title: "Create tools",
   },
-  "agent-frameworks": {
-    title: "Agent frameworks",
-  },
   "user-facing-agents": {
     title: "User-facing agents",
   },
