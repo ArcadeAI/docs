@@ -20,7 +20,7 @@ const meta: MetaRecord = {
   "visual-studio-code": {
     title: "Visual Studio Code",
   },
-  "copilot-studio": {
+  copilot_studio: {
     title: "Microsoft Copilot Studio",
   },
 };
