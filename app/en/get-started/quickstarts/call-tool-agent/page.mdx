@@ -1,3 +1,4 @@
+```mdx
 ---
 title: "Calling tools in your agent"
 description: "Learn how to call tools in your agent"
@@ -6,9 +7,15 @@ description: "Learn how to call tools in your agent"
 import { Steps, Tabs, Callout } from "nextra/components";
 import { SignupLink } from "@/app/_components/analytics";
 
+<!-- Editorial: Voice and Tone - Changed "gives your AI agents the power to act" to more direct language; Structure - Converted to 10/20/70 format with proper intro -->
+
 # Calling tools in your agent with Arcade
 
-Arcade gives your AI agents the power to act. With Arcade-hosted tools, your AI-powered apps can send Gmail, update Notion, message in Slack, and more.
+Learn how to install and use the Arcade client to call Arcade-hosted tools from your AI agent.
+
+With Arcade-hosted tools, your AI-powered apps can send Gmail, update Notion, message in Slack, and more. This quickstart shows you how to chain multiple tools together to create a workflow that searches for news, creates a Google Doc, and emails the results to a user.
+
+You'll need an Arcade account and API key to get started. The example demonstrates handling OAuth authorization flows and executing tools that require user permissions.
 
 <GuideOverview>
 <GuideOverview.Outcomes>
@@ -81,7 +88,7 @@ bun install @arcadeai/arcadejs
 
 </Tabs>
 
-### Setup the client
+### Set up the client
 
 <Tabs items={["Python", "TypeScript"]} storageKey="preferredLanguage">
 
@@ -125,7 +132,7 @@ let userId = "{arcade_user_id}";
 
 ### Write a helper function to authorize and run tools
 
-This helper function will check if a tool requires authorization and if so, it will print the authorization URL and wait for the user to authorize the tool call. If the tool does not require authorization, it will run the tool directly without interrupting the flow.
+This helper function checks if a tool requires authorization and if so, it prints the authorization URL and waits for the user to authorize the tool call. If the tool does not require authorization, it runs the tool directly without interrupting the flow.
 
 <Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
 
@@ -195,7 +202,7 @@ async function authorize_and_run_tool({
 
 ### Implement the workflow
 
-In this example workflow, we:
+In this example workflow, you:
 
 - Get the latest news about MCP URL mode elicitation
 - Create a Google Doc with the news
@@ -207,7 +214,7 @@ In this example workflow, we:
 
 ```python filename="main.py"
 # This tool does not require authorization, so it will return the results
-# without prompting the user to authorize the tool call.
+# without prompting for authorization.
 response_search = authorize_and_run_tool(
     tool_name="GoogleNews.SearchNewsStories",
     input={
@@ -226,7 +233,7 @@ for search_result in news:
     output += f"{search_result['link']}\n\n"
 
 # Create a Google Doc with the news results
-# If the user has not previously authorized the Google Docs tool, they will be prompted to authorize the tool call.
+# If the user has not previously authorized the Google Docs tool, the system prompts for authorization.
 response_create_doc = authorize_and_run_tool(
     tool_name="GoogleDocs.CreateDocumentFromText",
     input={
@@ -253,7 +260,7 @@ response_send_email = authorize_and_run_tool(
 )
 
 # Print the response from the tool call
-print(f"Success! Check your email at {user_id}\n\nYou just chained 3 tools together:\n  1. Searched Google News for stories about MCP URL mode elicitation\n  2. Created a Google Doc with the results\n  3. Sent yourself an email with the document link\n\nEmail metadata:")
+print(f"Success Check your email at {user_id}\n\nYou just chained 3 tools together:\n  1. Searched Google News for stories about MCP URL mode elicitation\n  2. Created a Google Doc with the results\n  3. Sent yourself an email with the document link\n\nEmail metadata:")
 print(response_send_email.output.value)
 ```
 
@@ -263,7 +270,7 @@ print(response_send_email.output.value)
 
 ```typescript filename="example.ts"
 // This tool does not require authorization, so it will return the results
-// without prompting the user to authorize the app.
+// without prompting for authorization.
 const response_search = await authorize_and_run_tool({
   tool_name: "GoogleNews.SearchNewsStories",
   input: {
@@ -284,7 +291,7 @@ for (const search_result of news) {
 }
 
 // Create a Google Doc with the news results
-// If the user has not previously authorized the Google Docs tool, they will be prompted to authorize the tool call.
+// If the user has not previously authorized the Google Docs tool, the system prompts for authorization.
 const respose_create_doc = await authorize_and_run_tool({
   tool_name: "GoogleDocs.CreateDocumentFromText",
   input: {
@@ -299,7 +306,7 @@ const google_doc = respose_create_doc.output?.value;
 // Send an email with the link to the Google Doc
 const email_body = `You can find the news about MCP URL mode elicitation in the following Google Doc: ${google_doc.documentUrl}`;
 
-// Here again, if the user has not previously authorized the Gmail tool, they will be prompted to authorize the tool call.
+// Here again, if the user has not previously authorized the Gmail tool, the system prompts for authorization.
 const respose_send_email = await authorize_and_run_tool({
   tool_name: "Gmail.SendEmail",
   input: {
@@ -312,7 +319,7 @@ const respose_send_email = await authorize_and_run_tool({
 
 // Print the response from the tool call
 console.log(
-  `Success! Check your email at ${userId}\n\nYou just chained 3 tools together:\n  1. Searched Google News for stories about MCP URL mode elicitation\n  2. Created a Google Doc with the results\n  3. Sent yourself an email with the document link\n\nEmail metadata:`
+  `Success Check your email at ${userId}\n\nYou just chained 3 tools together:\n  1. Searched Google News for stories about MCP URL mode elicitation\n  2. Created a Google Doc with the results\n  3. Sent yourself an email with the document link\n\nEmail metadata:`
 );
 console.log(respose_send_email.output?.value);
 ```
@@ -332,7 +339,7 @@ console.log(respose_send_email.output?.value);
     ```
 
     ```text
-    Success! Check your email at {arcade_user_id}
+    Success Check your email at {arcade_user_id}
 
     You just chained 3 tools together:
       1. Searched Google News for stories about MCP URL mode elicitation
@@ -351,7 +358,7 @@ console.log(respose_send_email.output?.value);
     ```
 
     ```text
-    Success! Check your email at {arcade_user_id}
+    Success Check your email at {arcade_user_id}
 
     You just chained 3 tools together:
       1. Searched Google News for stories about MCP URL mode elicitation
@@ -372,11 +379,11 @@ console.log(respose_send_email.output?.value);
 
 </Steps>
 
-## Next Steps
+## Next steps
 
-In this simple example, we call the tool methods directly. In your real applications and agents, you'll likely be letting the LLM decide which tools to call. Learn more about using Arcade with Frameworks in the [Frameworks](/get-started/agent-frameworks) section, or [how to build your own tools](/guides/create-tools/tool-basics/build-mcp-server).
+In this example, you call the tool methods directly. In your real applications and agents, you'll likely be letting the LLM decide which tools to call. Learn more about using Arcade with frameworks in the [Frameworks](/get-started/agent-frameworks) section, or [how to build your own tools](/guides/create-tools/tool-basics/build-mcp-server).
 
-## Example Code
+## Example code
 
 <Tabs items={["Python", "TypeScript"]} storageKey="preferredLanguage">
 
@@ -413,7 +420,7 @@ def authorize_and_run_tool(tool_name, input, user_id):
     return client.tools.execute(tool_name=tool_name, input=input, user_id=user_id)
 
 # This tool does not require authorization, so it will return the results
-# without prompting the user to authorize the tool call.
+# without prompting for authorization.
 response_search = authorize_and_run_tool(
     tool_name="GoogleNews.SearchNewsStories",
     input={
@@ -433,7 +440,7 @@ for search_result in news:
     output += f"{search_result['link']}\n"
 
 # Create a Google Doc with the news results
-# If the user has not previously authorized the Google Docs tool, they will be prompted to authorize the tool call.
+# If the user has not previously authorized the Google Docs tool, the system prompts for authorization.
 response_create_doc = authorize_and_run_tool(
     tool_name="GoogleDocs.CreateDocumentFromText",
     input={
@@ -460,7 +467,7 @@ response_send_email = authorize_and_run_tool(
 )
 
 # Print the response from the tool call
-print(f"Success! Check your email at {user_id}\n\nYou just chained 3 tools together:\n  1. Searched Google News for stories about MCP URL mode elicitation\n  2. Created a Google Doc with the results\n  3. Sent yourself an email with the document link\n\nEmail metadata:")
+print(f"Success Check your email at {user_id}\n\nYou just chained 3 tools together:\n  1. Searched Google News for stories about MCP URL mode elicitation\n  2. Created a Google Doc with the results\n  3. Sent yourself an email with the document link\n\nEmail metadata:")
 print(response_send_email.output.value)
 ```
 </details>
@@ -520,7 +527,7 @@ async function authorize_and_run_tool({
 }
 
 // This tool does not require authorization, so it will return the results
-// without prompting the user to authorize the app.
+// without prompting for authorization.
 const response_search = await authorize_and_run_tool({
   tool_name: "GoogleNews.SearchNewsStories",
   input: {
@@ -541,7 +548,7 @@ for (const search_result of news) {
 }
 
 // Create a Google Doc with the news results
-// If the user has not previously authorized the Google Docs tool, they will be prompted to authorize the tool call.
+// If the user has not previously authorized the Google Docs tool, the system prompts for authorization.
 const respose_create_doc = await authorize_and_run_tool({
   tool_name: "GoogleDocs.CreateDocumentFromText",
   input: {
@@ -556,7 +563,7 @@ const google_doc = respose_create_doc.output?.value;
 // Send an email with the link to the Google Doc
 const email_body = `You can find the news about MCP URL mode elicitation in the following Google Doc: ${google_doc.documentUrl}`;
 
-// Here again, if the user has not previously authorized the Gmail tool, they will be prompted to authorize the tool call.
+// Here again, if the user has not previously authorized the Gmail tool, the system prompts for authorization.
 const respose_send_email = await authorize_and_run_tool({
   tool_name: "Gmail.SendEmail",
   input: {
@@ -569,7 +576,7 @@ const respose_send_email = await authorize_and_run_tool({
 
 // Print the response from the tool call
 console.log(
-  `Success! Check your email at ${userId}\n\nYou just chained 3 tools together:\n  1. Searched Google News for stories about MCP URL mode elicitation\n  2. Created a Google Doc with the results\n  3. Sent yourself an email with the document link\n\nEmail metadata:`
+  `Success Check your email at ${userId}\n\nYou just chained 3 tools together:\n  1. Searched Google News for stories about MCP URL mode elicitation\n  2. Created a Google Doc with the results\n  3. Sent yourself an email with the document link\n\nEmail metadata:`
 );
 console.log(respose_send_email.output?.value);
 ```
@@ -577,3 +584,4 @@ console.log(respose_send_email.output?.value);
 
   </Tabs.Tab>
 </Tabs>
+```
