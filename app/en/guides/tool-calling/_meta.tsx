@@ -7,9 +7,6 @@ export const meta: MetaRecord = {
   "call-third-party-apis": {
     title: "Call third-party APIs",
   },
-  "mcp-clients": {
-    title: "Connect to MCP clients",
-  },
   "custom-apps": {
     title: "In custom applications",
   },
