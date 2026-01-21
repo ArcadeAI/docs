@@ -142,6 +142,19 @@ function parseNextChar(content: string, state: ParserState): void {
     return;
   }
 
+  // Skip comments
+  if (char === "/" && state.index + 1 < content.length) {
+    const nextChar = content[state.index + 1];
+    if (nextChar === "/") {
+      state.index = skipLineComment(content, state.index);
+      return;
+    }
+    if (nextChar === "*") {
+      state.index = skipBlockComment(content, state.index);
+      return;
+    }
+  }
+
   if (char === "`") {
     state.index = skipTemplateLiteral(content, state.index);
     return;
@@ -174,12 +187,19 @@ function handleStringBoundary(
       state.collectingKey = true;
       state.currentKey = "";
     }
-  } else if (char === state.stringChar) {
+    state.index += 1;
+    return true;
+  }
+
+  if (char === state.stringChar) {
     state.inString = false;
     state.collectingKey = false;
+    state.index += 1;
+    return true;
   }
-  state.index += 1;
-  return true;
+
+  // Quote character inside string of opposite type - let handleStringContent process it
+  return false;
 }
 
 /**
@@ -262,6 +282,31 @@ function skipTemplateLiteral(content: string, startIndex: number): number {
     i += 1;
   }
   return i + 1;
+}
+
+/**
+ * Skip over a line comment starting at index i (points to first /)
+ */
+function skipLineComment(content: string, startIndex: number): number {
+  let i = startIndex + 2; // Skip //
+  while (i < content.length && content[i] !== "\n") {
+    i += 1;
+  }
+  return i + 1; // Skip newline
+}
+
+/**
+ * Skip over a block comment starting at index i (points to /)
+ */
+function skipBlockComment(content: string, startIndex: number): number {
+  let i = startIndex + 2; // Skip /*
+  while (i < content.length - 1) {
+    if (content[i] === "*" && content[i + 1] === "/") {
+      return i + 2;
+    }
+    i += 1;
+  }
+  return i;
 }
 
 /**
@@ -350,14 +395,24 @@ function getValidSiblings(metaFilePath: string): Set<string> {
 /**
  * Validate a single _meta.tsx file
  */
-function validateMetaFile(filePath: string): MetaError[] {
+function validateMetaFile(filePath: string, readFromStaging = false): MetaError[] {
   const errors: MetaError[] = [];
 
-  if (!existsSync(filePath)) {
-    return errors;
+  let content: string;
+  if (readFromStaging) {
+    try {
+      content = execSync(`git show :0:${filePath}`, { encoding: "utf-8" });
+    } catch {
+      // File not in staging area or git error
+      return errors;
+    }
+  } else {
+    if (!existsSync(filePath)) {
+      return errors;
+    }
+    content = readFileSync(filePath, "utf-8");
   }
 
-  const content = readFileSync(filePath, "utf-8");
   const keys = extractMetaKeys(content);
   const validSiblings = getValidSiblings(filePath);
 
@@ -417,7 +472,7 @@ function main(): void {
   const allErrors: MetaError[] = [];
 
   for (const file of metaFiles) {
-    const errors = validateMetaFile(file);
+    const errors = validateMetaFile(file, stagedOnly);
     allErrors.push(...errors);
   }
 
