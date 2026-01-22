@@ -76,13 +76,47 @@ fi
 if git diff --cached --name-only | grep -q "next.config.ts"; then
   echo "🔗 Updating internal links for new redirects..."
 
+  # Capture files already modified in working directory BEFORE running update-links
+  # This prevents accidentally staging unrelated changes the user has in progress
+  ALREADY_MODIFIED=$(git diff --name-only -- 'app/**/*.mdx' 'app/**/*.tsx' 'app/**/*.md' 2>/dev/null || true)
+
   # Run the TypeScript update script
   if pnpm update-links 2>/dev/null; then
-    # Stage any files that were modified
-    UPDATED_FILES=$(git diff --name-only -- 'app/**/*.mdx' 'app/**/*.tsx' 'app/**/*.md' 2>/dev/null || true)
-    if [ -n "$UPDATED_FILES" ]; then
-      echo "$UPDATED_FILES" | xargs git add
-      echo "✅ Internal links updated and staged"
+    # Find files modified AFTER running update-links
+    NOW_MODIFIED=$(git diff --name-only -- 'app/**/*.mdx' 'app/**/*.tsx' 'app/**/*.md' 2>/dev/null || true)
+
+    # Only stage files that were NOT already modified (i.e., newly modified by update-links)
+    STAGED_COUNT=0
+    SKIPPED_FILES=""
+    if [ -n "$NOW_MODIFIED" ]; then
+      for file in $NOW_MODIFIED; do
+        # Check if this file was already modified before update-links ran
+        if [ -z "$ALREADY_MODIFIED" ] || ! echo "$ALREADY_MODIFIED" | grep -qxF "$file"; then
+          git add "$file"
+          STAGED_COUNT=$((STAGED_COUNT + 1))
+        else
+          # File had both user's unstaged changes AND needed link updates
+          # We can't stage it without also staging user's unrelated changes
+          SKIPPED_FILES="$SKIPPED_FILES $file"
+        fi
+      done
+    fi
+
+    if [ "$STAGED_COUNT" -gt 0 ]; then
+      echo "✅ Internal links updated and staged ($STAGED_COUNT file(s))"
+    fi
+
+    # Warn about files that needed link updates but couldn't be staged
+    if [ -n "$SKIPPED_FILES" ]; then
+      echo ""
+      echo "⚠️  Warning: The following files need link updates but have unstaged changes:"
+      for file in $SKIPPED_FILES; do
+        echo "   - $file"
+      done
+      echo ""
+      echo "   The link updates were applied but NOT staged to avoid mixing with your changes."
+      echo "   After this commit, review these files and stage the link updates separately,"
+      echo "   or run 'git checkout -- <file>' to discard all changes including link updates."
     fi
   fi
 fi
