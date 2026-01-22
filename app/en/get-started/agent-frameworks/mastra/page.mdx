@@ -46,7 +46,7 @@ Before diving into the code, here are the key Mastra concepts you'll use:
   - `ToolCallFilter`: Removes tool calls and results from memory to prevent large API responses from bloating context.
   - `TokenLimiterProcessor`: Limits input tokens to stay within model context limits.
 
-## Build the agent
+## Build an agent
 
 <Steps>
 
@@ -353,12 +353,15 @@ On first use, the agent will return an authorization URL. Visit the URL to conne
 
 Agents are great for open-ended conversations, but sometimes you want a **deterministic process** that runs the same way every time. Mastra workflows let you chain steps together, with each step's output feeding into the next.
 
-Let's build an email digest workflow that:
+This workflow does the following:
 1. Fetches emails from Gmail
 2. Summarizes them with an LLM
-3. Sends the digest to Slack
+3. Sends the digest as a direct message to the user on Slack
 
-This also demonstrates how workflows handle large data: the full email content stays internal to the workflow—only the compact summary gets sent to Slack.
+This also demonstrates how workflows:
+* handle **large data** the full email content stays internal to the workflow, and only the compact summary gets sent to Slack.
+* handle **authorization errors**
+* **pass auth URLs** through multiple workflow steps
 
 <Steps>
 
@@ -371,11 +374,13 @@ import { createStep, createWorkflow } from "@mastra/core/workflows";
 import { z } from "zod";
 import { Arcade } from "@arcadeai/arcadejs";
 
+const defaultUserId = process.env.ARCADE_USER_ID || "";
+
 // Step 1: Fetch emails from Gmail
 const fetchEmails = createStep({
   id: "fetch-emails",
   inputSchema: z.object({
-    userId: z.string(),
+    userId: z.string().optional(),
     maxEmails: z.number().optional(),
   }),
   outputSchema: z.object({
@@ -385,23 +390,45 @@ const fetchEmails = createStep({
       snippet: z.string(),
     })),
     userId: z.string(),
+    authRequired: z.boolean().optional(),
+    authUrl: z.string().optional(),
   }),
   execute: async ({ inputData }) => {
     const arcade = new Arcade();
-    const result = await arcade.tools.execute({
-      tool_name: "Gmail.ListEmails",
-      user_id: inputData!.userId,
-      input: { n_emails: inputData!.maxEmails ?? 5 },
-    });
+    const userId = inputData?.userId || defaultUserId;
 
-    const response = result as { output?: { value?: { emails?: any[] } } };
-    const emails = (response.output?.value?.emails || []).map((e: any) => ({
-      subject: String(e.subject || "(No subject)"),
-      from: String(e.sender || e.from || "Unknown"),
-      snippet: String(e.snippet || "").slice(0, 200),
-    }));
+    try {
+      const result = await arcade.tools.execute({
+        tool_name: "Gmail.ListEmails",
+        user_id: userId,
+        input: { n_emails: inputData!.maxEmails ?? 5 },
+      });
 
-    return { emails, userId: inputData!.userId };
+      const response = result as { output?: { value?: { emails?: any[] } } };
+      const emails = (response.output?.value?.emails || []).map((e: any) => ({
+        subject: String(e.subject || "(No subject)"),
+        from: String(e.sender || e.from || "Unknown"),
+        snippet: String(e.snippet || "").slice(0, 200),
+      }));
+
+      return { emails, userId };
+    } catch (error: any) {
+      // Handle authorization required error
+      if (error.status === 403 || error.message?.includes("authorization")) {
+        const authResponse = await arcade.auth.start({
+          user_id: userId,
+          provider: "google",
+          scopes: ["https://www.googleapis.com/auth/gmail.readonly"],
+        });
+        return {
+          emails: [],
+          userId,
+          authRequired: true,
+          authUrl: authResponse.url,
+        };
+      }
+      throw error;
+    }
   },
 });
 
@@ -415,13 +442,22 @@ const summarizeEmails = createStep({
       snippet: z.string(),
     })),
     userId: z.string(),
+    authRequired: z.boolean().optional(),
+    authUrl: z.string().optional(),
   }),
   outputSchema: z.object({
     summary: z.string(),
     userId: z.string(),
+    authRequired: z.boolean().optional(),
+    authUrl: z.string().optional(),
   }),
   execute: async ({ inputData, mastra }) => {
-    const { emails, userId } = inputData!;
+    const { emails, userId, authRequired, authUrl } = inputData!;
+
+    // Pass through auth requirement
+    if (authRequired) {
+      return { summary: "", userId, authRequired, authUrl };
+    }
 
     if (emails.length === 0) {
       return { summary: "No new emails.", userId };
@@ -440,31 +476,71 @@ const summarizeEmails = createStep({
   },
 });
 
-// Step 3: Send to Slack
+// Step 3: Send DM to Slack user
 const sendToSlack = createStep({
   id: "send-to-slack",
   inputSchema: z.object({
     summary: z.string(),
     userId: z.string(),
+    authRequired: z.boolean().optional(),
+    authUrl: z.string().optional(),
   }),
   outputSchema: z.object({
     success: z.boolean(),
     message: z.string(),
+    authUrl: z.string().optional(),
   }),
   execute: async ({ inputData }) => {
+    const { summary, userId, authRequired, authUrl } = inputData!;
+
+    // Return auth URL if authorization is needed
+    if (authRequired) {
+      return {
+        success: false,
+        message: `Authorization required. Please visit this URL to grant access: ${authUrl}`,
+        authUrl,
+      };
+    }
+
     const arcade = new Arcade();
-    const { summary, userId } = inputData!;
 
-    await arcade.tools.execute({
-      tool_name: "Slack.SendMessage",
-      user_id: userId,
-      input: {
-        message: `📬 *Email Digest*\n\n${summary}`,
-        channel_name: "general",
-      },
-    });
+    try {
+      // Get the user's Slack identity
+      const whoAmI = await arcade.tools.execute({
+        tool_name: "Slack_WhoAmI",
+        user_id: userId,
+        input: {},
+      });
 
-    return { success: true, message: "Digest sent to Slack" };
+      const slackUserId = (whoAmI as any)?.output?.value?.user_id;
+
+      // Send DM to the user
+      await arcade.tools.execute({
+        tool_name: "Slack_SendMessage",
+        user_id: userId,
+        input: {
+          message: `📬 *Email Digest*\n\n${summary}`,
+          user_ids: [slackUserId],
+        },
+      });
+
+      return { success: true, message: "Digest sent as DM" };
+    } catch (error: any) {
+      // Handle Slack authorization required
+      if (error.status === 403 || error.message?.includes("authorization")) {
+        const slackAuth = await arcade.auth.start({
+          user_id: userId,
+          provider: "slack",
+          scopes: ["chat:write", "users:read"],
+        });
+        return {
+          success: false,
+          message: `Slack authorization required. Please visit: ${slackAuth.url}`,
+          authUrl: slackAuth.url,
+        };
+      }
+      throw error;
+    }
   },
 });
 
@@ -472,12 +548,13 @@ const sendToSlack = createStep({
 const emailDigestWorkflow = createWorkflow({
   id: "email-digest",
   inputSchema: z.object({
-    userId: z.string(),
-    maxEmails: z.number().optional(),
+    userId: z.string().default(defaultUserId),
+    maxEmails: z.number().default(5),
   }),
   outputSchema: z.object({
     success: z.boolean(),
     message: z.string(),
+    authUrl: z.string().optional(),
   }),
 })
   .then(fetchEmails)
@@ -510,19 +587,20 @@ export const mastra = new Mastra({
 
 ### Test the workflow
 
-Restart the dev server and open Mastra Studio. Under **Workflows** in the sidebar, you'll see **emailDigestWorkflow**. Run it with your user ID to fetch emails, summarize them, and send the digest to Slack.
+1. Restart the dev server and open Mastra Studio. In the sidebar, open **Workflows**. Select **email-digest**.
+2. In the right sidebar, select "run" to run the workflow.
+3. If authorization is required, the workflow returns an auth URL. Visit the URL, complete authorization, then run the workflow again.
+4. Check your Slack DMs for the digest.
 
 </Steps>
-
-### Agent vs Workflow
-
-The agent handles open-ended requests ("help me with my emails"). The workflow handles repeatable processes ("every morning, summarize and send to Slack"). Use both together for powerful automation.
 
 ## Key takeaways
 
 - **Arcade tools work seamlessly with Mastra**: Use `toZodToolSet` to convert Arcade tools to the Zod schema format Mastra expects.
+- **Agent vs Workflow**: The agent handles open-ended requests ("help me with my emails"). The workflow handles repeatable processes ("every morning, summarize and send to Slack"). Use both together for powerful automation.
 - **Truncate large outputs**: Tools like Gmail can return 200KB+ of data. Wrap tool execution with truncation to prevent token overflow in the agentic loop.
 - **Authorization is automatic**: The `executeOrAuthorizeZodTool` factory handles auth flows. When a tool needs authorization, it returns a URL for the user to visit.
+- **Workflows need explicit auth handling**: Unlike agents, workflows don't have built-in auth handling. Catch 403 errors, call `arcade.auth.start()`, and pass the auth URL through your workflow steps.
 - **Use agents for conversation, workflows for automation**: Agents handle open-ended requests; workflows handle repeatable, deterministic processes.
 
 ## Next steps
@@ -706,10 +784,12 @@ import { createStep, createWorkflow } from "@mastra/core/workflows";
 import { z } from "zod";
 import { Arcade } from "@arcadeai/arcadejs";
 
+const defaultUserId = process.env.ARCADE_USER_ID || "";
+
 const fetchEmails = createStep({
   id: "fetch-emails",
   inputSchema: z.object({
-    userId: z.string(),
+    userId: z.string().optional(),
     maxEmails: z.number().optional(),
   }),
   outputSchema: z.object({
@@ -719,23 +799,44 @@ const fetchEmails = createStep({
       snippet: z.string(),
     })),
     userId: z.string(),
+    authRequired: z.boolean().optional(),
+    authUrl: z.string().optional(),
   }),
   execute: async ({ inputData }) => {
     const arcade = new Arcade();
-    const result = await arcade.tools.execute({
-      tool_name: "Gmail.ListEmails",
-      user_id: inputData!.userId,
-      input: { n_emails: inputData!.maxEmails ?? 5 },
-    });
+    const userId = inputData?.userId || defaultUserId;
 
-    const response = result as { output?: { value?: { emails?: any[] } } };
-    const emails = (response.output?.value?.emails || []).map((e: any) => ({
-      subject: String(e.subject || "(No subject)"),
-      from: String(e.sender || e.from || "Unknown"),
-      snippet: String(e.snippet || "").slice(0, 200),
-    }));
+    try {
+      const result = await arcade.tools.execute({
+        tool_name: "Gmail.ListEmails",
+        user_id: userId,
+        input: { n_emails: inputData!.maxEmails ?? 5 },
+      });
 
-    return { emails, userId: inputData!.userId };
+      const response = result as { output?: { value?: { emails?: any[] } } };
+      const emails = (response.output?.value?.emails || []).map((e: any) => ({
+        subject: String(e.subject || "(No subject)"),
+        from: String(e.sender || e.from || "Unknown"),
+        snippet: String(e.snippet || "").slice(0, 200),
+      }));
+
+      return { emails, userId };
+    } catch (error: any) {
+      if (error.status === 403 || error.message?.includes("authorization")) {
+        const authResponse = await arcade.auth.start({
+          user_id: userId,
+          provider: "google",
+          scopes: ["https://www.googleapis.com/auth/gmail.readonly"],
+        });
+        return {
+          emails: [],
+          userId,
+          authRequired: true,
+          authUrl: authResponse.url,
+        };
+      }
+      throw error;
+    }
   },
 });
 
@@ -748,13 +849,21 @@ const summarizeEmails = createStep({
       snippet: z.string(),
     })),
     userId: z.string(),
+    authRequired: z.boolean().optional(),
+    authUrl: z.string().optional(),
   }),
   outputSchema: z.object({
     summary: z.string(),
     userId: z.string(),
+    authRequired: z.boolean().optional(),
+    authUrl: z.string().optional(),
   }),
   execute: async ({ inputData, mastra }) => {
-    const { emails, userId } = inputData!;
+    const { emails, userId, authRequired, authUrl } = inputData!;
+
+    if (authRequired) {
+      return { summary: "", userId, authRequired, authUrl };
+    }
 
     if (emails.length === 0) {
       return { summary: "No new emails.", userId };
@@ -778,37 +887,74 @@ const sendToSlack = createStep({
   inputSchema: z.object({
     summary: z.string(),
     userId: z.string(),
+    authRequired: z.boolean().optional(),
+    authUrl: z.string().optional(),
   }),
   outputSchema: z.object({
     success: z.boolean(),
     message: z.string(),
+    authUrl: z.string().optional(),
   }),
   execute: async ({ inputData }) => {
+    const { summary, userId, authRequired, authUrl } = inputData!;
+
+    if (authRequired) {
+      return {
+        success: false,
+        message: `Authorization required. Please visit this URL to grant access: ${authUrl}`,
+        authUrl,
+      };
+    }
+
     const arcade = new Arcade();
-    const { summary, userId } = inputData!;
 
-    await arcade.tools.execute({
-      tool_name: "Slack.SendMessage",
-      user_id: userId,
-      input: {
-        message: `📬 *Email Digest*\n\n${summary}`,
-        channel_name: "general",
-      },
-    });
+    try {
+      const whoAmI = await arcade.tools.execute({
+        tool_name: "Slack_WhoAmI",
+        user_id: userId,
+        input: {},
+      });
 
-    return { success: true, message: "Digest sent to Slack" };
+      const slackUserId = (whoAmI as any)?.output?.value?.user_id;
+
+      await arcade.tools.execute({
+        tool_name: "Slack_SendMessage",
+        user_id: userId,
+        input: {
+          message: `📬 *Email Digest*\n\n${summary}`,
+          user_ids: [slackUserId],
+        },
+      });
+
+      return { success: true, message: "Digest sent as DM" };
+    } catch (error: any) {
+      if (error.status === 403 || error.message?.includes("authorization")) {
+        const slackAuth = await arcade.auth.start({
+          user_id: userId,
+          provider: "slack",
+          scopes: ["chat:write", "users:read"],
+        });
+        return {
+          success: false,
+          message: `Slack authorization required. Please visit: ${slackAuth.url}`,
+          authUrl: slackAuth.url,
+        };
+      }
+      throw error;
+    }
   },
 });
 
 const emailDigestWorkflow = createWorkflow({
   id: "email-digest",
   inputSchema: z.object({
-    userId: z.string(),
-    maxEmails: z.number().optional(),
+    userId: z.string().default(defaultUserId),
+    maxEmails: z.number().default(5),
   }),
   outputSchema: z.object({
     success: z.boolean(),
     message: z.string(),
+    authUrl: z.string().optional(),
   }),
 })
   .then(fetchEmails)
