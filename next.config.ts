@@ -23,7 +23,7 @@ const nextConfig: NextConfig = withLlmsTxt({
   withNextra({
     async redirects() {
       return [
-        // Auto-added redirects for deleted pages
+        // Moved MCP Gateway UI guide to guides
         {
           source: "/:locale/guides/create-tools/mcp-gateways",
           destination: "/:locale/guides/mcp-gateways",
