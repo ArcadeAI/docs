@@ -23,6 +23,24 @@ const nextConfig: NextConfig = withLlmsTxt({
   withNextra({
     async redirects() {
       return [
+        // Auto-added redirects for deleted pages
+        {
+          source: "/:locale/get-started/agent-frameworks/mastra/overview",
+          destination: "/:locale/get-started/agent-frameworks/mastra",
+          permanent: true,
+        },
+        {
+          source:
+            "/:locale/get-started/agent-frameworks/mastra/use-arcade-tools",
+          destination: "/:locale/get-started/agent-frameworks/mastra",
+          permanent: true,
+        },
+        {
+          source:
+            "/:locale/get-started/agent-frameworks/mastra/user-auth-interrupts",
+          destination: "/:locale/get-started/agent-frameworks/mastra",
+          permanent: true,
+        },
         // Moved from guides to get-started
         {
           source:
@@ -52,8 +70,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         },
         {
           source: "/:locale/home/mastra/user-auth-interrupts",
-          destination:
-            "/:locale/get-started/agent-frameworks/mastra/user-auth-interrupts",
+          destination: "/:locale/get-started/agent-frameworks/mastra",
           permanent: true,
         },
         {
@@ -278,8 +295,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         },
         {
           source: "/:locale/home/mastra/use-arcade-tools",
-          destination:
-            "/:locale/get-started/agent-frameworks/mastra/use-arcade-tools",
+          destination: "/:locale/get-started/agent-frameworks/mastra",
           permanent: true,
         },
         {
@@ -461,8 +477,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         },
         {
           source: "/:locale/guides/agent-frameworks/mastra/typescript",
-          destination:
-            "/:locale/get-started/agent-frameworks/mastra/use-arcade-tools",
+          destination: "/:locale/get-started/agent-frameworks/mastra",
           permanent: true,
         },
         {
@@ -485,8 +500,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         // Old resource paths
         {
           source: "/:locale/resources/mastra/user-auth-interrupts",
-          destination:
-            "/:locale/get-started/agent-frameworks/mastra/user-auth-interrupts",
+          destination: "/:locale/get-started/agent-frameworks/mastra",
           permanent: true,
         },
         {
