@@ -23,7 +23,28 @@ const nextConfig: NextConfig = withLlmsTxt({
   withNextra({
     async redirects() {
       return [
-        // Auto-added redirects for deleted pages
+        // Moved MCP Gateway UI guide to guides
+        {
+          source: "/:locale/guides/create-tools/mcp-gateways",
+          destination: "/:locale/guides/mcp-gateways",
+          permanent: true,
+        },
+        // Removed LangChain old stuff
+        {
+          source:
+            "/:locale/get-started/agent-frameworks/langchain/use-arcade-tools",
+          destination:
+            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain",
+          permanent: true,
+        },
+        {
+          source:
+            "/:locale/get-started/agent-frameworks/langchain/user-auth-interrupts",
+          destination:
+            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain",
+          permanent: true,
+        },
+        // Mastra tutorial consolidation
         {
           source: "/:locale/get-started/agent-frameworks/mastra/overview",
           destination: "/:locale/get-started/agent-frameworks/mastra",
@@ -53,13 +74,26 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/home/langchain/use-arcade-tools",
           destination:
-            "/:locale/get-started/agent-frameworks/langchain/use-arcade-tools",
+            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain",
+          permanent: true,
+        },
+        {
+          source: "/:locale/guides/agent-frameworks/langchain/use-arcade-tools",
+          destination:
+            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain",
           permanent: true,
         },
         {
           source: "/:locale/home/langchain/user-auth-interrupts",
           destination:
-            "/:locale/get-started/agent-frameworks/langchain/user-auth-interrupts",
+            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain",
+          permanent: true,
+        },
+        {
+          source:
+            "/:locale/guides/agent-frameworks/langchain/user-auth-interrupts",
+          destination:
+            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain",
           permanent: true,
         },
         {
@@ -320,7 +354,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         },
         {
           source: "/:locale/home/mcp-gateways",
-          destination: "/:locale/guides/create-tools/mcp-gateways",
+          destination: "/:locale/guides/mcp-gateways",
           permanent: true,
         },
         {
@@ -466,7 +500,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/guides/agent-frameworks/langchain/python",
           destination:
-            "/:locale/get-started/agent-frameworks/langchain/use-arcade-tools",
+            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain",
           permanent: true,
         },
         {
