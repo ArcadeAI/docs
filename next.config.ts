@@ -23,6 +23,12 @@ const nextConfig: NextConfig = withLlmsTxt({
   withNextra({
     async redirects() {
       return [
+        // Moved MCP Gateway UI guide to guides
+        {
+          source: "/:locale/guides/create-tools/mcp-gateways",
+          destination: "/:locale/guides/mcp-gateways",
+          permanent: true,
+        },
         // Removed LangChain old stuff
         {
           source:
@@ -332,7 +338,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         },
         {
           source: "/:locale/home/mcp-gateways",
-          destination: "/:locale/guides/create-tools/mcp-gateways",
+          destination: "/:locale/guides/mcp-gateways",
           permanent: true,
         },
         {
