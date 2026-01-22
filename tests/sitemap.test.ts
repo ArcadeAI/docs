@@ -49,5 +49,5 @@ test("robots.txt references llms.txt", () => {
   const robotsPath = join(process.cwd(), "public", "robots.txt");
   const robotsContent = readFileSync(robotsPath, "utf-8");
 
-  expect(robotsContent).toContain("https://docs.arcade.dev/llms.txt");
+  expect(robotsContent).toContain("# https://docs.arcade.dev/llms.txt");
 });
