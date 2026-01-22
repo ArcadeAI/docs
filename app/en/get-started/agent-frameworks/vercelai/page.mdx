@@ -5,13 +5,11 @@ description: "Create a browser-based chatbot that uses Arcade tools to access Gm
 
 import { Steps, Tabs, Callout } from "nextra/components";
 
-{/* Editorial: Structure - Removed marketing language "straightforward" in opening paragraph; Voice and tone - Changed "Let's get started!" to more direct language; Structure - Modified intro to better follow 10/20/70 format */}
-
 # Build an AI Chatbot with Arcade and Vercel AI SDK
 
-The [Vercel AI SDK](https://sdk.vercel.ai/) is a TypeScript toolkit for building AI-powered applications. It provides streaming responses, framework-agnostic support for React, Next.js, Vue, and more, plus AI provider switching. This guide uses **Vercel AI SDK v6**.
+This guide shows you how to build a browser-based chatbot that uses Arcade's Gmail and Slack tools.
 
-In this guide, you'll build a browser-based chatbot that uses Arcade's Gmail and Slack tools. Your users can read emails, send messages, and interact with Slack through a conversational interface with built-in authentication.
+You'll create a Next.js application that integrates the [Vercel AI SDK](https://sdk.vercel.ai/) with Arcade's tool ecosystem. Your users will be able to read emails, send messages, and interact with Slack through a conversational interface with built-in authentication. The Vercel AI SDK is a TypeScript toolkit for building AI-powered applications that provides streaming responses, framework-agnostic support for React, Next.js, Vue, and more, plus AI provider switching. This guide uses **Vercel AI SDK v6**.
 
 <GuideOverview>
 <GuideOverview.Outcomes>
@@ -891,74 +889,3 @@ export default function Chat() {
               }
               return false;
             });
-
-            // Get text content from message parts
-            const textContent = message.parts
-              ?.filter((part) => part.type === "text")
-              .map((part) => part.text)
-              .join("");
-
-            // Skip empty messages without auth prompts
-            if (!textContent && !authPart && !(message.role === "assistant" && isLoading)) {
-              return null;
-            }
-
-            return (
-              <Message key={message.id} from={message.role}>
-                <MessageContent>
-                  {/* Show loader while assistant is thinking */}
-                  {message.role === "assistant" && !textContent && !authPart && isLoading ? (
-                    <Loader />
-                  ) : authPart ? (
-                    // Show auth UI when Arcade needs authorization
-                    (() => {
-                      const toolPart = authPart as { toolName?: string; output?: unknown };
-                      const result = toolPart.output as Record<string, unknown>;
-                      const authResponse = result?.authorization_response as { url?: string };
-                      // In Vercel AI SDK v6, toolName is a property on the part, not derived from type
-                      const toolName = toolPart.toolName || "";
-                      return (
-                        <AuthPendingUI
-                          authUrl={authResponse?.url || ""}
-                          toolName={toolName}
-                          onAuthComplete={() => regenerate()}
-                        />
-                      );
-                    })()
-                  ) : (
-                    <MessageResponse>{textContent}</MessageResponse>
-                  )}
-                </MessageContent>
-              </Message>
-            );
-          })}
-        </ConversationContent>
-      </Conversation>
-
-      {/* PromptInput handles the form with auto-resize textarea */}
-      <div className="p-4">
-        <PromptInput
-          onSubmit={({ text }) => {
-            if (text.trim()) {
-              sendMessage({ text });
-            }
-          }}
-        >
-          <PromptInputTextarea
-            ref={inputRef}
-            placeholder="Ask about your emails or Slack..."
-            disabled={isLoading}
-          />
-          <PromptInputFooter>
-            <div /> {/* Spacer */}
-            <PromptInputSubmit status={status} disabled={isLoading} />
-          </PromptInputFooter>
-        </PromptInput>
-      </div>
-    </div>
-  );
-}
-```
-
-
-</details>
