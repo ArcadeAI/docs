@@ -49,13 +49,14 @@ const GUIDE_OVERVIEW_YOU_WILL_LEARN_REGEX =
 
 // Image component pattern - extract alt and src for markdown image
 // Handles both quoted strings and JSX expressions: alt="text" or alt={"text"}, src="/path" or src={"/path"}
-const IMAGE_ALT_REGEX = /alt=(?:["']([^"']+)["']|\{["']([^"']+)["']\})/;
-const IMAGE_SRC_REGEX = /src=(?:["']([^"']+)["']|\{["']([^"']+)["']\})/;
-const IMAGE_COMPONENT_REGEX = /<Image\s+[^>]*?\/>/g;
+const IMAGE_ALT_REGEX = /alt=(?:"([^"]*)"|'([^']*)'|\{"([^"]*)"\}|\{'([^']*)'\})/;
+const IMAGE_SRC_REGEX = /src=(?:"([^"]*)"|'([^']*)'|\{"([^"]*)"\}|\{'([^']*)'\})/;
+const IMAGE_COMPONENT_REGEX = new RegExp(`<Image\\s+${JSX_ATTRS_PATTERN}\\/>`,"g");
 
 // Internal markdown links - add .md extension
 // Matches [text](/path) but not [text](http...) or [text](#anchor)
-const INTERNAL_LINK_REGEX = /\[([^\]]+)\]\(\/([^)#][^)]*)\)/g;
+// Captures path and fragment separately to insert .md before fragment
+const INTERNAL_LINK_REGEX = /\[([^\]]+)\]\(\/([^)#][^)#]*)(#[^)]*)?\)/g;
 
 // Check if path has a file extension
 const HAS_EXTENSION_REGEX = /\.[a-zA-Z0-9]+$/;
@@ -252,9 +253,9 @@ function compileMdxToMarkdown(content: string, pagePath: string): string {
     const altMatch = match.match(IMAGE_ALT_REGEX);
     const srcMatch = match.match(IMAGE_SRC_REGEX);
 
-    // Extract from whichever capture group matched (quoted or JSX expression)
-    const alt = altMatch?.[1] || altMatch?.[2];
-    const src = srcMatch?.[1] || srcMatch?.[2];
+    // Extract from whichever capture group matched (double quotes, single quotes, or JSX expression with either)
+    const alt = altMatch?.[1] || altMatch?.[2] || altMatch?.[3] || altMatch?.[4];
+    const src = srcMatch?.[1] || srcMatch?.[2] || srcMatch?.[3] || srcMatch?.[4];
 
     if (alt && src) {
       // Make src absolute if it starts with /
@@ -302,12 +303,13 @@ function compileMdxToMarkdown(content: string, pagePath: string): string {
 
   // Convert internal links to .md links for LLM consumption
   // [text](/path/to/page) -> [text](/path/to/page.md)
-  result = result.replace(INTERNAL_LINK_REGEX, (_, text, path) => {
+  // [text](/path/to/page#section) -> [text](/path/to/page.md#section)
+  result = result.replace(INTERNAL_LINK_REGEX, (_, text, path, fragment) => {
     // Don't add .md if path already has an extension
     if (HAS_EXTENSION_REGEX.test(path)) {
-      return `[${text}](/${path})`;
+      return `[${text}](/${path}${fragment || ""})`;
     }
-    return `[${text}](/${path}.md)`;
+    return `[${text}](/${path}.md${fragment || ""})`;
   });
 
   // Normalize indentation (remove stray whitespace, preserve meaningful markdown indentation)
