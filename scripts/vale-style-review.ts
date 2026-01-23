@@ -384,10 +384,22 @@ function getLinesInCodeBlocks(content: string): Set<number> {
     const line = lines[i];
     const lineNum = i + 1; // 1-indexed
 
+    // Count leading spaces (CommonMark allows at most 3 spaces for fence markers)
+    let leadingSpaces = 0;
+    for (const char of line) {
+      if (char === " ") {
+        leadingSpaces += 1;
+      } else {
+        break;
+      }
+    }
+
+    // Only consider fence markers if indentation is 0-3 spaces
+    const trimmedLine = line.trim();
+
     // Check if this line starts or ends a code block
-    if (line.trim().startsWith(CODE_BLOCK_MARKER)) {
+    if (leadingSpaces <= 3 && trimmedLine.startsWith(CODE_BLOCK_MARKER)) {
       // Count consecutive backticks at the start
-      const trimmedLine = line.trim();
       let backtickCount = 0;
       for (const char of trimmedLine) {
         if (char === "`") {
@@ -398,14 +410,19 @@ function getLinesInCodeBlocks(content: string): Set<number> {
       }
 
       if (inCodeBlock) {
-        // Only close if we have at least as many backticks as the opening
-        if (backtickCount >= openingBacktickCount) {
+        // For closing fence: must have at least as many backticks as opening
+        // AND only whitespace after the backticks (per CommonMark spec)
+        const afterBackticks = trimmedLine.slice(backtickCount);
+        if (
+          backtickCount >= openingBacktickCount &&
+          afterBackticks.trim() === ""
+        ) {
           // Closing a code block - this line is still part of the block
           linesInCodeBlocks.add(lineNum);
           inCodeBlock = false;
           openingBacktickCount = 0;
         } else {
-          // Not enough backticks to close, treat as content inside the code block
+          // Not a valid closing fence, treat as content inside the code block
           linesInCodeBlocks.add(lineNum);
         }
       } else {
