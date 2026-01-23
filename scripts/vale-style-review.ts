@@ -46,7 +46,6 @@ const OWNER = "ArcadeAI";
 const REPO = "docs";
 const MAX_LENGTH_CHANGE_RATIO = 0.5;
 const MIN_SUGGESTED_LENGTH_RATIO = 0.7; // Suggested must be at least 70% of original length
-const CODE_BLOCK_MARKER = "```";
 const MAX_FENCE_INDENT = 3; // CommonMark allows 0-3 spaces before fence markers
 const TAB_STOP_WIDTH = 4; // CommonMark tab stops are at multiples of 4
 
@@ -261,7 +260,7 @@ ${STYLE_GUIDE}
 TASK: Fix the Vale style issues listed below for this file. Return JSON with your suggestions.
 
 CRITICAL - NEVER MODIFY CODE:
-- NEVER suggest changes to lines inside code blocks (lines between \`\`\` markers)
+- NEVER suggest changes to lines inside code blocks (lines between \`\`\` or ~~~ markers)
 - NEVER suggest changes to code examples, import statements, function calls, or variable names
 - SKIP any Vale issue that appears inside a code block or affects code
 
@@ -393,48 +392,58 @@ function countLeadingWhitespace(line: string): number {
   return position;
 }
 
-// Count consecutive backticks at the start of a trimmed line
-function countLeadingBackticks(trimmedLine: string): number {
+// Count consecutive fence characters (backticks or tildes) at the start of a trimmed line
+// Returns both the count and the character type
+function countLeadingFenceChars(trimmedLine: string): { count: number; char: string } {
+  const firstChar = trimmedLine[0];
+  if (firstChar !== "`" && firstChar !== "~") {
+    return { count: 0, char: "" };
+  }
+  
   let count = 0;
   for (const char of trimmedLine) {
-    if (char === "`") {
+    if (char === firstChar) {
       count += 1;
     } else {
       break;
     }
   }
-  return count;
+  return { count, char: firstChar };
 }
 
-// Check if a line could be a fence marker (has valid indentation and starts with ```)
+// Check if a line could be a fence marker (has valid indentation and starts with ``` or ~~~)
 function isFenceCandidate(line: string): boolean {
   const leadingWhitespace = countLeadingWhitespace(line);
   const trimmedLine = line.trim();
   return (
     leadingWhitespace <= MAX_FENCE_INDENT &&
-    trimmedLine.startsWith(CODE_BLOCK_MARKER)
+    (trimmedLine.startsWith("```") || trimmedLine.startsWith("~~~"))
   );
 }
 
 // Check if a line is a valid closing fence
 function isValidClosingFence(
   trimmedLine: string,
-  backtickCount: number,
-  openingBacktickCount: number
+  fenceInfo: { count: number; char: string },
+  openingFenceInfo: { count: number; char: string }
 ): boolean {
-  // For closing fence: must have at least as many backticks as opening
-  // AND only whitespace after the backticks (per CommonMark spec)
-  const afterBackticks = trimmedLine.slice(backtickCount);
-  return backtickCount >= openingBacktickCount && afterBackticks.trim() === "";
+  // For closing fence: must use same character, have at least as many chars as opening,
+  // AND only whitespace after the fence chars (per CommonMark spec)
+  const afterFenceChars = trimmedLine.slice(fenceInfo.count);
+  return (
+    fenceInfo.char === openingFenceInfo.char &&
+    fenceInfo.count >= openingFenceInfo.count &&
+    afterFenceChars.trim() === ""
+  );
 }
 
-// Check which lines are inside code blocks (fenced with ```)
+// Check which lines are inside code blocks (fenced with ``` or ~~~)
 // Returns a Set of line numbers (1-indexed) that are inside code blocks
 function getLinesInCodeBlocks(content: string): Set<number> {
   const linesInCodeBlocks = new Set<number>();
   const lines = content.split("\n");
   let inCodeBlock = false;
-  let openingBacktickCount = 0;
+  let openingFenceInfo = { count: 0, char: "" };
 
   for (let i = 0; i < lines.length; i += 1) {
     const line = lines[i];
@@ -442,21 +451,21 @@ function getLinesInCodeBlocks(content: string): Set<number> {
     const trimmedLine = line.trim();
 
     if (isFenceCandidate(line)) {
-      const backtickCount = countLeadingBackticks(trimmedLine);
+      const fenceInfo = countLeadingFenceChars(trimmedLine);
 
       if (inCodeBlock) {
         linesInCodeBlocks.add(lineNum);
         if (
-          isValidClosingFence(trimmedLine, backtickCount, openingBacktickCount)
+          isValidClosingFence(trimmedLine, fenceInfo, openingFenceInfo)
         ) {
           inCodeBlock = false;
-          openingBacktickCount = 0;
+          openingFenceInfo = { count: 0, char: "" };
         }
       } else {
         // Opening a code block
         linesInCodeBlocks.add(lineNum);
         inCodeBlock = true;
-        openingBacktickCount = backtickCount;
+        openingFenceInfo = fenceInfo;
       }
     } else if (inCodeBlock) {
       linesInCodeBlocks.add(lineNum);
