@@ -15,7 +15,7 @@ const ToolFooter: React.FC<ToolFooterProps> = ({ pipPackageName }) => (
     <div className="mt-16 grid gap-8 md:grid-cols-2">
       <QuickStartCard
         description="Arcade tools are hosted by our cloud platform and ready to be used in your agents.  Learn how."
-        href="/home/quickstart"
+        href="/get-started/quickstarts/call-tool-agent"
         icon={Cloud}
         title="Use tools hosted on Arcade Cloud"
       />
@@ -24,7 +24,7 @@ const ToolFooter: React.FC<ToolFooterProps> = ({ pipPackageName }) => (
         description={
           "Arcade tools can be self-hosted on your own infrastructure.  Learn more about self-hosting."
         }
-        href="/home/hosting-overview"
+        href="/guides/deployment-hosting"
         icon={Puzzle}
         title="Self Host Arcade tools"
       />

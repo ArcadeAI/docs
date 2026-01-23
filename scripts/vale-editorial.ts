@@ -45,7 +45,9 @@ const MAX_FILES = 5;
 const MAX_AI_TOKENS = 8192;
 const OWNER = "ArcadeAI";
 const REPO = "docs";
-const EDITORIAL_COMMENT_REGEX = /<!-- Editorial: (.+?) -->/;
+const SUMMARY_DELIMITER = "---SUMMARY---";
+const CODE_FENCE_OPEN_REGEX = /^```(?:mdx?|markdown)?\n/;
+const CODE_FENCE_CLOSE_REGEX = /\n```$/;
 const HTTP_UNPROCESSABLE_ENTITY = 422;
 const MEGABYTE = KILOBYTE * KILOBYTE;
 const MAX_BUFFER_MB = 10;
@@ -83,6 +85,15 @@ type ValeIssue = {
 };
 
 type ValeOutput = Record<string, ValeIssue[]>;
+
+// Strip markdown code fences from the beginning and end of LLM responses
+// LLMs often wrap their output in ```mdx or ```markdown blocks
+function stripCodeFences(content: string): string {
+  let result = content.trim();
+  result = result.replace(CODE_FENCE_OPEN_REGEX, "");
+  result = result.replace(CODE_FENCE_CLOSE_REGEX, "");
+  return result;
+}
 
 // Run Vale on content and return issues
 function runValeOnContent(filename: string, content: string): ValeIssue[] {
@@ -155,7 +166,9 @@ async function fixValeIssues(
         messages: [{ role: "user", content: prompt }],
       });
       const textBlock = response.content.find((b) => b.type === "text");
-      return textBlock?.type === "text" ? textBlock.text : content;
+      return textBlock?.type === "text"
+        ? stripCodeFences(textBlock.text)
+        : content;
     }
 
     const response = await ai.client.chat.completions.create({
@@ -163,7 +176,8 @@ async function fixValeIssues(
       max_tokens: MAX_AI_TOKENS,
       messages: [{ role: "user", content: prompt }],
     });
-    return response.choices[0]?.message?.content ?? content;
+    const result = response.choices[0]?.message?.content;
+    return result ? stripCodeFences(result) : content;
   } catch (error) {
     console.error("Error fixing Vale issues:", error);
     return content;
@@ -240,11 +254,35 @@ ${content}
 If the doc already conforms to the style guide, return exactly: NO_CHANGES_NEEDED
 
 If changes are needed to conform to the style guide:
-1. Return ONLY the revised markdown content, no explanations
+1. Return ONLY the revised markdown content, no explanations or comments
 2. Preserve all code blocks exactly as they are
 3. Preserve frontmatter exactly as it is
-4. Add a brief HTML comment at the top (after frontmatter) citing which style guide sections required changes:
-   <!-- Editorial: [Style guide section] - [what was changed] -->`;
+4. After the content, add a delimiter line "---SUMMARY---" followed by a brief summary of which style guide sections required changes
+
+Example format:
+[revised markdown content here]
+---SUMMARY---
+Voice and tone - Changed "we" references; Structure - Added intro line`;
+}
+
+// Extract content and summary from AI response
+function extractContentAndSummary(rawResponse: string): {
+  content: string;
+  summary: string;
+} {
+  const stripped = stripCodeFences(rawResponse);
+  const delimiterIndex = stripped.lastIndexOf(SUMMARY_DELIMITER);
+
+  if (delimiterIndex === -1) {
+    return { content: stripped, summary: "Structural improvements" };
+  }
+
+  const content = stripped.slice(0, delimiterIndex).trim();
+  const summary =
+    stripped.slice(delimiterIndex + SUMMARY_DELIMITER.length).trim() ||
+    "Structural improvements";
+
+  return { content, summary };
 }
 
 // Get editorial suggestions from Anthropic
@@ -266,15 +304,14 @@ async function getEditorialFromAnthropic(
     return null;
   }
 
-  const revisedContent = textBlock.text.trim();
+  const rawResponse = textBlock.text;
 
-  if (revisedContent === "NO_CHANGES_NEEDED") {
+  if (stripCodeFences(rawResponse) === "NO_CHANGES_NEEDED") {
     return null;
   }
 
-  // Extract summary from the HTML comment if present
-  const commentMatch = revisedContent.match(EDITORIAL_COMMENT_REGEX);
-  const summary = commentMatch ? commentMatch[1] : "Structural improvements";
+  const { content: revisedContent, summary } =
+    extractContentAndSummary(rawResponse);
 
   return {
     filename,
@@ -298,13 +335,17 @@ async function getEditorialFromOpenAI(
     messages: [{ role: "user", content: prompt }],
   });
 
-  const revisedContent = response.choices[0]?.message?.content?.trim();
-  if (!revisedContent || revisedContent === "NO_CHANGES_NEEDED") {
+  const rawResponse = response.choices[0]?.message?.content;
+  if (!rawResponse) {
     return null;
   }
 
-  const commentMatch = revisedContent.match(EDITORIAL_COMMENT_REGEX);
-  const summary = commentMatch ? commentMatch[1] : "Structural improvements";
+  if (stripCodeFences(rawResponse) === "NO_CHANGES_NEEDED") {
+    return null;
+  }
+
+  const { content: revisedContent, summary } =
+    extractContentAndSummary(rawResponse);
 
   return {
     filename,
