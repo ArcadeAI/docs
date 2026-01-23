@@ -3,6 +3,7 @@
  */
 
 export * from "./custom-sections-file.js";
+export * from "./engine-api.js";
 export * from "./in-memory.js";
 export * from "./interfaces.js";
 export * from "./mock-engine-api.js";

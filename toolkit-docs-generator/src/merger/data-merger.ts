@@ -19,6 +19,7 @@ import type {
   ToolkitAuthType,
   ToolkitMetadata,
 } from "../types/index.js";
+import { mapWithConcurrency } from "../utils/concurrency.js";
 
 // ============================================================================
 // Merger Configuration
@@ -27,7 +28,15 @@ import type {
 export interface DataMergerConfig {
   toolkitDataSource: IToolkitDataSource;
   customSectionsSource: ICustomSectionsSource;
-  toolExampleGenerator: ToolExampleGenerator;
+  toolExampleGenerator?: ToolExampleGenerator;
+  toolkitSummaryGenerator?: ToolkitSummaryGenerator;
+  previousToolkits?: ReadonlyMap<string, MergedToolkit>;
+  /** Maximum concurrent LLM calls for tool examples (default: 5) */
+  llmConcurrency?: number;
+  /** Maximum concurrent toolkit processing (default: 3) */
+  toolkitConcurrency?: number;
+  /** Progress callback for toolkit processing */
+  onToolkitProgress?: (toolkitId: string, status: "start" | "done") => void;
 }
 
 export interface MergeResult {
@@ -42,6 +51,16 @@ export interface ToolExampleResult {
 
 export interface ToolExampleGenerator {
   generate: (tool: ToolDefinition) => Promise<ToolExampleResult>;
+}
+
+export interface ToolkitSummaryGenerator {
+  generate: (toolkit: MergedToolkit) => Promise<string>;
+}
+
+interface MergeToolkitOptions {
+  previousToolkit?: MergedToolkit;
+  /** Maximum concurrent LLM calls for tool examples (default: 5) */
+  llmConcurrency?: number;
 }
 
 // ============================================================================
@@ -83,6 +102,95 @@ export const computeAllScopes = (
   }
 
   return Array.from(scopeSet).sort();
+};
+
+const normalizeList = (values: readonly string[]): string[] =>
+  Array.from(values).sort();
+
+const stableStringify = (value: unknown): string => {
+  if (Array.isArray(value)) {
+    return `[${value.map((item) => stableStringify(item)).join(",")}]`;
+  }
+
+  if (value && typeof value === "object") {
+    const entries = Object.entries(value as Record<string, unknown>).sort(
+      ([keyA], [keyB]) => keyA.localeCompare(keyB)
+    );
+    return `{${entries
+      .map(([key, entryValue]) => {
+        return `${JSON.stringify(key)}:${stableStringify(entryValue)}`;
+      })
+      .join(",")}}`;
+  }
+
+  return JSON.stringify(value);
+};
+
+const buildToolSignatureInput = (
+  tool: ToolDefinition | MergedTool
+): Record<string, unknown> => ({
+  name: tool.name,
+  qualifiedName: tool.qualifiedName,
+  description: tool.description ?? null,
+  parameters: tool.parameters
+    .map((param) => ({
+      name: param.name,
+      type: param.type,
+      innerType: param.innerType ?? null,
+      required: param.required,
+      description: param.description ?? null,
+      enum: param.enum ? normalizeList(param.enum) : null,
+      inferrable: param.inferrable ?? true,
+    }))
+    .sort((left, right) => left.name.localeCompare(right.name)),
+  auth: tool.auth
+    ? {
+        providerId: tool.auth.providerId ?? null,
+        providerType: tool.auth.providerType,
+        scopes: normalizeList(tool.auth.scopes),
+      }
+    : null,
+  secrets: normalizeList(tool.secrets),
+  output: tool.output
+    ? {
+        type: tool.output.type,
+        description: tool.output.description ?? null,
+      }
+    : null,
+});
+
+const buildToolSignature = (tool: ToolDefinition | MergedTool): string =>
+  stableStringify(buildToolSignatureInput(tool));
+
+const buildToolkitSummarySignature = (toolkit: MergedToolkit): string =>
+  stableStringify({
+    id: toolkit.id,
+    label: toolkit.label,
+    description: toolkit.description ?? null,
+    auth: toolkit.auth
+      ? {
+          type: toolkit.auth.type,
+          providerId: toolkit.auth.providerId ?? null,
+          allScopes: normalizeList(toolkit.auth.allScopes),
+        }
+      : null,
+    tools: toolkit.tools
+      .map((tool) => ({
+        qualifiedName: tool.qualifiedName,
+        signature: buildToolSignature(tool),
+      }))
+      .sort((left, right) => left.qualifiedName.localeCompare(right.qualifiedName)),
+  });
+
+const shouldReuseExample = (
+  tool: ToolDefinition,
+  previousTool: MergedTool
+): boolean => {
+  if (!previousTool.codeExample) {
+    return false;
+  }
+
+  return buildToolSignature(tool) === buildToolSignature(previousTool);
 };
 
 /**
@@ -164,8 +272,40 @@ const transformMetadata = (
 const transformTool = async (
   tool: ToolDefinition,
   toolChunks: { [key: string]: DocumentationChunk[] },
-  toolExampleGenerator: ToolExampleGenerator
+  toolExampleGenerator: ToolExampleGenerator | undefined,
+  previousTool?: MergedTool
 ): Promise<MergedTool> => {
+  if (previousTool && shouldReuseExample(tool, previousTool)) {
+    return {
+      name: tool.name,
+      qualifiedName: tool.qualifiedName,
+      fullyQualifiedName: tool.fullyQualifiedName,
+      description: tool.description,
+      parameters: tool.parameters,
+      auth: tool.auth,
+      secrets: tool.secrets,
+      secretsInfo: previousTool.secretsInfo ?? [],
+      output: tool.output,
+      documentationChunks: toolChunks[tool.name] ?? [],
+      codeExample: previousTool.codeExample,
+    };
+  }
+
+  if (!toolExampleGenerator) {
+    return {
+      name: tool.name,
+      qualifiedName: tool.qualifiedName,
+      fullyQualifiedName: tool.fullyQualifiedName,
+      description: tool.description,
+      parameters: tool.parameters,
+      auth: tool.auth,
+      secrets: tool.secrets,
+      secretsInfo: [],
+      output: tool.output,
+      documentationChunks: toolChunks[tool.name] ?? [],
+    };
+  }
+
   const exampleResult = await toolExampleGenerator.generate(tool);
 
   return {
@@ -195,7 +335,8 @@ export const mergeToolkit = async (
   tools: readonly ToolDefinition[],
   metadata: ToolkitMetadata | null,
   customSections: CustomSections | null,
-  toolExampleGenerator: ToolExampleGenerator
+  toolExampleGenerator: ToolExampleGenerator | undefined,
+  options: MergeToolkitOptions = {}
 ): Promise<MergeResult> => {
   const warnings: string[] = [];
 
@@ -215,8 +356,9 @@ export const mergeToolkit = async (
     ? extractVersion(firstTool.fullyQualifiedName)
     : "0.0.0";
 
-  // Get toolkit description from first tool's toolkit info
-  const description = firstTool?.description ?? null;
+  // Prefer toolkit-level description when available
+  const description =
+    firstTool?.toolkitDescription ?? firstTool?.description ?? null;
 
   // Build auth info
   const authType = determineAuthType(tools);
@@ -236,8 +378,24 @@ export const mergeToolkit = async (
   const toolChunks = (customSections?.toolChunks ?? {}) as {
     [key: string]: DocumentationChunk[];
   };
-  const mergedTools = await Promise.all(
-    tools.map((tool) => transformTool(tool, toolChunks, toolExampleGenerator))
+  const previousToolByQualifiedName = new Map<string, MergedTool>();
+  if (options.previousToolkit) {
+    for (const tool of options.previousToolkit.tools) {
+      previousToolByQualifiedName.set(tool.qualifiedName, tool);
+    }
+  }
+
+  const llmConcurrency = options.llmConcurrency ?? 5;
+  const mergedTools = await mapWithConcurrency(
+    tools,
+    (tool) =>
+      transformTool(
+        tool,
+        toolChunks,
+        toolExampleGenerator,
+        previousToolByQualifiedName.get(tool.qualifiedName)
+      ),
+    llmConcurrency
   );
 
   // Build final toolkit
@@ -270,12 +428,69 @@ export const mergeToolkit = async (
 export class DataMerger {
   private readonly toolkitDataSource: IToolkitDataSource;
   private readonly customSectionsSource: ICustomSectionsSource;
-  private readonly toolExampleGenerator: ToolExampleGenerator;
+  private readonly toolExampleGenerator: ToolExampleGenerator | undefined;
+  private readonly toolkitSummaryGenerator: ToolkitSummaryGenerator | undefined;
+  private readonly previousToolkits:
+    | ReadonlyMap<string, MergedToolkit>
+    | undefined;
+  private readonly llmConcurrency: number;
+  private readonly toolkitConcurrency: number;
+  private readonly onToolkitProgress:
+    | ((toolkitId: string, status: "start" | "done") => void)
+    | undefined;
 
   constructor(config: DataMergerConfig) {
     this.toolkitDataSource = config.toolkitDataSource;
     this.customSectionsSource = config.customSectionsSource;
     this.toolExampleGenerator = config.toolExampleGenerator;
+    this.toolkitSummaryGenerator = config.toolkitSummaryGenerator;
+    this.previousToolkits = config.previousToolkits;
+    this.llmConcurrency = config.llmConcurrency ?? 5;
+    this.toolkitConcurrency = config.toolkitConcurrency ?? 3;
+    this.onToolkitProgress = config.onToolkitProgress;
+  }
+
+  private getPreviousToolkit(toolkitId: string): MergedToolkit | undefined {
+    if (!this.previousToolkits) {
+      return undefined;
+    }
+
+    return (
+      this.previousToolkits.get(toolkitId.toLowerCase()) ??
+      this.previousToolkits.get(toolkitId)
+    );
+  }
+
+  private async maybeGenerateSummary(
+    result: MergeResult,
+    previousToolkit?: MergedToolkit
+  ): Promise<void> {
+    if (previousToolkit?.summary) {
+      const currentSignature = buildToolkitSummarySignature(result.toolkit);
+      const previousSignature = buildToolkitSummarySignature(previousToolkit);
+      if (currentSignature === previousSignature) {
+        result.toolkit.summary = previousToolkit.summary;
+        return;
+      }
+    }
+
+    if (!this.toolkitSummaryGenerator) {
+      return;
+    }
+
+    if (result.toolkit.summary) {
+      return;
+    }
+
+    try {
+      const summary = await this.toolkitSummaryGenerator.generate(result.toolkit);
+      result.toolkit.summary = summary;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      result.warnings.push(
+        `Summary generation failed for ${result.toolkit.id}: ${message}`
+      );
+    }
   }
 
   /**
@@ -294,36 +509,59 @@ export class DataMerger {
     const customSections =
       await this.customSectionsSource.getCustomSections(toolkitId);
 
-    return mergeToolkit(
+    const previousToolkit = this.getPreviousToolkit(toolkitId);
+    const result = await mergeToolkit(
       toolkitId,
       toolkitData.tools,
       toolkitData.metadata,
       customSections,
-      this.toolExampleGenerator
+      this.toolExampleGenerator,
+      {
+        ...(previousToolkit ? { previousToolkit } : {}),
+        llmConcurrency: this.llmConcurrency,
+      }
     );
+    await this.maybeGenerateSummary(result, previousToolkit);
+
+    return result;
   }
 
   /**
    * Merge data for all toolkits
    */
   async mergeAllToolkits(): Promise<MergeResult[]> {
-    const results: MergeResult[] = [];
-
     const allToolkitsData = await this.toolkitDataSource.fetchAllToolkitsData();
 
-    for (const [toolkitId, toolkitData] of allToolkitsData) {
-      const customSections =
-        await this.customSectionsSource.getCustomSections(toolkitId);
+    const toolkitEntries = Array.from(allToolkitsData.entries());
 
-      const result = await mergeToolkit(
-        toolkitId,
-        toolkitData.tools,
-        toolkitData.metadata,
-        customSections,
-        this.toolExampleGenerator
-      );
-      results.push(result);
-    }
+    const results = await mapWithConcurrency(
+      toolkitEntries,
+      async ([toolkitId, toolkitData]) => {
+        this.onToolkitProgress?.(toolkitId, "start");
+
+        const customSections =
+          await this.customSectionsSource.getCustomSections(toolkitId);
+
+        const previousToolkit = this.getPreviousToolkit(toolkitId);
+        const result = await mergeToolkit(
+          toolkitId,
+          toolkitData.tools,
+          toolkitData.metadata,
+          customSections,
+          this.toolExampleGenerator,
+          {
+            ...(previousToolkit ? { previousToolkit } : {}),
+            llmConcurrency: this.llmConcurrency,
+          }
+        );
+        await this.maybeGenerateSummary(result, previousToolkit);
+
+        this.onToolkitProgress?.(toolkitId, "done");
+
+        return result;
+      },
+      this.toolkitConcurrency
+    );
 
     return results;
   }

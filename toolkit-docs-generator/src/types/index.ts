@@ -99,6 +99,7 @@ export const ToolDefinitionSchema = z.object({
   qualifiedName: z.string(),
   fullyQualifiedName: z.string(),
   description: z.string().nullable(),
+  toolkitDescription: z.string().nullable().optional(),
   parameters: z.array(ToolParameterSchema),
   auth: ToolAuthSchema.nullable(),
   secrets: z.array(z.string()),

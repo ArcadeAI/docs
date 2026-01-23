@@ -11,6 +11,7 @@ import type {
   ToolkitIndexEntry,
 } from "../types/index.js";
 import { MergedToolkitSchema } from "../types/index.js";
+import { readToolkitsFromDir } from "./output-verifier.js";
 
 // ============================================================================
 // Generator Configuration
@@ -23,6 +24,8 @@ export interface JsonGeneratorConfig {
   prettyPrint?: boolean;
   /** Whether to generate an index file (default: true) */
   generateIndex?: boolean;
+  /** Where to source toolkits for the index file */
+  indexSource?: "current" | "output";
   /** Whether to validate output with Zod (default: true) */
   validateOutput?: boolean;
 }
@@ -45,12 +48,14 @@ export class JsonGenerator {
   private readonly outputDir: string;
   private readonly prettyPrint: boolean;
   private readonly generateIndex: boolean;
+  private readonly indexSource: "current" | "output";
   private readonly validateOutput: boolean;
 
   constructor(config: JsonGeneratorConfig) {
     this.outputDir = config.outputDir;
     this.prettyPrint = config.prettyPrint ?? true;
     this.generateIndex = config.generateIndex ?? true;
+    this.indexSource = config.indexSource ?? "current";
     this.validateOutput = config.validateOutput ?? true;
   }
 
@@ -105,7 +110,11 @@ export class JsonGenerator {
     // Generate index file
     if (this.generateIndex && toolkits.length > 0) {
       try {
-        const indexPath = await this.generateIndexFile(toolkits);
+        const indexToolkits =
+          this.indexSource === "output"
+            ? await this.getToolkitsFromOutputDir(errors)
+            : toolkits;
+        const indexPath = await this.generateIndexFile(indexToolkits);
         filesWritten.push(indexPath);
       } catch (error) {
         errors.push(`Failed to write index: ${error}`);
@@ -146,6 +155,16 @@ export class JsonGenerator {
 
     await writeFile(filePath, content, "utf-8");
     return filePath;
+  }
+
+  private async getToolkitsFromOutputDir(
+    errors: string[]
+  ): Promise<MergedToolkit[]> {
+    const readResult = await readToolkitsFromDir(this.outputDir);
+    if (readResult.errors.length > 0) {
+      errors.push(...readResult.errors);
+    }
+    return readResult.toolkits;
   }
 }
 

@@ -1,5 +1,7 @@
 "use client";
 
+import { CheckCircle2 } from "lucide-react";
+
 import type { ParametersTableProps, ToolParameter } from "../types";
 
 /**
@@ -37,88 +39,97 @@ export function ParametersTable({
 }: ParametersTableProps) {
   if (!parameters || parameters.length === 0) {
     return (
-      <p className="my-3 text-muted-foreground text-sm">
-        No parameters required.
-      </p>
+      <div className="rounded-lg border border-neutral-dark-high/40 bg-neutral-dark/30 p-4 text-center">
+        <p className="text-sm text-muted-foreground/70">No parameters required.</p>
+      </div>
     );
   }
 
   return (
-    <table className="my-4 w-full border-collapse overflow-hidden rounded-lg border-2 border-neutral-dark-high shadow-sm sm:text-sm">
-      <thead>
-        <tr>
-          <th className="border-neutral-dark-high border-b-2 bg-neutral-dark px-3 py-2.5 text-left text-neutral-light-high text-sm">
-            Parameter
-          </th>
-          <th className="border-neutral-dark-high border-b-2 bg-neutral-dark px-3 py-2.5 text-left text-neutral-light-high text-sm">
-            Type
-          </th>
-          <th className="border-neutral-dark-high border-b-2 bg-neutral-dark px-3 py-2.5 text-left text-neutral-light-high text-sm">
-            Required
-          </th>
-          <th className="border-neutral-dark-high border-b-2 bg-neutral-dark px-3 py-2.5 text-left text-neutral-light-high text-sm">
-            Description
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        {parameters.map((param, index) => {
-          const enumValues = formatEnumValues(param.enum);
-          const rowClass =
-            index % 2 === 0
-              ? "bg-neutral-dark"
-              : "border-neutral-dark-medium border-b bg-transparent";
+    <div className="overflow-hidden rounded-xl border border-neutral-dark-high/50 shadow-sm">
+      <table className="w-full border-collapse text-sm">
+        <thead>
+          <tr className="bg-gradient-to-r from-neutral-dark to-neutral-dark/80">
+            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-light-high/80">
+              Parameter
+            </th>
+            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-light-high/80">
+              Type
+            </th>
+            <th className="w-20 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-neutral-light-high/80">
+              Req.
+            </th>
+            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-light-high/80">
+              Description
+            </th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-neutral-dark-high/30">
+          {parameters.map((param, index) => {
+            const enumValues = formatEnumValues(param.enum);
 
-          return (
-            <tr className={`text-xs ${rowClass}`} key={param.name}>
-              <td className="border-neutral-dark-low border-b px-3 py-2 text-left font-semibold text-xs">
-                <code>{param.name}</code>
-              </td>
-              <td className="border-neutral-dark-low border-b px-3 py-2 text-left text-xs">
-                <code>{formatParameterType(param)}</code>
-              </td>
-              <td className="border-neutral-dark-low border-b px-3 py-2 text-left text-xs">
-                {param.required ? "Yes" : "No"}
-              </td>
-              <td className="border-neutral-dark-low border-b px-3 py-2 text-left text-xs">
-                {param.description ?? "No description provided."}
-                {enumValues.length > 0 && (
-                  <div className="mt-1 text-muted-foreground text-xs">
-                    Options:{" "}
-                    {enumValues.map((value, valueIndex) => {
-                      const content = <code>{value}</code>;
-                      const separator =
-                        valueIndex < enumValues.length - 1 ? ", " : "";
+            return (
+              <tr
+                className={index % 2 === 0 ? "bg-neutral-dark/20" : "bg-transparent"}
+                key={param.name}
+              >
+                <td className="px-4 py-3.5">
+                  <div className="flex items-center gap-2">
+                    {param.required && (
+                      <span
+                        className="h-2 w-2 shrink-0 rounded-full bg-red-400"
+                        title="Required"
+                      />
+                    )}
+                    <code className="font-medium text-text-color">{param.name}</code>
+                  </div>
+                </td>
+                <td className="px-4 py-3.5">
+                  <code className="rounded-md bg-neutral-dark-medium px-2 py-1 text-xs text-muted-foreground">
+                    {formatParameterType(param)}
+                  </code>
+                </td>
+                <td className="px-4 py-3.5 text-center">
+                  {param.required ? (
+                    <CheckCircle2 className="mx-auto h-4 w-4 text-red-400" />
+                  ) : (
+                    <span className="text-muted-foreground/50">—</span>
+                  )}
+                </td>
+                <td className="px-4 py-3.5 text-sm text-text-color/80">
+                  {param.description ?? "No description provided."}
+                  {enumValues.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {enumValues.map((value) => {
+                        const chip = (
+                          <code className="rounded-md border border-neutral-dark-high bg-neutral-dark/60 px-1.5 py-0.5 text-xs">
+                            {value}
+                          </code>
+                        );
 
-                      if (enumBaseUrl) {
-                        return (
-                          <span key={value}>
+                        if (enumBaseUrl) {
+                          return (
                             <a
                               className="text-brand-accent hover:underline"
                               href={`${enumBaseUrl}${encodeURIComponent(value)}`}
+                              key={value}
                             >
-                              {content}
+                              {chip}
                             </a>
-                            {separator}
-                          </span>
-                        );
-                      }
+                          );
+                        }
 
-                      return (
-                        <span key={value}>
-                          {content}
-                          {separator}
-                        </span>
-                      );
-                    })}
-                  </div>
-                )}
-              </td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
+                        return <span key={value}>{chip}</span>;
+                      })}
+                    </div>
+                  )}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
   );
 }
 

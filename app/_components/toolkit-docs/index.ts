@@ -34,6 +34,9 @@
 // Types
 export * from "./types";
 
+// Constants
+export * from "./constants";
+
 // Components
 export {
   DocumentationChunkRenderer,

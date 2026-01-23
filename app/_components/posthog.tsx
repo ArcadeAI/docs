@@ -6,11 +6,21 @@ import posthog from "posthog-js";
 import { PostHogProvider } from "posthog-js/react";
 import { useEffect } from "react";
 
+function createNoopPosthogClient() {
+  return {
+    capture: () => {},
+    identify: () => {},
+    reset: () => {},
+    // biome-ignore lint/suspicious/noExplicitAny: Minimal no-op client for disabled analytics
+  } as any;
+}
+
 export const PostHog = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
+  const isEnabled = Boolean(process.env.NEXT_PUBLIC_POSTHOG_KEY);
 
   useEffect(() => {
-    if (process.env.NEXT_PUBLIC_POSTHOG_KEY) {
+    if (isEnabled) {
       posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
         api_host:
           process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com",
@@ -34,18 +44,21 @@ export const PostHog = ({ children }: { children: React.ReactNode }) => {
         },
       });
     } else {
-      // biome-ignore lint/suspicious/noConsole: This is ok for PostHog
-      console.warn("Analytics is disabled because no key is set");
+      // No key: keep analytics fully disabled and avoid noisy console errors.
     }
-  }, []);
+  }, [isEnabled]);
 
   // Track page views when pathname changes
   // biome-ignore lint/correctness/useExhaustiveDependencies: pathname is required for route change tracking
   useEffect(() => {
-    if (process.env.NEXT_PUBLIC_POSTHOG_KEY) {
+    if (isEnabled) {
       posthog?.capture("$pageview");
     }
-  }, [pathname]);
+  }, [pathname, isEnabled]);
 
-  return <PostHogProvider client={posthog}>{children}</PostHogProvider>;
+  return (
+    <PostHogProvider client={isEnabled ? posthog : createNoopPosthogClient()}>
+      {children}
+    </PostHogProvider>
+  );
 };

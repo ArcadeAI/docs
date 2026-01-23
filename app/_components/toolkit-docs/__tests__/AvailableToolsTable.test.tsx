@@ -1,13 +1,15 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  buildToolsTableData,
+  buildScopeDisplayItems,
+  buildSecretDisplayItems,
+  filterTools,
   toToolAnchorId,
 } from "../components/AvailableToolsTable";
 
 describe("AvailableToolsTable helpers", () => {
-  it("builds table data with fallback descriptions", () => {
-    const data = buildToolsTableData([
+  it("builds secret display items from secrets info", () => {
+    const items = buildSecretDisplayItems(
       {
         name: "CreateIssue",
         qualifiedName: "Github.CreateIssue",
@@ -15,54 +17,64 @@ describe("AvailableToolsTable helpers", () => {
         secretsInfo: [
           { name: "GITHUB_API_KEY", type: "api_key" },
           { name: "SECONDARY_TOKEN", type: "token" },
-          { name: "ANOTHER_API_KEY", type: "api_key" },
         ],
       },
-      {
-        name: "ListPullRequests",
-        qualifiedName: "Github.ListPullRequests",
-        description: null,
-        secrets: ["WEBHOOK_SECRET"],
-      },
-      {
-        name: "GetRepo",
-        qualifiedName: "Github.GetRepo",
-        description: null,
-        secrets: [],
-      },
-    ]);
-
-    expect(data).toEqual([
-      ["Github.CreateIssue", "Create an issue", "API key, Token"],
-      ["Github.ListPullRequests", "No description provided.", "WEBHOOK_SECRET"],
-      ["Github.GetRepo", "No description provided.", "None"],
-    ]);
-  });
-
-  it("includes secret type docs base URL when provided", () => {
-    const data = buildToolsTableData(
-      [
-        {
-          name: "CreateIssue",
-          qualifiedName: "Github.CreateIssue",
-          description: "Create an issue",
-          secretsInfo: [{ name: "GITHUB_API_KEY", type: "api_key" }],
-        },
-      ],
-      {
-        secretsDisplay: "types",
-        secretTypeDocsBaseUrl: "/references/secrets",
-      }
+      { secretsDisplay: "summary" }
     );
 
-    expect(data).toEqual([
-      [
-        "Github.CreateIssue",
-        "Create an issue",
-        "API key (/references/secrets/api_key)",
-      ],
+    expect(items).toEqual([
+      { label: "API key", href: undefined },
+      { label: "Token", href: undefined },
     ]);
   });
+
+  it("adds hrefs for secret type docs when base URL is provided", () => {
+    const items = buildSecretDisplayItems(
+      {
+        name: "CreateIssue",
+        qualifiedName: "Github.CreateIssue",
+        description: "Create an issue",
+        secretsInfo: [{ name: "GITHUB_API_KEY", type: "api_key" }],
+      },
+      { secretsDisplay: "types", secretTypeDocsBaseUrl: "/references/secrets" }
+    );
+
+    expect(items).toEqual([
+      { label: "API key", href: "/references/secrets/api_key" },
+    ]);
+  });
+
+  it("filters tools by query and filter mode", () => {
+    const tools = [
+      {
+        name: "CreateIssue",
+        qualifiedName: "Github.CreateIssue",
+        description: "Create an issue",
+        scopes: ["repo"],
+        secrets: ["API_KEY"],
+      },
+      {
+        name: "ListRepos",
+        qualifiedName: "Github.ListRepos",
+        description: "List repositories",
+        scopes: [],
+        secrets: [],
+      },
+    ];
+
+    expect(filterTools(tools, "list", "all", [])).toEqual([tools[1]]);
+    expect(filterTools(tools, "", "has_scopes", [])).toEqual([tools[0]]);
+    expect(filterTools(tools, "", "no_secrets", [])).toEqual([tools[1]]);
+    expect(filterTools(tools, "", "all", ["repo"])).toEqual([tools[0]]);
+    expect(filterTools(tools, "", "all", ["missing"])).toEqual([]);
+  });
+
+  it("builds scope display items from scopes", () => {
+    expect(
+      buildScopeDisplayItems([" scope.one ", "", "scope.two", "scope.one"])
+    ).toEqual(["scope.one", "scope.two"]);
+  });
+
 
   it("matches the anchor id logic used by TableOfContents", () => {
     expect(toToolAnchorId("Github.CreateIssue")).toBe("githubcreateissue");

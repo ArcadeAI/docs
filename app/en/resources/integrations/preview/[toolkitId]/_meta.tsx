@@ -1,0 +1,14 @@
+import type { MetaRecord } from "nextra";
+
+const meta: MetaRecord = {
+  "*": {
+    theme: {
+      breadcrumb: false,
+      toc: false,
+      copyPage: true,
+    },
+  },
+};
+
+export default meta;
+

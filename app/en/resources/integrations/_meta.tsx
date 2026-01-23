@@ -49,6 +49,10 @@ const meta: MetaRecord = {
   "contribute-a-server": {
     title: "Contribute a Server",
   },
+  preview: {
+    title: "Preview (Dev)",
+    display: "hidden",
+  },
 };
 
 export default meta;

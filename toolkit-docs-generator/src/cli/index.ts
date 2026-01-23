@@ -12,21 +12,33 @@
  */
 
 import chalk from "chalk";
+import { readFile, readdir, rm } from "fs/promises";
 import { Command } from "commander";
 import ora from "ora";
 import { join, resolve } from "path";
-import { createJsonGenerator } from "../generator/json-generator.js";
+import { createJsonGenerator, verifyOutputDir } from "../generator/index.js";
 import {
   createLlmClient,
+  type LlmClient,
   type LlmProvider,
   LlmToolExampleGenerator,
+  LlmToolkitSummaryGenerator,
 } from "../llm/index.js";
 import type { MergeResult } from "../merger/data-merger.js";
 import { createDataMerger } from "../merger/data-merger.js";
 import { createCustomSectionsFileSource } from "../sources/custom-sections-file.js";
 import { createEmptyCustomSectionsSource } from "../sources/in-memory.js";
-import { createMockToolkitDataSource } from "../sources/toolkit-data-source.js";
-import { type ProviderVersion, ProviderVersionSchema } from "../types/index.js";
+import { createMockMetadataSource } from "../sources/mock-metadata.js";
+import {
+  createEngineToolkitDataSource,
+  createMockToolkitDataSource,
+} from "../sources/toolkit-data-source.js";
+import {
+  MergedToolkitSchema,
+  type MergedToolkit,
+  type ProviderVersion,
+  ProviderVersionSchema,
+} from "../types/index.js";
 
 const program = new Command();
 
@@ -62,6 +74,34 @@ const parseProviders = (input: string): ProviderVersion[] => {
  */
 const getDefaultMockDataDir = (): string => join(process.cwd(), "mock-data");
 
+/**
+ * Get the default output directory for docs JSON.
+ */
+const getDefaultOutputDir = (): string => {
+  const cwd = process.cwd();
+  if (cwd.endsWith("toolkit-docs-generator")) {
+    return resolve(cwd, "..", "data", "toolkits");
+  }
+  return resolve(cwd, "data", "toolkits");
+};
+
+const clearOutputDir = async (
+  outputDir: string,
+  verbose: boolean
+): Promise<void> => {
+  const resolvedDir = resolve(outputDir);
+  const repoRoot = resolve(process.cwd());
+  if (resolvedDir === "/" || resolvedDir === repoRoot) {
+    throw new Error(
+      `Refusing to overwrite output directory: ${resolvedDir}`
+    );
+  }
+  await rm(resolvedDir, { recursive: true, force: true });
+  if (verbose) {
+    console.log(chalk.dim(`Cleared output directory: ${resolvedDir}`));
+  }
+};
+
 const resolveLlmProvider = (value?: string): LlmProvider => {
   if (value === "openai" || value === "anthropic") {
     return value;
@@ -79,7 +119,13 @@ const resolveLlmConfig = (options: {
   llmTemperature?: number;
   llmMaxTokens?: number;
   llmSystemPrompt?: string;
-}) => {
+}): {
+  client: LlmClient;
+  model: string;
+  temperature?: number;
+  maxTokens?: number;
+  systemPrompt?: string;
+} => {
   const provider = resolveLlmProvider(
     options.llmProvider ?? process.env.LLM_PROVIDER
   );
@@ -111,7 +157,7 @@ const resolveLlmConfig = (options: {
     },
   });
 
-  return new LlmToolExampleGenerator({
+  return {
     client,
     model,
     ...(options.llmTemperature !== undefined
@@ -123,7 +169,101 @@ const resolveLlmConfig = (options: {
     ...(options.llmSystemPrompt
       ? { systemPrompt: options.llmSystemPrompt }
       : {}),
-  });
+  };
+};
+
+const resolveEngineConfig = (options: {
+  engineApiUrl?: string;
+  engineApiKey?: string;
+  enginePageSize?: number;
+}) => {
+  const baseUrl = options.engineApiUrl ?? process.env.ENGINE_API_URL;
+  const apiKey = options.engineApiKey ?? process.env.ENGINE_API_KEY;
+
+  if (!baseUrl && !apiKey) {
+    return null;
+  }
+
+  if (!baseUrl || !apiKey) {
+    throw new Error(
+      "Engine API requires both --engine-api-url and --engine-api-key (or ENGINE_API_URL/ENGINE_API_KEY)."
+    );
+  }
+
+  return {
+    baseUrl,
+    apiKey,
+    ...(options.enginePageSize ? { pageSize: options.enginePageSize } : {}),
+  };
+};
+
+const normalizeToolkitKey = (toolkitId: string): string =>
+  toolkitId.toLowerCase();
+
+const loadPreviousToolkit = async (
+  filePath: string
+): Promise<MergedToolkit | null> => {
+  try {
+    const content = await readFile(filePath, "utf-8");
+    const parsed = JSON.parse(content) as unknown;
+    const result = MergedToolkitSchema.safeParse(parsed);
+    if (!result.success) {
+      return null;
+    }
+    return result.data;
+  } catch {
+    return null;
+  }
+};
+
+const loadPreviousToolkitsForProviders = async (
+  dir: string,
+  providers: ProviderVersion[],
+  verbose: boolean
+): Promise<ReadonlyMap<string, MergedToolkit>> => {
+  const previousToolkits = new Map<string, MergedToolkit>();
+
+  for (const provider of providers) {
+    const filePath = join(dir, `${provider.provider.toLowerCase()}.json`);
+    const toolkit = await loadPreviousToolkit(filePath);
+    if (toolkit) {
+      previousToolkits.set(normalizeToolkitKey(toolkit.id), toolkit);
+    } else if (verbose) {
+      console.log(
+        chalk.dim(`No previous output found for ${provider.provider}.`)
+      );
+    }
+  }
+
+  return previousToolkits;
+};
+
+const loadPreviousToolkitsFromDir = async (
+  dir: string,
+  verbose: boolean
+): Promise<ReadonlyMap<string, MergedToolkit>> => {
+  const previousToolkits = new Map<string, MergedToolkit>();
+
+  try {
+    const entries = await readdir(dir);
+    const jsonFiles = entries.filter(
+      (entry) => entry.endsWith(".json") && entry !== "index.json"
+    );
+
+    for (const fileName of jsonFiles) {
+      const filePath = join(dir, fileName);
+      const toolkit = await loadPreviousToolkit(filePath);
+      if (toolkit) {
+        previousToolkits.set(normalizeToolkitKey(toolkit.id), toolkit);
+      }
+    }
+  } catch (error) {
+    if (verbose) {
+      console.log(chalk.dim(`Failed to read previous output: ${error}`));
+    }
+  }
+
+  return previousToolkits;
 };
 
 const processProviders = async (
@@ -161,13 +301,26 @@ program
 
 program
   .command("generate")
-  .description("Generate documentation for specified providers")
-  .requiredOption(
+  .description("Generate documentation for specific providers or all toolkits")
+  .option(
     "-p, --providers <providers>",
     'Comma-separated list of providers with optional versions (e.g., "Github:1.0.0,Slack:2.1.0" or "Github,Slack")'
   )
-  .option("-o, --output <dir>", "Output directory", "./output")
+  .option("--all", "Generate documentation for all toolkits", false)
+  .option("-o, --output <dir>", "Output directory", getDefaultOutputDir())
   .option("--mock-data-dir <dir>", "Path to mock data directory")
+  .option("--metadata-file <file>", "Path to metadata JSON file")
+  .option("--engine-api-url <url>", "Engine API base URL")
+  .option("--engine-api-key <key>", "Engine API key")
+  .option("--engine-page-size <number>", "Engine API page size", (value) =>
+    Number.parseInt(value, 10)
+  )
+  .option("--previous-output <dir>", "Path to previous output directory")
+  .option("--force-regenerate", "Regenerate all examples and summary", false)
+  .option(
+    "--overwrite-output",
+    "Delete output directory before writing new JSON"
+  )
   .option("--llm-provider <provider>", "LLM provider (openai|anthropic)")
   .option("--llm-model <model>", "LLM model to use")
   .option("--llm-api-key <key>", "LLM API key")
@@ -179,13 +332,38 @@ program
     Number.parseInt(value, 10)
   )
   .option("--llm-system-prompt <text>", "LLM system prompt override")
+  .option(
+    "--llm-concurrency <number>",
+    "Max concurrent LLM calls per toolkit (default: 5)",
+    (value) => Number.parseInt(value, 10)
+  )
+  .option(
+    "--toolkit-concurrency <number>",
+    "Max concurrent toolkit processing (default: 3)",
+    (value) => Number.parseInt(value, 10)
+  )
+  .option(
+    "--no-index-from-output",
+    "Do not rebuild index from output directory"
+  )
+  .option("--skip-examples", "Skip LLM example generation", false)
+  .option("--skip-summary", "Skip LLM summary generation", false)
+  .option("--no-verify-output", "Skip output verification")
   .option("--custom-sections <file>", "Path to custom sections JSON")
   .option("--verbose", "Enable verbose logging", false)
   .action(
     async (options: {
-      providers: string;
+      providers?: string;
+      all: boolean;
       output: string;
       mockDataDir?: string;
+      metadataFile?: string;
+      engineApiUrl?: string;
+      engineApiKey?: string;
+      enginePageSize?: number;
+      previousOutput?: string;
+      forceRegenerate: boolean;
+      overwriteOutput?: boolean;
       llmProvider?: string;
       llmModel?: string;
       llmApiKey?: string;
@@ -193,32 +371,100 @@ program
       llmTemperature?: number;
       llmMaxTokens?: number;
       llmSystemPrompt?: string;
+      llmConcurrency?: number;
+      toolkitConcurrency?: number;
+      indexFromOutput: boolean;
+      skipExamples: boolean;
+      skipSummary: boolean;
+      verifyOutput: boolean;
       customSections?: string;
       verbose: boolean;
     }) => {
       const spinner = ora("Parsing input...").start();
 
       try {
-        // Parse providers
-        const providers = parseProviders(options.providers);
-        spinner.succeed(`Parsed ${providers.length} provider(s)`);
+        const runAll = options.all;
+        if (runAll && options.providers) {
+          throw new Error('Use either "--all" or "--providers", not both.');
+        }
 
-        if (options.verbose) {
-          console.log(chalk.cyan("\nProviders to process:"));
-          for (const pv of providers) {
-            const version = pv.version ?? "latest";
-            console.log(chalk.dim(`  - ${pv.provider}:${version}`));
+        const providers = runAll
+          ? []
+          : options.providers
+            ? parseProviders(options.providers)
+            : null;
+
+        if (!runAll && !providers) {
+          throw new Error('Missing required option "--providers" or "--all".');
+        }
+
+        if (providers) {
+          spinner.succeed(`Parsed ${providers.length} provider(s)`);
+
+          if (options.verbose) {
+            console.log(chalk.cyan("\nProviders to process:"));
+            for (const pv of providers) {
+              const version = pv.version ?? "latest";
+              console.log(chalk.dim(`  - ${pv.provider}:${version}`));
+            }
           }
+        } else {
+          spinner.succeed("Parsed all toolkits");
         }
 
         // Initialize sources
         spinner.start("Initializing data sources...");
 
         const mockDataDir = options.mockDataDir ?? getDefaultMockDataDir();
-        const toolkitDataSource = createMockToolkitDataSource({
-          dataDir: mockDataDir,
-        });
-        const toolExampleGenerator = resolveLlmConfig(options);
+        const metadataFile =
+          options.metadataFile ?? join(mockDataDir, "metadata.json");
+        const metadataSource = createMockMetadataSource(metadataFile);
+        const engineConfig = resolveEngineConfig(options);
+        const toolkitDataSource = engineConfig
+          ? createEngineToolkitDataSource({
+              engine: engineConfig,
+              metadataSource,
+            })
+          : createMockToolkitDataSource({
+              dataDir: mockDataDir,
+            });
+        const needsExamples = !options.skipExamples;
+        const needsSummary = !options.skipSummary;
+        const needsLlm = needsExamples || needsSummary;
+
+        const llmConfig = needsLlm ? resolveLlmConfig(options) : null;
+
+        let toolExampleGenerator: LlmToolExampleGenerator | undefined;
+        if (needsExamples) {
+          if (!llmConfig) {
+            throw new Error("LLM configuration is required for examples.");
+          }
+          toolExampleGenerator = new LlmToolExampleGenerator(llmConfig);
+        }
+
+        let toolkitSummaryGenerator: LlmToolkitSummaryGenerator | undefined;
+        if (needsSummary) {
+          if (!llmConfig) {
+            throw new Error("LLM configuration is required for summaries.");
+          }
+          toolkitSummaryGenerator = new LlmToolkitSummaryGenerator(llmConfig);
+        }
+        const previousOutputDir = options.forceRegenerate
+          ? undefined
+          : options.previousOutput ??
+            (options.overwriteOutput ? undefined : options.output);
+        const previousToolkits = previousOutputDir
+          ? runAll
+            ? await loadPreviousToolkitsFromDir(
+                previousOutputDir,
+                options.verbose
+              )
+            : await loadPreviousToolkitsForProviders(
+                previousOutputDir,
+                providers ?? [],
+                options.verbose
+              )
+          : undefined;
 
         // Custom sections source
         const customSectionsSource = options.customSections
@@ -227,11 +473,36 @@ program
 
         spinner.succeed("Data sources initialized");
 
+        if (options.overwriteOutput) {
+          spinner.start("Clearing output directory...");
+          await clearOutputDir(options.output, options.verbose);
+          spinner.succeed("Output directory cleared");
+        }
+
+        // Track progress for --all mode
+        const completedToolkits: string[] = [];
+        const onToolkitProgress = (
+          toolkitId: string,
+          status: "start" | "done"
+        ) => {
+          if (status === "start") {
+            spinner.text = `Processing ${toolkitId}...`;
+          } else {
+            completedToolkits.push(toolkitId);
+            spinner.text = `Processed ${completedToolkits.length} toolkit(s) (latest: ${toolkitId})`;
+          }
+        };
+
         // Create merger using unified source
         const merger = createDataMerger({
           toolkitDataSource,
           customSectionsSource,
-          toolExampleGenerator,
+          ...(toolExampleGenerator ? { toolExampleGenerator } : {}),
+          ...(toolkitSummaryGenerator ? { toolkitSummaryGenerator } : {}),
+          ...(previousToolkits ? { previousToolkits } : {}),
+          ...(options.llmConcurrency ? { llmConcurrency: options.llmConcurrency } : {}),
+          ...(options.toolkitConcurrency ? { toolkitConcurrency: options.toolkitConcurrency } : {}),
+          ...(runAll ? { onToolkitProgress } : {}),
         });
 
         // Create generator
@@ -239,21 +510,30 @@ program
           outputDir: resolve(options.output),
           prettyPrint: true,
           generateIndex: true,
+          indexSource: options.indexFromOutput ? "output" : "current",
         });
 
-        // Process each provider
-        const allResults = await processProviders(
-          providers,
-          merger,
-          spinner,
-          options.verbose
-        );
+        // Process toolkits
+        if (runAll) {
+          spinner.start("Processing toolkits...");
+        }
+        const allResults = runAll
+          ? await merger.mergeAllToolkits()
+          : await processProviders(
+              providers ?? [],
+              merger,
+              spinner,
+              options.verbose
+            );
+        if (runAll) {
+          spinner.succeed(`Processed ${allResults.length} toolkit(s)`);
+        }
 
         // Generate output files
         if (allResults.length > 0) {
           spinner.start("Writing output files...");
 
-          const toolkits = allResults.map((r) => r.toolkit);
+        const toolkits = allResults.map((r) => r.toolkit);
           const genResult = await generator.generateAll(toolkits);
 
           if (genResult.errors.length > 0) {
@@ -269,6 +549,19 @@ program
             console.log(chalk.dim(`  ${file}`));
           }
         }
+
+        if (options.verifyOutput) {
+          spinner.start("Verifying output...");
+          const verification = await verifyOutputDir(resolve(options.output));
+          if (!verification.valid) {
+            spinner.fail("Output verification failed.");
+            for (const error of verification.errors) {
+              console.log(chalk.red(`  - ${error}`));
+            }
+            process.exit(1);
+          }
+          spinner.succeed("Output verified");
+        }
       } catch (error) {
         spinner.fail(
           `Error: ${error instanceof Error ? error.message : String(error)}`
@@ -281,8 +574,20 @@ program
 program
   .command("generate-all")
   .description("Generate documentation for all toolkits in mock data")
-  .option("-o, --output <dir>", "Output directory", "./output")
+  .option("-o, --output <dir>", "Output directory", getDefaultOutputDir())
   .option("--mock-data-dir <dir>", "Path to mock data directory")
+  .option("--metadata-file <file>", "Path to metadata JSON file")
+  .option("--engine-api-url <url>", "Engine API base URL")
+  .option("--engine-api-key <key>", "Engine API key")
+  .option("--engine-page-size <number>", "Engine API page size", (value) =>
+    Number.parseInt(value, 10)
+  )
+  .option("--previous-output <dir>", "Path to previous output directory")
+  .option("--force-regenerate", "Regenerate all examples and summary", false)
+  .option(
+    "--overwrite-output",
+    "Delete output directory before writing new JSON"
+  )
   .option("--llm-provider <provider>", "LLM provider (openai|anthropic)")
   .option("--llm-model <model>", "LLM model to use")
   .option("--llm-api-key <key>", "LLM API key")
@@ -294,12 +599,36 @@ program
     Number.parseInt(value, 10)
   )
   .option("--llm-system-prompt <text>", "LLM system prompt override")
+  .option(
+    "--llm-concurrency <number>",
+    "Max concurrent LLM calls per toolkit (default: 5)",
+    (value) => Number.parseInt(value, 10)
+  )
+  .option(
+    "--toolkit-concurrency <number>",
+    "Max concurrent toolkit processing (default: 3)",
+    (value) => Number.parseInt(value, 10)
+  )
+  .option(
+    "--no-index-from-output",
+    "Do not rebuild index from output directory"
+  )
+  .option("--skip-examples", "Skip LLM example generation", false)
+  .option("--skip-summary", "Skip LLM summary generation", false)
+  .option("--no-verify-output", "Skip output verification")
   .option("--custom-sections <file>", "Path to custom sections JSON")
   .option("--verbose", "Enable verbose logging", false)
   .action(
     async (options: {
       output: string;
       mockDataDir?: string;
+      metadataFile?: string;
+      engineApiUrl?: string;
+      engineApiKey?: string;
+      enginePageSize?: number;
+      previousOutput?: string;
+      forceRegenerate: boolean;
+      overwriteOutput?: boolean;
       llmProvider?: string;
       llmModel?: string;
       llmApiKey?: string;
@@ -307,6 +636,12 @@ program
       llmTemperature?: number;
       llmMaxTokens?: number;
       llmSystemPrompt?: string;
+      llmConcurrency?: number;
+      toolkitConcurrency?: number;
+      indexFromOutput: boolean;
+      skipExamples: boolean;
+      skipSummary: boolean;
+      verifyOutput: boolean;
       customSections?: string;
       verbose: boolean;
     }) => {
@@ -314,10 +649,49 @@ program
 
       try {
         const mockDataDir = options.mockDataDir ?? getDefaultMockDataDir();
-        const toolkitDataSource = createMockToolkitDataSource({
-          dataDir: mockDataDir,
-        });
-        const toolExampleGenerator = resolveLlmConfig(options);
+        const metadataFile =
+          options.metadataFile ?? join(mockDataDir, "metadata.json");
+        const metadataSource = createMockMetadataSource(metadataFile);
+        const engineConfig = resolveEngineConfig(options);
+        const toolkitDataSource = engineConfig
+          ? createEngineToolkitDataSource({
+              engine: engineConfig,
+              metadataSource,
+            })
+          : createMockToolkitDataSource({
+              dataDir: mockDataDir,
+            });
+        const needsExamples = !options.skipExamples;
+        const needsSummary = !options.skipSummary;
+        const needsLlm = needsExamples || needsSummary;
+
+        const llmConfig = needsLlm ? resolveLlmConfig(options) : null;
+
+        let toolExampleGenerator: LlmToolExampleGenerator | undefined;
+        if (needsExamples) {
+          if (!llmConfig) {
+            throw new Error("LLM configuration is required for examples.");
+          }
+          toolExampleGenerator = new LlmToolExampleGenerator(llmConfig);
+        }
+
+        let toolkitSummaryGenerator: LlmToolkitSummaryGenerator | undefined;
+        if (needsSummary) {
+          if (!llmConfig) {
+            throw new Error("LLM configuration is required for summaries.");
+          }
+          toolkitSummaryGenerator = new LlmToolkitSummaryGenerator(llmConfig);
+        }
+        const previousOutputDir = options.forceRegenerate
+          ? undefined
+          : options.previousOutput ??
+            (options.overwriteOutput ? undefined : options.output);
+        const previousToolkits = previousOutputDir
+          ? await loadPreviousToolkitsFromDir(
+              previousOutputDir,
+              options.verbose
+            )
+          : undefined;
 
         const customSectionsSource = options.customSections
           ? createCustomSectionsFileSource(options.customSections)
@@ -325,22 +699,48 @@ program
 
         spinner.succeed("Data sources initialized");
 
+        if (options.overwriteOutput) {
+          spinner.start("Clearing output directory...");
+          await clearOutputDir(options.output, options.verbose);
+          spinner.succeed("Output directory cleared");
+        }
+
+        // Track progress
+        const completedToolkits: string[] = [];
+        const onToolkitProgress = (
+          toolkitId: string,
+          status: "start" | "done"
+        ) => {
+          if (status === "start") {
+            spinner.text = `Processing ${toolkitId}...`;
+          } else {
+            completedToolkits.push(toolkitId);
+            spinner.text = `Processed ${completedToolkits.length} toolkit(s) (latest: ${toolkitId})`;
+          }
+        };
+
         // Create merger using unified source
         const merger = createDataMerger({
           toolkitDataSource,
           customSectionsSource,
-          toolExampleGenerator,
+          ...(toolExampleGenerator ? { toolExampleGenerator } : {}),
+          ...(toolkitSummaryGenerator ? { toolkitSummaryGenerator } : {}),
+          ...(previousToolkits ? { previousToolkits } : {}),
+          ...(options.llmConcurrency ? { llmConcurrency: options.llmConcurrency } : {}),
+          ...(options.toolkitConcurrency ? { toolkitConcurrency: options.toolkitConcurrency } : {}),
+          onToolkitProgress,
         });
 
-        spinner.start("Merging all toolkits...");
+        spinner.start("Processing toolkits...");
         const results = await merger.mergeAllToolkits();
-        spinner.succeed(`Merged ${results.length} toolkit(s)`);
+        spinner.succeed(`Processed ${results.length} toolkit(s)`);
 
         // Generate output
         const generator = createJsonGenerator({
           outputDir: resolve(options.output),
           prettyPrint: true,
           generateIndex: true,
+          indexSource: options.indexFromOutput ? "output" : "current",
         });
 
         spinner.start("Writing output files...");
@@ -351,6 +751,19 @@ program
           spinner.warn(`Written with errors: ${genResult.errors.join(", ")}`);
         } else {
           spinner.succeed(`Written ${genResult.filesWritten.length} file(s)`);
+        }
+
+        if (options.verifyOutput) {
+          spinner.start("Verifying output...");
+          const verification = await verifyOutputDir(resolve(options.output));
+          if (!verification.valid) {
+            spinner.fail("Output verification failed.");
+            for (const error of verification.errors) {
+              console.log(chalk.red(`  - ${error}`));
+            }
+            process.exit(1);
+          }
+          spinner.succeed("Output verified");
         }
 
         console.log(chalk.green("\n✓ Generation complete\n"));
@@ -418,6 +831,28 @@ program
           console.log(`  ${chalk.green(id.padEnd(20))} ${count} tool(s)`);
         }
       }
+    } catch (error) {
+      console.log(chalk.red(`Error: ${error}`));
+      process.exit(1);
+    }
+  });
+
+program
+  .command("verify-output")
+  .description("Verify output directory structure and schema")
+  .option("-o, --output <dir>", "Output directory", getDefaultOutputDir())
+  .action(async (options: { output: string }) => {
+    try {
+      const verification = await verifyOutputDir(resolve(options.output));
+      if (!verification.valid) {
+        console.log(chalk.red("Output verification failed:"));
+        for (const error of verification.errors) {
+          console.log(chalk.red(`  - ${error}`));
+        }
+        process.exit(1);
+      }
+
+      console.log(chalk.green("✓ Output verified"));
     } catch (error) {
       console.log(chalk.red(`Error: ${error}`));
       process.exit(1);

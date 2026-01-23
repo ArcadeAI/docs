@@ -1,6 +1,6 @@
 "use client";
 
-import { Callout } from "nextra/components";
+import { ShieldCheck } from "lucide-react";
 
 import type { ScopesDisplayProps } from "../types";
 
@@ -23,8 +23,8 @@ export function normalizeScopes(scopes: string[]): string[] {
 function ScopesInline({ scopes }: { scopes: string[] }) {
   if (scopes.length === 0) {
     return (
-      <span className="text-muted-foreground text-sm">
-        No scopes required.
+      <span className="text-sm text-muted-foreground/70">
+        None required
       </span>
     );
   }
@@ -33,8 +33,10 @@ function ScopesInline({ scopes }: { scopes: string[] }) {
     <div className="flex flex-wrap gap-2">
       {scopes.map((scope) => (
         <code
-          className="rounded bg-neutral-dark px-2 py-1 text-xs"
+          className="max-w-[220px] truncate rounded-md border border-red-400/30 bg-red-500/10 px-2 py-1 text-xs text-red-300"
+          dir="rtl"
           key={scope}
+          title={scope}
         >
           {scope}
         </code>
@@ -46,18 +48,22 @@ function ScopesInline({ scopes }: { scopes: string[] }) {
 function ScopesList({ scopes }: { scopes: string[] }) {
   if (scopes.length === 0) {
     return (
-      <p className="text-muted-foreground text-sm">No scopes required.</p>
+      <p className="text-sm text-muted-foreground/70">None required</p>
     );
   }
 
   return (
-    <ul className="ml-4 list-disc space-y-1 text-sm">
+    <div className="flex flex-wrap gap-2">
       {scopes.map((scope) => (
-        <li key={scope}>
-          <code>{scope}</code>
-        </li>
+        <code
+          className="max-w-full break-all rounded-md border border-red-400/30 bg-red-500/10 px-2.5 py-1.5 text-xs text-red-300"
+          key={scope}
+          title={scope}
+        >
+          {scope}
+        </code>
       ))}
-    </ul>
+    </div>
   );
 }
 
@@ -74,10 +80,17 @@ export function ScopesDisplay({
   const normalizedScopes = normalizeScopes(scopes);
 
   if (variant === "callout") {
+    const heading = title?.trim();
     return (
-      <Callout title={title ?? "Scopes required"} type="info">
+      <div className="mt-3 rounded-xl border border-neutral-dark-high/40 bg-neutral-dark/30 p-4">
+        {heading && (
+          <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-text-color">
+            <ShieldCheck className="h-4 w-4 text-muted-foreground" />
+            {heading}
+          </div>
+        )}
         <ScopesList scopes={normalizedScopes} />
-      </Callout>
+      </div>
     );
   }
 

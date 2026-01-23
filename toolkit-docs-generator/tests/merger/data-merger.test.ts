@@ -14,6 +14,7 @@ import {
   groupToolsByToolkit,
   mergeToolkit,
   type ToolExampleGenerator,
+  type ToolkitSummaryGenerator,
 } from "../../src/merger/data-merger.js";
 import {
   EmptyCustomSectionsSource,
@@ -38,6 +39,7 @@ const createTool = (
   qualifiedName: "TestKit.TestTool",
   fullyQualifiedName: "TestKit.TestTool@1.0.0",
   description: "A test tool",
+  toolkitDescription: "Toolkit description",
   parameters: [
     {
       name: "param1",
@@ -104,6 +106,56 @@ const createStubGenerator = (): ToolExampleGenerator => ({
     })),
   }),
 });
+
+const createStubSummaryGenerator = (
+  summary: string
+): ToolkitSummaryGenerator => ({
+  generate: async (toolkit) => `${summary} (${toolkit.id})`,
+});
+
+const createCountingGenerator = () => {
+  let calls = 0;
+  const generator: ToolExampleGenerator = {
+    generate: async (tool) => {
+      calls += 1;
+      return {
+        codeExample: {
+          toolName: tool.qualifiedName,
+          parameters: {},
+          requiresAuth: tool.auth !== null,
+          authProvider: tool.auth?.providerId ?? undefined,
+          tabLabel: tool.auth
+            ? "Call the Tool with User Authorization"
+            : "Call the Tool",
+        },
+        secretsInfo: tool.secrets.map((secret) => ({
+          name: secret,
+          type: "unknown",
+        })),
+      };
+    },
+  };
+
+  return {
+    generator,
+    getCalls: () => calls,
+  };
+};
+
+const createCountingSummaryGenerator = () => {
+  let calls = 0;
+  const generator: ToolkitSummaryGenerator = {
+    generate: async () => {
+      calls += 1;
+      return "Generated summary";
+    },
+  };
+
+  return {
+    generator,
+    getCalls: () => calls,
+  };
+};
 
 // ============================================================================
 // Pure Function Tests
@@ -471,6 +523,37 @@ describe("mergeToolkit", () => {
       { name: "ACCESS_TOKEN", type: "token" },
     ]);
   });
+
+  it("should omit code examples when generator is missing", async () => {
+    const tools = [createTool()];
+
+    const result = await mergeToolkit("TestKit", tools, null, null, undefined);
+
+    expect(result.toolkit.tools[0]?.codeExample).toBeUndefined();
+    expect(result.toolkit.tools[0]?.secretsInfo).toEqual([]);
+  });
+
+  it("should reuse previous code examples without generator", async () => {
+    const tools = [createTool({ qualifiedName: "TestKit.Tool1" })];
+    const previousResult = await mergeToolkit(
+      "TestKit",
+      tools,
+      null,
+      null,
+      createStubGenerator()
+    );
+
+    const result = await mergeToolkit("TestKit", tools, null, null, undefined, {
+      previousToolkit: previousResult.toolkit,
+    });
+
+    expect(result.toolkit.tools[0]?.codeExample).toEqual(
+      previousResult.toolkit.tools[0]?.codeExample
+    );
+    expect(result.toolkit.tools[0]?.secretsInfo).toEqual(
+      previousResult.toolkit.tools[0]?.secretsInfo
+    );
+  });
 });
 
 // ============================================================================
@@ -541,9 +624,116 @@ describe("DataMerger", () => {
 
       expect(result.toolkit.id).toBe("Github");
       expect(result.toolkit.label).toBe("GitHub");
+      expect(result.toolkit.description).toBe("Toolkit description");
       expect(result.toolkit.tools).toHaveLength(2);
       expect(result.toolkit.auth?.allScopes).toContain("repo");
       expect(result.toolkit.auth?.allScopes).toContain("public_repo");
+    });
+
+    it("adds a summary when a summary generator is provided", async () => {
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
+      });
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        toolkitSummaryGenerator: createStubSummaryGenerator("Toolkit summary"),
+      });
+
+      const result = await merger.mergeToolkit("Github");
+
+      expect(result.toolkit.summary).toBe("Toolkit summary (Github)");
+    });
+
+    it("reuses the previous summary when toolkit input is unchanged", async () => {
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
+      });
+      const previousResult = await mergeToolkit(
+        "Github",
+        [githubTool1],
+        githubMetadata,
+        null,
+        createStubGenerator()
+      );
+      previousResult.toolkit.summary = "Cached summary";
+
+      const countingSummary = createCountingSummaryGenerator();
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        toolkitSummaryGenerator: countingSummary.generator,
+        previousToolkits: new Map([["github", previousResult.toolkit]]),
+      });
+
+      const result = await merger.mergeToolkit("Github");
+
+      expect(countingSummary.getCalls()).toBe(0);
+      expect(result.toolkit.summary).toBe("Cached summary");
+    });
+
+    it("reuses previous examples when the tool is unchanged", async () => {
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
+      });
+      const previousResult = await mergeToolkit(
+        "Github",
+        [githubTool1],
+        githubMetadata,
+        null,
+        createStubGenerator()
+      );
+      const counting = createCountingGenerator();
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: counting.generator,
+        previousToolkits: new Map([["github", previousResult.toolkit]]),
+      });
+
+      const result = await merger.mergeToolkit("Github");
+
+      expect(counting.getCalls()).toBe(0);
+      expect(result.toolkit.tools[0]?.codeExample).toEqual(
+        previousResult.toolkit.tools[0]?.codeExample
+      );
+    });
+
+    it("calls the generator when the tool definition changes", async () => {
+      const updatedTool = createTool({
+        name: "CreateIssue",
+        qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@1.0.0",
+        description: "Updated description",
+        auth: { providerId: "github", providerType: "oauth2", scopes: ["repo"] },
+      });
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([updatedTool]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
+      });
+      const previousResult = await mergeToolkit(
+        "Github",
+        [githubTool1],
+        githubMetadata,
+        null,
+        createStubGenerator()
+      );
+      const counting = createCountingGenerator();
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: counting.generator,
+        previousToolkits: new Map([["github", previousResult.toolkit]]),
+      });
+
+      await merger.mergeToolkit("Github");
+
+      expect(counting.getCalls()).toBe(1);
     });
 
     it("should merge data using unified toolkit data source", async () => {
@@ -657,6 +847,7 @@ describe("DataMerger", () => {
       const merger = new DataMerger({
         toolkitDataSource,
         customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
       });
 
       const results = await merger.mergeAllToolkits();

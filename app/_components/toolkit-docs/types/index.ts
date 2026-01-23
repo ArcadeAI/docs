@@ -308,6 +308,8 @@ export interface ToolkitData {
   customImports: string[];
   /** Sub-pages that exist for this toolkit */
   subPages: string[];
+  /** Optional pip package name override */
+  pipPackageName?: string;
   /** Generation timestamp */
   generatedAt?: string;
 }
@@ -350,6 +352,12 @@ export interface ToolkitHeaderProps {
   version?: string;
   /** Author name (defaults to "Arcade") */
   author?: string;
+  /** Tool statistics */
+  toolStats?: {
+    total: number;
+    withScopes: number;
+    withSecrets: number;
+  };
 }
 
 /**
@@ -394,6 +402,12 @@ export interface ToolSectionProps {
   tool: ToolDefinition;
   /** Toolkit ID (for generating anchors) */
   toolkitId: string;
+  /** Whether the tool is selected in the selected tools panel */
+  isSelected?: boolean;
+  /** Show selection checkbox */
+  showSelection?: boolean;
+  /** Toggle selection handler */
+  onToggleSelection?: (toolName: string) => void;
 }
 
 /**
@@ -407,6 +421,7 @@ export interface AvailableToolsTableProps {
     description: string | null;
     secrets?: string[];
     secretsInfo?: ToolSecret[];
+    scopes?: string[];
   }>;
   /** Optional label for the secrets column */
   secretsColumnLabel?: string;
@@ -416,6 +431,28 @@ export interface AvailableToolsTableProps {
   secretTypeLabels?: Partial<Record<SecretType, string>>;
   /** Base URL for linking secret type docs */
   secretTypeDocsBaseUrl?: string;
+  /** Enable search input */
+  enableSearch?: boolean;
+  /** Enable filters */
+  enableFilters?: boolean;
+  /** Enable scope filter chips */
+  enableScopeFilter?: boolean;
+  /** Search input placeholder */
+  searchPlaceholder?: string;
+  /** Filter label */
+  filterLabel?: string;
+  /** Scope filter label */
+  scopeFilterLabel?: string;
+  /** Scope filter helper text */
+  scopeFilterDescription?: string;
+  /** Default filter selection */
+  defaultFilter?: "all" | "has_scopes" | "no_scopes" | "has_secrets" | "no_secrets";
+  /** Currently selected tool names */
+  selectedTools?: Set<string>;
+  /** Handler for toggling tool selection */
+  onToggleSelection?: (toolName: string) => void;
+  /** Whether to show selection checkboxes */
+  showSelection?: boolean;
 }
 
 /**

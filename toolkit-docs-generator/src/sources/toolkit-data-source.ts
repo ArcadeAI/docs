@@ -9,6 +9,10 @@
 import { join } from "path";
 import type { ToolDefinition, ToolkitMetadata } from "../types/index.js";
 import type { IMetadataSource, IToolDataSource } from "./internal.js";
+import {
+  createEngineApiSource,
+  type EngineApiSourceConfig,
+} from "./engine-api.js";
 import { createMockEngineApiSource } from "./mock-engine-api.js";
 import { createMockMetadataSource } from "./mock-metadata.js";
 
@@ -176,6 +180,25 @@ export class CombinedToolkitDataSource implements IToolkitDataSource {
 export const createCombinedToolkitDataSource = (
   config: CombinedToolkitDataSourceConfig
 ): IToolkitDataSource => new CombinedToolkitDataSource(config);
+
+// ============================================================================
+// Engine Toolkit Data Source
+// ============================================================================
+
+export interface EngineToolkitDataSourceConfig {
+  /** Engine API configuration */
+  readonly engine: EngineApiSourceConfig;
+  /** Source for toolkit metadata */
+  readonly metadataSource: IMetadataSource;
+}
+
+export const createEngineToolkitDataSource = (
+  config: EngineToolkitDataSourceConfig
+): IToolkitDataSource =>
+  createCombinedToolkitDataSource({
+    toolSource: createEngineApiSource(config.engine),
+    metadataSource: config.metadataSource,
+  });
 
 // ============================================================================
 // Mock Toolkit Data Source (Current: JSON fixtures)
