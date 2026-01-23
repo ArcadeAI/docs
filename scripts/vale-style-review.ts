@@ -273,7 +273,7 @@ RULES:
 7. If an issue should NOT be fixed (e.g., passive voice is appropriate, or it's inside code), OMIT IT
 8. The "original" field must contain the EXACT full line from the file
 9. The "suggested" field must be identical to "original" EXCEPT for the specific fix
-10. The "suggested" field must NEVER be shorter than the "original" - you are fixing style, not removing content
+10. The "suggested" field should not be significantly shorter than the "original" - you are fixing style, not removing content
 
 FILE: ${filename}
 
@@ -424,8 +424,8 @@ function wouldRemoveContent(s: Suggestion): boolean {
 
 // Check if a suggestion makes destructive length changes
 function isDestructiveChange(s: Suggestion): boolean {
-  const lengthDiff = Math.abs(s.suggested.length - s.original.length);
-  return lengthDiff > s.original.length * MAX_LENGTH_CHANGE_RATIO;
+  const lengthDiff = Math.abs(s.suggested.trim().length - s.original.trim().length);
+  return lengthDiff > s.original.trim().length * MAX_LENGTH_CHANGE_RATIO;
 }
 
 // Format suggestions as GitHub review comments
