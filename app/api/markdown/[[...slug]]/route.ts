@@ -35,7 +35,7 @@ const JSX_WITH_CHILDREN_REGEX = new RegExp(
   "g"
 );
 const CODE_BLOCK_REGEX = /```[\s\S]*?```/g;
-const JSX_EXPRESSION_REGEX = /\{[^}]+\}/g;
+const JSX_EXPRESSION_REGEX = new RegExp(BRACE_PATTERN, "g");
 const EXCESSIVE_NEWLINES_REGEX = /\n{3,}/g;
 const CODE_BLOCK_PLACEHOLDER_REGEX = /__CODE_BLOCK_(\d+)__/g;
 
