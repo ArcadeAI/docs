@@ -179,26 +179,43 @@ function extractFrontmatterMeta(frontmatter: string): {
 function normalizeIndentation(text: string): string {
   const finalLines: string[] = [];
   let inCodeBlock = false;
+  let fenceIndent = 0; // Track indentation level of opening fence
 
   for (const line of text.split("\n")) {
-    if (line.trim().startsWith("```")) {
-      inCodeBlock = !inCodeBlock;
-      finalLines.push(line.trimStart()); // Code block markers should start at column 0
+    const trimmed = line.trim();
+    const leadingSpaces = line.length - trimmed.length;
+
+    if (trimmed.startsWith("```")) {
+      if (!inCodeBlock) {
+        // Opening fence - track its indentation
+        inCodeBlock = true;
+        fenceIndent = leadingSpaces;
+        finalLines.push(line.trimStart()); // Code block markers should start at column 0
+      } else if (leadingSpaces <= fenceIndent) {
+        // Closing fence - only if not indented more than opening fence
+        inCodeBlock = false;
+        fenceIndent = 0;
+        finalLines.push(line.trimStart());
+      } else {
+        // ``` inside code block (indented more than opening fence)
+        finalLines.push(line); // Preserve as code block content
+      }
     } else if (inCodeBlock) {
       finalLines.push(line); // Preserve indentation inside code blocks
     } else {
-      const trimmed = line.trimStart();
+      const trimmedLine = line.trimStart();
       // Preserve indentation for nested list items and blockquotes
       const isListItem =
-        UNORDERED_LIST_REGEX.test(trimmed) || ORDERED_LIST_REGEX.test(trimmed);
-      const isBlockquote = trimmed.startsWith(">");
+        UNORDERED_LIST_REGEX.test(trimmedLine) ||
+        ORDERED_LIST_REGEX.test(trimmedLine);
+      const isBlockquote = trimmedLine.startsWith(">");
       if ((isListItem || isBlockquote) && line.startsWith("  ")) {
         // Keep markdown-meaningful indentation (but normalize to 2-space increments)
-        const leadingSpaces = line.length - line.trimStart().length;
-        const normalizedIndent = "  ".repeat(Math.floor(leadingSpaces / 2));
-        finalLines.push(normalizedIndent + trimmed);
+        const leadingSpacesCount = line.length - line.trimStart().length;
+        const normalizedIndent = "  ".repeat(Math.floor(leadingSpacesCount / 2));
+        finalLines.push(normalizedIndent + trimmedLine);
       } else {
-        finalLines.push(trimmed); // Remove leading whitespace for other lines
+        finalLines.push(trimmedLine); // Remove leading whitespace for other lines
       }
     }
   }
