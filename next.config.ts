@@ -23,6 +23,13 @@ const nextConfig: NextConfig = withLlmsTxt({
   withNextra({
     async redirects() {
       return [
+        // Auto-added redirects for deleted pages
+        {
+          source:
+            "/:locale/guides/create-tools/contribute/registry-early-access",
+          destination: "/:locale/resources/registry-early-access",
+          permanent: true,
+        },
         // Moved MCP Gateway UI guide to guides
         {
           source: "/:locale/guides/create-tools/mcp-gateways",
@@ -370,8 +377,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         },
         {
           source: "/:locale/home/registry-early-access",
-          destination:
-            "/:locale/guides/create-tools/contribute/registry-early-access",
+          destination: "/:locale/resources/registry-early-access",
           permanent: true,
         },
         {
@@ -486,8 +492,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         },
         {
           source: "/:locale/guides/create-tools/contribute/registry",
-          destination:
-            "/:locale/guides/create-tools/contribute/registry-early-access",
+          destination: "/:locale/resources/registry-early-access",
           permanent: true,
         },
         // Framework path aliases (old naming conventions)
