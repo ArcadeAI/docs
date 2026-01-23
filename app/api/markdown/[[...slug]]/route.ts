@@ -39,6 +39,27 @@ const JSX_EXPRESSION_REGEX = new RegExp(BRACE_PATTERN, "g");
 const EXCESSIVE_NEWLINES_REGEX = /\n{3,}/g;
 const CODE_BLOCK_PLACEHOLDER_REGEX = /__CODE_BLOCK_(\d+)__/g;
 
+// GuideOverview component patterns - convert to markdown headers
+const GUIDE_OVERVIEW_OUTCOMES_REGEX =
+  /<GuideOverview\.Outcomes>\s*([\s\S]*?)\s*<\/GuideOverview\.Outcomes>/g;
+const GUIDE_OVERVIEW_PREREQUISITES_REGEX =
+  /<GuideOverview\.Prerequisites>\s*([\s\S]*?)\s*<\/GuideOverview\.Prerequisites>/g;
+const GUIDE_OVERVIEW_YOU_WILL_LEARN_REGEX =
+  /<GuideOverview\.YouWillLearn>\s*([\s\S]*?)\s*<\/GuideOverview\.YouWillLearn>/g;
+
+// Image component pattern - extract alt and src for markdown image
+// Handles both quoted strings and JSX expressions: alt="text" or alt={"text"}, src="/path" or src={"/path"}
+const IMAGE_ALT_REGEX = /alt=(?:["']([^"']+)["']|\{["']([^"']+)["']\})/;
+const IMAGE_SRC_REGEX = /src=(?:["']([^"']+)["']|\{["']([^"']+)["']\})/;
+const IMAGE_COMPONENT_REGEX = /<Image\s+[^>]*?\/>/g;
+
+// Internal markdown links - add .md extension
+// Matches [text](/path) but not [text](http...) or [text](#anchor)
+const INTERNAL_LINK_REGEX = /\[([^\]]+)\]\(\/([^)#][^)]*)\)/g;
+
+// Check if path has a file extension
+const HAS_EXTENSION_REGEX = /\.[a-zA-Z0-9]+$/;
+
 // Regex for detecting markdown list items and numbered lists
 const UNORDERED_LIST_REGEX = /^[-*+]\s/;
 const ORDERED_LIST_REGEX = /^\d+[.)]\s/;
@@ -211,6 +232,40 @@ function compileMdxToMarkdown(content: string, pagePath: string): string {
   // Remove export statements (like export const metadata)
   result = result.replace(EXPORT_REGEX, "");
 
+  // Convert GuideOverview components to markdown headers before generic JSX stripping
+  result = result.replace(
+    GUIDE_OVERVIEW_OUTCOMES_REGEX,
+    (_, inner) => `## Outcomes\n\n${dedent(inner.trim())}\n`
+  );
+  result = result.replace(
+    GUIDE_OVERVIEW_PREREQUISITES_REGEX,
+    (_, inner) => `## Prerequisites\n\n${dedent(inner.trim())}\n`
+  );
+  result = result.replace(
+    GUIDE_OVERVIEW_YOU_WILL_LEARN_REGEX,
+    (_, inner) => `## You Will Learn\n\n${dedent(inner.trim())}\n`
+  );
+
+  // Convert Image components to markdown image syntax
+  // Extract alt and src from component attributes (handles both quoted and JSX expression syntax)
+  result = result.replace(IMAGE_COMPONENT_REGEX, (match) => {
+    const altMatch = match.match(IMAGE_ALT_REGEX);
+    const srcMatch = match.match(IMAGE_SRC_REGEX);
+
+    // Extract from whichever capture group matched (quoted or JSX expression)
+    const alt = altMatch?.[1] || altMatch?.[2];
+    const src = srcMatch?.[1] || srcMatch?.[2];
+
+    if (alt && src) {
+      // Make src absolute if it starts with /
+      const fullSrc = src.startsWith("/")
+        ? `https://docs.arcade.dev${src}`
+        : src;
+      return `![${alt}](${fullSrc})`;
+    }
+    return "";
+  });
+
   // Process self-closing JSX components (e.g., <Component /> or <Component prop="value" />)
   // Handles components with dots like <GuideOverview.Item />
   result = result.replace(SELF_CLOSING_JSX_REGEX, "");
@@ -244,6 +299,16 @@ function compileMdxToMarkdown(content: string, pagePath: string): string {
     CODE_BLOCK_PLACEHOLDER_REGEX,
     (match, index) => codeBlocks[Number.parseInt(index, 10)] ?? match
   );
+
+  // Convert internal links to .md links for LLM consumption
+  // [text](/path/to/page) -> [text](/path/to/page.md)
+  result = result.replace(INTERNAL_LINK_REGEX, (_, text, path) => {
+    // Don't add .md if path already has an extension
+    if (HAS_EXTENSION_REGEX.test(path)) {
+      return `[${text}](/${path})`;
+    }
+    return `[${text}](/${path}.md)`;
+  });
 
   // Normalize indentation (remove stray whitespace, preserve meaningful markdown indentation)
   result = normalizeIndentation(result);
