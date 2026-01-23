@@ -253,15 +253,15 @@ function compileMdxToMarkdown(content: string, pagePath: string): string {
   // Convert GuideOverview components to markdown headers before generic JSX stripping
   result = result.replace(
     GUIDE_OVERVIEW_OUTCOMES_REGEX,
-    (_, inner) => `## Outcomes\n\n${dedent(inner.trim())}\n`
+    (_, inner) => `## Outcomes\n\n${dedent(inner).trim()}\n`
   );
   result = result.replace(
     GUIDE_OVERVIEW_PREREQUISITES_REGEX,
-    (_, inner) => `## Prerequisites\n\n${dedent(inner.trim())}\n`
+    (_, inner) => `## Prerequisites\n\n${dedent(inner).trim()}\n`
   );
   result = result.replace(
     GUIDE_OVERVIEW_YOU_WILL_LEARN_REGEX,
-    (_, inner) => `## You Will Learn\n\n${dedent(inner.trim())}\n`
+    (_, inner) => `## You Will Learn\n\n${dedent(inner).trim()}\n`
   );
 
   // Convert Image components to markdown image syntax
@@ -297,7 +297,7 @@ function compileMdxToMarkdown(content: string, pagePath: string): string {
     // Match opening tag, capture tag name (with dots), and content until matching closing tag
     // Apply dedent to each extracted piece to normalize indentation
     result = result.replace(JSX_WITH_CHILDREN_REGEX, (_, _tag, innerContent) =>
-      dedent(innerContent.trim())
+      dedent(innerContent).trim()
     );
   }
 
