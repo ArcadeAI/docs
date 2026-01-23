@@ -1,0 +1,86 @@
+---
+title: "Handle Auth Status & Errors"
+description: "Gracefully handle authentication in your agent applications"
+---
+
+import { Callout } from "nextra/components";
+
+# Handle Auth Status & Errors
+
+When building user-facing applications, you need to check authentication status and handle errors gracefully.
+
+## Check Auth Status Before Calling Tools
+
+Always check if the user has authorized the required service before making tool calls:
+
+```python
+from arcadepy import Arcade
+
+client = Arcade()
+
+# Check auth status first
+status = client.auth.status(
+    tool_name="Google.SendEmail",
+    user_id="user_123"
+)
+
+if status.status == "authorized":
+    # Safe to call the tool
+    result = client.tools.execute(
+        tool_name="Google.SendEmail",
+        user_id="user_123",
+        inputs={...}
+    )
+elif status.status == "not_authorized":
+    # Redirect user to authorize
+    print(f"Please authorize: {status.authorization_url}")
+```
+
+## Common Auth Errors
+
+### `AuthorizationRequired`
+
+**Cause:** User hasn't completed OAuth for this service.
+
+**Solution:** Check auth status and redirect to authorization URL.
+
+### `TokenExpired`
+
+**Cause:** The OAuth token has expired and couldn't be refreshed.
+
+**Solution:** Arcade handles refresh automatically. If this persists, have the user re-authorize.
+
+### `InsufficientScopes`
+
+**Cause:** The user authorized but with fewer permissions than the tool needs.
+
+**Solution:** Request re-authorization with the required scopes.
+
+## Error Handling Pattern
+
+```python
+from arcadepy import Arcade
+from arcadepy.exceptions import AuthorizationRequired, ToolExecutionError
+
+client = Arcade()
+
+try:
+    result = client.tools.execute(
+        tool_name="Google.SendEmail",
+        user_id="user_123",
+        inputs={...}
+    )
+except AuthorizationRequired as e:
+    # Handle missing authorization
+    return redirect(e.authorization_url)
+except ToolExecutionError as e:
+    # Handle tool-specific errors
+    log.error(f"Tool failed: {e.message}")
+    return error_response(e.message)
+```
+
+## See Also
+
+- [User Authentication Patterns](/use-tools/agent/auth-patterns)
+- [Troubleshooting](/help/troubleshooting)
+- [Auth Tool Calling Guide](/guides/tool-calling/custom-apps/auth-tool-calling)

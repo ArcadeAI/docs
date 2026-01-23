@@ -1,0 +1,121 @@
+---
+title: "User Authentication Patterns"
+description: "How to handle user authentication when building apps with Arcade"
+---
+
+import { Callout } from "nextra/components";
+
+# User Authentication Patterns
+
+When building user-facing applications with Arcade, you need to decide how users will authenticate with the services your agent accesses. This page covers the three main patterns.
+
+<Callout type="warning">
+**This is critical for production apps.** Understanding these patterns will save you significant debugging time.
+</Callout>
+
+## Pattern 1: Pre-authorized (Your Credentials)
+
+Use your own API keys or OAuth tokens. The agent acts as you, not as the end user.
+
+**When to use:**
+- Internal tools and automations
+- Single-user applications
+- Testing and development
+
+**Example:** A Slack bot that posts to your company's #announcements channel using your Slack credentials.
+
+```python
+# You've already authorized during setup
+# All requests use your stored credentials
+response = client.tools.execute(
+    tool_name="Slack.SendMessage",
+    inputs={"channel": "#announcements", "message": "Hello!"}
+)
+```
+
+## Pattern 2: User-facing (OAuth Popup)
+
+Each user authorizes their own accounts. The agent acts on behalf of each individual user.
+
+**When to use:**
+- Multi-user SaaS applications
+- Apps where users manage their own data
+- Production applications
+
+**Example:** A productivity app where each user connects their own Gmail to summarize their emails.
+
+```python
+# Check if user has authorized
+auth_status = client.auth.status(
+    tool_name="Google.ListEmails",
+    user_id="user_123"
+)
+
+if auth_status.status == "not_authorized":
+    # Redirect user to authorization URL
+    return redirect(auth_status.authorization_url)
+
+# User is authorized, execute the tool
+response = client.tools.execute(
+    tool_name="Google.ListEmails",
+    user_id="user_123"
+)
+```
+
+[See detailed OAuth flow guide →](/guides/tool-calling/custom-apps/auth-tool-calling)
+
+## Pattern 3: Headless / CLI (Device Flow)
+
+For command-line tools and environments without a browser.
+
+**When to use:**
+- CLI applications
+- Server-side batch jobs
+- Environments without a UI
+
+**Example:** A CLI tool that posts to Twitter on your behalf.
+
+```python
+# Start device authorization flow
+auth = client.auth.start_device_flow(
+    tool_name="Twitter.PostTweet",
+    user_id="user_123"
+)
+
+print(f"Go to {auth.verification_url} and enter code: {auth.user_code}")
+
+# Poll for completion
+client.auth.wait_for_completion(auth.device_code)
+```
+
+## Comparison Table
+
+| Pattern | Multi-user | Requires UI | Complexity |
+|---------|------------|-------------|------------|
+| Pre-authorized | No | No | Low |
+| User-facing OAuth | Yes | Yes | Medium |
+| Headless/Device | Yes | No | Medium |
+
+## Working Examples
+
+See these patterns in action:
+
+- [LangChain with user auth](/get-started/agent-frameworks/langchain/auth-langchain-tools)
+- [OpenAI Agents with auth interrupts](/get-started/agent-frameworks/openai-agents/user-auth-interrupts)
+- [CrewAI custom auth flow](/get-started/agent-frameworks/crewai/custom-auth-flow)
+
+## Common Issues
+
+### "User not authorized" errors
+
+The user hasn't completed OAuth for the requested service. Check auth status before calling tools.
+
+### Token expiration
+
+OAuth tokens expire. Arcade handles refresh automatically, but you may see brief delays during token refresh.
+
+### Wrong user context
+
+Make sure you're passing the correct `user_id` to associate tool calls with the right user's credentials.
+
+[See troubleshooting guide →](/help/troubleshooting)
