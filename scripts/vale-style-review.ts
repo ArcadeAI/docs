@@ -47,6 +47,8 @@ const REPO = "docs";
 const MAX_LENGTH_CHANGE_RATIO = 0.5;
 const MIN_SUGGESTED_LENGTH_RATIO = 0.7; // Suggested must be at least 70% of original length
 const CODE_BLOCK_MARKER = "```";
+const MAX_FENCE_INDENT = 3; // CommonMark allows 0-3 spaces before fence markers
+const TAB_STOP_WIDTH = 4; // CommonMark tab stops are at multiples of 4
 
 // Load style guide
 const STYLE_GUIDE_PATH = join(__dirname, "..", "STYLEGUIDE.md");
@@ -372,6 +374,60 @@ async function getSuggestions(
   }
 }
 
+// Convert leading whitespace (including tabs) to equivalent space count
+// Per CommonMark spec: tabs behave as if replaced by spaces with tab stop of 4
+// Tab stops are at positions 0, 4, 8, 12, etc. (multiples of 4)
+function countLeadingWhitespace(line: string): number {
+  let position = 0;
+  for (const char of line) {
+    if (char === " ") {
+      position += 1;
+    } else if (char === "\t") {
+      // Advance to next tab stop (multiple of TAB_STOP_WIDTH)
+      position = Math.ceil((position + 1) / TAB_STOP_WIDTH) * TAB_STOP_WIDTH;
+    } else {
+      // Non-whitespace character - stop counting
+      break;
+    }
+  }
+  return position;
+}
+
+// Count consecutive backticks at the start of a trimmed line
+function countLeadingBackticks(trimmedLine: string): number {
+  let count = 0;
+  for (const char of trimmedLine) {
+    if (char === "`") {
+      count += 1;
+    } else {
+      break;
+    }
+  }
+  return count;
+}
+
+// Check if a line could be a fence marker (has valid indentation and starts with ```)
+function isFenceCandidate(line: string): boolean {
+  const leadingWhitespace = countLeadingWhitespace(line);
+  const trimmedLine = line.trim();
+  return (
+    leadingWhitespace <= MAX_FENCE_INDENT &&
+    trimmedLine.startsWith(CODE_BLOCK_MARKER)
+  );
+}
+
+// Check if a line is a valid closing fence
+function isValidClosingFence(
+  trimmedLine: string,
+  backtickCount: number,
+  openingBacktickCount: number
+): boolean {
+  // For closing fence: must have at least as many backticks as opening
+  // AND only whitespace after the backticks (per CommonMark spec)
+  const afterBackticks = trimmedLine.slice(backtickCount);
+  return backtickCount >= openingBacktickCount && afterBackticks.trim() === "";
+}
+
 // Check which lines are inside code blocks (fenced with ```)
 // Returns a Set of line numbers (1-indexed) that are inside code blocks
 function getLinesInCodeBlocks(content: string): Set<number> {
@@ -383,56 +439,26 @@ function getLinesInCodeBlocks(content: string): Set<number> {
   for (let i = 0; i < lines.length; i += 1) {
     const line = lines[i];
     const lineNum = i + 1; // 1-indexed
-
-    // Count leading spaces (CommonMark allows at most 3 spaces for fence markers)
-    let leadingSpaces = 0;
-    for (const char of line) {
-      if (char === " ") {
-        leadingSpaces += 1;
-      } else {
-        break;
-      }
-    }
-
-    // Only consider fence markers if indentation is 0-3 spaces
     const trimmedLine = line.trim();
 
-    // Check if this line starts or ends a code block
-    if (leadingSpaces <= 3 && trimmedLine.startsWith(CODE_BLOCK_MARKER)) {
-      // Count consecutive backticks at the start
-      let backtickCount = 0;
-      for (const char of trimmedLine) {
-        if (char === "`") {
-          backtickCount += 1;
-        } else {
-          break;
-        }
-      }
+    if (isFenceCandidate(line)) {
+      const backtickCount = countLeadingBackticks(trimmedLine);
 
       if (inCodeBlock) {
-        // For closing fence: must have at least as many backticks as opening
-        // AND only whitespace after the backticks (per CommonMark spec)
-        const afterBackticks = trimmedLine.slice(backtickCount);
+        linesInCodeBlocks.add(lineNum);
         if (
-          backtickCount >= openingBacktickCount &&
-          afterBackticks.trim() === ""
+          isValidClosingFence(trimmedLine, backtickCount, openingBacktickCount)
         ) {
-          // Closing a code block - this line is still part of the block
-          linesInCodeBlocks.add(lineNum);
           inCodeBlock = false;
           openingBacktickCount = 0;
-        } else {
-          // Not a valid closing fence, treat as content inside the code block
-          linesInCodeBlocks.add(lineNum);
         }
       } else {
-        // Opening a code block - this line is part of the block
+        // Opening a code block
         linesInCodeBlocks.add(lineNum);
         inCodeBlock = true;
         openingBacktickCount = backtickCount;
       }
     } else if (inCodeBlock) {
-      // Inside a code block
       linesInCodeBlocks.add(lineNum);
     }
   }
@@ -461,7 +487,9 @@ function wouldRemoveContent(s: Suggestion): boolean {
 
 // Check if a suggestion makes destructive length changes
 function isDestructiveChange(s: Suggestion): boolean {
-  const lengthDiff = Math.abs(s.suggested.trim().length - s.original.trim().length);
+  const lengthDiff = Math.abs(
+    s.suggested.trim().length - s.original.trim().length
+  );
   return lengthDiff > s.original.trim().length * MAX_LENGTH_CHANGE_RATIO;
 }
 
