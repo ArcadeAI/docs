@@ -1,5 +1,4 @@
 export default {
-  "use-arcade-tools": "Using Arcade tools",
-  "user-auth-interrupts": "User authorization",
+  "use-arcade-with-langchain": "Setup Arcade with LangChain",
   "auth-langchain-tools": "Authorizing existing tools",
 };

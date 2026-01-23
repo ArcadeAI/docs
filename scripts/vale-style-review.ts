@@ -87,6 +87,10 @@ type FileWithDiff = {
 // Regex to identify Vale-generated comments (starts with **`Rule.Name`**:)
 const VALE_COMMENT_REGEX = /^\*\*`[A-Za-z]+\.[A-Za-z]+`\*\*:/;
 
+// Regex to identify the Vale review summary comment
+const VALE_REVIEW_SUMMARY_REGEX =
+  /^## Style Review\s+Found \d+ style suggestion/;
+
 // Parse command line args
 function parseArgs(): { prNumber: number } {
   const args = process.argv.slice(2);
@@ -162,6 +166,34 @@ async function getChangedFiles(
       filename: f.filename,
       commentableLines: parseDiffForCommentableLines(f.patch),
     }));
+}
+
+// Check if a Vale style review has already been posted to this PR
+// Returns true if we should skip posting (a review already exists)
+async function hasExistingValeReview(
+  octokit: Octokit,
+  prNumber: number
+): Promise<boolean> {
+  try {
+    // Get all reviews on the PR
+    const reviews = await octokit.paginate(octokit.rest.pulls.listReviews, {
+      owner: OWNER,
+      repo: REPO,
+      pull_number: prNumber,
+      per_page: 100,
+    });
+
+    // Check if any review body matches the Vale review summary pattern
+    for (const review of reviews) {
+      if (review.body && VALE_REVIEW_SUMMARY_REGEX.test(review.body.trim())) {
+        return true;
+      }
+    }
+  } catch (error) {
+    console.warn("Warning: Could not check for existing Vale review:", error);
+  }
+
+  return false;
 }
 
 // Get existing Vale review comments on the PR to avoid duplicates
@@ -503,6 +535,15 @@ async function main() {
   }
 
   console.log(`Reviewing PR #${prNumber}...`);
+
+  // Check if a Vale review has already been posted - if so, skip to avoid noise
+  const alreadyReviewed = await hasExistingValeReview(octokit, prNumber);
+  if (alreadyReviewed) {
+    console.log(
+      "A Vale style review has already been posted to this PR. Skipping to avoid duplicate comments."
+    );
+    return;
+  }
 
   // Get changed files with their diff info
   const changedFiles = await getChangedFiles(octokit, prNumber);

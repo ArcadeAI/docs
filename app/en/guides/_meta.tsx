@@ -1,6 +1,9 @@
 import type { MetaRecord } from "nextra";
 
 export const meta: MetaRecord = {
+  "mcp-gateways": {
+    title: "MCP Gateways",
+  },
   "tool-calling": {
     title: "Call tools",
   },
