@@ -45,6 +45,8 @@ const DIFF_HUNK_REGEX = /^@@ -\d+(?:,\d+)? \+(\d+)(?:,\d+)? @@/;
 const OWNER = "ArcadeAI";
 const REPO = "docs";
 const MAX_LENGTH_CHANGE_RATIO = 0.5;
+const MIN_SUGGESTED_LENGTH_RATIO = 0.7; // Suggested must be at least 70% of original length
+const CODE_BLOCK_MARKER = "```";
 
 // Load style guide
 const STYLE_GUIDE_PATH = join(__dirname, "..", "STYLEGUIDE.md");
@@ -256,6 +258,11 @@ ${STYLE_GUIDE}
 
 TASK: Fix the Vale style issues listed below for this file. Return JSON with your suggestions.
 
+CRITICAL - NEVER MODIFY CODE:
+- NEVER suggest changes to lines inside code blocks (lines between \`\`\` markers)
+- NEVER suggest changes to code examples, import statements, function calls, or variable names
+- SKIP any Vale issue that appears inside a code block or affects code
+
 RULES:
 1. ONLY fix the specific issues listed - do not make any other changes
 2. Make MINIMAL changes - only change the specific word or phrase mentioned in the issue
@@ -263,9 +270,10 @@ RULES:
 4. If a message says "Use 'X' instead of 'Y'", find ONLY Y and replace with X - nothing else
 5. Preserve technical accuracy - never change code or technical details
 6. For passive voice - only fix if active voice is clearer
-7. If an issue should NOT be fixed (e.g., passive voice is appropriate), omit it
+7. If an issue should NOT be fixed (e.g., passive voice is appropriate, or it's inside code), OMIT IT
 8. The "original" field must contain the EXACT full line from the file
 9. The "suggested" field must be identical to "original" EXCEPT for the specific fix
+10. The "suggested" field must NEVER be shorter than the "original" - you are fixing style, not removing content
 
 FILE: ${filename}
 
@@ -364,6 +372,62 @@ async function getSuggestions(
   }
 }
 
+// Check which lines are inside code blocks (fenced with ```)
+// Returns a Set of line numbers (1-indexed) that are inside code blocks
+function getLinesInCodeBlocks(content: string): Set<number> {
+  const linesInCodeBlocks = new Set<number>();
+  const lines = content.split("\n");
+  let inCodeBlock = false;
+
+  for (let i = 0; i < lines.length; i += 1) {
+    const line = lines[i];
+    const lineNum = i + 1; // 1-indexed
+
+    // Check if this line starts or ends a code block
+    if (line.trim().startsWith(CODE_BLOCK_MARKER)) {
+      if (inCodeBlock) {
+        // Closing a code block - this line is still part of the block
+        linesInCodeBlocks.add(lineNum);
+        inCodeBlock = false;
+      } else {
+        // Opening a code block - this line is part of the block
+        linesInCodeBlocks.add(lineNum);
+        inCodeBlock = true;
+      }
+    } else if (inCodeBlock) {
+      // Inside a code block
+      linesInCodeBlocks.add(lineNum);
+    }
+  }
+
+  return linesInCodeBlocks;
+}
+
+// Validate that a suggestion has the required fields with correct types
+function hasValidFields(s: Suggestion): boolean {
+  return (
+    typeof s.line === "number" &&
+    typeof s.original === "string" &&
+    typeof s.suggested === "string" &&
+    typeof s.rule === "string"
+  );
+}
+
+// Check if a suggestion would remove too much content
+function wouldRemoveContent(s: Suggestion): boolean {
+  const originalLen = s.original.trim().length;
+  const suggestedLen = s.suggested.trim().length;
+  return (
+    originalLen > 0 && suggestedLen < originalLen * MIN_SUGGESTED_LENGTH_RATIO
+  );
+}
+
+// Check if a suggestion makes destructive length changes
+function isDestructiveChange(s: Suggestion): boolean {
+  const lengthDiff = Math.abs(s.suggested.length - s.original.length);
+  return lengthDiff > s.original.length * MAX_LENGTH_CHANGE_RATIO;
+}
+
 // Format suggestions as GitHub review comments
 // Only includes suggestions for lines that are in the PR diff and don't already have Vale comments
 function formatReviewComments(options: {
@@ -382,6 +446,9 @@ function formatReviewComments(options: {
   } = options;
   const lines = fileContent.split("\n");
 
+  // Get lines that are inside code blocks - NEVER modify these
+  const linesInCodeBlocks = getLinesInCodeBlocks(fileContent);
+
   return suggestions
     .filter((s) => {
       // Skip if there's already a Vale comment on this line
@@ -391,28 +458,34 @@ function formatReviewComments(options: {
         return false;
       }
       // Validate required fields exist and have correct types
-      if (
-        typeof s.line !== "number" ||
-        typeof s.original !== "string" ||
-        typeof s.suggested !== "string" ||
-        typeof s.rule !== "string"
-      ) {
+      if (!hasValidFields(s)) {
         return false;
       }
       // Validate line number is in range
       if (s.line < 1 || s.line > lines.length) {
         return false;
       }
+      // CRITICAL: Never modify lines inside code blocks
+      if (linesInCodeBlocks.has(s.line)) {
+        console.log(
+          `  Skipping line ${s.line} (inside code block - code must not be modified)`
+        );
+        return false;
+      }
       // Validate line is in the PR diff (GitHub API requirement)
       if (!commentableLines.has(s.line)) {
         return false;
       }
-      // Reject destructive suggestions (length change > 50% of original)
-      const lengthDiff = Math.abs(s.suggested.length - s.original.length);
-      if (lengthDiff > s.original.length * MAX_LENGTH_CHANGE_RATIO) {
+      // Reject suggestions that remove content (suggested is too short)
+      if (wouldRemoveContent(s)) {
         console.log(
-          `  Skipping destructive suggestion on line ${s.line} (length change: ${lengthDiff} chars)`
+          `  Skipping line ${s.line} (suggested text too short - would remove content)`
         );
+        return false;
+      }
+      // Reject destructive suggestions (length change > 50% of original)
+      if (isDestructiveChange(s)) {
+        console.log(`  Skipping destructive suggestion on line ${s.line}`);
         return false;
       }
       // Validate original content matches (loosely)
