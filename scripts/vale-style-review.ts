@@ -378,6 +378,7 @@ function getLinesInCodeBlocks(content: string): Set<number> {
   const linesInCodeBlocks = new Set<number>();
   const lines = content.split("\n");
   let inCodeBlock = false;
+  let openingBacktickCount = 0;
 
   for (let i = 0; i < lines.length; i += 1) {
     const line = lines[i];
@@ -385,14 +386,33 @@ function getLinesInCodeBlocks(content: string): Set<number> {
 
     // Check if this line starts or ends a code block
     if (line.trim().startsWith(CODE_BLOCK_MARKER)) {
+      // Count consecutive backticks at the start
+      const trimmedLine = line.trim();
+      let backtickCount = 0;
+      for (const char of trimmedLine) {
+        if (char === "`") {
+          backtickCount += 1;
+        } else {
+          break;
+        }
+      }
+
       if (inCodeBlock) {
-        // Closing a code block - this line is still part of the block
-        linesInCodeBlocks.add(lineNum);
-        inCodeBlock = false;
+        // Only close if we have at least as many backticks as the opening
+        if (backtickCount >= openingBacktickCount) {
+          // Closing a code block - this line is still part of the block
+          linesInCodeBlocks.add(lineNum);
+          inCodeBlock = false;
+          openingBacktickCount = 0;
+        } else {
+          // Not enough backticks to close, treat as content inside the code block
+          linesInCodeBlocks.add(lineNum);
+        }
       } else {
         // Opening a code block - this line is part of the block
         linesInCodeBlocks.add(lineNum);
         inCodeBlock = true;
+        openingBacktickCount = backtickCount;
       }
     } else if (inCodeBlock) {
       // Inside a code block
