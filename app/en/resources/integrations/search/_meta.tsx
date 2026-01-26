@@ -2,39 +2,39 @@ import type { MetaRecord } from "nextra";
 
 const meta: MetaRecord = {
   "exaapi": {
-    title: "Exa API",
+    title: "ExaApi",
     href: "/en/resources/integrations/preview/exaapi",
   },
   "googlefinance": {
-    title: "Google Finance",
+    title: "GoogleFinance",
     href: "/en/resources/integrations/preview/googlefinance",
   },
   "googleflights": {
-    title: "Google Flights",
+    title: "GoogleFlights",
     href: "/en/resources/integrations/preview/googleflights",
   },
   "googlehotels": {
-    title: "Google Hotels",
+    title: "GoogleHotels",
     href: "/en/resources/integrations/preview/googlehotels",
   },
   "googlejobs": {
-    title: "Google Jobs",
+    title: "GoogleJobs",
     href: "/en/resources/integrations/preview/googlejobs",
   },
   "googlemaps": {
-    title: "Google Maps",
+    title: "GoogleMaps",
     href: "/en/resources/integrations/preview/googlemaps",
   },
   "googlenews": {
-    title: "Google News",
+    title: "GoogleNews",
     href: "/en/resources/integrations/preview/googlenews",
   },
   "googlesearch": {
-    title: "Google Search",
+    title: "GoogleSearch",
     href: "/en/resources/integrations/preview/googlesearch",
   },
   "googleshopping": {
-    title: "Google Shopping",
+    title: "GoogleShopping",
     href: "/en/resources/integrations/preview/googleshopping",
   },
   "walmart": {

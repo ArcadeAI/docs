@@ -6,11 +6,11 @@ const meta: MetaRecord = {
     href: "/en/resources/integrations/preview/stripe",
   },
   "stripeapi": {
-    title: "Stripe API",
+    title: "StripeApi",
     href: "/en/resources/integrations/preview/stripeapi",
   },
   "zohobooksapi": {
-    title: "Zoho Books API",
+    title: "ZohoBooksApi",
     href: "/en/resources/integrations/preview/zohobooksapi",
   },
 };

@@ -2,11 +2,11 @@ import type { MetaRecord } from "nextra";
 
 const meta: MetaRecord = {
   "linkedin": {
-    title: "LinkedIn",
+    title: "Linkedin",
     href: "/en/resources/integrations/preview/linkedin",
   },
   "microsoftteams": {
-    title: "Microsoft Teams",
+    title: "MicrosoftTeams",
     href: "/en/resources/integrations/preview/microsoftteams",
   },
   "reddit": {
@@ -18,7 +18,7 @@ const meta: MetaRecord = {
     href: "/en/resources/integrations/preview/slack",
   },
   "slackapi": {
-    title: "Slack API",
+    title: "SlackApi",
     href: "/en/resources/integrations/preview/slackapi",
   },
   "x": {

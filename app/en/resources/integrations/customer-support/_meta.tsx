@@ -2,23 +2,23 @@ import type { MetaRecord } from "nextra";
 
 const meta: MetaRecord = {
   "customerioapi": {
-    title: "Customer.io API",
+    title: "CustomerioApi",
     href: "/en/resources/integrations/preview/customerioapi",
   },
   "customeriopipelinesapi": {
-    title: "Customer.io Pipelines API",
+    title: "CustomerioPipelinesApi",
     href: "/en/resources/integrations/preview/customeriopipelinesapi",
   },
   "customeriotrackapi": {
-    title: "Customer.io Track API",
+    title: "CustomerioTrackApi",
     href: "/en/resources/integrations/preview/customeriotrackapi",
   },
   "freshserviceapi": {
-    title: "Freshservice API",
+    title: "FreshserviceApi",
     href: "/en/resources/integrations/preview/freshserviceapi",
   },
   "intercomapi": {
-    title: "Intercom API",
+    title: "IntercomApi",
     href: "/en/resources/integrations/preview/intercomapi",
   },
   "zendesk": {
