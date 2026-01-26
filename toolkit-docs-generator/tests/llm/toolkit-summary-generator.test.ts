@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
-
-import { LlmToolkitSummaryGenerator } from "../../src/llm/toolkit-summary-generator.js";
 import type { LlmClient } from "../../src/llm/client.js";
+import { LlmToolkitSummaryGenerator } from "../../src/llm/toolkit-summary-generator.js";
 import type { MergedToolkit } from "../../src/types/index.js";
 
-const createToolkit = (overrides: Partial<MergedToolkit> = {}): MergedToolkit => ({
+const createToolkit = (
+  overrides: Partial<MergedToolkit> = {}
+): MergedToolkit => ({
   id: "Github",
   label: "GitHub",
   version: "1.0.0",
@@ -52,8 +53,7 @@ const createToolkit = (overrides: Partial<MergedToolkit> = {}): MergedToolkit =>
 describe("LlmToolkitSummaryGenerator", () => {
   it("parses summary from a JSON response", async () => {
     const client: LlmClient = {
-      generateText: async () =>
-        '```json\n{"summary":"Concise summary."}\n```',
+      generateText: async () => '```json\n{"summary":"Concise summary."}\n```',
     };
     const generator = new LlmToolkitSummaryGenerator({
       client,

@@ -1,0 +1,515 @@
+{
+  "id": "HubspotUsersApi",
+  "label": "HubspotUsersApi",
+  "version": "1.0.0",
+  "description": "Tools that enable LLMs to interact directly with the Hubspot Users API",
+  "metadata": {
+    "category": "development",
+    "iconUrl": "https://design-system.arcade.dev/icons/hubspotusersapi.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/development/hubspotusersapi",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": null,
+    "allScopes": [
+      "crm.objects.users.read",
+      "crm.objects.users.write",
+      "settings.users.read",
+      "settings.users.teams.read",
+      "settings.users.write"
+    ]
+  },
+  "tools": [
+    {
+      "name": "CreateHubspotUser",
+      "qualifiedName": "HubspotUsersApi.CreateHubspotUser",
+      "fullyQualifiedName": "HubspotUsersApi.CreateHubspotUser@1.0.0",
+      "description": "Create a new user in HubSpot with basic permissions.\n\nThis tool creates a new user in HubSpot with minimal permissions (contacts-base). The user will receive a welcome email to set a password and log in.",
+      "parameters": [
+        {
+          "name": "user_email",
+          "type": "string",
+          "required": true,
+          "description": "The email address of the user to be created in HubSpot.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "additional_team_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "List of IDs representing the user's additional teams.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "last_name",
+          "type": "string",
+          "required": false,
+          "description": "The last name of the user to be created in HubSpot.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "primary_team_id",
+          "type": "string",
+          "required": false,
+          "description": "The identifier for the user's primary team in HubSpot.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "send_welcome_email",
+          "type": "boolean",
+          "required": false,
+          "description": "Set to true to send a welcome email prompting the user to set a password and log in.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_first_name",
+          "type": "string",
+          "required": false,
+          "description": "The first name of the user to be created in HubSpot.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_role_id",
+          "type": "string",
+          "required": false,
+          "description": "A string representing the new user's role within HubSpot.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "crm.objects.users.write",
+          "settings.users.write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'post-/settings/v3/users/_create'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotUsersApi.CreateHubspotUser",
+        "parameters": {
+          "user_email": {
+            "value": "john.doe@example.com",
+            "type": "string",
+            "required": true
+          },
+          "additional_team_ids": {
+            "value": [
+              "team_1",
+              "team_2"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "last_name": {
+            "value": "Doe",
+            "type": "string",
+            "required": false
+          },
+          "primary_team_id": {
+            "value": "team_1",
+            "type": "string",
+            "required": false
+          },
+          "send_welcome_email": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "user_first_name": {
+            "value": "John",
+            "type": "string",
+            "required": false
+          },
+          "user_role_id": {
+            "value": "role_1",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "FetchHubspotUsersList",
+      "qualifiedName": "HubspotUsersApi.FetchHubspotUsersList",
+      "fullyQualifiedName": "HubspotUsersApi.FetchHubspotUsersList@1.0.0",
+      "description": "Retrieve a list of users from a HubSpot account.\n\nUse this tool to get a list of users associated with a specific HubSpot account. It is useful for managing or viewing user information within the account.",
+      "parameters": [
+        {
+          "name": "page_cursor_after",
+          "type": "string",
+          "required": false,
+          "description": "A string token used to retrieve the next page of users, if more than 100 users are available.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_retrieval_limit",
+          "type": "integer",
+          "required": false,
+          "description": "Specify the maximum number of users to retrieve from the HubSpot account.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "crm.objects.users.read",
+          "settings.users.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'get-/settings/v3/users/_getPage'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotUsersApi.FetchHubspotUsersList",
+        "parameters": {
+          "page_cursor_after": {
+            "value": "abc123xyz",
+            "type": "string",
+            "required": false
+          },
+          "user_retrieval_limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetAccountRoles",
+      "qualifiedName": "HubspotUsersApi.GetAccountRoles",
+      "fullyQualifiedName": "HubspotUsersApi.GetAccountRoles@1.0.0",
+      "description": "Retrieve all user roles from an account.\n\nThis tool is called to fetch and list all the roles available on a specific account from Hubspot.",
+      "parameters": [],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "crm.objects.users.read",
+          "settings.users.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'get-/settings/v3/users/roles_getAll'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotUsersApi.GetAccountRoles",
+        "parameters": {},
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "RemoveUserHubspot",
+      "qualifiedName": "HubspotUsersApi.RemoveUserHubspot",
+      "fullyQualifiedName": "HubspotUsersApi.RemoveUserHubspot@1.0.0",
+      "description": "Remove a user from HubSpot using their ID or email.\n\nThis tool removes a user from HubSpot, identified by either their user ID or email. It should be called when a user needs to be permanently deleted or archived from the HubSpot system.",
+      "parameters": [
+        {
+          "name": "user_identifier",
+          "type": "string",
+          "required": true,
+          "description": "Identifier of the user to remove from HubSpot. It can be a user ID or an email address.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_identifier_property",
+          "type": "string",
+          "required": false,
+          "description": "Specify whether to use `USER_ID` or `EMAIL` to identify the user.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "crm.objects.users.write",
+          "settings.users.write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'delete-/settings/v3/users/{userId}_archive'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotUsersApi.RemoveUserHubspot",
+        "parameters": {
+          "user_identifier": {
+            "value": "jane.doe@example.com",
+            "type": "string",
+            "required": true
+          },
+          "user_identifier_property": {
+            "value": "EMAIL",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "RetrieveHubspotUserById",
+      "qualifiedName": "HubspotUsersApi.RetrieveHubspotUserById",
+      "fullyQualifiedName": "HubspotUsersApi.RetrieveHubspotUserById@1.0.0",
+      "description": "Retrieve Hubspot user details using user ID or email.\n\nCall this tool to retrieve detailed information about a Hubspot user identified by their user ID or optionally by email.",
+      "parameters": [
+        {
+          "name": "user_identifier",
+          "type": "string",
+          "required": true,
+          "description": "Identifier of the Hubspot user to retrieve. It can be the user ID or email based on the `id_property`.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_identifier_property",
+          "type": "string",
+          "required": false,
+          "description": "Specifies the property to identify the user: `USER_ID` (default) or `EMAIL`.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "crm.objects.users.read",
+          "settings.users.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'get-/settings/v3/users/{userId}_getById'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotUsersApi.RetrieveHubspotUserById",
+        "parameters": {
+          "user_identifier": {
+            "value": "12345",
+            "type": "string",
+            "required": true
+          },
+          "user_identifier_property": {
+            "value": "USER_ID",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "UpdateHubspotUserInfo",
+      "qualifiedName": "HubspotUsersApi.UpdateHubspotUserInfo",
+      "fullyQualifiedName": "HubspotUsersApi.UpdateHubspotUserInfo@1.0.0",
+      "description": "Update information for a specified Hubspot user.\n\nThis tool modifies the information of a Hubspot user identified by `userId`. It can be called when you need to update user data using their ID or email.",
+      "parameters": [
+        {
+          "name": "user_identifier",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier for the user. Can be the user's ID or email, based on the `id_property`.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "additional_teams_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "An array of strings representing the IDs of the user's additional teams.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "first_name",
+          "type": "string",
+          "required": false,
+          "description": "The first name of the user to update. This should be a string value.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "last_name",
+          "type": "string",
+          "required": false,
+          "description": "The last name of the user to be modified. This is the new value of the user's last name.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_identifier_property",
+          "type": "string",
+          "required": false,
+          "description": "Specifies if the user is identified by 'USER_ID' or 'EMAIL'. Default is 'USER_ID'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_primary_team_id",
+          "type": "string",
+          "required": false,
+          "description": "The unique ID for the user's primary team.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_role_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID representing the user's role. Used to assign the user a specific role within the system.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "crm.objects.users.write",
+          "settings.users.write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'put-/settings/v3/users/{userId}_replace'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotUsersApi.UpdateHubspotUserInfo",
+        "parameters": {
+          "user_identifier": {
+            "value": "user123@example.com",
+            "type": "string",
+            "required": true
+          },
+          "additional_teams_ids": {
+            "value": [
+              "team1",
+              "team2"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "first_name": {
+            "value": "John",
+            "type": "string",
+            "required": false
+          },
+          "last_name": {
+            "value": "Doe",
+            "type": "string",
+            "required": false
+          },
+          "user_identifier_property": {
+            "value": "EMAIL",
+            "type": "string",
+            "required": false
+          },
+          "user_primary_team_id": {
+            "value": "primary_team",
+            "type": "string",
+            "required": false
+          },
+          "user_role_id": {
+            "value": "admin",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ViewAccountTeams",
+      "qualifiedName": "HubspotUsersApi.ViewAccountTeams",
+      "fullyQualifiedName": "HubspotUsersApi.ViewAccountTeams@1.0.0",
+      "description": "Retrieve all teams for the account.\n\nCall this tool to view all teams associated with a specific account in Hubspot. Useful for managing or reviewing team structures.",
+      "parameters": [],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "settings.users.teams.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'get-/settings/v3/users/teams_getAll'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotUsersApi.ViewAccountTeams",
+        "parameters": {},
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    }
+  ],
+  "documentationChunks": [
+    {
+      "type": "markdown",
+      "location": "auth",
+      "position": "after",
+      "content": "## Auth\n\n<Callout type=\"info\">\nThe HubspotUsersApi MCP Server uses the Auth Provider with id `arcade-hubspot` to connect to users' HubSpot accounts. To use the MCP Server, configure the `arcade-hubspot` auth provider.\n</Callout>\n\n**Configuration:**\n- Add an auth provider with id `arcade-hubspot` in your platform.\n- Provide the OAuth credentials and required scopes for HubSpot access.\n- Ensure redirect URIs and network access to HubSpot endpoints match your deployment (especially for self-hosted installations).\n\n**Notes:**\n- Verify permissions granted by the auth provider cover the user data the MCP Server needs.\n- For cloud or managed deployments, consult your platform docs for provider setup specifics.",
+      "header": "## Auth"
+    }
+  ],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-01-26T17:36:18.543Z",
+  "summary": "Arcade's HubspotUsersApi toolkit allows developers to interact seamlessly with the HubSpot Users API, enabling efficient management of user data and roles within HubSpot accounts.\n\n**Capabilities**  \n- Create, retrieve, update, and remove users in HubSpot.  \n- Fetch user roles and teams associated with specific accounts.  \n- Manage user permissions effectively through targeted API calls.\n\n**OAuth**  \n- This toolkit utilizes OAuth2 for authentication, requiring the following scopes: crm.objects.users.read, crm.objects.users.write, settings.users.read, settings.users.teams.read, settings.users.write."
+}

@@ -1,0 +1,3046 @@
+{
+  "id": "Google",
+  "label": "Google",
+  "version": "2.0.2",
+  "description": "Arcade.dev LLM tools for Google Workspace",
+  "metadata": {
+    "category": "development",
+    "iconUrl": "https://design-system.arcade.dev/icons/google.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/development/google",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": "google",
+    "allScopes": [
+      "https://www.googleapis.com/auth/calendar.events",
+      "https://www.googleapis.com/auth/calendar.readonly",
+      "https://www.googleapis.com/auth/contacts",
+      "https://www.googleapis.com/auth/contacts.readonly",
+      "https://www.googleapis.com/auth/drive.file",
+      "https://www.googleapis.com/auth/gmail.compose",
+      "https://www.googleapis.com/auth/gmail.labels",
+      "https://www.googleapis.com/auth/gmail.modify",
+      "https://www.googleapis.com/auth/gmail.readonly",
+      "https://www.googleapis.com/auth/gmail.send"
+    ]
+  },
+  "tools": [
+    {
+      "name": "ChangeEmailLabels",
+      "qualifiedName": "Google.ChangeEmailLabels",
+      "fullyQualifiedName": "Google.ChangeEmailLabels@2.0.2",
+      "description": "Add and remove labels from an email using the Gmail API.",
+      "parameters": [
+        {
+          "name": "email_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the email to modify labels for",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "labels_to_add",
+          "type": "array",
+          "innerType": "string",
+          "required": true,
+          "description": "List of label names to add",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "labels_to_remove",
+          "type": "array",
+          "innerType": "string",
+          "required": true,
+          "description": "List of label names to remove",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/gmail.modify"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "List of labels that were added, removed, and not found"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Google.ChangeEmailLabels",
+        "parameters": {
+          "email_id": {
+            "value": "12345abcde",
+            "type": "string",
+            "required": true
+          },
+          "labels_to_add": {
+            "value": [
+              "Work",
+              "Important"
+            ],
+            "type": "array",
+            "required": true
+          },
+          "labels_to_remove": {
+            "value": [
+              "Spam",
+              "Old"
+            ],
+            "type": "array",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateBlankDocument",
+      "qualifiedName": "Google.CreateBlankDocument",
+      "fullyQualifiedName": "Google.CreateBlankDocument@2.0.2",
+      "description": "Create a blank Google Docs document with the specified title.",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "The title of the blank document to create",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The created document's title, documentId, and documentUrl in a dictionary"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Google.CreateBlankDocument",
+        "parameters": {
+          "title": {
+            "value": "My New Document",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateContact",
+      "qualifiedName": "Google.CreateContact",
+      "fullyQualifiedName": "Google.CreateContact@2.0.2",
+      "description": "Create a new contact record in Google Contacts.\n\nExamples:\n```\ncreate_contact(given_name=\"Alice\")\ncreate_contact(given_name=\"Alice\", family_name=\"Smith\")\ncreate_contact(given_name=\"Alice\", email=\"alice@example.com\")\n```",
+      "parameters": [
+        {
+          "name": "given_name",
+          "type": "string",
+          "required": true,
+          "description": "The given name of the contact",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "family_name",
+          "type": "string",
+          "required": false,
+          "description": "The optional family name of the contact",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "required": false,
+          "description": "The optional email address of the contact",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/contacts"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing the details of the created contact"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Google.CreateContact",
+        "parameters": {
+          "given_name": {
+            "value": "Alice",
+            "type": "string",
+            "required": true
+          },
+          "family_name": {
+            "value": "Smith",
+            "type": "string",
+            "required": false
+          },
+          "email": {
+            "value": "alice@example.com",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateDocumentFromText",
+      "qualifiedName": "Google.CreateDocumentFromText",
+      "fullyQualifiedName": "Google.CreateDocumentFromText@2.0.2",
+      "description": "Create a Google Docs document with the specified title and text content.",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "The title of the document to create",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "text_content",
+          "type": "string",
+          "required": true,
+          "description": "The text content to insert into the document",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The created document's title, documentId, and documentUrl in a dictionary"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Google.CreateDocumentFromText",
+        "parameters": {
+          "title": {
+            "value": "Sample Document Title",
+            "type": "string",
+            "required": true
+          },
+          "text_content": {
+            "value": "This is an example of the text content for the Google Document.",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateEvent",
+      "qualifiedName": "Google.CreateEvent",
+      "fullyQualifiedName": "Google.CreateEvent@2.0.2",
+      "description": "Create a new event/meeting/sync/meetup in the specified calendar.",
+      "parameters": [
+        {
+          "name": "summary",
+          "type": "string",
+          "required": true,
+          "description": "The title of the event",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_datetime",
+          "type": "string",
+          "required": true,
+          "description": "The datetime when the event starts in ISO 8601 format, e.g., '2024-12-31T15:30:00'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_datetime",
+          "type": "string",
+          "required": true,
+          "description": "The datetime when the event ends in ISO 8601 format, e.g., '2024-12-31T17:30:00'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "calendar_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the calendar to create the event in, usually 'primary'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "The description of the event",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "location",
+          "type": "string",
+          "required": false,
+          "description": "The location of the event",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "visibility",
+          "type": "string",
+          "required": false,
+          "description": "The visibility of the event",
+          "enum": [
+            "default",
+            "public",
+            "private",
+            "confidential"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "attendee_emails",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The list of attendee emails. Must be valid email addresses e.g., username@domain.com.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/calendar.readonly",
+          "https://www.googleapis.com/auth/calendar.events"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing the created event details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Google.CreateEvent",
+        "parameters": {
+          "summary": {
+            "value": "Project Kickoff Meeting",
+            "type": "string",
+            "required": true
+          },
+          "start_datetime": {
+            "value": "2024-10-15T10:00:00",
+            "type": "string",
+            "required": true
+          },
+          "end_datetime": {
+            "value": "2024-10-15T11:00:00",
+            "type": "string",
+            "required": true
+          },
+          "calendar_id": {
+            "value": "primary",
+            "type": "string",
+            "required": false
+          },
+          "description": {
+            "value": "A meeting to kick off the new project and discuss objectives.",
+            "type": "string",
+            "required": false
+          },
+          "location": {
+            "value": "Conference Room B",
+            "type": "string",
+            "required": false
+          },
+          "visibility": {
+            "value": "public",
+            "type": "string",
+            "required": false
+          },
+          "attendee_emails": {
+            "value": [
+              "alice@example.com",
+              "bob@example.com",
+              "charlie@example.com"
+            ],
+            "type": "array",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateLabel",
+      "qualifiedName": "Google.CreateLabel",
+      "fullyQualifiedName": "Google.CreateLabel@2.0.2",
+      "description": "Create a new label in the user's mailbox.",
+      "parameters": [
+        {
+          "name": "label_name",
+          "type": "string",
+          "required": true,
+          "description": "The name of the label to create",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/gmail.labels"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The details of the created label"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Google.CreateLabel",
+        "parameters": {
+          "label_name": {
+            "value": "Important Documents",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateSpreadsheet",
+      "qualifiedName": "Google.CreateSpreadsheet",
+      "fullyQualifiedName": "Google.CreateSpreadsheet@2.0.2",
+      "description": "Create a new spreadsheet with the provided title and data in its first sheet\n\nReturns the newly created spreadsheet's id and title",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "The title of the new spreadsheet",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "data",
+          "type": "string",
+          "required": false,
+          "description": "The data to write to the spreadsheet. A JSON string (property names enclosed in double quotes) representing a dictionary that maps row numbers to dictionaries that map column letters to cell values. For example, data[23]['C'] would be the value of the cell in row 23, column C. Type hint: dict[int, dict[str, Union[int, float, str, bool]]]",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The created spreadsheet's id and title"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Google.CreateSpreadsheet",
+        "parameters": {
+          "title": {
+            "value": "Quarterly Sales Data",
+            "type": "string",
+            "required": false
+          },
+          "data": {
+            "value": "{\"1\": {\"A\": \"Product\", \"B\": \"Sales\", \"C\": \"Region\"}, \"2\": {\"A\": \"Gadgets\", \"B\": 15000, \"C\": \"North\"}, \"3\": {\"A\": \"Widgets\", \"B\": 12000, \"C\": \"South\"}, \"4\": {\"A\": \"Doodads\", \"B\": 8000, \"C\": \"East\"}}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "DeleteDraftEmail",
+      "qualifiedName": "Google.DeleteDraftEmail",
+      "fullyQualifiedName": "Google.DeleteDraftEmail@2.0.2",
+      "description": "Delete a draft email using the Gmail API.",
+      "parameters": [
+        {
+          "name": "draft_email_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the draft email to delete",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/gmail.compose"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "string",
+        "description": "A confirmation message indicating successful deletion"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Google.DeleteDraftEmail",
+        "parameters": {
+          "draft_email_id": {
+            "value": "abc123def456",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "DeleteEvent",
+      "qualifiedName": "Google.DeleteEvent",
+      "fullyQualifiedName": "Google.DeleteEvent@2.0.2",
+      "description": "Delete an event from Google Calendar.",
+      "parameters": [
+        {
+          "name": "event_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the event to delete",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "calendar_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the calendar containing the event",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "send_updates",
+          "type": "string",
+          "required": false,
+          "description": "Specifies which attendees to notify about the deletion",
+          "enum": [
+            "none",
+            "all",
+            "externalOnly"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/calendar.events"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "string",
+        "description": "A string containing the deletion confirmation message"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Google.DeleteEvent",
+        "parameters": {
+          "event_id": {
+            "value": "12345abcde",
+            "type": "string",
+            "required": true
+          },
+          "calendar_id": {
+            "value": "primary",
+            "type": "string",
+            "required": false
+          },
+          "send_updates": {
+            "value": "all",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "FindTimeSlotsWhenEveryoneIsFree",
+      "qualifiedName": "Google.FindTimeSlotsWhenEveryoneIsFree",
+      "fullyQualifiedName": "Google.FindTimeSlotsWhenEveryoneIsFree@2.0.2",
+      "description": "Provides time slots when everyone is free within a given date range and time boundaries.",
+      "parameters": [
+        {
+          "name": "email_addresses",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The list of email addresses from people in the same organization domain (apart from the currently logged in user) to search for free time slots. Defaults to None, which will return free time slots for the current user only.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_date",
+          "type": "string",
+          "required": false,
+          "description": "The start date to search for time slots in the format 'YYYY-MM-DD'. Defaults to today's date. It will search starting from this date at the time 00:00:00.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_date",
+          "type": "string",
+          "required": false,
+          "description": "The end date to search for time slots in the format 'YYYY-MM-DD'. Defaults to seven days from the start date. It will search until this date at the time 23:59:59.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_time_boundary",
+          "type": "string",
+          "required": false,
+          "description": "Will return free slots in any given day starting from this time in the format 'HH:MM'. Defaults to '08:00', which is a usual business hour start time.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_time_boundary",
+          "type": "string",
+          "required": false,
+          "description": "Will return free slots in any given day until this time in the format 'HH:MM'. Defaults to '18:00', which is a usual business hour end time.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/calendar.readonly"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary with the free slots and the timezone in which time slots are represented."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Google.FindTimeSlotsWhenEveryoneIsFree",
+        "parameters": {
+          "email_addresses": {
+            "value": [
+              "alice@example.com",
+              "bob@example.com"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "start_date": {
+            "value": "2023-10-01",
+            "type": "string",
+            "required": false
+          },
+          "end_date": {
+            "value": "2023-10-07",
+            "type": "string",
+            "required": false
+          },
+          "start_time_boundary": {
+            "value": "09:00",
+            "type": "string",
+            "required": false
+          },
+          "end_time_boundary": {
+            "value": "17:00",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GenerateGoogleFilePickerUrl",
+      "qualifiedName": "Google.GenerateGoogleFilePickerUrl",
+      "fullyQualifiedName": "Google.GenerateGoogleFilePickerUrl@2.0.2",
+      "description": "Generate a Google File Picker URL for user-driven file selection and authorization.\n\nThis tool generates a URL that directs the end-user to a Google File Picker interface where\nwhere they can select or upload Google Drive files. Users can grant permission to access their\nDrive files, providing a secure and authorized way to interact with their files.\n\nThis is particularly useful when prior tools (e.g., those accessing or modifying\nGoogle Docs, Google Sheets, etc.) encountered failures due to file non-existence\n(Requested entity was not found) or permission errors. Once the user completes the file\npicker flow, the prior tool can be retried.",
+      "parameters": [],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Google File Picker URL for user file selection and permission granting"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Google.GenerateGoogleFilePickerUrl",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetDocumentById",
+      "qualifiedName": "Google.GetDocumentById",
+      "fullyQualifiedName": "Google.GetDocumentById@2.0.2",
+      "description": "Get the latest version of the specified Google Docs document.",
+      "parameters": [
+        {
+          "name": "document_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the document to retrieve.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The document contents as a dictionary"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Google.GetDocumentById",
+        "parameters": {
+          "document_id": {
+            "value": "1A2B3C4D5E6F7G8H9I0J",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetFileTreeStructure",
+      "qualifiedName": "Google.GetFileTreeStructure",
+      "fullyQualifiedName": "Google.GetFileTreeStructure@2.0.2",
+      "description": "Get the file/folder tree structure of the user's Google Drive.",
+      "parameters": [
+        {
+          "name": "include_shared_drives",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to include shared drives in the file tree structure. Defaults to False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "restrict_to_shared_drive_id",
+          "type": "string",
+          "required": false,
+          "description": "If provided, only include files from this shared drive in the file tree structure. Defaults to None, which will include files and folders from all drives.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_organization_domain_documents",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to include documents from the organization's domain. This is applicable to admin users who have permissions to view organization-wide documents in a Google Workspace account. Defaults to False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "order_by",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Sort order. Defaults to listing the most recently modified documents first",
+          "enum": [
+            "createdTime",
+            "createdTime desc",
+            "folder",
+            "folder desc",
+            "modifiedByMeTime",
+            "modifiedByMeTime desc",
+            "modifiedTime",
+            "modifiedTime desc",
+            "name",
+            "name desc",
+            "name_natural",
+            "name_natural desc",
+            "quotaBytesUsed",
+            "quotaBytesUsed desc",
+            "recency",
+            "recency desc",
+            "sharedWithMeTime",
+            "sharedWithMeTime desc",
+            "starred",
+            "starred desc",
+            "viewedByMeTime",
+            "viewedByMeTime desc"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The number of files and folders to list. Defaults to None, which will list all files and folders.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing the file/folder tree structure in the user's Google Drive"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Google.GetFileTreeStructure",
+        "parameters": {
+          "include_shared_drives": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "restrict_to_shared_drive_id": {
+            "value": "12345abcde",
+            "type": "string",
+            "required": false
+          },
+          "include_organization_domain_documents": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "order_by": {
+            "value": [
+              "name",
+              "lastModifiedTime"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetSpreadsheet",
+      "qualifiedName": "Google.GetSpreadsheet",
+      "fullyQualifiedName": "Google.GetSpreadsheet@2.0.2",
+      "description": "Get the user entered values and formatted values for all cells in all sheets in the spreadsheet\nalong with the spreadsheet's properties",
+      "parameters": [
+        {
+          "name": "spreadsheet_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the spreadsheet to get",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The spreadsheet properties and data for all sheets in the spreadsheet"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Google.GetSpreadsheet",
+        "parameters": {
+          "spreadsheet_id": {
+            "value": "1aBcD3EfGhI456jKlMnOpQrStUvWxYz",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetThread",
+      "qualifiedName": "Google.GetThread",
+      "fullyQualifiedName": "Google.GetThread@2.0.2",
+      "description": "Get the specified thread by ID.",
+      "parameters": [
+        {
+          "name": "thread_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the thread to retrieve",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/gmail.readonly"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing the thread details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Google.GetThread",
+        "parameters": {
+          "thread_id": {
+            "value": "abc123xyz",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "InsertTextAtEndOfDocument",
+      "qualifiedName": "Google.InsertTextAtEndOfDocument",
+      "fullyQualifiedName": "Google.InsertTextAtEndOfDocument@2.0.2",
+      "description": "Updates an existing Google Docs document using the batchUpdate API endpoint.",
+      "parameters": [
+        {
+          "name": "document_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the document to update.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "text_content",
+          "type": "string",
+          "required": true,
+          "description": "The text content to insert into the document",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The response from the batchUpdate API as a dict."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Google.InsertTextAtEndOfDocument",
+        "parameters": {
+          "document_id": {
+            "value": "1A2B3C4D5E6F7G8H9I0J",
+            "type": "string",
+            "required": true
+          },
+          "text_content": {
+            "value": "This is the text to be added to the end of the document.",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListCalendars",
+      "qualifiedName": "Google.ListCalendars",
+      "fullyQualifiedName": "Google.ListCalendars@2.0.2",
+      "description": "List all calendars accessible by the user.",
+      "parameters": [
+        {
+          "name": "max_results",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of calendars to return. Up to 250 calendars, defaults to 10.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "show_deleted",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to show deleted calendars. Defaults to False",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "show_hidden",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to show hidden calendars. Defaults to False",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "next_page_token",
+          "type": "string",
+          "required": false,
+          "description": "The token to retrieve the next page of calendars. Optional.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/calendar.readonly",
+          "https://www.googleapis.com/auth/calendar.events"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing the calendars accessible by the end user"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Google.ListCalendars",
+        "parameters": {
+          "max_results": {
+            "value": 20,
+            "type": "integer",
+            "required": false
+          },
+          "show_deleted": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "show_hidden": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "next_page_token": {
+            "value": "abc123token",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListDraftEmails",
+      "qualifiedName": "Google.ListDraftEmails",
+      "fullyQualifiedName": "Google.ListDraftEmails@2.0.2",
+      "description": "Lists draft emails in the user's draft mailbox using the Gmail API.",
+      "parameters": [
+        {
+          "name": "n_drafts",
+          "type": "integer",
+          "required": false,
+          "description": "Number of draft emails to read",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/gmail.readonly"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing a list of draft email details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Google.ListDraftEmails",
+        "parameters": {
+          "n_drafts": {
+            "value": 5,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListEmails",
+      "qualifiedName": "Google.ListEmails",
+      "fullyQualifiedName": "Google.ListEmails@2.0.2",
+      "description": "Read emails from a Gmail account and extract plain text content.",
+      "parameters": [
+        {
+          "name": "n_emails",
+          "type": "integer",
+          "required": false,
+          "description": "Number of emails to read",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/gmail.readonly"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing a list of email details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Google.ListEmails",
+        "parameters": {
+          "n_emails": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListEmailsByHeader",
+      "qualifiedName": "Google.ListEmailsByHeader",
+      "fullyQualifiedName": "Google.ListEmailsByHeader@2.0.2",
+      "description": "Search for emails by header using the Gmail API.\n\nAt least one of the following parameters MUST be provided: sender, recipient,\nsubject, date_range, label, or body.",
+      "parameters": [
+        {
+          "name": "sender",
+          "type": "string",
+          "required": false,
+          "description": "The name or email address of the sender of the email",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "recipient",
+          "type": "string",
+          "required": false,
+          "description": "The name or email address of the recipient",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "subject",
+          "type": "string",
+          "required": false,
+          "description": "Words to find in the subject of the email",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "required": false,
+          "description": "Words to find in the body of the email",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "date_range",
+          "type": "string",
+          "required": false,
+          "description": "The date range of the email",
+          "enum": [
+            "today",
+            "yesterday",
+            "last_7_days",
+            "last_30_days",
+            "this_month",
+            "last_month",
+            "this_year"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": false,
+          "description": "The label name to filter by",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_results",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of emails to return",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/gmail.readonly"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing a list of email details matching the search criteria"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Google.ListEmailsByHeader",
+        "parameters": {
+          "sender": {
+            "value": "example@example.com",
+            "type": "string",
+            "required": false
+          },
+          "recipient": {
+            "value": "user@domain.com",
+            "type": "string",
+            "required": false
+          },
+          "subject": {
+            "value": "Project Update",
+            "type": "string",
+            "required": false
+          },
+          "body": {
+            "value": "Urgent meeting",
+            "type": "string",
+            "required": false
+          },
+          "date_range": {
+            "value": "2023-01-01 to 2023-12-31",
+            "type": "string",
+            "required": false
+          },
+          "label": {
+            "value": "Important",
+            "type": "string",
+            "required": false
+          },
+          "max_results": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListEvents",
+      "qualifiedName": "Google.ListEvents",
+      "fullyQualifiedName": "Google.ListEvents@2.0.2",
+      "description": "List events from the specified calendar within the given datetime range.\n\nmin_end_datetime serves as the lower bound (exclusive) for an event's end time.\nmax_start_datetime serves as the upper bound (exclusive) for an event's start time.\n\nFor example:\nIf min_end_datetime is set to 2024-09-15T09:00:00 and max_start_datetime\nis set to 2024-09-16T17:00:00, the function will return events that:\n1. End after 09:00 on September 15, 2024 (exclusive)\n2. Start before 17:00 on September 16, 2024 (exclusive)\nThis means an event starting at 08:00 on September 15 and\nending at 10:00 on September 15 would be included, but an\nevent starting at 17:00 on September 16 would not be included.",
+      "parameters": [
+        {
+          "name": "min_end_datetime",
+          "type": "string",
+          "required": true,
+          "description": "Filter by events that end on or after this datetime in ISO 8601 format, e.g., '2024-09-15T09:00:00'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_start_datetime",
+          "type": "string",
+          "required": true,
+          "description": "Filter by events that start before this datetime in ISO 8601 format, e.g., '2024-09-16T17:00:00'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "calendar_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the calendar to list events from",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_results",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of events to return",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/calendar.readonly",
+          "https://www.googleapis.com/auth/calendar.events"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing the list of events"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Google.ListEvents",
+        "parameters": {
+          "min_end_datetime": {
+            "value": "2024-09-15T09:00:00",
+            "type": "string",
+            "required": true
+          },
+          "max_start_datetime": {
+            "value": "2024-09-16T17:00:00",
+            "type": "string",
+            "required": true
+          },
+          "calendar_id": {
+            "value": "primary",
+            "type": "string",
+            "required": false
+          },
+          "max_results": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListLabels",
+      "qualifiedName": "Google.ListLabels",
+      "fullyQualifiedName": "Google.ListLabels@2.0.2",
+      "description": "List all the labels in the user's mailbox.",
+      "parameters": [],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/gmail.readonly"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing a list of label details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Google.ListLabels",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListThreads",
+      "qualifiedName": "Google.ListThreads",
+      "fullyQualifiedName": "Google.ListThreads@2.0.2",
+      "description": "List threads in the user's mailbox.",
+      "parameters": [
+        {
+          "name": "page_token",
+          "type": "string",
+          "required": false,
+          "description": "Page token to retrieve a specific page of results in the list",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_results",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of threads to return",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_spam_trash",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to include spam and trash in the results",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/gmail.readonly"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing a list of thread details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Google.ListThreads",
+        "parameters": {
+          "page_token": {
+            "value": "abc123",
+            "type": "string",
+            "required": false
+          },
+          "max_results": {
+            "value": 20,
+            "type": "integer",
+            "required": false
+          },
+          "include_spam_trash": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ReplyToEmail",
+      "qualifiedName": "Google.ReplyToEmail",
+      "fullyQualifiedName": "Google.ReplyToEmail@2.0.2",
+      "description": "Send a reply to an email message.",
+      "parameters": [
+        {
+          "name": "body",
+          "type": "string",
+          "required": true,
+          "description": "The body of the email",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "reply_to_message_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the message to reply to",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "reply_to_whom",
+          "type": "string",
+          "required": false,
+          "description": "Whether to reply to every recipient (including cc) or only to the original sender. Defaults to 'GmailReplyToWhom.ONLY_THE_SENDER'.",
+          "enum": [
+            "every_recipient",
+            "only_the_sender"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "bcc",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "BCC recipients of the email",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/gmail.send"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing the sent email details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Google.ReplyToEmail",
+        "parameters": {
+          "body": {
+            "value": "Thank you for your message. I will get back to you soon.",
+            "type": "string",
+            "required": true
+          },
+          "reply_to_message_id": {
+            "value": "12345abcdef",
+            "type": "string",
+            "required": true
+          },
+          "reply_to_whom": {
+            "value": "GmailReplyToWhom.ONLY_THE_SENDER",
+            "type": "string",
+            "required": false
+          },
+          "bcc": {
+            "value": [
+              "example1@example.com",
+              "example2@example.com"
+            ],
+            "type": "array",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "SearchAndRetrieveDocuments",
+      "qualifiedName": "Google.SearchAndRetrieveDocuments",
+      "fullyQualifiedName": "Google.SearchAndRetrieveDocuments@2.0.2",
+      "description": "Searches for documents in the user's Google Drive and returns a list of documents (with text\ncontent) matching the search criteria. Excludes documents that are in the trash.\n\nNote: use this tool only when the user prompt requires the documents' content. If the user only\nneeds a list of documents, use the `search_documents` tool instead.",
+      "parameters": [
+        {
+          "name": "return_format",
+          "type": "string",
+          "required": false,
+          "description": "The format of the document to return. Defaults to Markdown.",
+          "enum": [
+            "markdown",
+            "html",
+            "google_api_json"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "document_contains",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Keywords or phrases that must be in the document title or body. Provide a list of keywords or phrases if needed.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "document_not_contains",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Keywords or phrases that must NOT be in the document title or body. Provide a list of keywords or phrases if needed.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "search_only_in_shared_drive_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the shared drive to restrict the search to. If provided, the search will only return documents from this drive. Defaults to None, which searches across all drives.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_shared_drives",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to include documents from shared drives. Defaults to False (searches only in the user's 'My Drive').",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_organization_domain_documents",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to include documents from the organization's domain. This is applicable to admin users who have permissions to view organization-wide documents in a Google Workspace account. Defaults to False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "order_by",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Sort order. Defaults to listing the most recently modified documents first",
+          "enum": [
+            "createdTime",
+            "createdTime desc",
+            "folder",
+            "folder desc",
+            "modifiedByMeTime",
+            "modifiedByMeTime desc",
+            "modifiedTime",
+            "modifiedTime desc",
+            "name",
+            "name desc",
+            "name_natural",
+            "name_natural desc",
+            "quotaBytesUsed",
+            "quotaBytesUsed desc",
+            "recency",
+            "recency desc",
+            "sharedWithMeTime",
+            "sharedWithMeTime desc",
+            "starred",
+            "starred desc",
+            "viewedByMeTime",
+            "viewedByMeTime desc"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The number of documents to list",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "pagination_token",
+          "type": "string",
+          "required": false,
+          "description": "The pagination token to continue a previous request",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing 'documents_count' (number of documents returned) and 'documents' (a list of documents with their content)."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Google.SearchAndRetrieveDocuments",
+        "parameters": {
+          "return_format": {
+            "value": "Markdown",
+            "type": "string",
+            "required": false
+          },
+          "document_contains": {
+            "value": [
+              "project report",
+              "Q2 analysis"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "document_not_contains": {
+            "value": [
+              "draft",
+              "confidential"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "search_only_in_shared_drive_id": {
+            "value": "abc123sharedDriveID",
+            "type": "string",
+            "required": false
+          },
+          "include_shared_drives": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "include_organization_domain_documents": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "order_by": {
+            "value": [
+              "modifiedTime desc",
+              "name asc"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "pagination_token": {
+            "value": "token123",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "SearchContactsByEmail",
+      "qualifiedName": "Google.SearchContactsByEmail",
+      "fullyQualifiedName": "Google.SearchContactsByEmail@2.0.2",
+      "description": "Search the user's contacts in Google Contacts by email address.",
+      "parameters": [
+        {
+          "name": "email",
+          "type": "string",
+          "required": true,
+          "description": "The email address to search for",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of contacts to return (30 is the max allowed by Google API)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/contacts.readonly"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing the list of matching contacts"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Google.SearchContactsByEmail",
+        "parameters": {
+          "email": {
+            "value": "example@example.com",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "SearchContactsByName",
+      "qualifiedName": "Google.SearchContactsByName",
+      "fullyQualifiedName": "Google.SearchContactsByName@2.0.2",
+      "description": "Search the user's contacts in Google Contacts by name.",
+      "parameters": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "description": "The full name to search for",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of contacts to return (30 is the max allowed by Google API)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/contacts.readonly"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing the list of matching contacts"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Google.SearchContactsByName",
+        "parameters": {
+          "name": {
+            "value": "John Doe",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "SearchDocuments",
+      "qualifiedName": "Google.SearchDocuments",
+      "fullyQualifiedName": "Google.SearchDocuments@2.0.2",
+      "description": "Searches for documents in the user's Google Drive. Excludes documents that are in the trash.",
+      "parameters": [
+        {
+          "name": "document_contains",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Keywords or phrases that must be in the document title or body. Provide a list of keywords or phrases if needed.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "document_not_contains",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Keywords or phrases that must NOT be in the document title or body. Provide a list of keywords or phrases if needed.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "search_only_in_shared_drive_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the shared drive to restrict the search to. If provided, the search will only return documents from this drive. Defaults to None, which searches across all drives.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_shared_drives",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to include documents from shared drives. Defaults to False (searches only in the user's 'My Drive').",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_organization_domain_documents",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to include documents from the organization's domain. This is applicable to admin users who have permissions to view organization-wide documents in a Google Workspace account. Defaults to False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "order_by",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Sort order. Defaults to listing the most recently modified documents first",
+          "enum": [
+            "createdTime",
+            "createdTime desc",
+            "folder",
+            "folder desc",
+            "modifiedByMeTime",
+            "modifiedByMeTime desc",
+            "modifiedTime",
+            "modifiedTime desc",
+            "name",
+            "name desc",
+            "name_natural",
+            "name_natural desc",
+            "quotaBytesUsed",
+            "quotaBytesUsed desc",
+            "recency",
+            "recency desc",
+            "sharedWithMeTime",
+            "sharedWithMeTime desc",
+            "starred",
+            "starred desc",
+            "viewedByMeTime",
+            "viewedByMeTime desc"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The number of documents to list",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "pagination_token",
+          "type": "string",
+          "required": false,
+          "description": "The pagination token to continue a previous request",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing 'documents_count' (number of documents returned) and 'documents' (a list of document details including 'kind', 'mimeType', 'id', and 'name' for each document)"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Google.SearchDocuments",
+        "parameters": {
+          "document_contains": {
+            "value": [
+              "report",
+              "2023",
+              "budget"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "document_not_contains": {
+            "value": [
+              "draft",
+              "confidential"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "search_only_in_shared_drive_id": {
+            "value": "abcdef12345",
+            "type": "string",
+            "required": false
+          },
+          "include_shared_drives": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "include_organization_domain_documents": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "order_by": {
+            "value": [
+              "modifiedTime desc",
+              "name asc"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "pagination_token": {
+            "value": "xyz789",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "SearchThreads",
+      "qualifiedName": "Google.SearchThreads",
+      "fullyQualifiedName": "Google.SearchThreads@2.0.2",
+      "description": "Search for threads in the user's mailbox",
+      "parameters": [
+        {
+          "name": "page_token",
+          "type": "string",
+          "required": false,
+          "description": "Page token to retrieve a specific page of results in the list",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_results",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of threads to return",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_spam_trash",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to include spam and trash in the results",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "label_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The IDs of labels to filter by",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sender",
+          "type": "string",
+          "required": false,
+          "description": "The name or email address of the sender of the email",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "recipient",
+          "type": "string",
+          "required": false,
+          "description": "The name or email address of the recipient",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "subject",
+          "type": "string",
+          "required": false,
+          "description": "Words to find in the subject of the email",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "required": false,
+          "description": "Words to find in the body of the email",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "date_range",
+          "type": "string",
+          "required": false,
+          "description": "The date range of the email",
+          "enum": [
+            "today",
+            "yesterday",
+            "last_7_days",
+            "last_30_days",
+            "this_month",
+            "last_month",
+            "this_year"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/gmail.readonly"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing a list of thread details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Google.SearchThreads",
+        "parameters": {
+          "page_token": {
+            "value": "abc123token",
+            "type": "string",
+            "required": false
+          },
+          "max_results": {
+            "value": 30,
+            "type": "integer",
+            "required": false
+          },
+          "include_spam_trash": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "label_ids": {
+            "value": [
+              "inbox",
+              "important"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "sender": {
+            "value": "example@example.com",
+            "type": "string",
+            "required": false
+          },
+          "recipient": {
+            "value": "recipient@example.com",
+            "type": "string",
+            "required": false
+          },
+          "subject": {
+            "value": "Meeting",
+            "type": "string",
+            "required": false
+          },
+          "body": {
+            "value": "Project update",
+            "type": "string",
+            "required": false
+          },
+          "date_range": {
+            "value": "2023-01-01 to 2023-10-01",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "SendDraftEmail",
+      "qualifiedName": "Google.SendDraftEmail",
+      "fullyQualifiedName": "Google.SendDraftEmail@2.0.2",
+      "description": "Send a draft email using the Gmail API.",
+      "parameters": [
+        {
+          "name": "email_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the draft to send",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/gmail.send"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing the sent email details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Google.SendDraftEmail",
+        "parameters": {
+          "email_id": {
+            "value": "abc123def456",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "SendEmail",
+      "qualifiedName": "Google.SendEmail",
+      "fullyQualifiedName": "Google.SendEmail@2.0.2",
+      "description": "Send an email using the Gmail API.",
+      "parameters": [
+        {
+          "name": "subject",
+          "type": "string",
+          "required": true,
+          "description": "The subject of the email",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "required": true,
+          "description": "The body of the email",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "recipient",
+          "type": "string",
+          "required": true,
+          "description": "The recipient of the email",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cc",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "CC recipients of the email",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "bcc",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "BCC recipients of the email",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/gmail.send"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing the sent email details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Google.SendEmail",
+        "parameters": {
+          "subject": {
+            "value": "Meeting Reminder",
+            "type": "string",
+            "required": true
+          },
+          "body": {
+            "value": "This is a reminder for our meeting scheduled for tomorrow at 10 AM.",
+            "type": "string",
+            "required": true
+          },
+          "recipient": {
+            "value": "john.doe@example.com",
+            "type": "string",
+            "required": true
+          },
+          "cc": {
+            "value": [
+              "jane.smith@example.com"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "bcc": {
+            "value": [
+              "manager@example.com"
+            ],
+            "type": "array",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "TrashEmail",
+      "qualifiedName": "Google.TrashEmail",
+      "fullyQualifiedName": "Google.TrashEmail@2.0.2",
+      "description": "Move an email to the trash folder using the Gmail API.",
+      "parameters": [
+        {
+          "name": "email_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the email to trash",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/gmail.modify"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing the trashed email details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Google.TrashEmail",
+        "parameters": {
+          "email_id": {
+            "value": "1234567890abcdef",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "UpdateDraftEmail",
+      "qualifiedName": "Google.UpdateDraftEmail",
+      "fullyQualifiedName": "Google.UpdateDraftEmail@2.0.2",
+      "description": "Update an existing email draft using the Gmail API.",
+      "parameters": [
+        {
+          "name": "draft_email_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the draft email to update.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "subject",
+          "type": "string",
+          "required": true,
+          "description": "The subject of the draft email",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "required": true,
+          "description": "The body of the draft email",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "recipient",
+          "type": "string",
+          "required": true,
+          "description": "The recipient of the draft email",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cc",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "CC recipients of the draft email",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "bcc",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "BCC recipients of the draft email",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/gmail.compose"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing the updated draft email details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Google.UpdateDraftEmail",
+        "parameters": {
+          "draft_email_id": {
+            "value": "abc123xyz",
+            "type": "string",
+            "required": true
+          },
+          "subject": {
+            "value": "Project Update",
+            "type": "string",
+            "required": true
+          },
+          "body": {
+            "value": "Hi team,\n\nHere are the latest updates on the project.\n\nBest,\nJohn",
+            "type": "string",
+            "required": true
+          },
+          "recipient": {
+            "value": "team@example.com",
+            "type": "string",
+            "required": true
+          },
+          "cc": {
+            "value": [
+              "manager@example.com",
+              "admin@example.com"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "bcc": {
+            "value": [
+              "confidential@example.com"
+            ],
+            "type": "array",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "UpdateEvent",
+      "qualifiedName": "Google.UpdateEvent",
+      "fullyQualifiedName": "Google.UpdateEvent@2.0.2",
+      "description": "Update an existing event in the specified calendar with the provided details.\nOnly the provided fields will be updated; others will remain unchanged.\n\n`updated_start_datetime` and `updated_end_datetime` are\nindependent and can be provided separately.",
+      "parameters": [
+        {
+          "name": "event_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the event to update",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "updated_start_datetime",
+          "type": "string",
+          "required": false,
+          "description": "The updated datetime that the event starts in ISO 8601 format, e.g., '2024-12-31T15:30:00'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "updated_end_datetime",
+          "type": "string",
+          "required": false,
+          "description": "The updated datetime that the event ends in ISO 8601 format, e.g., '2024-12-31T17:30:00'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "updated_calendar_id",
+          "type": "string",
+          "required": false,
+          "description": "The updated ID of the calendar containing the event.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "updated_summary",
+          "type": "string",
+          "required": false,
+          "description": "The updated title of the event",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "updated_description",
+          "type": "string",
+          "required": false,
+          "description": "The updated description of the event",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "updated_location",
+          "type": "string",
+          "required": false,
+          "description": "The updated location of the event",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "updated_visibility",
+          "type": "string",
+          "required": false,
+          "description": "The visibility of the event",
+          "enum": [
+            "default",
+            "public",
+            "private",
+            "confidential"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "attendee_emails_to_add",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The list of attendee emails to add. Must be valid email addresses e.g., username@domain.com.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "attendee_emails_to_remove",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The list of attendee emails to remove. Must be valid email addresses e.g., username@domain.com.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "send_updates",
+          "type": "string",
+          "required": false,
+          "description": "Should attendees be notified of the update? (none, all, external_only)",
+          "enum": [
+            "none",
+            "all",
+            "externalOnly"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/calendar.events"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "string",
+        "description": "A string containing the updated event details, including the event ID, update timestamp, and a link to view the updated event."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Google.UpdateEvent",
+        "parameters": {
+          "event_id": {
+            "value": "12345",
+            "type": "string",
+            "required": true
+          },
+          "updated_start_datetime": {
+            "value": "2024-12-31T15:30:00",
+            "type": "string",
+            "required": false
+          },
+          "updated_end_datetime": {
+            "value": "2024-12-31T17:30:00",
+            "type": "string",
+            "required": false
+          },
+          "updated_calendar_id": {
+            "value": "abcde12345",
+            "type": "string",
+            "required": false
+          },
+          "updated_summary": {
+            "value": "New Year Celebration",
+            "type": "string",
+            "required": false
+          },
+          "updated_description": {
+            "value": "Celebrate the New Year with friends and family!",
+            "type": "string",
+            "required": false
+          },
+          "updated_location": {
+            "value": "123 Celebration St, Party City, NY",
+            "type": "string",
+            "required": false
+          },
+          "updated_visibility": {
+            "value": "public",
+            "type": "string",
+            "required": false
+          },
+          "attendee_emails_to_add": {
+            "value": [
+              "friend@example.com",
+              "family@example.com"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "attendee_emails_to_remove": {
+            "value": [
+              "old_friend@example.com"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "send_updates": {
+            "value": "all",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "WriteDraftEmail",
+      "qualifiedName": "Google.WriteDraftEmail",
+      "fullyQualifiedName": "Google.WriteDraftEmail@2.0.2",
+      "description": "Compose a new email draft using the Gmail API.",
+      "parameters": [
+        {
+          "name": "subject",
+          "type": "string",
+          "required": true,
+          "description": "The subject of the draft email",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "required": true,
+          "description": "The body of the draft email",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "recipient",
+          "type": "string",
+          "required": true,
+          "description": "The recipient of the draft email",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cc",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "CC recipients of the draft email",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "bcc",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "BCC recipients of the draft email",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/gmail.compose"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing the created draft email details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Google.WriteDraftEmail",
+        "parameters": {
+          "subject": {
+            "value": "Meeting Confirmation",
+            "type": "string",
+            "required": true
+          },
+          "body": {
+            "value": "Hi team,\n\nJust a reminder about our meeting scheduled for tomorrow at 10 AM. Please be prepared with your updates.\n\nBest,\nJohn",
+            "type": "string",
+            "required": true
+          },
+          "recipient": {
+            "value": "team@example.com",
+            "type": "string",
+            "required": true
+          },
+          "cc": {
+            "value": [
+              "manager@example.com"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "bcc": {
+            "value": [
+              "admin@example.com"
+            ],
+            "type": "array",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "WriteDraftReplyEmail",
+      "qualifiedName": "Google.WriteDraftReplyEmail",
+      "fullyQualifiedName": "Google.WriteDraftReplyEmail@2.0.2",
+      "description": "Compose a draft reply to an email message.",
+      "parameters": [
+        {
+          "name": "body",
+          "type": "string",
+          "required": true,
+          "description": "The body of the draft reply email",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "reply_to_message_id",
+          "type": "string",
+          "required": true,
+          "description": "The Gmail message ID of the message to draft a reply to",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "reply_to_whom",
+          "type": "string",
+          "required": false,
+          "description": "Whether to reply to every recipient (including cc) or only to the original sender. Defaults to 'GmailReplyToWhom.ONLY_THE_SENDER'.",
+          "enum": [
+            "every_recipient",
+            "only_the_sender"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "bcc",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "BCC recipients of the draft reply email",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/gmail.compose"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing the created draft reply email details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Google.WriteDraftReplyEmail",
+        "parameters": {
+          "body": {
+            "value": "Thank you for your email. I appreciate your insights and will get back to you shortly.",
+            "type": "string",
+            "required": true
+          },
+          "reply_to_message_id": {
+            "value": "1627384950123",
+            "type": "string",
+            "required": true
+          },
+          "reply_to_whom": {
+            "value": "GmailReplyToWhom.REPLY_ALL",
+            "type": "string",
+            "required": false
+          },
+          "bcc": {
+            "value": [
+              "example1@example.com",
+              "example2@example.com"
+            ],
+            "type": "array",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "WriteToCell",
+      "qualifiedName": "Google.WriteToCell",
+      "fullyQualifiedName": "Google.WriteToCell@2.0.2",
+      "description": "Write a value to a single cell in a spreadsheet.",
+      "parameters": [
+        {
+          "name": "spreadsheet_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the spreadsheet to write to",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "column",
+          "type": "string",
+          "required": true,
+          "description": "The column string to write to. For example, 'A', 'F', or 'AZ'",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "row",
+          "type": "integer",
+          "required": true,
+          "description": "The row number to write to",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "required": true,
+          "description": "The value to write to the cell",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sheet_name",
+          "type": "string",
+          "required": false,
+          "description": "The name of the sheet to write to. Defaults to 'Sheet1'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The status of the operation"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Google.WriteToCell",
+        "parameters": {
+          "spreadsheet_id": {
+            "value": "1A2B3C4D5E6F7G8H9I0J",
+            "type": "string",
+            "required": true
+          },
+          "column": {
+            "value": "B",
+            "type": "string",
+            "required": true
+          },
+          "row": {
+            "value": 5,
+            "type": "integer",
+            "required": true
+          },
+          "value": {
+            "value": "Hello, World!",
+            "type": "string",
+            "required": true
+          },
+          "sheet_name": {
+            "value": "Sheet1",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-01-26T17:31:47.092Z",
+  "summary": "Arcade.dev provides tools for integrating with Google Workspace, enabling developers to automate tasks and enhance productivity through access to various Google services.\n\n### Capabilities\n- Manage calendar events, including creation, deletion, and updates.\n- Access and manipulate Gmail functionalities, such as sending emails and organizing threads and labels.\n- Interact with Google Drive for file management, including document creation and retrieval.\n- Create and manage contacts within Google Contacts seamlessly.\n\n### OAuth\nUses Google OAuth 2.0 for authentication, requiring the following scopes: \n- `https://www.googleapis.com/auth/calendar.events` \n- `https://www.googleapis.com/auth/contacts` \n- `https://www.googleapis.com/auth/gmail.*`\n\n### Secrets\nNo secrets are utilized in this toolkit."
+}

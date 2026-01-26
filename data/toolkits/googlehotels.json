@@ -1,0 +1,210 @@
+{
+  "id": "GoogleHotels",
+  "label": "GoogleHotels",
+  "version": "3.1.2",
+  "description": "Arcade.dev LLM tools for getting Hotel information via Google Hotels",
+  "metadata": {
+    "category": "development",
+    "iconUrl": "https://design-system.arcade.dev/icons/googlehotels.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/development/googlehotels",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": null,
+  "tools": [
+    {
+      "name": "SearchHotels",
+      "qualifiedName": "GoogleHotels.SearchHotels",
+      "fullyQualifiedName": "GoogleHotels.SearchHotels@3.1.2",
+      "description": "Retrieve hotel search results using the Google Hotels API.",
+      "parameters": [
+        {
+          "name": "location",
+          "type": "string",
+          "required": true,
+          "description": "Location to search for hotels, e.g., a city name, a state, etc.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "check_in_date",
+          "type": "string",
+          "required": true,
+          "description": "Check-in date in YYYY-MM-DD format",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "check_out_date",
+          "type": "string",
+          "required": true,
+          "description": "Check-out date in YYYY-MM-DD format",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "query",
+          "type": "string",
+          "required": false,
+          "description": "Anything that would be used in a regular Google Hotels search",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "currency",
+          "type": "string",
+          "required": false,
+          "description": "Currency code for prices. Defaults to 'USD'",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "min_price",
+          "type": "integer",
+          "required": false,
+          "description": "Minimum price per night. Defaults to no minimum",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_price",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum price per night. Defaults to no maximum",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "num_adults",
+          "type": "integer",
+          "required": false,
+          "description": "Number of adults per room. Defaults to 2",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "num_children",
+          "type": "integer",
+          "required": false,
+          "description": "Number of children per room. Defaults to 0",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sort_by",
+          "type": "string",
+          "required": false,
+          "description": "The sorting order of the results. Defaults to RELEVANCE",
+          "enum": [
+            "RELEVANCE",
+            "LOWEST_PRICE",
+            "HIGHEST_RATING",
+            "MOST_REVIEWED"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "num_results",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of results to return. Defaults to 5. Max 20",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "SERP_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SERP_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Hotel search results from the Google Hotels API"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleHotels.SearchHotels",
+        "parameters": {
+          "location": {
+            "value": "New York City",
+            "type": "string",
+            "required": true
+          },
+          "check_in_date": {
+            "value": "2023-10-15",
+            "type": "string",
+            "required": true
+          },
+          "check_out_date": {
+            "value": "2023-10-20",
+            "type": "string",
+            "required": true
+          },
+          "query": {
+            "value": "luxury hotels",
+            "type": "string",
+            "required": false
+          },
+          "currency": {
+            "value": "USD",
+            "type": "string",
+            "required": false
+          },
+          "min_price": {
+            "value": 200,
+            "type": "integer",
+            "required": false
+          },
+          "max_price": {
+            "value": 500,
+            "type": "integer",
+            "required": false
+          },
+          "num_adults": {
+            "value": 2,
+            "type": "integer",
+            "required": false
+          },
+          "num_children": {
+            "value": 1,
+            "type": "integer",
+            "required": false
+          },
+          "sort_by": {
+            "value": "PRICE",
+            "type": "string",
+            "required": false
+          },
+          "num_results": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    }
+  ],
+  "documentationChunks": [
+    {
+      "type": "markdown",
+      "location": "auth",
+      "position": "after",
+      "content": "The Arcade Google Hotels MCP Server uses the [SerpAPI](https://serpapi.com/) to search for hotels on Google Hotels.\n\n- **Secret:**\n  - `SERP_API_KEY`: Your SerpAPI API key.\n\n<Callout type=\"info\">\nSetting the `SERP_API_KEY` secret is only required if you are [self-hosting](/guides/deployment-hosting/configure-engine) Arcade. If you're using Arcade Cloud, the secret is already set for you. To manage your secrets, go to the [Secrets page](https://api.arcade.dev/dashboard/auth/secrets) in the Arcade Dashboard.\n</Callout>",
+      "header": "## Auth"
+    }
+  ],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-01-26T17:32:46.374Z",
+  "summary": "Arcade.dev provides the GoogleHotels toolkit, enabling developers to efficiently retrieve hotel information through the Google Hotels API. This toolkit facilitates hotel searches, offering a streamlined method to access comprehensive hotel data.\n\n**Capabilities:**  \n- Effortlessly search for hotels based on various parameters.  \n- Retrieve detailed hotel information including availability and pricing.  \n- Integrate smoothly with existing applications for enhanced user experience.  \n\n**OAuth:**  \n- No OAuth authentication required.\n\n**Secrets:**  \n- API Key: Use the `SERP_API_KEY` for API access and secure interactions with the Google Hotels service."
+}

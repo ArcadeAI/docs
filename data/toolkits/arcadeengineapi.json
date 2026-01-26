@@ -1,0 +1,1725 @@
+{
+  "id": "ArcadeEngineApi",
+  "label": "ArcadeEngineApi",
+  "version": "1.0.0",
+  "description": "Tools that enable LLMs to interact directly with the engine API.",
+  "metadata": {
+    "category": "development",
+    "iconUrl": "https://design-system.arcade.dev/icons/arcadeengineapi.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/development/arcadeengineapi",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": null,
+  "tools": [
+    {
+      "name": "AuthorizeUserToolAccess",
+      "qualifiedName": "ArcadeEngineApi.AuthorizeUserToolAccess",
+      "fullyQualifiedName": "ArcadeEngineApi.AuthorizeUserToolAccess@1.0.0",
+      "description": "Authorize a user to access a specific tool.\n\nThis tool authorizes a user for a specific tool by its name. It should be called when a user needs permission to access a specific tool. The tool returns the authorization status.",
+      "parameters": [
+        {
+          "name": "tool_name_for_authorization",
+          "type": "string",
+          "required": true,
+          "description": "Specify the name of the tool to authorize the user for access.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "redirect_uri_after_authorization",
+          "type": "string",
+          "required": false,
+          "description": "Optional URI to redirect the user after authorization.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "tool_version",
+          "type": "string",
+          "required": false,
+          "description": "Specify the tool version to authorize. If not provided, any version will be used.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_id",
+          "type": "string",
+          "required": false,
+          "description": "The unique identifier for a user. Required only when using an API key for authorization.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "ARCADE_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ARCADE_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'tool-authorize'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "ArcadeEngineApi.AuthorizeUserToolAccess",
+        "parameters": {
+          "tool_name_for_authorization": {
+            "value": "ArcadeEngine",
+            "type": "string",
+            "required": true
+          },
+          "redirect_uri_after_authorization": {
+            "value": "https://example.com/redirect",
+            "type": "string",
+            "required": false
+          },
+          "tool_version": {
+            "value": "1.0.0",
+            "type": "string",
+            "required": false
+          },
+          "user_id": {
+            "value": "user12345",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "AuthorizeWorker",
+      "qualifiedName": "ArcadeEngineApi.AuthorizeWorker",
+      "fullyQualifiedName": "ArcadeEngineApi.AuthorizeWorker@1.0.0",
+      "description": "Authorize a worker based on their ID.\n\nThis tool is used to verify and authorize a worker by their ID. It should be called when it's necessary to check if a worker has the appropriate permissions or status to perform certain tasks.",
+      "parameters": [
+        {
+          "name": "worker_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier for the worker to be authorized.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "ARCADE_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ARCADE_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'workers-authorize'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "ArcadeEngineApi.AuthorizeWorker",
+        "parameters": {
+          "worker_id": {
+            "value": "worker_12345",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "CheckArcadeEngineHealth",
+      "qualifiedName": "ArcadeEngineApi.CheckArcadeEngineHealth",
+      "fullyQualifiedName": "ArcadeEngineApi.CheckArcadeEngineHealth@1.0.0",
+      "description": "Check the health status of the Arcade Engine.\n\nUse this tool to verify if the Arcade Engine service is currently healthy and operational.",
+      "parameters": [],
+      "auth": null,
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'arcade-health'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "ArcadeEngineApi.CheckArcadeEngineHealth",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "CheckAuthStatus",
+      "qualifiedName": "ArcadeEngineApi.CheckAuthStatus",
+      "fullyQualifiedName": "ArcadeEngineApi.CheckAuthStatus@1.0.0",
+      "description": "Verify the ongoing authorization status of a tool.\n\nUse this tool to check the status of an ongoing authorization process for a specific tool. Ideal for monitoring when an authorization completes or times out.",
+      "parameters": [
+        {
+          "name": "authorization_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique ID for the authorization process to check its status.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "timeout_in_seconds",
+          "type": "integer",
+          "required": false,
+          "description": "Specify the timeout duration in seconds. Maximum allowed is 59 seconds.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "ARCADE_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ARCADE_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'auth-status'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "ArcadeEngineApi.CheckAuthStatus",
+        "parameters": {
+          "authorization_id": {
+            "value": "auth_123456789",
+            "type": "string",
+            "required": true
+          },
+          "timeout_in_seconds": {
+            "value": 30,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "CreateWorker",
+      "qualifiedName": "ArcadeEngineApi.CreateWorker",
+      "fullyQualifiedName": "ArcadeEngineApi.CreateWorker@1.0.0",
+      "description": "Create a new worker in the system.\n\nThis tool is used to add a new worker to the system. It should be called when there's a need to register a new worker.",
+      "parameters": [
+        {
+          "name": "worker_id",
+          "type": "string",
+          "required": true,
+          "description": "A unique identifier for the worker to be created. It should be a string.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "enable_worker",
+          "type": "boolean",
+          "required": false,
+          "description": "Set to true to enable the new worker upon creation, or false to keep it disabled.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "http_retry_attempts",
+          "type": "integer",
+          "required": false,
+          "description": "Number of retry attempts for HTTP requests if a failure occurs.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "http_secret_key",
+          "type": "string",
+          "required": false,
+          "description": "A secret key used for HTTP authentication and authorization. It should be a secure string provided by the service.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "http_timeout_seconds",
+          "type": "integer",
+          "required": false,
+          "description": "The timeout duration for the HTTP connection, specified in seconds. This defines how long the system should wait for the HTTP request to complete before timing out.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "mcp_retry_attempts",
+          "type": "integer",
+          "required": false,
+          "description": "Specifies the number of retry attempts for MCP connections. Provide an integer value to define how many times the system should retry a connection if it fails.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "mcp_timeout_duration",
+          "type": "integer",
+          "required": false,
+          "description": "The timeout duration for MCP operations in seconds. Must be an integer value.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "worker_http_uri",
+          "type": "string",
+          "required": false,
+          "description": "The HTTP URI for the worker's endpoint. This expects a valid URL string that specifies where the worker's service can be accessed.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "worker_resource_uri",
+          "type": "string",
+          "required": false,
+          "description": "The URI for the worker's resource location or service endpoint. Provide the full URI as a string.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "worker_type",
+          "type": "string",
+          "required": false,
+          "description": "Specifies the type of worker to be created. It should be a string indicating the category or role of the worker.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "ARCADE_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ARCADE_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'workers-create'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "ArcadeEngineApi.CreateWorker",
+        "parameters": {
+          "worker_id": {
+            "value": "worker_12345",
+            "type": "string",
+            "required": true
+          },
+          "enable_worker": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "http_retry_attempts": {
+            "value": 3,
+            "type": "integer",
+            "required": false
+          },
+          "http_secret_key": {
+            "value": "s3cur3K3y123!",
+            "type": "string",
+            "required": false
+          },
+          "http_timeout_seconds": {
+            "value": 30,
+            "type": "integer",
+            "required": false
+          },
+          "mcp_retry_attempts": {
+            "value": 5,
+            "type": "integer",
+            "required": false
+          },
+          "mcp_timeout_duration": {
+            "value": 60,
+            "type": "integer",
+            "required": false
+          },
+          "worker_http_uri": {
+            "value": "https://api.example.com/workers/worker_12345",
+            "type": "string",
+            "required": false
+          },
+          "worker_resource_uri": {
+            "value": "https://api.example.com/resources/worker_12345",
+            "type": "string",
+            "required": false
+          },
+          "worker_type": {
+            "value": "service_worker",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "DeleteAuthProvider",
+      "qualifiedName": "ArcadeEngineApi.DeleteAuthProvider",
+      "fullyQualifiedName": "ArcadeEngineApi.DeleteAuthProvider@1.0.0",
+      "description": "Delete a specific auth provider by ID.\n\nThis tool deletes a specified authentication provider using its ID. It should be called when you need to remove an auth provider from the system.",
+      "parameters": [
+        {
+          "name": "auth_provider_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the authentication provider to delete.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "ARCADE_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ARCADE_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'auth-providers-delete'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "ArcadeEngineApi.DeleteAuthProvider",
+        "parameters": {
+          "auth_provider_id": {
+            "value": "auth_123456",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "DeleteMcpEndpoint",
+      "qualifiedName": "ArcadeEngineApi.DeleteMcpEndpoint",
+      "fullyQualifiedName": "ArcadeEngineApi.DeleteMcpEndpoint@1.0.0",
+      "description": "Delete the Model Context Protocol endpoint data.\n\nThis tool deletes data at the Model Context Protocol (MCP) endpoint, which supports Streamable HTTP transport. Use it to remove existing configurations or data tied to this endpoint.",
+      "parameters": [],
+      "auth": null,
+      "secrets": [
+        "ARCADE_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ARCADE_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'mcp-endpoint'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "ArcadeEngineApi.DeleteMcpEndpoint",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "DeleteSecretById",
+      "qualifiedName": "ArcadeEngineApi.DeleteSecretById",
+      "fullyQualifiedName": "ArcadeEngineApi.DeleteSecretById@1.0.0",
+      "description": "Deletes a secret using its unique ID.\n\nUse this tool to delete a specific secret identified by its ID. Useful when needing to permanently remove a secret from the system.",
+      "parameters": [
+        {
+          "name": "secret_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier of the secret to delete.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "ARCADE_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ARCADE_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'secrets-delete'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "ArcadeEngineApi.DeleteSecretById",
+        "parameters": {
+          "secret_id": {
+            "value": "abc123xyz",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "DeleteUserAuthConnection",
+      "qualifiedName": "ArcadeEngineApi.DeleteUserAuthConnection",
+      "fullyQualifiedName": "ArcadeEngineApi.DeleteUserAuthConnection@1.0.0",
+      "description": "Deletes a user/auth provider connection.\n\nThis tool deletes a connection between a user and an authentication provider. It should be called when a user needs to disconnect their account from an external auth provider.",
+      "parameters": [
+        {
+          "name": "connection_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier for the user/auth provider connection to be deleted.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "ARCADE_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ARCADE_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'auth-connections-delete'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "ArcadeEngineApi.DeleteUserAuthConnection",
+        "parameters": {
+          "connection_id": {
+            "value": "conn_1234567890abcdef",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "DeleteWorker",
+      "qualifiedName": "ArcadeEngineApi.DeleteWorker",
+      "fullyQualifiedName": "ArcadeEngineApi.DeleteWorker@1.0.0",
+      "description": "Deletes a specified worker from the system.\n\nUse this tool to remove a worker by providing their unique ID. It should be called when you need to permanently delete a worker record from the system.",
+      "parameters": [
+        {
+          "name": "worker_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier for the worker to be deleted.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "ARCADE_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ARCADE_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'workers-delete'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "ArcadeEngineApi.DeleteWorker",
+        "parameters": {
+          "worker_id": {
+            "value": "12345-abcde-67890-fghij",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "ExecuteTool",
+      "qualifiedName": "ArcadeEngineApi.ExecuteTool",
+      "fullyQualifiedName": "ArcadeEngineApi.ExecuteTool@1.0.0",
+      "description": "Execute a specified tool with given parameters.\n\nThis tool allows the execution of a specified tool by providing its name and necessary arguments. It's useful for triggering specific actions or processes as dictated by the tool's logic.\n\nNote: Understanding the request schema is necessary to properly create\nthe stringified JSON input object for execution.\n\nModes:\n- GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n  already have it. Do NOT call repeatedly if you already received\n  the schema.\n- EXECUTE: Performs the operation with the provided request body\n  JSON.\n\nIf you need the schema, call with mode='get_request_schema' ONCE, then execute.",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": [
+            "get_request_schema",
+            "execute"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "ARCADE_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ARCADE_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'tool-execute'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "ArcadeEngineApi.ExecuteTool",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "request_body": {
+            "value": "{\"action\":\"start\",\"toolName\":\"exampleTool\",\"parameters\":{\"param1\":\"value1\",\"param2\":\"value2\"}}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "FetchToolsPage",
+      "qualifiedName": "ArcadeEngineApi.FetchToolsPage",
+      "fullyQualifiedName": "ArcadeEngineApi.FetchToolsPage@1.0.0",
+      "description": "Retrieve a list of tools for a specific worker.\n\nThis tool is used to get a list of tools associated with a specific worker ID. It should be called when you need an overview of tools for a particular worker.",
+      "parameters": [
+        {
+          "name": "worker_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique ID of the worker for which to retrieve the tools list.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "number_of_items",
+          "type": "integer",
+          "required": false,
+          "description": "Number of items to return in the result set. Default is 25 and the maximum is 100.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_offset",
+          "type": "integer",
+          "required": false,
+          "description": "Offset from the start of the list for pagination. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "ARCADE_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ARCADE_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'tools-list'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "ArcadeEngineApi.FetchToolsPage",
+        "parameters": {
+          "worker_id": {
+            "value": "worker_12345",
+            "type": "string",
+            "required": true
+          },
+          "number_of_items": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "start_offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetAuthProviderDetails",
+      "qualifiedName": "ArcadeEngineApi.GetAuthProviderDetails",
+      "fullyQualifiedName": "ArcadeEngineApi.GetAuthProviderDetails@1.0.0",
+      "description": "Retrieve details of a specific authentication provider.\n\nUse this tool to obtain the details of a particular authentication provider by specifying its ID.",
+      "parameters": [
+        {
+          "name": "auth_provider_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the authentication provider to retrieve.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "ARCADE_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ARCADE_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'auth-providers-get'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "ArcadeEngineApi.GetAuthProviderDetails",
+        "parameters": {
+          "auth_provider_id": {
+            "value": "authProvider123",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetFormattedToolSpecification",
+      "qualifiedName": "ArcadeEngineApi.GetFormattedToolSpecification",
+      "fullyQualifiedName": "ArcadeEngineApi.GetFormattedToolSpecification@1.0.0",
+      "description": "Fetches a formatted specification for a given tool.\n\nUse this to obtain detailed, formatted specifications for a specific tool from a provider.",
+      "parameters": [
+        {
+          "name": "tool_name",
+          "type": "string",
+          "required": true,
+          "description": "The name of the tool for which the formatted specification is requested.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "provider_format",
+          "type": "string",
+          "required": false,
+          "description": "Specifies the format of the tool as required by the provider.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_id",
+          "type": "string",
+          "required": false,
+          "description": "The identifier for the user requesting the tool specification. This should be a string.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "ARCADE_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ARCADE_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'tool-spec-formatted'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "ArcadeEngineApi.GetFormattedToolSpecification",
+        "parameters": {
+          "tool_name": {
+            "value": "ImageProcessingTool",
+            "type": "string",
+            "required": true
+          },
+          "provider_format": {
+            "value": "json",
+            "type": "string",
+            "required": false
+          },
+          "user_id": {
+            "value": "user_123456",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetOpenapiSpecification",
+      "qualifiedName": "ArcadeEngineApi.GetOpenapiSpecification",
+      "fullyQualifiedName": "ArcadeEngineApi.GetOpenapiSpecification@1.0.0",
+      "description": "Get the OpenAPI 3.0 specification in JSON format.\n\nUse this tool to retrieve the OpenAPI 3.0 specification for the Arcade Engine API, which provides detailed information about all available endpoints and their usage.",
+      "parameters": [],
+      "auth": null,
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'openapi' (returns OpenAPI 3.0 specification)."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "ArcadeEngineApi.GetOpenapiSpecification",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetProjectDetails",
+      "qualifiedName": "ArcadeEngineApi.GetProjectDetails",
+      "fullyQualifiedName": "ArcadeEngineApi.GetProjectDetails@1.0.0",
+      "description": "Retrieve detailed information about a specific project.\n\nThis tool fetches and returns detailed information for a given project based on its ID. Use it when you need to access specific details about a project.",
+      "parameters": [
+        {
+          "name": "authorization_token",
+          "type": "string",
+          "required": true,
+          "description": "JWT token required for authentication. Should be provided in the format: 'Bearer <token>'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier for the project to retrieve details for. This should be a string matching the project's ID in the database.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "ARCADE_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ARCADE_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'get-project'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "ArcadeEngineApi.GetProjectDetails",
+        "parameters": {
+          "authorization_token": {
+            "value": "Bearer abcdef123456",
+            "type": "string",
+            "required": true
+          },
+          "project_id": {
+            "value": "proj_7890",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetScheduledToolDetails",
+      "qualifiedName": "ArcadeEngineApi.GetScheduledToolDetails",
+      "fullyQualifiedName": "ArcadeEngineApi.GetScheduledToolDetails@1.0.0",
+      "description": "Retrieve details for a specific scheduled tool execution.\n\nUse this tool to get information about a specific tool execution that has been scheduled, based on its unique identifier. It provides insights into the timing and parameters of the execution.",
+      "parameters": [
+        {
+          "name": "scheduled_execution_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier for the scheduled tool execution to retrieve details for.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "ARCADE_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ARCADE_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'tool-scheduled-get'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "ArcadeEngineApi.GetScheduledToolDetails",
+        "parameters": {
+          "scheduled_execution_id": {
+            "value": "exec_1234567890",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetScheduledToolExecutions",
+      "qualifiedName": "ArcadeEngineApi.GetScheduledToolExecutions",
+      "fullyQualifiedName": "ArcadeEngineApi.GetScheduledToolExecutions@1.0.0",
+      "description": "Fetch a list of scheduled tool executions.\n\nUse this tool to retrieve a page of scheduled tool executions, useful for monitoring upcoming automated processes.",
+      "parameters": [
+        {
+          "name": "items_limit",
+          "type": "integer",
+          "required": false,
+          "description": "The number of scheduled tool executions to return. Defaults to 25, max is 100.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "list_offset",
+          "type": "integer",
+          "required": false,
+          "description": "The starting position in the list of scheduled tool executions, default is 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "ARCADE_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ARCADE_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'tool-scheduled-list'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "ArcadeEngineApi.GetScheduledToolExecutions",
+        "parameters": {
+          "items_limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "list_offset": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetToolsList",
+      "qualifiedName": "ArcadeEngineApi.GetToolsList",
+      "fullyQualifiedName": "ArcadeEngineApi.GetToolsList@1.0.0",
+      "description": "Retrieve a list of tools from the engine configuration.\n\nUse this tool to get a paginated list of tools available in the engine configuration, with optional filtering by toolkit.",
+      "parameters": [
+        {
+          "name": "include_formats",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "List of tool formats to include in the response, specified by their names.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "items_per_page",
+          "type": "integer",
+          "required": false,
+          "description": "Specify the number of tools to return, with a maximum of 100. Defaults to 25 if not specified.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_offset",
+          "type": "integer",
+          "required": false,
+          "description": "Offset to determine the starting point from the list of tools. Default is 0.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "toolkit_name",
+          "type": "string",
+          "required": false,
+          "description": "Specifies the name of the toolkit to filter the tools list.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the user requesting the tool list. It is used to filter the results for a specific user context.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "ARCADE_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ARCADE_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'tools-list-static'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "ArcadeEngineApi.GetToolsList",
+        "parameters": {
+          "include_formats": {
+            "value": [
+              "format1",
+              "format2",
+              "format3"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "items_per_page": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "start_offset": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "toolkit_name": {
+            "value": "my_toolkit",
+            "type": "string",
+            "required": false
+          },
+          "user_id": {
+            "value": "user123",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetToolSpecification",
+      "qualifiedName": "ArcadeEngineApi.GetToolSpecification",
+      "fullyQualifiedName": "ArcadeEngineApi.GetToolSpecification@1.0.0",
+      "description": "Retrieve the specification for a specific arcade tool.\n\nThis tool returns the arcade tool specification for a specified tool by its name. It should be called when there's a need to understand the details or capabilities of a particular tool.",
+      "parameters": [
+        {
+          "name": "tool_name",
+          "type": "string",
+          "required": true,
+          "description": "The name of the tool whose specification is to be retrieved. This should match the tool's registered name.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "formats_to_include",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "List of tool formats to include in the response. Provide formats as a list of strings.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_identifier",
+          "type": "string",
+          "required": false,
+          "description": "The unique identifier for the user requesting the tool specification.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "ARCADE_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ARCADE_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'tool-spec'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "ArcadeEngineApi.GetToolSpecification",
+        "parameters": {
+          "tool_name": {
+            "value": "ArcadeTool1",
+            "type": "string",
+            "required": true
+          },
+          "formats_to_include": {
+            "value": [
+              "json",
+              "xml",
+              "csv"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "user_identifier": {
+            "value": "user123",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetWorkerById",
+      "qualifiedName": "ArcadeEngineApi.GetWorkerById",
+      "fullyQualifiedName": "ArcadeEngineApi.GetWorkerById@1.0.0",
+      "description": "Retrieve worker details using their ID.\n\nUse this tool to obtain detailed information about a worker by providing their unique ID. Ideal for situations where specific worker data is required.",
+      "parameters": [
+        {
+          "name": "worker_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier for the worker to retrieve details.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "ARCADE_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ARCADE_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'workers-get'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "ArcadeEngineApi.GetWorkerById",
+        "parameters": {
+          "worker_id": {
+            "value": "worker_12345",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetWorkerHealthStatus",
+      "qualifiedName": "ArcadeEngineApi.GetWorkerHealthStatus",
+      "fullyQualifiedName": "ArcadeEngineApi.GetWorkerHealthStatus@1.0.0",
+      "description": "Retrieve the health status of a worker.\n\nThis tool is used to check the health status of a specific worker by their ID. It should be called when you need to monitor or verify the operational status of a worker.",
+      "parameters": [
+        {
+          "name": "worker_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier for the worker whose health status you want to check.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "ARCADE_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ARCADE_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'workers-health'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "ArcadeEngineApi.GetWorkerHealthStatus",
+        "parameters": {
+          "worker_id": {
+            "value": "worker_12345",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "ListAccessibleProjects",
+      "qualifiedName": "ArcadeEngineApi.ListAccessibleProjects",
+      "fullyQualifiedName": "ArcadeEngineApi.ListAccessibleProjects@1.0.0",
+      "description": "Retrieve a list of accessible projects.\n\nThis tool returns all projects that the caller has access to. It is useful for identifying projects available to a specific user or account.",
+      "parameters": [
+        {
+          "name": "bearer_token",
+          "type": "string",
+          "required": true,
+          "description": "A string containing the Bearer (JWT) token for authentication.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "items_to_skip",
+          "type": "integer",
+          "required": false,
+          "description": "The number of projects to skip before starting to collect the result set.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "maximum_items_to_return",
+          "type": "integer",
+          "required": false,
+          "description": "Specifies the maximum number of projects to return. Must be an integer.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "ARCADE_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ARCADE_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'list-projects'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "ArcadeEngineApi.ListAccessibleProjects",
+        "parameters": {
+          "bearer_token": {
+            "value": "eyJz93a...k4laUWw",
+            "type": "string",
+            "required": true
+          },
+          "items_to_skip": {
+            "value": 5,
+            "type": "integer",
+            "required": false
+          },
+          "maximum_items_to_return": {
+            "value": 20,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "ListAuthConnections",
+      "qualifiedName": "ArcadeEngineApi.ListAuthConnections",
+      "fullyQualifiedName": "ArcadeEngineApi.ListAuthConnections@1.0.0",
+      "description": "Retrieve all authentication connections for users.\n\nUse this tool to get a comprehensive list of all authentication connections associated with users. Ideal for managing or auditing user authentication setups.",
+      "parameters": [
+        {
+          "name": "page_offset",
+          "type": "integer",
+          "required": false,
+          "description": "The starting point in the list for pagination. Useful for retrieving subsequent pages of data.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "page_size",
+          "type": "integer",
+          "required": false,
+          "description": "Number of auth connections to return per page. Use to control the size of the result set.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "provider_id",
+          "type": "string",
+          "required": false,
+          "description": "Unique identifier for the authentication provider.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_id",
+          "type": "string",
+          "required": false,
+          "description": "The unique identifier for the user to list authentication connections for.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "ARCADE_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ARCADE_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'auth-connections-list'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "ArcadeEngineApi.ListAuthConnections",
+        "parameters": {
+          "page_offset": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "page_size": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "provider_id": {
+            "value": "auth_provider_123",
+            "type": "string",
+            "required": false
+          },
+          "user_id": {
+            "value": "user_456",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "ListAvailableAuthProviders",
+      "qualifiedName": "ArcadeEngineApi.ListAvailableAuthProviders",
+      "fullyQualifiedName": "ArcadeEngineApi.ListAvailableAuthProviders@1.0.0",
+      "description": "Retrieve a list of available authentication providers.\n\nThis tool fetches a paginated list of authentication providers accessible to the caller. It should be used when identifying or managing auth providers in the system.",
+      "parameters": [],
+      "auth": null,
+      "secrets": [
+        "ARCADE_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ARCADE_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'auth-providers-list'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "ArcadeEngineApi.ListAvailableAuthProviders",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "ListWorkers",
+      "qualifiedName": "ArcadeEngineApi.ListWorkers",
+      "fullyQualifiedName": "ArcadeEngineApi.ListWorkers@1.0.0",
+      "description": "Retrieve a list of all workers with their definitions.\n\nUse this tool to get information about all available workers and their definitions. This can be helpful for managing or reviewing the current worker pool.",
+      "parameters": [
+        {
+          "name": "number_of_items_to_return",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of worker items to return, with a default of 25 and a maximum of 100.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_offset",
+          "type": "integer",
+          "required": false,
+          "description": "Offset from the start of the list for pagination. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "ARCADE_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ARCADE_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'workers-list'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "ArcadeEngineApi.ListWorkers",
+        "parameters": {
+          "number_of_items_to_return": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "start_offset": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "RetrieveFormattedToolsList",
+      "qualifiedName": "ArcadeEngineApi.RetrieveFormattedToolsList",
+      "fullyQualifiedName": "ArcadeEngineApi.RetrieveFormattedToolsList@1.0.0",
+      "description": "Fetches a formatted list of tools from engine configuration.\n\nUse this tool to retrieve a page of tools from the engine's configuration, which can be filtered by toolkit and formatted for a specific provider.",
+      "parameters": [
+        {
+          "name": "filter_by_toolkit",
+          "type": "string",
+          "required": false,
+          "description": "Specify the toolkit name to filter the list of tools.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "number_of_items_to_return",
+          "type": "integer",
+          "required": false,
+          "description": "Specify the number of tools to return. Defaults to 25, with a maximum of 100.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset_start_index",
+          "type": "integer",
+          "required": false,
+          "description": "Offset from the start of the tools list. Default is 0.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "provider_format",
+          "type": "string",
+          "required": false,
+          "description": "Format the tools according to the provider's specifications. Accepts a string value.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_identifier",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the user for whom the tool list is to be retrieved.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "ARCADE_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ARCADE_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'tools-list-formatted'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "ArcadeEngineApi.RetrieveFormattedToolsList",
+        "parameters": {
+          "filter_by_toolkit": {
+            "value": "game_development",
+            "type": "string",
+            "required": false
+          },
+          "number_of_items_to_return": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "offset_start_index": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "provider_format": {
+            "value": "json",
+            "type": "string",
+            "required": false
+          },
+          "user_identifier": {
+            "value": "user_12345",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "TestWorkerConnection",
+      "qualifiedName": "ArcadeEngineApi.TestWorkerConnection",
+      "fullyQualifiedName": "ArcadeEngineApi.TestWorkerConnection@1.0.0",
+      "description": "Test a worker connection before adding it to the system.\n\nUse this tool to verify if a worker connection is functioning properly before integrating it into your system.",
+      "parameters": [
+        {
+          "name": "worker_connection_type",
+          "type": "string",
+          "required": true,
+          "description": "Specify the type of worker connection to test. It must be a string value indicating the category or mode of the worker.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "http_uri",
+          "type": "string",
+          "required": false,
+          "description": "Specify the HTTP URI of the worker to test the connection.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "mcp_uri",
+          "type": "string",
+          "required": false,
+          "description": "The URI for the MCP connection required to test a worker connection.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "ARCADE_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ARCADE_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'workers-test'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "ArcadeEngineApi.TestWorkerConnection",
+        "parameters": {
+          "worker_connection_type": {
+            "value": "REST",
+            "type": "string",
+            "required": true
+          },
+          "http_uri": {
+            "value": "http://example.com/api/worker",
+            "type": "string",
+            "required": false
+          },
+          "mcp_uri": {
+            "value": "http://example.com/api/mcp",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "UpdateSessionVerificationSettings",
+      "qualifiedName": "ArcadeEngineApi.UpdateSessionVerificationSettings",
+      "fullyQualifiedName": "ArcadeEngineApi.UpdateSessionVerificationSettings@1.0.0",
+      "description": "Update session verification settings for a user.\n\nThis tool updates the session verification settings for the user or entity making the call. It should be used when there's a need to modify how sessions are verified, reflecting any new security or configuration preferences.",
+      "parameters": [
+        {
+          "name": "unsafe_skip_verification",
+          "type": "boolean",
+          "required": false,
+          "description": "Set to true to skip the session verification, making it unsafe.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "verifier_url",
+          "type": "string",
+          "required": false,
+          "description": "The URL of the verifier service used for session verification. Provide a valid URL.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "ARCADE_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ARCADE_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'session-verification-settings-update'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "ArcadeEngineApi.UpdateSessionVerificationSettings",
+        "parameters": {
+          "unsafe_skip_verification": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "verifier_url": {
+            "value": "https://example.com/verifier",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    }
+  ],
+  "documentationChunks": [
+    {
+      "type": "markdown",
+      "location": "custom_section",
+      "position": "after",
+      "content": "This MCP Server requires the `ARCADE_API_KEY` secret to be configured. Without it, requests to the Arcade Engine will fail.\n</Callout>\n\n**Getting your Arcade API Key**\n\n- To use the Arcade Engine API MCP Server, you need an Arcade API key. This key authenticates your requests to the Arcade Engine.\n- Learn how to create and manage your Arcade API keys in the [API Keys documentation](/get-started/setup/api-keys).\n- Configure the `ARCADE_API_KEY` secret in your MCP Server settings as described in the [configure secrets](/guides/create-tools/tool-basics/create-tool-secrets) guide.\n\n<Callout type=\"info\">\nEnsure the secret name is exactly `ARCADE_API_KEY` and that the value is kept secure. Rotate keys regularly and update the MCP secret when keys are replaced.",
+      "header": "## Secrets"
+    }
+  ],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-01-26T17:25:46.352Z",
+  "summary": "The Arcade Engine API toolkit provides developers with the ability to seamlessly integrate language models (LLMs) with the Arcade Engine API, enabling dynamic interactions and tool management.\n\n**Capabilities**\n- Authorize users and workers for specific tools.\n- Retrieve detailed information about tools, projects, and workers.\n- Monitor health statuses of the Arcade Engine and workers.\n- Execute tools with specified parameters and manage scheduled executions.\n- Manage user authentication connections and configurations.\n\n**OAuth**\nThere is no OAuth authentication for this toolkit.\n\n**Secrets**\nUtilize the `ARCADE_API_KEY` to access secure endpoints and manage sensitive operations within the system."
+}

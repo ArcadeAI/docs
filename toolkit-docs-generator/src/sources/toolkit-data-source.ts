@@ -8,11 +8,15 @@
 
 import { join } from "path";
 import type { ToolDefinition, ToolkitMetadata } from "../types/index.js";
-import type { IMetadataSource, IToolDataSource } from "./internal.js";
+import {
+  type ArcadeApiSourceConfig,
+  createArcadeApiSource,
+} from "./arcade-api.js";
 import {
   createEngineApiSource,
   type EngineApiSourceConfig,
 } from "./engine-api.js";
+import type { IMetadataSource, IToolDataSource } from "./internal.js";
 import { createMockEngineApiSource } from "./mock-engine-api.js";
 import { createMockMetadataSource } from "./mock-metadata.js";
 
@@ -197,6 +201,28 @@ export const createEngineToolkitDataSource = (
 ): IToolkitDataSource =>
   createCombinedToolkitDataSource({
     toolSource: createEngineApiSource(config.engine),
+    metadataSource: config.metadataSource,
+  });
+
+// ============================================================================
+// Arcade API Toolkit Data Source
+// ============================================================================
+
+export interface ArcadeToolkitDataSourceConfig {
+  /** Arcade API configuration */
+  readonly arcade: ArcadeApiSourceConfig;
+  /** Source for toolkit metadata */
+  readonly metadataSource: IMetadataSource;
+}
+
+/**
+ * Create a toolkit data source using the Arcade Production API (/v1/tools)
+ */
+export const createArcadeToolkitDataSource = (
+  config: ArcadeToolkitDataSourceConfig
+): IToolkitDataSource =>
+  createCombinedToolkitDataSource({
+    toolSource: createArcadeApiSource(config.arcade),
     metadataSource: config.metadataSource,
   });
 

@@ -1,0 +1,326 @@
+{
+  "id": "HubspotMeetingsApi",
+  "label": "HubspotMeetingsApi",
+  "version": "1.0.0",
+  "description": "Tools that enable LLMs to interact directly with the Hubspot Meetings API",
+  "metadata": {
+    "category": "development",
+    "iconUrl": "https://design-system.arcade.dev/icons/hubspotmeetingsapi.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/development/hubspotmeetingsapi",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": null,
+    "allScopes": [
+      "crm.objects.appointments.sensitive.write.v2",
+      "crm.objects.appointments.write",
+      "crm.objects.commercepayments.write",
+      "crm.objects.companies.highly_sensitive.write.v2",
+      "crm.objects.companies.sensitive.write.v2",
+      "crm.objects.companies.write",
+      "crm.objects.contacts.highly_sensitive.write.v2",
+      "crm.objects.contacts.sensitive.write.v2",
+      "crm.objects.contacts.write",
+      "crm.objects.courses.write",
+      "crm.objects.deals.highly_sensitive.write.v2",
+      "crm.objects.deals.sensitive.write.v2",
+      "crm.objects.deals.write",
+      "crm.objects.goals.write",
+      "crm.objects.line_items.write",
+      "crm.objects.listings.write",
+      "crm.objects.products.write",
+      "crm.objects.services.write",
+      "scheduler.meetings.meeting-link.read",
+      "tickets",
+      "tickets.highly_sensitive.v2",
+      "tickets.sensitive.v2"
+    ]
+  },
+  "tools": [
+    {
+      "name": "BookHubspotMeeting",
+      "qualifiedName": "HubspotMeetingsApi.BookHubspotMeeting",
+      "fullyQualifiedName": "HubspotMeetingsApi.BookHubspotMeeting@1.0.0",
+      "description": "Book a meeting using Hubspot's scheduling feature.\n\nUse this tool to book a meeting for a specified meeting page through Hubspot. It is ideal for scheduling meetings directly through Hubspot's platform.\n\nNote: Understanding the request schema is necessary to properly create\nthe stringified JSON input object for execution.\n\nModes:\n- GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n  already have it. Do NOT call repeatedly if you already received\n  the schema.\n- EXECUTE: Performs the operation with the provided request body\n  JSON.\n\nIf you need the schema, call with mode='get_request_schema' ONCE, then execute.",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": [
+            "get_request_schema",
+            "execute"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "crm.objects.listings.write",
+          "crm.objects.companies.sensitive.write.v2",
+          "crm.objects.deals.write",
+          "crm.objects.deals.sensitive.write.v2",
+          "crm.objects.goals.write",
+          "crm.objects.companies.highly_sensitive.write.v2",
+          "crm.objects.appointments.write",
+          "crm.objects.courses.write",
+          "crm.objects.products.write",
+          "crm.objects.appointments.sensitive.write.v2",
+          "crm.objects.commercepayments.write",
+          "crm.objects.services.write",
+          "crm.objects.contacts.highly_sensitive.write.v2",
+          "tickets",
+          "tickets.sensitive.v2",
+          "tickets.highly_sensitive.v2",
+          "crm.objects.contacts.sensitive.write.v2",
+          "crm.objects.companies.write",
+          "crm.objects.contacts.write",
+          "crm.objects.deals.highly_sensitive.write.v2",
+          "crm.objects.line_items.write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'post-/scheduler/v3/meetings/meeting-links/book'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotMeetingsApi.BookHubspotMeeting",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "request_body": {
+            "value": "{\"meetingPageId\": \"123456\", \"startTime\": \"2023-10-15T10:00:00Z\", \"endTime\": \"2023-10-15T11:00:00Z\", \"attendees\": [{\"email\": \"example@domain.com\"}], \"topic\": \"Project Discussion\"}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetMeetingSchedulerDetails",
+      "qualifiedName": "HubspotMeetingsApi.GetMeetingSchedulerDetails",
+      "fullyQualifiedName": "HubspotMeetingsApi.GetMeetingSchedulerDetails@1.0.0",
+      "description": "Get necessary details for setting up a meeting scheduler.\n\nUse this tool to obtain the essential information required to set up a meeting scheduler via Hubspot. It retrieves the initial data needed to schedule meetings.",
+      "parameters": [
+        {
+          "name": "meeting_slug",
+          "type": "string",
+          "required": true,
+          "description": "A unique identifier for the meeting link, used to retrieve specific scheduler details.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "scheduler.meetings.meeting-link.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'get-/scheduler/v3/meetings/meeting-links/book/{slug}'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotMeetingsApi.GetMeetingSchedulerDetails",
+        "parameters": {
+          "meeting_slug": {
+            "value": "team-sync-2023",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetNextMeetingAvailability",
+      "qualifiedName": "HubspotMeetingsApi.GetNextMeetingAvailability",
+      "fullyQualifiedName": "HubspotMeetingsApi.GetNextMeetingAvailability@1.0.0",
+      "description": "Fetch the next availability times for a meeting page.\n\nThis tool retrieves the upcoming available time slots for booking a meeting on a specified page using a given slug. It should be called when a user wants to check or display free time slots for a meeting.",
+      "parameters": [
+        {
+          "name": "availability_page_slug",
+          "type": "string",
+          "required": true,
+          "description": "The unique slug identifier for the meeting page to check available time slots.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "scheduler.meetings.meeting-link.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'get-/scheduler/v3/meetings/meeting-links/book/availability-page/{slug}'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotMeetingsApi.GetNextMeetingAvailability",
+        "parameters": {
+          "availability_page_slug": {
+            "value": "next-available-meeting",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListMeetingSchedulingPages",
+      "qualifiedName": "HubspotMeetingsApi.ListMeetingSchedulingPages",
+      "fullyQualifiedName": "HubspotMeetingsApi.ListMeetingSchedulingPages@1.0.0",
+      "description": "Retrieve a paged list of meeting scheduling links.\n\nUse this tool to get a paged list of meeting scheduling pages from Hubspot. It is useful when you need to see or manage the scheduling links available.",
+      "parameters": [],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "scheduler.meetings.meeting-link.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'get-/scheduler/v3/meetings/meeting-links'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotMeetingsApi.ListMeetingSchedulingPages",
+        "parameters": {},
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ScheduleMeetingHubspot",
+      "qualifiedName": "HubspotMeetingsApi.ScheduleMeetingHubspot",
+      "fullyQualifiedName": "HubspotMeetingsApi.ScheduleMeetingHubspot@1.0.0",
+      "description": "Schedule a meeting using Hubspot's calendar integration.\n\nThis tool allows you to schedule meetings through Hubspot's external calendar integration, streamlining event creation and ensuring synchronization with Hubspot's scheduling system.\n\nNote: Understanding the request schema is necessary to properly create\nthe stringified JSON input object for execution.\n\nModes:\n- GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n  already have it. Do NOT call repeatedly if you already received\n  the schema.\n- EXECUTE: Performs the operation with the provided request body\n  JSON.\n\nIf you need the schema, call with mode='get_request_schema' ONCE, then execute.",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": [
+            "get_request_schema",
+            "execute"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "crm.objects.listings.write",
+          "crm.objects.companies.sensitive.write.v2",
+          "crm.objects.deals.write",
+          "crm.objects.deals.sensitive.write.v2",
+          "crm.objects.goals.write",
+          "crm.objects.companies.highly_sensitive.write.v2",
+          "crm.objects.appointments.write",
+          "crm.objects.courses.write",
+          "crm.objects.products.write",
+          "crm.objects.appointments.sensitive.write.v2",
+          "crm.objects.commercepayments.write",
+          "crm.objects.services.write",
+          "crm.objects.contacts.highly_sensitive.write.v2",
+          "tickets",
+          "tickets.sensitive.v2",
+          "tickets.highly_sensitive.v2",
+          "crm.objects.contacts.sensitive.write.v2",
+          "crm.objects.companies.write",
+          "crm.objects.contacts.write",
+          "crm.objects.deals.highly_sensitive.write.v2",
+          "crm.objects.line_items.write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'post-/scheduler/v3/meetings/calendar'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotMeetingsApi.ScheduleMeetingHubspot",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "request_body": {
+            "value": "{\"meeting_title\": \"Team Sync\", \"start_time\": \"2023-10-10T10:00:00Z\", \"end_time\": \"2023-10-10T11:00:00Z\", \"participants\": [{\"email\": \"example@example.com\"}], \"location\": \"Zoom\", \"agenda\": \"Discuss project updates\"}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    }
+  ],
+  "documentationChunks": [
+    {
+      "type": "markdown",
+      "location": "auth",
+      "position": "after",
+      "content": "## Auth\n\n<Callout type=\"warning\">\nThe HubspotMeetingsApi MCP Server uses the Auth Provider with id `arcade-hubspot` to connect to users' Hubspot accounts. In order to use the MCP Server, you must configure the `arcade-hubspot` auth provider.\n</Callout>\n\n**Configuration summary:**\n- Configure the `arcade-hubspot` auth provider in your Auth Providers settings.\n- Provide the HubSpot application credentials and required callback/redirect information to the auth provider.\n- Enable the provider for any users or teams that need access to HubspotMeetingsApi functionality.\n\n**Important:**\n- The MCP Server cannot connect to HubSpot on behalf of users unless the `arcade-hubspot` provider is present and correctly configured.",
+      "header": "## Auth"
+    }
+  ],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-01-26T17:36:16.205Z",
+  "summary": "Arcade Toolkit for HubSpot Meetings API enables seamless interaction with HubSpot's scheduling features, allowing developers to automate meeting management directly through the platform.\n\n**Capabilities**  \n- Schedule and manage meetings with calendar integration  \n- Retrieve upcoming availability for booking  \n- Get details for setting up meeting schedulers  \n- List available meeting scheduling pages  \n- Book meetings using HubSpot's APIs  \n\n**OAuth**  \n- Provider: Unknown  \n- Scopes: Multiple CRM-related appointment and sensitive data scopes  \n\n**Secrets**  \n- No secrets or API keys are required for this toolkit."
+}

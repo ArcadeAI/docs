@@ -3,7 +3,7 @@
  *
  * Outputs merged toolkit data as JSON files.
  */
-import { mkdir, writeFile } from "fs/promises";
+import { mkdir, readFile, stat, writeFile } from "fs/promises";
 import { dirname, join } from "path";
 import type {
   MergedToolkit,
@@ -86,6 +86,55 @@ export class JsonGenerator {
 
     await writeFile(filePath, content, "utf-8");
     return filePath;
+  }
+
+  /**
+   * Check if a toolkit file already exists in the output directory
+   */
+  async hasToolkitFile(toolkitId: string): Promise<boolean> {
+    const fileName = `${toolkitId.toLowerCase()}.json`;
+    const filePath = join(this.outputDir, fileName);
+    try {
+      const stats = await stat(filePath);
+      return stats.isFile();
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Get set of toolkit IDs that already have output files
+   */
+  async getCompletedToolkitIds(): Promise<Set<string>> {
+    const completedIds = new Set<string>();
+    try {
+      const result = await readToolkitsFromDir(this.outputDir);
+      for (const toolkit of result.toolkits) {
+        completedIds.add(toolkit.id.toLowerCase());
+      }
+    } catch {
+      // Directory doesn't exist or is empty - that's fine
+    }
+    return completedIds;
+  }
+
+  /**
+   * Load an existing toolkit file
+   */
+  async loadToolkitFile(toolkitId: string): Promise<MergedToolkit | null> {
+    const fileName = `${toolkitId.toLowerCase()}.json`;
+    const filePath = join(this.outputDir, fileName);
+    try {
+      const content = await readFile(filePath, "utf-8");
+      const parsed = JSON.parse(content) as unknown;
+      const result = MergedToolkitSchema.safeParse(parsed);
+      if (result.success) {
+        return result.data;
+      }
+      return null;
+    } catch {
+      return null;
+    }
   }
 
   /**

@@ -268,6 +268,11 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
         location="header"
         position="before"
       />
+      <DocumentationChunkRenderer
+        chunks={data.documentationChunks}
+        location="description"
+        position="before"
+      />
       <ToolkitHeader
         auth={data.auth}
         description={data.description}
@@ -276,6 +281,11 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
         metadata={data.metadata}
         toolStats={toolStats}
         version={data.version}
+      />
+      <DocumentationChunkRenderer
+        chunks={data.documentationChunks}
+        location="description"
+        position="after"
       />
       <DocumentationChunkRenderer
         chunks={data.documentationChunks}
@@ -293,6 +303,39 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
           <ReactMarkdown>{data.summary}</ReactMarkdown>
         </div>
       )}
+
+      <DocumentationChunkRenderer
+        chunks={data.documentationChunks}
+        location="auth"
+        position="before"
+      />
+      <DocumentationChunkRenderer
+        chunks={data.documentationChunks}
+        location="auth"
+        position="after"
+      />
+
+      <DocumentationChunkRenderer
+        chunks={data.documentationChunks}
+        location="before_available_tools"
+        position="before"
+      />
+      <DocumentationChunkRenderer
+        chunks={data.documentationChunks}
+        location="before_available_tools"
+        position="after"
+      />
+
+      <DocumentationChunkRenderer
+        chunks={data.documentationChunks}
+        location="custom_section"
+        position="before"
+      />
+      <DocumentationChunkRenderer
+        chunks={data.documentationChunks}
+        location="custom_section"
+        position="after"
+      />
 
       <div className="mt-10 scroll-mt-20" id="available-tools">
         <h2 className="flex items-center gap-3 text-2xl font-semibold">
@@ -319,6 +362,17 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
           secretsInfo: tool.secretsInfo,
           scopes: tool.auth?.scopes ?? [],
         }))}
+      />
+
+      <DocumentationChunkRenderer
+        chunks={data.documentationChunks}
+        location="after_available_tools"
+        position="before"
+      />
+      <DocumentationChunkRenderer
+        chunks={data.documentationChunks}
+        location="after_available_tools"
+        position="after"
       />
 
       {shouldShowSelection && (

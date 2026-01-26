@@ -1,0 +1,963 @@
+{
+  "id": "GoogleDocs",
+  "label": "GoogleDocs",
+  "version": "5.0.1",
+  "description": "Arcade.dev LLM tools for Google Docs",
+  "metadata": {
+    "category": "development",
+    "iconUrl": "https://design-system.arcade.dev/icons/googledocs.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/development/googledocs",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": "google",
+    "allScopes": [
+      "https://www.googleapis.com/auth/drive.file",
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/userinfo.profile"
+    ]
+  },
+  "tools": [
+    {
+      "name": "CommentOnDocument",
+      "qualifiedName": "GoogleDocs.CommentOnDocument",
+      "fullyQualifiedName": "GoogleDocs.CommentOnDocument@5.0.1",
+      "description": "Comment on a specific document by its ID.",
+      "parameters": [
+        {
+          "name": "document_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the document to comment on",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "comment_text",
+          "type": "string",
+          "required": true,
+          "description": "The comment to add to the document",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The comment's ID, documentId, and documentUrl in a dictionary"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleDocs.CommentOnDocument",
+        "parameters": {
+          "document_id": {
+            "value": "abc123xyz",
+            "type": "string",
+            "required": true
+          },
+          "comment_text": {
+            "value": "Great work on this section!",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateBlankDocument",
+      "qualifiedName": "GoogleDocs.CreateBlankDocument",
+      "fullyQualifiedName": "GoogleDocs.CreateBlankDocument@5.0.1",
+      "description": "Create a blank Google Docs document with the specified title.",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "The title of the blank document to create",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The created document's title, documentId, and documentUrl in a dictionary"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleDocs.CreateBlankDocument",
+        "parameters": {
+          "title": {
+            "value": "Meeting Notes - September 2023",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateDocumentFromText",
+      "qualifiedName": "GoogleDocs.CreateDocumentFromText",
+      "fullyQualifiedName": "GoogleDocs.CreateDocumentFromText@5.0.1",
+      "description": "Create a Google Docs document with the specified title and text content.",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "The title of the document to create",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "text_content",
+          "type": "string",
+          "required": true,
+          "description": "The text content to insert into the document",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The created document's title, documentId, and documentUrl in a dictionary"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleDocs.CreateDocumentFromText",
+        "parameters": {
+          "title": {
+            "value": "Meeting Notes - October 2023",
+            "type": "string",
+            "required": true
+          },
+          "text_content": {
+            "value": "These are the notes from the meeting held on October 10, 2023. Discussed project timelines, deliverables, and assigned tasks.",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "EditDocument",
+      "qualifiedName": "GoogleDocs.EditDocument",
+      "fullyQualifiedName": "GoogleDocs.EditDocument@5.0.1",
+      "description": "Edit a Google Docs document with the specified edit request.\n\nThis tool does not have context about previous edits because it is stateless. If your edit\nrequest depends on knowledge about previous edits, then you should provide that context in\nthe edit requests.",
+      "parameters": [
+        {
+          "name": "document_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the document to edit",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "edit_requests",
+          "type": "array",
+          "innerType": "string",
+          "required": true,
+          "description": "A list of natural language descriptions of the desired change(s) to the document. Each entry should be a single, self-contained edit request that can be fully understood independently. Note: Each request may result in zero, one, or multiple actual edits depending on what changes are needed (e.g., a request might be ignored if the change already exists in the document).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "reasoning_effort",
+          "type": "string",
+          "required": false,
+          "description": "The effort to put into reasoning about the edit(s). Defaults to medium",
+          "enum": [
+            "minimal",
+            "low",
+            "medium",
+            "high"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [
+        "OPENAI_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "OPENAI_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The edited document's title, documentId, and documentUrl in a dictionary"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleDocs.EditDocument",
+        "parameters": {
+          "document_id": {
+            "value": "1A2B3C4D5E6F7G8H9I0J",
+            "type": "string",
+            "required": true
+          },
+          "edit_requests": {
+            "value": [
+              "Change the title of the document to 'Quarterly Financial Report'",
+              "Add a new section discussing the effects of the market downturn",
+              "Correct the spelling of 'recieve' to 'receive' throughout the document"
+            ],
+            "type": "array",
+            "required": true
+          },
+          "reasoning_effort": {
+            "value": "high",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GenerateGoogleFilePickerUrl",
+      "qualifiedName": "GoogleDocs.GenerateGoogleFilePickerUrl",
+      "fullyQualifiedName": "GoogleDocs.GenerateGoogleFilePickerUrl@5.0.1",
+      "description": "Generate a Google File Picker URL for user-driven file selection and authorization.\n\nThis tool generates a URL that directs the end-user to a Google File Picker interface where\nwhere they can select or upload Google Drive files. Users can grant permission to access their\nDrive files, providing a secure and authorized way to interact with their files.\n\nThis is particularly useful when prior tools (e.g., those accessing or modifying\nGoogle Docs, Google Sheets, etc.) encountered failures due to file non-existence\n(Requested entity was not found) or permission errors. Once the user completes the file\npicker flow, the prior tool can be retried.\n\nSuggest this tool to users when they are surprised or confused that the file they are\nsearching for or attempting to access cannot be found.",
+      "parameters": [],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Google File Picker URL for user file selection and permission granting"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleDocs.GenerateGoogleFilePickerUrl",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetDocumentAsDocmd",
+      "qualifiedName": "GoogleDocs.GetDocumentAsDocmd",
+      "fullyQualifiedName": "GoogleDocs.GetDocumentAsDocmd@5.0.1",
+      "description": "Get the latest version of the specified Google Docs document as DocMD.\nThe DocMD output will include tags that can be used to annotate the document with location\ninformation, the type of block, block IDs, and other metadata. If the document has tabs,\nall tabs are included in sequential order unless a specific tab_id is provided.",
+      "parameters": [
+        {
+          "name": "document_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the document to retrieve.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "tab_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of a specific tab to retrieve. If provided, returns only content from that tab. If omitted, returns all tabs in sequential depth-first order.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "string",
+        "description": "The document contents as DocMD"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleDocs.GetDocumentAsDocmd",
+        "parameters": {
+          "document_id": {
+            "value": "1A2B3C4D5E6F",
+            "type": "string",
+            "required": true
+          },
+          "tab_id": {
+            "value": "tab1",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetDocumentById",
+      "qualifiedName": "GoogleDocs.GetDocumentById",
+      "fullyQualifiedName": "GoogleDocs.GetDocumentById@5.0.1",
+      "description": "DEPRECATED DO NOT USE THIS TOOL\nGet the latest version of the specified Google Docs document.",
+      "parameters": [
+        {
+          "name": "document_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the document to retrieve.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The document contents as a dictionary"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleDocs.GetDocumentById",
+        "parameters": {
+          "document_id": {
+            "value": "1A2B3C4D5E6F7G8H9I0J",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetDocumentMetadata",
+      "qualifiedName": "GoogleDocs.GetDocumentMetadata",
+      "fullyQualifiedName": "GoogleDocs.GetDocumentMetadata@5.0.1",
+      "description": "Get metadata for a Google Docs document including hierarchical tab structure.\nReturns document title, ID, URL, total character count, and nested tab information\nwith character counts for each tab.",
+      "parameters": [
+        {
+          "name": "document_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the document to get metadata for",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Document metadata including hierarchical tab structure"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleDocs.GetDocumentMetadata",
+        "parameters": {
+          "document_id": {
+            "value": "1A2B3C4D5E6F7G8H9I0J",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "InsertTextAtEndOfDocument",
+      "qualifiedName": "GoogleDocs.InsertTextAtEndOfDocument",
+      "fullyQualifiedName": "GoogleDocs.InsertTextAtEndOfDocument@5.0.1",
+      "description": "Updates an existing Google Docs document using the batchUpdate API endpoint.",
+      "parameters": [
+        {
+          "name": "document_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the document to update.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "text_content",
+          "type": "string",
+          "required": true,
+          "description": "The text content to insert into the document",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The response from the batchUpdate API as a dict."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleDocs.InsertTextAtEndOfDocument",
+        "parameters": {
+          "document_id": {
+            "value": "1A2B3C4D5E6F7G8H9I0J",
+            "type": "string",
+            "required": true
+          },
+          "text_content": {
+            "value": "This text was added at the end of the document.",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListDocumentComments",
+      "qualifiedName": "GoogleDocs.ListDocumentComments",
+      "fullyQualifiedName": "GoogleDocs.ListDocumentComments@5.0.1",
+      "description": "List all comments on the specified Google Docs document.",
+      "parameters": [
+        {
+          "name": "document_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the document to list comments for",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_deleted",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to include deleted comments in the results. Defaults to False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing the comments"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleDocs.ListDocumentComments",
+        "parameters": {
+          "document_id": {
+            "value": "1a2b3c4d5e6f7g8h9i0j",
+            "type": "string",
+            "required": true
+          },
+          "include_deleted": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "SearchAndRetrieveDocuments",
+      "qualifiedName": "GoogleDocs.SearchAndRetrieveDocuments",
+      "fullyQualifiedName": "GoogleDocs.SearchAndRetrieveDocuments@5.0.1",
+      "description": "Searches for documents in the user's Google Drive and returns documents with their main body\ncontent and tab metadata. Excludes documents that are in the trash.\n\nReturns main body content only with metadata about tabs. Use get_document_as_docmd() to retrieve\nfull tab content for specific documents. Use search_documents() for metadata-only searches.",
+      "parameters": [
+        {
+          "name": "return_format",
+          "type": "string",
+          "required": false,
+          "description": "The format of the document to return. Defaults to Markdown.",
+          "enum": [
+            "docmd",
+            "markdown",
+            "html",
+            "google_api_json"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "document_contains",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Keywords or phrases that must be in the document title or body. Provide a list of keywords or phrases if needed.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "document_not_contains",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Keywords or phrases that must NOT be in the document title or body. Provide a list of keywords or phrases if needed.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "search_only_in_shared_drive_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the shared drive to restrict the search to. If provided, the search will only return documents from this drive. Defaults to None, which searches across all drives.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_shared_drives",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to include documents from shared drives. Defaults to False (searches only in the user's 'My Drive').",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_organization_domain_documents",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to include documents from the organization's domain. This is applicable to admin users who have permissions to view organization-wide documents in a Google Workspace account. Defaults to False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "order_by",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Sort order. Defaults to listing the most recently modified documents first",
+          "enum": [
+            "createdTime",
+            "createdTime desc",
+            "folder",
+            "folder desc",
+            "modifiedByMeTime",
+            "modifiedByMeTime desc",
+            "modifiedTime",
+            "modifiedTime desc",
+            "name",
+            "name desc",
+            "name_natural",
+            "name_natural desc",
+            "quotaBytesUsed",
+            "quotaBytesUsed desc",
+            "recency",
+            "recency desc",
+            "sharedWithMeTime",
+            "sharedWithMeTime desc",
+            "starred",
+            "starred desc",
+            "viewedByMeTime",
+            "viewedByMeTime desc"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The number of documents to list",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "pagination_token",
+          "type": "string",
+          "required": false,
+          "description": "The pagination token to continue a previous request",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing document count, list of documents with content and metadata, pagination token, and has_more flag"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleDocs.SearchAndRetrieveDocuments",
+        "parameters": {
+          "return_format": {
+            "value": "Markdown",
+            "type": "string",
+            "required": false
+          },
+          "document_contains": {
+            "value": [
+              "project",
+              "meeting",
+              "report"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "document_not_contains": {
+            "value": [
+              "draft",
+              "confidential"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "search_only_in_shared_drive_id": {
+            "value": "abc123456",
+            "type": "string",
+            "required": false
+          },
+          "include_shared_drives": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "include_organization_domain_documents": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "order_by": {
+            "value": [
+              "modifiedTime desc",
+              "name asc"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "pagination_token": {
+            "value": "xyz987654",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "SearchDocuments",
+      "qualifiedName": "GoogleDocs.SearchDocuments",
+      "fullyQualifiedName": "GoogleDocs.SearchDocuments@5.0.1",
+      "description": "Searches for documents in the user's Google Drive. Excludes documents in trash.\nReturns metadata only. Use get_document_metadata or get_document_as_docmd for content.",
+      "parameters": [
+        {
+          "name": "document_contains",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Keywords or phrases that must be in the document title or body. Provide a list of keywords or phrases if needed.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "document_not_contains",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Keywords or phrases that must NOT be in the document title or body. Provide a list of keywords or phrases if needed.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "search_only_in_shared_drive_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the shared drive to restrict the search to. If provided, the search will only return documents from this drive. Defaults to None, which searches across all drives.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_shared_drives",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to include documents from shared drives. Defaults to False (searches only in the user's 'My Drive').",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_organization_domain_documents",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to include documents from the organization's domain. This is applicable to admin users who have permissions to view organization-wide documents in a Google Workspace account. Defaults to False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "order_by",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Sort order. Defaults to listing the most recently modified documents first. If document_contains or document_not_contains is provided, then the order_by will be ignored.",
+          "enum": [
+            "createdTime",
+            "createdTime desc",
+            "folder",
+            "folder desc",
+            "modifiedByMeTime",
+            "modifiedByMeTime desc",
+            "modifiedTime",
+            "modifiedTime desc",
+            "name",
+            "name desc",
+            "name_natural",
+            "name_natural desc",
+            "quotaBytesUsed",
+            "quotaBytesUsed desc",
+            "recency",
+            "recency desc",
+            "sharedWithMeTime",
+            "sharedWithMeTime desc",
+            "starred",
+            "starred desc",
+            "viewedByMeTime",
+            "viewedByMeTime desc"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The number of documents to list",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "pagination_token",
+          "type": "string",
+          "required": false,
+          "description": "The pagination token to continue a previous request",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Document count, list of documents, pagination token, and has_more flag"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleDocs.SearchDocuments",
+        "parameters": {
+          "document_contains": {
+            "value": [
+              "project",
+              "report",
+              "meeting notes"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "document_not_contains": {
+            "value": [
+              "draft",
+              "old",
+              "deprecated"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "search_only_in_shared_drive_id": {
+            "value": "abc123sharedDriveId",
+            "type": "string",
+            "required": false
+          },
+          "include_shared_drives": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "include_organization_domain_documents": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "order_by": {
+            "value": [
+              "createdTime",
+              "name"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "pagination_token": {
+            "value": "nextPageToken",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "GoogleDocs.WhoAmI",
+      "fullyQualifiedName": "GoogleDocs.WhoAmI@5.0.1",
+      "description": "Get comprehensive user profile and Google Docs environment information.\n\nThis tool provides detailed information about the authenticated user including\ntheir name, email, profile picture, Google Docs access permissions, and other\nimportant profile details from Google services.",
+      "parameters": [],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file",
+          "https://www.googleapis.com/auth/userinfo.profile",
+          "https://www.googleapis.com/auth/userinfo.email"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Get comprehensive user profile and Google Docs environment information."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleDocs.WhoAmI",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    }
+  ],
+  "documentationChunks": [
+    {
+      "type": "warning",
+      "location": "description",
+      "position": "after",
+      "content": "This Toolkit is not available in Arcade Cloud. You can use these tools with a\n  [self-hosted](/guides/deployment-hosting/configure-engine) instance of Arcade."
+    },
+    {
+      "type": "markdown",
+      "location": "custom_section",
+      "position": "after",
+      "content": "<Callout type=\"info\">\nGoogle Docs supports hierarchical tabs within documents. Tabs can be nested up to 3 levels deep and include metadata with approximate character and word counts.\n</Callout>\n\n**Tool support:**\n- `GetDocumentMetadata` returns hierarchical tab structures with approximate character and word counts for each tab\n- `GetDocumentAsDocMD` and `SearchAndRetrieveDocuments` include all tab content in their output\n- `GetDocumentAsDocMD` supports filtering to retrieve content from a specific tab using the `tab_id` parameter\n\n**Tab structure:**\n- Each tab has a unique `tabId`, `title`, `index`, and `nestingLevel`\n- Tabs can be nested up to 3 levels deep (parent → child → grandchild)\n- Tab metadata includes approximate character and word counts for each tab's content",
+      "header": "## Tab Support"
+    },
+    {
+      "type": "info",
+      "location": "auth",
+      "position": "after",
+      "content": "The Arcade Docs MCP Server uses the [Google auth provider](/references/auth-providers/google) to connect to users' Google accounts.",
+      "header": "## Auth"
+    }
+  ],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-01-26T17:32:15.847Z",
+  "summary": "Arcade.dev offers a toolkit for Google Docs that facilitates seamless interaction with Google Drive and document management. This toolkit enables developers to create, edit, and manage documents through a variety of functions in a secure environment.\n\n**Capabilities**\n- Create, edit, and comment on Google Docs seamlessly.\n- Retrieve document metadata and manage file permissions securely.\n- Generate user-friendly file picker URLs for easy file access.\n- List and manage comments within documents.\n\n**OAuth**\nProvider: Google\nScopes: https://www.googleapis.com/auth/drive.file, https://www.googleapis.com/auth/userinfo.email, https://www.googleapis.com/auth/userinfo.profile\n\n**Secrets**\nSecret Type: API Key\nExample: OPENAI_API_KEY."
+}

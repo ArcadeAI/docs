@@ -143,9 +143,7 @@ const createErrorFetchStub = (status: number, payload: unknown) => {
     });
 };
 
-const createInspectFetchStub = (
-  inspect: (params: URLSearchParams) => void
-) => {
+const createInspectFetchStub = (inspect: (params: URLSearchParams) => void) => {
   return async (input: RequestInfo | URL) => {
     const url = new URL(input.toString());
     inspect(url.searchParams);

@@ -1,0 +1,562 @@
+{
+  "id": "HubspotAutomationApi",
+  "label": "HubspotAutomationApi",
+  "version": "1.0.0",
+  "description": "Tools that enable LLMs to interact directly with the HubSpot Automation API.",
+  "metadata": {
+    "category": "development",
+    "iconUrl": "https://design-system.arcade.dev/icons/hubspotautomationapi.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/development/hubspotautomationapi",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": null,
+    "allScopes": [
+      "automation",
+      "automation.sequences.enrollments.write",
+      "automation.sequences.read"
+    ]
+  },
+  "tools": [
+    {
+      "name": "CheckContactEnrollmentStatus",
+      "qualifiedName": "HubspotAutomationApi.CheckContactEnrollmentStatus",
+      "fullyQualifiedName": "HubspotAutomationApi.CheckContactEnrollmentStatus@1.0.0",
+      "description": "Retrieve the sequence enrollment status of a contact by ID.\n\nUse this tool to find out if a contact is enrolled in any sequences, using their contact ID to get the status information.",
+      "parameters": [
+        {
+          "name": "contact_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique ID of the contact to check their sequence enrollment status.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "automation.sequences.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'get-/automation/v4/sequences/enrollments/contact/{contactId}'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotAutomationApi.CheckContactEnrollmentStatus",
+        "parameters": {
+          "contact_id": {
+            "value": "12345-abcde-67890-fghij",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CompleteActionExecution",
+      "qualifiedName": "HubspotAutomationApi.CompleteActionExecution",
+      "fullyQualifiedName": "HubspotAutomationApi.CompleteActionExecution@1.0.0",
+      "description": "Complete a specific blocked action execution by ID.\n\n    Call this tool to complete an action in an automation workflow that is currently blocked by its ID.\n\n    Note: Understanding the request schema is necessary to properly create\n    the stringified JSON input object for execution.\n\nThis operation also requires path parameters.\n\n    Modes:\n    - GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n      already have it. Do NOT call repeatedly if you already received\n      the schema.\n    - EXECUTE: Performs the operation with the provided request body\n      JSON.\n      Note: You must also provide the required path parameters when executing.\n\n    If you need the schema, call with mode='get_request_schema' ONCE, then execute.\n    ",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": [
+            "get_request_schema",
+            "execute"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "action_execution_id",
+          "type": "string",
+          "required": false,
+          "description": "The unique identifier of the action execution to be completed.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "automation"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'post-/automation/v4/actions/callbacks/{callbackId}/complete_complete'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotAutomationApi.CompleteActionExecution",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "action_execution_id": {
+            "value": "abc123xyz",
+            "type": "string",
+            "required": false
+          },
+          "request_body": {
+            "value": "{\"status\":\"completed\"}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CompleteBatchActionExecutions",
+      "qualifiedName": "HubspotAutomationApi.CompleteBatchActionExecutions",
+      "fullyQualifiedName": "HubspotAutomationApi.CompleteBatchActionExecutions@1.0.0",
+      "description": "Complete a batch of blocked action executions.\n\nUse this tool to mark a batch of previously blocked action executions as complete. Ideal for situations where action executions need to be finalized as part of an automated workflow.\n\nNote: Understanding the request schema is necessary to properly create\nthe stringified JSON input object for execution.\n\nModes:\n- GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n  already have it. Do NOT call repeatedly if you already received\n  the schema.\n- EXECUTE: Performs the operation with the provided request body\n  JSON.\n\nIf you need the schema, call with mode='get_request_schema' ONCE, then execute.",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": [
+            "get_request_schema",
+            "execute"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "automation"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'post-/automation/v4/actions/callbacks/complete_completeBatch'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotAutomationApi.CompleteBatchActionExecutions",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "request_body": {
+            "value": "{\"action_ids\":[\"action_1\",\"action_2\"],\"status\":\"completed\"}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "EnrollContactInSequence",
+      "qualifiedName": "HubspotAutomationApi.EnrollContactInSequence",
+      "fullyQualifiedName": "HubspotAutomationApi.EnrollContactInSequence@1.0.0",
+      "description": "Enroll a contact into a sequence with user ID and details.\n\nThis tool enrolls a specified contact into an automation sequence using the provided user ID and sequence details, facilitating automated follow-up actions.",
+      "parameters": [
+        {
+          "name": "contact_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier of the contact to be enrolled in the sequence.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sender_email",
+          "type": "string",
+          "required": true,
+          "description": "The email address of the sender enrolling the contact. This should be a valid email associated with the sender's HubSpot user account.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sequence_identifier",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier of the sequence to enroll the contact into. It should be a valid string matching the sequence available in the system.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sender_alias_address",
+          "type": "string",
+          "required": false,
+          "description": "Email alias for the sender addressing the sequence. This is used instead of the default email address.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "automation.sequences.enrollments.write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'post-/automation/v4/sequences/enrollments'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotAutomationApi.EnrollContactInSequence",
+        "parameters": {
+          "contact_id": {
+            "value": "12345",
+            "type": "string",
+            "required": true
+          },
+          "sender_email": {
+            "value": "sender@example.com",
+            "type": "string",
+            "required": true
+          },
+          "sequence_identifier": {
+            "value": "sequence_001",
+            "type": "string",
+            "required": true
+          },
+          "sender_alias_address": {
+            "value": "alias@example.com",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "FetchEmailCampaigns",
+      "qualifiedName": "HubspotAutomationApi.FetchEmailCampaigns",
+      "fullyQualifiedName": "HubspotAutomationApi.FetchEmailCampaigns@1.0.0",
+      "description": "Fetch email campaigns from HubSpot Automation.\n\nUse this tool to retrieve information about email campaigns managed within HubSpot's automation platform. It can be called to get an overview of current or past email marketing activities.",
+      "parameters": [
+        {
+          "name": "email_campaign_flow_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "An array of flow IDs to specify which email campaigns to retrieve. Each ID should be a string.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_date_filter",
+          "type": "string",
+          "required": false,
+          "description": "A timestamp filter to get campaigns before a specific date (in YYYY-MM-DD format).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_results",
+          "type": "integer",
+          "required": false,
+          "description": "Specifies the maximum number of email campaign entries to retrieve. Should be an integer value.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_date",
+          "type": "string",
+          "required": false,
+          "description": "Specify the start date for fetching email campaigns. This should be in the format YYYY-MM-DD to filter results starting after this date.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "automation"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'get-/automation/v4/flows/email-campaigns'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotAutomationApi.FetchEmailCampaigns",
+        "parameters": {
+          "email_campaign_flow_ids": {
+            "value": [
+              "flow_id_123",
+              "flow_id_456"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "end_date_filter": {
+            "value": "2023-09-30",
+            "type": "string",
+            "required": false
+          },
+          "max_results": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "start_date": {
+            "value": "2023-01-01",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetSequenceDetails",
+      "qualifiedName": "HubspotAutomationApi.GetSequenceDetails",
+      "fullyQualifiedName": "HubspotAutomationApi.GetSequenceDetails@1.0.0",
+      "description": "Retrieve details of a specific sequence by its ID.\n\nThis tool retrieves information about a specific sequence using its ID. It should be called when you need details about a sequence within HubSpot Automation.",
+      "parameters": [
+        {
+          "name": "sequence_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique ID of the sequence to retrieve details for. This ID identifies which sequence's information will be returned.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "automation.sequences.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'get-/automation/v4/sequences/{sequenceId}'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotAutomationApi.GetSequenceDetails",
+        "parameters": {
+          "sequence_id": {
+            "value": "12345-abcde-67890-fghij",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetUserSequences",
+      "qualifiedName": "HubspotAutomationApi.GetUserSequences",
+      "fullyQualifiedName": "HubspotAutomationApi.GetUserSequences@1.0.0",
+      "description": "Retrieve a list of sequences for a specific user.\n\nUse this tool to get sequences associated with a user in HubSpot. Useful for tracking user-specific automated processes.",
+      "parameters": [],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "automation.sequences.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'get-/automation/v4/sequences/'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotAutomationApi.GetUserSequences",
+        "parameters": {},
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetWorkflowIdMappings",
+      "qualifiedName": "HubspotAutomationApi.GetWorkflowIdMappings",
+      "fullyQualifiedName": "HubspotAutomationApi.GetWorkflowIdMappings@1.0.0",
+      "description": "Retrieve HubSpot workflow ID mappings in batch.\n\nCall this tool to obtain mappings for HubSpot workflow IDs in batch. Useful for integrating workflows and managing automation processes.\n\nNote: Understanding the request schema is necessary to properly create\nthe stringified JSON input object for execution.\n\nModes:\n- GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n  already have it. Do NOT call repeatedly if you already received\n  the schema.\n- EXECUTE: Performs the operation with the provided request body\n  JSON.\n\nIf you need the schema, call with mode='get_request_schema' ONCE, then execute.",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": [
+            "get_request_schema",
+            "execute"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "automation"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'post-/automation/v4/workflow-id-mappings/batch/read'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotAutomationApi.GetWorkflowIdMappings",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "request_body": {
+            "value": "{\"workflowIds\": [12345, 67890]}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetWorkflows",
+      "qualifiedName": "HubspotAutomationApi.GetWorkflows",
+      "fullyQualifiedName": "HubspotAutomationApi.GetWorkflows@1.0.0",
+      "description": "Retrieve details of HubSpot workflows.\n\nThis tool allows you to fetch information about workflows in HubSpot. Use it when you need to access or manage workflow details for automation purposes.\n\nNote: Understanding the request schema is necessary to properly create\nthe stringified JSON input object for execution.\n\nModes:\n- GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n  already have it. Do NOT call repeatedly if you already received\n  the schema.\n- EXECUTE: Performs the operation with the provided request body\n  JSON.\n\nIf you need the schema, call with mode='get_request_schema' ONCE, then execute.",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": [
+            "get_request_schema",
+            "execute"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "automation"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'post-/automation/v4/flows/batch/read'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotAutomationApi.GetWorkflows",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "request_body": {
+            "value": "{\"workflowId\":\"12345\"}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    }
+  ],
+  "documentationChunks": [
+    {
+      "type": "markdown",
+      "location": "auth",
+      "position": "after",
+      "content": "## Auth\n\n<Callout type=\"info\">\nThe HubspotAutomationApi MCP Server uses the Auth Provider with id `arcade-hubspot` to connect to users' HubSpot accounts. To use the MCP Server, you must configure the `arcade-hubspot` auth provider.\n</Callout>\n\n**Configuration guidance:**\n- Configure an auth provider with id `arcade-hubspot` in your platform.\n- Provide the required HubSpot OAuth credentials (for example, client ID and client secret) and set the correct callback/redirect URL in your auth provider settings.\n- Ensure your deployment (self-hosted or cloud) can reach HubSpot's OAuth endpoints and that client secrets are stored securely.\n\n**Notes & important limitations:**\n- This integration requires OAuth-based authentication and a properly configured auth provider.\n- On self-hosted deployments, verify network egress to HubSpot and any firewall or proxy settings that may block OAuth traffic.",
+      "header": "## Auth"
+    }
+  ],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-01-26T17:34:06.653Z",
+  "summary": "Arcade's HubSpot Automation API toolkit empowers developers to integrate LLMs with HubSpot's automation capabilities, facilitating seamless interaction with various automation workflows and sequences.\n\n**Capabilities**\n- Enroll contacts in sequences and fetch campaign details via automation tools.\n- Retrieve sequence statuses and details efficiently using contact IDs.\n- Manage batch actions and workflow ID mappings to optimize automation processes.\n- Access user-specific sequences to track individual automated tasks.\n\n**OAuth**\nProvider: Unknown\nScopes: automation, automation.sequences.enrollments.write, automation.sequences.read\n\n**Secrets**\nNo secrets required for this toolkit."
+}

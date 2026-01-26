@@ -1,9 +1,5 @@
 import type { ToolkitSummaryGenerator } from "../merger/data-merger.js";
-import type {
-  MergedTool,
-  MergedToolkit,
-  SecretType,
-} from "../types/index.js";
+import type { MergedTool, MergedToolkit, SecretType } from "../types/index.js";
 import type { LlmClient } from "./client.js";
 
 export interface LlmToolkitSummaryGeneratorConfig {

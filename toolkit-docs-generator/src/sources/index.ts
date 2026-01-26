@@ -2,6 +2,8 @@
  * Data sources exports
  */
 
+export * from "./arcade-api.js";
+export * from "./arcade-api-types.js";
 export * from "./custom-sections-file.js";
 export * from "./engine-api.js";
 export * from "./in-memory.js";

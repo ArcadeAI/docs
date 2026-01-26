@@ -1,0 +1,61 @@
+"use client";
+
+import type React from "react";
+
+export type DataTableProps = {
+  columns: string[];
+  rows: string[][];
+  caption?: string;
+  compact?: boolean;
+};
+
+export function DataTable({ columns, rows, caption, compact = false }: DataTableProps) {
+  if (!columns.length || !rows.length) {
+    return null;
+  }
+
+  const cellPadding = compact ? "px-3 py-2" : "px-4 py-3";
+
+  return (
+    <div className="my-3 overflow-hidden rounded-xl border border-neutral-dark-high/50 shadow-sm">
+      <table className="w-full border-collapse text-sm">
+        {caption ? (
+          <caption className="bg-neutral-dark/30 px-4 py-2 text-left text-xs uppercase tracking-wider text-neutral-light-high/70">
+            {caption}
+          </caption>
+        ) : null}
+        <thead>
+          <tr className="bg-gradient-to-r from-neutral-dark to-neutral-dark/80">
+            {columns.map((column) => (
+              <th
+                className={`${cellPadding} text-left text-xs font-semibold uppercase tracking-wider text-neutral-light-high/80`}
+                key={column}
+              >
+                {column}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-neutral-dark-high/30">
+          {rows.map((row, rowIndex) => (
+            <tr
+              className={rowIndex % 2 === 0 ? "bg-neutral-dark/20" : "bg-transparent"}
+              key={`row-${rowIndex}`}
+            >
+              {columns.map((_, columnIndex) => (
+                <td
+                  className={`${cellPadding} align-top text-text-color/80`}
+                  key={`cell-${rowIndex}-${columnIndex}`}
+                >
+                  {row[columnIndex] ?? "—"}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+export default DataTable;

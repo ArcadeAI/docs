@@ -1,0 +1,1330 @@
+{
+  "id": "HubspotConversationsApi",
+  "label": "HubspotConversationsApi",
+  "version": "1.0.0",
+  "description": "Tools that enable LLMs to interact directly with the Hubspot Conversations API",
+  "metadata": {
+    "category": "development",
+    "iconUrl": "https://design-system.arcade.dev/icons/hubspotconversationsapi.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/development/hubspotconversationsapi",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": null,
+    "allScopes": [
+      "conversations.custom_channels.read",
+      "conversations.custom_channels.write",
+      "conversations.read",
+      "conversations.write"
+    ]
+  },
+  "tools": [
+    {
+      "name": "ArchiveConversationThread",
+      "qualifiedName": "HubspotConversationsApi.ArchiveConversationThread",
+      "fullyQualifiedName": "HubspotConversationsApi.ArchiveConversationThread@1.0.0",
+      "description": "Archives a conversation thread, marking it for deletion.\n\nUse this tool to archive a conversation thread, which will then be permanently deleted after 30 days. Ideal for managing conversational data efficiently by removing unnecessary threads.",
+      "parameters": [
+        {
+          "name": "thread_identifier",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier of the conversation thread to archive. This is a required field and should match the specific thread you wish to archive.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "conversations.write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'delete-/conversations/v3/conversations/threads/{threadId}'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotConversationsApi.ArchiveConversationThread",
+        "parameters": {
+          "thread_identifier": {
+            "value": "12345-abcde-67890-fghij",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateChannelAccount",
+      "qualifiedName": "HubspotConversationsApi.CreateChannelAccount",
+      "fullyQualifiedName": "HubspotConversationsApi.CreateChannelAccount@1.0.0",
+      "description": "Create a new account for a specified communication channel.\n\nThis tool is used to create a new account within a specific communication channel using Hubspot. It enables multiple accounts to communicate over a single channel with different delivery identifiers.",
+      "parameters": [
+        {
+          "name": "account_name",
+          "type": "string",
+          "required": true,
+          "description": "The name of the account to be created for the channel. It identifies the account within the specified communication channel.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "channel_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier for the communication channel where the account will be created. This should be a string value.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "inbox_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier for the inbox where the channel account will be created. This should be a string that corresponds to an existing inbox in Hubspot.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "is_authorized",
+          "type": "boolean",
+          "required": true,
+          "description": "Boolean to indicate if the account should be authorized. Set to true for authorized accounts, false otherwise.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "delivery_identifier_type",
+          "type": "string",
+          "required": false,
+          "description": "Type of identifier: HS_EMAIL_ADDRESS, HS_PHONE_NUMBER, or CHANNEL_SPECIFIC_OPAQUE_ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "delivery_identifier_value",
+          "type": "string",
+          "required": false,
+          "description": "A string representation of the delivery identifier. Can be an E.164 phone number, an email address, or a channel-specific identifier.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "conversations.custom_channels.write",
+          "conversations.custom_channels.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'post-/conversations/v3/custom-channels/{channelId}/channel-accounts'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotConversationsApi.CreateChannelAccount",
+        "parameters": {
+          "account_name": {
+            "value": "Customer Support Account",
+            "type": "string",
+            "required": true
+          },
+          "channel_id": {
+            "value": "channel-12345",
+            "type": "string",
+            "required": true
+          },
+          "inbox_id": {
+            "value": "inbox-67890",
+            "type": "string",
+            "required": true
+          },
+          "is_authorized": {
+            "value": true,
+            "type": "boolean",
+            "required": true
+          },
+          "delivery_identifier_type": {
+            "value": "HS_EMAIL_ADDRESS",
+            "type": "string",
+            "required": false
+          },
+          "delivery_identifier_value": {
+            "value": "support@example.com",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetChannelAccountDetails",
+      "qualifiedName": "HubspotConversationsApi.GetChannelAccountDetails",
+      "fullyQualifiedName": "HubspotConversationsApi.GetChannelAccountDetails@1.0.0",
+      "description": "Retrieve details of a HubSpot channel account by ID.\n\nFetches detailed information about a specific HubSpot channel account using the channel account ID. Use this tool to obtain information about a channel account, such as its status and configuration.",
+      "parameters": [
+        {
+          "name": "channel_account_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique ID of the HubSpot channel account to retrieve details for. This ID is required to fetch the channel account's information.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "conversations.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'get-/conversations/v3/conversations/channel-accounts/{channelAccountId}'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotConversationsApi.GetChannelAccountDetails",
+        "parameters": {
+          "channel_account_id": {
+            "value": "12345-abcde-67890-fghij",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetCustomChannelAccounts",
+      "qualifiedName": "HubspotConversationsApi.GetCustomChannelAccounts",
+      "fullyQualifiedName": "HubspotConversationsApi.GetCustomChannelAccounts@1.0.0",
+      "description": "Retrieve accounts for a specified custom channel.\n\nThis tool is used to fetch a list of accounts associated with a specific custom channel in Hubspot Conversations, identified by the channel ID.",
+      "parameters": [
+        {
+          "name": "custom_channel_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier of the custom channel to retrieve accounts for. Must be a valid string.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "conversations.custom_channels.write",
+          "conversations.custom_channels.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'get-/conversations/v3/custom-channels/{channelId}/channel-accounts'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotConversationsApi.GetCustomChannelAccounts",
+        "parameters": {
+          "custom_channel_id": {
+            "value": "abc123-custom-channel",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetCustomChannelMessageDetails",
+      "qualifiedName": "HubspotConversationsApi.GetCustomChannelMessageDetails",
+      "fullyQualifiedName": "HubspotConversationsApi.GetCustomChannelMessageDetails@1.0.0",
+      "description": "Retrieve details for a specific message in a custom channel.\n\nUse this tool to get the details of a specific message sent through a custom channel in Hubspot Conversations. Ideal for obtaining message content, sender information, and timestamps.",
+      "parameters": [
+        {
+          "name": "channel_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier for the custom channel from which the message was sent. Required to fetch specific message details.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "message_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier of the message to retrieve details for. This ID is used to specify the exact message in the custom channel.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "conversations.custom_channels.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'get-/conversations/v3/custom-channels/{channelId}/messages/{messageId}'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotConversationsApi.GetCustomChannelMessageDetails",
+        "parameters": {
+          "channel_id": {
+            "value": "1234567890",
+            "type": "string",
+            "required": true
+          },
+          "message_id": {
+            "value": "0987654321",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetInboxDetails",
+      "qualifiedName": "HubspotConversationsApi.GetInboxDetails",
+      "fullyQualifiedName": "HubspotConversationsApi.GetInboxDetails@1.0.0",
+      "description": "Retrieve details of a conversation inbox by ID.\n\nUse this tool to obtain detailed information about a specific conversation inbox by providing the inbox ID.",
+      "parameters": [
+        {
+          "name": "inbox_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier for the conversation inbox you wish to retrieve details for. It should be a string representing the inbox ID.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "conversations.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'get-/conversations/v3/conversations/inboxes/{inboxId}'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotConversationsApi.GetInboxDetails",
+        "parameters": {
+          "inbox_id": {
+            "value": "12345-abcde-67890-fghij",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetMessageHistoryForThread",
+      "qualifiedName": "HubspotConversationsApi.GetMessageHistoryForThread",
+      "fullyQualifiedName": "HubspotConversationsApi.GetMessageHistoryForThread@1.0.0",
+      "description": "Retrieve the message history for a specific thread.\n\nThis tool retrieves the message history for a given conversation thread by its ID. It should be used when you need to access past messages of a thread in Hubspot Conversations.",
+      "parameters": [
+        {
+          "name": "thread_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier for the conversation thread whose message history is to be retrieved.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "conversations.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'get-/conversations/v3/conversations/threads/{threadId}/messages'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotConversationsApi.GetMessageHistoryForThread",
+        "parameters": {
+          "thread_id": {
+            "value": "12345-abcde-67890-fghij",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListConversationChannels",
+      "qualifiedName": "HubspotConversationsApi.ListConversationChannels",
+      "fullyQualifiedName": "HubspotConversationsApi.ListConversationChannels@1.0.0",
+      "description": "Retrieve a list of conversation channels from Hubspot.\n\nUse this tool to get a list of conversation channels from Hubspot, applying optional filters and sorting if needed.",
+      "parameters": [],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "conversations.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'get-/conversations/v3/conversations/channels'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotConversationsApi.ListConversationChannels",
+        "parameters": {},
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListConversationInboxes",
+      "qualifiedName": "HubspotConversationsApi.ListConversationInboxes",
+      "fullyQualifiedName": "HubspotConversationsApi.ListConversationInboxes@1.0.0",
+      "description": "Retrieve a list of conversation inboxes.\n\nThis tool fetches a list of conversation inboxes, allowing for optional filters and sorting to customize the results.",
+      "parameters": [],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "conversations.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'get-/conversations/v3/conversations/inboxes'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotConversationsApi.ListConversationInboxes",
+        "parameters": {},
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "PublishCustomChannelMessage",
+      "qualifiedName": "HubspotConversationsApi.PublishCustomChannelMessage",
+      "fullyQualifiedName": "HubspotConversationsApi.PublishCustomChannelMessage@1.0.0",
+      "description": "Publish a message to a custom channel on HubSpot.\n\n    This tool sends a message over a specified custom channel in HubSpot Conversations. Use this tool to communicate via custom-integrated messaging channels.\n\n    Note: Understanding the request schema is necessary to properly create\n    the stringified JSON input object for execution.\n\nThis operation also requires path parameters.\n\n    Modes:\n    - GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n      already have it. Do NOT call repeatedly if you already received\n      the schema.\n    - EXECUTE: Performs the operation with the provided request body\n      JSON.\n      Note: You must also provide the required path parameters when executing.\n\n    If you need the schema, call with mode='get_request_schema' ONCE, then execute.\n    ",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": [
+            "get_request_schema",
+            "execute"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "custom_channel_id",
+          "type": "string",
+          "required": false,
+          "description": "The unique ID of the custom channel where the message will be published. Must be a string.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "conversations.custom_channels.write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'post-/conversations/v3/custom-channels/{channelId}/messages'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotConversationsApi.PublishCustomChannelMessage",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "custom_channel_id": {
+            "value": "123456",
+            "type": "string",
+            "required": false
+          },
+          "request_body": {
+            "value": "{\"message\":\"Hello, this is a test message!\"}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ResolveConversationActors",
+      "qualifiedName": "HubspotConversationsApi.ResolveConversationActors",
+      "fullyQualifiedName": "HubspotConversationsApi.ResolveConversationActors@1.0.0",
+      "description": "Resolve ActorIds to conversation participants.\n\nUse this tool to retrieve detailed information about participants in a conversation given their ActorIds. Typically called when there's a need to understand who the participants in a conversation are by resolving their IDs.",
+      "parameters": [
+        {
+          "name": "actor_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": true,
+          "description": "A list of Actor IDs to resolve into detailed participant information. Each entry should be a string representing an Actor ID.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "conversations.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'post-/conversations/v3/conversations/actors/batch/read'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotConversationsApi.ResolveConversationActors",
+        "parameters": {
+          "actor_ids": {
+            "value": [
+              "actor_12345",
+              "actor_67890",
+              "actor_54321"
+            ],
+            "type": "array",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "RetrieveActorDetails",
+      "qualifiedName": "HubspotConversationsApi.RetrieveActorDetails",
+      "fullyQualifiedName": "HubspotConversationsApi.RetrieveActorDetails@1.0.0",
+      "description": "Retrieve details of a specific actor by actor ID.\n\nUse this tool to get information about a specific actor within Hubspot Conversations by providing their actor ID. It should be called when actor-specific details are needed.",
+      "parameters": [
+        {
+          "name": "actor_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier for the actor whose details are to be retrieved.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "conversations.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'get-/conversations/v3/conversations/actors/{actorId}'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotConversationsApi.RetrieveActorDetails",
+        "parameters": {
+          "actor_id": {
+            "value": "12345-abcde-67890-fghij",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "RetrieveChannelAccountDetails",
+      "qualifiedName": "HubspotConversationsApi.RetrieveChannelAccountDetails",
+      "fullyQualifiedName": "HubspotConversationsApi.RetrieveChannelAccountDetails@1.0.0",
+      "description": "Retrieve details for a specific channel account.\n\nUse this tool to get detailed metadata about a channel account, including its channel, inbox ID, and delivery identifiers. Ideal for understanding the configuration and associations of a channel account in Hubspot.",
+      "parameters": [
+        {
+          "name": "channel_account_id",
+          "type": "string",
+          "required": true,
+          "description": "Unique identifier for the specific channel account to retrieve details about. Provided as a string.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "channel_identifier",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier for the channel. Used to specify which channel's account details to retrieve.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "conversations.custom_channels.write",
+          "conversations.custom_channels.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'get-/conversations/v3/custom-channels/{channelId}/channel-accounts/{channelAccountId}'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotConversationsApi.RetrieveChannelAccountDetails",
+        "parameters": {
+          "channel_account_id": {
+            "value": "123456789",
+            "type": "string",
+            "required": true
+          },
+          "channel_identifier": {
+            "value": "email_channel",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "RetrieveChannelAccounts",
+      "qualifiedName": "HubspotConversationsApi.RetrieveChannelAccounts",
+      "fullyQualifiedName": "HubspotConversationsApi.RetrieveChannelAccounts@1.0.0",
+      "description": "Retrieve a list of channel accounts from Hubspot.\n\nThis tool calls the Hubspot Conversations API to retrieve a list of channel accounts. It supports optional filters and sorting to refine the results.",
+      "parameters": [],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "conversations.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'get-/conversations/v3/conversations/channel-accounts'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotConversationsApi.RetrieveChannelAccounts",
+        "parameters": {},
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "RetrieveChannelDetails",
+      "qualifiedName": "HubspotConversationsApi.RetrieveChannelDetails",
+      "fullyQualifiedName": "HubspotConversationsApi.RetrieveChannelDetails@1.0.0",
+      "description": "Retrieve details of a channel using its ID.\n\nUse this tool to get comprehensive details about a specific channel in Hubspot Conversations by providing the channel ID.",
+      "parameters": [
+        {
+          "name": "channel_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique ID of the channel to retrieve details for in Hubspot Conversations.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "conversations.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'get-/conversations/v3/conversations/channels/{channelId}'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotConversationsApi.RetrieveChannelDetails",
+        "parameters": {
+          "channel_id": {
+            "value": "12345-abcde-67890-fghij",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "RetrieveConversationThreads",
+      "qualifiedName": "HubspotConversationsApi.RetrieveConversationThreads",
+      "fullyQualifiedName": "HubspotConversationsApi.RetrieveConversationThreads@1.0.0",
+      "description": "Retrieve conversation threads from Hubspot Conversations.\n\nUse this tool to fetch a list of conversation threads from Hubspot Conversations. You can apply optional filters and sorting to tailor the results.",
+      "parameters": [],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "conversations.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'get-/conversations/v3/conversations/threads'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotConversationsApi.RetrieveConversationThreads",
+        "parameters": {},
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "RetrieveFullMessageContent",
+      "qualifiedName": "HubspotConversationsApi.RetrieveFullMessageContent",
+      "fullyQualifiedName": "HubspotConversationsApi.RetrieveFullMessageContent@1.0.0",
+      "description": "Retrieve the original text and rich text of a HubSpot message.\n\nUse this tool to access the full original content of a message within a conversation on HubSpot. Ideal for retrieving untruncated message details when the truncation status indicates it might be truncated.",
+      "parameters": [
+        {
+          "name": "conversation_thread_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier for the conversation thread containing the message.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "message_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier for the message. Used to retrieve the message's full original content.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "conversations.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'get-/conversations/v3/conversations/threads/{threadId}/messages/{messageId}/original-content'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotConversationsApi.RetrieveFullMessageContent",
+        "parameters": {
+          "conversation_thread_id": {
+            "value": "abc12345",
+            "type": "string",
+            "required": true
+          },
+          "message_id": {
+            "value": "msg98765",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "RetrieveThreadById",
+      "qualifiedName": "HubspotConversationsApi.RetrieveThreadById",
+      "fullyQualifiedName": "HubspotConversationsApi.RetrieveThreadById@1.0.0",
+      "description": "Retrieve detailed information about a conversation thread by ID.\n\nUse this to access specific conversation threads and their details for a given thread ID.",
+      "parameters": [
+        {
+          "name": "conversation_thread_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier for the conversation thread you wish to retrieve. Provide the specific thread ID to access its details.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "conversations.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'get-/conversations/v3/conversations/threads/{threadId}'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotConversationsApi.RetrieveThreadById",
+        "parameters": {
+          "conversation_thread_id": {
+            "value": "12345-abcde-67890-fghij",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "RetrieveThreadMessage",
+      "qualifiedName": "HubspotConversationsApi.RetrieveThreadMessage",
+      "fullyQualifiedName": "HubspotConversationsApi.RetrieveThreadMessage@1.0.0",
+      "description": "Retrieve a single message from a conversation thread.\n\nCall this tool to get the details of a specific message within a conversation thread using the message ID. Useful for accessing conversation content for review or processing.",
+      "parameters": [
+        {
+          "name": "message_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier for the specific message within a thread. Used to retrieve message details.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "thread_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier of the conversation thread from which to retrieve the message.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "conversations.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'get-/conversations/v3/conversations/threads/{threadId}/messages/{messageId}'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotConversationsApi.RetrieveThreadMessage",
+        "parameters": {
+          "message_id": {
+            "value": "12345abcd",
+            "type": "string",
+            "required": true
+          },
+          "thread_id": {
+            "value": "thread-67890xyz",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "SendConversationMessage",
+      "qualifiedName": "HubspotConversationsApi.SendConversationMessage",
+      "fullyQualifiedName": "HubspotConversationsApi.SendConversationMessage@1.0.0",
+      "description": "Send a new message in a conversation thread.\n\n    Use this tool to send a new message on an existing conversation thread. Ideal for continuing discussions or replying within a thread.\n\n    Note: Understanding the request schema is necessary to properly create\n    the stringified JSON input object for execution.\n\nThis operation also requires path parameters.\n\n    Modes:\n    - GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n      already have it. Do NOT call repeatedly if you already received\n      the schema.\n    - EXECUTE: Performs the operation with the provided request body\n      JSON.\n      Note: You must also provide the required path parameters when executing.\n\n    If you need the schema, call with mode='get_request_schema' ONCE, then execute.\n    ",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": [
+            "get_request_schema",
+            "execute"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "thread_id",
+          "type": "string",
+          "required": false,
+          "description": "The unique identifier for the conversation thread where the message will be sent. It should be a string that corresponds to the existing thread ID in Hubspot.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "conversations.write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'post-/conversations/v3/conversations/threads/{threadId}/messages'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotConversationsApi.SendConversationMessage",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "thread_id": {
+            "value": "abc12345",
+            "type": "string",
+            "required": false
+          },
+          "request_body": {
+            "value": "{\"message\":\"Hello, how can I assist you today?\"}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "UpdateChannelAccountInfo",
+      "qualifiedName": "HubspotConversationsApi.UpdateChannelAccountInfo",
+      "fullyQualifiedName": "HubspotConversationsApi.UpdateChannelAccountInfo@1.0.0",
+      "description": "Update channel account name and authorization status.\n\nUse this tool to modify the name and authorization status of a channel account in Hubspot Conversations. This is useful for managing channel accounts, including disabling them by setting the isAuthorized flag to False.",
+      "parameters": [
+        {
+          "name": "channel_account_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier for the channel account to be updated. It is required for specifying which channel account to modify.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "channel_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier for the channel in Hubspot Conversations. Required to specify which channel account to update.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "channel_account_name",
+          "type": "string",
+          "required": false,
+          "description": "The new name for the channel account. This updates the display name associated with the account.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "set_authorization_status",
+          "type": "boolean",
+          "required": false,
+          "description": "Boolean value to update the channel account's authorization. Set to False to disable the account.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "conversations.custom_channels.write",
+          "conversations.custom_channels.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'patch-/conversations/v3/custom-channels/{channelId}/channel-accounts/{channelAccountId}'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotConversationsApi.UpdateChannelAccountInfo",
+        "parameters": {
+          "channel_account_id": {
+            "value": "123456789",
+            "type": "string",
+            "required": true
+          },
+          "channel_id": {
+            "value": "987654321",
+            "type": "string",
+            "required": true
+          },
+          "channel_account_name": {
+            "value": "Customer Support Channel",
+            "type": "string",
+            "required": false
+          },
+          "set_authorization_status": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "UpdateChannelAccountStaging",
+      "qualifiedName": "HubspotConversationsApi.UpdateChannelAccountStaging",
+      "fullyQualifiedName": "HubspotConversationsApi.UpdateChannelAccountStaging@1.0.0",
+      "description": "Update channel account staging token details for public apps.\n\nThis tool updates the account name and delivery identifier of a channel account staging token in Hubspot Conversations. Use it when you need to modify these details for a specific channel account created from a staging token.",
+      "parameters": [
+        {
+          "name": "account_name",
+          "type": "string",
+          "required": true,
+          "description": "The name of the account to be updated for the channel account staging token.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "account_token",
+          "type": "string",
+          "required": true,
+          "description": "The unique token identifying the specific channel account staging. Required for updating account details.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "channel_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier for the channel to update. This is necessary to specify which channel's staging token details are being modified.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "delivery_identifier_type",
+          "type": "string",
+          "required": true,
+          "description": "Type of delivery identifier: HS_EMAIL_ADDRESS, HS_PHONE_NUMBER, or CHANNEL_SPECIFIC_OPAQUE_ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "delivery_identifier_value",
+          "type": "string",
+          "required": true,
+          "description": "The PublicDeliveryIdentifier in string format, such as an E.164 phone number, an email address, or a channel-specific identifier.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "conversations.custom_channels.write",
+          "conversations.custom_channels.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'patch-/conversations/v3/custom-channels/{channelId}/channel-account-staging-tokens/{accountToken}'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotConversationsApi.UpdateChannelAccountStaging",
+        "parameters": {
+          "account_name": {
+            "value": "Example Account Inc.",
+            "type": "string",
+            "required": true
+          },
+          "account_token": {
+            "value": "abc123xyz456token",
+            "type": "string",
+            "required": true
+          },
+          "channel_id": {
+            "value": "channel_7890",
+            "type": "string",
+            "required": true
+          },
+          "delivery_identifier_type": {
+            "value": "HS_EMAIL_ADDRESS",
+            "type": "string",
+            "required": true
+          },
+          "delivery_identifier_value": {
+            "value": "contact@example.com",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "UpdateConversationThread",
+      "qualifiedName": "HubspotConversationsApi.UpdateConversationThread",
+      "fullyQualifiedName": "HubspotConversationsApi.UpdateConversationThread@1.0.0",
+      "description": "Update the status or restore a conversation thread.\n\nThis tool updates a single thread's status or restores it within Hubspot Conversations. Use it to change the status or restore a thread based on the thread ID provided.",
+      "parameters": [
+        {
+          "name": "thread_identifier",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier for the conversation thread to update or restore.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "is_thread_archived",
+          "type": "boolean",
+          "required": false,
+          "description": "Set to true to archive or false to restore the thread. Determines if the thread is currently archived.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "thread_status",
+          "type": "string",
+          "required": false,
+          "description": "Set the thread's status to `OPEN` or `CLOSED`.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "conversations.write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'patch-/conversations/v3/conversations/threads/{threadId}'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotConversationsApi.UpdateConversationThread",
+        "parameters": {
+          "thread_identifier": {
+            "value": "12345-abcde-67890-fghij",
+            "type": "string",
+            "required": true
+          },
+          "is_thread_archived": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "thread_status": {
+            "value": "OPEN",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "UpdateMessageStatus",
+      "qualifiedName": "HubspotConversationsApi.UpdateMessageStatus",
+      "fullyQualifiedName": "HubspotConversationsApi.UpdateMessageStatus@1.0.0",
+      "description": "Update the status of a conversation message.\n\nUse this tool to update the status of a message within a custom channel on Hubspot Conversations. It indicates whether a message was successfully sent, failed, or read. Additionally, for failed messages, you can include an error message for clarification.",
+      "parameters": [
+        {
+          "name": "channel_identifier",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier for the custom channel where the message is located. It is required to specify which channel the message belongs to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "message_id",
+          "type": "string",
+          "required": true,
+          "description": "Unique identifier of the message to be updated.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "message_status",
+          "type": "string",
+          "required": true,
+          "description": "Specifies the status of the message. Valid values are SENT, FAILED, and READ.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "error_message_for_failed_status",
+          "type": "string",
+          "required": false,
+          "description": "Provide an error message when the status is FAILED to clarify the reason for failure. Only use this when 'statusType' is 'FAILED'.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "conversations.custom_channels.write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'patch-/conversations/v3/custom-channels/{channelId}/messages/{messageId}'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "HubspotConversationsApi.UpdateMessageStatus",
+        "parameters": {
+          "channel_identifier": {
+            "value": "custom_channel_123",
+            "type": "string",
+            "required": true
+          },
+          "message_id": {
+            "value": "msg_456",
+            "type": "string",
+            "required": true
+          },
+          "message_status": {
+            "value": "FAILED",
+            "type": "string",
+            "required": true
+          },
+          "error_message_for_failed_status": {
+            "value": "Network timeout on send",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    }
+  ],
+  "documentationChunks": [
+    {
+      "type": "markdown",
+      "location": "auth",
+      "position": "after",
+      "content": "The HubspotConversationsApi MCP Server uses the Auth Provider with id `arcade-hubspot` to connect to users' HubspotConversationsApi accounts.\n</Callout>\n\nIn order to use the MCP Server, you will need to configure the `arcade-hubspot` auth provider.\n\n<Callout type=\"warning\">\nYou must configure the `arcade-hubspot` auth provider before using the MCP Server. See the [setup guide](/references/auth-providers/hubspot) for configuration steps.",
+      "header": "## Auth"
+    }
+  ],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-01-26T17:34:19.945Z",
+  "summary": "HubspotConversationsApi enables seamless interactions with HubSpot's Conversations API, allowing for efficient management of conversation data. Developers can leverage this toolkit to execute various functionalities within HubSpot Conversations directly.\n\n**Capabilities**\n- Archive and manage conversation threads for data efficiency.\n- Create and retrieve details about channel accounts and inboxes.\n- Publish and manage custom channel messages.\n- Access detailed message history and conversation participants.\n- Update statuses and configurations for conversation threads and messages.\n\n**OAuth**\n- **Provider:** Unknown  \n- **Scopes:** conversations.custom_channels.read, conversations.custom_channels.write, conversations.read, conversations.write.\n\n**Secrets**\n- No secrets exist for this toolkit."
+}

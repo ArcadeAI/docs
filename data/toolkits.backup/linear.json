@@ -1,0 +1,219 @@
+{
+  "id": "Linear",
+  "label": "Linear",
+  "version": "0.1.0",
+  "description": "Arcade tools designed for LLMs to interact with Linear",
+  "metadata": {
+    "category": "development",
+    "iconUrl": "https://design-system.arcade.dev/icons/linear.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/development/linear",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": "linear",
+    "allScopes": [
+      "read"
+    ]
+  },
+  "tools": [
+    {
+      "name": "GetIssue",
+      "qualifiedName": "Linear.GetIssue",
+      "fullyQualifiedName": "Linear.GetIssue@0.1.0",
+      "description": "Get detailed information about a specific Linear issue\n\nThis tool retrieves complete information about a single Linear issue when you have\nits specific ID or identifier. It's purely for reading and viewing data.\n\nWhat this tool provides:\n- Complete issue details (title, description, status, assignee, etc.)\n- Comments and discussion history (if requested)\n- File attachments (if requested)\n- Related issues and dependencies (if requested)\n- Sub-issues and hierarchical relationships (if requested)\n\nWhen to use this tool:\n- When you need to examine the full details of a specific issue\n- When you want to read issue content, comments, or relationships\n- When you need to analyze or compare issue information\n- When you have an issue ID and need to understand its current state\n\nWhen NOT to use this tool:\n- Do NOT use this if you need to change, modify, or update anything\n- Do NOT use this if you're trying to create new issues\n- Do NOT use this if you're searching for multiple issues\n\nThis tool is READ-ONLY - it cannot make any changes to issues.",
+      "parameters": [
+        {
+          "name": "issue_id",
+          "type": "string",
+          "required": true,
+          "description": "The Linear issue ID or identifier (e.g. 'FE-123', 'API-456') to retrieve.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "include_comments",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to include comments in the response. Defaults to True.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "include_attachments",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to include attachments in the response. Defaults to True.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "include_relations",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to include issue relations (blocks, dependencies) in the response. Defaults to True.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "include_children",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to include sub-issues in the response. Defaults to True.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Complete issue details with related data"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.GetIssue",
+        "parameters": {
+          "issue_id": {
+            "value": "FE-123",
+            "type": "string",
+            "required": true
+          },
+          "include_comments": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "include_attachments": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "include_relations": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "include_children": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetTeams",
+      "qualifiedName": "Linear.GetTeams",
+      "fullyQualifiedName": "Linear.GetTeams@0.1.0",
+      "description": "Get Linear teams and team information including team members\n\nThis tool retrieves team information from your Linear workspace, including team details,\nsettings, and member information. Use this tool for team discovery and team membership queries.\n\nWhat this tool provides:\n- Team basic information (name, key, description)\n- Team members and their roles\n- Team settings and configuration\n- Team creation and status information\n- Team hierarchy and relationships\n\nThis tool is the primary way to get team information.",
+      "parameters": [
+        {
+          "name": "team_name",
+          "type": "string",
+          "required": false,
+          "description": "Filter by team name. Provide specific team name (e.g. 'Frontend', 'Product Web') or partial name. Use this to find specific teams or check team membership. Defaults to None (all teams).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "include_archived",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to include archived teams in results. Defaults to False.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "created_after",
+          "type": "string",
+          "required": false,
+          "description": "Filter teams created after this date. Can be:\n- Relative date string (e.g. 'last month', 'this week', 'yesterday')\n- ISO date string (e.g. 'YYYY-MM-DD')\nDefaults to None (all time).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of teams to return. Min 1, max 100. Defaults to 50.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "end_cursor",
+          "type": "string",
+          "required": false,
+          "description": "Cursor for pagination - get teams after this cursor. Use the 'end_cursor' from previous response. Defaults to None (start from beginning).",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Teams in the workspace with member information"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.GetTeams",
+        "parameters": {
+          "team_name": {
+            "value": "Frontend",
+            "type": "string",
+            "required": false
+          },
+          "include_archived": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "created_after": {
+            "value": "2023-01-01",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "end_cursor": {
+            "value": null,
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-01-23T18:50:36.795Z"
+}

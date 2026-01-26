@@ -1,0 +1,680 @@
+{
+  "id": "Reddit",
+  "label": "Reddit",
+  "version": "0.1.3",
+  "description": "Arcade.dev LLM tools Reddit",
+  "metadata": {
+    "category": "development",
+    "iconUrl": "https://design-system.arcade.dev/icons/reddit.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/development/reddit",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": "reddit",
+    "allScopes": [
+      "history",
+      "identity",
+      "read",
+      "submit"
+    ]
+  },
+  "tools": [
+    {
+      "name": "CheckSubredditAccess",
+      "qualifiedName": "Reddit.CheckSubredditAccess",
+      "fullyQualifiedName": "Reddit.CheckSubredditAccess@0.1.3",
+      "description": "Checks whether the specified subreddit exists and also if it is accessible\nto the authenticated user.\n\nReturns:\n    {\"exists\": True, \"accessible\": True} if the subreddit exists and is accessible.\n    {\"exists\": True, \"accessible\": False} if the subreddit exists but is private or restricted.\n    {\"exists\": False, \"accessible\": False} if the subreddit does not exist.",
+      "parameters": [
+        {
+          "name": "subreddit",
+          "type": "string",
+          "required": true,
+          "description": "The name of the subreddit to check access for",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "reddit",
+        "providerType": "oauth2",
+        "scopes": [
+          "read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dict indicating whether the subreddit exists and is accessible to the authenticated user"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Reddit.CheckSubredditAccess",
+        "parameters": {
+          "subreddit": {
+            "value": "exampleSubreddit",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "reddit",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CommentOnPost",
+      "qualifiedName": "Reddit.CommentOnPost",
+      "fullyQualifiedName": "Reddit.CommentOnPost@0.1.3",
+      "description": "Comment on a Reddit post",
+      "parameters": [
+        {
+          "name": "post_identifier",
+          "type": "string",
+          "required": true,
+          "description": "The identifier of the Reddit post. The identifier may be a reddit URL, a permalink, a fullname, or a post id.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "text",
+          "type": "string",
+          "required": true,
+          "description": "The body of the comment in markdown format",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "reddit",
+        "providerType": "oauth2",
+        "scopes": [
+          "submit"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from Reddit after submission"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Reddit.CommentOnPost",
+        "parameters": {
+          "post_identifier": {
+            "value": "t3_abc123",
+            "type": "string",
+            "required": true
+          },
+          "text": {
+            "value": "This is a great post! Thanks for sharing.",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "reddit",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetContentOfMultiplePosts",
+      "qualifiedName": "Reddit.GetContentOfMultiplePosts",
+      "fullyQualifiedName": "Reddit.GetContentOfMultiplePosts@0.1.3",
+      "description": "Get the content (body) of multiple Reddit posts by their identifiers.\n\nEfficiently retrieve the content of multiple posts in a single request.\nAlways use this tool to retrieve more than one post's content.",
+      "parameters": [
+        {
+          "name": "post_identifiers",
+          "type": "array",
+          "innerType": "string",
+          "required": true,
+          "description": "A list of Reddit post identifiers. The identifiers may be reddit URLs to the posts, permalinks to the posts, fullnames for the posts, or post ids. Must be less than or equal to 100 identifiers.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "reddit",
+        "providerType": "oauth2",
+        "scopes": [
+          "read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing the content of multiple Reddit posts"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Reddit.GetContentOfMultiplePosts",
+        "parameters": {
+          "post_identifiers": {
+            "value": [
+              "t3_a1b2c3",
+              "https://www.reddit.com/r/example/comments/d4e5f6/example_title/",
+              "https://redd.it/g7h8i9",
+              "t3_j0k1l2"
+            ],
+            "type": "array",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "reddit",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetContentOfPost",
+      "qualifiedName": "Reddit.GetContentOfPost",
+      "fullyQualifiedName": "Reddit.GetContentOfPost@0.1.3",
+      "description": "Get the content (body) of a Reddit post by its identifier.",
+      "parameters": [
+        {
+          "name": "post_identifier",
+          "type": "string",
+          "required": true,
+          "description": "The identifier of the Reddit post. The identifier may be a reddit URL to the post, a permalink to the post, a fullname for the post, or a post id.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "reddit",
+        "providerType": "oauth2",
+        "scopes": [
+          "read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The content (body) of the Reddit post"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Reddit.GetContentOfPost",
+        "parameters": {
+          "post_identifier": {
+            "value": "t3_abcdef",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "reddit",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetMyPosts",
+      "qualifiedName": "Reddit.GetMyPosts",
+      "fullyQualifiedName": "Reddit.GetMyPosts@0.1.3",
+      "description": "Get posts that were created by the authenticated user sorted by newest first",
+      "parameters": [
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of posts to fetch. Default is 10. Maximum is 100",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "include_body",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to include the body (content) of the posts. Defaults to True.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "The pagination token from a previous call",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "reddit",
+        "providerType": "oauth2",
+        "scopes": [
+          "identity",
+          "history",
+          "read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary with a cursor for the next page and a list of posts created by the authenticated user"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Reddit.GetMyPosts",
+        "parameters": {
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "include_body": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "cursor": {
+            "value": "abc123",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "reddit",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetMyUsername",
+      "qualifiedName": "Reddit.GetMyUsername",
+      "fullyQualifiedName": "Reddit.GetMyUsername@0.1.3",
+      "description": "Get the Reddit username of the authenticated user",
+      "parameters": [],
+      "auth": {
+        "providerId": "reddit",
+        "providerType": "oauth2",
+        "scopes": [
+          "identity"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "string",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Reddit.GetMyUsername",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "reddit",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetPostsInSubreddit",
+      "qualifiedName": "Reddit.GetPostsInSubreddit",
+      "fullyQualifiedName": "Reddit.GetPostsInSubreddit@0.1.3",
+      "description": "Gets posts titles, links, and other metadata in the specified subreddit\n\nThe time_range is required if the listing type is 'top' or 'controversial'.",
+      "parameters": [
+        {
+          "name": "subreddit",
+          "type": "string",
+          "required": true,
+          "description": "The name of the subreddit to fetch posts from",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "listing",
+          "type": "string",
+          "required": false,
+          "description": "The type of listing to fetch. For simple listings such as 'hot', 'new', or 'rising', the 'time_range' parameter is ignored. For time-based listings such as 'top' or 'controversial', the 'time_range' parameter is required.",
+          "enum": [
+            "hot",
+            "new",
+            "rising",
+            "top",
+            "controversial"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of posts to fetch. Default is 10, max is 100.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "The pagination token from a previous call",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "time_range",
+          "type": "string",
+          "required": false,
+          "description": "The time range for filtering posts. Must be provided if the listing type is top or controversial. Otherwise, it is ignored. Defaults to TODAY.",
+          "enum": [
+            "NOW",
+            "TODAY",
+            "THIS_WEEK",
+            "THIS_MONTH",
+            "THIS_YEAR",
+            "ALL_TIME"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "reddit",
+        "providerType": "oauth2",
+        "scopes": [
+          "read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary with a cursor for the next page and a list of posts"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Reddit.GetPostsInSubreddit",
+        "parameters": {
+          "subreddit": {
+            "value": "exampleSubreddit",
+            "type": "string",
+            "required": true
+          },
+          "listing": {
+            "value": "top",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "t3_prevpost",
+            "type": "string",
+            "required": false
+          },
+          "time_range": {
+            "value": "week",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "reddit",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetSubredditRules",
+      "qualifiedName": "Reddit.GetSubredditRules",
+      "fullyQualifiedName": "Reddit.GetSubredditRules@0.1.3",
+      "description": "Gets the rules of the specified subreddit",
+      "parameters": [
+        {
+          "name": "subreddit",
+          "type": "string",
+          "required": true,
+          "description": "The name of the subreddit for which to fetch rules",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "reddit",
+        "providerType": "oauth2",
+        "scopes": [
+          "read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing the subreddit rules"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Reddit.GetSubredditRules",
+        "parameters": {
+          "subreddit": {
+            "value": "exampleSubreddit",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "reddit",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetTopLevelComments",
+      "qualifiedName": "Reddit.GetTopLevelComments",
+      "fullyQualifiedName": "Reddit.GetTopLevelComments@0.1.3",
+      "description": "Get the first page of top-level comments of a Reddit post.",
+      "parameters": [
+        {
+          "name": "post_identifier",
+          "type": "string",
+          "required": true,
+          "description": "The identifier of the Reddit post to fetch comments from. The identifier may be a reddit URL, a permalink, a fullname, or a post id.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "reddit",
+        "providerType": "oauth2",
+        "scopes": [
+          "read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary with a list of top level comments"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Reddit.GetTopLevelComments",
+        "parameters": {
+          "post_identifier": {
+            "value": "t3_123abc",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "reddit",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ReplyToComment",
+      "qualifiedName": "Reddit.ReplyToComment",
+      "fullyQualifiedName": "Reddit.ReplyToComment@0.1.3",
+      "description": "Reply to a Reddit comment",
+      "parameters": [
+        {
+          "name": "comment_identifier",
+          "type": "string",
+          "required": true,
+          "description": "The identifier of the Reddit comment to reply to. The identifier may be a comment ID, a reddit URL to the comment, a permalink to the comment, or the fullname of the comment.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "text",
+          "type": "string",
+          "required": true,
+          "description": "The body of the reply in markdown format",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "reddit",
+        "providerType": "oauth2",
+        "scopes": [
+          "submit"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from Reddit after submission"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Reddit.ReplyToComment",
+        "parameters": {
+          "comment_identifier": {
+            "value": "t1_g5opq7s",
+            "type": "string",
+            "required": true
+          },
+          "text": {
+            "value": "Thanks for sharing your thoughts! I completely agree with your perspective and appreciate your input.",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "reddit",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "SubmitTextPost",
+      "qualifiedName": "Reddit.SubmitTextPost",
+      "fullyQualifiedName": "Reddit.SubmitTextPost@0.1.3",
+      "description": "Submit a text-based post to a subreddit",
+      "parameters": [
+        {
+          "name": "subreddit",
+          "type": "string",
+          "required": true,
+          "description": "The name of the subreddit to which the post will be submitted",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "The title of the submission",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "required": false,
+          "description": "The body of the post in markdown format. Should never be the same as the title",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "nsfw",
+          "type": "boolean",
+          "required": false,
+          "description": "Indicates if the submission has content that is 'Not Safe For Work' (NSFW). Default is False",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "spoiler",
+          "type": "boolean",
+          "required": false,
+          "description": "Indicates if the post is marked as a spoiler. Default is False",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "send_replies",
+          "type": "boolean",
+          "required": false,
+          "description": "If true, sends replies to the user's inbox. Default is True",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "reddit",
+        "providerType": "oauth2",
+        "scopes": [
+          "submit"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from Reddit after submission"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Reddit.SubmitTextPost",
+        "parameters": {
+          "subreddit": {
+            "value": "exampleSubreddit",
+            "type": "string",
+            "required": true
+          },
+          "title": {
+            "value": "Interesting Discussion on AI",
+            "type": "string",
+            "required": true
+          },
+          "body": {
+            "value": "Let's talk about the impact of artificial intelligence on different industries.",
+            "type": "string",
+            "required": false
+          },
+          "nsfw": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "spoiler": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "send_replies": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "reddit",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-01-23T18:50:52.000Z"
+}

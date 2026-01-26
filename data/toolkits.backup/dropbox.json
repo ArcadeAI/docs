@@ -1,0 +1,264 @@
+{
+  "id": "Dropbox",
+  "label": "Dropbox",
+  "version": "0.1.4",
+  "description": "Arcade tools designed for LLMs to interact with Dropbox",
+  "metadata": {
+    "category": "development",
+    "iconUrl": "https://design-system.arcade.dev/icons/dropbox.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/development/dropbox",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": "dropbox",
+    "allScopes": [
+      "files.content.read",
+      "files.metadata.read"
+    ]
+  },
+  "tools": [
+    {
+      "name": "DownloadFile",
+      "qualifiedName": "Dropbox.DownloadFile",
+      "fullyQualifiedName": "Dropbox.DownloadFile@0.1.4",
+      "description": "Downloads the specified file.\n\nNote: either one of `file_path` or `file_id` must be provided.",
+      "parameters": [
+        {
+          "name": "file_path",
+          "type": "string",
+          "required": false,
+          "description": "The path of the file to download. E.g. '/AcmeInc/Reports/Q1_2025.txt'. Defaults to None.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "file_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the file to download. E.g. 'id:a4ayc_80_OEAAAAAAAAAYa'. Defaults to None.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "dropbox",
+        "providerType": "oauth2",
+        "scopes": [
+          "files.content.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Contents of the specified file"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Dropbox.DownloadFile",
+        "parameters": {
+          "file_path": {
+            "value": "/AcmeInc/Reports/Q1_2025.txt",
+            "type": "string",
+            "required": false
+          },
+          "file_id": {
+            "value": "id:a4ayc_80_OEAAAAAAAAAYa",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "dropbox",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListItemsInFolder",
+      "qualifiedName": "Dropbox.ListItemsInFolder",
+      "fullyQualifiedName": "Dropbox.ListItemsInFolder@0.1.4",
+      "description": "Provides a dictionary containing the list of items in the specified folder path.\n\nNote 1: when paginating, it is not necessary to provide any other argument besides the cursor.\nNote 2: when paginating, any given item (file or folder) may be returned in multiple pages.",
+      "parameters": [
+        {
+          "name": "folder_path",
+          "type": "string",
+          "required": false,
+          "description": "The path to the folder to list the contents of. E.g. '/AcmeInc/Reports'. Defaults to an empty string (list items in the Dropbox root folder).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of items to return. Defaults to 100. Maximum allowed is 2000.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "The cursor token for the next page of results. Defaults to None (returns the first page of results).",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "dropbox",
+        "providerType": "oauth2",
+        "scopes": [
+          "files.metadata.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Dictionary containing the list of files and folders in the specified folder path"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Dropbox.ListItemsInFolder",
+        "parameters": {
+          "folder_path": {
+            "value": "/AcmeInc/Reports",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 150,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": null,
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "dropbox",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "SearchFilesAndFolders",
+      "qualifiedName": "Dropbox.SearchFilesAndFolders",
+      "fullyQualifiedName": "Dropbox.SearchFilesAndFolders@0.1.4",
+      "description": "Returns a list of items in the specified folder path matching the search criteria.\n\nNote 1: the Dropbox API will return up to 10,000 (ten thousand) items cumulatively across\nmultiple pagination requests using the cursor token.\nNote 2: when paginating, it is not necessary to provide any other argument besides the cursor.\nNote 3: when paginating, any given item (file or folder) may be returned in multiple pages.",
+      "parameters": [
+        {
+          "name": "keywords",
+          "type": "string",
+          "required": true,
+          "description": "The keywords to search for. E.g. 'quarterly report'. Maximum length allowed by the Dropbox API is 1000 characters. ",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "search_in_folder_path",
+          "type": "string",
+          "required": false,
+          "description": "Restricts the search to the specified folder path. E.g. '/AcmeInc/Reports'. Defaults to None (search in the entire Dropbox).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "filter_by_category",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Restricts the search to the specified category(ies) of items. Provide None, one or multiple, if needed. Defaults to None (returns all categories).",
+          "enum": [
+            "image",
+            "document",
+            "pdf",
+            "spreadsheet",
+            "presentation",
+            "audio",
+            "video",
+            "folder",
+            "paper"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of items to return. Defaults to 100. Maximum allowed is 1000.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "The cursor token for the next page of results. Defaults to None (first page of results).",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "dropbox",
+        "providerType": "oauth2",
+        "scopes": [
+          "files.metadata.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "List of items in the specified folder path matching the search criteria"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Dropbox.SearchFilesAndFolders",
+        "parameters": {
+          "keywords": {
+            "value": "annual financial summary",
+            "type": "string",
+            "required": true
+          },
+          "search_in_folder_path": {
+            "value": "/Company/Documents",
+            "type": "string",
+            "required": false
+          },
+          "filter_by_category": {
+            "value": [
+              "documents",
+              "sheets"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "limit": {
+            "value": 500,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "abc123def456",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "dropbox",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-01-23T18:49:47.091Z"
+}

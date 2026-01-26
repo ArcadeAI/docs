@@ -1,0 +1,3209 @@
+{
+  "id": "Jira",
+  "label": "Jira",
+  "version": "1.0.0",
+  "description": "Arcade.dev LLM tools for interacting with Atlassian Jira",
+  "metadata": {
+    "category": "development",
+    "iconUrl": "https://design-system.arcade.dev/icons/jira.svg",
+    "isBYOC": true,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/development/jira",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": "atlassian",
+    "allScopes": [
+      "manage:jira-configuration",
+      "read:jira-user",
+      "read:jira-work",
+      "write:jira-work"
+    ]
+  },
+  "tools": [
+    {
+      "name": "AddCommentToIssue",
+      "qualifiedName": "Jira.AddCommentToIssue",
+      "fullyQualifiedName": "Jira.AddCommentToIssue@1.0.0",
+      "description": "Add a comment to a Jira issue.",
+      "parameters": [
+        {
+          "name": "issue",
+          "type": "string",
+          "required": true,
+          "description": "The ID or key of the issue to comment on.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "required": true,
+          "description": "The body of the comment to add to the issue.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "reply_to_comment",
+          "type": "string",
+          "required": false,
+          "description": "Quote a previous comment as a reply to it. Provide the comment's ID. Must be a comment from the same issue. Defaults to None (no quoted comment).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "mention_users",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The users to mention in the comment. Provide the user display name, email address, or ID. Ex: 'John Doe' or 'john.doe@example.com'. Defaults to None (no user mentions).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "write:jira-work",
+          "read:jira-work",
+          "read:jira-user"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Information about the comment created"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Jira.AddCommentToIssue",
+        "parameters": {
+          "issue": {
+            "value": "PROJ-123",
+            "type": "string",
+            "required": true
+          },
+          "body": {
+            "value": "This is a new comment on the issue.",
+            "type": "string",
+            "required": true
+          },
+          "reply_to_comment": {
+            "value": "456789",
+            "type": "string",
+            "required": false
+          },
+          "mention_users": {
+            "value": [
+              "john.doe@example.com",
+              "Jane Doe"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "atlassian_cloud_id": {
+            "value": "cloud-6789",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "AddLabelsToIssue",
+      "qualifiedName": "Jira.AddLabelsToIssue",
+      "fullyQualifiedName": "Jira.AddLabelsToIssue@1.0.0",
+      "description": "Add labels to an existing Jira issue.",
+      "parameters": [
+        {
+          "name": "issue",
+          "type": "string",
+          "required": true,
+          "description": "The ID or key of the issue to update",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "labels",
+          "type": "array",
+          "innerType": "string",
+          "required": true,
+          "description": "The labels to add to the issue. A label cannot contain spaces. If a label is provided with spaces, they will be trimmed and replaced by underscores.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "notify_watchers",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to notify the issue's watchers. Defaults to True (notifies watchers).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "read:jira-work",
+          "write:jira-work",
+          "read:jira-user",
+          "manage:jira-configuration"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The updated issue"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Jira.AddLabelsToIssue",
+        "parameters": {
+          "issue": {
+            "value": "PROJ-123",
+            "type": "string",
+            "required": true
+          },
+          "labels": {
+            "value": [
+              "bug",
+              "high_priority",
+              "urgent_fix"
+            ],
+            "type": "array",
+            "required": true
+          },
+          "notify_watchers": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "atlassian_cloud_id": {
+            "value": "cloud-456",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "AttachFileToIssue",
+      "qualifiedName": "Jira.AttachFileToIssue",
+      "fullyQualifiedName": "Jira.AttachFileToIssue@1.0.0",
+      "description": "Add an attachment to an issue.\n\nMust provide exactly one of file_content_str or file_content_base64.",
+      "parameters": [
+        {
+          "name": "issue",
+          "type": "string",
+          "required": true,
+          "description": "The issue ID or key to add the attachment to",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "filename",
+          "type": "string",
+          "required": true,
+          "description": "The name of the file to add as an attachment. The filename should contain the file extension (e.g. 'test.txt', 'report.pdf'), but it is not mandatory.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "file_content_str",
+          "type": "string",
+          "required": false,
+          "description": "The string content of the file to attach. Use this if the file is a text file. Defaults to None.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "file_content_base64",
+          "type": "string",
+          "required": false,
+          "description": "The base64-encoded binary contents of the file. Use this for binary files like images or PDFs. Defaults to None.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "file_encoding",
+          "type": "string",
+          "required": false,
+          "description": "The encoding of the file to attach. Only used with file_content_str. Defaults to 'utf-8'.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "file_type",
+          "type": "string",
+          "required": false,
+          "description": "The type of the file to attach. E.g. 'application/pdf', 'text', 'image/png'. If not provided, the tool will try to infer the type from the filename. If the filename is not recognized, it will attach the file without specifying a type. Defaults to None (infer from filename or attach without type).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "write:jira-work"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Metadata about the attachment"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Jira.AttachFileToIssue",
+        "parameters": {
+          "issue": {
+            "value": "PROJ-123",
+            "type": "string",
+            "required": true
+          },
+          "filename": {
+            "value": "report.pdf",
+            "type": "string",
+            "required": true
+          },
+          "file_content_str": {
+            "value": null,
+            "type": "string",
+            "required": false
+          },
+          "file_content_base64": {
+            "value": "JVBERi0xLjUKJba...",
+            "type": "string",
+            "required": false
+          },
+          "file_encoding": {
+            "value": "utf-8",
+            "type": "string",
+            "required": false
+          },
+          "file_type": {
+            "value": "application/pdf",
+            "type": "string",
+            "required": false
+          },
+          "atlassian_cloud_id": {
+            "value": "cloud123",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateIssue",
+      "qualifiedName": "Jira.CreateIssue",
+      "fullyQualifiedName": "Jira.CreateIssue@1.0.0",
+      "description": "Create a new Jira issue.\n\nProvide a value to one of `project` or `parent_issue` arguments. If `project` and\n`parent_issue` are not provided, the tool will select the single project available.\nIf the user has multiple, an error will be returned with the available projects to choose from.\n\nIF YOU DO NOT FOLLOW THE INSTRUCTIONS BELOW AND UNNECESSARILY CALL MULTIPLE TOOLS IN ORDER TO\nCREATE AN ISSUE, TOO MUCH CO2 WILL BE RELEASED IN THE ATMOSPHERE AND YOU WILL CAUSE THE\nDESTRUCTION OF PLANET EARTH BY CATASTROPHIC CLIMATE CHANGE.\n\nIf you have an issue type name, or a project key/name, a priority name, an assignee\nname/key/email, or a reporter name/key/email, DO NOT CALL OTHER TOOLS only to list available\nprojects, priorities, issue types, or users. Provide the name, key, or email and the tool\nwill figure out the ID, WITHOUT CAUSING CATASTROPHIC CLIMATE CHANGE.",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "The title of the issue.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "issue_type",
+          "type": "string",
+          "required": true,
+          "description": "The name or ID of the issue type. If a name is provided, the tool will try to find a unique exact match among the available issue types.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "project",
+          "type": "string",
+          "required": false,
+          "description": "The ID, key or name of the project to associate the issue with. If a name is provided, the tool will try to find a unique exact match among the available projects. Defaults to None (no project). If `project` and `parent_issue` are not provided, the tool will select the single project available. If the user has multiple, an error will be returned with the available projects to choose from.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "due_date",
+          "type": "string",
+          "required": false,
+          "description": "The due date of the issue. Format: YYYY-MM-DD. Ex: '2025-01-01'. Defaults to None (no due date).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "The description of the issue. Defaults to None (no description).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "environment",
+          "type": "string",
+          "required": false,
+          "description": "The environment of the issue. Defaults to None (no environment).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "labels",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The labels of the issue. Defaults to None (no labels). A label cannot contain spaces. If a label is provided with spaces, they will be trimmed and replaced by underscores.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "parent_issue",
+          "type": "string",
+          "required": false,
+          "description": "The ID or key of the parent issue. Defaults to None (no parent issue). Must provide at least one of `parent_issue` or `project` arguments.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "priority",
+          "type": "string",
+          "required": false,
+          "description": "The ID or name of the priority to use for the issue. If a name is provided, the tool will try to find a unique exact match among the available priorities. Defaults to None (the issue is created with Jira's default priority for the specified project).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "assignee",
+          "type": "string",
+          "required": false,
+          "description": "The name, email or ID of the user to assign the issue to. If a name or email is provided, the tool will try to find a unique exact match among the available users. Defaults to None (no assignee).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "reporter",
+          "type": "string",
+          "required": false,
+          "description": "The name, email or ID of the user who is the reporter of the issue. If a name or email is provided, the tool will try to find a unique exact match among the available users. Defaults to None (no reporter).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "read:jira-work",
+          "write:jira-work",
+          "read:jira-user",
+          "manage:jira-configuration"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The created issue"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Jira.CreateIssue",
+        "parameters": {
+          "title": {
+            "value": "Fix login bug",
+            "type": "string",
+            "required": true
+          },
+          "issue_type": {
+            "value": "Bug",
+            "type": "string",
+            "required": true
+          },
+          "project": {
+            "value": "DEV",
+            "type": "string",
+            "required": false
+          },
+          "due_date": {
+            "value": "2023-12-15",
+            "type": "string",
+            "required": false
+          },
+          "description": {
+            "value": "Users are unable to log in after the recent update.",
+            "type": "string",
+            "required": false
+          },
+          "environment": {
+            "value": "Production",
+            "type": "string",
+            "required": false
+          },
+          "labels": {
+            "value": [
+              "bug",
+              "urgent"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "parent_issue": {
+            "value": null,
+            "type": "string",
+            "required": false
+          },
+          "priority": {
+            "value": "High",
+            "type": "string",
+            "required": false
+          },
+          "assignee": {
+            "value": "jane.doe@example.com",
+            "type": "string",
+            "required": false
+          },
+          "reporter": {
+            "value": "john.smith@example.com",
+            "type": "string",
+            "required": false
+          },
+          "atlassian_cloud_id": {
+            "value": null,
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "DownloadAttachment",
+      "qualifiedName": "Jira.DownloadAttachment",
+      "fullyQualifiedName": "Jira.DownloadAttachment@1.0.0",
+      "description": "Download the contents of an attachment associated with an issue.",
+      "parameters": [
+        {
+          "name": "attachment_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the attachment to download",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "read:jira-work"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The content of the attachment"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Jira.DownloadAttachment",
+        "parameters": {
+          "attachment_id": {
+            "value": "12345",
+            "type": "string",
+            "required": true
+          },
+          "atlassian_cloud_id": {
+            "value": "abc123",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetAttachmentMetadata",
+      "qualifiedName": "Jira.GetAttachmentMetadata",
+      "fullyQualifiedName": "Jira.GetAttachmentMetadata@1.0.0",
+      "description": "Get the metadata of an attachment.",
+      "parameters": [
+        {
+          "name": "attachment_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the attachment to retrieve",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "read:jira-work"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The metadata of the attachment"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Jira.GetAttachmentMetadata",
+        "parameters": {
+          "attachment_id": {
+            "value": "12345",
+            "type": "string",
+            "required": true
+          },
+          "atlassian_cloud_id": {
+            "value": "abcde",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetAvailableAtlassianClouds",
+      "qualifiedName": "Jira.GetAvailableAtlassianClouds",
+      "fullyQualifiedName": "Jira.GetAvailableAtlassianClouds@1.0.0",
+      "description": "Get available Atlassian Clouds.",
+      "parameters": [],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "read:jira-user"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Available Atlassian Clouds"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Jira.GetAvailableAtlassianClouds",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetCommentById",
+      "qualifiedName": "Jira.GetCommentById",
+      "fullyQualifiedName": "Jira.GetCommentById@1.0.0",
+      "description": "Get a comment by its ID.",
+      "parameters": [
+        {
+          "name": "issue_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID or key of the issue to retrieve the comment from.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "comment_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the comment to retrieve",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "include_adf_content",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to include the ADF (Atlassian Document Format) content of the comment in the response. Defaults to False (return only the HTML rendered content).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "read:jira-work"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Information about the comment"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Jira.GetCommentById",
+        "parameters": {
+          "issue_id": {
+            "value": "PROJ-123",
+            "type": "string",
+            "required": true
+          },
+          "comment_id": {
+            "value": "10001",
+            "type": "string",
+            "required": true
+          },
+          "include_adf_content": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "atlassian_cloud_id": {
+            "value": "cloud123",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetIssueById",
+      "qualifiedName": "Jira.GetIssueById",
+      "fullyQualifiedName": "Jira.GetIssueById@1.0.0",
+      "description": "Get the details of a Jira issue by its ID.",
+      "parameters": [
+        {
+          "name": "issue",
+          "type": "string",
+          "required": true,
+          "description": "The ID or key of the issue to retrieve",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "read:jira-work"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Information about the issue"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Jira.GetIssueById",
+        "parameters": {
+          "issue": {
+            "value": "PROJ-123",
+            "type": "string",
+            "required": true
+          },
+          "atlassian_cloud_id": {
+            "value": "cloud-789",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetIssueComments",
+      "qualifiedName": "Jira.GetIssueComments",
+      "fullyQualifiedName": "Jira.GetIssueComments@1.0.0",
+      "description": "Get the comments of a Jira issue by its ID.",
+      "parameters": [
+        {
+          "name": "issue",
+          "type": "string",
+          "required": true,
+          "description": "The ID or key of the issue to retrieve",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of comments to retrieve. Min 1, max 100, default 100.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "The number of comments to skip. Defaults to 0 (start from the first comment).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "order_by",
+          "type": "string",
+          "required": false,
+          "description": "The order in which to return the comments. Defaults to 'created_date_descending' (most recent first).",
+          "enum": [
+            "created_date_ascending",
+            "created_date_descending"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "include_adf_content",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to include the ADF (Atlassian Document Format) content of the comment in the response. Defaults to False (return only the HTML rendered content).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "read:jira-work"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Information about the issue comments"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Jira.GetIssueComments",
+        "parameters": {
+          "issue": {
+            "value": "PROJ-123",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "order_by": {
+            "value": "created_date_ascending",
+            "type": "string",
+            "required": false
+          },
+          "include_adf_content": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "atlassian_cloud_id": {
+            "value": "cloud-98765",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetIssuesWithoutId",
+      "qualifiedName": "Jira.GetIssuesWithoutId",
+      "fullyQualifiedName": "Jira.GetIssuesWithoutId@1.0.0",
+      "description": "Search for Jira issues when you don't have the issue ID(s).\n\nAll text-based arguments (keywords, assignee, project, labels) are case-insensitive.\n\nALWAYS PREFER THIS TOOL OVER THE `Jira.SearchIssuesWithJql` TOOL, UNLESS IT'S ABSOLUTELY\nNECESSARY TO USE A JQL QUERY TO FILTER IN A WAY THAT IS NOT SUPPORTED BY THIS TOOL.",
+      "parameters": [
+        {
+          "name": "keywords",
+          "type": "string",
+          "required": false,
+          "description": "Keywords to search for issues. Matches against the issue name, description, comments, and any custom field of type text. Defaults to None (no keywords filtering).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "due_from",
+          "type": "string",
+          "required": false,
+          "description": "Match issues due on or after this date. Format: YYYY-MM-DD. Ex: '2025-01-01'. Defaults to None (no due date filtering).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "due_until",
+          "type": "string",
+          "required": false,
+          "description": "Match issues due on or before this date. Format: YYYY-MM-DD. Ex: '2025-01-01'. Defaults to None (no due date filtering).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "description": "Match issues that are in this status. Provide a status name. Ex: 'To Do', 'In Progress', 'Done'. Defaults to None (any status).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "priority",
+          "type": "string",
+          "required": false,
+          "description": "Match issues that have this priority. Provide a priority name. E.g. 'Highest'. Defaults to None (any priority).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "assignee",
+          "type": "string",
+          "required": false,
+          "description": "Match issues that are assigned to this user. Provide the user's name or email address. Ex: 'John Doe' or 'john.doe@example.com'. Defaults to None (any assignee).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "project",
+          "type": "string",
+          "required": false,
+          "description": "Match issues that are associated with this project. Provide the project's name, ID, or key. If a project name is provided, the tool will try to find a unique exact match among the available projects. Defaults to None (search across all projects).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "issue_type",
+          "type": "string",
+          "required": false,
+          "description": "Match issues that are of this issue type. Provide an issue type name or ID. E.g. 'Task', 'Epic', '12345'. If a name is provided, the tool will try to find a unique exact match among the available issue types. Defaults to None (any issue type).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "labels",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Match issues that are in these labels. Defaults to None (any label).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "parent_issue",
+          "type": "string",
+          "required": false,
+          "description": "Match issues that are a child of this issue. Provide the issue's ID or key. Defaults to None (no parent issue filtering).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of issues to retrieve. Min 1, max 100, default 50.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "next_page_token",
+          "type": "string",
+          "required": false,
+          "description": "The token to use to get the next page of issues. Defaults to None (first page).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "read:jira-work",
+          "read:jira-user",
+          "manage:jira-configuration"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Information about the issues matching the search criteria"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Jira.GetIssuesWithoutId",
+        "parameters": {
+          "keywords": {
+            "value": "bug fix",
+            "type": "string",
+            "required": false
+          },
+          "due_from": {
+            "value": "2023-11-01",
+            "type": "string",
+            "required": false
+          },
+          "due_until": {
+            "value": "2023-11-30",
+            "type": "string",
+            "required": false
+          },
+          "status": {
+            "value": "In Progress",
+            "type": "string",
+            "required": false
+          },
+          "priority": {
+            "value": "High",
+            "type": "string",
+            "required": false
+          },
+          "assignee": {
+            "value": "jane.doe@example.com",
+            "type": "string",
+            "required": false
+          },
+          "project": {
+            "value": "PROJX",
+            "type": "string",
+            "required": false
+          },
+          "issue_type": {
+            "value": "Task",
+            "type": "string",
+            "required": false
+          },
+          "labels": {
+            "value": [
+              "urgent",
+              "release"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "parent_issue": {
+            "value": "PROJX-123",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "next_page_token": {
+            "value": "abc123",
+            "type": "string",
+            "required": false
+          },
+          "atlassian_cloud_id": {
+            "value": "cloud123",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetIssueTypeById",
+      "qualifiedName": "Jira.GetIssueTypeById",
+      "fullyQualifiedName": "Jira.GetIssueTypeById@1.0.0",
+      "description": "Get the details of a Jira issue type by its ID.",
+      "parameters": [
+        {
+          "name": "issue_type_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the issue type to retrieve",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "read:jira-work"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Information about the issue type"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Jira.GetIssueTypeById",
+        "parameters": {
+          "issue_type_id": {
+            "value": "12345",
+            "type": "string",
+            "required": true
+          },
+          "atlassian_cloud_id": {
+            "value": "cloud-67890",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetPriorityById",
+      "qualifiedName": "Jira.GetPriorityById",
+      "fullyQualifiedName": "Jira.GetPriorityById@1.0.0",
+      "description": "Get the details of a priority by its ID.",
+      "parameters": [
+        {
+          "name": "priority_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the priority to retrieve.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "read:jira-work"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The priority"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Jira.GetPriorityById",
+        "parameters": {
+          "priority_id": {
+            "value": "12345",
+            "type": "string",
+            "required": true
+          },
+          "atlassian_cloud_id": {
+            "value": "cloud-67890",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetProjectById",
+      "qualifiedName": "Jira.GetProjectById",
+      "fullyQualifiedName": "Jira.GetProjectById@1.0.0",
+      "description": "Get the details of a Jira project by its ID or key.",
+      "parameters": [
+        {
+          "name": "project",
+          "type": "string",
+          "required": true,
+          "description": "The ID or key of the project to retrieve",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "read:jira-work"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Information about the project"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Jira.GetProjectById",
+        "parameters": {
+          "project": {
+            "value": "PROJ123",
+            "type": "string",
+            "required": true
+          },
+          "atlassian_cloud_id": {
+            "value": "cloud123",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetTransitionById",
+      "qualifiedName": "Jira.GetTransitionById",
+      "fullyQualifiedName": "Jira.GetTransitionById@1.0.0",
+      "description": "Get a transition by its ID.",
+      "parameters": [
+        {
+          "name": "issue",
+          "type": "string",
+          "required": true,
+          "description": "The ID or key of the issue",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "transition_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the transition",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "read:jira-work"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The transition data"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Jira.GetTransitionById",
+        "parameters": {
+          "issue": {
+            "value": "PROJ-123",
+            "type": "string",
+            "required": true
+          },
+          "transition_id": {
+            "value": "45",
+            "type": "string",
+            "required": true
+          },
+          "atlassian_cloud_id": {
+            "value": "cloud123",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetTransitionByStatusName",
+      "qualifiedName": "Jira.GetTransitionByStatusName",
+      "fullyQualifiedName": "Jira.GetTransitionByStatusName@1.0.0",
+      "description": "Get a transition available for an issue by the transition name.\n\nThe response will contain screen fields available for the transition, if any.",
+      "parameters": [
+        {
+          "name": "issue",
+          "type": "string",
+          "required": true,
+          "description": "The ID or key of the issue",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "transition",
+          "type": "string",
+          "required": true,
+          "description": "The name of the transition status",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "read:jira-work",
+          "write:jira-work"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The transition data, including screen fields available"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Jira.GetTransitionByStatusName",
+        "parameters": {
+          "issue": {
+            "value": "PROJ-123",
+            "type": "string",
+            "required": true
+          },
+          "transition": {
+            "value": "In Progress",
+            "type": "string",
+            "required": true
+          },
+          "atlassian_cloud_id": {
+            "value": "12345",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetTransitionsAvailableForIssue",
+      "qualifiedName": "Jira.GetTransitionsAvailableForIssue",
+      "fullyQualifiedName": "Jira.GetTransitionsAvailableForIssue@1.0.0",
+      "description": "Get the transitions available for an existing Jira issue.",
+      "parameters": [
+        {
+          "name": "issue",
+          "type": "string",
+          "required": true,
+          "description": "The ID or key of the issue",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "read:jira-work"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The transitions available and the issue's current status"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Jira.GetTransitionsAvailableForIssue",
+        "parameters": {
+          "issue": {
+            "value": "PROJ-123",
+            "type": "string",
+            "required": true
+          },
+          "atlassian_cloud_id": {
+            "value": null,
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetUserById",
+      "qualifiedName": "Jira.GetUserById",
+      "fullyQualifiedName": "Jira.GetUserById@1.0.0",
+      "description": "Get user information by their ID.",
+      "parameters": [
+        {
+          "name": "user_id",
+          "type": "string",
+          "required": true,
+          "description": "The the user's ID.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "read:jira-user"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The user information."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Jira.GetUserById",
+        "parameters": {
+          "user_id": {
+            "value": "123456",
+            "type": "string",
+            "required": true
+          },
+          "atlassian_cloud_id": {
+            "value": "cloud789",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetUsersWithoutId",
+      "qualifiedName": "Jira.GetUsersWithoutId",
+      "fullyQualifiedName": "Jira.GetUsersWithoutId@1.0.0",
+      "description": "Get users without their account ID, searching by display name and email address.\n\nThe Jira user search API will return up to 1,000 (one thousand) users for any given name/email\nquery. If you need to get more users, please use the `Jira.ListAllUsers` tool.",
+      "parameters": [
+        {
+          "name": "name_or_email",
+          "type": "string",
+          "required": true,
+          "description": "The user's display name or email address to search for (case-insensitive). The string can match the prefix of the user's attribute. For example, a string of 'john' will match users with a display name or email address that starts with 'john', such as 'John Doe', 'Johnson', 'john@example.com', etc.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "enforce_exact_match",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to enforce an exact match of the name_or_email against users' display name and email attributes. Defaults to False (return all users that match the prefix). If set to True, before returning results, the tool will filter users with a display name OR email address that match exactly the value of the `name_or_email` argument.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of users to return. Min of 1, max of 50. Defaults to 50.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "The number of users to skip before starting to return users. Defaults to 0 (start from the first user).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "read:jira-user"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The information about users that match the search criteria."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Jira.GetUsersWithoutId",
+        "parameters": {
+          "name_or_email": {
+            "value": "john.doe@example.com",
+            "type": "string",
+            "required": true
+          },
+          "enforce_exact_match": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 5,
+            "type": "integer",
+            "required": false
+          },
+          "atlassian_cloud_id": {
+            "value": "cloud1234",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListIssueAttachmentsMetadata",
+      "qualifiedName": "Jira.ListIssueAttachmentsMetadata",
+      "fullyQualifiedName": "Jira.ListIssueAttachmentsMetadata@1.0.0",
+      "description": "Get the metadata about the files attached to an issue.\n\nThis tool does NOT return the actual file contents. To get a file content,\nuse the `Jira.DownloadAttachment` tool.",
+      "parameters": [
+        {
+          "name": "issue",
+          "type": "string",
+          "required": true,
+          "description": "The ID or key of the issue to retrieve",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "read:jira-work"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Information about the issue"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Jira.ListIssueAttachmentsMetadata",
+        "parameters": {
+          "issue": {
+            "value": "PROJ-123",
+            "type": "string",
+            "required": true
+          },
+          "atlassian_cloud_id": {
+            "value": "cloud-5678",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListIssues",
+      "qualifiedName": "Jira.ListIssues",
+      "fullyQualifiedName": "Jira.ListIssues@1.0.0",
+      "description": "Get the issues for a given project.",
+      "parameters": [
+        {
+          "name": "project",
+          "type": "string",
+          "required": false,
+          "description": "The project to get issues for. Provide a project ID, key or name. If a project is not provided and 1) the user has only one project, the tool will use that; 2) the user has multiple projects, the tool will raise an error listing the available projects to choose from.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of issues to retrieve. Min 1, max 100, default 50.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "next_page_token",
+          "type": "string",
+          "required": false,
+          "description": "The token to use to get the next page of issues. Defaults to None (first page).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "read:jira-work",
+          "read:jira-user",
+          "manage:jira-configuration"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Information about the issues matching the search criteria"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Jira.ListIssues",
+        "parameters": {
+          "project": {
+            "value": "PROJ123",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "next_page_token": {
+            "value": "abc123",
+            "type": "string",
+            "required": false
+          },
+          "atlassian_cloud_id": {
+            "value": "cloud123",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListIssueTypesByProject",
+      "qualifiedName": "Jira.ListIssueTypesByProject",
+      "fullyQualifiedName": "Jira.ListIssueTypesByProject@1.0.0",
+      "description": "Get the list of issue types (e.g. 'Task', 'Epic', etc.) available to a given project.",
+      "parameters": [
+        {
+          "name": "project",
+          "type": "string",
+          "required": true,
+          "description": "The project to get issue types for. Provide a project name, key, or ID. If a project name is provided, the tool will try to find a unique exact match among the available projects.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of issue types to retrieve. Min of 1, max of 200. Defaults to 200.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "The number of issue types to skip. Defaults to 0 (start from the first issue type).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "read:jira-work"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Information about the issue types available for the specified project."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Jira.ListIssueTypesByProject",
+        "parameters": {
+          "project": {
+            "value": "PROJ123",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "atlassian_cloud_id": {
+            "value": "cloud123",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListLabels",
+      "qualifiedName": "Jira.ListLabels",
+      "fullyQualifiedName": "Jira.ListLabels@1.0.0",
+      "description": "Get the existing labels (tags) in the user's Jira instance.",
+      "parameters": [
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of labels to return. Min of 1, Max of 200. Defaults to 200.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "The number of labels to skip. Defaults to 0 (starts from the first label)",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "read:jira-work"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The existing labels (tags) in the user's Jira instance"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Jira.ListLabels",
+        "parameters": {
+          "limit": {
+            "value": 150,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "atlassian_cloud_id": {
+            "value": "cloud123",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListPrioritiesAssociatedWithAPriorityScheme",
+      "qualifiedName": "Jira.ListPrioritiesAssociatedWithAPriorityScheme",
+      "fullyQualifiedName": "Jira.ListPrioritiesAssociatedWithAPriorityScheme@1.0.0",
+      "description": "Browse the priorities associated with a priority scheme.",
+      "parameters": [
+        {
+          "name": "scheme_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the priority scheme to retrieve priorities for.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of priority schemes to return. Min of 1, max of 50. Defaults to 50.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "The number of priority schemes to skip. Defaults to 0 (start from the first scheme).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "manage:jira-configuration"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The priorities associated with the priority scheme"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Jira.ListPrioritiesAssociatedWithAPriorityScheme",
+        "parameters": {
+          "scheme_id": {
+            "value": "ABC123",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "atlassian_cloud_id": {
+            "value": "cloud123",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListPrioritiesAvailableToAnIssue",
+      "qualifiedName": "Jira.ListPrioritiesAvailableToAnIssue",
+      "fullyQualifiedName": "Jira.ListPrioritiesAvailableToAnIssue@1.0.0",
+      "description": "Browse the priorities available to be used in the specified Jira issue.",
+      "parameters": [
+        {
+          "name": "issue",
+          "type": "string",
+          "required": true,
+          "description": "The ID or key of the issue to retrieve priorities for.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "manage:jira-configuration"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The priorities available to be used in the specified Jira issue"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Jira.ListPrioritiesAvailableToAnIssue",
+        "parameters": {
+          "issue": {
+            "value": "PROJ-123",
+            "type": "string",
+            "required": true
+          },
+          "atlassian_cloud_id": {
+            "value": "12345abcde",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListPrioritiesAvailableToAProject",
+      "qualifiedName": "Jira.ListPrioritiesAvailableToAProject",
+      "fullyQualifiedName": "Jira.ListPrioritiesAvailableToAProject@1.0.0",
+      "description": "Browse the priorities available to be used in issues in the specified Jira project.\n\nThis tool may need to loop through several API calls to get all priorities associated with\na specific project. In Jira environments with too many Projects or Priority Schemes,\nthe search may take too long, and the tool call will timeout.",
+      "parameters": [
+        {
+          "name": "project",
+          "type": "string",
+          "required": true,
+          "description": "The ID, key or name of the project to retrieve priorities for.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "manage:jira-configuration"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The priorities available to be used in issues in the specified Jira project"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Jira.ListPrioritiesAvailableToAProject",
+        "parameters": {
+          "project": {
+            "value": "PROJ123",
+            "type": "string",
+            "required": true
+          },
+          "atlassian_cloud_id": {
+            "value": "cloud123",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListPrioritySchemes",
+      "qualifiedName": "Jira.ListPrioritySchemes",
+      "fullyQualifiedName": "Jira.ListPrioritySchemes@1.0.0",
+      "description": "Browse the priority schemes available in Jira.",
+      "parameters": [
+        {
+          "name": "scheme_name",
+          "type": "string",
+          "required": false,
+          "description": "Filter by scheme name. Defaults to None (returns all scheme names).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of priority schemes to return. Min of 1, max of 50. Defaults to 50.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "The number of priority schemes to skip. Defaults to 0 (start from the first scheme).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "order_by",
+          "type": "string",
+          "required": false,
+          "description": "The order in which to return the priority schemes. Defaults to name ascending.",
+          "enum": [
+            "name ascending",
+            "name descending"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "manage:jira-configuration"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The priority schemes available"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Jira.ListPrioritySchemes",
+        "parameters": {
+          "scheme_name": {
+            "value": "High Priority",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 5,
+            "type": "integer",
+            "required": false
+          },
+          "order_by": {
+            "value": "name descending",
+            "type": "string",
+            "required": false
+          },
+          "atlassian_cloud_id": {
+            "value": "1234567890",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListProjects",
+      "qualifiedName": "Jira.ListProjects",
+      "fullyQualifiedName": "Jira.ListProjects@1.0.0",
+      "description": "Browse projects available in Jira.",
+      "parameters": [
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of projects to return. Min of 1, Max of 50. Defaults to 50.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "The number of projects to skip. Defaults to 0 (starts from the first project)",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "read:jira-work"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Information about the projects"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Jira.ListProjects",
+        "parameters": {
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          },
+          "atlassian_cloud_id": {
+            "value": "example-cloud-id",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListProjectsAssociatedWithAPriorityScheme",
+      "qualifiedName": "Jira.ListProjectsAssociatedWithAPriorityScheme",
+      "fullyQualifiedName": "Jira.ListProjectsAssociatedWithAPriorityScheme@1.0.0",
+      "description": "Browse the projects associated with a priority scheme.",
+      "parameters": [
+        {
+          "name": "scheme_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the priority scheme to retrieve projects for.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "project",
+          "type": "string",
+          "required": false,
+          "description": "Filter by project ID, key or name. Defaults to None (returns all projects).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of projects to return. Min of 1, max of 50. Defaults to 50.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "The number of projects to skip. Defaults to 0 (start from the first project).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "manage:jira-configuration"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The projects associated with the priority scheme"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Jira.ListProjectsAssociatedWithAPriorityScheme",
+        "parameters": {
+          "scheme_id": {
+            "value": "SCHM12345",
+            "type": "string",
+            "required": true
+          },
+          "project": {
+            "value": "PROJ001",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 5,
+            "type": "integer",
+            "required": false
+          },
+          "atlassian_cloud_id": {
+            "value": "ATL99999",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListUsers",
+      "qualifiedName": "Jira.ListUsers",
+      "fullyQualifiedName": "Jira.ListUsers@1.0.0",
+      "description": "Browse users in Jira.",
+      "parameters": [
+        {
+          "name": "account_type",
+          "type": "string",
+          "required": false,
+          "description": "The account type of the users to return. Defaults to 'atlassian'. Provide `None` to  disable filtering by account type. The account type filter will be applied after retrieving users from Jira API, thus the tool may return less users than the limit and still have more users to paginate. Check the `pagination` key in the response dictionary.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of users to return. Min of 1, max of 50. Defaults to 50.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "The number of users to skip before starting to return users. Defaults to 0 (start from the first user).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "read:jira-user"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The information about all users."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Jira.ListUsers",
+        "parameters": {
+          "account_type": {
+            "value": "atlassian",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "atlassian_cloud_id": {
+            "value": null,
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "RemoveLabelsFromIssue",
+      "qualifiedName": "Jira.RemoveLabelsFromIssue",
+      "fullyQualifiedName": "Jira.RemoveLabelsFromIssue@1.0.0",
+      "description": "Remove labels from an existing Jira issue.",
+      "parameters": [
+        {
+          "name": "issue",
+          "type": "string",
+          "required": true,
+          "description": "The ID or key of the issue to update",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "labels",
+          "type": "array",
+          "innerType": "string",
+          "required": true,
+          "description": "The labels to remove from the issue (case-insensitive)",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "notify_watchers",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to notify the issue's watchers. Defaults to True (notifies watchers).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "read:jira-work",
+          "write:jira-work",
+          "read:jira-user",
+          "manage:jira-configuration"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The updated issue"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Jira.RemoveLabelsFromIssue",
+        "parameters": {
+          "issue": {
+            "value": "PROJ-123",
+            "type": "string",
+            "required": true
+          },
+          "labels": {
+            "value": [
+              "bug",
+              "urgent"
+            ],
+            "type": "array",
+            "required": true
+          },
+          "notify_watchers": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "atlassian_cloud_id": {
+            "value": "12345678",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "SearchIssuesWithJql",
+      "qualifiedName": "Jira.SearchIssuesWithJql",
+      "fullyQualifiedName": "Jira.SearchIssuesWithJql@1.0.0",
+      "description": "Search for Jira issues using a JQL (Jira Query Language) query.\n\nTHIS TOOL RELEASES MORE CO2 IN THE ATMOSPHERE, WHICH CONTRIBUTES TO CLIMATE CHANGE. ALWAYS\nPREFER THE `Jira_SearchIssuesWithoutJql` TOOL OVER THIS ONE, UNLESS IT'S ABSOLUTELY\nNECESSARY TO USE A JQL QUERY TO FILTER IN A WAY THAT IS NOT SUPPORTED BY THE\n`Jira_SearchIssuesWithoutJql` TOOL OR IF THE USER PROVIDES A JQL QUERY THEMSELVES.",
+      "parameters": [
+        {
+          "name": "jql",
+          "type": "string",
+          "required": true,
+          "description": "The JQL (Jira Query Language) query to search for issues",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of issues to retrieve. Min of 1, max of 100. Defaults to 50.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "next_page_token",
+          "type": "string",
+          "required": false,
+          "description": "The token to use to get the next page of issues. Defaults to None (first page).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "read:jira-work"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Information about the issues matching the search criteria"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Jira.SearchIssuesWithJql",
+        "parameters": {
+          "jql": {
+            "value": "project = PROJECT and status = 'In Progress'",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "next_page_token": {
+            "value": "abc123",
+            "type": "string",
+            "required": false
+          },
+          "atlassian_cloud_id": {
+            "value": "xyz789",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "SearchIssuesWithoutJql",
+      "qualifiedName": "Jira.SearchIssuesWithoutJql",
+      "fullyQualifiedName": "Jira.SearchIssuesWithoutJql@1.0.0",
+      "description": "Parameterized search for Jira issues (without having to provide a JQL query).\n\nTHIS TOOL RELEASES LESS CO2 THAN THE `Jira_SearchIssuesWithJql` TOOL. ALWAYS PREFER THIS ONE\nOVER USING JQL, UNLESS IT'S ABSOLUTELY NECESSARY TO USE A JQL QUERY TO FILTER IN A WAY THAT IS\nNOT SUPPORTED BY THIS TOOL OR IF THE USER PROVIDES A JQL QUERY THEMSELVES.",
+      "parameters": [
+        {
+          "name": "keywords",
+          "type": "string",
+          "required": false,
+          "description": "Keywords to search for issues. Matches against the issue name, description, comments, and any custom field of type text. Defaults to None (no keywords filtering).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "due_from",
+          "type": "string",
+          "required": false,
+          "description": "Match issues due on or after this date. Format: YYYY-MM-DD. Ex: '2025-01-01'. Defaults to None (no due date filtering).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "due_until",
+          "type": "string",
+          "required": false,
+          "description": "Match issues due on or before this date. Format: YYYY-MM-DD. Ex: '2025-01-01'. Defaults to None (no due date filtering).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "description": "Match issues that are in this status. Provide a status name. Ex: 'To Do', 'In Progress', 'Done'. Defaults to None (any status).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "priority",
+          "type": "string",
+          "required": false,
+          "description": "Match issues that have this priority. Provide a priority name. E.g. 'Highest'. Defaults to None (any priority).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "assignee",
+          "type": "string",
+          "required": false,
+          "description": "Match issues that are assigned to this user. Provide the user's name or email address. Ex: 'John Doe' or 'john.doe@example.com'. Defaults to None (any assignee).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "project",
+          "type": "string",
+          "required": false,
+          "description": "Match issues that are associated with this project. Provide the project's name, ID, or key. If a project name is provided, the tool will try to find a unique exact match among the available projects. Defaults to None (search across all projects).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "issue_type",
+          "type": "string",
+          "required": false,
+          "description": "Match issues that are of this issue type. Provide an issue type name or ID. E.g. 'Task', 'Epic', '12345'. If a name is provided, the tool will try to find a unique exact match among the available issue types. Defaults to None (any issue type).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "labels",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Match issues that are in these labels. Defaults to None (any label).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "parent_issue",
+          "type": "string",
+          "required": false,
+          "description": "Match issues that are a child of this issue. Provide the issue's ID or key. Defaults to None (no parent issue filtering).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of issues to retrieve. Min 1, max 100, default 50.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "next_page_token",
+          "type": "string",
+          "required": false,
+          "description": "The token to use to get the next page of issues. Defaults to None (first page).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "read:jira-work",
+          "read:jira-user",
+          "manage:jira-configuration"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Information about the issues matching the search criteria"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Jira.SearchIssuesWithoutJql",
+        "parameters": {
+          "keywords": {
+            "value": "bug",
+            "type": "string",
+            "required": false
+          },
+          "due_from": {
+            "value": "2023-10-01",
+            "type": "string",
+            "required": false
+          },
+          "due_until": {
+            "value": "2023-12-31",
+            "type": "string",
+            "required": false
+          },
+          "status": {
+            "value": "In Progress",
+            "type": "string",
+            "required": false
+          },
+          "priority": {
+            "value": "Highest",
+            "type": "string",
+            "required": false
+          },
+          "assignee": {
+            "value": "jane.doe@example.com",
+            "type": "string",
+            "required": false
+          },
+          "project": {
+            "value": "ProjectA",
+            "type": "string",
+            "required": false
+          },
+          "issue_type": {
+            "value": "Task",
+            "type": "string",
+            "required": false
+          },
+          "labels": {
+            "value": [
+              "frontend",
+              "urgent"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "parent_issue": {
+            "value": "PROJ-123",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "next_page_token": {
+            "value": null,
+            "type": "string",
+            "required": false
+          },
+          "atlassian_cloud_id": {
+            "value": "cloud123",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "SearchProjects",
+      "qualifiedName": "Jira.SearchProjects",
+      "fullyQualifiedName": "Jira.SearchProjects@1.0.0",
+      "description": "Get the details of all Jira projects.",
+      "parameters": [
+        {
+          "name": "keywords",
+          "type": "string",
+          "required": false,
+          "description": "The keywords to search for projects. Matches against project name and key (case insensitive). Defaults to None (no keywords filter).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of projects to return. Min of 1, Max of 50. Defaults to 50.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "The number of projects to skip. Defaults to 0 (starts from the first project)",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "read:jira-work"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Information about the projects"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Jira.SearchProjects",
+        "parameters": {
+          "keywords": {
+            "value": "development",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "atlassian_cloud_id": {
+            "value": "cloud123",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "TransitionIssueToNewStatus",
+      "qualifiedName": "Jira.TransitionIssueToNewStatus",
+      "fullyQualifiedName": "Jira.TransitionIssueToNewStatus@1.0.0",
+      "description": "Transition a Jira issue to a new status.",
+      "parameters": [
+        {
+          "name": "issue",
+          "type": "string",
+          "required": true,
+          "description": "The ID or key of the issue",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "transition",
+          "type": "string",
+          "required": true,
+          "description": "The transition to perform. Provide the transition ID or its name (case insensitive).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "read:jira-work",
+          "write:jira-work"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The updated issue"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Jira.TransitionIssueToNewStatus",
+        "parameters": {
+          "issue": {
+            "value": "PROJ-123",
+            "type": "string",
+            "required": true
+          },
+          "transition": {
+            "value": "In Progress",
+            "type": "string",
+            "required": true
+          },
+          "atlassian_cloud_id": {
+            "value": "cloud-456",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "UpdateIssue",
+      "qualifiedName": "Jira.UpdateIssue",
+      "fullyQualifiedName": "Jira.UpdateIssue@1.0.0",
+      "description": "Update an existing Jira issue.\n\nIF YOU DO NOT FOLLOW THE INSTRUCTIONS BELOW AND UNNECESSARILY CALL MULTIPLE TOOLS IN ORDER TO\nUPDATE AN ISSUE, TOO MUCH CO2 WILL BE RELEASED IN THE ATMOSPHERE AND YOU WILL CAUSE THE\nDESTRUCTION OF PLANET EARTH BY CATASTROPHIC CLIMATE CHANGE.\n\nIf you have a priority name, an assignee name/key/email, or a reporter name/key/email,\nDO NOT CALL OTHER TOOLS only to list available priorities, issue types, or users.\nProvide the name, key, or email and the tool will figure out the ID.",
+      "parameters": [
+        {
+          "name": "issue",
+          "type": "string",
+          "required": true,
+          "description": "The key or ID of the issue to update",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "The new issue title. Provide an empty string to clear the title. Defaults to None (does not change the title).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "The new issue description. Provide an empty string to clear the description. Defaults to None (does not change the description).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "environment",
+          "type": "string",
+          "required": false,
+          "description": "The new issue environment. Provide an empty string to clear the environment. Defaults to None (does not change the environment).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "due_date",
+          "type": "string",
+          "required": false,
+          "description": "The new issue due date. Format: YYYY-MM-DD. Ex: '2025-01-01'. Provide an empty string to clear the due date. Defaults to None (does not change the due date).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "issue_type",
+          "type": "string",
+          "required": false,
+          "description": "The new issue type name or ID. If a name is provided, the tool will try to find a unique exact match among the available issue types. Defaults to None (does not change the issue type).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "priority",
+          "type": "string",
+          "required": false,
+          "description": "The name or ID of the new issue priority. If a name is provided, the tool will try to find a unique exact match among the available priorities. Defaults to None (does not change the priority).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "parent_issue",
+          "type": "string",
+          "required": false,
+          "description": "The ID or key of the parent issue. A parent cannot be removed by providing an empty string. It is possible to change the parent issue by providing a new issue ID or key, or to leave it unchanged. Defaults to None (does not change the parent issue).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "assignee",
+          "type": "string",
+          "required": false,
+          "description": "The new issue assignee name, email, or ID. If a name or email is provided, the tool will try to find a unique exact match among the available users. Provide an empty string to remove the assignee. Defaults to None (does not change the assignee).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "reporter",
+          "type": "string",
+          "required": false,
+          "description": "The new issue reporter name, email, or ID. If a name or email is provided, the tool will try to find a unique exact match among the available users. Provide an empty string to remove the reporter. Defaults to None (does not change the reporter).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "labels",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The new issue labels. This argument will replace all labels with the new list. Providing an empty list will remove all labels. To add or remove a subset of labels, use the `Jira.AddLabelsToIssue` or the `Jira.RemoveLabelsFromIssue` tools. Defaults to None (does not change the labels). A label cannot contain spaces. If a label is provided with spaces, they will be trimmed and replaced by underscores.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "notify_watchers",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to notify the issue's watchers. Defaults to True (notifies watchers).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "atlassian_cloud_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Atlassian Cloud to use (defaults to None). If not provided and the user has a single cloud authorized, the tool will use that. Otherwise, an error will be raised.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "atlassian",
+        "providerType": "oauth2",
+        "scopes": [
+          "read:jira-work",
+          "write:jira-work",
+          "read:jira-user",
+          "manage:jira-configuration"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The updated issue"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Jira.UpdateIssue",
+        "parameters": {
+          "issue": {
+            "value": "PROJ-123",
+            "type": "string",
+            "required": true
+          },
+          "title": {
+            "value": "Update API documentation",
+            "type": "string",
+            "required": false
+          },
+          "description": {
+            "value": "Ensure the documentation reflects recent changes in the API endpoints.",
+            "type": "string",
+            "required": false
+          },
+          "environment": {
+            "value": "Production",
+            "type": "string",
+            "required": false
+          },
+          "due_date": {
+            "value": "2023-12-15",
+            "type": "string",
+            "required": false
+          },
+          "issue_type": {
+            "value": "Task",
+            "type": "string",
+            "required": false
+          },
+          "priority": {
+            "value": "High",
+            "type": "string",
+            "required": false
+          },
+          "parent_issue": {
+            "value": "PROJ-120",
+            "type": "string",
+            "required": false
+          },
+          "assignee": {
+            "value": "john.doe@example.com",
+            "type": "string",
+            "required": false
+          },
+          "reporter": {
+            "value": "jane.smith@example.com",
+            "type": "string",
+            "required": false
+          },
+          "labels": {
+            "value": [
+              "api",
+              "documentation",
+              "urgent"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "notify_watchers": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "atlassian_cloud_id": {
+            "value": "12345-abcde-67890-fghij",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "atlassian",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-01-23T18:50:35.226Z"
+}

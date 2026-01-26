@@ -1,0 +1,550 @@
+{
+  "id": "Zendesk",
+  "label": "Zendesk",
+  "version": "0.3.1",
+  "description": "",
+  "metadata": {
+    "category": "development",
+    "iconUrl": "https://design-system.arcade.dev/icons/zendesk.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/development/zendesk",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": null,
+    "allScopes": [
+      "read",
+      "tickets:write"
+    ]
+  },
+  "tools": [
+    {
+      "name": "AddTicketComment",
+      "qualifiedName": "Zendesk.AddTicketComment",
+      "fullyQualifiedName": "Zendesk.AddTicketComment@0.3.1",
+      "description": "Add a comment to an existing Zendesk ticket.\n\nThe returned ticket object includes an 'html_url' field with the direct link\nto view the ticket in Zendesk.",
+      "parameters": [
+        {
+          "name": "ticket_id",
+          "type": "integer",
+          "required": true,
+          "description": "The ID of the ticket to comment on",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "comment_body",
+          "type": "string",
+          "required": true,
+          "description": "The text of the comment",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "public",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether the comment is public (visible to requester) or internal. Defaults to True",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "tickets:write"
+        ]
+      },
+      "secrets": [
+        "ZENDESK_SUBDOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ZENDESK_SUBDOMAIN",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing the result of the comment operation and ticket URL"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Zendesk.AddTicketComment",
+        "parameters": {
+          "ticket_id": {
+            "value": 123456,
+            "type": "integer",
+            "required": true
+          },
+          "comment_body": {
+            "value": "This is an update on your ticket. Thank you for your patience.",
+            "type": "string",
+            "required": true
+          },
+          "public": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetTicketComments",
+      "qualifiedName": "Zendesk.GetTicketComments",
+      "fullyQualifiedName": "Zendesk.GetTicketComments@0.3.1",
+      "description": "Get all comments for a specific Zendesk ticket, including the original description.\n\nThe first comment is always the ticket's original description/content.\nSubsequent comments show the conversation history.\n\nEach comment includes:\n- author_id: ID of the comment author\n- body: The comment text\n- created_at: Timestamp when comment was created\n- public: Whether the comment is public or internal\n- attachments: List of file attachments (if any) with file_name, content_url, size, etc.",
+      "parameters": [
+        {
+          "name": "ticket_id",
+          "type": "integer",
+          "required": true,
+          "description": "The ID of the ticket to get comments for",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "read"
+        ]
+      },
+      "secrets": [
+        "ZENDESK_SUBDOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ZENDESK_SUBDOMAIN",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing the ticket comments, metadata, and ticket URL"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Zendesk.GetTicketComments",
+        "parameters": {
+          "ticket_id": {
+            "value": 12345,
+            "type": "integer",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListTickets",
+      "qualifiedName": "Zendesk.ListTickets",
+      "fullyQualifiedName": "Zendesk.ListTickets@0.3.1",
+      "description": "List tickets from your Zendesk account with offset-based pagination.\n\nBy default, returns tickets sorted by ID with newest tickets first (desc).\n\nEach ticket in the response includes an 'html_url' field with the direct link\nto view the ticket in Zendesk.\n\nPAGINATION:\n- The response includes 'next_offset' when more results are available\n- To fetch the next batch, simply pass the 'next_offset' value as the 'offset' parameter\n- If 'next_offset' is not present, you've reached the end of available results",
+      "parameters": [
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "description": "The status of tickets to filter by. Defaults to 'open'",
+          "enum": [
+            "new",
+            "open",
+            "pending",
+            "solved",
+            "closed"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Number of tickets to return. Defaults to 30",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Number of tickets to skip before returning results. Defaults to 0",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sort_order",
+          "type": "string",
+          "required": false,
+          "description": "Sort order for tickets by ID. 'asc' returns oldest first, 'desc' returns newest first. Defaults to 'desc'",
+          "enum": [
+            "asc",
+            "desc"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "read"
+        ]
+      },
+      "secrets": [
+        "ZENDESK_SUBDOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ZENDESK_SUBDOMAIN",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing tickets list (each with html_url), count, and pagination metadata. Includes 'next_offset' when more results are available"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Zendesk.ListTickets",
+        "parameters": {
+          "status": {
+            "value": "open",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 15,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          },
+          "sort_order": {
+            "value": "desc",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "MarkTicketSolved",
+      "qualifiedName": "Zendesk.MarkTicketSolved",
+      "fullyQualifiedName": "Zendesk.MarkTicketSolved@0.3.1",
+      "description": "Mark a Zendesk ticket as solved, optionally with a final comment.\n\nThe returned ticket object includes an 'html_url' field with the direct link\nto view the ticket in Zendesk.",
+      "parameters": [
+        {
+          "name": "ticket_id",
+          "type": "integer",
+          "required": true,
+          "description": "The ID of the ticket to mark as solved",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "comment_body",
+          "type": "string",
+          "required": false,
+          "description": "Optional final comment to add when solving the ticket",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "comment_public",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether the comment is visible to the requester. Defaults to False",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "tickets:write"
+        ]
+      },
+      "secrets": [
+        "ZENDESK_SUBDOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ZENDESK_SUBDOMAIN",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing the result of the solve operation"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Zendesk.MarkTicketSolved",
+        "parameters": {
+          "ticket_id": {
+            "value": 12345,
+            "type": "integer",
+            "required": true
+          },
+          "comment_body": {
+            "value": "This ticket has been resolved. Please reach out if you have any further questions.",
+            "type": "string",
+            "required": false
+          },
+          "comment_public": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "SearchArticles",
+      "qualifiedName": "Zendesk.SearchArticles",
+      "fullyQualifiedName": "Zendesk.SearchArticles@0.3.1",
+      "description": "Search for Help Center articles in your Zendesk knowledge base.\n\nThis tool searches specifically for published knowledge base articles that provide\nsolutions and guidance to users. At least one search parameter (query or label_names)\nmust be provided.\n\nPAGINATION:\n- The response includes 'next_offset' when more results are available\n- To fetch the next batch, simply pass the 'next_offset' value as the 'offset' parameter\n- If 'next_offset' is not present, you've reached the end of available results\n- The tool automatically handles fetching from the correct page based on your offset\n\nIMPORTANT: ALL FILTERS CAN BE COMBINED IN A SINGLE CALL\nYou can combine multiple filters (query, labels, dates) in one search request.\nDo NOT make separate tool calls - combine all relevant filters together.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": false,
+          "description": "Search text to match against articles. Supports quoted expressions for exact matching",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "label_names",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "List of label names to filter by (case-insensitive). Article must have at least one matching label. Available on Professional/Enterprise plans only",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "created_after",
+          "type": "string",
+          "required": false,
+          "description": "Filter articles created after this date (format: YYYY-MM-DD)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "created_before",
+          "type": "string",
+          "required": false,
+          "description": "Filter articles created before this date (format: YYYY-MM-DD)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "created_at",
+          "type": "string",
+          "required": false,
+          "description": "Filter articles created on this exact date (format: YYYY-MM-DD)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sort_by",
+          "type": "string",
+          "required": false,
+          "description": "Field to sort articles by. Defaults to relevance according to the search query",
+          "enum": [
+            "created_at",
+            "relevance"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "sort_order",
+          "type": "string",
+          "required": false,
+          "description": "Sort order direction. Defaults to descending",
+          "enum": [
+            "asc",
+            "desc"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Number of articles to return. Defaults to 30",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Number of articles to skip before returning results. Defaults to 0",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_body",
+          "type": "boolean",
+          "required": false,
+          "description": "Include article body content in results. Bodies will be cleaned of HTML and truncated",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_article_length",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum length for article body content in characters. Set to None for no limit. Defaults to 500",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "read"
+        ]
+      },
+      "secrets": [
+        "ZENDESK_SUBDOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ZENDESK_SUBDOMAIN",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Article search results with pagination metadata. Includes 'next_offset' when more results are available. Simply use this value as the 'offset' parameter in your next call to fetch the next batch"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Zendesk.SearchArticles",
+        "parameters": {
+          "query": {
+            "value": "account setup",
+            "type": "string",
+            "required": false
+          },
+          "label_names": {
+            "value": [
+              "setup",
+              "account"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "created_after": {
+            "value": "2021-01-01",
+            "type": "string",
+            "required": false
+          },
+          "created_before": {
+            "value": "2023-01-01",
+            "type": "string",
+            "required": false
+          },
+          "created_at": {
+            "value": null,
+            "type": "string",
+            "required": false
+          },
+          "sort_by": {
+            "value": "created_at",
+            "type": "string",
+            "required": false
+          },
+          "sort_order": {
+            "value": "ascending",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          },
+          "include_body": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "max_article_length": {
+            "value": 300,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "Zendesk.WhoAmI",
+      "fullyQualifiedName": "Zendesk.WhoAmI@0.3.1",
+      "description": "Get comprehensive user profile and Zendesk account information.\n\nThis tool provides detailed information about the authenticated user including\ntheir name, email, role, organization details, and Zendesk account context.",
+      "parameters": [],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "read"
+        ]
+      },
+      "secrets": [
+        "ZENDESK_SUBDOMAIN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "ZENDESK_SUBDOMAIN",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Get comprehensive user profile and Zendesk account information."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Zendesk.WhoAmI",
+        "parameters": {},
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-01-26T17:47:02.796Z",
+  "summary": "Arcade's Zendesk toolkit enables seamless integration with Zendesk's customer service platform, allowing developers to interact with tickets and knowledge base articles efficiently.\n\n**Capabilities**  \n- Retrieve and manage ticket comments and statuses.  \n- List and paginate through tickets for dynamic retrieval.  \n- Search for Help Center articles using various parameters.  \n- Fetch comprehensive user profiles and account information.  \n\n**OAuth**  \n- Auth Type: OAuth2  \n- Provider: Unknown  \n- Scopes: read, tickets:write  \n\n**Secrets**  \n- Secret types: unknown, api_key  \n- Example: ZENDESK_SUBDOMAIN  "
+}

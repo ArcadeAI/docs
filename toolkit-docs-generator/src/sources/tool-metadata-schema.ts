@@ -114,7 +114,8 @@ export const transformToolMetadataItem = (
   auth: apiTool.requirements?.authorization
     ? {
         providerId: apiTool.requirements.authorization.provider_id ?? null,
-        providerType: apiTool.requirements.authorization.provider_type ?? "unknown",
+        providerType:
+          apiTool.requirements.authorization.provider_type ?? "unknown",
         scopes: apiTool.requirements.authorization.scopes ?? [],
       }
     : null,

@@ -1,0 +1,1558 @@
+{
+  "id": "Asana",
+  "label": "Asana",
+  "version": "0.1.3",
+  "description": "Arcade tools designed for LLMs to interact with Asana",
+  "metadata": {
+    "category": "development",
+    "iconUrl": "https://design-system.arcade.dev/icons/asana.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/development/asana",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": "asana",
+    "allScopes": [
+      "default"
+    ]
+  },
+  "tools": [
+    {
+      "name": "AttachFileToTask",
+      "qualifiedName": "Asana.AttachFileToTask",
+      "fullyQualifiedName": "Asana.AttachFileToTask@0.1.3",
+      "description": "Attaches a file to an Asana task\n\nProvide exactly one of file_content_str, file_content_base64, or file_content_url, never more\nthan one.\n\n- Use file_content_str for text files (will be encoded using file_encoding)\n- Use file_content_base64 for binary files like images, PDFs, etc.\n- Use file_content_url if the file is hosted on an external URL",
+      "parameters": [
+        {
+          "name": "task_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the task to attach the file to.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "file_name",
+          "type": "string",
+          "required": true,
+          "description": "The name of the file to attach with format extension. E.g. 'Image.png' or 'Report.pdf'.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "file_content_str",
+          "type": "string",
+          "required": false,
+          "description": "The string contents of the file to attach. Use this if the file is a text file. Defaults to None.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "file_content_base64",
+          "type": "string",
+          "required": false,
+          "description": "The base64-encoded binary contents of the file. Use this for binary files like images or PDFs. Defaults to None.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "file_content_url",
+          "type": "string",
+          "required": false,
+          "description": "The URL of the file to attach. Use this if the file is hosted on an external URL. Defaults to None.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "file_encoding",
+          "type": "string",
+          "required": false,
+          "description": "The encoding of the file to attach. Only used with file_content_str. Defaults to 'utf-8'.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "asana",
+        "providerType": "oauth2",
+        "scopes": [
+          "default"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The task with the file attached."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Asana.AttachFileToTask",
+        "parameters": {
+          "task_id": {
+            "value": "123456789",
+            "type": "string",
+            "required": true
+          },
+          "file_name": {
+            "value": "Document.pdf",
+            "type": "string",
+            "required": true
+          },
+          "file_content_str": {
+            "value": null,
+            "type": "string",
+            "required": false
+          },
+          "file_content_base64": {
+            "value": "dGVzdGJhc2U2NA==",
+            "type": "string",
+            "required": false
+          },
+          "file_content_url": {
+            "value": null,
+            "type": "string",
+            "required": false
+          },
+          "file_encoding": {
+            "value": "utf-8",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "asana",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateTag",
+      "qualifiedName": "Asana.CreateTag",
+      "fullyQualifiedName": "Asana.CreateTag@0.1.3",
+      "description": "Create a tag in Asana",
+      "parameters": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "description": "The name of the tag to create. Length must be between 1 and 100.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "The description of the tag to create. Defaults to None (no description).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "color",
+          "type": "string",
+          "required": false,
+          "description": "The color of the tag to create. Defaults to None (no color).",
+          "enum": [
+            "dark-green",
+            "dark-red",
+            "dark-blue",
+            "dark-purple",
+            "dark-pink",
+            "dark-orange",
+            "dark-teal",
+            "dark-brown",
+            "dark-warm-gray",
+            "light-green",
+            "light-red",
+            "light-blue",
+            "light-purple",
+            "light-pink",
+            "light-orange",
+            "light-teal",
+            "light-brown",
+            "light-warm-gray"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "workspace_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the workspace to create the tag in. If not provided, it will associated the tag to a current workspace, if there's only one. Otherwise, it will raise an error.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "asana",
+        "providerType": "oauth2",
+        "scopes": [
+          "default"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The created tag."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Asana.CreateTag",
+        "parameters": {
+          "name": {
+            "value": "Project Planning",
+            "type": "string",
+            "required": true
+          },
+          "description": {
+            "value": "Tag for project planning tasks",
+            "type": "string",
+            "required": false
+          },
+          "color": {
+            "value": "red",
+            "type": "string",
+            "required": false
+          },
+          "workspace_id": {
+            "value": "123456789",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "asana",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateTask",
+      "qualifiedName": "Asana.CreateTask",
+      "fullyQualifiedName": "Asana.CreateTask@0.1.3",
+      "description": "Creates a task in Asana\n\nThe task must be associated to at least one of the following: parent_task_id, project, or\nworkspace_id. If none of these are provided and the account has only one workspace, the task\nwill be associated to that workspace. If the account has multiple workspaces, an error will\nbe raised with a list of available workspaces.",
+      "parameters": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "description": "The name of the task",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "start_date",
+          "type": "string",
+          "required": false,
+          "description": "The start date of the task in the format YYYY-MM-DD. Example: '2025-01-01'. Defaults to None.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "due_date",
+          "type": "string",
+          "required": false,
+          "description": "The due date of the task in the format YYYY-MM-DD. Example: '2025-01-01'. Defaults to None.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "The description of the task. Defaults to None.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "parent_task_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the parent task. Defaults to None.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "workspace_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the workspace to associate the task to. Defaults to None.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "project",
+          "type": "string",
+          "required": false,
+          "description": "The ID or name of the project to associate the task to. Defaults to None.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "assignee_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the user to assign the task to. Defaults to 'me', which assigns the task to the current user.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "tags",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The tags to associate with the task. Multiple tags can be provided in the list. Each item in the list can be a tag name (e.g. 'My Tag') or a tag ID (e.g. '1234567890'). If a tag name does not exist, it will be automatically created with the new task. Defaults to None (no tags associated).",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "asana",
+        "providerType": "oauth2",
+        "scopes": [
+          "default"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Creates a task in Asana"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Asana.CreateTask",
+        "parameters": {
+          "name": {
+            "value": "Design New Logo",
+            "type": "string",
+            "required": true
+          },
+          "start_date": {
+            "value": "2023-11-10",
+            "type": "string",
+            "required": false
+          },
+          "due_date": {
+            "value": "2023-11-20",
+            "type": "string",
+            "required": false
+          },
+          "description": {
+            "value": "Create a design for the new corporate logo.",
+            "type": "string",
+            "required": false
+          },
+          "parent_task_id": {
+            "value": null,
+            "type": "string",
+            "required": false
+          },
+          "workspace_id": {
+            "value": "9876543210",
+            "type": "string",
+            "required": false
+          },
+          "project": {
+            "value": "Marketing Campaign",
+            "type": "string",
+            "required": false
+          },
+          "assignee_id": {
+            "value": "me",
+            "type": "string",
+            "required": false
+          },
+          "tags": {
+            "value": [
+              "Design",
+              "Urgent"
+            ],
+            "type": "array",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "asana",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetProjectById",
+      "qualifiedName": "Asana.GetProjectById",
+      "fullyQualifiedName": "Asana.GetProjectById@0.1.3",
+      "description": "Get an Asana project by its ID",
+      "parameters": [
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the project.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "asana",
+        "providerType": "oauth2",
+        "scopes": [
+          "default"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Get a project by its ID"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Asana.GetProjectById",
+        "parameters": {
+          "project_id": {
+            "value": "1234567890",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "asana",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetSubtasksFromATask",
+      "qualifiedName": "Asana.GetSubtasksFromATask",
+      "fullyQualifiedName": "Asana.GetSubtasksFromATask@0.1.3",
+      "description": "Get the subtasks of a task",
+      "parameters": [
+        {
+          "name": "task_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the task to get the subtasks of.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of subtasks to return. Min of 1, max of 100. Defaults to 100.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "next_page_token",
+          "type": "string",
+          "required": false,
+          "description": "The token to retrieve the next page of subtasks. Defaults to None (start from the first page of subtasks)",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "asana",
+        "providerType": "oauth2",
+        "scopes": [
+          "default"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The subtasks of the task."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Asana.GetSubtasksFromATask",
+        "parameters": {
+          "task_id": {
+            "value": "1234567890",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "next_page_token": {
+            "value": "abc123xyz",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "asana",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetTagById",
+      "qualifiedName": "Asana.GetTagById",
+      "fullyQualifiedName": "Asana.GetTagById@0.1.3",
+      "description": "Get an Asana tag by its ID",
+      "parameters": [
+        {
+          "name": "tag_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the Asana tag to get",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "asana",
+        "providerType": "oauth2",
+        "scopes": [
+          "default"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Get an Asana tag by its ID"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Asana.GetTagById",
+        "parameters": {
+          "tag_id": {
+            "value": "12345",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "asana",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetTaskById",
+      "qualifiedName": "Asana.GetTaskById",
+      "fullyQualifiedName": "Asana.GetTaskById@0.1.3",
+      "description": "Get a task by its ID",
+      "parameters": [
+        {
+          "name": "task_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the task to get.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "max_subtasks",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of subtasks to return. Min of 0 (no subtasks), max of 100. Defaults to 100.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "asana",
+        "providerType": "oauth2",
+        "scopes": [
+          "default"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The task with the given ID."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Asana.GetTaskById",
+        "parameters": {
+          "task_id": {
+            "value": "1234567890",
+            "type": "string",
+            "required": true
+          },
+          "max_subtasks": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "asana",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetTasksWithoutId",
+      "qualifiedName": "Asana.GetTasksWithoutId",
+      "fullyQualifiedName": "Asana.GetTasksWithoutId@0.1.3",
+      "description": "Search for tasks",
+      "parameters": [
+        {
+          "name": "keywords",
+          "type": "string",
+          "required": false,
+          "description": "Keywords to search for tasks. Matches against the task name and description.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "workspace_id",
+          "type": "string",
+          "required": false,
+          "description": "The workspace ID to search for tasks. Defaults to None. If not provided and the user has only one workspace, it will use that workspace. If not provided and the user has multiple workspaces, it will raise an error listing the available workspaces.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "assignee_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the user to filter tasks assigned to. Defaults to None (does not filter by assignee).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "project",
+          "type": "string",
+          "required": false,
+          "description": "The ID or name of the project to filter tasks. Defaults to None (searches tasks associated to any project or no project).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "team_id",
+          "type": "string",
+          "required": false,
+          "description": "Restricts the search to tasks associated to the given team ID. Defaults to None (searches tasks associated to any team).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "tags",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Restricts the search to tasks associated to the given tags. Each item in the list can be a tag name (e.g. 'My Tag') or a tag ID (e.g. '1234567890'). Defaults to None (searches tasks associated to any tag or no tag).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "due_on",
+          "type": "string",
+          "required": false,
+          "description": "Match tasks that are due exactly on this date. Format: YYYY-MM-DD. Ex: '2025-01-01'. Defaults to None (searches tasks due on any date or without a due date).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "due_on_or_after",
+          "type": "string",
+          "required": false,
+          "description": "Match tasks that are due on OR AFTER this date. Format: YYYY-MM-DD. Ex: '2025-01-01' Defaults to None (searches tasks due on any date or without a due date).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "due_on_or_before",
+          "type": "string",
+          "required": false,
+          "description": "Match tasks that are due on OR BEFORE this date. Format: YYYY-MM-DD. Ex: '2025-01-01' Defaults to None (searches tasks due on any date or without a due date).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "start_on",
+          "type": "string",
+          "required": false,
+          "description": "Match tasks that started on this date. Format: YYYY-MM-DD. Ex: '2025-01-01'. Defaults to None (searches tasks started on any date or without a start date).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "start_on_or_after",
+          "type": "string",
+          "required": false,
+          "description": "Match tasks that started on OR AFTER this date. Format: YYYY-MM-DD. Ex: '2025-01-01' Defaults to None (searches tasks started on any date or without a start date).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "start_on_or_before",
+          "type": "string",
+          "required": false,
+          "description": "Match tasks that started on OR BEFORE this date. Format: YYYY-MM-DD. Ex: '2025-01-01' Defaults to None (searches tasks started on any date or without a start date).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "completed",
+          "type": "boolean",
+          "required": false,
+          "description": "Match tasks that are completed. Defaults to None (does not filter by completion status).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of tasks to return. Min of 1, max of 100. Defaults to 100.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "sort_by",
+          "type": "string",
+          "required": false,
+          "description": "The field to sort the tasks by. Defaults to TaskSortBy.MODIFIED_AT.",
+          "enum": [
+            "due_date",
+            "created_at",
+            "completed_at",
+            "modified_at",
+            "likes"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "sort_order",
+          "type": "string",
+          "required": false,
+          "description": "The order to sort the tasks by. Defaults to SortOrder.DESCENDING.",
+          "enum": [
+            "ascending",
+            "descending"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "asana",
+        "providerType": "oauth2",
+        "scopes": [
+          "default"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The tasks that match the query."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Asana.GetTasksWithoutId",
+        "parameters": {
+          "keywords": {
+            "value": "project launch",
+            "type": "string",
+            "required": false
+          },
+          "workspace_id": {
+            "value": "987654321",
+            "type": "string",
+            "required": false
+          },
+          "assignee_id": {
+            "value": "12345678",
+            "type": "string",
+            "required": false
+          },
+          "project": {
+            "value": "Development",
+            "type": "string",
+            "required": false
+          },
+          "team_id": {
+            "value": "654321",
+            "type": "string",
+            "required": false
+          },
+          "tags": {
+            "value": [
+              "priority",
+              "1234567890"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "due_on": {
+            "value": "2023-12-01",
+            "type": "string",
+            "required": false
+          },
+          "due_on_or_after": {
+            "value": "2023-11-01",
+            "type": "string",
+            "required": false
+          },
+          "due_on_or_before": {
+            "value": "2023-11-30",
+            "type": "string",
+            "required": false
+          },
+          "start_on": {
+            "value": "2023-10-01",
+            "type": "string",
+            "required": false
+          },
+          "start_on_or_after": {
+            "value": "2023-09-01",
+            "type": "string",
+            "required": false
+          },
+          "start_on_or_before": {
+            "value": "2023-09-30",
+            "type": "string",
+            "required": false
+          },
+          "completed": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "sort_by": {
+            "value": "created_at",
+            "type": "string",
+            "required": false
+          },
+          "sort_order": {
+            "value": "ascending",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "asana",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetTeamById",
+      "qualifiedName": "Asana.GetTeamById",
+      "fullyQualifiedName": "Asana.GetTeamById@0.1.3",
+      "description": "Get an Asana team by its ID",
+      "parameters": [
+        {
+          "name": "team_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the Asana team to get",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "asana",
+        "providerType": "oauth2",
+        "scopes": [
+          "default"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Get an Asana team by its ID"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Asana.GetTeamById",
+        "parameters": {
+          "team_id": {
+            "value": "1234567890",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "asana",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetUserById",
+      "qualifiedName": "Asana.GetUserById",
+      "fullyQualifiedName": "Asana.GetUserById@0.1.3",
+      "description": "Get a user by ID",
+      "parameters": [
+        {
+          "name": "user_id",
+          "type": "string",
+          "required": true,
+          "description": "The user ID to get.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "asana",
+        "providerType": "oauth2",
+        "scopes": [
+          "default"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The user information."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Asana.GetUserById",
+        "parameters": {
+          "user_id": {
+            "value": "1234567890",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "asana",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetWorkspaceById",
+      "qualifiedName": "Asana.GetWorkspaceById",
+      "fullyQualifiedName": "Asana.GetWorkspaceById@0.1.3",
+      "description": "Get an Asana workspace by its ID",
+      "parameters": [
+        {
+          "name": "workspace_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the Asana workspace to get",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "asana",
+        "providerType": "oauth2",
+        "scopes": [
+          "default"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Get an Asana workspace by its ID"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Asana.GetWorkspaceById",
+        "parameters": {
+          "workspace_id": {
+            "value": "123456789",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "asana",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListProjects",
+      "qualifiedName": "Asana.ListProjects",
+      "fullyQualifiedName": "Asana.ListProjects@0.1.3",
+      "description": "List projects in Asana",
+      "parameters": [
+        {
+          "name": "team_id",
+          "type": "string",
+          "required": false,
+          "description": "The team ID to get projects from. Defaults to None (does not filter by team).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "workspace_id",
+          "type": "string",
+          "required": false,
+          "description": "The workspace ID to get projects from. Defaults to None. If not provided and the user has only one workspace, it will use that workspace. If not provided and the user has multiple workspaces, it will raise an error listing the available workspaces.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of projects to return. Min is 1, max is 100. Defaults to 100.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "next_page_token",
+          "type": "string",
+          "required": false,
+          "description": "The token to retrieve the next page of projects. Defaults to None (start from the first page of projects).",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "asana",
+        "providerType": "oauth2",
+        "scopes": [
+          "default"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "List projects in Asana associated to teams the current user is a member of"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Asana.ListProjects",
+        "parameters": {
+          "team_id": {
+            "value": "12345",
+            "type": "string",
+            "required": false
+          },
+          "workspace_id": {
+            "value": "67890",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "next_page_token": {
+            "value": "abcdef",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "asana",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListTags",
+      "qualifiedName": "Asana.ListTags",
+      "fullyQualifiedName": "Asana.ListTags@0.1.3",
+      "description": "List tags in an Asana workspace",
+      "parameters": [
+        {
+          "name": "workspace_id",
+          "type": "string",
+          "required": false,
+          "description": "The workspace ID to retrieve tags from. Defaults to None. If not provided and the user has only one workspace, it will use that workspace. If not provided and the user has multiple workspaces, it will raise an error listing the available workspaces.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of tags to return. Min is 1, max is 100. Defaults to 100.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "next_page_token",
+          "type": "string",
+          "required": false,
+          "description": "The token to retrieve the next page of tags. Defaults to None (start from the first page of tags)",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "asana",
+        "providerType": "oauth2",
+        "scopes": [
+          "default"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "List tags in an Asana workspace"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Asana.ListTags",
+        "parameters": {
+          "workspace_id": {
+            "value": "1234567890",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "next_page_token": {
+            "value": "abc123",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "asana",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListTeams",
+      "qualifiedName": "Asana.ListTeams",
+      "fullyQualifiedName": "Asana.ListTeams@0.1.3",
+      "description": "List teams in an Asana workspace",
+      "parameters": [
+        {
+          "name": "workspace_id",
+          "type": "string",
+          "required": false,
+          "description": "The workspace ID to list teams from. Defaults to None. If no workspace ID is provided, it will use the current user's workspace, if there's only one. If the user has multiple workspaces, it will raise an error listing the available workspaces.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of teams to return. Min is 1, max is 100. Defaults to 100.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "next_page_token",
+          "type": "string",
+          "required": false,
+          "description": "The token to retrieve the next page of teams. Defaults to None (start from the first page of teams)",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "asana",
+        "providerType": "oauth2",
+        "scopes": [
+          "default"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "List teams in an Asana workspace"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Asana.ListTeams",
+        "parameters": {
+          "workspace_id": {
+            "value": "1200123456789",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "next_page_token": {
+            "value": "eyJjdXJzb3IiOiJiYWNrIn0",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "asana",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListTeamsTheCurrentUserIsAMemberOf",
+      "qualifiedName": "Asana.ListTeamsTheCurrentUserIsAMemberOf",
+      "fullyQualifiedName": "Asana.ListTeamsTheCurrentUserIsAMemberOf@0.1.3",
+      "description": "List teams in Asana that the current user is a member of",
+      "parameters": [
+        {
+          "name": "workspace_id",
+          "type": "string",
+          "required": false,
+          "description": "The workspace ID to list teams from. Defaults to None. If no workspace ID is provided, it will use the current user's workspace , if there's only one. If the user has multiple workspaces, it will raise an error.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of teams to return. Min is 1, max is 100. Defaults to 100.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "next_page_token",
+          "type": "string",
+          "required": false,
+          "description": "The token to retrieve the next page of teams. Defaults to None (start from the first page of teams)",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "asana",
+        "providerType": "oauth2",
+        "scopes": [
+          "default"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "List teams in Asana that the current user is a member of"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Asana.ListTeamsTheCurrentUserIsAMemberOf",
+        "parameters": {
+          "workspace_id": {
+            "value": "123456789",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "next_page_token": {
+            "value": "abcdef123456",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "asana",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListUsers",
+      "qualifiedName": "Asana.ListUsers",
+      "fullyQualifiedName": "Asana.ListUsers@0.1.3",
+      "description": "List users in Asana",
+      "parameters": [
+        {
+          "name": "workspace_id",
+          "type": "string",
+          "required": false,
+          "description": "The workspace ID to list users from. Defaults to None. If no workspace ID is provided, it will use the current user's workspace , if there's only one. If the user has multiple workspaces, it will raise an error.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of users to retrieve. Min is 1, max is 100. Defaults to 100.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "next_page_token",
+          "type": "string",
+          "required": false,
+          "description": "The token to retrieve the next page of users. Defaults to None (start from the first page of users)",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "asana",
+        "providerType": "oauth2",
+        "scopes": [
+          "default"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "List users in Asana"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Asana.ListUsers",
+        "parameters": {
+          "workspace_id": {
+            "value": "1234567890",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "next_page_token": {
+            "value": "abc123",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "asana",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListWorkspaces",
+      "qualifiedName": "Asana.ListWorkspaces",
+      "fullyQualifiedName": "Asana.ListWorkspaces@0.1.3",
+      "description": "List workspaces in Asana that are visible to the authenticated user",
+      "parameters": [
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of workspaces to return. Min is 1, max is 100. Defaults to 100.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "next_page_token",
+          "type": "string",
+          "required": false,
+          "description": "The token to retrieve the next page of workspaces. Defaults to None (start from the first page of workspaces)",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "asana",
+        "providerType": "oauth2",
+        "scopes": [
+          "default"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "List workspaces in Asana that are visible to the authenticated user"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Asana.ListWorkspaces",
+        "parameters": {
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "next_page_token": {
+            "value": "abc123",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "asana",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "MarkTaskAsCompleted",
+      "qualifiedName": "Asana.MarkTaskAsCompleted",
+      "fullyQualifiedName": "Asana.MarkTaskAsCompleted@0.1.3",
+      "description": "Mark a task in Asana as completed",
+      "parameters": [
+        {
+          "name": "task_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the task to mark as completed.",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "asana",
+        "providerType": "oauth2",
+        "scopes": [
+          "default"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The task marked as completed."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Asana.MarkTaskAsCompleted",
+        "parameters": {
+          "task_id": {
+            "value": "1234567890",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "asana",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "UpdateTask",
+      "qualifiedName": "Asana.UpdateTask",
+      "fullyQualifiedName": "Asana.UpdateTask@0.1.3",
+      "description": "Updates a task in Asana",
+      "parameters": [
+        {
+          "name": "task_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the task to update.",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "The new name of the task. Defaults to None (does not change the current name).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "completed",
+          "type": "boolean",
+          "required": false,
+          "description": "The new completion status of the task. Provide True to mark the task as completed, False to mark it as not completed. Defaults to None (does not change the current completion status).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "start_date",
+          "type": "string",
+          "required": false,
+          "description": "The new start date of the task in the format YYYY-MM-DD. Example: '2025-01-01'. Defaults to None (does not change the current start date).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "due_date",
+          "type": "string",
+          "required": false,
+          "description": "The new due date of the task in the format YYYY-MM-DD. Example: '2025-01-01'. Defaults to None (does not change the current due date).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "The new description of the task. Defaults to None (does not change the current description).",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "assignee_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the new user to assign the task to. Provide 'me' to assign the task to the current user. Defaults to None (does not change the current assignee).",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "asana",
+        "providerType": "oauth2",
+        "scopes": [
+          "default"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Updates a task in Asana"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Asana.UpdateTask",
+        "parameters": {
+          "task_id": {
+            "value": "1234567890",
+            "type": "string",
+            "required": true
+          },
+          "name": {
+            "value": "Update Project Plan",
+            "type": "string",
+            "required": false
+          },
+          "completed": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "start_date": {
+            "value": "2025-08-01",
+            "type": "string",
+            "required": false
+          },
+          "due_date": {
+            "value": "2025-09-01",
+            "type": "string",
+            "required": false
+          },
+          "description": {
+            "value": "Finalize updates to the project plan.",
+            "type": "string",
+            "required": false
+          },
+          "assignee_id": {
+            "value": "me",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "asana",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-01-23T18:49:41.022Z"
+}

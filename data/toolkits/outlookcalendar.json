@@ -1,0 +1,323 @@
+{
+  "id": "OutlookCalendar",
+  "label": "OutlookCalendar",
+  "version": "2.2.1",
+  "description": "rcade.dev LLM tools for Outlook Calendar",
+  "metadata": {
+    "category": "development",
+    "iconUrl": "https://design-system.arcade.dev/icons/outlookcalendar.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/development/outlookcalendar",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": "microsoft",
+    "allScopes": [
+      "Calendars.ReadBasic",
+      "Calendars.ReadWrite",
+      "MailboxSettings.Read",
+      "User.Read"
+    ]
+  },
+  "tools": [
+    {
+      "name": "CreateEvent",
+      "qualifiedName": "OutlookCalendar.CreateEvent",
+      "fullyQualifiedName": "OutlookCalendar.CreateEvent@2.2.1",
+      "description": "Create an event in the authenticated user's default calendar.\n\nIgnores timezone offsets provided in the start_date_time and end_date_time parameters.\nInstead, uses the user's default calendar timezone to filter events.\nIf the user has not set a timezone for their calendar, then the timezone will be UTC.",
+      "parameters": [
+        {
+          "name": "subject",
+          "type": "string",
+          "required": true,
+          "description": "The text of the event's subject (title) line.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "required": true,
+          "description": "The body of the event",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_date_time",
+          "type": "string",
+          "required": true,
+          "description": "The datetime of the event's start, represented in ISO 8601 format. Timezone offset is ignored. For example, 2025-04-25T13:00:00",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_date_time",
+          "type": "string",
+          "required": true,
+          "description": "The datetime of the event's end, represented in ISO 8601 format. Timezone offset is ignored. For example, 2025-04-25T13:30:00",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "location",
+          "type": "string",
+          "required": false,
+          "description": "The location of the event",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "attendee_emails",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The email addresses of the attendees of the event. Must be valid email addresses e.g., username@domain.com.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "is_online_meeting",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether the event is an online meeting. Defaults to False",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "custom_meeting_url",
+          "type": "string",
+          "required": false,
+          "description": "The URL of the online meeting. If not provided and is_online_meeting is True, then a url will be generated for you",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "MailboxSettings.Read",
+          "Calendars.ReadWrite"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing the created event details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "OutlookCalendar.CreateEvent",
+        "parameters": {
+          "subject": {
+            "value": "Team Sync Meeting",
+            "type": "string",
+            "required": true
+          },
+          "body": {
+            "value": "Discuss project updates and next steps.",
+            "type": "string",
+            "required": true
+          },
+          "start_date_time": {
+            "value": "2025-04-25T13:00:00",
+            "type": "string",
+            "required": true
+          },
+          "end_date_time": {
+            "value": "2025-04-25T14:00:00",
+            "type": "string",
+            "required": true
+          },
+          "location": {
+            "value": "Meeting Room A",
+            "type": "string",
+            "required": false
+          },
+          "attendee_emails": {
+            "value": [
+              "john.doe@example.com",
+              "jane.smith@example.com"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "is_online_meeting": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "custom_meeting_url": {
+            "value": "https://example.com/meeting/12345",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetEvent",
+      "qualifiedName": "OutlookCalendar.GetEvent",
+      "fullyQualifiedName": "OutlookCalendar.GetEvent@2.2.1",
+      "description": "Get an event by its ID from the user's calendar.",
+      "parameters": [
+        {
+          "name": "event_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the event to get",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "MailboxSettings.Read",
+          "Calendars.ReadBasic"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing the event details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "OutlookCalendar.GetEvent",
+        "parameters": {
+          "event_id": {
+            "value": "abc123xyz",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListEventsInTimeRange",
+      "qualifiedName": "OutlookCalendar.ListEventsInTimeRange",
+      "fullyQualifiedName": "OutlookCalendar.ListEventsInTimeRange@2.2.1",
+      "description": "List events in the user's calendar in a specific time range.\n\nIgnores timezone offsets provided in the start_date_time and end_date_time parameters.\nInstead, uses the user's default calendar timezone to filter events.\nIf the user has not set a timezone for their calendar, then the timezone will be UTC.",
+      "parameters": [
+        {
+          "name": "start_date_time",
+          "type": "string",
+          "required": true,
+          "description": "The start date and time of the time range, represented in ISO 8601 format. Timezone offset is ignored. For example, 2025-04-24T19:00:00",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_date_time",
+          "type": "string",
+          "required": true,
+          "description": "The end date and time of the time range, represented in ISO 8601 format. Timezone offset is ignored. For example, 2025-04-24T19:30:00",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of events to return. Max 1000. Defaults to 10",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "MailboxSettings.Read",
+          "Calendars.ReadBasic"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing a list of events"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "OutlookCalendar.ListEventsInTimeRange",
+        "parameters": {
+          "start_date_time": {
+            "value": "2025-04-24T09:00:00",
+            "type": "string",
+            "required": true
+          },
+          "end_date_time": {
+            "value": "2025-04-24T17:00:00",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 15,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "OutlookCalendar.WhoAmI",
+      "fullyQualifiedName": "OutlookCalendar.WhoAmI@2.2.1",
+      "description": "Get information about the current user and their Outlook Calendar environment.",
+      "parameters": [],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "User.Read",
+          "Calendars.ReadBasic"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Get comprehensive user profile and Outlook Calendar information."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "OutlookCalendar.WhoAmI",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    }
+  ],
+  "documentationChunks": [
+    {
+      "type": "markdown",
+      "location": "auth",
+      "position": "after",
+      "content": "## Auth\n\n<Callout type=\"info\">\nThe Arcade Outlook Calendar MCP Server uses the [Microsoft auth provider](/references/auth-providers/microsoft) to connect to users' Microsoft accounts.\n</Callout>",
+      "header": "## Auth"
+    }
+  ],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-01-26T17:38:10.447Z",
+  "summary": "Arcade Toolkit for Outlook Calendar provides developers with powerful integrations utilizing Microsoft’s OAuth2 authentication. This toolkit empowers users to proficiently manage calendar events and retrieve user details.\n\n**Capabilities**\n- Create and manage calendar events seamlessly in users' default calendar.\n- Retrieve detailed event information by event ID.\n- List events occurring within specified time ranges, taking into account default calendar time zones.\n- Access current user information and their Outlook Calendar environment effortlessly.\n\n**OAuth**\n- Provider: Microsoft\n- Scopes: Calendars.ReadBasic, Calendars.ReadWrite, MailboxSettings.Read, User.Read"
+}

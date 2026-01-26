@@ -1,0 +1,2312 @@
+{
+  "id": "Clickup",
+  "label": "Clickup",
+  "version": "1.1.1",
+  "description": "Arcade.dev LLM tools for interacting with ClickUp",
+  "metadata": {
+    "category": "development",
+    "iconUrl": "https://design-system.arcade.dev/icons/clickup.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/development/clickup",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": "clickup",
+    "allScopes": []
+  },
+  "tools": [
+    {
+      "name": "CreateTask",
+      "qualifiedName": "Clickup.CreateTask",
+      "fullyQualifiedName": "Clickup.CreateTask@1.1.1",
+      "description": "Create a new task in a ClickUp list with optional planning metadata.\n\nUse this tool when you want to add a task to a specific list and optionally set\nits initial status, priority, scheduling information, and hierarchy.",
+      "parameters": [
+        {
+          "name": "list_id",
+          "type": "string",
+          "required": true,
+          "description": "The ClickUp list ID where the task will be created",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "task_title",
+          "type": "string",
+          "required": true,
+          "description": "The name/title of the task",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "The description/content of the task",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "priority",
+          "type": "string",
+          "required": false,
+          "description": "Task priority",
+          "enum": [
+            "URGENT",
+            "HIGH",
+            "NORMAL",
+            "LOW"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "description": "Task status label (string)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "parent_task_id",
+          "type": "string",
+          "required": false,
+          "description": "The parent task ID if this is a subtask",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_date",
+          "type": "string",
+          "required": false,
+          "description": "Date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS]; ISO-8601 also supported",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "due_date",
+          "type": "string",
+          "required": false,
+          "description": "Date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS]; ISO-8601 also supported",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sprint_points",
+          "type": "integer",
+          "required": false,
+          "description": "The sprint points for the task",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "clickup",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Details of the created task"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Clickup.CreateTask",
+        "parameters": {
+          "list_id": {
+            "value": "12345",
+            "type": "string",
+            "required": true
+          },
+          "task_title": {
+            "value": "Implement API Integration",
+            "type": "string",
+            "required": true
+          },
+          "description": {
+            "value": "Develop and integrate the new API feature for the application.",
+            "type": "string",
+            "required": false
+          },
+          "priority": {
+            "value": "high",
+            "type": "string",
+            "required": false
+          },
+          "status": {
+            "value": "in progress",
+            "type": "string",
+            "required": false
+          },
+          "parent_task_id": {
+            "value": "67890",
+            "type": "string",
+            "required": false
+          },
+          "start_date": {
+            "value": "2023-10-01T09:00:00",
+            "type": "string",
+            "required": false
+          },
+          "due_date": {
+            "value": "2023-10-15T17:00:00",
+            "type": "string",
+            "required": false
+          },
+          "sprint_points": {
+            "value": 5,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "clickup",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateTaskComment",
+      "qualifiedName": "Clickup.CreateTaskComment",
+      "fullyQualifiedName": "Clickup.CreateTaskComment@1.1.1",
+      "description": "Create a new comment on a ClickUp task with optional assignment.\n\nUse this tool to add text comments to tasks. You can optionally assign\nthe comment to a specific user for follow-up.",
+      "parameters": [
+        {
+          "name": "task_id",
+          "type": "string",
+          "required": true,
+          "description": "The ClickUp task ID to add a comment to",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "comment_text",
+          "type": "string",
+          "required": true,
+          "description": "The text content of the comment",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "assignee_id",
+          "type": "integer",
+          "required": false,
+          "description": "User ID to assign the comment to (optional)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "clickup",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Details of the created comment"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Clickup.CreateTaskComment",
+        "parameters": {
+          "task_id": {
+            "value": "12345",
+            "type": "string",
+            "required": true
+          },
+          "comment_text": {
+            "value": "Please review the latest updates on this task.",
+            "type": "string",
+            "required": true
+          },
+          "assignee_id": {
+            "value": 678,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "clickup",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateTaskCommentReply",
+      "qualifiedName": "Clickup.CreateTaskCommentReply",
+      "fullyQualifiedName": "Clickup.CreateTaskCommentReply@1.1.1",
+      "description": "Create a new threaded reply to an existing ClickUp comment.\n\nUse this tool to add threaded replies to comments, creating conversation threads.\nYou can optionally assign the reply to a specific user for follow-up.",
+      "parameters": [
+        {
+          "name": "comment_id",
+          "type": "string",
+          "required": true,
+          "description": "The ClickUp comment ID to reply to",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "reply_text",
+          "type": "string",
+          "required": true,
+          "description": "The text content of the reply",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "assignee_id",
+          "type": "integer",
+          "required": false,
+          "description": "User ID to assign the reply to",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "clickup",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Details of the created reply"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Clickup.CreateTaskCommentReply",
+        "parameters": {
+          "comment_id": {
+            "value": "123456",
+            "type": "string",
+            "required": true
+          },
+          "reply_text": {
+            "value": "Thank you for the insights, I appreciate your input!",
+            "type": "string",
+            "required": true
+          },
+          "assignee_id": {
+            "value": 789,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "clickup",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "FuzzySearchFoldersByName",
+      "qualifiedName": "Clickup.FuzzySearchFoldersByName",
+      "fullyQualifiedName": "Clickup.FuzzySearchFoldersByName@1.1.1",
+      "description": "Search for folders using fuzzy matching on folder names.\n\nThis tool should ONLY be used when you cannot find the desired folder through normal context\nor direct searches. It performs fuzzy matching against folder names and returns simplified\nfolder information. Use other ClickUp tools to get full folder details or work with the folders.\n\nThis tool is also useful to avoid navigating through the ClickUp hierarchy tree\nwhen you know approximately what folder/project you're looking for\nbut don't know its exact location in the hierarchy.\n\nIn ClickUp, folders are also known as projects and serve as organizational containers for lists.\nReturns folders that match the name_to_search with match scores indicating relevance\n(1.0 = perfect match, lower scores = less relevant matches).",
+      "parameters": [
+        {
+          "name": "name_to_search",
+          "type": "string",
+          "required": true,
+          "description": "Folder name to search for (minimum 2 characters)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "workspace_id",
+          "type": "string",
+          "required": true,
+          "description": "The workspace ID to search folders in (should be a number)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "scan_size",
+          "type": "integer",
+          "required": false,
+          "description": "Number of folders to scan (in increments of 100, max 500 default: 500)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "space_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Filter by ClickUp space IDs - limit search to specific spaces/teams",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "should_include_archived",
+          "type": "boolean",
+          "required": false,
+          "description": "Include archived folders (default: false)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of matches to return (max: 50, default: 10)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "clickup",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Fuzzy search results for folders"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Clickup.FuzzySearchFoldersByName",
+        "parameters": {
+          "name_to_search": {
+            "value": "Marketing",
+            "type": "string",
+            "required": true
+          },
+          "workspace_id": {
+            "value": "123456",
+            "type": "string",
+            "required": true
+          },
+          "scan_size": {
+            "value": 300,
+            "type": "integer",
+            "required": false
+          },
+          "space_ids": {
+            "value": [
+              "101",
+              "102"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "should_include_archived": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "clickup",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "FuzzySearchListsByName",
+      "qualifiedName": "Clickup.FuzzySearchListsByName",
+      "fullyQualifiedName": "Clickup.FuzzySearchListsByName@1.1.1",
+      "description": "Search for lists using fuzzy matching on list names.\n\nThis tool should ONLY be used when you cannot find the desired list through normal context\nor direct searches. It performs fuzzy matching against list names and returns simplified\nlist information. Use other ClickUp tools to get full list details or work with the lists.\n\nThis tool is also useful to avoid navigating through the ClickUp hierarchy tree\nwhen you know approximately what list you're looking for\nbut don't know its exact location in the hierarchy.\n\nReturns lists that match the name_to_search with match scores indicating relevance\n(1.0 = perfect match, lower scores = less relevant matches).",
+      "parameters": [
+        {
+          "name": "name_to_search",
+          "type": "string",
+          "required": true,
+          "description": "List name to search for (minimum 2 characters)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "workspace_id",
+          "type": "string",
+          "required": true,
+          "description": "The workspace ID to search lists in (should be a number)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "scan_size",
+          "type": "integer",
+          "required": false,
+          "description": "Number of lists to scan (in increments of 100, max 500 default: 500)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "space_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Filter by ClickUp space IDs - limit search to specific spaces/teams",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "folder_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Filter by ClickUp folder IDs - limit search to specific folders/projects",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "should_include_archived",
+          "type": "boolean",
+          "required": false,
+          "description": "Include archived lists (default: false)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of matches to return (max: 50, default: 10)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "clickup",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Fuzzy search results for lists"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Clickup.FuzzySearchListsByName",
+        "parameters": {
+          "name_to_search": {
+            "value": "Project Alpha",
+            "type": "string",
+            "required": true
+          },
+          "workspace_id": {
+            "value": "123456",
+            "type": "string",
+            "required": true
+          },
+          "scan_size": {
+            "value": 500,
+            "type": "integer",
+            "required": false
+          },
+          "space_ids": {
+            "value": [
+              "654321",
+              "987654"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "folder_ids": {
+            "value": [
+              "345678"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "should_include_archived": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "clickup",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "FuzzySearchMembersByName",
+      "qualifiedName": "Clickup.FuzzySearchMembersByName",
+      "fullyQualifiedName": "Clickup.FuzzySearchMembersByName@1.1.1",
+      "description": "Search for workspace members using fuzzy matching on member names.\n\nThis tool should ONLY be used when you cannot find the desired team member through\nnormal context\nIt performs fuzzy matching against member names and returns\nsimplified member information including ID, name, and email.\n\nReturns team members that match the name_to_search with match scores indicating\nrelevance (1.0 = perfect match, lower scores = less relevant matches).",
+      "parameters": [
+        {
+          "name": "name_to_search",
+          "type": "string",
+          "required": true,
+          "description": "Member name to search for (minimum 2 characters)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "workspace_id",
+          "type": "string",
+          "required": true,
+          "description": "The workspace ID to search members in (should be a number)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "scan_size",
+          "type": "integer",
+          "required": false,
+          "description": "Number of members to scan (in increments of 100, max 500 default: 500)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of matches to return (max: 50, default: 10)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "clickup",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Fuzzy search results for members"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Clickup.FuzzySearchMembersByName",
+        "parameters": {
+          "name_to_search": {
+            "value": "John Doe",
+            "type": "string",
+            "required": true
+          },
+          "workspace_id": {
+            "value": "12345",
+            "type": "string",
+            "required": true
+          },
+          "scan_size": {
+            "value": 200,
+            "type": "integer",
+            "required": false
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "clickup",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "FuzzySearchTasksByName",
+      "qualifiedName": "Clickup.FuzzySearchTasksByName",
+      "fullyQualifiedName": "Clickup.FuzzySearchTasksByName@1.1.1",
+      "description": "Search for tasks using fuzzy matching on task names.\n\nThis tool should ONLY be used when you cannot find the desired task through normal context\nor direct searches. It performs fuzzy matching against task names and returns simplified\ntask information. Use the returned task IDs with get_task_by_id to retrieve full task details.\n\nThis tool is also useful to avoid navigating through the ClickUp hierarchy tree\nwhen you know approximately what task you're looking for\nbut don't know its exact location in the hierarchy.\n\nReturns the most recently updated tasks that match the name_to_search with match scores\nindicating relevance (1.0 = perfect match, lower scores = less relevant matches).",
+      "parameters": [
+        {
+          "name": "name_to_search",
+          "type": "string",
+          "required": true,
+          "description": "Task name to search for (minimum 2 characters)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "workspace_id",
+          "type": "string",
+          "required": true,
+          "description": "The workspace ID to search tasks in (should be a number)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "scan_size",
+          "type": "integer",
+          "required": false,
+          "description": "Number of recent tasks to scan (max 500 default: 500)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_closed",
+          "type": "boolean",
+          "required": false,
+          "description": "Include closed/completed tasks (default: false)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "statuses",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Filter by specific ClickUp status names. Each list has its own statuses set.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "assignee_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Filter by assignee user IDs",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "space_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Filter by ClickUp space IDs - limit search to specific spaces/teams",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "folder_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Filter by ClickUp folder IDs - limit search to specific folders/projects",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "list_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Filter by ClickUp list IDs - limit search to specific lists",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of matches to return (max: 50, default: 10)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "clickup",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Fuzzy search results for tasks"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Clickup.FuzzySearchTasksByName",
+        "parameters": {
+          "name_to_search": {
+            "value": "Project Alpha",
+            "type": "string",
+            "required": true
+          },
+          "workspace_id": {
+            "value": "123456",
+            "type": "string",
+            "required": true
+          },
+          "scan_size": {
+            "value": 100,
+            "type": "integer",
+            "required": false
+          },
+          "include_closed": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "statuses": {
+            "value": [
+              "in progress",
+              "completed"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "assignee_ids": {
+            "value": [
+              "987654",
+              "123987"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "space_ids": {
+            "value": [
+              "555666"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "folder_ids": {
+            "value": [
+              "111222"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "list_ids": {
+            "value": [
+              "333444"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "limit": {
+            "value": 20,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "clickup",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetFoldersForSpace",
+      "qualifiedName": "Clickup.GetFoldersForSpace",
+      "fullyQualifiedName": "Clickup.GetFoldersForSpace@1.1.1",
+      "description": "Retrieve folders (also called directories, project categories, or project areas) from a\nClickUp space.\n\nOnly use this tool when you already have the space ID and want to see the folders within\nthat specific space.\n\nImportant: When users mention a space(or area),\nalways use this tool to get the folders within that space.\n\nThis tool fetches folders from the specified space with support for offset-based retrieval\nand archived folder filtering. Results are sorted alphabetically by name.",
+      "parameters": [
+        {
+          "name": "space_id",
+          "type": "string",
+          "required": true,
+          "description": "The ClickUp space ID to get folders from",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "workspace_id",
+          "type": "string",
+          "required": true,
+          "description": "The ClickUp workspace ID for GUI URL generation (should be a number)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Starting position for offset-based retrieval (default: 0)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of folders to return (max: 50, default: 50)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_archived",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to include archived, inactive, or deleted folders (default: False)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "clickup",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "List of folders in the space"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Clickup.GetFoldersForSpace",
+        "parameters": {
+          "space_id": {
+            "value": "abc123",
+            "type": "string",
+            "required": true
+          },
+          "workspace_id": {
+            "value": "456",
+            "type": "string",
+            "required": true
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "include_archived": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "clickup",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetListsForFolder",
+      "qualifiedName": "Clickup.GetListsForFolder",
+      "fullyQualifiedName": "Clickup.GetListsForFolder@1.1.1",
+      "description": "Retrieve task lists from a ClickUp folder (when users refer to a folder as a \"directory\",\nthey mean the same thing).\n\nOnly use this tool when you already have the folder ID and want to see the lists within\nthat specific folder.\n\nImportant: When users mention a specific folder(or directory), always use this tool to get\nthe lists within that folder.\n\nThis tool fetches lists from the specified folder with support for offset-based retrieval\nand archived list filtering. Results are sorted alphabetically by name.",
+      "parameters": [
+        {
+          "name": "folder_id",
+          "type": "string",
+          "required": true,
+          "description": "The ClickUp folder ID (also called directory ID) to get lists from",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "workspace_id",
+          "type": "string",
+          "required": true,
+          "description": "The ClickUp workspace ID for GUI URL generation (should be a number)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Starting position for offset-based retrieval (default: 0)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of lists to return (max: 50, default: 50)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_archived",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to include archived, inactive, or completed lists (default: False)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "clickup",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "List of task lists in the folder"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Clickup.GetListsForFolder",
+        "parameters": {
+          "folder_id": {
+            "value": "123456",
+            "type": "string",
+            "required": true
+          },
+          "workspace_id": {
+            "value": "78910",
+            "type": "string",
+            "required": true
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          },
+          "limit": {
+            "value": 20,
+            "type": "integer",
+            "required": false
+          },
+          "include_archived": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "clickup",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetListsForSpace",
+      "qualifiedName": "Clickup.GetListsForSpace",
+      "fullyQualifiedName": "Clickup.GetListsForSpace@1.1.1",
+      "description": "Retrieve all task lists from a ClickUp space by collecting lists from all folders within the\nspace.\n\nOnly use this tool when you have a space ID and want to see all lists across all folders\nwithin that space.\n\nThis tool provides a comprehensive view of all lists in a space with support for offset-based\nretrieval and archived list filtering. Results are sorted alphabetically by name.",
+      "parameters": [
+        {
+          "name": "space_id",
+          "type": "string",
+          "required": true,
+          "description": "The ClickUp space ID to get lists from",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "workspace_id",
+          "type": "string",
+          "required": true,
+          "description": "The ClickUp workspace ID for GUI URL generation (should be a number)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Starting position for offset-based retrieval (default: 0)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of lists to return (max: 50, default: 50)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_archived",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to include archived, inactive, or completed lists (default: False)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "clickup",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "List of task lists from all folders in the space"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Clickup.GetListsForSpace",
+        "parameters": {
+          "space_id": {
+            "value": "123456",
+            "type": "string",
+            "required": true
+          },
+          "workspace_id": {
+            "value": "7890",
+            "type": "string",
+            "required": true
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "include_archived": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "clickup",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetMembersForWorkspace",
+      "qualifiedName": "Clickup.GetMembersForWorkspace",
+      "fullyQualifiedName": "Clickup.GetMembersForWorkspace@1.1.1",
+      "description": "Retrieve all team members from a specific ClickUp workspace.\n\nOnly use this tool when you already have the workspace ID and need to see the members\nwithin that specific workspace.\n\nThis tool fetches detailed information about all members of a ClickUp workspace,\nincluding their basic profile information and role within the workspace.\nResults are sorted and support offset-based retrieval.",
+      "parameters": [
+        {
+          "name": "workspace_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the ClickUp workspace to get team members from (should be a number)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Starting position for offset-based retrieval (default: 0)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of members to return (max: 50, default: 50)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "clickup",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "List of team members in the specified workspace"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Clickup.GetMembersForWorkspace",
+        "parameters": {
+          "workspace_id": {
+            "value": "123456",
+            "type": "string",
+            "required": true
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "clickup",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetSpaces",
+      "qualifiedName": "Clickup.GetSpaces",
+      "fullyQualifiedName": "Clickup.GetSpaces@1.1.1",
+      "description": "Retrieve spaces from a ClickUp workspace.\n\nUse this tool when users ask for:\n- Spaces within a workspace (not folders or lists)\n- Available spaces to choose from before getting folders\n- Space discovery when you need to identify space IDs or names\n- High-level workspace organization structure\n\nNote: This is for spaces (top-level containers), not folders (which contain lists) nor lists.\nThis tool fetches spaces from the specified workspace with support for offset-based retrieval\nand archived space filtering. Results are sorted alphabetically by name.",
+      "parameters": [
+        {
+          "name": "workspace_id",
+          "type": "string",
+          "required": true,
+          "description": "The ClickUp workspace ID to get spaces from (should be a number)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Starting position for offset-based retrieval (default: 0)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of spaces to return (max: 50, default: 50)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_archived",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to include archived spaces (default: False)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "clickup",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "List of spaces in the workspace"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Clickup.GetSpaces",
+        "parameters": {
+          "workspace_id": {
+            "value": "123456",
+            "type": "string",
+            "required": true
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "include_archived": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "clickup",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetStatusesForList",
+      "qualifiedName": "Clickup.GetStatusesForList",
+      "fullyQualifiedName": "Clickup.GetStatusesForList@1.1.1",
+      "description": "Retrieve the possible task statuses for a specific ClickUp list.\n\nOnly use this tool when you already have the list ID and need to discover the valid\nstatuses for that specific list.\n\nUse this tool to discover valid status labels and their ordering/type for a list\nbefore creating or updating tasks, since statuses can be customized per list.",
+      "parameters": [
+        {
+          "name": "list_id",
+          "type": "string",
+          "required": true,
+          "description": "The ClickUp list ID to retrieve possible task statuses for",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "clickup",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Possible statuses for a given list (useful when creating or updating tasks)"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Clickup.GetStatusesForList",
+        "parameters": {
+          "list_id": {
+            "value": "abc123def456",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "clickup",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetSystemGuidance",
+      "qualifiedName": "Clickup.GetSystemGuidance",
+      "fullyQualifiedName": "Clickup.GetSystemGuidance@1.1.1",
+      "description": "Return static guidance intended solely to help agents make informed decisions.\n\nImportant: The guidance content is for internal agent use only and should not be\ndisplayed to end users.",
+      "parameters": [],
+      "auth": null,
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Static guidance about ClickUp structure and usage tips"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Clickup.GetSystemGuidance",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetTaskById",
+      "qualifiedName": "Clickup.GetTaskById",
+      "fullyQualifiedName": "Clickup.GetTaskById@1.1.1",
+      "description": "Get detailed information about a specific task by its ID. Also supports custom task IDs\nwhen workspace_id_for_custom_id is provided.\n\nUse when need more information about a task than if it id or custom id is already known.",
+      "parameters": [
+        {
+          "name": "task_id",
+          "type": "string",
+          "required": true,
+          "description": "The task ID or custom task ID to retrieve",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_subtasks",
+          "type": "boolean",
+          "required": false,
+          "description": "Include subtask information (default: false )",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "workspace_id_for_custom_id",
+          "type": "string",
+          "required": false,
+          "description": "The ClickUp workspace ID (provide this to use custom task IDs)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "clickup",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The detailed task response"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Clickup.GetTaskById",
+        "parameters": {
+          "task_id": {
+            "value": "12345",
+            "type": "string",
+            "required": true
+          },
+          "include_subtasks": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "workspace_id_for_custom_id": {
+            "value": "workspace_6789",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "clickup",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetTaskCommentReplies",
+      "qualifiedName": "Clickup.GetTaskCommentReplies",
+      "fullyQualifiedName": "Clickup.GetTaskCommentReplies@1.1.1",
+      "description": "Get threaded replies for a specific ClickUp comment with pagination support.\n\nThis tool retrieves replies to a parent comment using ClickUp's threaded\ncomment system with offset-based pagination. The parent comment itself\nis not included in the results, only the threaded replies.",
+      "parameters": [
+        {
+          "name": "comment_id",
+          "type": "string",
+          "required": true,
+          "description": "The ClickUp comment ID to get replies for",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Starting position for offset-based retrieval (default: 0)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of replies to return (max: 50, default: 20)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "clickup",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Threaded replies for the specified comment"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Clickup.GetTaskCommentReplies",
+        "parameters": {
+          "comment_id": {
+            "value": "abcd1234",
+            "type": "string",
+            "required": true
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          },
+          "limit": {
+            "value": 20,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "clickup",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetTaskComments",
+      "qualifiedName": "Clickup.GetTaskComments",
+      "fullyQualifiedName": "Clickup.GetTaskComments@1.1.1",
+      "description": "Get comments for a specific ClickUp task with pagination support.\n\nThis tool retrieves comments from a task using ClickUp's specific pagination method.\nFor the first call, omit oldest_comment_id. For subsequent calls, use the\noldest_comment_id from the previous response to get the next set of comments.",
+      "parameters": [
+        {
+          "name": "task_id",
+          "type": "string",
+          "required": true,
+          "description": "The ClickUp task ID to get comments for",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Number of comments to retrieve (max 25, default: 5)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "oldest_comment_id",
+          "type": "string",
+          "required": false,
+          "description": "ID of the oldest comment from previous call for pagination",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "clickup",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Comments for the specified task"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Clickup.GetTaskComments",
+        "parameters": {
+          "task_id": {
+            "value": "123456789",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 5,
+            "type": "integer",
+            "required": false
+          },
+          "oldest_comment_id": {
+            "value": "",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "clickup",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetTasksByAssignees",
+      "qualifiedName": "Clickup.GetTasksByAssignees",
+      "fullyQualifiedName": "Clickup.GetTasksByAssignees@1.1.1",
+      "description": "Get filtered tasks assigned to specific team members with advanced filtering options.\n\nThis tool filters tasks by assignee(s) across the entire workspace.\nProvides comprehensive filtering capabilities including status and date range filtering.\n\nImportant: Use this tool when not interested in a specific task but a set of tasks from\na specific assignee\nor filtering criteria that does not include the task title(name).",
+      "parameters": [
+        {
+          "name": "workspace_id",
+          "type": "string",
+          "required": true,
+          "description": "The ClickUp workspace ID for GUI URL generation (should be a number)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "assignees_ids",
+          "type": "array",
+          "innerType": "integer",
+          "required": true,
+          "description": "List of assignee user IDs to get tasks for",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Starting position for offset-based retrieval (default: 0)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of tasks to return (max: 50, default: 20)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "order_by",
+          "type": "string",
+          "required": false,
+          "description": "Field to sort tasks by",
+          "enum": [
+            "created",
+            "updated",
+            "due_date"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "should_sort_by_reverse",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to sort in descending order (default: False)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "statuses",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "List of status strings to filter by",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_closed",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to include closed tasks (default: False)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "due_date_gt",
+          "type": "string",
+          "required": false,
+          "description": "Due date greater than (date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS])",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "due_date_lt",
+          "type": "string",
+          "required": false,
+          "description": "Due date less than (date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS])",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "date_created_gt",
+          "type": "string",
+          "required": false,
+          "description": "Created date greater than (date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS])",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "date_created_lt",
+          "type": "string",
+          "required": false,
+          "description": "Created date less than (date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS])",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "clickup",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Filtered tasks assigned to the specified assignees"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Clickup.GetTasksByAssignees",
+        "parameters": {
+          "workspace_id": {
+            "value": "123456",
+            "type": "string",
+            "required": true
+          },
+          "assignees_ids": {
+            "value": [
+              "111",
+              "222",
+              "333"
+            ],
+            "type": "array",
+            "required": true
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          },
+          "limit": {
+            "value": 20,
+            "type": "integer",
+            "required": false
+          },
+          "order_by": {
+            "value": "due_date",
+            "type": "string",
+            "required": false
+          },
+          "should_sort_by_reverse": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "statuses": {
+            "value": [
+              "in_progress",
+              "completed"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "include_closed": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "due_date_gt": {
+            "value": "2023-01-01",
+            "type": "string",
+            "required": false
+          },
+          "due_date_lt": {
+            "value": "2023-12-31",
+            "type": "string",
+            "required": false
+          },
+          "date_created_gt": {
+            "value": "2022-01-01",
+            "type": "string",
+            "required": false
+          },
+          "date_created_lt": {
+            "value": "2022-12-31",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "clickup",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetTasksByScope",
+      "qualifiedName": "Clickup.GetTasksByScope",
+      "fullyQualifiedName": "Clickup.GetTasksByScope@1.1.1",
+      "description": "Get filtered tasks from ClickUp with advanced filtering options.\n\nThis unified tool filters tasks at different organizational levels:\n\nImportant: Use this tool when not interested in a specific task but a set of tasks from a\nspecific scope\nor filtering criteria that does not include the task title(name).",
+      "parameters": [
+        {
+          "name": "workspace_id",
+          "type": "string",
+          "required": true,
+          "description": "The ClickUp workspace ID for GUI URL generation (should be a number)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "scope",
+          "type": "string",
+          "required": true,
+          "description": "The scope to filter tasks by (all, spaces, folders, or lists)",
+          "enum": [
+            "all",
+            "spaces",
+            "folders",
+            "lists"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "item_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "List of IDs to get tasks from (required for spaces/folders/lists, ignored for 'all')",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Starting position for offset-based retrieval (default: 0)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of tasks to return (max: 50, default: 20)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "order_by",
+          "type": "string",
+          "required": false,
+          "description": "Field to sort tasks by",
+          "enum": [
+            "created",
+            "updated",
+            "due_date"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "should_sort_by_reverse",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to sort in descending order (default: False)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "statuses",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "List of status strings to filter by",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_closed",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to include closed tasks (default: False)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "due_date_gt",
+          "type": "string",
+          "required": false,
+          "description": "Due date greater than (date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS])",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "due_date_lt",
+          "type": "string",
+          "required": false,
+          "description": "Due date less than (date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS])",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "date_created_gt",
+          "type": "string",
+          "required": false,
+          "description": "Created date greater than (date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS])",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "date_created_lt",
+          "type": "string",
+          "required": false,
+          "description": "Created date less than (date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS])",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "clickup",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Filtered tasks from the specified scope"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Clickup.GetTasksByScope",
+        "parameters": {
+          "workspace_id": {
+            "value": "123456",
+            "type": "string",
+            "required": true
+          },
+          "scope": {
+            "value": "lists",
+            "type": "string",
+            "required": true
+          },
+          "item_ids": {
+            "value": [
+              "654321",
+              "789012"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          },
+          "limit": {
+            "value": 20,
+            "type": "integer",
+            "required": false
+          },
+          "order_by": {
+            "value": "due_date",
+            "type": "string",
+            "required": false
+          },
+          "should_sort_by_reverse": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "statuses": {
+            "value": [
+              "in progress",
+              "completed"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "include_closed": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "due_date_gt": {
+            "value": "2023-10-01",
+            "type": "string",
+            "required": false
+          },
+          "due_date_lt": {
+            "value": "2023-10-31",
+            "type": "string",
+            "required": false
+          },
+          "date_created_gt": {
+            "value": "2023-09-01",
+            "type": "string",
+            "required": false
+          },
+          "date_created_lt": {
+            "value": "2023-09-30",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "clickup",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetWorkspaceInsights",
+      "qualifiedName": "Clickup.GetWorkspaceInsights",
+      "fullyQualifiedName": "Clickup.GetWorkspaceInsights@1.1.1",
+      "description": "Return a brief overview for a workspace using the latest updated tasks to inform the user.\n\nIncludes task summary, team insights, and container(space, folder, list) insights.",
+      "parameters": [
+        {
+          "name": "workspace_id",
+          "type": "string",
+          "required": true,
+          "description": "The ClickUp workspace ID to summarize (should be a number)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "clickup",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Brief workspace overview leveraging latest updated tasks to deliver actionable insights"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Clickup.GetWorkspaceInsights",
+        "parameters": {
+          "workspace_id": {
+            "value": "123456",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "clickup",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "UpdateTask",
+      "qualifiedName": "Clickup.UpdateTask",
+      "fullyQualifiedName": "Clickup.UpdateTask@1.1.1",
+      "description": "Update one or more fields of an existing ClickUp task.\n\nUse this tool to change a task's title, description, status, priority, dates,\nhierarchy (by setting a new parent), or sprint points. You can pass only the\nfields you want to modify—everything else remains unchanged.",
+      "parameters": [
+        {
+          "name": "task_id",
+          "type": "string",
+          "required": true,
+          "description": "The ClickUp task ID to update",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "task_title",
+          "type": "string",
+          "required": false,
+          "description": "The new name/title of the task",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "The new description/content of the task",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "priority",
+          "type": "string",
+          "required": false,
+          "description": "Task priority",
+          "enum": [
+            "URGENT",
+            "HIGH",
+            "NORMAL",
+            "LOW"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "description": "Task status label (string)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "parent_task_id",
+          "type": "string",
+          "required": false,
+          "description": "The new parent task ID",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_date",
+          "type": "string",
+          "required": false,
+          "description": "Date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS]; ISO-8601 also supported",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "due_date",
+          "type": "string",
+          "required": false,
+          "description": "Date string in format YYYY-MM-DD or YYYY-MM-DD HH:MM[:SS]; ISO-8601 also supported",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sprint_points",
+          "type": "integer",
+          "required": false,
+          "description": "The new sprint points for the task",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "clickup",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Details of the updated task"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Clickup.UpdateTask",
+        "parameters": {
+          "task_id": {
+            "value": "abc123",
+            "type": "string",
+            "required": true
+          },
+          "task_title": {
+            "value": "Update User Interface",
+            "type": "string",
+            "required": false
+          },
+          "description": {
+            "value": "Enhance the user interface for better accessibility.",
+            "type": "string",
+            "required": false
+          },
+          "priority": {
+            "value": "High",
+            "type": "string",
+            "required": false
+          },
+          "status": {
+            "value": "In Progress",
+            "type": "string",
+            "required": false
+          },
+          "parent_task_id": {
+            "value": "def456",
+            "type": "string",
+            "required": false
+          },
+          "start_date": {
+            "value": "2023-10-01",
+            "type": "string",
+            "required": false
+          },
+          "due_date": {
+            "value": "2023-10-15",
+            "type": "string",
+            "required": false
+          },
+          "sprint_points": {
+            "value": 5,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "clickup",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "UpdateTaskAssignees",
+      "qualifiedName": "Clickup.UpdateTaskAssignees",
+      "fullyQualifiedName": "Clickup.UpdateTaskAssignees@1.1.1",
+      "description": "Update task assignees by adding and/or removing specific users.\n\nUse this tool to manage task assignments by specifying which users to add or remove.\nYou can add assignees, remove assignees, or do both in a single operation.\nAt least one of the parameters (assignee_ids_to_add or assignee_ids_to_remove) must be provided.",
+      "parameters": [
+        {
+          "name": "task_id",
+          "type": "string",
+          "required": true,
+          "description": "The ClickUp task ID to update assignees for",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "assignee_ids_to_add",
+          "type": "array",
+          "innerType": "integer",
+          "required": false,
+          "description": "List of user IDs to add as assignees",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "assignee_ids_to_remove",
+          "type": "array",
+          "innerType": "integer",
+          "required": false,
+          "description": "List of user IDs to remove from assignees",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "clickup",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Result of the assignee update operation"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Clickup.UpdateTaskAssignees",
+        "parameters": {
+          "task_id": {
+            "value": "12345",
+            "type": "string",
+            "required": true
+          },
+          "assignee_ids_to_add": {
+            "value": [
+              "user_1",
+              "user_2"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "assignee_ids_to_remove": {
+            "value": [
+              "user_3"
+            ],
+            "type": "array",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "clickup",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "UpdateTaskComment",
+      "qualifiedName": "Clickup.UpdateTaskComment",
+      "fullyQualifiedName": "Clickup.UpdateTaskComment@1.1.1",
+      "description": "Update an existing comment on a ClickUp task.\n\nThis tool is for updating top-level comments only, not threaded comment replies.\nUse this tool to modify comment text, change assignment, or set resolution status.\nAt least one parameter (comment_text, assignee_id, or resolution) must be provided.",
+      "parameters": [
+        {
+          "name": "comment_id",
+          "type": "string",
+          "required": true,
+          "description": "The ClickUp comment ID to update",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "task_id",
+          "type": "string",
+          "required": true,
+          "description": "The ClickUp task ID the comment belongs to",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "comment_text",
+          "type": "string",
+          "required": false,
+          "description": "New text content for the comment (optional)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "assignee_id",
+          "type": "integer",
+          "required": false,
+          "description": "User ID to assign the comment to (optional)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "resolution",
+          "type": "string",
+          "required": false,
+          "description": "Set comment resolution status (optional)",
+          "enum": [
+            "resolved",
+            "unresolved"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "clickup",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Details of the updated comment"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Clickup.UpdateTaskComment",
+        "parameters": {
+          "comment_id": {
+            "value": "abc123",
+            "type": "string",
+            "required": true
+          },
+          "task_id": {
+            "value": "def456",
+            "type": "string",
+            "required": true
+          },
+          "comment_text": {
+            "value": "Updated comment text here.",
+            "type": "string",
+            "required": false
+          },
+          "assignee_id": {
+            "value": 789,
+            "type": "integer",
+            "required": false
+          },
+          "resolution": {
+            "value": "resolved",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "clickup",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "Clickup.WhoAmI",
+      "fullyQualifiedName": "Clickup.WhoAmI@1.1.1",
+      "description": "Return current user profile and accessible workspaces (teams).\n\nThis should be the FIRST tool called when starting any ClickUp interaction.\n\nEach workspace represents\na separate team or organization with its own members, projects, and settings.",
+      "parameters": [],
+      "auth": {
+        "providerId": "clickup",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The current user's profile information and accessible workspaces (teams). This should be the first tool called."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Clickup.WhoAmI",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "clickup",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    }
+  ],
+  "documentationChunks": [
+    {
+      "type": "markdown",
+      "location": "custom_section",
+      "position": "after",
+      "content": "## TaskPriority\n\n- **URGENT**: `URGENT`\n- **HIGH**: `HIGH`\n- **NORMAL**: `NORMAL`\n- **LOW**: `LOW`",
+      "header": "## TaskPriority"
+    },
+    {
+      "type": "markdown",
+      "location": "custom_section",
+      "position": "after",
+      "content": "## TaskOrderBy\n\n- **CREATED**: `created`\n- **UPDATED**: `updated`\n- **DUE_DATE**: `due_date`",
+      "header": "## TaskOrderBy"
+    },
+    {
+      "type": "markdown",
+      "location": "custom_section",
+      "position": "after",
+      "content": "## CommentResolution\n\n- **SET_AS_RESOLVED**: `resolved`\n- **SET_AS_UNRESOLVED**: `unresolved`",
+      "header": "## CommentResolution"
+    }
+  ],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-01-26T17:27:41.755Z",
+  "summary": "The Arcade.dev Toolkit for ClickUp empowers developers to efficiently manage tasks, comments, and workspace structures within ClickUp through seamless API interactions. \n\n**Capabilities**\n- Create, update, and retrieve tasks and comments, enabling direct engagement with team tasks.\n- Conduct fuzzy searches for lists, folders, and members to enhance navigability.\n- Retrieve insights about workspaces and configure task statuses dynamically.\n- Manage team assignments effectively, facilitating team collaboration.\n- Execute structured queries for tasks based on specified criteria to optimize task management.\n\n**OAuth**  \n- Provider: ClickUp  \n- Note: Utilizes OAuth2 authentication for secure access.\n\n**Secrets**  \n- No secrets required for integration."
+}

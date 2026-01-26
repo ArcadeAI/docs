@@ -1,0 +1,564 @@
+{
+  "id": "Firecrawl",
+  "label": "Firecrawl",
+  "version": "3.0.1",
+  "description": "Arcade.dev LLM tools for web scraping related tasks via Firecrawl",
+  "metadata": {
+    "category": "development",
+    "iconUrl": "https://design-system.arcade.dev/icons/firecrawl.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/development/firecrawl",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": null,
+  "tools": [
+    {
+      "name": "CancelCrawl",
+      "qualifiedName": "Firecrawl.CancelCrawl",
+      "fullyQualifiedName": "Firecrawl.CancelCrawl@3.0.1",
+      "description": "Cancel an asynchronous crawl job that is in progress using the Firecrawl API.",
+      "parameters": [
+        {
+          "name": "crawl_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the asynchronous crawl job to cancel",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FIRECRAWL_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FIRECRAWL_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Cancellation status information"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Firecrawl.CancelCrawl",
+        "parameters": {
+          "crawl_id": {
+            "value": "123456789abcdef",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "CrawlWebsite",
+      "qualifiedName": "Firecrawl.CrawlWebsite",
+      "fullyQualifiedName": "Firecrawl.CrawlWebsite@3.0.1",
+      "description": "Crawl a website using Firecrawl. If the crawl is asynchronous, then returns the crawl ID.\nIf the crawl is synchronous, then returns the crawl data.",
+      "parameters": [
+        {
+          "name": "url",
+          "type": "string",
+          "required": true,
+          "description": "URL to crawl",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "exclude_paths",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "URL patterns to exclude from the crawl",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_paths",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "URL patterns to include in the crawl",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_depth",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum depth to crawl relative to the entered URL",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "ignore_sitemap",
+          "type": "boolean",
+          "required": false,
+          "description": "Ignore the website sitemap when crawling",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Limit the number of pages to crawl",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "allow_backward_links",
+          "type": "boolean",
+          "required": false,
+          "description": "Enable navigation to previously linked pages and enable crawling sublinks that are not children of the 'url' input parameter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "allow_external_links",
+          "type": "boolean",
+          "required": false,
+          "description": "Allow following links to external websites",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "webhook",
+          "type": "string",
+          "required": false,
+          "description": "The URL to send a POST request to when the crawl is started, updated and completed.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "async_crawl",
+          "type": "boolean",
+          "required": false,
+          "description": "Run the crawl asynchronously",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FIRECRAWL_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FIRECRAWL_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Crawl status and data"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Firecrawl.CrawlWebsite",
+        "parameters": {
+          "url": {
+            "value": "https://example.com",
+            "type": "string",
+            "required": true
+          },
+          "exclude_paths": {
+            "value": [
+              "/login",
+              "/private/*"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "include_paths": {
+            "value": [
+              "/public/*",
+              "/about"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "max_depth": {
+            "value": 3,
+            "type": "integer",
+            "required": false
+          },
+          "ignore_sitemap": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "allow_backward_links": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "allow_external_links": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "webhook": {
+            "value": "https://mywebhook.com/crawl-update",
+            "type": "string",
+            "required": false
+          },
+          "async_crawl": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetCrawlData",
+      "qualifiedName": "Firecrawl.GetCrawlData",
+      "fullyQualifiedName": "Firecrawl.GetCrawlData@3.0.1",
+      "description": "Get the data of a Firecrawl 'crawl' that is either in progress or recently completed.",
+      "parameters": [
+        {
+          "name": "crawl_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the crawl job",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FIRECRAWL_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FIRECRAWL_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Crawl data information"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Firecrawl.GetCrawlData",
+        "parameters": {
+          "crawl_id": {
+            "value": "abc12345",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetCrawlStatus",
+      "qualifiedName": "Firecrawl.GetCrawlStatus",
+      "fullyQualifiedName": "Firecrawl.GetCrawlStatus@3.0.1",
+      "description": "Get the status of a Firecrawl 'crawl' that is either in progress or recently completed.",
+      "parameters": [
+        {
+          "name": "crawl_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the crawl job",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FIRECRAWL_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FIRECRAWL_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Crawl status information"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Firecrawl.GetCrawlStatus",
+        "parameters": {
+          "crawl_id": {
+            "value": "12345-abcde-67890-fghij",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "MapWebsite",
+      "qualifiedName": "Firecrawl.MapWebsite",
+      "fullyQualifiedName": "Firecrawl.MapWebsite@3.0.1",
+      "description": "Map a website from a single URL to a map of the entire website.",
+      "parameters": [
+        {
+          "name": "url",
+          "type": "string",
+          "required": true,
+          "description": "The base URL to start crawling from",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "search",
+          "type": "string",
+          "required": false,
+          "description": "Search query to use for mapping",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "ignore_sitemap",
+          "type": "boolean",
+          "required": false,
+          "description": "Ignore the website sitemap when crawling",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_subdomains",
+          "type": "boolean",
+          "required": false,
+          "description": "Include subdomains of the website",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of links to return",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FIRECRAWL_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FIRECRAWL_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Website map data"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Firecrawl.MapWebsite",
+        "parameters": {
+          "url": {
+            "value": "https://example.com",
+            "type": "string",
+            "required": true
+          },
+          "search": {
+            "value": "contact",
+            "type": "string",
+            "required": false
+          },
+          "ignore_sitemap": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "include_subdomains": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "limit": {
+            "value": 100,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "ScrapeUrl",
+      "qualifiedName": "Firecrawl.ScrapeUrl",
+      "fullyQualifiedName": "Firecrawl.ScrapeUrl@3.0.1",
+      "description": "Scrape a URL using Firecrawl and return the data in specified formats.",
+      "parameters": [
+        {
+          "name": "url",
+          "type": "string",
+          "required": true,
+          "description": "URL to scrape",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "formats",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Formats to retrieve. Defaults to ['markdown'].",
+          "enum": [
+            "markdown",
+            "html",
+            "rawHtml",
+            "links",
+            "screenshot",
+            "screenshot@fullPage"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "only_main_content",
+          "type": "boolean",
+          "required": false,
+          "description": "Only return the main content of the page excluding headers, navs, footers, etc.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_tags",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "List of tags to include in the output",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "exclude_tags",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "List of tags to exclude from the output",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "wait_for",
+          "type": "integer",
+          "required": false,
+          "description": "Specify a delay in milliseconds before fetching the content, allowing the page sufficient time to load.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "timeout",
+          "type": "integer",
+          "required": false,
+          "description": "Timeout in milliseconds for the request",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "FIRECRAWL_API_KEY"
+      ],
+      "secretsInfo": [
+        {
+          "name": "FIRECRAWL_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Scraped data in specified formats"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Firecrawl.ScrapeUrl",
+        "parameters": {
+          "url": {
+            "value": "https://example.com",
+            "type": "string",
+            "required": true
+          },
+          "formats": {
+            "value": [
+              "markdown",
+              "html"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "only_main_content": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "include_tags": {
+            "value": [
+              "h1",
+              "p"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "exclude_tags": {
+            "value": [
+              "script",
+              "style"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "wait_for": {
+            "value": 2000,
+            "type": "integer",
+            "required": false
+          },
+          "timeout": {
+            "value": 5000,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    }
+  ],
+  "documentationChunks": [
+    {
+      "type": "markdown",
+      "location": "auth",
+      "position": "after",
+      "content": "The Arcade Web MCP Server uses [Firecrawl](https://www.firecrawl.dev/) to scrape, crawl, and map websites.\n\n**Global Environment Variables:**\n- `FIRECRAWL_API_KEY`: Your [Firecrawl](https://www.firecrawl.dev/) API key.\n\n<Callout type=\"warning\">\n**Keep the API key secret** — do not commit `FIRECRAWL_API_KEY` to source control or expose it in client-side code.\n</Callout>\n\n<Callout type=\"info\">\nCheck [Firecrawl](https://www.firecrawl.dev/) for available deployment and enterprise options (cloud, self-hosted, enterprise plans) and follow their configuration guides for API access.\n</Callout>",
+      "header": "## Auth"
+    }
+  ],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-01-26T17:29:24.632Z",
+  "summary": "Firecrawl is an Arcade.dev toolkit designed for efficient web scraping tasks. It leverages the Firecrawl API to perform various operations, enabling developers to streamline their data extraction processes.\n\n**Capabilities**  \n- Perform asynchronous and synchronous website crawls  \n- Retrieve crawl status and data for ongoing or recent tasks  \n- Map an entire website from a single URL  \n- Scrape specific URLs and return data in various formats  \n- Cancel ongoing crawl jobs seamlessly  \n\n**OAuth**  \nNo OAuth authentication is required. An API key is utilized for accessing the Firecrawl API.  \n\n**Secrets**  \n- API Key: FIRECRAWL_API_KEY, used for authenticating requests to the Firecrawl API."
+}

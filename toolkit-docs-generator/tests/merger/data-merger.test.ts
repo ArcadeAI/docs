@@ -710,7 +710,11 @@ describe("DataMerger", () => {
         qualifiedName: "Github.CreateIssue",
         fullyQualifiedName: "Github.CreateIssue@1.0.0",
         description: "Updated description",
-        auth: { providerId: "github", providerType: "oauth2", scopes: ["repo"] },
+        auth: {
+          providerId: "github",
+          providerType: "oauth2",
+          scopes: ["repo"],
+        },
       });
       const toolkitDataSource = createCombinedToolkitDataSource({
         toolSource: new InMemoryToolDataSource([updatedTool]),

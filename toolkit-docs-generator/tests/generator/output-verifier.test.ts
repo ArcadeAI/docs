@@ -107,9 +107,7 @@ describe("verifyOutputDir", () => {
       const index = JSON.parse(await readFile(indexPath, "utf-8")) as {
         toolkits: Array<Record<string, unknown>>;
       };
-      const githubEntry = index.toolkits.find(
-        (entry) => entry.id === "Github"
-      );
+      const githubEntry = index.toolkits.find((entry) => entry.id === "Github");
       if (githubEntry) {
         githubEntry.version = "9.9.9";
         githubEntry.category = "social";

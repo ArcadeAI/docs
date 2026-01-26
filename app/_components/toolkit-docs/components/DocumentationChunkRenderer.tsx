@@ -1,9 +1,17 @@
 "use client";
 
-import { Callout } from "nextra/components";
+import { evaluate } from "@mdx-js/mdx";
+import { Callout, Steps, Tabs } from "nextra/components";
 import type React from "react";
-import ReactMarkdown from "react-markdown";
+import { useEffect, useMemo, useState } from "react";
+import * as runtime from "react/jsx-runtime";
+import remarkGfm from "remark-gfm";
 
+import { SignupLink } from "../../analytics";
+import TabbedCodeBlock from "../../tabbed-code-block";
+import DataTable from "./DataTable";
+import TableOfContents from "../../table-of-contents";
+import ToolFooter from "../../tool-footer";
 import type {
   DocumentationChunk,
   DocumentationChunkLocation,
@@ -34,10 +42,116 @@ const VARIANT_TYPE_MAP: Record<string, "default" | "info" | "warning" | "error">
 };
 
 /**
- * Renders markdown content from a string.
+ * Checks if content contains JSX/HTML tags
  */
-function MarkdownContent({ content }: { content: string }) {
-  return <ReactMarkdown>{content}</ReactMarkdown>;
+function hasJSXContent(content: string): boolean {
+  // Check for common JSX/HTML patterns
+  return /<[A-Z][a-zA-Z]*[\s>]/.test(content) || // Component tags like <Callout>
+         /<details/.test(content) ||            // HTML details tag
+         /<summary/.test(content);              // HTML summary tag
+}
+
+/**
+ * Strip top-level MDX import/export lines from a content block.
+ */
+function stripMdxImports(content: string): string {
+  const lines = content.split("\n");
+  const result: string[] = [];
+  let inCodeFence = false;
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+
+    if (trimmed.startsWith("```")) {
+      inCodeFence = !inCodeFence;
+      result.push(line);
+      continue;
+    }
+
+    if (!inCodeFence && (trimmed.startsWith("import ") || trimmed.startsWith("export "))) {
+      continue;
+    }
+
+    result.push(line);
+  }
+
+  return result.join("\n");
+}
+
+const MDX_COMPONENTS = {
+  Callout,
+  Steps,
+  Tabs,
+  TabbedCodeBlock,
+  TableOfContents,
+  ToolFooter,
+  SignupLink,
+  DataTable,
+};
+
+const mdxCache = new Map<string, React.ComponentType<{ components?: typeof MDX_COMPONENTS }>>();
+
+/**
+ * Renders MDX content from a string with custom components.
+ */
+function MdxContent({ content }: { content: string }) {
+  const source = useMemo(() => stripMdxImports(content), [content]);
+  const [Component, setComponent] = useState<
+    React.ComponentType<{ components?: typeof MDX_COMPONENTS }> | null
+  >(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (mdxCache.has(source)) {
+      setComponent(() => mdxCache.get(source) ?? null);
+      return;
+    }
+
+    let cancelled = false;
+    setError(null);
+    setComponent(null);
+
+    evaluate(source, {
+      ...runtime,
+      remarkPlugins: [remarkGfm],
+      providerImportSource: "@mdx-js/react",
+      useDynamicImport: false,
+    })
+      .then((result) => {
+        if (cancelled) {
+          return;
+        }
+        mdxCache.set(source, result.default);
+        setComponent(() => result.default);
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "Failed to render MDX");
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [source]);
+
+  if (error) {
+    return (
+      <div className="my-3 rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+        Failed to render section: {error}
+      </div>
+    );
+  }
+
+  if (!Component) {
+    return null;
+  }
+
+  return (
+    <div className="prose prose-sm prose-invert max-w-none">
+      <Component components={MDX_COMPONENTS} />
+    </div>
+  );
 }
 
 /**
@@ -55,16 +169,16 @@ function ChunkContent({ chunk }: { chunk: DocumentationChunk }) {
     );
   }
 
-  // Handle plain markdown
-  if (type === "markdown") {
+  // Render complex MDX content directly
+  if (type === "section" || type === "markdown" || hasJSXContent(content)) {
     return (
       <div className="my-3">
-        <MarkdownContent content={content} />
+        <MdxContent content={content} />
       </div>
     );
   }
 
-  // Handle callout types (callout, info, tip, warning)
+  // Handle callout types (callout, info, tip, warning, error)
   // Determine the callout type from chunk type or variant
   let calloutType: "default" | "info" | "warning" | "error" = "default";
 
@@ -76,7 +190,7 @@ function ChunkContent({ chunk }: { chunk: DocumentationChunk }) {
 
   return (
     <Callout type={calloutType} title={title}>
-      <MarkdownContent content={content} />
+      <MdxContent content={content} />
     </Callout>
   );
 }

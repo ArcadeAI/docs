@@ -1,0 +1,969 @@
+{
+  "id": "GoogleDrive",
+  "label": "GoogleDrive",
+  "version": "5.1.0",
+  "description": "Arcade.dev LLM tools for Google Drive",
+  "metadata": {
+    "category": "development",
+    "iconUrl": "https://design-system.arcade.dev/icons/googledrive.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/development/googledrive",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": "google",
+    "allScopes": [
+      "https://www.googleapis.com/auth/drive.file",
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/userinfo.profile"
+    ]
+  },
+  "tools": [
+    {
+      "name": "CreateFolder",
+      "qualifiedName": "GoogleDrive.CreateFolder",
+      "fullyQualifiedName": "GoogleDrive.CreateFolder@5.1.0",
+      "description": "Create a new folder in Google Drive.\n\nBy default, parent folder paths are resolved in My Drive. For shared drives, use folder IDs\nor provide shared_drive_id.",
+      "parameters": [
+        {
+          "name": "folder_name",
+          "type": "string",
+          "required": true,
+          "description": "The name of the new folder to create",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "parent_folder_path_or_id",
+          "type": "string",
+          "required": false,
+          "description": "The parent folder path like folder/subfolder or folder ID where to create. If None, creates at the root of My Drive. If providing a path, it will be resolved within My Drive by default. Do not include the folder to create in this path. Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "shared_drive_id",
+          "type": "string",
+          "required": false,
+          "description": "If creating in a shared drive and using a parent folder path, provide the shared drive ID. Not needed when using folder IDs or creating in My Drive. Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Created folder information including ID, name, web view link, and location path"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleDrive.CreateFolder",
+        "parameters": {
+          "folder_name": {
+            "value": "ProjectDocumentation",
+            "type": "string",
+            "required": true
+          },
+          "parent_folder_path_or_id": {
+            "value": "Projects/2023",
+            "type": "string",
+            "required": false
+          },
+          "shared_drive_id": {
+            "value": "abc123xyz",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "DownloadFile",
+      "qualifiedName": "GoogleDrive.DownloadFile",
+      "fullyQualifiedName": "GoogleDrive.DownloadFile@5.1.0",
+      "description": "Download a blob file (non-workspace file) from Google Drive as base64 encoded content.\n\nFor small files (under ~5MB raw), returns the file content directly in the response as base64.\nFor large files, returns metadata with requires_chunked_download=True - use download_file_chunk\nto retrieve the file in parts.\n\nBy default, paths are resolved in My Drive. For shared drives, use file IDs or provide\nshared_drive_id.",
+      "parameters": [
+        {
+          "name": "file_path_or_id",
+          "type": "string",
+          "required": true,
+          "description": "The file path like folder/subfolder/filename or the file ID of the file to download Folders NOT supported. If providing a path, it will be resolved within 'My Drive' by default.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "shared_drive_id",
+          "type": "string",
+          "required": false,
+          "description": "If the file is in a shared drive and using a path, provide the shared drive ID. Not needed when using file IDs. Defaults to None (uses 'My Drive').",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "For small files (<5MB): file content (base64 encoded) and metadata. For large files: metadata with requires_chunked_download=True and instructions."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleDrive.DownloadFile",
+        "parameters": {
+          "file_path_or_id": {
+            "value": "1234567890abcdef",
+            "type": "string",
+            "required": true
+          },
+          "shared_drive_id": {
+            "value": "shared-drive-unique-id",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "DownloadFileChunk",
+      "qualifiedName": "GoogleDrive.DownloadFileChunk",
+      "fullyQualifiedName": "GoogleDrive.DownloadFileChunk@5.1.0",
+      "description": "Download a specific byte range of a file from Google Drive.\n\nUse this for large files that require chunked download (when download_file returns\nrequires_chunked_download=True). Call repeatedly with increasing start_byte values\nto retrieve the complete file.\n\nReturns the chunk content as base64, along with progress information including\nwhether this is the final chunk.",
+      "parameters": [
+        {
+          "name": "file_path_or_id",
+          "type": "string",
+          "required": true,
+          "description": "The file path like folder/subfolder/filename or the file ID to download a chunk from. If providing a path, it will be resolved within 'My Drive' by default.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_byte",
+          "type": "integer",
+          "required": true,
+          "description": "The starting byte position for this chunk (0-indexed).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "chunk_size",
+          "type": "integer",
+          "required": false,
+          "description": "The size of the chunk to download in bytes. Max 5MB (5242880). Defaults to 5MB (5242880).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "shared_drive_id",
+          "type": "string",
+          "required": false,
+          "description": "If the file is in a shared drive and using a path, provide the shared drive ID. Not needed when using file IDs. Defaults to None (uses 'My Drive').",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Chunk content (base64 encoded), byte range info, and progress details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleDrive.DownloadFileChunk",
+        "parameters": {
+          "file_path_or_id": {
+            "value": "1A2B3C4D5E6F7G8H9I0J",
+            "type": "string",
+            "required": true
+          },
+          "start_byte": {
+            "value": 0,
+            "type": "integer",
+            "required": true
+          },
+          "chunk_size": {
+            "value": 5242880,
+            "type": "integer",
+            "required": false
+          },
+          "shared_drive_id": {
+            "value": null,
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GenerateGoogleFilePickerUrl",
+      "qualifiedName": "GoogleDrive.GenerateGoogleFilePickerUrl",
+      "fullyQualifiedName": "GoogleDrive.GenerateGoogleFilePickerUrl@5.1.0",
+      "description": "Generate a Google File Picker URL for user-driven file selection and authorization.\n\nThis tool generates a URL that directs the end-user to a Google File Picker interface where\nwhere they can select or upload Google Drive files. Users can grant permission to access their\nDrive files, providing a secure and authorized way to interact with their files.\n\nThis is particularly useful when prior tools (e.g., those accessing or modifying\nGoogle Docs, Google Sheets, etc.) encountered failures due to file non-existence\n(Requested entity was not found) or permission errors. Once the user completes the file\npicker flow, the prior tool can be retried.\n\nSuggest this tool to users when they are surprised or confused that the file they are\nsearching for or attempting to access cannot be found.",
+      "parameters": [],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Google File Picker URL for user file selection and permission granting"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleDrive.GenerateGoogleFilePickerUrl",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetFileTreeStructure",
+      "qualifiedName": "GoogleDrive.GetFileTreeStructure",
+      "fullyQualifiedName": "GoogleDrive.GetFileTreeStructure@5.1.0",
+      "description": "Get the file/folder tree structure of the user's entire Google Drive.\nVery inefficient for large drives. Use with caution.",
+      "parameters": [
+        {
+          "name": "include_shared_drives",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to include shared drives in the file tree structure. Defaults to False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "restrict_to_shared_drive_id",
+          "type": "string",
+          "required": false,
+          "description": "If provided, only include files from this shared drive in the file tree structure. Defaults to None, which will include files and folders from all drives.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_organization_domain_documents",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to include documents from the organization's domain. This is applicable to admin users who have permissions to view organization-wide documents in a Google Workspace account. Defaults to False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "order_by",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Sort order. Defaults to listing the most recently modified documents first",
+          "enum": [
+            "createdTime",
+            "createdTime desc",
+            "folder",
+            "folder desc",
+            "modifiedByMeTime",
+            "modifiedByMeTime desc",
+            "modifiedTime",
+            "modifiedTime desc",
+            "name",
+            "name desc",
+            "name_natural",
+            "name_natural desc",
+            "quotaBytesUsed",
+            "quotaBytesUsed desc",
+            "recency",
+            "recency desc",
+            "sharedWithMeTime",
+            "sharedWithMeTime desc",
+            "starred",
+            "starred desc",
+            "viewedByMeTime",
+            "viewedByMeTime desc"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The number of files and folders to list. Defaults to None, which will list all files and folders.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing the file/folder tree structure in the user's Google Drive"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleDrive.GetFileTreeStructure",
+        "parameters": {
+          "include_shared_drives": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "restrict_to_shared_drive_id": {
+            "value": "123abc456def",
+            "type": "string",
+            "required": false
+          },
+          "include_organization_domain_documents": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "order_by": {
+            "value": [
+              "name",
+              "modifiedTime"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "MoveFile",
+      "qualifiedName": "GoogleDrive.MoveFile",
+      "fullyQualifiedName": "GoogleDrive.MoveFile@5.1.0",
+      "description": "Move a file or folder to a different folder within the same Google Drive.\n\nCan move to a folder (keeping name), or move and rename in one operation. By default, paths\nare resolved in My Drive. For shared drives, use file IDs or provide shared_drive_id.",
+      "parameters": [
+        {
+          "name": "source_file_path_or_id",
+          "type": "string",
+          "required": true,
+          "description": "The source file path like folder/subfolder/filename or the file ID of the file to move. If providing a path, it will be resolved within 'My Drive' by default.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "destination_folder_path_or_id",
+          "type": "string",
+          "required": false,
+          "description": "The path to the file's parent folder (exclude the file to be moved) or parent folder ID to move the file into. If None, moves to the root of the drive. Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "new_filename",
+          "type": "string",
+          "required": false,
+          "description": "Optional new name for the file after moving. If None, keeps the original name. Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "shared_drive_id",
+          "type": "string",
+          "required": false,
+          "description": "If working with paths in a shared drive, provide the shared drive ID. Not needed when using IDs. Defaults to None (uses My Drive).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Confirmation with the file's ID, name, and new location"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleDrive.MoveFile",
+        "parameters": {
+          "source_file_path_or_id": {
+            "value": "folder1/subfolder1/document.txt",
+            "type": "string",
+            "required": true
+          },
+          "destination_folder_path_or_id": {
+            "value": "folder2/subfolder2",
+            "type": "string",
+            "required": false
+          },
+          "new_filename": {
+            "value": "new_document.txt",
+            "type": "string",
+            "required": false
+          },
+          "shared_drive_id": {
+            "value": null,
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "RenameFile",
+      "qualifiedName": "GoogleDrive.RenameFile",
+      "fullyQualifiedName": "GoogleDrive.RenameFile@5.1.0",
+      "description": "Rename a file or folder in Google Drive.\n\nBy default, paths are resolved in My Drive. For files in shared drives, either use the file ID\ndirectly or provide the shared_drive_id parameter.",
+      "parameters": [
+        {
+          "name": "file_path_or_id",
+          "type": "string",
+          "required": true,
+          "description": "The path like folder/subfolder/filename or the file ID to rename. If providing a path, it will be resolved within 'My Drive' by default.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "new_filename",
+          "type": "string",
+          "required": true,
+          "description": "The new name for the file",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "shared_drive_id",
+          "type": "string",
+          "required": false,
+          "description": "If the file is in a shared drive and you're using a path (not ID), provide the shared drive ID to resolve the path within that drive. Not needed when using file IDs. Defaults to None (searches 'My Drive').",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Confirmation with the file's new name, ID, and web view link"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleDrive.RenameFile",
+        "parameters": {
+          "file_path_or_id": {
+            "value": "folder/subfolder/old_filename.txt",
+            "type": "string",
+            "required": true
+          },
+          "new_filename": {
+            "value": "new_filename.txt",
+            "type": "string",
+            "required": true
+          },
+          "shared_drive_id": {
+            "value": "12345abcd",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "SearchFiles",
+      "qualifiedName": "GoogleDrive.SearchFiles",
+      "fullyQualifiedName": "GoogleDrive.SearchFiles@5.1.0",
+      "description": "Search for files in Google Drive.\n\nThe provided 'query' should only contain the search terms.\nThe tool will construct the full search query for you.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": true,
+          "description": "The exact search query to send to the Google Drive API to find files in Google Drive. The tool will construct the query for you. Will search for filenames and file contents that match the provided query.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "folder_path_or_id",
+          "type": "string",
+          "required": false,
+          "description": "Search only within this specific folder. Provide either a path like folder/subfolder or a folder ID. If None, searches across all accessible locations. Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "shared_drive_id",
+          "type": "string",
+          "required": false,
+          "description": "If provided, search only within this shared drive. Defaults to None (searches My Drive and optionally all shared drives).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_shared_drives",
+          "type": "boolean",
+          "required": false,
+          "description": "If True and shared_drive_id is not set, include all shared drives in search. Defaults to False (My Drive only).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_organization_domain_documents",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to include documents from the organization's domain. This is applicable to admin users who have permissions to view organization-wide documents in a Google Workspace account. Defaults to False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "order_by",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Sort order for search results. Defaults to listing the most recently modified documents first. If the query contains 'fullText', then the order_by will be ignored.",
+          "enum": [
+            "createdTime",
+            "createdTime desc",
+            "folder",
+            "folder desc",
+            "modifiedByMeTime",
+            "modifiedByMeTime desc",
+            "modifiedTime",
+            "modifiedTime desc",
+            "name",
+            "name desc",
+            "name_natural",
+            "name_natural desc",
+            "quotaBytesUsed",
+            "quotaBytesUsed desc",
+            "recency",
+            "recency desc",
+            "sharedWithMeTime",
+            "sharedWithMeTime desc",
+            "starred",
+            "starred desc",
+            "viewedByMeTime",
+            "viewedByMeTime desc"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of search results to return. Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "file_types",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Filter by specific file types. Defaults to None, which includes all file types.",
+          "enum": [
+            "spreadsheet",
+            "slides",
+            "document",
+            "drawing",
+            "form",
+            "folder",
+            "image",
+            "video",
+            "audio",
+            "script",
+            "sites",
+            "pdf"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Search results containing matching files from Google Drive with metadata and file information"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleDrive.SearchFiles",
+        "parameters": {
+          "query": {
+            "value": "project plan",
+            "type": "string",
+            "required": true
+          },
+          "folder_path_or_id": {
+            "value": "2023/ProjectX",
+            "type": "string",
+            "required": false
+          },
+          "shared_drive_id": {
+            "value": "0B12abcDEfgHIJklMNO",
+            "type": "string",
+            "required": false
+          },
+          "include_shared_drives": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "include_organization_domain_documents": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "order_by": {
+            "value": [
+              "modifiedTime desc"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "limit": {
+            "value": 20,
+            "type": "integer",
+            "required": false
+          },
+          "file_types": {
+            "value": [
+              "application/vnd.google-apps.document",
+              "application/pdf"
+            ],
+            "type": "array",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ShareFile",
+      "qualifiedName": "GoogleDrive.ShareFile",
+      "fullyQualifiedName": "GoogleDrive.ShareFile@5.1.0",
+      "description": "Share a file or folder in Google Drive with specific people by granting them permissions.\n\nIf a user already has permission on the file, their role will be updated to the new role.\nBy default, paths are resolved in My Drive. For shared drives, use file IDs or provide\nshared_drive_id.",
+      "parameters": [
+        {
+          "name": "file_path_or_id",
+          "type": "string",
+          "required": true,
+          "description": "The file path like folder/subfolder/filename or the file ID to share. If providing a path, it will be resolved within My Drive by default.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "email_addresses",
+          "type": "array",
+          "innerType": "string",
+          "required": true,
+          "description": "List of email addresses like user@domain.com to share with",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "role",
+          "type": "string",
+          "required": false,
+          "description": "The permission role to grant. Defaults to reader (view-only).",
+          "enum": [
+            "reader",
+            "commenter",
+            "writer",
+            "owner"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "send_notification_email",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to send an email notification to the recipients. Defaults to True.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "message",
+          "type": "string",
+          "required": false,
+          "description": "Optional message to include in the notification email. Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "shared_drive_id",
+          "type": "string",
+          "required": false,
+          "description": "If the file is in a shared drive and using a path, provide the shared drive ID. Not needed when using file IDs. Defaults to None (uses My Drive).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Sharing confirmation with list of granted permissions including recipient emails and roles"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleDrive.ShareFile",
+        "parameters": {
+          "file_path_or_id": {
+            "value": "folder1/subfolder1/file1.pdf",
+            "type": "string",
+            "required": true
+          },
+          "email_addresses": {
+            "value": [
+              "user1@example.com",
+              "user2@example.com"
+            ],
+            "type": "array",
+            "required": true
+          },
+          "role": {
+            "value": "editor",
+            "type": "string",
+            "required": false
+          },
+          "send_notification_email": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "message": {
+            "value": "Please find the file attached.",
+            "type": "string",
+            "required": false
+          },
+          "shared_drive_id": {
+            "value": "abc123def456",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "UploadFile",
+      "qualifiedName": "GoogleDrive.UploadFile",
+      "fullyQualifiedName": "GoogleDrive.UploadFile@5.1.0",
+      "description": "Upload a file to Google Drive from a URL.\n\nFetches the file content from the provided URL and uploads it to Google Drive.\nSupports files of any size - uses resumable upload internally for large files.\n\nCANNOT upload Google Workspace files (Google Docs, Sheets, Slides)\nCANNOT upload files larger than 25MB",
+      "parameters": [
+        {
+          "name": "file_name",
+          "type": "string",
+          "required": true,
+          "description": "The name for the uploaded file",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "source_url",
+          "type": "string",
+          "required": true,
+          "description": "The public download URL to fetch the file content from. The tool will download from this URL and upload to Google Drive",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "mime_type",
+          "type": "string",
+          "required": false,
+          "description": "The file type. If not provided, will be inferred from the URL or Content-Type header. Supported: text (txt, csv, json, html, md), pdf, images (png, jpeg, gif). Defaults to None (auto-detect).",
+          "enum": [
+            "text/plain",
+            "text/csv",
+            "application/json",
+            "text/html",
+            "text/markdown",
+            "application/pdf",
+            "image/png",
+            "image/jpeg",
+            "image/gif",
+            "image/webp",
+            "image/svg+xml"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "destination_folder_path_or_id",
+          "type": "string",
+          "required": false,
+          "description": "The folder path like folder/subfolder or folder ID where to upload. If None, uploads to the root of 'My Drive'. If providing a path, it will be resolved within 'My Drive' by default. Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "shared_drive_id",
+          "type": "string",
+          "required": false,
+          "description": "If uploading to a folder in a shared drive using a path, provide the shared drive ID. Not needed when using folder IDs or uploading to My Drive. Defaults to None ('My Drive')",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Uploaded file information including ID, name, web view link, and location"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleDrive.UploadFile",
+        "parameters": {
+          "file_name": {
+            "value": "example_document.pdf",
+            "type": "string",
+            "required": true
+          },
+          "source_url": {
+            "value": "https://example.com/files/example_document.pdf",
+            "type": "string",
+            "required": true
+          },
+          "mime_type": {
+            "value": "application/pdf",
+            "type": "string",
+            "required": false
+          },
+          "destination_folder_path_or_id": {
+            "value": "Invoices/2023",
+            "type": "string",
+            "required": false
+          },
+          "shared_drive_id": {
+            "value": null,
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "GoogleDrive.WhoAmI",
+      "fullyQualifiedName": "GoogleDrive.WhoAmI@5.1.0",
+      "description": "Get comprehensive user profile and Google Drive environment information.\n\nThis tool provides detailed information about the authenticated user including\ntheir name, email, profile picture, Google Drive storage information, the shared\ndrives (and their IDs) the user has access to, and other\nimportant profile details from Google services.",
+      "parameters": [],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file",
+          "https://www.googleapis.com/auth/userinfo.profile",
+          "https://www.googleapis.com/auth/userinfo.email"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Get comprehensive user profile and Google Drive environment information."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleDrive.WhoAmI",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-01-26T17:32:25.869Z",
+  "summary": "Arcade.dev provides a toolkit for integrating with Google Drive, enabling seamless file management and user authentication. This toolkit allows developers to efficiently manage and interact with files and folders in Google Drive through a variety of LLM tools that streamline operations.\n\n**Capabilities**\n- Create, move, rename, and manage files and folders in Google Drive.\n- Upload, download, and share files securely with granular permissions.\n- Search for files and retrieve the complete file tree structure.\n- Generate a Google File Picker URL for user-driven file selection.\n\n**OAuth**\nProvider: Google\nScopes: https://www.googleapis.com/auth/drive.file, https://www.googleapis.com/auth/userinfo.email, https://www.googleapis.com/auth/userinfo.profile"
+}

@@ -1,0 +1,747 @@
+{
+  "id": "Sharepoint",
+  "label": "Sharepoint",
+  "version": "0.4.1",
+  "description": "Arcade.dev LLM tools for Microsoft SharePoint",
+  "metadata": {
+    "category": "development",
+    "iconUrl": "https://design-system.arcade.dev/icons/sharepoint.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/development/sharepoint",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": "microsoft",
+    "allScopes": [
+      "Sites.Read.All",
+      "User.Read"
+    ]
+  },
+  "tools": [
+    {
+      "name": "GetDrivesFromSite",
+      "qualifiedName": "Sharepoint.GetDrivesFromSite",
+      "fullyQualifiedName": "Sharepoint.GetDrivesFromSite@0.4.1",
+      "description": "Retrieve drives / document libraries from a SharePoint site.\n\nIf you have a site name, it is not necessary to call Sharepoint.SearchSites first. You can simply\ncall this tool with the site name / keywords.",
+      "parameters": [
+        {
+          "name": "site",
+          "type": "string",
+          "required": true,
+          "description": "Site ID, SharePoint URL, or site name to get drives from. Prefer using a site ID whenever available for optimal performance.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The drives from the SharePoint site."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Sharepoint.GetDrivesFromSite",
+        "parameters": {
+          "site": {
+            "value": "https://contoso.sharepoint.com/sites/Marketing",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetItemsFromList",
+      "qualifiedName": "Sharepoint.GetItemsFromList",
+      "fullyQualifiedName": "Sharepoint.GetItemsFromList@0.4.1",
+      "description": "Retrieve items from a list in a SharePoint site.\n\nNote: The Microsoft Graph API does not offer endpoints to retrieve list item attachments.\nBecause of that, the only information we can get is whether the item has attachments or not.",
+      "parameters": [
+        {
+          "name": "site",
+          "type": "string",
+          "required": true,
+          "description": "Site ID, SharePoint URL, or site name to get lists from. Prefer using a site ID whenever available for optimal performance.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "list_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the list to get items from.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The SharePoint list items."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Sharepoint.GetItemsFromList",
+        "parameters": {
+          "site": {
+            "value": "site-id-12345",
+            "type": "string",
+            "required": true
+          },
+          "list_id": {
+            "value": "list-id-67890",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetListsFromSite",
+      "qualifiedName": "Sharepoint.GetListsFromSite",
+      "fullyQualifiedName": "Sharepoint.GetListsFromSite@0.4.1",
+      "description": "Retrieve lists from a SharePoint site.",
+      "parameters": [
+        {
+          "name": "site",
+          "type": "string",
+          "required": true,
+          "description": "Site ID, SharePoint URL, or site name to get lists from. Prefer using a site ID whenever available for optimal performance.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The SharePoint site lists."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Sharepoint.GetListsFromSite",
+        "parameters": {
+          "site": {
+            "value": "https://contoso.sharepoint.com/sites/Marketing",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetPage",
+      "qualifiedName": "Sharepoint.GetPage",
+      "fullyQualifiedName": "Sharepoint.GetPage@0.4.1",
+      "description": "Retrieve metadata and the contents of a page in a SharePoint site.\n\nPage content is a list of Microsoft Sharepoint web part objects, such as text, images, banners,\nbuttons, etc.\n\nIf `include_page_content` is set to False, the tool will return only the page metadata.",
+      "parameters": [
+        {
+          "name": "site",
+          "type": "string",
+          "required": true,
+          "description": "Site ID, SharePoint URL, or site name to retrieve base pages from. Prefer using a site ID whenever available for optimal performance",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "page_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the page to retrieve.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_page_content",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to include the page content in the response. Defaults to True. If set to False, the tool will return only the page metadata.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The page from the SharePoint site."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Sharepoint.GetPage",
+        "parameters": {
+          "site": {
+            "value": "site-12345",
+            "type": "string",
+            "required": true
+          },
+          "page_id": {
+            "value": "page-67890",
+            "type": "string",
+            "required": true
+          },
+          "include_page_content": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetSite",
+      "qualifiedName": "Sharepoint.GetSite",
+      "fullyQualifiedName": "Sharepoint.GetSite@0.4.1",
+      "description": "Retrieve information about a specific SharePoint site by its ID, URL, or name.",
+      "parameters": [
+        {
+          "name": "site",
+          "type": "string",
+          "required": true,
+          "description": "Site ID, SharePoint URL, or site name to search for.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The SharePoint site information."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Sharepoint.GetSite",
+        "parameters": {
+          "site": {
+            "value": "https://example.sharepoint.com/sites/ProjectX",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListItemsInFolder",
+      "qualifiedName": "Sharepoint.ListItemsInFolder",
+      "fullyQualifiedName": "Sharepoint.ListItemsInFolder@0.4.1",
+      "description": "Retrieve items from a folder in a drive in a SharePoint site.\n\nNote: Due to how the Microsoft Graph API is designed, we have to retrieve all items, including the ones\nskipped by offset. For this reason, the tool execution time tends to increase with the offset value.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the drive to get items from.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "folder_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the folder to get items from.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The number of items to get. Defaults to 100, max is 500.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "The number of items to skip.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The items from the folder in the drive."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Sharepoint.ListItemsInFolder",
+        "parameters": {
+          "drive_id": {
+            "value": "12345-abcde-67890-fghij",
+            "type": "string",
+            "required": true
+          },
+          "folder_id": {
+            "value": "54321-jihgf-09876-fedcba",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 250,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListPages",
+      "qualifiedName": "Sharepoint.ListPages",
+      "fullyQualifiedName": "Sharepoint.ListPages@0.4.1",
+      "description": "Retrieve pages from a SharePoint site.\n\nThe Microsoft Graph API does not support pagination on this endpoint.",
+      "parameters": [
+        {
+          "name": "site",
+          "type": "string",
+          "required": true,
+          "description": "Site ID, SharePoint URL, or site name to retrieve base pages from. Prefer using a site ID whenever available for optimal performance.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of pages to return. Defaults to 10, max is 200.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The pages from the SharePoint site."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Sharepoint.ListPages",
+        "parameters": {
+          "site": {
+            "value": "site-id-12345",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 20,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListRootItemsInDrive",
+      "qualifiedName": "Sharepoint.ListRootItemsInDrive",
+      "fullyQualifiedName": "Sharepoint.ListRootItemsInDrive@0.4.1",
+      "description": "Retrieve items from the root of a drive in a SharePoint site.\n\nNote: Due to how the Microsoft Graph API is designed, we have to retrieve all items, including the ones\nskipped by offset. For this reason, the tool execution time tends to increase with the offset value.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the drive to get items from.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The number of items to get. Defaults to 100, max is 500.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "The number of items to skip.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The items from the root of a drive in a SharePoint site."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Sharepoint.ListRootItemsInDrive",
+        "parameters": {
+          "drive_id": {
+            "value": "12345abcdef",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 250,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListSites",
+      "qualifiedName": "Sharepoint.ListSites",
+      "fullyQualifiedName": "Sharepoint.ListSites@0.4.1",
+      "description": "List all SharePoint sites accessible to the current user.",
+      "parameters": [
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of sites to return. Defaults to 10, max is 100.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "The offset to start from.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The SharePoint sites matching the search criteria."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Sharepoint.ListSites",
+        "parameters": {
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "SearchDriveItems",
+      "qualifiedName": "Sharepoint.SearchDriveItems",
+      "fullyQualifiedName": "Sharepoint.SearchDriveItems@0.4.1",
+      "description": "Search for items in one or more Sharepoint drives.\n\nNote: when searching within a single Drive and/or Folder, due to how the Microsoft Graph API is designed,\nwe have to retrieve all items, including the ones skipped by offset. For this reason, the tool execution\ntime tends to increase with the offset value.",
+      "parameters": [
+        {
+          "name": "keywords",
+          "type": "string",
+          "required": true,
+          "description": "The keywords to search for files in the drive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": false,
+          "description": "Optionally, the ID of the drive to search items in. If not provided, the search will be performed in all drives.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "folder_id",
+          "type": "string",
+          "required": false,
+          "description": "Optionally narrow the search within a specific folder by its ID. If not provided, the search will be performed in the whole drive. If a folder_id is provided, it is required to provide a drive_id as well.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The number of files to get. Defaults to 50, max is 500.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "The number of files to skip.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The items from the drive(s)."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Sharepoint.SearchDriveItems",
+        "parameters": {
+          "keywords": {
+            "value": "project report",
+            "type": "string",
+            "required": true
+          },
+          "drive_id": {
+            "value": "12345678-90ab-cdef-1234-567890abcdef",
+            "type": "string",
+            "required": false
+          },
+          "folder_id": {
+            "value": "abcdef12-3456-7890-abcd-ef1234567890",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 100,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "SearchSites",
+      "qualifiedName": "Sharepoint.SearchSites",
+      "fullyQualifiedName": "Sharepoint.SearchSites@0.4.1",
+      "description": "Search for SharePoint sites by name or description.\n\nIn case you need to retrieve a specific site by its name, ID or SharePoint URL, use the\n`Sharepoint.GetSite` tool instead, passing the ID, name or SharePoint URL to it. If you use\nthe `Sharepoint.SearchSites` tool to retrieve a single site by its name, too much CO2 will be\nreleased in the atmosphere and you will contribute to catastrophic climate change.",
+      "parameters": [
+        {
+          "name": "keywords",
+          "type": "string",
+          "required": true,
+          "description": "The search term to find sites by name or description.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of sites to return. Defaults to 10, max is 100.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "The offset to start from.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The SharePoint sites matching the search criteria."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Sharepoint.SearchSites",
+        "parameters": {
+          "keywords": {
+            "value": "Project Management",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 5,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "Sharepoint.WhoAmI",
+      "fullyQualifiedName": "Sharepoint.WhoAmI@0.4.1",
+      "description": "Get information about the current user and their SharePoint environment.",
+      "parameters": [],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "User.Read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Get comprehensive user profile and SharePoint environment information."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Sharepoint.WhoAmI",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    }
+  ],
+  "documentationChunks": [
+    {
+      "type": "warning",
+      "location": "description",
+      "position": "after",
+      "content": "The SharePoint MCP Server requires a Microsoft 365 account. Personal Microsoft accounts are not supported."
+    }
+  ],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-01-26T17:41:02.555Z",
+  "summary": "Arcade.dev's SharePoint toolkit enables seamless integration with Microsoft SharePoint, enhancing productivity through advanced LLM tools. This toolkit provides developers with the capability to efficiently manage and retrieve information across various SharePoint resources.\n\n## Capabilities\n- Retrieve site, list, and drive information seamlessly.\n- Access and manage page content and associated metadata.\n- Execute specific searches for items within drives and sites.\n- Identify and list all accessible SharePoint sites for users.\n\n## OAuth\n**Provider:** Microsoft  \n**Scopes:** Sites.Read.All, User.Read\n\n## Secrets\nNo secret types or names are required for this toolkit."
+}

@@ -33,7 +33,8 @@ const normalizePageSize = (value?: number): number => {
   return Math.min(value, MAX_PAGE_SIZE);
 };
 
-const normalizeBaseUrl = (baseUrl: string): string => baseUrl.replace(/\/+$/, "");
+const normalizeBaseUrl = (baseUrl: string): string =>
+  baseUrl.replace(/\/+$/, "");
 
 const buildEndpointUrl = (baseUrl: string): string => {
   const normalized = normalizeBaseUrl(baseUrl);
@@ -65,7 +66,9 @@ export class EngineApiSource implements IToolDataSource {
     const url = new URL(this.endpoint);
     url.searchParams.set("limit", String(this.pageSize));
     url.searchParams.set("offset", String(offset));
-    const includeAllVersions = options?.version ? true : this.includeAllVersions;
+    const includeAllVersions = options?.version
+      ? true
+      : this.includeAllVersions;
     if (includeAllVersions) {
       url.searchParams.set("include_all_versions", "true");
     }
@@ -144,9 +147,7 @@ export class EngineApiSource implements IToolDataSource {
     }
   }
 
-  private async getErrorDetail(
-    response: Response
-  ): Promise<string | null> {
+  private async getErrorDetail(response: Response): Promise<string | null> {
     const contentType = response.headers.get("content-type") ?? "";
     if (!contentType.includes("application/json")) {
       return null;

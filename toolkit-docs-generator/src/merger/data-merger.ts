@@ -35,8 +35,18 @@ export interface DataMergerConfig {
   llmConcurrency?: number;
   /** Maximum concurrent toolkit processing (default: 3) */
   toolkitConcurrency?: number;
-  /** Progress callback for toolkit processing */
-  onToolkitProgress?: (toolkitId: string, status: "start" | "done") => void;
+  /** Progress callback for toolkit processing (extended with tool count) */
+  onToolkitProgress?:
+    | ((
+        toolkitId: string,
+        status: "start" | "done",
+        toolCount?: number
+      ) => void)
+    | undefined;
+  /** Callback when a toolkit is completed - for incremental writes */
+  onToolkitComplete?: ((result: MergeResult) => Promise<void>) | undefined;
+  /** Set of toolkit IDs to skip (for resume support) */
+  skipToolkitIds?: ReadonlySet<string> | undefined;
 }
 
 export interface MergeResult {
@@ -179,7 +189,9 @@ const buildToolkitSummarySignature = (toolkit: MergedToolkit): string =>
         qualifiedName: tool.qualifiedName,
         signature: buildToolSignature(tool),
       }))
-      .sort((left, right) => left.qualifiedName.localeCompare(right.qualifiedName)),
+      .sort((left, right) =>
+        left.qualifiedName.localeCompare(right.qualifiedName)
+      ),
   });
 
 const shouldReuseExample = (
@@ -436,8 +448,16 @@ export class DataMerger {
   private readonly llmConcurrency: number;
   private readonly toolkitConcurrency: number;
   private readonly onToolkitProgress:
-    | ((toolkitId: string, status: "start" | "done") => void)
+    | ((
+        toolkitId: string,
+        status: "start" | "done",
+        toolCount?: number
+      ) => void)
     | undefined;
+  private readonly onToolkitComplete:
+    | ((result: MergeResult) => Promise<void>)
+    | undefined;
+  private readonly skipToolkitIds: ReadonlySet<string>;
 
   constructor(config: DataMergerConfig) {
     this.toolkitDataSource = config.toolkitDataSource;
@@ -448,6 +468,8 @@ export class DataMerger {
     this.llmConcurrency = config.llmConcurrency ?? 5;
     this.toolkitConcurrency = config.toolkitConcurrency ?? 3;
     this.onToolkitProgress = config.onToolkitProgress;
+    this.onToolkitComplete = config.onToolkitComplete;
+    this.skipToolkitIds = config.skipToolkitIds ?? new Set();
   }
 
   private getPreviousToolkit(toolkitId: string): MergedToolkit | undefined {
@@ -483,7 +505,9 @@ export class DataMerger {
     }
 
     try {
-      const summary = await this.toolkitSummaryGenerator.generate(result.toolkit);
+      const summary = await this.toolkitSummaryGenerator.generate(
+        result.toolkit
+      );
       result.toolkit.summary = summary;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -534,36 +558,105 @@ export class DataMerger {
 
     const toolkitEntries = Array.from(allToolkitsData.entries());
 
+    // Filter out toolkits that should be skipped (for resume support)
+    const filteredEntries = toolkitEntries.filter(
+      ([toolkitId]) => !this.skipToolkitIds.has(toolkitId.toLowerCase())
+    );
+
     const results = await mapWithConcurrency(
-      toolkitEntries,
+      filteredEntries,
       async ([toolkitId, toolkitData]) => {
         this.onToolkitProgress?.(toolkitId, "start");
 
-        const customSections =
-          await this.customSectionsSource.getCustomSections(toolkitId);
+        try {
+          const customSections =
+            await this.customSectionsSource.getCustomSections(toolkitId);
 
-        const previousToolkit = this.getPreviousToolkit(toolkitId);
-        const result = await mergeToolkit(
-          toolkitId,
-          toolkitData.tools,
-          toolkitData.metadata,
-          customSections,
-          this.toolExampleGenerator,
-          {
-            ...(previousToolkit ? { previousToolkit } : {}),
-            llmConcurrency: this.llmConcurrency,
+          const previousToolkit = this.getPreviousToolkit(toolkitId);
+          const result = await mergeToolkit(
+            toolkitId,
+            toolkitData.tools,
+            toolkitData.metadata,
+            customSections,
+            this.toolExampleGenerator,
+            {
+              ...(previousToolkit ? { previousToolkit } : {}),
+              llmConcurrency: this.llmConcurrency,
+            }
+          );
+          await this.maybeGenerateSummary(result, previousToolkit);
+
+          // Write immediately if callback provided (incremental mode)
+          if (this.onToolkitComplete) {
+            await this.onToolkitComplete(result);
           }
-        );
-        await this.maybeGenerateSummary(result, previousToolkit);
 
-        this.onToolkitProgress?.(toolkitId, "done");
+          this.onToolkitProgress?.(
+            toolkitId,
+            "done",
+            result.toolkit.tools.length
+          );
 
-        return result;
+          return result;
+        } catch (error) {
+          // Report error but don't stop processing other toolkits
+          const message =
+            error instanceof Error ? error.message : String(error);
+          const errorResult: MergeResult = {
+            toolkit: {
+              id: toolkitId,
+              label: toolkitId,
+              version: "0.0.0",
+              description: null,
+              metadata: {
+                category: "development",
+                iconUrl: "",
+                isBYOC: false,
+                isPro: false,
+                type: "arcade",
+                docsLink: "",
+                isComingSoon: false,
+                isHidden: false,
+              },
+              auth: null,
+              tools: [],
+              documentationChunks: [],
+              customImports: [],
+              subPages: [],
+              generatedAt: new Date().toISOString(),
+            },
+            warnings: [`Error processing toolkit: ${message}`],
+          };
+
+          this.onToolkitProgress?.(toolkitId, "done", 0);
+
+          return errorResult;
+        }
       },
       this.toolkitConcurrency
     );
 
     return results;
+  }
+
+  /**
+   * Get the count of toolkits that will be processed (excluding skipped ones)
+   */
+  async getToolkitCount(): Promise<{
+    total: number;
+    toProcess: number;
+    skipped: number;
+  }> {
+    const allToolkitsData = await this.toolkitDataSource.fetchAllToolkitsData();
+    const total = allToolkitsData.size;
+    const skipped = Array.from(allToolkitsData.keys()).filter((id) =>
+      this.skipToolkitIds.has(id.toLowerCase())
+    ).length;
+    return {
+      total,
+      toProcess: total - skipped,
+      skipped,
+    };
   }
 }
 

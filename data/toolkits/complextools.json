@@ -1,0 +1,281 @@
+{
+  "id": "ComplexTools",
+  "label": "ComplexTools",
+  "version": "0.1.0",
+  "description": "",
+  "metadata": {
+    "category": "development",
+    "iconUrl": "https://design-system.arcade.dev/icons/complextools.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/development/complextools",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": null,
+  "tools": [
+    {
+      "name": "CreateOrder",
+      "qualifiedName": "ComplexTools.CreateOrder",
+      "fullyQualifiedName": "ComplexTools.CreateOrder@0.1.0",
+      "description": "Create a new order in the e-commerce system.\n\nNote: Understanding the request schema is necessary to properly create the stringified\nJSON input object for execution.\n\nModes:\n- GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't already have it.\n  Do NOT call repeatedly if you already received the schema.\n- EXECUTE: Creates the order with request body JSON, priority, and notification_email.\n  Priority must be: 'low', 'normal', 'high', or 'urgent'.\n\nIf you need the schema, call with mode='get_request_schema' ONCE, then execute.",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual order creation",
+          "enum": [
+            "get_request_schema",
+            "execute"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "priority",
+          "type": "string",
+          "required": true,
+          "description": "Order priority level. Required when mode is 'execute', ignored when mode is 'get_request_schema'. Valid values: 'low', 'normal', 'high', 'urgent'",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "notification_email",
+          "type": "string",
+          "required": true,
+          "description": "Email address for order notifications. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the order creation request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "gift_message",
+          "type": "string",
+          "required": false,
+          "description": "Optional gift message to include with the order. Only used when mode is 'execute'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "ComplexTools.CreateOrder",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "priority": {
+            "value": "normal",
+            "type": "string",
+            "required": true
+          },
+          "notification_email": {
+            "value": "customer@example.com",
+            "type": "string",
+            "required": true
+          },
+          "request_body": {
+            "value": "{\"item_id\": \"12345\", \"quantity\": 2, \"shipping_address\": \"123 Main St, Anytown, USA\"}",
+            "type": "string",
+            "required": false
+          },
+          "gift_message": {
+            "value": "Happy Birthday!",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "CreateUser",
+      "qualifiedName": "ComplexTools.CreateUser",
+      "fullyQualifiedName": "ComplexTools.CreateUser@0.1.0",
+      "description": "Create a new user in the system.\n\nNote: Understanding the request schema is necessary to properly create the stringified\nJSON input object for execution.\n\nModes:\n- GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't already have it.\n  Do NOT call repeatedly if you already received the schema.\n- EXECUTE: Creates the user with the provided request body JSON.\n\nIf you need the schema, call with mode='get_request_schema' ONCE, then execute.",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual user creation",
+          "enum": [
+            "get_request_schema",
+            "execute"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the user creation request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "ComplexTools.CreateUser",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "request_body": {
+            "value": "{\"username\":\"johndoe\",\"email\":\"johndoe@example.com\",\"password\":\"P@ssw0rd123\",\"first_name\":\"John\",\"last_name\":\"Doe\"}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetAvailableProducts",
+      "qualifiedName": "ComplexTools.GetAvailableProducts",
+      "fullyQualifiedName": "ComplexTools.GetAvailableProducts@0.1.0",
+      "description": "Retrieve a list of available products with their IDs and details.\n\nThis tool returns static product data that can be used when creating orders.\nEach product includes its UUID, name, category, and available customizations.\nUse the product IDs from this response when building order request bodies.",
+      "parameters": [],
+      "auth": null,
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "string",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "ComplexTools.GetAvailableProducts",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetCustomerInfo",
+      "qualifiedName": "ComplexTools.GetCustomerInfo",
+      "fullyQualifiedName": "ComplexTools.GetCustomerInfo@0.1.0",
+      "description": "Retrieve customer information by email address.\n\nThis tool returns customer details including their UUID, profile information,\nand preferences. The customer ID can be used when creating orders or users.\nThis is a simplified tool that returns static data for demonstration purposes.",
+      "parameters": [
+        {
+          "name": "customer_email",
+          "type": "string",
+          "required": true,
+          "description": "Email address of the customer to look up",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "string",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "ComplexTools.GetCustomerInfo",
+        "parameters": {
+          "customer_email": {
+            "value": "example.customer@mail.com",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetDiscountCodes",
+      "qualifiedName": "ComplexTools.GetDiscountCodes",
+      "fullyQualifiedName": "ComplexTools.GetDiscountCodes@0.1.0",
+      "description": "Retrieve a list of currently active discount codes.\n\nThis tool returns available discount codes that can be applied to orders,\nincluding their codes, descriptions, and discount percentages.\nUse these codes in the order creation request body.",
+      "parameters": [],
+      "auth": null,
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "string",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "ComplexTools.GetDiscountCodes",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetShippingRates",
+      "qualifiedName": "ComplexTools.GetShippingRates",
+      "fullyQualifiedName": "ComplexTools.GetShippingRates@0.1.0",
+      "description": "Get available shipping rates and estimated delivery times for a specific country.\n\nThis tool returns shipping options (standard, express, overnight, international)\nwith their costs and estimated delivery times based on the destination country.\nUse this information to choose an appropriate shipping method when creating orders.",
+      "parameters": [
+        {
+          "name": "country_code",
+          "type": "string",
+          "required": true,
+          "description": "ISO 3166-1 alpha-2 country code (e.g., 'US', 'GB', 'CA')",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "string",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "ComplexTools.GetShippingRates",
+        "parameters": {
+          "country_code": {
+            "value": "CA",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-01-26T17:27:46.761Z",
+  "summary": "ComplexTools provides an extensive toolkit for managing e-commerce operations, enabling seamless order creation, user management, and access to vital product information.\n\n### Capabilities\n- Create orders and manage user accounts efficiently.\n- Retrieve product data, customer information, active discount codes, and shipping rates.\n- Simple integration with static data for demonstration and development purposes.\n- Understand request schemas for effective API usage without redundancy.\n\n### Secrets\n- No secrets or sensitive information are utilized in this toolkit."
+}
