@@ -1,69 +1,121 @@
 import type { MetaRecord } from "nextra";
 
 const meta: MetaRecord = {
-  "*": {
-    theme: {
-      breadcrumb: true,
-      toc: true,
-      copyPage: true,
-    },
+  "airtableapi": {
+    title: "Airtable API",
+    href: "/en/resources/integrations/preview/airtableapi",
   },
-  asana: {
+  "asana": {
     title: "Asana",
+    href: "/en/resources/integrations/preview/asana",
   },
-  clickup: {
+  "asanaapi": {
+    title: "Asana API",
+    href: "/en/resources/integrations/preview/asanaapi",
+  },
+  "ashbyapi": {
+    title: "Ashby API",
+    href: "/en/resources/integrations/preview/ashbyapi",
+  },
+  "boxapi": {
+    title: "Box API",
+    href: "/en/resources/integrations/preview/boxapi",
+  },
+  "calendlyapi": {
+    title: "Calendly API",
+    href: "/en/resources/integrations/preview/calendlyapi",
+  },
+  "clickup": {
     title: "ClickUp",
+    href: "/en/resources/integrations/preview/clickup",
   },
-  closeio: {
-    title: "Close.io",
+  "clickupapi": {
+    title: "ClickUp API",
+    href: "/en/resources/integrations/preview/clickupapi",
   },
-  confluence: {
+  "confluence": {
     title: "Confluence",
+    href: "/en/resources/integrations/preview/confluence",
   },
-  dropbox: {
+  "dropbox": {
     title: "Dropbox",
+    href: "/en/resources/integrations/preview/dropbox",
   },
-  gmail: {
+  "figmaapi": {
+    title: "Figma API",
+    href: "/en/resources/integrations/preview/figmaapi",
+  },
+  "gmail": {
     title: "Gmail",
+    href: "/en/resources/integrations/preview/gmail",
   },
-  "google-calendar": {
+  "googlecalendar": {
     title: "Google Calendar",
+    href: "/en/resources/integrations/preview/googlecalendar",
   },
-  "google-contacts": {
+  "googlecontacts": {
     title: "Google Contacts",
+    href: "/en/resources/integrations/preview/googlecontacts",
   },
-  "google-docs": {
+  "googledocs": {
     title: "Google Docs",
+    href: "/en/resources/integrations/preview/googledocs",
   },
-  "google-drive": {
+  "googledrive": {
     title: "Google Drive",
+    href: "/en/resources/integrations/preview/googledrive",
   },
-  "google-sheets": {
+  "googlesheets": {
     title: "Google Sheets",
+    href: "/en/resources/integrations/preview/googlesheets",
   },
-  "google-slides": {
+  "googleslides": {
     title: "Google Slides",
+    href: "/en/resources/integrations/preview/googleslides",
   },
-  jira: {
+  "jira": {
     title: "Jira",
+    href: "/en/resources/integrations/preview/jira",
   },
-  linear: {
+  "linear": {
     title: "Linear",
+    href: "/en/resources/integrations/preview/linear",
   },
-  "mailchimp-marketing-api": {
-    title: "Mailchimp Marketing API",
+  "lumaapi": {
+    title: "Luma API",
+    href: "/en/resources/integrations/preview/lumaapi",
   },
-  notion: {
-    title: "Notion",
+  "sharepoint": {
+    title: "Microsoft SharePoint",
+    href: "/en/resources/integrations/preview/sharepoint",
   },
-  obsidian: {
-    title: "Obsidian",
+  "miroapi": {
+    title: "Miro API",
+    href: "/en/resources/integrations/preview/miroapi",
   },
-  "outlook-calendar": {
+  "outlookcalendar": {
     title: "Outlook Calendar",
+    href: "/en/resources/integrations/preview/outlookcalendar",
   },
-  "outlook-mail": {
+  "outlookmail": {
     title: "Outlook Mail",
+    href: "/en/resources/integrations/preview/outlookmail",
+  },
+  "squareupapi": {
+    title: "SquareUp API",
+    href: "/en/resources/integrations/preview/squareupapi",
+  },
+  "ticktickapi": {
+    title: "TickTick API",
+    href: "/en/resources/integrations/preview/ticktickapi",
+  },
+  "trelloapi": {
+    title: "Trello API",
+    href: "/en/resources/integrations/preview/trelloapi",
+  },
+  "xeroapi": {
+    title: "Xero API",
+    href: "/en/resources/integrations/preview/xeroapi",
   },
 };
 

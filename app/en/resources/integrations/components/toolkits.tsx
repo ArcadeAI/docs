@@ -14,20 +14,15 @@ import { ToolCard } from "./tool-card";
 import { TYPE_CONFIG, TYPE_DESCRIPTIONS } from "./type-config";
 import { useFilterStore, useToolkitFilters } from "./use-toolkit-filters";
 
-// Pattern: /en/mcp-servers/{category}/{tool} -> /en/resources/integrations/{category}/{tool}
+// Pattern: /en/mcp-servers/{category}/{tool} -> /en/resources/integrations/preview/{tool}
 const MCP_SERVER_PATTERN = /^\/en\/mcp-servers\/([^/]+)\/([^/]+)$/;
+// Pattern: /en/resources/integrations/{category}/{tool}
+const INTEGRATIONS_PATTERN = /^\/en\/resources\/integrations\/([^/]+)\/([^/]+)$/;
 
-// Map old MCP server paths to new integration paths
-function mapToNewIA(oldLink: string): string {
-  const match = oldLink.match(MCP_SERVER_PATTERN);
-
-  if (match) {
-    const [, category, tool] = match;
-    return `/en/resources/integrations/${category}/${tool}`;
-  }
-
-  // Return original link if it doesn't match the pattern
-  return oldLink;
+// Map toolkit paths to preview pages (JSON-rendered pages)
+function mapToPreviewPage(oldLink: string, toolkitId: string): string {
+  // Always use the preview page which renders from JSON data
+  return `/en/resources/integrations/preview/${toolkitId.toLowerCase()}`;
 }
 
 export default function Toolkits() {
@@ -139,7 +134,7 @@ export default function Toolkits() {
                       isComingSoon={toolkit.isComingSoon}
                       isPro={toolkit.isPro}
                       key={toolkit.id}
-                      link={mapToNewIA(toolkit.relativeDocsLink)}
+                      link={mapToPreviewPage(toolkit.relativeDocsLink, toolkit.id)}
                       name={toolkit.label}
                       type={toolkit.type}
                     />

@@ -467,6 +467,52 @@ const nextConfig: NextConfig = withLlmsTxt({
           destination: "/:locale/guides/create-tools/:path*",
           permanent: true,
         },
+        // Old integration category paths to new preview pages
+        {
+          source: "/:locale/resources/integrations/productivity/:toolkit",
+          destination: "/:locale/resources/integrations/preview/:toolkit",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/development/:toolkit",
+          destination: "/:locale/resources/integrations/preview/:toolkit",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/social-communication/:toolkit",
+          destination: "/:locale/resources/integrations/preview/:toolkit",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/entertainment/:toolkit",
+          destination: "/:locale/resources/integrations/preview/:toolkit",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/payments/:toolkit",
+          destination: "/:locale/resources/integrations/preview/:toolkit",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/search/:toolkit",
+          destination: "/:locale/resources/integrations/preview/:toolkit",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/sales/:toolkit",
+          destination: "/:locale/resources/integrations/preview/:toolkit",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/databases/:toolkit",
+          destination: "/:locale/resources/integrations/preview/:toolkit",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/customer-support/:toolkit",
+          destination: "/:locale/resources/integrations/preview/:toolkit",
+          permanent: true,
+        },
       ];
     },
     headers: async () => [

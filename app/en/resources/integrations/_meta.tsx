@@ -18,7 +18,7 @@ const meta: MetaRecord = {
   productivity: {
     title: "Productivity & Docs",
   },
-  "social-communication": {
+  social: {
     title: "Social & Communication",
   },
   entertainment: {
@@ -36,9 +36,6 @@ const meta: MetaRecord = {
   sales: {
     title: "Sales",
   },
-  databases: {
-    title: "Databases",
-  },
   "customer-support": {
     title: "Customer Support",
   },
@@ -50,7 +47,7 @@ const meta: MetaRecord = {
     title: "Contribute a Server",
   },
   preview: {
-    title: "Preview (Dev)",
+    title: "All Toolkits",
     display: "hidden",
   },
 };

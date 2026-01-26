@@ -1,43 +1,49 @@
-/** biome-ignore-all lint/style/useNamingConvention: This is ok for the meta file */
 import type { MetaRecord } from "nextra";
 
 const meta: MetaRecord = {
-  "*": {
-    theme: {
-      breadcrumb: true,
-      toc: true,
-      copyPage: true,
-    },
+  "exaapi": {
+    title: "Exa API",
+    href: "/en/resources/integrations/preview/exaapi",
   },
-  google_finance: {
+  "googlefinance": {
     title: "Google Finance",
+    href: "/en/resources/integrations/preview/googlefinance",
   },
-  google_flights: {
+  "googleflights": {
     title: "Google Flights",
+    href: "/en/resources/integrations/preview/googleflights",
   },
-  google_hotels: {
+  "googlehotels": {
     title: "Google Hotels",
+    href: "/en/resources/integrations/preview/googlehotels",
   },
-  google_jobs: {
+  "googlejobs": {
     title: "Google Jobs",
+    href: "/en/resources/integrations/preview/googlejobs",
   },
-  google_maps: {
+  "googlemaps": {
     title: "Google Maps",
+    href: "/en/resources/integrations/preview/googlemaps",
   },
-  google_news: {
+  "googlenews": {
     title: "Google News",
+    href: "/en/resources/integrations/preview/googlenews",
   },
-  google_search: {
+  "googlesearch": {
     title: "Google Search",
+    href: "/en/resources/integrations/preview/googlesearch",
   },
-  google_shopping: {
+  "googleshopping": {
     title: "Google Shopping",
+    href: "/en/resources/integrations/preview/googleshopping",
   },
-  walmart: {
+  "walmart": {
     title: "Walmart",
+    href: "/en/resources/integrations/preview/walmart",
   },
-  youtube: {
-    title: "YouTube",
+  "youtube": {
+    title: "Youtube",
+    href: "/en/resources/integrations/preview/youtube",
   },
 };
 
