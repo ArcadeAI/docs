@@ -30,7 +30,10 @@ export type DocumentationChunkLocation =
   | "auth"
   | "secrets"
   | "output"
-  | "footer";
+  | "footer"
+  | "before_available_tools"
+  | "after_available_tools"
+  | "custom_section";
 
 /**
  * Position relative to the location
@@ -446,7 +449,12 @@ export interface AvailableToolsTableProps {
   /** Scope filter helper text */
   scopeFilterDescription?: string;
   /** Default filter selection */
-  defaultFilter?: "all" | "has_scopes" | "no_scopes" | "has_secrets" | "no_secrets";
+  defaultFilter?:
+    | "all"
+    | "has_scopes"
+    | "no_scopes"
+    | "has_secrets"
+    | "no_secrets";
   /** Currently selected tool names */
   selectedTools?: Set<string>;
   /** Handler for toggling tool selection */

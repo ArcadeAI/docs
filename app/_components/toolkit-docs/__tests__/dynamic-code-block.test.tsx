@@ -1,11 +1,10 @@
 import { describe, expect, it } from "vitest";
-
-import type { ToolCodeExample } from "../types";
 import {
   buildToolInput,
   generateJavaScriptExample,
   generatePythonExample,
 } from "../components/DynamicCodeBlock";
+import type { ToolCodeExample } from "../types";
 
 describe("DynamicCodeBlock helpers", () => {
   it("builds tool input with placeholders for required values", () => {

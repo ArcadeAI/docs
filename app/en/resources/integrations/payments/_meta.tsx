@@ -1,15 +1,15 @@
 import type { MetaRecord } from "nextra";
 
 const meta: MetaRecord = {
-  "stripe": {
+  stripe: {
     title: "Stripe",
     href: "/en/resources/integrations/preview/stripe",
   },
-  "stripeapi": {
+  stripeapi: {
     title: "StripeApi",
     href: "/en/resources/integrations/preview/stripeapi",
   },
-  "zohobooksapi": {
+  zohobooksapi: {
     title: "ZohoBooksApi",
     href: "/en/resources/integrations/preview/zohobooksapi",
   },

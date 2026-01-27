@@ -15,31 +15,31 @@ const meta: MetaRecord = {
       copyPage: false,
     },
   },
-  "productivity": {
+  productivity: {
     title: "Productivity & Docs",
   },
-  "social": {
+  social: {
     title: "Social & Communication",
   },
-  "entertainment": {
+  entertainment: {
     title: "Entertainment",
   },
-  "development": {
+  development: {
     title: "Developer Tools",
   },
-  "payments": {
+  payments: {
     title: "Payments & Finance",
   },
-  "search": {
+  search: {
     title: "Search Tools",
   },
-  "sales": {
+  sales: {
     title: "Sales",
   },
   "customer-support": {
     title: "Customer Support",
   },
-  "others": {
+  others: {
     title: "Others",
   },
   "-- Submit your Server": {

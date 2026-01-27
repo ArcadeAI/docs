@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { normalizeScopes } from "../components/ScopesDisplay";
+import { normalizeScopes } from "../components/scopes-display";
 
 describe("ScopesDisplay helpers", () => {
   it("trims scope values and removes duplicates", () => {

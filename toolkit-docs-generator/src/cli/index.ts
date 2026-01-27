@@ -124,7 +124,8 @@ const getDefaultVerificationDir = (): string => {
   return resolve(cwd, "toolkit-docs-generator-verification");
 };
 
-const getDefaultLogDir = (): string => resolve(getDefaultVerificationDir(), "logs");
+const getDefaultLogDir = (): string =>
+  resolve(getDefaultVerificationDir(), "logs");
 
 const buildLogPaths = (logDir: string) => ({
   runLogPath: join(logDir, "runs.log"),
@@ -834,7 +835,9 @@ program
           );
 
           if (!hasChanges(detectedChanges)) {
-            spinner.succeed("No changes detected. All toolkits are up to date.");
+            spinner.succeed(
+              "No changes detected. All toolkits are up to date."
+            );
             console.log(chalk.green("\n✓ Nothing to regenerate.\n"));
 
             await appendLogEntry(logPaths.runLogPath, {
@@ -1670,7 +1673,11 @@ program
   .description(
     "Check for changes in tool definitions without generating (dry-run)"
   )
-  .option("-o, --output <dir>", "Previous output directory", getDefaultOutputDir())
+  .option(
+    "-o, --output <dir>",
+    "Previous output directory",
+    getDefaultOutputDir()
+  )
   .option("--log-dir <dir>", "Directory for run logs", getDefaultLogDir())
   .option("--mock-data-dir <dir>", "Path to mock data directory")
   .option("--metadata-file <file>", "Path to metadata JSON file")
@@ -1756,7 +1763,10 @@ program
 
         // Detect changes
         spinner.text = "Comparing tool definitions...";
-        const changeResult = detectChanges(currentToolkitTools, previousToolkits);
+        const changeResult = detectChanges(
+          currentToolkitTools,
+          previousToolkits
+        );
 
         spinner.stop();
 
@@ -1785,12 +1795,14 @@ program
           console.log();
 
           // Check if there are any changes
-          if (!hasChanges(changeResult)) {
-            console.log(chalk.green("✓ No changes detected. All toolkits are up to date.\n"));
-          } else {
+          if (hasChanges(changeResult)) {
             // Show changed toolkits
             const changedIds = getChangedToolkitIds(changeResult);
-            console.log(chalk.yellow(`⚠ ${changedIds.length} toolkit(s) need regeneration:\n`));
+            console.log(
+              chalk.yellow(
+                `⚠ ${changedIds.length} toolkit(s) need regeneration:\n`
+              )
+            );
 
             if (options.verbose) {
               // Detailed view
@@ -1839,6 +1851,12 @@ program
             console.log(
               chalk.dim(
                 'Run "generate --skip-unchanged" to only regenerate changed toolkits.'
+              )
+            );
+          } else {
+            console.log(
+              chalk.green(
+                "✓ No changes detected. All toolkits are up to date.\n"
               )
             );
           }

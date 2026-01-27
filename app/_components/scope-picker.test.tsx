@@ -17,7 +17,10 @@ describe("scope picker helpers", () => {
   it("builds required scopes for selected tools", () => {
     const selected = new Set(["SendEmail", "ListEmails"]);
 
-    expect(getRequiredScopes(tools, selected)).toEqual(["scope.read", "scope.send"]);
+    expect(getRequiredScopes(tools, selected)).toEqual([
+      "scope.read",
+      "scope.send",
+    ]);
   });
 
   it("returns empty scopes when no valid tools selected", () => {

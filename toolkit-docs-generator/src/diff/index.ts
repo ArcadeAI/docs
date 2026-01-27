@@ -5,13 +5,9 @@
  */
 
 export {
+  buildToolDefinitionSignature,
   type ChangeDetectionResult,
   type ChangeSummary,
-  type ToolChange,
-  type ToolChangeType,
-  type ToolkitChange,
-  type ToolkitChangeType,
-  buildToolDefinitionSignature,
   compareToolkit,
   compareTools,
   detectChanges,
@@ -19,4 +15,8 @@ export {
   formatDetailedChanges,
   getChangedToolkitIds,
   hasChanges,
+  type ToolChange,
+  type ToolChangeType,
+  type ToolkitChange,
+  type ToolkitChangeType,
 } from "./toolkit-diff.js";

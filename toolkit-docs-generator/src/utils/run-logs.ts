@@ -66,7 +66,9 @@ export const readFailedToolsReport = async (
 ): Promise<FailedToolsReport> => {
   const content = await readFile(filePath, "utf-8");
   const parsed = JSON.parse(content) as FailedToolsReport;
-  if (!parsed || !Array.isArray(parsed.toolkits) || !Array.isArray(parsed.tools)) {
+  if (
+    !(parsed && Array.isArray(parsed.toolkits) && Array.isArray(parsed.tools))
+  ) {
     throw new Error("Invalid failed tools report format.");
   }
   return parsed;

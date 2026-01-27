@@ -1,6 +1,6 @@
 /**
  * Scenario Test: Toolkit not returned by API but exists in docs
- * 
+ *
  * Verifies that when a toolkit is missing from API but exists in previous output:
  * - The toolkit is detected as removed
  * - It's logged but not deleted from output
@@ -58,7 +58,9 @@ describe("Scenario: Toolkit removed from API", () => {
     const result = detectChanges(currentToolkitTools, previousToolkits);
 
     expect(result.summary.removedToolkits).toBe(2);
-    expect(result.toolkitChanges.filter((c) => c.changeType === "removed")).toHaveLength(2);
+    expect(
+      result.toolkitChanges.filter((c) => c.changeType === "removed")
+    ).toHaveLength(2);
   });
 
   it("marks removed toolkits correctly", () => {
@@ -69,7 +71,9 @@ describe("Scenario: Toolkit removed from API", () => {
 
     const result = detectChanges(currentToolkitTools, previousToolkits);
 
-    const removedChange = result.toolkitChanges.find((c) => c.toolkitId === "OldKit");
+    const removedChange = result.toolkitChanges.find(
+      (c) => c.toolkitId === "OldKit"
+    );
     expect(removedChange?.changeType).toBe("removed");
     expect(removedChange?.currentToolCount).toBe(0);
     expect(removedChange?.previousToolCount).toBe(1);
@@ -83,9 +87,11 @@ describe("Scenario: Toolkit removed from API", () => {
 
     const result = detectChanges(currentToolkitTools, previousToolkits);
 
-    expect(result.toolkitChanges.some((c) => 
-      c.changeType === "removed" && c.toolkitId === "RemovedKit"
-    )).toBe(true);
+    expect(
+      result.toolkitChanges.some(
+        (c) => c.changeType === "removed" && c.toolkitId === "RemovedKit"
+      )
+    ).toBe(true);
   });
 
   it("does not count removed toolkits as needing regeneration", () => {

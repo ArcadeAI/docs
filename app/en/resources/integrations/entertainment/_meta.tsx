@@ -1,11 +1,11 @@
 import type { MetaRecord } from "nextra";
 
 const meta: MetaRecord = {
-  "imgflip": {
+  imgflip: {
     title: "Imgflip",
     href: "/en/resources/integrations/preview/imgflip",
   },
-  "spotify": {
+  spotify: {
     title: "Spotify",
     href: "/en/resources/integrations/preview/spotify",
   },

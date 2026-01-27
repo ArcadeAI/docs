@@ -92,8 +92,9 @@ const createItems = (): ToolMetadataItem[] => [
   },
 ];
 
-const createFetchStub = (items: ToolMetadataItem[], status = 200) => {
-  return async (input: RequestInfo | URL) => {
+const createFetchStub =
+  (items: ToolMetadataItem[], status = 200) =>
+  async (input: RequestInfo | URL) => {
     if (status !== 200) {
       return new Response("error", { status });
     }
@@ -133,18 +134,16 @@ const createFetchStub = (items: ToolMetadataItem[], status = 200) => {
       }
     );
   };
-};
 
-const createErrorFetchStub = (status: number, payload: unknown) => {
-  return async () =>
-    new Response(JSON.stringify(payload), {
-      status,
-      headers: { "Content-Type": "application/json" },
-    });
-};
+const createErrorFetchStub = (status: number, payload: unknown) => async () =>
+  new Response(JSON.stringify(payload), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
 
-const createInspectFetchStub = (inspect: (params: URLSearchParams) => void) => {
-  return async (input: RequestInfo | URL) => {
+const createInspectFetchStub =
+  (inspect: (params: URLSearchParams) => void) =>
+  async (input: RequestInfo | URL) => {
     const url = new URL(input.toString());
     inspect(url.searchParams);
     return new Response(
@@ -158,7 +157,6 @@ const createInspectFetchStub = (inspect: (params: URLSearchParams) => void) => {
       }
     );
   };
-};
 
 describe("EngineApiSource", () => {
   it("fetches and transforms tool metadata with pagination", async () => {

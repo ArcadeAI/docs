@@ -6,7 +6,10 @@ import { describe, expect, it } from "vitest";
 import { readToolkitData, readToolkitIndex } from "../toolkit-data";
 
 const loadFixture = async (fileName: string): Promise<string> => {
-  const fixturesDir = new URL("../../../toolkit-docs-generator/tests/fixtures/", import.meta.url);
+  const fixturesDir = new URL(
+    "../../../toolkit-docs-generator/tests/fixtures/",
+    import.meta.url
+  );
   const filePath = new URL(fileName, fixturesDir);
   return await readFile(filePath, "utf-8");
 };

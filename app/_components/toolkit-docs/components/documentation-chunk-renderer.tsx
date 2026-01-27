@@ -9,7 +9,6 @@ import remarkGfm from "remark-gfm";
 
 import { SignupLink } from "../../analytics";
 import TabbedCodeBlock from "../../tabbed-code-block";
-import DataTable from "./DataTable";
 import TableOfContents from "../../table-of-contents";
 import ToolFooter from "../../tool-footer";
 import type {
@@ -18,11 +17,15 @@ import type {
   DocumentationChunkPosition,
   DocumentationChunkRendererProps,
 } from "../types";
+import DataTable from "./data-table";
 
 /**
  * Maps chunk types to Nextra Callout types
  */
-const CALLOUT_TYPE_MAP: Record<string, "default" | "info" | "warning" | "error"> = {
+const CALLOUT_TYPE_MAP: Record<
+  string,
+  "default" | "info" | "warning" | "error"
+> = {
   callout: "default",
   info: "info",
   tip: "info",
@@ -33,7 +36,10 @@ const CALLOUT_TYPE_MAP: Record<string, "default" | "info" | "warning" | "error">
 /**
  * Maps chunk variants to Nextra Callout types
  */
-const VARIANT_TYPE_MAP: Record<string, "default" | "info" | "warning" | "error"> = {
+const VARIANT_TYPE_MAP: Record<
+  string,
+  "default" | "info" | "warning" | "error"
+> = {
   default: "default",
   info: "info",
   success: "info",
@@ -41,14 +47,21 @@ const VARIANT_TYPE_MAP: Record<string, "default" | "info" | "warning" | "error">
   destructive: "error",
 };
 
+// Regex patterns for detecting JSX/HTML content
+const COMPONENT_TAG_REGEX = /<[A-Z][a-zA-Z]*[\s>]/;
+const DETAILS_TAG_REGEX = /<details/;
+const SUMMARY_TAG_REGEX = /<summary/;
+
 /**
  * Checks if content contains JSX/HTML tags
  */
 function hasJSXContent(content: string): boolean {
   // Check for common JSX/HTML patterns
-  return /<[A-Z][a-zA-Z]*[\s>]/.test(content) || // Component tags like <Callout>
-         /<details/.test(content) ||            // HTML details tag
-         /<summary/.test(content);              // HTML summary tag
+  return (
+    COMPONENT_TAG_REGEX.test(content) || // Component tags like <Callout>
+    DETAILS_TAG_REGEX.test(content) || // HTML details tag
+    SUMMARY_TAG_REGEX.test(content)
+  ); // HTML summary tag
 }
 
 /**
@@ -68,7 +81,10 @@ function stripMdxImports(content: string): string {
       continue;
     }
 
-    if (!inCodeFence && (trimmed.startsWith("import ") || trimmed.startsWith("export "))) {
+    if (
+      !inCodeFence &&
+      (trimmed.startsWith("import ") || trimmed.startsWith("export "))
+    ) {
       continue;
     }
 
@@ -89,16 +105,19 @@ const MDX_COMPONENTS = {
   DataTable,
 };
 
-const mdxCache = new Map<string, React.ComponentType<{ components?: typeof MDX_COMPONENTS }>>();
+const mdxCache = new Map<
+  string,
+  React.ComponentType<{ components?: typeof MDX_COMPONENTS }>
+>();
 
 /**
  * Renders MDX content from a string with custom components.
  */
 function MdxContent({ content }: { content: string }) {
   const source = useMemo(() => stripMdxImports(content), [content]);
-  const [Component, setComponent] = useState<
-    React.ComponentType<{ components?: typeof MDX_COMPONENTS }> | null
-  >(null);
+  const [Component, setComponent] = useState<React.ComponentType<{
+    components?: typeof MDX_COMPONENTS;
+  }> | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -114,8 +133,6 @@ function MdxContent({ content }: { content: string }) {
     evaluate(source, {
       ...runtime,
       remarkPlugins: [remarkGfm],
-      providerImportSource: "@mdx-js/react",
-      useDynamicImport: false,
     })
       .then((result) => {
         if (cancelled) {
@@ -137,7 +154,7 @@ function MdxContent({ content }: { content: string }) {
 
   if (error) {
     return (
-      <div className="my-3 rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+      <div className="my-3 rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-red-300 text-sm">
         Failed to render section: {error}
       </div>
     );
@@ -164,13 +181,13 @@ function ChunkContent({ chunk }: { chunk: DocumentationChunk }) {
   if (type === "code") {
     return (
       <pre className="my-3 overflow-x-auto rounded-md bg-gray-900 p-4">
-        <code className="font-mono text-sm text-gray-100">{content}</code>
+        <code className="font-mono text-gray-100 text-sm">{content}</code>
       </pre>
     );
   }
 
   // Render complex MDX content directly
-  if (type === "section" || type === "markdown" || hasJSXContent(content)) {
+  if (type === "markdown" || hasJSXContent(content)) {
     return (
       <div className="my-3">
         <MdxContent content={content} />
@@ -189,7 +206,7 @@ function ChunkContent({ chunk }: { chunk: DocumentationChunk }) {
   }
 
   return (
-    <Callout type={calloutType} title={title}>
+    <Callout title={title} type={calloutType}>
       <MdxContent content={content} />
     </Callout>
   );

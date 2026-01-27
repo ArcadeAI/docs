@@ -479,7 +479,8 @@ const nextConfig: NextConfig = withLlmsTxt({
           permanent: true,
         },
         {
-          source: "/:locale/resources/integrations/social-communication/:toolkit",
+          source:
+            "/:locale/resources/integrations/social-communication/:toolkit",
           destination: "/:locale/resources/integrations/preview/:toolkit",
           permanent: true,
         },

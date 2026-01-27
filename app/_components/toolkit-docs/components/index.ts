@@ -2,11 +2,14 @@
  * Toolkit Documentation Components
  */
 
-export { DocumentationChunkRenderer, hasChunksAt } from "./DocumentationChunkRenderer";
-export { DynamicCodeBlock } from "./DynamicCodeBlock";
 export { AvailableToolsTable } from "./AvailableToolsTable";
-export { ParametersTable } from "./ParametersTable";
-export { ScopesDisplay } from "./ScopesDisplay";
-export { ToolSection } from "./ToolSection";
-export { ToolkitHeader } from "./ToolkitHeader";
-export { ToolkitPage } from "./ToolkitPage";
+export {
+  DocumentationChunkRenderer,
+  hasChunksAt,
+} from "./documentation-chunk-renderer";
+export { DynamicCodeBlock } from "./DynamicCodeBlock";
+export { ParametersTable } from "./parameters-table";
+export { ScopesDisplay } from "./scopes-display";
+export { ToolkitHeader } from "./toolkit-header";
+export { ToolkitPage } from "./toolkit-page";
+export { ToolSection } from "./tool-section";

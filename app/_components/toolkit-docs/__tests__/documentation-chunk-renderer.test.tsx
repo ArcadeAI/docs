@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
-
+import { hasChunksAt } from "../components/documentation-chunk-renderer";
 import type { DocumentationChunk } from "../types";
-import { hasChunksAt } from "../components/DocumentationChunkRenderer";
 
 /**
  * Unit tests for DocumentationChunkRenderer utility functions

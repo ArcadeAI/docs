@@ -1,6 +1,6 @@
 /**
  * Scenario Test: New toolkit is added
- * 
+ *
  * Verifies that when a new toolkit appears in the API:
  * - A new toolkit JSON file is created
  * - The toolkit appears in index.json
@@ -13,11 +13,17 @@ import { describe, expect, it } from "vitest";
 
 import { createJsonGenerator } from "../../src/generator/index.js";
 import { createDataMerger } from "../../src/merger/data-merger.js";
-import { EmptyCustomSectionsSource, InMemoryMetadataSource, InMemoryToolDataSource } from "../../src/sources/in-memory.js";
+import {
+  EmptyCustomSectionsSource,
+  InMemoryMetadataSource,
+  InMemoryToolDataSource,
+} from "../../src/sources/in-memory.js";
 import { createCombinedToolkitDataSource } from "../../src/sources/toolkit-data-source.js";
 import type { ToolDefinition, ToolkitMetadata } from "../../src/types/index.js";
 
-const createTool = (overrides: Partial<ToolDefinition> = {}): ToolDefinition => ({
+const createTool = (
+  overrides: Partial<ToolDefinition> = {}
+): ToolDefinition => ({
   name: "TestTool",
   qualifiedName: "NewKit.TestTool",
   fullyQualifiedName: "NewKit.TestTool@1.0.0",
@@ -60,17 +66,27 @@ describe("Scenario: New toolkit is added", () => {
       });
 
       const results = await merger.mergeAllToolkits();
-      const genResult = await generator.generateAll(results.map((r) => r.toolkit));
+      const genResult = await generator.generateAll(
+        results.map((r) => r.toolkit)
+      );
 
       expect(genResult.errors).toHaveLength(0);
       expect(genResult.filesWritten.length).toBeGreaterThan(0);
-      expect(genResult.filesWritten.some((f) => f.includes("newkit.json"))).toBe(true);
-      expect(genResult.filesWritten.some((f) => f.includes("index.json"))).toBe(true);
+      expect(
+        genResult.filesWritten.some((f) => f.includes("newkit.json"))
+      ).toBe(true);
+      expect(genResult.filesWritten.some((f) => f.includes("index.json"))).toBe(
+        true
+      );
 
-      const toolkitFile = genResult.filesWritten.find((f) => f.includes("newkit.json"));
+      const toolkitFile = genResult.filesWritten.find((f) =>
+        f.includes("newkit.json")
+      );
       expect(toolkitFile).toBeDefined();
 
-      const indexFile = genResult.filesWritten.find((f) => f.includes("index.json"));
+      const indexFile = genResult.filesWritten.find((f) =>
+        f.includes("index.json")
+      );
       expect(indexFile).toBeDefined();
     });
   });
@@ -92,7 +108,9 @@ describe("Scenario: New toolkit is added", () => {
 
       expect(results[0]?.toolkit.metadata.category).toBe("development");
       expect(results[0]?.toolkit.metadata.type).toBe("arcade");
-      expect(results[0]?.warnings.some((w) => w.includes("No metadata found"))).toBe(true);
+      expect(
+        results[0]?.warnings.some((w) => w.includes("No metadata found"))
+      ).toBe(true);
     });
   });
 
@@ -126,7 +144,9 @@ describe("Scenario: New toolkit is added", () => {
 
       expect(results[0]?.toolkit.metadata.category).toBe("productivity");
       expect(results[0]?.toolkit.label).toBe("New Kit");
-      expect(results[0]?.warnings.some((w) => w.includes("No metadata found"))).toBe(false);
+      expect(
+        results[0]?.warnings.some((w) => w.includes("No metadata found"))
+      ).toBe(false);
     });
   });
 });

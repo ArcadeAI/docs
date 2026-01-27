@@ -1,6 +1,6 @@
-import type { ToolkitData } from "../types";
 import { readToolkitData } from "@/app/_lib/toolkit-data";
-import { ToolkitPage } from "./ToolkitPage";
+import type { ToolkitData } from "../types";
+import { ToolkitPage } from "./toolkit-page";
 
 type ToolkitDocsPreviewProps = {
   toolkitId: string;

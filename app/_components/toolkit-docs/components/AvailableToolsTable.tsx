@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { SCROLLING_CELL } from "../constants";
 import type { AvailableToolsTableProps, SecretType } from "../types";
-import { normalizeScopes } from "./ScopesDisplay";
+import { normalizeScopes } from "./scopes-display";
 
 /**
  * A cell content wrapper that auto-scrolls on hover when content overflows.
@@ -40,13 +40,18 @@ function ScrollingCell({
         setIsOverflowing(overflow > 0);
         setScrollOffset(overflow + SCROLLING_CELL.extraPadding);
         // Calculate duration based on scroll distance
-        setDuration(Math.max(SCROLLING_CELL.minDurationMs, (overflow + SCROLLING_CELL.extraPadding) / pixelsPerSecond * 1000));
+        setDuration(
+          Math.max(
+            SCROLLING_CELL.minDurationMs,
+            ((overflow + SCROLLING_CELL.extraPadding) / pixelsPerSecond) * 1000
+          )
+        );
       }
     };
     checkOverflow();
     window.addEventListener("resize", checkOverflow);
     return () => window.removeEventListener("resize", checkOverflow);
-  }, [children, pixelsPerSecond]);
+  }, [pixelsPerSecond]);
 
   const handleMouseEnter = () => {
     if (isOverflowing) {
@@ -64,13 +69,14 @@ function ScrollingCell({
     setIsHovered(false);
   };
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       if (hoverTimeoutRef.current) {
         clearTimeout(hoverTimeoutRef.current);
       }
-    };
-  }, []);
+    },
+    []
+  );
 
   return (
     <div
@@ -85,7 +91,9 @@ function ScrollingCell({
         style={
           isOverflowing
             ? ({
-                transform: isHovered ? `translateX(-${scrollOffset}px)` : "translateX(0)",
+                transform: isHovered
+                  ? `translateX(-${scrollOffset}px)`
+                  : "translateX(0)",
                 transitionProperty: "transform",
                 transitionDuration: `${isHovered ? duration : SCROLLING_CELL.returnDurationMs}ms`,
               } as React.CSSProperties)
@@ -140,7 +148,7 @@ const DEFAULT_SECRET_LABELS: Record<SecretType, string> = {
 
 function normalizeBaseUrl(baseUrl?: string): string | undefined {
   if (!baseUrl) {
-    return undefined;
+    return;
   }
   return baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
 }
@@ -196,7 +204,7 @@ export function sortTools(
   const countSecrets = (tool: (typeof tools)[number]): number => {
     const names = [
       ...(tool.secrets ?? []),
-      ...((tool.secretsInfo ?? []).map((secret) => secret.name)),
+      ...(tool.secretsInfo ?? []).map((secret) => secret.name),
     ];
     return new Set(names).size;
   };
@@ -210,21 +218,27 @@ export function sortTools(
       return sorted.sort((a, b) => {
         const aScopes = (a.scopes ?? []).length;
         const bScopes = (b.scopes ?? []).length;
-        if (aScopes !== bScopes) return bScopes - aScopes;
+        if (aScopes !== bScopes) {
+          return bScopes - aScopes;
+        }
         return a.name.localeCompare(b.name);
       });
     case "secrets_first":
       return sorted.sort((a, b) => {
         const aSecrets = countSecrets(a);
         const bSecrets = countSecrets(b);
-        if (aSecrets !== bSecrets) return bSecrets - aSecrets;
+        if (aSecrets !== bSecrets) {
+          return bSecrets - aSecrets;
+        }
         return a.name.localeCompare(b.name);
       });
     case "selected_first":
       return sorted.sort((a, b) => {
         const aSelected = selectedTools?.has(a.name) ? 1 : 0;
         const bSelected = selectedTools?.has(b.name) ? 1 : 0;
-        if (aSelected !== bSelected) return bSelected - aSelected;
+        if (aSelected !== bSelected) {
+          return bSelected - aSelected;
+        }
         return a.name.localeCompare(b.name);
       });
     default:
@@ -241,11 +255,7 @@ export function filterTools(
   const normalizedQuery = query.trim().toLowerCase();
 
   return tools.filter((tool) => {
-    const haystack = [
-      tool.name,
-      tool.qualifiedName,
-      tool.description ?? "",
-    ]
+    const haystack = [tool.name, tool.qualifiedName, tool.description ?? ""]
       .join(" ")
       .toLowerCase();
     const matchesQuery =
@@ -277,7 +287,6 @@ export function filterTools(
         return hasSecrets;
       case "no_secrets":
         return !hasSecrets;
-      case "all":
       default:
         return true;
     }
@@ -319,9 +328,7 @@ export function AvailableToolsTable({
 }: AvailableToolsTableProps) {
   if (!tools || tools.length === 0) {
     return (
-      <p className="my-3 text-muted-foreground text-sm">
-        No tools available.
-      </p>
+      <p className="my-3 text-muted-foreground text-sm">No tools available.</p>
     );
   }
 
@@ -330,7 +337,7 @@ export function AvailableToolsTable({
   const [sort, setSort] = useState<AvailableToolsSort>("name_asc");
   const [selectedScopes, setSelectedScopes] = useState<string[]>([]);
 
-  const availableScopes = useMemo(() => {
+  const _availableScopes = useMemo(() => {
     const allScopes = tools.flatMap((tool) =>
       buildScopeDisplayItems(tool.scopes ?? [])
     );
@@ -342,7 +349,7 @@ export function AvailableToolsTable({
     return sortTools(filtered, sort, selectedTools);
   }, [tools, query, filter, selectedScopes, sort, selectedTools]);
 
-  const toggleScope = (scope: string) => {
+  const _toggleScope = (scope: string) => {
     setSelectedScopes((current) => {
       if (current.includes(scope)) {
         return current.filter((item) => item !== scope);
@@ -351,7 +358,7 @@ export function AvailableToolsTable({
     });
   };
 
-  const clearScopes = () => {
+  const _clearScopes = () => {
     setSelectedScopes([]);
   };
 
@@ -362,7 +369,7 @@ export function AvailableToolsTable({
           {enableSearch && (
             <div className="relative flex-1">
               <svg
-                className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
@@ -372,7 +379,7 @@ export function AvailableToolsTable({
                 <path d="m21 21-4.35-4.35" strokeLinecap="round" />
               </svg>
               <input
-                className="w-full rounded-lg border border-neutral-dark-high bg-neutral-dark/60 py-2.5 pl-10 pr-4 text-sm transition-colors focus:border-brand-accent focus:outline-none"
+                className="w-full rounded-lg border border-neutral-dark-high bg-neutral-dark/60 py-2.5 pr-4 pl-10 text-sm transition-colors focus:border-brand-accent focus:outline-none"
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder={searchPlaceholder}
                 type="search"
@@ -405,9 +412,11 @@ export function AvailableToolsTable({
             <option value="name_asc">Name A-Z</option>
             <option value="name_desc">Name Z-A</option>
             <option value="secrets_first">Requires secrets first</option>
-            {showSelection && <option value="selected_first">Selected first</option>}
+            {showSelection && (
+              <option value="selected_first">Selected first</option>
+            )}
           </select>
-          <span className="whitespace-nowrap rounded-full bg-neutral-dark-medium px-3 py-1 text-xs text-muted-foreground">
+          <span className="whitespace-nowrap rounded-full bg-neutral-dark-medium px-3 py-1 text-muted-foreground text-xs">
             {filteredTools.length} of {tools.length}
           </span>
         </div>
@@ -423,17 +432,17 @@ export function AvailableToolsTable({
               <thead>
                 <tr className="bg-gradient-to-r from-neutral-dark to-neutral-dark/80">
                   {showSelection && (
-                    <th className="sticky left-0 z-10 w-[50px] bg-neutral-dark px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider text-neutral-light-high/80">
+                    <th className="sticky left-0 z-10 w-[50px] bg-neutral-dark px-3 py-3 text-center font-semibold text-neutral-light-high/80 text-xs uppercase tracking-wider">
                       <Check className="mx-auto h-3.5 w-3.5" />
                     </th>
                   )}
-                  <th className="w-[200px] min-w-[180px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-light-high/80">
+                  <th className="w-[200px] min-w-[180px] px-4 py-3 text-left font-semibold text-neutral-light-high/80 text-xs uppercase tracking-wider">
                     Tool name
                   </th>
-                  <th className="min-w-[200px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-light-high/80">
+                  <th className="min-w-[200px] px-4 py-3 text-left font-semibold text-neutral-light-high/80 text-xs uppercase tracking-wider">
                     Description
                   </th>
-                  <th className="w-[120px] min-w-[100px] px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-light-high/80">
+                  <th className="w-[120px] min-w-[100px] px-4 py-3 text-left font-semibold text-neutral-light-high/80 text-xs uppercase tracking-wider">
                     <span className="inline-flex items-center gap-1.5">
                       <KeyRound className="h-3.5 w-3.5" />
                       {secretsColumnLabel}
@@ -444,7 +453,10 @@ export function AvailableToolsTable({
               <tbody className="divide-y divide-neutral-dark-high/30">
                 {filteredTools.map((tool, index) => {
                   const scopes = buildScopeDisplayItems(tool.scopes ?? []);
-                  const { visibleItems, remainingCount } = truncateItems(scopes, 2);
+                  const { visibleItems, remainingCount } = truncateItems(
+                    scopes,
+                    2
+                  );
                   const secretItems = buildSecretDisplayItems(tool, {
                     secretsDisplay,
                     secretTypeLabels,
@@ -511,7 +523,9 @@ export function AvailableToolsTable({
                       </td>
                       <td className="px-4 py-3.5">
                         {secretItems.length === 0 ? (
-                          <span className="text-xs text-muted-foreground/60">—</span>
+                          <span className="text-muted-foreground/60 text-xs">
+                            —
+                          </span>
                         ) : (
                           <div className="flex flex-col gap-1">
                             {secretItems.map((item) =>
@@ -527,7 +541,7 @@ export function AvailableToolsTable({
                                 </a>
                               ) : (
                                 <code
-                                  className="block rounded-md border border-red-400/30 bg-red-500/10 px-2 py-1 text-xs text-red-300"
+                                  className="block rounded-md border border-red-400/30 bg-red-500/10 px-2 py-1 text-red-300 text-xs"
                                   key={item.label}
                                 >
                                   {item.label}

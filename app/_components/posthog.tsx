@@ -8,8 +8,11 @@ import { useEffect } from "react";
 
 function createNoopPosthogClient() {
   return {
+    // biome-ignore lint/suspicious/noEmptyBlockStatements: Intentional no-op for disabled analytics
     capture: () => {},
+    // biome-ignore lint/suspicious/noEmptyBlockStatements: Intentional no-op for disabled analytics
     identify: () => {},
+    // biome-ignore lint/suspicious/noEmptyBlockStatements: Intentional no-op for disabled analytics
     reset: () => {},
     // biome-ignore lint/suspicious/noExplicitAny: Minimal no-op client for disabled analytics
   } as any;
@@ -20,7 +23,7 @@ export const PostHog = ({ children }: { children: React.ReactNode }) => {
   const isEnabled = Boolean(process.env.NEXT_PUBLIC_POSTHOG_KEY);
 
   useEffect(() => {
-    if (isEnabled) {
+    if (isEnabled && process.env.NEXT_PUBLIC_POSTHOG_KEY) {
       posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
         api_host:
           process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com",

@@ -551,9 +551,9 @@ describe("mergeToolkit", () => {
 
     expect(result.failedTools).toHaveLength(1);
     expect(result.failedTools[0]?.qualifiedName).toBe("TestKit.FailTool");
-    expect(result.warnings.some((warning) => warning.includes("LLM error"))).toBe(
-      true
-    );
+    expect(
+      result.warnings.some((warning) => warning.includes("LLM error"))
+    ).toBe(true);
     expect(result.toolkit.tools[0]?.codeExample).toBeUndefined();
   });
 
@@ -581,7 +581,7 @@ describe("mergeToolkit", () => {
 
   it("should preserve toolkit-level custom sections from previous output when source is empty", async () => {
     const tools = [createTool({ qualifiedName: "TestKit.Tool1" })];
-    
+
     // Create a previous result with custom sections
     const previousResult = await mergeToolkit(
       "TestKit",
@@ -608,14 +608,16 @@ describe("mergeToolkit", () => {
     });
 
     expect(result.toolkit.documentationChunks).toHaveLength(1);
-    expect(result.toolkit.documentationChunks[0]?.content).toBe("Important warning!");
+    expect(result.toolkit.documentationChunks[0]?.content).toBe(
+      "Important warning!"
+    );
     expect(result.toolkit.customImports).toHaveLength(1);
     expect(result.toolkit.subPages).toHaveLength(1);
   });
 
   it("should use source custom sections over previous when source has content", async () => {
     const tools = [createTool({ qualifiedName: "TestKit.Tool1" })];
-    
+
     // Create previous with old custom sections
     const previousResult = await mergeToolkit(
       "TestKit",
@@ -656,12 +658,16 @@ describe("mergeToolkit", () => {
     );
 
     expect(result.toolkit.documentationChunks).toHaveLength(1);
-    expect(result.toolkit.documentationChunks[0]?.content).toBe("New info from source");
+    expect(result.toolkit.documentationChunks[0]?.content).toBe(
+      "New info from source"
+    );
   });
 
   it("should preserve per-tool documentation chunks from previous output when source is empty", async () => {
-    const tools = [createTool({ name: "SpecialTool", qualifiedName: "TestKit.SpecialTool" })];
-    
+    const tools = [
+      createTool({ name: "SpecialTool", qualifiedName: "TestKit.SpecialTool" }),
+    ];
+
     // Create previous with tool-level custom sections
     const previousResult = await mergeToolkit(
       "TestKit",
@@ -688,7 +694,9 @@ describe("mergeToolkit", () => {
     });
 
     expect(result.toolkit.tools[0]?.documentationChunks).toHaveLength(1);
-    expect(result.toolkit.tools[0]?.documentationChunks[0]?.content).toBe("Note about params");
+    expect(result.toolkit.tools[0]?.documentationChunks[0]?.content).toBe(
+      "Note about params"
+    );
   });
 });
 

@@ -1,43 +1,43 @@
 import type { MetaRecord } from "nextra";
 
 const meta: MetaRecord = {
-  "hubspot": {
+  hubspot: {
     title: "Hubspot",
     href: "/en/resources/integrations/preview/hubspot",
   },
-  "hubspotautomationapi": {
+  hubspotautomationapi: {
     title: "HubspotAutomationApi",
     href: "/en/resources/integrations/preview/hubspotautomationapi",
   },
-  "hubspotcmsapi": {
+  hubspotcmsapi: {
     title: "HubspotCmsApi",
     href: "/en/resources/integrations/preview/hubspotcmsapi",
   },
-  "hubspotconversationsapi": {
+  hubspotconversationsapi: {
     title: "HubspotConversationsApi",
     href: "/en/resources/integrations/preview/hubspotconversationsapi",
   },
-  "hubspotcrmapi": {
+  hubspotcrmapi: {
     title: "HubspotCrmApi",
     href: "/en/resources/integrations/preview/hubspotcrmapi",
   },
-  "hubspoteventsapi": {
+  hubspoteventsapi: {
     title: "HubspotEventsApi",
     href: "/en/resources/integrations/preview/hubspoteventsapi",
   },
-  "hubspotmarketingapi": {
+  hubspotmarketingapi: {
     title: "HubspotMarketingApi",
     href: "/en/resources/integrations/preview/hubspotmarketingapi",
   },
-  "hubspotmeetingsapi": {
+  hubspotmeetingsapi: {
     title: "HubspotMeetingsApi",
     href: "/en/resources/integrations/preview/hubspotmeetingsapi",
   },
-  "hubspotusersapi": {
+  hubspotusersapi: {
     title: "HubspotUsersApi",
     href: "/en/resources/integrations/preview/hubspotusersapi",
   },
-  "salesforce": {
+  salesforce: {
     title: "Salesforce",
     href: "/en/resources/integrations/preview/salesforce",
   },

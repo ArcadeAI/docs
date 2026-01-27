@@ -1,67 +1,67 @@
 import type { MetaRecord } from "nextra";
 
 const meta: MetaRecord = {
-  "codesandbox": {
+  codesandbox: {
     title: "CodeSandbox",
     href: "/en/resources/integrations/preview/codesandbox",
   },
-  "complextools": {
+  complextools: {
     title: "ComplexTools",
     href: "/en/resources/integrations/preview/complextools",
   },
-  "deepwiki": {
+  deepwiki: {
     title: "Deepwiki",
     href: "/en/resources/integrations/preview/deepwiki",
   },
-  "figma": {
+  figma: {
     title: "Figma",
     href: "/en/resources/integrations/preview/figma",
   },
-  "google": {
+  google: {
     title: "Google",
     href: "/en/resources/integrations/preview/google",
   },
-  "mailchimpmarketingapi": {
+  mailchimpmarketingapi: {
     title: "MailchimpMarketingApi",
     href: "/en/resources/integrations/preview/mailchimpmarketingapi",
   },
-  "math": {
+  math: {
     title: "Math",
     href: "/en/resources/integrations/preview/math",
   },
-  "microsoft": {
+  microsoft: {
     title: "Microsoft",
     href: "/en/resources/integrations/preview/microsoft",
   },
-  "notiontoolkit": {
+  notiontoolkit: {
     title: "NotionToolkit",
     href: "/en/resources/integrations/preview/notiontoolkit",
   },
-  "pagerduty": {
+  pagerduty: {
     title: "Pagerduty",
     href: "/en/resources/integrations/preview/pagerduty",
   },
-  "pylon": {
+  pylon: {
     title: "Pylon",
     href: "/en/resources/integrations/preview/pylon",
   },
-  "pylonapi": {
+  pylonapi: {
     title: "PylonApi",
     href: "/en/resources/integrations/preview/pylonapi",
   },
-  "search": {
+  search: {
     title: "Search",
     href: "/en/resources/integrations/preview/search",
   },
-  "test2": {
+  test2: {
     title: "Test2",
     href: "/en/resources/integrations/preview/test2",
   },
-  "upclickapi": {
+  upclickapi: {
     title: "UpclickApi",
     href: "/en/resources/integrations/preview/upclickapi",
   },
-  "web": {
+  web: {
     title: "Web",
     href: "/en/resources/integrations/preview/web",
   },

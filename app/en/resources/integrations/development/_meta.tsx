@@ -1,51 +1,51 @@
 import type { MetaRecord } from "nextra";
 
 const meta: MetaRecord = {
-  "arcadeengineapi": {
+  arcadeengineapi: {
     title: "ArcadeEngineApi",
     href: "/en/resources/integrations/preview/arcadeengineapi",
   },
-  "brightdata": {
+  brightdata: {
     title: "Brightdata",
     href: "/en/resources/integrations/preview/brightdata",
   },
-  "cursoragentsapi": {
+  cursoragentsapi: {
     title: "CursorAgentsApi",
     href: "/en/resources/integrations/preview/cursoragentsapi",
   },
-  "datadogapi": {
+  datadogapi: {
     title: "DatadogApi",
     href: "/en/resources/integrations/preview/datadogapi",
   },
-  "e2b": {
+  e2b: {
     title: "E2b",
     href: "/en/resources/integrations/preview/e2b",
   },
-  "firecrawl": {
+  firecrawl: {
     title: "Firecrawl",
     href: "/en/resources/integrations/preview/firecrawl",
   },
-  "github": {
+  github: {
     title: "GitHub",
     href: "/en/resources/integrations/preview/github",
   },
-  "githubapi": {
+  githubapi: {
     title: "GithubApi",
     href: "/en/resources/integrations/preview/githubapi",
   },
-  "pagerdutyapi": {
+  pagerdutyapi: {
     title: "PagerdutyApi",
     href: "/en/resources/integrations/preview/pagerdutyapi",
   },
-  "posthogapi": {
+  posthogapi: {
     title: "PosthogApi",
     href: "/en/resources/integrations/preview/posthogapi",
   },
-  "vercelapi": {
+  vercelapi: {
     title: "VercelApi",
     href: "/en/resources/integrations/preview/vercelapi",
   },
-  "weaviateapi": {
+  weaviateapi: {
     title: "WeaviateApi",
     href: "/en/resources/integrations/preview/weaviateapi",
   },

@@ -11,15 +11,17 @@ import {
   Wrench,
 } from "lucide-react";
 import { useCallback, useState } from "react";
-
-import { DocumentationChunkRenderer, hasChunksAt } from "./DocumentationChunkRenderer";
-import { DynamicCodeBlock } from "./DynamicCodeBlock";
-import { ParametersTable } from "./ParametersTable";
-import { ScopesDisplay } from "./ScopesDisplay";
-import { toToolAnchorId } from "./AvailableToolsTable";
-import { getDashboardUrl } from "../../dashboard-link";
 import { useOrySession } from "../../../_lib/ory-session-context";
+import { getDashboardUrl } from "../../dashboard-link";
 import type { ToolSectionProps } from "../types";
+import { toToolAnchorId } from "./AvailableToolsTable";
+import {
+  DocumentationChunkRenderer,
+  hasChunksAt,
+} from "./documentation-chunk-renderer";
+import { DynamicCodeBlock } from "./DynamicCodeBlock";
+import { ParametersTable } from "./parameters-table";
+import { ScopesDisplay } from "./scopes-display";
 
 function CopyToolButton({ tool }: { tool: ToolSectionProps["tool"] }) {
   const [copied, setCopied] = useState(false);
@@ -41,17 +43,17 @@ function CopyToolButton({ tool }: { tool: ToolSectionProps["tool"] }) {
     };
 
     try {
-      await navigator.clipboard.writeText(JSON.stringify(toolDefinition, null, 2));
+      await navigator.clipboard.writeText(
+        JSON.stringify(toolDefinition, null, 2)
+      );
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch {
-      console.error("Failed to copy tool definition");
-    }
+    } catch {}
   }, [tool]);
 
   return (
     <button
-      className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-dark-high bg-neutral-dark/60 px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-neutral-dark hover:text-text-color"
+      className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-dark-high bg-neutral-dark/60 px-3 py-1.5 font-medium text-muted-foreground text-xs transition-colors hover:bg-neutral-dark hover:text-text-color"
       onClick={handleCopy}
       title="Copy tool definition as JSON"
       type="button"
@@ -74,14 +76,12 @@ function CopyScopesButton({ scopes }: { scopes: string[] }) {
       await navigator.clipboard.writeText(scopes.join("\n"));
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch {
-      console.error("Failed to copy scopes");
-    }
+    } catch {}
   }, [scopes]);
 
   return (
     <button
-      className="inline-flex items-center gap-1 rounded-md border border-red-400/30 bg-red-500/10 px-2 py-1 text-xs text-red-300 transition-colors hover:bg-red-500/20"
+      className="inline-flex items-center gap-1 rounded-md border border-red-400/30 bg-red-500/10 px-2 py-1 text-red-300 text-xs transition-colors hover:bg-red-500/20"
       onClick={handleCopy}
       title="Copy scopes list"
       type="button"
@@ -131,11 +131,14 @@ export function ToolSection({
     "parameters"
   );
   const showAuth = shouldRenderDefaultSection(tool.documentationChunks, "auth");
-  const showSecrets = shouldRenderDefaultSection(
+  const _showSecrets = shouldRenderDefaultSection(
     tool.documentationChunks,
     "secrets"
   );
-  const showOutput = shouldRenderDefaultSection(tool.documentationChunks, "output");
+  const showOutput = shouldRenderDefaultSection(
+    tool.documentationChunks,
+    "output"
+  );
 
   const { email, loading } = useOrySession();
   const isLoggedIn = !loading && !!email;
@@ -163,14 +166,14 @@ export function ToolSection({
           <div className="rounded-lg bg-brand-accent/10 p-2">
             <Wrench className="h-5 w-5 text-brand-accent" />
           </div>
-          <h3 className="text-xl font-semibold text-text-color">
+          <h3 className="font-semibold text-text-color text-xl">
             {tool.qualifiedName}
           </h3>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <CopyToolButton tool={tool} />
           {showSelection && (
-            <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-neutral-dark-high bg-neutral-dark/40 px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-neutral-dark/60">
+            <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-neutral-dark-high bg-neutral-dark/40 px-3 py-1.5 text-muted-foreground text-xs transition-colors hover:bg-neutral-dark/60">
               <input
                 aria-label={`Add ${tool.name} to selected tools`}
                 checked={isSelected}
@@ -179,8 +182,10 @@ export function ToolSection({
                 type="checkbox"
               />
               Add to selected tools
-              {!hasScopes && !hasSecrets && (
-                <span className="text-muted-foreground/60">(no auth required)</span>
+              {!(hasScopes || hasSecrets) && (
+                <span className="text-muted-foreground/60">
+                  (no auth required)
+                </span>
               )}
             </label>
           )}
@@ -194,7 +199,7 @@ export function ToolSection({
         position="before"
       />
       {showDescription && (
-        <p className="text-sm leading-relaxed text-text-color/90">
+        <p className="text-sm text-text-color/90 leading-relaxed">
           {tool.description ?? "No description provided."}
         </p>
       )}
@@ -211,7 +216,7 @@ export function ToolSection({
 
       {/* Parameters */}
       <div className="mt-6">
-        <h4 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+        <h4 className="mb-3 font-semibold text-muted-foreground text-sm uppercase tracking-wider">
           Parameters
         </h4>
         <DocumentationChunkRenderer
@@ -234,10 +239,10 @@ export function ToolSection({
 
       {/* Requirements Summary */}
       <div className="mt-6 rounded-lg border border-neutral-dark-high/40 bg-neutral-dark/30 p-4">
-        <h4 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+        <h4 className="mb-3 font-semibold text-muted-foreground text-sm uppercase tracking-wider">
           Requirements
         </h4>
-        
+
         {/* Scopes indicator - only shown when advanced is enabled and there are scopes */}
         {showAdvanced && hasScopes && (
           <div className="mb-3 flex items-center gap-2">
@@ -250,7 +255,9 @@ export function ToolSection({
 
         {/* Secrets - always show the actual secret names */}
         <div className="flex items-start gap-2">
-          <KeyRound className={`mt-0.5 h-4 w-4 shrink-0 ${hasSecrets ? "text-amber-400" : "text-muted-foreground/50"}`} />
+          <KeyRound
+            className={`mt-0.5 h-4 w-4 shrink-0 ${hasSecrets ? "text-amber-400" : "text-muted-foreground/50"}`}
+          />
           {hasSecrets ? (
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-sm text-text-color">Secrets:</span>
@@ -266,7 +273,7 @@ export function ToolSection({
                   ))
                 : tool.secrets.map((secret) => (
                     <code
-                      className="rounded-md border border-amber-400/30 bg-amber-500/10 px-2 py-0.5 text-xs text-amber-300"
+                      className="rounded-md border border-amber-400/30 bg-amber-500/10 px-2 py-0.5 text-amber-300 text-xs"
                       key={secret}
                     >
                       {secret}
@@ -274,13 +281,15 @@ export function ToolSection({
                   ))}
             </div>
           ) : (
-            <span className="text-sm text-muted-foreground/70">No secrets required</span>
+            <span className="text-muted-foreground/70 text-sm">
+              No secrets required
+            </span>
           )}
         </div>
 
         {/* Show OAuth Scopes Toggle - inside the box, only when there are scopes */}
         {hasScopes && (
-          <div className="mt-3 border-t border-neutral-dark-high/30 pt-3">
+          <div className="mt-3 border-neutral-dark-high/30 border-t pt-3">
             <button
               className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs transition-colors ${
                 showAdvanced
@@ -292,7 +301,9 @@ export function ToolSection({
               type="button"
             >
               <ShieldCheck className="h-3 w-3" />
-              {showAdvanced ? "Hide OAuth requirements" : "Show OAuth requirements"}
+              {showAdvanced
+                ? "Hide OAuth requirements"
+                : "Show OAuth requirements"}
             </button>
           </div>
         )}
@@ -302,7 +313,7 @@ export function ToolSection({
       {showAdvanced && hasScopes && (
         <div className="mt-4 rounded-lg border border-red-400/20 bg-red-500/5 p-4">
           <div className="mb-3 flex items-center justify-between">
-            <h4 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-red-300/80">
+            <h4 className="flex items-center gap-2 font-semibold text-red-300/80 text-sm uppercase tracking-wider">
               <ShieldCheck className="h-4 w-4" />
               Required OAuth scopes
             </h4>
@@ -329,7 +340,7 @@ export function ToolSection({
 
       {/* Output */}
       <div className="mt-6">
-        <h4 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+        <h4 className="mb-3 font-semibold text-muted-foreground text-sm uppercase tracking-wider">
           Output
         </h4>
         <DocumentationChunkRenderer
@@ -342,15 +353,19 @@ export function ToolSection({
             {tool.output ? (
               <div className="flex items-center gap-3">
                 <span className="text-muted-foreground">Type:</span>
-                <code className="rounded-md bg-neutral-dark-medium px-2 py-1 text-xs font-medium text-text-color">
+                <code className="rounded-md bg-neutral-dark-medium px-2 py-1 font-medium text-text-color text-xs">
                   {tool.output.type}
                 </code>
                 {tool.output.description && (
-                  <span className="text-text-color/80">— {tool.output.description}</span>
+                  <span className="text-text-color/80">
+                    — {tool.output.description}
+                  </span>
                 )}
               </div>
             ) : (
-              <p className="text-muted-foreground/70">No output schema provided.</p>
+              <p className="text-muted-foreground/70">
+                No output schema provided.
+              </p>
             )}
           </div>
         )}
@@ -371,7 +386,7 @@ export function ToolSection({
         <div className="flex flex-wrap items-center justify-between gap-4 p-4">
           <div>
             <h4 className="font-semibold text-text-color">Try it in Arcade</h4>
-            <p className="mt-0.5 text-xs text-muted-foreground">{actionHint}</p>
+            <p className="mt-0.5 text-muted-foreground text-xs">{actionHint}</p>
           </div>
           <Button
             asChild
@@ -401,7 +416,7 @@ export function ToolSection({
           <DynamicCodeBlock codeExample={tool.codeExample} />
         </div>
       ) : (
-        <p className="mt-6 text-sm text-muted-foreground/70">
+        <p className="mt-6 text-muted-foreground/70 text-sm">
           No code example available for this tool.
         </p>
       )}

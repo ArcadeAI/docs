@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import type {
-  ToolkitHeaderProps,
-  ToolkitMetadata,
   ToolkitAuth,
   ToolkitCategory,
+  ToolkitHeaderProps,
+  ToolkitMetadata,
   ToolkitType,
 } from "../types";
 

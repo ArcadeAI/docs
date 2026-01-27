@@ -1,10 +1,9 @@
 import { describe, expect, it } from "vitest";
-
-import type { ToolParameter } from "../types";
 import {
   formatEnumValues,
   formatParameterType,
-} from "../components/ParametersTable";
+} from "../components/parameters-table";
+import type { ToolParameter } from "../types";
 
 describe("ParametersTable helpers", () => {
   describe("formatParameterType", () => {

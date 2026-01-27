@@ -135,9 +135,10 @@ export const withRetry = async <T>(
 /**
  * Create a retry wrapper for a specific function
  */
-export const createRetryWrapper = <TArgs extends unknown[], TResult>(
-  fn: (...args: TArgs) => Promise<TResult>,
-  options?: RetryOptions
-): ((...args: TArgs) => Promise<TResult>) => {
-  return (...args: TArgs) => withRetry(() => fn(...args), options);
-};
+export const createRetryWrapper =
+  <TArgs extends unknown[], TResult>(
+    fn: (...args: TArgs) => Promise<TResult>,
+    options?: RetryOptions
+  ): ((...args: TArgs) => Promise<TResult>) =>
+  (...args: TArgs) =>
+    withRetry(() => fn(...args), options);

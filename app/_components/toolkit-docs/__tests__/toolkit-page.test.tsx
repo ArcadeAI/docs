@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildPipPackageName } from "../components/ToolkitPage";
+import { buildPipPackageName } from "../components/toolkit-page";
 
 describe("ToolkitPage helpers", () => {
   it("builds a pip package name from toolkit id", () => {

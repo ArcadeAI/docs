@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
-
+import { shouldRenderDefaultSection } from "../components/tool-section";
 import type { DocumentationChunk } from "../types";
-import { shouldRenderDefaultSection } from "../components/ToolSection";
 
 describe("ToolSection helpers", () => {
   it("returns true when no replace chunks exist", () => {

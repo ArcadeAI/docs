@@ -1,14 +1,20 @@
 /**
  * Scenario Test: Skip unchanged toolkits
- * 
+ *
  * Verifies that --skip-unchanged correctly identifies and skips unchanged toolkits.
  */
 import { describe, expect, it } from "vitest";
 
-import { detectChanges, getChangedToolkitIds, hasChanges } from "../../src/diff/index.js";
+import {
+  detectChanges,
+  getChangedToolkitIds,
+  hasChanges,
+} from "../../src/diff/index.js";
 import type { MergedToolkit, ToolDefinition } from "../../src/types/index.js";
 
-const createTool = (overrides: Partial<ToolDefinition> = {}): ToolDefinition => ({
+const createTool = (
+  overrides: Partial<ToolDefinition> = {}
+): ToolDefinition => ({
   name: "TestTool",
   qualifiedName: "TestKit.TestTool",
   fullyQualifiedName: "TestKit.TestTool@1.0.0",
@@ -21,7 +27,7 @@ const createTool = (overrides: Partial<ToolDefinition> = {}): ToolDefinition => 
   ...overrides,
 });
 
-const createMergedToolkit = (id: string, version: string = "1.0.0"): MergedToolkit => ({
+const createMergedToolkit = (id: string, version = "1.0.0"): MergedToolkit => ({
   id,
   label: id,
   version,
@@ -60,7 +66,10 @@ const createMergedToolkit = (id: string, version: string = "1.0.0"): MergedToolk
 describe("Scenario: Skip unchanged toolkits", () => {
   it("identifies unchanged toolkits correctly", () => {
     const currentToolkitTools = new Map([
-      ["Github", [createTool({ name: "Tool1", qualifiedName: "Github.Tool1" })]],
+      [
+        "Github",
+        [createTool({ name: "Tool1", qualifiedName: "Github.Tool1" })],
+      ],
       ["Slack", [createTool({ name: "Tool1", qualifiedName: "Slack.Tool1" })]],
     ]);
 
@@ -78,7 +87,16 @@ describe("Scenario: Skip unchanged toolkits", () => {
 
   it("identifies only changed toolkits when mixed", () => {
     const currentToolkitTools = new Map([
-      ["Github", [createTool({ name: "Tool1", qualifiedName: "Github.Tool1", description: "Updated" })]],
+      [
+        "Github",
+        [
+          createTool({
+            name: "Tool1",
+            qualifiedName: "Github.Tool1",
+            description: "Updated",
+          }),
+        ],
+      ],
       ["Slack", [createTool({ name: "Tool1", qualifiedName: "Slack.Tool1" })]],
       ["Jira", [createTool({ name: "Tool1", qualifiedName: "Jira.Tool1" })]],
     ]);
@@ -99,7 +117,10 @@ describe("Scenario: Skip unchanged toolkits", () => {
 
   it("excludes removed toolkits from changed IDs", () => {
     const currentToolkitTools = new Map([
-      ["Github", [createTool({ name: "Tool1", qualifiedName: "Github.Tool1" })]],
+      [
+        "Github",
+        [createTool({ name: "Tool1", qualifiedName: "Github.Tool1" })],
+      ],
     ]);
 
     const previousToolkits = new Map([
@@ -158,13 +179,9 @@ describe("Scenario: Skip unchanged toolkits", () => {
       generatedAt: new Date().toISOString(),
     };
 
-    const currentToolkitTools = new Map([
-      ["Github", [currentTool]],
-    ]);
+    const currentToolkitTools = new Map([["Github", [currentTool]]]);
 
-    const previousToolkits = new Map([
-      ["Github", previousToolkit],
-    ]);
+    const previousToolkits = new Map([["Github", previousToolkit]]);
 
     const result = detectChanges(currentToolkitTools, previousToolkits);
 

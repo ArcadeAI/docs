@@ -16,7 +16,6 @@ import {
   getAuthProviderDocsUrl,
   getGitHubRepoUrl,
   getPackageName,
-  getPyPIUrl,
   LICENSE_BADGE,
   PYPI_BADGES,
 } from "../constants";
@@ -151,7 +150,7 @@ export function ToolkitHeader({
 
           {/* Description */}
           {description && (
-            <p className="text-base leading-relaxed text-text-color/90">
+            <p className="text-base text-text-color/90 leading-relaxed">
               {description}
             </p>
           )}
@@ -168,7 +167,7 @@ export function ToolkitHeader({
             {version && (
               <div className="flex items-center gap-2">
                 <span className="text-muted-foreground">Version:</span>
-                <code className="rounded bg-neutral-dark-medium px-1.5 py-0.5 text-xs font-medium">
+                <code className="rounded bg-neutral-dark-medium px-1.5 py-0.5 font-medium text-xs">
                   {version}
                 </code>
               </div>
@@ -185,8 +184,18 @@ export function ToolkitHeader({
                   target="_blank"
                 >
                   GitHub
-                  <svg className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3" strokeLinecap="round" strokeLinejoin="round" />
+                  <svg
+                    className="h-3 w-3"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
                   </svg>
                 </a>
               </div>
@@ -206,7 +215,8 @@ export function ToolkitHeader({
                 ) : auth?.type === "mixed" ? (
                   <>
                     {AUTH_TYPE_LABELS.mixed}
-                    {authProviderLink && <> via the {authProviderLink}</>} {AUTH_TYPE_LABELS.mixedSuffix}
+                    {authProviderLink && <> via the {authProviderLink}</>}{" "}
+                    {AUTH_TYPE_LABELS.mixedSuffix}
                   </>
                 ) : (
                   AUTH_TYPE_LABELS.none
@@ -224,8 +234,10 @@ export function ToolkitHeader({
                   <Wrench className="h-4 w-4 text-brand-accent" />
                 </div>
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-lg font-semibold text-text-color">{toolStats.total}</span>
-                  <span className="text-sm text-muted-foreground">tools</span>
+                  <span className="font-semibold text-lg text-text-color">
+                    {toolStats.total}
+                  </span>
+                  <span className="text-muted-foreground text-sm">tools</span>
                 </div>
               </div>
 
@@ -236,8 +248,12 @@ export function ToolkitHeader({
                     <KeyRound className="h-4 w-4 text-amber-400" />
                   </div>
                   <div className="flex items-baseline gap-1.5">
-                    <span className="text-lg font-semibold text-amber-300">{toolStats.withSecrets}</span>
-                    <span className="text-sm text-amber-300/70">require secrets</span>
+                    <span className="font-semibold text-amber-300 text-lg">
+                      {toolStats.withSecrets}
+                    </span>
+                    <span className="text-amber-300/70 text-sm">
+                      require secrets
+                    </span>
                   </div>
                 </div>
               )}
@@ -248,11 +264,15 @@ export function ToolkitHeader({
 
       {/* PyPI Badges */}
       {id && (
-        <div className="border-t border-neutral-dark-high/50 bg-neutral-dark/20 px-6 py-3">
+        <div className="border-neutral-dark-high/50 border-t bg-neutral-dark/20 px-6 py-3">
           <div className="flex flex-wrap justify-center gap-2">
             {PYPI_BADGES.map((badge) => (
               <a
-                href={typeof badge.href === "function" ? badge.href(packageName) : badge.href}
+                href={
+                  typeof badge.href === "function"
+                    ? badge.href(packageName)
+                    : badge.href
+                }
                 key={badge.alt}
                 rel="noopener noreferrer"
                 target="_blank"
@@ -260,19 +280,31 @@ export function ToolkitHeader({
                 <img
                   alt={badge.alt}
                   className="h-5"
-                  src={typeof badge.src === "function" ? badge.src(packageName) : badge.src}
+                  src={
+                    typeof badge.src === "function"
+                      ? badge.src(packageName)
+                      : badge.src
+                  }
                 />
               </a>
             ))}
             <a
-              href={typeof LICENSE_BADGE.href === "function" ? LICENSE_BADGE.href(packageName) : LICENSE_BADGE.href}
+              href={
+                typeof LICENSE_BADGE.href === "function"
+                  ? LICENSE_BADGE.href(packageName)
+                  : LICENSE_BADGE.href
+              }
               rel="noopener noreferrer"
               target="_blank"
             >
               <img
                 alt={LICENSE_BADGE.alt}
                 className="h-5"
-                src={typeof LICENSE_BADGE.src === "function" ? LICENSE_BADGE.src(packageName) : LICENSE_BADGE.src}
+                src={
+                  typeof LICENSE_BADGE.src === "function"
+                    ? LICENSE_BADGE.src(packageName)
+                    : LICENSE_BADGE.src
+                }
               />
             </a>
           </div>

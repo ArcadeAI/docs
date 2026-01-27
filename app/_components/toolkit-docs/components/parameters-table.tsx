@@ -40,7 +40,9 @@ export function ParametersTable({
   if (!parameters || parameters.length === 0) {
     return (
       <div className="rounded-lg border border-neutral-dark-high/40 bg-neutral-dark/30 p-4 text-center">
-        <p className="text-sm text-muted-foreground/70">No parameters required.</p>
+        <p className="text-muted-foreground/70 text-sm">
+          No parameters required.
+        </p>
       </div>
     );
   }
@@ -50,16 +52,16 @@ export function ParametersTable({
       <table className="w-full border-collapse text-sm">
         <thead>
           <tr className="bg-gradient-to-r from-neutral-dark to-neutral-dark/80">
-            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-light-high/80">
+            <th className="px-4 py-3 text-left font-semibold text-neutral-light-high/80 text-xs uppercase tracking-wider">
               Parameter
             </th>
-            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-light-high/80">
+            <th className="px-4 py-3 text-left font-semibold text-neutral-light-high/80 text-xs uppercase tracking-wider">
               Type
             </th>
-            <th className="w-20 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-neutral-light-high/80">
+            <th className="w-20 px-4 py-3 text-center font-semibold text-neutral-light-high/80 text-xs uppercase tracking-wider">
               Req.
             </th>
-            <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-neutral-light-high/80">
+            <th className="px-4 py-3 text-left font-semibold text-neutral-light-high/80 text-xs uppercase tracking-wider">
               Description
             </th>
           </tr>
@@ -70,7 +72,9 @@ export function ParametersTable({
 
             return (
               <tr
-                className={index % 2 === 0 ? "bg-neutral-dark/20" : "bg-transparent"}
+                className={
+                  index % 2 === 0 ? "bg-neutral-dark/20" : "bg-transparent"
+                }
                 key={param.name}
               >
                 <td className="px-4 py-3.5">
@@ -81,11 +85,13 @@ export function ParametersTable({
                         title="Required"
                       />
                     )}
-                    <code className="font-medium text-text-color">{param.name}</code>
+                    <code className="font-medium text-text-color">
+                      {param.name}
+                    </code>
                   </div>
                 </td>
                 <td className="px-4 py-3.5">
-                  <code className="rounded-md bg-neutral-dark-medium px-2 py-1 text-xs text-muted-foreground">
+                  <code className="rounded-md bg-neutral-dark-medium px-2 py-1 text-muted-foreground text-xs">
                     {formatParameterType(param)}
                   </code>
                 </td>

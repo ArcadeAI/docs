@@ -3,8 +3,11 @@ import Link from "next/link";
 const DASHBOARD_BASE_URL =
   process.env.NEXT_PUBLIC_DASHBOARD_URL || "https://app.arcade.dev";
 
+const TRAILING_SLASH_REGEX = /\/+$/;
+const LEADING_SLASH_REGEX = /^\/+/;
+
 const normalizePath = (value: string): string =>
-  value.replace(/\/+$/, "").replace(/^\/+/, "");
+  value.replace(TRAILING_SLASH_REGEX, "").replace(LEADING_SLASH_REGEX, "");
 
 const resolveDashboardPrefix = (): string => {
   const baseUrl = DASHBOARD_BASE_URL.toLowerCase();
@@ -22,14 +25,10 @@ const resolveDashboardPrefix = (): string => {
 };
 
 const DASHBOARD_PATH_PREFIX = resolveDashboardPrefix();
-const BASE_URL = DASHBOARD_BASE_URL.replace(/\/+$/, "");
+const BASE_URL = DASHBOARD_BASE_URL.replace(TRAILING_SLASH_REGEX, "");
 
 export const getDashboardUrl = (path = "") =>
-  [
-    BASE_URL,
-    DASHBOARD_PATH_PREFIX,
-    path ? normalizePath(path) : "",
-  ]
+  [BASE_URL, DASHBOARD_PATH_PREFIX, path ? normalizePath(path) : ""]
     .filter(Boolean)
     .join("/");
 

@@ -1,6 +1,6 @@
 /**
  * Scenario Test: Tool example generation fails
- * 
+ *
  * Verifies that when tool example generation fails:
  * - The toolkit is still processed
  * - Failed tools are recorded
@@ -9,12 +9,21 @@
  */
 import { describe, expect, it } from "vitest";
 
-import { createDataMerger, type ToolExampleGenerator } from "../../src/merger/data-merger.js";
-import { EmptyCustomSectionsSource, InMemoryMetadataSource, InMemoryToolDataSource } from "../../src/sources/in-memory.js";
+import {
+  createDataMerger,
+  type ToolExampleGenerator,
+} from "../../src/merger/data-merger.js";
+import {
+  EmptyCustomSectionsSource,
+  InMemoryMetadataSource,
+  InMemoryToolDataSource,
+} from "../../src/sources/in-memory.js";
 import { createCombinedToolkitDataSource } from "../../src/sources/toolkit-data-source.js";
 import type { ToolDefinition } from "../../src/types/index.js";
 
-const createTool = (overrides: Partial<ToolDefinition> = {}): ToolDefinition => ({
+const createTool = (
+  overrides: Partial<ToolDefinition> = {}
+): ToolDefinition => ({
   name: "TestTool",
   qualifiedName: "TestKit.TestTool",
   fullyQualifiedName: "TestKit.TestTool@1.0.0",
@@ -32,7 +41,10 @@ describe("Scenario: Failed tool example generation", () => {
     const tools = [
       createTool({ name: "GoodTool", qualifiedName: "TestKit.GoodTool" }),
       createTool({ name: "FailTool", qualifiedName: "TestKit.FailTool" }),
-      createTool({ name: "AnotherGoodTool", qualifiedName: "TestKit.AnotherGoodTool" }),
+      createTool({
+        name: "AnotherGoodTool",
+        qualifiedName: "TestKit.AnotherGoodTool",
+      }),
     ];
 
     const failingGenerator: ToolExampleGenerator = {
@@ -71,7 +83,9 @@ describe("Scenario: Failed tool example generation", () => {
     expect(result?.failedTools).toHaveLength(1);
     expect(result?.failedTools[0]?.toolName).toBe("FailTool");
     expect(result?.failedTools[0]?.reason).toContain("LLM API timeout");
-    expect(result?.warnings.some((w) => w.includes("LLM API timeout"))).toBe(true);
+    expect(result?.warnings.some((w) => w.includes("LLM API timeout"))).toBe(
+      true
+    );
 
     const failedTool = result?.toolkit.tools.find((t) => t.name === "FailTool");
     expect(failedTool?.codeExample).toBeUndefined();

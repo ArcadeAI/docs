@@ -5,13 +5,8 @@
  * Used to determine which toolkits need regeneration.
  */
 
+import { buildToolSignature, extractVersion } from "../merger/data-merger.js";
 import type { MergedToolkit, ToolDefinition } from "../types/index.js";
-import {
-  buildToolSignature,
-  extractVersion,
-  normalizeList,
-  stableStringify,
-} from "../merger/data-merger.js";
 
 // ============================================================================
 // Types

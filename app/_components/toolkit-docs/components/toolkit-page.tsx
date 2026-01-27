@@ -6,11 +6,18 @@ import ReactMarkdown from "react-markdown";
 
 import ScopePicker from "../../scope-picker";
 import ToolFooter from "../../tool-footer";
+import type {
+  ToolDefinition,
+  ToolkitCategory,
+  ToolkitPageProps,
+} from "../types";
 import { AvailableToolsTable, toToolAnchorId } from "./AvailableToolsTable";
-import { DocumentationChunkRenderer, hasChunksAt } from "./DocumentationChunkRenderer";
-import { ToolkitHeader } from "./ToolkitHeader";
-import { ToolSection } from "./ToolSection";
-import type { ToolkitPageProps, ToolDefinition, ToolkitCategory } from "../types";
+import {
+  DocumentationChunkRenderer,
+  hasChunksAt,
+} from "./documentation-chunk-renderer";
+import { ToolkitHeader } from "./toolkit-header";
+import { ToolSection } from "./tool-section";
 
 export function buildPipPackageName(toolkitId: string): string {
   const normalized = toolkitId.toLowerCase().replace(/[^a-z0-9]+/g, "_");
@@ -37,7 +44,7 @@ function BreadcrumbBar({
   category: ToolkitCategory;
 }) {
   return (
-    <nav className="mb-6 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+    <nav className="mb-6 flex flex-wrap items-center gap-2 text-muted-foreground text-sm">
       <a className="hover:text-brand-accent" href="/en/resources">
         Resources
       </a>
@@ -46,7 +53,9 @@ function BreadcrumbBar({
         Integrations
       </a>
       <span className="text-muted-foreground/40">›</span>
-      <span className="text-muted-foreground">{toTitleCaseCategory(category)}</span>
+      <span className="text-muted-foreground">
+        {toTitleCaseCategory(category)}
+      </span>
       <span className="text-muted-foreground/40">›</span>
       <span className="font-medium text-text-color">{label}</span>
     </nav>
@@ -116,8 +125,14 @@ function ToolsOnThisPage({ tools }: { tools: ToolDefinition[] }) {
 
         // Check if item is outside visible area
         if (itemTop < sidebarScrollTop + 60) {
-          sidebar.scrollTo({ top: Math.max(0, itemTop - 60), behavior: "smooth" });
-        } else if (itemTop + itemHeight > sidebarScrollTop + sidebarHeight - 60) {
+          sidebar.scrollTo({
+            top: Math.max(0, itemTop - 60),
+            behavior: "smooth",
+          });
+        } else if (
+          itemTop + itemHeight >
+          sidebarScrollTop + sidebarHeight - 60
+        ) {
           sidebar.scrollTo({
             top: itemTop + itemHeight - sidebarHeight + 60,
             behavior: "smooth",
@@ -144,10 +159,10 @@ function ToolsOnThisPage({ tools }: { tools: ToolDefinition[] }) {
 
   return (
     <aside
-      className="fixed right-0 top-28 hidden h-[calc(100vh-7rem)] w-72 overflow-y-auto border-l border-neutral-dark-high/30 bg-neutral-dark/40 px-6 py-6 xl:block 2xl:w-80"
+      className="fixed top-28 right-0 hidden h-[calc(100vh-7rem)] w-72 overflow-y-auto border-neutral-dark-high/30 border-l bg-neutral-dark/40 px-6 py-6 xl:block 2xl:w-80"
       ref={sidebarRef}
     >
-      <h2 className="text-sm font-semibold text-text-color">On this page</h2>
+      <h2 className="font-semibold text-sm text-text-color">On this page</h2>
       <div className="mt-4 space-y-2">
         <a
           className={`block text-sm transition-colors ${getLinkClasses("available-tools")}`}
@@ -159,7 +174,8 @@ function ToolsOnThisPage({ tools }: { tools: ToolDefinition[] }) {
         <div className="space-y-1">
           {tools.map((tool) => {
             const hasSecrets =
-              (tool.secretsInfo?.length ?? 0) > 0 || (tool.secrets?.length ?? 0) > 0;
+              (tool.secretsInfo?.length ?? 0) > 0 ||
+              (tool.secrets?.length ?? 0) > 0;
             const toolId = toToolAnchorId(tool.qualifiedName);
             return (
               <a
@@ -231,15 +247,19 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
   // Compute tool stats
   const toolStats = {
     total: tools.length,
-    withScopes: tools.filter((tool) => (tool.auth?.scopes ?? []).length > 0).length,
+    withScopes: tools.filter((tool) => (tool.auth?.scopes ?? []).length > 0)
+      .length,
     withSecrets: tools.filter(
       (tool) =>
         (tool.secretsInfo?.length ?? 0) > 0 || (tool.secrets?.length ?? 0) > 0
     ).length,
   };
-  const showToolFooter = !hasChunksAt(data.documentationChunks, "footer", "replace");
-  const pipPackageName =
-    data.pipPackageName ?? buildPipPackageName(data.id);
+  const showToolFooter = !hasChunksAt(
+    data.documentationChunks,
+    "footer",
+    "replace"
+  );
+  const pipPackageName = data.pipPackageName ?? buildPipPackageName(data.id);
 
   const handleScopeSelectionChange = (toolNames: string[]) => {
     setSelectedTools(new Set(toolNames));
@@ -260,7 +280,7 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
   return (
     <div className="w-full">
       <BreadcrumbBar category={data.metadata.category} label={data.label} />
-      <h1 className="mb-6 text-4xl font-bold tracking-tight text-text-color">
+      <h1 className="mb-6 font-bold text-4xl text-text-color tracking-tight">
         {data.label}
       </h1>
       <DocumentationChunkRenderer
@@ -338,14 +358,24 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
       />
 
       <div className="mt-10 scroll-mt-20" id="available-tools">
-        <h2 className="flex items-center gap-3 text-2xl font-semibold">
+        <h2 className="flex items-center gap-3 font-semibold text-2xl">
           <span className="rounded-lg bg-brand-accent/10 p-2">
-            <svg className="h-5 w-5 text-brand-accent" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-              <path d="M4 6h16M4 12h16M4 18h7" strokeLinecap="round" strokeLinejoin="round" />
+            <svg
+              className="h-5 w-5 text-brand-accent"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M4 6h16M4 12h16M4 18h7"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           </span>
           Available tools
-          <span className="ml-2 rounded-full bg-neutral-dark-medium px-3 py-1 text-sm font-normal text-muted-foreground">
+          <span className="ml-2 rounded-full bg-neutral-dark-medium px-3 py-1 font-normal text-muted-foreground text-sm">
             {tools.length}
           </span>
         </h2>

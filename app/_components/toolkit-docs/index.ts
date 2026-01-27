@@ -31,21 +31,19 @@
  * ```
  */
 
-// Types
-export * from "./types";
-
-// Constants
-export * from "./constants";
-
+export { AvailableToolsTable } from "./components/AvailableToolsTable";
 // Components
 export {
   DocumentationChunkRenderer,
   hasChunksAt,
-} from "./components/DocumentationChunkRenderer";
-export { AvailableToolsTable } from "./components/AvailableToolsTable";
+} from "./components/documentation-chunk-renderer";
 export { DynamicCodeBlock } from "./components/DynamicCodeBlock";
-export { ParametersTable } from "./components/ParametersTable";
-export { ScopesDisplay } from "./components/ScopesDisplay";
-export { ToolSection } from "./components/ToolSection";
-export { ToolkitHeader } from "./components/ToolkitHeader";
-export { ToolkitPage } from "./components/ToolkitPage";
+export { ParametersTable } from "./components/parameters-table";
+export { ScopesDisplay } from "./components/scopes-display";
+export { ToolkitHeader } from "./components/toolkit-header";
+export { ToolkitPage } from "./components/toolkit-page";
+export { ToolSection } from "./components/tool-section";
+// Constants
+export * from "./constants";
+// Types
+export * from "./types";

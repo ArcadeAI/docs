@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ToolkitPage } from "@/app/_components/toolkit-docs/components/ToolkitPage";
+import { ToolkitPage } from "@/app/_components/toolkit-docs/components/toolkit-page";
 import type { ToolkitData } from "@/app/_components/toolkit-docs/types";
 
 export function ToolkitPreviewContent() {

@@ -135,9 +135,10 @@ export const stableStringify = (value: unknown): string => {
       ([keyA], [keyB]) => keyA.localeCompare(keyB)
     );
     return `{${entries
-      .map(([key, entryValue]) => {
-        return `${JSON.stringify(key)}:${stableStringify(entryValue)}`;
-      })
+      .map(
+        ([key, entryValue]) =>
+          `${JSON.stringify(key)}:${stableStringify(entryValue)}`
+      )
       .join(",")}}`;
   }
 
@@ -296,7 +297,7 @@ const getToolDocumentationChunks = (
 ): DocumentationChunk[] => {
   const fromSource = toolChunks[toolName] ?? [];
   const fromPrevious = previousTool?.documentationChunks ?? [];
-  
+
   // If source has chunks, use source (it's authoritative)
   // If source is empty but previous has chunks, preserve previous
   if (fromSource.length > 0) {
@@ -482,7 +483,7 @@ export const mergeToolkit = async (
   ): T[] => {
     const sourceItems = fromSource ?? [];
     const previousItems = fromPrevious ?? [];
-    
+
     // If source has items, use source (it's the authoritative source)
     // If source is empty but previous has items, preserve previous
     if (sourceItems.length > 0) {
@@ -564,7 +565,7 @@ export class DataMerger {
 
   private getPreviousToolkit(toolkitId: string): MergedToolkit | undefined {
     if (!this.previousToolkits) {
-      return undefined;
+      return;
     }
 
     return (

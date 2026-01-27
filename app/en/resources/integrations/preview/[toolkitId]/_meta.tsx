@@ -11,4 +11,3 @@ const meta: MetaRecord = {
 };
 
 export default meta;
-

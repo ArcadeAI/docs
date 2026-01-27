@@ -40,12 +40,16 @@ function CopyButton({
   if (variant === "small") {
     return (
       <button
-        className="inline-flex items-center gap-1 rounded-md border border-neutral-dark-high bg-neutral-dark/60 px-2 py-1 text-xs text-muted-foreground transition-colors hover:bg-neutral-dark hover:text-text-color"
+        className="inline-flex items-center gap-1 rounded-md border border-neutral-dark-high bg-neutral-dark/60 px-2 py-1 text-muted-foreground text-xs transition-colors hover:bg-neutral-dark hover:text-text-color"
         onClick={handleCopy}
         title={label}
         type="button"
       >
-        {copied ? <Check className="h-3 w-3 text-green-400" /> : <Copy className="h-3 w-3" />}
+        {copied ? (
+          <Check className="h-3 w-3 text-green-400" />
+        ) : (
+          <Copy className="h-3 w-3" />
+        )}
         {copied ? "Copied" : label}
       </button>
     );
@@ -53,12 +57,16 @@ function CopyButton({
 
   return (
     <button
-      className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-dark-high bg-neutral-dark/60 px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-neutral-dark hover:text-text-color"
+      className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-dark-high bg-neutral-dark/60 px-3 py-1.5 font-medium text-muted-foreground text-xs transition-colors hover:bg-neutral-dark hover:text-text-color"
       onClick={handleCopy}
       title={label}
       type="button"
     >
-      {copied ? <Check className="h-3.5 w-3.5 text-green-400" /> : <Copy className="h-3.5 w-3.5" />}
+      {copied ? (
+        <Check className="h-3.5 w-3.5 text-green-400" />
+      ) : (
+        <Copy className="h-3.5 w-3.5" />
+      )}
       {copied ? "Copied!" : label}
     </button>
   );
@@ -105,9 +113,9 @@ export default function ScopePicker({
   selectedTools,
   onSelectedToolsChange,
 }: ScopePickerProps) {
-  const [internalSelectedTools, setInternalSelectedTools] = useState<Set<string>>(
-    new Set()
-  );
+  const [internalSelectedTools, setInternalSelectedTools] = useState<
+    Set<string>
+  >(new Set());
   const [showAdvanced, setShowAdvanced] = useState(false);
   const isControlled = Array.isArray(selectedTools);
   const selectedToolsSet = useMemo(
@@ -176,38 +184,43 @@ export default function ScopePicker({
   const selectedToolsAsJson = JSON.stringify(
     tools
       .filter((t) => selectedToolsSet.has(t.name))
-      .map((t) => ({ name: t.name, scopes: t.scopes, secrets: t.secrets ?? [] })),
+      .map((t) => ({
+        name: t.name,
+        scopes: t.scopes,
+        secrets: t.secrets ?? [],
+      })),
     null,
     2
   );
 
-  const hasRequirements = requiredScopes.length > 0 || requiredSecrets.length > 0;
+  const hasRequirements =
+    requiredScopes.length > 0 || requiredSecrets.length > 0;
   const hasScopes = requiredScopes.length > 0;
 
   return (
     <div className="my-6 overflow-hidden rounded-xl border border-neutral-dark-high/50 bg-neutral-dark/20">
       {/* Header */}
-      <div className="border-b border-neutral-dark-high/50 bg-neutral-dark/40 px-4 py-3">
+      <div className="border-neutral-dark-high/50 border-b bg-neutral-dark/40 px-4 py-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h3 className="flex items-center gap-2 font-semibold text-text-color text-sm">
+          <h3 className="flex items-center gap-2 font-semibold text-sm text-text-color">
             <Wrench className="h-4 w-4 text-muted-foreground" />
             Selected tools
             {selectedToolNames.length > 0 && (
-              <span className="rounded-full bg-brand-accent/20 px-2 py-0.5 text-xs text-brand-accent">
+              <span className="rounded-full bg-brand-accent/20 px-2 py-0.5 text-brand-accent text-xs">
                 {selectedToolNames.length} of {tools.length}
               </span>
             )}
           </h3>
           <div className="flex items-center gap-2">
             <button
-              className="rounded-md border border-brand-accent/30 bg-brand-accent/10 px-2.5 py-1 text-xs text-brand-accent transition-colors hover:bg-brand-accent/20"
+              className="rounded-md border border-brand-accent/30 bg-brand-accent/10 px-2.5 py-1 text-brand-accent text-xs transition-colors hover:bg-brand-accent/20"
               onClick={selectAll}
               type="button"
             >
               Select all
             </button>
             <button
-              className="rounded-md border border-neutral-dark-high bg-neutral-dark/60 px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:bg-neutral-dark"
+              className="rounded-md border border-neutral-dark-high bg-neutral-dark/60 px-2.5 py-1 text-muted-foreground text-xs transition-colors hover:bg-neutral-dark"
               onClick={clearAll}
               type="button"
             >
@@ -248,10 +261,16 @@ export default function ScopePicker({
                 </div>
                 <div className="flex items-center gap-1">
                   {showAdvanced && toolHasScopes && (
-                    <ShieldCheck className="h-3 w-3 text-red-400" title="Requires scopes" />
+                    <ShieldCheck
+                      aria-label="Requires scopes"
+                      className="h-3 w-3 text-red-400"
+                    />
                   )}
                   {toolHasSecrets && (
-                    <KeyRound className="h-3 w-3 text-amber-400" title="Requires secrets" />
+                    <KeyRound
+                      aria-label="Requires secrets"
+                      className="h-3 w-3 text-amber-400"
+                    />
                   )}
                 </div>
               </label>
@@ -262,24 +281,40 @@ export default function ScopePicker({
         {/* Copy Actions */}
         {selectedToolNames.length > 0 && (
           <div className="mb-4 flex flex-wrap gap-2">
-            <CopyButton label="Copy tool names" text={toolNamesAsText} variant="small" />
-            <CopyButton label="Copy tools JSON" text={selectedToolsAsJson} variant="small" />
+            <CopyButton
+              label="Copy tool names"
+              text={toolNamesAsText}
+              variant="small"
+            />
+            <CopyButton
+              label="Copy tools JSON"
+              text={selectedToolsAsJson}
+              variant="small"
+            />
             {showAdvanced && requiredScopes.length > 0 && (
-              <CopyButton label="Copy scopes" text={scopesAsText} variant="small" />
+              <CopyButton
+                label="Copy scopes"
+                text={scopesAsText}
+                variant="small"
+              />
             )}
             {requiredSecrets.length > 0 && (
-              <CopyButton label="Copy secrets" text={secretsAsText} variant="small" />
+              <CopyButton
+                label="Copy secrets"
+                text={secretsAsText}
+                variant="small"
+              />
             )}
           </div>
         )}
 
         {/* Requirements Summary */}
         <div className="rounded-lg border border-neutral-dark-high/50 bg-neutral-dark/30 p-4">
-          <h4 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+          <h4 className="mb-3 font-semibold text-muted-foreground text-sm uppercase tracking-wider">
             Requirements
           </h4>
           {selectedToolNames.length === 0 ? (
-            <p className="text-sm text-muted-foreground/70">
+            <p className="text-muted-foreground/70 text-sm">
               Select tools to see requirements
             </p>
           ) : (
@@ -289,20 +324,23 @@ export default function ScopePicker({
                 <div className="mb-3 flex items-center gap-2">
                   <ShieldCheck className="h-4 w-4 text-red-400" />
                   <span className="text-sm text-text-color">
-                    {requiredScopes.length} OAuth scope{requiredScopes.length > 1 ? "s" : ""} required
+                    {requiredScopes.length} OAuth scope
+                    {requiredScopes.length > 1 ? "s" : ""} required
                   </span>
                 </div>
               )}
 
               {/* Secrets - always show the actual secret names */}
               <div className="flex items-start gap-2">
-                <KeyRound className={`mt-0.5 h-4 w-4 shrink-0 ${requiredSecrets.length > 0 ? "text-amber-400" : "text-muted-foreground/50"}`} />
+                <KeyRound
+                  className={`mt-0.5 h-4 w-4 shrink-0 ${requiredSecrets.length > 0 ? "text-amber-400" : "text-muted-foreground/50"}`}
+                />
                 {requiredSecrets.length > 0 ? (
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="text-sm text-text-color">Secrets:</span>
                     {requiredSecrets.map((secret) => (
                       <code
-                        className="rounded-md border border-amber-400/30 bg-amber-500/10 px-2 py-0.5 text-xs text-amber-300"
+                        className="rounded-md border border-amber-400/30 bg-amber-500/10 px-2 py-0.5 text-amber-300 text-xs"
                         key={secret}
                       >
                         {secret}
@@ -310,13 +348,15 @@ export default function ScopePicker({
                     ))}
                   </div>
                 ) : (
-                  <span className="text-sm text-muted-foreground/70">No secrets required</span>
+                  <span className="text-muted-foreground/70 text-sm">
+                    No secrets required
+                  </span>
                 )}
               </div>
 
               {/* Show OAuth Scopes Toggle - inside the box, only when there are scopes */}
               {requiredScopes.length > 0 && (
-                <div className="mt-3 border-t border-neutral-dark-high/30 pt-3">
+                <div className="mt-3 border-neutral-dark-high/30 border-t pt-3">
                   <button
                     className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs transition-colors ${
                       showAdvanced
@@ -328,7 +368,9 @@ export default function ScopePicker({
                     type="button"
                   >
                     <ShieldCheck className="h-3 w-3" />
-                    {showAdvanced ? "Hide OAuth requirements" : "Show OAuth requirements"}
+                    {showAdvanced
+                      ? "Hide OAuth requirements"
+                      : "Show OAuth requirements"}
                   </button>
                 </div>
               )}
@@ -337,31 +379,37 @@ export default function ScopePicker({
         </div>
 
         {/* OAuth Scopes Details - only shown when advanced is enabled and there are scopes */}
-        {showAdvanced && selectedToolNames.length > 0 && requiredScopes.length > 0 && (
-          <div className="mt-4 rounded-lg border border-red-400/20 bg-red-500/5 p-4">
-            <div className="mb-3 flex items-center justify-between">
-              <h4 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-red-300/80">
-                <ShieldCheck className="h-4 w-4" />
-                Required OAuth scopes
-                <span className="rounded-full bg-red-500/20 px-2 py-0.5 text-xs font-normal normal-case text-red-300">
-                  {requiredScopes.length}
-                </span>
-              </h4>
-              <CopyButton label="Copy scopes" text={scopesAsText} variant="small" />
+        {showAdvanced &&
+          selectedToolNames.length > 0 &&
+          requiredScopes.length > 0 && (
+            <div className="mt-4 rounded-lg border border-red-400/20 bg-red-500/5 p-4">
+              <div className="mb-3 flex items-center justify-between">
+                <h4 className="flex items-center gap-2 font-semibold text-red-300/80 text-sm uppercase tracking-wider">
+                  <ShieldCheck className="h-4 w-4" />
+                  Required OAuth scopes
+                  <span className="rounded-full bg-red-500/20 px-2 py-0.5 font-normal text-red-300 text-xs normal-case">
+                    {requiredScopes.length}
+                  </span>
+                </h4>
+                <CopyButton
+                  label="Copy scopes"
+                  text={scopesAsText}
+                  variant="small"
+                />
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {requiredScopes.map((scope) => (
+                  <code
+                    className="max-w-full break-all rounded-md border border-red-400/30 bg-red-500/10 px-2 py-1 text-red-300 text-xs"
+                    key={scope}
+                    title={scope}
+                  >
+                    {scope}
+                  </code>
+                ))}
+              </div>
             </div>
-            <div className="flex flex-wrap gap-2">
-              {requiredScopes.map((scope) => (
-                <code
-                  className="max-w-full break-all rounded-md border border-red-400/30 bg-red-500/10 px-2 py-1 text-xs text-red-300"
-                  key={scope}
-                  title={scope}
-                >
-                  {scope}
-                </code>
-              ))}
-            </div>
-          </div>
-        )}
+          )}
       </div>
     </div>
   );

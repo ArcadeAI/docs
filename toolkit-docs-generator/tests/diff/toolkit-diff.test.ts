@@ -52,9 +52,7 @@ const createToolDefinition = (
   ...overrides,
 });
 
-const createMergedTool = (
-  overrides: Partial<MergedTool> = {}
-): MergedTool => ({
+const createMergedTool = (overrides: Partial<MergedTool> = {}): MergedTool => ({
   name: "TestTool",
   qualifiedName: "TestKit.TestTool",
   fullyQualifiedName: "TestKit.TestTool@1.0.0",
@@ -325,9 +323,7 @@ describe("compareToolkit", () => {
   });
 
   it("should return modified when tools changed", () => {
-    const currentTools = [
-      createToolDefinition({ description: "Updated" }),
-    ];
+    const currentTools = [createToolDefinition({ description: "Updated" })];
     const previousToolkit = createMergedToolkit();
 
     const change = compareToolkit("TestKit", currentTools, previousToolkit);
@@ -368,7 +364,10 @@ describe("compareToolkit", () => {
 describe("detectChanges", () => {
   it("should detect new toolkits", () => {
     const currentToolkitTools = new Map([
-      ["Github", [createToolDefinition({ qualifiedName: "Github.CreateIssue" })]],
+      [
+        "Github",
+        [createToolDefinition({ qualifiedName: "Github.CreateIssue" })],
+      ],
     ]);
     const previousToolkits = new Map<string, MergedToolkit>();
 
@@ -398,9 +397,7 @@ describe("detectChanges", () => {
         [createToolDefinition({ description: "Updated description" })],
       ],
     ]);
-    const previousToolkits = new Map([
-      ["TestKit", createMergedToolkit()],
-    ]);
+    const previousToolkits = new Map([["TestKit", createMergedToolkit()]]);
 
     const result = detectChanges(currentToolkitTools, previousToolkits);
 
@@ -412,9 +409,7 @@ describe("detectChanges", () => {
     const currentToolkitTools = new Map([
       ["TestKit", [createToolDefinition()]],
     ]);
-    const previousToolkits = new Map([
-      ["TestKit", createMergedToolkit()],
-    ]);
+    const previousToolkits = new Map([["TestKit", createMergedToolkit()]]);
 
     const result = detectChanges(currentToolkitTools, previousToolkits);
 
@@ -529,7 +524,9 @@ describe("hasChanges", () => {
 
   it("should return true when there are new toolkits", () => {
     const result = detectChanges(
-      new Map([["NewKit", [createToolDefinition({ qualifiedName: "NewKit.Tool" })]]]),
+      new Map([
+        ["NewKit", [createToolDefinition({ qualifiedName: "NewKit.Tool" })]],
+      ]),
       new Map()
     );
 
@@ -538,7 +535,9 @@ describe("hasChanges", () => {
 
   it("should return true when there are modified toolkits", () => {
     const result = detectChanges(
-      new Map([["TestKit", [createToolDefinition({ description: "Changed" })]]]),
+      new Map([
+        ["TestKit", [createToolDefinition({ description: "Changed" })]],
+      ]),
       new Map([["TestKit", createMergedToolkit()]])
     );
 
@@ -563,12 +562,35 @@ describe("getChangedToolkitIds", () => {
   it("should return IDs of changed toolkits only", () => {
     const result = detectChanges(
       new Map([
-        ["Changed", [createToolDefinition({ qualifiedName: "Changed.Tool", description: "New" })]],
-        ["Unchanged", [createToolDefinition({ qualifiedName: "Unchanged.Tool" })]],
+        [
+          "Changed",
+          [
+            createToolDefinition({
+              qualifiedName: "Changed.Tool",
+              description: "New",
+            }),
+          ],
+        ],
+        [
+          "Unchanged",
+          [createToolDefinition({ qualifiedName: "Unchanged.Tool" })],
+        ],
       ]),
       new Map([
-        ["Changed", createMergedToolkit({ id: "Changed", tools: [createMergedTool({ qualifiedName: "Changed.Tool" })] })],
-        ["Unchanged", createMergedToolkit({ id: "Unchanged", tools: [createMergedTool({ qualifiedName: "Unchanged.Tool" })] })],
+        [
+          "Changed",
+          createMergedToolkit({
+            id: "Changed",
+            tools: [createMergedTool({ qualifiedName: "Changed.Tool" })],
+          }),
+        ],
+        [
+          "Unchanged",
+          createMergedToolkit({
+            id: "Unchanged",
+            tools: [createMergedTool({ qualifiedName: "Unchanged.Tool" })],
+          }),
+        ],
       ])
     );
 
@@ -585,10 +607,24 @@ describe("formatChangeSummary", () => {
     const result = detectChanges(
       new Map([
         ["New", [createToolDefinition({ qualifiedName: "New.Tool" })]],
-        ["Modified", [createToolDefinition({ qualifiedName: "Modified.Tool", description: "New desc" })]],
+        [
+          "Modified",
+          [
+            createToolDefinition({
+              qualifiedName: "Modified.Tool",
+              description: "New desc",
+            }),
+          ],
+        ],
       ]),
       new Map([
-        ["Modified", createMergedToolkit({ id: "Modified", tools: [createMergedTool({ qualifiedName: "Modified.Tool" })] })],
+        [
+          "Modified",
+          createMergedToolkit({
+            id: "Modified",
+            tools: [createMergedTool({ qualifiedName: "Modified.Tool" })],
+          }),
+        ],
         ["Removed", createMergedToolkit({ id: "Removed" })],
       ])
     );
@@ -615,7 +651,15 @@ describe("formatDetailedChanges", () => {
   it("should format detailed changes with tool-level info", () => {
     const result = detectChanges(
       new Map([
-        ["Github", [createToolDefinition({ qualifiedName: "Github.NewTool", name: "NewTool" })]],
+        [
+          "Github",
+          [
+            createToolDefinition({
+              qualifiedName: "Github.NewTool",
+              name: "NewTool",
+            }),
+          ],
+        ],
       ]),
       new Map()
     );

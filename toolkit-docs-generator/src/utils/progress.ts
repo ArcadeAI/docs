@@ -275,15 +275,16 @@ export class ProgressTracker {
 /**
  * Create a progress callback for use with DataMerger
  */
-export const createMergerProgressCallback = (
-  tracker: ProgressTracker,
-  getSpinnerText: (text: string) => void
-): ((
-  toolkitId: string,
-  status: "start" | "done",
-  toolCount?: number
-) => void) => {
-  return (toolkitId: string, status: "start" | "done", toolCount?: number) => {
+export const createMergerProgressCallback =
+  (
+    tracker: ProgressTracker,
+    getSpinnerText: (text: string) => void
+  ): ((
+    toolkitId: string,
+    status: "start" | "done",
+    toolCount?: number
+  ) => void) =>
+  (toolkitId: string, status: "start" | "done", toolCount?: number) => {
     if (status === "start") {
       tracker.start(toolkitId);
       getSpinnerText(tracker.getProgressString(toolkitId));
@@ -292,7 +293,6 @@ export const createMergerProgressCallback = (
       getSpinnerText(tracker.getProgressString());
     }
   };
-};
 
 /**
  * Extended progress callback interface for DataMerger
@@ -327,11 +327,7 @@ export const formatToolkitComplete = (
 /**
  * Format a summary line for errored toolkit
  */
-export const formatToolkitError = (
-  toolkitId: string,
-  error: string
-): string => {
-  return `${chalk.red("✗")} ${toolkitId}: ${error}`;
-};
+export const formatToolkitError = (toolkitId: string, error: string): string =>
+  `${chalk.red("✗")} ${toolkitId}: ${error}`;
 
 export { formatDuration };
