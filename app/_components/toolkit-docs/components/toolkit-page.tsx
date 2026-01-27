@@ -359,6 +359,81 @@ function ToolsOnThisPage({ tools }: { tools: ToolDefinition[] }) {
  * Composes the full toolkit documentation page from JSON data.
  */
 export function ToolkitPage({ data }: ToolkitPageProps) {
+  useEffect(() => {
+    document.documentElement.dataset.pageKind = "toolkit";
+
+    const hideBuiltInActions = () => {
+      const root = document;
+
+      const shouldSkip = (element: Element | null) =>
+        Boolean(element?.closest("[data-toolkit-page-actions]"));
+
+      // Hide Copy page button and its dropdown toggle without text matching.
+      const copyButtons = Array.from(root.querySelectorAll("button")).filter(
+        (button) => {
+          const text = (button.textContent ?? "").trim().toLowerCase();
+          const title = (button.getAttribute("title") ?? "").toLowerCase();
+          const ariaLabel = (
+            button.getAttribute("aria-label") ?? ""
+          ).toLowerCase();
+          return (
+            text.includes("copy page") ||
+            title === "copy page" ||
+            ariaLabel === "copy page"
+          );
+        }
+      );
+
+      for (const button of copyButtons) {
+        if (shouldSkip(button)) {
+          continue;
+        }
+        const group =
+          button.closest('[role="group"], [role="toolbar"]') ??
+          button.parentElement;
+        if (group && !shouldSkip(group)) {
+          const groupButtons = group.querySelectorAll("button");
+          for (const btn of groupButtons) {
+            (btn as HTMLElement).style.display = "none";
+          }
+          (group as HTMLElement).style.display = "none";
+        } else {
+          (button as HTMLElement).style.display = "none";
+        }
+      }
+
+      // Hide Edit this page on GitHub link by href (not text).
+      const editLinks = root.querySelectorAll(
+        'a[href*="github.com/ArcadeAI/docs/tree/main/"]'
+      );
+      for (const link of editLinks) {
+        if (shouldSkip(link)) {
+          continue;
+        }
+        const group =
+          link.closest('[role="group"], [role="toolbar"]') ??
+          link.parentElement;
+        if (group && !shouldSkip(group)) {
+          (group as HTMLElement).style.display = "none";
+        } else {
+          (link as HTMLElement).style.display = "none";
+        }
+      }
+    };
+
+    const observer = new MutationObserver(() => hideBuiltInActions());
+    if (document.body) {
+      observer.observe(document.body, { childList: true, subtree: true });
+    }
+
+    hideBuiltInActions();
+
+    return () => {
+      observer.disconnect();
+      delete document.documentElement.dataset.pageKind;
+    };
+  }, []);
+
   const rawTools = data.tools ?? [];
   // Temporary UI fallback for toolkit-level secrets that are documented but not yet
   // emitted by the Engine tool metadata endpoint.
