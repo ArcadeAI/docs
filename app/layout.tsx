@@ -23,6 +23,8 @@ import {
 import { PostHog } from "./_components/posthog";
 
 const REGEX_LOCALE = /^\/([a-z]{2}(?:-[A-Z]{2})?)(?:\/|$)/;
+const REGEX_TOOLKIT_PAGE =
+  /^\/[a-z]{2}(?:-[A-Z]{2})?\/resources\/integrations\/[^/]+\/[^/]+/;
 
 export const metadata = {
   title: {
@@ -84,6 +86,7 @@ export default async function RootLayout({
   const headersList = await headers();
   const pathname = headersList.get("x-pathname") || "/";
   const lang = getLocaleFromPathname(pathname);
+  const isToolkitPage = REGEX_TOOLKIT_PAGE.test(pathname);
 
   const dictionary = await getDictionary(lang);
   const pageMap = await getPageMap(`/${lang}`);
@@ -111,9 +114,9 @@ export default async function RootLayout({
           <TranslationBanner dictionary={dictionary} locale={lang} />
         )}
         <Layout
-          copyPageButton={true}
+          copyPageButton={!isToolkitPage}
           docsRepositoryBase="https://github.com/ArcadeAI/docs/tree/main/"
-          editLink={dictionary.editPage}
+          editLink={isToolkitPage ? false : dictionary.editPage}
           feedback={{
             content: false,
           }}

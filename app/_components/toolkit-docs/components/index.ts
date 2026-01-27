@@ -8,6 +8,11 @@ export {
   DocumentationChunkRenderer,
   hasChunksAt,
 } from "./documentation-chunk-renderer";
+export {
+  CopyOptimizedPageContent,
+  EditJsonOnGithub,
+  PageActionsBar,
+} from "./page-actions";
 export { ParametersTable } from "./parameters-table";
 export { ScopesDisplay } from "./scopes-display";
 export { ToolSection } from "./tool-section";

@@ -20,10 +20,24 @@ const TOOLS_PAGE_SIZE_OPTIONS = [
 
 const JSON_PRETTY_PRINT_INDENT = 2;
 
+type ToolParameter = {
+  name: string;
+  type: string;
+  required: boolean;
+  description: string | null;
+  enum: string[] | null;
+};
+
 type Tool = {
   name: string;
   scopes: string[];
   secrets?: string[];
+  // Full tool definition fields (optional for backward compatibility)
+  qualifiedName?: string;
+  fullyQualifiedName?: string;
+  description?: string | null;
+  parameters?: ToolParameter[];
+  output?: { type: string; description: string | null } | null;
 };
 
 export const DEFAULT_SHOW_UNSELECTED_TOOLS = false;
@@ -419,11 +433,31 @@ export default function ScopePicker({
   const selectedToolsAsJson = JSON.stringify(
     tools
       .filter((t) => selectedToolsSet.has(t.name))
-      .map((t) => ({
-        name: t.name,
-        scopes: t.scopes,
-        secrets: t.secrets ?? [],
-      })),
+      .map((t) => {
+        // If full tool definition is available, include all fields
+        if (t.qualifiedName && t.parameters) {
+          return {
+            name: t.qualifiedName,
+            description: t.description ?? null,
+            parameters: t.parameters.map((p) => ({
+              name: p.name,
+              type: p.type,
+              required: p.required,
+              description: p.description,
+              ...(p.enum ? { enum: p.enum } : {}),
+            })),
+            scopes: t.scopes,
+            secrets: t.secrets ?? [],
+            output: t.output ?? null,
+          };
+        }
+        // Fallback to basic format
+        return {
+          name: t.name,
+          scopes: t.scopes,
+          secrets: t.secrets ?? [],
+        };
+      }),
     null,
     JSON_PRETTY_PRINT_INDENT
   );

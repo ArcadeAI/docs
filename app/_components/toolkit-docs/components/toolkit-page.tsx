@@ -17,6 +17,7 @@ import {
   DocumentationChunkRenderer,
   hasChunksAt,
 } from "./documentation-chunk-renderer";
+import { PageActionsBar } from "./page-actions";
 import { ToolSection } from "./tool-section";
 import { ToolkitHeader } from "./toolkit-header";
 
@@ -387,6 +388,12 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
       name: tool.name,
       scopes: tool.auth?.scopes ?? [],
       secrets,
+      // Full tool definition for enhanced copy functionality
+      qualifiedName: tool.qualifiedName,
+      fullyQualifiedName: tool.fullyQualifiedName,
+      description: tool.description,
+      parameters: tool.parameters,
+      output: tool.output,
     };
   });
   const shouldShowSelection = tools.length > 0;
@@ -436,6 +443,7 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
       {/* Overview section */}
       <section className="scroll-mt-20" id={TOOLKIT_PAGE_OVERVIEW_LINK.id}>
         <BreadcrumbBar category={data.metadata.category} label={data.label} />
+        <PageActionsBar data={data} />
         <h1 className="mb-6 font-bold text-4xl text-text-color tracking-tight">
           {data.label}
         </h1>
