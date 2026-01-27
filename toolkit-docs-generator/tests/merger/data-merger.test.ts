@@ -533,6 +533,30 @@ describe("mergeToolkit", () => {
     expect(result.toolkit.tools[0]?.secretsInfo).toEqual([]);
   });
 
+  it("should record failed tools when example generation fails", async () => {
+    const tools = [createTool({ qualifiedName: "TestKit.FailTool" })];
+    const failingGenerator: ToolExampleGenerator = {
+      generate: async () => {
+        throw new Error("LLM error");
+      },
+    };
+
+    const result = await mergeToolkit(
+      "TestKit",
+      tools,
+      null,
+      null,
+      failingGenerator
+    );
+
+    expect(result.failedTools).toHaveLength(1);
+    expect(result.failedTools[0]?.qualifiedName).toBe("TestKit.FailTool");
+    expect(result.warnings.some((warning) => warning.includes("LLM error"))).toBe(
+      true
+    );
+    expect(result.toolkit.tools[0]?.codeExample).toBeUndefined();
+  });
+
   it("should reuse previous code examples without generator", async () => {
     const tools = [createTool({ qualifiedName: "TestKit.Tool1" })];
     const previousResult = await mergeToolkit(
@@ -553,6 +577,118 @@ describe("mergeToolkit", () => {
     expect(result.toolkit.tools[0]?.secretsInfo).toEqual(
       previousResult.toolkit.tools[0]?.secretsInfo
     );
+  });
+
+  it("should preserve toolkit-level custom sections from previous output when source is empty", async () => {
+    const tools = [createTool({ qualifiedName: "TestKit.Tool1" })];
+    
+    // Create a previous result with custom sections
+    const previousResult = await mergeToolkit(
+      "TestKit",
+      tools,
+      null,
+      createCustomSections({
+        documentationChunks: [
+          {
+            type: "warning",
+            location: "header",
+            position: "after",
+            content: "Important warning!",
+          },
+        ],
+        customImports: ['import CustomComponent from "@/components/custom";'],
+        subPages: ["environment-variables"],
+      }),
+      createStubGenerator()
+    );
+
+    // Run again with empty custom sections - should preserve previous
+    const result = await mergeToolkit("TestKit", tools, null, null, undefined, {
+      previousToolkit: previousResult.toolkit,
+    });
+
+    expect(result.toolkit.documentationChunks).toHaveLength(1);
+    expect(result.toolkit.documentationChunks[0]?.content).toBe("Important warning!");
+    expect(result.toolkit.customImports).toHaveLength(1);
+    expect(result.toolkit.subPages).toHaveLength(1);
+  });
+
+  it("should use source custom sections over previous when source has content", async () => {
+    const tools = [createTool({ qualifiedName: "TestKit.Tool1" })];
+    
+    // Create previous with old custom sections
+    const previousResult = await mergeToolkit(
+      "TestKit",
+      tools,
+      null,
+      createCustomSections({
+        documentationChunks: [
+          {
+            type: "warning",
+            location: "header",
+            position: "after",
+            content: "Old warning",
+          },
+        ],
+      }),
+      createStubGenerator()
+    );
+
+    // Run with new custom sections from source - should use source
+    const newCustomSections = createCustomSections({
+      documentationChunks: [
+        {
+          type: "info",
+          location: "header",
+          position: "before",
+          content: "New info from source",
+        },
+      ],
+    });
+
+    const result = await mergeToolkit(
+      "TestKit",
+      tools,
+      null,
+      newCustomSections,
+      undefined,
+      { previousToolkit: previousResult.toolkit }
+    );
+
+    expect(result.toolkit.documentationChunks).toHaveLength(1);
+    expect(result.toolkit.documentationChunks[0]?.content).toBe("New info from source");
+  });
+
+  it("should preserve per-tool documentation chunks from previous output when source is empty", async () => {
+    const tools = [createTool({ name: "SpecialTool", qualifiedName: "TestKit.SpecialTool" })];
+    
+    // Create previous with tool-level custom sections
+    const previousResult = await mergeToolkit(
+      "TestKit",
+      tools,
+      null,
+      createCustomSections({
+        toolChunks: {
+          SpecialTool: [
+            {
+              type: "info",
+              location: "parameters",
+              position: "after",
+              content: "Note about params",
+            },
+          ],
+        },
+      }),
+      createStubGenerator()
+    );
+
+    // Run again with empty custom sections - should preserve previous tool chunks
+    const result = await mergeToolkit("TestKit", tools, null, null, undefined, {
+      previousToolkit: previousResult.toolkit,
+    });
+
+    expect(result.toolkit.tools[0]?.documentationChunks).toHaveLength(1);
+    expect(result.toolkit.tools[0]?.documentationChunks[0]?.content).toBe("Note about params");
   });
 });
 

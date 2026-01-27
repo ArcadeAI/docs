@@ -227,9 +227,9 @@ describe("EngineApiSource", () => {
     const source = new EngineApiSource({
       baseUrl: "https://api.arcade.dev",
       apiKey: "test",
-      pageSize: 500,
+      pageSize: 1500, // Over max of 1000
       fetchFn: createInspectFetchStub((params) => {
-        expect(params.get("limit")).toBe("100");
+        expect(params.get("limit")).toBe("1000"); // Capped at 1000
       }),
     });
 

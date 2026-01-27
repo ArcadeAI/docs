@@ -280,14 +280,14 @@ describe("ArcadeApiSource", () => {
       const source = new ArcadeApiSource({
         baseUrl: "https://api.arcade.dev",
         apiKey: "test-key",
-        pageSize: 500, // Over max
+        pageSize: 1500, // Over max of 1000
         fetchFn: mockFetch,
       });
 
       source.fetchAllTools();
 
       const calledUrl = mockFetch.mock.calls[0]?.[0] as string;
-      expect(calledUrl).toContain("limit=100"); // Capped at 100
+      expect(calledUrl).toContain("limit=1000"); // Capped at 1000
     });
   });
 

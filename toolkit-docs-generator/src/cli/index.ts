@@ -17,6 +17,13 @@ import { readdir, readFile, rm } from "fs/promises";
 import ora from "ora";
 import { join, resolve } from "path";
 import {
+  detectChanges,
+  formatChangeSummary,
+  formatDetailedChanges,
+  getChangedToolkitIds,
+  hasChanges,
+} from "../diff/index.js";
+import {
   createJsonGenerator,
   type VerificationProgress,
   verifyOutputDir,
@@ -43,6 +50,11 @@ import {
   createProgressTracker,
   formatToolkitComplete,
 } from "../utils/progress.js";
+import {
+  appendLogEntry,
+  readFailedToolsReport,
+  writeFailedToolsReport,
+} from "../utils/run-logs.js";
 
 /**
  * Supported API sources:
@@ -102,6 +114,51 @@ const getDefaultOutputDir = (): string => {
     return resolve(cwd, "..", "data", "toolkits");
   }
   return resolve(cwd, "data", "toolkits");
+};
+
+const getDefaultVerificationDir = (): string => {
+  const cwd = process.cwd();
+  if (cwd.endsWith("toolkit-docs-generator")) {
+    return resolve(cwd, "..", "toolkit-docs-generator-verification");
+  }
+  return resolve(cwd, "toolkit-docs-generator-verification");
+};
+
+const getDefaultLogDir = (): string => resolve(getDefaultVerificationDir(), "logs");
+
+const buildLogPaths = (logDir: string) => ({
+  runLogPath: join(logDir, "runs.log"),
+  changeLogPath: join(logDir, "changes.log"),
+  failedToolsPath: join(logDir, "failed-tools.json"),
+});
+
+const buildChangeLogDetails = (
+  result: ReturnType<typeof detectChanges>
+): string[] => {
+  const changed = getChangedToolkitIds(result);
+  const removed = result.toolkitChanges
+    .filter((change) => change.changeType === "removed")
+    .map((change) => change.toolkitId);
+  const versionOnly = result.toolkitChanges
+    .filter(
+      (change) =>
+        change.changeType === "modified" &&
+        change.toolChanges.length === 0 &&
+        change.versionChanged
+    )
+    .map((change) => change.toolkitId);
+
+  const details = [
+    `summary=${formatChangeSummary(result)}`,
+    `changed=${changed.length > 0 ? changed.join(", ") : "none"}`,
+    `removed=${removed.length > 0 ? removed.join(", ") : "none"}`,
+  ];
+
+  if (versionOnly.length > 0) {
+    details.push(`versionOnly=${versionOnly.join(", ")}`);
+  }
+
+  return details;
 };
 
 const clearOutputDir = async (
@@ -464,8 +521,13 @@ program
     "-p, --providers <providers>",
     'Comma-separated list of providers with optional versions (e.g., "Github:1.0.0,Slack:2.1.0" or "Github,Slack")'
   )
+  .option(
+    "--failed-tools-file <file>",
+    "Path to failed tools report to rerun only impacted toolkits"
+  )
   .option("--all", "Generate documentation for all toolkits", false)
   .option("-o, --output <dir>", "Output directory", getDefaultOutputDir())
+  .option("--log-dir <dir>", "Directory for run logs", getDefaultLogDir())
   .option("--mock-data-dir <dir>", "Path to mock data directory")
   .option("--metadata-file <file>", "Path to metadata JSON file")
   .option(
@@ -545,12 +607,19 @@ program
     "Write each toolkit immediately after processing (default when --resume)",
     false
   )
+  .option(
+    "--skip-unchanged",
+    "Only regenerate toolkits with changed tool definitions",
+    false
+  )
   .option("--verbose", "Enable verbose logging", false)
   .action(
     async (options: {
       providers?: string;
+      failedToolsFile?: string;
       all: boolean;
       output: string;
+      logDir: string;
       mockDataDir?: string;
       metadataFile?: string;
       apiSource?: string;
@@ -580,21 +649,55 @@ program
       customSections?: string;
       resume: boolean;
       incremental: boolean;
+      skipUnchanged: boolean;
       verbose: boolean;
     }) => {
       const spinner = ora("Parsing input...").start();
+      const logPaths = buildLogPaths(resolve(options.logDir));
 
       try {
         const runAll = options.all;
         if (runAll && options.providers) {
           throw new Error('Use either "--all" or "--providers", not both.');
         }
+        if (runAll && options.failedToolsFile) {
+          throw new Error(
+            'Use either "--all" or "--failed-tools-file", not both.'
+          );
+        }
+        if (options.providers && options.failedToolsFile) {
+          throw new Error(
+            'Use either "--providers" or "--failed-tools-file", not both.'
+          );
+        }
 
-        const providers = runAll
+        let providers = runAll
           ? []
           : options.providers
             ? parseProviders(options.providers)
             : null;
+
+        if (options.failedToolsFile) {
+          const report = await readFailedToolsReport(options.failedToolsFile);
+          const toolkitIds = Array.from(
+            new Set([
+              ...(report.toolkits ?? []),
+              ...(report.failedToolkits ?? []),
+            ])
+          );
+          if (toolkitIds.length === 0) {
+            spinner.succeed("No failed toolkits found in report.");
+            await appendLogEntry(logPaths.runLogPath, {
+              title: "generate (failed-tools-file no-op)",
+              details: [
+                `output=${resolve(options.output)}`,
+                `file=${options.failedToolsFile}`,
+              ],
+            });
+            process.exit(0);
+          }
+          providers = toolkitIds.map((provider) => ({ provider }));
+        }
 
         if (!(runAll || providers)) {
           throw new Error('Missing required option "--providers" or "--all".');
@@ -705,6 +808,66 @@ program
           }
         }
 
+        // Handle --skip-unchanged: detect changes and only regenerate changed toolkits
+        let changedToolkitIds: Set<string> | undefined;
+        let changeResult: ReturnType<typeof detectChanges> | undefined;
+        if (options.skipUnchanged && runAll && !options.overwriteOutput) {
+          spinner.start("Detecting changes in tool definitions...");
+
+          // Fetch all current tools
+          const currentToolkitsData =
+            await toolkitDataSource.fetchAllToolkitsData();
+
+          // Build map of toolkit ID -> tools for comparison
+          const currentToolkitTools = new Map<
+            string,
+            readonly import("../types/index.js").ToolDefinition[]
+          >();
+          for (const [id, data] of currentToolkitsData) {
+            currentToolkitTools.set(id, data.tools);
+          }
+
+          // Detect changes
+          const detectedChanges = detectChanges(
+            currentToolkitTools,
+            previousToolkits ?? new Map()
+          );
+
+          if (!hasChanges(detectedChanges)) {
+            spinner.succeed("No changes detected. All toolkits are up to date.");
+            console.log(chalk.green("\n✓ Nothing to regenerate.\n"));
+
+            await appendLogEntry(logPaths.runLogPath, {
+              title: "generate --skip-unchanged (no changes)",
+              details: [
+                `output=${resolve(options.output)}`,
+                `apiSource=${apiSource}`,
+                `summary=${formatChangeSummary(detectedChanges)}`,
+              ],
+            });
+            await appendLogEntry(logPaths.changeLogPath, {
+              title: "changes (no-op)",
+              details: [formatChangeSummary(detectedChanges)],
+            });
+            process.exit(0);
+          }
+
+          // Get IDs of changed toolkits
+          const changedIds = getChangedToolkitIds(detectedChanges);
+          changedToolkitIds = new Set(changedIds.map((id) => id.toLowerCase()));
+          changeResult = detectedChanges;
+
+          spinner.succeed(
+            `Detected ${changedIds.length} changed toolkit(s): ${changedIds.join(", ")}`
+          );
+
+          if (options.verbose) {
+            console.log(
+              chalk.dim(`  Summary: ${formatChangeSummary(detectedChanges)}`)
+            );
+          }
+        }
+
         if (options.overwriteOutput) {
           spinner.start("Clearing output directory...");
           await clearOutputDir(options.output, options.verbose);
@@ -765,14 +928,31 @@ program
           spinner.start("Fetching toolkit list...");
           const toolkitList = await toolkitDataSource.fetchAllToolkitsData();
           const totalToolkits = toolkitList.size;
+
+          // If --skip-unchanged, only process changed toolkits
+          // Add unchanged toolkits to skipToolkitIds
+          if (changedToolkitIds) {
+            for (const [id] of toolkitList) {
+              const normalizedId = id.toLowerCase();
+              if (!changedToolkitIds.has(normalizedId)) {
+                skipToolkitIds.add(normalizedId);
+              }
+            }
+          }
+
           const toProcess = totalToolkits - skipToolkitIds.size;
 
           if (toProcess === 0) {
             spinner.succeed(`All ${totalToolkits} toolkit(s) already complete`);
             allResults = [];
           } else {
+            const skipReason = changedToolkitIds
+              ? `(${skipToolkitIds.size} unchanged)`
+              : skipToolkitIds.size > 0
+                ? `(${skipToolkitIds.size} skipped)`
+                : "";
             spinner.succeed(
-              `Found ${totalToolkits} toolkit(s), ${toProcess} to process${skipToolkitIds.size > 0 ? ` (${skipToolkitIds.size} skipped)` : ""}`
+              `Found ${totalToolkits} toolkit(s), ${toProcess} to process ${skipReason}`.trim()
             );
 
             // Set up progress tracker
@@ -930,10 +1110,80 @@ program
           }
           spinner.succeed("Output verified");
         }
+
+        const warningCount = allResults.reduce(
+          (count, result) => count + result.warnings.length,
+          0
+        );
+        const failedToolkits = allResults
+          .filter((result) =>
+            result.warnings.some((warning) =>
+              warning.startsWith("Error processing toolkit")
+            )
+          )
+          .map((result) => result.toolkit.id);
+        const failedTools = allResults.flatMap((result) => result.failedTools);
+        const failedToolkitsFromTools = Array.from(
+          new Set(failedTools.map((tool) => tool.toolkitId))
+        );
+
+        const runDetails = [
+          `output=${resolve(options.output)}`,
+          `apiSource=${apiSource}`,
+          `mode=${runAll ? "all" : "providers"}`,
+          `skipUnchanged=${options.skipUnchanged}`,
+          `filesWritten=${filesWritten.length}`,
+          `warnings=${warningCount}`,
+          `writeErrors=${writeErrors.length}`,
+        ];
+
+        if (!runAll && providers) {
+          runDetails.push(
+            `providers=${providers.map((p) => p.provider).join(", ")}`
+          );
+        }
+
+        if (options.failedToolsFile) {
+          runDetails.push(`failedToolsFile=${options.failedToolsFile}`);
+        }
+
+        if (failedToolkits.length > 0) {
+          runDetails.push(`failedToolkits=${failedToolkits.join(", ")}`);
+        }
+        if (failedTools.length > 0) {
+          runDetails.push(`failedTools=${failedTools.length}`);
+        }
+
+        if (changeResult) {
+          runDetails.push(...buildChangeLogDetails(changeResult));
+          await appendLogEntry(logPaths.changeLogPath, {
+            title: "changes",
+            details: buildChangeLogDetails(changeResult),
+          });
+        }
+
+        await writeFailedToolsReport(logPaths.failedToolsPath, {
+          generatedAt: new Date().toISOString(),
+          toolkits: failedToolkitsFromTools,
+          failedToolkits,
+          tools: failedTools,
+        });
+
+        await appendLogEntry(logPaths.runLogPath, {
+          title: "generate",
+          details: runDetails,
+        });
       } catch (error) {
         spinner.fail(
           `Error: ${error instanceof Error ? error.message : String(error)}`
         );
+        await appendLogEntry(logPaths.runLogPath, {
+          title: "generate (error)",
+          details: [
+            `output=${resolve(options.output)}`,
+            `message=${error instanceof Error ? error.message : String(error)}`,
+          ],
+        });
         process.exit(1);
       }
     }
@@ -1414,6 +1664,200 @@ program
       process.exit(1);
     }
   });
+
+program
+  .command("check-changes")
+  .description(
+    "Check for changes in tool definitions without generating (dry-run)"
+  )
+  .option("-o, --output <dir>", "Previous output directory", getDefaultOutputDir())
+  .option("--log-dir <dir>", "Directory for run logs", getDefaultLogDir())
+  .option("--mock-data-dir <dir>", "Path to mock data directory")
+  .option("--metadata-file <file>", "Path to metadata JSON file")
+  .option(
+    "--api-source <source>",
+    'API source: "list-tools" (/v1/tools), "tool-metadata" (/v1/tool_metadata), or "mock" (default: auto-detect)'
+  )
+  .option(
+    "--list-tools-url <url>",
+    "List tools API URL (default: https://api.arcade.dev)"
+  )
+  .option(
+    "--list-tools-key <key>",
+    "List tools API key (or ARCADE_API_KEY env)"
+  )
+  .option(
+    "--list-tools-page-size <number>",
+    "List tools API page size",
+    (value) => Number.parseInt(value, 10)
+  )
+  .option("--tool-metadata-url <url>", "Tool metadata API URL")
+  .option(
+    "--tool-metadata-key <key>",
+    "Tool metadata API key (or ENGINE_API_KEY env)"
+  )
+  .option("--verbose", "Show detailed tool-level changes", false)
+  .option("--json", "Output as JSON", false)
+  .action(
+    async (options: {
+      output: string;
+      logDir: string;
+      mockDataDir?: string;
+      metadataFile?: string;
+      apiSource?: string;
+      listToolsUrl?: string;
+      listToolsKey?: string;
+      listToolsPageSize?: number;
+      toolMetadataUrl?: string;
+      toolMetadataKey?: string;
+      verbose: boolean;
+      json: boolean;
+    }) => {
+      const spinner = ora("Checking for changes...").start();
+      const logPaths = buildLogPaths(resolve(options.logDir));
+
+      try {
+        // Initialize data source
+        const mockDataDir = options.mockDataDir ?? getDefaultMockDataDir();
+        const metadataFile =
+          options.metadataFile ?? join(mockDataDir, "metadata.json");
+        const metadataSource = createMockMetadataSource(metadataFile);
+
+        const apiSource = resolveApiSource(options);
+        const toolkitDataSource = createToolkitDataSourceForApi(
+          apiSource,
+          options,
+          metadataSource,
+          mockDataDir,
+          false, // not verbose during fetch
+          spinner
+        );
+
+        // Fetch current data from API
+        spinner.text = "Fetching current tool definitions from API...";
+        const currentToolkitsData =
+          await toolkitDataSource.fetchAllToolkitsData();
+
+        // Build map of toolkit ID -> tools
+        const currentToolkitTools = new Map<
+          string,
+          readonly import("../types/index.js").ToolDefinition[]
+        >();
+        for (const [id, data] of currentToolkitsData) {
+          currentToolkitTools.set(id, data.tools);
+        }
+
+        // Load previous output
+        spinner.text = "Loading previous output...";
+        const previousToolkits = await loadPreviousToolkitsFromDir(
+          resolve(options.output),
+          false
+        );
+
+        // Detect changes
+        spinner.text = "Comparing tool definitions...";
+        const changeResult = detectChanges(currentToolkitTools, previousToolkits);
+
+        spinner.stop();
+
+        await appendLogEntry(logPaths.runLogPath, {
+          title: "check-changes",
+          details: [
+            `output=${resolve(options.output)}`,
+            `apiSource=${apiSource}`,
+            ...buildChangeLogDetails(changeResult),
+          ],
+        });
+        await appendLogEntry(logPaths.changeLogPath, {
+          title: "changes",
+          details: buildChangeLogDetails(changeResult),
+        });
+
+        // Output results
+        if (options.json) {
+          console.log(JSON.stringify(changeResult, null, 2));
+        } else {
+          console.log(chalk.bold("\n📋 Change Detection Results\n"));
+
+          // Summary
+          console.log(chalk.cyan("Summary:"));
+          console.log(`  ${formatChangeSummary(changeResult)}`);
+          console.log();
+
+          // Check if there are any changes
+          if (!hasChanges(changeResult)) {
+            console.log(chalk.green("✓ No changes detected. All toolkits are up to date.\n"));
+          } else {
+            // Show changed toolkits
+            const changedIds = getChangedToolkitIds(changeResult);
+            console.log(chalk.yellow(`⚠ ${changedIds.length} toolkit(s) need regeneration:\n`));
+
+            if (options.verbose) {
+              // Detailed view
+              const detailedLines = formatDetailedChanges(changeResult);
+              for (const line of detailedLines) {
+                if (line.startsWith("[NEW]")) {
+                  console.log(chalk.green(line));
+                } else if (line.startsWith("[REMOVED]")) {
+                  console.log(chalk.red(line));
+                } else if (line.startsWith("[MODIFIED]")) {
+                  console.log(chalk.yellow(line));
+                } else if (line.startsWith("  + ")) {
+                  console.log(chalk.green(line));
+                } else if (line.startsWith("  - ")) {
+                  console.log(chalk.red(line));
+                } else if (line.startsWith("  ~ ")) {
+                  console.log(chalk.yellow(line));
+                } else {
+                  console.log(line);
+                }
+              }
+            } else {
+              // Compact view
+              for (const change of changeResult.toolkitChanges) {
+                if (change.changeType === "unchanged") continue;
+
+                const icon = {
+                  added: chalk.green("+ "),
+                  removed: chalk.red("- "),
+                  modified: chalk.yellow("~ "),
+                  unchanged: "  ",
+                }[change.changeType];
+
+                const toolChangeSummary =
+                  change.changeType === "modified"
+                    ? ` (${change.toolChanges.length} tool change(s))`
+                    : "";
+
+                console.log(
+                  `  ${icon}${change.toolkitId} [${change.currentToolCount} tools]${toolChangeSummary}`
+                );
+              }
+            }
+
+            console.log();
+            console.log(
+              chalk.dim(
+                'Run "generate --skip-unchanged" to only regenerate changed toolkits.'
+              )
+            );
+          }
+        }
+      } catch (error) {
+        spinner.fail(
+          `Error: ${error instanceof Error ? error.message : String(error)}`
+        );
+        await appendLogEntry(logPaths.runLogPath, {
+          title: "check-changes (error)",
+          details: [
+            `output=${resolve(options.output)}`,
+            `message=${error instanceof Error ? error.message : String(error)}`,
+          ],
+        });
+        process.exit(1);
+      }
+    }
+  );
 
 // Parse command line arguments
 program.parse();

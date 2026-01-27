@@ -23,8 +23,8 @@ type ToolMetadataPage = {
   totalCount: number;
 };
 
-const DEFAULT_PAGE_SIZE = 100;
-const MAX_PAGE_SIZE = 100;
+const DEFAULT_PAGE_SIZE = 1000;
+const MAX_PAGE_SIZE = 1000;
 
 const normalizePageSize = (value?: number): number => {
   if (!value || Number.isNaN(value) || value <= 0) {

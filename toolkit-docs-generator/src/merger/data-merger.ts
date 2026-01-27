@@ -49,9 +49,17 @@ export interface DataMergerConfig {
   skipToolkitIds?: ReadonlySet<string> | undefined;
 }
 
+export interface FailedTool {
+  readonly toolkitId: string;
+  readonly toolName: string;
+  readonly qualifiedName: string;
+  readonly reason: string;
+}
+
 export interface MergeResult {
   toolkit: MergedToolkit;
   warnings: string[];
+  failedTools: FailedTool[];
 }
 
 export interface ToolExampleResult {
@@ -114,10 +122,10 @@ export const computeAllScopes = (
   return Array.from(scopeSet).sort();
 };
 
-const normalizeList = (values: readonly string[]): string[] =>
+export const normalizeList = (values: readonly string[]): string[] =>
   Array.from(values).sort();
 
-const stableStringify = (value: unknown): string => {
+export const stableStringify = (value: unknown): string => {
   if (Array.isArray(value)) {
     return `[${value.map((item) => stableStringify(item)).join(",")}]`;
   }
@@ -136,7 +144,7 @@ const stableStringify = (value: unknown): string => {
   return JSON.stringify(value);
 };
 
-const buildToolSignatureInput = (
+export const buildToolSignatureInput = (
   tool: ToolDefinition | MergedTool
 ): Record<string, unknown> => ({
   name: tool.name,
@@ -169,10 +177,10 @@ const buildToolSignatureInput = (
     : null,
 });
 
-const buildToolSignature = (tool: ToolDefinition | MergedTool): string =>
+export const buildToolSignature = (tool: ToolDefinition | MergedTool): string =>
   stableStringify(buildToolSignatureInput(tool));
 
-const buildToolkitSummarySignature = (toolkit: MergedToolkit): string =>
+export const buildToolkitSummarySignature = (toolkit: MergedToolkit): string =>
   stableStringify({
     id: toolkit.id,
     label: toolkit.label,
@@ -279,14 +287,41 @@ const transformMetadata = (
 });
 
 /**
+ * Get documentation chunks for a tool, preserving from previous output if source is empty
+ */
+const getToolDocumentationChunks = (
+  toolName: string,
+  toolChunks: { [key: string]: DocumentationChunk[] },
+  previousTool?: MergedTool
+): DocumentationChunk[] => {
+  const fromSource = toolChunks[toolName] ?? [];
+  const fromPrevious = previousTool?.documentationChunks ?? [];
+  
+  // If source has chunks, use source (it's authoritative)
+  // If source is empty but previous has chunks, preserve previous
+  if (fromSource.length > 0) {
+    return fromSource;
+  }
+  return fromPrevious;
+};
+
+/**
  * Transform a tool definition into a merged tool
  */
 const transformTool = async (
   tool: ToolDefinition,
   toolChunks: { [key: string]: DocumentationChunk[] },
   toolExampleGenerator: ToolExampleGenerator | undefined,
+  warnings: string[],
+  failedTools: FailedTool[],
   previousTool?: MergedTool
 ): Promise<MergedTool> => {
+  const documentationChunks = getToolDocumentationChunks(
+    tool.name,
+    toolChunks,
+    previousTool
+  );
+
   if (previousTool && shouldReuseExample(tool, previousTool)) {
     return {
       name: tool.name,
@@ -298,7 +333,7 @@ const transformTool = async (
       secrets: tool.secrets,
       secretsInfo: previousTool.secretsInfo ?? [],
       output: tool.output,
-      documentationChunks: toolChunks[tool.name] ?? [],
+      documentationChunks,
       codeExample: previousTool.codeExample,
     };
   }
@@ -314,25 +349,51 @@ const transformTool = async (
       secrets: tool.secrets,
       secretsInfo: [],
       output: tool.output,
-      documentationChunks: toolChunks[tool.name] ?? [],
+      documentationChunks,
     };
   }
 
-  const exampleResult = await toolExampleGenerator.generate(tool);
+  try {
+    const exampleResult = await toolExampleGenerator.generate(tool);
 
-  return {
-    name: tool.name,
-    qualifiedName: tool.qualifiedName,
-    fullyQualifiedName: tool.fullyQualifiedName,
-    description: tool.description,
-    parameters: tool.parameters,
-    auth: tool.auth,
-    secrets: tool.secrets,
-    secretsInfo: exampleResult.secretsInfo,
-    output: tool.output,
-    documentationChunks: toolChunks[tool.name] ?? [],
-    codeExample: exampleResult.codeExample,
-  };
+    return {
+      name: tool.name,
+      qualifiedName: tool.qualifiedName,
+      fullyQualifiedName: tool.fullyQualifiedName,
+      description: tool.description,
+      parameters: tool.parameters,
+      auth: tool.auth,
+      secrets: tool.secrets,
+      secretsInfo: exampleResult.secretsInfo,
+      output: tool.output,
+      documentationChunks,
+      codeExample: exampleResult.codeExample,
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    warnings.push(
+      `Example generation failed for ${tool.qualifiedName}: ${message}`
+    );
+    failedTools.push({
+      toolkitId: tool.qualifiedName.split(".")[0] ?? tool.qualifiedName,
+      toolName: tool.name,
+      qualifiedName: tool.qualifiedName,
+      reason: message,
+    });
+
+    return {
+      name: tool.name,
+      qualifiedName: tool.qualifiedName,
+      fullyQualifiedName: tool.fullyQualifiedName,
+      description: tool.description,
+      parameters: tool.parameters,
+      auth: tool.auth,
+      secrets: tool.secrets,
+      secretsInfo: previousTool?.secretsInfo ?? [],
+      output: tool.output,
+      documentationChunks,
+    };
+  }
 };
 
 // ============================================================================
@@ -351,6 +412,7 @@ export const mergeToolkit = async (
   options: MergeToolkitOptions = {}
 ): Promise<MergeResult> => {
   const warnings: string[] = [];
+  const failedTools: FailedTool[] = [];
 
   if (tools.length === 0) {
     warnings.push(`No tools found for toolkit: ${toolkitId}`);
@@ -405,10 +467,29 @@ export const mergeToolkit = async (
         tool,
         toolChunks,
         toolExampleGenerator,
+        warnings,
+        failedTools,
         previousToolByQualifiedName.get(tool.qualifiedName)
       ),
     llmConcurrency
   );
+
+  // Merge custom sections from source file with previous output
+  // This preserves manually-added custom sections that aren't in the source file
+  const mergeCustomSectionsArrays = <T>(
+    fromSource: readonly T[] | undefined,
+    fromPrevious: readonly T[] | undefined
+  ): T[] => {
+    const sourceItems = fromSource ?? [];
+    const previousItems = fromPrevious ?? [];
+    
+    // If source has items, use source (it's the authoritative source)
+    // If source is empty but previous has items, preserve previous
+    if (sourceItems.length > 0) {
+      return [...sourceItems];
+    }
+    return [...previousItems];
+  };
 
   // Build final toolkit
   const toolkit: MergedToolkit = {
@@ -421,13 +502,22 @@ export const mergeToolkit = async (
       : getDefaultMetadata(toolkitId),
     auth,
     tools: mergedTools,
-    documentationChunks: customSections?.documentationChunks ?? [],
-    customImports: customSections?.customImports ?? [],
-    subPages: customSections?.subPages ?? [],
+    documentationChunks: mergeCustomSectionsArrays(
+      customSections?.documentationChunks,
+      options.previousToolkit?.documentationChunks
+    ),
+    customImports: mergeCustomSectionsArrays(
+      customSections?.customImports,
+      options.previousToolkit?.customImports
+    ),
+    subPages: mergeCustomSectionsArrays(
+      customSections?.subPages,
+      options.previousToolkit?.subPages
+    ),
     generatedAt: new Date().toISOString(),
   };
 
-  return { toolkit, warnings };
+  return { toolkit, warnings, failedTools };
 };
 
 // ============================================================================
@@ -626,6 +716,7 @@ export class DataMerger {
               generatedAt: new Date().toISOString(),
             },
             warnings: [`Error processing toolkit: ${message}`],
+            failedTools: [],
           };
 
           this.onToolkitProgress?.(toolkitId, "done", 0);

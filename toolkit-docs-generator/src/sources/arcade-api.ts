@@ -39,8 +39,8 @@ export interface ArcadeApiSourceConfig {
 // Constants
 // ============================================================================
 
-const DEFAULT_PAGE_SIZE = 100;
-const MAX_PAGE_SIZE = 100;
+const DEFAULT_PAGE_SIZE = 1000;
+const MAX_PAGE_SIZE = 1000;
 const DEFAULT_BASE_URL = "https://api.arcade.dev";
 
 // ============================================================================
