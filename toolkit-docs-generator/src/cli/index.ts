@@ -38,6 +38,7 @@ import {
 import type { MergeResult } from "../merger/data-merger.js";
 import { createDataMerger } from "../merger/data-merger.js";
 import { createCustomSectionsFileSource } from "../sources/custom-sections-file.js";
+import { createDesignSystemMetadataSource } from "../sources/design-system-metadata.js";
 import { createEmptyCustomSectionsSource } from "../sources/in-memory.js";
 import { createMockMetadataSource } from "../sources/mock-metadata.js";
 import {
@@ -50,6 +51,7 @@ import {
   createProgressTracker,
   formatToolkitComplete,
 } from "../utils/progress.js";
+import { resolveProviderIdsFromMetadata } from "../utils/provider-matching.js";
 import {
   appendLogEntry,
   readFailedToolsReport,
@@ -100,6 +102,21 @@ const parseProviders = (input: string): ProviderVersion[] => {
   });
 };
 
+const resolveProviderIds = async (
+  providers: ProviderVersion[],
+  metadataSource: unknown
+): Promise<ProviderVersion[]> => {
+  const source = metadataSource as {
+    getAllToolkitsMetadata?: () => Promise<
+      readonly { id: string; label: string }[]
+    >;
+  };
+  if (!source.getAllToolkitsMetadata) return providers;
+
+  const all = await source.getAllToolkitsMetadata();
+  return resolveProviderIdsFromMetadata(providers, all);
+};
+
 /**
  * Get the default fixture paths (for mock mode)
  */
@@ -132,6 +149,55 @@ const buildLogPaths = (logDir: string) => ({
   changeLogPath: join(logDir, "changes.log"),
   failedToolsPath: join(logDir, "failed-tools.json"),
 });
+
+const createMetadataSource = async (options: {
+  metadataFile: string;
+  useMetadataFile: boolean;
+  verbose: boolean;
+}) => {
+  if (options.useMetadataFile) {
+    if (options.verbose) {
+      console.log(
+        chalk.dim(
+          `Using metadata file source: ${resolve(options.metadataFile)}`
+        )
+      );
+    }
+    return createMockMetadataSource(options.metadataFile);
+  }
+
+  try {
+    const dsSource = await createDesignSystemMetadataSource();
+    const all =
+      "getAllToolkitsMetadata" in dsSource
+        ? await (
+            dsSource as {
+              getAllToolkitsMetadata: () => Promise<readonly unknown[]>;
+            }
+          ).getAllToolkitsMetadata()
+        : [];
+
+    if (Array.isArray(all) && all.length > 0) {
+      if (options.verbose) {
+        console.log(chalk.dim(`Using Design System metadata (${all.length})`));
+      }
+      return dsSource;
+    }
+  } catch (error) {
+    if (options.verbose) {
+      console.log(chalk.dim(`Design System metadata unavailable: ${error}`));
+    }
+  }
+
+  if (options.verbose) {
+    console.log(
+      chalk.dim(
+        `Falling back to metadata file source: ${resolve(options.metadataFile)}`
+      )
+    );
+  }
+  return createMockMetadataSource(options.metadataFile);
+};
 
 const buildChangeLogDetails = (
   result: ReturnType<typeof detectChanges>
@@ -724,7 +790,16 @@ program
         const mockDataDir = options.mockDataDir ?? getDefaultMockDataDir();
         const metadataFile =
           options.metadataFile ?? join(mockDataDir, "metadata.json");
-        const metadataSource = createMockMetadataSource(metadataFile);
+        const metadataSource = await createMetadataSource({
+          metadataFile,
+          useMetadataFile: Boolean(options.metadataFile),
+          verbose: options.verbose,
+        });
+
+        // Resolve provider names to canonical toolkit IDs (best effort).
+        if (providers && providers.length > 0) {
+          providers = await resolveProviderIds(providers, metadataSource);
+        }
 
         // Create toolkit data source based on API source
         const apiSource = resolveApiSource(options);
@@ -1316,7 +1391,11 @@ program
         const mockDataDir = options.mockDataDir ?? getDefaultMockDataDir();
         const metadataFile =
           options.metadataFile ?? join(mockDataDir, "metadata.json");
-        const metadataSource = createMockMetadataSource(metadataFile);
+        const metadataSource = await createMetadataSource({
+          metadataFile,
+          useMetadataFile: Boolean(options.metadataFile),
+          verbose: options.verbose,
+        });
 
         // Create toolkit data source based on API source
         const apiSource = resolveApiSource(options);
@@ -1728,7 +1807,11 @@ program
         const mockDataDir = options.mockDataDir ?? getDefaultMockDataDir();
         const metadataFile =
           options.metadataFile ?? join(mockDataDir, "metadata.json");
-        const metadataSource = createMockMetadataSource(metadataFile);
+        const metadataSource = await createMetadataSource({
+          metadataFile,
+          useMetadataFile: Boolean(options.metadataFile),
+          verbose: false,
+        });
 
         const apiSource = resolveApiSource(options);
         const toolkitDataSource = createToolkitDataSourceForApi(

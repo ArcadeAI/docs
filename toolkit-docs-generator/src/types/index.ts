@@ -386,6 +386,7 @@ export const ToolkitIndexEntrySchema = z.object({
   label: z.string(),
   version: z.string(),
   category: ToolkitCategorySchema,
+  type: ToolkitTypeSchema,
   toolCount: z.number(),
   authType: ToolkitAuthTypeSchema,
 });

@@ -7,7 +7,8 @@ import type { ToolkitData } from "@/app/_components/toolkit-docs/types";
 
 export function ToolkitPreviewContent() {
   const params = useParams();
-  const toolkitId = params.toolkitId as string;
+  const rawToolkitId = String(params.toolkitId ?? "");
+  const toolkitId = rawToolkitId.toLowerCase().replace(/[^a-z0-9]+/g, "");
   const [data, setData] = useState<ToolkitData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -17,7 +18,7 @@ export function ToolkitPreviewContent() {
       try {
         const response = await fetch(`/api/toolkit-data/${toolkitId}`);
         if (!response.ok) {
-          throw new Error(`Toolkit not found: ${toolkitId}`);
+          throw new Error(`Toolkit not found: ${rawToolkitId}`);
         }
         const toolkitData = await response.json();
         setData(toolkitData);
@@ -29,7 +30,7 @@ export function ToolkitPreviewContent() {
     };
 
     loadData();
-  }, [toolkitId]);
+  }, [toolkitId, rawToolkitId]);
 
   if (loading) {
     return <p className="text-muted-foreground">Loading toolkit data...</p>;
@@ -38,7 +39,7 @@ export function ToolkitPreviewContent() {
   if (error || !data) {
     return (
       <p className="text-red-500">
-        {error || `Toolkit "${toolkitId}" not found.`}
+        {error || `Toolkit "${rawToolkitId}" not found.`}
       </p>
     );
   }

@@ -1,5 +1,5 @@
-import { readFile } from "fs/promises";
-import { join } from "path";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import type { ToolkitData } from "@/app/_components/toolkit-docs/types";
 
 export type ToolkitIndexEntry = {
@@ -7,6 +7,7 @@ export type ToolkitIndexEntry = {
   label: string;
   version: string;
   category: string;
+  type?: string;
   toolCount: number;
   authType: string;
 };
@@ -30,7 +31,8 @@ export const readToolkitData = async (
   toolkitId: string,
   options?: ToolkitDataOptions
 ): Promise<ToolkitData | null> => {
-  const fileName = `${toolkitId.toLowerCase()}.json`;
+  const normalizedId = toolkitId.toLowerCase().replace(/[^a-z0-9]+/g, "");
+  const fileName = `${normalizedId}.json`;
   const filePath = join(resolveDataDir(options), fileName);
 
   try {

@@ -124,4 +124,31 @@ describe("CombinedToolkitDataSource", () => {
     expect(result.get("Github")?.metadata?.label).toBe("GitHub");
     expect(result.get("Slack")?.metadata?.label).toBe("Slack");
   });
+
+  it("should fall back to providerId metadata for *Api toolkits", async () => {
+    const toolSource = new InMemoryToolDataSource([
+      createTool({
+        qualifiedName: "MailchimpMarketingApi.CreateCampaign",
+        fullyQualifiedName: "MailchimpMarketingApi.CreateCampaign@1.0.0",
+        auth: { providerId: "mailchimp", providerType: "oauth2", scopes: [] },
+      }),
+    ]);
+
+    const metadataSource = new InMemoryMetadataSource([
+      createMetadata({
+        id: "MailchimpApi",
+        label: "Mailchimp API",
+        category: "productivity",
+        type: "arcade_starter",
+      }),
+    ]);
+
+    const dataSource = createCombinedToolkitDataSource({
+      toolSource,
+      metadataSource,
+    });
+
+    const result = await dataSource.fetchToolkitData("MailchimpMarketingApi");
+    expect(result.metadata?.label).toBe("Mailchimp API");
+  });
 });

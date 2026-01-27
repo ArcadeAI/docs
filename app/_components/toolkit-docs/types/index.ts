@@ -53,7 +53,7 @@ export type DocumentationChunkVariant =
 /**
  * A documentation chunk represents custom content to inject into docs
  */
-export interface DocumentationChunk {
+export type DocumentationChunk = {
   /** Type of content */
   type: DocumentationChunkType;
   /** Where to inject the content */
@@ -66,7 +66,7 @@ export interface DocumentationChunk {
   title?: string;
   /** Optional variant for styling */
   variant?: DocumentationChunkVariant;
-}
+};
 
 // ============================================================================
 // Tool Parameter Types
@@ -75,7 +75,7 @@ export interface DocumentationChunk {
 /**
  * Tool parameter definition
  */
-export interface ToolParameter {
+export type ToolParameter = {
   /** Parameter name */
   name: string;
   /** Parameter type (string, integer, boolean, array, object) */
@@ -92,7 +92,7 @@ export interface ToolParameter {
   inferrable?: boolean;
   /** Default value if not provided */
   default?: unknown;
-}
+};
 
 // ============================================================================
 // Tool Auth Types
@@ -101,14 +101,14 @@ export interface ToolParameter {
 /**
  * Tool-level authentication requirements
  */
-export interface ToolAuth {
+export type ToolAuth = {
   /** Auth provider ID (e.g., "github", "google") */
   providerId: string | null;
   /** Provider type (e.g., "oauth2", "api_key") */
   providerType: string;
   /** Required OAuth scopes for this specific tool */
   scopes: string[];
-}
+};
 
 // ============================================================================
 // Tool Output Types
@@ -117,12 +117,12 @@ export interface ToolAuth {
 /**
  * Tool output schema
  */
-export interface ToolOutput {
+export type ToolOutput = {
   /** Output type (object, array, string, etc.) */
   type: string;
   /** Output description */
   description: string | null;
-}
+};
 
 // ============================================================================
 // Tool Secrets Types
@@ -137,12 +137,12 @@ export type SecretType =
   | "password"
   | "unknown";
 
-export interface ToolSecret {
+export type ToolSecret = {
   /** Secret name */
   name: string;
   /** Secret type classification */
   type: SecretType;
-}
+};
 
 // ============================================================================
 // Code Example Types
@@ -151,20 +151,20 @@ export interface ToolSecret {
 /**
  * Parameter value with type information for code generation
  */
-export interface ExampleParameterValue {
+export type ExampleParameterValue = {
   /** The example value to use in generated code */
   value: unknown;
   /** Parameter type for proper serialization */
   type: "string" | "integer" | "boolean" | "array" | "object";
   /** Whether this parameter is required */
   required: boolean;
-}
+};
 
 /**
  * Tool code example configuration
  * Used to generate Python/JavaScript example code
  */
-export interface ToolCodeExample {
+export type ToolCodeExample = {
   /** Full tool name (e.g., "Github.SetStarred") */
   toolName: string;
   /** Parameter values with type info */
@@ -175,7 +175,7 @@ export interface ToolCodeExample {
   authProvider?: string;
   /** Optional tab label for the code example */
   tabLabel?: string;
-}
+};
 
 // ============================================================================
 // Tool Definition Types
@@ -184,7 +184,7 @@ export interface ToolCodeExample {
 /**
  * Complete tool definition with all documentation data
  */
-export interface ToolDefinition {
+export type ToolDefinition = {
   /** Tool name (e.g., "CreateIssue") */
   name: string;
   /** Qualified name (e.g., "Github.CreateIssue") */
@@ -207,7 +207,7 @@ export interface ToolDefinition {
   documentationChunks: DocumentationChunk[];
   /** Generated code example configuration */
   codeExample?: ToolCodeExample;
-}
+};
 
 // ============================================================================
 // Toolkit Metadata Types
@@ -240,7 +240,7 @@ export type ToolkitType =
 /**
  * Toolkit metadata from Design System
  */
-export interface ToolkitMetadata {
+export type ToolkitMetadata = {
   /** Category for navigation grouping */
   category: ToolkitCategory;
   /** Icon URL */
@@ -257,7 +257,7 @@ export interface ToolkitMetadata {
   isComingSoon?: boolean;
   /** Whether this toolkit is hidden */
   isHidden?: boolean;
-}
+};
 
 // ============================================================================
 // Toolkit Auth Types
@@ -271,14 +271,14 @@ export type ToolkitAuthType = "oauth2" | "api_key" | "mixed" | "none";
 /**
  * Toolkit-level authentication summary
  */
-export interface ToolkitAuth {
+export type ToolkitAuth = {
   /** Auth type */
   type: ToolkitAuthType;
   /** Auth provider ID */
   providerId: string | null;
   /** Union of all scopes required by tools in this toolkit */
   allScopes: string[];
-}
+};
 
 // ============================================================================
 // Complete Toolkit Data Type
@@ -288,7 +288,7 @@ export interface ToolkitAuth {
  * Complete toolkit data structure for rendering documentation
  * This is the main type consumed by the ToolkitPage component
  */
-export interface ToolkitData {
+export type ToolkitData = {
   /** Unique toolkit ID (e.g., "Github") */
   id: string;
   /** Human-readable label (e.g., "GitHub") */
@@ -315,7 +315,7 @@ export interface ToolkitData {
   pipPackageName?: string;
   /** Generation timestamp */
   generatedAt?: string;
-}
+};
 
 // ============================================================================
 // Component Props Types
@@ -324,7 +324,7 @@ export interface ToolkitData {
 /**
  * Props for DocumentationChunkRenderer component
  */
-export interface DocumentationChunkRendererProps {
+export type DocumentationChunkRendererProps = {
   /** Array of documentation chunks to filter and render */
   chunks: DocumentationChunk[];
   /** Filter by location */
@@ -333,12 +333,12 @@ export interface DocumentationChunkRendererProps {
   position: DocumentationChunkPosition;
   /** Optional className for the wrapper */
   className?: string;
-}
+};
 
 /**
  * Props for ToolkitHeader component
  */
-export interface ToolkitHeaderProps {
+export type ToolkitHeaderProps = {
   /** Toolkit ID for icon lookup */
   id: string;
   /** Display label */
@@ -361,46 +361,46 @@ export interface ToolkitHeaderProps {
     withScopes: number;
     withSecrets: number;
   };
-}
+};
 
 /**
  * Props for ParametersTable component
  */
-export interface ParametersTableProps {
+export type ParametersTableProps = {
   /** Array of parameters to render */
   parameters: ToolParameter[];
   /** Base URL for enum references (optional) */
   enumBaseUrl?: string;
-}
+};
 
 /**
  * Props for ScopesDisplay component
  */
-export interface ScopesDisplayProps {
+export type ScopesDisplayProps = {
   /** Array of OAuth scopes */
   scopes: string[];
   /** Display variant */
   variant?: "inline" | "callout";
   /** Optional title for the callout */
   title?: string;
-}
+};
 
 /**
  * Props for DynamicCodeBlock component
  */
-export interface DynamicCodeBlockProps {
+export type DynamicCodeBlockProps = {
   /** Code example configuration */
   codeExample: ToolCodeExample;
   /** Languages to generate (defaults to both) */
   languages?: ("python" | "javascript")[];
   /** Tab label override */
   tabLabel?: string;
-}
+};
 
 /**
  * Props for ToolSection component
  */
-export interface ToolSectionProps {
+export type ToolSectionProps = {
   /** Tool definition */
   tool: ToolDefinition;
   /** Toolkit ID (for generating anchors) */
@@ -411,12 +411,12 @@ export interface ToolSectionProps {
   showSelection?: boolean;
   /** Toggle selection handler */
   onToggleSelection?: (toolName: string) => void;
-}
+};
 
 /**
  * Props for AvailableToolsTable component
  */
-export interface AvailableToolsTableProps {
+export type AvailableToolsTableProps = {
   /** Tools to display in the table */
   tools: Array<{
     name: string;
@@ -461,12 +461,12 @@ export interface AvailableToolsTableProps {
   onToggleSelection?: (toolName: string) => void;
   /** Whether to show selection checkboxes */
   showSelection?: boolean;
-}
+};
 
 /**
  * Props for ToolkitPage component
  */
-export interface ToolkitPageProps {
+export type ToolkitPageProps = {
   /** Complete toolkit data */
   data: ToolkitData;
-}
+};

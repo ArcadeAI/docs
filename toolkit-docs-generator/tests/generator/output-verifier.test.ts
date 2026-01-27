@@ -105,12 +105,13 @@ describe("verifyOutputDir", () => {
 
       const indexPath = join(dir, "index.json");
       const index = JSON.parse(await readFile(indexPath, "utf-8")) as {
-        toolkits: Array<Record<string, unknown>>;
+        toolkits: Record<string, unknown>[];
       };
       const githubEntry = index.toolkits.find((entry) => entry.id === "Github");
       if (githubEntry) {
         githubEntry.version = "9.9.9";
         githubEntry.category = "social";
+        githubEntry.type = "community";
         githubEntry.toolCount = 999;
         githubEntry.authType = "none";
       }
@@ -127,6 +128,11 @@ describe("verifyOutputDir", () => {
       expect(
         result.errors.some((error) =>
           error.includes("category mismatch for Github")
+        )
+      ).toBe(true);
+      expect(
+        result.errors.some((error) =>
+          error.includes("type mismatch for Github")
         )
       ).toBe(true);
       expect(
@@ -158,13 +164,14 @@ describe("verifyOutputDir", () => {
 
       const indexPath = join(dir, "index.json");
       const index = JSON.parse(await readFile(indexPath, "utf-8")) as {
-        toolkits: Array<Record<string, unknown>>;
+        toolkits: Record<string, unknown>[];
       };
       index.toolkits.push({
         id: "Ghost",
         label: "Ghost",
         version: "1.0.0",
         category: "development",
+        type: "arcade",
         toolCount: 0,
         authType: "none",
       });

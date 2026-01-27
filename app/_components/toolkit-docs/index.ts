@@ -32,17 +32,17 @@
  */
 
 export { AvailableToolsTable } from "./components/AvailableToolsTable";
+export { DynamicCodeBlock } from "./components/DynamicCodeBlock";
 // Components
 export {
   DocumentationChunkRenderer,
   hasChunksAt,
 } from "./components/documentation-chunk-renderer";
-export { DynamicCodeBlock } from "./components/DynamicCodeBlock";
 export { ParametersTable } from "./components/parameters-table";
 export { ScopesDisplay } from "./components/scopes-display";
+export { ToolSection } from "./components/tool-section";
 export { ToolkitHeader } from "./components/toolkit-header";
 export { ToolkitPage } from "./components/toolkit-page";
-export { ToolSection } from "./components/tool-section";
 // Constants
 export * from "./constants";
 // Types

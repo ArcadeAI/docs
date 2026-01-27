@@ -260,16 +260,49 @@ export const extractVersion = (fullyQualifiedName: string): string => {
 /**
  * Create default metadata for toolkits not found in Design System
  */
-const getDefaultMetadata = (toolkitId: string): MergedToolkitMetadata => ({
-  category: "development",
-  iconUrl: `https://design-system.arcade.dev/icons/${toolkitId.toLowerCase()}.svg`,
-  isBYOC: false,
-  isPro: false,
-  type: "arcade",
-  docsLink: `https://docs.arcade.dev/en/mcp-servers/development/${toolkitId.toLowerCase()}`,
-  isComingSoon: false,
-  isHidden: false,
-});
+const TOOLKIT_ID_NORMALIZER = /[^a-z0-9]/g;
+
+const normalizeToolkitId = (toolkitId: string): string =>
+  toolkitId.toLowerCase().replace(TOOLKIT_ID_NORMALIZER, "");
+
+const isStarterToolkitId = (toolkitId: string): boolean =>
+  normalizeToolkitId(toolkitId).endsWith("api");
+
+const getDefaultIconId = (toolkitId: string): string => {
+  const normalized = normalizeToolkitId(toolkitId);
+  // Prefer provider icons for "*Api" toolkits when possible.
+  return normalized.endsWith("api") ? normalized.slice(0, -3) : normalized;
+};
+
+const getDefaultDocsSlug = (toolkitId: string): string => {
+  const normalized = normalizeToolkitId(toolkitId);
+  // Prefer "github-api" style slugs for "*Api" toolkits.
+  return normalized.endsWith("api")
+    ? `${normalized.slice(0, -3)}-api`
+    : normalized;
+};
+
+const applyToolkitTypeOverrides = (
+  toolkitId: string,
+  metadata: MergedToolkitMetadata
+): MergedToolkitMetadata => {
+  if (isStarterToolkitId(toolkitId) && metadata.type === "arcade") {
+    return { ...metadata, type: "arcade_starter" };
+  }
+  return metadata;
+};
+
+const getDefaultMetadata = (toolkitId: string): MergedToolkitMetadata =>
+  applyToolkitTypeOverrides(toolkitId, {
+    category: "development",
+    iconUrl: `https://design-system.arcade.dev/icons/${getDefaultIconId(toolkitId)}.svg`,
+    isBYOC: false,
+    isPro: false,
+    type: "arcade",
+    docsLink: `https://docs.arcade.dev/en/mcp-servers/development/${getDefaultDocsSlug(toolkitId)}`,
+    isComingSoon: false,
+    isHidden: false,
+  });
 
 /**
  * Transform ToolkitMetadata to MergedToolkitMetadata (without id/label)
@@ -493,14 +526,16 @@ export const mergeToolkit = async (
   };
 
   // Build final toolkit
+  const mergedMetadata = applyToolkitTypeOverrides(
+    toolkitId,
+    metadata ? transformMetadata(metadata) : getDefaultMetadata(toolkitId)
+  );
   const toolkit: MergedToolkit = {
     id: toolkitId,
     label: metadata?.label ?? toolkitId,
     version,
     description,
-    metadata: metadata
-      ? transformMetadata(metadata)
-      : getDefaultMetadata(toolkitId),
+    metadata: mergedMetadata,
     auth,
     tools: mergedTools,
     documentationChunks: mergeCustomSectionsArrays(
@@ -704,7 +739,9 @@ export class DataMerger {
                 iconUrl: "",
                 isBYOC: false,
                 isPro: false,
-                type: "arcade",
+                type: isStarterToolkitId(toolkitId)
+                  ? "arcade_starter"
+                  : "arcade",
                 docsLink: "",
                 isComingSoon: false,
                 isHidden: false,

@@ -66,14 +66,26 @@ export const PACKAGE_PREFIX = "arcade_";
  * Generate PyPI package name from toolkit ID
  */
 export function getPackageName(toolkitId: string): string {
-  return `${PACKAGE_PREFIX}${toolkitId.toLowerCase()}`;
+  const id = toolkitId.toLowerCase();
+
+  // Many "*Api" toolkits publish as "<name>_api" (not "<name>api").
+  if (id.endsWith("api") && !id.endsWith("_api") && !id.endsWith("-api")) {
+    return `${PACKAGE_PREFIX}${id.slice(0, -3)}_api`;
+  }
+
+  return `${PACKAGE_PREFIX}${id}`;
 }
 
 /**
  * Generate GitHub repository URL from toolkit ID
  */
 export function getGitHubRepoUrl(toolkitId: string): string {
-  return `${GITHUB_ORG_URL}/${GITHUB_REPO_PREFIX}${toolkitId.toLowerCase()}`;
+  const id = toolkitId.toLowerCase();
+  const repoId =
+    id.endsWith("api") && !id.endsWith("_api") && !id.endsWith("-api")
+      ? `${id.slice(0, -3)}_api`
+      : id;
+  return `${GITHUB_ORG_URL}/${GITHUB_REPO_PREFIX}${repoId}`;
 }
 
 /**

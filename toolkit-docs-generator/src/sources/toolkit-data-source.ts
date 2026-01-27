@@ -8,6 +8,7 @@
 
 import { join } from "path";
 import type { ToolDefinition, ToolkitMetadata } from "../types/index.js";
+import { normalizeId } from "../utils/fp.js";
 import {
   type ArcadeApiSourceConfig,
   createArcadeApiSource,
@@ -111,10 +112,23 @@ export class CombinedToolkitDataSource implements IToolkitDataSource {
     version?: string
   ): Promise<ToolkitData> {
     // Fetch tools and metadata in parallel
-    const [tools, metadata] = await Promise.all([
+    const [tools, fetchedMetadata] = await Promise.all([
       this.toolSource.fetchToolsByToolkit(toolkitId),
       this.metadataSource.getToolkitMetadata(toolkitId),
     ]);
+
+    // If the toolkit isn't in the Design System under its exact ID, try to match
+    // based on the auth provider for "*Api" toolkits (e.g. MailchimpMarketingApi -> MailchimpApi).
+    let metadata = fetchedMetadata;
+    if (!metadata && normalizeId(toolkitId).endsWith("api")) {
+      const providerId = tools.find((t) => t.auth?.providerId)?.auth
+        ?.providerId;
+      if (providerId) {
+        metadata =
+          (await this.metadataSource.getToolkitMetadata(`${providerId}Api`)) ??
+          (await this.metadataSource.getToolkitMetadata(providerId));
+      }
+    }
 
     // Filter tools by version if specified
     const filteredTools = version

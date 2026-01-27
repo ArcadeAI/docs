@@ -338,11 +338,15 @@ const calculateSummary = (
             case "modified":
               modifiedTools++;
               break;
+            default:
+              break;
           }
         }
         break;
       case "unchanged":
         unchangedToolkits++;
+        break;
+      default:
         break;
     }
   }
@@ -428,12 +432,13 @@ export const formatDetailedChanges = (
       unchanged: "",
     }[toolkitChange.changeType];
 
-    const versionSuffix =
-      toolkitChange.versionChanged && toolkitChange.previousVersion !== "0.0.0"
-        ? ` (version ${toolkitChange.previousVersion} -> ${toolkitChange.currentVersion})`
-        : toolkitChange.versionChanged
-          ? ` (version -> ${toolkitChange.currentVersion})`
-          : "";
+    let versionSuffix = "";
+    if (toolkitChange.versionChanged) {
+      versionSuffix =
+        toolkitChange.previousVersion !== "0.0.0"
+          ? ` (version ${toolkitChange.previousVersion} -> ${toolkitChange.currentVersion})`
+          : ` (version -> ${toolkitChange.currentVersion})`;
+    }
 
     lines.push(
       `${changeLabel} ${toolkitChange.toolkitId} (${toolkitChange.currentToolCount} tools)${versionSuffix}`

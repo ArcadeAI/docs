@@ -10,29 +10,33 @@
 import { readdir, readFile, writeFile } from "fs/promises";
 import { join } from "path";
 
-interface DocumentationChunk {
+const JSON_PRETTY_PRINT_INDENT = 2;
+const ERROR_PREVIEW_LIMIT = 10;
+const SUMMARY_SEPARATOR_LENGTH = 50;
+
+type DocumentationChunk = {
   type: string;
   location: string;
   position: string;
   content: string;
   header?: string;
   contentBlocks?: unknown[];
-}
+};
 
-interface CustomSections {
+type CustomSections = {
   documentationChunks?: DocumentationChunk[];
   customImports?: string[];
   subPages?: unknown[];
   toolChunks?: Record<string, DocumentationChunk[]>;
-}
+};
 
-interface MergedToolkit {
+type MergedToolkit = {
   id: string;
   documentationChunks: DocumentationChunk[];
   customImports: string[];
   subPages: unknown[];
   [key: string]: unknown;
-}
+};
 
 const normalizeId = (id: string): string =>
   id.toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -119,20 +123,23 @@ async function main() {
       }
 
       // Merge
-      if (hasChunks) {
-        toolkit.documentationChunks = sections.documentationChunks!;
+      if (
+        sections.documentationChunks &&
+        sections.documentationChunks.length > 0
+      ) {
+        toolkit.documentationChunks = sections.documentationChunks;
       }
-      if (hasImports) {
-        toolkit.customImports = sections.customImports!;
+      if (sections.customImports && sections.customImports.length > 0) {
+        toolkit.customImports = sections.customImports;
       }
-      if (hasSubPages) {
-        toolkit.subPages = sections.subPages!;
+      if (sections.subPages && sections.subPages.length > 0) {
+        toolkit.subPages = sections.subPages;
       }
 
       // Write back
       await writeFile(
         filePath,
-        JSON.stringify(toolkit, null, 2) + "\n",
+        `${JSON.stringify(toolkit, null, JSON_PRETTY_PRINT_INDENT)}\n`,
         "utf-8"
       );
 
@@ -150,20 +157,21 @@ async function main() {
   }
 
   // Summary
-  console.log("\n" + "=".repeat(50));
+  const separator = "=".repeat(SUMMARY_SEPARATOR_LENGTH);
+  console.log(`\n${separator}`);
   console.log("📊 Merge Summary");
-  console.log("=".repeat(50));
+  console.log(separator);
   console.log(`  Toolkits merged:  ${mergedCount}`);
   console.log(`  Toolkits skipped: ${skippedCount} (no custom sections)`);
   console.log(`  Errors:           ${errors.length}`);
 
   if (errors.length > 0) {
     console.log("\n⚠️  Errors:");
-    for (const error of errors.slice(0, 10)) {
+    for (const error of errors.slice(0, ERROR_PREVIEW_LIMIT)) {
       console.log(`  - ${error}`);
     }
-    if (errors.length > 10) {
-      console.log(`  ... and ${errors.length - 10} more`);
+    if (errors.length > ERROR_PREVIEW_LIMIT) {
+      console.log(`  ... and ${errors.length - ERROR_PREVIEW_LIMIT} more`);
     }
   }
 

@@ -439,6 +439,26 @@ describe("mergeToolkit", () => {
     );
   });
 
+  it("marks *Api toolkits as arcade_starter", async () => {
+    const tools = [
+      createTool({
+        qualifiedName: "GithubApi.ListRepos",
+        fullyQualifiedName: "GithubApi.ListRepos@1.0.0",
+      }),
+    ];
+    const metadata = createMetadata({ id: "GithubApi", type: "arcade" });
+
+    const result = await mergeToolkit(
+      "GithubApi",
+      tools,
+      metadata,
+      null,
+      createStubGenerator()
+    );
+
+    expect(result.toolkit.metadata.type).toBe("arcade_starter");
+  });
+
   it("should warn when no tools found", async () => {
     const result = await mergeToolkit(
       "Empty",

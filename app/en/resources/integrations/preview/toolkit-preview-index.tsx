@@ -1,3 +1,4 @@
+import { TOOLKITS } from "@arcadeai/design-system";
 import Link from "next/link";
 import { readToolkitIndex } from "@/app/_lib/toolkit-data";
 
@@ -28,13 +29,22 @@ export async function ToolkitPreviewIndex() {
     );
   }
 
+  const toolkitById = new Map(
+    TOOLKITS.map((toolkit) => [toolkit.id.toLowerCase(), toolkit] as const)
+  );
+
   const groupedByCategory = index.toolkits.reduce(
     (acc, toolkit) => {
-      const category = toolkit.category || "other";
+      const resolved = toolkitById.get(toolkit.id.toLowerCase());
+      const category = resolved?.category || toolkit.category || "other";
       if (!acc[category]) {
         acc[category] = [];
       }
-      acc[category].push(toolkit);
+      acc[category].push({
+        ...toolkit,
+        category,
+        label: resolved?.label || toolkit.label,
+      });
       return acc;
     },
     {} as Record<string, typeof index.toolkits>
@@ -69,7 +79,7 @@ export async function ToolkitPreviewIndex() {
               .map((toolkit) => (
                 <Link
                   className="group flex flex-col rounded-xl border border-neutral-dark-high/50 bg-gradient-to-br from-neutral-dark/40 to-transparent p-4 transition-all hover:border-brand-accent/30 hover:shadow-brand-accent/5 hover:shadow-lg"
-                  href={`/en/resources/integrations/preview/${toolkit.id.toLowerCase()}`}
+                  href={`/en/resources/integrations/${toolkit.category}/${toolkit.id.toLowerCase()}`}
                   key={toolkit.id}
                 >
                   <div className="flex items-start justify-between gap-2">

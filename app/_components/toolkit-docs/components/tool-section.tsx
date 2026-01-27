@@ -15,13 +15,16 @@ import { useOrySession } from "../../../_lib/ory-session-context";
 import { getDashboardUrl } from "../../dashboard-link";
 import type { ToolSectionProps } from "../types";
 import { toToolAnchorId } from "./AvailableToolsTable";
+import { DynamicCodeBlock } from "./DynamicCodeBlock";
 import {
   DocumentationChunkRenderer,
   hasChunksAt,
 } from "./documentation-chunk-renderer";
-import { DynamicCodeBlock } from "./DynamicCodeBlock";
 import { ParametersTable } from "./parameters-table";
 import { ScopesDisplay } from "./scopes-display";
+
+const COPY_FEEDBACK_MS = 2000;
+const JSON_PRETTY_PRINT_INDENT = 2;
 
 function CopyToolButton({ tool }: { tool: ToolSectionProps["tool"] }) {
   const [copied, setCopied] = useState(false);
@@ -44,11 +47,13 @@ function CopyToolButton({ tool }: { tool: ToolSectionProps["tool"] }) {
 
     try {
       await navigator.clipboard.writeText(
-        JSON.stringify(toolDefinition, null, 2)
+        JSON.stringify(toolDefinition, null, JSON_PRETTY_PRINT_INDENT)
       );
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {}
+      setTimeout(() => setCopied(false), COPY_FEEDBACK_MS);
+    } catch {
+      // Ignore clipboard errors (e.g., permissions, unsupported browser).
+    }
   }, [tool]);
 
   return (
@@ -75,8 +80,10 @@ function CopyScopesButton({ scopes }: { scopes: string[] }) {
     try {
       await navigator.clipboard.writeText(scopes.join("\n"));
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {}
+      setTimeout(() => setCopied(false), COPY_FEEDBACK_MS);
+    } catch {
+      // Ignore clipboard errors (e.g., permissions, unsupported browser).
+    }
   }, [scopes]);
 
   return (

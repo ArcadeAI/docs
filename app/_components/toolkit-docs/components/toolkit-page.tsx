@@ -1,6 +1,6 @@
 "use client";
 
-import { KeyRound } from "lucide-react";
+import { ArrowDown, ArrowUp, KeyRound } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 
@@ -10,18 +10,127 @@ import type {
   ToolDefinition,
   ToolkitCategory,
   ToolkitPageProps,
+  ToolkitType,
 } from "../types";
 import { AvailableToolsTable, toToolAnchorId } from "./AvailableToolsTable";
 import {
   DocumentationChunkRenderer,
   hasChunksAt,
 } from "./documentation-chunk-renderer";
-import { ToolkitHeader } from "./toolkit-header";
 import { ToolSection } from "./tool-section";
+import { ToolkitHeader } from "./toolkit-header";
+
+/**
+ * Floating buttons to scroll to top/bottom of the page.
+ * Only shows when user has scrolled past a threshold.
+ */
+function ScrollToButtons() {
+  const [showButtons, setShowButtons] = useState(false);
+  const [atBottom, setAtBottom] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+
+      // Show buttons after scrolling 300px
+      setShowButtons(scrollTop > 300);
+
+      // Check if near bottom (within 100px)
+      setAtBottom(scrollTop + windowHeight >= documentHeight - 100);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll(); // Initial check
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const scrollToBottom = () => {
+    window.scrollTo({
+      top: document.documentElement.scrollHeight,
+      behavior: "smooth",
+    });
+  };
+
+  if (!showButtons) {
+    return null;
+  }
+
+  return (
+    <div className="fixed right-6 bottom-6 z-50 flex flex-col gap-2 xl:right-80 2xl:right-[22rem]">
+      <button
+        aria-label="Scroll to top"
+        className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-dark-high bg-neutral-dark/90 text-muted-foreground shadow-lg backdrop-blur-sm transition-all hover:bg-neutral-dark hover:text-text-color"
+        onClick={scrollToTop}
+        title="Scroll to top"
+        type="button"
+      >
+        <ArrowUp className="h-5 w-5" />
+      </button>
+      {!atBottom && (
+        <button
+          aria-label="Scroll to bottom"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-dark-high bg-neutral-dark/90 text-muted-foreground shadow-lg backdrop-blur-sm transition-all hover:bg-neutral-dark hover:text-text-color"
+          onClick={scrollToBottom}
+          title="Scroll to bottom"
+          type="button"
+        >
+          <ArrowDown className="h-5 w-5" />
+        </button>
+      )}
+    </div>
+  );
+}
 
 export function buildPipPackageName(toolkitId: string): string {
   const normalized = toolkitId.toLowerCase().replace(/[^a-z0-9]+/g, "_");
   return `arcade_${normalized}`;
+}
+
+export const TOOLKIT_PAGE_OVERVIEW_LINK = {
+  id: "overview",
+  label: "Overview",
+  href: "#overview",
+} as const;
+
+export const TOOLKIT_PAGE_AVAILABLE_TOOLS_LINK = {
+  id: "available-tools",
+  label: "Available tools",
+  href: "#available-tools",
+} as const;
+
+export const TOOLKIT_PAGE_GET_BUILDING_LINK = {
+  id: "get-building",
+  label: "Get building",
+  href: "#get-building",
+} as const;
+
+export function buildObservedSectionIds(
+  tools: ReadonlyArray<{ qualifiedName: string }>
+): string[] {
+  const ids: string[] = [
+    TOOLKIT_PAGE_OVERVIEW_LINK.id,
+    TOOLKIT_PAGE_AVAILABLE_TOOLS_LINK.id,
+  ];
+
+  for (const tool of tools) {
+    ids.push(toToolAnchorId(tool.qualifiedName));
+  }
+
+  ids.push(TOOLKIT_PAGE_GET_BUILDING_LINK.id);
+  return ids;
+}
+
+function inferToolkitType(toolkitId: string, type: ToolkitType): ToolkitType {
+  if (toolkitId.toLowerCase().endsWith("api") && type === "arcade") {
+    return "arcade_starter";
+  }
+  return type;
 }
 
 function toTitleCaseCategory(category: ToolkitCategory): string {
@@ -64,23 +173,27 @@ function BreadcrumbBar({
 
 /**
  * Right sidebar that lists the tools on the page.
- * Kept fixed and flush to the window edge, without narrowing main content.
+ * Structure: Fixed header/footer with scrollable middle tool list.
  * Auto-scrolls and highlights the currently visible section.
  */
 function ToolsOnThisPage({ tools }: { tools: ToolDefinition[] }) {
   const [activeId, setActiveId] = useState<string | null>(null);
-  const sidebarRef = useRef<HTMLElement>(null);
+  const toolListRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
+  const [query, setQuery] = useState("");
 
   // Build list of all section IDs to observe
   const sectionIds = useMemo(() => {
-    const ids = ["available-tools"];
-    for (const tool of tools) {
-      ids.push(toToolAnchorId(tool.qualifiedName));
-    }
-    ids.push("get-building");
-    return ids;
+    return buildObservedSectionIds(tools);
   }, [tools]);
+
+  const filteredTools = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (q.length === 0) {
+      return tools;
+    }
+    return tools.filter((tool) => tool.qualifiedName.toLowerCase().includes(q));
+  }, [tools, query]);
 
   // Intersection Observer to track visible sections
   useEffect(() => {
@@ -112,33 +225,34 @@ function ToolsOnThisPage({ tools }: { tools: ToolDefinition[] }) {
     return () => observer.disconnect();
   }, [sectionIds]);
 
-  // Auto-scroll sidebar to keep active item visible
+  // Auto-scroll tool list to keep active item visible
   useEffect(() => {
-    if (activeId && sidebarRef.current) {
-      const activeItem = itemRefs.current.get(activeId);
-      if (activeItem) {
-        const sidebar = sidebarRef.current;
-        const itemTop = activeItem.offsetTop;
-        const itemHeight = activeItem.offsetHeight;
-        const sidebarScrollTop = sidebar.scrollTop;
-        const sidebarHeight = sidebar.clientHeight;
+    if (!(activeId && toolListRef.current)) {
+      return;
+    }
 
-        // Check if item is outside visible area
-        if (itemTop < sidebarScrollTop + 60) {
-          sidebar.scrollTo({
-            top: Math.max(0, itemTop - 60),
-            behavior: "smooth",
-          });
-        } else if (
-          itemTop + itemHeight >
-          sidebarScrollTop + sidebarHeight - 60
-        ) {
-          sidebar.scrollTo({
-            top: itemTop + itemHeight - sidebarHeight + 60,
-            behavior: "smooth",
-          });
-        }
-      }
+    const activeItem = itemRefs.current.get(activeId);
+    if (!activeItem) {
+      return;
+    }
+
+    const container = toolListRef.current;
+    const itemTop = activeItem.offsetTop - container.offsetTop;
+    const itemHeight = activeItem.offsetHeight;
+    const containerScrollTop = container.scrollTop;
+    const containerHeight = container.clientHeight;
+
+    // Check if item is outside visible area
+    if (itemTop < containerScrollTop + 20) {
+      container.scrollTo({
+        top: Math.max(0, itemTop - 20),
+        behavior: "smooth",
+      });
+    } else if (itemTop + itemHeight > containerScrollTop + containerHeight - 20) {
+      container.scrollTo({
+        top: itemTop + itemHeight - containerHeight + 20,
+        behavior: "smooth",
+      });
     }
   }, [activeId]);
 
@@ -158,21 +272,46 @@ function ToolsOnThisPage({ tools }: { tools: ToolDefinition[] }) {
   };
 
   return (
-    <aside
-      className="fixed top-28 right-0 hidden h-[calc(100vh-7rem)] w-72 overflow-y-auto border-neutral-dark-high/30 border-l bg-neutral-dark/40 px-6 py-6 xl:block 2xl:w-80"
-      ref={sidebarRef}
-    >
-      <h2 className="font-semibold text-sm text-text-color">On this page</h2>
-      <div className="mt-4 space-y-2">
-        <a
-          className={`block text-sm transition-colors ${getLinkClasses("available-tools")}`}
-          href="#available-tools"
-          ref={(el) => setItemRef("available-tools", el)}
-        >
-          Available tools
-        </a>
+    <aside className="fixed top-28 right-0 hidden h-[calc(100vh-7rem)] w-72 flex-col border-neutral-dark-high/30 border-l bg-neutral-dark/40 xl:flex 2xl:w-80">
+      {/* Fixed header section */}
+      <div className="shrink-0 border-neutral-dark-high/20 border-b px-6 pt-6 pb-4">
+        <h2 className="font-semibold text-sm text-text-color">On this page</h2>
+        <div className="mt-4 space-y-3">
+          <input
+            aria-label="Search tools on this page"
+            className="w-full rounded-lg border border-neutral-dark-high bg-neutral-dark/60 px-3 py-2 text-sm transition-colors placeholder:text-muted-foreground/70 focus:border-brand-accent focus:outline-none"
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search tools..."
+            type="search"
+            value={query}
+          />
+          <div className="text-muted-foreground text-xs">
+            {filteredTools.length} of {tools.length} tools
+          </div>
+        </div>
+        {/* Navigation links - fixed above scrollable list */}
+        <div className="mt-4 space-y-2">
+          <a
+            className={`block text-sm transition-colors ${getLinkClasses(TOOLKIT_PAGE_OVERVIEW_LINK.id)}`}
+            href={TOOLKIT_PAGE_OVERVIEW_LINK.href}
+            ref={(el) => setItemRef(TOOLKIT_PAGE_OVERVIEW_LINK.id, el)}
+          >
+            {TOOLKIT_PAGE_OVERVIEW_LINK.label}
+          </a>
+          <a
+            className={`block text-sm transition-colors ${getLinkClasses(TOOLKIT_PAGE_AVAILABLE_TOOLS_LINK.id)}`}
+            href={TOOLKIT_PAGE_AVAILABLE_TOOLS_LINK.href}
+            ref={(el) => setItemRef(TOOLKIT_PAGE_AVAILABLE_TOOLS_LINK.id, el)}
+          >
+            {TOOLKIT_PAGE_AVAILABLE_TOOLS_LINK.label}
+          </a>
+        </div>
+      </div>
+
+      {/* Scrollable tool list */}
+      <div className="min-h-0 flex-1 overflow-y-auto px-6 py-3" ref={toolListRef}>
         <div className="space-y-1">
-          {tools.map((tool) => {
+          {filteredTools.map((tool) => {
             const hasSecrets =
               (tool.secretsInfo?.length ?? 0) > 0 ||
               (tool.secrets?.length ?? 0) > 0;
@@ -193,12 +332,16 @@ function ToolsOnThisPage({ tools }: { tools: ToolDefinition[] }) {
             );
           })}
         </div>
+      </div>
+
+      {/* Fixed footer section */}
+      <div className="shrink-0 border-neutral-dark-high/20 border-t px-6 py-4">
         <a
-          className={`block pt-2 text-sm transition-colors ${getLinkClasses("get-building")}`}
-          href="#get-building"
-          ref={(el) => setItemRef("get-building", el)}
+          className={`block text-sm transition-colors ${getLinkClasses(TOOLKIT_PAGE_GET_BUILDING_LINK.id)}`}
+          href={TOOLKIT_PAGE_GET_BUILDING_LINK.href}
+          ref={(el) => setItemRef(TOOLKIT_PAGE_GET_BUILDING_LINK.id, el)}
         >
-          Get building
+          {TOOLKIT_PAGE_GET_BUILDING_LINK.label}
         </a>
       </div>
     </aside>
@@ -260,6 +403,13 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
     "replace"
   );
   const pipPackageName = data.pipPackageName ?? buildPipPackageName(data.id);
+  const metadata = useMemo(
+    () => ({
+      ...data.metadata,
+      type: inferToolkitType(data.id, data.metadata.type),
+    }),
+    [data.id, data.metadata]
+  );
 
   const handleScopeSelectionChange = (toolNames: string[]) => {
     setSelectedTools(new Set(toolNames));
@@ -279,61 +429,64 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
 
   return (
     <div className="w-full">
-      <BreadcrumbBar category={data.metadata.category} label={data.label} />
-      <h1 className="mb-6 font-bold text-4xl text-text-color tracking-tight">
-        {data.label}
-      </h1>
-      <DocumentationChunkRenderer
-        chunks={data.documentationChunks}
-        location="header"
-        position="before"
-      />
-      <DocumentationChunkRenderer
-        chunks={data.documentationChunks}
-        location="description"
-        position="before"
-      />
-      <ToolkitHeader
-        auth={data.auth}
-        description={data.description}
-        id={data.id}
-        label={data.label}
-        metadata={data.metadata}
-        toolStats={toolStats}
-        version={data.version}
-      />
-      <DocumentationChunkRenderer
-        chunks={data.documentationChunks}
-        location="description"
-        position="after"
-      />
-      <DocumentationChunkRenderer
-        chunks={data.documentationChunks}
-        location="header"
-        position="replace"
-      />
-      <DocumentationChunkRenderer
-        chunks={data.documentationChunks}
-        location="header"
-        position="after"
-      />
+      {/* Overview section */}
+      <section className="scroll-mt-20" id={TOOLKIT_PAGE_OVERVIEW_LINK.id}>
+        <BreadcrumbBar category={data.metadata.category} label={data.label} />
+        <h1 className="mb-6 font-bold text-4xl text-text-color tracking-tight">
+          {data.label}
+        </h1>
+        <DocumentationChunkRenderer
+          chunks={data.documentationChunks}
+          location="header"
+          position="before"
+        />
+        <DocumentationChunkRenderer
+          chunks={data.documentationChunks}
+          location="description"
+          position="before"
+        />
+        <ToolkitHeader
+          auth={data.auth}
+          description={data.description}
+          id={data.id}
+          label={data.label}
+          metadata={metadata}
+          toolStats={toolStats}
+          version={data.version}
+        />
+        <DocumentationChunkRenderer
+          chunks={data.documentationChunks}
+          location="description"
+          position="after"
+        />
+        <DocumentationChunkRenderer
+          chunks={data.documentationChunks}
+          location="header"
+          position="replace"
+        />
+        <DocumentationChunkRenderer
+          chunks={data.documentationChunks}
+          location="header"
+          position="after"
+        />
 
-      {data.summary && (
-        <div className="prose prose-sm prose-invert mt-6 max-w-none text-text-color/90">
-          <ReactMarkdown>{data.summary}</ReactMarkdown>
-        </div>
-      )}
+        {data.summary && (
+          <div className="prose prose-sm prose-invert mt-6 max-w-none text-text-color/90">
+            <ReactMarkdown>{data.summary}</ReactMarkdown>
+          </div>
+        )}
 
-      <DocumentationChunkRenderer
-        chunks={data.documentationChunks}
-        location="auth"
-        position="before"
-      />
-      <DocumentationChunkRenderer
-        chunks={data.documentationChunks}
-        location="auth"
-        position="after"
-      />
+        <DocumentationChunkRenderer
+          chunks={data.documentationChunks}
+          location="auth"
+          position="before"
+        />
+        <DocumentationChunkRenderer
+          chunks={data.documentationChunks}
+          location="auth"
+          position="after"
+        />
+      </section>
 
       <DocumentationChunkRenderer
         chunks={data.documentationChunks}
@@ -361,8 +514,10 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
         <h2 className="flex items-center gap-3 font-semibold text-2xl">
           <span className="rounded-lg bg-brand-accent/10 p-2">
             <svg
+              aria-hidden="true"
               className="h-5 w-5 text-brand-accent"
               fill="none"
+              focusable="false"
               stroke="currentColor"
               strokeWidth="2"
               viewBox="0 0 24 24"
@@ -446,6 +601,7 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
       </section>
 
       <ToolsOnThisPage tools={tools} />
+      <ScrollToButtons />
     </div>
   );
 }

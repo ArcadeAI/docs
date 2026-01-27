@@ -184,6 +184,7 @@ export class JsonGenerator {
       label: t.label,
       version: t.version,
       category: t.metadata.category,
+      type: t.metadata.type,
       toolCount: t.tools.length,
       authType: t.auth?.type ?? "none",
     }));

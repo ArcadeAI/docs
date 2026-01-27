@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  Badge,
-  ByocBadge,
-  getToolkitIconByName,
-  ProBadge,
-} from "@arcadeai/design-system";
+import { Badge, ByocBadge, ProBadge } from "@arcadeai/design-system";
 import { KeyRound, Wrench } from "lucide-react";
 import type React from "react";
 
@@ -90,8 +85,7 @@ export function ToolkitHeader({
   author = DEFAULT_AUTHOR,
   toolStats,
 }: ToolkitHeaderProps): React.ReactElement {
-  // Get the icon component from Design System
-  const IconComponent = getToolkitIconByName(label);
+  // Icon comes from the JSON metadata - the source of truth
   const iconUrl = metadata.iconUrl;
   const packageName = getPackageName(id);
 
@@ -112,6 +106,45 @@ export function ToolkitHeader({
       </a>
     ) : null;
 
+  // Icon comes from the JSON's iconUrl - always use img tag
+  const iconNode = iconUrl ? (
+    <div className="flex shrink-0 items-center justify-center">
+      <div className="rounded-2xl bg-gradient-to-br from-white/10 to-white/5 p-6 shadow-lg ring-1 ring-white/10">
+        <img
+          alt={`${label} icon`}
+          className="h-20 w-20"
+          height={80}
+          src={iconUrl}
+          width={80}
+        />
+      </div>
+    </div>
+  ) : null;
+
+  const authNode = (() => {
+    if (auth?.type === "oauth2") {
+      return (
+        <>
+          {AUTH_TYPE_LABELS.oauth2}
+          {authProviderLink && <> via the {authProviderLink}</>}
+        </>
+      );
+    }
+    if (auth?.type === "api_key") {
+      return AUTH_TYPE_LABELS.api_key;
+    }
+    if (auth?.type === "mixed") {
+      return (
+        <>
+          {AUTH_TYPE_LABELS.mixed}
+          {authProviderLink && <> via the {authProviderLink}</>}{" "}
+          {AUTH_TYPE_LABELS.mixedSuffix}
+        </>
+      );
+    }
+    return AUTH_TYPE_LABELS.none;
+  })();
+
   return (
     <div
       className="mt-6 mb-8 overflow-hidden rounded-xl border border-neutral-dark-high bg-gradient-to-br from-neutral-dark to-neutral-dark/60 shadow-lg"
@@ -119,25 +152,7 @@ export function ToolkitHeader({
     >
       <div className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center">
         {/* Icon - centered vertically */}
-        {IconComponent ? (
-          <div className="flex shrink-0 items-center justify-center">
-            <div className="rounded-2xl bg-gradient-to-br from-white/10 to-white/5 p-6 shadow-lg ring-1 ring-white/10">
-              <IconComponent className="h-20 w-20" />
-            </div>
-          </div>
-        ) : iconUrl ? (
-          <div className="flex shrink-0 items-center justify-center">
-            <div className="rounded-2xl bg-gradient-to-br from-white/10 to-white/5 p-6 shadow-lg ring-1 ring-white/10">
-              <img
-                alt={`${label} icon`}
-                className="h-20 w-20"
-                height={80}
-                src={iconUrl}
-                width={80}
-              />
-            </div>
-          </div>
-        ) : null}
+        {iconNode}
 
         {/* Content */}
         <div className="min-w-0 flex-1 space-y-4">
@@ -185,6 +200,7 @@ export function ToolkitHeader({
                 >
                   GitHub
                   <svg
+                    aria-hidden="true"
                     className="h-3 w-3"
                     fill="none"
                     stroke="currentColor"
@@ -204,24 +220,7 @@ export function ToolkitHeader({
             {/* Auth info */}
             <div className="flex items-start gap-2 sm:col-span-2">
               <span className="text-muted-foreground">Auth:</span>
-              <span className="font-medium text-text-color">
-                {auth?.type === "oauth2" ? (
-                  <>
-                    {AUTH_TYPE_LABELS.oauth2}
-                    {authProviderLink && <> via the {authProviderLink}</>}
-                  </>
-                ) : auth?.type === "api_key" ? (
-                  AUTH_TYPE_LABELS.api_key
-                ) : auth?.type === "mixed" ? (
-                  <>
-                    {AUTH_TYPE_LABELS.mixed}
-                    {authProviderLink && <> via the {authProviderLink}</>}{" "}
-                    {AUTH_TYPE_LABELS.mixedSuffix}
-                  </>
-                ) : (
-                  AUTH_TYPE_LABELS.none
-                )}
-              </span>
+              <span className="font-medium text-text-color">{authNode}</span>
             </div>
           </div>
 
@@ -279,12 +278,14 @@ export function ToolkitHeader({
               >
                 <img
                   alt={badge.alt}
-                  className="h-5"
+                  className="h-5 w-auto"
+                  height={20}
                   src={
                     typeof badge.src === "function"
                       ? badge.src(packageName)
                       : badge.src
                   }
+                  width={80}
                 />
               </a>
             ))}
@@ -299,12 +300,14 @@ export function ToolkitHeader({
             >
               <img
                 alt={LICENSE_BADGE.alt}
-                className="h-5"
+                className="h-5 w-auto"
+                height={20}
                 src={
                   typeof LICENSE_BADGE.src === "function"
                     ? LICENSE_BADGE.src(packageName)
                     : LICENSE_BADGE.src
                 }
+                width={80}
               />
             </a>
           </div>

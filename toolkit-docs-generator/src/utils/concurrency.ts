@@ -9,7 +9,7 @@
 export class ConcurrencyLimiter {
   private readonly maxConcurrency: number;
   private running = 0;
-  private queue: Array<() => void> = [];
+  private readonly queue: Array<() => void> = [];
 
   constructor(maxConcurrency: number) {
     this.maxConcurrency = Math.max(1, maxConcurrency);

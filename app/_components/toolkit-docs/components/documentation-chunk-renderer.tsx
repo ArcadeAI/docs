@@ -4,7 +4,7 @@ import { evaluate } from "@mdx-js/mdx";
 import { Callout, Steps, Tabs } from "nextra/components";
 import type React from "react";
 import { useEffect, useMemo, useState } from "react";
-import * as runtime from "react/jsx-runtime";
+import { Fragment, jsx, jsxs } from "react/jsx-runtime";
 import remarkGfm from "remark-gfm";
 
 import { SignupLink } from "../../analytics";
@@ -131,7 +131,9 @@ function MdxContent({ content }: { content: string }) {
     setComponent(null);
 
     evaluate(source, {
-      ...runtime,
+      Fragment,
+      jsx,
+      jsxs,
       remarkPlugins: [remarkGfm],
     })
       .then((result) => {

@@ -20,36 +20,38 @@ function createNoopPosthogClient() {
 
 export const PostHog = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
-  const isEnabled = Boolean(process.env.NEXT_PUBLIC_POSTHOG_KEY);
+  const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
+  const isEnabled = Boolean(posthogKey);
 
   useEffect(() => {
-    if (isEnabled && process.env.NEXT_PUBLIC_POSTHOG_KEY) {
-      posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
-        api_host:
-          process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com",
-        ui_host:
-          process.env.NEXT_PUBLIC_POSTHOG_UI_HOST || "https://us.posthog.com",
-        // Enable session recording for user behavior analysis
-        disable_session_recording: false,
-        session_recording: {
-          maskAllInputs: true, // Privacy: mask sensitive input fields
-          blockClass: "ph-no-capture", // Allow opting out specific elements
-          recordCrossOriginIframes: false, // Don't record third-party iframes
-        },
-        // Enable heatmaps for click tracking
-        enable_heatmaps: true,
-        // Enable surveys for CSAT feedback
-        disable_surveys: false,
-        loaded: (posthogInstance) => {
-          if (process.env.NEXT_PUBLIC_POSTHOG_DEBUG === "true") {
-            posthogInstance.debug();
-          }
-        },
-      });
-    } else {
+    if (!posthogKey) {
       // No key: keep analytics fully disabled and avoid noisy console errors.
+      return;
     }
-  }, [isEnabled]);
+
+    posthog.init(posthogKey, {
+      api_host:
+        process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com",
+      ui_host:
+        process.env.NEXT_PUBLIC_POSTHOG_UI_HOST || "https://us.posthog.com",
+      // Enable session recording for user behavior analysis
+      disable_session_recording: false,
+      session_recording: {
+        maskAllInputs: true, // Privacy: mask sensitive input fields
+        blockClass: "ph-no-capture", // Allow opting out specific elements
+        recordCrossOriginIframes: false, // Don't record third-party iframes
+      },
+      // Enable heatmaps for click tracking
+      enable_heatmaps: true,
+      // Enable surveys for CSAT feedback
+      disable_surveys: false,
+      loaded: (posthogInstance) => {
+        if (process.env.NEXT_PUBLIC_POSTHOG_DEBUG === "true") {
+          posthogInstance.debug();
+        }
+      },
+    });
+  }, [posthogKey]);
 
   // Track page views when pathname changes
   // biome-ignore lint/correctness/useExhaustiveDependencies: pathname is required for route change tracking

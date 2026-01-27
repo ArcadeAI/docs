@@ -18,6 +18,13 @@ export function DataTable({
   }
 
   const cellPadding = compact ? "px-3 py-2" : "px-4 py-3";
+  const rowKeyCounts = new Map<string, number>();
+  const getRowKey = (row: string[]): string => {
+    const baseKey = row.join("|");
+    const count = rowKeyCounts.get(baseKey) ?? 0;
+    rowKeyCounts.set(baseKey, count + 1);
+    return count === 0 ? baseKey : `${baseKey}__${count}`;
+  };
 
   return (
     <div className="my-3 overflow-hidden rounded-xl border border-neutral-dark-high/50 shadow-sm">
@@ -40,23 +47,26 @@ export function DataTable({
           </tr>
         </thead>
         <tbody className="divide-y divide-neutral-dark-high/30">
-          {rows.map((row, rowIndex) => (
-            <tr
-              className={
-                rowIndex % 2 === 0 ? "bg-neutral-dark/20" : "bg-transparent"
-              }
-              key={`row-${rowIndex}`}
-            >
-              {columns.map((_, columnIndex) => (
-                <td
-                  className={`${cellPadding} align-top text-text-color/80`}
-                  key={`cell-${rowIndex}-${columnIndex}`}
-                >
-                  {row[columnIndex] ?? "—"}
-                </td>
-              ))}
-            </tr>
-          ))}
+          {rows.map((row, rowIndex) => {
+            const rowKey = getRowKey(row);
+            return (
+              <tr
+                className={
+                  rowIndex % 2 === 0 ? "bg-neutral-dark/20" : "bg-transparent"
+                }
+                key={rowKey}
+              >
+                {columns.map((column, columnIndex) => (
+                  <td
+                    className={`${cellPadding} align-top text-text-color/80`}
+                    key={`${rowKey}-${column}`}
+                  >
+                    {row[columnIndex] ?? "—"}
+                  </td>
+                ))}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

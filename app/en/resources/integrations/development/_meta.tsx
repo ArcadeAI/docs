@@ -1,53 +1,61 @@
 import type { MetaRecord } from "nextra";
 
 const meta: MetaRecord = {
-  arcadeengineapi: {
-    title: "ArcadeEngineApi",
-    href: "/en/resources/integrations/preview/arcadeengineapi",
+  "-- Optimized": {
+    type: "separator",
+    title: "Optimized",
   },
   brightdata: {
-    title: "Brightdata",
-    href: "/en/resources/integrations/preview/brightdata",
-  },
-  cursoragentsapi: {
-    title: "CursorAgentsApi",
-    href: "/en/resources/integrations/preview/cursoragentsapi",
-  },
-  datadogapi: {
-    title: "DatadogApi",
-    href: "/en/resources/integrations/preview/datadogapi",
+    title: "Bright Data",
+    href: "/en/resources/integrations/development/brightdata",
   },
   e2b: {
-    title: "E2b",
-    href: "/en/resources/integrations/preview/e2b",
+    title: "E2B",
+    href: "/en/resources/integrations/development/e2b",
   },
   firecrawl: {
     title: "Firecrawl",
-    href: "/en/resources/integrations/preview/firecrawl",
+    href: "/en/resources/integrations/development/firecrawl",
   },
   github: {
     title: "GitHub",
-    href: "/en/resources/integrations/preview/github",
+    href: "/en/resources/integrations/development/github",
+  },
+  "-- Starter": {
+    type: "separator",
+    title: "Starter",
+  },
+  arcadeengineapi: {
+    title: "Arcade Engine API",
+    href: "/en/resources/integrations/development/arcadeengineapi",
+  },
+  cursoragentsapi: {
+    title: "Cursor Agents API",
+    href: "/en/resources/integrations/development/cursoragentsapi",
+  },
+  datadogapi: {
+    title: "Datadog API",
+    href: "/en/resources/integrations/development/datadogapi",
   },
   githubapi: {
-    title: "GithubApi",
-    href: "/en/resources/integrations/preview/githubapi",
+    title: "GitHub API",
+    href: "/en/resources/integrations/development/githubapi",
   },
   pagerdutyapi: {
-    title: "PagerdutyApi",
-    href: "/en/resources/integrations/preview/pagerdutyapi",
+    title: "PagerDuty API",
+    href: "/en/resources/integrations/development/pagerdutyapi",
   },
   posthogapi: {
-    title: "PosthogApi",
-    href: "/en/resources/integrations/preview/posthogapi",
+    title: "PostHog API",
+    href: "/en/resources/integrations/development/posthogapi",
   },
   vercelapi: {
-    title: "VercelApi",
-    href: "/en/resources/integrations/preview/vercelapi",
+    title: "Vercel API",
+    href: "/en/resources/integrations/development/vercelapi",
   },
   weaviateapi: {
-    title: "WeaviateApi",
-    href: "/en/resources/integrations/preview/weaviateapi",
+    title: "Weaviate API",
+    href: "/en/resources/integrations/development/weaviateapi",
   },
 };
 

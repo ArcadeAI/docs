@@ -181,6 +181,12 @@ export const verifyOutputDir = async (
         );
       }
 
+      if (indexEntry.type !== toolkit.metadata.type) {
+        errors.push(
+          `index.json type mismatch for ${toolkit.id}: ${indexEntry.type} vs ${toolkit.metadata.type}`
+        );
+      }
+
       if (indexEntry.toolCount !== toolkit.tools.length) {
         errors.push(
           `index.json toolCount mismatch for ${toolkit.id}: ${indexEntry.toolCount} vs ${toolkit.tools.length}`

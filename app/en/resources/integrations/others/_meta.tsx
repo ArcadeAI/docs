@@ -1,69 +1,77 @@
 import type { MetaRecord } from "nextra";
 
 const meta: MetaRecord = {
+  "-- Optimized": {
+    type: "separator",
+    title: "Optimized",
+  },
   codesandbox: {
-    title: "CodeSandbox",
-    href: "/en/resources/integrations/preview/codesandbox",
+    title: "Codesandbox",
+    href: "/en/resources/integrations/others/codesandbox",
   },
   complextools: {
     title: "ComplexTools",
-    href: "/en/resources/integrations/preview/complextools",
+    href: "/en/resources/integrations/others/complextools",
   },
   deepwiki: {
     title: "Deepwiki",
-    href: "/en/resources/integrations/preview/deepwiki",
+    href: "/en/resources/integrations/others/deepwiki",
   },
   figma: {
     title: "Figma",
-    href: "/en/resources/integrations/preview/figma",
+    href: "/en/resources/integrations/others/figma",
   },
   google: {
     title: "Google",
-    href: "/en/resources/integrations/preview/google",
-  },
-  mailchimpmarketingapi: {
-    title: "MailchimpMarketingApi",
-    href: "/en/resources/integrations/preview/mailchimpmarketingapi",
+    href: "/en/resources/integrations/others/google",
   },
   math: {
     title: "Math",
-    href: "/en/resources/integrations/preview/math",
+    href: "/en/resources/integrations/others/math",
   },
   microsoft: {
     title: "Microsoft",
-    href: "/en/resources/integrations/preview/microsoft",
+    href: "/en/resources/integrations/others/microsoft",
   },
   notiontoolkit: {
-    title: "NotionToolkit",
-    href: "/en/resources/integrations/preview/notiontoolkit",
+    title: "Notion",
+    href: "/en/resources/integrations/others/notiontoolkit",
   },
   pagerduty: {
     title: "Pagerduty",
-    href: "/en/resources/integrations/preview/pagerduty",
+    href: "/en/resources/integrations/others/pagerduty",
   },
   pylon: {
     title: "Pylon",
-    href: "/en/resources/integrations/preview/pylon",
-  },
-  pylonapi: {
-    title: "PylonApi",
-    href: "/en/resources/integrations/preview/pylonapi",
+    href: "/en/resources/integrations/others/pylon",
   },
   search: {
     title: "Search",
-    href: "/en/resources/integrations/preview/search",
+    href: "/en/resources/integrations/others/search",
   },
   test2: {
     title: "Test2",
-    href: "/en/resources/integrations/preview/test2",
-  },
-  upclickapi: {
-    title: "UpclickApi",
-    href: "/en/resources/integrations/preview/upclickapi",
+    href: "/en/resources/integrations/others/test2",
   },
   web: {
     title: "Web",
-    href: "/en/resources/integrations/preview/web",
+    href: "/en/resources/integrations/others/web",
+  },
+  "-- Starter": {
+    type: "separator",
+    title: "Starter",
+  },
+  upclickapi: {
+    title: "ClickUp API",
+    href: "/en/resources/integrations/others/upclickapi",
+  },
+  mailchimpmarketingapi: {
+    title: "Mailchimp API",
+    href: "/en/resources/integrations/others/mailchimpmarketingapi",
+  },
+  pylonapi: {
+    title: "PylonApi",
+    href: "/en/resources/integrations/others/pylonapi",
   },
 };
 

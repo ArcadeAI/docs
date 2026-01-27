@@ -14,16 +14,35 @@ import { ToolCard } from "./tool-card";
 import { TYPE_CONFIG, TYPE_DESCRIPTIONS } from "./type-config";
 import { useFilterStore, useToolkitFilters } from "./use-toolkit-filters";
 
-// Pattern: /en/mcp-servers/{category}/{tool} -> /en/resources/integrations/preview/{tool}
-const MCP_SERVER_PATTERN = /^\/en\/mcp-servers\/([^/]+)\/([^/]+)$/;
-// Pattern: /en/resources/integrations/{category}/{tool}
-const INTEGRATIONS_PATTERN =
-  /^\/en\/resources\/integrations\/([^/]+)\/([^/]+)$/;
+// Map toolkits to their category page (JSON-rendered pages).
+function mapToToolkitPage(toolkitId: string, category: string): string {
+  return `/en/resources/integrations/${category}/${toolkitId.toLowerCase()}`;
+}
 
-// Map toolkit paths to preview pages (JSON-rendered pages)
-function mapToPreviewPage(oldLink: string, toolkitId: string): string {
-  // Always use the preview page which renders from JSON data
-  return `/en/resources/integrations/preview/${toolkitId.toLowerCase()}`;
+/**
+ * Get toolkit icon with fallback for API toolkits.
+ * If "GithubApi" has no icon, falls back to "Github" icon.
+ */
+function getToolkitIconWithFallback(
+  toolkitId: string
+): React.ComponentType<React.SVGProps<SVGSVGElement>> | null {
+  // Try direct match first
+  const directIcon = getToolkitIcon(toolkitId);
+  if (directIcon) {
+    return directIcon;
+  }
+
+  // For API toolkits, try the base provider ID
+  const normalizedId = toolkitId.toLowerCase();
+  if (normalizedId.endsWith("api")) {
+    const baseProviderId = toolkitId.slice(0, -3); // Remove "Api" suffix
+    const baseIcon = getToolkitIcon(baseProviderId);
+    if (baseIcon) {
+      return baseIcon;
+    }
+  }
+
+  return null;
 }
 
 export default function Toolkits() {
@@ -126,18 +145,24 @@ export default function Toolkits() {
             ) : (
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 md:gap-5 lg:grid-cols-3">
                 {filteredToolkits.map((toolkit) => {
-                  // Get the icon component from the Design System utility
-                  const IconComponent = getToolkitIcon(toolkit.id);
+                  // Get icon with fallback for API toolkits (e.g., GithubApi → Github)
+                  const IconComponent = getToolkitIconWithFallback(toolkit.id);
+                  // Use publicIconUrl from Design System as additional fallback
+                  const iconUrl =
+                    "publicIconUrl" in toolkit
+                      ? (toolkit.publicIconUrl as string)
+                      : undefined;
                   return (
                     <ToolCard
                       icon={IconComponent}
+                      iconUrl={iconUrl}
                       isByoc={toolkit.isBYOC}
                       isComingSoon={toolkit.isComingSoon}
                       isPro={toolkit.isPro}
                       key={toolkit.id}
-                      link={mapToPreviewPage(
-                        toolkit.relativeDocsLink,
-                        toolkit.id
+                      link={mapToToolkitPage(
+                        toolkit.id,
+                        toolkit.category ?? "others"
                       )}
                       name={toolkit.label}
                       type={toolkit.type}

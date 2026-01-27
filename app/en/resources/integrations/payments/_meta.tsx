@@ -1,17 +1,25 @@
 import type { MetaRecord } from "nextra";
 
 const meta: MetaRecord = {
+  "-- Optimized": {
+    type: "separator",
+    title: "Optimized",
+  },
   stripe: {
     title: "Stripe",
-    href: "/en/resources/integrations/preview/stripe",
+    href: "/en/resources/integrations/payments/stripe",
+  },
+  "-- Starter": {
+    type: "separator",
+    title: "Starter",
   },
   stripeapi: {
-    title: "StripeApi",
-    href: "/en/resources/integrations/preview/stripeapi",
+    title: "Stripe API",
+    href: "/en/resources/integrations/payments/stripeapi",
   },
   zohobooksapi: {
-    title: "ZohoBooksApi",
-    href: "/en/resources/integrations/preview/zohobooksapi",
+    title: "Zoho Books API",
+    href: "/en/resources/integrations/payments/zohobooksapi",
   },
 };
 

@@ -92,7 +92,7 @@ describe("Scenario: New toolkit is added", () => {
   });
 
   it("uses default metadata when not provided", async () => {
-    await withTempDir(async (outputDir) => {
+    await withTempDir(async (_outputDir) => {
       const newTool = createTool();
       const toolkitDataSource = createCombinedToolkitDataSource({
         toolSource: new InMemoryToolDataSource([newTool]),
@@ -115,7 +115,7 @@ describe("Scenario: New toolkit is added", () => {
   });
 
   it("uses provided metadata when available", async () => {
-    await withTempDir(async (outputDir) => {
+    await withTempDir(async (_outputDir) => {
       const newTool = createTool();
       const metadata: ToolkitMetadata = {
         id: "NewKit",
