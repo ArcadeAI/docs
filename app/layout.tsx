@@ -48,7 +48,7 @@ export const metadata = {
     siteName: "Arcade Docs",
     images: [
       {
-        url: "/images/logo/arcade-logo.png",
+        url: "/images/logo/arcade_og-logo.jpg",
         width: 1200,
         height: 630,
         alt: "Arcade",
@@ -58,7 +58,7 @@ export const metadata = {
   twitter: {
     card: "summary_large_image",
     site: "@TryArcade",
-    images: ["/images/logo/arcade-logo.png"],
+    images: ["/images/logo/arcade_og-logo.jpg"],
   },
   appleWebApp: {
     title: "Arcade Documentation",
