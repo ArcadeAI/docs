@@ -1,0 +1,103 @@
+---
+title: "Quick Start: Your First Custom Tool"
+description: "Build your first custom tool in 5 minutes"
+---
+
+import { Steps, Callout } from "nextra/components";
+
+# Quick Start: Your First Custom Tool
+
+Build a simple custom tool in under 5 minutes. This tutorial will help you understand the basics of creating MCP servers with Arcade.
+
+## Prerequisites
+
+- Python 3.10+
+- An [Arcade API key](/get-started/setup/api-keys)
+
+<Steps>
+
+### Install the Arcade SDK
+
+```bash
+pip install arcade-ai
+```
+
+### Create your tool file
+
+Create a new file called `my_tools.py`:
+
+```python
+from arcade.sdk import tool
+
+@tool
+def greet_user(name: str) -> str:
+    """
+    Greet a user by name.
+
+    Args:
+        name: The name of the person to greet
+
+    Returns:
+        A friendly greeting message
+    """
+    return f"Hello, {name}! Welcome to Arcade."
+
+
+@tool
+def add_numbers(a: float, b: float) -> float:
+    """
+    Add two numbers together.
+
+    Args:
+        a: The first number
+        b: The second number
+
+    Returns:
+        The sum of a and b
+    """
+    return a + b
+```
+
+### Test your tools locally
+
+```bash
+arcade dev my_tools.py
+```
+
+This starts a local MCP server. You can test it with:
+
+```bash
+arcade chat
+```
+
+Try asking: "Greet someone named Alice" or "Add 5 and 3"
+
+### Connect to your IDE (optional)
+
+Add your local server to your MCP client configuration:
+
+```json
+{
+  "mcpServers": {
+    "my-tools": {
+      "command": "arcade",
+      "args": ["dev", "my_tools.py"]
+    }
+  }
+}
+```
+
+</Steps>
+
+## What's Next?
+
+You've built your first custom tool! Here's where to go next:
+
+- [Add authentication](/guides/create-tools/tool-basics/create-tool-with-auth) to call external APIs
+- [Add secrets](/guides/create-tools/tool-basics/create-tool-with-secrets) for API keys
+- [Structure your MCP server](/guides/create-tools/tool-basics/organize-tools) as it grows
+- [Deploy to production](/build-tools/deploy)
+
+<Callout type="info">
+**See the full tutorial:** [Build an MCP Server](/guides/create-tools/tool-basics/build-mcp-server) for a more comprehensive guide.
+</Callout>

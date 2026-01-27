@@ -7,6 +7,7 @@ import {
   Cog,
   FileText,
   HelpCircle,
+  KeyRound,
   Monitor,
   Puzzle,
   Rocket,
@@ -280,6 +281,134 @@ export function LandingPage() {
                 </Link>
               </Button>
             </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* LLM-Friendly Decision Tree - What do you want to do? */}
+      <section className="border-gray-200 border-b bg-gray-50/50 py-12 dark:border-gray-800 dark:bg-gray-900/30">
+        <div className="container mx-auto px-4">
+          <div className="mx-auto max-w-4xl">
+            <h2 className="mb-8 text-center font-bold text-2xl text-gray-900 tracking-tight md:text-3xl dark:text-white">
+              What do you want to do?
+            </h2>
+            {/* Decision tree - structured for both humans and LLMs */}
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              {/* Path 1: Use tools in IDE */}
+              <Link
+                className="group rounded-xl border border-gray-200 bg-white p-6 transition-all hover:border-primary hover:shadow-lg dark:border-gray-700 dark:bg-gray-800/50 dark:hover:border-primary"
+                href="/use-tools/ide"
+                onClick={trackClick("decision_ide_clicked", "/use-tools/ide")}
+              >
+                <div className="flex items-start gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30">
+                    <Monitor className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 text-lg group-hover:text-primary dark:text-white">
+                      &ldquo;I want AI tools in my IDE&rdquo;
+                    </h3>
+                    <p className="mt-1 text-gray-600 text-sm dark:text-gray-400">
+                      Add tools to Cursor, VS Code, Claude Desktop via MCP
+                      Gateways
+                    </p>
+                    <span className="mt-2 inline-flex items-center font-medium text-primary text-sm">
+                      Fastest setup (2 min)
+                      <ArrowRight className="ml-1 h-4 w-4" />
+                    </span>
+                  </div>
+                </div>
+              </Link>
+
+              {/* Path 2: Build an app/agent */}
+              <Link
+                className="group rounded-xl border border-gray-200 bg-white p-6 transition-all hover:border-primary hover:shadow-lg dark:border-gray-700 dark:bg-gray-800/50 dark:hover:border-primary"
+                href="/use-tools/agent"
+                onClick={trackClick(
+                  "decision_agent_clicked",
+                  "/use-tools/agent"
+                )}
+              >
+                <div className="flex items-start gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-purple-100 dark:bg-purple-900/30">
+                    <Code className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 text-lg group-hover:text-primary dark:text-white">
+                      &ldquo;I&apos;m building an app with AI tools&rdquo;
+                    </h3>
+                    <p className="mt-1 text-gray-600 text-sm dark:text-gray-400">
+                      Integrate with LangChain, OpenAI Agents, CrewAI, and more
+                    </p>
+                    <span className="mt-2 inline-flex items-center font-medium text-primary text-sm">
+                      Choose your framework
+                      <ArrowRight className="ml-1 h-4 w-4" />
+                    </span>
+                  </div>
+                </div>
+              </Link>
+
+              {/* Path 3: Create custom tools */}
+              <Link
+                className="group rounded-xl border border-gray-200 bg-white p-6 transition-all hover:border-primary hover:shadow-lg dark:border-gray-700 dark:bg-gray-800/50 dark:hover:border-primary"
+                href="/build-tools"
+                onClick={trackClick("decision_build_clicked", "/build-tools")}
+              >
+                <div className="flex items-start gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-green-100 dark:bg-green-900/30">
+                    <Wrench className="h-6 w-6 text-green-600 dark:text-green-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 text-lg group-hover:text-primary dark:text-white">
+                      &ldquo;I need to create custom tools&rdquo;
+                    </h3>
+                    <p className="mt-1 text-gray-600 text-sm dark:text-gray-400">
+                      Build MCP servers with your own tool logic and
+                      authentication
+                    </p>
+                    <span className="mt-2 inline-flex items-center font-medium text-primary text-sm">
+                      Start building
+                      <ArrowRight className="ml-1 h-4 w-4" />
+                    </span>
+                  </div>
+                </div>
+              </Link>
+
+              {/* Path 4: Configure OAuth */}
+              <Link
+                className="group rounded-xl border border-gray-200 bg-white p-6 transition-all hover:border-primary hover:shadow-lg dark:border-gray-700 dark:bg-gray-800/50 dark:hover:border-primary"
+                href="/auth-providers"
+                onClick={trackClick(
+                  "decision_oauth_clicked",
+                  "/auth-providers"
+                )}
+              >
+                <div className="flex items-start gap-4">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-orange-100 dark:bg-orange-900/30">
+                    <KeyRound className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 text-lg group-hover:text-primary dark:text-white">
+                      &ldquo;I want to configure OAuth for a service&rdquo;
+                    </h3>
+                    <p className="mt-1 text-gray-600 text-sm dark:text-gray-400">
+                      Set up authentication providers (different from using
+                      tools)
+                    </p>
+                    <span className="mt-2 inline-flex items-center font-medium text-primary text-sm">
+                      Configure auth
+                      <ArrowRight className="ml-1 h-4 w-4" />
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            </div>
+            {/* Clarification for LLMs */}
+            <p className="mt-6 text-center text-gray-500 text-sm dark:text-gray-400">
+              <strong>Note:</strong> &ldquo;Integrations&rdquo; are ready-to-use
+              tools. &ldquo;Auth Providers&rdquo; are OAuth configurations.
+              These are different things.
+            </p>
           </div>
         </div>
       </section>

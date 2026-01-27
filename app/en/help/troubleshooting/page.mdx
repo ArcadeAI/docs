@@ -1,0 +1,144 @@
+---
+title: "Troubleshooting"
+description: "Common issues and how to fix them"
+---
+
+import { Callout } from "nextra/components";
+
+# Troubleshooting
+
+Quick solutions to common Arcade issues.
+
+## Authentication Issues
+
+### "User not authorized" error
+
+**Problem:** Tool call fails with authorization error.
+
+**Solution:**
+1. Check if the user has completed OAuth for the service
+2. Verify you're passing the correct `user_id`
+3. Check auth status before calling tools:
+
+```python
+status = client.auth.status(tool_name="Google.SendEmail", user_id="user_123")
+if status.status == "not_authorized":
+    # Redirect to status.authorization_url
+```
+
+[Learn about auth patterns →](/use-tools/agent/auth-patterns)
+
+### OAuth popup doesn't appear
+
+**Problem:** User clicks authorize but nothing happens.
+
+**Solutions:**
+- Check browser popup blocker settings
+- Ensure the authorization URL is opened in a new window/tab
+- Verify your OAuth redirect URI is correctly configured
+
+### Token expired errors
+
+**Problem:** Previously working tools now fail with token errors.
+
+**Solution:** Arcade handles token refresh automatically. If you're seeing this:
+1. The refresh token may have been revoked by the user
+2. Have the user re-authorize the service
+
+---
+
+## Tool Calling Issues
+
+### "Tool not found" error
+
+**Problem:** Tool execution fails because the tool doesn't exist.
+
+**Solutions:**
+1. Check the tool name is spelled correctly (case-sensitive)
+2. Verify the tool is available in your plan
+3. List available tools: `arcade tools list`
+
+### Tool returns unexpected results
+
+**Problem:** Tool works but returns wrong or incomplete data.
+
+**Solutions:**
+1. Check the input parameters match the tool's expected schema
+2. Verify the user has the required permissions in the target service
+3. Check the [tool documentation](/tool-catalog) for specific requirements
+
+### Tool call timeout
+
+**Problem:** Tool execution takes too long and times out.
+
+**Solutions:**
+1. Some operations (like large file uploads) may take longer
+2. Increase timeout in your client configuration
+3. For batch operations, consider breaking into smaller chunks
+
+---
+
+## MCP Client Issues
+
+### Claude Desktop not connecting
+
+**Problem:** Claude Desktop can't connect to Arcade.
+
+**Solutions:**
+1. Verify your configuration in `claude_desktop_config.json`
+2. Restart Claude Desktop after config changes
+3. Check that your API key is valid
+
+[Claude Desktop setup guide →](/use-tools/ide/claude-desktop)
+
+### Cursor not showing tools
+
+**Problem:** Tools don't appear in Cursor's tool list.
+
+**Solutions:**
+1. Check MCP server configuration in Cursor settings
+2. Verify the MCP gateway URL is correct
+3. Restart Cursor after configuration changes
+
+[Cursor setup guide →](/use-tools/ide/cursor)
+
+### VS Code extension issues
+
+**Problem:** VS Code can't connect to Arcade MCP server.
+
+**Solutions:**
+1. Check the extension is properly installed and enabled
+2. Verify MCP configuration in settings
+3. Check the extension output panel for error messages
+
+[VS Code setup guide →](/use-tools/ide/visual-studio-code)
+
+---
+
+## MCP Server Issues (Custom Tools)
+
+### Server won't start
+
+**Problem:** `arcade dev` fails to start your server.
+
+**Solutions:**
+1. Check Python version (requires 3.10+)
+2. Verify all dependencies are installed
+3. Check for syntax errors in your tool code
+
+### Tools not appearing in the server
+
+**Problem:** Server starts but your tools aren't registered.
+
+**Solutions:**
+1. Ensure tools use the `@tool` decorator
+2. Check that tool functions are imported correctly
+3. Verify tool docstrings are properly formatted
+
+---
+
+## Still Need Help?
+
+- Check the [FAQ](/help/faq) for more answers
+- Browse the [Glossary](/help/glossary) for term definitions
+- [Contact support](/help/contact-us) for additional assistance

@@ -1,0 +1,92 @@
+---
+title: "Build Custom Tools"
+description: "Create your own MCP servers and custom tools with Arcade"
+---
+
+import { Callout } from "nextra/components";
+
+# Build Custom Tools
+
+Need tools that don't exist in the catalog? Build your own MCP servers with custom logic and authentication.
+
+<Callout type="info">
+**Looking for pre-built tools?** Check the [Tool Catalog](/tool-catalog) first - we have 100+ integrations ready to use.
+</Callout>
+
+## When to Build Custom Tools
+
+- You need to integrate with an internal API
+- You want custom business logic in your tools
+- The service you need isn't in the tool catalog yet
+- You want to combine multiple operations into a single tool
+
+## Getting Started
+
+### 1. Quick Start (5 minutes)
+
+Build your first tool to understand the basics.
+
+[Start the quick tutorial →](/build-tools/quickstart)
+
+### 2. MCP Server Basics
+
+Learn how MCP servers work and how to structure your tools.
+
+- [What is an MCP Server?](/guides/create-tools/tool-basics/compare-mcp-server-types)
+- [Build an MCP Server](/guides/create-tools/tool-basics/build-mcp-server)
+- [Organize your tools](/guides/create-tools/tool-basics/organize-tools)
+
+### 3. Add Authentication
+
+Make your tools work with user credentials.
+
+- [Create a tool with auth](/guides/create-tools/tool-basics/create-tool-with-auth)
+- [Create a tool with secrets](/guides/create-tools/tool-basics/create-tool-with-secrets)
+- [Server-level vs Tool-level auth](/learn/server-level-vs-tool-level-auth)
+
+### 4. Test & Evaluate
+
+Ensure your tools work correctly before deploying.
+
+- [Why evaluate tools?](/guides/create-tools/evaluate-tools/why-evaluate)
+- [Create an evaluation suite](/guides/create-tools/evaluate-tools/create-evaluation-suite)
+- [Run evaluations](/guides/create-tools/evaluate-tools/run-evaluations)
+
+### 5. Deploy
+
+Get your tools running in production.
+
+- [Deploy to Arcade Cloud](/guides/deployment-hosting/arcade-cloud) (easiest)
+- [Self-host with Arcade Engine](/guides/deployment-hosting/configure-engine)
+- [On-premise options](/guides/deployment-hosting/on-prem)
+
+## Example: Simple Custom Tool
+
+```python
+from arcade.sdk import tool
+
+@tool
+def calculate_shipping(
+    weight_kg: float,
+    destination_country: str
+) -> dict:
+    """Calculate shipping cost based on weight and destination."""
+
+    # Your custom business logic here
+    base_rate = 5.00
+    per_kg_rate = 2.50
+    international_surcharge = 10.00 if destination_country != "US" else 0
+
+    total = base_rate + (weight_kg * per_kg_rate) + international_surcharge
+
+    return {
+        "cost_usd": total,
+        "estimated_days": 5 if destination_country == "US" else 14
+    }
+```
+
+## Next Steps
+
+1. [Start the quick tutorial](/build-tools/quickstart)
+2. [Explore the MCP reference docs](/references/mcp)
+3. [See example tools](https://github.com/ArcadeAI/arcade-ai/tree/main/examples)
