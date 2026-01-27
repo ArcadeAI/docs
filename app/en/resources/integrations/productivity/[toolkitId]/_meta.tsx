@@ -6,7 +6,6 @@ const meta: MetaRecord = {
       breadcrumb: false,
       toc: false,
       copyPage: false,
-      editLink: false,
     },
   },
 };
