@@ -9,7 +9,6 @@ import {
   AUTH_TYPE_LABELS,
   DEFAULT_AUTHOR,
   getAuthProviderDocsUrl,
-  getGitHubRepoUrl,
   getPackageName,
   LICENSE_BADGE,
   PYPI_BADGES,
@@ -185,35 +184,6 @@ export function ToolkitHeader({
                 <code className="rounded bg-neutral-dark-medium px-1.5 py-0.5 font-medium text-xs">
                   {version}
                 </code>
-              </div>
-            )}
-
-            {/* Code link */}
-            {id && (
-              <div className="flex items-center gap-2">
-                <span className="text-muted-foreground">Code:</span>
-                <a
-                  className="inline-flex items-center gap-1 font-medium text-brand-accent no-underline hover:underline"
-                  href={getGitHubRepoUrl(id)}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  GitHub
-                  <svg
-                    aria-hidden="true"
-                    className="h-3 w-3"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </a>
               </div>
             )}
 

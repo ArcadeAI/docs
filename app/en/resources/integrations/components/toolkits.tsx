@@ -26,6 +26,8 @@ function mapToToolkitPage(toolkitId: string, category: string): string {
 function getToolkitIconWithFallback(
   toolkitId: string
 ): React.ComponentType<React.SVGProps<SVGSVGElement>> | null {
+  const apiSuffix = "api";
+
   // Try direct match first
   const directIcon = getToolkitIcon(toolkitId);
   if (directIcon) {
@@ -34,8 +36,8 @@ function getToolkitIconWithFallback(
 
   // For API toolkits, try the base provider ID
   const normalizedId = toolkitId.toLowerCase();
-  if (normalizedId.endsWith("api")) {
-    const baseProviderId = toolkitId.slice(0, -3); // Remove "Api" suffix
+  if (normalizedId.endsWith(apiSuffix)) {
+    const baseProviderId = toolkitId.slice(0, -apiSuffix.length); // Remove "Api" suffix
     const baseIcon = getToolkitIcon(baseProviderId);
     if (baseIcon) {
       return baseIcon;

@@ -183,9 +183,7 @@ function ToolsOnThisPage({ tools }: { tools: ToolDefinition[] }) {
   const [query, setQuery] = useState("");
 
   // Build list of all section IDs to observe
-  const sectionIds = useMemo(() => {
-    return buildObservedSectionIds(tools);
-  }, [tools]);
+  const sectionIds = useMemo(() => buildObservedSectionIds(tools), [tools]);
 
   const filteredTools = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -248,7 +246,10 @@ function ToolsOnThisPage({ tools }: { tools: ToolDefinition[] }) {
         top: Math.max(0, itemTop - 20),
         behavior: "smooth",
       });
-    } else if (itemTop + itemHeight > containerScrollTop + containerHeight - 20) {
+    } else if (
+      itemTop + itemHeight >
+      containerScrollTop + containerHeight - 20
+    ) {
       container.scrollTo({
         top: itemTop + itemHeight - containerHeight + 20,
         behavior: "smooth",
@@ -309,7 +310,10 @@ function ToolsOnThisPage({ tools }: { tools: ToolDefinition[] }) {
       </div>
 
       {/* Scrollable tool list */}
-      <div className="min-h-0 flex-1 overflow-y-auto px-6 py-3" ref={toolListRef}>
+      <div
+        className="min-h-0 flex-1 overflow-y-auto px-6 py-3"
+        ref={toolListRef}
+      >
         <div className="space-y-1">
           {filteredTools.map((tool) => {
             const hasSecrets =

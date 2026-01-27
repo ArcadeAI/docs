@@ -26,6 +26,8 @@ type Tool = {
   secrets?: string[];
 };
 
+export const DEFAULT_SHOW_UNSELECTED_TOOLS = false;
+
 type ScopePickerProps = {
   tools: Tool[];
   selectedTools?: string[];
@@ -122,6 +124,17 @@ export function getRequiredSecrets(
     .filter((secret) => secret.length > 0);
 
   return Array.from(new Set(secrets)).sort();
+}
+
+export function getToolsForSelectionGrid(
+  tools: Tool[],
+  selectedTools: Set<string>,
+  showUnselectedTools: boolean = DEFAULT_SHOW_UNSELECTED_TOOLS
+): Tool[] {
+  if (showUnselectedTools) {
+    return tools;
+  }
+  return tools.filter((tool) => selectedTools.has(tool.name));
 }
 
 function CopyActions({
@@ -321,6 +334,9 @@ export default function ScopePicker({
   const posthog = usePostHog();
   const [pageSize, setPageSize] = useState<number>(DEFAULT_TOOLS_PAGE_SIZE);
   const [page, setPage] = useState<number>(1);
+  const [showUnselectedTools, setShowUnselectedTools] = useState(
+    DEFAULT_SHOW_UNSELECTED_TOOLS
+  );
 
   const trackScopeCalculatorUsed = (
     action: string,
@@ -376,9 +392,15 @@ export default function ScopePicker({
   const requiredScopes = getRequiredScopes(tools, selectedToolsSet);
   const requiredSecrets = getRequiredSecrets(tools, selectedToolsSet);
 
+  const toolsForSelectionGrid = useMemo(
+    () =>
+      getToolsForSelectionGrid(tools, selectedToolsSet, showUnselectedTools),
+    [tools, selectedToolsSet, showUnselectedTools]
+  );
+
   const pageCount = useMemo(
-    () => Math.max(1, Math.ceil(tools.length / pageSize)),
-    [tools.length, pageSize]
+    () => Math.max(1, Math.ceil(toolsForSelectionGrid.length / pageSize)),
+    [toolsForSelectionGrid.length, pageSize]
   );
 
   useEffect(() => {
@@ -388,8 +410,8 @@ export default function ScopePicker({
   const pagedTools = useMemo(() => {
     const start = (page - 1) * pageSize;
     const end = start + pageSize;
-    return tools.slice(start, end);
-  }, [tools, page, pageSize]);
+    return toolsForSelectionGrid.slice(start, end);
+  }, [toolsForSelectionGrid, page, pageSize]);
 
   const scopesAsText = requiredScopes.join("\n");
   const secretsAsText = requiredSecrets.join("\n");
@@ -421,6 +443,21 @@ export default function ScopePicker({
             )}
           </h3>
           <div className="flex items-center gap-2">
+            <button
+              aria-pressed={showUnselectedTools}
+              className={`rounded-md border px-2.5 py-1 text-xs transition-colors ${
+                showUnselectedTools
+                  ? "border-brand-accent/30 bg-brand-accent/10 text-brand-accent hover:bg-brand-accent/20"
+                  : "border-neutral-dark-high bg-neutral-dark/60 text-muted-foreground hover:bg-neutral-dark"
+              }`}
+              onClick={() => {
+                setShowUnselectedTools((current) => !current);
+                setPage(1);
+              }}
+              type="button"
+            >
+              {showUnselectedTools ? "Show selected only" : "Show all tools"}
+            </button>
             <button
               className="rounded-md border border-brand-accent/30 bg-brand-accent/10 px-2.5 py-1 text-brand-accent text-xs transition-colors hover:bg-brand-accent/20"
               onClick={selectAll}
@@ -485,51 +522,62 @@ export default function ScopePicker({
             </div>
           </div>
         )}
-        <div className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          {pagedTools.map((tool) => {
-            const toolHasScopes = (tool.scopes?.length ?? 0) > 0;
-            const toolHasSecrets = (tool.secrets?.length ?? 0) > 0;
-            return (
-              <label
-                className={`group flex cursor-pointer items-center gap-2 rounded-lg p-2.5 transition-colors ${
-                  selectedToolsSet.has(tool.name)
-                    ? "border border-brand-accent/40 bg-brand-accent/10"
-                    : "border border-neutral-dark-high/50 bg-neutral-dark/30 hover:bg-neutral-dark/50"
-                }`}
-                key={tool.name}
-              >
-                <input
-                  checked={selectedToolsSet.has(tool.name)}
-                  className="rounded border-neutral-dark-high text-brand-accent focus:ring-brand-accent"
-                  onChange={() => toggleTool(tool.name)}
-                  type="checkbox"
-                />
-                <div className="relative flex-1 overflow-hidden">
-                  <span className="block truncate text-sm text-text-color group-hover:opacity-0">
-                    {tool.name}
-                  </span>
-                  <span className="pointer-events-none absolute inset-0 hidden whitespace-nowrap text-sm text-text-color group-hover:block group-hover:animate-[tool-name-marquee_6s_linear_infinite]">
-                    {tool.name}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1">
-                  {showAdvanced && toolHasScopes && (
-                    <ShieldCheck
-                      aria-label="Requires scopes"
-                      className="h-3 w-3 text-red-400"
-                    />
-                  )}
-                  {toolHasSecrets && (
-                    <KeyRound
-                      aria-label="Requires secrets"
-                      className="h-3 w-3 text-amber-400"
-                    />
-                  )}
-                </div>
-              </label>
-            );
-          })}
-        </div>
+        {pagedTools.length > 0 ? (
+          <div className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {pagedTools.map((tool) => {
+              const toolHasScopes = (tool.scopes?.length ?? 0) > 0;
+              const toolHasSecrets = (tool.secrets?.length ?? 0) > 0;
+              return (
+                <label
+                  className={`group flex cursor-pointer items-center gap-2 rounded-lg p-2.5 transition-colors ${
+                    selectedToolsSet.has(tool.name)
+                      ? "border border-brand-accent/40 bg-brand-accent/10"
+                      : "border border-neutral-dark-high/50 bg-neutral-dark/30 hover:bg-neutral-dark/50"
+                  }`}
+                  key={tool.name}
+                >
+                  <input
+                    checked={selectedToolsSet.has(tool.name)}
+                    className="rounded border-neutral-dark-high text-brand-accent focus:ring-brand-accent"
+                    onChange={() => toggleTool(tool.name)}
+                    type="checkbox"
+                  />
+                  <div className="relative flex-1 overflow-hidden">
+                    <span className="block truncate text-sm text-text-color group-hover:opacity-0">
+                      {tool.name}
+                    </span>
+                    <span className="pointer-events-none absolute inset-0 hidden whitespace-nowrap text-sm text-text-color group-hover:block group-hover:animate-[tool-name-marquee_6s_linear_infinite]">
+                      {tool.name}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {showAdvanced && toolHasScopes && (
+                      <ShieldCheck
+                        aria-label="Requires scopes"
+                        className="h-3 w-3 text-red-400"
+                      />
+                    )}
+                    {toolHasSecrets && (
+                      <KeyRound
+                        aria-label="Requires secrets"
+                        className="h-3 w-3 text-amber-400"
+                      />
+                    )}
+                  </div>
+                </label>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="mb-4 rounded-lg border border-neutral-dark-high/50 bg-neutral-dark/30 p-4">
+            <p className="text-sm text-text-color">No tools selected.</p>
+            {!showUnselectedTools && (
+              <p className="mt-1 text-muted-foreground text-xs">
+                Click &quot;Show all tools&quot; to add tools.
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Copy Actions */}
         <CopyActions

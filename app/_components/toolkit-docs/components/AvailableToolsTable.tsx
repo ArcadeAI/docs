@@ -101,7 +101,9 @@ function PaginationControls({
       >
         <ChevronLeft className={iconClass} />
       </button>
-      <span className={`whitespace-nowrap px-2 text-muted-foreground ${textClass}`}>
+      <span
+        className={`whitespace-nowrap px-2 text-muted-foreground ${textClass}`}
+      >
         Page {page} of {pageCount}
       </span>
       <button
@@ -124,7 +126,9 @@ function PaginationControls({
       >
         <ChevronsRight className={iconClass} />
       </button>
-      <span className={`whitespace-nowrap text-muted-foreground/70 ${textClass}`}>
+      <span
+        className={`whitespace-nowrap text-muted-foreground/70 ${textClass}`}
+      >
         ({itemsShowing} of {totalItems})
       </span>
     </div>
@@ -241,6 +245,15 @@ function ScrollingCell({
 
 export function toToolAnchorId(value: string): string {
   return value.toLowerCase().replace(/\s+/g, "-").replace(".", "");
+}
+
+export function handleSelectionButtonClick(
+  event: { stopPropagation: () => void },
+  onToggleSelection: AvailableToolsTableProps["onToggleSelection"],
+  toolName: string
+): void {
+  event.stopPropagation();
+  onToggleSelection?.(toolName);
 }
 
 export type AvailableToolsFilter =
@@ -639,22 +652,32 @@ export function AvailableToolsTable({
                     >
                       {showSelection && (
                         <td
-                          className={`sticky left-0 z-10 px-3 py-3.5 text-center ${selectionCellBg} group-hover:bg-brand-accent/10`}
+                          className={`relative sticky left-0 z-10 p-0 text-center ${selectionCellBg} group-hover:bg-brand-accent/10`}
                         >
                           <button
-                            className={`flex h-5 w-5 items-center justify-center rounded border transition-colors ${
-                              isSelected
-                                ? "border-brand-accent bg-brand-accent text-white"
-                                : "border-neutral-dark-high bg-neutral-dark/40 hover:border-brand-accent/50"
-                            }`}
+                            aria-label={
+                              isSelected ? "Deselect tool" : "Select tool"
+                            }
+                            className="absolute inset-0 flex items-center justify-center"
                             onClick={(e) => {
-                              e.stopPropagation();
-                              onToggleSelection?.(tool.name);
+                              handleSelectionButtonClick(
+                                e,
+                                onToggleSelection,
+                                tool.name
+                              );
                             }}
                             title={isSelected ? "Deselect tool" : "Select tool"}
                             type="button"
                           >
-                            {isSelected && <Check className="h-3 w-3" />}
+                            <span
+                              className={`flex h-5 w-5 items-center justify-center rounded border transition-colors ${
+                                isSelected
+                                  ? "border-brand-accent bg-brand-accent text-white"
+                                  : "border-neutral-dark-high bg-neutral-dark/40 hover:border-brand-accent/50"
+                              }`}
+                            >
+                              {isSelected && <Check className="h-3 w-3" />}
+                            </span>
                           </button>
                         </td>
                       )}
