@@ -83,24 +83,34 @@ function formatKey(key: string, language: LanguageKey): string {
   return isValidIdentifier ? key : JSON.stringify(key);
 }
 
+function serializeNumber(value: number, language: LanguageKey): string {
+  if (Number.isFinite(value)) {
+    return String(value);
+  }
+  return language === "python" ? "None" : "null";
+}
+
 function serializePrimitive(value: unknown, language: LanguageKey): string {
   if (value === null) {
     return language === "python" ? "None" : "null";
   }
 
-  switch (typeof value) {
-    case "string":
-      return JSON.stringify(value);
-    case "number":
-      return Number.isFinite(value) ? String(value) : "null";
-    case "boolean":
-      if (language === "python") {
-        return value ? "True" : "False";
-      }
-      return String(value);
-    default:
-      return language === "python" ? "None" : "null";
+  if (typeof value === "string") {
+    return JSON.stringify(value);
   }
+
+  if (typeof value === "number") {
+    return serializeNumber(value, language);
+  }
+
+  if (typeof value === "boolean") {
+    if (language === "python") {
+      return value ? "True" : "False";
+    }
+    return String(value);
+  }
+
+  return language === "python" ? "None" : "null";
 }
 
 function shouldInline(values: string[]): boolean {

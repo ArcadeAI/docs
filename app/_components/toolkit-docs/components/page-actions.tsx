@@ -2,6 +2,7 @@
 
 import { Check, Copy, ExternalLink } from "lucide-react";
 import { useCallback, useState } from "react";
+import { getPackageName } from "../constants";
 import type { ToolDefinition, ToolkitData } from "../types";
 
 const COPY_FEEDBACK_MS = 2000;
@@ -32,11 +33,37 @@ function buildToolDefinitionForCopy(tool: ToolDefinition) {
 }
 
 /**
- * Builds the pip package name from toolkit ID.
+ * Builds a generic tool execution example for copy payloads.
  */
-function buildPipPackageName(toolkitId: string): string {
-  const normalized = toolkitId.toLowerCase().replace(/[^a-z0-9]+/g, "_");
-  return `arcade_${normalized}`;
+function buildGenericToolExample(
+  language: "javascript" | "typescript"
+): string {
+  const lines: string[] = [
+    'import { Arcade } from "@arcadeai/arcadejs";',
+    "",
+    "const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env variable",
+    "",
+    'const TOOL_NAME = "Toolkit.Tool";',
+  ];
+
+  if (language === "typescript") {
+    lines.push("const toolInput: Record<string, unknown> = {");
+  } else {
+    lines.push("const toolInput = {");
+  }
+
+  lines.push("  // TODO: add parameters", "};", "");
+
+  lines.push(
+    "const response = await client.tools.execute({",
+    "  tool_name: TOOL_NAME,",
+    "  input: toolInput,",
+    "});",
+    "",
+    "console.log(response);"
+  );
+
+  return lines.join("\n");
 }
 
 /**
@@ -50,8 +77,8 @@ function isOptimizedToolkit(type: string): boolean {
  * Builds the optimized page content for copying.
  * Structure: Package info first, then overview, then tools.
  */
-function buildOptimizedPageContent(data: ToolkitData): string {
-  const pipPackageName = data.pipPackageName ?? buildPipPackageName(data.id);
+export function buildOptimizedPageContent(data: ToolkitData): string {
+  const pipPackageName = data.pipPackageName ?? getPackageName(data.id);
 
   const content = {
     // Package info (first)
@@ -81,6 +108,11 @@ function buildOptimizedPageContent(data: ToolkitData): string {
     overview: {
       description: data.description,
       summary: data.summary ?? null,
+    },
+    // Generic tool execution examples
+    examples: {
+      javascript: buildGenericToolExample("javascript"),
+      typescript: buildGenericToolExample("typescript"),
     },
     // Tools with full definitions
     tools: data.tools.map(buildToolDefinitionForCopy),

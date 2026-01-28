@@ -78,8 +78,11 @@ describe("AvailableToolsTable helpers", () => {
 
   it("matches the anchor id logic used by TableOfContents", () => {
     expect(toToolAnchorId("Github.CreateIssue")).toBe("githubcreateissue");
-    expect(toToolAnchorId("Slack Api.Send Message")).toBe(
-      "slack-api.send-message".replace(".", "")
+    expect(toToolAnchorId("Slack.Api.Send.Message")).toBe(
+      "slackapisendmessage"
+    );
+    expect(toToolAnchorId("Slack Api.Send.Message")).toBe(
+      "slack-apisendmessage"
     );
   });
 

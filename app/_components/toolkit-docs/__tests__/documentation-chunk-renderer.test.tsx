@@ -48,6 +48,11 @@ describe("hasChunksAt", () => {
     expect(hasChunksAt([], "header", "after")).toBe(false);
   });
 
+  it("returns false when chunks are missing", () => {
+    expect(hasChunksAt(undefined, "header", "after")).toBe(false);
+    expect(hasChunksAt(null, "header", "after")).toBe(false);
+  });
+
   it("returns true when multiple chunks match", () => {
     const chunks: DocumentationChunk[] = [
       createChunk({ location: "description", position: "before" }),

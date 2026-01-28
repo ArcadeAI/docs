@@ -306,7 +306,7 @@ export type ToolkitData = {
   /** All tools in this toolkit */
   tools: ToolDefinition[];
   /** Toolkit-level documentation chunks */
-  documentationChunks: DocumentationChunk[];
+  documentationChunks?: DocumentationChunk[];
   /** Custom imports for MDX */
   customImports: string[];
   /** Sub-pages that exist for this toolkit */
@@ -326,7 +326,7 @@ export type ToolkitData = {
  */
 export type DocumentationChunkRendererProps = {
   /** Array of documentation chunks to filter and render */
-  chunks: DocumentationChunk[];
+  chunks?: DocumentationChunk[] | null;
   /** Filter by location */
   location: DocumentationChunkLocation;
   /** Filter by position */

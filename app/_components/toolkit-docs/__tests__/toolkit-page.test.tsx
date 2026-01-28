@@ -13,6 +13,7 @@ describe("ToolkitPage helpers", () => {
     expect(buildPipPackageName("Github")).toBe("arcade_github");
     expect(buildPipPackageName("Google Sheets")).toBe("arcade_google_sheets");
     expect(buildPipPackageName("Slack-Api")).toBe("arcade_slack_api");
+    expect(buildPipPackageName("SlackApi")).toBe("arcade_slack_api");
   });
 
   it("defines sidebar navigation links", () => {

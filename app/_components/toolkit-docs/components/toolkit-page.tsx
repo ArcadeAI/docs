@@ -6,6 +6,7 @@ import ReactMarkdown from "react-markdown";
 
 import ScopePicker from "../../scope-picker";
 import ToolFooter from "../../tool-footer";
+import { getPackageName } from "../constants";
 import type {
   ToolDefinition,
   ToolkitCategory,
@@ -89,8 +90,7 @@ function ScrollToButtons() {
 }
 
 export function buildPipPackageName(toolkitId: string): string {
-  const normalized = toolkitId.toLowerCase().replace(/[^a-z0-9]+/g, "_");
-  return `arcade_${normalized}`;
+  return getPackageName(toolkitId);
 }
 
 export const TOOLKIT_PAGE_OVERVIEW_LINK = {
@@ -449,6 +449,7 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
   }, []);
 
   const rawTools = data.tools ?? [];
+  const documentationChunks = data.documentationChunks ?? [];
   // Temporary UI fallback for toolkit-level secrets that are documented but not yet
   // emitted by the Engine tool metadata endpoint.
   //
@@ -497,11 +498,7 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
         (tool.secretsInfo?.length ?? 0) > 0 || (tool.secrets?.length ?? 0) > 0
     ).length,
   };
-  const showToolFooter = !hasChunksAt(
-    data.documentationChunks,
-    "footer",
-    "replace"
-  );
+  const showToolFooter = !hasChunksAt(documentationChunks, "footer", "replace");
   const pipPackageName = data.pipPackageName ?? buildPipPackageName(data.id);
   const metadata = useMemo(
     () => ({
@@ -537,12 +534,12 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
           {data.label}
         </h1>
         <DocumentationChunkRenderer
-          chunks={data.documentationChunks}
+          chunks={documentationChunks}
           location="header"
           position="before"
         />
         <DocumentationChunkRenderer
-          chunks={data.documentationChunks}
+          chunks={documentationChunks}
           location="description"
           position="before"
         />
@@ -556,17 +553,17 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
           version={data.version}
         />
         <DocumentationChunkRenderer
-          chunks={data.documentationChunks}
+          chunks={documentationChunks}
           location="description"
           position="after"
         />
         <DocumentationChunkRenderer
-          chunks={data.documentationChunks}
+          chunks={documentationChunks}
           location="header"
           position="replace"
         />
         <DocumentationChunkRenderer
-          chunks={data.documentationChunks}
+          chunks={documentationChunks}
           location="header"
           position="after"
         />
@@ -578,35 +575,35 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
         )}
 
         <DocumentationChunkRenderer
-          chunks={data.documentationChunks}
+          chunks={documentationChunks}
           location="auth"
           position="before"
         />
         <DocumentationChunkRenderer
-          chunks={data.documentationChunks}
+          chunks={documentationChunks}
           location="auth"
           position="after"
         />
       </section>
 
       <DocumentationChunkRenderer
-        chunks={data.documentationChunks}
+        chunks={documentationChunks}
         location="before_available_tools"
         position="before"
       />
       <DocumentationChunkRenderer
-        chunks={data.documentationChunks}
+        chunks={documentationChunks}
         location="before_available_tools"
         position="after"
       />
 
       <DocumentationChunkRenderer
-        chunks={data.documentationChunks}
+        chunks={documentationChunks}
         location="custom_section"
         position="before"
       />
       <DocumentationChunkRenderer
-        chunks={data.documentationChunks}
+        chunks={documentationChunks}
         location="custom_section"
         position="after"
       />
@@ -651,12 +648,12 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
       />
 
       <DocumentationChunkRenderer
-        chunks={data.documentationChunks}
+        chunks={documentationChunks}
         location="after_available_tools"
         position="before"
       />
       <DocumentationChunkRenderer
-        chunks={data.documentationChunks}
+        chunks={documentationChunks}
         location="after_available_tools"
         position="after"
       />
@@ -684,18 +681,18 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
 
       <section className="mt-10 scroll-mt-20" id="get-building">
         <DocumentationChunkRenderer
-          chunks={data.documentationChunks}
+          chunks={documentationChunks}
           location="footer"
           position="before"
         />
         {showToolFooter && <ToolFooter pipPackageName={pipPackageName} />}
         <DocumentationChunkRenderer
-          chunks={data.documentationChunks}
+          chunks={documentationChunks}
           location="footer"
           position="replace"
         />
         <DocumentationChunkRenderer
-          chunks={data.documentationChunks}
+          chunks={documentationChunks}
           location="footer"
           position="after"
         />

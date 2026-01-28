@@ -83,4 +83,22 @@ describe("DynamicCodeBlock helpers", () => {
     expect(output).toContain("tool_input = {");
     expect(output).toContain('"limit": 50');
   });
+
+  it("serializes non-finite numbers as None in Python output", () => {
+    const codeExample: ToolCodeExample = {
+      toolName: "Slack.ListChannels",
+      parameters: {
+        limit: {
+          value: Number.NaN,
+          type: "integer",
+          required: false,
+        },
+      },
+      requiresAuth: false,
+    };
+
+    const output = generatePythonExample(codeExample);
+
+    expect(output).toContain('"limit": None');
+  });
 });

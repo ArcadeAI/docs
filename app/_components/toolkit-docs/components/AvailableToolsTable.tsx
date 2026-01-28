@@ -244,7 +244,7 @@ function ScrollingCell({
 }
 
 export function toToolAnchorId(value: string): string {
-  return value.toLowerCase().replace(/\s+/g, "-").replace(".", "");
+  return value.toLowerCase().replace(/\s+/g, "-").replace(/\./g, "");
 }
 
 export function handleSelectionButtonClick(
@@ -586,12 +586,11 @@ export function AvailableToolsTable({
   secretTypeDocsBaseUrl,
   enableSearch = true,
   enableFilters = true,
-  enableScopeFilter: _enableScopeFilter = true,
+  enableScopeFilter = true,
   searchPlaceholder = "Search tools...",
   filterLabel = "Filter",
-  scopeFilterLabel: _scopeFilterLabel = "Filter by scope",
-  scopeFilterDescription:
-    _scopeFilterDescription = "Select scopes to narrow the tool list.",
+  scopeFilterLabel = "Filter by scope",
+  scopeFilterDescription = "Select scopes to narrow the tool list.",
   defaultFilter = "all",
   selectedTools,
   onToggleSelection,
@@ -607,7 +606,7 @@ export function AvailableToolsTable({
   const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
   const [page, setPage] = useState<number>(1);
 
-  const _availableScopes = useMemo(() => {
+  const availableScopes = useMemo(() => {
     const allScopes = safeTools.flatMap((tool) =>
       buildScopeDisplayItems(tool.scopes ?? [])
     );
@@ -635,17 +634,19 @@ export function AvailableToolsTable({
     return filteredTools.slice(start, end);
   }, [filteredTools, page, pageSize]);
 
-  const _toggleScope = (scope: string) => {
+  const toggleScope = (scope: string) => {
     setSelectedScopes((current) => {
       if (current.includes(scope)) {
         return current.filter((item) => item !== scope);
       }
       return [...current, scope];
     });
+    setPage(1);
   };
 
-  const _clearScopes = () => {
+  const clearScopes = () => {
     setSelectedScopes([]);
+    setPage(1);
   };
 
   if (!hasTools) {
@@ -656,7 +657,7 @@ export function AvailableToolsTable({
 
   return (
     <div className="mt-6 space-y-4">
-      {(enableSearch || enableFilters) && (
+      {(enableSearch || enableFilters || enableScopeFilter) && (
         <div className="flex flex-wrap items-center gap-3 rounded-lg border border-neutral-dark-high/50 bg-neutral-dark/30 p-3">
           {enableSearch && (
             <div className="relative flex-1">
@@ -730,6 +731,49 @@ export function AvailableToolsTable({
           <span className="whitespace-nowrap rounded-full bg-neutral-dark-medium px-3 py-1 text-muted-foreground text-xs">
             {filteredTools.length} of {safeTools.length}
           </span>
+          {enableScopeFilter && availableScopes.length > 0 && (
+            <div className="flex w-full flex-wrap items-start gap-3 border-neutral-dark-high/40 border-t pt-3">
+              <div className="min-w-[180px]">
+                <p className="font-medium text-muted-foreground text-xs">
+                  {scopeFilterLabel}
+                </p>
+                {scopeFilterDescription && (
+                  <p className="mt-1 text-muted-foreground/70 text-xs">
+                    {scopeFilterDescription}
+                  </p>
+                )}
+              </div>
+              <div className="flex flex-1 flex-wrap gap-2">
+                {availableScopes.map((scope) => {
+                  const isSelected = selectedScopes.includes(scope);
+                  return (
+                    <button
+                      aria-pressed={isSelected}
+                      className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+                        isSelected
+                          ? "border-brand-accent bg-brand-accent/15 text-brand-accent"
+                          : "border-neutral-dark-high bg-neutral-dark/40 text-muted-foreground hover:border-brand-accent/40 hover:text-text-color"
+                      }`}
+                      key={scope}
+                      onClick={() => toggleScope(scope)}
+                      type="button"
+                    >
+                      {scope}
+                    </button>
+                  );
+                })}
+                {selectedScopes.length > 0 && (
+                  <button
+                    className="rounded-full border border-neutral-dark-high px-3 py-1 text-muted-foreground text-xs transition-colors hover:border-brand-accent/40 hover:text-text-color"
+                    onClick={clearScopes}
+                    type="button"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       )}
       {filteredTools.length === 0 ? (

@@ -1,6 +1,6 @@
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { readToolkitData, readToolkitIndex } from "../toolkit-data";
@@ -70,6 +70,28 @@ describe("toolkit data loader", () => {
 
       expect(index?.toolkits).toHaveLength(1);
       expect(index?.toolkits[0]?.id).toBe("Github");
+    });
+  });
+
+  it("prevents path traversal when reading toolkit data", async () => {
+    await withTempDir(async (dir) => {
+      const escapeId = `${basename(dir)}-escape`;
+      const escapeFilePath = join(dir, "..", `${escapeId}.json`);
+      await writeFile(
+        escapeFilePath,
+        JSON.stringify({ id: "Escape", tools: [] }),
+        "utf-8"
+      );
+
+      try {
+        const data = await readToolkitData(`../${escapeId}`, {
+          dataDir: dir,
+        });
+
+        expect(data).toBeNull();
+      } finally {
+        await rm(escapeFilePath, { force: true });
+      }
     });
   });
 });

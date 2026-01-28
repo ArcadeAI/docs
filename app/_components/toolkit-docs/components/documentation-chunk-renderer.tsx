@@ -245,7 +245,7 @@ export function DocumentationChunkRenderer({
   className,
 }: DocumentationChunkRendererProps): React.ReactElement | null {
   // Filter chunks that match the specified location and position
-  const matchingChunks = chunks.filter(
+  const matchingChunks = (chunks ?? []).filter(
     (chunk) => chunk.location === location && chunk.position === position
   );
 
@@ -271,11 +271,11 @@ export function DocumentationChunkRenderer({
  * Useful for conditional rendering
  */
 export function hasChunksAt(
-  chunks: DocumentationChunk[],
+  chunks: DocumentationChunk[] | null | undefined,
   location: DocumentationChunkLocation,
   position: DocumentationChunkPosition
 ): boolean {
-  return chunks.some(
+  return (chunks ?? []).some(
     (chunk) => chunk.location === location && chunk.position === position
   );
 }

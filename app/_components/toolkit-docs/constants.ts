@@ -66,10 +66,13 @@ export const PACKAGE_PREFIX = "arcade_";
  * Generate PyPI package name from toolkit ID
  */
 export function getPackageName(toolkitId: string): string {
-  const id = toolkitId.toLowerCase();
+  const id = toolkitId
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
 
   // Many "*Api" toolkits publish as "<name>_api" (not "<name>api").
-  if (id.endsWith("api") && !id.endsWith("_api") && !id.endsWith("-api")) {
+  if (id.endsWith("api") && !id.endsWith("_api")) {
     return `${PACKAGE_PREFIX}${id.slice(0, -3)}_api`;
   }
 
