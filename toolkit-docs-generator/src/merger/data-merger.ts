@@ -5,7 +5,16 @@
  * into the final MergedToolkit format.
  */
 
-import type { ICustomSectionsSource } from "../sources/interfaces.js";
+import type {
+  OverviewGenerationInput,
+  ToolkitOverviewGenerator,
+  ToolkitOverviewInstructions,
+} from "../overview/types.js";
+import { createEmptyOverviewInstructionsSource } from "../sources/in-memory.js";
+import type {
+  ICustomSectionsSource,
+  IOverviewInstructionsSource,
+} from "../sources/interfaces.js";
 import type { IToolkitDataSource } from "../sources/toolkit-data-source.js";
 import type {
   CustomSections,
@@ -28,6 +37,9 @@ import { mapWithConcurrency } from "../utils/concurrency.js";
 export interface DataMergerConfig {
   toolkitDataSource: IToolkitDataSource;
   customSectionsSource: ICustomSectionsSource;
+  overviewInstructionsSource?: IOverviewInstructionsSource;
+  overviewGenerator?: ToolkitOverviewGenerator;
+  skipOverview?: boolean;
   toolExampleGenerator?: ToolExampleGenerator;
   toolkitSummaryGenerator?: ToolkitSummaryGenerator;
   previousToolkits?: ReadonlyMap<string, MergedToolkit>;
@@ -79,6 +91,9 @@ interface MergeToolkitOptions {
   previousToolkit?: MergedToolkit;
   /** Maximum concurrent LLM calls for tool examples (default: 5) */
   llmConcurrency?: number;
+  overviewGenerator?: ToolkitOverviewGenerator;
+  overviewInstructions?: ToolkitOverviewInstructions | null;
+  skipOverview?: boolean;
 }
 
 // ============================================================================
@@ -339,6 +354,239 @@ const getToolDocumentationChunks = (
   return fromPrevious;
 };
 
+const isOverviewChunk = (chunk: DocumentationChunk): boolean =>
+  chunk.location === "header" &&
+  chunk.position === "before" &&
+  chunk.type === "markdown" &&
+  chunk.content.trim().toLowerCase().startsWith("## overview");
+
+const getPreviousOverview = (toolkit?: MergedToolkit): string | null => {
+  if (!toolkit) {
+    return null;
+  }
+  const overviewChunk = toolkit.documentationChunks.find(isOverviewChunk);
+  return overviewChunk?.content ?? null;
+};
+
+const applyOverviewChunk = (
+  chunks: DocumentationChunk[],
+  chunk: DocumentationChunk
+): DocumentationChunk[] => {
+  const filtered = chunks.filter((item) => !isOverviewChunk(item));
+  return [chunk, ...filtered];
+};
+
+const shouldAttemptOverview = (
+  hasInstructions: boolean,
+  isNewToolkit: boolean
+): boolean => hasInstructions || isNewToolkit;
+
+const buildOverviewInput = (
+  toolkit: MergedToolkit,
+  instructions: ToolkitOverviewInstructions | null,
+  previousOverview: string | null,
+  mode: OverviewGenerationInput["mode"]
+): OverviewGenerationInput => ({
+  toolkit,
+  instructions,
+  previousOverview,
+  mode,
+});
+
+const mergeCustomSectionsArrays = <T>(
+  fromSource: readonly T[] | undefined,
+  fromPrevious: readonly T[] | undefined
+): T[] => {
+  const sourceItems = fromSource ?? [];
+  const previousItems = fromPrevious ?? [];
+
+  // If source has items, use source (it's the authoritative source)
+  // If source is empty but previous has items, preserve previous
+  if (sourceItems.length > 0) {
+    return [...sourceItems];
+  }
+  return [...previousItems];
+};
+
+const appendMergeWarnings = (
+  warnings: string[],
+  toolkitId: string,
+  tools: readonly ToolDefinition[],
+  metadata: ToolkitMetadata | null
+): void => {
+  if (tools.length === 0) {
+    warnings.push(`No tools found for toolkit: ${toolkitId}`);
+  }
+
+  if (!metadata) {
+    warnings.push(
+      `No metadata found for toolkit: ${toolkitId} - using defaults`
+    );
+  }
+};
+
+const getToolkitVersion = (tools: readonly ToolDefinition[]): string => {
+  const firstTool = tools[0];
+  return firstTool ? extractVersion(firstTool.fullyQualifiedName) : "0.0.0";
+};
+
+const getToolkitDescription = (
+  tools: readonly ToolDefinition[]
+): string | null => {
+  const firstTool = tools[0];
+  return firstTool?.toolkitDescription ?? firstTool?.description ?? null;
+};
+
+const buildToolkitAuth = (
+  tools: readonly ToolDefinition[]
+): MergedToolkitAuth | null => {
+  const authType = determineAuthType(tools);
+  if (authType === "none") {
+    return null;
+  }
+
+  return {
+    type: authType,
+    providerId: getProviderId(tools),
+    allScopes: computeAllScopes(tools),
+  };
+};
+
+const buildPreviousToolMap = (
+  toolkit?: MergedToolkit
+): Map<string, MergedTool> => {
+  const previousToolByQualifiedName = new Map<string, MergedTool>();
+  if (!toolkit) {
+    return previousToolByQualifiedName;
+  }
+
+  for (const tool of toolkit.tools) {
+    previousToolByQualifiedName.set(tool.qualifiedName, tool);
+  }
+  return previousToolByQualifiedName;
+};
+
+const buildMergedTools = async (options: {
+  tools: readonly ToolDefinition[];
+  toolChunks: { [key: string]: DocumentationChunk[] };
+  toolExampleGenerator: ToolExampleGenerator | undefined;
+  warnings: string[];
+  failedTools: FailedTool[];
+  previousToolByQualifiedName: ReadonlyMap<string, MergedTool>;
+  llmConcurrency: number;
+}): Promise<MergedTool[]> =>
+  mapWithConcurrency(
+    options.tools,
+    (tool) =>
+      transformTool(
+        tool,
+        options.toolChunks,
+        options.toolExampleGenerator,
+        options.warnings,
+        options.failedTools,
+        options.previousToolByQualifiedName.get(tool.qualifiedName)
+      ),
+    options.llmConcurrency
+  );
+
+const buildMergedToolkit = (options: {
+  toolkitId: string;
+  metadata: ToolkitMetadata | null;
+  version: string;
+  description: string | null;
+  auth: MergedToolkitAuth | null;
+  tools: MergedTool[];
+  customSections: CustomSections | null;
+  previousToolkit: MergedToolkit | undefined;
+}): MergedToolkit => {
+  const mergedMetadata = applyToolkitTypeOverrides(
+    options.toolkitId,
+    options.metadata
+      ? transformMetadata(options.metadata)
+      : getDefaultMetadata(options.toolkitId)
+  );
+
+  return {
+    id: options.toolkitId,
+    label: options.metadata?.label ?? options.toolkitId,
+    version: options.version,
+    description: options.description,
+    metadata: mergedMetadata,
+    auth: options.auth,
+    tools: options.tools,
+    documentationChunks: mergeCustomSectionsArrays(
+      options.customSections?.documentationChunks,
+      options.previousToolkit?.documentationChunks
+    ),
+    customImports: mergeCustomSectionsArrays(
+      options.customSections?.customImports,
+      options.previousToolkit?.customImports
+    ),
+    subPages: mergeCustomSectionsArrays(
+      options.customSections?.subPages,
+      options.previousToolkit?.subPages
+    ),
+    generatedAt: new Date().toISOString(),
+  };
+};
+
+const applyOverviewIfNeeded = async (options: {
+  toolkit: MergedToolkit;
+  toolkitId: string;
+  mergeOptions: MergeToolkitOptions;
+  warnings: string[];
+}): Promise<void> => {
+  const { toolkit, toolkitId, mergeOptions, warnings } = options;
+  const isNewToolkit = !mergeOptions.previousToolkit;
+  const hasInstructions = Boolean(mergeOptions.overviewInstructions);
+
+  if (
+    mergeOptions.skipOverview ||
+    !shouldAttemptOverview(hasInstructions, isNewToolkit)
+  ) {
+    return;
+  }
+
+  if (!mergeOptions.overviewGenerator) {
+    if (hasInstructions) {
+      warnings.push(
+        `Overview generation skipped for ${toolkitId}: missing LLM configuration`
+      );
+    }
+    return;
+  }
+
+  const previousOverview = getPreviousOverview(mergeOptions.previousToolkit);
+  const mode: OverviewGenerationInput["mode"] = hasInstructions
+    ? "file"
+    : "auto";
+  try {
+    const overviewResult = await mergeOptions.overviewGenerator.generate(
+      buildOverviewInput(
+        toolkit,
+        mergeOptions.overviewInstructions ?? null,
+        previousOverview,
+        mode
+      )
+    );
+    if (overviewResult?.chunk) {
+      toolkit.documentationChunks = applyOverviewChunk(
+        toolkit.documentationChunks,
+        overviewResult.chunk
+      );
+      return;
+    }
+    if (hasInstructions) {
+      warnings.push(
+        `Overview generation skipped for ${toolkitId}: no overview produced`
+      );
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    warnings.push(`Overview generation failed for ${toolkitId}: ${message}`);
+  }
+};
+
 /**
  * Transform a tool definition into a merged tool
  */
@@ -448,110 +696,48 @@ export const mergeToolkit = async (
   const warnings: string[] = [];
   const failedTools: FailedTool[] = [];
 
-  if (tools.length === 0) {
-    warnings.push(`No tools found for toolkit: ${toolkitId}`);
-  }
+  appendMergeWarnings(warnings, toolkitId, tools, metadata);
 
-  if (!metadata) {
-    warnings.push(
-      `No metadata found for toolkit: ${toolkitId} - using defaults`
-    );
-  }
+  const version = getToolkitVersion(tools);
 
-  // Get version from first tool
-  const firstTool = tools[0];
-  const version = firstTool
-    ? extractVersion(firstTool.fullyQualifiedName)
-    : "0.0.0";
+  const description = getToolkitDescription(tools);
 
-  // Prefer toolkit-level description when available
-  const description =
-    firstTool?.toolkitDescription ?? firstTool?.description ?? null;
+  const auth = buildToolkitAuth(tools);
 
-  // Build auth info
-  const authType = determineAuthType(tools);
-  const providerId = getProviderId(tools);
-  const allScopes = computeAllScopes(tools);
-
-  const auth: MergedToolkitAuth | null =
-    authType !== "none"
-      ? {
-          type: authType,
-          providerId,
-          allScopes,
-        }
-      : null;
-
-  // Transform tools
   const toolChunks = (customSections?.toolChunks ?? {}) as {
     [key: string]: DocumentationChunk[];
   };
-  const previousToolByQualifiedName = new Map<string, MergedTool>();
-  if (options.previousToolkit) {
-    for (const tool of options.previousToolkit.tools) {
-      previousToolByQualifiedName.set(tool.qualifiedName, tool);
-    }
-  }
-
   const llmConcurrency = options.llmConcurrency ?? 5;
-  const mergedTools = await mapWithConcurrency(
+  const previousToolByQualifiedName = buildPreviousToolMap(
+    options.previousToolkit
+  );
+  const mergedTools = await buildMergedTools({
     tools,
-    (tool) =>
-      transformTool(
-        tool,
-        toolChunks,
-        toolExampleGenerator,
-        warnings,
-        failedTools,
-        previousToolByQualifiedName.get(tool.qualifiedName)
-      ),
-    llmConcurrency
-  );
+    toolChunks,
+    toolExampleGenerator,
+    warnings,
+    failedTools,
+    previousToolByQualifiedName,
+    llmConcurrency,
+  });
 
-  // Merge custom sections from source file with previous output
-  // This preserves manually-added custom sections that aren't in the source file
-  const mergeCustomSectionsArrays = <T>(
-    fromSource: readonly T[] | undefined,
-    fromPrevious: readonly T[] | undefined
-  ): T[] => {
-    const sourceItems = fromSource ?? [];
-    const previousItems = fromPrevious ?? [];
-
-    // If source has items, use source (it's the authoritative source)
-    // If source is empty but previous has items, preserve previous
-    if (sourceItems.length > 0) {
-      return [...sourceItems];
-    }
-    return [...previousItems];
-  };
-
-  // Build final toolkit
-  const mergedMetadata = applyToolkitTypeOverrides(
+  const toolkit = buildMergedToolkit({
     toolkitId,
-    metadata ? transformMetadata(metadata) : getDefaultMetadata(toolkitId)
-  );
-  const toolkit: MergedToolkit = {
-    id: toolkitId,
-    label: metadata?.label ?? toolkitId,
+    metadata,
     version,
     description,
-    metadata: mergedMetadata,
     auth,
     tools: mergedTools,
-    documentationChunks: mergeCustomSectionsArrays(
-      customSections?.documentationChunks,
-      options.previousToolkit?.documentationChunks
-    ),
-    customImports: mergeCustomSectionsArrays(
-      customSections?.customImports,
-      options.previousToolkit?.customImports
-    ),
-    subPages: mergeCustomSectionsArrays(
-      customSections?.subPages,
-      options.previousToolkit?.subPages
-    ),
-    generatedAt: new Date().toISOString(),
-  };
+    customSections,
+    previousToolkit: options.previousToolkit,
+  });
+
+  await applyOverviewIfNeeded({
+    toolkit,
+    toolkitId,
+    mergeOptions: options,
+    warnings,
+  });
 
   return { toolkit, warnings, failedTools };
 };
@@ -566,6 +752,9 @@ export const mergeToolkit = async (
 export class DataMerger {
   private readonly toolkitDataSource: IToolkitDataSource;
   private readonly customSectionsSource: ICustomSectionsSource;
+  private readonly overviewInstructionsSource: IOverviewInstructionsSource;
+  private readonly overviewGenerator: ToolkitOverviewGenerator | undefined;
+  private readonly skipOverview: boolean;
   private readonly toolExampleGenerator: ToolExampleGenerator | undefined;
   private readonly toolkitSummaryGenerator: ToolkitSummaryGenerator | undefined;
   private readonly previousToolkits:
@@ -588,6 +777,11 @@ export class DataMerger {
   constructor(config: DataMergerConfig) {
     this.toolkitDataSource = config.toolkitDataSource;
     this.customSectionsSource = config.customSectionsSource;
+    this.overviewInstructionsSource =
+      config.overviewInstructionsSource ??
+      createEmptyOverviewInstructionsSource();
+    this.overviewGenerator = config.overviewGenerator;
+    this.skipOverview = config.skipOverview ?? false;
     this.toolExampleGenerator = config.toolExampleGenerator;
     this.toolkitSummaryGenerator = config.toolkitSummaryGenerator;
     this.previousToolkits = config.previousToolkits;
@@ -658,6 +852,8 @@ export class DataMerger {
     // Fetch custom sections
     const customSections =
       await this.customSectionsSource.getCustomSections(toolkitId);
+    const overviewInstructions =
+      await this.overviewInstructionsSource.getOverviewInstructions(toolkitId);
 
     const previousToolkit = this.getPreviousToolkit(toolkitId);
     const result = await mergeToolkit(
@@ -669,6 +865,9 @@ export class DataMerger {
       {
         ...(previousToolkit ? { previousToolkit } : {}),
         llmConcurrency: this.llmConcurrency,
+        overviewGenerator: this.overviewGenerator,
+        overviewInstructions,
+        skipOverview: this.skipOverview,
       }
     );
     await this.maybeGenerateSummary(result, previousToolkit);
@@ -697,6 +896,10 @@ export class DataMerger {
         try {
           const customSections =
             await this.customSectionsSource.getCustomSections(toolkitId);
+          const overviewInstructions =
+            await this.overviewInstructionsSource.getOverviewInstructions(
+              toolkitId
+            );
 
           const previousToolkit = this.getPreviousToolkit(toolkitId);
           const result = await mergeToolkit(
@@ -708,6 +911,9 @@ export class DataMerger {
             {
               ...(previousToolkit ? { previousToolkit } : {}),
               llmConcurrency: this.llmConcurrency,
+              overviewGenerator: this.overviewGenerator,
+              overviewInstructions,
+              skipOverview: this.skipOverview,
             }
           );
           await this.maybeGenerateSummary(result, previousToolkit);

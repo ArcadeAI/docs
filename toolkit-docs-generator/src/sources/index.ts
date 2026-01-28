@@ -11,6 +11,7 @@ export * from "./in-memory.js";
 export * from "./interfaces.js";
 export * from "./mock-engine-api.js";
 export * from "./mock-metadata.js";
+export * from "./overview-instructions-file.js";
 export * from "./toolkit-data-source.js";
 
 // Note: Design System source requires @arcadeai/design-system to be installed.

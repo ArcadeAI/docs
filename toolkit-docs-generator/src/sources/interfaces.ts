@@ -2,6 +2,8 @@
  * Public source interfaces for the toolkit docs generator
  *
  */
+
+import type { ToolkitOverviewInstructions } from "../overview/types.js";
 import type { CustomSections } from "../types/index.js";
 
 // ============================================================================
@@ -29,5 +31,19 @@ export interface ICustomSectionsSource {
    */
   readonly getAllCustomSections: () => Promise<
     Readonly<Record<string, CustomSections>>
+  >;
+}
+
+// ============================================================================
+// Overview Instructions Source Interface
+// ============================================================================
+
+export interface IOverviewInstructionsSource {
+  readonly getOverviewInstructions: (
+    toolkitId: string
+  ) => Promise<ToolkitOverviewInstructions | null>;
+
+  readonly getAllOverviewInstructions: () => Promise<
+    Readonly<Record<string, ToolkitOverviewInstructions>>
   >;
 }

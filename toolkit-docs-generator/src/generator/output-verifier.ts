@@ -105,6 +105,144 @@ const readIndexFile = async (dir: string): Promise<ToolkitIndex | null> => {
   }
 };
 
+const buildToolkitMap = (
+  toolkits: MergedToolkit[]
+): Map<string, MergedToolkit> => {
+  const toolkitById = new Map<string, MergedToolkit>();
+  for (const toolkit of toolkits) {
+    const key = normalizeToolkitKey(toolkit.id);
+    toolkitById.set(key, toolkit);
+  }
+  return toolkitById;
+};
+
+const reportProgress = (
+  onProgress: VerificationProgressCallback | undefined,
+  progress: VerificationProgress
+): void => {
+  onProgress?.(progress);
+};
+
+const validateIndexEntry = (
+  toolkit: MergedToolkit,
+  indexEntry: ToolkitIndex["toolkits"][number]
+): string[] => {
+  const errors: string[] = [];
+  if (indexEntry.version !== toolkit.version) {
+    errors.push(
+      `index.json version mismatch for ${toolkit.id}: ${indexEntry.version} vs ${toolkit.version}`
+    );
+  }
+  if (indexEntry.category !== toolkit.metadata.category) {
+    errors.push(
+      `index.json category mismatch for ${toolkit.id}: ${indexEntry.category} vs ${toolkit.metadata.category}`
+    );
+  }
+  if (indexEntry.type !== toolkit.metadata.type) {
+    errors.push(
+      `index.json type mismatch for ${toolkit.id}: ${indexEntry.type} vs ${toolkit.metadata.type}`
+    );
+  }
+  if (indexEntry.toolCount !== toolkit.tools.length) {
+    errors.push(
+      `index.json toolCount mismatch for ${toolkit.id}: ${indexEntry.toolCount} vs ${toolkit.tools.length}`
+    );
+  }
+  const authType = toolkit.auth?.type ?? "none";
+  if (indexEntry.authType !== authType) {
+    errors.push(
+      `index.json authType mismatch for ${toolkit.id}: ${indexEntry.authType} vs ${authType}`
+    );
+  }
+  return errors;
+};
+
+const validateIndex = async (
+  dir: string,
+  toolkitById: Map<string, MergedToolkit>,
+  onProgress?: VerificationProgressCallback
+): Promise<string[]> => {
+  const errors: string[] = [];
+
+  reportProgress(onProgress, {
+    phase: "validating",
+    current: 0,
+    total: 1,
+    fileName: "index.json",
+  });
+
+  const index = await readIndexFile(dir);
+  if (!index) {
+    errors.push("Missing or invalid index.json in output directory.");
+    return errors;
+  }
+
+  const indexIds = new Set(
+    index.toolkits.map((entry) => normalizeToolkitKey(entry.id))
+  );
+
+  const toolkitEntries = Array.from(toolkitById.entries());
+  const totalEntries = toolkitEntries.length;
+
+  for (let i = 0; i < toolkitEntries.length; i++) {
+    const entry = toolkitEntries[i];
+    if (!entry) {
+      continue;
+    }
+    const [toolkitId, toolkit] = entry;
+
+    reportProgress(onProgress, {
+      phase: "cross-referencing",
+      current: i + 1,
+      total: totalEntries,
+      fileName: `${toolkit.id}.json`,
+    });
+
+    if (!indexIds.has(toolkitId)) {
+      errors.push(`index.json missing toolkit entry: ${toolkit.id}`);
+      continue;
+    }
+
+    const indexEntry = index.toolkits.find(
+      (item) => normalizeToolkitKey(item.id) === toolkitId
+    );
+    if (!indexEntry) {
+      continue;
+    }
+
+    errors.push(...validateIndexEntry(toolkit, indexEntry));
+  }
+
+  for (const indexEntry of index.toolkits) {
+    const toolkitId = normalizeToolkitKey(indexEntry.id);
+    if (!toolkitById.has(toolkitId)) {
+      errors.push(`index.json entry has no matching file: ${indexEntry.id}`);
+    }
+  }
+
+  return errors;
+};
+
+const validateFileNames = async (
+  dir: string,
+  toolkitById: Map<string, MergedToolkit>
+): Promise<string[]> => {
+  const errors: string[] = [];
+  const fileNames = await readdir(dir).catch(() => []);
+  const jsonFiles = fileNames.filter(isToolkitFile);
+  for (const fileName of jsonFiles) {
+    const baseName = basename(fileName, ".json");
+    if (baseName !== baseName.toLowerCase()) {
+      errors.push(`File name must be lowercase: ${fileName}`);
+    }
+    const idFromFile = baseName.toLowerCase();
+    if (!toolkitById.has(idFromFile)) {
+      errors.push(`File name does not match toolkit id: ${fileName}`);
+    }
+  }
+  return errors;
+};
+
 export const verifyOutputDir = async (
   dir: string,
   onProgress?: VerificationProgressCallback
@@ -122,107 +260,9 @@ export const verifyOutputDir = async (
     errors.push("No toolkit JSON files found in output directory.");
   }
 
-  const toolkitById = new Map<string, MergedToolkit>();
-  for (const toolkit of toolkits) {
-    const key = normalizeToolkitKey(toolkit.id);
-    toolkitById.set(key, toolkit);
-  }
-
-  onProgress?.({
-    phase: "validating",
-    current: 0,
-    total: 1,
-    fileName: "index.json",
-  });
-
-  const index = await readIndexFile(dir);
-  if (index) {
-    const indexIds = new Set(
-      index.toolkits.map((entry) => normalizeToolkitKey(entry.id))
-    );
-
-    const toolkitEntries = Array.from(toolkitById.entries());
-    const totalEntries = toolkitEntries.length;
-
-    for (let i = 0; i < toolkitEntries.length; i++) {
-      const entry = toolkitEntries[i];
-      if (!entry) continue;
-
-      const [toolkitId, toolkit] = entry;
-
-      onProgress?.({
-        phase: "cross-referencing",
-        current: i + 1,
-        total: totalEntries,
-        fileName: `${toolkit.id}.json`,
-      });
-
-      if (!indexIds.has(toolkitId)) {
-        errors.push(`index.json missing toolkit entry: ${toolkit.id}`);
-        continue;
-      }
-
-      const indexEntry = index.toolkits.find(
-        (item) => normalizeToolkitKey(item.id) === toolkitId
-      );
-      if (!indexEntry) {
-        continue;
-      }
-
-      if (indexEntry.version !== toolkit.version) {
-        errors.push(
-          `index.json version mismatch for ${toolkit.id}: ${indexEntry.version} vs ${toolkit.version}`
-        );
-      }
-
-      if (indexEntry.category !== toolkit.metadata.category) {
-        errors.push(
-          `index.json category mismatch for ${toolkit.id}: ${indexEntry.category} vs ${toolkit.metadata.category}`
-        );
-      }
-
-      if (indexEntry.type !== toolkit.metadata.type) {
-        errors.push(
-          `index.json type mismatch for ${toolkit.id}: ${indexEntry.type} vs ${toolkit.metadata.type}`
-        );
-      }
-
-      if (indexEntry.toolCount !== toolkit.tools.length) {
-        errors.push(
-          `index.json toolCount mismatch for ${toolkit.id}: ${indexEntry.toolCount} vs ${toolkit.tools.length}`
-        );
-      }
-
-      const authType = toolkit.auth?.type ?? "none";
-      if (indexEntry.authType !== authType) {
-        errors.push(
-          `index.json authType mismatch for ${toolkit.id}: ${indexEntry.authType} vs ${authType}`
-        );
-      }
-    }
-
-    for (const indexEntry of index.toolkits) {
-      const toolkitId = normalizeToolkitKey(indexEntry.id);
-      if (!toolkitById.has(toolkitId)) {
-        errors.push(`index.json entry has no matching file: ${indexEntry.id}`);
-      }
-    }
-  } else {
-    errors.push("Missing or invalid index.json in output directory.");
-  }
-
-  const fileNames = await readdir(dir).catch(() => []);
-  const jsonFiles = fileNames.filter(isToolkitFile);
-  for (const fileName of jsonFiles) {
-    const baseName = basename(fileName, ".json");
-    if (baseName !== baseName.toLowerCase()) {
-      errors.push(`File name must be lowercase: ${fileName}`);
-    }
-    const idFromFile = baseName.toLowerCase();
-    if (!toolkitById.has(idFromFile)) {
-      errors.push(`File name does not match toolkit id: ${fileName}`);
-    }
-  }
+  const toolkitById = buildToolkitMap(toolkits);
+  errors.push(...(await validateIndex(dir, toolkitById, onProgress)));
+  errors.push(...(await validateFileNames(dir, toolkitById)));
 
   return {
     valid: errors.length === 0,

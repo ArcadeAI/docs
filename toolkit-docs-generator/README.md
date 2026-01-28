@@ -64,6 +64,11 @@ pnpm start generate-all \
   --llm-model claude-3-5-sonnet-latest \
   --llm-api-key "$ANTHROPIC_API_KEY" \
   --output ../data/toolkits
+
+# Scaffold an overview instructions file
+pnpm start overview-init \
+  --toolkits "Github" \
+  --overview-dir ./overview-input
 ```
 
 ## Configuration
@@ -86,12 +91,22 @@ ENGINE_API_URL=https://api.arcade.dev
 ENGINE_API_KEY=your-engine-api-key
 ```
 
+### Toolkit overview inputs
+
+By default, the generator looks for overview instruction files in:
+
+- `toolkit-docs-generator/overview-input/` (gitignored)
+
+Use `--overview-dir` to point at a different folder, or `--overview-file` to use a single file.
+Use `--skip-overview` to disable overview generation.
+
 ### CLI options
 
 ```bash
 Usage: toolkit-docs-generator [command] [options]
 
 Commands:
+  overview-init   Create overview instruction file(s) for toolkits
   generate        Generate documentation for selected toolkits
   generate-all    Generate documentation for all toolkits
   validate <file> Validate a generated JSON file
@@ -103,6 +118,8 @@ Options:
   -o, --output <dir>            Output directory (default: data/toolkits)
   --mock-data-dir <dir>         Path to mock data directory
   --metadata-file <file>        Path to metadata JSON file
+  --overview-dir <dir>          Directory with overview instruction files
+  --overview-file <file>        Path to a single overview instruction file
   --engine-api-url <url>        Engine API base URL
   --engine-api-key <key>        Engine API key
   --engine-page-size <number>   Engine API page size
@@ -121,6 +138,7 @@ Options:
   --no-index-from-output        Do not rebuild index from output directory
   --skip-examples               Skip LLM example generation
   --skip-summary                Skip LLM summary generation
+  --skip-overview               Skip LLM overview generation
   --no-verify-output            Skip output verification
   --custom-sections <file>      Path to custom sections JSON
   --overwrite-output            Delete output directory before writing new JSON
@@ -169,7 +187,9 @@ The tool uses a single toolkit data source interface, making it easy to swap imp
 
 ```typescript
 // Use mock data (current)
-const toolkitDataSource = createMockToolkitDataSource({ dataDir: "./mock-data" });
+const toolkitDataSource = createMockToolkitDataSource({
+  dataDir: "./mock-data",
+});
 ```
 
 ## Output format

@@ -16,6 +16,10 @@ import {
   type ToolExampleGenerator,
   type ToolkitSummaryGenerator,
 } from "../../src/merger/data-merger.js";
+import type {
+  ToolkitOverviewGenerator,
+  ToolkitOverviewInstructions,
+} from "../../src/overview/types.js";
 import {
   EmptyCustomSectionsSource,
   InMemoryMetadataSource,
@@ -717,6 +721,69 @@ describe("mergeToolkit", () => {
     expect(result.toolkit.tools[0]?.documentationChunks[0]?.content).toBe(
       "Note about params"
     );
+  });
+});
+
+describe("mergeToolkit overview handling", () => {
+  it("replaces existing overview when instructions are present", async () => {
+    const tool = createTool();
+    const metadata = createMetadata();
+
+    const previous = await mergeToolkit(
+      "TestKit",
+      [tool],
+      metadata,
+      null,
+      undefined,
+      {}
+    );
+    previous.toolkit.documentationChunks = [
+      {
+        type: "markdown",
+        location: "header",
+        position: "before",
+        content: "## Overview\n\nOld overview.",
+      },
+    ];
+
+    const overviewGenerator: ToolkitOverviewGenerator = {
+      generate: async () => ({
+        chunk: {
+          type: "markdown",
+          location: "header",
+          position: "before",
+          content: "## Overview\n\nNew overview.",
+        },
+      }),
+    };
+
+    const overviewInstructions: ToolkitOverviewInstructions = {
+      toolkitId: "TestKit",
+      instructions: "Write a new overview.",
+      sources: [],
+    };
+
+    const result = await mergeToolkit(
+      "TestKit",
+      [tool],
+      metadata,
+      null,
+      undefined,
+      {
+        previousToolkit: previous.toolkit,
+        overviewGenerator,
+        overviewInstructions,
+      }
+    );
+
+    expect(result.toolkit.documentationChunks[0]?.content).toBe(
+      "## Overview\n\nNew overview."
+    );
+    expect(
+      result.toolkit.documentationChunks.some((chunk) =>
+        chunk.content.includes("Old overview")
+      )
+    ).toBe(false);
   });
 });
 

@@ -82,35 +82,41 @@ const mapParamType = (
   }
 };
 
+const normalizeIntegerValue = (value: unknown): unknown => {
+  if (typeof value !== "string") {
+    return value;
+  }
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : value;
+};
+
+const normalizeBooleanValue = (value: unknown): unknown => {
+  if (typeof value !== "string") {
+    return value;
+  }
+  const lowered = value.toLowerCase();
+  if (lowered === "true") {
+    return true;
+  }
+  if (lowered === "false") {
+    return false;
+  }
+  return value;
+};
+
 const normalizeExampleValue = (paramType: string, value: unknown): unknown => {
   if (value === null || value === undefined) {
     return null;
   }
 
-  const mappedType = mapParamType(paramType);
-
-  if (mappedType === "integer") {
-    if (typeof value === "string") {
-      const parsed = Number(value);
-      return Number.isFinite(parsed) ? parsed : value;
-    }
-    return value;
+  switch (mapParamType(paramType)) {
+    case "integer":
+      return normalizeIntegerValue(value);
+    case "boolean":
+      return normalizeBooleanValue(value);
+    default:
+      return value;
   }
-
-  if (mappedType === "boolean") {
-    if (typeof value === "string") {
-      const lowered = value.toLowerCase();
-      if (lowered === "true") {
-        return true;
-      }
-      if (lowered === "false") {
-        return false;
-      }
-    }
-    return value;
-  }
-
-  return value;
 };
 
 export class LlmToolExampleGenerator implements ToolExampleGenerator {

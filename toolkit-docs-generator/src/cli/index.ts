@@ -13,7 +13,7 @@
 
 import chalk from "chalk";
 import { Command } from "commander";
-import { readdir, readFile, rm } from "fs/promises";
+import { access, mkdir, readdir, readFile, rm, writeFile } from "fs/promises";
 import ora from "ora";
 import { join, resolve } from "path";
 import {
@@ -33,6 +33,7 @@ import {
   type LlmClient,
   type LlmProvider,
   LlmToolExampleGenerator,
+  LlmToolkitOverviewGenerator,
   LlmToolkitSummaryGenerator,
 } from "../llm/index.js";
 import type { MergeResult } from "../merger/data-merger.js";
@@ -41,12 +42,14 @@ import { createCustomSectionsFileSource } from "../sources/custom-sections-file.
 import { createDesignSystemMetadataSource } from "../sources/design-system-metadata.js";
 import { createEmptyCustomSectionsSource } from "../sources/in-memory.js";
 import { createMockMetadataSource } from "../sources/mock-metadata.js";
+import { createOverviewInstructionsFileSource } from "../sources/overview-instructions-file.js";
 import {
   createArcadeToolkitDataSource,
   createEngineToolkitDataSource,
   createMockToolkitDataSource,
   type IToolkitDataSource,
 } from "../sources/toolkit-data-source.js";
+import { normalizeId } from "../utils/fp.js";
 import {
   createProgressTracker,
   formatToolkitComplete,
@@ -102,6 +105,25 @@ const parseProviders = (input: string): ProviderVersion[] => {
   });
 };
 
+const parseToolkitList = (input: string): string[] =>
+  input
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+const buildOverviewTemplate = (toolkitId: string, label?: string) => ({
+  toolkitId,
+  label: label ?? toolkitId,
+  sources: [],
+  instructions:
+    "Write an overview section for this toolkit. Start with a short paragraph, then add a **Capabilities** list. Mention auth type/scopes and secrets if relevant.",
+});
+
+const buildOverviewFilePath = (dir: string, toolkitId: string): string => {
+  const fileName = `${normalizeId(toolkitId)}.json`;
+  return resolve(dir, fileName);
+};
+
 const resolveProviderIds = async (
   providers: ProviderVersion[],
   metadataSource: unknown
@@ -143,6 +165,14 @@ const getDefaultVerificationDir = (): string => {
 
 const getDefaultLogDir = (): string =>
   resolve(getDefaultVerificationDir(), "logs");
+
+const getDefaultOverviewDir = (): string => {
+  const cwd = process.cwd();
+  if (cwd.endsWith("toolkit-docs-generator")) {
+    return resolve(cwd, "overview-input");
+  }
+  return resolve(cwd, "toolkit-docs-generator", "overview-input");
+};
 
 const buildLogPaths = (logDir: string) => ({
   runLogPath: join(logDir, "runs.log"),
@@ -197,6 +227,103 @@ const createMetadataSource = async (options: {
     );
   }
   return createMockMetadataSource(options.metadataFile);
+};
+
+type OverviewInitOptions = {
+  toolkits?: string;
+  overviewDir: string;
+  metadataFile?: string;
+  force: boolean;
+};
+
+type MetadataSource = Awaited<ReturnType<typeof createMetadataSource>>;
+
+const getOverviewInitToolkits = (options: OverviewInitOptions): string[] => {
+  if (!options.toolkits) {
+    throw new Error('Missing required option "--toolkits".');
+  }
+
+  const toolkits = parseToolkitList(options.toolkits);
+  if (toolkits.length === 0) {
+    throw new Error("No toolkit IDs provided.");
+  }
+
+  return toolkits;
+};
+
+const resolveOverviewInitMetadataSource = async (
+  options: OverviewInitOptions
+): Promise<MetadataSource> => {
+  const metadataFile =
+    options.metadataFile ?? join(getDefaultMockDataDir(), "metadata.json");
+  return createMetadataSource({
+    metadataFile,
+    useMetadataFile: Boolean(options.metadataFile),
+    verbose: false,
+  });
+};
+
+const shouldSkipOverviewFile = async (
+  filePath: string,
+  force: boolean
+): Promise<boolean> => {
+  if (force) {
+    return false;
+  }
+
+  try {
+    await access(filePath);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const getOverviewTemplateLabel = async (
+  metadataSource: MetadataSource,
+  toolkitId: string
+): Promise<string | undefined> => {
+  if ("getToolkitMetadata" in metadataSource) {
+    const metadata = await metadataSource.getToolkitMetadata(toolkitId);
+    return metadata?.label ?? undefined;
+  }
+
+  return;
+};
+
+const writeOverviewTemplate = async (
+  filePath: string,
+  template: ReturnType<typeof buildOverviewTemplate>
+): Promise<void> => {
+  await writeFile(filePath, `${JSON.stringify(template, null, 2)}\n`, "utf-8");
+};
+
+const createOverviewFiles = async (options: {
+  toolkits: readonly string[];
+  overviewDir: string;
+  metadataSource: MetadataSource;
+  force: boolean;
+}): Promise<{ created: number; skipped: number }> => {
+  let created = 0;
+  let skipped = 0;
+
+  for (const toolkitId of options.toolkits) {
+    const filePath = buildOverviewFilePath(options.overviewDir, toolkitId);
+    if (await shouldSkipOverviewFile(filePath, options.force)) {
+      skipped += 1;
+      continue;
+    }
+
+    const label = await getOverviewTemplateLabel(
+      options.metadataSource,
+      toolkitId
+    );
+    const template = buildOverviewTemplate(toolkitId, label);
+    await writeOverviewTemplate(filePath, template);
+    created += 1;
+  }
+
+  return { created, skipped };
 };
 
 const buildChangeLogDetails = (
@@ -582,6 +709,46 @@ program
   .version("1.0.0");
 
 program
+  .command("overview-init")
+  .description("Create overview instruction file(s) for toolkits")
+  .option(
+    "--toolkits <list>",
+    'Comma-separated toolkit IDs (e.g. "Github,Slack")'
+  )
+  .option(
+    "--overview-dir <dir>",
+    "Directory for overview instruction files",
+    getDefaultOverviewDir()
+  )
+  .option("--metadata-file <file>", "Path to metadata JSON file")
+  .option("--force", "Overwrite existing overview files", false)
+  .action(async (options: OverviewInitOptions) => {
+    const spinner = ora("Preparing overview files...").start();
+    try {
+      const toolkits = getOverviewInitToolkits(options);
+      const overviewDir = resolve(options.overviewDir);
+      await mkdir(overviewDir, { recursive: true });
+
+      const metadataSource = await resolveOverviewInitMetadataSource(options);
+      const { created, skipped } = await createOverviewFiles({
+        toolkits,
+        overviewDir,
+        metadataSource,
+        force: options.force,
+      });
+
+      spinner.succeed(
+        `Overview files created: ${created}${skipped > 0 ? ` (skipped ${skipped})` : ""}`
+      );
+    } catch (error) {
+      spinner.fail(
+        `Error: ${error instanceof Error ? error.message : String(error)}`
+      );
+      process.exit(1);
+    }
+  });
+
+program
   .command("generate")
   .description("Generate documentation for specific providers or all toolkits")
   .option(
@@ -597,6 +764,15 @@ program
   .option("--log-dir <dir>", "Directory for run logs", getDefaultLogDir())
   .option("--mock-data-dir <dir>", "Path to mock data directory")
   .option("--metadata-file <file>", "Path to metadata JSON file")
+  .option(
+    "--overview-dir <dir>",
+    "Directory with toolkit overview instruction files",
+    getDefaultOverviewDir()
+  )
+  .option(
+    "--overview-file <file>",
+    "Path to a single overview instruction file"
+  )
   .option(
     "--api-source <source>",
     'API source: "list-tools" (/v1/tools), "tool-metadata" (/v1/tool_metadata), or "mock" (default: auto-detect)'
@@ -662,6 +838,8 @@ program
   )
   .option("--skip-examples", "Skip LLM example generation", false)
   .option("--skip-summary", "Skip LLM summary generation", false)
+  .option("--skip-overview", "Skip LLM overview generation", false)
+  .option("--skip-overview", "Skip LLM overview generation", false)
   .option("--no-verify-output", "Skip output verification")
   .option("--custom-sections <file>", "Path to custom sections JSON")
   .option(
@@ -712,12 +890,16 @@ program
       indexFromOutput: boolean;
       skipExamples: boolean;
       skipSummary: boolean;
+      skipOverview: boolean;
+      overviewDir: string;
+      overviewFile?: string;
       verifyOutput: boolean;
       customSections?: string;
       resume: boolean;
       incremental: boolean;
       skipUnchanged: boolean;
       verbose: boolean;
+      // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: legacy CLI flow
     }) => {
       const spinner = ora("Parsing input...").start();
       const logPaths = buildLogPaths(resolve(options.logDir));
@@ -814,7 +996,8 @@ program
 
         const needsExamples = !options.skipExamples;
         const needsSummary = !options.skipSummary;
-        const needsLlm = needsExamples || needsSummary;
+        const needsOverview = !options.skipOverview;
+        const needsLlm = needsExamples || needsSummary || needsOverview;
 
         const llmConfig = needsLlm
           ? resolveLlmConfig(options, options.verbose)
@@ -834,6 +1017,16 @@ program
             throw new Error("LLM configuration is required for summaries.");
           }
           toolkitSummaryGenerator = new LlmToolkitSummaryGenerator(llmConfig);
+        }
+        let overviewGenerator: LlmToolkitOverviewGenerator | undefined;
+        if (needsOverview) {
+          if (llmConfig) {
+            overviewGenerator = new LlmToolkitOverviewGenerator(llmConfig);
+          } else {
+            spinner.warn(
+              "Overview generation skipped (missing LLM configuration)."
+            );
+          }
         }
         const previousOutputDir = options.forceRegenerate
           ? undefined
@@ -856,6 +1049,15 @@ program
         const customSectionsSource = options.customSections
           ? createCustomSectionsFileSource(options.customSections)
           : createEmptyCustomSectionsSource();
+        const overviewInstructionsSource = options.overviewFile
+          ? createOverviewInstructionsFileSource({
+              filePath: resolve(options.overviewFile),
+              allowMissing: false,
+            })
+          : createOverviewInstructionsFileSource({
+              dirPath: resolve(options.overviewDir ?? getDefaultOverviewDir()),
+              allowMissing: true,
+            });
 
         spinner.succeed("Data sources initialized");
 
@@ -985,6 +1187,9 @@ program
         const merger = createDataMerger({
           toolkitDataSource,
           customSectionsSource,
+          overviewInstructionsSource,
+          ...(overviewGenerator ? { overviewGenerator } : {}),
+          skipOverview: options.skipOverview || !overviewGenerator,
           ...(toolExampleGenerator ? { toolExampleGenerator } : {}),
           ...(toolkitSummaryGenerator ? { toolkitSummaryGenerator } : {}),
           ...(previousToolkits ? { previousToolkits } : {}),
@@ -1064,6 +1269,9 @@ program
             const mergerWithProgress = createDataMerger({
               toolkitDataSource,
               customSectionsSource,
+              overviewInstructionsSource,
+              ...(overviewGenerator ? { overviewGenerator } : {}),
+              skipOverview: options.skipOverview || !overviewGenerator,
               ...(toolExampleGenerator ? { toolExampleGenerator } : {}),
               ...(toolkitSummaryGenerator ? { toolkitSummaryGenerator } : {}),
               ...(previousToolkits ? { previousToolkits } : {}),
@@ -1274,6 +1482,15 @@ program
   .option("--mock-data-dir <dir>", "Path to mock data directory")
   .option("--metadata-file <file>", "Path to metadata JSON file")
   .option(
+    "--overview-dir <dir>",
+    "Directory with toolkit overview instruction files",
+    getDefaultOverviewDir()
+  )
+  .option(
+    "--overview-file <file>",
+    "Path to a single overview instruction file"
+  )
+  .option(
     "--api-source <source>",
     'API source: "list-tools" (/v1/tools), "tool-metadata" (/v1/tool_metadata), or "mock" (default: auto-detect)'
   )
@@ -1379,11 +1596,15 @@ program
       indexFromOutput: boolean;
       skipExamples: boolean;
       skipSummary: boolean;
+      skipOverview: boolean;
+      overviewDir: string;
+      overviewFile?: string;
       verifyOutput: boolean;
       customSections?: string;
       resume: boolean;
       incremental: boolean;
       verbose: boolean;
+      // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: legacy CLI flow
     }) => {
       const spinner = ora("Initializing...").start();
 
@@ -1410,7 +1631,8 @@ program
 
         const needsExamples = !options.skipExamples;
         const needsSummary = !options.skipSummary;
-        const needsLlm = needsExamples || needsSummary;
+        const needsOverview = !options.skipOverview;
+        const needsLlm = needsExamples || needsSummary || needsOverview;
 
         const llmConfig = needsLlm
           ? resolveLlmConfig(options, options.verbose)
@@ -1431,6 +1653,16 @@ program
           }
           toolkitSummaryGenerator = new LlmToolkitSummaryGenerator(llmConfig);
         }
+        let overviewGenerator: LlmToolkitOverviewGenerator | undefined;
+        if (needsOverview) {
+          if (llmConfig) {
+            overviewGenerator = new LlmToolkitOverviewGenerator(llmConfig);
+          } else {
+            spinner.warn(
+              "Overview generation skipped (missing LLM configuration)."
+            );
+          }
+        }
         const previousOutputDir = options.forceRegenerate
           ? undefined
           : (options.previousOutput ??
@@ -1445,6 +1677,15 @@ program
         const customSectionsSource = options.customSections
           ? createCustomSectionsFileSource(options.customSections)
           : createEmptyCustomSectionsSource();
+        const overviewInstructionsSource = options.overviewFile
+          ? createOverviewInstructionsFileSource({
+              filePath: resolve(options.overviewFile),
+              allowMissing: false,
+            })
+          : createOverviewInstructionsFileSource({
+              dirPath: resolve(options.overviewDir ?? getDefaultOverviewDir()),
+              allowMissing: true,
+            });
 
         spinner.succeed("Data sources initialized");
 
@@ -1543,6 +1784,9 @@ program
           const merger = createDataMerger({
             toolkitDataSource,
             customSectionsSource,
+            overviewInstructionsSource,
+            ...(overviewGenerator ? { overviewGenerator } : {}),
+            skipOverview: options.skipOverview || !overviewGenerator,
             ...(toolExampleGenerator ? { toolExampleGenerator } : {}),
             ...(toolkitSummaryGenerator ? { toolkitSummaryGenerator } : {}),
             ...(previousToolkits ? { previousToolkits } : {}),
@@ -1798,6 +2042,7 @@ program
       toolMetadataKey?: string;
       verbose: boolean;
       json: boolean;
+      // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: legacy CLI flow
     }) => {
       const spinner = ora("Checking for changes...").start();
       const logPaths = buildLogPaths(resolve(options.logDir));

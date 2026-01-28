@@ -285,6 +285,147 @@ const DEFAULT_SECRET_LABELS: Record<SecretType, string> = {
   unknown: "Unknown",
 };
 
+const getRowBackground = (isSelected: boolean, index: number): string => {
+  if (isSelected) {
+    return "bg-brand-accent/10";
+  }
+  return index % 2 === 0 ? "bg-neutral-dark/20" : "bg-neutral-dark/5";
+};
+
+const getSelectionCellBackground = (
+  isSelected: boolean,
+  index: number
+): string => {
+  if (isSelected) {
+    return "bg-brand-accent/10";
+  }
+  return index % 2 === 0 ? "bg-neutral-dark/95" : "bg-neutral-dark/90";
+};
+
+const getSelectionLabel = (isSelected: boolean): string =>
+  isSelected ? "Deselect tool" : "Select tool";
+
+type AvailableToolsRowProps = {
+  tool: AvailableToolsTableProps["tools"][number];
+  index: number;
+  showSelection: boolean;
+  selectedTools?: Set<string>;
+  onToggleSelection?: AvailableToolsTableProps["onToggleSelection"];
+  secretsDisplay?: AvailableToolsTableProps["secretsDisplay"];
+  secretTypeLabels?: AvailableToolsTableProps["secretTypeLabels"];
+  secretTypeDocsBaseUrl?: AvailableToolsTableProps["secretTypeDocsBaseUrl"];
+};
+
+function SelectionCell({
+  isSelected,
+  selectionCellBg,
+  toolName,
+  onToggleSelection,
+}: {
+  isSelected: boolean;
+  selectionCellBg: string;
+  toolName: string;
+  onToggleSelection?: AvailableToolsTableProps["onToggleSelection"];
+}) {
+  return (
+    <td
+      className={`relative sticky left-0 z-10 p-0 text-center ${selectionCellBg} group-hover:bg-brand-accent/10`}
+    >
+      <button
+        aria-label={getSelectionLabel(isSelected)}
+        className="absolute inset-0 flex items-center justify-center"
+        onClick={(event) => {
+          handleSelectionButtonClick(event, onToggleSelection, toolName);
+        }}
+        title={getSelectionLabel(isSelected)}
+        type="button"
+      >
+        <span
+          className={`flex h-5 w-5 items-center justify-center rounded border transition-colors ${
+            isSelected
+              ? "border-brand-accent bg-brand-accent text-white"
+              : "border-neutral-dark-high bg-neutral-dark/40 hover:border-brand-accent/50"
+          }`}
+        >
+          {isSelected && <Check className="h-3 w-3" />}
+        </span>
+      </button>
+    </td>
+  );
+}
+
+function SecretsCell({ secretCount }: { secretCount: number }) {
+  if (secretCount === 0) {
+    return (
+      <span aria-hidden="true" className="text-muted-foreground/60 text-xs">
+        —
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-500/10 px-2.5 py-1 text-amber-300 text-xs">
+      <KeyRound className="h-3 w-3" />
+      {secretCount}
+    </span>
+  );
+}
+
+function AvailableToolsRow({
+  tool,
+  index,
+  showSelection,
+  selectedTools,
+  onToggleSelection,
+  secretsDisplay,
+  secretTypeLabels,
+  secretTypeDocsBaseUrl,
+}: AvailableToolsRowProps) {
+  const secretItems = buildSecretDisplayItems(tool, {
+    secretsDisplay,
+    secretTypeLabels,
+    secretTypeDocsBaseUrl,
+  });
+  const isSelected = selectedTools?.has(tool.name) ?? false;
+  const rowBg = getRowBackground(isSelected, index);
+  const selectionCellBg = getSelectionCellBackground(isSelected, index);
+  return (
+    <tr
+      className={`group cursor-pointer transition-colors hover:bg-brand-accent/5 ${rowBg}`}
+      key={tool.qualifiedName}
+      onClick={() => {
+        window.location.hash = `#${toToolAnchorId(tool.qualifiedName)}`;
+      }}
+    >
+      {showSelection && (
+        <SelectionCell
+          isSelected={isSelected}
+          onToggleSelection={onToggleSelection}
+          selectionCellBg={selectionCellBg}
+          toolName={tool.name}
+        />
+      )}
+      <td className="max-w-[200px] px-4 py-3.5">
+        <ScrollingCell>
+          <a
+            className="font-medium text-brand-accent no-underline transition-colors group-hover:text-brand-accent/80"
+            href={`#${toToolAnchorId(tool.qualifiedName)}`}
+          >
+            {tool.qualifiedName}
+          </a>
+        </ScrollingCell>
+      </td>
+      <td className="max-w-[300px] px-4 py-3.5 text-sm text-text-color/80">
+        <ScrollingCell>
+          <span>{tool.description ?? "No description provided."}</span>
+        </ScrollingCell>
+      </td>
+      <td className="px-4 py-3.5">
+        <SecretsCell secretCount={secretItems.length} />
+      </td>
+    </tr>
+  );
+}
+
 function normalizeBaseUrl(baseUrl?: string): string | undefined {
   if (!baseUrl) {
     return;
@@ -621,98 +762,19 @@ export function AvailableToolsTable({
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-dark-high/30">
-                {pagedTools.map((tool, index) => {
-                  const secretItems = buildSecretDisplayItems(tool, {
-                    secretsDisplay,
-                    secretTypeLabels,
-                    secretTypeDocsBaseUrl,
-                  });
-                  const isSelected = selectedTools?.has(tool.name) ?? false;
-                  let rowBg = "bg-neutral-dark/5";
-                  if (isSelected) {
-                    rowBg = "bg-brand-accent/10";
-                  } else if (index % 2 === 0) {
-                    rowBg = "bg-neutral-dark/20";
-                  }
-
-                  let selectionCellBg = "bg-neutral-dark/90";
-                  if (isSelected) {
-                    selectionCellBg = "bg-brand-accent/10";
-                  } else if (index % 2 === 0) {
-                    selectionCellBg = "bg-neutral-dark/95";
-                  }
-
-                  return (
-                    <tr
-                      className={`group cursor-pointer transition-colors hover:bg-brand-accent/5 ${rowBg}`}
-                      key={tool.qualifiedName}
-                      onClick={() => {
-                        window.location.hash = `#${toToolAnchorId(tool.qualifiedName)}`;
-                      }}
-                    >
-                      {showSelection && (
-                        <td
-                          className={`relative sticky left-0 z-10 p-0 text-center ${selectionCellBg} group-hover:bg-brand-accent/10`}
-                        >
-                          <button
-                            aria-label={
-                              isSelected ? "Deselect tool" : "Select tool"
-                            }
-                            className="absolute inset-0 flex items-center justify-center"
-                            onClick={(e) => {
-                              handleSelectionButtonClick(
-                                e,
-                                onToggleSelection,
-                                tool.name
-                              );
-                            }}
-                            title={isSelected ? "Deselect tool" : "Select tool"}
-                            type="button"
-                          >
-                            <span
-                              className={`flex h-5 w-5 items-center justify-center rounded border transition-colors ${
-                                isSelected
-                                  ? "border-brand-accent bg-brand-accent text-white"
-                                  : "border-neutral-dark-high bg-neutral-dark/40 hover:border-brand-accent/50"
-                              }`}
-                            >
-                              {isSelected && <Check className="h-3 w-3" />}
-                            </span>
-                          </button>
-                        </td>
-                      )}
-                      <td className="max-w-[200px] px-4 py-3.5">
-                        <ScrollingCell>
-                          <a
-                            className="font-medium text-brand-accent no-underline transition-colors group-hover:text-brand-accent/80"
-                            href={`#${toToolAnchorId(tool.qualifiedName)}`}
-                          >
-                            {tool.qualifiedName}
-                          </a>
-                        </ScrollingCell>
-                      </td>
-                      <td className="max-w-[300px] px-4 py-3.5 text-sm text-text-color/80">
-                        <ScrollingCell>
-                          <span>
-                            {tool.description ?? "No description provided."}
-                          </span>
-                        </ScrollingCell>
-                      </td>
-                      <td className="px-4 py-3.5">
-                        {secretItems.length === 0 ? (
-                          <span className="text-muted-foreground/60 text-xs">
-                            —
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-500/10 px-2.5 py-1 text-amber-300 text-xs">
-                            <KeyRound className="h-3 w-3" />
-                            {secretItems.length}
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
+                {pagedTools.map((tool, index) => (
+                  <AvailableToolsRow
+                    index={index}
+                    key={tool.qualifiedName}
+                    onToggleSelection={onToggleSelection}
+                    secretsDisplay={secretsDisplay}
+                    secretTypeDocsBaseUrl={secretTypeDocsBaseUrl}
+                    secretTypeLabels={secretTypeLabels}
+                    selectedTools={selectedTools}
+                    showSelection={showSelection}
+                    tool={tool}
+                  />
+                ))}
               </tbody>
             </table>
           </div>

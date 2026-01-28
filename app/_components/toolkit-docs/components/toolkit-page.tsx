@@ -353,6 +353,70 @@ function ToolsOnThisPage({ tools }: { tools: ToolDefinition[] }) {
   );
 }
 
+const COPY_PAGE_LABEL = "copy page";
+const EDIT_LINK_SELECTOR = 'a[href*="github.com/ArcadeAI/docs/tree/main/"]';
+
+const toLowerText = (value: string | null): string =>
+  value?.trim().toLowerCase() ?? "";
+
+const isCopyPageButton = (button: HTMLButtonElement): boolean => {
+  const text = toLowerText(button.textContent);
+  const title = toLowerText(button.getAttribute("title"));
+  const ariaLabel = toLowerText(button.getAttribute("aria-label"));
+  return (
+    text.includes(COPY_PAGE_LABEL) ||
+    title === COPY_PAGE_LABEL ||
+    ariaLabel === COPY_PAGE_LABEL
+  );
+};
+
+const findActionGroup = (element: HTMLElement): HTMLElement | null =>
+  element.closest('[role="group"], [role="toolbar"]') ?? element.parentElement;
+
+const hideElementGroup = (
+  element: HTMLElement,
+  shouldSkip: (node: Element | null) => boolean
+) => {
+  const group = findActionGroup(element);
+  if (group && !shouldSkip(group)) {
+    const groupButtons = group.querySelectorAll("button");
+    for (const btn of groupButtons) {
+      (btn as HTMLElement).style.display = "none";
+    }
+    group.style.display = "none";
+    return;
+  }
+  element.style.display = "none";
+};
+
+const hideCopyPageButtons = (
+  root: Document,
+  shouldSkip: (element: Element | null) => boolean
+) => {
+  const copyButtons = Array.from(root.querySelectorAll("button")).filter(
+    (button) => isCopyPageButton(button as HTMLButtonElement)
+  );
+  for (const button of copyButtons) {
+    if (shouldSkip(button)) {
+      continue;
+    }
+    hideElementGroup(button as HTMLElement, shouldSkip);
+  }
+};
+
+const hideEditLinks = (
+  root: Document,
+  shouldSkip: (element: Element | null) => boolean
+) => {
+  const editLinks = root.querySelectorAll(EDIT_LINK_SELECTOR);
+  for (const link of editLinks) {
+    if (shouldSkip(link)) {
+      continue;
+    }
+    hideElementGroup(link as HTMLElement, shouldSkip);
+  }
+};
+
 /**
  * ToolkitPage
  *
@@ -364,61 +428,11 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
 
     const hideBuiltInActions = () => {
       const root = document;
-
       const shouldSkip = (element: Element | null) =>
         Boolean(element?.closest("[data-toolkit-page-actions]"));
 
-      // Hide Copy page button and its dropdown toggle without text matching.
-      const copyButtons = Array.from(root.querySelectorAll("button")).filter(
-        (button) => {
-          const text = (button.textContent ?? "").trim().toLowerCase();
-          const title = (button.getAttribute("title") ?? "").toLowerCase();
-          const ariaLabel = (
-            button.getAttribute("aria-label") ?? ""
-          ).toLowerCase();
-          return (
-            text.includes("copy page") ||
-            title === "copy page" ||
-            ariaLabel === "copy page"
-          );
-        }
-      );
-
-      for (const button of copyButtons) {
-        if (shouldSkip(button)) {
-          continue;
-        }
-        const group =
-          button.closest('[role="group"], [role="toolbar"]') ??
-          button.parentElement;
-        if (group && !shouldSkip(group)) {
-          const groupButtons = group.querySelectorAll("button");
-          for (const btn of groupButtons) {
-            (btn as HTMLElement).style.display = "none";
-          }
-          (group as HTMLElement).style.display = "none";
-        } else {
-          (button as HTMLElement).style.display = "none";
-        }
-      }
-
-      // Hide Edit this page on GitHub link by href (not text).
-      const editLinks = root.querySelectorAll(
-        'a[href*="github.com/ArcadeAI/docs/tree/main/"]'
-      );
-      for (const link of editLinks) {
-        if (shouldSkip(link)) {
-          continue;
-        }
-        const group =
-          link.closest('[role="group"], [role="toolbar"]') ??
-          link.parentElement;
-        if (group && !shouldSkip(group)) {
-          (group as HTMLElement).style.display = "none";
-        } else {
-          (link as HTMLElement).style.display = "none";
-        }
-      }
+      hideCopyPageButtons(root, shouldSkip);
+      hideEditLinks(root, shouldSkip);
     };
 
     const observer = new MutationObserver(() => hideBuiltInActions());

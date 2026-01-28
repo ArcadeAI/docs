@@ -113,4 +113,37 @@ describe("LlmToolExampleGenerator", () => {
     expect(result.codeExample.parameters.repo?.value).toBe("toolkit");
     expect(result.secretsInfo).toEqual([{ name: "API_KEY", type: "api_key" }]);
   });
+
+  it("should coerce boolean strings for boolean parameters", async () => {
+    const fakeClient: LlmClient = {
+      provider: "openai",
+      generateText: async () =>
+        JSON.stringify({
+          parameters: { owner: "arcadeai", repo: "docs", archived: "true" },
+          secrets: { API_KEY: "api_key" },
+        }),
+    };
+    const generator = new LlmToolExampleGenerator({
+      client: fakeClient,
+      model: "gpt-4.1-mini",
+    });
+
+    const tool = createTool({
+      parameters: [
+        ...createTool().parameters,
+        {
+          name: "archived",
+          type: "boolean",
+          required: false,
+          description: null,
+          enum: null,
+          inferrable: true,
+        },
+      ],
+    });
+
+    const result = await generator.generate(tool);
+
+    expect(result.codeExample.parameters.archived?.value).toBe(true);
+  });
 });

@@ -412,6 +412,68 @@ export const formatChangeSummary = (result: ChangeDetectionResult): string => {
   return parts.join(", ");
 };
 
+const TOOLKIT_CHANGE_LABELS: Record<ToolkitChange["changeType"], string> = {
+  added: "[NEW]",
+  removed: "[REMOVED]",
+  modified: "[MODIFIED]",
+  unchanged: "",
+};
+
+const TOOL_CHANGE_LABELS: Record<ToolChange["changeType"], string> = {
+  added: "  + ",
+  removed: "  - ",
+  modified: "  ~ ",
+};
+
+const buildVersionSuffix = (toolkitChange: ToolkitChange): string => {
+  if (!toolkitChange.versionChanged) {
+    return "";
+  }
+  return toolkitChange.previousVersion !== "0.0.0"
+    ? ` (version ${toolkitChange.previousVersion} -> ${toolkitChange.currentVersion})`
+    : ` (version -> ${toolkitChange.currentVersion})`;
+};
+
+const shouldListToolChanges = (toolkitChange: ToolkitChange): boolean =>
+  toolkitChange.changeType === "modified" ||
+  toolkitChange.changeType === "added";
+
+const shouldNoteVersionOnlyUpdate = (toolkitChange: ToolkitChange): boolean =>
+  toolkitChange.changeType === "modified" &&
+  toolkitChange.toolChanges.length === 0 &&
+  toolkitChange.versionChanged;
+
+const formatToolkitLine = (toolkitChange: ToolkitChange): string => {
+  const changeLabel = TOOLKIT_CHANGE_LABELS[toolkitChange.changeType];
+  const versionSuffix = buildVersionSuffix(toolkitChange);
+  return `${changeLabel} ${toolkitChange.toolkitId} (${toolkitChange.currentToolCount} tools)${versionSuffix}`;
+};
+
+const appendToolChanges = (
+  lines: string[],
+  toolkitChange: ToolkitChange
+): void => {
+  if (!shouldListToolChanges(toolkitChange)) {
+    return;
+  }
+  if (shouldNoteVersionOnlyUpdate(toolkitChange)) {
+    lines.push("  ~ version update only");
+  }
+  for (const toolChange of toolkitChange.toolChanges) {
+    const toolLabel = TOOL_CHANGE_LABELS[toolChange.changeType];
+    lines.push(`${toolLabel}${toolChange.toolName}`);
+  }
+};
+
+const appendRemovedNotice = (
+  lines: string[],
+  toolkitChange: ToolkitChange
+): void => {
+  if (toolkitChange.changeType === "removed") {
+    lines.push("  ~ not returned by API; existing docs retained");
+  }
+};
+
 /**
  * Format detailed changes for logging
  */
@@ -425,51 +487,9 @@ export const formatDetailedChanges = (
       continue;
     }
 
-    const changeLabel = {
-      added: "[NEW]",
-      removed: "[REMOVED]",
-      modified: "[MODIFIED]",
-      unchanged: "",
-    }[toolkitChange.changeType];
-
-    let versionSuffix = "";
-    if (toolkitChange.versionChanged) {
-      versionSuffix =
-        toolkitChange.previousVersion !== "0.0.0"
-          ? ` (version ${toolkitChange.previousVersion} -> ${toolkitChange.currentVersion})`
-          : ` (version -> ${toolkitChange.currentVersion})`;
-    }
-
-    lines.push(
-      `${changeLabel} ${toolkitChange.toolkitId} (${toolkitChange.currentToolCount} tools)${versionSuffix}`
-    );
-
-    // Show tool-level changes for modified toolkits
-    if (
-      toolkitChange.changeType === "modified" ||
-      toolkitChange.changeType === "added"
-    ) {
-      if (
-        toolkitChange.changeType === "modified" &&
-        toolkitChange.toolChanges.length === 0 &&
-        toolkitChange.versionChanged
-      ) {
-        lines.push("  ~ version update only");
-      }
-      for (const toolChange of toolkitChange.toolChanges) {
-        const toolLabel = {
-          added: "  + ",
-          removed: "  - ",
-          modified: "  ~ ",
-        }[toolChange.changeType];
-
-        lines.push(`${toolLabel}${toolChange.toolName}`);
-      }
-    }
-
-    if (toolkitChange.changeType === "removed") {
-      lines.push("  ~ not returned by API; existing docs retained");
-    }
+    lines.push(formatToolkitLine(toolkitChange));
+    appendToolChanges(lines, toolkitChange);
+    appendRemovedNotice(lines, toolkitChange);
   }
 
   return lines;
