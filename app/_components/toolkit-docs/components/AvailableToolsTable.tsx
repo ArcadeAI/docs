@@ -1,13 +1,23 @@
 "use client";
 
 import {
+  Button,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@arcadeai/design-system";
+import {
   Check,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
   KeyRound,
+  Search,
+  X,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -19,37 +29,6 @@ const DEFAULT_PAGE_SIZE = 25;
 const PAGE_SIZE_OPTIONS = [25, 50, 100, 200] as const;
 
 /**
- * Custom styled select dropdown with chevron indicator.
- */
-function StyledSelect({
-  "aria-label": ariaLabel,
-  value,
-  onChange,
-  children,
-  className = "",
-}: {
-  "aria-label": string;
-  value: string | number;
-  onChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <div className={`relative ${className}`}>
-      <select
-        aria-label={ariaLabel}
-        className="w-full appearance-none rounded-lg border border-neutral-dark-high bg-neutral-dark/60 py-2.5 pr-9 pl-3 text-sm transition-colors focus:border-brand-accent focus:outline-none"
-        onChange={onChange}
-        value={value}
-      >
-        {children}
-      </select>
-      <ChevronDown className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-    </div>
-  );
-}
-
-/**
  * Pagination controls with First, Prev, Next, Last buttons.
  */
 function PaginationControls({
@@ -58,74 +37,70 @@ function PaginationControls({
   onPageChange,
   itemsShowing,
   totalItems,
-  size = "md",
+  size = "default",
 }: {
   page: number;
   pageCount: number;
   onPageChange: (newPage: number) => void;
   itemsShowing: number;
   totalItems: number;
-  size?: "sm" | "md";
+  size?: "sm" | "default";
 }) {
   if (pageCount <= 1) {
     return null;
   }
 
-  const buttonClass =
-    size === "sm"
-      ? "rounded-md border border-neutral-dark-high bg-neutral-dark/60 p-1.5 text-muted-foreground transition-colors hover:bg-neutral-dark hover:text-text-color disabled:cursor-not-allowed disabled:opacity-40"
-      : "rounded-md border border-neutral-dark-high bg-neutral-dark/60 p-2 text-muted-foreground transition-colors hover:bg-neutral-dark hover:text-text-color disabled:cursor-not-allowed disabled:opacity-40";
-
+  const buttonSize = size === "sm" ? "sm" : "default";
   const iconClass = size === "sm" ? "h-3.5 w-3.5" : "h-4 w-4";
   const textClass = size === "sm" ? "text-xs" : "text-sm";
 
   return (
     <div className="flex items-center gap-2">
-      <button
+      <Button
         aria-label="First page"
-        className={buttonClass}
         disabled={page <= 1}
         onClick={() => onPageChange(1)}
+        size={buttonSize}
         title="First page"
-        type="button"
+        variant="outline"
       >
         <ChevronsLeft className={iconClass} />
-      </button>
-      <button
+      </Button>
+      <Button
         aria-label="Previous page"
-        className={buttonClass}
         disabled={page <= 1}
         onClick={() => onPageChange(Math.max(1, page - 1))}
+        size={buttonSize}
         title="Previous page"
-        type="button"
+        variant="outline"
       >
         <ChevronLeft className={iconClass} />
-      </button>
+      </Button>
       <span
         className={`whitespace-nowrap px-2 text-muted-foreground ${textClass}`}
       >
         Page {page} of {pageCount}
       </span>
-      <button
+      <Button
         aria-label="Next page"
-        className={buttonClass}
         disabled={page >= pageCount}
         onClick={() => onPageChange(Math.min(pageCount, page + 1))}
+        size={buttonSize}
         title="Next page"
-        type="button"
+        variant="outline"
       >
         <ChevronRight className={iconClass} />
-      </button>
-      <button
+      </Button>
+      <Button
         aria-label="Last page"
-        className={buttonClass}
         disabled={page >= pageCount}
         onClick={() => onPageChange(pageCount)}
+        size={buttonSize}
         title="Last page"
-        type="button"
+        variant="outline"
       >
         <ChevronsRight className={iconClass} />
-      </button>
+      </Button>
       <span
         className={`whitespace-nowrap text-muted-foreground/70 ${textClass}`}
       >
@@ -289,7 +264,9 @@ const getRowBackground = (isSelected: boolean, index: number): string => {
   if (isSelected) {
     return "bg-brand-accent/10";
   }
-  return index % 2 === 0 ? "bg-neutral-dark/20" : "bg-neutral-dark/5";
+  return index % 2 === 0
+    ? "bg-muted/30 dark:bg-neutral-dark/40"
+    : "bg-transparent";
 };
 
 const getSelectionCellBackground = (
@@ -299,7 +276,9 @@ const getSelectionCellBackground = (
   if (isSelected) {
     return "bg-brand-accent/10";
   }
-  return index % 2 === 0 ? "bg-neutral-dark/95" : "bg-neutral-dark/90";
+  return index % 2 === 0
+    ? "bg-muted/30 dark:bg-neutral-dark/95"
+    : "bg-background dark:bg-neutral-dark/90";
 };
 
 const getSelectionLabel = (isSelected: boolean): string =>
@@ -331,14 +310,15 @@ function SelectionCell({
     <td
       className={`relative sticky left-0 z-10 p-0 text-center ${selectionCellBg} group-hover:bg-brand-accent/10`}
     >
-      <button
+      <Button
         aria-label={getSelectionLabel(isSelected)}
-        className="absolute inset-0 flex items-center justify-center"
+        className="absolute inset-0 h-full w-full rounded-none"
         onClick={(event) => {
           handleSelectionButtonClick(event, onToggleSelection, toolName);
         }}
+        size="sm"
         title={getSelectionLabel(isSelected)}
-        type="button"
+        variant="ghost"
       >
         <span
           className={`flex h-5 w-5 items-center justify-center rounded border transition-colors ${
@@ -349,7 +329,7 @@ function SelectionCell({
         >
           {isSelected && <Check className="h-3 w-3" />}
         </span>
-      </button>
+      </Button>
     </td>
   );
 }
@@ -363,7 +343,7 @@ function SecretsCell({ secretCount }: { secretCount: number }) {
     );
   }
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-400/40 bg-amber-500/10 px-2.5 py-1 text-amber-300 text-xs">
+    <span className="inline-flex items-center gap-1.5 text-amber-300 text-xs">
       <KeyRound className="h-3 w-3" />
       {secretCount}
     </span>
@@ -390,7 +370,7 @@ function AvailableToolsRow({
   const selectionCellBg = getSelectionCellBackground(isSelected, index);
   return (
     <tr
-      className={`group cursor-pointer transition-colors hover:bg-brand-accent/5 ${rowBg}`}
+      className={`group cursor-pointer transition-colors duration-150 hover:bg-muted/50 dark:hover:bg-brand-accent/5 ${rowBg}`}
       key={tool.qualifiedName}
       onClick={() => {
         window.location.hash = `#${toToolAnchorId(tool.qualifiedName)}`;
@@ -414,7 +394,7 @@ function AvailableToolsRow({
           </a>
         </ScrollingCell>
       </td>
-      <td className="max-w-[300px] px-4 py-3.5 text-sm text-text-color/80">
+      <td className="max-w-[300px] px-4 py-3.5 text-sm text-foreground">
         <ScrollingCell>
           <span>{tool.description ?? "No description provided."}</span>
         </ScrollingCell>
@@ -586,11 +566,8 @@ export function AvailableToolsTable({
   secretTypeDocsBaseUrl,
   enableSearch = true,
   enableFilters = true,
-  enableScopeFilter = true,
   searchPlaceholder = "Search tools...",
   filterLabel = "Filter",
-  scopeFilterLabel = "Filter by scope",
-  scopeFilterDescription = "Select scopes to narrow the tool list.",
   defaultFilter = "all",
   selectedTools,
   onToggleSelection,
@@ -602,21 +579,14 @@ export function AvailableToolsTable({
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<AvailableToolsFilter>(defaultFilter);
   const [sort, setSort] = useState<AvailableToolsSort>("name_asc");
-  const [selectedScopes, setSelectedScopes] = useState<string[]>([]);
   const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
   const [page, setPage] = useState<number>(1);
-
-  const availableScopes = useMemo(() => {
-    const allScopes = safeTools.flatMap((tool) =>
-      buildScopeDisplayItems(tool.scopes ?? [])
-    );
-    return Array.from(new Set(allScopes)).sort();
-  }, [safeTools]);
+  const selectedScopes: string[] = [];
 
   const filteredTools = useMemo(() => {
     const filtered = filterTools(safeTools, query, filter, selectedScopes);
     return sortTools(filtered, sort, selectedTools);
-  }, [safeTools, query, filter, selectedScopes, sort, selectedTools]);
+  }, [safeTools, query, filter, sort, selectedTools]);
 
   const pageCount = useMemo(
     () => Math.max(1, Math.ceil(filteredTools.length / pageSize)),
@@ -634,21 +604,6 @@ export function AvailableToolsTable({
     return filteredTools.slice(start, end);
   }, [filteredTools, page, pageSize]);
 
-  const toggleScope = (scope: string) => {
-    setSelectedScopes((current) => {
-      if (current.includes(scope)) {
-        return current.filter((item) => item !== scope);
-      }
-      return [...current, scope];
-    });
-    setPage(1);
-  };
-
-  const clearScopes = () => {
-    setSelectedScopes([]);
-    setPage(1);
-  };
-
   if (!hasTools) {
     return (
       <p className="my-3 text-muted-foreground text-sm">No tools available.</p>
@@ -657,131 +612,116 @@ export function AvailableToolsTable({
 
   return (
     <div className="mt-6 space-y-4">
-      {(enableSearch || enableFilters || enableScopeFilter) && (
-        <div className="flex flex-wrap items-center gap-3 rounded-lg border border-neutral-dark-high/50 bg-neutral-dark/30 p-3">
+      {(enableSearch || enableFilters) && (
+        <div className="flex flex-wrap items-center gap-3 rounded-lg bg-neutral-dark/20 p-3">
           {enableSearch && (
-            <div className="relative flex-1">
-              <svg
-                aria-hidden="true"
-                className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
-                fill="none"
-                focusable="false"
-                stroke="currentColor"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-              >
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.35-4.35" strokeLinecap="round" />
-              </svg>
-              <input
-                className="w-full rounded-lg border border-neutral-dark-high bg-neutral-dark/60 py-2.5 pr-4 pl-10 text-sm transition-colors focus:border-brand-accent focus:outline-none"
+            <div className="relative w-full flex-1 sm:min-w-[200px] sm:max-w-md">
+              <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                className="pr-9 pl-9"
                 onChange={(event) => {
                   setQuery(event.target.value);
                   setPage(1);
                 }}
                 placeholder={searchPlaceholder}
-                type="search"
+                type="text"
                 value={query}
               />
+              {query && (
+                <Button
+                  aria-label="Clear search"
+                  className="absolute top-1/2 right-3 h-auto -translate-y-1/2 p-0"
+                  onClick={() => setQuery("")}
+                  size="sm"
+                  variant="ghost"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
             </div>
           )}
           {enableFilters && (
-            <StyledSelect
-              aria-label={filterLabel}
-              onChange={(event) => {
-                setFilter(event.target.value as AvailableToolsFilter);
+            <Select
+              onValueChange={(value) => {
+                setFilter(value as AvailableToolsFilter);
                 setPage(1);
               }}
               value={filter}
             >
-              <option value="all">All tools</option>
-              <option value="has_secrets">Requires secrets only</option>
-              <option value="no_secrets">No secrets required</option>
-            </StyledSelect>
+              <SelectTrigger
+                aria-label={filterLabel}
+                className="h-9 w-full sm:w-[180px] border-muted/60 text-sm hover:border-muted"
+              >
+                <SelectValue placeholder={filterLabel} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All tools</SelectItem>
+                <SelectItem value="has_secrets">
+                  Requires secrets only
+                </SelectItem>
+                <SelectItem value="no_secrets">No secrets required</SelectItem>
+              </SelectContent>
+            </Select>
           )}
-          <StyledSelect
-            aria-label="Rows per page"
-            onChange={(event) => {
-              setPageSize(Number(event.target.value));
+          <Select
+            onValueChange={(value) => {
+              setPageSize(Number(value));
               setPage(1);
             }}
-            value={pageSize}
+            value={String(pageSize)}
           >
-            {PAGE_SIZE_OPTIONS.map((size) => (
-              <option key={size} value={size}>
-                {size} / page
-              </option>
-            ))}
-          </StyledSelect>
-          <StyledSelect
-            aria-label="Sort by"
-            onChange={(event) => {
-              setSort(event.target.value as AvailableToolsSort);
+            <SelectTrigger
+              aria-label="Rows per page"
+              className="h-9 w-full sm:w-[140px] border-muted/60 text-sm hover:border-muted"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {PAGE_SIZE_OPTIONS.map((size) => (
+                <SelectItem key={size} value={String(size)}>
+                  {size} / page
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select
+            onValueChange={(value) => {
+              setSort(value as AvailableToolsSort);
               setPage(1);
             }}
             value={sort}
           >
-            <option value="name_asc">Name A-Z</option>
-            <option value="name_desc">Name Z-A</option>
-            <option value="secrets_first">Requires secrets first</option>
-            {showSelection && (
-              <option value="selected_first">Selected first</option>
-            )}
-          </StyledSelect>
-          <span className="whitespace-nowrap rounded-full bg-neutral-dark-medium px-3 py-1 text-muted-foreground text-xs">
-            {filteredTools.length} of {safeTools.length}
+            <SelectTrigger
+              aria-label="Sort by"
+              className="h-9 w-full sm:w-[180px] border-muted/60 text-sm hover:border-muted"
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="name_asc">Name A-Z</SelectItem>
+              <SelectItem value="name_desc">Name Z-A</SelectItem>
+              <SelectItem value="secrets_first">
+                Requires secrets first
+              </SelectItem>
+              {showSelection && (
+                <SelectItem value="selected_first">Selected first</SelectItem>
+              )}
+            </SelectContent>
+          </Select>
+          <span className="text-muted-foreground text-sm">
+            <span className="font-medium text-foreground">
+              {filteredTools.length}
+            </span>{" "}
+            of {safeTools.length}
           </span>
-          {enableScopeFilter && availableScopes.length > 0 && (
-            <div className="flex w-full flex-wrap items-start gap-3 border-neutral-dark-high/40 border-t pt-3">
-              <div className="min-w-[180px]">
-                <p className="font-medium text-muted-foreground text-xs">
-                  {scopeFilterLabel}
-                </p>
-                {scopeFilterDescription && (
-                  <p className="mt-1 text-muted-foreground/70 text-xs">
-                    {scopeFilterDescription}
-                  </p>
-                )}
-              </div>
-              <div className="flex flex-1 flex-wrap gap-2">
-                {availableScopes.map((scope) => {
-                  const isSelected = selectedScopes.includes(scope);
-                  return (
-                    <button
-                      aria-pressed={isSelected}
-                      className={`rounded-full border px-3 py-1 text-xs transition-colors ${
-                        isSelected
-                          ? "border-brand-accent bg-brand-accent/15 text-brand-accent"
-                          : "border-neutral-dark-high bg-neutral-dark/40 text-muted-foreground hover:border-brand-accent/40 hover:text-text-color"
-                      }`}
-                      key={scope}
-                      onClick={() => toggleScope(scope)}
-                      type="button"
-                    >
-                      {scope}
-                    </button>
-                  );
-                })}
-                {selectedScopes.length > 0 && (
-                  <button
-                    className="rounded-full border border-neutral-dark-high px-3 py-1 text-muted-foreground text-xs transition-colors hover:border-brand-accent/40 hover:text-text-color"
-                    onClick={clearScopes}
-                    type="button"
-                  >
-                    Clear
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
         </div>
       )}
       {filteredTools.length === 0 ? (
-        <div className="rounded-lg border border-neutral-dark-high/50 bg-neutral-dark/20 p-8 text-center">
+        <div className="rounded-lg bg-neutral-dark/20 p-8 text-center">
           <p className="text-muted-foreground">No tools match your search.</p>
         </div>
       ) : (
-        <div className="rounded-xl border border-neutral-dark-high/50 shadow-sm">
+        <div className="rounded-xl bg-neutral-dark/10">
           <div className="relative overflow-x-auto">
             <table className="w-full min-w-[700px] border-collapse text-sm">
               <thead>
@@ -824,7 +764,7 @@ export function AvailableToolsTable({
           </div>
           {/* Pagination bar below the table */}
           {pageCount > 1 && (
-            <div className="flex items-center justify-center border-neutral-dark-high/30 border-t bg-neutral-dark/20 px-4 py-3">
+            <div className="flex items-center justify-center bg-neutral-dark/30 px-4 py-3">
               <PaginationControls
                 itemsShowing={pagedTools.length}
                 onPageChange={setPage}

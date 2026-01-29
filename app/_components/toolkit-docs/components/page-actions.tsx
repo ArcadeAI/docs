@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@arcadeai/design-system";
 import { Check, Copy, ExternalLink } from "lucide-react";
 import { useCallback, useState } from "react";
 import { getPackageName } from "../constants";
@@ -155,11 +156,11 @@ export function CopyOptimizedPageContent({
   }, [data]);
 
   return (
-    <button
-      className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-dark-high bg-neutral-dark/60 px-3 py-1.5 font-medium text-muted-foreground text-xs transition-colors hover:bg-neutral-dark hover:text-text-color"
+    <Button
       onClick={handleCopy}
+      size="sm"
       title="Copy optimized page content as JSON"
-      type="button"
+      variant="outline"
     >
       {copied ? (
         <Check className="h-3.5 w-3.5 text-green-400" />
@@ -167,7 +168,7 @@ export function CopyOptimizedPageContent({
         <Copy className="h-3.5 w-3.5" />
       )}
       {copied ? "Copied!" : "Copy optimized page content"}
-    </button>
+    </Button>
   );
 }
 
@@ -184,16 +185,17 @@ export function EditJsonOnGithub({ toolkitId }: EditJsonOnGithubProps) {
   const editUrl = buildGithubEditUrl(toolkitId);
 
   return (
-    <a
-      className="inline-flex items-center gap-1.5 text-muted-foreground text-xs transition-colors hover:text-text-color"
-      href={editUrl}
-      rel="noopener noreferrer"
-      target="_blank"
-      title="Edit the toolkit JSON file on GitHub"
-    >
-      Edit content in GitHub
-      <ExternalLink className="h-3.5 w-3.5" />
-    </a>
+    <Button asChild size="sm" variant="ghost">
+      <a
+        href={editUrl}
+        rel="noopener noreferrer"
+        target="_blank"
+        title="Edit the toolkit JSON file on GitHub"
+      >
+        Edit content in GitHub
+        <ExternalLink className="ml-1 h-3.5 w-3.5" />
+      </a>
+    </Button>
   );
 }
 

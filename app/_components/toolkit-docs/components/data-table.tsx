@@ -58,7 +58,7 @@ export function DataTable({
               >
                 {columns.map((column, columnIndex) => (
                   <td
-                    className={`${cellPadding} align-top text-text-color/80`}
+                    className={`${cellPadding} align-top text-foreground`}
                     key={`${rowKey}-${column}`}
                   >
                     {row[columnIndex] ?? "—"}

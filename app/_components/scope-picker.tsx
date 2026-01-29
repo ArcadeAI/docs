@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@arcadeai/design-system";
 import { Check, Copy, KeyRound, ShieldCheck, Wrench } from "lucide-react";
 import { usePostHog } from "posthog-js/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -48,15 +49,7 @@ type ScopePickerProps = {
   onSelectedToolsChange?: (selectedTools: string[]) => void;
 };
 
-function CopyButton({
-  text,
-  label,
-  variant = "default",
-}: {
-  text: string;
-  label: string;
-  variant?: "default" | "small";
-}) {
+function CopyButton({ text, label }: { text: string; label: string }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = useCallback(async () => {
@@ -69,38 +62,15 @@ function CopyButton({
     }
   }, [text]);
 
-  if (variant === "small") {
-    return (
-      <button
-        className="inline-flex items-center gap-1 rounded-md border border-neutral-dark-high bg-neutral-dark/60 px-2 py-1 text-muted-foreground text-xs transition-colors hover:bg-neutral-dark hover:text-text-color"
-        onClick={handleCopy}
-        title={label}
-        type="button"
-      >
-        {copied ? (
-          <Check className="h-3 w-3 text-green-400" />
-        ) : (
-          <Copy className="h-3 w-3" />
-        )}
-        {copied ? "Copied" : label}
-      </button>
-    );
-  }
-
   return (
-    <button
-      className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-dark-high bg-neutral-dark/60 px-3 py-1.5 font-medium text-muted-foreground text-xs transition-colors hover:bg-neutral-dark hover:text-text-color"
-      onClick={handleCopy}
-      title={label}
-      type="button"
-    >
+    <Button onClick={handleCopy} size="sm" title={label} variant="outline">
       {copied ? (
-        <Check className="h-3.5 w-3.5 text-green-400" />
+        <Check className="h-3 w-3 text-green-400" />
       ) : (
-        <Copy className="h-3.5 w-3.5" />
+        <Copy className="h-3 w-3" />
       )}
       {copied ? "Copied!" : label}
-    </button>
+    </Button>
   );
 }
 
@@ -151,51 +121,6 @@ export function getToolsForSelectionGrid(
   return tools.filter((tool) => selectedTools.has(tool.name));
 }
 
-function CopyActions({
-  scopesAsText,
-  secretsAsText,
-  selectedToolNames,
-  selectedToolsAsJson,
-  showAdvanced,
-  toolNamesAsText,
-  requiredScopes,
-  requiredSecrets,
-}: {
-  scopesAsText: string;
-  secretsAsText: string;
-  selectedToolNames: string[];
-  selectedToolsAsJson: string;
-  showAdvanced: boolean;
-  toolNamesAsText: string;
-  requiredScopes: string[];
-  requiredSecrets: string[];
-}) {
-  if (selectedToolNames.length === 0) {
-    return null;
-  }
-
-  return (
-    <div className="mb-4 flex flex-wrap gap-2">
-      <CopyButton
-        label="Copy tool names"
-        text={toolNamesAsText}
-        variant="small"
-      />
-      <CopyButton
-        label="Copy tools JSON"
-        text={selectedToolsAsJson}
-        variant="small"
-      />
-      {showAdvanced && requiredScopes.length > 0 ? (
-        <CopyButton label="Copy scopes" text={scopesAsText} variant="small" />
-      ) : null}
-      {requiredSecrets.length > 0 ? (
-        <CopyButton label="Copy secrets" text={secretsAsText} variant="small" />
-      ) : null}
-    </div>
-  );
-}
-
 function RequirementsPanel({
   onToggleAdvanced,
   requiredScopes,
@@ -211,7 +136,7 @@ function RequirementsPanel({
 }) {
   if (selectedToolNames.length === 0) {
     return (
-      <div className="rounded-lg border border-neutral-dark-high/50 bg-neutral-dark/30 p-4">
+      <div className="rounded-lg bg-neutral-dark/30 p-4">
         <h4 className="mb-3 font-semibold text-muted-foreground text-sm uppercase tracking-wider">
           Requirements
         </h4>
@@ -222,67 +147,66 @@ function RequirementsPanel({
     );
   }
 
+  const hasScopes = requiredScopes.length > 0;
+  const hasSecrets = requiredSecrets.length > 0;
+  const noRequirements = !(hasScopes || hasSecrets);
+
   return (
-    <div className="rounded-lg border border-neutral-dark-high/50 bg-neutral-dark/30 p-4">
+    <div className="rounded-lg bg-neutral-dark/30 p-4">
       <h4 className="mb-3 font-semibold text-muted-foreground text-sm uppercase tracking-wider">
         Requirements
       </h4>
 
-      {/* Scopes indicator - only shown when advanced is enabled and there are scopes */}
-      {showAdvanced && requiredScopes.length > 0 ? (
+      {/* No requirements case */}
+      {noRequirements && (
+        <p className="text-muted-foreground/70 text-sm">
+          No authentication required for selected tools
+        </p>
+      )}
+
+      {/* OAuth scopes - always show count when present */}
+      {hasScopes && (
         <div className="mb-3 flex items-center gap-2">
-          <ShieldCheck className="h-4 w-4 text-red-400" />
-          <span className="text-sm text-text-color">
+          <ShieldCheck className="h-4 w-4 text-red-600 dark:text-red-400" />
+          <span className="text-sm text-foreground">
             {requiredScopes.length} OAuth scope
             {requiredScopes.length > 1 ? "s" : ""} required
           </span>
         </div>
-      ) : null}
+      )}
 
-      {/* Secrets - always show the actual secret names */}
-      <div className="flex items-start gap-2">
-        <KeyRound
-          className={`mt-0.5 h-4 w-4 shrink-0 ${requiredSecrets.length > 0 ? "text-amber-400" : "text-muted-foreground/50"}`}
-        />
-        {requiredSecrets.length > 0 ? (
+      {/* Secrets - only show if there are secrets */}
+      {hasSecrets && (
+        <div className="flex items-start gap-2">
+          <KeyRound className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm text-text-color">Secrets:</span>
+            <span className="text-sm text-foreground">Secrets:</span>
             {requiredSecrets.map((secret) => (
               <code
-                className="rounded-md border border-amber-400/30 bg-amber-500/10 px-2 py-0.5 text-amber-300 text-xs"
+                className="font-mono text-amber-600 dark:text-amber-300 text-xs"
                 key={secret}
               >
                 {secret}
               </code>
             ))}
           </div>
-        ) : (
-          <span className="text-muted-foreground/70 text-sm">
-            No secrets required
-          </span>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Show OAuth Scopes Toggle - inside the box, only when there are scopes */}
-      {requiredScopes.length > 0 ? (
-        <div className="mt-3 border-neutral-dark-high/30 border-t pt-3">
-          <button
-            className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs transition-colors ${
-              showAdvanced
-                ? "border-brand-accent/40 bg-brand-accent/10 text-brand-accent"
-                : "border-neutral-dark-high/60 bg-neutral-dark/40 text-muted-foreground hover:bg-neutral-dark/60"
-            }`}
+      {/* Show OAuth Scopes Toggle - only when there are scopes */}
+      {hasScopes && (
+        <div className="mt-3 pt-3">
+          <Button
             onClick={onToggleAdvanced}
+            size="sm"
             title="Show OAuth requirements (scopes)"
-            type="button"
+            variant={showAdvanced ? "default" : "outline"}
           >
             <ShieldCheck className="h-3 w-3" />
-            {showAdvanced
-              ? "Hide OAuth requirements"
-              : "Show OAuth requirements"}
-          </button>
+            {showAdvanced ? "Hide OAuth details" : "Show OAuth details"}
+          </Button>
         </div>
-      ) : null}
+      )}
     </div>
   );
 }
@@ -305,21 +229,21 @@ function OAuthScopesDetails({
   }
 
   return (
-    <div className="mt-4 rounded-lg border border-red-400/20 bg-red-500/5 p-4">
+    <div className="mt-4 rounded-lg bg-red-500/5 p-4">
       <div className="mb-3 flex items-center justify-between">
         <h4 className="flex items-center gap-2 font-semibold text-red-300/80 text-sm uppercase tracking-wider">
           <ShieldCheck className="h-4 w-4" />
           Required OAuth scopes
-          <span className="rounded-full bg-red-500/20 px-2 py-0.5 font-normal text-red-300 text-xs normal-case">
-            {requiredScopes.length}
+          <span className="font-normal text-red-300 text-xs normal-case">
+            ({requiredScopes.length})
           </span>
         </h4>
-        <CopyButton label="Copy scopes" text={scopesAsText} variant="small" />
+        <CopyButton label="Copy scopes" text={scopesAsText} />
       </div>
       <div className="flex flex-wrap gap-2">
         {requiredScopes.map((scope) => (
           <code
-            className="max-w-full break-all rounded-md border border-red-400/30 bg-red-500/10 px-2 py-1 text-red-300 text-xs"
+            className="max-w-full break-all font-mono text-red-300 text-xs"
             key={scope}
             title={scope}
           >
@@ -463,49 +387,41 @@ export default function ScopePicker({
   );
 
   return (
-    <div className="my-6 overflow-hidden rounded-xl border border-neutral-dark-high/50 bg-neutral-dark/20">
+    <div className="my-6 overflow-hidden rounded-xl bg-neutral-dark/20">
       {/* Header */}
-      <div className="border-neutral-dark-high/50 border-b bg-neutral-dark/40 px-4 py-3">
+      <div className="bg-neutral-dark/40 px-4 py-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h3 className="flex items-center gap-2 font-semibold text-sm text-text-color">
+          <h3 className="flex items-center gap-2 font-semibold text-sm text-foreground">
             <Wrench className="h-4 w-4 text-muted-foreground" />
             Selected tools
             {selectedToolNames.length > 0 && (
-              <span className="rounded-full bg-brand-accent/20 px-2 py-0.5 text-brand-accent text-xs">
+              <span className="text-muted-foreground text-xs">
                 {selectedToolNames.length} of {tools.length}
               </span>
             )}
           </h3>
           <div className="flex items-center gap-2">
-            <button
+            <Button
               aria-pressed={showUnselectedTools}
-              className={`rounded-md border px-2.5 py-1 text-xs transition-colors ${
-                showUnselectedTools
-                  ? "border-brand-accent/30 bg-brand-accent/10 text-brand-accent hover:bg-brand-accent/20"
-                  : "border-neutral-dark-high bg-neutral-dark/60 text-muted-foreground hover:bg-neutral-dark"
-              }`}
               onClick={() => {
                 setShowUnselectedTools((current) => !current);
                 setPage(1);
               }}
-              type="button"
+              size="sm"
+              variant={showUnselectedTools ? "default" : "outline"}
             >
               {showUnselectedTools ? "Show selected only" : "Show all tools"}
-            </button>
-            <button
-              className="rounded-md border border-brand-accent/30 bg-brand-accent/10 px-2.5 py-1 text-brand-accent text-xs transition-colors hover:bg-brand-accent/20"
-              onClick={selectAll}
-              type="button"
-            >
-              Select all
-            </button>
-            <button
-              className="rounded-md border border-neutral-dark-high bg-neutral-dark/60 px-2.5 py-1 text-muted-foreground text-xs transition-colors hover:bg-neutral-dark"
-              onClick={clearAll}
-              type="button"
-            >
-              Clear
-            </button>
+            </Button>
+            {selectedToolNames.length < tools.length && (
+              <Button onClick={selectAll} size="sm" variant="outline">
+                Select all
+              </Button>
+            )}
+            {selectedToolNames.length > 0 && (
+              <Button onClick={clearAll} size="sm" variant="ghost">
+                Deselect all
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -513,7 +429,7 @@ export default function ScopePicker({
       {/* Tools Grid */}
       <div className="p-4">
         {pageCount > 1 && (
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-neutral-dark-high/50 bg-neutral-dark/30 px-3 py-2">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-lg bg-neutral-dark/30 px-3 py-2">
             <div className="flex items-center gap-2">
               <select
                 aria-label="Tools per page"
@@ -577,10 +493,10 @@ export default function ScopePicker({
                     type="checkbox"
                   />
                   <div className="relative flex-1 overflow-hidden">
-                    <span className="block truncate text-sm text-text-color group-hover:opacity-0">
+                    <span className="block truncate text-sm text-foreground group-hover:opacity-0">
                       {tool.name}
                     </span>
-                    <span className="pointer-events-none absolute inset-0 hidden whitespace-nowrap text-sm text-text-color group-hover:block group-hover:animate-[tool-name-marquee_6s_linear_infinite]">
+                    <span className="pointer-events-none absolute inset-0 hidden whitespace-nowrap text-sm text-foreground group-hover:block group-hover:animate-[tool-name-marquee_6s_linear_infinite]">
                       {tool.name}
                     </span>
                   </div>
@@ -603,8 +519,8 @@ export default function ScopePicker({
             })}
           </div>
         ) : (
-          <div className="mb-4 rounded-lg border border-neutral-dark-high/50 bg-neutral-dark/30 p-4">
-            <p className="text-sm text-text-color">No tools selected.</p>
+          <div className="mb-4 rounded-lg bg-neutral-dark/30 p-4">
+            <p className="text-sm text-foreground">No tools selected.</p>
             {!showUnselectedTools && (
               <p className="mt-1 text-muted-foreground text-xs">
                 Click &quot;Show all tools&quot; to add tools.
@@ -614,16 +530,18 @@ export default function ScopePicker({
         )}
 
         {/* Copy Actions */}
-        <CopyActions
-          requiredScopes={requiredScopes}
-          requiredSecrets={requiredSecrets}
-          scopesAsText={scopesAsText}
-          secretsAsText={secretsAsText}
-          selectedToolNames={selectedToolNames}
-          selectedToolsAsJson={selectedToolsAsJson}
-          showAdvanced={showAdvanced}
-          toolNamesAsText={toolNamesAsText}
-        />
+        {selectedToolNames.length > 0 && (
+          <div className="mb-4 flex flex-wrap gap-2">
+            <CopyButton label="Copy tool names" text={toolNamesAsText} />
+            <CopyButton label="Copy tools JSON" text={selectedToolsAsJson} />
+            {showAdvanced && requiredScopes.length > 0 && (
+              <CopyButton label="Copy scopes" text={scopesAsText} />
+            )}
+            {requiredSecrets.length > 0 && (
+              <CopyButton label="Copy secrets" text={secretsAsText} />
+            )}
+          </div>
+        )}
 
         {/* Requirements Summary */}
         <RequirementsPanel

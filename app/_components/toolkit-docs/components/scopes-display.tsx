@@ -31,7 +31,7 @@ function ScopesInline({ scopes }: { scopes: string[] }) {
     <div className="flex flex-wrap gap-2">
       {scopes.map((scope) => (
         <code
-          className="max-w-[220px] truncate rounded-md border border-red-400/30 bg-red-500/10 px-2 py-1 text-red-300 text-xs"
+          className="max-w-[220px] truncate font-mono text-red-300 text-xs"
           dir="rtl"
           key={scope}
           title={scope}
@@ -52,7 +52,7 @@ function ScopesList({ scopes }: { scopes: string[] }) {
     <div className="flex flex-wrap gap-2">
       {scopes.map((scope) => (
         <code
-          className="max-w-full break-all rounded-md border border-red-400/30 bg-red-500/10 px-2.5 py-1.5 text-red-300 text-xs"
+          className="max-w-full break-all font-mono text-red-300 text-xs"
           key={scope}
           title={scope}
         >
@@ -78,9 +78,9 @@ export function ScopesDisplay({
   if (variant === "callout") {
     const heading = title?.trim();
     return (
-      <div className="mt-3 rounded-xl border border-neutral-dark-high/40 bg-neutral-dark/30 p-4">
+      <div className="mt-3 rounded-xl bg-neutral-dark/30 p-4">
         {heading && (
-          <div className="mb-3 flex items-center gap-2 font-semibold text-sm text-text-color">
+          <div className="mb-3 flex items-center gap-2 font-semibold text-sm text-foreground">
             <ShieldCheck className="h-4 w-4 text-muted-foreground" />
             {heading}
           </div>

@@ -146,7 +146,7 @@ export function ToolkitHeader({
 
   return (
     <div
-      className="mt-6 mb-8 overflow-hidden rounded-xl border border-neutral-dark-high bg-gradient-to-br from-neutral-dark to-neutral-dark/60 shadow-lg"
+      className="mt-4 mb-6 overflow-hidden rounded-xl bg-neutral-dark/40"
       data-testid="toolkit-header"
     >
       <div className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center">
@@ -164,7 +164,7 @@ export function ToolkitHeader({
 
           {/* Description */}
           {description && (
-            <p className="text-base text-text-color/90 leading-relaxed">
+            <p className="text-base text-foreground leading-relaxed">
               {description}
             </p>
           )}
@@ -174,14 +174,14 @@ export function ToolkitHeader({
             {/* Author */}
             <div className="flex items-center gap-2">
               <span className="text-muted-foreground">Author:</span>
-              <span className="font-medium text-text-color">{author}</span>
+              <span className="font-medium text-foreground">{author}</span>
             </div>
 
             {/* Version */}
             {version && (
               <div className="flex items-center gap-2">
                 <span className="text-muted-foreground">Version:</span>
-                <code className="rounded bg-neutral-dark-medium px-1.5 py-0.5 font-medium text-xs">
+                <code className="font-mono text-foreground text-xs">
                   {version}
                 </code>
               </div>
@@ -190,40 +190,30 @@ export function ToolkitHeader({
             {/* Auth info */}
             <div className="flex items-start gap-2 sm:col-span-2">
               <span className="text-muted-foreground">Auth:</span>
-              <span className="font-medium text-text-color">{authNode}</span>
+              <span className="font-medium text-foreground">{authNode}</span>
             </div>
           </div>
 
           {/* Tool Stats */}
           {toolStats && (
-            <div className="flex flex-wrap items-center gap-4 pt-3">
+            <div className="flex flex-wrap items-center gap-4 pt-3 text-sm">
               {/* Total tools */}
-              <div className="flex items-center gap-2.5 rounded-full border border-neutral-dark-high/60 bg-neutral-dark/50 px-4 py-2 shadow-sm">
-                <div className="flex h-7 w-7 items-center justify-center rounded-full bg-brand-accent/20">
-                  <Wrench className="h-4 w-4 text-brand-accent" />
-                </div>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="font-semibold text-lg text-text-color">
-                    {toolStats.total}
-                  </span>
-                  <span className="text-muted-foreground text-sm">tools</span>
-                </div>
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Wrench className="h-4 w-4" />
+                <span className="font-medium text-foreground">
+                  {toolStats.total}
+                </span>
+                <span>tools</span>
               </div>
 
               {/* Tools with secrets */}
               {toolStats.withSecrets > 0 && (
-                <div className="flex items-center gap-2.5 rounded-full border border-amber-400/40 bg-amber-500/10 px-4 py-2 shadow-sm">
-                  <div className="flex h-7 w-7 items-center justify-center rounded-full bg-amber-500/20">
-                    <KeyRound className="h-4 w-4 text-amber-400" />
-                  </div>
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="font-semibold text-amber-300 text-lg">
-                      {toolStats.withSecrets}
-                    </span>
-                    <span className="text-amber-300/70 text-sm">
-                      require secrets
-                    </span>
-                  </div>
+                <div className="flex items-center gap-2">
+                  <KeyRound className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                  <span className="font-medium text-foreground">
+                    {toolStats.withSecrets}
+                  </span>
+                  <span className="text-muted-foreground">require secrets</span>
                 </div>
               )}
             </div>
@@ -233,7 +223,7 @@ export function ToolkitHeader({
 
       {/* PyPI Badges */}
       {id && (
-        <div className="border-neutral-dark-high/50 border-t bg-neutral-dark/20 px-6 py-3">
+        <div className="bg-neutral-dark/20 px-6 py-3">
           <div className="flex flex-wrap justify-center gap-2">
             {PYPI_BADGES.map((badge) => (
               <a

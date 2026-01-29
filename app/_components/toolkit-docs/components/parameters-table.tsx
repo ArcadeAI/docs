@@ -1,7 +1,5 @@
 "use client";
 
-import { CheckCircle2 } from "lucide-react";
-
 import type { ParametersTableProps, ToolParameter } from "../types";
 
 /**
@@ -39,7 +37,7 @@ export function ParametersTable({
 }: ParametersTableProps) {
   if (!parameters || parameters.length === 0) {
     return (
-      <div className="rounded-lg border border-neutral-dark-high/40 bg-neutral-dark/30 p-4 text-center">
+      <div className="rounded-lg bg-neutral-dark/30 p-4 text-center">
         <p className="text-muted-foreground/70 text-sm">
           No parameters required.
         </p>
@@ -48,7 +46,7 @@ export function ParametersTable({
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-neutral-dark-high/50 shadow-sm">
+    <div className="overflow-hidden rounded-xl bg-neutral-dark/20">
       <table className="w-full border-collapse text-sm">
         <thead>
           <tr className="bg-gradient-to-r from-neutral-dark to-neutral-dark/80">
@@ -72,43 +70,39 @@ export function ParametersTable({
 
             return (
               <tr
-                className={
-                  index % 2 === 0 ? "bg-neutral-dark/20" : "bg-transparent"
-                }
+                className={`transition-colors ${
+                  index % 2 === 0
+                    ? "bg-muted/30 dark:bg-neutral-dark/40"
+                    : "bg-transparent"
+                } hover:bg-muted/50 dark:hover:bg-neutral-dark/50`}
                 key={param.name}
               >
                 <td className="px-4 py-3.5">
-                  <div className="flex items-center gap-2">
-                    {param.required && (
-                      <span
-                        className="h-2 w-2 shrink-0 rounded-full bg-red-400"
-                        title="Required"
-                      />
-                    )}
-                    <code className="font-medium text-text-color">
-                      {param.name}
-                    </code>
-                  </div>
+                  <code className="font-medium text-foreground">
+                    {param.name}
+                  </code>
                 </td>
                 <td className="px-4 py-3.5">
-                  <code className="rounded-md bg-neutral-dark-medium px-2 py-1 text-muted-foreground text-xs">
+                  <code className="font-mono text-muted-foreground text-xs">
                     {formatParameterType(param)}
                   </code>
                 </td>
                 <td className="px-4 py-3.5 text-center">
                   {param.required ? (
-                    <CheckCircle2 className="mx-auto h-4 w-4 text-red-400" />
+                    <span className="text-red-400 text-xs">Required</span>
                   ) : (
-                    <span className="text-muted-foreground/50">—</span>
+                    <span className="text-muted-foreground/50 text-xs">
+                      Optional
+                    </span>
                   )}
                 </td>
-                <td className="px-4 py-3.5 text-sm text-text-color/80">
+                <td className="px-4 py-3.5 text-sm text-foreground">
                   {param.description ?? "No description provided."}
                   {enumValues.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       {enumValues.map((value) => {
                         const chip = (
-                          <code className="rounded-md border border-neutral-dark-high bg-neutral-dark/60 px-1.5 py-0.5 text-xs">
+                          <code className="font-mono text-muted-foreground text-xs">
                             {value}
                           </code>
                         );

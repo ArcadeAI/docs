@@ -393,8 +393,6 @@ export type DynamicCodeBlockProps = {
   codeExample: ToolCodeExample;
   /** Languages to generate (defaults to both) */
   languages?: ("python" | "javascript")[];
-  /** Tab label override */
-  tabLabel?: string;
 };
 
 /**

@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@arcadeai/design-system";
 import { ArrowDown, ArrowUp, KeyRound } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
@@ -65,25 +66,27 @@ function ScrollToButtons() {
 
   return (
     <div className="fixed right-6 bottom-6 z-50 flex flex-col gap-2 xl:right-80 2xl:right-[22rem]">
-      <button
+      <Button
         aria-label="Scroll to top"
-        className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-dark-high bg-neutral-dark/90 text-muted-foreground shadow-lg backdrop-blur-sm transition-all hover:bg-neutral-dark hover:text-text-color"
+        className="h-10 w-10 rounded-full shadow-lg backdrop-blur-sm"
         onClick={scrollToTop}
+        size="sm"
         title="Scroll to top"
-        type="button"
+        variant="outline"
       >
         <ArrowUp className="h-5 w-5" />
-      </button>
+      </Button>
       {!atBottom && (
-        <button
+        <Button
           aria-label="Scroll to bottom"
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-neutral-dark-high bg-neutral-dark/90 text-muted-foreground shadow-lg backdrop-blur-sm transition-all hover:bg-neutral-dark hover:text-text-color"
+          className="h-10 w-10 rounded-full shadow-lg backdrop-blur-sm"
           onClick={scrollToBottom}
+          size="sm"
           title="Scroll to bottom"
-          type="button"
+          variant="outline"
         >
           <ArrowDown className="h-5 w-5" />
-        </button>
+        </Button>
       )}
     </div>
   );
@@ -167,7 +170,7 @@ function BreadcrumbBar({
         {toTitleCaseCategory(category)}
       </span>
       <span className="text-muted-foreground/40">›</span>
-      <span className="font-medium text-text-color">{label}</span>
+      <span className="font-medium text-foreground">{label}</span>
     </nav>
   );
 }
@@ -277,7 +280,7 @@ function ToolsOnThisPage({ tools }: { tools: ToolDefinition[] }) {
     <aside className="fixed top-28 right-0 hidden h-[calc(100vh-7rem)] w-72 flex-col border-neutral-dark-high/30 border-l bg-neutral-dark/40 xl:flex 2xl:w-80">
       {/* Fixed header section */}
       <div className="shrink-0 border-neutral-dark-high/20 border-b px-6 pt-6 pb-4">
-        <h2 className="font-semibold text-sm text-text-color">On this page</h2>
+        <h2 className="font-semibold text-sm text-foreground">On this page</h2>
         <div className="mt-4 space-y-3">
           <input
             aria-label="Search tools on this page"
@@ -530,7 +533,7 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
       <section className="scroll-mt-20" id={TOOLKIT_PAGE_OVERVIEW_LINK.id}>
         <BreadcrumbBar category={data.metadata.category} label={data.label} />
         <PageActionsBar data={data} />
-        <h1 className="mb-6 font-bold text-4xl text-text-color tracking-tight">
+        <h1 className="mb-6 font-bold text-4xl text-foreground tracking-tight">
           {data.label}
         </h1>
         <DocumentationChunkRenderer
@@ -569,7 +572,7 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
         />
 
         {data.summary && (
-          <div className="prose prose-sm prose-invert mt-6 max-w-none text-text-color/90">
+          <div className="prose prose-sm dark:prose-invert mt-6 max-w-none text-foreground">
             <ReactMarkdown>{data.summary}</ReactMarkdown>
           </div>
         )}
@@ -628,8 +631,8 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
             </svg>
           </span>
           Available tools
-          <span className="ml-2 rounded-full bg-neutral-dark-medium px-3 py-1 font-normal text-muted-foreground text-sm">
-            {tools.length}
+          <span className="ml-2 text-muted-foreground text-sm">
+            ({tools.length})
           </span>
         </h2>
       </div>

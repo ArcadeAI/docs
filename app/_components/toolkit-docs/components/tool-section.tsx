@@ -1,18 +1,8 @@
 "use client";
 
 import { Button } from "@arcadeai/design-system";
-import {
-  Check,
-  Copy,
-  ExternalLink,
-  KeyRound,
-  Lock,
-  ShieldCheck,
-  Wrench,
-} from "lucide-react";
+import { Check, Copy, KeyRound, ShieldCheck } from "lucide-react";
 import { useCallback, useState } from "react";
-import { useOrySession } from "../../../_lib/ory-session-context";
-import { getDashboardUrl } from "../../dashboard-link";
 import type { ToolSectionProps } from "../types";
 import { toToolAnchorId } from "./AvailableToolsTable";
 import { DynamicCodeBlock } from "./DynamicCodeBlock";
@@ -57,11 +47,11 @@ function CopyToolButton({ tool }: { tool: ToolSectionProps["tool"] }) {
   }, [tool]);
 
   return (
-    <button
-      className="inline-flex items-center gap-1.5 rounded-lg border border-neutral-dark-high bg-neutral-dark/60 px-3 py-1.5 font-medium text-muted-foreground text-xs transition-colors hover:bg-neutral-dark hover:text-text-color"
+    <Button
       onClick={handleCopy}
+      size="sm"
       title="Copy tool definition as JSON"
-      type="button"
+      variant="outline"
     >
       {copied ? (
         <Check className="h-3.5 w-3.5 text-green-400" />
@@ -69,7 +59,7 @@ function CopyToolButton({ tool }: { tool: ToolSectionProps["tool"] }) {
         <Copy className="h-3.5 w-3.5" />
       )}
       {copied ? "Copied!" : "Copy definition"}
-    </button>
+    </Button>
   );
 }
 
@@ -87,11 +77,11 @@ function CopyScopesButton({ scopes }: { scopes: string[] }) {
   }, [scopes]);
 
   return (
-    <button
-      className="inline-flex items-center gap-1 rounded-md border border-red-400/30 bg-red-500/10 px-2 py-1 text-red-300 text-xs transition-colors hover:bg-red-500/20"
+    <Button
       onClick={handleCopy}
+      size="sm"
       title="Copy scopes list"
-      type="button"
+      variant="outline"
     >
       {copied ? (
         <Check className="h-3 w-3 text-green-400" />
@@ -99,7 +89,7 @@ function CopyScopesButton({ scopes }: { scopes: string[] }) {
         <Copy className="h-3 w-3" />
       )}
       {copied ? "Copied!" : "Copy scopes"}
-    </button>
+    </Button>
   );
 }
 
@@ -117,6 +107,7 @@ function ToolHeaderSection({
   onToggleSelection,
   hasScopes,
   hasSecrets,
+  anchorId,
 }: {
   tool: ToolSectionProps["tool"];
   showSelection: boolean;
@@ -124,14 +115,19 @@ function ToolHeaderSection({
   onToggleSelection?: (toolName: string) => void;
   hasScopes: boolean;
   hasSecrets: boolean;
+  anchorId: string;
 }) {
   return (
     <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
-      <div className="flex items-center gap-3">
-        <div className="rounded-lg bg-brand-accent/10 p-2">
-          <Wrench className="h-5 w-5 text-brand-accent" />
-        </div>
-        <h3 className="font-semibold text-text-color text-xl">
+      <div className="group flex items-center gap-2">
+        <a
+          aria-label={`Link to ${tool.qualifiedName}`}
+          className="text-muted-foreground/40 opacity-0 transition-opacity group-hover:opacity-100 hover:text-brand-accent"
+          href={`#${anchorId}`}
+        >
+          #
+        </a>
+        <h3 className="font-semibold text-foreground text-xl">
           {tool.qualifiedName}
         </h3>
       </div>
@@ -174,7 +170,7 @@ function ToolDescriptionSection({
         position="before"
       />
       {showDescription && (
-        <p className="text-sm text-text-color/90 leading-relaxed">
+        <p className="text-sm text-foreground leading-relaxed">
           {tool.description ?? "No description provided."}
         </p>
       )}
@@ -243,15 +239,15 @@ function ToolRequirementsSection({
 }) {
   const secretsInfoList = secretsInfo ?? [];
   return (
-    <div className="mt-6 rounded-lg border border-neutral-dark-high/40 bg-neutral-dark/30 p-4">
+    <div className="mt-6 rounded-lg bg-neutral-dark/30 p-4">
       <h4 className="mb-3 font-semibold text-muted-foreground text-sm uppercase tracking-wider">
         Requirements
       </h4>
 
       {showAdvanced && hasScopes && (
         <div className="mb-3 flex items-center gap-2">
-          <ShieldCheck className="h-4 w-4 text-red-400" />
-          <span className="text-sm text-text-color">
+          <ShieldCheck className="h-4 w-4 text-red-600 dark:text-red-400" />
+          <span className="text-sm text-foreground">
             Requires {scopes.length} OAuth scope{scopes.length > 1 ? "s" : ""}
           </span>
         </div>
@@ -263,24 +259,23 @@ function ToolRequirementsSection({
         />
         {hasSecrets ? (
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm text-text-color">Secrets:</span>
+            <span className="text-sm text-foreground">Secrets:</span>
             {secretsInfoList.length > 0
               ? secretsInfoList.map((secret) => (
                   <span
-                    className="inline-flex items-center gap-1 rounded-md border border-amber-400/30 bg-amber-500/10 px-2 py-0.5 text-xs"
+                    className="font-mono text-amber-600 dark:text-amber-300 text-xs"
                     key={secret.name}
                   >
-                    <code className="text-amber-300">{secret.name}</code>
-                    <span className="text-amber-300/60">({secret.type})</span>
+                    {secret.name}
                   </span>
                 ))
               : tool.secrets.map((secret) => (
-                  <code
-                    className="rounded-md border border-amber-400/30 bg-amber-500/10 px-2 py-0.5 text-amber-300 text-xs"
+                  <span
+                    className="font-mono text-amber-600 dark:text-amber-300 text-xs"
                     key={secret}
                   >
                     {secret}
-                  </code>
+                  </span>
                 ))}
           </div>
         ) : (
@@ -292,21 +287,17 @@ function ToolRequirementsSection({
 
       {hasScopes && (
         <div className="mt-3 border-neutral-dark-high/30 border-t pt-3">
-          <button
-            className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs transition-colors ${
-              showAdvanced
-                ? "border-brand-accent/40 bg-brand-accent/10 text-brand-accent"
-                : "border-neutral-dark-high/60 bg-neutral-dark/40 text-muted-foreground hover:bg-neutral-dark/60"
-            }`}
+          <Button
             onClick={onToggleAdvanced}
+            size="sm"
             title="Show OAuth requirements (scopes)"
-            type="button"
+            variant={showAdvanced ? "default" : "outline"}
           >
             <ShieldCheck className="h-3 w-3" />
             {showAdvanced
               ? "Hide OAuth requirements"
               : "Show OAuth requirements"}
-          </button>
+          </Button>
         </div>
       )}
     </div>
@@ -331,7 +322,7 @@ function ToolScopesDetailsSection({
   }
 
   return (
-    <div className="mt-4 rounded-lg border border-red-400/20 bg-red-500/5 p-4">
+    <div className="mt-4 rounded-lg bg-red-500/5 p-4">
       <div className="mb-3 flex items-center justify-between">
         <h4 className="flex items-center gap-2 font-semibold text-red-300/80 text-sm uppercase tracking-wider">
           <ShieldCheck className="h-4 w-4" />
@@ -377,15 +368,15 @@ function ToolOutputSection({
         position="before"
       />
       {showOutput && (
-        <div className="rounded-lg border border-neutral-dark-high/40 bg-neutral-dark/30 p-4 text-sm">
+        <div className="rounded-lg bg-neutral-dark/30 p-4 text-sm">
           {tool.output ? (
             <div className="flex items-center gap-3">
               <span className="text-muted-foreground">Type:</span>
-              <code className="rounded-md bg-neutral-dark-medium px-2 py-1 font-medium text-text-color text-xs">
+              <code className="font-mono text-foreground text-xs">
                 {tool.output.type}
               </code>
               {tool.output.description && (
-                <span className="text-text-color/80">
+                <span className="text-foreground">
                   — {tool.output.description}
                 </span>
               )}
@@ -407,50 +398,6 @@ function ToolOutputSection({
         location="output"
         position="after"
       />
-    </div>
-  );
-}
-
-function ToolTryItSection({
-  isLoggedIn,
-  actionHint,
-  executeUrl,
-  getActionHref,
-  getActionTitle,
-}: {
-  isLoggedIn: boolean;
-  actionHint: string;
-  executeUrl: string;
-  getActionHref: (href: string) => string;
-  getActionTitle: (label: string) => string;
-}) {
-  return (
-    <div className="mt-6 overflow-hidden rounded-xl border border-brand-accent/20 bg-gradient-to-r from-brand-accent/5 to-transparent">
-      <div className="flex flex-wrap items-center justify-between gap-4 p-4">
-        <div>
-          <h4 className="font-semibold text-text-color">Try it in Arcade</h4>
-          <p className="mt-0.5 text-muted-foreground text-xs">{actionHint}</p>
-        </div>
-        <Button
-          asChild
-          size="sm"
-          variant={isLoggedIn ? "default" : "secondary"}
-        >
-          <a
-            href={getActionHref(executeUrl)}
-            rel="noreferrer"
-            target="_blank"
-            title={getActionTitle("Run on Arcade dashboard")}
-          >
-            {isLoggedIn ? (
-              <ExternalLink className="mr-2 h-4 w-4" />
-            ) : (
-              <Lock className="mr-2 h-4 w-4" />
-            )}
-            Run on Arcade dashboard
-          </a>
-        </Button>
-      </div>
     </div>
   );
 }
@@ -500,27 +447,13 @@ export function ToolSection({
     "output"
   );
 
-  const { email, loading } = useOrySession();
-  const isLoggedIn = !loading && !!email;
-  const loginUrl = getDashboardUrl();
-  const executeUrl = getDashboardUrl(
-    `playground/execute?toolId=${encodeURIComponent(tool.qualifiedName)}`
-  );
-
-  const getActionHref = (href: string) => (isLoggedIn ? href : loginUrl);
-  const getActionTitle = (label: string) =>
-    isLoggedIn ? label : "Sign in to use this in the Arcade dashboard";
-
-  const actionHint = isLoggedIn
-    ? "Run this tool directly in the Arcade dashboard."
-    : "Sign in to run tools. You'll be redirected to the dashboard login.";
-
   return (
     <section
-      className="mt-10 scroll-mt-20 rounded-xl border border-neutral-dark-high/40 bg-gradient-to-b from-neutral-dark/30 to-transparent p-6"
+      className="mt-10 scroll-mt-20 rounded-xl bg-neutral-dark/20 p-6 border-neutral-dark-high/20 border-b last:border-b-0"
       id={anchorId}
     >
       <ToolHeaderSection
+        anchorId={anchorId}
         hasScopes={hasScopes}
         hasSecrets={hasSecrets}
         isSelected={isSelected}
@@ -547,13 +480,6 @@ export function ToolSection({
         tool={tool}
       />
       <ToolOutputSection showOutput={showOutput} tool={tool} />
-      <ToolTryItSection
-        actionHint={actionHint}
-        executeUrl={executeUrl}
-        getActionHref={getActionHref}
-        getActionTitle={getActionTitle}
-        isLoggedIn={isLoggedIn}
-      />
       <ToolExampleSection tool={tool} />
     </section>
   );
