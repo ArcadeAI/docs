@@ -7,8 +7,8 @@ import Image from "next/image";
 import { Callout, Steps, Tabs } from "nextra/components";
 import { SignupLink } from "@/app/_components/analytics";
 
-export const REMOTE_SETUP_WIDTH = 557/1.5;
-export const REMOTE_SETUP_HEIGHT = 773/1.5;
+export const REMOTE_SETUP_WIDTH = 557 / 1.5;
+export const REMOTE_SETUP_HEIGHT = 773 / 1.5;
 
 # Add remote MCP servers
 
@@ -40,7 +40,7 @@ Register a remote MCP server and use its tools in gateways and SDKs.
 
 ## Why use MCP Gateways for Remote MCP Servers
 
-MCP Gateways let you manage and filter tools in one place, so your agent or team uses a curated set of tools across clients.  This is especially useful for remote MCP servers, where you may not have control over the tools available.  By using MCP Gateways, you can select the tools you want to use and hide the ones you don't want to use.
+MCP Gateways let you manage and filter tools in one place, so your agent or team uses a curated set of tools across clients. This is especially useful for remote MCP servers, where you may not have control over the tools available. By using MCP Gateways, you can select the tools you want to use and hide the ones you don't want to use.
 
 ## Add the remote server to your project
 
@@ -54,8 +54,13 @@ Go to the [MCP servers dashboard](https://api.arcade.dev/dashboard/servers) for 
 
 Arcade requires two fields for remote MCP servers:
 
-- **ID**: A unique, human-readable identifier (for example, `figma-mcp-server`)
-- **URI**: The public URL for your MCP server (for example, `https://mcp.figma.com/mcp`)
+- **ID**: A unique, human-readable identifier (for example, `render-mcp-server`)
+- **URI**: The public URL for your MCP server (for example, `https://mcp.render.com/mcp`)
+
+<Callout type="info">
+  Use the [MCP Debugger](https://mcpdebugger.dev) to verify the remote server's
+  MCP compliance before adding it to Arcade.
+</Callout>
 
 <Image
   alt={"Remote MCP server setup"}
@@ -67,7 +72,7 @@ Arcade requires two fields for remote MCP servers:
 
 ### Save and confirm the connection
 
-Create the server and confirm that Arcade lists the server tools in your project.  If the remote MCP server requires authentication, Arcade will prompt you to complete the OAuth flow.
+Create the server and confirm that Arcade lists the server tools in your project. If the remote MCP server requires authentication, Arcade will prompt you to complete the OAuth flow.
 
 Don't worry, we will always load the tools available per Arcade user, but we pre-load the list of tools so that you can filter them by your own criteria in your MCP Gateways.
 
@@ -89,7 +94,7 @@ Common settings include:
 Once the server is registered, its tools show up in the Playground for this project, as well as in the MCP Gateway tool picker.
 
 1. Create or edit an MCP Gateway in the [MCP Gateways dashboard](https://app.arcade.dev/mcp-gateways).
-2. Open **Select tools** and filter by your remote server ID.
+2. Open **Select tools** and filter by your remote server name.
 3. Choose the tools you want to expose through the gateway.
 
 ## Call remote tools from Arcade SDKs
@@ -105,8 +110,8 @@ from arcade import Arcade
 client = Arcade(api_key="ARCADE_API_KEY")
 
 result = client.tools.execute(
-    tool_name="figma-mcp-server.get_user_info",
-    input={"user_id": "user-123"},
+    tool_name="render-mcp-server.get_key_value",
+    input={"keyValueId": "foo-bar"},
     user_id="user-123",
 )
 
@@ -122,8 +127,8 @@ import { Arcade } from "@arcadeai/arcade";
 const client = new Arcade({ apiKey: "ARCADE_API_KEY" });
 
 const result = await client.tools.execute({
-  tool_name: "figma-mcp-server.get_user_info",
-  input: { user_id: "user-123" },
+  tool_name: "render-mcp-server.get_key_value",
+  input: { keyValueId: "foo-bar" },
   user_id: "user-123",
 });
 
@@ -136,7 +141,9 @@ console.log(result);
 ## Limitations and caveats
 
 <Callout type="warning">
-Remote servers must be reachable from Arcade and must support the Streamable HTTP(s) transport. If your server depends on non-HTTP MCP transports, Arcade cannot proxy it.
+  Remote servers must be reachable from Arcade and must support the Streamable
+  HTTP(s) transport. If your server depends on non-HTTP MCP transports, Arcade
+  cannot proxy it.
 </Callout>
 
 - If the remote server is offline, gateway and SDK calls will fail until it is reachable again.
