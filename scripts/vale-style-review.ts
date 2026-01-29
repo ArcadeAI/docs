@@ -394,12 +394,15 @@ function countLeadingWhitespace(line: string): number {
 
 // Count consecutive fence characters (backticks or tildes) at the start of a trimmed line
 // Returns both the count and the character type
-function countLeadingFenceChars(trimmedLine: string): { count: number; char: string } {
+function countLeadingFenceChars(trimmedLine: string): {
+  count: number;
+  char: string;
+} {
   const firstChar = trimmedLine[0];
   if (firstChar !== "`" && firstChar !== "~") {
     return { count: 0, char: "" };
   }
-  
+
   let count = 0;
   for (const char of trimmedLine) {
     if (char === firstChar) {
@@ -455,9 +458,7 @@ function getLinesInCodeBlocks(content: string): Set<number> {
 
       if (inCodeBlock) {
         linesInCodeBlocks.add(lineNum);
-        if (
-          isValidClosingFence(trimmedLine, fenceInfo, openingFenceInfo)
-        ) {
+        if (isValidClosingFence(trimmedLine, fenceInfo, openingFenceInfo)) {
           inCodeBlock = false;
           openingFenceInfo = { count: 0, char: "" };
         }
