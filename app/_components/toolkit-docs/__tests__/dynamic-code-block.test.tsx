@@ -3,7 +3,7 @@ import {
   buildToolInput,
   generateJavaScriptExample,
   generatePythonExample,
-} from "../components/DynamicCodeBlock";
+} from "../components/dynamic-code-block";
 import type { ToolCodeExample } from "../types";
 
 describe("DynamicCodeBlock helpers", () => {

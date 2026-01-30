@@ -12,9 +12,6 @@ export const meta: MetaRecord = {
   improve: {
     title: "Improve an existing toolkit",
   },
-  contribute: {
-    title: "Contribute to Arcade's tool catalog",
-  },
   "error-handling": {
     title: "Handle errors",
     href: "/guides/create-tools/error-handling",

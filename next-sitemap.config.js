@@ -3,4 +3,15 @@ export default {
   siteUrl: process.env.SITE_URL || "https://docs.arcade.dev",
   generateRobotsTxt: true,
   sitemapSize: 3000,
+  robotsTxtOptions: {
+    additionalSitemaps: [],
+    policies: [
+      {
+        userAgent: "*",
+        allow: "/",
+      },
+    ],
+    transformRobotsTxt: (_, robotsTxt) =>
+      `${robotsTxt}\n# https://docs.arcade.dev/llms.txt`,
+  },
 };

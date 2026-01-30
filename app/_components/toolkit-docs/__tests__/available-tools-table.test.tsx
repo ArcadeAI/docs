@@ -6,7 +6,7 @@ import {
   filterTools,
   handleSelectionButtonClick,
   toToolAnchorId,
-} from "../components/AvailableToolsTable";
+} from "../components/available-tools-table";
 
 describe("AvailableToolsTable helpers", () => {
   it("builds secret display items from secrets info", () => {

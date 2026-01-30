@@ -31,13 +31,13 @@
  * ```
  */
 
-export { AvailableToolsTable } from "./components/AvailableToolsTable";
-export { DynamicCodeBlock } from "./components/DynamicCodeBlock";
+export { AvailableToolsTable } from "./components/available-tools-table";
 // Components
 export {
   DocumentationChunkRenderer,
   hasChunksAt,
 } from "./components/documentation-chunk-renderer";
+export { DynamicCodeBlock } from "./components/dynamic-code-block";
 export { ParametersTable } from "./components/parameters-table";
 export { ScopesDisplay } from "./components/scopes-display";
 export { ToolSection } from "./components/tool-section";

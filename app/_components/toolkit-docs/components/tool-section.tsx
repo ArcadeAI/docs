@@ -4,12 +4,12 @@ import { Button } from "@arcadeai/design-system";
 import { Check, Copy, KeyRound, ShieldCheck } from "lucide-react";
 import { useCallback, useState } from "react";
 import type { ToolSectionProps } from "../types";
-import { toToolAnchorId } from "./AvailableToolsTable";
-import { DynamicCodeBlock } from "./DynamicCodeBlock";
+import { toToolAnchorId } from "./available-tools-table";
 import {
   DocumentationChunkRenderer,
   hasChunksAt,
 } from "./documentation-chunk-renderer";
+import { DynamicCodeBlock } from "./dynamic-code-block";
 import { ParametersTable } from "./parameters-table";
 import { ScopesDisplay } from "./scopes-display";
 
