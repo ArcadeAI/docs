@@ -122,7 +122,7 @@ function ToolHeaderSection({
       <div className="group flex items-center gap-2">
         <a
           aria-label={`Link to ${tool.qualifiedName}`}
-          className="text-muted-foreground/40 opacity-0 transition-opacity group-hover:opacity-100 hover:text-brand-accent"
+          className="text-muted-foreground/40 opacity-0 transition-opacity hover:text-brand-accent group-hover:opacity-100"
           href={`#${anchorId}`}
         >
           #
@@ -170,7 +170,7 @@ function ToolDescriptionSection({
         position="before"
       />
       {showDescription && (
-        <p className="text-sm text-foreground leading-relaxed">
+        <p className="text-foreground text-sm leading-relaxed">
           {tool.description ?? "No description provided."}
         </p>
       )}
@@ -247,7 +247,7 @@ function ToolRequirementsSection({
       {showAdvanced && hasScopes && (
         <div className="mb-3 flex items-center gap-2">
           <ShieldCheck className="h-4 w-4 text-red-600 dark:text-red-400" />
-          <span className="text-sm text-foreground">
+          <span className="text-foreground text-sm">
             Requires {scopes.length} OAuth scope{scopes.length > 1 ? "s" : ""}
           </span>
         </div>
@@ -259,11 +259,11 @@ function ToolRequirementsSection({
         />
         {hasSecrets ? (
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-sm text-foreground">Secrets:</span>
+            <span className="text-foreground text-sm">Secrets:</span>
             {secretsInfoList.length > 0
               ? secretsInfoList.map((secret) => (
                   <span
-                    className="font-mono text-amber-600 dark:text-amber-300 text-xs"
+                    className="font-mono text-amber-600 text-xs dark:text-amber-300"
                     key={secret.name}
                   >
                     {secret.name}
@@ -271,7 +271,7 @@ function ToolRequirementsSection({
                 ))
               : tool.secrets.map((secret) => (
                   <span
-                    className="font-mono text-amber-600 dark:text-amber-300 text-xs"
+                    className="font-mono text-amber-600 text-xs dark:text-amber-300"
                     key={secret}
                   >
                     {secret}
@@ -449,7 +449,7 @@ export function ToolSection({
 
   return (
     <section
-      className="mt-10 scroll-mt-20 rounded-xl bg-neutral-dark/20 p-6 border-neutral-dark-high/20 border-b last:border-b-0"
+      className="mt-10 scroll-mt-20 rounded-xl border-neutral-dark-high/20 border-b bg-neutral-dark/20 p-6 last:border-b-0"
       id={anchorId}
     >
       <ToolHeaderSection
