@@ -6,6 +6,9 @@ import { createIndex } from "pagefind";
 import rehypeStringify from "rehype-stringify";
 import { remark } from "remark";
 import remarkRehype from "remark-rehype";
+import { readToolkitData } from "@/app/_lib/toolkit-data";
+import { listToolkitRoutes } from "@/app/_lib/toolkit-static-params";
+import { toolkitDataToSearchMarkdown } from "./pagefind-toolkit-content";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -100,6 +103,14 @@ for (const language of languages) {
   console.log(`Adding directory: ${searchPath}`);
 
   for (const entry of glob.sync("**/*.mdx", { cwd: searchPath })) {
+    // Skip dynamic templates (we index concrete toolkit pages separately).
+    if (
+      entry.includes("resources/integrations") &&
+      entry.includes("[toolkitId]/page.mdx")
+    ) {
+      continue;
+    }
+
     const filePath = path.join(searchPath, entry);
     const url = `/${language}/${entry.split("/page.mdx")[0]}`;
     const mdxContent = await fs.readFile(filePath, "utf-8");
@@ -121,6 +132,39 @@ for (const language of languages) {
     }
 
     page_count += 1;
+  }
+
+  // Index toolkit docs pages (rendered from JSON), so search can find tools.
+  // These pages live under /en/resources/integrations/<category>/<toolkitId>.
+  if (language === "en") {
+    const toolkitRoutes = await listToolkitRoutes();
+    for (const route of toolkitRoutes) {
+      const toolkitData = await readToolkitData(route.toolkitId);
+      if (!toolkitData) {
+        continue;
+      }
+
+      const url = `/en/resources/integrations/${route.category}/${route.toolkitId}`;
+      const markdown = toolkitDataToSearchMarkdown(toolkitData);
+      const htmlContent = await markdownToHtml(markdown);
+
+      const { errors, file } = await index.addHTMLFile({
+        url,
+        content: `<html lang='en'><body>${htmlContent}</body></html>`,
+      });
+
+      const fileInfo = file
+        ? ` (${file.uniqueWords} words${file.meta?.title ? `, title: ${file.meta.title}` : ""})`
+        : "";
+      console.log(`Adding page: ${url}${fileInfo}`);
+
+      if (errors.length > 0) {
+        console.error(`Error adding page: ${url}`);
+        console.error(errors);
+      }
+
+      page_count += 1;
+    }
   }
 }
 

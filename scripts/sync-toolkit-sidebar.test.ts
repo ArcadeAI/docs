@@ -298,11 +298,18 @@ describe("buildToolkitInfoList", () => {
     expect(result[0].label).toBe("Unknown Toolkit");
   });
 
-  it("should prefer label from JSON over design system", () => {
+  it("should skip hidden toolkits", () => {
+    createToolkitJson("HiddenToolkit", { label: "Hidden" });
+
+    const result = buildToolkitInfoList(TEST_DATA_DIR);
+    expect(result).toEqual([]);
+  });
+
+  it("should prefer design system label over JSON", () => {
     createToolkitJson("gmail", { label: "Custom Gmail Label" });
 
     const result = buildToolkitInfoList(TEST_DATA_DIR);
-    expect(result[0].label).toBe("Custom Gmail Label");
+    expect(result[0].label).toBe("Gmail");
   });
 
   it("should use design system label as fallback", () => {
@@ -386,16 +393,17 @@ describe("generateCategoryMeta", () => {
 
     const result = generateCategoryMeta(
       toolkits,
-      "/en/resources/integrations/preview"
+      "productivity",
+      "/en/resources/integrations"
     );
 
     expect(result).toContain('import type { MetaRecord } from "nextra"');
-    expect(result).toContain('"gmail": {');
+    expect(result).toContain("gmail: {");
     expect(result).toContain('title: "Gmail"');
     expect(result).toContain(
-      'href: "/en/resources/integrations/preview/gmail"'
+      'href: "/en/resources/integrations/productivity/gmail"'
     );
-    expect(result).toContain('"dropbox": {');
+    expect(result).toContain("dropbox: {");
     expect(result).toContain("export default meta");
   });
 
@@ -409,13 +417,13 @@ describe("generateCategoryMeta", () => {
       },
     ];
 
-    const result = generateCategoryMeta(toolkits, "/preview");
+    const result = generateCategoryMeta(toolkits, "others", "/preview");
 
     expect(result).toContain('title: "Test \\"Quoted\\" Label"');
   });
 
   it("should handle empty array", () => {
-    const result = generateCategoryMeta([], "/preview");
+    const result = generateCategoryMeta([], "productivity", "/preview");
 
     expect(result).toContain("const meta: MetaRecord = {");
     expect(result).toContain("};");
@@ -427,10 +435,34 @@ describe("generateCategoryMeta", () => {
       { id: "gmail", slug: "gmail", label: "Gmail", category: "productivity" },
     ];
 
-    const result = generateCategoryMeta(toolkits, "/preview");
+    const result = generateCategoryMeta(toolkits, "productivity", "/preview");
 
-    expect(result).toContain('"gmail": {');
+    expect(result).toContain("gmail: {");
     expect(result).not.toContain(",\n,"); // No trailing comma issues
+  });
+
+  it("does not mutate the input array", () => {
+    const toolkits: ToolkitInfo[] = [
+      {
+        id: "zoom",
+        slug: "zoom",
+        label: "Zoom",
+        category: "social",
+        navGroup: "optimized",
+      },
+      {
+        id: "slack",
+        slug: "slack",
+        label: "Slack",
+        category: "social",
+        navGroup: "optimized",
+      },
+    ];
+    const originalOrder = [...toolkits];
+
+    generateCategoryMeta(toolkits, "social", "/preview");
+
+    expect(toolkits).toEqual(originalOrder);
   });
 });
 
@@ -443,9 +475,9 @@ describe("generateMainMeta", () => {
     const result = generateMainMeta(["productivity", "social"]);
 
     expect(result).toContain('import type { MetaRecord } from "nextra"');
-    expect(result).toContain('"productivity": {');
+    expect(result).toContain("productivity: {");
     expect(result).toContain('title: "Productivity & Docs"');
-    expect(result).toContain('"social": {');
+    expect(result).toContain("social: {");
     expect(result).toContain('title: "Social & Communication"');
     expect(result).toContain('"contribute-a-server"');
     expect(result).toContain("preview:");
@@ -454,9 +486,9 @@ describe("generateMainMeta", () => {
   it("should sort categories by defined order", () => {
     const result = generateMainMeta(["sales", "productivity", "development"]);
 
-    const productivityIndex = result.indexOf('"productivity"');
-    const developmentIndex = result.indexOf('"development"');
-    const salesIndex = result.indexOf('"sales"');
+    const productivityIndex = result.indexOf("productivity:");
+    const developmentIndex = result.indexOf("development:");
+    const salesIndex = result.indexOf("sales:");
 
     expect(productivityIndex).toBeLessThan(developmentIndex);
     expect(developmentIndex).toBeLessThan(salesIndex);
@@ -465,15 +497,15 @@ describe("generateMainMeta", () => {
   it("should include 'others' category when present", () => {
     const result = generateMainMeta(["productivity", "others"]);
 
-    expect(result).toContain('"others": {');
+    expect(result).toContain("others: {");
     expect(result).toContain('title: "Others"');
   });
 
   it("should place 'others' at the end", () => {
     const result = generateMainMeta(["others", "productivity"]);
 
-    const productivityIndex = result.indexOf('"productivity"');
-    const othersIndex = result.indexOf('"others"');
+    const productivityIndex = result.indexOf("productivity:");
+    const othersIndex = result.indexOf("others:");
 
     expect(productivityIndex).toBeLessThan(othersIndex);
   });
@@ -484,6 +516,15 @@ describe("generateMainMeta", () => {
     expect(result).toContain("const meta: MetaRecord = {");
     expect(result).toContain("index:");
     expect(result).toContain('"contribute-a-server"');
+  });
+
+  it("does not mutate the input array", () => {
+    const categories = ["sales", "productivity", "development"];
+    const originalOrder = [...categories];
+
+    generateMainMeta(categories);
+
+    expect(categories).toEqual(originalOrder);
   });
 
   it("should include required structure elements", () => {
@@ -639,7 +680,7 @@ describe("Meta Content Validation", () => {
       { id: "slack", slug: "slack", label: "Slack", category: "social" },
     ];
 
-    const result = generateCategoryMeta(toolkits, "/preview");
+    const result = generateCategoryMeta(toolkits, "productivity", "/preview");
 
     // Basic syntax checks
     expect(result).toMatch(/^import type \{ MetaRecord \} from "nextra";/);
@@ -657,7 +698,7 @@ describe("Meta Content Validation", () => {
       { id: "gmail", slug: "gmail", label: "Gmail", category: "productivity" },
     ];
 
-    const result = generateCategoryMeta(toolkits, "/preview");
+    const result = generateCategoryMeta(toolkits, "productivity", "/preview");
 
     // Extract the object part
     const objectMatch = result.match(

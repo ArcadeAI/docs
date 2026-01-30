@@ -15,12 +15,19 @@
  *   npx tsx scripts/sync-toolkit-sidebar.ts --verbose
  */
 
-import * as fs from "fs";
-import * as path from "path";
-import { fileURLToPath } from "url";
+import {
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = dirname(__filename);
 
 // Import design system toolkits
 let TOOLKITS: Array<{
@@ -40,13 +47,13 @@ try {
 }
 
 // Get project root (one level up from scripts/)
-const PROJECT_ROOT = path.resolve(__dirname, "..");
+const PROJECT_ROOT = resolve(__dirname, "..");
 
 // Configuration
 const CONFIG = {
-  dataDir: path.join(PROJECT_ROOT, "data/toolkits"),
-  integrationsDir: path.join(PROJECT_ROOT, "app/en/resources/integrations"),
-  previewBasePath: "/en/resources/integrations/preview",
+  dataDir: join(PROJECT_ROOT, "data/toolkits"),
+  integrationsDir: join(PROJECT_ROOT, "app/en/resources/integrations"),
+  integrationsBasePath: "/en/resources/integrations",
 };
 
 // Known categories with display names
@@ -77,37 +84,50 @@ const CATEGORY_ORDER = [
   "others",
 ];
 
-export interface ToolkitInfo {
+const CAPITAL_LETTER_REGEX = /([A-Z])/g;
+const FIRST_CHARACTER_REGEX = /^./;
+
+const IDENTIFIER_KEY_REGEX = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
+
+function renderObjectKey(key: string): string {
+  if (IDENTIFIER_KEY_REGEX.test(key)) {
+    return key;
+  }
+  const escaped = key.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  return `"${escaped}"`;
+}
+
+export type ToolkitInfo = {
   id: string;
   slug: string;
   label: string;
   category: string;
-}
+  navGroup: "optimized" | "starter";
+};
 
-export interface CategoryData {
+export type CategoryData = {
   category: string;
   displayName: string;
   toolkits: ToolkitInfo[];
-}
+};
 
-export interface SyncResult {
+export type SyncResult = {
   categoriesUpdated: string[];
   categoriesCreated: string[];
   categoriesRemoved: string[];
   toolkitCount: number;
   errors: string[];
-}
+};
 
 /**
  * Get list of toolkit JSON files (excluding index.json)
  */
 export function getToolkitFiles(dataDir: string): string[] {
-  if (!fs.existsSync(dataDir)) {
+  if (!existsSync(dataDir)) {
     return [];
   }
 
-  return fs
-    .readdirSync(dataDir)
+  return readdirSync(dataDir)
     .filter((f) => f.endsWith(".json") && f !== "index.json")
     .map((f) => f.replace(".json", "").toLowerCase());
 }
@@ -141,8 +161,8 @@ export function getToolkitLabel(toolkitId: string): string {
 
   // Fallback: Convert ID to readable label
   return toolkitId
-    .replace(/([A-Z])/g, " $1")
-    .replace(/^./, (str) => str.toUpperCase())
+    .replace(CAPITAL_LETTER_REGEX, " $1")
+    .replace(FIRST_CHARACTER_REGEX, (str) => str.toUpperCase())
     .trim();
 }
 
@@ -153,11 +173,11 @@ export function getToolkitLabelFromJson(
   dataDir: string,
   slug: string
 ): string | null {
-  const filePath = path.join(dataDir, `${slug}.json`);
+  const filePath = join(dataDir, `${slug}.json`);
 
   try {
-    if (fs.existsSync(filePath)) {
-      const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+    if (existsSync(filePath)) {
+      const data = JSON.parse(readFileSync(filePath, "utf-8"));
       return data.label || data.name || null;
     }
   } catch {
@@ -165,6 +185,39 @@ export function getToolkitLabelFromJson(
   }
 
   return null;
+}
+
+export function getToolkitTypeFromJson(
+  dataDir: string,
+  slug: string
+): string | null {
+  const filePath = join(dataDir, `${slug}.json`);
+
+  try {
+    if (existsSync(filePath)) {
+      const data = JSON.parse(readFileSync(filePath, "utf-8"));
+      return data?.metadata?.type ?? null;
+    }
+  } catch {
+    // Ignore parse errors
+  }
+
+  return null;
+}
+
+export function inferNavGroup(
+  toolkitIdOrSlug: string,
+  typeFromJson?: string | null
+) {
+  // Prefer explicit type when available.
+  if (typeFromJson === "arcade_starter") {
+    return "starter" as const;
+  }
+
+  // Heuristic fallback: "*Api" toolkits are starter.
+  return toolkitIdOrSlug.toLowerCase().endsWith("api")
+    ? ("starter" as const)
+    : ("optimized" as const);
 }
 
 /**
@@ -175,15 +228,26 @@ export function buildToolkitInfoList(dataDir: string): ToolkitInfo[] {
   const toolkits: ToolkitInfo[] = [];
 
   for (const slug of files) {
-    const category = getToolkitCategory(slug) || "others";
+    const designSystemToolkit = TOOLKITS.find(
+      (t) => t.id.toLowerCase() === slug.toLowerCase()
+    );
+    if (designSystemToolkit?.isHidden) {
+      continue;
+    }
+
+    const category = designSystemToolkit?.category ?? "others";
+    const labelFromDesignSystem = designSystemToolkit?.label ?? null;
     const labelFromJson = getToolkitLabelFromJson(dataDir, slug);
-    const labelFromDesignSystem = getToolkitLabel(slug);
+    const typeFromJson = getToolkitTypeFromJson(dataDir, slug);
 
     toolkits.push({
       id: slug,
       slug,
-      label: labelFromJson || labelFromDesignSystem,
+      // Prefer the Design System label (has correct spacing/casing), but fall back
+      // to JSON label for toolkits not present in the design system.
+      label: labelFromDesignSystem ?? labelFromJson ?? getToolkitLabel(slug),
       category,
+      navGroup: inferNavGroup(slug, typeFromJson),
     });
   }
 
@@ -203,7 +267,12 @@ export function groupByCategory(
     if (!grouped.has(category)) {
       grouped.set(category, []);
     }
-    grouped.get(category)!.push(toolkit);
+    const list = grouped.get(category);
+    if (list) {
+      list.push(toolkit);
+    } else {
+      grouped.set(category, [toolkit]);
+    }
   }
 
   // Sort toolkits within each category by label
@@ -219,18 +288,48 @@ export function groupByCategory(
  */
 export function generateCategoryMeta(
   toolkits: ToolkitInfo[],
-  previewBasePath: string
+  category: string,
+  integrationsBasePath: string
 ): string {
-  const entries = toolkits
-    .map((t) => {
-      // Escape any quotes in the label
-      const escapedLabel = t.label.replace(/"/g, '\\"');
-      return `  "${t.slug}": {
+  const byLabel = (a: ToolkitInfo, b: ToolkitInfo) =>
+    a.label.localeCompare(b.label);
+
+  const optimized = toolkits
+    .filter((t) => t.navGroup === "optimized")
+    .sort(byLabel);
+  const starter = toolkits
+    .filter((t) => t.navGroup === "starter")
+    .sort(byLabel);
+
+  const renderEntry = (t: ToolkitInfo) => {
+    // Escape any quotes in the label
+    const escapedLabel = t.label.replace(/"/g, '\\"');
+    return `  ${renderObjectKey(t.slug)}: {
     title: "${escapedLabel}",
-    href: "${previewBasePath}/${t.slug}",
+    href: "${integrationsBasePath}/${category}/${t.slug}",
   }`;
-    })
-    .join(",\n");
+  };
+
+  const renderSeparator = (title: string) => {
+    const key = `-- ${title}`;
+    return `  ${renderObjectKey(key)}: {
+    type: "separator",
+    title: "${title}",
+  }`;
+  };
+
+  const sections: string[] = [];
+  if (optimized.length > 0 && starter.length > 0) {
+    sections.push(renderSeparator("Optimized"));
+    sections.push(...optimized.map(renderEntry));
+    sections.push(renderSeparator("Starter"));
+    sections.push(...starter.map(renderEntry));
+  } else {
+    const sortedToolkits = [...toolkits].sort(byLabel);
+    sections.push(...sortedToolkits.map(renderEntry));
+  }
+
+  const entries = sections.join(",\n");
 
   return `import type { MetaRecord } from "nextra";
 
@@ -247,7 +346,7 @@ export default meta;
  */
 export function generateMainMeta(activeCategories: string[]): string {
   // Sort categories by defined order
-  const sortedCategories = activeCategories.sort((a, b) => {
+  const sortedCategories = [...activeCategories].sort((a, b) => {
     const indexA = CATEGORY_ORDER.indexOf(a);
     const indexB = CATEGORY_ORDER.indexOf(b);
     if (indexA === -1 && indexB === -1) return a.localeCompare(b);
@@ -259,7 +358,7 @@ export function generateMainMeta(activeCategories: string[]): string {
   const categoryEntries = sortedCategories
     .map((cat) => {
       const displayName = CATEGORY_NAMES[cat] || cat;
-      return `  "${cat}": {
+      return `  ${renderObjectKey(cat)}: {
     title: "${displayName}",
   }`;
     })
@@ -304,9 +403,9 @@ export default meta;
  * Sync toolkit sidebar with available JSON files
  */
 export function syncToolkitSidebar(
-  options: { dryRun?: boolean; verbose?: boolean } = {}
+  options: { dryRun?: boolean; verbose?: boolean; prune?: boolean } = {}
 ): SyncResult {
-  const { dryRun = false, verbose = false } = options;
+  const { dryRun = false, verbose = false, prune = false } = options;
 
   const result: SyncResult = {
     categoriesUpdated: [],
@@ -332,9 +431,8 @@ export function syncToolkitSidebar(
     log(`Active categories: ${activeCategories.join(", ")}`);
 
     // Get existing category directories
-    const existingDirs = fs.existsSync(CONFIG.integrationsDir)
-      ? fs
-          .readdirSync(CONFIG.integrationsDir, { withFileTypes: true })
+    const existingDirs = existsSync(CONFIG.integrationsDir)
+      ? readdirSync(CONFIG.integrationsDir, { withFileTypes: true })
           .filter((d) => d.isDirectory())
           .filter(
             (d) =>
@@ -345,20 +443,21 @@ export function syncToolkitSidebar(
 
     // Create/update category directories
     for (const [category, categoryToolkits] of grouped) {
-      const categoryDir = path.join(CONFIG.integrationsDir, category);
-      const metaPath = path.join(categoryDir, "_meta.tsx");
+      const categoryDir = join(CONFIG.integrationsDir, category);
+      const metaPath = join(categoryDir, "_meta.tsx");
       const metaContent = generateCategoryMeta(
         categoryToolkits,
-        CONFIG.previewBasePath
+        category,
+        CONFIG.integrationsBasePath
       );
 
-      const dirExists = fs.existsSync(categoryDir);
-      const metaExists = fs.existsSync(metaPath);
+      const dirExists = existsSync(categoryDir);
+      const metaExists = existsSync(metaPath);
 
       if (!dirExists) {
         log(`Creating category directory: ${category}`);
         if (!dryRun) {
-          fs.mkdirSync(categoryDir, { recursive: true });
+          mkdirSync(categoryDir, { recursive: true });
         }
         result.categoriesCreated.push(category);
       }
@@ -366,7 +465,7 @@ export function syncToolkitSidebar(
       // Check if content changed
       let contentChanged = true;
       if (metaExists) {
-        const existingContent = fs.readFileSync(metaPath, "utf-8");
+        const existingContent = readFileSync(metaPath, "utf-8");
         contentChanged = existingContent !== metaContent;
       }
 
@@ -375,7 +474,7 @@ export function syncToolkitSidebar(
           `Updating _meta.tsx for: ${category} (${categoryToolkits.length} toolkits)`
         );
         if (!dryRun) {
-          fs.writeFileSync(metaPath, metaContent);
+          writeFileSync(metaPath, metaContent);
         }
         if (!result.categoriesCreated.includes(category)) {
           result.categoriesUpdated.push(category);
@@ -385,34 +484,36 @@ export function syncToolkitSidebar(
       }
     }
 
-    // Remove empty categories
-    for (const existingDir of existingDirs) {
-      if (!activeCategories.includes(existingDir)) {
-        const categoryDir = path.join(CONFIG.integrationsDir, existingDir);
-        log(`Removing empty category: ${existingDir}`);
-        if (!dryRun) {
-          fs.rmSync(categoryDir, { recursive: true });
+    // Remove empty categories (optional; off by default for safety).
+    if (prune) {
+      for (const existingDir of existingDirs) {
+        if (!activeCategories.includes(existingDir)) {
+          const categoryDir = join(CONFIG.integrationsDir, existingDir);
+          log(`Removing empty category: ${existingDir}`);
+          if (!dryRun) {
+            rmSync(categoryDir, { recursive: true });
+          }
+          result.categoriesRemoved.push(existingDir);
         }
-        result.categoriesRemoved.push(existingDir);
       }
     }
 
     // Update main _meta.tsx
-    const mainMetaPath = path.join(CONFIG.integrationsDir, "_meta.tsx");
+    const mainMetaPath = join(CONFIG.integrationsDir, "_meta.tsx");
     const mainMetaContent = generateMainMeta(activeCategories);
 
-    if (fs.existsSync(mainMetaPath)) {
-      const existingMainMeta = fs.readFileSync(mainMetaPath, "utf-8");
+    if (existsSync(mainMetaPath)) {
+      const existingMainMeta = readFileSync(mainMetaPath, "utf-8");
       if (existingMainMeta !== mainMetaContent) {
         log("Updating main _meta.tsx");
         if (!dryRun) {
-          fs.writeFileSync(mainMetaPath, mainMetaContent);
+          writeFileSync(mainMetaPath, mainMetaContent);
         }
       }
     } else {
       log("Creating main _meta.tsx");
       if (!dryRun) {
-        fs.writeFileSync(mainMetaPath, mainMetaContent);
+        writeFileSync(mainMetaPath, mainMetaContent);
       }
     }
   } catch (error) {
@@ -431,22 +532,30 @@ export function printResults(result: SyncResult): void {
 
   if (result.categoriesCreated.length > 0) {
     console.log(`\nCategories created (${result.categoriesCreated.length}):`);
-    result.categoriesCreated.forEach((c) => console.log(`  + ${c}`));
+    for (const category of result.categoriesCreated) {
+      console.log(`  + ${category}`);
+    }
   }
 
   if (result.categoriesUpdated.length > 0) {
     console.log(`\nCategories updated (${result.categoriesUpdated.length}):`);
-    result.categoriesUpdated.forEach((c) => console.log(`  ~ ${c}`));
+    for (const category of result.categoriesUpdated) {
+      console.log(`  ~ ${category}`);
+    }
   }
 
   if (result.categoriesRemoved.length > 0) {
     console.log(`\nCategories removed (${result.categoriesRemoved.length}):`);
-    result.categoriesRemoved.forEach((c) => console.log(`  - ${c}`));
+    for (const category of result.categoriesRemoved) {
+      console.log(`  - ${category}`);
+    }
   }
 
   if (result.errors.length > 0) {
     console.log(`\nErrors (${result.errors.length}):`);
-    result.errors.forEach((e) => console.log(`  ! ${e}`));
+    for (const error of result.errors) {
+      console.log(`  ! ${error}`);
+    }
   }
 
   console.log("\n====================================\n");
@@ -461,12 +570,13 @@ if (isMainModule) {
   const args = process.argv.slice(2);
   const dryRun = args.includes("--dry-run");
   const verbose = args.includes("--verbose") || args.includes("-v");
+  const prune = args.includes("--prune");
 
   if (dryRun) {
     console.log("Running in dry-run mode (no changes will be made)\n");
   }
 
-  const result = syncToolkitSidebar({ dryRun, verbose });
+  const result = syncToolkitSidebar({ dryRun, verbose, prune });
   printResults(result);
 
   if (result.errors.length > 0) {
