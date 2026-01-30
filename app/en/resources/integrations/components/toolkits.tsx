@@ -14,20 +14,37 @@ import { ToolCard } from "./tool-card";
 import { TYPE_CONFIG, TYPE_DESCRIPTIONS } from "./type-config";
 import { useFilterStore, useToolkitFilters } from "./use-toolkit-filters";
 
-// Pattern: /en/mcp-servers/{category}/{tool} -> /en/resources/integrations/{category}/{tool}
-const MCP_SERVER_PATTERN = /^\/en\/mcp-servers\/([^/]+)\/([^/]+)$/;
+// Map toolkits to their category page (JSON-rendered pages).
+function mapToToolkitPage(toolkitId: string, category: string): string {
+  return `/en/resources/integrations/${category}/${toolkitId.toLowerCase()}`;
+}
 
-// Map old MCP server paths to new integration paths
-function mapToNewIA(oldLink: string): string {
-  const match = oldLink.match(MCP_SERVER_PATTERN);
+/**
+ * Get toolkit icon with fallback for API toolkits.
+ * If "GithubApi" has no icon, falls back to "Github" icon.
+ */
+function getToolkitIconWithFallback(
+  toolkitId: string
+): React.ComponentType<React.SVGProps<SVGSVGElement>> | null {
+  const apiSuffix = "api";
 
-  if (match) {
-    const [, category, tool] = match;
-    return `/en/resources/integrations/${category}/${tool}`;
+  // Try direct match first
+  const directIcon = getToolkitIcon(toolkitId);
+  if (directIcon) {
+    return directIcon;
   }
 
-  // Return original link if it doesn't match the pattern
-  return oldLink;
+  // For API toolkits, try the base provider ID
+  const normalizedId = toolkitId.toLowerCase();
+  if (normalizedId.endsWith(apiSuffix)) {
+    const baseProviderId = toolkitId.slice(0, -apiSuffix.length); // Remove "Api" suffix
+    const baseIcon = getToolkitIcon(baseProviderId);
+    if (baseIcon) {
+      return baseIcon;
+    }
+  }
+
+  return null;
 }
 
 export default function Toolkits() {
@@ -130,16 +147,25 @@ export default function Toolkits() {
             ) : (
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 md:gap-5 lg:grid-cols-3">
                 {filteredToolkits.map((toolkit) => {
-                  // Get the icon component from the Design System utility
-                  const IconComponent = getToolkitIcon(toolkit.id);
+                  // Get icon with fallback for API toolkits (e.g., GithubApi → Github)
+                  const IconComponent = getToolkitIconWithFallback(toolkit.id);
+                  // Use publicIconUrl from Design System as additional fallback
+                  const iconUrl =
+                    "publicIconUrl" in toolkit
+                      ? (toolkit.publicIconUrl as string)
+                      : undefined;
                   return (
                     <ToolCard
                       icon={IconComponent}
+                      iconUrl={iconUrl}
                       isByoc={toolkit.isBYOC}
                       isComingSoon={toolkit.isComingSoon}
                       isPro={toolkit.isPro}
                       key={toolkit.id}
-                      link={mapToNewIA(toolkit.relativeDocsLink)}
+                      link={mapToToolkitPage(
+                        toolkit.id,
+                        toolkit.category ?? "others"
+                      )}
                       name={toolkit.label}
                       type={toolkit.type}
                     />

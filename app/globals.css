@@ -3,6 +3,7 @@
 @import "@arcadeai/design-system/assets/variables.css";
 @source "../node_modules/@arcadeai/design-system/dist";
 @plugin 'tailwindcss-animate';
+@plugin '@tailwindcss/typography';
 
 @variant dark (&:where(.dark *));
 
@@ -61,9 +62,81 @@ code {
   white-space: pre-wrap;
 }
 
+/* Hide built-in Nextra actions on toolkit pages */
+html[data-page-kind="toolkit"] {
+  /* Hide Nextra's copy page dropdown (has x:float-end class) */
+  [class*="x\:float-end"] {
+    display: none !important;
+  }
+  /* Hide "Edit content in GitHub" link from Nextra (we have our own) */
+  a[href*="github.com/ArcadeAI/docs/tree/main/"],
+  a[href*="github.com/ArcadeAI/docs/blob/main/"] {
+    display: none !important;
+  }
+}
+
 pre code {
   font-family:
     ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+/* Toolkit pages: Improve code readability in light mode */
+html[data-page-kind="toolkit"].light pre,
+html[data-page-kind="toolkit"]:not(.dark) pre {
+  background-color: #f8fafc;
+  color: #0f172a;
+}
+
+html[data-page-kind="toolkit"].light pre code,
+html[data-page-kind="toolkit"]:not(.dark) pre code,
+html[data-page-kind="toolkit"].light .nextra-code,
+html[data-page-kind="toolkit"]:not(.dark) .nextra-code {
+  color: inherit;
+}
+
+/* Toolkit pages: Override Nextra callout colors for better readability */
+html[data-page-kind="toolkit"] .nextra-callout {
+  border-width: 1px;
+  border-radius: 0.75rem;
+}
+
+/* Warning callouts - toolkit pages only */
+html[data-page-kind="toolkit"] .nextra-callout.x\:bg-yellow-50 {
+  background-color: rgb(254 252 232) !important;
+  color: rgb(113 63 18) !important;
+  border-color: rgb(234 179 8) !important;
+}
+
+html.dark[data-page-kind="toolkit"] .nextra-callout.x\:bg-yellow-50 {
+  background-color: rgb(113 63 18 / 0.15) !important;
+  color: rgb(253 224 71) !important;
+  border-color: rgb(234 179 8 / 0.4) !important;
+}
+
+/* Info callouts - toolkit pages only */
+html[data-page-kind="toolkit"] .nextra-callout.x\:bg-blue-100 {
+  background-color: rgb(239 246 255) !important;
+  color: rgb(29 78 216) !important;
+  border-color: rgb(59 130 246) !important;
+}
+
+html.dark[data-page-kind="toolkit"] .nextra-callout.x\:bg-blue-100 {
+  background-color: rgb(30 58 138 / 0.15) !important;
+  color: rgb(147 197 253) !important;
+  border-color: rgb(59 130 246 / 0.4) !important;
+}
+
+/* Success/default callouts - toolkit pages only */
+html[data-page-kind="toolkit"] .nextra-callout.x\:bg-green-100 {
+  background-color: rgb(240 253 244) !important;
+  color: rgb(21 128 61) !important;
+  border-color: rgb(34 197 94) !important;
+}
+
+html.dark[data-page-kind="toolkit"] .nextra-callout.x\:bg-green-100 {
+  background-color: rgb(20 83 45 / 0.15) !important;
+  color: rgb(134 239 172) !important;
+  border-color: rgb(34 197 94 / 0.4) !important;
 }
 
 /* Position search next to logo */
@@ -97,3 +170,13 @@ nav > div:has(.nextra-search) {
 .guide-overview ul ul {
   margin-top: 0;
 }
+
+@keyframes tool-name-marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+

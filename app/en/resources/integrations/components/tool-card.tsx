@@ -9,6 +9,7 @@ import {
   type ToolkitType,
 } from "@arcadeai/design-system";
 import { cn } from "@arcadeai/design-system/lib/utils";
+import { Package } from "lucide-react";
 import Link from "next/link";
 import { usePostHog } from "posthog-js/react";
 import type React from "react";
@@ -18,7 +19,8 @@ import { TOOL_CARD_TYPE_CONFIG } from "./type-config";
 
 type ToolCardProps = {
   name: string;
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>> | null;
+  iconUrl?: string;
   link: string;
   type: ToolkitType;
   isComingSoon?: boolean;
@@ -29,6 +31,7 @@ type ToolCardProps = {
 export const ToolCard: React.FC<ToolCardProps> = ({
   name: toolName,
   icon: ToolkitIcon,
+  iconUrl,
   link,
   type,
   isComingSoon = false,
@@ -68,6 +71,23 @@ export const ToolCard: React.FC<ToolCardProps> = ({
     setIsModalOpen(false);
   };
 
+  let iconNode: React.ReactNode;
+  if (ToolkitIcon) {
+    iconNode = <ToolkitIcon className="size-9" />;
+  } else if (iconUrl) {
+    iconNode = (
+      <img
+        alt={`${toolName} icon`}
+        className="size-9"
+        height={36}
+        src={iconUrl}
+        width={36}
+      />
+    );
+  } else {
+    iconNode = <Package className="size-9 text-gray-400 dark:text-gray-500" />;
+  }
+
   const cardContent = (
     <Card
       className={cn(
@@ -80,7 +100,7 @@ export const ToolCard: React.FC<ToolCardProps> = ({
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div className="flex items-center space-x-5">
             <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg">
-              <ToolkitIcon className="size-9" />
+              {iconNode}
             </div>
             <div>
               <CardTitle className="mb-0.5 text-base text-gray-900 dark:text-gray-50">

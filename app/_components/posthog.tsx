@@ -6,46 +6,64 @@ import posthog from "posthog-js";
 import { PostHogProvider } from "posthog-js/react";
 import { useEffect } from "react";
 
+function createNoopPosthogClient() {
+  return {
+    // biome-ignore lint/suspicious/noEmptyBlockStatements: Intentional no-op for disabled analytics
+    capture: () => {},
+    // biome-ignore lint/suspicious/noEmptyBlockStatements: Intentional no-op for disabled analytics
+    identify: () => {},
+    // biome-ignore lint/suspicious/noEmptyBlockStatements: Intentional no-op for disabled analytics
+    reset: () => {},
+    // biome-ignore lint/suspicious/noExplicitAny: Minimal no-op client for disabled analytics
+  } as any;
+}
+
 export const PostHog = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
+  const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
+  const isEnabled = Boolean(posthogKey);
 
   useEffect(() => {
-    if (process.env.NEXT_PUBLIC_POSTHOG_KEY) {
-      posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
-        api_host:
-          process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com",
-        ui_host:
-          process.env.NEXT_PUBLIC_POSTHOG_UI_HOST || "https://us.posthog.com",
-        // Enable session recording for user behavior analysis
-        disable_session_recording: false,
-        session_recording: {
-          maskAllInputs: true, // Privacy: mask sensitive input fields
-          blockClass: "ph-no-capture", // Allow opting out specific elements
-          recordCrossOriginIframes: false, // Don't record third-party iframes
-        },
-        // Enable heatmaps for click tracking
-        enable_heatmaps: true,
-        // Enable surveys for CSAT feedback
-        disable_surveys: false,
-        loaded: (posthogInstance) => {
-          if (process.env.NEXT_PUBLIC_POSTHOG_DEBUG === "true") {
-            posthogInstance.debug();
-          }
-        },
-      });
-    } else {
-      // biome-ignore lint/suspicious/noConsole: This is ok for PostHog
-      console.warn("Analytics is disabled because no key is set");
+    if (!posthogKey) {
+      // No key: keep analytics fully disabled and avoid noisy console errors.
+      return;
     }
-  }, []);
+
+    posthog.init(posthogKey, {
+      api_host:
+        process.env.NEXT_PUBLIC_POSTHOG_HOST || "https://us.i.posthog.com",
+      ui_host:
+        process.env.NEXT_PUBLIC_POSTHOG_UI_HOST || "https://us.posthog.com",
+      // Enable session recording for user behavior analysis
+      disable_session_recording: false,
+      session_recording: {
+        maskAllInputs: true, // Privacy: mask sensitive input fields
+        blockClass: "ph-no-capture", // Allow opting out specific elements
+        recordCrossOriginIframes: false, // Don't record third-party iframes
+      },
+      // Enable heatmaps for click tracking
+      enable_heatmaps: true,
+      // Enable surveys for CSAT feedback
+      disable_surveys: false,
+      loaded: (posthogInstance) => {
+        if (process.env.NEXT_PUBLIC_POSTHOG_DEBUG === "true") {
+          posthogInstance.debug();
+        }
+      },
+    });
+  }, [posthogKey]);
 
   // Track page views when pathname changes
   // biome-ignore lint/correctness/useExhaustiveDependencies: pathname is required for route change tracking
   useEffect(() => {
-    if (process.env.NEXT_PUBLIC_POSTHOG_KEY) {
+    if (isEnabled) {
       posthog?.capture("$pageview");
     }
-  }, [pathname]);
+  }, [pathname, isEnabled]);
 
-  return <PostHogProvider client={posthog}>{children}</PostHogProvider>;
+  return (
+    <PostHogProvider client={isEnabled ? posthog : createNoopPosthogClient()}>
+      {children}
+    </PostHogProvider>
+  );
 };
