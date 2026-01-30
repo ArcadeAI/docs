@@ -1,6 +1,5 @@
 "use client";
-import type { Survey } from "posthog-js";
-import { usePostHog } from "posthog-js/react";
+import posthog, { type Survey } from "posthog-js";
 import { useEffect, useRef } from "react";
 import { useSurvey } from "./hooks/use-survey";
 import { Navigation } from "./navigation";
@@ -19,7 +18,6 @@ export default function DynamicSurvey({
   onComplete,
   onBack,
 }: DynamicSurveyProps) {
-  const posthog = usePostHog();
   const surveyShown = useRef(false);
 
   const {
@@ -33,30 +31,30 @@ export default function DynamicSurvey({
 
   // Capture the survey shown event when the survey is loaded
   useEffect(() => {
-    if (!(surveyData && posthog) || surveyData.questions.length === 0) {
+    if (!surveyData || surveyData.questions.length === 0) {
       return;
     }
     if (!surveyShown.current) {
-      posthog?.capture("survey shown", { $survey_id: surveyData.id });
+      posthog.capture("survey shown", { $survey_id: surveyData.id });
       surveyShown.current = true;
     }
-  }, [surveyData, posthog]);
+  }, [surveyData]);
 
   // Capture the survey dismissed event when the user navigates away from the survey
   useEffect(() => {
-    if (!(surveyData && posthog)) {
+    if (!surveyData) {
       return;
     }
 
     const handleBeforeUnload = () => {
       if (currentQuestionIndex < surveyData.questions.length - 1) {
-        posthog?.capture("survey dismissed", { $survey_id: surveyData.id });
+        posthog.capture("survey dismissed", { $survey_id: surveyData.id });
       }
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [surveyData, posthog, currentQuestionIndex]);
+  }, [surveyData, currentQuestionIndex]);
 
   // Handle back button click
   const handleBackButton = () => {

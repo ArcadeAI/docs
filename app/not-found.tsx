@@ -11,16 +11,32 @@ import {
 import { cn } from "@arcadeai/design-system/lib/utils";
 import { Home, SearchX } from "lucide-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { use, useMemo } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
+import posthog from "posthog-js";
+import { use, useEffect, useMemo, useRef } from "react";
 import { getDictionaryClient } from "@/_dictionaries/get-dictionary-client";
 import { BackButton } from "@/app/_components/back-button";
 
 const LOCALE_PATH_REGEX = /^\/([a-z]{2}(?:-[A-Z]{2})?)(?:\/.+|$)/;
 const LOCALE_PREFIX_REGEX = /^\/[a-z]{2}(?:-[A-Z]{2})?/;
 
+function getReferrerInfo(): { referrer: string; referringDomain: string } {
+  const referrer =
+    typeof document !== "undefined" ? document.referrer || "" : "";
+  if (!referrer) {
+    return { referrer: "", referringDomain: "" };
+  }
+  try {
+    return { referrer, referringDomain: new URL(referrer).hostname };
+  } catch {
+    return { referrer, referringDomain: "" };
+  }
+}
+
 export default function NotFound() {
   const pathname = usePathname() || "/";
+  const searchParams = useSearchParams();
+  const lastCapturedPathRef = useRef<string | null>(null);
 
   const { currentLocale, englishPath, showEnglishLink } = useMemo(() => {
     const locale = pathname.match(LOCALE_PATH_REGEX)?.[1] || "en";
@@ -35,6 +51,32 @@ export default function NotFound() {
   }, [pathname]);
 
   const dict = use(getDictionaryClient(currentLocale));
+
+  useEffect(() => {
+    const search = searchParams?.toString();
+    const pathWithQuery = search ? `${pathname}?${search}` : pathname;
+
+    // Prevent duplicate capture if this component re-renders for the same 404 URL.
+    if (lastCapturedPathRef.current === pathWithQuery) {
+      return;
+    }
+    lastCapturedPathRef.current = pathWithQuery;
+
+    const { referrer, referringDomain } = getReferrerInfo();
+
+    posthog.capture("Page not found", {
+      status_code: 404,
+      pathname,
+      path: pathWithQuery,
+      locale: currentLocale,
+      english_path: englishPath,
+      show_english_link: showEnglishLink,
+      // Ensure special props are attached to custom 404 events for link analysis.
+      $current_url: typeof window !== "undefined" ? window.location.href : null,
+      $referrer: referrer || null,
+      $referring_domain: referringDomain || null,
+    });
+  }, [currentLocale, englishPath, pathname, searchParams, showEnglishLink]);
 
   return (
     <div className="flex items-center justify-center py-16">

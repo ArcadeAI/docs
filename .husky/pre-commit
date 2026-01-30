@@ -1,14 +1,128 @@
-pnpm dlx lint-staged
-
 #!/bin/sh
 # Exit on any error
 set -e
 
 # Check if there are any staged files
 if [ -z "$(git diff --cached --name-only)" ]; then
-  echo "No staged files to format"
+  echo "No staged files to check"
   exit 0
 fi
+
+# --- Vale Style Check ---
+# Check for staged .md/.mdx files
+STAGED_DOCS=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '\.(md|mdx)$' || true)
+
+if [ -n "$STAGED_DOCS" ]; then
+  echo "🔍 Checking documentation style with Vale..."
+
+  # Run vale-fix script in staged mode (interactive)
+  if [ -t 0 ]; then
+    # Terminal is interactive - run the fix script
+    pnpm vale:fix --staged
+  else
+    # Non-interactive (CI) - just run vale and report
+    echo "$STAGED_DOCS" | xargs vale --output=line || {
+      echo "⚠️  Vale found style issues. Run 'pnpm vale:fix <file>' to fix."
+      # Don't block commit for style issues in CI, only toxic language
+      # The GitHub Action (Option 1) will handle this later
+    }
+  fi
+fi
+
+# --- Check Meta Keys (when _meta.tsx files are changed) ---
+STAGED_META=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '_meta\.tsx$' || true)
+
+if [ -n "$STAGED_META" ]; then
+  echo "🔍 Checking _meta.tsx keys..."
+
+  if ! pnpm check-meta --staged-only; then
+    echo ""
+    echo "❌ Commit blocked: _meta.tsx keys must match sibling directories or files."
+    exit 1
+  fi
+fi
+
+# --- Check Redirects (when markdown pages are deleted or renamed) ---
+# Detect deleted pages (D status) and renamed pages (R status - old path needs redirect)
+DELETED_PAGES=$(git diff --cached --name-status | grep -E "^D.*page\.(md|mdx)$" | cut -f2 || true)
+RENAMED_PAGES=$(git diff --cached --name-status | grep -E "^R.*page\.(md|mdx)$" | cut -f2 || true)
+
+if [ -n "$DELETED_PAGES" ] || [ -n "$RENAMED_PAGES" ]; then
+  echo "🔗 Detected deleted/renamed page(s), checking for redirects..."
+
+  # Run the TypeScript redirect checker with auto-fix (only checks staged changes)
+  # This will add redirect entries to next.config.ts if missing
+  if ! pnpm check-redirects --auto-fix --staged-only 2>&1; then
+    # Stage next.config.ts if it was modified
+    if git diff --name-only next.config.ts 2>/dev/null | grep -q "next.config.ts"; then
+      git add next.config.ts
+      echo ""
+      echo "📝 Redirect entries added to next.config.ts and staged."
+    fi
+    echo ""
+    # Check if there are placeholders vs other errors
+    if grep -q "REPLACE_WITH_NEW_PATH" next.config.ts 2>/dev/null; then
+      echo "❌ Commit blocked: Please update the placeholder destinations in next.config.ts"
+      echo "   Search for 'REPLACE_WITH_NEW_PATH' and provide actual redirect paths."
+    else
+      echo "❌ Commit blocked: Please fix the redirect issues shown above."
+    fi
+    exit 1
+  fi
+fi
+
+# --- Update Internal Links (when redirects are added) ---
+# If next.config.ts is staged, update any internal links pointing to redirected paths
+if git diff --cached --name-only | grep -q "next.config.ts"; then
+  echo "🔗 Updating internal links for new redirects..."
+
+  # Capture files already modified in working directory BEFORE running update-links
+  # This prevents accidentally staging unrelated changes the user has in progress
+  ALREADY_MODIFIED=$(git diff --name-only -- 'app/**/*.mdx' 'app/**/*.tsx' 'app/**/*.md' 2>/dev/null || true)
+
+  # Run the TypeScript update script
+  if pnpm update-links 2>/dev/null; then
+    # Find files modified AFTER running update-links
+    NOW_MODIFIED=$(git diff --name-only -- 'app/**/*.mdx' 'app/**/*.tsx' 'app/**/*.md' 2>/dev/null || true)
+
+    # Only stage files that were NOT already modified (i.e., newly modified by update-links)
+    STAGED_COUNT=0
+    SKIPPED_FILES=""
+    if [ -n "$NOW_MODIFIED" ]; then
+      for file in $NOW_MODIFIED; do
+        # Check if this file was already modified before update-links ran
+        if [ -z "$ALREADY_MODIFIED" ] || ! echo "$ALREADY_MODIFIED" | grep -qxF "$file"; then
+          git add "$file"
+          STAGED_COUNT=$((STAGED_COUNT + 1))
+        else
+          # File had both user's unstaged changes AND needed link updates
+          # We can't stage it without also staging user's unrelated changes
+          SKIPPED_FILES="$SKIPPED_FILES $file"
+        fi
+      done
+    fi
+
+    if [ "$STAGED_COUNT" -gt 0 ]; then
+      echo "✅ Internal links updated and staged ($STAGED_COUNT file(s))"
+    fi
+
+    # Warn about files that needed link updates but couldn't be staged
+    if [ -n "$SKIPPED_FILES" ]; then
+      echo ""
+      echo "⚠️  Warning: The following files need link updates but have unstaged changes:"
+      for file in $SKIPPED_FILES; do
+        echo "   - $file"
+      done
+      echo ""
+      echo "   The link updates were applied but NOT staged to avoid mixing with your changes."
+      echo "   After this commit, review these files and stage the link updates separately,"
+      echo "   or run 'git checkout -- <file>' to discard all changes including link updates."
+    fi
+  fi
+fi
+
+# --- Lint Staged (formatting) ---
+pnpm dlx lint-staged
 
 # Store the hash of staged changes to detect modifications
 STAGED_HASH=$(git diff --cached | sha256sum | cut -d' ' -f1)
@@ -36,10 +150,10 @@ if [ $STASHED -eq 0 ]; then
       fi
     done
   fi
-  
+
   # Restore unstaged changes
   git stash pop --quiet || true
-  
+
   # Restore partial staging if files were partially staged
   if [ -n "$PARTIALLY_STAGED" ]; then
     for file in $PARTIALLY_STAGED; do

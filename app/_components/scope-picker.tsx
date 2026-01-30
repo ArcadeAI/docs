@@ -2,7 +2,7 @@
 
 import { Button } from "@arcadeai/design-system";
 import { Check, Copy, KeyRound, ShieldCheck, Wrench } from "lucide-react";
-import { usePostHog } from "posthog-js/react";
+import posthog from "posthog-js";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 const COPY_FEEDBACK_MS = 2000;
@@ -281,7 +281,7 @@ export default function ScopePicker({
     toolName: string | undefined,
     newSelectedCount: number
   ) => {
-    posthog?.capture("scope_calculator_used", {
+    posthog.capture("Scope calculator used", {
       action,
       tool_name: toolName || null,
       selected_tools_count: newSelectedCount,

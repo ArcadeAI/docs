@@ -19,7 +19,6 @@ import {
   Navbar,
   Footer as NextraFooter,
 } from "nextra-theme-docs";
-import { PostHog } from "./_components/posthog";
 
 export const metadata = {
   title: {
@@ -46,7 +45,7 @@ export const metadata = {
     siteName: "Arcade Docs",
     images: [
       {
-        url: "/images/logo/arcade-logo.png",
+        url: "/images/logo/arcade_og-logo.jpg",
         width: 1200,
         height: 630,
         alt: "Arcade",
@@ -56,7 +55,7 @@ export const metadata = {
   twitter: {
     card: "summary_large_image",
     site: "@TryArcade",
-    images: ["/images/logo/arcade-logo.png"],
+    images: ["/images/logo/arcade_og-logo.jpg"],
   },
   appleWebApp: {
     title: "Arcade Documentation",
@@ -161,9 +160,7 @@ export default async function RootLayout({
             src="https://status.arcade.dev/embed/script.js"
             strategy="afterInteractive"
           />
-          <PostHog>
-            <CustomLayout>{children}</CustomLayout>
-          </PostHog>
+          <CustomLayout>{children}</CustomLayout>
         </Layout>
       </body>
     </html>

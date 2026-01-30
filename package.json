@@ -10,13 +10,22 @@
     "lint": "pnpm dlx ultracite check",
     "format": "pnpm dlx ultracite fix",
     "prepare": "husky install",
-    "postbuild": "pnpm run custompagefind && next-sitemap",
+    "postbuild": "pnpm run custompagefind",
     "translate": "pnpm dlx tsx scripts/i18n-sync/index.ts && pnpm format",
     "sync:metas": "pnpm dlx tsx scripts/sync-metas.ts app/en",
     "llmstxt": "pnpm dlx tsx scripts/generate-llmstxt.ts",
     "custompagefind": "pnpm dlx tsx scripts/pagefind.ts",
     "test": "vitest --run",
-    "test:watch": "vitest --watch"
+    "test:watch": "vitest --watch",
+    "vale": "vale",
+    "vale:check": "vale app/en/",
+    "vale:fix": "pnpm dlx tsx scripts/vale-fix.ts",
+    "vale:review": "pnpm dlx tsx scripts/vale-style-review.ts",
+    "vale:editorial": "pnpm dlx tsx scripts/vale-editorial.ts",
+    "vale:sync": "vale sync",
+    "check-redirects": "pnpm dlx tsx scripts/check-redirects.ts",
+    "update-links": "pnpm dlx tsx scripts/update-internal-links.ts",
+    "check-meta": "pnpm dlx tsx scripts/check-meta-keys.ts"
   },
   "repository": {
     "type": "git",
@@ -32,7 +41,7 @@
   },
   "homepage": "https://arcade.dev/",
   "dependencies": {
-    "@arcadeai/design-system": "^3.26.0",
+    "@arcadeai/design-system": "^3.26.1",
     "@next/third-parties": "16.0.1",
     "@ory/client": "1.22.7",
     "@theguild/remark-mermaid": "0.3.0",
@@ -40,11 +49,10 @@
     "lucide-react": "0.548.0",
     "mdast-util-to-string": "4.0.0",
     "motion": "12.23.24",
-    "next": "16.0.10",
-    "next-sitemap": "4.2.3",
+    "next": "16.1.1",
     "nextra": "4.6.0",
     "nextra-theme-docs": "4.6.0",
-    "posthog-js": "1.298.0",
+    "posthog-js": "1.321.2",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-hook-form": "7.65.0",
@@ -56,7 +64,9 @@
     "zustand": "5.0.8"
   },
   "devDependencies": {
+    "@anthropic-ai/sdk": "^0.71.2",
     "@biomejs/biome": "2.3.2",
+    "@octokit/rest": "^22.0.1",
     "@tailwindcss/postcss": "4.1.16",
     "@types/mdast": "4.0.4",
     "@types/mdx": "2.0.13",
@@ -66,6 +76,7 @@
     "@types/react-syntax-highlighter": "15.5.13",
     "@types/unist": "3.0.3",
     "commander": "14.0.2",
+    "dotenv": "^17.2.3",
     "fast-glob": "3.3.3",
     "husky": "9.1.7",
     "lint-staged": "16.2.6",
@@ -93,5 +104,10 @@
       "pnpm dlx ultracite fix "
     ]
   },
-  "packageManager": "pnpm@10.11.0"
+  "packageManager": "pnpm@10.11.0",
+  "pnpm": {
+    "overrides": {
+      "tar": ">=7.5.3"
+    }
+  }
 }
