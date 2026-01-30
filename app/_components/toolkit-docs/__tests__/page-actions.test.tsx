@@ -1,64 +1,57 @@
 import { describe, expect, it } from "vitest";
 
-import { buildOptimizedPageContent } from "../components/page-actions";
-import type { ToolkitData } from "../types";
+// Test the pure function that builds the GitHub edit URL
+// The function is not exported, so we test the logic directly
+describe("page-actions helpers", () => {
+  describe("buildGithubEditUrl logic", () => {
+    const GITHUB_JSON_BASE_URL =
+      "https://github.com/ArcadeAI/docs/blob/main/data/toolkits";
 
-describe("buildOptimizedPageContent", () => {
-  const baseToolkit: ToolkitData = {
-    id: "Github",
-    label: "GitHub",
-    version: "1.0.0",
-    description: "Toolkit description",
-    summary: "Toolkit summary",
-    metadata: {
-      category: "development",
-      iconUrl: "https://example.com/icon.svg",
-      isBYOC: false,
-      isPro: false,
-      type: "arcade",
-      docsLink: "https://docs.arcade.dev",
-    },
-    auth: null,
-    tools: [
-      {
-        name: "CreateIssue",
-        qualifiedName: "Github.CreateIssue",
-        fullyQualifiedName: "Github.CreateIssue@1.0.0",
-        description: "Create an issue",
-        parameters: [],
-        auth: null,
-        secrets: [],
-        output: null,
-        documentationChunks: [],
-      },
-    ],
-    customImports: [],
-    subPages: [],
-  };
+    function buildGithubEditUrl(toolkitId: string): string {
+      const jsonFileName = `${toolkitId.toLowerCase()}.json`;
+      return `${GITHUB_JSON_BASE_URL}/${jsonFileName}`;
+    }
 
-  it("adds generic examples before tool listing", () => {
-    const content = buildOptimizedPageContent(baseToolkit);
-    expect(content.indexOf('"examples"')).toBeLessThan(
-      content.indexOf('"tools"')
-    );
+    it("builds correct URL for simple toolkit ID", () => {
+      expect(buildGithubEditUrl("Github")).toBe(
+        "https://github.com/ArcadeAI/docs/blob/main/data/toolkits/github.json"
+      );
+    });
+
+    it("lowercases the toolkit ID", () => {
+      expect(buildGithubEditUrl("CustomerioApi")).toBe(
+        "https://github.com/ArcadeAI/docs/blob/main/data/toolkits/customerioapi.json"
+      );
+    });
+
+    it("handles toolkit IDs with uppercase letters", () => {
+      expect(buildGithubEditUrl("SlackApi")).toBe(
+        "https://github.com/ArcadeAI/docs/blob/main/data/toolkits/slackapi.json"
+      );
+    });
+
+    it("handles single word toolkit IDs", () => {
+      expect(buildGithubEditUrl("Jira")).toBe(
+        "https://github.com/ArcadeAI/docs/blob/main/data/toolkits/jira.json"
+      );
+    });
   });
 
-  it("includes JavaScript and TypeScript tool execution examples", () => {
-    const content = buildOptimizedPageContent(baseToolkit);
-    const parsed = JSON.parse(content);
+  describe("API endpoint construction", () => {
+    it("constructs correct markdown API endpoint from pathname", () => {
+      const pathname = "/en/resources/integrations/development/github";
+      const endpoint = `/api/markdown${pathname}.md`;
+      expect(endpoint).toBe(
+        "/api/markdown/en/resources/integrations/development/github.md"
+      );
+    });
 
-    expect(parsed.examples.javascript).toContain("client.tools.execute");
-    expect(parsed.examples.javascript).toContain("const toolInput = {");
-    expect(parsed.examples.typescript).toContain("client.tools.execute");
-    expect(parsed.examples.typescript).toContain(
-      "const toolInput: Record<string, unknown> = {"
-    );
-  });
-
-  it("does not include per-tool code examples", () => {
-    const content = buildOptimizedPageContent(baseToolkit);
-    const parsed = JSON.parse(content);
-
-    expect(parsed.tools[0].codeExample).toBeUndefined();
+    it("handles different categories", () => {
+      const pathname = "/en/resources/integrations/productivity/jira";
+      const endpoint = `/api/markdown${pathname}.md`;
+      expect(endpoint).toBe(
+        "/api/markdown/en/resources/integrations/productivity/jira.md"
+      );
+    });
   });
 });

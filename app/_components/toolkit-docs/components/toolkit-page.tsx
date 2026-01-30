@@ -8,6 +8,10 @@ import ReactMarkdown from "react-markdown";
 import ScopePicker from "../../scope-picker";
 import ToolFooter from "../../tool-footer";
 import { getPackageName } from "../constants";
+
+// Regex for removing leading ## from headers (defined at top level for performance)
+const HEADER_PREFIX_REGEX = /^#+\s*/;
+
 import type {
   ToolDefinition,
   ToolkitCategory,
@@ -65,7 +69,7 @@ function ScrollToButtons() {
   }
 
   return (
-    <div className="fixed right-6 bottom-6 z-50 flex flex-col gap-2 xl:right-80 2xl:right-[22rem]">
+    <div className="fixed right-6 bottom-6 z-50 flex flex-col gap-2 xl:right-80 2xl:right-80">
       <Button
         aria-label="Scroll to top"
         className="h-10 w-10 rounded-full shadow-lg backdrop-blur-sm"
@@ -108,19 +112,73 @@ export const TOOLKIT_PAGE_AVAILABLE_TOOLS_LINK = {
   href: "#available-tools",
 } as const;
 
+export const TOOLKIT_PAGE_SELECTED_TOOLS_LINK = {
+  id: "selected-tools",
+  label: "Selected tools",
+  href: "#selected-tools",
+} as const;
+
 export const TOOLKIT_PAGE_GET_BUILDING_LINK = {
   id: "get-building",
   label: "Get building",
   href: "#get-building",
 } as const;
 
+/**
+ * Converts a header string to a URL-friendly anchor ID.
+ * E.g., "## Auth Setup" -> "auth-setup"
+ */
+function headerToAnchorId(header: string): string {
+  return header
+    .replace(HEADER_PREFIX_REGEX, "") // Remove leading ##
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "") // Remove special chars
+    .replace(/\s+/g, "-") // Replace spaces with hyphens
+    .replace(/-+/g, "-"); // Collapse multiple hyphens
+}
+
+/**
+ * Extracts section links from documentation chunks that have headers.
+ */
+export function extractChunkSectionLinks(
+  chunks: ReadonlyArray<{ header?: string }>
+): Array<{ id: string; label: string; href: string }> {
+  const links: Array<{ id: string; label: string; href: string }> = [];
+  const seenIds = new Set<string>();
+
+  for (const chunk of chunks) {
+    if (chunk.header) {
+      const id = headerToAnchorId(chunk.header);
+      if (!seenIds.has(id)) {
+        seenIds.add(id);
+        links.push({
+          id,
+          label: chunk.header.replace(HEADER_PREFIX_REGEX, ""), // Remove ## prefix for display
+          href: `#${id}`,
+        });
+      }
+    }
+  }
+
+  return links;
+}
+
 export function buildObservedSectionIds(
-  tools: ReadonlyArray<{ qualifiedName: string }>
+  tools: ReadonlyArray<{ qualifiedName: string }>,
+  documentationChunks: ReadonlyArray<{ header?: string }> = []
 ): string[] {
   const ids: string[] = [
     TOOLKIT_PAGE_OVERVIEW_LINK.id,
     TOOLKIT_PAGE_AVAILABLE_TOOLS_LINK.id,
+    TOOLKIT_PAGE_SELECTED_TOOLS_LINK.id,
   ];
+
+  // Add custom section IDs from documentation chunks
+  const chunkSections = extractChunkSectionLinks(documentationChunks);
+  for (const section of chunkSections) {
+    ids.push(section.id);
+  }
 
   for (const tool of tools) {
     ids.push(toToolAnchorId(tool.qualifiedName));
@@ -180,14 +238,31 @@ function BreadcrumbBar({
  * Structure: Fixed header/footer with scrollable middle tool list.
  * Auto-scrolls and highlights the currently visible section.
  */
-function ToolsOnThisPage({ tools }: { tools: ToolDefinition[] }) {
+function ToolsOnThisPage({
+  tools,
+  selectedTools,
+  documentationChunks = [],
+}: {
+  tools: ToolDefinition[];
+  selectedTools: Set<string>;
+  documentationChunks?: ReadonlyArray<{ header?: string }>;
+}) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const toolListRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<Map<string, HTMLAnchorElement>>(new Map());
   const [query, setQuery] = useState("");
 
+  // Extract custom section links from documentation chunks
+  const customSections = useMemo(
+    () => extractChunkSectionLinks(documentationChunks),
+    [documentationChunks]
+  );
+
   // Build list of all section IDs to observe
-  const sectionIds = useMemo(() => buildObservedSectionIds(tools), [tools]);
+  const sectionIds = useMemo(
+    () => buildObservedSectionIds(tools, documentationChunks),
+    [tools, documentationChunks]
+  );
 
   const filteredTools = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -197,22 +272,56 @@ function ToolsOnThisPage({ tools }: { tools: ToolDefinition[] }) {
     return tools.filter((tool) => tool.qualifiedName.toLowerCase().includes(q));
   }, [tools, query]);
 
+  const selectedToolsList = useMemo(
+    () => tools.filter((tool) => selectedTools.has(tool.name)),
+    [tools, selectedTools]
+  );
+
   // Intersection Observer to track visible sections
   useEffect(() => {
+    // Track visibility state for all sections
+    const visibleSections = new Map<string, number>();
+
     const observer = new IntersectionObserver(
       (entries) => {
-        // Find the first visible section (from top)
-        const visibleEntries = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        // Update visibility map
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            // Store the top position (lower = higher on screen)
+            visibleSections.set(entry.target.id, entry.boundingClientRect.top);
+          } else {
+            visibleSections.delete(entry.target.id);
+          }
+        }
 
-        if (visibleEntries.length > 0) {
-          setActiveId(visibleEntries[0].target.id);
+        // Find the section closest to (but below) the top of the viewport
+        let closestId: string | null = null;
+        let closestTop = Number.POSITIVE_INFINITY;
+
+        for (const [id, top] of visibleSections) {
+          // Consider sections that are in the upper half of viewport
+          if (top >= 0 && top < closestTop) {
+            closestTop = top;
+            closestId = id;
+          }
+        }
+
+        // If no section is below the top, use the first visible one
+        if (!closestId && visibleSections.size > 0) {
+          const sorted = [...visibleSections.entries()].sort(
+            (a, b) => a[1] - b[1]
+          );
+          closestId = sorted[0][0];
+        }
+
+        if (closestId) {
+          setActiveId(closestId);
         }
       },
       {
-        rootMargin: "-80px 0px -60% 0px",
-        threshold: 0,
+        // Observe the top portion of the viewport
+        rootMargin: "-80px 0px -50% 0px",
+        threshold: [0, 0.1, 0.5],
       }
     );
 
@@ -277,14 +386,14 @@ function ToolsOnThisPage({ tools }: { tools: ToolDefinition[] }) {
   };
 
   return (
-    <aside className="fixed top-28 right-0 hidden h-[calc(100vh-7rem)] w-72 flex-col border-neutral-dark-high/30 border-l bg-neutral-dark/40 xl:flex 2xl:w-80">
-      {/* Fixed header section */}
-      <div className="shrink-0 border-neutral-dark-high/20 border-b px-6 pt-6 pb-4">
+    <aside className="fixed top-28 right-0 hidden w-80 flex-col border-muted/60 border-l bg-background xl:flex dark:border-neutral-dark-high/30 dark:bg-neutral-dark/40 2xl:w-80">
+      {/* Header section */}
+      <div className="px-6 pt-6 pb-4">
         <h2 className="font-semibold text-sm text-foreground">On this page</h2>
         <div className="mt-4 space-y-3">
           <input
             aria-label="Search tools on this page"
-            className="w-full rounded-lg border border-neutral-dark-high bg-neutral-dark/60 px-3 py-2 text-sm transition-colors placeholder:text-muted-foreground/70 focus:border-brand-accent focus:outline-none"
+            className="w-full rounded-lg border border-muted/60 bg-background px-3 py-2 text-sm transition-colors placeholder:text-muted-foreground/70 focus:border-brand-accent focus:outline-none dark:border-neutral-dark-high dark:bg-neutral-dark/60"
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search tools..."
             type="search"
@@ -294,7 +403,7 @@ function ToolsOnThisPage({ tools }: { tools: ToolDefinition[] }) {
             {filteredTools.length} of {tools.length} tools
           </div>
         </div>
-        {/* Navigation links - fixed above scrollable list */}
+        {/* Navigation links */}
         <div className="mt-4 space-y-2">
           <a
             className={`block text-sm transition-colors ${getLinkClasses(TOOLKIT_PAGE_OVERVIEW_LINK.id)}`}
@@ -303,6 +412,17 @@ function ToolsOnThisPage({ tools }: { tools: ToolDefinition[] }) {
           >
             {TOOLKIT_PAGE_OVERVIEW_LINK.label}
           </a>
+          {/* Custom documentation sections */}
+          {customSections.map((section) => (
+            <a
+              className={`block pl-3 text-sm transition-colors ${getLinkClasses(section.id)}`}
+              href={section.href}
+              key={section.id}
+              ref={(el) => setItemRef(section.id, el)}
+            >
+              {section.label}
+            </a>
+          ))}
           <a
             className={`block text-sm transition-colors ${getLinkClasses(TOOLKIT_PAGE_AVAILABLE_TOOLS_LINK.id)}`}
             href={TOOLKIT_PAGE_AVAILABLE_TOOLS_LINK.href}
@@ -310,40 +430,50 @@ function ToolsOnThisPage({ tools }: { tools: ToolDefinition[] }) {
           >
             {TOOLKIT_PAGE_AVAILABLE_TOOLS_LINK.label}
           </a>
+          <a
+            className={`block text-sm transition-colors ${getLinkClasses(TOOLKIT_PAGE_SELECTED_TOOLS_LINK.id)}`}
+            href={TOOLKIT_PAGE_SELECTED_TOOLS_LINK.href}
+            ref={(el) => setItemRef(TOOLKIT_PAGE_SELECTED_TOOLS_LINK.id, el)}
+          >
+            {TOOLKIT_PAGE_SELECTED_TOOLS_LINK.label} ({selectedToolsList.length}
+            )
+          </a>
         </div>
       </div>
 
-      {/* Scrollable tool list */}
-      <div
-        className="min-h-0 flex-1 overflow-y-auto px-6 py-3"
-        ref={toolListRef}
-      >
-        <div className="space-y-1">
-          {filteredTools.map((tool) => {
-            const hasSecrets =
-              (tool.secretsInfo?.length ?? 0) > 0 ||
-              (tool.secrets?.length ?? 0) > 0;
-            const toolId = toToolAnchorId(tool.qualifiedName);
-            return (
-              <a
-                className={`flex items-center gap-2 py-1 pl-3 text-sm transition-colors ${getLinkClasses(toolId)}`}
-                href={`#${toolId}`}
-                key={tool.qualifiedName}
-                ref={(el) => setItemRef(toolId, el)}
-                title={tool.qualifiedName}
-              >
-                <span className="truncate">{tool.qualifiedName}</span>
-                {hasSecrets && (
-                  <KeyRound className="h-3.5 w-3.5 shrink-0 text-amber-400" />
-                )}
-              </a>
-            );
-          })}
+      {/* Divider + Scrollable tool list (constrained height) */}
+      <div className="border-muted/60 border-t dark:border-neutral-dark-high/30">
+        <div
+          className="max-h-[50vh] overflow-y-auto px-6 py-3"
+          ref={toolListRef}
+        >
+          <div className="space-y-1">
+            {filteredTools.map((tool) => {
+              const hasSecrets =
+                (tool.secretsInfo?.length ?? 0) > 0 ||
+                (tool.secrets?.length ?? 0) > 0;
+              const toolId = toToolAnchorId(tool.qualifiedName);
+              return (
+                <a
+                  className={`flex items-center gap-2 py-1 pl-3 text-sm transition-colors ${getLinkClasses(toolId)}`}
+                  href={`#${toolId}`}
+                  key={tool.qualifiedName}
+                  ref={(el) => setItemRef(toolId, el)}
+                  title={tool.qualifiedName}
+                >
+                  <span className="truncate">{tool.qualifiedName}</span>
+                  {hasSecrets && (
+                    <KeyRound className="h-3.5 w-3.5 shrink-0 text-amber-400" />
+                  )}
+                </a>
+              );
+            })}
+          </div>
         </div>
       </div>
 
-      {/* Fixed footer section */}
-      <div className="shrink-0 border-neutral-dark-high/20 border-t px-6 py-4">
+      {/* Footer section */}
+      <div className="border-muted/60 border-t px-6 py-4 dark:border-neutral-dark-high/20">
         <a
           className={`block text-sm transition-colors ${getLinkClasses(TOOLKIT_PAGE_GET_BUILDING_LINK.id)}`}
           href={TOOLKIT_PAGE_GET_BUILDING_LINK.href}
@@ -356,70 +486,6 @@ function ToolsOnThisPage({ tools }: { tools: ToolDefinition[] }) {
   );
 }
 
-const COPY_PAGE_LABEL = "copy page";
-const EDIT_LINK_SELECTOR = 'a[href*="github.com/ArcadeAI/docs/tree/main/"]';
-
-const toLowerText = (value: string | null): string =>
-  value?.trim().toLowerCase() ?? "";
-
-const isCopyPageButton = (button: HTMLButtonElement): boolean => {
-  const text = toLowerText(button.textContent);
-  const title = toLowerText(button.getAttribute("title"));
-  const ariaLabel = toLowerText(button.getAttribute("aria-label"));
-  return (
-    text.includes(COPY_PAGE_LABEL) ||
-    title === COPY_PAGE_LABEL ||
-    ariaLabel === COPY_PAGE_LABEL
-  );
-};
-
-const findActionGroup = (element: HTMLElement): HTMLElement | null =>
-  element.closest('[role="group"], [role="toolbar"]') ?? element.parentElement;
-
-const hideElementGroup = (
-  element: HTMLElement,
-  shouldSkip: (node: Element | null) => boolean
-) => {
-  const group = findActionGroup(element);
-  if (group && !shouldSkip(group)) {
-    const groupButtons = group.querySelectorAll("button");
-    for (const btn of groupButtons) {
-      (btn as HTMLElement).style.display = "none";
-    }
-    group.style.display = "none";
-    return;
-  }
-  element.style.display = "none";
-};
-
-const hideCopyPageButtons = (
-  root: Document,
-  shouldSkip: (element: Element | null) => boolean
-) => {
-  const copyButtons = Array.from(root.querySelectorAll("button")).filter(
-    (button) => isCopyPageButton(button as HTMLButtonElement)
-  );
-  for (const button of copyButtons) {
-    if (shouldSkip(button)) {
-      continue;
-    }
-    hideElementGroup(button as HTMLElement, shouldSkip);
-  }
-};
-
-const hideEditLinks = (
-  root: Document,
-  shouldSkip: (element: Element | null) => boolean
-) => {
-  const editLinks = root.querySelectorAll(EDIT_LINK_SELECTOR);
-  for (const link of editLinks) {
-    if (shouldSkip(link)) {
-      continue;
-    }
-    hideElementGroup(link as HTMLElement, shouldSkip);
-  }
-};
-
 /**
  * ToolkitPage
  *
@@ -428,25 +494,7 @@ const hideEditLinks = (
 export function ToolkitPage({ data }: ToolkitPageProps) {
   useEffect(() => {
     document.documentElement.dataset.pageKind = "toolkit";
-
-    const hideBuiltInActions = () => {
-      const root = document;
-      const shouldSkip = (element: Element | null) =>
-        Boolean(element?.closest("[data-toolkit-page-actions]"));
-
-      hideCopyPageButtons(root, shouldSkip);
-      hideEditLinks(root, shouldSkip);
-    };
-
-    const observer = new MutationObserver(() => hideBuiltInActions());
-    if (document.body) {
-      observer.observe(document.body, { childList: true, subtree: true });
-    }
-
-    hideBuiltInActions();
-
     return () => {
-      observer.disconnect();
       delete document.documentElement.dataset.pageKind;
     };
   }, []);
@@ -532,7 +580,7 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
       {/* Overview section */}
       <section className="scroll-mt-20" id={TOOLKIT_PAGE_OVERVIEW_LINK.id}>
         <BreadcrumbBar category={data.metadata.category} label={data.label} />
-        <PageActionsBar data={data} />
+        <PageActionsBar toolkitId={data.id} />
         <h1 className="mb-6 font-bold text-4xl text-foreground tracking-tight">
           {data.label}
         </h1>
@@ -662,7 +710,10 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
       />
 
       {shouldShowSelection && (
-        <section className="mt-10">
+        <section
+          className="mt-10 scroll-mt-20"
+          id={TOOLKIT_PAGE_SELECTED_TOOLS_LINK.id}
+        >
           <ScopePicker
             onSelectedToolsChange={handleScopeSelectionChange}
             selectedTools={Array.from(selectedTools)}
@@ -701,7 +752,11 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
         />
       </section>
 
-      <ToolsOnThisPage tools={tools} />
+      <ToolsOnThisPage
+        documentationChunks={documentationChunks}
+        selectedTools={selectedTools}
+        tools={tools}
+      />
       <ScrollToButtons />
     </div>
   );

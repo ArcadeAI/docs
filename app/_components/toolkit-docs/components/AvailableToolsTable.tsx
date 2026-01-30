@@ -310,26 +310,16 @@ function SelectionCell({
     <td
       className={`relative sticky left-0 z-10 p-0 text-center ${selectionCellBg} group-hover:bg-brand-accent/10`}
     >
-      <Button
-        aria-label={getSelectionLabel(isSelected)}
-        className="absolute inset-0 h-full w-full rounded-none"
-        onClick={(event) => {
-          handleSelectionButtonClick(event, onToggleSelection, toolName);
-        }}
-        size="sm"
-        title={getSelectionLabel(isSelected)}
-        variant="ghost"
-      >
-        <span
-          className={`flex h-5 w-5 items-center justify-center rounded border transition-colors ${
-            isSelected
-              ? "border-brand-accent bg-brand-accent text-white"
-              : "border-neutral-dark-high bg-neutral-dark/40 hover:border-brand-accent/50"
-          }`}
-        >
-          {isSelected && <Check className="h-3 w-3" />}
-        </span>
-      </Button>
+      <label className="absolute inset-0 flex h-full w-full cursor-pointer items-center justify-center rounded-none">
+        <input
+          aria-label={getSelectionLabel(isSelected)}
+          checked={isSelected}
+          className="h-4 w-4 rounded border-neutral-dark-high text-brand-accent accent-brand-accent focus:ring-brand-accent"
+          onChange={() => onToggleSelection?.(toolName)}
+          onClick={(event) => event.stopPropagation()}
+          type="checkbox"
+        />
+      </label>
     </td>
   );
 }

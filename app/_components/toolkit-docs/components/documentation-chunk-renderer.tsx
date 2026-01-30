@@ -19,6 +19,9 @@ import type {
 } from "../types";
 import DataTable from "./data-table";
 
+// Regex for removing leading ## from headers (defined at top level for performance)
+const HEADER_PREFIX_REGEX = /^#+\s*/;
+
 /**
  * Maps chunk types to Nextra Callout types
  */
@@ -174,10 +177,27 @@ function MdxContent({ content }: { content: string }) {
 }
 
 /**
+ * Converts a header string to a URL-friendly anchor ID.
+ * E.g., "## Auth Setup" -> "auth-setup"
+ */
+export function headerToAnchorId(header: string): string {
+  return header
+    .replace(HEADER_PREFIX_REGEX, "") // Remove leading ##
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "") // Remove special chars
+    .replace(/\s+/g, "-") // Replace spaces with hyphens
+    .replace(/-+/g, "-"); // Collapse multiple hyphens
+}
+
+/**
  * Renders a single documentation chunk
  */
 function ChunkContent({ chunk }: { chunk: DocumentationChunk }) {
-  const { type, content, title, variant } = chunk;
+  const { type, content, title, variant, header } = chunk;
+
+  // Generate anchor ID from header if present
+  const anchorId = header ? headerToAnchorId(header) : undefined;
 
   // Handle code blocks
   if (type === "code") {
@@ -191,9 +211,9 @@ function ChunkContent({ chunk }: { chunk: DocumentationChunk }) {
   // Render complex MDX content directly
   if (type === "markdown" || hasJSXContent(content)) {
     return (
-      <div className="my-3">
+      <section className="my-3 scroll-mt-20" id={anchorId}>
         <MdxContent content={content} />
-      </div>
+      </section>
     );
   }
 
@@ -208,9 +228,11 @@ function ChunkContent({ chunk }: { chunk: DocumentationChunk }) {
   }
 
   return (
-    <Callout title={title} type={calloutType}>
-      <MdxContent content={content} />
-    </Callout>
+    <section className="scroll-mt-20" id={anchorId}>
+      <Callout title={title} type={calloutType}>
+        <MdxContent content={content} />
+      </Callout>
+    </section>
   );
 }
 

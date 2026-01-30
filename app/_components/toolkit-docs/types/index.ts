@@ -66,6 +66,8 @@ export type DocumentationChunk = {
   title?: string;
   /** Optional variant for styling */
   variant?: DocumentationChunkVariant;
+  /** Optional section header for sidebar navigation (e.g., "## Auth Setup") */
+  header?: string;
 };
 
 // ============================================================================

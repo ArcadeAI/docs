@@ -999,37 +999,11 @@
   ],
   "documentationChunks": [
     {
-      "type": "warning",
+      "type": "markdown",
       "location": "auth",
       "position": "after",
-      "content": "**Critical**: Confluence Cloud requires OAuth 2.0 (3LO) or API tokens; Confluence Server/Data Center (self-hosted) commonly uses Basic auth, OAuth 1.0a, or app links. Ensure you select the correct auth provider for your deployment. See [Confluence auth](/references/auth-providers/confluence)"
-    },
-    {
-      "type": "markdown",
-      "location": "description",
-      "position": "after",
-      "content": "Confluence is available in two main deployment models with important differences to consider:\n\n- **Confluence Cloud**\n  - Uses Atlassian's hosted API endpoints and OAuth 2.0 (3LO) or API tokens.\n  - Atlassian-managed rate limits and feature rollout; some admin capabilities are restricted to site admins.\n- **Confluence Server / Data Center (self-hosted)**\n  - Hosts live on customer infrastructure; may expose different API paths and authentication options (Basic, OAuth 1.0a, app links).\n  - Requires additional configuration for external tool access (proxy, TLS, firewall rules).\n\n<Callout type=\"info\">\nFeature parity between Cloud and self-hosted can vary. Validate API availability and required scopes for your Confluence version before integrating.\n</Callout>\n\n**Checklist when choosing deployment type:**\n- Confirm auth method supported by your Confluence instance.\n- Verify API surface and endpoints available in your Confluence version.\n- Plan for network access (IP allowlists, VPN, reverse proxy) for self-hosted instances.",
-      "header": "## Availability: Cloud vs Self-hosted"
-    },
-    {
-      "type": "markdown",
-      "location": "before_available_tools",
-      "position": "after",
-      "content": "**Enterprise support considerations**\n\n- Enterprise customers should coordinate with their Atlassian account team for support on Cloud tenant or Data Center issues.\n- For self-hosted (Server/Data Center), coordinate with your internal infrastructure and security teams for firewall, TLS, and proxy configuration.\n\n**Configuration notes**\n\n- **Base URL**: For self-hosted instances set the tool's base URL to your Confluence base (example: `https://confluence.example.com`).\n- **OAuth / API credentials**: Configure OAuth client ID/secret or API tokens in a secure secret store. Ensure client callback URLs match exactly.\n- **Required scopes / permissions**:\n  - Scopes for reading content and metadata (pages, spaces).\n  - Scopes for creating/updating content and attachments if write operations are needed.\n  - Scopes for comments and permissions management where applicable.\n- **Network configuration**:\n  - Allow outbound requests to Atlassian OAuth endpoints for Cloud.\n  - For self-hosted, permit inbound requests from the tool or set up a secure reverse proxy.\n\n<Callout type=\"warning\">\nInstalling app links or configuring OAuth on Confluence requires Confluence admin permissions. Plan for an admin to perform initial setup and consent.\n</Callout>\n\n<Callout type=\"info\">\nStore credentials in a secrets manager and rotate them according to your security policy. Do not embed credentials in code or config files.\n</Callout>",
-      "header": "## Enterprise support & configuration"
-    },
-    {
-      "type": "markdown",
-      "location": "description",
-      "position": "after",
-      "content": "Permission behavior and limitations to note when integrating with Confluence:\n\n- **Permission model**\n  - API access follows Confluence user permissions. The integration can only read or modify content that the authenticated user/app has permission to access.\n  - Space-level and page-level restrictions will prevent access to restricted content.\n- **Common permission scopes needed**\n  - Read spaces and pages\n  - Read attachments\n  - Create/update pages and attachments (if writing is required)\n  - Add comments (if comment functionality is used)\n- **Limitations**\n  - Restricted pages and content are not accessible via the API unless the authenticated identity has explicit access.\n  - Rate limits differ between Cloud and self-hosted; Cloud enforces Atlassian rate limits—implement retry/backoff.\n  - Large attachments or pages may be subject to size limits or timeouts; design upload and retrieval logic accordingly.\n  - Impersonation is not generally supported; actions are performed as the granted OAuth user or service account.\n\n<Callout type=\"info\">\nWhere possible, use a dedicated service account with the minimal required scopes for automated integrations. For actions requiring user context, use OAuth flows that prompt the user for consent.\n</Callout>",
-      "header": "## Permissions & important limitations"
-    },
-    {
-      "type": "info",
-      "location": "auth",
-      "position": "before",
-      "content": "**Note**: For self-hosted Confluence, ensure the API base path and context (e.g., `/wiki/rest/api`) match your instance configuration. Mismatched paths are a common cause of integration failures."
+      "content": "The Arcade Notion MCP Sever uses the [Notion auth provider](/references/auth-providers/notion) to connect to users' Notion accounts.\n---",
+      "header": "## Auth"
     }
   ],
   "customImports": [],

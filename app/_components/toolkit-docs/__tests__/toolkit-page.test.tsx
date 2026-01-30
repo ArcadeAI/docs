@@ -6,6 +6,7 @@ import {
   TOOLKIT_PAGE_AVAILABLE_TOOLS_LINK,
   TOOLKIT_PAGE_GET_BUILDING_LINK,
   TOOLKIT_PAGE_OVERVIEW_LINK,
+  TOOLKIT_PAGE_SELECTED_TOOLS_LINK,
 } from "../components/toolkit-page";
 
 describe("ToolkitPage helpers", () => {
@@ -27,6 +28,11 @@ describe("ToolkitPage helpers", () => {
       label: "Available tools",
       href: "#available-tools",
     });
+    expect(TOOLKIT_PAGE_SELECTED_TOOLS_LINK).toEqual({
+      id: "selected-tools",
+      label: "Selected tools",
+      href: "#selected-tools",
+    });
     expect(TOOLKIT_PAGE_GET_BUILDING_LINK).toEqual({
       id: "get-building",
       label: "Get building",
@@ -43,6 +49,7 @@ describe("ToolkitPage helpers", () => {
     ).toEqual([
       "overview",
       "available-tools",
+      "selected-tools",
       "githubcreateissue",
       "slacklistchannels",
       "get-building",
