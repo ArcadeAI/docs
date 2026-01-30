@@ -9,6 +9,7 @@ import { TranslationBanner } from "@/app/_components/translation-banner";
 import "@/app/globals.css";
 import { Discord, Github } from "@arcadeai/design-system";
 import { GoogleTagManager } from "@next/third-parties/google";
+import { headers } from "next/headers";
 import Link from "next/link";
 import Script from "next/script";
 import { Head } from "nextra/components";
@@ -19,6 +20,8 @@ import {
   Navbar,
   Footer as NextraFooter,
 } from "nextra-theme-docs";
+
+const REGEX_LOCALE = /^\/([a-z]{2}(?:-[A-Z]{2})?)(?:\/|$)/;
 
 export const metadata = {
   title: {
@@ -67,12 +70,19 @@ export const metadata = {
   },
 };
 
+function getLocaleFromPathname(pathname: string): string {
+  const localeMatch = pathname.match(REGEX_LOCALE);
+  return localeMatch?.[1] || "en";
+}
+
 export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const lang = "en";
+  const headersList = await headers();
+  const pathname = headersList.get("x-pathname") || "/";
+  const lang = getLocaleFromPathname(pathname);
 
   const dictionary = await getDictionary(lang);
   const pageMap = await getPageMap(`/${lang}`);
