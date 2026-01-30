@@ -1,0 +1,133 @@
+{
+  "id": "GoogleNews",
+  "label": "Google News",
+  "version": "3.1.2",
+  "description": "Arcade.dev LLM tools for getting new via Google News",
+  "metadata": {
+    "category": "search",
+    "iconUrl": "https://design-system.arcade.dev/icons/google-news.svg",
+    "isBYOC": true,
+    "isPro": true,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/search/google_news",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": null,
+  "tools": [
+    {
+      "name": "SearchNewsStories",
+      "qualifiedName": "GoogleNews.SearchNewsStories",
+      "fullyQualifiedName": "GoogleNews.SearchNewsStories@3.1.2",
+      "description": "Search for news articles related to a given query.",
+      "parameters": [
+        {
+          "name": "keywords",
+          "type": "string",
+          "required": true,
+          "description": "Keywords to search for news articles. E.g. 'Apple launches new iPhone'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "country_code",
+          "type": "string",
+          "required": false,
+          "description": "2-character country code to search for news articles. E.g. 'us' (United States). Defaults to 'None'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "language_code",
+          "type": "string",
+          "required": false,
+          "description": "2-character language code to search for news articles. E.g. 'en' (English). Defaults to 'en'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of news articles to return. Defaults to None (returns all results found by the API).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["SERP_API_KEY"],
+      "secretsInfo": [
+        {
+          "name": "SERP_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "News search results with article details."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleNews.SearchNewsStories",
+        "parameters": {
+          "keywords": {
+            "value": "Apple launches new iPhone",
+            "type": "string",
+            "required": true
+          },
+          "country_code": {
+            "value": "us",
+            "type": "string",
+            "required": false
+          },
+          "language_code": {
+            "value": "en",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    }
+  ],
+  "documentationChunks": [
+    {
+      "type": "markdown",
+      "location": "auth",
+      "position": "after",
+      "content": "The Arcade Google News MCP Sever uses the [SerpAPI](https://serpapi.com/) to get news data from Google News.\n- **Secret:**\n  - `SERP_API_KEY`: Your SerpAPI API key.\n    <Callout type=\"info\">\n      Setting the `SERP_API_KEY` secret is only required if you are\n      [self-hosting](/guides/deployment-hosting/configure-engine) Arcade. If you're\n      using Arcade Cloud, the secret is already set for you. To manage your\n      secrets, go to the [Secrets\n      page](https://api.arcade.dev/dashboard/auth/secrets) in the Arcade\n      Dashboard.\n    </Callout>",
+      "header": "## Auth"
+    },
+    {
+      "type": "section",
+      "location": "custom_section",
+      "position": "after",
+      "content": "## Default parameters\n\nLanguage and Country are configurable through environment variables. When set, they will be used as default for Google News tools.\n\nProviding a different value as `language_code` or `country_code` argument in the tool call will override the default value.\n\n**Language**\n\nThe language code is a 2-character code that determines the language in which the API will search and return news articles. There are two environment variables:\n\n- `ARCADE_GOOGLE_LANGUAGE`: a default value for all Google search tools. If not set, defaults to 'en' (English).\n- `ARCADE_GOOGLE_NEWS_LANGUAGE`: a default value for the news search tools. If not set, defaults to `ARCADE_GOOGLE_LANGUAGE`.\n\nA list of supported language codes can be found [here](#languagecodes).\n\n**Country**\n\nThe country code is a 2-character code that determines the country in which the API will search for news articles. There are two environment variables:\n\n- `ARCADE_GOOGLE_NEWS_COUNTRY`: a default value for the `SearchNews` tool. If not set, defaults to `None` (search news globally).\n\nA list of supported country codes can be found [here](#countrycodes).\n\n---",
+      "header": "## Default parameters"
+    },
+    {
+      "type": "section",
+      "location": "custom_section",
+      "position": "after",
+      "content": "## LanguageCodes\n\n- **`ar`**: Arabic\n- **`bn`**: Bengali\n- **`da`**: Danish\n- **`de`**: German\n- **`el`**: Greek\n- **`en`**: English\n- **`es`**: Spanish\n- **`fi`**: Finnish\n- **`fr`**: French\n- **`hi`**: Hindi\n- **`hu`**: Hungarian\n- **`id`**: Indonesian\n- **`it`**: Italian\n- **`ja`**: Japanese\n- **`ko`**: Korean\n- **`ms`**: Malay\n- **`nl`**: Dutch\n- **`no`**: Norwegian\n- **`pcm`**: Nigerian Pidgin\n- **`pl`**: Polish\n- **`pt`**: Portuguese\n- **`pt-br`**: Portuguese (Brazil)\n- **`pt-pt`**: Portuguese (Portugal)\n- **`ru`**: Russian\n- **`sv`**: Swedish\n- **`tl`**: Filipino\n- **`tr`**: Turkish\n- **`uk`**: Ukrainian\n- **`zh`**: Chinese\n- **`zh-cn`**: Chinese (Simplified)\n- **`zh-tw`**: Chinese (Traditional)",
+      "header": "## LanguageCodes"
+    },
+    {
+      "type": "section",
+      "location": "custom_section",
+      "position": "after",
+      "content": "## CountryCodes\n\n- **`af`**: Afghanistan\n- **`al`**: Albania\n- **`dz`**: Algeria\n- **`as`**: American Samoa\n- **`ad`**: Andorra\n- **`ao`**: Angola\n- **`ai`**: Anguilla\n- **`aq`**: Antarctica\n- **`ag`**: Antigua and Barbuda\n- **`ar`**: Argentina\n- **`am`**: Armenia\n- **`aw`**: Aruba\n- **`au`**: Australia\n- **`at`**: Austria\n- **`az`**: Azerbaijan\n- **`bs`**: Bahamas\n- **`bh`**: Bahrain\n- **`bd`**: Bangladesh\n- **`bb`**: Barbados\n- **`by`**: Belarus\n- **`be`**: Belgium\n- **`bz`**: Belize\n- **`bj`**: Benin\n- **`bm`**: Bermuda\n- **`bt`**: Bhutan\n- **`bo`**: Bolivia\n- **`ba`**: Bosnia and Herzegovina\n- **`bw`**: Botswana\n- **`bv`**: Bouvet Island\n- **`br`**: Brazil\n- **`io`**: British Indian Ocean Territory\n- **`bn`**: Brunei Darussalam\n- **`bg`**: Bulgaria\n- **`bf`**: Burkina Faso\n- **`bi`**: Burundi\n- **`kh`**: Cambodia\n- **`cm`**: Cameroon\n- **`ca`**: Canada\n- **`cv`**: Cape Verde\n- **`ky`**: Cayman Islands\n- **`cf`**: Central African Republic\n- **`td`**: Chad\n- **`cl`**: Chile\n- **`cn`**: China\n- **`cx`**: Christmas Island\n- **`cc`**: Cocos (Keeling) Islands\n- **`co`**: Colombia\n- **`km`**: Comoros\n- **`cg`**: Congo\n- **`cd`**: Congo, the Democratic Republic of the\n- **`ck`**: Cook Islands\n- **`cr`**: Costa Rica\n- **`ci`**: Cote D'ivoire\n- **`hr`**: Croatia\n- **`cu`**: Cuba\n- **`cy`**: Cyprus\n- **`cz`**: Czech Republic\n- **`dk`**: Denmark\n- **`dj`**: Djibouti\n- **`dm`**: Dominica\n- **`do`**: Dominican Republic\n- **`ec`**: Ecuador\n- **`eg`**: Egypt\n- **`sv`**: El Salvador\n- **`gq`**: Equatorial Guinea\n- **`er`**: Eritrea\n- **`ee`**: Estonia\n- **`et`**: Ethiopia\n- **`fk`**: Falkland Islands (Malvinas)\n- **`fo`**: Faroe Islands\n- **`fj`**: Fiji\n- **`fi`**: Finland\n- **`fr`**: France\n- **`gf`**: French Guiana\n- **`pf`**: French Polynesia\n- **`tf`**: French Southern Territories\n- **`ga`**: Gabon\n- **`gm`**: Gambia\n- **`ge`**: Georgia\n- **`de`**: Germany\n- **`gh`**: Ghana\n- **`gi`**: Gibraltar\n- **`gr`**: Greece\n- **`gl`**: Greenland\n- **`gd`**: Grenada\n- **`gp`**: Guadeloupe\n- **`gu`**: Guam\n- **`gt`**: Guatemala\n- **`gg`**: Guernsey\n- **`gn`**: Guinea\n- **`gw`**: Guinea-Bissau\n- **`gy`**: Guyana\n- **`ht`**: Haiti\n- **`hm`**: Heard Island and Mcdonald Islands\n- **`va`**: Holy See (Vatican City State)\n- **`hn`**: Honduras\n- **`hk`**: Hong Kong\n- **`hu`**: Hungary\n- **`is`**: Iceland\n- **`in`**: India\n- **`id`**: Indonesia\n- **`ir`**: Iran, Islamic Republic of\n- **`iq`**: Iraq\n- **`ie`**: Ireland\n- **`im`**: Isle of Man\n- **`il`**: Israel\n- **`it`**: Italy\n- **`je`**: Jersey\n- **`jm`**: Jamaica\n- **`jp`**: Japan\n- **`jo`**: Jordan\n- **`kz`**: Kazakhstan\n- **`ke`**: Kenya\n- **`ki`**: Kiribati\n- **`kp`**: Korea, Democratic People's Republic of\n- **`kr`**: Korea, Republic of\n- **`kw`**: Kuwait\n- **`kg`**: Kyrgyzstan\n- **`la`**: Lao People's Democratic Republic\n- **`lv`**: Latvia\n- **`lb`**: Lebanon\n- **`ls`**: Lesotho\n- **`lr`**: Liberia\n- **`ly`**: Libyan Arab Jamahiriya\n- **`li`**: Liechtenstein\n- **`lt`**: Lithuania\n- **`lu`**: Luxembourg\n- **`mo`**: Macao\n- **`mk`**: Macedonia, the Former Yugosalv Republic of\n- **`mg`**: Madagascar\n- **`mw`**: Malawi\n- **`my`**: Malaysia\n- **`mv`**: Maldives\n- **`ml`**: Mali\n- **`mt`**: Malta\n- **`mh`**: Marshall Islands\n- **`mq`**: Martinique\n- **`mr`**: Mauritania\n- **`mu`**: Mauritius\n- **`yt`**: Mayotte\n- **`mx`**: Mexico\n- **`fm`**: Micronesia, Federated States of\n- **`md`**: Moldova, Republic of\n- **`mc`**: Monaco\n- **`mn`**: Mongolia\n- **`me`**: Montenegro\n- **`ms`**: Montserrat\n- **`ma`**: Morocco\n- **`mz`**: Mozambique\n- **`mm`**: Myanmar\n- **`na`**: Namibia\n- **`nr`**: Nauru\n- **`np`**: Nepal\n- **`nl`**: Netherlands\n- **`an`**: Netherlands Antilles\n- **`nc`**: New Caledonia\n- **`nz`**: New Zealand\n- **`ni`**: Nicaragua\n- **`ne`**: Niger\n- **`ng`**: Nigeria\n- **`nu`**: Niue\n- **`nf`**: Norfolk Island\n- **`mp`**: Northern Mariana Islands\n- **`no`**: Norway\n- **`om`**: Oman\n- **`pk`**: Pakistan\n- **`pw`**: Palau\n- **`ps`**: Palestinian Territory, Occupied\n- **`pa`**: Panama\n- **`pg`**: Papua New Guinea\n- **`py`**: Paraguay\n- **`pe`**: Peru\n- **`ph`**: Philippines\n- **`pn`**: Pitcairn\n- **`pl`**: Poland\n- **`pt`**: Portugal\n- **`pr`**: Puerto Rico\n- **`qa`**: Qatar\n- **`re`**: Reunion\n- **`ro`**: Romania\n- **`ru`**: Russian Federation\n- **`rw`**: Rwanda\n- **`sh`**: Saint Helena\n- **`kn`**: Saint Kitts and Nevis\n- **`lc`**: Saint Lucia\n- **`pm`**: Saint Pierre and Miquelon\n- **`vc`**: Saint Vincent and the Grenadines\n- **`ws`**: Samoa\n- **`sm`**: San Marino\n- **`st`**: Sao Tome and Principe\n- **`sa`**: Saudi Arabia\n- **`sn`**: Senegal\n- **`rs`**: Serbia\n- **`sc`**: Seychelles\n- **`sl`**: Sierra Leone\n- **`sg`**: Singapore\n- **`sk`**: Slovakia\n- **`si`**: Slovenia\n- **`sb`**: Solomon Islands\n- **`so`**: Somalia\n- **`za`**: South Africa\n- **`gs`**: South Georgia and the South Sandwich Islands\n- **`es`**: Spain\n- **`lk`**: Sri Lanka\n- **`sd`**: Sudan\n- **`sr`**: Suriname\n- **`sj`**: Svalbard and Jan Mayen\n- **`sz`**: Swaziland\n- **`se`**: Sweden\n- **`ch`**: Switzerland\n- **`sy`**: Syrian Arab Republic\n- **`tw`**: Taiwan, Province of China\n- **`tj`**: Tajikistan\n- **`tz`**: Tanzania, United Republic of\n- **`th`**: Thailand\n- **`tl`**: Timor-Leste\n- **`tg`**: Togo\n- **`tk`**: Tokelau\n- **`to`**: Tonga\n- **`tt`**: Trinidad and Tobago\n- **`tn`**: Tunisia\n- **`tr`**: Turkiye\n- **`tm`**: Turkmenistan\n- **`tc`**: Turks and Caicos Islands\n- **`tv`**: Tuvalu\n- **`ug`**: Uganda\n- **`ua`**: Ukraine\n- **`ae`**: United Arab Emirates\n- **`uk`**: United Kingdom\n- **`gb`**: United Kingdom\n- **`us`**: United States\n- **`um`**: United States Minor Outlying Islands\n- **`uy`**: Uruguay\n- **`uz`**: Uzbekistan\n- **`vu`**: Vanuatu\n- **`ve`**: Venezuela\n- **`vn`**: Viet Nam\n- **`vg`**: Virgin Islands, British\n- **`vi`**: Virgin Islands, U.S.\n- **`wf`**: Wallis and Futuna\n- **`eh`**: Western Sahara\n- **`ye`**: Yemen\n- **`zm`**: Zambia\n- **`zw`**: Zimbabwe\n\n<ToolFooter pipPackageName=\"arcade_google_news\" />",
+      "header": "## CountryCodes"
+    }
+  ],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-01-26T17:33:06.757Z",
+  "summary": "The Arcade toolkit for GoogleNews enables developers to retrieve the latest news articles through a seamless integration with Google News. This toolkit provides efficient access to current stories based on queries, ensuring users stay informed.\n\n### Capabilities\n- Access to real-time news articles from Google News.\n- Query-based searching for specific topics or events.\n- Easy integration into applications for timely updates.\n\n### OAuth  \nNo OAuth authentication is required, but API key usage is necessary for accessing the service.\n\n### Secrets  \nDevelopers must use the following secret type for accessing the API:  \n- **API Key**: SERP_API_KEY, required for API access."
+}

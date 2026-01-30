@@ -1,0 +1,139 @@
+{
+  "id": "GoogleJobs",
+  "label": "Google Jobs",
+  "version": "3.1.2",
+  "description": "Arcade.dev LLM tools for getting job postings via Google Jobs",
+  "metadata": {
+    "category": "search",
+    "iconUrl": "https://design-system.arcade.dev/icons/google-jobs.svg",
+    "isBYOC": true,
+    "isPro": true,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/search/google_jobs",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": null,
+  "tools": [
+    {
+      "name": "SearchJobs",
+      "qualifiedName": "GoogleJobs.SearchJobs",
+      "fullyQualifiedName": "GoogleJobs.SearchJobs@3.1.2",
+      "description": "Search Google Jobs using SerpAPI.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": true,
+          "description": "Search query. Provide a job title, company name, and/or any keywords in general representing what kind of jobs the user is looking for. E.g. 'software engineer' or 'data analyst at Apple'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "location",
+          "type": "string",
+          "required": false,
+          "description": "Location to search for jobs. E.g. 'United States' or 'New York, NY'. Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "language",
+          "type": "string",
+          "required": false,
+          "description": "2-character language code to use in the Google Jobs search. E.g. 'en' for English. Defaults to 'en'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of results to retrieve. Defaults to 10 (max supported by the API).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "next_page_token",
+          "type": "string",
+          "required": false,
+          "description": "Next page token to paginate results. Defaults to None (start from the first page).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["SERP_API_KEY"],
+      "secretsInfo": [
+        {
+          "name": "SERP_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Google Jobs results"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleJobs.SearchJobs",
+        "parameters": {
+          "query": {
+            "value": "software engineer",
+            "type": "string",
+            "required": true
+          },
+          "location": {
+            "value": "San Francisco, CA",
+            "type": "string",
+            "required": false
+          },
+          "language": {
+            "value": "en",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "next_page_token": {
+            "value": null,
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    }
+  ],
+  "documentationChunks": [
+    {
+      "type": "markdown",
+      "location": "auth",
+      "position": "after",
+      "content": "The Arcade Google Jobs MCP Sever uses the [SerpAPI](https://serpapi.com/) to get job data from Google Jobs.\n- **Secret:**\n  - `SERP_API_KEY`: Your SerpAPI API key.\n    <Callout type=\"info\">\n      Setting the `SERP_API_KEY` secret is only required if you are\n      [self-hosting](/guides/deployment-hosting/configure-engine) Arcade. If you're\n      using Arcade Cloud, the secret is already set for you. To manage your\n      secrets, go to the [Secrets\n      page](https://api.arcade.dev/dashboard/auth/secrets) in the Arcade\n      Dashboard.\n    </Callout>",
+      "header": "## Auth"
+    },
+    {
+      "type": "section",
+      "location": "custom_section",
+      "position": "after",
+      "content": "## Default parameters\n\nLanguage is configurable through environment variables. When set, they will be used as default for Google Jobs tools.\n\nProviding a different value as `language` argument in a tool call will override the default value.\n\n**Language**\n\nThe language code is a 2-character code that determines the language in which the API will search and return news articles. There are two environment variables:\n\n- `ARCADE_GOOGLE_LANGUAGE`: a default value for all Google search tools. If not set, defaults to 'en' (English).\n- `ARCADE_GOOGLE_JOBS_LANGUAGE`: a default value for the jobs search tools. If not set, defaults to `ARCADE_GOOGLE_LANGUAGE`.\n\nA list of supported language codes can be found [here](#languagecodes).",
+      "header": "## Default parameters"
+    },
+    {
+      "type": "section",
+      "location": "custom_section",
+      "position": "after",
+      "content": "## LanguageCodes\n\n- **`ar`**: Arabic\n- **`bn`**: Bengali\n- **`da`**: Danish\n- **`de`**: German\n- **`el`**: Greek\n- **`en`**: English\n- **`es`**: Spanish\n- **`fi`**: Finnish\n- **`fr`**: French\n- **`hi`**: Hindi\n- **`hu`**: Hungarian\n- **`id`**: Indonesian\n- **`it`**: Italian\n- **`ja`**: Japanese\n- **`ko`**: Korean\n- **`ms`**: Malay\n- **`nl`**: Dutch\n- **`no`**: Norwegian\n- **`pcm`**: Nigerian Pidgin\n- **`pl`**: Polish\n- **`pt`**: Portuguese\n- **`pt-br`**: Portuguese (Brazil)\n- **`pt-pt`**: Portuguese (Portugal)\n- **`ru`**: Russian\n- **`sv`**: Swedish\n- **`tl`**: Filipino\n- **`tr`**: Turkish\n- **`uk`**: Ukrainian\n- **`zh`**: Chinese\n- **`zh-cn`**: Chinese (Simplified)\n- **`zh-tw`**: Chinese (Traditional)\n\n<ToolFooter pipPackageName=\"arcade_google_jobs\" />",
+      "header": "## LanguageCodes"
+    }
+  ],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-01-26T17:32:52.433Z",
+  "summary": "Arcade.dev provides the GoogleJobs toolkit, enabling developers to access job postings directly from Google Jobs through SerpAPI. This toolkit streamlines job searches, making it efficient and effective to find relevant job listings.\n\n**Capabilities**  \n- Seamless integration with Google Jobs for job postings retrieval.  \n- Comprehensive search capabilities tailored to various job criteria.  \n- Easy access to job data through a user-friendly API.\n\n**OAuth**  \n- This toolkit does not require OAuth authentication but uses an API key for access.\n\n**Secrets**  \n- Contains secrets in the form of API keys, such as the SERP_API_KEY for authenticating requests."
+}

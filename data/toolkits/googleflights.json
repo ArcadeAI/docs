@@ -1,0 +1,205 @@
+{
+  "id": "GoogleFlights",
+  "label": "Google Flights",
+  "version": "3.1.2",
+  "description": "Arcade.dev LLM tools for getting flights via Google Flights",
+  "metadata": {
+    "category": "search",
+    "iconUrl": "https://design-system.arcade.dev/icons/google-flights.svg",
+    "isBYOC": true,
+    "isPro": true,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/search/google_flights",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": null,
+  "tools": [
+    {
+      "name": "SearchOneWayFlights",
+      "qualifiedName": "GoogleFlights.SearchOneWayFlights",
+      "fullyQualifiedName": "GoogleFlights.SearchOneWayFlights@3.1.2",
+      "description": "Retrieve flight search results for a one-way flight using Google Flights",
+      "parameters": [
+        {
+          "name": "departure_airport_code",
+          "type": "string",
+          "required": true,
+          "description": "The departure airport code. An uppercase 3-letter code",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "arrival_airport_code",
+          "type": "string",
+          "required": true,
+          "description": "The arrival airport code. An uppercase 3-letter code",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "outbound_date",
+          "type": "string",
+          "required": true,
+          "description": "Flight departure date in YYYY-MM-DD format",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "currency_code",
+          "type": "string",
+          "required": false,
+          "description": "Currency of the returned prices. Defaults to 'USD'",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "travel_class",
+          "type": "string",
+          "required": false,
+          "description": "Travel class of the flight. Defaults to 'ECONOMY'",
+          "enum": ["ECONOMY", "PREMIUM_ECONOMY", "BUSINESS", "FIRST"],
+          "inferrable": true
+        },
+        {
+          "name": "num_adults",
+          "type": "integer",
+          "required": false,
+          "description": "Number of adult passengers. Defaults to 1",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "num_children",
+          "type": "integer",
+          "required": false,
+          "description": "Number of child passengers. Defaults to 0",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_stops",
+          "type": "string",
+          "required": false,
+          "description": "Maximum number of stops (layovers) for the flight. Defaults to any number of stops",
+          "enum": ["ANY", "NONSTOP", "ONE", "TWO"],
+          "inferrable": true
+        },
+        {
+          "name": "sort_by",
+          "type": "string",
+          "required": false,
+          "description": "The sorting order of the results. Defaults to TOP_FLIGHTS.",
+          "enum": [
+            "TOP_FLIGHTS",
+            "PRICE",
+            "DEPARTURE_TIME",
+            "ARRIVAL_TIME",
+            "DURATION",
+            "EMISSIONS"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["SERP_API_KEY"],
+      "secretsInfo": [
+        {
+          "name": "SERP_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Flight search results from the Google Flights API"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleFlights.SearchOneWayFlights",
+        "parameters": {
+          "departure_airport_code": {
+            "value": "LAX",
+            "type": "string",
+            "required": true
+          },
+          "arrival_airport_code": {
+            "value": "JFK",
+            "type": "string",
+            "required": true
+          },
+          "outbound_date": {
+            "value": "2023-12-15",
+            "type": "string",
+            "required": true
+          },
+          "currency_code": {
+            "value": "USD",
+            "type": "string",
+            "required": false
+          },
+          "travel_class": {
+            "value": "ECONOMY",
+            "type": "string",
+            "required": false
+          },
+          "num_adults": {
+            "value": 1,
+            "type": "integer",
+            "required": false
+          },
+          "num_children": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          },
+          "max_stops": {
+            "value": "1",
+            "type": "string",
+            "required": false
+          },
+          "sort_by": {
+            "value": "TOP_FLIGHTS",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    }
+  ],
+  "documentationChunks": [
+    {
+      "type": "markdown",
+      "location": "auth",
+      "position": "after",
+      "content": "The Arcade Google Flights MCP Sever uses the [SerpAPI](https://serpapi.com/) to search for flights from Google Flights.\n- **Secret:**\n  - `SERP_API_KEY`: Your SerpAPI API key.\n<Callout type=\"info\">\n  Setting the `SERP_API_KEY` secret is only required if you are\n  [self-hosting](/guides/deployment-hosting/configure-engine) Arcade. If you're\n  using Arcade Cloud, the secret is already set for you. To manage your secrets,\n  go to the [Secrets page](https://api.arcade.dev/dashboard/auth/secrets) in the\n  Arcade Dashboard.\n</Callout>\n---",
+      "header": "## Auth"
+    },
+    {
+      "type": "section",
+      "location": "custom_section",
+      "position": "after",
+      "content": "## GoogleFlightsMaxStops\n\nDefines the maximum number of stops for flights.\n\n- **`ANY`**: Any number of stops is allowed.\n- **`NONSTOP`**: Only nonstop flights are allowed.\n- **`ONE`**: Only flights with one stop are allowed.\n- **`TWO`**: Only flights with two stops are allowed.",
+      "header": "## GoogleFlightsMaxStops"
+    },
+    {
+      "type": "section",
+      "location": "custom_section",
+      "position": "after",
+      "content": "## GoogleFlightsSortBy\n\nDefines the sorting options for flight search results.\n\n- **`TOP_FLIGHTS`**: Sort by the best available flights.\n- **`PRICE`**: Sort by the lowest price.\n- **`DEPARTURE_TIME`**: Sort by the earliest departure time.\n- **`ARRIVAL_TIME`**: Sort by the earliest arrival time.\n- **`DURATION`**: Sort by the shortest flight duration.\n- **`EMISSIONS`**: Sort by the lowest carbon emissions.",
+      "header": "## GoogleFlightsSortBy"
+    },
+    {
+      "type": "section",
+      "location": "custom_section",
+      "position": "after",
+      "content": "## GoogleFlightsTravelClass\n\nDefines the travel class options for flights.\n\n- **`ECONOMY`**: Economy class.\n- **`PREMIUM_ECONOMY`**: Premium economy class.\n- **`BUSINESS`**: Business class.\n- **`FIRST`**: First class.\n\n<ToolFooter pipPackageName=\"arcade_google_flights\" />",
+      "header": "## GoogleFlightsTravelClass"
+    }
+  ],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-01-26T17:32:39.012Z",
+  "summary": "The Arcade toolkit for Google Flights empowers developers to seamlessly integrate flight search capabilities into their applications, allowing for efficient retrieval of flight information.  \n\n**Capabilities**  \n- Access comprehensive one-way flight search results from Google Flights.  \n- Easily integrate with existing applications for enhanced user experience.  \n- Streamlined queries for fast and relevant flight data.  \n\n**OAuth**  \n- No OAuth requirements; utilize API key for access.  \n\n**Secrets**  \n- Secret type: API key.  \n- Example: SERP_API_KEY is necessary for utilizing the flight search tool.  "
+}

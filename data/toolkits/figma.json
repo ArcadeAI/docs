@@ -1,0 +1,933 @@
+{
+  "id": "Figma",
+  "label": "Figma",
+  "version": "0.1.0",
+  "description": "Arcade tools designed for LLMs to interact with Figma",
+  "metadata": {
+    "category": "development",
+    "iconUrl": "https://design-system.arcade.dev/icons/figma.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/development/figma",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": "figma",
+    "allScopes": [
+      "current_user:read",
+      "file_comments:read",
+      "file_comments:write",
+      "file_content:read",
+      "library_assets:read",
+      "library_content:read",
+      "projects:read",
+      "team_library_content:read"
+    ]
+  },
+  "tools": [
+    {
+      "name": "AddCommentOrReply",
+      "qualifiedName": "Figma.AddCommentOrReply",
+      "fullyQualifiedName": "Figma.AddCommentOrReply@0.1.0",
+      "description": "Add a comment to a Figma file or reply to an existing comment.\n\nIf parent_comment_id is provided, creates a reply to that comment.\nOtherwise creates a new comment (optionally attached to a node).",
+      "parameters": [
+        {
+          "name": "file_key",
+          "type": "string",
+          "required": true,
+          "description": "File key. Can be found in Figma URL: https://www.figma.com/file/{FILE_KEY}/...",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "message",
+          "type": "string",
+          "required": true,
+          "description": "The comment or reply text.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "parent_comment_id",
+          "type": "string",
+          "required": false,
+          "description": "Parent comment ID to reply to. If provided, creates a reply. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "node_id",
+          "type": "string",
+          "required": false,
+          "description": "Node ID to attach the comment to. Ignored for replies. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "x",
+          "type": "number",
+          "required": false,
+          "description": "X position offset on the node. Only used with node_id. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "y",
+          "type": "number",
+          "required": false,
+          "description": "Y position offset on the node. Only used with node_id. Default is None.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "figma",
+        "providerType": "oauth2",
+        "scopes": ["file_comments:write"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Created comment or reply details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Figma.AddCommentOrReply",
+        "parameters": {
+          "file_key": {
+            "value": "abc123def456",
+            "type": "string",
+            "required": true
+          },
+          "message": {
+            "value": "This is a test comment.",
+            "type": "string",
+            "required": true
+          },
+          "parent_comment_id": {
+            "value": "comment789",
+            "type": "string",
+            "required": false
+          },
+          "node_id": {
+            "value": "node321",
+            "type": "string",
+            "required": false
+          },
+          "x": {
+            "value": 150,
+            "type": "integer",
+            "required": false
+          },
+          "y": {
+            "value": 200,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "figma",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ExportImage",
+      "qualifiedName": "Figma.ExportImage",
+      "fullyQualifiedName": "Figma.ExportImage@0.1.0",
+      "description": "Export Figma frames/nodes as images.\n\nReturns temporary URLs to download images. URLs valid for approximately 14 days.",
+      "parameters": [
+        {
+          "name": "file_key",
+          "type": "string",
+          "required": true,
+          "description": "File key. Can be found in Figma URL: https://www.figma.com/file/{FILE_KEY}/...",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "node_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": true,
+          "description": "List of node IDs to export as images.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "image_format",
+          "type": "string",
+          "required": false,
+          "description": "Image format. Default is png.",
+          "enum": ["png", "svg", "pdf", "jpg"],
+          "inferrable": true
+        },
+        {
+          "name": "scale",
+          "type": "number",
+          "required": false,
+          "description": "Scale factor (0.01 to 4.0). Only applies to PNG/JPG. Default is 1.0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "figma",
+        "providerType": "oauth2",
+        "scopes": ["file_content:read"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Exported image URLs (temporary, ~14 days)"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Figma.ExportImage",
+        "parameters": {
+          "file_key": {
+            "value": "abc123xyz456",
+            "type": "string",
+            "required": true
+          },
+          "node_ids": {
+            "value": ["node1", "node2", "node3"],
+            "type": "array",
+            "required": true
+          },
+          "image_format": {
+            "value": "jpg",
+            "type": "string",
+            "required": false
+          },
+          "scale": {
+            "value": 2,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "figma",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetComments",
+      "qualifiedName": "Figma.GetComments",
+      "fullyQualifiedName": "Figma.GetComments@0.1.0",
+      "description": "Get comments on a Figma file.\n\nReturns comments with pagination support.",
+      "parameters": [
+        {
+          "name": "file_key",
+          "type": "string",
+          "required": true,
+          "description": "File key. Can be found in Figma URL: https://www.figma.com/file/{FILE_KEY}/...",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Starting offset for pagination. Default is 0.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_items",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of comments to return (1-50). Default is 10.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "figma",
+        "providerType": "oauth2",
+        "scopes": ["file_comments:read"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Comments on the file"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Figma.GetComments",
+        "parameters": {
+          "file_key": {
+            "value": "3KJGvUdTm2ZgX3L9jH8wFQ",
+            "type": "string",
+            "required": true
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          },
+          "max_items": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "figma",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetComponent",
+      "qualifiedName": "Figma.GetComponent",
+      "fullyQualifiedName": "Figma.GetComponent@0.1.0",
+      "description": "Get metadata for a specific component by its key.",
+      "parameters": [
+        {
+          "name": "component_key",
+          "type": "string",
+          "required": true,
+          "description": "The unique component key.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "figma",
+        "providerType": "oauth2",
+        "scopes": ["library_assets:read"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Component metadata"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Figma.GetComponent",
+        "parameters": {
+          "component_key": {
+            "value": "abc123xyz456",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "figma",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetComponents",
+      "qualifiedName": "Figma.GetComponents",
+      "fullyQualifiedName": "Figma.GetComponents@0.1.0",
+      "description": "Get published components from a file or team library.\n\nFor file: Returns all published components in the file.\nFor team: Returns paginated list of components across team library.",
+      "parameters": [
+        {
+          "name": "source",
+          "type": "string",
+          "required": true,
+          "description": "Source type: 'file' for a specific file, 'team' for team library.",
+          "enum": ["file", "team"],
+          "inferrable": true
+        },
+        {
+          "name": "source_id",
+          "type": "string",
+          "required": true,
+          "description": "File key (if source='file') or team ID (if source='team').",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "page_size",
+          "type": "integer",
+          "required": false,
+          "description": "Number of items per page (team mode only, 1-50). Default is 10.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "after_cursor",
+          "type": "integer",
+          "required": false,
+          "description": "Cursor for next page (team mode only). Default is None.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "figma",
+        "providerType": "oauth2",
+        "scopes": ["library_content:read", "team_library_content:read"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Published components from file or team library"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Figma.GetComponents",
+        "parameters": {
+          "source": {
+            "value": "team",
+            "type": "string",
+            "required": true
+          },
+          "source_id": {
+            "value": "12345-team-id",
+            "type": "string",
+            "required": true
+          },
+          "page_size": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "after_cursor": {
+            "value": 1,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "figma",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetComponentSet",
+      "qualifiedName": "Figma.GetComponentSet",
+      "fullyQualifiedName": "Figma.GetComponentSet@0.1.0",
+      "description": "Get metadata for a specific component set by its key.\n\nA component set is a group of related component variants.",
+      "parameters": [
+        {
+          "name": "component_set_key",
+          "type": "string",
+          "required": true,
+          "description": "The unique component set key.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "figma",
+        "providerType": "oauth2",
+        "scopes": ["library_assets:read"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Component set metadata"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Figma.GetComponentSet",
+        "parameters": {
+          "component_set_key": {
+            "value": "abc123xyz",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "figma",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetComponentSets",
+      "qualifiedName": "Figma.GetComponentSets",
+      "fullyQualifiedName": "Figma.GetComponentSets@0.1.0",
+      "description": "Get published component sets (groups of component variants) from a file or team library.\n\nComponent sets are groups of related component variants, like a Button\nwith states: default, hover, pressed, disabled.\n\nFor file: Returns all published component sets in the file.\nFor team: Returns paginated list of component sets across team library.",
+      "parameters": [
+        {
+          "name": "source",
+          "type": "string",
+          "required": true,
+          "description": "Source type: 'file' for a specific file, 'team' for team library.",
+          "enum": ["file", "team"],
+          "inferrable": true
+        },
+        {
+          "name": "source_id",
+          "type": "string",
+          "required": true,
+          "description": "File key (if source='file') or team ID (if source='team').",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "page_size",
+          "type": "integer",
+          "required": false,
+          "description": "Number of items per page (team mode only, 1-50). Default is 10.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "after_cursor",
+          "type": "integer",
+          "required": false,
+          "description": "Cursor for next page (team mode only). Default is None.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "figma",
+        "providerType": "oauth2",
+        "scopes": ["library_content:read", "team_library_content:read"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Published component sets from file or team library"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Figma.GetComponentSets",
+        "parameters": {
+          "source": {
+            "value": "file",
+            "type": "string",
+            "required": true
+          },
+          "source_id": {
+            "value": "abc123xyz",
+            "type": "string",
+            "required": true
+          },
+          "page_size": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "after_cursor": {
+            "value": null,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "figma",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetFile",
+      "qualifiedName": "Figma.GetFile",
+      "fullyQualifiedName": "Figma.GetFile@0.1.0",
+      "description": "Get a Figma file's structure including pages and metadata.\n\nReturns the file name, version, thumbnail, and list of pages.\nUse depth parameter to limit how much of the tree is returned for large files.",
+      "parameters": [
+        {
+          "name": "file_key",
+          "type": "string",
+          "required": true,
+          "description": "File key. Can be found in Figma URL: https://www.figma.com/file/{FILE_KEY}/...",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "depth",
+          "type": "integer",
+          "required": false,
+          "description": "How deep to traverse the node tree. Default traverses full depth. Use 1 for pages only, 2 for pages and top-level frames",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "figma",
+        "providerType": "oauth2",
+        "scopes": ["file_content:read"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "File structure with pages and metadata"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Figma.GetFile",
+        "parameters": {
+          "file_key": {
+            "value": "abc123xyz",
+            "type": "string",
+            "required": true
+          },
+          "depth": {
+            "value": 2,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "figma",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetFileNodes",
+      "qualifiedName": "Figma.GetFileNodes",
+      "fullyQualifiedName": "Figma.GetFileNodes@0.1.0",
+      "description": "Get specific nodes from a Figma file by their IDs.\n\nReturns the requested nodes with their properties and optionally their children.\nUse this to fetch specific parts of a file without loading the entire document.",
+      "parameters": [
+        {
+          "name": "file_key",
+          "type": "string",
+          "required": true,
+          "description": "File key. Can be found in Figma URL: https://www.figma.com/file/{FILE_KEY}/...",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "node_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": true,
+          "description": "List of node IDs to retrieve. Node IDs can be found in Figma URL after ?node-id= parameter (URL encoded, e.g., '0:1' or '1-2').",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "depth",
+          "type": "integer",
+          "required": false,
+          "description": "How deep to traverse from each node. Use 1 for direct children only. Default returns all descendants.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "figma",
+        "providerType": "oauth2",
+        "scopes": ["file_content:read"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Requested nodes with their data"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Figma.GetFileNodes",
+        "parameters": {
+          "file_key": {
+            "value": "1234abcd5678efgh",
+            "type": "string",
+            "required": true
+          },
+          "node_ids": {
+            "value": ["0:1", "1-2"],
+            "type": "array",
+            "required": true
+          },
+          "depth": {
+            "value": 1,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "figma",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetPages",
+      "qualifiedName": "Figma.GetPages",
+      "fullyQualifiedName": "Figma.GetPages@0.1.0",
+      "description": "Get a list of pages in a Figma file.\n\nReturns page IDs and names without the full node tree.",
+      "parameters": [
+        {
+          "name": "file_key",
+          "type": "string",
+          "required": true,
+          "description": "File key. Can be found in Figma URL: https://www.figma.com/file/{FILE_KEY}/...",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "figma",
+        "providerType": "oauth2",
+        "scopes": ["file_content:read"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "List of pages in the file"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Figma.GetPages",
+        "parameters": {
+          "file_key": {
+            "value": "abc123xyz456",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "figma",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetProjectFiles",
+      "qualifiedName": "Figma.GetProjectFiles",
+      "fullyQualifiedName": "Figma.GetProjectFiles@0.1.0",
+      "description": "Get all files in a Figma project.\n\nFiles are Figma design documents containing pages and frames.",
+      "parameters": [
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "Project ID. Can be obtained from get_team_projects.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "figma",
+        "providerType": "oauth2",
+        "scopes": ["projects:read"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Files in the specified project"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Figma.GetProjectFiles",
+        "parameters": {
+          "project_id": {
+            "value": "1234567890abcdef",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "figma",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetStyle",
+      "qualifiedName": "Figma.GetStyle",
+      "fullyQualifiedName": "Figma.GetStyle@0.1.0",
+      "description": "Get metadata for a specific style by its key.",
+      "parameters": [
+        {
+          "name": "style_key",
+          "type": "string",
+          "required": true,
+          "description": "The unique style key.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "figma",
+        "providerType": "oauth2",
+        "scopes": ["library_assets:read"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Style metadata"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Figma.GetStyle",
+        "parameters": {
+          "style_key": {
+            "value": "12345-abcde-67890-fghij",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "figma",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetStyles",
+      "qualifiedName": "Figma.GetStyles",
+      "fullyQualifiedName": "Figma.GetStyles@0.1.0",
+      "description": "Get published styles from a file or team library.\n\nFor file: Returns all published styles in the file.\nFor team: Returns paginated list of styles across team library.",
+      "parameters": [
+        {
+          "name": "source",
+          "type": "string",
+          "required": true,
+          "description": "Source type: 'file' for a specific file, 'team' for team library.",
+          "enum": ["file", "team"],
+          "inferrable": true
+        },
+        {
+          "name": "source_id",
+          "type": "string",
+          "required": true,
+          "description": "File key (if source='file') or team ID (if source='team').",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "page_size",
+          "type": "integer",
+          "required": false,
+          "description": "Number of items per page (team mode only, 1-50). Default is 10.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "after_cursor",
+          "type": "integer",
+          "required": false,
+          "description": "Cursor for next page (team mode only). Default is None.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "figma",
+        "providerType": "oauth2",
+        "scopes": ["library_content:read", "team_library_content:read"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Published styles from file or team library"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Figma.GetStyles",
+        "parameters": {
+          "source": {
+            "value": "file",
+            "type": "string",
+            "required": true
+          },
+          "source_id": {
+            "value": "12345ABC",
+            "type": "string",
+            "required": true
+          },
+          "page_size": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "after_cursor": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "figma",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetTeamProjects",
+      "qualifiedName": "Figma.GetTeamProjects",
+      "fullyQualifiedName": "Figma.GetTeamProjects@0.1.0",
+      "description": "Get all projects in a Figma team.\n\nProjects are containers within a team that group related design files.",
+      "parameters": [
+        {
+          "name": "team_id",
+          "type": "string",
+          "required": true,
+          "description": "Team ID. Can be found in Figma URL: https://www.figma.com/files/team/{TEAM_ID}/...",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "figma",
+        "providerType": "oauth2",
+        "scopes": ["projects:read"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Projects in the specified team"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Figma.GetTeamProjects",
+        "parameters": {
+          "team_id": {
+            "value": "abc123xyz",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "figma",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "Figma.WhoAmI",
+      "fullyQualifiedName": "Figma.WhoAmI@0.1.0",
+      "description": "Get the authenticated user's profile.",
+      "parameters": [],
+      "auth": {
+        "providerId": "figma",
+        "providerType": "oauth2",
+        "scopes": ["current_user:read"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Authenticated user's profile."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Figma.WhoAmI",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "figma",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    }
+  ],
+  "documentationChunks": [
+    {
+      "type": "markdown",
+      "location": "auth",
+      "position": "after",
+      "content": "<Callout type=\"warning\" title=\"Private OAuth app requirement\">\nThe `projects:read` scope is **ONLY available in private Figma OAuth apps**. This scope is required for the navigation tools (`GetTeamProjects` and `GetProjectFiles`). \nIf you need these navigation tools, you must create a private OAuth app through your Figma organization settings. All other tools work with public OAuth apps.\n</Callout>",
+      "header": "## Auth"
+    }
+  ],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-01-26T17:29:03.977Z",
+  "summary": "Arcade provides a toolkit for LLMs to seamlessly interact with Figma, enabling users to automate design tasks and extract valuable data from Figma files. \n\n**Capabilities**  \n- Interact with Figma files, including reading content and comments.  \n- Export images and retrieve component metadata efficiently.  \n- Manage and fetch styles, components, and team projects in an organized manner.  \n- Access user profiles and detailed file structures for enhanced design workflows.\n\n**OAuth**  \n- Provider: Figma  \n- Scopes: current_user:read, file_comments:read, file_comments:write, file_content:read, library_assets:read, library_content:read, projects:read, team_library_content:read  \n\n**Secrets**  \n- None."
+}
