@@ -63,6 +63,11 @@ export const AUTH_PROVIDER_DOCS_PATH = "/references/auth-providers";
 export const PACKAGE_PREFIX = "arcade_";
 
 /**
+ * Length of the "api" suffix for package name transformation
+ */
+const API_SUFFIX_LENGTH = 3;
+
+/**
  * Generate PyPI package name from toolkit ID
  */
 export function getPackageName(toolkitId: string): string {
@@ -73,7 +78,7 @@ export function getPackageName(toolkitId: string): string {
 
   // Many "*Api" toolkits publish as "<name>_api" (not "<name>api").
   if (id.endsWith("api") && !id.endsWith("_api")) {
-    return `${PACKAGE_PREFIX}${id.slice(0, -3)}_api`;
+    return `${PACKAGE_PREFIX}${id.slice(0, -API_SUFFIX_LENGTH)}_api`;
   }
 
   return `${PACKAGE_PREFIX}${id}`;
@@ -86,7 +91,7 @@ export function getGitHubRepoUrl(toolkitId: string): string {
   const id = toolkitId.toLowerCase();
   const repoId =
     id.endsWith("api") && !id.endsWith("_api") && !id.endsWith("-api")
-      ? `${id.slice(0, -3)}_api`
+      ? `${id.slice(0, -API_SUFFIX_LENGTH)}_api`
       : id;
   return `${GITHUB_ORG_URL}/${GITHUB_REPO_PREFIX}${repoId}`;
 }

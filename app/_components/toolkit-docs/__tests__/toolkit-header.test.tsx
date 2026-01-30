@@ -227,7 +227,8 @@ describe("ToolkitAuth type validation", () => {
       ],
     };
 
-    expect(auth.allScopes.length).toBe(3);
+    const expectedScopeCount = 3;
+    expect(auth.allScopes.length).toBe(expectedScopeCount);
     expect(auth.allScopes).toContain(
       "https://www.googleapis.com/auth/gmail.readonly"
     );

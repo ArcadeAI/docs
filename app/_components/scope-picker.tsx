@@ -2,7 +2,6 @@
 
 import { Button } from "@arcadeai/design-system";
 import { Check, Copy, KeyRound, ShieldCheck, Wrench } from "lucide-react";
-import posthog from "posthog-js";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 const COPY_FEEDBACK_MS = 2000;
@@ -269,35 +268,15 @@ export default function ScopePicker({
     () => (isControlled ? new Set(selectedTools) : internalSelectedTools),
     [isControlled, selectedTools, internalSelectedTools]
   );
-  const posthog = usePostHog();
   const [pageSize, setPageSize] = useState<number>(DEFAULT_TOOLS_PAGE_SIZE);
   const [page, setPage] = useState<number>(1);
   const [showUnselectedTools, setShowUnselectedTools] = useState(
     DEFAULT_SHOW_UNSELECTED_TOOLS
   );
 
-  const trackScopeCalculatorUsed = (
-    action: string,
-    toolName: string | undefined,
-    newSelectedCount: number
-  ) => {
-    posthog.capture("Scope calculator used", {
-      action,
-      tool_name: toolName || null,
-      selected_tools_count: newSelectedCount,
-      total_tools_available: tools.length,
-    });
-  };
-
-  const updateSelectedTools = (
-    nextSelected: Set<string>,
-    action: string,
-    toolName?: string
-  ) => {
-    const nextList = Array.from(nextSelected).sort();
-    trackScopeCalculatorUsed(action, toolName, nextSelected.size);
+  const updateSelectedTools = (nextSelected: Set<string>) => {
     if (isControlled) {
-      onSelectedToolsChange?.(nextList);
+      onSelectedToolsChange?.(Array.from(nextSelected).sort());
     } else {
       setInternalSelectedTools(nextSelected);
     }
@@ -305,25 +284,20 @@ export default function ScopePicker({
 
   const toggleTool = (toolName: string) => {
     const newSelected = new Set(selectedToolsSet);
-    const isSelecting = !newSelected.has(toolName);
     if (newSelected.has(toolName)) {
       newSelected.delete(toolName);
     } else {
       newSelected.add(toolName);
     }
-    updateSelectedTools(
-      newSelected,
-      isSelecting ? "tool_selected" : "tool_deselected",
-      toolName
-    );
+    updateSelectedTools(newSelected);
   };
 
   const selectAll = () => {
-    updateSelectedTools(new Set(tools.map((t) => t.name)), "select_all");
+    updateSelectedTools(new Set(tools.map((t) => t.name)));
   };
 
   const clearAll = () => {
-    updateSelectedTools(new Set(), "clear_all");
+    updateSelectedTools(new Set());
   };
 
   const selectedToolNames = getSelectedToolNames(tools, selectedToolsSet);

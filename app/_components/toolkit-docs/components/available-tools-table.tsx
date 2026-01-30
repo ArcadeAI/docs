@@ -26,7 +26,16 @@ import type { AvailableToolsTableProps, SecretType } from "../types";
 import { normalizeScopes } from "./scopes-display";
 
 const DEFAULT_PAGE_SIZE = 25;
-const PAGE_SIZE_OPTIONS = [25, 50, 100, 200] as const;
+const PAGE_SIZE_50 = 50;
+const PAGE_SIZE_100 = 100;
+const PAGE_SIZE_200 = 200;
+const PAGE_SIZE_OPTIONS = [
+  DEFAULT_PAGE_SIZE,
+  PAGE_SIZE_50,
+  PAGE_SIZE_100,
+  PAGE_SIZE_200,
+] as const;
+const MS_PER_SECOND = 1000;
 
 /**
  * Pagination controls with First, Prev, Next, Last buttons.
@@ -146,7 +155,8 @@ function ScrollingCell({
         setDuration(
           Math.max(
             SCROLLING_CELL.minDurationMs,
-            ((overflow + SCROLLING_CELL.extraPadding) / pixelsPerSecond) * 1000
+            ((overflow + SCROLLING_CELL.extraPadding) / pixelsPerSecond) *
+              MS_PER_SECOND
           )
         );
       }

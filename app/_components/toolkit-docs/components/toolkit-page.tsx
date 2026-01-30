@@ -12,13 +12,24 @@ import { getPackageName } from "../constants";
 // Regex for removing leading ## from headers (defined at top level for performance)
 const HEADER_PREFIX_REGEX = /^#+\s*/;
 
+// Scroll detection thresholds
+const SCROLL_SHOW_BUTTONS_THRESHOLD = 300;
+const SCROLL_BOTTOM_THRESHOLD = 100;
+
+// Intersection observer thresholds for TOC highlighting
+const TOC_OBSERVER_THRESHOLD_MIN = 0.1;
+const TOC_OBSERVER_THRESHOLD_MID = 0.5;
+
+// Scroll padding for TOC item visibility
+const TOC_SCROLL_PADDING = 20;
+
 import type {
   ToolDefinition,
   ToolkitCategory,
   ToolkitPageProps,
   ToolkitType,
 } from "../types";
-import { AvailableToolsTable, toToolAnchorId } from "./AvailableToolsTable";
+import { AvailableToolsTable, toToolAnchorId } from "./available-tools-table";
 import {
   DocumentationChunkRenderer,
   hasChunksAt,
@@ -41,11 +52,13 @@ function ScrollToButtons() {
       const windowHeight = window.innerHeight;
       const documentHeight = document.documentElement.scrollHeight;
 
-      // Show buttons after scrolling 300px
-      setShowButtons(scrollTop > 300);
+      // Show buttons after scrolling past threshold
+      setShowButtons(scrollTop > SCROLL_SHOW_BUTTONS_THRESHOLD);
 
-      // Check if near bottom (within 100px)
-      setAtBottom(scrollTop + windowHeight >= documentHeight - 100);
+      // Check if near bottom (within threshold)
+      setAtBottom(
+        scrollTop + windowHeight >= documentHeight - SCROLL_BOTTOM_THRESHOLD
+      );
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -282,46 +295,51 @@ function ToolsOnThisPage({
     // Track visibility state for all sections
     const visibleSections = new Map<string, number>();
 
+    // Helper: find section closest to top of viewport
+    const findClosestSection = (): string | null => {
+      let closestId: string | null = null;
+      let closestTop = Number.POSITIVE_INFINITY;
+
+      for (const [id, top] of visibleSections) {
+        if (top >= 0 && top < closestTop) {
+          closestTop = top;
+          closestId = id;
+        }
+      }
+
+      // Fallback: use topmost visible section if none below viewport top
+      if (!closestId && visibleSections.size > 0) {
+        const sorted = [...visibleSections.entries()].sort(
+          (a, b) => a[1] - b[1]
+        );
+        return sorted[0][0];
+      }
+
+      return closestId;
+    };
+
+    // Helper: update visibility map from observer entries
+    const updateVisibilityMap = (entries: IntersectionObserverEntry[]) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          visibleSections.set(entry.target.id, entry.boundingClientRect.top);
+        } else {
+          visibleSections.delete(entry.target.id);
+        }
+      }
+    };
+
     const observer = new IntersectionObserver(
       (entries) => {
-        // Update visibility map
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            // Store the top position (lower = higher on screen)
-            visibleSections.set(entry.target.id, entry.boundingClientRect.top);
-          } else {
-            visibleSections.delete(entry.target.id);
-          }
-        }
-
-        // Find the section closest to (but below) the top of the viewport
-        let closestId: string | null = null;
-        let closestTop = Number.POSITIVE_INFINITY;
-
-        for (const [id, top] of visibleSections) {
-          // Consider sections that are in the upper half of viewport
-          if (top >= 0 && top < closestTop) {
-            closestTop = top;
-            closestId = id;
-          }
-        }
-
-        // If no section is below the top, use the first visible one
-        if (!closestId && visibleSections.size > 0) {
-          const sorted = [...visibleSections.entries()].sort(
-            (a, b) => a[1] - b[1]
-          );
-          closestId = sorted[0][0];
-        }
-
+        updateVisibilityMap(entries);
+        const closestId = findClosestSection();
         if (closestId) {
           setActiveId(closestId);
         }
       },
       {
-        // Observe the top portion of the viewport
         rootMargin: "-80px 0px -50% 0px",
-        threshold: [0, 0.1, 0.5],
+        threshold: [0, TOC_OBSERVER_THRESHOLD_MIN, TOC_OBSERVER_THRESHOLD_MID],
       }
     );
 
@@ -354,17 +372,17 @@ function ToolsOnThisPage({
     const containerHeight = container.clientHeight;
 
     // Check if item is outside visible area
-    if (itemTop < containerScrollTop + 20) {
+    if (itemTop < containerScrollTop + TOC_SCROLL_PADDING) {
       container.scrollTo({
-        top: Math.max(0, itemTop - 20),
+        top: Math.max(0, itemTop - TOC_SCROLL_PADDING),
         behavior: "smooth",
       });
     } else if (
       itemTop + itemHeight >
-      containerScrollTop + containerHeight - 20
+      containerScrollTop + containerHeight - TOC_SCROLL_PADDING
     ) {
       container.scrollTo({
-        top: itemTop + itemHeight - containerHeight + 20,
+        top: itemTop + itemHeight - containerHeight + TOC_SCROLL_PADDING,
         behavior: "smooth",
       });
     }
