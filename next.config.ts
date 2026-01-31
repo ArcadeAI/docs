@@ -516,12 +516,6 @@ const nextConfig: NextConfig = withLlmsTxt({
           permanent: true,
         },
         {
-          source: "/:locale/guides/agent-frameworks/langchain/python",
-          destination:
-            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain-py",
-          permanent: true,
-        },
-        {
           source: "/:locale/guides/agent-frameworks/langchain/tools",
           destination:
             "/:locale/get-started/agent-frameworks/langchain/auth-langchain-tools",
