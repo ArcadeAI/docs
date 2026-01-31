@@ -45,21 +45,32 @@ export function ParametersTable({
     );
   }
 
+  const headerCellPadding = "px-3 py-2 sm:px-4 sm:py-3";
+  const cellPadding = "px-3 py-2 sm:px-4 sm:py-3.5";
+
   return (
     <div className="overflow-hidden rounded-xl bg-neutral-dark/20">
       <table className="w-full border-collapse text-sm">
         <thead>
           <tr className="bg-gradient-to-r from-neutral-dark to-neutral-dark/80">
-            <th className="px-4 py-3 text-left font-semibold text-neutral-light-high/80 text-xs uppercase tracking-wider">
+            <th
+              className={`${headerCellPadding} text-left font-semibold text-neutral-light-high/80 text-xs uppercase tracking-wider`}
+            >
               Parameter
             </th>
-            <th className="px-4 py-3 text-left font-semibold text-neutral-light-high/80 text-xs uppercase tracking-wider">
+            <th
+              className={`${headerCellPadding} text-left font-semibold text-neutral-light-high/80 text-xs uppercase tracking-wider`}
+            >
               Type
             </th>
-            <th className="w-20 px-4 py-3 text-center font-semibold text-neutral-light-high/80 text-xs uppercase tracking-wider">
+            <th
+              className={`${headerCellPadding} w-20 text-center font-semibold text-neutral-light-high/80 text-xs uppercase tracking-wider`}
+            >
               Req.
             </th>
-            <th className="px-4 py-3 text-left font-semibold text-neutral-light-high/80 text-xs uppercase tracking-wider">
+            <th
+              className={`${headerCellPadding} text-left font-semibold text-neutral-light-high/80 text-xs uppercase tracking-wider`}
+            >
               Description
             </th>
           </tr>
@@ -77,17 +88,17 @@ export function ParametersTable({
                 } hover:bg-muted/50 dark:hover:bg-neutral-dark/50`}
                 key={param.name}
               >
-                <td className="px-4 py-3.5">
+                <td className={cellPadding}>
                   <code className="font-medium text-foreground">
                     {param.name}
                   </code>
                 </td>
-                <td className="px-4 py-3.5">
+                <td className={cellPadding}>
                   <code className="font-mono text-muted-foreground text-xs">
                     {formatParameterType(param)}
                   </code>
                 </td>
-                <td className="px-4 py-3.5 text-center">
+                <td className={`${cellPadding} text-center`}>
                   {param.required ? (
                     <span className="text-red-400 text-xs">Required</span>
                   ) : (
@@ -96,7 +107,7 @@ export function ParametersTable({
                     </span>
                   )}
                 </td>
-                <td className="px-4 py-3.5 text-sm text-foreground">
+                <td className={`${cellPadding} text-sm text-foreground`}>
                   {param.description ?? "No description provided."}
                   {enumValues.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-1.5">

@@ -3,6 +3,8 @@ import type { FetchOptions, IToolDataSource } from "./internal.js";
 import {
   parseToolMetadataError,
   parseToolMetadataResponse,
+  parseToolMetadataSummaryResponse,
+  type ToolMetadataSummary,
 } from "./tool-metadata-schema.js";
 
 export interface EngineApiSourceConfig {
@@ -42,6 +44,20 @@ const buildEndpointUrl = (baseUrl: string): string => {
     return `${normalized}/tool_metadata`;
   }
   return `${normalized}/v1/tool_metadata`;
+};
+
+const parseJsonResponse = async (
+  response: Response,
+  context: string
+): Promise<unknown> => {
+  try {
+    return await response.json();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(
+      `Engine API returned invalid JSON for ${context}: ${message}`
+    );
+  }
 };
 
 export class EngineApiSource implements IToolDataSource {
@@ -97,12 +113,34 @@ export class EngineApiSource implements IToolDataSource {
       );
     }
 
-    const payload = (await response.json()) as unknown;
+    const payload = await parseJsonResponse(response, "tool metadata");
     const parsed = parseToolMetadataResponse(payload);
     return {
       items: parsed.items,
       totalCount: parsed.totalCount,
     };
+  }
+
+  private async fetchSummary(): Promise<ToolMetadataSummary> {
+    const url = new URL(this.endpoint);
+    url.searchParams.set("mode", "summary");
+
+    const response = await this.fetchFn(url.toString(), {
+      headers: {
+        Authorization: `Bearer ${this.apiKey}`,
+        Accept: "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      const errorDetail = await this.getErrorDetail(response);
+      throw new Error(
+        `Engine API error ${response.status}: ${errorDetail ?? response.statusText}`
+      );
+    }
+
+    const payload = await parseJsonResponse(response, "tool metadata summary");
+    return parseToolMetadataSummaryResponse(payload);
   }
 
   async fetchToolsByToolkit(
@@ -136,6 +174,10 @@ export class EngineApiSource implements IToolDataSource {
     }
 
     return tools;
+  }
+
+  async fetchToolkitsSummary(): Promise<ToolMetadataSummary> {
+    return this.fetchSummary();
   }
 
   async isAvailable(): Promise<boolean> {

@@ -158,6 +158,25 @@ const createInspectFetchStub =
     );
   };
 
+const createSummaryFetchStub =
+  (payload: unknown, inspect?: (params: URLSearchParams) => void) =>
+  async (input: RequestInfo | URL) => {
+    const url = new URL(input.toString());
+    inspect?.(url.searchParams);
+    return new Response(JSON.stringify(payload), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  };
+
+const createInvalidJsonFetchStub =
+  (contentType = "application/json") =>
+  async () =>
+    new Response("not-json", {
+      status: 200,
+      headers: { "Content-Type": contentType },
+    });
+
 describe("EngineApiSource", () => {
   it("fetches and transforms tool metadata with pagination", async () => {
     const items = createItems();
@@ -245,5 +264,65 @@ describe("EngineApiSource", () => {
     });
 
     await source.fetchAllTools({ version: "0.1.3" });
+  });
+
+  it("fetches toolkit summary using summary mode", async () => {
+    const summaryPayload = {
+      total_tools: 2,
+      total_toolkits: 1,
+      starter_toolkits: 0,
+      toolkits: [
+        {
+          name: "Github",
+          version: "1.0.0",
+          tool_count: 2,
+          requires_secrets: true,
+          requires_oauth: true,
+        },
+      ],
+    };
+
+    const source = new EngineApiSource({
+      baseUrl: "https://api.arcade.dev",
+      apiKey: "test",
+      fetchFn: createSummaryFetchStub(summaryPayload, (params) => {
+        expect(params.get("mode")).toBe("summary");
+      }),
+    });
+
+    const summary = await source.fetchToolkitsSummary();
+
+    expect(summary.totalToolkits).toBe(1);
+    expect(summary.toolkits[0]).toEqual({
+      name: "Github",
+      version: "1.0.0",
+      toolCount: 2,
+      requiresSecrets: true,
+      requiresOauth: true,
+    });
+  });
+
+  it("throws a clear error when tool metadata response is invalid JSON", async () => {
+    const source = new EngineApiSource({
+      baseUrl: "https://api.arcade.dev",
+      apiKey: "test",
+      fetchFn: createInvalidJsonFetchStub(),
+    });
+
+    await expect(source.fetchAllTools()).rejects.toThrow(
+      "Engine API returned invalid JSON for tool metadata"
+    );
+  });
+
+  it("throws a clear error when summary response is invalid JSON", async () => {
+    const source = new EngineApiSource({
+      baseUrl: "https://api.arcade.dev",
+      apiKey: "test",
+      fetchFn: createInvalidJsonFetchStub(),
+    });
+
+    await expect(source.fetchToolkitsSummary()).rejects.toThrow(
+      "Engine API returned invalid JSON for tool metadata summary"
+    );
   });
 });

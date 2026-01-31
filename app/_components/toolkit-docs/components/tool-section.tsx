@@ -269,7 +269,7 @@ function ToolRequirementsSection({
                     {secret.name}
                   </span>
                 ))
-              : tool.secrets.map((secret) => (
+              : (tool.secrets ?? []).map((secret) => (
                   <span
                     className="font-mono text-amber-600 text-xs dark:text-amber-300"
                     key={secret}

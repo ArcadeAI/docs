@@ -6,6 +6,7 @@ export { AvailableToolsTable } from "./available-tools-table";
 export {
   DocumentationChunkRenderer,
   hasChunksAt,
+  sortChunksDeterministically,
 } from "./documentation-chunk-renderer";
 export { DynamicCodeBlock } from "./dynamic-code-block";
 export { ParametersTable } from "./parameters-table";

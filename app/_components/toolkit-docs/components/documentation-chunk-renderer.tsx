@@ -18,6 +18,7 @@ import type {
   DocumentationChunkRendererProps,
 } from "../types";
 import DataTable from "./data-table";
+import { createMdxCache } from "./mdx-cache";
 
 // Regex for removing leading ## from headers (defined at top level for performance)
 const HEADER_PREFIX_REGEX = /^#+\s*/;
@@ -108,10 +109,13 @@ const MDX_COMPONENTS = {
   DataTable,
 };
 
-const mdxCache = new Map<
-  string,
-  React.ComponentType<{ components?: typeof MDX_COMPONENTS }>
->();
+// Maximum number of MDX components to cache to prevent unbounded memory growth
+const MDX_CACHE_MAX_SIZE = 100;
+
+const mdxCache =
+  createMdxCache<React.ComponentType<{ components?: typeof MDX_COMPONENTS }>>(
+    MDX_CACHE_MAX_SIZE
+  );
 
 /**
  * Renders MDX content from a string with custom components.
@@ -125,8 +129,11 @@ function MdxContent({ content }: { content: string }) {
 
   useEffect(() => {
     if (mdxCache.has(source)) {
-      setComponent(() => mdxCache.get(source) ?? null);
-      return;
+      const cached = mdxCache.get(source);
+      if (cached) {
+        setComponent(() => cached);
+        return;
+      }
     }
 
     let cancelled = false;
@@ -237,11 +244,57 @@ function ChunkContent({ chunk }: { chunk: DocumentationChunk }) {
 }
 
 /**
+ * Default priority for chunks without an explicit priority
+ */
+const DEFAULT_CHUNK_PRIORITY = 100;
+
+/**
+ * Sorts documentation chunks deterministically by:
+ * 1. Priority (lower = earlier)
+ * 2. Header alphabetically (for chunks with same priority)
+ * 3. Content hash (for chunks with same priority and no header)
+ */
+export function sortChunksDeterministically(
+  chunks: readonly DocumentationChunk[]
+): DocumentationChunk[] {
+  return [...chunks].sort((a, b) => {
+    const priorityA = a.priority ?? DEFAULT_CHUNK_PRIORITY;
+    const priorityB = b.priority ?? DEFAULT_CHUNK_PRIORITY;
+
+    // First sort by priority
+    if (priorityA !== priorityB) {
+      return priorityA - priorityB;
+    }
+
+    // Then by header alphabetically (headers without ## prefix for comparison)
+    const headerA = (a.header ?? "").replace(HEADER_PREFIX_REGEX, "").trim();
+    const headerB = (b.header ?? "").replace(HEADER_PREFIX_REGEX, "").trim();
+
+    if (headerA && headerB) {
+      return headerA.localeCompare(headerB);
+    }
+
+    // Chunks with headers come before chunks without
+    if (headerA && !headerB) {
+      return -1;
+    }
+    if (!headerA && headerB) {
+      return 1;
+    }
+
+    // Finally, sort by content for stability
+    return a.content.localeCompare(b.content);
+  });
+}
+
+/**
  * DocumentationChunkRenderer
  *
  * A generic component for rendering custom documentation content at specified
  * injection points. Filters chunks by location and position, then renders
  * the appropriate component based on chunk type.
+ *
+ * Chunks are sorted deterministically by priority, then header, then content.
  *
  * @example
  * ```tsx
@@ -276,9 +329,12 @@ export function DocumentationChunkRenderer({
     return null;
   }
 
+  // Sort chunks deterministically
+  const sortedChunks = sortChunksDeterministically(matchingChunks);
+
   return (
     <div className={className} data-testid="documentation-chunk-renderer">
-      {matchingChunks.map((chunk, index) => (
+      {sortedChunks.map((chunk, index) => (
         <ChunkContent
           chunk={chunk}
           key={`${chunk.location}-${chunk.position}-${index}`}

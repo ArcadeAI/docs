@@ -10,9 +10,9 @@
  * 5. Updates the main integrations _meta.tsx if needed
  *
  * Usage:
- *   npx tsx scripts/sync-toolkit-sidebar.ts
- *   npx tsx scripts/sync-toolkit-sidebar.ts --dry-run
- *   npx tsx scripts/sync-toolkit-sidebar.ts --verbose
+ *   npx tsx .github/scripts/sync-toolkit-sidebar.ts
+ *   npx tsx .github/scripts/sync-toolkit-sidebar.ts --dry-run
+ *   npx tsx .github/scripts/sync-toolkit-sidebar.ts --verbose
  */
 
 import {
@@ -46,8 +46,8 @@ try {
   );
 }
 
-// Get project root (one level up from scripts/)
-const PROJECT_ROOT = resolve(__dirname, "..");
+// Get project root (two levels up from .github/scripts)
+const PROJECT_ROOT = resolve(__dirname, "..", "..");
 
 // Configuration
 const CONFIG = {
@@ -349,9 +349,15 @@ export function generateMainMeta(activeCategories: string[]): string {
   const sortedCategories = [...activeCategories].sort((a, b) => {
     const indexA = CATEGORY_ORDER.indexOf(a);
     const indexB = CATEGORY_ORDER.indexOf(b);
-    if (indexA === -1 && indexB === -1) return a.localeCompare(b);
-    if (indexA === -1) return 1;
-    if (indexB === -1) return -1;
+    if (indexA === -1 && indexB === -1) {
+      return a.localeCompare(b);
+    }
+    if (indexA === -1) {
+      return 1;
+    }
+    if (indexB === -1) {
+      return -1;
+    }
     return indexA - indexB;
   });
 
@@ -402,6 +408,7 @@ export default meta;
 /**
  * Sync toolkit sidebar with available JSON files
  */
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Main orchestration function requires multiple steps
 export function syncToolkitSidebar(
   options: { dryRun?: boolean; verbose?: boolean; prune?: boolean } = {}
 ): SyncResult {
@@ -416,7 +423,9 @@ export function syncToolkitSidebar(
   };
 
   const log = (msg: string) => {
-    if (verbose) console.log(msg);
+    if (verbose) {
+      console.log(msg);
+    }
   };
 
   try {

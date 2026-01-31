@@ -71,12 +71,43 @@ export const ToolMetadataResponseSchema = z.object({
   total_count: z.number(),
 });
 
+const ToolMetadataToolkitSummarySchema = z.object({
+  name: z.string(),
+  version: z.string(),
+  tool_count: z.number(),
+  requires_secrets: z.boolean(),
+  requires_oauth: z.boolean(),
+});
+
+export const ToolMetadataSummaryResponseSchema = z.object({
+  total_tools: z.number(),
+  total_toolkits: z.number(),
+  starter_toolkits: z.number(),
+  toolkits: z.array(ToolMetadataToolkitSummarySchema),
+});
+
 const ToolMetadataErrorSchema = z.object({
   name: z.string(),
   message: z.string(),
 });
 
 type ToolMetadataItem = z.infer<typeof ToolMetadataItemSchema>;
+type ToolMetadataToolkitSummary = z.infer<
+  typeof ToolMetadataToolkitSummarySchema
+>;
+
+export type ToolMetadataSummary = {
+  totalTools: number;
+  totalToolkits: number;
+  starterToolkits: number;
+  toolkits: Array<{
+    name: string;
+    version: string;
+    toolCount: number;
+    requiresSecrets: boolean;
+    requiresOauth: boolean;
+  }>;
+};
 
 const transformParameter = (
   apiParam: z.infer<typeof ToolMetadataParameterSchema>
@@ -135,6 +166,24 @@ export const parseToolMetadataResponse = (
   return {
     items: parsed.items.map(transformToolMetadataItem),
     totalCount: parsed.total_count,
+  };
+};
+
+export const parseToolMetadataSummaryResponse = (
+  payload: unknown
+): ToolMetadataSummary => {
+  const parsed = ToolMetadataSummaryResponseSchema.parse(payload);
+  return {
+    totalTools: parsed.total_tools,
+    totalToolkits: parsed.total_toolkits,
+    starterToolkits: parsed.starter_toolkits,
+    toolkits: parsed.toolkits.map((toolkit: ToolMetadataToolkitSummary) => ({
+      name: toolkit.name,
+      version: toolkit.version,
+      toolCount: toolkit.tool_count,
+      requiresSecrets: toolkit.requires_secrets,
+      requiresOauth: toolkit.requires_oauth,
+    })),
   };
 };
 

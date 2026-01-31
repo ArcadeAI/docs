@@ -1,34 +1,84 @@
-# Toolkit Docs Generator
+# Generate toolkit docs
 
-A Node.js CLI tool for generating Arcade toolkit documentation JSON from multiple data sources.
+This guide explains how Arcade generates toolkit JSON, how the GitHub workflow runs, and how the docs site renders the output. Use this file as the single source of truth for toolkit generation in this repo.
 
-## Overview
+## What gets generated
 
-This tool combines data from:
+- `data/toolkits/<toolkit>.json` for each toolkit
+- `data/toolkits/index.json` with category, type, version, and counts
+- Run logs under `toolkit-docs-generator-verification/logs` by default
+- Use `--log-dir` to change the log location
 
-- **Engine API**: Tool definitions, parameters, auth requirements, scopes
-- **Design System**: Toolkit metadata (category, icons, flags)
-- **Custom Sections**: Extracted documentation content from existing MDX files
+## Data sources
 
-## Quick start
+The generator merges three inputs into one JSON output per toolkit:
+
+- **Engine API** for tool definitions, auth requirements, and scopes
+- **Arcade design system** for metadata (category, icons, flags)
+- **Custom sections file** (optional) for preserved or curated docs content
+
+It also reads the previous output when you use `--skip-unchanged` or `--previous-output`.
+
+When `--skip-unchanged` runs against the tool metadata API, the generator calls
+`mode=summary` first to decide which toolkits need updates. It only fetches full
+tool metadata for toolkits with version changes. The Engine API guarantees that
+tool definitions do not change unless the toolkit version changes.
+
+## GitHub workflow: generate and sync
+
+The workflow file is `/.github/workflows/generate-toolkit-docs-porter.yml`.
+It runs these steps:
+
+1. Generate toolkit JSON using `toolkit-docs-generator` and the Engine API.
+2. Sync sidebar navigation from `data/toolkits` to the `_meta.tsx` files.
+3. Create a pull request if there are changes.
+
+Required secrets:
+
+- `ENGINE_API_URL`, `ENGINE_API_KEY`
+- `OPENAI_API_KEY` for LLM examples and summaries
+
+Optional secrets:
+
+- `OPENAI_MODEL` (defaults in the workflow)
+
+## Rendering pipeline (docs site)
+
+The docs site consumes the generated JSON directly:
+
+- `app/_lib/toolkit-data.ts` reads `data/toolkits/<toolkit>.json`.
+- `app/_lib/toolkit-static-params.ts` builds routes from `index.json` and the design system catalog.
+- `app/_components/toolkit-docs` renders the toolkit page using `metadata.iconUrl`, `metadata.type`, and auth fields.
+- `app/en/resources/integrations/preview` uses the design system catalog for preview pages.
+- `app/en/resources/integrations/*/_meta.tsx` controls sidebar navigation for each category.
+
+## Sidebar sync step (required for navigation)
+
+`.github/scripts/sync-toolkit-sidebar.ts` keeps sidebar navigation aligned with generated JSON:
+
+- Reads `data/toolkits` for available toolkits.
+- Uses the design system for category and label, with JSON label fallback.
+- Groups toolkits by category and writes `_meta.tsx` files per category.
+- Uses a fixed category order and alphabetical label order within each nav group.
+- Splits `optimized` vs `starter` using `metadata.type` (or an `*Api` fallback).
+- Does not prune categories unless you pass `--prune` (not used in the workflow).
+
+This step does not change JSON output. It only updates navigation files.
+
+## Architecture at a glance
+
+- **CLI**: `toolkit-docs-generator/src/cli/index.ts`
+- **Sources**: `src/sources` for Engine API, mock data, and design system metadata
+- **Merger**: `src/merger/data-merger.ts` merges tools, metadata, and custom sections
+- **Generator**: `src/generator/json-generator.ts` writes JSON and `index.json`
+- **Verifier**: `src/generator/output-verifier.ts` validates output and index consistency
+- **Rendering details**: `toolkit-docs-generator/RENDERING.md`
+
+## Local usage
+
+Generate a single toolkit:
 
 ```bash
-# Install dependencies
-pnpm install
-
-# Build the CLI
-pnpm build
-
-# Generate docs for a toolkit (LLM required for examples)
-pnpm start generate \
-  --providers "Github:1.0.0" \
-  --mock-data-dir ./mock-data \
-  --llm-provider openai \
-  --llm-model gpt-4.1-mini \
-  --llm-api-key "$OPENAI_API_KEY" \
-  --output ../data/toolkits
-
-# Generate docs using Engine API (tool metadata endpoint)
 pnpm start generate \
   --providers "Github:1.0.0" \
   --engine-api-url "$ENGINE_API_URL" \
@@ -37,194 +87,55 @@ pnpm start generate \
   --llm-model gpt-4.1-mini \
   --llm-api-key "$OPENAI_API_KEY" \
   --output ../data/toolkits
+```
 
-# Generate docs without LLM (skip examples and summary)
+Generate all toolkits:
+
+```bash
+pnpm start generate \
+  --all \
+  --skip-unchanged \
+  --engine-api-url "$ENGINE_API_URL" \
+  --engine-api-key "$ENGINE_API_KEY" \
+  --llm-provider openai \
+  --llm-model gpt-4.1-mini \
+  --llm-api-key "$OPENAI_API_KEY" \
+  --output ../data/toolkits
+```
+
+Generate without LLM output:
+
+```bash
 pnpm start generate \
   --providers "Asana:0.1.3" \
   --engine-api-url "$ENGINE_API_URL" \
   --engine-api-key "$ENGINE_API_KEY" \
   --skip-examples \
   --skip-summary \
+  --skip-overview \
   --output ../data/toolkits
-
-# Generate docs for all toolkits (Engine API)
-pnpm start generate \
-  --all \
-  --engine-api-url "$ENGINE_API_URL" \
-  --engine-api-key "$ENGINE_API_KEY" \
-  --llm-provider openai \
-  --llm-model gpt-4.1-mini \
-  --llm-api-key "$OPENAI_API_KEY" \
-  --output ../data/toolkits
-
-# Or generate for all toolkits
-pnpm start generate-all \
-  --mock-data-dir ./mock-data \
-  --llm-provider anthropic \
-  --llm-model claude-3-5-sonnet-latest \
-  --llm-api-key "$ANTHROPIC_API_KEY" \
-  --output ../data/toolkits
-
-# Scaffold an overview instructions file
-pnpm start overview-init \
-  --toolkits "Github" \
-  --overview-dir ./overview-input
 ```
 
-## Configuration
-
-### Environment variables
+Sync sidebar navigation locally:
 
 ```bash
-# Required for LLM-based examples
-LLM_PROVIDER=openai
-LLM_MODEL=gpt-4.1-mini
-OPENAI_API_KEY=your-openai-key
-
-# Or use Anthropic
-LLM_PROVIDER=anthropic
-LLM_MODEL=claude-3-5-sonnet-latest
-ANTHROPIC_API_KEY=your-anthropic-key
-
-# Engine API (optional; replaces mock tool source)
-ENGINE_API_URL=https://api.arcade.dev
-ENGINE_API_KEY=your-engine-api-key
+pnpm dlx tsx .github/scripts/sync-toolkit-sidebar.ts
 ```
 
-### Toolkit overview inputs
+## Key CLI options
 
-By default, the generator looks for overview instruction files in:
+- `--all` generate all toolkits
+- `--providers` generate a subset of toolkits
+- `--skip-unchanged` only write changed toolkits
+- `--api-source` select `tool-metadata` (default with Engine creds), `list-tools`
+  (only with the explicit flag), or `mock`
+- `--previous-output` compare against a previous output directory
+- `--custom-sections` load curated docs sections
+- `--skip-examples`, `--skip-summary`, `--skip-overview` disable LLM steps
+- `--no-verify-output` skip output verification
 
-- `toolkit-docs-generator/overview-input/` (gitignored)
+## Troubleshooting
 
-Use `--overview-dir` to point at a different folder, or `--overview-file` to use a single file.
-Use `--skip-overview` to disable overview generation.
-
-### CLI options
-
-```bash
-Usage: toolkit-docs-generator [command] [options]
-
-Commands:
-  overview-init   Create overview instruction file(s) for toolkits
-  generate        Generate documentation for selected toolkits
-  generate-all    Generate documentation for all toolkits
-  validate <file> Validate a generated JSON file
-  list-toolkits   List available toolkits from mock data
-  verify-output   Verify output directory structure and schema
-
-Options:
-  --all                        Generate documentation for all toolkits
-  -o, --output <dir>            Output directory (default: data/toolkits)
-  --mock-data-dir <dir>         Path to mock data directory
-  --metadata-file <file>        Path to metadata JSON file
-  --overview-dir <dir>          Directory with overview instruction files
-  --overview-file <file>        Path to a single overview instruction file
-  --engine-api-url <url>        Engine API base URL
-  --engine-api-key <key>        Engine API key
-  --engine-page-size <number>   Engine API page size
-  --previous-output <dir>       Path to previous output directory
-  --force-regenerate            Regenerate all examples and summary
-  --overwrite-output            Delete output directory before writing new JSON
-  --llm-provider <provider>     LLM provider (openai|anthropic)
-  --llm-model <model>           LLM model to use
-  --llm-api-key <key>           LLM API key
-  --llm-base-url <url>          LLM base URL
-  --llm-temperature <number>    LLM temperature
-  --llm-max-tokens <number>     LLM max tokens
-  --llm-system-prompt <text>    LLM system prompt override
-  --llm-concurrency <number>    Max concurrent LLM calls per toolkit (default: 5)
-  --toolkit-concurrency <number> Max concurrent toolkit processing (default: 3)
-  --no-index-from-output        Do not rebuild index from output directory
-  --skip-examples               Skip LLM example generation
-  --skip-summary                Skip LLM summary generation
-  --skip-overview               Skip LLM overview generation
-  --no-verify-output            Skip output verification
-  --custom-sections <file>      Path to custom sections JSON
-  --overwrite-output            Delete output directory before writing new JSON
-  --verbose                     Enable verbose logging
-```
-
-## Development
-
-```bash
-# Run in watch mode
-pnpm dev
-
-# Run tests
-pnpm test
-
-# Type check
-pnpm typecheck
-
-# Lint
-pnpm lint
-```
-
-## Architecture
-
-See [PLANNING.md](./PLANNING.md) for detailed architecture and implementation tickets.
-
-```text
-toolkit-docs-generator/
-├── src/
-│   ├── cli/           # CLI commands and interface
-│   ├── sources/       # Data source implementations
-│   ├── merger/        # Data merging logic
-│   ├── llm/           # LLM service for examples/summaries
-│   ├── generator/     # JSON output generation
-│   ├── types/         # TypeScript type definitions
-│   └── utils/         # Shared utilities
-├── tests/             # Test files
-├── package.json
-├── tsconfig.json
-└── README.md
-```
-
-## Data source abstraction
-
-The tool uses a single toolkit data source interface, making it easy to swap implementations:
-
-```typescript
-// Use mock data (current)
-const toolkitDataSource = createMockToolkitDataSource({
-  dataDir: "./mock-data",
-});
-```
-
-## Output format
-
-Generated JSON follows this structure:
-
-```json
-{
-  "id": "Github",
-  "label": "GitHub",
-  "version": "1.0.0",
-  "description": "...",
-  "metadata": {
-    "category": "development",
-    "iconUrl": "...",
-    "isBYOC": false,
-    "isPro": false
-  },
-  "auth": {
-    "type": "oauth2",
-    "providerId": "github",
-    "allScopes": ["repo", "user:email"]
-  },
-  "tools": [
-    {
-      "name": "CreateIssue",
-      "description": "...",
-      "parameters": [...],
-      "auth": { "scopes": ["repo"] },
-      "codeExample": { "toolName": "Github.CreateIssue", "parameters": {} }
-    }
-  ]
-}
-```
-
-## License
-
-MIT
+- **Nothing regenerated**: `--skip-unchanged` exits early when tool definitions did not change.
+- **Missing metadata**: the generator falls back to the metadata JSON file when design system metadata is unavailable.
+- **Verify output fails**: run `pnpm start verify-output --output ../data/toolkits` and fix the reported mismatch.

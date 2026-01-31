@@ -17,20 +17,23 @@ export function DataTable({
     return null;
   }
 
-  const cellPadding = compact ? "px-3 py-2" : "px-4 py-3";
-  const rowKeyCounts = new Map<string, number>();
-  const getRowKey = (row: string[]): string => {
+  const cellPadding = compact
+    ? "px-2 py-1.5 sm:px-3 sm:py-2"
+    : "px-3 py-2 sm:px-4 sm:py-3";
+
+  // Generate unique keys for rows, handling duplicates by appending index
+  // This is computed once per render using the row index as a stable fallback
+  const getRowKey = (row: string[], rowIndex: number): string => {
     const baseKey = row.join("|");
-    const count = rowKeyCounts.get(baseKey) ?? 0;
-    rowKeyCounts.set(baseKey, count + 1);
-    return count === 0 ? baseKey : `${baseKey}__${count}`;
+    // Use row index as suffix to ensure uniqueness for duplicate rows
+    return `${baseKey}__${rowIndex}`;
   };
 
   return (
     <div className="my-3 overflow-hidden rounded-xl border border-neutral-dark-high/50 shadow-sm">
       <table className="w-full border-collapse text-sm">
         {caption ? (
-          <caption className="bg-neutral-dark/30 px-4 py-2 text-left text-neutral-light-high/70 text-xs uppercase tracking-wider">
+          <caption className="bg-neutral-dark/30 px-3 py-2 text-left text-neutral-light-high/70 text-xs uppercase tracking-wider sm:px-4">
             {caption}
           </caption>
         ) : null}
@@ -48,7 +51,7 @@ export function DataTable({
         </thead>
         <tbody className="divide-y divide-neutral-dark-high/30">
           {rows.map((row, rowIndex) => {
-            const rowKey = getRowKey(row);
+            const rowKey = getRowKey(row, rowIndex);
             return (
               <tr
                 className={

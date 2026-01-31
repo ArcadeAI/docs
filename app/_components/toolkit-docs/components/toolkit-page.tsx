@@ -33,6 +33,7 @@ import { AvailableToolsTable, toToolAnchorId } from "./available-tools-table";
 import {
   DocumentationChunkRenderer,
   hasChunksAt,
+  sortChunksDeterministically,
 } from "./documentation-chunk-renderer";
 import { PageActionsBar } from "./page-actions";
 import { ToolSection } from "./tool-section";
@@ -153,14 +154,24 @@ function headerToAnchorId(header: string): string {
 
 /**
  * Extracts section links from documentation chunks that have headers.
+ * Chunks are sorted deterministically before extraction to ensure consistent TOC order.
  */
 export function extractChunkSectionLinks(
-  chunks: ReadonlyArray<{ header?: string }>
+  chunks: ReadonlyArray<{
+    header?: string;
+    priority?: number;
+    content?: string;
+  }>
 ): Array<{ id: string; label: string; href: string }> {
   const links: Array<{ id: string; label: string; href: string }> = [];
   const seenIds = new Set<string>();
 
-  for (const chunk of chunks) {
+  // Sort chunks deterministically before extracting links
+  const sortedChunks = sortChunksDeterministically(
+    chunks as Parameters<typeof sortChunksDeterministically>[0]
+  );
+
+  for (const chunk of sortedChunks) {
     if (chunk.header) {
       const id = headerToAnchorId(chunk.header);
       if (!seenIds.has(id)) {

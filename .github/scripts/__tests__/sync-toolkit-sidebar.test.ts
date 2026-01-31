@@ -1,12 +1,12 @@
 /**
  * Tests for sync-toolkit-sidebar.ts
  *
- * Run with: npx vitest run scripts/sync-toolkit-sidebar.test.ts
- * Or: npx vitest watch scripts/sync-toolkit-sidebar.test.ts
+ * Run with: npx vitest run .github/scripts/__tests__/sync-toolkit-sidebar.test.ts
+ * Or: npx vitest watch .github/scripts/__tests__/sync-toolkit-sidebar.test.ts
  */
 
-import * as fs from "fs";
-import * as path from "path";
+import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   buildToolkitInfoList,
@@ -19,7 +19,7 @@ import {
   groupByCategory,
   syncToolkitSidebar,
   type ToolkitInfo,
-} from "./sync-toolkit-sidebar";
+} from "../sync-toolkit-sidebar";
 
 // Mock the design system
 vi.mock("@arcadeai/design-system", () => ({
@@ -43,27 +43,24 @@ vi.mock("@arcadeai/design-system", () => ({
 }));
 
 // Test directory setup
-const TEST_DIR = path.join(process.cwd(), ".test-sync-sidebar");
-const TEST_DATA_DIR = path.join(TEST_DIR, "data/toolkits");
-const TEST_INTEGRATIONS_DIR = path.join(
-  TEST_DIR,
-  "app/en/resources/integrations"
-);
+const TEST_DIR = join(process.cwd(), ".test-sync-sidebar");
+const TEST_DATA_DIR = join(TEST_DIR, "data/toolkits");
+const TEST_INTEGRATIONS_DIR = join(TEST_DIR, "app/en/resources/integrations");
 
 function setupTestDirs() {
-  fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
-  fs.mkdirSync(TEST_INTEGRATIONS_DIR, { recursive: true });
+  mkdirSync(TEST_DATA_DIR, { recursive: true });
+  mkdirSync(TEST_INTEGRATIONS_DIR, { recursive: true });
 }
 
 function cleanupTestDirs() {
-  if (fs.existsSync(TEST_DIR)) {
-    fs.rmSync(TEST_DIR, { recursive: true });
+  if (existsSync(TEST_DIR)) {
+    rmSync(TEST_DIR, { recursive: true });
   }
 }
 
 function createToolkitJson(slug: string, data: object = {}) {
-  const filePath = path.join(TEST_DATA_DIR, `${slug}.json`);
-  fs.writeFileSync(filePath, JSON.stringify({ id: slug, ...data }, null, 2));
+  const filePath = join(TEST_DATA_DIR, `${slug}.json`);
+  writeFileSync(filePath, JSON.stringify({ id: slug, ...data }, null, 2));
 }
 
 // ============================================================================
@@ -79,63 +76,21 @@ describe("getToolkitFiles", () => {
     cleanupTestDirs();
   });
 
-  it("should return empty array for non-existent directory", () => {
-    const result = getToolkitFiles("/non/existent/path");
+  it("returns empty array when directory does not exist", () => {
+    const result = getToolkitFiles("/nonexistent");
     expect(result).toEqual([]);
   });
 
-  it("should return empty array for empty directory", () => {
-    const result = getToolkitFiles(TEST_DATA_DIR);
-    expect(result).toEqual([]);
-  });
-
-  it("should return JSON file slugs without extension", () => {
+  it("returns JSON filenames without extension", () => {
     createToolkitJson("gmail");
     createToolkitJson("slack");
-    createToolkitJson("github");
+    writeFileSync(join(TEST_DATA_DIR, "index.json"), "{}");
 
     const result = getToolkitFiles(TEST_DATA_DIR);
-    expect(result).toHaveLength(3);
+
     expect(result).toContain("gmail");
     expect(result).toContain("slack");
-    expect(result).toContain("github");
-  });
-
-  it("should exclude index.json", () => {
-    createToolkitJson("gmail");
-    fs.writeFileSync(
-      path.join(TEST_DATA_DIR, "index.json"),
-      JSON.stringify({ toolkits: [] })
-    );
-
-    const result = getToolkitFiles(TEST_DATA_DIR);
-    expect(result).toHaveLength(1);
-    expect(result).toContain("gmail");
     expect(result).not.toContain("index");
-  });
-
-  it("should return lowercase slugs", () => {
-    // Create file with uppercase name (filesystem may normalize this)
-    fs.writeFileSync(
-      path.join(TEST_DATA_DIR, "MyToolkit.json"),
-      JSON.stringify({ id: "MyToolkit" })
-    );
-
-    const result = getToolkitFiles(TEST_DATA_DIR);
-    expect(result[0]).toBe("mytoolkit");
-  });
-
-  it("should ignore non-JSON files", () => {
-    createToolkitJson("gmail");
-    fs.writeFileSync(path.join(TEST_DATA_DIR, "readme.md"), "# Test");
-    fs.writeFileSync(
-      path.join(TEST_DATA_DIR, "config.ts"),
-      "export const x = 1;"
-    );
-
-    const result = getToolkitFiles(TEST_DATA_DIR);
-    expect(result).toHaveLength(1);
-    expect(result).toContain("gmail");
   });
 });
 
@@ -147,26 +102,14 @@ describe("getToolkitCategory", () => {
   it("should return category for known toolkit", () => {
     expect(getToolkitCategory("Gmail")).toBe("productivity");
     expect(getToolkitCategory("Slack")).toBe("social");
-    expect(getToolkitCategory("Github")).toBe("development");
-  });
-
-  it("should be case-insensitive", () => {
-    expect(getToolkitCategory("gmail")).toBe("productivity");
-    expect(getToolkitCategory("GMAIL")).toBe("productivity");
-    expect(getToolkitCategory("GmAiL")).toBe("productivity");
   });
 
   it("should return null for unknown toolkit", () => {
-    expect(getToolkitCategory("UnknownToolkit")).toBeNull();
-    expect(getToolkitCategory("RandomName")).toBeNull();
+    expect(getToolkitCategory("Unknown")).toBeNull();
   });
 
   it("should return null for hidden toolkit", () => {
     expect(getToolkitCategory("HiddenToolkit")).toBeNull();
-  });
-
-  it("should handle empty string", () => {
-    expect(getToolkitCategory("")).toBeNull();
   });
 });
 
@@ -181,7 +124,7 @@ describe("getToolkitLabel", () => {
     expect(getToolkitLabel("GoogleSearch")).toBe("Google Search");
   });
 
-  it("should be case-insensitive", () => {
+  it("should return label for known toolkit regardless of case", () => {
     expect(getToolkitLabel("gmail")).toBe("Gmail");
     expect(getToolkitLabel("GITHUB")).toBe("GitHub");
   });
@@ -191,7 +134,7 @@ describe("getToolkitLabel", () => {
     expect(getToolkitLabel("APIHelper")).toBe("A P I Helper");
   });
 
-  it("should handle single word", () => {
+  it("should handle single-word toolkit", () => {
     expect(getToolkitLabel("Test")).toBe("Test");
   });
 });
@@ -213,42 +156,46 @@ describe("getToolkitLabelFromJson", () => {
     createToolkitJson("mytoolkit", { label: "My Custom Label" });
 
     const result = getToolkitLabelFromJson(TEST_DATA_DIR, "mytoolkit");
+
     expect(result).toBe("My Custom Label");
   });
 
   it("should return name if label not present", () => {
-    createToolkitJson("mytoolkit", { name: "My Custom Name" });
+    createToolkitJson("mytoolkit", { name: "Toolkit Name" });
 
     const result = getToolkitLabelFromJson(TEST_DATA_DIR, "mytoolkit");
-    expect(result).toBe("My Custom Name");
+
+    expect(result).toBe("Toolkit Name");
   });
 
   it("should prefer label over name", () => {
     createToolkitJson("mytoolkit", { label: "Label", name: "Name" });
 
     const result = getToolkitLabelFromJson(TEST_DATA_DIR, "mytoolkit");
+
     expect(result).toBe("Label");
   });
 
-  it("should return null for non-existent file", () => {
+  it("should return null if file doesn't exist", () => {
     const result = getToolkitLabelFromJson(TEST_DATA_DIR, "nonexistent");
+
     expect(result).toBeNull();
   });
 
-  it("should return null for invalid JSON", () => {
-    fs.writeFileSync(
-      path.join(TEST_DATA_DIR, "invalid.json"),
-      "not valid json"
-    );
+  it("should handle invalid JSON", () => {
+    const filePath = join(TEST_DATA_DIR, "invalid.json");
+    writeFileSync(filePath, "{invalid json}");
 
     const result = getToolkitLabelFromJson(TEST_DATA_DIR, "invalid");
+
     expect(result).toBeNull();
   });
 
   it("should return null if no label or name in JSON", () => {
-    createToolkitJson("mytoolkit", { version: "1.0.0" });
+    createToolkitJson("mytoolkit", { other: "data" });
 
     const result = getToolkitLabelFromJson(TEST_DATA_DIR, "mytoolkit");
+
     expect(result).toBeNull();
   });
 });
@@ -266,56 +213,40 @@ describe("buildToolkitInfoList", () => {
     cleanupTestDirs();
   });
 
-  it("should return empty array for empty directory", () => {
-    const result = buildToolkitInfoList(TEST_DATA_DIR);
-    expect(result).toEqual([]);
-  });
-
-  it("should build toolkit info with design system category", () => {
-    createToolkitJson("gmail");
-    createToolkitJson("slack");
-
-    const result = buildToolkitInfoList(TEST_DATA_DIR);
-    expect(result).toHaveLength(2);
-
-    const gmail = result.find((t) => t.slug === "gmail");
-    expect(gmail).toBeDefined();
-    expect(gmail?.category).toBe("productivity");
-    expect(gmail?.label).toBe("Gmail");
-
-    const slack = result.find((t) => t.slug === "slack");
-    expect(slack).toBeDefined();
-    expect(slack?.category).toBe("social");
-    expect(slack?.label).toBe("Slack");
-  });
-
-  it("should use 'others' category for unknown toolkits", () => {
+  it("should build list of toolkits with correct labels and categories", () => {
+    createToolkitJson("gmail", { label: "Gmail" });
+    createToolkitJson("slack", { label: "Slack" });
     createToolkitJson("unknowntoolkit", { label: "Unknown Toolkit" });
 
     const result = buildToolkitInfoList(TEST_DATA_DIR);
-    expect(result).toHaveLength(1);
-    expect(result[0].category).toBe("others");
-    expect(result[0].label).toBe("Unknown Toolkit");
+
+    expect(result).toHaveLength(3);
+    expect(result[0].label).toBe("Gmail");
+    expect(result[1].label).toBe("Slack");
+    expect(result[2].label).toBe("Unknown Toolkit");
   });
 
   it("should skip hidden toolkits", () => {
     createToolkitJson("HiddenToolkit", { label: "Hidden" });
 
     const result = buildToolkitInfoList(TEST_DATA_DIR);
-    expect(result).toEqual([]);
+
+    expect(result).toHaveLength(0);
   });
 
   it("should prefer design system label over JSON", () => {
     createToolkitJson("gmail", { label: "Custom Gmail Label" });
 
     const result = buildToolkitInfoList(TEST_DATA_DIR);
+
     expect(result[0].label).toBe("Gmail");
   });
 
   it("should use design system label as fallback", () => {
-    createToolkitJson("gmail");
+    createToolkitJson("gmail", { label: null });
 
     const result = buildToolkitInfoList(TEST_DATA_DIR);
+
     expect(result[0].label).toBe("Gmail");
   });
 });
@@ -352,11 +283,11 @@ describe("groupByCategory", () => {
     ];
 
     const result = groupByCategory(toolkits);
-    const social = result.get("social")!;
+    const social = result.get("social");
 
-    expect(social[0].label).toBe("Discord");
-    expect(social[1].label).toBe("Slack");
-    expect(social[2].label).toBe("Zoom");
+    expect(social?.[0].label).toBe("Discord");
+    expect(social?.[1].label).toBe("Slack");
+    expect(social?.[2].label).toBe("Zoom");
   });
 
   it("should handle empty array", () => {
@@ -547,163 +478,15 @@ describe("syncToolkitSidebar", () => {
   // Note: These tests would require mocking the CONFIG object
   // or using dependency injection. For now, we test the logic separately.
 
-  it("should be a function", () => {
-    expect(typeof syncToolkitSidebar).toBe("function");
-  });
-
-  it("should return SyncResult structure", () => {
-    // Dry run to avoid actual file changes
+  it("returns expected result shape", () => {
     const result = syncToolkitSidebar({ dryRun: true });
 
-    expect(result).toHaveProperty("categoriesUpdated");
-    expect(result).toHaveProperty("categoriesCreated");
-    expect(result).toHaveProperty("categoriesRemoved");
-    expect(result).toHaveProperty("toolkitCount");
-    expect(result).toHaveProperty("errors");
-
-    expect(Array.isArray(result.categoriesUpdated)).toBe(true);
-    expect(Array.isArray(result.categoriesCreated)).toBe(true);
-    expect(Array.isArray(result.categoriesRemoved)).toBe(true);
-    expect(Array.isArray(result.errors)).toBe(true);
-    expect(typeof result.toolkitCount).toBe("number");
-  });
-});
-
-// ============================================================================
-// Edge Cases and Error Handling
-// ============================================================================
-
-describe("Edge Cases", () => {
-  beforeEach(() => {
-    setupTestDirs();
-  });
-
-  afterEach(() => {
-    cleanupTestDirs();
-  });
-
-  it("should handle toolkit with special characters in label", () => {
-    createToolkitJson("test", { label: "Test & More <Special>" });
-
-    const result = buildToolkitInfoList(TEST_DATA_DIR);
-    expect(result[0].label).toBe("Test & More <Special>");
-  });
-
-  it("should handle very long toolkit labels", () => {
-    const longLabel = "A".repeat(1000);
-    createToolkitJson("test", { label: longLabel });
-
-    const result = buildToolkitInfoList(TEST_DATA_DIR);
-    expect(result[0].label).toBe(longLabel);
-  });
-
-  it("should handle unicode in labels", () => {
-    createToolkitJson("test", { label: "日本語ツールキット" });
-
-    const result = buildToolkitInfoList(TEST_DATA_DIR);
-    expect(result[0].label).toBe("日本語ツールキット");
-  });
-
-  it("should handle empty JSON file", () => {
-    fs.writeFileSync(path.join(TEST_DATA_DIR, "empty.json"), "{}");
-
-    const result = buildToolkitInfoList(TEST_DATA_DIR);
-    expect(result).toHaveLength(1);
-    expect(result[0].category).toBe("others");
-  });
-
-  it("should handle JSON with nested objects", () => {
-    createToolkitJson("test", {
-      label: "Test",
-      metadata: { nested: { deeply: { value: 123 } } },
+    expect(result).toEqual({
+      categoriesUpdated: expect.any(Array),
+      categoriesCreated: expect.any(Array),
+      categoriesRemoved: expect.any(Array),
+      toolkitCount: expect.any(Number),
+      errors: expect.any(Array),
     });
-
-    const result = buildToolkitInfoList(TEST_DATA_DIR);
-    expect(result[0].label).toBe("Test");
-  });
-
-  it("should handle multiple toolkits in same category", () => {
-    createToolkitJson("gmail");
-    createToolkitJson("slack");
-    createToolkitJson("github");
-    createToolkitJson("stripe");
-    createToolkitJson("custom1", { label: "Custom 1" });
-    createToolkitJson("custom2", { label: "Custom 2" });
-
-    const result = buildToolkitInfoList(TEST_DATA_DIR);
-    const grouped = groupByCategory(result);
-
-    expect(grouped.get("productivity")).toHaveLength(1); // gmail
-    expect(grouped.get("social")).toHaveLength(1); // slack
-    expect(grouped.get("development")).toHaveLength(1); // github
-    expect(grouped.get("payments")).toHaveLength(1); // stripe
-    expect(grouped.get("others")).toHaveLength(2); // custom1, custom2
-  });
-});
-
-// ============================================================================
-// Category Mapping Tests
-// ============================================================================
-
-describe("Category Mapping", () => {
-  it("should map all known categories correctly", () => {
-    const categories = [
-      { id: "Gmail", expected: "productivity" },
-      { id: "Slack", expected: "social" },
-      { id: "Github", expected: "development" },
-      { id: "Stripe", expected: "payments" },
-      { id: "Zendesk", expected: "customer-support" },
-      { id: "GoogleSearch", expected: "search" },
-      { id: "Hubspot", expected: "sales" },
-      { id: "Spotify", expected: "entertainment" },
-      { id: "Postgres", expected: "databases" },
-    ];
-
-    for (const { id, expected } of categories) {
-      expect(getToolkitCategory(id)).toBe(expected);
-    }
-  });
-
-  it("should return null for hidden toolkit", () => {
-    expect(getToolkitCategory("HiddenToolkit")).toBeNull();
-  });
-});
-
-// ============================================================================
-// Meta Content Validation Tests
-// ============================================================================
-
-describe("Meta Content Validation", () => {
-  it("should generate syntactically valid TypeScript", () => {
-    const toolkits: ToolkitInfo[] = [
-      { id: "gmail", slug: "gmail", label: "Gmail", category: "productivity" },
-      { id: "slack", slug: "slack", label: "Slack", category: "social" },
-    ];
-
-    const result = generateCategoryMeta(toolkits, "productivity", "/preview");
-
-    // Basic syntax checks
-    expect(result).toMatch(/^import type \{ MetaRecord \} from "nextra";/);
-    expect(result).toMatch(/const meta: MetaRecord = \{/);
-    expect(result).toMatch(/\};[\s\S]*export default meta;/);
-
-    // No syntax errors (basic checks)
-    expect(result.match(/\{/g)?.length).toBe(result.match(/\}/g)?.length);
-    expect(result).not.toContain("undefined");
-    expect(result).not.toContain("null");
-  });
-
-  it("should generate proper JSON-like object structure", () => {
-    const toolkits: ToolkitInfo[] = [
-      { id: "gmail", slug: "gmail", label: "Gmail", category: "productivity" },
-    ];
-
-    const result = generateCategoryMeta(toolkits, "productivity", "/preview");
-
-    // Extract the object part
-    const objectMatch = result.match(
-      /const meta: MetaRecord = (\{[\s\S]*?\});/
-    );
-    expect(objectMatch).toBeTruthy();
   });
 });

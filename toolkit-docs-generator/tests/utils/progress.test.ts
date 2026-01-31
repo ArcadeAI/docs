@@ -138,13 +138,14 @@ describe("ProgressTracker", () => {
     });
   });
 
-  it("tracks elapsed time", async () => {
+  it("tracks elapsed time", () => {
+    vi.useFakeTimers();
     const tracker = createProgressTracker({ total: 1 });
 
-    // Wait a bit
-    await new Promise((resolve) => setTimeout(resolve, 50));
+    vi.advanceTimersByTime(50);
 
     expect(tracker.getElapsedMs()).toBeGreaterThanOrEqual(50);
+    vi.useRealTimers();
   });
 
   it("estimates remaining time", () => {

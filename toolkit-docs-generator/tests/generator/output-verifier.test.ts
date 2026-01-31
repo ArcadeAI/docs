@@ -235,4 +235,37 @@ describe("verifyOutputDir", () => {
       ).toBe(true);
     });
   });
+
+  it("flags invalid JSON with a helpful message", async () => {
+    await withTempDir(async (dir) => {
+      await writeFile(join(dir, "broken.json"), "{ invalid-json");
+
+      const result = await verifyOutputDir(dir);
+
+      expect(result.valid).toBe(false);
+      expect(
+        result.errors.some((error) =>
+          error.startsWith("Invalid JSON in broken.json:")
+        )
+      ).toBe(true);
+    });
+  });
+
+  it("flags invalid schema with a helpful message", async () => {
+    await withTempDir(async (dir) => {
+      await writeFile(
+        join(dir, "bad-schema.json"),
+        JSON.stringify({ id: "Github" }, null, 2)
+      );
+
+      const result = await verifyOutputDir(dir);
+
+      expect(result.valid).toBe(false);
+      expect(
+        result.errors.some((error) =>
+          error.startsWith("Invalid toolkit schema in bad-schema.json:")
+        )
+      ).toBe(true);
+    });
+  });
 });

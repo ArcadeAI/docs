@@ -181,12 +181,13 @@ function formatCodeExample(
   };
 
   // Add authentication info
-  if (codeExample.requiresAuth || (auth && auth.scopes && auth.scopes.length > 0)) {
-    toolSchema.requires_auth = codeExample.requiresAuth;
+  const hasAuthScopes = Boolean(auth?.scopes && auth.scopes.length > 0);
+  if (codeExample.requiresAuth || hasAuthScopes) {
+    toolSchema.requires_auth = codeExample.requiresAuth || hasAuthScopes;
     if (codeExample.authProvider) {
       toolSchema.auth_provider = codeExample.authProvider;
     }
-    if (auth && auth.scopes && auth.scopes.length > 0) {
+    if (hasAuthScopes) {
       toolSchema.scopes = auth.scopes;
     }
   }

@@ -31,20 +31,46 @@ const isToolkitFile = (fileName: string): boolean =>
 const normalizeToolkitKey = (toolkitId: string): string =>
   toolkitId.toLowerCase();
 
+type ReadToolkitFileResult = {
+  toolkit: MergedToolkit | null;
+  error?: string;
+};
+
 const readToolkitFile = async (
   filePath: string
-): Promise<MergedToolkit | null> => {
+): Promise<ReadToolkitFileResult> => {
+  const fileName = basename(filePath);
+  let content: string;
   try {
-    const content = await readFile(filePath, "utf-8");
-    const parsed = JSON.parse(content) as unknown;
-    const result = MergedToolkitSchema.safeParse(parsed);
-    if (!result.success) {
-      return null;
-    }
-    return result.data;
-  } catch {
-    return null;
+    content = await readFile(filePath, "utf-8");
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return {
+      toolkit: null,
+      error: `Failed to read ${fileName}: ${message}`,
+    };
   }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(content) as unknown;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return {
+      toolkit: null,
+      error: `Invalid JSON in ${fileName}: ${message}`,
+    };
+  }
+
+  const result = MergedToolkitSchema.safeParse(parsed);
+  if (!result.success) {
+    return {
+      toolkit: null,
+      error: `Invalid toolkit schema in ${fileName}: ${result.error.message}`,
+    };
+  }
+
+  return { toolkit: result.data };
 };
 
 export const readToolkitsFromDir = async (
@@ -79,12 +105,12 @@ export const readToolkitsFromDir = async (
     });
 
     const filePath = join(dir, fileName);
-    const toolkit = await readToolkitFile(filePath);
-    if (!toolkit) {
-      errors.push(`Invalid toolkit JSON: ${fileName}`);
+    const result = await readToolkitFile(filePath);
+    if (!result.toolkit) {
+      errors.push(result.error ?? `Invalid toolkit JSON: ${fileName}`);
       continue;
     }
-    toolkits.push(toolkit);
+    toolkits.push(result.toolkit);
   }
 
   return { toolkits, errors };

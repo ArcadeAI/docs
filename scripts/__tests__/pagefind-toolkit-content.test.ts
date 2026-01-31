@@ -286,6 +286,31 @@ describe("toolkitDataToSearchMarkdown", () => {
     expect(markdown).toContain('"type": "api_key"');
   });
 
+  it("marks requires_auth when scopes exist, even if example flags false", () => {
+    const markdown = toolkitDataToSearchMarkdown(
+      makeToolkit([
+        makeTool("Github.CreateIssue", {
+          auth: {
+            providerId: "github",
+            providerType: "oauth2",
+            scopes: ["repo"],
+          },
+          codeExample: {
+            toolName: "Github.CreateIssue",
+            parameters: {
+              repo: { value: "my-repo", type: "string", required: true },
+            },
+            requiresAuth: false,
+          },
+        }),
+      ])
+    );
+
+    expect(markdown).toContain('"requires_auth": true');
+    expect(markdown).toContain('"scopes"');
+    expect(markdown).toContain('"repo"');
+  });
+
   it("includes toolkit-level documentation chunks", () => {
     const markdown = toolkitDataToSearchMarkdown(
       makeToolkit([makeTool("Stripe.CreateCustomer")], {

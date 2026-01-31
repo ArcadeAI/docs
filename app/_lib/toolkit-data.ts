@@ -31,13 +31,32 @@ export const readToolkitData = async (
   toolkitId: string,
   options?: ToolkitDataOptions
 ): Promise<ToolkitData | null> => {
+  // Normalize the toolkit ID to lowercase alphanumeric
   const normalizedId = toolkitId.toLowerCase().replace(/[^a-z0-9]+/g, "");
+
+  // Guard against empty normalized ID (e.g., input was only special characters)
+  if (!normalizedId) {
+    return null;
+  }
+
   const fileName = `${normalizedId}.json`;
   const filePath = join(resolveDataDir(options), fileName);
 
   try {
     const content = await readFile(filePath, "utf-8");
-    return JSON.parse(content) as ToolkitData;
+    const parsed: unknown = JSON.parse(content);
+
+    // Basic runtime validation - ensure it's an object with required fields
+    if (
+      typeof parsed !== "object" ||
+      parsed === null ||
+      !("id" in parsed) ||
+      !("label" in parsed || "name" in parsed)
+    ) {
+      return null;
+    }
+
+    return parsed as ToolkitData;
   } catch {
     return null;
   }
@@ -50,7 +69,19 @@ export const readToolkitIndex = async (
 
   try {
     const content = await readFile(filePath, "utf-8");
-    return JSON.parse(content) as ToolkitIndex;
+    const parsed: unknown = JSON.parse(content);
+
+    // Basic runtime validation - ensure it's an object with required fields
+    if (
+      typeof parsed !== "object" ||
+      parsed === null ||
+      !("toolkits" in parsed) ||
+      !Array.isArray((parsed as { toolkits: unknown }).toolkits)
+    ) {
+      return null;
+    }
+
+    return parsed as ToolkitIndex;
   } catch {
     return null;
   }

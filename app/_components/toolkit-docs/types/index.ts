@@ -68,6 +68,8 @@ export type DocumentationChunk = {
   variant?: DocumentationChunkVariant;
   /** Optional section header for sidebar navigation (e.g., "## Auth Setup") */
   header?: string;
+  /** Optional priority for ordering (lower = earlier, default = 100) */
+  priority?: number;
 };
 
 // ============================================================================

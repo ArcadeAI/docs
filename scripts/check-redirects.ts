@@ -49,6 +49,7 @@ const REDIRECT_REGEX =
   /\{\s*source:\s*["']([^"']+)["']\s*,\s*destination:\s*["']([^"']+)["']/g;
 const REVERSED_REDIRECT_REGEX =
   /\{\s*destination:\s*["']([^"']+)["']\s*,\s*source:\s*["']([^"']+)["']/g;
+const DYNAMIC_ROUTE_REGEX = /\[[^\]]+\]/;
 
 type Redirect = {
   source: string;
@@ -60,6 +61,13 @@ type RedirectChain = {
   source: string;
   oldDest: string;
   newDest: string;
+};
+
+type DynamicRouteMove = {
+  oldPath: string;
+  newPath: string;
+  oldUrl: string;
+  newUrl: string;
 };
 
 /**
@@ -86,6 +94,36 @@ function urlToFile(urlPath: string): string {
 }
 
 /**
+ * Check if a dynamic route exists that could serve this URL path.
+ * e.g., for /resources/integrations/productivity/gmail,
+ * check if /resources/integrations/productivity/[toolkitId]/page.mdx exists
+ */
+function dynamicRouteExists(urlPath: string): boolean {
+  const pathWithoutLocale = urlPath.replace(LOCALE_PREFIX_REGEX, "");
+  const segments = pathWithoutLocale.split("/").filter(Boolean);
+
+  // Try replacing the last segment with common dynamic route patterns
+  const dynamicPatterns = ["[toolkitId]", "[slug]", "[id]", "[...slug]"];
+
+  for (let i = segments.length - 1; i >= 0; i--) {
+    for (const pattern of dynamicPatterns) {
+      const testSegments = [...segments];
+      testSegments[i] = pattern;
+      const testPath = `app/en/${testSegments.join("/")}/page.mdx`;
+      if (existsSync(testPath)) {
+        return true;
+      }
+      const testPathMd = testPath.replace(MDX_EXTENSION_REGEX, ".md");
+      if (existsSync(testPathMd)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+/**
  * Check if a page exists on disk
  */
 function pageExists(urlPath: string): boolean {
@@ -100,6 +138,11 @@ function pageExists(urlPath: string): boolean {
 
   const mdPath = filePath.replace(MDX_EXTENSION_REGEX, ".md");
   if (existsSync(mdPath)) {
+    return true;
+  }
+
+  // Check if a dynamic route could serve this URL
+  if (dynamicRouteExists(urlPath)) {
     return true;
   }
 
@@ -182,6 +225,159 @@ function parseGitDiffOutput(
       renamedFromFiles.push(filePath);
     }
   }
+}
+
+/**
+ * Convert a file path containing a dynamic route to a URL pattern.
+ * Replaces [param] with :param and [...param] with :param*
+ * e.g., app/en/resources/[toolkitId]/page.mdx -> /:locale/resources/:toolkitId
+ */
+function dynamicFileToUrlPattern(filePath: string): string {
+  const urlPath = filePath
+    .replace(APP_LOCALE_PREFIX_REGEX, "")
+    .replace(PAGE_FILE_SUFFIX_REGEX, "");
+
+  // Replace [...param] with :param* (catch-all routes)
+  // Replace [param] with :param (dynamic segments)
+  const patternPath = urlPath
+    .replace(/\[\.\.\.([^\]]+)\]/g, ":$1*")
+    .replace(/\[([^\]]+)\]/g, ":$1");
+
+  return patternPath ? `/:locale/${patternPath}` : "/:locale";
+}
+
+/**
+ * Parse git diff output for renamed dynamic route page files.
+ * Detects when a page.mdx inside a dynamic route folder is moved.
+ */
+function parseDynamicRouteMoves(
+  output: string,
+  moves: DynamicRouteMove[]
+): void {
+  for (const line of output.split("\n")) {
+    if (!line) {
+      continue;
+    }
+    const parts = line.split("\t");
+    const status = parts[0];
+
+    // Only look at renames (R followed by similarity percentage)
+    if (!status?.startsWith("R")) {
+      continue;
+    }
+
+    const oldPath = parts[1];
+    const newPath = parts[2];
+
+    if (!oldPath || !newPath) {
+      continue;
+    }
+
+    // Check if either path contains a dynamic route segment
+    const oldHasDynamic = DYNAMIC_ROUTE_REGEX.test(oldPath);
+    const newHasDynamic = DYNAMIC_ROUTE_REGEX.test(newPath);
+
+    // We care about moves where the URL pattern changes
+    if (!PAGE_FILE_MATCH_REGEX.test(oldPath)) {
+      continue;
+    }
+
+    const oldUrl = dynamicFileToUrlPattern(oldPath);
+    const newUrl = dynamicFileToUrlPattern(newPath);
+
+    // Skip if the URL pattern hasn't actually changed
+    if (oldUrl === newUrl) {
+      continue;
+    }
+
+    // Record the move if either path has a dynamic route
+    // or if the directory structure changed significantly
+    if (oldHasDynamic || newHasDynamic) {
+      moves.push({ oldPath, newPath, oldUrl, newUrl });
+    }
+  }
+}
+
+/**
+ * Get moved dynamic routes by comparing branches
+ */
+function getMovedDynamicRoutes(
+  branch: string,
+  checkStagedOnly: boolean
+): DynamicRouteMove[] {
+  const moves: DynamicRouteMove[] = [];
+
+  if (checkStagedOnly) {
+    try {
+      const stagedChanges = execSync("git diff --cached --name-status", {
+        encoding: "utf-8",
+      });
+      parseDynamicRouteMoves(stagedChanges, moves);
+    } catch {
+      // Ignore errors
+    }
+  } else {
+    ensureBranchExists(branch);
+
+    try {
+      const committedChanges = execSync(
+        `git diff --name-status ${branch}...HEAD`,
+        { encoding: "utf-8" }
+      );
+      parseDynamicRouteMoves(committedChanges, moves);
+    } catch {
+      // Ignore errors
+    }
+
+    try {
+      const uncommittedChanges = execSync("git diff --name-status HEAD", {
+        encoding: "utf-8",
+      });
+      parseDynamicRouteMoves(uncommittedChanges, moves);
+    } catch {
+      // Ignore errors
+    }
+  }
+
+  // Deduplicate by oldUrl
+  const seen = new Set<string>();
+  return moves.filter((move) => {
+    if (seen.has(move.oldUrl)) {
+      return false;
+    }
+    seen.add(move.oldUrl);
+    return true;
+  });
+}
+
+/**
+ * Check if a wildcard redirect already covers a dynamic route move
+ */
+function isMoveCoveredByRedirect(
+  move: DynamicRouteMove,
+  redirects: Redirect[]
+): boolean {
+  // Check for exact match or wildcard that covers the path
+  for (const redirect of redirects) {
+    // Exact pattern match
+    if (redirect.source === move.oldUrl) {
+      return true;
+    }
+
+    // Check if a wildcard redirect covers this path
+    if (redirect.source.includes(":path*")) {
+      const prefix = redirect.source
+        .replace(WILDCARD_PATH_REGEX, "")
+        .replace(LOCALE_PATH_PREFIX_REGEX, "");
+      const movePrefix = move.oldUrl.replace(LOCALE_PATH_PREFIX_REGEX, "");
+
+      if (movePrefix.startsWith(`${prefix}/`) || movePrefix === prefix) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 /**
@@ -489,12 +685,17 @@ for (const file of allDeletedOrRenamed) {
 
   const hasExactRedirect = latestRedirects.some((r) => r.source === urlPath);
   const hasWildcardRedirect = checkWildcardMatch(urlPath, latestRedirects);
+  const servedByDynamicRoute = dynamicRouteExists(urlPath);
 
   if (hasExactRedirect) {
     console.log(colors.green(`✓ Redirect exists for: ${urlPath}`));
   } else if (hasWildcardRedirect) {
     console.log(
       colors.green(`✓ Redirect exists for: ${urlPath} (via wildcard)`)
+    );
+  } else if (servedByDynamicRoute) {
+    console.log(
+      colors.green(`✓ URL still served by dynamic route: ${urlPath}`)
     );
   } else {
     console.log(colors.red(`✗ Missing redirect for: ${urlPath}`));
@@ -633,6 +834,64 @@ if (invalidRedirects.length > 0) {
   console.log("  2. Find the redirect(s) listed above");
   console.log("  3. Update the destination to a valid page path");
   console.log("     (Check that the path exists under app/en/)");
+}
+
+// ============================================================
+// PART 4: Check for moved dynamic routes
+// ============================================================
+const movedDynamicRoutes = getMovedDynamicRoutes(baseBranch, stagedOnly);
+const uncoveredMoves = movedDynamicRoutes.filter(
+  (move) => !isMoveCoveredByRedirect(move, latestRedirects)
+);
+
+if (uncoveredMoves.length > 0) {
+  console.log("");
+  console.log(
+    colors.yellow(
+      "══════════════════════════════════════════════════════════════"
+    )
+  );
+  console.log(
+    colors.yellow(
+      `⚠ Found ${uncoveredMoves.length} moved dynamic route(s) without redirects`
+    )
+  );
+  console.log(
+    colors.yellow(
+      "══════════════════════════════════════════════════════════════"
+    )
+  );
+  console.log("");
+  console.log("Dynamic routes were moved to new locations. Consider adding");
+  console.log("wildcard redirects to preserve existing URLs:");
+  console.log("");
+
+  for (const move of uncoveredMoves) {
+    console.log(colors.blue(`  ${move.oldPath}`));
+    console.log(colors.blue(`    → ${move.newPath}`));
+    console.log("");
+    console.log(colors.yellow("  Suggested redirect:"));
+    console.log(`        {
+          source: "${move.oldUrl}/:path*",
+          destination: "${move.newUrl}/:path*",
+          permanent: true,
+        },`);
+    console.log("");
+  }
+
+  console.log(
+    colors.yellow(
+      "NOTE: Review these suggestions carefully. Wildcard redirects"
+    )
+  );
+  console.log(
+    colors.yellow("affect all URLs under the source path. Only add them if")
+  );
+  console.log(colors.yellow("you want to preserve all existing URLs."));
+  console.log("");
+
+  // This is a warning, not an error - don't set exitCode = 1
+  // because moved dynamic routes might be intentional breaks
 }
 
 if (exitCode === 0) {

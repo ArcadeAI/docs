@@ -1,5 +1,5 @@
 import { access, readdir, readFile } from "node:fs/promises";
-import { join } from "node:path";
+import { join, normalize, resolve } from "node:path";
 import { type NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -7,6 +7,41 @@ export const dynamic = "force-dynamic";
 // Regex pattern for removing .md extension
 const MD_EXTENSION_REGEX = /\.md$/;
 const TOOLKIT_MARKDOWN_ROOT = join(process.cwd(), "public", "toolkit-markdown");
+const APP_ROOT = join(process.cwd(), "app");
+
+/**
+ * Validates that a resolved path is within the allowed directory.
+ * Prevents path traversal attacks (e.g., ../../../etc/passwd).
+ */
+function isPathWithinDirectory(filePath: string, allowedDir: string): boolean {
+  const resolvedPath = resolve(filePath);
+  const resolvedAllowedDir = resolve(allowedDir);
+  return (
+    resolvedPath.startsWith(`${resolvedAllowedDir}/`) ||
+    resolvedPath === resolvedAllowedDir
+  );
+}
+
+/**
+ * Sanitizes a path by removing path traversal sequences.
+ * Returns null if the path contains suspicious patterns.
+ */
+function sanitizePath(inputPath: string): string | null {
+  // Normalize the path to resolve . and .. segments
+  const normalized = normalize(inputPath);
+
+  // Reject paths that try to escape (contain .. after normalization that go above root)
+  if (normalized.includes("..")) {
+    return null;
+  }
+
+  // Reject null bytes (common attack vector)
+  if (inputPath.includes("\0")) {
+    return null;
+  }
+
+  return normalized;
+}
 
 // Minimum path segments for toolkit markdown: [lang, "resources", "integrations", category, toolkitId]
 const MIN_TOOLKIT_PATH_SEGMENTS = 5;
@@ -109,7 +144,13 @@ export async function GET(
     // Remove .md extension
     const pathWithoutMd = originalPath.replace(MD_EXTENSION_REGEX, "");
 
-    const toolkitTarget = getToolkitMarkdownTarget(pathWithoutMd);
+    // Sanitize the path to prevent traversal attacks
+    const sanitizedPath = sanitizePath(pathWithoutMd);
+    if (!sanitizedPath) {
+      return new NextResponse("Invalid path", { status: 400 });
+    }
+
+    const toolkitTarget = getToolkitMarkdownTarget(sanitizedPath);
 
     let filePath: string;
 
@@ -121,14 +162,27 @@ export async function GET(
       );
 
       if (toolkitFile) {
+        // Validate toolkit file is within allowed directory
+        if (!isPathWithinDirectory(toolkitFile, TOOLKIT_MARKDOWN_ROOT)) {
+          return new NextResponse("Invalid path", { status: 400 });
+        }
         filePath = toolkitFile;
       } else {
         // Fall back to MDX file if toolkit markdown not found
-        filePath = join(process.cwd(), "app", `${pathWithoutMd}/page.mdx`);
+        filePath = join(APP_ROOT, `${sanitizedPath}/page.mdx`);
       }
     } else {
       // Non-toolkit page - use MDX file
-      filePath = join(process.cwd(), "app", `${pathWithoutMd}/page.mdx`);
+      filePath = join(APP_ROOT, `${sanitizedPath}/page.mdx`);
+    }
+
+    // Final validation: ensure file path is within allowed directories
+    const isValidPath =
+      isPathWithinDirectory(filePath, APP_ROOT) ||
+      isPathWithinDirectory(filePath, TOOLKIT_MARKDOWN_ROOT);
+
+    if (!isValidPath) {
+      return new NextResponse("Invalid path", { status: 400 });
     }
 
     // Check if file exists
@@ -146,6 +200,8 @@ export async function GET(
       headers: {
         "Content-Type": "text/plain; charset=utf-8",
         "Content-Disposition": "inline",
+        // Add cache headers for better performance
+        "Cache-Control": "public, max-age=3600, stale-while-revalidate=86400",
       },
     });
   } catch (error) {

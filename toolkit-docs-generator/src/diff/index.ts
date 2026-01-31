@@ -5,6 +5,17 @@
  */
 
 export {
+  detectSummaryChanges,
+  formatSummaryChangeSummary,
+  getChangedToolkitIdsFromSummary,
+  hasSummaryChanges,
+  type SummaryChangeResult,
+  type SummaryChangeSummary,
+  type SummaryToolkit,
+  type SummaryToolkitChange,
+  type SummaryToolkitChangeType,
+} from "./summary-diff.js";
+export {
   buildToolDefinitionSignature,
   type ChangeDetectionResult,
   type ChangeSummary,

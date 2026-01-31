@@ -37,6 +37,30 @@ export interface CustomSectionsFileConfig {
   filePath: string;
 }
 
+const parseCustomSectionsFile = (
+  content: string,
+  filePath: string
+): CustomSectionsFile => {
+  let parsedJson: unknown;
+  try {
+    parsedJson = JSON.parse(content) as unknown;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(
+      `Custom sections file is not valid JSON (${filePath}): ${message}`
+    );
+  }
+
+  const parsed = CustomSectionsFileSchema.safeParse(parsedJson);
+  if (!parsed.success) {
+    throw new Error(
+      `Custom sections file has invalid schema (${filePath}): ${parsed.error.message}`
+    );
+  }
+
+  return parsed.data;
+};
+
 /**
  * Source that loads custom documentation sections from a JSON file
  */
@@ -56,8 +80,7 @@ export class CustomSectionsFileSource implements ICustomSectionsSource {
     try {
       await access(this.filePath);
       const content = await readFile(this.filePath, "utf-8");
-      const json = JSON.parse(content);
-      this.cachedData = CustomSectionsFileSchema.parse(json);
+      this.cachedData = parseCustomSectionsFile(content, this.filePath);
       return this.cachedData;
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code === "ENOENT") {
@@ -74,7 +97,7 @@ export class CustomSectionsFileSource implements ICustomSectionsSource {
 
     // Try exact match
     if (data[toolkitId]) {
-      return data[toolkitId] as CustomSections;
+      return data[toolkitId];
     }
 
     // Try normalized match
@@ -83,14 +106,14 @@ export class CustomSectionsFileSource implements ICustomSectionsSource {
       ([key]) => normalizeId(key) === normalizedId
     );
 
-    return entry ? (entry[1] as CustomSections) : null;
+    return entry ? entry[1] : null;
   }
 
   async getAllCustomSections(): Promise<
     Readonly<Record<string, CustomSections>>
   > {
     const data = await this.loadFile();
-    return data as Record<string, CustomSections>;
+    return data;
   }
 }
 

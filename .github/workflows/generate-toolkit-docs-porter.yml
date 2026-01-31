@@ -1,4 +1,10 @@
 name: Generate toolkit docs after Porter deploy
+# Description: Generate toolkit JSON from Engine API, then sync sidebar navigation.
+# Flow:
+# 1) Build the toolkit docs generator
+# 2) Generate toolkit JSON into data/toolkits
+# 3) Sync integrations sidebar _meta.tsx from data/toolkits
+# 4) Open a PR if changes were produced
 
 on:
   repository_dispatch:
@@ -33,6 +39,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build toolkit docs generator
+        run: pnpm build
+        working-directory: toolkit-docs-generator
+
       - name: Generate toolkit docs
         run: |
           pnpm start generate \
@@ -52,7 +62,7 @@ jobs:
           OPENAI_MODEL: ${{ secrets.OPENAI_MODEL || 'gpt-4o-mini' }}
 
       - name: Sync toolkit sidebar navigation
-        run: pnpm dlx tsx scripts/sync-toolkit-sidebar.ts
+        run: pnpm dlx tsx .github/scripts/sync-toolkit-sidebar.ts
 
       - name: Check for changes
         id: check-changes
