@@ -35,11 +35,11 @@ Learn how to integrate Arcade tools using LangChain primitives
 
 ## LangChain primitives you will use in this guide
 
-LangChain provides multiple abstractions for building AI agents, and it's very useful to internalize how some of these primitives work, so you can understand and extend the different agentic patterns LangChain supports.
+LangChain provides multiple abstractions for building AI agents, and it's useful to internalize how some of these primitives work, so you can understand and extend the different agentic patterns LangChain supports.
 
 - [_Agents_](https://docs.langchain.com/oss/python/langchain/agents): Most agentic frameworks, including LangChain, provide an abstraction for a ReAct agent.
 - [_Interrupts_](https://docs.langchain.com/oss/python/langgraph/interrupts): Interrupts in LangChain are a way to control the flow of the agentic loop when something needs to be done outside of the normal ReAct flow. For example, if a tool requires authorization, you can interrupt the agent and ask the user to authorize the tool before continuing.
-- [_Checkpointers_](https://docs.langchain.com/oss/python/langgraph/persistence): Checkpointers are how LangChain implements persistence. A checkpointer stores the agent's state in a "checkpoint" that can be resumed later. Those checkpoints are saved to a _thread_, which can be accessed after the agent's execution, making it very simlpe for long-running agents and for handling interruptions and more sophisticated flows such as branching, time travel, and more.
+- [_Checkpointers_](https://docs.langchain.com/oss/python/langgraph/persistence): Checkpointers are how LangChain implements persistence. A checkpointer stores the agent's state in a "checkpoint" that you can resume later. You save those checkpoints to a _thread_, which you can access after the agent's execution, making it simple for long-running agents and for handling interruptions and more sophisticated flows such as branching, time travel, and more.
 
 ## Integrate Arcade tools into a LangChain agent
 
@@ -97,7 +97,7 @@ This is quite a number of imports, let's break them down:
   - `StructuredTool`: LangChain's tool definition type, defines the shape of the tools that the agent can use.
   - `RunnableConfig`: The configuration type for the agent's run, includes the thread ID and other configuration options.
   - `ChatOpenAI`: The LLM to use for the agent's response, specific to OpenAI models.
-  - `MemorySaver`: Stores the agent's state, and is required for checkpointing and interrupts.
+  - `MemorySaver`: Stores the agent's state, and checkpointing and interrupts require it.
   - `Command`: Communicates the user's decisions to the agent's interrupts.
   - `interrupt`: Interrupts the ReAct flow and asks the user for input.
 - Other imports:
@@ -108,7 +108,7 @@ This is quite a number of imports, let's break them down:
 
 ### Configure the agent
 
-These variables are used in the rest of the code to customize the agent and manage the tools. Feel free to configure them to your liking.
+The rest of the code uses these variables to customize the agent and manage the tools. Feel free to configure them to your liking.
 
 ```python filename="main.py"
 # Load environment variables from the .env file
