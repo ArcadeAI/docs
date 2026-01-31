@@ -1,10 +1,9 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import {
   buildScopeDisplayItems,
   buildSecretDisplayItems,
   filterTools,
-  handleSelectionButtonClick,
   toToolAnchorId,
 } from "../components/available-tools-table";
 
@@ -84,25 +83,5 @@ describe("AvailableToolsTable helpers", () => {
     expect(toToolAnchorId("Slack Api.Send.Message")).toBe(
       "slack-apisendmessage"
     );
-  });
-
-  it("stops row navigation and toggles selection when clicking the button", () => {
-    const stopPropagation = vi.fn();
-    const onToggleSelection = vi.fn();
-
-    handleSelectionButtonClick(
-      { stopPropagation },
-      onToggleSelection,
-      "CreateIssue"
-    );
-
-    expect(stopPropagation).toHaveBeenCalledTimes(1);
-    expect(onToggleSelection).toHaveBeenCalledWith("CreateIssue");
-  });
-
-  it("stops row navigation even when selection handler is missing", () => {
-    const stopPropagation = vi.fn();
-    handleSelectionButtonClick({ stopPropagation }, undefined, "CreateIssue");
-    expect(stopPropagation).toHaveBeenCalledTimes(1);
   });
 });

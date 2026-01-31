@@ -222,15 +222,6 @@ export function toToolAnchorId(value: string): string {
   return value.toLowerCase().replace(/\s+/g, "-").replace(/\./g, "");
 }
 
-export function handleSelectionButtonClick(
-  event: { stopPropagation: () => void },
-  onToggleSelection: AvailableToolsTableProps["onToggleSelection"],
-  toolName: string
-): void {
-  event.stopPropagation();
-  onToggleSelection?.(toolName);
-}
-
 export type AvailableToolsFilter =
   | "all"
   | "has_scopes"

@@ -9,9 +9,6 @@ import ScopePicker from "../../scope-picker";
 import ToolFooter from "../../tool-footer";
 import { getPackageName } from "../constants";
 
-// Regex for removing leading ## from headers (defined at top level for performance)
-const HEADER_PREFIX_REGEX = /^#+\s*/;
-
 // Scroll detection thresholds
 const SCROLL_SHOW_BUTTONS_THRESHOLD = 300;
 const SCROLL_BOTTOM_THRESHOLD = 100;
@@ -33,6 +30,7 @@ import { AvailableToolsTable, toToolAnchorId } from "./available-tools-table";
 import {
   DocumentationChunkRenderer,
   hasChunksAt,
+  headerToAnchorId,
   sortChunksDeterministically,
 } from "./documentation-chunk-renderer";
 import { PageActionsBar } from "./page-actions";
@@ -138,19 +136,8 @@ export const TOOLKIT_PAGE_GET_BUILDING_LINK = {
   href: "#get-building",
 } as const;
 
-/**
- * Converts a header string to a URL-friendly anchor ID.
- * E.g., "## Auth Setup" -> "auth-setup"
- */
-function headerToAnchorId(header: string): string {
-  return header
-    .replace(HEADER_PREFIX_REGEX, "") // Remove leading ##
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9\s-]/g, "") // Remove special chars
-    .replace(/\s+/g, "-") // Replace spaces with hyphens
-    .replace(/-+/g, "-"); // Collapse multiple hyphens
-}
+// Regex for removing leading ## from headers (used for display label extraction)
+const HEADER_PREFIX_REGEX = /^#+\s*/;
 
 /**
  * Extracts section links from documentation chunks that have headers.
@@ -758,7 +745,6 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
           onToggleSelection={toggleToolSelection}
           showSelection={shouldShowSelection}
           tool={tool}
-          toolkitId={data.id}
         />
       ))}
 

@@ -405,8 +405,6 @@ export type DynamicCodeBlockProps = {
 export type ToolSectionProps = {
   /** Tool definition */
   tool: ToolDefinition;
-  /** Toolkit ID (for generating anchors) */
-  toolkitId: string;
   /** Whether the tool is selected in the selected tools panel */
   isSelected?: boolean;
   /** Show selection checkbox */
@@ -440,16 +438,10 @@ export type AvailableToolsTableProps = {
   enableSearch?: boolean;
   /** Enable filters */
   enableFilters?: boolean;
-  /** Enable scope filter chips */
-  enableScopeFilter?: boolean;
   /** Search input placeholder */
   searchPlaceholder?: string;
   /** Filter label */
   filterLabel?: string;
-  /** Scope filter label */
-  scopeFilterLabel?: string;
-  /** Scope filter helper text */
-  scopeFilterDescription?: string;
   /** Default filter selection */
   defaultFilter?:
     | "all"

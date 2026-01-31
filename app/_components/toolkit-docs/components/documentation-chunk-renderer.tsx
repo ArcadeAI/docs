@@ -131,6 +131,7 @@ function MdxContent({ content }: { content: string }) {
     if (mdxCache.has(source)) {
       const cached = mdxCache.get(source);
       if (cached) {
+        setError(null);
         setComponent(() => cached);
         return;
       }

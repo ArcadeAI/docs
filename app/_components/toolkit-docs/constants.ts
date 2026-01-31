@@ -35,15 +35,6 @@ export const PYPI_BASE_URL = "https://pypi.org/project";
  */
 export const SHIELDS_IO_BASE_URL = "https://img.shields.io";
 
-/**
- * Arcade Dashboard URLs
- */
-export const ARCADE_DASHBOARD = {
-  baseUrl: "https://app.arcade.dev",
-  playgroundExecute: "https://app.arcade.dev/playground/execute",
-  login: "https://app.arcade.dev/login",
-} as const;
-
 // =============================================================================
 // Internal Routes
 // =============================================================================
@@ -72,23 +63,12 @@ export function getPackageName(toolkitId: string): string {
     .replace(/^_+|_+$/g, "");
 
   // Many "*Api" toolkits publish as "<name>_api" (not "<name>api").
-  if (id.endsWith("api") && !id.endsWith("_api")) {
+  // Handle edge case: if ID is exactly "api", don't produce double underscore.
+  if (id.endsWith("api") && !id.endsWith("_api") && id !== "api") {
     return `${PACKAGE_PREFIX}${id.slice(0, -3)}_api`;
   }
 
   return `${PACKAGE_PREFIX}${id}`;
-}
-
-/**
- * Generate GitHub repository URL from toolkit ID
- */
-export function getGitHubRepoUrl(toolkitId: string): string {
-  const id = toolkitId.toLowerCase();
-  const repoId =
-    id.endsWith("api") && !id.endsWith("_api") && !id.endsWith("-api")
-      ? `${id.slice(0, -3)}_api`
-      : id;
-  return `${GITHUB_ORG_URL}/${GITHUB_REPO_PREFIX}${repoId}`;
 }
 
 /**

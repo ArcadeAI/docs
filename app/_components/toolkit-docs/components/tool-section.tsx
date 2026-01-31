@@ -228,6 +228,7 @@ function ToolRequirementsSection({
   secretsInfo,
   hasScopes,
   hasSecrets,
+  showSecrets,
 }: {
   tool: ToolSectionProps["tool"];
   showAdvanced: boolean;
@@ -236,6 +237,7 @@ function ToolRequirementsSection({
   secretsInfo: ToolSectionProps["tool"]["secretsInfo"];
   hasScopes: boolean;
   hasSecrets: boolean;
+  showSecrets: boolean;
 }) {
   const secretsInfoList = secretsInfo ?? [];
   return (
@@ -253,37 +255,54 @@ function ToolRequirementsSection({
         </div>
       )}
 
-      <div className="flex items-start gap-2">
-        <KeyRound
-          className={`mt-0.5 h-4 w-4 shrink-0 ${hasSecrets ? "text-amber-400" : "text-muted-foreground/50"}`}
-        />
-        {hasSecrets ? (
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-foreground text-sm">Secrets:</span>
-            {secretsInfoList.length > 0
-              ? secretsInfoList.map((secret) => (
-                  <span
-                    className="font-mono text-amber-600 text-xs dark:text-amber-300"
-                    key={secret.name}
-                  >
-                    {secret.name}
-                  </span>
-                ))
-              : (tool.secrets ?? []).map((secret) => (
-                  <span
-                    className="font-mono text-amber-600 text-xs dark:text-amber-300"
-                    key={secret}
-                  >
-                    {secret}
-                  </span>
-                ))}
-          </div>
-        ) : (
-          <span className="text-muted-foreground/70 text-sm">
-            No secrets required
-          </span>
-        )}
-      </div>
+      <DocumentationChunkRenderer
+        chunks={tool.documentationChunks}
+        location="secrets"
+        position="before"
+      />
+      {showSecrets && (
+        <div className="flex items-start gap-2">
+          <KeyRound
+            className={`mt-0.5 h-4 w-4 shrink-0 ${hasSecrets ? "text-amber-400" : "text-muted-foreground/50"}`}
+          />
+          {hasSecrets ? (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-foreground text-sm">Secrets:</span>
+              {secretsInfoList.length > 0
+                ? secretsInfoList.map((secret) => (
+                    <span
+                      className="font-mono text-amber-600 text-xs dark:text-amber-300"
+                      key={secret.name}
+                    >
+                      {secret.name}
+                    </span>
+                  ))
+                : (tool.secrets ?? []).map((secret) => (
+                    <span
+                      className="font-mono text-amber-600 text-xs dark:text-amber-300"
+                      key={secret}
+                    >
+                      {secret}
+                    </span>
+                  ))}
+            </div>
+          ) : (
+            <span className="text-muted-foreground/70 text-sm">
+              No secrets required
+            </span>
+          )}
+        </div>
+      )}
+      <DocumentationChunkRenderer
+        chunks={tool.documentationChunks}
+        location="secrets"
+        position="replace"
+      />
+      <DocumentationChunkRenderer
+        chunks={tool.documentationChunks}
+        location="secrets"
+        position="after"
+      />
 
       {hasScopes && (
         <div className="mt-3 border-neutral-dark-high/30 border-t pt-3">
@@ -442,6 +461,10 @@ export function ToolSection({
     "parameters"
   );
   const showAuth = shouldRenderDefaultSection(tool.documentationChunks, "auth");
+  const showSecrets = shouldRenderDefaultSection(
+    tool.documentationChunks,
+    "secrets"
+  );
   const showOutput = shouldRenderDefaultSection(
     tool.documentationChunks,
     "output"
@@ -470,6 +493,7 @@ export function ToolSection({
         scopes={scopes}
         secretsInfo={secretsInfo}
         showAdvanced={showAdvanced}
+        showSecrets={showSecrets}
         tool={tool}
       />
       <ToolScopesDetailsSection
