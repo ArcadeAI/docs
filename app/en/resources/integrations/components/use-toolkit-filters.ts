@@ -20,7 +20,7 @@ const TYPE_PRIORITY: Record<ToolkitType, number> = {
 
 const TYPE_LABELS: Record<ToolkitType, string> = {
   arcade: "Arcade Optimized",
-  arcade_starter: "Arcade Starter",
+  arcade_starter: "Arcade Unoptimized",
   verified: "Verified",
   community: "Community",
   auth: "Auth Provider",
