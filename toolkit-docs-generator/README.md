@@ -20,9 +20,10 @@ The generator merges three inputs into one JSON output per toolkit:
 It also reads the previous output when you use `--skip-unchanged` or `--previous-output`.
 
 When `--skip-unchanged` runs against the tool metadata API, the generator calls
-`mode=summary` first to decide which toolkits need updates. It only fetches full
-tool metadata for toolkits with version changes. The Engine API guarantees that
-tool definitions do not change unless the toolkit version changes.
+the summary endpoint (`/v1/tool_metadata_summary`) first to decide which toolkits
+need updates. It only fetches full tool metadata from `/v1/tool_metadata` for
+toolkits with version changes. The Engine API guarantees that tool definitions
+do not change unless the toolkit version changes.
 
 ## GitHub workflow: generate and sync
 

@@ -5,7 +5,7 @@ This workflow regenerates toolkit JSON after a Porter deploy and opens a PR with
 ## What it does
 
 1. Builds the toolkit docs generator.
-2. Generates toolkit JSON in `data/toolkits` using the Engine tool metadata endpoint.
+2. Generates toolkit JSON in `data/toolkits` using the Engine tool metadata and summary endpoints.
 3. Syncs integrations sidebar navigation from the generated JSON.
 4. Creates a PR if any files changed.
 

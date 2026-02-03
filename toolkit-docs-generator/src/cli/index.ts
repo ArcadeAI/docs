@@ -586,7 +586,9 @@ const createToolkitDataSourceForApi = (
     }
     if (verbose) {
       console.log(
-        chalk.dim(`Using /v1/tool_metadata endpoint: ${config.baseUrl}`)
+        chalk.dim(
+          `Using /v1/tool_metadata and /v1/tool_metadata_summary endpoints: ${config.baseUrl}`
+        )
       );
     }
     return createEngineToolkitDataSource({
@@ -772,7 +774,7 @@ program
   )
   .option(
     "--api-source <source>",
-    'API source: "tool-metadata" (/v1/tool_metadata, default with Engine creds), "list-tools" (/v1/tools, only when --api-source list-tools), or "mock"'
+    'API source: "tool-metadata" (/v1/tool_metadata + /v1/tool_metadata_summary, default with Engine creds), "list-tools" (/v1/tools, only when --api-source list-tools), or "mock"'
   )
   .option(
     "--list-tools-url <url>",
@@ -1585,7 +1587,7 @@ program
   )
   .option(
     "--api-source <source>",
-    'API source: "tool-metadata" (/v1/tool_metadata, default with Engine creds), "list-tools" (/v1/tools, only when --api-source list-tools), or "mock"'
+    'API source: "tool-metadata" (/v1/tool_metadata + /v1/tool_metadata_summary, default with Engine creds), "list-tools" (/v1/tools, only when --api-source list-tools), or "mock"'
   )
   .option(
     "--list-tools-url <url>",
@@ -2099,7 +2101,7 @@ program
   .option("--metadata-file <file>", "Path to metadata JSON file")
   .option(
     "--api-source <source>",
-    'API source: "tool-metadata" (/v1/tool_metadata, default with Engine creds), "list-tools" (/v1/tools, only when --api-source list-tools), or "mock"'
+    'API source: "tool-metadata" (/v1/tool_metadata + /v1/tool_metadata_summary, default with Engine creds), "list-tools" (/v1/tools, only when --api-source list-tools), or "mock"'
   )
   .option(
     "--list-tools-url <url>",

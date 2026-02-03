@@ -38,12 +38,12 @@ const normalizePageSize = (value?: number): number => {
 const normalizeBaseUrl = (baseUrl: string): string =>
   baseUrl.replace(/\/+$/, "");
 
-const buildEndpointUrl = (baseUrl: string): string => {
+const buildEndpointUrl = (baseUrl: string, path: string): string => {
   const normalized = normalizeBaseUrl(baseUrl);
   if (normalized.endsWith("/v1")) {
-    return `${normalized}/tool_metadata`;
+    return `${normalized}/${path}`;
   }
-  return `${normalized}/v1/tool_metadata`;
+  return `${normalized}/v1/${path}`;
 };
 
 const parseJsonResponse = async (
@@ -62,13 +62,18 @@ const parseJsonResponse = async (
 
 export class EngineApiSource implements IToolDataSource {
   private readonly endpoint: string;
+  private readonly summaryEndpoint: string;
   private readonly apiKey: string;
   private readonly fetchFn: typeof fetch;
   private readonly pageSize: number;
   private readonly includeAllVersions: boolean;
 
   constructor(config: EngineApiSourceConfig) {
-    this.endpoint = buildEndpointUrl(config.baseUrl);
+    this.endpoint = buildEndpointUrl(config.baseUrl, "tool_metadata");
+    this.summaryEndpoint = buildEndpointUrl(
+      config.baseUrl,
+      "tool_metadata_summary"
+    );
     this.apiKey = config.apiKey;
     this.fetchFn = config.fetchFn ?? fetch;
     this.pageSize = normalizePageSize(config.pageSize);
@@ -122,8 +127,7 @@ export class EngineApiSource implements IToolDataSource {
   }
 
   private async fetchSummary(): Promise<ToolMetadataSummary> {
-    const url = new URL(this.endpoint);
-    url.searchParams.set("mode", "summary");
+    const url = new URL(this.summaryEndpoint);
 
     const response = await this.fetchFn(url.toString(), {
       headers: {

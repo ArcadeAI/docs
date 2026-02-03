@@ -159,10 +159,10 @@ const createInspectFetchStub =
   };
 
 const createSummaryFetchStub =
-  (payload: unknown, inspect?: (params: URLSearchParams) => void) =>
+  (payload: unknown, inspect?: (url: URL) => void) =>
   async (input: RequestInfo | URL) => {
     const url = new URL(input.toString());
-    inspect?.(url.searchParams);
+    inspect?.(url);
     return new Response(JSON.stringify(payload), {
       status: 200,
       headers: { "Content-Type": "application/json" },
@@ -266,7 +266,7 @@ describe("EngineApiSource", () => {
     await source.fetchAllTools({ version: "0.1.3" });
   });
 
-  it("fetches toolkit summary using summary mode", async () => {
+  it("fetches toolkit summary from the summary endpoint", async () => {
     const summaryPayload = {
       total_tools: 2,
       total_toolkits: 1,
@@ -285,8 +285,9 @@ describe("EngineApiSource", () => {
     const source = new EngineApiSource({
       baseUrl: "https://api.arcade.dev",
       apiKey: "test",
-      fetchFn: createSummaryFetchStub(summaryPayload, (params) => {
-        expect(params.get("mode")).toBe("summary");
+      fetchFn: createSummaryFetchStub(summaryPayload, (url) => {
+        expect(url.pathname).toBe("/v1/tool_metadata_summary");
+        expect(url.searchParams.get("mode")).toBeNull();
       }),
     });
 
