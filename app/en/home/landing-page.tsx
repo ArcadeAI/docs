@@ -149,7 +149,7 @@ const FRAMEWORKS = [
   },
   {
     name: "OpenAI Agents",
-    href: "/guides/agent-frameworks/openai-agents/use-arcade-tools",
+    href: "/get-started/agent-frameworks/openai-agents/overview",
     icon: "/images/icons/openai.png",
   },
   {

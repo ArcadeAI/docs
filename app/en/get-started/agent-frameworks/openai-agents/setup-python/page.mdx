@@ -1,0 +1,267 @@
+---
+title: "Setup Arcade with OpenAI Agents (Python)"
+description: "Build a CLI agent with Arcade tools using the OpenAI Agents SDK for Python"
+---
+
+import { Steps, Callout } from "nextra/components";
+
+# Setup Arcade with OpenAI Agents (Python)
+
+The [OpenAI Agents SDK](https://openai.github.io/openai-agents-python/) is a Python library for building AI agents. It provides an interface for defining agents with tools, system prompts, and model configurations.
+
+<GuideOverview>
+<GuideOverview.Outcomes>
+
+Build a CLI agent that uses Arcade tools to help users with Gmail and Slack
+
+</GuideOverview.Outcomes>
+
+<GuideOverview.Prerequisites>
+
+- <DashboardLink path="register" />
+- [Obtain an Arcade API key](/get-started/setup/api-keys)
+- The [`uv` package manager](https://docs.astral.sh/uv/)
+
+</GuideOverview.Prerequisites>
+
+<GuideOverview.YouWillLearn>
+
+- How to retrieve Arcade tools and convert them to OpenAI Agents format
+- How to build an OpenAI Agents agent with Arcade tools
+- How to handle "just in time" (JIT) tool authorization
+
+</GuideOverview.YouWillLearn>
+</GuideOverview>
+
+## How Arcade integrates with OpenAI Agents
+
+The OpenAI Agents SDK provides an [Agent](https://openai.github.io/openai-agents-python/ref/agent/#agents.agent.Agent) class that implements a ReAct agent. It accepts tools in the [FunctionTool](https://openai.github.io/openai-agents-python/ref/tool/#agents.tool.FunctionTool) format. The `agents-arcade` package provides a `get_arcade_tools` function that retrieves Arcade tools and converts them to this format automatically.
+
+When a tool requires authorization (like Gmail or GitHub), the agent raises an `AuthorizationError` with a URL for the user to visit. After the user authorizes, the agent can retry the operation.
+
+## Build the agent
+
+<Steps>
+
+### Create a new project
+
+Create a new directory and set up a virtual environment:
+
+```bash
+mkdir openai-agents-arcade-example
+cd openai-agents-arcade-example
+uv venv
+source .venv/bin/activate
+```
+
+Install the required packages:
+
+```bash
+uv pip install openai-agents arcadepy agents-arcade python-dotenv
+```
+
+Create a `.env` file with your API keys:
+
+```env filename=".env"
+# Arcade API key from https://app.arcade.dev
+ARCADE_API_KEY=YOUR_ARCADE_API_KEY
+# Your Arcade user ID (the email you used to sign up)
+ARCADE_USER_ID={arcade_user_id}
+# OpenAI API key
+OPENAI_API_KEY=YOUR_OPENAI_API_KEY
+```
+
+### Write the agent code
+
+Create `main.py` with the following imports:
+
+```python filename="main.py"
+from agents import Agent, Runner, TResponseInputItem
+from arcadepy import AsyncArcade
+from agents_arcade import get_arcade_tools
+from agents_arcade.errors import AuthorizationError
+from dotenv import load_dotenv
+import os
+import asyncio
+
+# Load environment variables
+load_dotenv()
+```
+
+### Configure the agent
+
+Define which tools and MCP servers your agent can access:
+
+```python filename="main.py"
+# Configuration
+ARCADE_USER_ID = os.getenv("ARCADE_USER_ID")
+# MCP servers provide groups of related tools
+MCP_SERVERS = ["Slack"]
+# Individual tools can be specified by name
+TOOLS = ["Gmail_ListEmails", "Gmail_SendEmail", "Gmail_WhoAmI"]
+# System prompt for the agent
+SYSTEM_PROMPT = "You are a helpful assistant that can assist with Gmail and Slack."
+# Model to use
+MODEL = "gpt-4o-mini"
+```
+
+<Callout type="info">
+Browse the [MCP server catalog](/resources/integrations) to see all available MCP servers and tools.
+</Callout>
+
+### Create the main function
+
+The main function initializes the Arcade client, retrieves tools, creates an agent, and runs a conversation loop:
+
+```python filename="main.py"
+async def main():
+    # Initialize the Arcade client
+    client = AsyncArcade()
+
+    # Get tools from MCP servers and individual tool names
+    tools = await get_arcade_tools(
+        client,
+        toolkits=MCP_SERVERS,
+        tools=TOOLS
+    )
+
+    # Create the agent with Arcade tools
+    agent = Agent(
+        name="Inbox Assistant",
+        instructions=SYSTEM_PROMPT,
+        model=MODEL,
+        tools=tools,
+    )
+
+    # Conversation loop
+    history: list[TResponseInputItem] = []
+    while True:
+        prompt = input("You: ")
+        if prompt.lower() == "exit":
+            break
+
+        history.append({"role": "user", "content": prompt})
+
+        try:
+            result = await Runner.run(
+                starting_agent=agent,
+                input=history,
+                context={"user_id": ARCADE_USER_ID},
+            )
+            history = result.to_input_list()
+            print(f"Assistant: {result.final_output}")
+        except AuthorizationError as e:
+            # Display the authorization URL to the user
+            print(f"Authorization required. Please visit: {e}")
+            print("After authorizing, run your request again.")
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+### Handle authorization
+
+When a tool requires OAuth authorization (like Gmail or GitHub), the `AuthorizationError` contains a URL where the user can grant access:
+
+```python
+except AuthorizationError as e:
+    print(f"Please visit this URL to authorize: {e}")
+```
+
+After the user completes authorization, Arcade remembers it for that `user_id`. Future requests with the same `user_id` won't require re-authorization.
+
+<Callout type="info">
+The `user_id` should be a unique, consistent identifier for each user in your application (like their email or database ID). Arcade uses this to track which users have authorized which tools.
+</Callout>
+
+### Run the agent
+
+```bash
+uv run main.py
+```
+
+Try prompts like:
+
+- "What are my latest emails?"
+- "Send a Slack message to #general saying hello"
+- "Summarize my last 3 emails"
+
+</Steps>
+
+## Key takeaways
+
+- **`get_arcade_tools`** retrieves Arcade tools and converts them to OpenAI Agents `FunctionTool` format
+- **`AuthorizationError`** is raised when a tool needs OAuth authorization, containing the URL for the user to visit
+- **`user_id`** tracks authorization per user - use a consistent ID for each user in your application
+- You can mix MCP servers (for groups of tools) with individual tool names
+
+## Complete code
+
+```python filename="main.py"
+from agents import Agent, Runner, TResponseInputItem
+from arcadepy import AsyncArcade
+from agents_arcade import get_arcade_tools
+from agents_arcade.errors import AuthorizationError
+from dotenv import load_dotenv
+import os
+import asyncio
+
+# Load environment variables
+load_dotenv()
+
+# Configuration
+ARCADE_USER_ID = os.getenv("ARCADE_USER_ID")
+MCP_SERVERS = ["Slack"]
+TOOLS = ["Gmail_ListEmails", "Gmail_SendEmail", "Gmail_WhoAmI"]
+SYSTEM_PROMPT = "You are a helpful assistant that can assist with Gmail and Slack."
+MODEL = "gpt-4o-mini"
+
+async def main():
+    # Initialize the Arcade client
+    client = AsyncArcade()
+
+    # Get tools from MCP servers and individual tool names
+    tools = await get_arcade_tools(
+        client,
+        toolkits=MCP_SERVERS,
+        tools=TOOLS
+    )
+
+    # Create the agent with Arcade tools
+    agent = Agent(
+        name="Inbox Assistant",
+        instructions=SYSTEM_PROMPT,
+        model=MODEL,
+        tools=tools,
+    )
+
+    # Conversation loop
+    history: list[TResponseInputItem] = []
+    while True:
+        prompt = input("You: ")
+        if prompt.lower() == "exit":
+            break
+
+        history.append({"role": "user", "content": prompt})
+
+        try:
+            result = await Runner.run(
+                starting_agent=agent,
+                input=history,
+                context={"user_id": ARCADE_USER_ID},
+            )
+            history = result.to_input_list()
+            print(f"Assistant: {result.final_output}")
+        except AuthorizationError as e:
+            print(f"Authorization required. Please visit: {e}")
+            print("After authorizing, run your request again.")
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+## Next steps
+
+- Add more tools by modifying `MCP_SERVERS` and `TOOLS`
+- Build a web interface instead of CLI using frameworks like FastAPI or Flask
+- Explore [creating custom tools](/guides/create-tools/tool-basics/build-mcp-server) with the Arcade Tool SDK

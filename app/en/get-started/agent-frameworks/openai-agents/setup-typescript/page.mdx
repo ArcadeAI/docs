@@ -1,0 +1,301 @@
+---
+title: "Setup Arcade with OpenAI Agents (TypeScript)"
+description: "Build an agent with Arcade tools using the OpenAI Agents SDK for JavaScript/TypeScript"
+---
+
+import { Steps, Callout } from "nextra/components";
+
+# Setup Arcade with OpenAI Agents (TypeScript)
+
+The [OpenAI Agents SDK for JavaScript](https://openai.github.io/openai-agents-js/) provides a framework for building AI agents in TypeScript and JavaScript. Arcade's `@arcadeai/arcadejs` library converts Arcade tools to the format OpenAI Agents expects.
+
+<GuideOverview>
+<GuideOverview.Outcomes>
+
+Build an agent that uses Arcade tools to help users with Gmail and Slack
+
+</GuideOverview.Outcomes>
+
+<GuideOverview.Prerequisites>
+
+- <DashboardLink path="register" />
+- [Obtain an Arcade API key](/get-started/setup/api-keys)
+- Node.js 18+ or [Bun](https://bun.sh/)
+
+</GuideOverview.Prerequisites>
+
+<GuideOverview.YouWillLearn>
+
+- How to retrieve Arcade tools and convert them to OpenAI Agents format
+- How to use the factory pattern for tool execution
+- How to handle authorization with `executeOrAuthorizeZodTool`
+
+</GuideOverview.YouWillLearn>
+</GuideOverview>
+
+## How Arcade integrates with OpenAI Agents
+
+The OpenAI Agents JS SDK uses [Zod](https://zod.dev) schemas for tool definitions. Arcade's `toZod()` function converts Arcade tool definitions to Zod schemas, and the `executeFactory` parameter determines how tools are executed.
+
+The key difference from Python: instead of using `functools.partial` to bind context to tool functions, TypeScript uses a **factory pattern**. The `executeFactory` receives tool context (client, userId, tool definition) and returns an execute function with that context "baked in".
+
+## Build the agent
+
+<Steps>
+
+### Create a new project
+
+Create a new directory and install dependencies:
+
+```bash
+mkdir openai-agents-arcade-ts
+cd openai-agents-arcade-ts
+npm init -y
+npm install @openai/agents @arcadeai/arcadejs dotenv
+```
+
+Create a `.env` file with your API keys:
+
+```env filename=".env"
+# Arcade API key from https://app.arcade.dev
+ARCADE_API_KEY=YOUR_ARCADE_API_KEY
+# Your Arcade user ID (the email you used to sign up)
+ARCADE_USER_ID={arcade_user_id}
+# OpenAI API key
+OPENAI_API_KEY=YOUR_OPENAI_API_KEY
+```
+
+### Write the agent code
+
+Create `index.ts` (or `index.mjs` for plain JavaScript):
+
+```typescript filename="index.ts"
+import Arcade from "@arcadeai/arcadejs";
+import { executeOrAuthorizeZodTool, toZod } from "@arcadeai/arcadejs/lib";
+import { Agent, run, tool } from "@openai/agents";
+import "dotenv/config";
+
+// Configuration
+const ARCADE_USER_ID = process.env.ARCADE_USER_ID || "default-user";
+const MCP_SERVERS = ["Slack"];
+const INDIVIDUAL_TOOLS = ["Gmail_ListEmails", "Gmail_SendEmail", "Gmail_WhoAmI"];
+const SYSTEM_PROMPT = "You are a helpful assistant that can assist with Gmail and Slack.";
+const MODEL = "gpt-4o-mini";
+```
+
+### Retrieve and convert Arcade tools
+
+Use `toZod()` to convert Arcade tools to Zod schemas, then `tool()` to convert them to OpenAI Agents format:
+
+```typescript filename="index.ts"
+async function getArcadeTools(client: Arcade, userId: string) {
+  // Fetch tools from MCP servers
+  const mcpServerTools = await Promise.all(
+    MCP_SERVERS.map(async (serverName) => {
+      const response = await client.tools.list({
+        toolkit: serverName,
+        limit: 30,
+      });
+      return response.items;
+    })
+  );
+
+  // Fetch individual tools by name
+  const individualToolDefs = await Promise.all(
+    INDIVIDUAL_TOOLS.map((toolName) => client.tools.get(toolName))
+  );
+
+  // Combine and deduplicate
+  const allTools = [...mcpServerTools.flat(), ...individualToolDefs];
+  const uniqueTools = Array.from(
+    new Map(allTools.map((t) => [t.qualified_name, t])).values()
+  );
+
+  // Convert to Zod format with the execute factory
+  // This is the TypeScript equivalent of Python's functools.partial -
+  // the factory receives context and returns an execute function
+  const zodTools = toZod({
+    tools: uniqueTools,
+    client,
+    userId,
+    executeFactory: executeOrAuthorizeZodTool,
+  });
+
+  // Convert Zod tools to OpenAI Agents format
+  return zodTools.map(tool);
+}
+```
+
+<Callout type="info">
+**Understanding the factory pattern**: In Python, you'd use `functools.partial(invoke_tool, client=client, tool_name=name)` to bind context to a function. In TypeScript, `executeFactory` serves the same purpose - it receives the tool context and returns an execute function with that context already bound.
+</Callout>
+
+### Create and run the agent
+
+```typescript filename="index.ts"
+async function main() {
+  // Initialize Arcade client
+  const client = new Arcade();
+
+  // Get tools converted to OpenAI Agents format
+  const tools = await getArcadeTools(client, ARCADE_USER_ID);
+
+  // Create the agent
+  const agent = new Agent({
+    name: "Inbox Assistant",
+    instructions: SYSTEM_PROMPT,
+    model: MODEL,
+    tools,
+  });
+
+  // Run a single query
+  const result = await run(agent, "What are my latest emails?");
+  console.log(result.finalOutput);
+}
+
+main().catch(console.error);
+```
+
+### Handle authorization
+
+The `executeOrAuthorizeZodTool` factory automatically handles authorization. When a tool needs OAuth authorization (like Gmail), instead of throwing an error, it returns a response with the authorization URL:
+
+```typescript
+// The agent's output will include something like:
+// "Please authorize access: https://accounts.google.com/..."
+```
+
+After the user visits the URL and authorizes, running the same request again will succeed.
+
+For more control over authorization flow, you can create a custom execute factory:
+
+```typescript filename="index.ts"
+import { isAuthorizationRequiredError, executeZodTool } from "@arcadeai/arcadejs/lib";
+
+// Custom factory that waits for authorization
+function executeWithWait({ zodToolSchema, toolDefinition, client, userId }) {
+  return async (input) => {
+    try {
+      return await executeZodTool({ zodToolSchema, toolDefinition, client, userId })(input);
+    } catch (error) {
+      if (error instanceof Error && isAuthorizationRequiredError(error)) {
+        const response = await client.tools.authorize({
+          tool_name: zodToolSchema.name,
+          user_id: userId,
+        });
+
+        if (response.status !== "completed") {
+          console.log(`Please authorize: ${response.url}`);
+          // Wait for the user to complete authorization
+          await client.auth.waitForCompletion(response);
+        }
+
+        // Retry after authorization
+        return await executeZodTool({ zodToolSchema, toolDefinition, client, userId })(input);
+      }
+      throw error;
+    }
+  };
+}
+
+// Use with toZod
+const zodTools = toZod({
+  tools: uniqueTools,
+  client,
+  userId,
+  executeFactory: executeWithWait,
+});
+```
+
+### Run the agent
+
+```bash
+npx tsx index.ts
+# or with Bun
+bun run index.ts
+```
+
+</Steps>
+
+## Key takeaways
+
+- **`toZod()`** converts Arcade tools to Zod schemas that OpenAI Agents can use
+- **`executeFactory`** is the TypeScript equivalent of Python's `functools.partial` - it binds context to tool execute functions
+- **`executeOrAuthorizeZodTool`** automatically returns authorization URLs when tools need OAuth
+- **`isAuthorizationRequiredError`** lets you detect and handle authorization errors in custom factories
+- The **`userId`** parameter tracks authorization per user - use a consistent ID for each user
+
+## Complete code
+
+```typescript filename="index.ts"
+import Arcade from "@arcadeai/arcadejs";
+import { executeOrAuthorizeZodTool, toZod } from "@arcadeai/arcadejs/lib";
+import { Agent, run, tool } from "@openai/agents";
+import "dotenv/config";
+
+// Configuration
+const ARCADE_USER_ID = process.env.ARCADE_USER_ID || "default-user";
+const MCP_SERVERS = ["Slack"];
+const INDIVIDUAL_TOOLS = ["Gmail_ListEmails", "Gmail_SendEmail", "Gmail_WhoAmI"];
+const SYSTEM_PROMPT = "You are a helpful assistant that can assist with Gmail and Slack.";
+const MODEL = "gpt-4o-mini";
+
+async function getArcadeTools(client: Arcade, userId: string) {
+  // Fetch tools from MCP servers
+  const mcpServerTools = await Promise.all(
+    MCP_SERVERS.map(async (serverName) => {
+      const response = await client.tools.list({
+        toolkit: serverName,
+        limit: 30,
+      });
+      return response.items;
+    })
+  );
+
+  // Fetch individual tools by name
+  const individualToolDefs = await Promise.all(
+    INDIVIDUAL_TOOLS.map((toolName) => client.tools.get(toolName))
+  );
+
+  // Combine and deduplicate
+  const allTools = [...mcpServerTools.flat(), ...individualToolDefs];
+  const uniqueTools = Array.from(
+    new Map(allTools.map((t) => [t.qualified_name, t])).values()
+  );
+
+  // Convert to Zod format with the execute factory
+  const zodTools = toZod({
+    tools: uniqueTools,
+    client,
+    userId,
+    executeFactory: executeOrAuthorizeZodTool,
+  });
+
+  // Convert Zod tools to OpenAI Agents format
+  return zodTools.map(tool);
+}
+
+async function main() {
+  const client = new Arcade();
+  const tools = await getArcadeTools(client, ARCADE_USER_ID);
+
+  const agent = new Agent({
+    name: "Inbox Assistant",
+    instructions: SYSTEM_PROMPT,
+    model: MODEL,
+    tools,
+  });
+
+  const result = await run(agent, "What are my latest emails?");
+  console.log(result.finalOutput);
+}
+
+main().catch(console.error);
+```
+
+## Next steps
+
+- Add more tools by modifying `MCP_SERVERS` and `INDIVIDUAL_TOOLS`
+- Build a web interface using frameworks like Next.js or Express
+- See the [Vercel AI SDK tutorial](/get-started/agent-frameworks/vercelai) for a complete web chatbot example
+- Explore [creating custom tools](/guides/create-tools/tool-basics/build-mcp-server) with the Arcade Tool SDK
