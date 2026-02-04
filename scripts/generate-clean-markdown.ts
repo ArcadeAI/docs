@@ -18,7 +18,7 @@ const RETRY_DELAY_MS = 1000;
 const BATCH_SIZE = 10;
 const SERVER_CLEANUP_DELAY_MS = 500;
 const HTTP_NOT_FOUND = 404;
-const MIN_INTEGRATION_LINKS = 5;
+const MIN_INTEGRATION_LINKS = 10;
 const MAX_DOTFILE_LENGTH = 20;
 const MAX_CHILD_TEXT_LENGTH = 50;
 const PARENT_SEARCH_DEPTH = 4;
@@ -41,6 +41,14 @@ const STEPS_COMPONENT_PATTERN = /<Steps>|<\/Steps>/g;
 const TABS_COMPONENT_PATTERN = /<Tabs[\s>]/g;
 const CALLOUT_COMPONENT_PATTERN = /<Callout[\s>]/g;
 const GUIDE_OVERVIEW_PATTERN = /<GuideOverview[\s>]/g;
+
+// HTML element patterns that should be removed during cleaning
+const HTML_SCRIPT_PATTERN = /<script[\s>]/gi;
+const HTML_STYLE_PATTERN = /<style[\s>]/gi;
+const HTML_SVG_PATTERN = /<svg[\s>]/gi;
+const HTML_NAV_PATTERN = /<nav[\s>]/gi;
+const HTML_FOOTER_PATTERN = /<footer[\s>]/gi;
+const HTML_ASIDE_PATTERN = /<aside[\s>]/gi;
 
 // Meta tag extraction patterns
 const TITLE_PATTERN = /<title[^>]*>([^<]*)<\/title>/i;
@@ -745,17 +753,9 @@ async function discoverPages(): Promise<
 }
 
 /**
- * Validates that the generated markdown files contain expected content
+ * Validates that the integrations page has proper links
  */
-async function validateGeneratedContent(): Promise<{
-  passed: boolean;
-  errors: string[];
-}> {
-  const errors: string[] = [];
-
-  console.log(pc.blue("\n🧪 Running validation tests...\n"));
-
-  // Test 1: Integrations overview should contain links to integrations
+async function validateIntegrationsPage(errors: string[]): Promise<void> {
   const integrationsPath = path.join(
     OUTPUT_DIR,
     "en",
@@ -764,9 +764,6 @@ async function validateGeneratedContent(): Promise<{
   );
   try {
     const content = await fs.readFile(integrationsPath, "utf-8");
-
-    // Check for integration links (links to /en/resources/integrations/...)
-    // The turndown conversion may produce multi-line links, so we look for the URL pattern
     const integrationLinkPattern =
       /\]\(\/en\/resources\/integrations\/[^)]+\)/g;
     const matches = content.match(integrationLinkPattern) || [];
@@ -784,7 +781,6 @@ async function validateGeneratedContent(): Promise<{
       );
     }
 
-    // Also check that raw MDX syntax is NOT present
     if (content.includes("<Toolkits") || content.includes("import ")) {
       errors.push(
         "Integrations page still contains raw MDX syntax (<Toolkits /> or import statements)"
@@ -795,8 +791,12 @@ async function validateGeneratedContent(): Promise<{
   } catch (error) {
     errors.push(`Could not read integrations page: ${error}`);
   }
+}
 
-  // Test 2: A typical page should not contain JSX/MDX syntax
+/**
+ * Validates that the quickstart page has no raw MDX syntax
+ */
+async function validateQuickstartPage(errors: string[]): Promise<void> {
   const quickstartPath = path.join(
     OUTPUT_DIR,
     "en",
@@ -806,8 +806,6 @@ async function validateGeneratedContent(): Promise<{
   );
   try {
     const content = await fs.readFile(quickstartPath, "utf-8");
-
-    // Check for common MDX patterns that should NOT be present
     const mdxPatterns = [
       { pattern: IMPORT_STATEMENT_PATTERN, name: "import statements" },
       { pattern: STEPS_COMPONENT_PATTERN, name: "<Steps> component" },
@@ -816,17 +814,17 @@ async function validateGeneratedContent(): Promise<{
       { pattern: GUIDE_OVERVIEW_PATTERN, name: "<GuideOverview> component" },
     ];
 
-    for (const { pattern, name } of mdxPatterns) {
-      if (pattern.test(content)) {
-        errors.push(`Quickstart page still contains ${name}`);
-      }
+    const foundPatterns = mdxPatterns.filter(({ pattern }) =>
+      pattern.test(content)
+    );
+    for (const { name } of foundPatterns) {
+      errors.push(`Quickstart page still contains ${name}`);
     }
 
-    if (!mdxPatterns.some(({ pattern }) => pattern.test(content))) {
+    if (foundPatterns.length === 0) {
       console.log(pc.green("  ✓ Quickstart page has no raw MDX syntax"));
     }
 
-    // Check that actual content is present
     if (content.includes("arcade new") && content.includes("uv tool install")) {
       console.log(
         pc.green("  ✓ Quickstart page contains expected code examples")
@@ -837,6 +835,53 @@ async function validateGeneratedContent(): Promise<{
   } catch (error) {
     errors.push(`Could not read quickstart page: ${error}`);
   }
+}
+
+/**
+ * Validates that the home page has HTML elements properly cleaned
+ */
+async function validateHtmlCleaning(errors: string[]): Promise<void> {
+  const homePath = path.join(OUTPUT_DIR, "en", "home.md");
+  try {
+    const content = await fs.readFile(homePath, "utf-8");
+    const htmlPatterns = [
+      { pattern: HTML_SCRIPT_PATTERN, name: "<script>" },
+      { pattern: HTML_STYLE_PATTERN, name: "<style>" },
+      { pattern: HTML_SVG_PATTERN, name: "<svg>" },
+      { pattern: HTML_NAV_PATTERN, name: "<nav>" },
+      { pattern: HTML_FOOTER_PATTERN, name: "<footer>" },
+      { pattern: HTML_ASIDE_PATTERN, name: "<aside>" },
+    ];
+
+    const foundTags = htmlPatterns.filter(({ pattern }) =>
+      pattern.test(content)
+    );
+    for (const { name } of foundTags) {
+      errors.push(`Home page still contains ${name} HTML element`);
+    }
+
+    if (foundTags.length === 0) {
+      console.log(pc.green("  ✓ Home page has HTML elements properly cleaned"));
+    }
+  } catch (error) {
+    errors.push(`Could not read home page: ${error}`);
+  }
+}
+
+/**
+ * Validates that the generated markdown files contain expected content
+ */
+async function validateGeneratedContent(): Promise<{
+  passed: boolean;
+  errors: string[];
+}> {
+  const errors: string[] = [];
+
+  console.log(pc.blue("\n🧪 Running validation tests...\n"));
+
+  await validateIntegrationsPage(errors);
+  await validateQuickstartPage(errors);
+  await validateHtmlCleaning(errors);
 
   return { passed: errors.length === 0, errors };
 }
@@ -937,6 +982,10 @@ async function main() {
       await cleanupServer(server);
     }
   }
+
+  // Explicitly exit to ensure the process terminates
+  // (event listeners on the spawned server may keep the event loop alive)
+  process.exit(0);
 }
 
 // Run if called directly
