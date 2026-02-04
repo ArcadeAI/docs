@@ -75,6 +75,16 @@ function getLocaleFromPathname(pathname: string): string {
   return localeMatch?.[1] || "en";
 }
 
+function getMarkdownAlternatePath(pathname: string): string {
+  // Handle root paths
+  if (pathname === "/" || pathname === "") {
+    return "/index.md";
+  }
+  // Remove trailing slash if present, then add .md extension
+  const cleanPath = pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
+  return `${cleanPath}.md`;
+}
+
 export default async function RootLayout({
   children,
 }: {
@@ -104,6 +114,11 @@ export default async function RootLayout({
         <meta content="width=device-width, initial-scale=1" name="viewport" />
         <link href="https://www.googletagmanager.com" rel="preconnect" />
         <link href="https://www.googletagmanager.com" rel="dns-prefetch" />
+        <link
+          href={getMarkdownAlternatePath(pathname)}
+          rel="alternate"
+          type="text/markdown"
+        />
       </Head>
       <body>
         {lang !== "en" && (
