@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ToolkitPage } from "@/app/_components/toolkit-docs";
 import { readToolkitData } from "@/app/_lib/toolkit-data";
+import { normalizeToolkitId } from "@/app/_lib/toolkit-slug";
 import {
   getToolkitStaticParamsForCategory,
   type IntegrationCategory,
-  normalizeToolkitId,
 } from "@/app/_lib/toolkit-static-params";
 
 type ToolkitDocsParams = {

@@ -2,11 +2,10 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-
+import { normalizeToolkitId } from "../toolkit-slug";
 import {
   getToolkitStaticParamsForCategory,
   listToolkitRoutes,
-  normalizeToolkitId,
   type ToolkitCatalogEntry,
 } from "../toolkit-static-params";
 
@@ -33,6 +32,18 @@ const writeIndex = async (
     2
   );
   await writeFile(join(dir, "index.json"), indexFixture, "utf-8");
+};
+
+const writeToolkitData = async (
+  dir: string,
+  toolkit: {
+    id: string;
+    metadata?: { category?: string; docsLink?: string; isHidden?: boolean };
+  }
+) => {
+  const fileName = `${normalizeToolkitId(toolkit.id)}.json`;
+  const toolkitFixture = JSON.stringify(toolkit, null, 2);
+  await writeFile(join(dir, fileName), toolkitFixture, "utf-8");
 };
 
 describe("toolkit static params", () => {
@@ -78,6 +89,50 @@ describe("toolkit static params", () => {
         toolkitsCatalog,
       });
       expect(params).toEqual([{ toolkitId: "github" }]);
+    });
+  });
+
+  it("uses docsLink slugs when available", async () => {
+    await withTempDir(async (dir) => {
+      await writeIndex(dir, [
+        { id: "GoogleCalendar", category: "productivity" },
+      ]);
+
+      const toolkitsCatalog: ToolkitCatalogEntry[] = [
+        {
+          id: "GoogleCalendar",
+          category: "productivity",
+          docsLink:
+            "https://docs.arcade.dev/en/mcp-servers/productivity/google-calendar",
+        },
+      ];
+
+      const routes = await listToolkitRoutes({ dataDir: dir, toolkitsCatalog });
+      expect(routes).toEqual([
+        { toolkitId: "google-calendar", category: "productivity" },
+      ]);
+    });
+  });
+
+  it("falls back to scanning data files when the index is missing", async () => {
+    await withTempDir(async (dir) => {
+      await writeToolkitData(dir, {
+        id: "GoogleCalendar",
+        metadata: {
+          category: "productivity",
+          docsLink:
+            "https://docs.arcade.dev/en/mcp-servers/productivity/google-calendar",
+        },
+      });
+
+      const routes = await listToolkitRoutes({
+        dataDir: dir,
+        toolkitsCatalog: [],
+      });
+
+      expect(routes).toEqual([
+        { toolkitId: "google-calendar", category: "productivity" },
+      ]);
     });
   });
 

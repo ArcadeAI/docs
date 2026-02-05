@@ -1,7 +1,7 @@
 import { TOOLKITS } from "@arcadeai/design-system";
 import Link from "next/link";
-import { getToolkitSlug, normalizeToolkitId } from "@/app/_lib/toolkit-slug";
 import { readToolkitData, readToolkitIndex } from "@/app/_lib/toolkit-data";
+import { getToolkitSlug, normalizeToolkitId } from "@/app/_lib/toolkit-slug";
 
 const AUTH_TYPE_STYLES: Record<string, string> = {
   oauth2: "bg-blue-500/10 text-blue-400 border-blue-500/30",
@@ -31,7 +31,9 @@ export async function ToolkitPreviewIndex() {
   }
 
   const toolkitById = new Map(
-    TOOLKITS.map((toolkit) => [normalizeToolkitId(toolkit.id), toolkit] as const)
+    TOOLKITS.map(
+      (toolkit) => [normalizeToolkitId(toolkit.id), toolkit] as const
+    )
   );
 
   const docsLinkById = new Map<string, string>();
@@ -103,7 +105,8 @@ export async function ToolkitPreviewIndex() {
                       id: toolkit.id,
                       docsLink:
                         toolkitById.get(normalizeToolkitId(toolkit.id))
-                          ?.docsLink ?? docsLinkById.get(normalizeToolkitId(toolkit.id)),
+                          ?.docsLink ??
+                        docsLinkById.get(normalizeToolkitId(toolkit.id)),
                     }
                   )}`}
                   key={toolkit.id}

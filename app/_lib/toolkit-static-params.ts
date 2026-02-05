@@ -4,8 +4,6 @@ import { TOOLKITS as DESIGN_SYSTEM_TOOLKITS } from "@arcadeai/design-system";
 import { readToolkitData, readToolkitIndex } from "./toolkit-data";
 import { getToolkitSlug, normalizeToolkitId } from "./toolkit-slug";
 
-export { normalizeToolkitId } from "./toolkit-slug";
-
 export const INTEGRATION_CATEGORIES = [
   "productivity",
   "social",
@@ -87,10 +85,49 @@ const listToolkitRoutesFromDataDir = async (options?: {
       });
       const category = normalizeCategory(parsed.metadata?.category);
       unique.set(slug, { toolkitId: slug, category });
-    } catch {}
+    } catch {
+      // Ignore malformed toolkit data files.
+    }
   }
 
   return [...unique.values()];
+};
+
+const shouldReadToolkitData = (entry?: ToolkitCatalogEntry): boolean => {
+  if (!entry) {
+    return true;
+  }
+  return (
+    typeof entry.docsLink === "undefined" &&
+    typeof entry.category === "undefined" &&
+    typeof entry.isHidden === "undefined"
+  );
+};
+
+const resolveToolkitRoute = async (
+  toolkit: { id: string; category?: string },
+  catalogByNormalizedId: Map<string, ToolkitCatalogEntry>,
+  dataDir?: string
+): Promise<ToolkitRouteEntry | null> => {
+  const normalizedId = normalizeToolkitId(toolkit.id);
+  const catalogEntry = catalogByNormalizedId.get(normalizedId);
+  const data = shouldReadToolkitData(catalogEntry)
+    ? await readToolkitData(toolkit.id, dataDir ? { dataDir } : undefined)
+    : null;
+
+  const isHidden = catalogEntry?.isHidden ?? data?.metadata?.isHidden ?? false;
+  if (isHidden) {
+    return null;
+  }
+
+  const slug = getToolkitSlug({
+    id: catalogEntry?.id ?? toolkit.id,
+    docsLink: catalogEntry?.docsLink ?? data?.metadata?.docsLink,
+  });
+  const category = normalizeCategory(
+    catalogEntry?.category ?? toolkit.category ?? data?.metadata?.category
+  );
+  return { toolkitId: slug, category };
 };
 
 export async function listToolkitRoutes(options?: {
@@ -112,30 +149,15 @@ export async function listToolkitRoutes(options?: {
 
   const unique = new Map<string, ToolkitRouteEntry>();
   for (const toolkit of index.toolkits) {
-    const normalizedId = normalizeToolkitId(toolkit.id);
-    const catalogEntry = catalogByNormalizedId.get(normalizedId);
-    const data =
-      catalogEntry?.docsLink || catalogEntry?.category
-        ? null
-        : await readToolkitData(
-            toolkit.id,
-            options?.dataDir ? { dataDir: options.dataDir } : undefined
-          );
-
-    const isHidden =
-      catalogEntry?.isHidden ?? data?.metadata?.isHidden ?? false;
-    if (isHidden) {
+    const route = await resolveToolkitRoute(
+      toolkit,
+      catalogByNormalizedId,
+      options?.dataDir
+    );
+    if (!route) {
       continue;
     }
-
-    const slug = getToolkitSlug({
-      id: catalogEntry?.id ?? toolkit.id,
-      docsLink: catalogEntry?.docsLink ?? data?.metadata?.docsLink,
-    });
-    const category = normalizeCategory(
-      catalogEntry?.category ?? toolkit.category ?? data?.metadata?.category
-    );
-    unique.set(slug, { toolkitId: slug, category });
+    unique.set(route.toolkitId, route);
   }
 
   return [...unique.values()];

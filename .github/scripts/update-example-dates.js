@@ -97,7 +97,7 @@ async function updateExampleDates() {
 
   // Read the current MDX file
   const mdxPath = path.join(
-    __dirname,
+    import.meta.dirname,
     "../../app/en/resources/examples/page.mdx"
   );
   let content = fs.readFileSync(mdxPath, "utf8");

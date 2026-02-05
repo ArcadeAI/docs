@@ -19,10 +19,14 @@ export function getToolkitSlug({ id, docsLink }: ToolkitSlugSource): string {
     try {
       const url = new URL(docsLink);
       const slug = extractSlugFromPath(url.pathname);
-      if (slug) return slug;
+      if (slug) {
+        return slug;
+      }
     } catch {
       const slug = extractSlugFromPath(docsLink);
-      if (slug) return slug;
+      if (slug) {
+        return slug;
+      }
     }
   }
 
