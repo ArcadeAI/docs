@@ -4,19 +4,19 @@ import {
   buttonVariants,
   getToolkitIcon,
   Separator,
-  type Toolkit,
 } from "@arcadeai/design-system";
 import { cn } from "@arcadeai/design-system/lib/utils";
 import { Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { ComingSoonProvider } from "@/app/_components/coming-soon-context";
-import { getToolkitSlug } from "@/app/_lib/toolkit-slug";
+import {
+  getToolkitSlug,
+  type ToolkitWithDocsLink,
+} from "@/app/_lib/toolkit-slug";
 import { FiltersBar } from "./filters-bar";
 import { ToolCard } from "./tool-card";
 import { TYPE_CONFIG, TYPE_DESCRIPTIONS } from "./type-config";
 import { useFilterStore, useToolkitFilters } from "./use-toolkit-filters";
-
-type ToolkitWithDocsLink = Toolkit & { docsLink?: string | null };
 
 type ToolkitsClientProps = {
   toolkits: ToolkitWithDocsLink[];

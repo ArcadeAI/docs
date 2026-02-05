@@ -73,6 +73,34 @@ describe("toolkit data loader", () => {
     });
   });
 
+  it("finds toolkit data by docsLink slug when file name doesn't match", async () => {
+    await withTempDir(async (dir) => {
+      // File is named posthogapi.json (normalized) but we look up by the
+      // hyphenated slug "posthog-api" that comes from the docsLink.
+      const toolkitData = {
+        id: "PosthogApi",
+        label: "PostHog API",
+        tools: [],
+        metadata: {
+          docsLink:
+            "https://docs.arcade.dev/en/mcp-servers/development/posthog-api",
+        },
+      };
+      await writeFile(
+        join(dir, "posthogapi.json"),
+        JSON.stringify(toolkitData),
+        "utf-8"
+      );
+
+      // Look up by the hyphenated slug — the direct file "posthog-api.json"
+      // doesn't exist, so the fallback findToolkitDataBySlug must match.
+      const data = await readToolkitData("posthog-api", { dataDir: dir });
+
+      expect(data).not.toBeNull();
+      expect(data?.id).toBe("PosthogApi");
+    });
+  });
+
   it("prevents path traversal when reading toolkit data", async () => {
     await withTempDir(async (dir) => {
       const escapeId = `${basename(dir)}-escape`;

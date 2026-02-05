@@ -1,12 +1,22 @@
-import { TOOLKITS, type Toolkit } from "@arcadeai/design-system";
+import { TOOLKITS } from "@arcadeai/design-system";
 import { readToolkitData } from "@/app/_lib/toolkit-data";
-import { normalizeToolkitId } from "@/app/_lib/toolkit-slug";
+import {
+  normalizeToolkitId,
+  type ToolkitWithDocsLink,
+} from "@/app/_lib/toolkit-slug";
 import ToolkitsClient from "./toolkits-client";
 
-type ToolkitWithDocsLink = Toolkit & { docsLink?: string | null };
-
-const getToolkitDocsLink = (toolkit: Toolkit): string | undefined => {
-  if ("docsLink" in toolkit) {
+/**
+ * Safely extract a docsLink from a toolkit entry.
+ * The design-system Toolkit type doesn't declare `docsLink`, but some
+ * runtime entries carry it. We use a runtime property check to be safe.
+ */
+const getToolkitDocsLink = (toolkit: unknown): string | undefined => {
+  if (
+    typeof toolkit === "object" &&
+    toolkit !== null &&
+    "docsLink" in toolkit
+  ) {
     const value = (toolkit as ToolkitWithDocsLink).docsLink;
     return value ?? undefined;
   }
@@ -18,8 +28,7 @@ const getToolkitsWithDocsLinks = async (): Promise<ToolkitWithDocsLink[]> => {
 
   await Promise.all(
     TOOLKITS.map(async (toolkit) => {
-      const existing = getToolkitDocsLink(toolkit);
-      if (existing) {
+      if (getToolkitDocsLink(toolkit)) {
         return;
       }
 

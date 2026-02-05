@@ -16,14 +16,16 @@ export function createToolkitDocsPage(category: IntegrationCategory) {
   const dataCache = new Map<string, ReturnType<typeof readToolkitData>>();
 
   const getToolkitData = async (toolkitId: string) => {
-    const normalizedId = normalizeToolkitId(toolkitId);
-    const cached = dataCache.get(normalizedId);
+    const cacheKey = normalizeToolkitId(toolkitId);
+    const cached = dataCache.get(cacheKey);
     if (cached) {
       return await cached;
     }
 
-    const promise = readToolkitData(normalizedId);
-    dataCache.set(normalizedId, promise);
+    // Pass the original toolkitId (not normalized) so readToolkitData's
+    // findToolkitDataBySlug fallback can match hyphenated slugs like "posthog-api".
+    const promise = readToolkitData(toolkitId);
+    dataCache.set(cacheKey, promise);
     return await promise;
   };
 
