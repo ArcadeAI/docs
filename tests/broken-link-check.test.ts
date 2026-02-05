@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import fg from "fast-glob";
 import { scanURLs, validateFiles } from "next-validate-link";
@@ -9,6 +9,67 @@ const TIMEOUT = 30_000;
 const staticFiles = ["/llms.txt", "/robots.txt", "/sitemap.xml"];
 
 const toolkitDataDir = join(process.cwd(), "data", "toolkits");
+const TOOLKIT_ID_NORMALIZER = /[^a-z0-9]+/g;
+const normalizeToolkitSlug = (value: string): string =>
+  value.toLowerCase().replace(TOOLKIT_ID_NORMALIZER, "");
+
+function getDocsLinkSlug(docsLink?: string | null): string | null {
+  if (!docsLink) {
+    return null;
+  }
+
+  try {
+    const url = new URL(docsLink);
+    const segments = url.pathname.split("/").filter(Boolean);
+    return segments.at(-1) ?? null;
+  } catch {
+    const segments = docsLink.split("/").filter(Boolean);
+    return segments.at(-1) ?? null;
+  }
+}
+
+type ToolkitMetadataFile = {
+  id?: string;
+  metadata?: { docsLink?: string };
+};
+
+function readToolkitMetadataFile(filePath: string): ToolkitMetadataFile | null {
+  try {
+    const content = readFileSync(filePath, "utf-8");
+    return JSON.parse(content) as ToolkitMetadataFile;
+  } catch {
+    return null;
+  }
+}
+
+function resolveToolkitDataPath(slug: string): string | null {
+  const normalizedSlug = normalizeToolkitSlug(slug);
+  const directPath = join(toolkitDataDir, `${normalizedSlug}.json`);
+  if (existsSync(directPath)) {
+    return directPath;
+  }
+
+  const entries = readdirSync(toolkitDataDir);
+  for (const entry of entries) {
+    if (!entry.endsWith(".json") || entry === "index.json") {
+      continue;
+    }
+
+    const filePath = join(toolkitDataDir, entry);
+    const parsed = readToolkitMetadataFile(filePath);
+    if (!parsed?.id) {
+      continue;
+    }
+
+    const docsSlug = getDocsLinkSlug(parsed.metadata?.docsLink);
+    const candidateSlug = docsSlug ?? normalizeToolkitSlug(parsed.id);
+    if (candidateSlug.toLowerCase() === slug.toLowerCase()) {
+      return filePath;
+    }
+  }
+
+  return null;
+}
 
 // Function to validate anchor fragments by checking file content
 function validateAnchorFragment(filePath: string, fragment: string): boolean {
@@ -67,7 +128,7 @@ function validateToolkitIntegrationRoute(
   // urlPath can be:
   // - /resources/integrations/<category>/<toolkitSlug>
   // - /en/resources/integrations/<category>/<toolkitSlug>
-  // (toolkitSlug is the lowercased toolkit id, e.g. githubapi)
+  // (toolkitSlug can be docs slugs like github-api or normalized ids like githubapi)
   const parts = urlPath.split("/").filter(Boolean);
 
   let cursor = 0;
@@ -95,8 +156,8 @@ function validateToolkitIntegrationRoute(
     return false;
   }
 
-  const jsonPath = join(toolkitDataDir, `${slug}.json`);
-  if (!existsSync(jsonPath)) {
+  const jsonPath = resolveToolkitDataPath(slug);
+  if (!jsonPath) {
     return false;
   }
 
