@@ -9,9 +9,9 @@ const meta: MetaRecord = {
     title: "LinkedIn",
     href: "/en/resources/integrations/social/linkedin",
   },
-  microsoftteams: {
+  "microsoft-teams": {
     title: "Microsoft Teams",
-    href: "/en/resources/integrations/social/microsoftteams",
+    href: "/en/resources/integrations/social/microsoft-teams",
   },
   reddit: {
     title: "Reddit",
@@ -33,9 +33,9 @@ const meta: MetaRecord = {
     type: "separator",
     title: "Starter",
   },
-  slackapi: {
+  "slack-api": {
     title: "Slack API",
-    href: "/en/resources/integrations/social/slackapi",
+    href: "/en/resources/integrations/social/slack-api",
   },
 };
 

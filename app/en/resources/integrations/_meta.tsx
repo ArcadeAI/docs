@@ -39,9 +39,6 @@ const meta: MetaRecord = {
   "customer-support": {
     title: "Customer Support",
   },
-  others: {
-    title: "Others",
-  },
   "-- Submit your Server": {
     type: "separator",
     title: "Submit your server",

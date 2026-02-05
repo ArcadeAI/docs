@@ -17,37 +17,37 @@ const meta: MetaRecord = {
     type: "separator",
     title: "Starter",
   },
-  hubspotautomationapi: {
+  "hubspot-automation-api": {
     title: "HubSpot Automation API",
-    href: "/en/resources/integrations/sales/hubspotautomationapi",
+    href: "/en/resources/integrations/sales/hubspot-automation-api",
   },
-  hubspotcmsapi: {
+  "hubspot-cms-api": {
     title: "HubSpot CMS API",
-    href: "/en/resources/integrations/sales/hubspotcmsapi",
+    href: "/en/resources/integrations/sales/hubspot-cms-api",
   },
-  hubspotconversationsapi: {
+  "hubspot-conversations-api": {
     title: "HubSpot Conversations API",
-    href: "/en/resources/integrations/sales/hubspotconversationsapi",
+    href: "/en/resources/integrations/sales/hubspot-conversations-api",
   },
-  hubspotcrmapi: {
+  "hubspot-crm-api": {
     title: "HubSpot CRM API",
-    href: "/en/resources/integrations/sales/hubspotcrmapi",
+    href: "/en/resources/integrations/sales/hubspot-crm-api",
   },
-  hubspoteventsapi: {
+  "hubspot-events-api": {
     title: "HubSpot Events API",
-    href: "/en/resources/integrations/sales/hubspoteventsapi",
+    href: "/en/resources/integrations/sales/hubspot-events-api",
   },
-  hubspotmarketingapi: {
+  "hubspot-marketing-api": {
     title: "HubSpot Marketing API",
-    href: "/en/resources/integrations/sales/hubspotmarketingapi",
+    href: "/en/resources/integrations/sales/hubspot-marketing-api",
   },
-  hubspotmeetingsapi: {
+  "hubspot-meetings-api": {
     title: "HubSpot Meetings API",
-    href: "/en/resources/integrations/sales/hubspotmeetingsapi",
+    href: "/en/resources/integrations/sales/hubspot-meetings-api",
   },
-  hubspotusersapi: {
+  "hubspot-users-api": {
     title: "HubSpot Users API",
-    href: "/en/resources/integrations/sales/hubspotusersapi",
+    href: "/en/resources/integrations/sales/hubspot-users-api",
   },
 };
 

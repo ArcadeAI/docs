@@ -13,25 +13,25 @@ const meta: MetaRecord = {
     type: "separator",
     title: "Starter",
   },
-  customerioapi: {
+  "customerio-api": {
     title: "Customer.io API",
-    href: "/en/resources/integrations/customer-support/customerioapi",
+    href: "/en/resources/integrations/customer-support/customerio-api",
   },
-  customeriopipelinesapi: {
+  "customerio-pipelines-api": {
     title: "Customer.io Pipelines API",
-    href: "/en/resources/integrations/customer-support/customeriopipelinesapi",
+    href: "/en/resources/integrations/customer-support/customerio-pipelines-api",
   },
-  customeriotrackapi: {
+  "customerio-track-api": {
     title: "Customer.io Track API",
-    href: "/en/resources/integrations/customer-support/customeriotrackapi",
+    href: "/en/resources/integrations/customer-support/customerio-track-api",
   },
-  freshserviceapi: {
+  "freshservice-api": {
     title: "Freshservice API",
-    href: "/en/resources/integrations/customer-support/freshserviceapi",
+    href: "/en/resources/integrations/customer-support/freshservice-api",
   },
-  intercomapi: {
+  "intercom-api": {
     title: "Intercom API",
-    href: "/en/resources/integrations/customer-support/intercomapi",
+    href: "/en/resources/integrations/customer-support/intercom-api",
   },
 };
 

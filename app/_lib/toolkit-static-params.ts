@@ -97,9 +97,10 @@ const shouldReadToolkitData = (entry?: ToolkitCatalogEntry): boolean => {
   if (!entry) {
     return true;
   }
+
+  // Read toolkit data if we need a docsLink or hidden flag.
   return (
-    typeof entry.docsLink === "undefined" &&
-    typeof entry.category === "undefined" &&
+    typeof entry.docsLink === "undefined" ||
     typeof entry.isHidden === "undefined"
   );
 };

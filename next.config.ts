@@ -27,174 +27,180 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source:
             "/:locale/resources/integrations/customer-support/zendesk/reference",
-          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          destination:
+            "/:locale/resources/integrations/customer-support/zendesk",
           permanent: true,
         },
         {
           source:
             "/:locale/resources/integrations/development/firecrawl/reference",
-          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          destination: "/:locale/resources/integrations/development/firecrawl",
           permanent: true,
         },
         {
           source:
             "/:locale/resources/integrations/productivity/asana/reference",
-          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          destination: "/:locale/resources/integrations/productivity/asana",
           permanent: true,
         },
         {
           source:
             "/:locale/resources/integrations/productivity/clickup/reference",
-          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          destination: "/:locale/resources/integrations/productivity/clickup",
           permanent: true,
         },
         {
           source:
             "/:locale/resources/integrations/productivity/dropbox/reference",
-          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          destination: "/:locale/resources/integrations/productivity/dropbox",
           permanent: true,
         },
         {
           source:
             "/:locale/resources/integrations/productivity/gmail/reference",
-          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          destination: "/:locale/resources/integrations/productivity/gmail",
           permanent: true,
         },
         {
           source:
             "/:locale/resources/integrations/productivity/google-calendar/reference",
-          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          destination:
+            "/:locale/resources/integrations/productivity/google-calendar",
           permanent: true,
         },
         {
           source:
             "/:locale/resources/integrations/productivity/google-docs/reference",
-          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          destination:
+            "/:locale/resources/integrations/productivity/google-docs",
           permanent: true,
         },
         {
           source:
             "/:locale/resources/integrations/productivity/google-drive/reference",
-          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          destination:
+            "/:locale/resources/integrations/productivity/google-drive",
           permanent: true,
         },
         {
           source:
             "/:locale/resources/integrations/productivity/google-sheets/reference",
-          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          destination:
+            "/:locale/resources/integrations/productivity/google-sheets",
           permanent: true,
         },
         {
           source:
             "/:locale/resources/integrations/productivity/jira/environment-variables",
-          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          destination: "/:locale/resources/integrations/productivity/jira",
           permanent: true,
         },
         {
           source: "/:locale/resources/integrations/productivity/jira/reference",
-          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          destination: "/:locale/resources/integrations/productivity/jira",
           permanent: true,
         },
         {
           source:
             "/:locale/resources/integrations/productivity/outlook-mail/reference",
-          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          destination:
+            "/:locale/resources/integrations/productivity/outlook-mail",
           permanent: true,
         },
         {
           source: "/:locale/resources/integrations/sales/hubspot/reference",
-          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          destination: "/:locale/resources/integrations/sales/hubspot",
           permanent: true,
         },
         {
           source:
             "/:locale/resources/integrations/social-communication/discord",
-          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          destination: "/:locale/resources/integrations",
           permanent: true,
         },
         {
           source:
             "/:locale/resources/integrations/social-communication/linkedin",
-          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          destination: "/:locale/resources/integrations/social/linkedin",
           permanent: true,
         },
         {
           source:
             "/:locale/resources/integrations/social-communication/microsoft-teams",
-          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          destination: "/:locale/resources/integrations/social/microsoft-teams",
           permanent: true,
         },
         {
           source:
             "/:locale/resources/integrations/social-communication/microsoft-teams/reference",
-          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          destination: "/:locale/resources/integrations/social/microsoft-teams",
           permanent: true,
         },
         {
           source: "/:locale/resources/integrations/social-communication/reddit",
-          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          destination: "/:locale/resources/integrations/social/reddit",
           permanent: true,
         },
         {
           source:
             "/:locale/resources/integrations/social-communication/slack-api",
-          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          destination: "/:locale/resources/integrations/social/slack-api",
           permanent: true,
         },
         {
           source:
             "/:locale/resources/integrations/social-communication/slack/environment-variables",
-          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          destination: "/:locale/resources/integrations/social/slack",
           permanent: true,
         },
         {
           source:
             "/:locale/resources/integrations/social-communication/slack/install",
-          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          destination: "/:locale/resources/integrations/social/slack",
           permanent: true,
         },
         {
           source: "/:locale/resources/integrations/social-communication/slack",
-          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          destination: "/:locale/resources/integrations/social/slack",
           permanent: true,
         },
         {
           source:
             "/:locale/resources/integrations/social-communication/slack/reference",
-          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          destination: "/:locale/resources/integrations/social/slack",
           permanent: true,
         },
         {
           source:
             "/:locale/resources/integrations/social-communication/teams/reference",
-          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          destination: "/:locale/resources/integrations/social/microsoft-teams",
           permanent: true,
         },
         {
           source: "/:locale/resources/integrations/social-communication/twilio",
-          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          destination: "/:locale/resources/integrations",
           permanent: true,
         },
         {
           source:
             "/:locale/resources/integrations/social-communication/twilio/reference",
-          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          destination: "/:locale/resources/integrations",
           permanent: true,
         },
         {
           source: "/:locale/resources/integrations/social-communication/x",
-          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          destination: "/:locale/resources/integrations/social/x",
           permanent: true,
         },
         {
           source:
             "/:locale/resources/integrations/social-communication/zoom/install",
-          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          destination: "/:locale/resources/integrations/social/zoom",
           permanent: true,
         },
         {
           source: "/:locale/resources/integrations/social-communication/zoom",
-          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          destination: "/:locale/resources/integrations/social/zoom",
           permanent: true,
         },
         // Auto-added redirects for deleted pages

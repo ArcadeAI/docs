@@ -13,13 +13,13 @@ const meta: MetaRecord = {
     type: "separator",
     title: "Starter",
   },
-  stripeapi: {
+  stripe_api: {
     title: "Stripe API",
-    href: "/en/resources/integrations/payments/stripeapi",
+    href: "/en/resources/integrations/payments/stripe_api",
   },
-  zohobooksapi: {
+  "zoho-books-api": {
     title: "Zoho Books API",
-    href: "/en/resources/integrations/payments/zohobooksapi",
+    href: "/en/resources/integrations/payments/zoho-books-api",
   },
 };
 

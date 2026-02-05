@@ -5,37 +5,37 @@ const meta: MetaRecord = {
     type: "separator",
     title: "Optimized",
   },
-  googlefinance: {
+  google_finance: {
     title: "Google Finance",
-    href: "/en/resources/integrations/search/googlefinance",
+    href: "/en/resources/integrations/search/google_finance",
   },
-  googleflights: {
+  google_flights: {
     title: "Google Flights",
-    href: "/en/resources/integrations/search/googleflights",
+    href: "/en/resources/integrations/search/google_flights",
   },
-  googlehotels: {
+  google_hotels: {
     title: "Google Hotels",
-    href: "/en/resources/integrations/search/googlehotels",
+    href: "/en/resources/integrations/search/google_hotels",
   },
-  googlejobs: {
+  google_jobs: {
     title: "Google Jobs",
-    href: "/en/resources/integrations/search/googlejobs",
+    href: "/en/resources/integrations/search/google_jobs",
   },
-  googlemaps: {
+  google_maps: {
     title: "Google Maps",
-    href: "/en/resources/integrations/search/googlemaps",
+    href: "/en/resources/integrations/search/google_maps",
   },
-  googlenews: {
+  google_news: {
     title: "Google News",
-    href: "/en/resources/integrations/search/googlenews",
+    href: "/en/resources/integrations/search/google_news",
   },
-  googlesearch: {
+  google_search: {
     title: "Google Search",
-    href: "/en/resources/integrations/search/googlesearch",
+    href: "/en/resources/integrations/search/google_search",
   },
-  googleshopping: {
+  google_shopping: {
     title: "Google Shopping",
-    href: "/en/resources/integrations/search/googleshopping",
+    href: "/en/resources/integrations/search/google_shopping",
   },
   walmart: {
     title: "Walmart",
@@ -49,9 +49,9 @@ const meta: MetaRecord = {
     type: "separator",
     title: "Starter",
   },
-  exaapi: {
+  "exa-api": {
     title: "Exa API",
-    href: "/en/resources/integrations/search/exaapi",
+    href: "/en/resources/integrations/search/exa-api",
   },
 };
 

@@ -89,6 +89,18 @@ const FIRST_CHARACTER_REGEX = /^./;
 
 const IDENTIFIER_KEY_REGEX = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
 
+type ToolkitJson = {
+  id?: string;
+  label?: string;
+  name?: string;
+  metadata?: {
+    category?: string;
+    docsLink?: string;
+    isHidden?: boolean;
+    type?: string;
+  };
+};
+
 function renderObjectKey(key: string): string {
   if (IDENTIFIER_KEY_REGEX.test(key)) {
     return key;
@@ -166,6 +178,35 @@ export function getToolkitLabel(toolkitId: string): string {
     .trim();
 }
 
+function readToolkitJson(dataDir: string, slug: string): ToolkitJson | null {
+  const filePath = join(dataDir, `${slug}.json`);
+
+  try {
+    if (existsSync(filePath)) {
+      return JSON.parse(readFileSync(filePath, "utf-8")) as ToolkitJson;
+    }
+  } catch {
+    // Ignore parse errors.
+  }
+
+  return null;
+}
+
+function getDocsSlugFromLink(docsLink?: string | null): string | null {
+  if (!docsLink) {
+    return null;
+  }
+
+  try {
+    const url = new URL(docsLink);
+    const segments = url.pathname.split("/").filter(Boolean);
+    return segments.at(-1) ?? null;
+  } catch {
+    const segments = docsLink.split("/").filter(Boolean);
+    return segments.at(-1) ?? null;
+  }
+}
+
 /**
  * Read toolkit JSON and extract label if available
  */
@@ -173,36 +214,16 @@ export function getToolkitLabelFromJson(
   dataDir: string,
   slug: string
 ): string | null {
-  const filePath = join(dataDir, `${slug}.json`);
-
-  try {
-    if (existsSync(filePath)) {
-      const data = JSON.parse(readFileSync(filePath, "utf-8"));
-      return data.label || data.name || null;
-    }
-  } catch {
-    // Ignore parse errors
-  }
-
-  return null;
+  const data = readToolkitJson(dataDir, slug);
+  return data?.label ?? data?.name ?? null;
 }
 
 export function getToolkitTypeFromJson(
   dataDir: string,
   slug: string
 ): string | null {
-  const filePath = join(dataDir, `${slug}.json`);
-
-  try {
-    if (existsSync(filePath)) {
-      const data = JSON.parse(readFileSync(filePath, "utf-8"));
-      return data?.metadata?.type ?? null;
-    }
-  } catch {
-    // Ignore parse errors
-  }
-
-  return null;
+  const data = readToolkitJson(dataDir, slug);
+  return data?.metadata?.type ?? null;
 }
 
 export function inferNavGroup(
@@ -223,35 +244,63 @@ export function inferNavGroup(
 /**
  * Build toolkit info from available JSON files
  */
+type ToolkitInfoEntry = {
+  info: ToolkitInfo;
+  priority: number;
+};
+
+function resolveToolkitInfo(
+  dataDir: string,
+  slug: string
+): ToolkitInfoEntry | null {
+  const jsonData = readToolkitJson(dataDir, slug);
+  const toolkitId = jsonData?.id ?? slug;
+  const docsSlug = getDocsSlugFromLink(jsonData?.metadata?.docsLink) ?? slug;
+  const designSystemToolkit = TOOLKITS.find(
+    (t) => t.id.toLowerCase() === toolkitId.toLowerCase()
+  );
+  const isHidden = jsonData?.metadata?.isHidden ?? false;
+  if (designSystemToolkit?.isHidden || isHidden) {
+    return null;
+  }
+
+  const category =
+    designSystemToolkit?.category ?? jsonData?.metadata?.category ?? "others";
+  const labelFromDesignSystem = designSystemToolkit?.label ?? null;
+  const labelFromJson = jsonData?.label ?? jsonData?.name ?? null;
+  const typeFromJson = jsonData?.metadata?.type ?? null;
+
+  const info: ToolkitInfo = {
+    id: toolkitId,
+    slug: docsSlug,
+    // Prefer the Design System label (has correct spacing/casing), but fall back
+    // to JSON label for toolkits not present in the design system.
+    label: labelFromDesignSystem ?? labelFromJson ?? getToolkitLabel(toolkitId),
+    category,
+    navGroup: inferNavGroup(toolkitId, typeFromJson),
+  };
+
+  const priority = designSystemToolkit ? 2 : 0;
+  return { info, priority };
+}
+
 export function buildToolkitInfoList(dataDir: string): ToolkitInfo[] {
   const files = getToolkitFiles(dataDir);
-  const toolkits: ToolkitInfo[] = [];
+  const toolkitsBySlug = new Map<string, ToolkitInfoEntry>();
 
   for (const slug of files) {
-    const designSystemToolkit = TOOLKITS.find(
-      (t) => t.id.toLowerCase() === slug.toLowerCase()
-    );
-    if (designSystemToolkit?.isHidden) {
+    const entry = resolveToolkitInfo(dataDir, slug);
+    if (!entry) {
       continue;
     }
 
-    const category = designSystemToolkit?.category ?? "others";
-    const labelFromDesignSystem = designSystemToolkit?.label ?? null;
-    const labelFromJson = getToolkitLabelFromJson(dataDir, slug);
-    const typeFromJson = getToolkitTypeFromJson(dataDir, slug);
-
-    toolkits.push({
-      id: slug,
-      slug,
-      // Prefer the Design System label (has correct spacing/casing), but fall back
-      // to JSON label for toolkits not present in the design system.
-      label: labelFromDesignSystem ?? labelFromJson ?? getToolkitLabel(slug),
-      category,
-      navGroup: inferNavGroup(slug, typeFromJson),
-    });
+    const existing = toolkitsBySlug.get(entry.info.slug);
+    if (!existing || entry.priority > existing.priority) {
+      toolkitsBySlug.set(entry.info.slug, entry);
+    }
   }
 
-  return toolkits;
+  return Array.from(toolkitsBySlug.values()).map((entry) => entry.info);
 }
 
 /**

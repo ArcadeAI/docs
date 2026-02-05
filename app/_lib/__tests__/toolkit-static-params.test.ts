@@ -38,11 +38,16 @@ const writeToolkitData = async (
   dir: string,
   toolkit: {
     id: string;
+    label?: string;
     metadata?: { category?: string; docsLink?: string; isHidden?: boolean };
   }
 ) => {
   const fileName = `${normalizeToolkitId(toolkit.id)}.json`;
-  const toolkitFixture = JSON.stringify(toolkit, null, 2);
+  const toolkitFixture = JSON.stringify(
+    { label: toolkit.label ?? toolkit.id, ...toolkit },
+    null,
+    2
+  );
   await writeFile(join(dir, fileName), toolkitFixture, "utf-8");
 };
 
@@ -110,6 +115,31 @@ describe("toolkit static params", () => {
       const routes = await listToolkitRoutes({ dataDir: dir, toolkitsCatalog });
       expect(routes).toEqual([
         { toolkitId: "google-calendar", category: "productivity" },
+      ]);
+    });
+  });
+
+  it("falls back to data docsLink when catalog entry lacks it", async () => {
+    await withTempDir(async (dir) => {
+      await writeIndex(dir, [
+        { id: "HubspotConversationsApi", category: "sales" },
+      ]);
+      await writeToolkitData(dir, {
+        id: "HubspotConversationsApi",
+        metadata: {
+          category: "sales",
+          docsLink:
+            "https://docs.arcade.dev/en/mcp-servers/sales/hubspot-conversations-api",
+        },
+      });
+
+      const toolkitsCatalog: ToolkitCatalogEntry[] = [
+        { id: "HubspotConversationsApi", category: "sales" },
+      ];
+
+      const routes = await listToolkitRoutes({ dataDir: dir, toolkitsCatalog });
+      expect(routes).toEqual([
+        { toolkitId: "hubspot-conversations-api", category: "sales" },
       ]);
     });
   });

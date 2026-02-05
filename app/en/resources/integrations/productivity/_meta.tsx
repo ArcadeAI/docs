@@ -25,29 +25,29 @@ const meta: MetaRecord = {
     title: "Gmail",
     href: "/en/resources/integrations/productivity/gmail",
   },
-  googlecalendar: {
+  "google-calendar": {
     title: "Google Calendar",
-    href: "/en/resources/integrations/productivity/googlecalendar",
+    href: "/en/resources/integrations/productivity/google-calendar",
   },
-  googlecontacts: {
+  "google-contacts": {
     title: "Google Contacts",
-    href: "/en/resources/integrations/productivity/googlecontacts",
+    href: "/en/resources/integrations/productivity/google-contacts",
   },
-  googledocs: {
+  "google-docs": {
     title: "Google Docs",
-    href: "/en/resources/integrations/productivity/googledocs",
+    href: "/en/resources/integrations/productivity/google-docs",
   },
-  googledrive: {
+  "google-drive": {
     title: "Google Drive",
-    href: "/en/resources/integrations/productivity/googledrive",
+    href: "/en/resources/integrations/productivity/google-drive",
   },
-  googlesheets: {
+  "google-sheets": {
     title: "Google Sheets",
-    href: "/en/resources/integrations/productivity/googlesheets",
+    href: "/en/resources/integrations/productivity/google-sheets",
   },
-  googleslides: {
+  "google-slides": {
     title: "Google Slides",
-    href: "/en/resources/integrations/productivity/googleslides",
+    href: "/en/resources/integrations/productivity/google-slides",
   },
   jira: {
     title: "Jira",
@@ -61,69 +61,73 @@ const meta: MetaRecord = {
     title: "Microsoft SharePoint",
     href: "/en/resources/integrations/productivity/sharepoint",
   },
-  outlookcalendar: {
+  "outlook-calendar": {
     title: "Outlook Calendar",
-    href: "/en/resources/integrations/productivity/outlookcalendar",
+    href: "/en/resources/integrations/productivity/outlook-calendar",
   },
-  outlookmail: {
+  "outlook-mail": {
     title: "Outlook Mail",
-    href: "/en/resources/integrations/productivity/outlookmail",
+    href: "/en/resources/integrations/productivity/outlook-mail",
   },
   "-- Starter": {
     type: "separator",
     title: "Starter",
   },
-  airtableapi: {
+  "airtable-api": {
     title: "Airtable API",
-    href: "/en/resources/integrations/productivity/airtableapi",
+    href: "/en/resources/integrations/productivity/airtable-api",
   },
-  asanaapi: {
+  "asana-api": {
     title: "Asana API",
-    href: "/en/resources/integrations/productivity/asanaapi",
+    href: "/en/resources/integrations/productivity/asana-api",
   },
-  ashbyapi: {
+  "ashby-api": {
     title: "Ashby API",
-    href: "/en/resources/integrations/productivity/ashbyapi",
+    href: "/en/resources/integrations/productivity/ashby-api",
   },
-  boxapi: {
+  "box-api": {
     title: "Box API",
-    href: "/en/resources/integrations/productivity/boxapi",
+    href: "/en/resources/integrations/productivity/box-api",
   },
-  calendlyapi: {
+  "calendly-api": {
     title: "Calendly API",
-    href: "/en/resources/integrations/productivity/calendlyapi",
+    href: "/en/resources/integrations/productivity/calendly-api",
   },
-  clickupapi: {
+  "clickup-api": {
     title: "ClickUp API",
-    href: "/en/resources/integrations/productivity/clickupapi",
+    href: "/en/resources/integrations/productivity/clickup-api",
   },
-  figmaapi: {
+  "figma-api": {
     title: "Figma API",
-    href: "/en/resources/integrations/productivity/figmaapi",
+    href: "/en/resources/integrations/productivity/figma-api",
   },
-  lumaapi: {
+  "luma-api": {
     title: "Luma API",
-    href: "/en/resources/integrations/productivity/lumaapi",
+    href: "/en/resources/integrations/productivity/luma-api",
   },
-  miroapi: {
+  "mailchimp-api": {
+    title: "Mailchimp API",
+    href: "/en/resources/integrations/productivity/mailchimp-api",
+  },
+  "miro-api": {
     title: "Miro API",
-    href: "/en/resources/integrations/productivity/miroapi",
+    href: "/en/resources/integrations/productivity/miro-api",
   },
-  squareupapi: {
+  "squareup-api": {
     title: "SquareUp API",
-    href: "/en/resources/integrations/productivity/squareupapi",
+    href: "/en/resources/integrations/productivity/squareup-api",
   },
-  ticktickapi: {
+  "ticktick-api": {
     title: "TickTick API",
-    href: "/en/resources/integrations/productivity/ticktickapi",
+    href: "/en/resources/integrations/productivity/ticktick-api",
   },
-  trelloapi: {
+  "trello-api": {
     title: "Trello API",
-    href: "/en/resources/integrations/productivity/trelloapi",
+    href: "/en/resources/integrations/productivity/trello-api",
   },
-  xeroapi: {
+  "xero-api": {
     title: "Xero API",
-    href: "/en/resources/integrations/productivity/xeroapi",
+    href: "/en/resources/integrations/productivity/xero-api",
   },
 };
 

@@ -249,6 +249,49 @@ describe("buildToolkitInfoList", () => {
 
     expect(result[0].label).toBe("Gmail");
   });
+
+  it("should use docsLink slug when available", () => {
+    createToolkitJson("hubspotconversationsapi", {
+      id: "HubspotConversationsApi",
+      label: "HubSpot Conversations API",
+      metadata: {
+        category: "sales",
+        docsLink:
+          "https://docs.arcade.dev/en/mcp-servers/sales/hubspot-conversations-api",
+      },
+    });
+
+    const result = buildToolkitInfoList(TEST_DATA_DIR);
+    const entry = result.find((item) => item.id === "HubspotConversationsApi");
+
+    expect(entry?.slug).toBe("hubspot-conversations-api");
+    expect(entry?.category).toBe("sales");
+  });
+
+  it("should dedupe entries that share a docsLink slug", () => {
+    createToolkitJson("upclickapi", {
+      id: "UpclickApi",
+      label: "ClickUp API",
+      metadata: {
+        category: "productivity",
+        docsLink:
+          "https://docs.arcade.dev/en/mcp-servers/productivity/clickup-api",
+      },
+    });
+    createToolkitJson("clickupapi", {
+      id: "ClickupApi",
+      label: "ClickUp API",
+      metadata: {
+        category: "productivity",
+        docsLink:
+          "https://docs.arcade.dev/en/mcp-servers/productivity/clickup-api",
+      },
+    });
+
+    const result = buildToolkitInfoList(TEST_DATA_DIR);
+    const matches = result.filter((item) => item.slug === "clickup-api");
+    expect(matches).toHaveLength(1);
+  });
 });
 
 // ============================================================================
