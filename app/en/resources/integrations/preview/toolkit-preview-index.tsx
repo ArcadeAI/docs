@@ -1,6 +1,7 @@
 import { TOOLKITS } from "@arcadeai/design-system";
 import Link from "next/link";
-import { readToolkitIndex } from "@/app/_lib/toolkit-data";
+import { getToolkitSlug, normalizeToolkitId } from "@/app/_lib/toolkit-slug";
+import { readToolkitData, readToolkitIndex } from "@/app/_lib/toolkit-data";
 
 const AUTH_TYPE_STYLES: Record<string, string> = {
   oauth2: "bg-blue-500/10 text-blue-400 border-blue-500/30",
@@ -30,12 +31,28 @@ export async function ToolkitPreviewIndex() {
   }
 
   const toolkitById = new Map(
-    TOOLKITS.map((toolkit) => [toolkit.id.toLowerCase(), toolkit] as const)
+    TOOLKITS.map((toolkit) => [normalizeToolkitId(toolkit.id), toolkit] as const)
+  );
+
+  const docsLinkById = new Map<string, string>();
+  await Promise.all(
+    index.toolkits.map(async (toolkit) => {
+      const normalizedId = normalizeToolkitId(toolkit.id);
+      const resolved = toolkitById.get(normalizedId);
+      if (resolved?.docsLink) {
+        return;
+      }
+      const data = await readToolkitData(toolkit.id);
+      if (data?.metadata?.docsLink) {
+        docsLinkById.set(normalizedId, data.metadata.docsLink);
+      }
+    })
   );
 
   const groupedByCategory = index.toolkits.reduce(
     (acc, toolkit) => {
-      const resolved = toolkitById.get(toolkit.id.toLowerCase());
+      const normalizedId = normalizeToolkitId(toolkit.id);
+      const resolved = toolkitById.get(normalizedId);
       const category = resolved?.category || toolkit.category || "other";
       if (!acc[category]) {
         acc[category] = [];
@@ -77,9 +94,18 @@ export async function ToolkitPreviewIndex() {
             {groupedByCategory[category]
               .sort((a, b) => a.label.localeCompare(b.label))
               .map((toolkit) => (
+                // Use docsLink when available to preserve hyphenated slugs.
+                // Fall back to normalized IDs for toolkits missing docs links.
                 <Link
                   className="group flex flex-col rounded-xl border border-neutral-dark-high/50 bg-gradient-to-br from-neutral-dark/40 to-transparent p-4 transition-all hover:border-brand-accent/30 hover:shadow-brand-accent/5 hover:shadow-lg"
-                  href={`/en/resources/integrations/${toolkit.category}/${toolkit.id.toLowerCase()}`}
+                  href={`/en/resources/integrations/${toolkit.category}/${getToolkitSlug(
+                    {
+                      id: toolkit.id,
+                      docsLink:
+                        toolkitById.get(normalizeToolkitId(toolkit.id))
+                          ?.docsLink ?? docsLinkById.get(normalizeToolkitId(toolkit.id)),
+                    }
+                  )}`}
                   key={toolkit.id}
                 >
                   <div className="flex items-start justify-between gap-2">

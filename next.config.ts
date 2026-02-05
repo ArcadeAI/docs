@@ -25,57 +25,68 @@ const nextConfig: NextConfig = withLlmsTxt({
       return [
         // Auto-added redirects for deleted pages
         {
-          source: "/:locale/resources/integrations/customer-support/zendesk/reference",
+          source:
+            "/:locale/resources/integrations/customer-support/zendesk/reference",
           destination: "/:locale/REPLACE_WITH_NEW_PATH",
           permanent: true,
         },
         {
-          source: "/:locale/resources/integrations/development/firecrawl/reference",
+          source:
+            "/:locale/resources/integrations/development/firecrawl/reference",
           destination: "/:locale/REPLACE_WITH_NEW_PATH",
           permanent: true,
         },
         {
-          source: "/:locale/resources/integrations/productivity/asana/reference",
+          source:
+            "/:locale/resources/integrations/productivity/asana/reference",
           destination: "/:locale/REPLACE_WITH_NEW_PATH",
           permanent: true,
         },
         {
-          source: "/:locale/resources/integrations/productivity/clickup/reference",
+          source:
+            "/:locale/resources/integrations/productivity/clickup/reference",
           destination: "/:locale/REPLACE_WITH_NEW_PATH",
           permanent: true,
         },
         {
-          source: "/:locale/resources/integrations/productivity/dropbox/reference",
+          source:
+            "/:locale/resources/integrations/productivity/dropbox/reference",
           destination: "/:locale/REPLACE_WITH_NEW_PATH",
           permanent: true,
         },
         {
-          source: "/:locale/resources/integrations/productivity/gmail/reference",
+          source:
+            "/:locale/resources/integrations/productivity/gmail/reference",
           destination: "/:locale/REPLACE_WITH_NEW_PATH",
           permanent: true,
         },
         {
-          source: "/:locale/resources/integrations/productivity/google-calendar/reference",
+          source:
+            "/:locale/resources/integrations/productivity/google-calendar/reference",
           destination: "/:locale/REPLACE_WITH_NEW_PATH",
           permanent: true,
         },
         {
-          source: "/:locale/resources/integrations/productivity/google-docs/reference",
+          source:
+            "/:locale/resources/integrations/productivity/google-docs/reference",
           destination: "/:locale/REPLACE_WITH_NEW_PATH",
           permanent: true,
         },
         {
-          source: "/:locale/resources/integrations/productivity/google-drive/reference",
+          source:
+            "/:locale/resources/integrations/productivity/google-drive/reference",
           destination: "/:locale/REPLACE_WITH_NEW_PATH",
           permanent: true,
         },
         {
-          source: "/:locale/resources/integrations/productivity/google-sheets/reference",
+          source:
+            "/:locale/resources/integrations/productivity/google-sheets/reference",
           destination: "/:locale/REPLACE_WITH_NEW_PATH",
           permanent: true,
         },
         {
-          source: "/:locale/resources/integrations/productivity/jira/environment-variables",
+          source:
+            "/:locale/resources/integrations/productivity/jira/environment-variables",
           destination: "/:locale/REPLACE_WITH_NEW_PATH",
           permanent: true,
         },
@@ -85,7 +96,8 @@ const nextConfig: NextConfig = withLlmsTxt({
           permanent: true,
         },
         {
-          source: "/:locale/resources/integrations/productivity/outlook-mail/reference",
+          source:
+            "/:locale/resources/integrations/productivity/outlook-mail/reference",
           destination: "/:locale/REPLACE_WITH_NEW_PATH",
           permanent: true,
         },
@@ -95,22 +107,26 @@ const nextConfig: NextConfig = withLlmsTxt({
           permanent: true,
         },
         {
-          source: "/:locale/resources/integrations/social-communication/discord",
+          source:
+            "/:locale/resources/integrations/social-communication/discord",
           destination: "/:locale/REPLACE_WITH_NEW_PATH",
           permanent: true,
         },
         {
-          source: "/:locale/resources/integrations/social-communication/linkedin",
+          source:
+            "/:locale/resources/integrations/social-communication/linkedin",
           destination: "/:locale/REPLACE_WITH_NEW_PATH",
           permanent: true,
         },
         {
-          source: "/:locale/resources/integrations/social-communication/microsoft-teams",
+          source:
+            "/:locale/resources/integrations/social-communication/microsoft-teams",
           destination: "/:locale/REPLACE_WITH_NEW_PATH",
           permanent: true,
         },
         {
-          source: "/:locale/resources/integrations/social-communication/microsoft-teams/reference",
+          source:
+            "/:locale/resources/integrations/social-communication/microsoft-teams/reference",
           destination: "/:locale/REPLACE_WITH_NEW_PATH",
           permanent: true,
         },
@@ -120,17 +136,20 @@ const nextConfig: NextConfig = withLlmsTxt({
           permanent: true,
         },
         {
-          source: "/:locale/resources/integrations/social-communication/slack-api",
+          source:
+            "/:locale/resources/integrations/social-communication/slack-api",
           destination: "/:locale/REPLACE_WITH_NEW_PATH",
           permanent: true,
         },
         {
-          source: "/:locale/resources/integrations/social-communication/slack/environment-variables",
+          source:
+            "/:locale/resources/integrations/social-communication/slack/environment-variables",
           destination: "/:locale/REPLACE_WITH_NEW_PATH",
           permanent: true,
         },
         {
-          source: "/:locale/resources/integrations/social-communication/slack/install",
+          source:
+            "/:locale/resources/integrations/social-communication/slack/install",
           destination: "/:locale/REPLACE_WITH_NEW_PATH",
           permanent: true,
         },
@@ -140,12 +159,14 @@ const nextConfig: NextConfig = withLlmsTxt({
           permanent: true,
         },
         {
-          source: "/:locale/resources/integrations/social-communication/slack/reference",
+          source:
+            "/:locale/resources/integrations/social-communication/slack/reference",
           destination: "/:locale/REPLACE_WITH_NEW_PATH",
           permanent: true,
         },
         {
-          source: "/:locale/resources/integrations/social-communication/teams/reference",
+          source:
+            "/:locale/resources/integrations/social-communication/teams/reference",
           destination: "/:locale/REPLACE_WITH_NEW_PATH",
           permanent: true,
         },
@@ -155,7 +176,8 @@ const nextConfig: NextConfig = withLlmsTxt({
           permanent: true,
         },
         {
-          source: "/:locale/resources/integrations/social-communication/twilio/reference",
+          source:
+            "/:locale/resources/integrations/social-communication/twilio/reference",
           destination: "/:locale/REPLACE_WITH_NEW_PATH",
           permanent: true,
         },
@@ -165,7 +187,8 @@ const nextConfig: NextConfig = withLlmsTxt({
           permanent: true,
         },
         {
-          source: "/:locale/resources/integrations/social-communication/zoom/install",
+          source:
+            "/:locale/resources/integrations/social-communication/zoom/install",
           destination: "/:locale/REPLACE_WITH_NEW_PATH",
           permanent: true,
         },

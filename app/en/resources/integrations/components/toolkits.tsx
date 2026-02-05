@@ -174,7 +174,9 @@ export default function Toolkits() {
                         {
                           id: toolkit.id,
                           docsLink:
-                            "docsLink" in toolkit ? toolkit.docsLink : undefined,
+                            "docsLink" in toolkit
+                              ? toolkit.docsLink
+                              : undefined,
                         },
                         toolkit.category ?? "others"
                       )}
