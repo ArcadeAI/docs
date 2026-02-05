@@ -1,21 +1,37 @@
 import type { MetaRecord } from "nextra";
 
 const meta: MetaRecord = {
-  "*": {
-    theme: {
-      breadcrumb: true,
-      toc: true,
-      copyPage: true,
-    },
+  "-- Optimized": {
+    type: "separator",
+    title: "Optimized",
   },
   zendesk: {
     title: "Zendesk",
+    href: "/en/resources/integrations/customer-support/zendesk",
   },
-  pylon: {
-    title: "Pylon",
+  "-- Starter": {
+    type: "separator",
+    title: "Starter",
   },
-  pagerduty: {
-    title: "PagerDuty",
+  customerioapi: {
+    title: "Customer.io API",
+    href: "/en/resources/integrations/customer-support/customerioapi",
+  },
+  customeriopipelinesapi: {
+    title: "Customer.io Pipelines API",
+    href: "/en/resources/integrations/customer-support/customeriopipelinesapi",
+  },
+  customeriotrackapi: {
+    title: "Customer.io Track API",
+    href: "/en/resources/integrations/customer-support/customeriotrackapi",
+  },
+  freshserviceapi: {
+    title: "Freshservice API",
+    href: "/en/resources/integrations/customer-support/freshserviceapi",
+  },
+  intercomapi: {
+    title: "Intercom API",
+    href: "/en/resources/integrations/customer-support/intercomapi",
   },
 };
 

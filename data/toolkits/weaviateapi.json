@@ -1,0 +1,5185 @@
+{
+  "id": "WeaviateApi",
+  "label": "Weaviate API",
+  "version": "2.0.0",
+  "description": "Tools that enable LLMs to interact directly with the weaviate API.",
+  "metadata": {
+    "category": "development",
+    "iconUrl": "https://design-system.arcade.dev/icons/weaviate.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade_starter",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/development/weaviate-api",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": null,
+  "tools": [
+    {
+      "name": "ActivateDatabaseUser",
+      "qualifiedName": "WeaviateApi.ActivateDatabaseUser",
+      "fullyQualifiedName": "WeaviateApi.ActivateDatabaseUser@2.0.0",
+      "description": "Activate a deactivated database user account.\n\nUse this tool to activate a user with a `db` user type in the database. It should be called when re-enabling user access is needed.",
+      "parameters": [
+        {
+          "name": "user_name",
+          "type": "string",
+          "required": true,
+          "description": "The name of the database user to activate.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'activateUser'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.ActivateDatabaseUser",
+        "parameters": {
+          "user_name": {
+            "value": "john_doe",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "AddPermissionsToRole",
+      "qualifiedName": "WeaviateApi.AddPermissionsToRole",
+      "fullyQualifiedName": "WeaviateApi.AddPermissionsToRole@2.0.0",
+      "description": "Add new permissions to a role without affecting existing ones.\n\n    Use this tool to assign additional permissions to a specified role within a system, ensuring that current permissions remain unchanged.\n\n    Note: Understanding the request schema is necessary to properly create\n    the stringified JSON input object for execution.\n\nThis operation also requires path parameters.\n\n    Modes:\n    - GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n      already have it. Do NOT call repeatedly if you already received\n      the schema.\n    - EXECUTE: Performs the operation with the provided request body\n      JSON.\n      Note: You must also provide the required path parameters when executing.\n\n    If you need the schema, call with mode='get_request_schema' ONCE, then execute.\n    ",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": ["get_request_schema", "execute"],
+          "inferrable": true
+        },
+        {
+          "name": "role_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the role to which new permissions will be added.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'addPermissions'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.AddPermissionsToRole",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "role_id": {
+            "value": "role_123",
+            "type": "string",
+            "required": false
+          },
+          "request_body": {
+            "value": "{\"permissions\":[\"read\",\"write\"]}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "AddPropertyToCollection",
+      "qualifiedName": "WeaviateApi.AddPropertyToCollection",
+      "fullyQualifiedName": "WeaviateApi.AddPropertyToCollection@2.0.0",
+      "description": "Add a new property to an existing collection schema.\n\n    Use this tool to add a new property definition to a specified collection (className) within the schema. It is called when a new property needs to be incorporated into an existing data structure.\n\n    Note: Understanding the request schema is necessary to properly create\n    the stringified JSON input object for execution.\n\nThis operation also requires path parameters.\n\n    Modes:\n    - GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n      already have it. Do NOT call repeatedly if you already received\n      the schema.\n    - EXECUTE: Performs the operation with the provided request body\n      JSON.\n      Note: You must also provide the required path parameters when executing.\n\n    If you need the schema, call with mode='get_request_schema' ONCE, then execute.\n    ",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": ["get_request_schema", "execute"],
+          "inferrable": true
+        },
+        {
+          "name": "collection_name",
+          "type": "string",
+          "required": false,
+          "description": "The name of the collection (class) to which the property will be added.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'schema.objects.properties.add'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.AddPropertyToCollection",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "collection_name": {
+            "value": "Product",
+            "type": "string",
+            "required": false
+          },
+          "request_body": {
+            "value": "{\"name\": \"price\", \"dataType\": [\"number\"]}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "AddReferenceToObject",
+      "qualifiedName": "WeaviateApi.AddReferenceToObject",
+      "fullyQualifiedName": "WeaviateApi.AddReferenceToObject@2.0.0",
+      "description": "Add a reference to an object's property.\n\n    This tool adds a new reference to a specified property of a data object. The object is identified by its class and UUID. Use this to link related objects within a dataset.\n\n    Note: Understanding the request schema is necessary to properly create\n    the stringified JSON input object for execution.\n\nThis operation also requires path, query parameters.\n\n    Modes:\n    - GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n      already have it. Do NOT call repeatedly if you already received\n      the schema.\n    - EXECUTE: Performs the operation with the provided request body\n      JSON.\n      Note: You must also provide the required path, query parameters when executing.\n\n    If you need the schema, call with mode='get_request_schema' ONCE, then execute.\n    ",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": ["get_request_schema", "execute"],
+          "inferrable": true
+        },
+        {
+          "name": "source_class_name",
+          "type": "string",
+          "required": false,
+          "description": "Name of the collection (class) the source object belongs to.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "source_object_uuid",
+          "type": "string",
+          "required": false,
+          "description": "Unique UUID identifying the source object to which the reference will be added.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "reference_property_name",
+          "type": "string",
+          "required": false,
+          "description": "Unique name of the reference property of the source object to which the reference will be added.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "required_consistency_level",
+          "type": "string",
+          "required": false,
+          "description": "Specifies the number of replicas that must acknowledge a request for it to be successful.  Only used when mode is 'execute'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "tenant_identifier",
+          "type": "string",
+          "required": false,
+          "description": "Specifies the tenant for multi-tenant collection requests in a Weaviate class.  Only used when mode is 'execute'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'objects.class.references.create'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.AddReferenceToObject",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "source_class_name": {
+            "value": "Product",
+            "type": "string",
+            "required": false
+          },
+          "source_object_uuid": {
+            "value": "123e4567-e89b-12d3-a456-426614174000",
+            "type": "string",
+            "required": false
+          },
+          "reference_property_name": {
+            "value": "relatedProducts",
+            "type": "string",
+            "required": false
+          },
+          "required_consistency_level": {
+            "value": "One",
+            "type": "string",
+            "required": false
+          },
+          "tenant_identifier": {
+            "value": "tenant123",
+            "type": "string",
+            "required": false
+          },
+          "request_body": {
+            "value": "{\"uuid\":\"456e7890-e12d-34f5-a678-426614174001\"}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "AssignRolesToUser",
+      "qualifiedName": "WeaviateApi.AssignRolesToUser",
+      "fullyQualifiedName": "WeaviateApi.AssignRolesToUser@2.0.0",
+      "description": "Assign roles to a user in the system.\n\nUse this tool to assign one or more roles to a specific user, allowing flexibility in user permissions and access control.",
+      "parameters": [
+        {
+          "name": "user_name",
+          "type": "string",
+          "required": true,
+          "description": "The name or identifier of the user to assign roles to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "assigned_roles",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "List of roles to assign to the specified user. Each role should be a string.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_type",
+          "type": "string",
+          "required": false,
+          "description": "Specify the user type. Choose 'db' for Weaviate managed users or 'oidc' for users managed by an external OIDC provider.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'assignRoleToUser'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.AssignRolesToUser",
+        "parameters": {
+          "user_name": {
+            "value": "john_doe",
+            "type": "string",
+            "required": true
+          },
+          "assigned_roles": {
+            "value": ["admin", "editor"],
+            "type": "array",
+            "required": false
+          },
+          "user_type": {
+            "value": "db",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "AssignRoleToGroup",
+      "qualifiedName": "WeaviateApi.AssignRoleToGroup",
+      "fullyQualifiedName": "WeaviateApi.AssignRoleToGroup@2.0.0",
+      "description": "Assign roles to a specific group.\n\nUse this tool to assign one or more roles to a designated group, identified by its ID.",
+      "parameters": [
+        {
+          "name": "group_name",
+          "type": "string",
+          "required": true,
+          "description": "The name of the group to which roles will be assigned.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "group_type",
+          "type": "string",
+          "required": false,
+          "description": "Indicate if the group contains OIDC or database users. Choose 'oidc' for OIDC users.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "roles_to_assign",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "A list of roles to assign to a specified group. Each role is a string.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'assignRoleToGroup'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.AssignRoleToGroup",
+        "parameters": {
+          "group_name": {
+            "value": "data_scientists",
+            "type": "string",
+            "required": true
+          },
+          "group_type": {
+            "value": "oidc",
+            "type": "string",
+            "required": false
+          },
+          "roles_to_assign": {
+            "value": ["admin", "editor"],
+            "type": "array",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "BatchCreateReferences",
+      "qualifiedName": "WeaviateApi.BatchCreateReferences",
+      "fullyQualifiedName": "WeaviateApi.BatchCreateReferences@2.0.0",
+      "description": "Batch create cross-references between items in a collection.\n\n    Use this tool to efficiently establish multiple cross-references between items in a collection at once. Ideal for handling large datasets where establishing individual links manually would be inefficient.\n\n    Note: Understanding the request schema is necessary to properly create\n    the stringified JSON input object for execution.\n\nThis operation also requires query parameters.\n\n    Modes:\n    - GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n      already have it. Do NOT call repeatedly if you already received\n      the schema.\n    - EXECUTE: Performs the operation with the provided request body\n      JSON.\n      Note: You must also provide the required query parameters when executing.\n\n    If you need the schema, call with mode='get_request_schema' ONCE, then execute.\n    ",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": ["get_request_schema", "execute"],
+          "inferrable": true
+        },
+        {
+          "name": "consistency_level",
+          "type": "string",
+          "required": false,
+          "description": "Specifies the number of replicas needed to acknowledge a request for it to be deemed successful.  Only used when mode is 'execute'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'batch.references.create'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.BatchCreateReferences",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "consistency_level": {
+            "value": "quorum",
+            "type": "string",
+            "required": false
+          },
+          "request_body": {
+            "value": "{\"references\": [{\"from\": \"item1\", \"to\": \"item2\"}, {\"from\": \"item3\", \"to\": \"item4\"}]}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "BatchRegisterObjects",
+      "qualifiedName": "WeaviateApi.BatchRegisterObjects",
+      "fullyQualifiedName": "WeaviateApi.BatchRegisterObjects@2.0.0",
+      "description": "Register multiple data objects in a single request.\n\n    This tool registers multiple data objects in one request for efficiency. It validates metadata and schema values for each object. The operation is idempotent, meaning if an object with a given UUID already exists, it will be overwritten.\n\n    Note: Understanding the request schema is necessary to properly create\n    the stringified JSON input object for execution.\n\nThis operation also requires query parameters.\n\n    Modes:\n    - GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n      already have it. Do NOT call repeatedly if you already received\n      the schema.\n    - EXECUTE: Performs the operation with the provided request body\n      JSON.\n      Note: You must also provide the required query parameters when executing.\n\n    If you need the schema, call with mode='get_request_schema' ONCE, then execute.\n    ",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": ["get_request_schema", "execute"],
+          "inferrable": true
+        },
+        {
+          "name": "consistency_level",
+          "type": "string",
+          "required": false,
+          "description": "Specifies how many replicas must confirm a request for it to be successful.  Only used when mode is 'execute'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'batch.objects.create'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.BatchRegisterObjects",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "consistency_level": {
+            "value": "all",
+            "type": "string",
+            "required": false
+          },
+          "request_body": {
+            "value": "{\"objects\":[{\"class\":\"Person\",\"properties\":{\"name\":\"John Doe\",\"age\":30}},{\"class\":\"Person\",\"properties\":{\"name\":\"Jane Smith\",\"age\":25}}]}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "CancelBackup",
+      "qualifiedName": "WeaviateApi.CancelBackup",
+      "fullyQualifiedName": "WeaviateApi.CancelBackup@2.0.0",
+      "description": "Cancel a backup by its ID from a specified backend storage.\n\nUse this tool to delete a backup using its unique ID from a specified backend storage location, ensuring the backup is no longer retrievable.",
+      "parameters": [
+        {
+          "name": "backup_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique ID of the backup to delete. Must be URL-safe, using lowercase, numbers, underscores, and minus characters.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "storage_backend_system",
+          "type": "string",
+          "required": true,
+          "description": "Specifies the backend storage system where the backup resides (e.g., 'filesystem', 'gcs', 's3', 'azure').",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "backup_subpath",
+          "type": "string",
+          "required": false,
+          "description": "Specifies the optional path within the storage if the backup is not at the root.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "specified_bucket_name",
+          "type": "string",
+          "required": false,
+          "description": "Specifies the bucket, container, or volume name if required by the backend storage system. Optional parameter.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'backups.cancel'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.CancelBackup",
+        "parameters": {
+          "backup_id": {
+            "value": "abc123_backup",
+            "type": "string",
+            "required": true
+          },
+          "storage_backend_system": {
+            "value": "s3",
+            "type": "string",
+            "required": true
+          },
+          "backup_subpath": {
+            "value": "my_backups/",
+            "type": "string",
+            "required": false
+          },
+          "specified_bucket_name": {
+            "value": "my_bucket",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "CancelReplication",
+      "qualifiedName": "WeaviateApi.CancelReplication",
+      "fullyQualifiedName": "WeaviateApi.CancelReplication@2.0.0",
+      "description": "Cancel an active replication operation by ID.\n\nUse this tool to request the cancellation of an ongoing replication operation specified by its ID. The operation is stopped and marked as 'CANCELLED' but is not automatically deleted.",
+      "parameters": [
+        {
+          "name": "replication_operation_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the replication operation you wish to cancel. This is a string identifier for the specific operation.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'cancelReplication'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.CancelReplication",
+        "parameters": {
+          "replication_operation_id": {
+            "value": "12345-abcde-67890-fghij",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "CancelReplicationOperation",
+      "qualifiedName": "WeaviateApi.CancelReplicationOperation",
+      "fullyQualifiedName": "WeaviateApi.CancelReplicationOperation@2.0.0",
+      "description": "Cancel an active replication operation.\n\nUse this tool to remove and cancel a specific replication operation. It ensures that active processes are halted and resources are cleaned up before deletion.",
+      "parameters": [
+        {
+          "name": "replication_operation_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier of the replication operation to be canceled and deleted.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'deleteReplication'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.CancelReplicationOperation",
+        "parameters": {
+          "replication_operation_id": {
+            "value": "op123456789",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "CheckBackupRestoreStatus",
+      "qualifiedName": "WeaviateApi.CheckBackupRestoreStatus",
+      "fullyQualifiedName": "WeaviateApi.CheckBackupRestoreStatus@2.0.0",
+      "description": "Check the status of a backup restoration process.\n\nUse this tool to manually check the status of a specific backup restoration on a given backend, using the backup ID. Ideal when automatic polling is disabled.",
+      "parameters": [
+        {
+          "name": "backend_storage_system",
+          "type": "string",
+          "required": true,
+          "description": "Specifies the backend storage system where the backup resides, such as 'filesystem', 'gcs', 's3', or 'azure'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "backup_id",
+          "type": "string",
+          "required": true,
+          "description": "The URL-safe unique identifier of the backup being restored. Use lowercase, numbers, underscores, and minus characters only.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "backup_bucket_name",
+          "type": "string",
+          "required": false,
+          "description": "Specifies the bucket, container, or volume name if required by the backend.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "bucket_path",
+          "type": "string",
+          "required": false,
+          "description": "Specifies the path within the bucket, optional based on backend requirements.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'backups.restore.status'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.CheckBackupRestoreStatus",
+        "parameters": {
+          "backend_storage_system": {
+            "value": "s3",
+            "type": "string",
+            "required": true
+          },
+          "backup_id": {
+            "value": "backup_12345",
+            "type": "string",
+            "required": true
+          },
+          "backup_bucket_name": {
+            "value": "my-backup-bucket",
+            "type": "string",
+            "required": false
+          },
+          "bucket_path": {
+            "value": "restores/2023-10-01",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "CheckBackupStatus",
+      "qualifiedName": "WeaviateApi.CheckBackupStatus",
+      "fullyQualifiedName": "WeaviateApi.CheckBackupStatus@2.0.0",
+      "description": "Get the current status of a backup creation process.\n\nUse this tool to manually check the status of a backup creation process by its ID on the specified backend. Ideal for when waiting for completion is disabled or not suitable.",
+      "parameters": [
+        {
+          "name": "backup_backend_system",
+          "type": "string",
+          "required": true,
+          "description": "Specifies the backend storage system where the backup resides, such as 'filesystem', 'gcs', 's3', or 'azure'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "backup_identifier",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier of the backup. Use only lowercase, numbers, underscores, and minus characters.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "backup_storage_path",
+          "type": "string",
+          "required": false,
+          "description": "Specifies the path within the bucket/container/volume if the backup is not at the root. Optional.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "bucket_name",
+          "type": "string",
+          "required": false,
+          "description": "Specifies the bucket, container, or volume name if required by the backend.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'backups.create.status'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.CheckBackupStatus",
+        "parameters": {
+          "backup_backend_system": {
+            "value": "s3",
+            "type": "string",
+            "required": true
+          },
+          "backup_identifier": {
+            "value": "backup_12345",
+            "type": "string",
+            "required": true
+          },
+          "backup_storage_path": {
+            "value": "backups/2023/",
+            "type": "string",
+            "required": false
+          },
+          "bucket_name": {
+            "value": "my-backup-bucket",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "CheckRolePermission",
+      "qualifiedName": "WeaviateApi.CheckRolePermission",
+      "fullyQualifiedName": "WeaviateApi.CheckRolePermission@2.0.0",
+      "description": "Check if a role has specific permissions in the system.\n\n    Use this tool to verify whether a particular role possesses certain permissions within the system. It should be called when there's a need to confirm role access rights.\n\n    Note: Understanding the request schema is necessary to properly create\n    the stringified JSON input object for execution.\n\nThis operation also requires path parameters.\n\n    Modes:\n    - GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n      already have it. Do NOT call repeatedly if you already received\n      the schema.\n    - EXECUTE: Performs the operation with the provided request body\n      JSON.\n      Note: You must also provide the required path parameters when executing.\n\n    If you need the schema, call with mode='get_request_schema' ONCE, then execute.\n    ",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": ["get_request_schema", "execute"],
+          "inferrable": true
+        },
+        {
+          "name": "role_name",
+          "type": "string",
+          "required": false,
+          "description": "The name of the role to check permissions for.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'hasPermission'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.CheckRolePermission",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "role_name": {
+            "value": "admin",
+            "type": "string",
+            "required": false
+          },
+          "request_body": {
+            "value": "{\"permissions\":[\"read\",\"write\",\"delete\"]}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "CheckWeaviateLiveness",
+      "qualifiedName": "WeaviateApi.CheckWeaviateLiveness",
+      "fullyQualifiedName": "WeaviateApi.CheckWeaviateLiveness@2.0.0",
+      "description": "Check if the Weaviate instance is running properly.\n\nUse this tool to perform a basic health check on a Weaviate instance, ensuring it is running and responding to HTTP requests. Useful for monitoring and maintenance tasks.",
+      "parameters": [],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'weaviate.wellknown.liveness'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.CheckWeaviateLiveness",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "CheckWeaviateReadiness",
+      "qualifiedName": "WeaviateApi.CheckWeaviateReadiness",
+      "fullyQualifiedName": "WeaviateApi.CheckWeaviateReadiness@2.0.0",
+      "description": "Check if the Weaviate instance is ready to accept traffic.\n\nUse this tool to determine if the Weaviate instance has completed its startup routines and is ready for operations such as data import and queries. Ideal for readiness checks in container orchestration contexts like Kubernetes.",
+      "parameters": [],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'weaviate.wellknown.readiness'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.CheckWeaviateReadiness",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "CreateAliasMapping",
+      "qualifiedName": "WeaviateApi.CreateAliasMapping",
+      "fullyQualifiedName": "WeaviateApi.CreateAliasMapping@2.0.0",
+      "description": "Create a new alias for a collection in Weaviate.\n\nThis tool creates a new alias mapping between an alias name and a collection (class) in Weaviate. Use it to set up alternative names for accessing collections.",
+      "parameters": [
+        {
+          "name": "alias_name",
+          "type": "string",
+          "required": false,
+          "description": "The unique name of the alias, serving as an alternative identifier for the specified collection.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "collection_class_name",
+          "type": "string",
+          "required": false,
+          "description": "The name of the collection (class) to which the alias is mapped.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'aliases.create'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.CreateAliasMapping",
+        "parameters": {
+          "alias_name": {
+            "value": "my_alias_name",
+            "type": "string",
+            "required": false
+          },
+          "collection_class_name": {
+            "value": "MyCollection",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "CreateBackup",
+      "qualifiedName": "WeaviateApi.CreateBackup",
+      "fullyQualifiedName": "WeaviateApi.CreateBackup@2.0.0",
+      "description": "Initiates backup creation for specified collections.\n\nThis tool starts the process of creating a backup for the specified collections on a designated backend storage using Weaviate. The backup is compressed using gzip by default, and the system remains operational during the backup process. Use this tool when you need to ensure data is safely backed up without interrupting service.",
+      "parameters": [
+        {
+          "name": "backend_storage_system",
+          "type": "string",
+          "required": true,
+          "description": "Specifies the backend storage system where the backup will be stored, such as `filesystem`, `gcs`, `s3`, or `azure`.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "backup_chunk_size",
+          "type": "integer",
+          "required": false,
+          "description": "Set the chunk size for the backup with a minimum of 2MB, default of 128MB, and a maximum of 512MB.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "backup_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the backup. Must be URL-safe, using only lowercase, numbers, underscore, and minus characters.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "bucket_name",
+          "type": "string",
+          "required": false,
+          "description": "Name of the bucket, container, or volume where the backup will be stored.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "bucket_path",
+          "type": "string",
+          "required": false,
+          "description": "Specifies the path or key within the storage bucket. This helps in locating where the backup will be stored within the bucket.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "collections_to_include_in_backup",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "List of collections to include in the backup. If not set, all collections are included. Cannot be used with `collections_to_exclude_in_backup`.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "compression_level",
+          "type": "string",
+          "required": false,
+          "description": "Specifies the compression level for the backup: DefaultCompression, BestSpeed, or BestCompression.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cpu_utilization_percentage",
+          "type": "integer",
+          "required": false,
+          "description": "Sets desired CPU core utilization, ranging from 1% to 80%, during backup creation.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "exclude_collections",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "List of collections to exclude from the backup. Overrides include if both are set.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "storage_endpoint_name",
+          "type": "string",
+          "required": false,
+          "description": "Name of the storage endpoint, such as s3.amazonaws.com, where the backup will be stored.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'backups.create'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.CreateBackup",
+        "parameters": {
+          "backend_storage_system": {
+            "value": "s3",
+            "type": "string",
+            "required": true
+          },
+          "backup_chunk_size": {
+            "value": 256,
+            "type": "integer",
+            "required": false
+          },
+          "backup_id": {
+            "value": "my_backup_123",
+            "type": "string",
+            "required": false
+          },
+          "bucket_name": {
+            "value": "my_backup_bucket",
+            "type": "string",
+            "required": false
+          },
+          "bucket_path": {
+            "value": "backups/2023/",
+            "type": "string",
+            "required": false
+          },
+          "collections_to_include_in_backup": {
+            "value": ["users", "transactions"],
+            "type": "array",
+            "required": false
+          },
+          "compression_level": {
+            "value": "BestCompression",
+            "type": "string",
+            "required": false
+          },
+          "cpu_utilization_percentage": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "exclude_collections": {
+            "value": ["logs"],
+            "type": "array",
+            "required": false
+          },
+          "storage_endpoint_name": {
+            "value": "s3.amazonaws.com",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "CreateDatabaseUser",
+      "qualifiedName": "WeaviateApi.CreateDatabaseUser",
+      "fullyQualifiedName": "WeaviateApi.CreateDatabaseUser@2.0.0",
+      "description": "Create a new database user and obtain an API key.\n\nThis tool is used to create a new database user by specifying a name. It returns an API key for the created user.",
+      "parameters": [
+        {
+          "name": "user_name",
+          "type": "string",
+          "required": true,
+          "description": "Specify the name for the new database user. It should be a string that identifies the user.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "disable_import_experimental",
+          "type": "boolean",
+          "required": false,
+          "description": "Set to true to prevent importing an API key from a static user. Experimental and will be removed.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "set_creation_time_experimental",
+          "type": "string",
+          "required": false,
+          "description": "EXPERIMENTAL: Set the given time as creation time. This will be removed in future versions.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'createUser'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.CreateDatabaseUser",
+        "parameters": {
+          "user_name": {
+            "value": "john_doe",
+            "type": "string",
+            "required": true
+          },
+          "disable_import_experimental": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "set_creation_time_experimental": {
+            "value": "2023-10-01T12:30:00Z",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "CreateObjectInWeaviate",
+      "qualifiedName": "WeaviateApi.CreateObjectInWeaviate",
+      "fullyQualifiedName": "WeaviateApi.CreateObjectInWeaviate@2.0.0",
+      "description": "Create a new data object in Weaviate.\n\n    This tool creates a new data object in Weaviate, ensuring that the object's metadata and schema values are validated. It's useful for adding new data objects when there is no existing object with the same ID.\n\n    Note: Understanding the request schema is necessary to properly create\n    the stringified JSON input object for execution.\n\nThis operation also requires query parameters.\n\n    Modes:\n    - GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n      already have it. Do NOT call repeatedly if you already received\n      the schema.\n    - EXECUTE: Performs the operation with the provided request body\n      JSON.\n      Note: You must also provide the required query parameters when executing.\n\n    If you need the schema, call with mode='get_request_schema' ONCE, then execute.\n    ",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": ["get_request_schema", "execute"],
+          "inferrable": true
+        },
+        {
+          "name": "consistency_level_replica_acknowledgement",
+          "type": "string",
+          "required": false,
+          "description": "Specifies the number of replicas that must confirm the request for it to be successful.  Only used when mode is 'execute'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'objects.create'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.CreateObjectInWeaviate",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "consistency_level_replica_acknowledgement": {
+            "value": "all",
+            "type": "string",
+            "required": false
+          },
+          "request_body": {
+            "value": "{\"class\":\"Article\",\"properties\":{\"title\":\"Understanding AI\",\"content\":\"This article explores the fundamentals of Artificial Intelligence.\"}}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "CreateRoleWithPermissions",
+      "qualifiedName": "WeaviateApi.CreateRoleWithPermissions",
+      "fullyQualifiedName": "WeaviateApi.CreateRoleWithPermissions@2.0.0",
+      "description": "Create a new role with specified permissions.\n\nUse this tool to create a new role in the system and define its permissions. It should be called when there is a need to set up access controls for new role-based functionalities.\n\nNote: Understanding the request schema is necessary to properly create\nthe stringified JSON input object for execution.\n\nModes:\n- GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n  already have it. Do NOT call repeatedly if you already received\n  the schema.\n- EXECUTE: Performs the operation with the provided request body\n  JSON.\n\nIf you need the schema, call with mode='get_request_schema' ONCE, then execute.",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": ["get_request_schema", "execute"],
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'createRole'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.CreateRoleWithPermissions",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "request_body": {
+            "value": "{\"role_name\": \"editor\", \"permissions\": [\"read\", \"write\", \"delete\"]}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "CreateSchemaObject",
+      "qualifiedName": "WeaviateApi.CreateSchemaObject",
+      "fullyQualifiedName": "WeaviateApi.CreateSchemaObject@2.0.0",
+      "description": "Create a new collection (class) in Weaviate.\n\nThis tool is used to define and create a new collection (class) in Weaviate. It provides explicit control over the schema definition, which is essential when `AutoSchema` is not relied upon. Use this tool to ensure accurate schema setup in a Weaviate instance.\n\nNote: Understanding the request schema is necessary to properly create\nthe stringified JSON input object for execution.\n\nModes:\n- GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n  already have it. Do NOT call repeatedly if you already received\n  the schema.\n- EXECUTE: Performs the operation with the provided request body\n  JSON.\n\nIf you need the schema, call with mode='get_request_schema' ONCE, then execute.",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": ["get_request_schema", "execute"],
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'schema.objects.create'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.CreateSchemaObject",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "request_body": {
+            "value": "{\"class\":\"Book\",\"properties\":[{\"name\":\"title\",\"dataType\":[\"string\"]},{\"name\":\"author\",\"dataType\":[\"string\"]},{\"name\":\"published_date\",\"dataType\":[\"date\"]}]}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "CreateTenants",
+      "qualifiedName": "WeaviateApi.CreateTenants",
+      "fullyQualifiedName": "WeaviateApi.CreateTenants@2.0.0",
+      "description": "Create new tenants in a specified collection.\n\n    Use this tool to create one or more new tenants for a specified collection when multi-tenancy is enabled. Useful for managing tenants within a Weaviate database.\n\n    Note: Understanding the request schema is necessary to properly create\n    the stringified JSON input object for execution.\n\nThis operation also requires path parameters.\n\n    Modes:\n    - GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n      already have it. Do NOT call repeatedly if you already received\n      the schema.\n    - EXECUTE: Performs the operation with the provided request body\n      JSON.\n      Note: You must also provide the required path parameters when executing.\n\n    If you need the schema, call with mode='get_request_schema' ONCE, then execute.\n    ",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": ["get_request_schema", "execute"],
+          "inferrable": true
+        },
+        {
+          "name": "collection_name",
+          "type": "string",
+          "required": false,
+          "description": "The name of the multi-tenant enabled collection for creating tenants.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'tenants.create'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.CreateTenants",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "collection_name": {
+            "value": "tenantCollectionA",
+            "type": "string",
+            "required": false
+          },
+          "request_body": {
+            "value": "{\"tenants\":[{\"name\":\"Tenant1\",\"description\":\"First tenant\"},{\"name\":\"Tenant2\",\"description\":\"Second tenant\"}]}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "DeactivateDatabaseUser",
+      "qualifiedName": "WeaviateApi.DeactivateDatabaseUser",
+      "fullyQualifiedName": "WeaviateApi.DeactivateDatabaseUser@2.0.0",
+      "description": "Deactivate a database user account.\n\nUse this tool to deactivate a user with the type 'db' in the database. Provide the user ID to deactivate their account and prevent access to the database.",
+      "parameters": [
+        {
+          "name": "database_user_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier for the database user to be deactivated.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "revoke_api_key",
+          "type": "boolean",
+          "required": false,
+          "description": "Revoke the user's API key when deactivating. Set to true to enable.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'deactivateUser'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.DeactivateDatabaseUser",
+        "parameters": {
+          "database_user_id": {
+            "value": "user_12345",
+            "type": "string",
+            "required": true
+          },
+          "revoke_api_key": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "DeleteAlias",
+      "qualifiedName": "WeaviateApi.DeleteAlias",
+      "fullyQualifiedName": "WeaviateApi.DeleteAlias@2.0.0",
+      "description": "Delete an existing alias from the system.\n\nThis tool removes an alias from the system without affecting the underlying collection. It should be called when an alias is no longer needed.",
+      "parameters": [
+        {
+          "name": "alias_name",
+          "type": "string",
+          "required": true,
+          "description": "The name of the alias to be deleted. This identifier specifies which alias mapping to remove from the system.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'aliases.delete'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.DeleteAlias",
+        "parameters": {
+          "alias_name": {
+            "value": "exampleAlias123",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "DeleteAllReplications",
+      "qualifiedName": "WeaviateApi.DeleteAllReplications",
+      "fullyQualifiedName": "WeaviateApi.DeleteAllReplications@2.0.0",
+      "description": "Schedule deletion of all replication operations across the system.\n\nThis tool is used to schedule the deletion of all replication operations across all collections, shards, and nodes. It should be called when you need to clear all replication tasks in the system.",
+      "parameters": [],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'deleteAllReplications'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.DeleteAllReplications",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "DeleteDatabaseUser",
+      "qualifiedName": "WeaviateApi.DeleteDatabaseUser",
+      "fullyQualifiedName": "WeaviateApi.DeleteDatabaseUser@2.0.0",
+      "description": "Delete a specific database user.\n\nThis tool deletes a specified user from the database. It should be called when there is a need to remove a user, except the current active user.",
+      "parameters": [
+        {
+          "name": "user_identifier",
+          "type": "string",
+          "required": true,
+          "description": "Specify the name of the user you want to delete. This cannot be the current user.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'deleteUser'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.DeleteDatabaseUser",
+        "parameters": {
+          "user_identifier": {
+            "value": "john_doe",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "DeleteDataObject",
+      "qualifiedName": "WeaviateApi.DeleteDataObject",
+      "fullyQualifiedName": "WeaviateApi.DeleteDataObject@2.0.0",
+      "description": "Delete a data object from a specified collection using its UUID.\n\nUse this tool to remove a specific data object from a Weaviate collection, identified by its `className` and `id` (UUID). Useful for managing data within a Weaviate instance.",
+      "parameters": [
+        {
+          "name": "collection_name",
+          "type": "string",
+          "required": true,
+          "description": "Name of the collection (class) the object belongs to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "object_uuid",
+          "type": "string",
+          "required": true,
+          "description": "Unique UUID of the object to be deleted from the collection.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "replica_acknowledgment_level",
+          "type": "string",
+          "required": false,
+          "description": "Specifies the number of replicas needed to confirm request success.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "tenant_identifier",
+          "type": "string",
+          "required": false,
+          "description": "Specifies the tenant when targeting a multi-tenant collection (class).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'objects.class.delete'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.DeleteDataObject",
+        "parameters": {
+          "collection_name": {
+            "value": "user_profiles",
+            "type": "string",
+            "required": true
+          },
+          "object_uuid": {
+            "value": "123e4567-e89b-12d3-a456-426614174000",
+            "type": "string",
+            "required": true
+          },
+          "replica_acknowledgment_level": {
+            "value": "all",
+            "type": "string",
+            "required": false
+          },
+          "tenant_identifier": {
+            "value": "tenant_1",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "DeleteMultipleObjects",
+      "qualifiedName": "WeaviateApi.DeleteMultipleObjects",
+      "fullyQualifiedName": "WeaviateApi.DeleteMultipleObjects@2.0.0",
+      "description": "Deletes multiple data objects using specified filter criteria.\n\n    This tool removes data objects based on a filter. Use it when you need to delete multiple objects that match specific criteria within the limit. The deletion is performed in the order objects match the filter. If you need to delete beyond the limit, repeat the process until finished.\n\n    Note: Understanding the request schema is necessary to properly create\n    the stringified JSON input object for execution.\n\nThis operation also requires query parameters.\n\n    Modes:\n    - GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n      already have it. Do NOT call repeatedly if you already received\n      the schema.\n    - EXECUTE: Performs the operation with the provided request body\n      JSON.\n      Note: You must also provide the required query parameters when executing.\n\n    If you need the schema, call with mode='get_request_schema' ONCE, then execute.\n    ",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": ["get_request_schema", "execute"],
+          "inferrable": true
+        },
+        {
+          "name": "replica_acknowledgement_level",
+          "type": "string",
+          "required": false,
+          "description": "Specifies the number of replicas that must confirm the request for it to be deemed successful.  Only used when mode is 'execute'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "target_tenant",
+          "type": "string",
+          "required": false,
+          "description": "Specifies the tenant when targeting a multi-tenant collection. Use the tenant's unique identifier.  Only used when mode is 'execute'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'batch.objects.delete'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.DeleteMultipleObjects",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "replica_acknowledgement_level": {
+            "value": "all",
+            "type": "string",
+            "required": false
+          },
+          "target_tenant": {
+            "value": "tenant123",
+            "type": "string",
+            "required": false
+          },
+          "request_body": {
+            "value": "{\"filter\": {\"class\": \"Article\", \"where\": {\"title\": {\"$eq\": \"Old Title\"}}}}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "DeleteReferenceFromObject",
+      "qualifiedName": "WeaviateApi.DeleteReferenceFromObject",
+      "fullyQualifiedName": "WeaviateApi.DeleteReferenceFromObject@2.0.0",
+      "description": "Delete a specific reference from an object's property.\n\n    Use this tool to remove a reference from a specific property of a data object in a collection, identified by its class name and UUID. Call this tool when you need to delete a reference from an object's property.\n\n    Note: Understanding the request schema is necessary to properly create\n    the stringified JSON input object for execution.\n\nThis operation also requires path, query parameters.\n\n    Modes:\n    - GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n      already have it. Do NOT call repeatedly if you already received\n      the schema.\n    - EXECUTE: Performs the operation with the provided request body\n      JSON.\n      Note: You must also provide the required path, query parameters when executing.\n\n    If you need the schema, call with mode='get_request_schema' ONCE, then execute.\n    ",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": ["get_request_schema", "execute"],
+          "inferrable": true
+        },
+        {
+          "name": "collection_name",
+          "type": "string",
+          "required": false,
+          "description": "Name of the collection (class) the source object belongs to. This identifies where the object is located.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "source_object_uuid",
+          "type": "string",
+          "required": false,
+          "description": "Unique UUID of the source object from which the reference will be deleted.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "reference_property_name",
+          "type": "string",
+          "required": false,
+          "description": "Unique name of the reference property of the source object from which to delete the reference.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "required_consistency_level",
+          "type": "string",
+          "required": false,
+          "description": "Specifies how many replicas must acknowledge the request for success.  Only used when mode is 'execute'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "tenant_identifier",
+          "type": "string",
+          "required": false,
+          "description": "Specifies the tenant in a request targeting a multi-tenant collection (class).  Only used when mode is 'execute'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'objects.class.references.delete'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.DeleteReferenceFromObject",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "collection_name": {
+            "value": "Documents",
+            "type": "string",
+            "required": false
+          },
+          "source_object_uuid": {
+            "value": "123e4567-e89b-12d3-a456-426614174000",
+            "type": "string",
+            "required": false
+          },
+          "reference_property_name": {
+            "value": "relatedDocuments",
+            "type": "string",
+            "required": false
+          },
+          "required_consistency_level": {
+            "value": "QUORUM",
+            "type": "string",
+            "required": false
+          },
+          "tenant_identifier": {
+            "value": "tenant_01",
+            "type": "string",
+            "required": false
+          },
+          "request_body": {
+            "value": "{\"reference_id\": \"456e7890-e12b-34d5-a678-912345678901\"}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "DeleteRole",
+      "qualifiedName": "WeaviateApi.DeleteRole",
+      "fullyQualifiedName": "WeaviateApi.DeleteRole@2.0.0",
+      "description": "Delete a role and revoke its permissions system-wide.\n\nUse this tool to delete a role from the system, removing it and revoking the associated permissions from all users who had it.",
+      "parameters": [
+        {
+          "name": "role_name",
+          "type": "string",
+          "required": true,
+          "description": "Specify the name of the role to be deleted and revoked from users.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'deleteRole'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.DeleteRole",
+        "parameters": {
+          "role_name": {
+            "value": "admin",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "DeleteSchemaCollection",
+      "qualifiedName": "WeaviateApi.DeleteSchemaCollection",
+      "fullyQualifiedName": "WeaviateApi.DeleteSchemaCollection@2.0.0",
+      "description": "Permanently delete a collection from the schema.\n\nCall this tool to remove a collection definition and all its data objects from the schema permanently.",
+      "parameters": [
+        {
+          "name": "collection_name_to_delete",
+          "type": "string",
+          "required": true,
+          "description": "The name of the collection (class) that will be permanently deleted from the schema.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'schema.objects.delete'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.DeleteSchemaCollection",
+        "parameters": {
+          "collection_name_to_delete": {
+            "value": "example_collection",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "DeleteTenants",
+      "qualifiedName": "WeaviateApi.DeleteTenants",
+      "fullyQualifiedName": "WeaviateApi.DeleteTenants@2.0.0",
+      "description": "Permanently delete specified tenants from a collection.\n\nUse this tool to delete one or more tenants from a specified collection in Weaviate. This action is irreversible and will remove all data related to the specified tenants.",
+      "parameters": [
+        {
+          "name": "collection_name",
+          "type": "string",
+          "required": true,
+          "description": "The name of the collection from which to delete tenants.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "tenant_names_to_delete",
+          "type": "array",
+          "innerType": "string",
+          "required": true,
+          "description": "An array of tenant names to permanently delete from the specified collection.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'tenants.delete'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.DeleteTenants",
+        "parameters": {
+          "collection_name": {
+            "value": "user_data",
+            "type": "string",
+            "required": true
+          },
+          "tenant_names_to_delete": {
+            "value": ["tenant1", "tenant2", "tenant3"],
+            "type": "array",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "DiscoverApiEndpoints",
+      "qualifiedName": "WeaviateApi.DiscoverApiEndpoints",
+      "fullyQualifiedName": "WeaviateApi.DiscoverApiEndpoints@2.0.0",
+      "description": "Retrieve links to available REST API endpoints.\n\nThis tool fetches links to other endpoints within the REST API, aiding in the discovery and navigation of the available API options.",
+      "parameters": [],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'weaviate.root'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.DiscoverApiEndpoints",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "ExecuteGraphqlBatchQueries",
+      "qualifiedName": "WeaviateApi.ExecuteGraphqlBatchQueries",
+      "fullyQualifiedName": "WeaviateApi.ExecuteGraphqlBatchQueries@2.0.0",
+      "description": "Execute multiple GraphQL queries in a single request.\n\nExecutes multiple GraphQL queries sent in a single network request for efficiency. Ideal for performing batch queries in Weaviate.\n\nNote: Understanding the request schema is necessary to properly create\nthe stringified JSON input object for execution.\n\nModes:\n- GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n  already have it. Do NOT call repeatedly if you already received\n  the schema.\n- EXECUTE: Performs the operation with the provided request body\n  JSON.\n\nIf you need the schema, call with mode='get_request_schema' ONCE, then execute.",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": ["get_request_schema", "execute"],
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'graphql.batch'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.ExecuteGraphqlBatchQueries",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "request_body": {
+            "value": "{\"queries\":[{\"query\":\"{Get {Things {id property}}}\"},{\"query\":\"{Get {Things {id property}}}\"}]}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "FetchReplicationStatus",
+      "qualifiedName": "WeaviateApi.FetchReplicationStatus",
+      "fullyQualifiedName": "WeaviateApi.FetchReplicationStatus@2.0.0",
+      "description": "Retrieve the status of a specific replication operation.\n\nUse this tool to get current status and detailed information about a replication operation by its unique ID. It can optionally include historical progress data of the operation.",
+      "parameters": [
+        {
+          "name": "replication_operation_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier for the replication operation to fetch details for.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_history",
+          "type": "boolean",
+          "required": false,
+          "description": "Set to true to include the history of the replication operation.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'replicationDetails'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.FetchReplicationStatus",
+        "parameters": {
+          "replication_operation_id": {
+            "value": "replication_12345",
+            "type": "string",
+            "required": true
+          },
+          "include_history": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "FetchRoleByName",
+      "qualifiedName": "WeaviateApi.FetchRoleByName",
+      "fullyQualifiedName": "WeaviateApi.FetchRoleByName@2.0.0",
+      "description": "Fetch role details using its name.\n\nThis tool retrieves the details of a specific role by its name from the Weaviate service. It should be called when information about a role is required, typically for authorization or configuration purposes.",
+      "parameters": [
+        {
+          "name": "role_name",
+          "type": "string",
+          "required": true,
+          "description": "The name of the role to fetch details for.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'getRole'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.FetchRoleByName",
+        "parameters": {
+          "role_name": {
+            "value": "admin",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "FetchShardingState",
+      "qualifiedName": "WeaviateApi.FetchShardingState",
+      "fullyQualifiedName": "WeaviateApi.FetchShardingState@2.0.0",
+      "description": "Fetch the current sharding state and replica details for collections.\n\nThis tool retrieves the current sharding state for all collections or a specified collection, including replica locations and statuses. If needed, it can also provide the state for a specific shard within a collection.",
+      "parameters": [
+        {
+          "name": "collection_name",
+          "type": "string",
+          "required": false,
+          "description": "The name of the collection to retrieve the sharding state for.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "target_shard",
+          "type": "string",
+          "required": false,
+          "description": "Specify the shard name to retrieve its sharding state in a collection.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'getCollectionShardingState'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.FetchShardingState",
+        "parameters": {
+          "collection_name": {
+            "value": "user_profiles",
+            "type": "string",
+            "required": false
+          },
+          "target_shard": {
+            "value": "shard_1",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "ForceDeleteReplications",
+      "qualifiedName": "WeaviateApi.ForceDeleteReplications",
+      "fullyQualifiedName": "WeaviateApi.ForceDeleteReplications@2.0.0",
+      "description": "Forcefully delete replication operations with caution.\n\nThis tool is used to forcefully delete operations from the FSM in Weaviate. It should be called when there is a need to remove replication operations without performing state checks, which may lead to data corruption or loss. Ensure replication engine workers are scaled to 0 before using this to prevent in-flight operations.",
+      "parameters": [
+        {
+          "name": "collection_name",
+          "type": "string",
+          "required": false,
+          "description": "The name of the collection associated with the shard being replicated.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "dry_run",
+          "type": "boolean",
+          "required": false,
+          "description": "When set to true, the operation simulates the deletion and returns the expected result without executing it.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "replication_operation_id",
+          "type": "string",
+          "required": false,
+          "description": "The unique identifier (ID) of the replication operation to be forcefully deleted.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "shard_identifier",
+          "type": "string",
+          "required": false,
+          "description": "The unique identifier of the shard involved in the replication operations.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "target_node_name",
+          "type": "string",
+          "required": false,
+          "description": "The name of the target node where replication operations are registered.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'forceDeleteReplications'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.ForceDeleteReplications",
+        "parameters": {
+          "collection_name": {
+            "value": "example_collection",
+            "type": "string",
+            "required": false
+          },
+          "dry_run": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "replication_operation_id": {
+            "value": "replication_12345",
+            "type": "string",
+            "required": false
+          },
+          "shard_identifier": {
+            "value": "shard_01",
+            "type": "string",
+            "required": false
+          },
+          "target_node_name": {
+            "value": "target_node_1",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetAuthenticatedUserInfo",
+      "qualifiedName": "WeaviateApi.GetAuthenticatedUserInfo",
+      "fullyQualifiedName": "WeaviateApi.GetAuthenticatedUserInfo@2.0.0",
+      "description": "Retrieve details about the authenticated user and their roles.\n\nThis tool retrieves information about the current user, including their username and assigned roles, from the authenticated session.",
+      "parameters": [],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'getOwnInfo'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.GetAuthenticatedUserInfo",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetClassificationStatus",
+      "qualifiedName": "WeaviateApi.GetClassificationStatus",
+      "fullyQualifiedName": "WeaviateApi.GetClassificationStatus@2.0.0",
+      "description": "Retrieve status and results of a classification task.\n\nUse this tool to obtain the status, metadata, and results of an ongoing or completed classification task by providing its unique ID.",
+      "parameters": [
+        {
+          "name": "classification_task_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier (UUID) of the classification task to retrieve its status and results.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'classifications.get'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.GetClassificationStatus",
+        "parameters": {
+          "classification_task_id": {
+            "value": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetClusterNodeStatus",
+      "qualifiedName": "WeaviateApi.GetClusterNodeStatus",
+      "fullyQualifiedName": "WeaviateApi.GetClusterNodeStatus@2.0.0",
+      "description": "Retrieve status information about all nodes in a cluster.\n\nFetches status details for all nodes in the cluster, with adjustable detail level using the output parameter.",
+      "parameters": [
+        {
+          "name": "output_verbosity",
+          "type": "string",
+          "required": false,
+          "description": "Controls the verbosity of the output for node status information. Accepted values: `minimal`, `verbose`. Defaults to `minimal`.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'nodes.get'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.GetClusterNodeStatus",
+        "parameters": {
+          "output_verbosity": {
+            "value": "verbose",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetCollectionShardStatus",
+      "qualifiedName": "WeaviateApi.GetCollectionShardStatus",
+      "fullyQualifiedName": "WeaviateApi.GetCollectionShardStatus@2.0.0",
+      "description": "Retrieves status of shards for a specified collection.\n\nUse this tool to get the status of all shards associated with a specific collection (`className`) in Weaviate. For multi-tenant collections, specify the `tenant` query parameter to retrieve shard status for a particular tenant.",
+      "parameters": [
+        {
+          "name": "collection_name",
+          "type": "string",
+          "required": true,
+          "description": "The name of the collection (class) whose shards to query.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "tenant_name",
+          "type": "string",
+          "required": false,
+          "description": "The name of the tenant for retrieving shard statuses, applicable only for multi-tenant collections.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'schema.objects.shards.get'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.GetCollectionShardStatus",
+        "parameters": {
+          "collection_name": {
+            "value": "products",
+            "type": "string",
+            "required": true
+          },
+          "tenant_name": {
+            "value": "tenantA",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetCollectionTenants",
+      "qualifiedName": "WeaviateApi.GetCollectionTenants",
+      "fullyQualifiedName": "WeaviateApi.GetCollectionTenants@2.0.0",
+      "description": "Retrieve tenants for a specified collection.\n\nThis tool retrieves a list of all tenants associated with a given collection. Call this tool to obtain tenant information for a specified collection in the Weaviate service.",
+      "parameters": [
+        {
+          "name": "collection_name",
+          "type": "string",
+          "required": true,
+          "description": "The name of the collection (class) whose tenants to list.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'tenants.get'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.GetCollectionTenants",
+        "parameters": {
+          "collection_name": {
+            "value": "example_collection",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetDatabaseUserInfo",
+      "qualifiedName": "WeaviateApi.GetDatabaseUserInfo",
+      "fullyQualifiedName": "WeaviateApi.GetDatabaseUserInfo@2.0.0",
+      "description": "Retrieve information about a specific database user.\n\nUse this tool to get detailed information about a database user, including their roles, status, and type. Call this tool when you need to know specific details about a database user's profile or attributes.",
+      "parameters": [
+        {
+          "name": "database_user_name",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier or name of the database user to retrieve information for.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_last_used_time",
+          "type": "boolean",
+          "required": false,
+          "description": "Set to true to include the last used time in the user's information.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'getUserInfo'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.GetDatabaseUserInfo",
+        "parameters": {
+          "database_user_name": {
+            "value": "john_doe",
+            "type": "string",
+            "required": true
+          },
+          "include_last_used_time": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetDataObject",
+      "qualifiedName": "WeaviateApi.GetDataObject",
+      "fullyQualifiedName": "WeaviateApi.GetDataObject@2.0.0",
+      "description": "Retrieve a data object using collection name and UUID.",
+      "parameters": [
+        {
+          "name": "collection_name",
+          "type": "string",
+          "required": true,
+          "description": "Name of the collection (class) the object belongs to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "object_uuid",
+          "type": "string",
+          "required": true,
+          "description": "Unique UUID of the object to be retrieved from the specified collection.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_additional_information",
+          "type": "string",
+          "required": false,
+          "description": "Specify additional info to include: `classification`, `vector`, or `interpretation`.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "required_replica_acknowledgment",
+          "type": "string",
+          "required": false,
+          "description": "Specifies how many replicas must confirm a request for success. Relates to consistency level.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "target_node_name",
+          "type": "string",
+          "required": false,
+          "description": "Specify the target node to fulfill the request.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "tenant_identifier",
+          "type": "string",
+          "required": false,
+          "description": "Specify the tenant for a multi-tenant collection request.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'objects.class.get'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.GetDataObject",
+        "parameters": {
+          "collection_name": {
+            "value": "users",
+            "type": "string",
+            "required": true
+          },
+          "object_uuid": {
+            "value": "123e4567-e89b-12d3-a456-426614174000",
+            "type": "string",
+            "required": true
+          },
+          "include_additional_information": {
+            "value": "classification",
+            "type": "string",
+            "required": false
+          },
+          "required_replica_acknowledgment": {
+            "value": "2",
+            "type": "string",
+            "required": false
+          },
+          "target_node_name": {
+            "value": "node_1",
+            "type": "string",
+            "required": false
+          },
+          "tenant_identifier": {
+            "value": "tenant_123",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetGroupsForRole",
+      "qualifiedName": "WeaviateApi.GetGroupsForRole",
+      "fullyQualifiedName": "WeaviateApi.GetGroupsForRole@2.0.0",
+      "description": "Retrieve groups assigned to a specific role.\n\nUse this tool to get a list of all groups that have been assigned a particular role, identified by the role's name.",
+      "parameters": [
+        {
+          "name": "role_name",
+          "type": "string",
+          "required": true,
+          "description": "The unique name of the role to retrieve associated groups.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'getGroupsForRole'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.GetGroupsForRole",
+        "parameters": {
+          "role_name": {
+            "value": "admin",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetOidcDiscovery",
+      "qualifiedName": "WeaviateApi.GetOidcDiscovery",
+      "fullyQualifiedName": "WeaviateApi.GetOidcDiscovery@2.0.0",
+      "description": "Fetches OIDC discovery details for Weaviate authentication.\n\nThis tool retrieves OpenID Connect (OIDC) discovery information for Weaviate if OIDC authentication is configured. It provides essential details like the token issuer URL, client ID, and required scopes.",
+      "parameters": [],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint ''."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.GetOidcDiscovery",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetRolesAndPermissions",
+      "qualifiedName": "WeaviateApi.GetRolesAndPermissions",
+      "fullyQualifiedName": "WeaviateApi.GetRolesAndPermissions@2.0.0",
+      "description": "Retrieve all roles and their assigned permissions.\n\nUse this tool to obtain detailed information on all roles and the specific permissions associated with each role.",
+      "parameters": [],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'getRoles'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.GetRolesAndPermissions",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetRolesForGroup",
+      "qualifiedName": "WeaviateApi.GetRolesForGroup",
+      "fullyQualifiedName": "WeaviateApi.GetRolesForGroup@2.0.0",
+      "description": "Retrieve roles assigned to a specific group.\n\nFetches all roles associated with a group identified by its name and type (options: `db` or `oidc`).",
+      "parameters": [
+        {
+          "name": "group_name",
+          "type": "string",
+          "required": true,
+          "description": "The unique name of the group to retrieve roles for.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "group_type",
+          "type": "string",
+          "required": true,
+          "description": "Specifies the type of the group, either 'db' or 'oidc'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_full_role_definitions",
+          "type": "boolean",
+          "required": false,
+          "description": "Include full role definitions with all permissions if true; return only role names if false.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'getRolesForGroup'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.GetRolesForGroup",
+        "parameters": {
+          "group_name": {
+            "value": "admin_users",
+            "type": "string",
+            "required": true
+          },
+          "group_type": {
+            "value": "db",
+            "type": "string",
+            "required": true
+          },
+          "include_full_role_definitions": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetShardHostNodesStatus",
+      "qualifiedName": "WeaviateApi.GetShardHostNodesStatus",
+      "fullyQualifiedName": "WeaviateApi.GetShardHostNodesStatus@2.0.0",
+      "description": "Retrieve status of nodes hosting shards for a collection.\n\nThis tool fetches status information for nodes that host shards of a specified collection. Use it to monitor or diagnose the nodes in a distributed database cluster, customizing the level of detail with the `output` query parameter.",
+      "parameters": [
+        {
+          "name": "collection_class_name",
+          "type": "string",
+          "required": true,
+          "description": "The name of the collection (class) for which to retrieve node status.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "output_verbosity",
+          "type": "string",
+          "required": false,
+          "description": "Set the verbosity of the output. Possible values: 'minimal', 'verbose'. Defaults to 'minimal'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "shard_name",
+          "type": "string",
+          "required": false,
+          "description": "Specifies the name of the shard for which to retrieve node status information. This helps to focus the request on specific shards within a collection.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'nodes.get.class'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.GetShardHostNodesStatus",
+        "parameters": {
+          "collection_class_name": {
+            "value": "UserProfiles",
+            "type": "string",
+            "required": true
+          },
+          "output_verbosity": {
+            "value": "verbose",
+            "type": "string",
+            "required": false
+          },
+          "shard_name": {
+            "value": "shard_02",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetTenantDetails",
+      "qualifiedName": "WeaviateApi.GetTenantDetails",
+      "fullyQualifiedName": "WeaviateApi.GetTenantDetails@2.0.0",
+      "description": "Retrieve details about a specific tenant's status.\n\nCall this tool to get information about a specific tenant within a specified collection, including their current activity status.",
+      "parameters": [
+        {
+          "name": "collection_name",
+          "type": "string",
+          "required": true,
+          "description": "The name of the collection (class) that contains the tenant.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "tenant_name",
+          "type": "string",
+          "required": true,
+          "description": "The name of the tenant to retrieve details about within the specified collection.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'tenants.get.one'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.GetTenantDetails",
+        "parameters": {
+          "collection_name": {
+            "value": "customers",
+            "type": "string",
+            "required": true
+          },
+          "tenant_name": {
+            "value": "tenant123",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetUserRoles",
+      "qualifiedName": "WeaviateApi.GetUserRoles",
+      "fullyQualifiedName": "WeaviateApi.GetUserRoles@2.0.0",
+      "description": "Retrieve all roles assigned to a specific user.\n\nUse this tool to get a list of all roles for a specified user, identified by their ID and user type (`db` or `oidc`).",
+      "parameters": [
+        {
+          "name": "user_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique name or identifier of the user for whom roles are being retrieved.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_type",
+          "type": "string",
+          "required": true,
+          "description": "Specify the user type: 'oidc' for OpenID Connect or 'db' for database.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_detailed_role_information",
+          "type": "boolean",
+          "required": false,
+          "description": "Set to true to include detailed role information like assigned permissions.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'getRolesForUser'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.GetUserRoles",
+        "parameters": {
+          "user_id": {
+            "value": "user123",
+            "type": "string",
+            "required": true
+          },
+          "user_type": {
+            "value": "oidc",
+            "type": "string",
+            "required": true
+          },
+          "include_detailed_role_information": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetUsersByRole",
+      "qualifiedName": "WeaviateApi.GetUsersByRole",
+      "fullyQualifiedName": "WeaviateApi.GetUsersByRole@2.0.0",
+      "description": "Retrieve users with a specific role assignment.\n\nUse to obtain a list of users assigned to a particular role by role ID.",
+      "parameters": [
+        {
+          "name": "role_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier for the role to fetch associated users.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'getUsersForRole'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.GetUsersByRole",
+        "parameters": {
+          "role_id": {
+            "value": "admin-12345",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetWeaviateClusterStatistics",
+      "qualifiedName": "WeaviateApi.GetWeaviateClusterStatistics",
+      "fullyQualifiedName": "WeaviateApi.GetWeaviateClusterStatistics@2.0.0",
+      "description": "Get Weaviate cluster Raft protocol statistics.\n\nUse this tool to retrieve detailed statistics about the internal Raft consensus protocol state for a Weaviate cluster. This can help monitor the cluster's status and performance.",
+      "parameters": [],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'cluster.get.statistics'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.GetWeaviateClusterStatistics",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetWeaviateInstanceMeta",
+      "qualifiedName": "WeaviateApi.GetWeaviateInstanceMeta",
+      "fullyQualifiedName": "WeaviateApi.GetWeaviateInstanceMeta@2.0.0",
+      "description": "Get meta-information about a Weaviate instance.\n\nUse this tool to obtain details such as version, modules, and network hostname of a running Weaviate instance. Useful for monitoring, compatibility checks, or communication between instances.",
+      "parameters": [],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'meta.get'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.GetWeaviateInstanceMeta",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "InitiateClassificationTask",
+      "qualifiedName": "WeaviateApi.InitiateClassificationTask",
+      "fullyQualifiedName": "WeaviateApi.InitiateClassificationTask@2.0.0",
+      "description": "Initiate a classification task in the background.\n\nUse this tool to start a background classification task with specific parameters. This will initiate the process, and you can monitor its status and retrieve results using the GET /classifications/{id} endpoint.\n\nNote: Understanding the request schema is necessary to properly create\nthe stringified JSON input object for execution.\n\nModes:\n- GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n  already have it. Do NOT call repeatedly if you already received\n  the schema.\n- EXECUTE: Performs the operation with the provided request body\n  JSON.\n\nIf you need the schema, call with mode='get_request_schema' ONCE, then execute.",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": ["get_request_schema", "execute"],
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'classifications.post'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.InitiateClassificationTask",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "request_body": {
+            "value": "{\"dataset\":\"sample_dataset\",\"class_name\":\"ClassA\",\"config\":{\"threshold\":0.75}}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "ListBackups",
+      "qualifiedName": "WeaviateApi.ListBackups",
+      "fullyQualifiedName": "WeaviateApi.ListBackups@2.0.0",
+      "description": "Retrieve all backup IDs and their statuses.\n\nUse this tool to get a list of all created backup IDs along with their current statuses. Useful for monitoring or managing backup data.",
+      "parameters": [
+        {
+          "name": "backend_storage_system",
+          "type": "string",
+          "required": true,
+          "description": "Specifies the backend storage system to list backups from (e.g., `filesystem`, `gcs`, `s3`, `azure`).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'backups.list'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.ListBackups",
+        "parameters": {
+          "backend_storage_system": {
+            "value": "s3",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "ListDataObjects",
+      "qualifiedName": "WeaviateApi.ListDataObjects",
+      "fullyQualifiedName": "WeaviateApi.ListDataObjects@2.0.0",
+      "description": "Retrieve a list of data objects from a specified collection.\n\nUse this tool to get a list of data objects from a particular collection by providing the collection name parameter. The objects are returned in reverse order of creation.",
+      "parameters": [
+        {
+          "name": "collection_name",
+          "type": "string",
+          "required": false,
+          "description": "Specifies the collection name to query objects from. If not provided, no objects will be returned.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_additional_information",
+          "type": "string",
+          "required": false,
+          "description": "Include additional information types such as `classification`, `vector`, or `interpretation`.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "maximum_items_per_page",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of items to be returned per page. The default is 25 unless set otherwise as an environment variable.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "query_start_index",
+          "type": "integer",
+          "required": false,
+          "description": "The starting index for the result window. Retrieves `offset+limit` results and returns `limit` results from this index onward. Cannot be used with `after`. Should be used with `limit`.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sort_order",
+          "type": "string",
+          "required": false,
+          "description": "Specify how to order the data within the sorted field(s). Use 'asc' for ascending and 'desc' for descending. Should match the order of fields used in `sort`. Multiple values should be separated by commas.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sort_properties",
+          "type": "string",
+          "required": false,
+          "description": "Names of properties to sort by, e.g., 'city' or 'country,city'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "tenant_identifier",
+          "type": "string",
+          "required": false,
+          "description": "Specifies the tenant for requests targeting a multi-tenant collection (class).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "threshold_uuid_after",
+          "type": "string",
+          "required": false,
+          "description": "A UUID to retrieve objects after, excluding this object. Use with `class` and `limit`. Leave empty for the start.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'objects.list'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.ListDataObjects",
+        "parameters": {
+          "collection_name": {
+            "value": "users",
+            "type": "string",
+            "required": false
+          },
+          "include_additional_information": {
+            "value": "classification,vector",
+            "type": "string",
+            "required": false
+          },
+          "maximum_items_per_page": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "query_start_index": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "sort_order": {
+            "value": "desc",
+            "type": "string",
+            "required": false
+          },
+          "sort_properties": {
+            "value": "created_at",
+            "type": "string",
+            "required": false
+          },
+          "tenant_identifier": {
+            "value": "tenant123",
+            "type": "string",
+            "required": false
+          },
+          "threshold_uuid_after": {
+            "value": "550e8400-e29b-41d4-a716-446655440000",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "ListDbUsers",
+      "qualifiedName": "WeaviateApi.ListDbUsers",
+      "fullyQualifiedName": "WeaviateApi.ListDbUsers@2.0.0",
+      "description": "Retrieve all database users and their roles and statuses.\n\nUse this tool to obtain a comprehensive list of all users within the database, along with detailed information about their roles and current status. This is useful for auditing and managing user permissions in the database.",
+      "parameters": [
+        {
+          "name": "include_last_used_time",
+          "type": "boolean",
+          "required": false,
+          "description": "Include the last time users were utilized in the response.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'listAllUsers'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.ListDbUsers",
+        "parameters": {
+          "include_last_used_time": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "ListDistributedTasks",
+      "qualifiedName": "WeaviateApi.ListDistributedTasks",
+      "fullyQualifiedName": "WeaviateApi.ListDistributedTasks@2.0.0",
+      "description": "Retrieve all distributed tasks in the cluster.\n\nUse this tool to get an overview of all distributed tasks currently active or available within the cluster.",
+      "parameters": [],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'distributedTasks.get'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.ListDistributedTasks",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "ListReplicationStatus",
+      "qualifiedName": "WeaviateApi.ListReplicationStatus",
+      "fullyQualifiedName": "WeaviateApi.ListReplicationStatus@2.0.0",
+      "description": "Retrieve registered replication operations and details.\n\nCall this tool to get information about current replication operations in Weaviate, filtered by collection, shard, or node ID if needed.",
+      "parameters": [
+        {
+          "name": "collection_name",
+          "type": "string",
+          "required": false,
+          "description": "Specify the name of the collection for which to retrieve replication details.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_replication_history",
+          "type": "boolean",
+          "required": false,
+          "description": "Set to true to include the history of the replication operation, false to exclude it.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "shard_name",
+          "type": "string",
+          "required": false,
+          "description": "The specific shard for which to retrieve replication details.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "target_node_name",
+          "type": "string",
+          "required": false,
+          "description": "The name of the target node to retrieve replication operation details for.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'listReplication'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.ListReplicationStatus",
+        "parameters": {
+          "collection_name": {
+            "value": "exampleCollection",
+            "type": "string",
+            "required": false
+          },
+          "include_replication_history": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "shard_name": {
+            "value": "shard1",
+            "type": "string",
+            "required": false
+          },
+          "target_node_name": {
+            "value": "nodeA",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "ReplaceObjectReferences",
+      "qualifiedName": "WeaviateApi.ReplaceObjectReferences",
+      "fullyQualifiedName": "WeaviateApi.ReplaceObjectReferences@2.0.0",
+      "description": "Replace existing references for an object in Weaviate.\n\n    Use this tool to replace all current references of a specific property for an object in Weaviate. Specify the object's collection name, UUID, and the reference property to update. Useful for updating linked data within a dataset.\n\n    Note: Understanding the request schema is necessary to properly create\n    the stringified JSON input object for execution.\n\nThis operation also requires path, query parameters.\n\n    Modes:\n    - GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n      already have it. Do NOT call repeatedly if you already received\n      the schema.\n    - EXECUTE: Performs the operation with the provided request body\n      JSON.\n      Note: You must also provide the required path, query parameters when executing.\n\n    If you need the schema, call with mode='get_request_schema' ONCE, then execute.\n    ",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": ["get_request_schema", "execute"],
+          "inferrable": true
+        },
+        {
+          "name": "collection_name",
+          "type": "string",
+          "required": false,
+          "description": "Name of the collection the source object belongs to.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "source_object_uuid",
+          "type": "string",
+          "required": false,
+          "description": "Unique UUID of the source object to identify it for reference replacement.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "reference_property_name",
+          "type": "string",
+          "required": false,
+          "description": "Unique name of the reference property for the source object to update.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "consistency_level",
+          "type": "string",
+          "required": false,
+          "description": "Defines the required number of replica acknowledgements for request success.  Only used when mode is 'execute'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "tenant_identifier",
+          "type": "string",
+          "required": false,
+          "description": "Specifies the tenant in a request targeting a multi-tenant collection (class).  Only used when mode is 'execute'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'objects.class.references.put'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.ReplaceObjectReferences",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "collection_name": {
+            "value": "products",
+            "type": "string",
+            "required": false
+          },
+          "source_object_uuid": {
+            "value": "123e4567-e89b-12d3-a456-426614174000",
+            "type": "string",
+            "required": false
+          },
+          "reference_property_name": {
+            "value": "related_products",
+            "type": "string",
+            "required": false
+          },
+          "consistency_level": {
+            "value": "ONE",
+            "type": "string",
+            "required": false
+          },
+          "tenant_identifier": {
+            "value": "tenant1",
+            "type": "string",
+            "required": false
+          },
+          "request_body": {
+            "value": "{\"reference_ids\": [\"456e4567-e89b-12d3-a456-426614174001\", \"789e4567-e89b-12d3-a456-426614174002\"]}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "ReplicateShardReplica",
+      "qualifiedName": "WeaviateApi.ReplicateShardReplica",
+      "fullyQualifiedName": "WeaviateApi.ReplicateShardReplica@2.0.0",
+      "description": "Initiates replication of a shard replica to a target node.\n\nThis tool starts an asynchronous process to move or copy a specific shard replica from its current node to a specified target node. It handles data copying, synchronization, and may decommission the source replica.",
+      "parameters": [
+        {
+          "name": "shard_name",
+          "type": "string",
+          "required": true,
+          "description": "The name of the shard whose replica is to be moved or copied. Specify the shard to initiate the operation.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "source_node",
+          "type": "string",
+          "required": true,
+          "description": "The name of the Weaviate node currently hosting the shard replica to be moved or copied.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "target_collection_name",
+          "type": "string",
+          "required": true,
+          "description": "The name of the collection to which the target shard belongs in the Weaviate database.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "target_weaviate_node",
+          "type": "string",
+          "required": true,
+          "description": "Name of the Weaviate node for creating the new shard replica during the operation.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "replication_operation_type",
+          "type": "string",
+          "required": false,
+          "description": "Specifies whether to 'COPY' or 'MOVE' the shard replica. Defaults to 'COPY' if not provided.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'replicate'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.ReplicateShardReplica",
+        "parameters": {
+          "shard_name": {
+            "value": "shard_42",
+            "type": "string",
+            "required": true
+          },
+          "source_node": {
+            "value": "node_A",
+            "type": "string",
+            "required": true
+          },
+          "target_collection_name": {
+            "value": "collection_example",
+            "type": "string",
+            "required": true
+          },
+          "target_weaviate_node": {
+            "value": "node_B",
+            "type": "string",
+            "required": true
+          },
+          "replication_operation_type": {
+            "value": "MOVE",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "RestoreBackup",
+      "qualifiedName": "WeaviateApi.RestoreBackup",
+      "fullyQualifiedName": "WeaviateApi.RestoreBackup@2.0.0",
+      "description": "Restore collections from a specified backup.\n\n    Initiates the restoration of collections from a backup stored on a designated backend. Ensure the target cluster has identical node configurations as the source cluster, and that the collections do not already exist on the target.\n\n    Note: Understanding the request schema is necessary to properly create\n    the stringified JSON input object for execution.\n\nThis operation also requires path parameters.\n\n    Modes:\n    - GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n      already have it. Do NOT call repeatedly if you already received\n      the schema.\n    - EXECUTE: Performs the operation with the provided request body\n      JSON.\n      Note: You must also provide the required path parameters when executing.\n\n    If you need the schema, call with mode='get_request_schema' ONCE, then execute.\n    ",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": ["get_request_schema", "execute"],
+          "inferrable": true
+        },
+        {
+          "name": "backup_backend_storage",
+          "type": "string",
+          "required": false,
+          "description": "Specifies the backend storage system where the backup resides, such as `filesystem`, `gcs`, `s3`, or `azure`.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "backup_identifier",
+          "type": "string",
+          "required": false,
+          "description": "The unique identifier for the backup to restore. It must be URL-safe and compatible with filesystem paths, using only lowercase letters, numbers, underscores, and minus characters.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'backups.restore'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.RestoreBackup",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "backup_backend_storage": {
+            "value": "s3",
+            "type": "string",
+            "required": false
+          },
+          "backup_identifier": {
+            "value": "backup_2023_09_15",
+            "type": "string",
+            "required": false
+          },
+          "request_body": {
+            "value": "{\"restore\": true, \"collections\": [\"collection1\", \"collection2\"]}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "RetrieveAliasDetails",
+      "qualifiedName": "WeaviateApi.RetrieveAliasDetails",
+      "fullyQualifiedName": "WeaviateApi.RetrieveAliasDetails@2.0.0",
+      "description": "Retrieve details about a specific alias by its name.\n\nUse this tool to obtain information about an alias, such as the collection (class) it points to, by specifying the alias name.",
+      "parameters": [
+        {
+          "name": "alias_name",
+          "type": "string",
+          "required": true,
+          "description": "The name of the alias to retrieve details for, including its associated collection.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'aliases.get.alias'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.RetrieveAliasDetails",
+        "parameters": {
+          "alias_name": {
+            "value": "exampleAlias",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "RetrieveAliases",
+      "qualifiedName": "WeaviateApi.RetrieveAliases",
+      "fullyQualifiedName": "WeaviateApi.RetrieveAliases@2.0.0",
+      "description": "Retrieve all aliases from the system.\n\nFetches a list of all aliases, with an option to filter by collection (class) name for specific aliases.",
+      "parameters": [
+        {
+          "name": "filter_by_collection_name",
+          "type": "string",
+          "required": false,
+          "description": "Optional filter to retrieve aliases for a specific collection (class) only. If not provided, returns all aliases.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'aliases.get'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.RetrieveAliases",
+        "parameters": {
+          "filter_by_collection_name": {
+            "value": "example_collection",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "RetrieveCollectionSchema",
+      "qualifiedName": "WeaviateApi.RetrieveCollectionSchema",
+      "fullyQualifiedName": "WeaviateApi.RetrieveCollectionSchema@2.0.0",
+      "description": "Retrieve the schema of a specified collection.\n\nFetches the definition of a specific collection by `className`, detailing its properties, configuration, and vectorizer settings.",
+      "parameters": [
+        {
+          "name": "collection_name",
+          "type": "string",
+          "required": true,
+          "description": "The name of the collection to retrieve the schema for.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'schema.objects.get'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.RetrieveCollectionSchema",
+        "parameters": {
+          "collection_name": {
+            "value": "ProductCatalog",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "RetrieveDatabaseSchema",
+      "qualifiedName": "WeaviateApi.RetrieveDatabaseSchema",
+      "fullyQualifiedName": "WeaviateApi.RetrieveDatabaseSchema@2.0.0",
+      "description": "Retrieve definitions of all classes in the database schema.\n\nUse this tool to obtain the definitions of all collections (classes) currently present in the database schema. It provides a comprehensive overview of the database structure.",
+      "parameters": [],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'schema.dump'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.RetrieveDatabaseSchema",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "RetrieveGroupNames",
+      "qualifiedName": "WeaviateApi.RetrieveGroupNames",
+      "fullyQualifiedName": "WeaviateApi.RetrieveGroupNames@2.0.0",
+      "description": "Retrieve available group names for a specified type.\n\nThis tool retrieves a list of all available group names for a specified group type, either 'oidc' or 'db'. Use it when you need to list groups of a certain type.",
+      "parameters": [
+        {
+          "name": "group_type",
+          "type": "string",
+          "required": true,
+          "description": "Specifies the group type to retrieve, either 'oidc' or 'db'.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'getGroups'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.RetrieveGroupNames",
+        "parameters": {
+          "group_type": {
+            "value": "oidc",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "RevokeRoleFromGroup",
+      "qualifiedName": "WeaviateApi.RevokeRoleFromGroup",
+      "fullyQualifiedName": "WeaviateApi.RevokeRoleFromGroup@2.0.0",
+      "description": "Revoke roles from a specified group to manage permissions.\n\nThis tool allows the revocation of roles from a specified group, which is useful for managing and updating group permissions within a system using Weaviate.",
+      "parameters": [
+        {
+          "name": "group_name",
+          "type": "string",
+          "required": true,
+          "description": "The name of the group from which roles will be revoked.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "group_type",
+          "type": "string",
+          "required": false,
+          "description": "Specifies whether the group contains OIDC or database users.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "roles_to_revoke",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "An array of role names to revoke from the specified group.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'revokeRoleFromGroup'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.RevokeRoleFromGroup",
+        "parameters": {
+          "group_name": {
+            "value": "developers",
+            "type": "string",
+            "required": true
+          },
+          "group_type": {
+            "value": "OIDC",
+            "type": "string",
+            "required": false
+          },
+          "roles_to_revoke": {
+            "value": ["write_access", "admin"],
+            "type": "array",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "RevokeRolePermissions",
+      "qualifiedName": "WeaviateApi.RevokeRolePermissions",
+      "fullyQualifiedName": "WeaviateApi.RevokeRolePermissions@2.0.0",
+      "description": "Revoke permissions from a specified role.\n\n    This tool is used to revoke permissions from a specified role in the Weaviate system. If all permissions are removed, the role will be deleted.\n\n    Note: Understanding the request schema is necessary to properly create\n    the stringified JSON input object for execution.\n\nThis operation also requires path parameters.\n\n    Modes:\n    - GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n      already have it. Do NOT call repeatedly if you already received\n      the schema.\n    - EXECUTE: Performs the operation with the provided request body\n      JSON.\n      Note: You must also provide the required path parameters when executing.\n\n    If you need the schema, call with mode='get_request_schema' ONCE, then execute.\n    ",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": ["get_request_schema", "execute"],
+          "inferrable": true
+        },
+        {
+          "name": "role_name",
+          "type": "string",
+          "required": false,
+          "description": "The name of the role from which permissions are being revoked. Removing all permissions will delete the role.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'removePermissions'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.RevokeRolePermissions",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "role_name": {
+            "value": "editor",
+            "type": "string",
+            "required": false
+          },
+          "request_body": {
+            "value": "{\"permissions\":[]}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "RevokeUserRole",
+      "qualifiedName": "WeaviateApi.RevokeUserRole",
+      "fullyQualifiedName": "WeaviateApi.RevokeUserRole@2.0.0",
+      "description": "Remove roles from a specified user in the system.\n\nUse this tool to revoke one or more roles assigned to a user by specifying their user ID. It's useful for updating user permissions in the system.",
+      "parameters": [
+        {
+          "name": "user_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier or name of the user from whom roles will be revoked.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "roles_to_revoke",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "A list of roles to be removed from the specified user. Provide each role as a string in the array.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_type",
+          "type": "string",
+          "required": false,
+          "description": "Specify the user type: `db` for Weaviate-managed or `oidc` for external OIDC-managed users.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'revokeRoleFromUser'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.RevokeUserRole",
+        "parameters": {
+          "user_id": {
+            "value": "user123",
+            "type": "string",
+            "required": true
+          },
+          "roles_to_revoke": {
+            "value": ["editor", "viewer"],
+            "type": "array",
+            "required": false
+          },
+          "user_type": {
+            "value": "db",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "RotateUserApiKey",
+      "qualifiedName": "WeaviateApi.RotateUserApiKey",
+      "fullyQualifiedName": "WeaviateApi.RotateUserApiKey@2.0.0",
+      "description": "Revoke and regenerate the API key for a database user.\n\nThis tool is used to revoke the current API key for a specified database user and generate a new one. It should be called when an API key needs refreshing or if security has been compromised.",
+      "parameters": [
+        {
+          "name": "database_user_name",
+          "type": "string",
+          "required": true,
+          "description": "The name of the database user for which the API key will be rotated.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'rotateUserApiKey'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.RotateUserApiKey",
+        "parameters": {
+          "database_user_name": {
+            "value": "db_user_123",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "UpdateCollectionAlias",
+      "qualifiedName": "WeaviateApi.UpdateCollectionAlias",
+      "fullyQualifiedName": "WeaviateApi.UpdateCollectionAlias@2.0.0",
+      "description": "Redirect an alias to a different collection.\n\nUse this tool to update an existing alias so it points to a new collection. This allows alias redirection without changing its name.",
+      "parameters": [
+        {
+          "name": "alias_name",
+          "type": "string",
+          "required": true,
+          "description": "The name of the existing alias that you want to update to point to a new collection.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "new_collection_name",
+          "type": "string",
+          "required": false,
+          "description": "Specify the new collection (class) for the alias to point to.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'aliases.update'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.UpdateCollectionAlias",
+        "parameters": {
+          "alias_name": {
+            "value": "user_alias",
+            "type": "string",
+            "required": true
+          },
+          "new_collection_name": {
+            "value": "users_v2",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "UpdateCollectionSettings",
+      "qualifiedName": "WeaviateApi.UpdateCollectionSettings",
+      "fullyQualifiedName": "WeaviateApi.UpdateCollectionSettings@2.0.0",
+      "description": "Update settings of an existing collection.\n\n    Use this tool to update the configuration settings of an existing collection by specifying the className and the new settings. This tool is useful when you need to change mutable settings of a collection but not its name or properties.\n\n    Note: Understanding the request schema is necessary to properly create\n    the stringified JSON input object for execution.\n\nThis operation also requires path parameters.\n\n    Modes:\n    - GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n      already have it. Do NOT call repeatedly if you already received\n      the schema.\n    - EXECUTE: Performs the operation with the provided request body\n      JSON.\n      Note: You must also provide the required path parameters when executing.\n\n    If you need the schema, call with mode='get_request_schema' ONCE, then execute.\n    ",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": ["get_request_schema", "execute"],
+          "inferrable": true
+        },
+        {
+          "name": "collection_name_to_update",
+          "type": "string",
+          "required": false,
+          "description": "The name of the collection to be updated. Specify the collection's class name.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'schema.objects.update'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.UpdateCollectionSettings",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "collection_name_to_update": {
+            "value": "my_collection",
+            "type": "string",
+            "required": false
+          },
+          "request_body": {
+            "value": "{\"replication_factor\": 3, \"sharding\": {\"enabled\": true}}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "UpdateDataObject",
+      "qualifiedName": "WeaviateApi.UpdateDataObject",
+      "fullyQualifiedName": "WeaviateApi.UpdateDataObject@2.0.0",
+      "description": "Update specific properties of a data object.\n\n    This tool updates properties of an existing object in a specified collection using JSON merge patch semantics. The object is identified by its collection name and UUID. Use this to modify selected fields of a data object while ensuring validation and timestamp updates.\n\n    Note: Understanding the request schema is necessary to properly create\n    the stringified JSON input object for execution.\n\nThis operation also requires path, query parameters.\n\n    Modes:\n    - GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n      already have it. Do NOT call repeatedly if you already received\n      the schema.\n    - EXECUTE: Performs the operation with the provided request body\n      JSON.\n      Note: You must also provide the required path, query parameters when executing.\n\n    If you need the schema, call with mode='get_request_schema' ONCE, then execute.\n    ",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": ["get_request_schema", "execute"],
+          "inferrable": true
+        },
+        {
+          "name": "collection_name",
+          "type": "string",
+          "required": false,
+          "description": "Specifies the name of the collection or class the object belongs to. This identifies where the object is stored.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "object_uuid",
+          "type": "string",
+          "required": false,
+          "description": "Unique UUID of the object to be patched within the specified collection.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "consistency_level",
+          "type": "string",
+          "required": false,
+          "description": "Specify the number of replicas that must acknowledge the request for success.  Only used when mode is 'execute'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'objects.class.patch'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.UpdateDataObject",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "collection_name": {
+            "value": "example_collection",
+            "type": "string",
+            "required": false
+          },
+          "object_uuid": {
+            "value": "123e4567-e89b-12d3-a456-426614174000",
+            "type": "string",
+            "required": false
+          },
+          "consistency_level": {
+            "value": "QUORUM",
+            "type": "string",
+            "required": false
+          },
+          "request_body": {
+            "value": "{\"property\":\"new_value\"}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "UpdateObjectProperties",
+      "qualifiedName": "WeaviateApi.UpdateObjectProperties",
+      "fullyQualifiedName": "WeaviateApi.UpdateObjectProperties@2.0.0",
+      "description": "Replace properties of a data object using its class and ID.\n\n    This tool updates the properties of an existing object identified by its class name and UUID. The request must include the complete object definition with new values to replace the existing ones.\n\n    Note: Understanding the request schema is necessary to properly create\n    the stringified JSON input object for execution.\n\nThis operation also requires path, query parameters.\n\n    Modes:\n    - GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n      already have it. Do NOT call repeatedly if you already received\n      the schema.\n    - EXECUTE: Performs the operation with the provided request body\n      JSON.\n      Note: You must also provide the required path, query parameters when executing.\n\n    If you need the schema, call with mode='get_request_schema' ONCE, then execute.\n    ",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": ["get_request_schema", "execute"],
+          "inferrable": true
+        },
+        {
+          "name": "collection_name",
+          "type": "string",
+          "required": false,
+          "description": "The name of the class (collection) to which the object belongs.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "object_uuid",
+          "type": "string",
+          "required": false,
+          "description": "Unique UUID of the object to be replaced.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "required_replica_acknowledgement",
+          "type": "string",
+          "required": false,
+          "description": "Specifies how many replicas must acknowledge a request for it to be successful.  Only used when mode is 'execute'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'objects.class.put'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.UpdateObjectProperties",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "collection_name": {
+            "value": "users",
+            "type": "string",
+            "required": false
+          },
+          "object_uuid": {
+            "value": "550e8400-e29b-41d4-a716-446655440000",
+            "type": "string",
+            "required": false
+          },
+          "required_replica_acknowledgement": {
+            "value": "one",
+            "type": "string",
+            "required": false
+          },
+          "request_body": {
+            "value": "{\"name\":\"John Doe\",\"email\":\"john.doe@example.com\"}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "UpdateShardStatus",
+      "qualifiedName": "WeaviateApi.UpdateShardStatus",
+      "fullyQualifiedName": "WeaviateApi.UpdateShardStatus@2.0.0",
+      "description": "Update the status of a specific shard in a collection.\n\nUse this tool to update the status of a specific shard within a Weaviate collection. It is typically used to change the shard's status to `READY` or `READONLY` after addressing issues that affected its operation.",
+      "parameters": [
+        {
+          "name": "collection_name",
+          "type": "string",
+          "required": true,
+          "description": "The name of the collection or class containing the shard to be updated.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "shard_name",
+          "type": "string",
+          "required": true,
+          "description": "The specific name of the shard to update in the collection.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "shard_status",
+          "type": "string",
+          "required": false,
+          "description": "The status to set for the shard, such as 'READY' or 'READONLY'.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'schema.objects.shards.update'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.UpdateShardStatus",
+        "parameters": {
+          "collection_name": {
+            "value": "user_data",
+            "type": "string",
+            "required": true
+          },
+          "shard_name": {
+            "value": "shard_01",
+            "type": "string",
+            "required": true
+          },
+          "shard_status": {
+            "value": "READY",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "UpdateTenantStatus",
+      "qualifiedName": "WeaviateApi.UpdateTenantStatus",
+      "fullyQualifiedName": "WeaviateApi.UpdateTenantStatus@2.0.0",
+      "description": "Update the activity status of specified tenants.\n\n    This tool updates the activity status, such as `ACTIVE` or `INACTIVE`, of one or more specified tenants within a collection (specified by `className`). Use this tool to manage tenant statuses efficiently within your system.\n\n    Note: Understanding the request schema is necessary to properly create\n    the stringified JSON input object for execution.\n\nThis operation also requires path parameters.\n\n    Modes:\n    - GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n      already have it. Do NOT call repeatedly if you already received\n      the schema.\n    - EXECUTE: Performs the operation with the provided request body\n      JSON.\n      Note: You must also provide the required path parameters when executing.\n\n    If you need the schema, call with mode='get_request_schema' ONCE, then execute.\n    ",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": ["get_request_schema", "execute"],
+          "inferrable": true
+        },
+        {
+          "name": "collection_name",
+          "type": "string",
+          "required": false,
+          "description": "The name of the collection (class) containing the tenants whose status is to be updated.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'tenants.update'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.UpdateTenantStatus",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "collection_name": {
+            "value": "tenants_collection",
+            "type": "string",
+            "required": false
+          },
+          "request_body": {
+            "value": "{\"tenants\": [\"tenant1\", \"tenant2\"], \"status\": \"ACTIVE\"}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "ValidateDataObjectStructure",
+      "qualifiedName": "WeaviateApi.ValidateDataObjectStructure",
+      "fullyQualifiedName": "WeaviateApi.ValidateDataObjectStructure@2.0.0",
+      "description": "Validate a data object's structure against the schema.\n\nUse this tool to check if a data object conforms to the specified collection schema and metadata rules without storing it. A successful validation returns a confirmation, while errors provide detailed feedback.\n\nNote: Understanding the request schema is necessary to properly create\nthe stringified JSON input object for execution.\n\nModes:\n- GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n  already have it. Do NOT call repeatedly if you already received\n  the schema.\n- EXECUTE: Performs the operation with the provided request body\n  JSON.\n\nIf you need the schema, call with mode='get_request_schema' ONCE, then execute.",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": ["get_request_schema", "execute"],
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["WEAVIATE_API_KEY", "WEAVIATE_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "WEAVIATE_API_KEY",
+          "type": "api_key"
+        },
+        {
+          "name": "WEAVIATE_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'objects.validate'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "WeaviateApi.ValidateDataObjectStructure",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "request_body": {
+            "value": "{\"class\":\"Person\",\"properties\":{\"name\":\"John Doe\",\"age\":30,\"email\":\"john.doe@example.com\"}}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    }
+  ],
+  "documentationChunks": [
+    {
+      "type": "section",
+      "location": "before_available_tools",
+      "position": "after",
+      "content": "## Authentication\n\nThe Arcade Weaviate API MCP Server requires two environment variables to authenticate with your Weaviate instance:\n\n- `WEAVIATE_API_KEY`\n- `WEAVIATE_SERVER_URL`\n\n**How to obtain your credentials:**\n\n1. Log in to your [Weaviate Console](https://console.weaviate.cloud/)\n2. Select your Weaviate cluster\n3. Navigate to **Details** or **API Keys** section\n4. Click **Create API Key** or use an existing key\n5. Copy your **API Key**\n6. Copy your **Cluster URL** (this is your server URL and must include `https://`)\n\n**Note:** The `WEAVIATE_SERVER_URL` must include the full URL with the `https://` protocol (e.g., `https://your-cluster.weaviate.network`).\n\nFor more details, see the [Weaviate Authentication documentation](https://weaviate.io/developers/weaviate/configuration/authentication).",
+      "header": "## Authentication"
+    }
+  ],
+  "customImports": [
+    "import StarterToolInfo from \"@/app/_components/starter-tool-info\";"
+  ],
+  "subPages": [],
+  "generatedAt": "2026-01-26T17:47:15.746Z",
+  "summary": "Arcade Toolkit provides tools to interface directly with the Weaviate API, enabling developers to manage and organize data efficiently. This toolkit is essential for working with databases within Weaviate, making it easier to handle complex operations.\n\n### Capabilities\n- Manage database users and roles, including assignment and permissions.\n- Perform batch operations for data objects and references, improving efficiency.\n- Create, update, and delete schemas and collections.\n- Monitor and manage backup and replication processes for data integrity and recovery.\n- Validate data object structures to ensure compliance with schema requirements.\n\n### Secrets\n- **API Key**: `WEAVIATE_API_KEY` \n- **Server URL**: `WEAVIATE_SERVER_URL` \nUse these secrets for authenticating and connecting to your Weaviate instance."
+}

@@ -1,0 +1,4085 @@
+{
+  "id": "Hubspot",
+  "label": "HubSpot",
+  "version": "3.0.0",
+  "description": "Arcade tools designed for LLMs to interact with Hubspot",
+  "metadata": {
+    "category": "sales",
+    "iconUrl": "https://design-system.arcade.dev/icons/hubspot.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/sales/hubspot",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": null,
+    "allScopes": [
+      "crm.objects.companies.read",
+      "crm.objects.companies.write",
+      "crm.objects.contacts.read",
+      "crm.objects.contacts.write",
+      "crm.objects.deals.read",
+      "crm.objects.deals.write",
+      "crm.objects.owners.read",
+      "oauth",
+      "sales-email-read"
+    ]
+  },
+  "tools": [
+    {
+      "name": "AssociateActivityToDeal",
+      "qualifiedName": "Hubspot.AssociateActivityToDeal",
+      "fullyQualifiedName": "Hubspot.AssociateActivityToDeal@3.0.0",
+      "description": "Associate a single activity object to a deal using HubSpot standard association type.",
+      "parameters": [
+        {
+          "name": "activity_type",
+          "type": "string",
+          "required": true,
+          "description": "Engagement activity type.",
+          "enum": ["note", "call", "email", "meeting", "task", "communication"],
+          "inferrable": true
+        },
+        {
+          "name": "activity_id",
+          "type": "integer",
+          "required": true,
+          "description": "The activity object ID",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "deal_id",
+          "type": "integer",
+          "required": true,
+          "description": "The deal ID to associate to",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "oauth",
+          "crm.objects.contacts.write",
+          "crm.objects.deals.write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Associate an activity to a deal"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.AssociateActivityToDeal",
+        "parameters": {
+          "activity_type": {
+            "value": "EMAIL",
+            "type": "string",
+            "required": true
+          },
+          "activity_id": {
+            "value": 12345,
+            "type": "integer",
+            "required": true
+          },
+          "deal_id": {
+            "value": 67890,
+            "type": "integer",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "AssociateContactToDeal",
+      "qualifiedName": "Hubspot.AssociateContactToDeal",
+      "fullyQualifiedName": "Hubspot.AssociateContactToDeal@3.0.0",
+      "description": "Associate a contact with an existing deal in HubSpot.",
+      "parameters": [
+        {
+          "name": "deal_id",
+          "type": "integer",
+          "required": true,
+          "description": "The ID of the deal to associate the contact with",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "contact_id",
+          "type": "integer",
+          "required": true,
+          "description": "The ID of the contact to associate with the deal",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "oauth",
+          "crm.objects.deals.write",
+          "crm.objects.deals.read",
+          "crm.objects.contacts.write",
+          "crm.objects.contacts.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Dictionary containing the association result"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.AssociateContactToDeal",
+        "parameters": {
+          "deal_id": {
+            "value": 12345,
+            "type": "integer",
+            "required": true
+          },
+          "contact_id": {
+            "value": 67890,
+            "type": "integer",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateCallActivity",
+      "qualifiedName": "Hubspot.CreateCallActivity",
+      "fullyQualifiedName": "Hubspot.CreateCallActivity@3.0.0",
+      "description": "Create a call engagement activity with required owner and associations.\nMust be associated with at least one of: contact, company, or deal.\nAssign to the current user if not specified otherwise.",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "Short title for the call.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "when_occurred",
+          "type": "string",
+          "required": true,
+          "description": "When the call occurred (ISO date format: YYYY-MM-DDTHH:MM:SS).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "direction",
+          "type": "string",
+          "required": false,
+          "description": "Call direction (INBOUND or OUTBOUND).",
+          "enum": ["INBOUND", "OUTBOUND"],
+          "inferrable": true
+        },
+        {
+          "name": "summary",
+          "type": "string",
+          "required": false,
+          "description": "Short summary/notes of the call.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "duration",
+          "type": "integer",
+          "required": false,
+          "description": "Call duration in seconds.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "to_number",
+          "type": "string",
+          "required": false,
+          "description": "Phone number called to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "from_number",
+          "type": "string",
+          "required": false,
+          "description": "Phone number called from.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "associate_to_contact_id",
+          "type": "integer",
+          "required": false,
+          "description": "Contact ID to associate this call with.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "associate_to_company_id",
+          "type": "integer",
+          "required": false,
+          "description": "Company ID to associate this call with.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "associate_to_deal_id",
+          "type": "integer",
+          "required": false,
+          "description": "Deal ID to associate this call with.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": ["oauth", "crm.objects.contacts.write"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Details of the call engagement activity created."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.CreateCallActivity",
+        "parameters": {
+          "title": {
+            "value": "Follow-up Call",
+            "type": "string",
+            "required": true
+          },
+          "when_occurred": {
+            "value": "2023-10-01T14:30:00",
+            "type": "string",
+            "required": true
+          },
+          "direction": {
+            "value": "OUTBOUND",
+            "type": "string",
+            "required": false
+          },
+          "summary": {
+            "value": "Discussed project updates and next steps.",
+            "type": "string",
+            "required": false
+          },
+          "duration": {
+            "value": 300,
+            "type": "integer",
+            "required": false
+          },
+          "to_number": {
+            "value": "+1234567890",
+            "type": "string",
+            "required": false
+          },
+          "from_number": {
+            "value": "+0987654321",
+            "type": "string",
+            "required": false
+          },
+          "associate_to_contact_id": {
+            "value": 12345,
+            "type": "integer",
+            "required": false
+          },
+          "associate_to_company_id": {
+            "value": 67890,
+            "type": "integer",
+            "required": false
+          },
+          "associate_to_deal_id": {
+            "value": 112233,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateCommunicationActivity",
+      "qualifiedName": "Hubspot.CreateCommunicationActivity",
+      "fullyQualifiedName": "Hubspot.CreateCommunicationActivity@3.0.0",
+      "description": "Create a communication activity for logging communications that are not done via\nemail, call, or meeting.\n\nThis includes SMS, WhatsApp, LinkedIn messages, physical mail, and custom channel\nconversations.\nMust be associated with at least one of: contact, company, or deal.\nThe communication will be assigned to the current user.",
+      "parameters": [
+        {
+          "name": "channel",
+          "type": "string",
+          "required": true,
+          "description": "Communication channel type.",
+          "enum": [
+            "SMS",
+            "WHATS_APP",
+            "LINKEDIN_MESSAGE",
+            "PHYSICAL_MAIL",
+            "CUSTOM_CHANNEL_CONVERSATION"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "when_occurred",
+          "type": "string",
+          "required": true,
+          "description": "When the communication occurred (ISO date format: YYYY-MM-DDTHH:MM:SS).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body_text",
+          "type": "string",
+          "required": false,
+          "description": "Full message content.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "associate_to_contact_id",
+          "type": "integer",
+          "required": false,
+          "description": "Contact ID to associate this communication with.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "associate_to_company_id",
+          "type": "integer",
+          "required": false,
+          "description": "Company ID to associate this communication with.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "associate_to_deal_id",
+          "type": "integer",
+          "required": false,
+          "description": "Deal ID to associate this communication with.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": ["oauth", "crm.objects.contacts.write"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Details of the communication engagement activity created."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.CreateCommunicationActivity",
+        "parameters": {
+          "channel": {
+            "value": "SMS",
+            "type": "string",
+            "required": true
+          },
+          "when_occurred": {
+            "value": "2023-10-01T14:30:00",
+            "type": "string",
+            "required": true
+          },
+          "body_text": {
+            "value": "Just following up on our previous conversation.",
+            "type": "string",
+            "required": false
+          },
+          "associate_to_contact_id": {
+            "value": 12345,
+            "type": "integer",
+            "required": false
+          },
+          "associate_to_company_id": {
+            "value": 67890,
+            "type": "integer",
+            "required": false
+          },
+          "associate_to_deal_id": {
+            "value": 11122,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateCompany",
+      "qualifiedName": "Hubspot.CreateCompany",
+      "fullyQualifiedName": "Hubspot.CreateCompany@3.0.0",
+      "description": "Create a new company in HubSpot.\n\nBefore calling this tool, use Hubspot.GetAvailableIndustryTypes to see valid values.",
+      "parameters": [
+        {
+          "name": "company_name",
+          "type": "string",
+          "required": true,
+          "description": "The company name (required)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "web_domain",
+          "type": "string",
+          "required": false,
+          "description": "The company web domain (e.g., example.com)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "industry_type",
+          "type": "string",
+          "required": false,
+          "description": "The company industry type (case-insensitive).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "company_city",
+          "type": "string",
+          "required": false,
+          "description": "The company city location",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "company_state",
+          "type": "string",
+          "required": false,
+          "description": "The company state or province",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "company_country",
+          "type": "string",
+          "required": false,
+          "description": "The company country",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "phone_number",
+          "type": "string",
+          "required": false,
+          "description": "The company main phone number",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "website_url",
+          "type": "string",
+          "required": false,
+          "description": "The company website URL",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": ["oauth", "crm.objects.companies.write"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Dictionary containing the created company information"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.CreateCompany",
+        "parameters": {
+          "company_name": {
+            "value": "Tech Innovations LLC",
+            "type": "string",
+            "required": true
+          },
+          "web_domain": {
+            "value": "techinnovations.com",
+            "type": "string",
+            "required": false
+          },
+          "industry_type": {
+            "value": "Information Technology",
+            "type": "string",
+            "required": false
+          },
+          "company_city": {
+            "value": "San Francisco",
+            "type": "string",
+            "required": false
+          },
+          "company_state": {
+            "value": "California",
+            "type": "string",
+            "required": false
+          },
+          "company_country": {
+            "value": "United States",
+            "type": "string",
+            "required": false
+          },
+          "phone_number": {
+            "value": "+1-415-555-0123",
+            "type": "string",
+            "required": false
+          },
+          "website_url": {
+            "value": "https://www.techinnovations.com",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateContact",
+      "qualifiedName": "Hubspot.CreateContact",
+      "fullyQualifiedName": "Hubspot.CreateContact@3.0.0",
+      "description": "Create a contact associated with a company.",
+      "parameters": [
+        {
+          "name": "company_id",
+          "type": "integer",
+          "required": true,
+          "description": "The ID of the company to create the contact for.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "first_name",
+          "type": "string",
+          "required": true,
+          "description": "The first name of the contact.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "last_name",
+          "type": "string",
+          "required": false,
+          "description": "The last name of the contact.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "required": false,
+          "description": "The email address of the contact.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "phone",
+          "type": "string",
+          "required": false,
+          "description": "The phone number of the contact.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "mobile_phone",
+          "type": "string",
+          "required": false,
+          "description": "The mobile phone number of the contact.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "job_title",
+          "type": "string",
+          "required": false,
+          "description": "The job title of the contact.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": ["oauth", "crm.objects.contacts.write"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Create a contact associated with a company."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.CreateContact",
+        "parameters": {
+          "company_id": {
+            "value": 12345,
+            "type": "integer",
+            "required": true
+          },
+          "first_name": {
+            "value": "John",
+            "type": "string",
+            "required": true
+          },
+          "last_name": {
+            "value": "Doe",
+            "type": "string",
+            "required": false
+          },
+          "email": {
+            "value": "john.doe@example.com",
+            "type": "string",
+            "required": false
+          },
+          "phone": {
+            "value": "+1234567890",
+            "type": "string",
+            "required": false
+          },
+          "mobile_phone": {
+            "value": "+1987654321",
+            "type": "string",
+            "required": false
+          },
+          "job_title": {
+            "value": "Software Engineer",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateDeal",
+      "qualifiedName": "Hubspot.CreateDeal",
+      "fullyQualifiedName": "Hubspot.CreateDeal@3.0.0",
+      "description": "Create a new deal in HubSpot.\n\nIf pipeline_id is not provided, the default pipeline will be used.\n\nFor custom pipelines, deal_stage must be a valid stage ID within\nthe selected pipeline. If deal_stage is not specified,\nthe first stage in the pipeline will be used automatically.\n\nIt is recommended have already pipeline data available when\nplanning to call this tool.",
+      "parameters": [
+        {
+          "name": "deal_name",
+          "type": "string",
+          "required": true,
+          "description": "The deal name (required)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "deal_amount",
+          "type": "number",
+          "required": false,
+          "description": "The deal amount/value",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "deal_stage",
+          "type": "string",
+          "required": false,
+          "description": "The deal stage",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "deal_type",
+          "type": "string",
+          "required": false,
+          "description": "The deal type.",
+          "enum": ["newbusiness", "existingbusiness"],
+          "inferrable": true
+        },
+        {
+          "name": "expected_close_date",
+          "type": "string",
+          "required": false,
+          "description": "Expected close date in YYYY-MM-DD format",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "pipeline_id",
+          "type": "string",
+          "required": false,
+          "description": "Pipeline id. Use 'default' for default pipeline or pass a pipeline id (integer)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "deal_owner",
+          "type": "string",
+          "required": false,
+          "description": "The deal owner user ID",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "priority_level",
+          "type": "string",
+          "required": false,
+          "description": "Priority level.",
+          "enum": ["low", "medium", "high"],
+          "inferrable": true
+        },
+        {
+          "name": "deal_description",
+          "type": "string",
+          "required": false,
+          "description": "The deal description",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": ["oauth", "crm.objects.deals.write"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Dictionary containing the created deal information"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.CreateDeal",
+        "parameters": {
+          "deal_name": {
+            "value": "New Website Development Project",
+            "type": "string",
+            "required": true
+          },
+          "deal_amount": {
+            "value": 15000,
+            "type": "integer",
+            "required": false
+          },
+          "deal_stage": {
+            "value": "initial_consultation",
+            "type": "string",
+            "required": false
+          },
+          "deal_type": {
+            "value": "service",
+            "type": "string",
+            "required": false
+          },
+          "expected_close_date": {
+            "value": "2023-12-01",
+            "type": "string",
+            "required": false
+          },
+          "pipeline_id": {
+            "value": "default",
+            "type": "string",
+            "required": false
+          },
+          "deal_owner": {
+            "value": "12345",
+            "type": "string",
+            "required": false
+          },
+          "priority_level": {
+            "value": "high",
+            "type": "string",
+            "required": false
+          },
+          "deal_description": {
+            "value": "This deal involves the development of a new website for the client.",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateEmailActivity",
+      "qualifiedName": "Hubspot.CreateEmailActivity",
+      "fullyQualifiedName": "Hubspot.CreateEmailActivity@3.0.0",
+      "description": "Create a logged email engagement activity with essential fields including email headers.\nMust be associated with at least one of: contact, company, or deal.\nThe email will be assigned to the current user.",
+      "parameters": [
+        {
+          "name": "subject",
+          "type": "string",
+          "required": true,
+          "description": "Email subject.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "when_occurred",
+          "type": "string",
+          "required": true,
+          "description": "When the email occurred (ISO date format: YYYY-MM-DDTHH:MM:SS).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "from_email",
+          "type": "string",
+          "required": true,
+          "description": "Sender email address.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "to_email",
+          "type": "string",
+          "required": true,
+          "description": "Primary recipient email address.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body_text",
+          "type": "string",
+          "required": false,
+          "description": "Email body in plain text.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body_html",
+          "type": "string",
+          "required": false,
+          "description": "Email body in HTML format.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "from_first_name",
+          "type": "string",
+          "required": false,
+          "description": "Sender first name.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "from_last_name",
+          "type": "string",
+          "required": false,
+          "description": "Sender last name.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "to_first_name",
+          "type": "string",
+          "required": false,
+          "description": "Primary recipient first name.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "to_last_name",
+          "type": "string",
+          "required": false,
+          "description": "Primary recipient last name.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cc_emails",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "CC recipient email addresses.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "bcc_emails",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "BCC recipient email addresses.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "direction",
+          "type": "string",
+          "required": false,
+          "description": "Direction the email was sent (EMAIL, INCOMING_EMAIL, FORWARDED_EMAIL).",
+          "enum": ["EMAIL", "INCOMING_EMAIL", "FORWARDED_EMAIL"],
+          "inferrable": true
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "description": "Email status indicating the state of the email.",
+          "enum": ["BOUNCED", "FAILED", "SCHEDULED", "SENDING", "SENT"],
+          "inferrable": true
+        },
+        {
+          "name": "associate_to_contact_id",
+          "type": "integer",
+          "required": false,
+          "description": "Contact ID to associate this email with.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "associate_to_company_id",
+          "type": "integer",
+          "required": false,
+          "description": "Company ID to associate this email with.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "associate_to_deal_id",
+          "type": "integer",
+          "required": false,
+          "description": "Deal ID to associate this email with.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": ["oauth", "crm.objects.contacts.write"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Details of the email engagement activity created."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.CreateEmailActivity",
+        "parameters": {
+          "subject": {
+            "value": "Quarterly Business Review",
+            "type": "string",
+            "required": true
+          },
+          "when_occurred": {
+            "value": "2023-10-01T14:30:00",
+            "type": "string",
+            "required": true
+          },
+          "from_email": {
+            "value": "sender@example.com",
+            "type": "string",
+            "required": true
+          },
+          "to_email": {
+            "value": "recipient@example.com",
+            "type": "string",
+            "required": true
+          },
+          "body_text": {
+            "value": "Dear Recipient,\n\nI hope this email finds you well. Looking forward to our meeting.\nBest,\nSender",
+            "type": "string",
+            "required": false
+          },
+          "body_html": {
+            "value": "<p>Dear Recipient,</p><p>I hope this email finds you well. Looking forward to our meeting.</p><p>Best,<br>Sender</p>",
+            "type": "string",
+            "required": false
+          },
+          "from_first_name": {
+            "value": "Sender",
+            "type": "string",
+            "required": false
+          },
+          "from_last_name": {
+            "value": "Name",
+            "type": "string",
+            "required": false
+          },
+          "to_first_name": {
+            "value": "Recipient",
+            "type": "string",
+            "required": false
+          },
+          "to_last_name": {
+            "value": "Name",
+            "type": "string",
+            "required": false
+          },
+          "cc_emails": {
+            "value": ["cc1@example.com", "cc2@example.com"],
+            "type": "array",
+            "required": false
+          },
+          "bcc_emails": {
+            "value": ["bcc1@example.com"],
+            "type": "array",
+            "required": false
+          },
+          "direction": {
+            "value": "EMAIL",
+            "type": "string",
+            "required": false
+          },
+          "status": {
+            "value": "SENT",
+            "type": "string",
+            "required": false
+          },
+          "associate_to_contact_id": {
+            "value": 12345,
+            "type": "integer",
+            "required": false
+          },
+          "associate_to_company_id": {
+            "value": 67890,
+            "type": "integer",
+            "required": false
+          },
+          "associate_to_deal_id": {
+            "value": 111213,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateMeetingActivity",
+      "qualifiedName": "Hubspot.CreateMeetingActivity",
+      "fullyQualifiedName": "Hubspot.CreateMeetingActivity@3.0.0",
+      "description": "Create a meeting with essential fields including separate date and time.\n\nThe start_date and start_time are combined to create the meeting timestamp.\nDuration can be specified in HH:MM format.\nMust be associated with at least one of: contact, company, or deal.\nThe meeting will be assigned to the current user.",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "Meeting title.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_date",
+          "type": "string",
+          "required": true,
+          "description": "Start date (YYYY-MM-DD format).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_time",
+          "type": "string",
+          "required": true,
+          "description": "Start time (HH:MM or HH:MM:SS format).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "duration",
+          "type": "string",
+          "required": false,
+          "description": "Meeting duration in HH:MM format (e.g., 1:30 for 1 hour 30 minutes).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "location",
+          "type": "string",
+          "required": false,
+          "description": "Meeting location.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "outcome",
+          "type": "string",
+          "required": false,
+          "description": "Meeting outcome.",
+          "enum": [
+            "SCHEDULED",
+            "COMPLETED",
+            "RESCHEDULED",
+            "NO_SHOW",
+            "CANCELED"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "associate_to_contact_id",
+          "type": "integer",
+          "required": false,
+          "description": "Contact ID to associate this meeting with.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "associate_to_company_id",
+          "type": "integer",
+          "required": false,
+          "description": "Company ID to associate this meeting with.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "associate_to_deal_id",
+          "type": "integer",
+          "required": false,
+          "description": "Deal ID to associate this meeting with.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": ["oauth", "crm.objects.contacts.write"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Details of the meeting engagement activity created."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.CreateMeetingActivity",
+        "parameters": {
+          "title": {
+            "value": "Project Kickoff",
+            "type": "string",
+            "required": true
+          },
+          "start_date": {
+            "value": "2023-10-15",
+            "type": "string",
+            "required": true
+          },
+          "start_time": {
+            "value": "14:00",
+            "type": "string",
+            "required": true
+          },
+          "duration": {
+            "value": "1:00",
+            "type": "string",
+            "required": false
+          },
+          "location": {
+            "value": "Conference Room A",
+            "type": "string",
+            "required": false
+          },
+          "outcome": {
+            "value": "Successful kickoff meeting",
+            "type": "string",
+            "required": false
+          },
+          "associate_to_contact_id": {
+            "value": 12345,
+            "type": "integer",
+            "required": false
+          },
+          "associate_to_company_id": {
+            "value": 67890,
+            "type": "integer",
+            "required": false
+          },
+          "associate_to_deal_id": {
+            "value": 54321,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateNoteActivity",
+      "qualifiedName": "Hubspot.CreateNoteActivity",
+      "fullyQualifiedName": "Hubspot.CreateNoteActivity@3.0.0",
+      "description": "Create a note engagement activity with required owner and associations.\nMust be associated with at least one of: contact, company, or deal.\nAssign to the current user if not specified otherwise.",
+      "parameters": [
+        {
+          "name": "body",
+          "type": "string",
+          "required": true,
+          "description": "The note content/body.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "when_occurred",
+          "type": "string",
+          "required": true,
+          "description": "When the note was created (ISO date format: YYYY-MM-DDTHH:MM:SS).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "associate_to_contact_id",
+          "type": "integer",
+          "required": false,
+          "description": "Contact ID to associate this note with.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "associate_to_company_id",
+          "type": "integer",
+          "required": false,
+          "description": "Company ID to associate this note with.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "associate_to_deal_id",
+          "type": "integer",
+          "required": false,
+          "description": "Deal ID to associate this note with.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": ["oauth", "crm.objects.contacts.write"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Details of the note engagement activity created."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.CreateNoteActivity",
+        "parameters": {
+          "body": {
+            "value": "This is a sample note about the recent meeting.",
+            "type": "string",
+            "required": true
+          },
+          "when_occurred": {
+            "value": "2023-10-10T14:30:00",
+            "type": "string",
+            "required": true
+          },
+          "associate_to_contact_id": {
+            "value": 12345,
+            "type": "integer",
+            "required": false
+          },
+          "associate_to_company_id": {
+            "value": 67890,
+            "type": "integer",
+            "required": false
+          },
+          "associate_to_deal_id": {
+            "value": 112233,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetAllUsers",
+      "qualifiedName": "Hubspot.GetAllUsers",
+      "fullyQualifiedName": "Hubspot.GetAllUsers@3.0.0",
+      "description": "Get all users/owners in the HubSpot portal.\n\nThis tool retrieves a list of all users (owners) in your HubSpot portal,\nUseful for user management and assignment operations.\n\nUse this tool when needing information about ALL users in the HubSpot portal.",
+      "parameters": [],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": ["oauth", "crm.objects.owners.read"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Get all users/owners in the HubSpot portal with their names, emails, IDs, and status."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.GetAllUsers",
+        "parameters": {},
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetAvailableIndustryTypes",
+      "qualifiedName": "Hubspot.GetAvailableIndustryTypes",
+      "fullyQualifiedName": "Hubspot.GetAvailableIndustryTypes@3.0.0",
+      "description": "Get all available industry types for HubSpot companies.\n\nReturns a sorted list of valid industry type values that can be used\nwhen creating companies.",
+      "parameters": [],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": ["oauth"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "array",
+        "description": "List of all available industry types for HubSpot companies."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.GetAvailableIndustryTypes",
+        "parameters": {},
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetCallDataByKeywords",
+      "qualifiedName": "Hubspot.GetCallDataByKeywords",
+      "fullyQualifiedName": "Hubspot.GetCallDataByKeywords@3.0.0",
+      "description": "Search for call activities with associated contacts, companies, and deals.",
+      "parameters": [
+        {
+          "name": "search_terms",
+          "type": "string",
+          "required": true,
+          "description": "Search phrase or terms to find in CALL properties.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of calls to return. Defaults to 10. Max is 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "associations_limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of each associated object type to return. Defaults to 10.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "truncate_big_strings",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to truncate string properties longer than 100 characters. Defaults to False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "next_page_token",
+          "type": "string",
+          "required": false,
+          "description": "The token to get the next page of results. Defaults to None (returns first page of results)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "oauth",
+          "crm.objects.contacts.read",
+          "crm.objects.companies.read",
+          "crm.objects.deals.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Retrieve call activity data with associated contacts, companies, and deals."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.GetCallDataByKeywords",
+        "parameters": {
+          "search_terms": {
+            "value": "customer support issues",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 20,
+            "type": "integer",
+            "required": false
+          },
+          "associations_limit": {
+            "value": 5,
+            "type": "integer",
+            "required": false
+          },
+          "truncate_big_strings": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "next_page_token": {
+            "value": "abc123",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetCommunicationDataByKeywords",
+      "qualifiedName": "Hubspot.GetCommunicationDataByKeywords",
+      "fullyQualifiedName": "Hubspot.GetCommunicationDataByKeywords@3.0.0",
+      "description": "Search for communication activities with associated contacts, companies, and deals.",
+      "parameters": [
+        {
+          "name": "search_terms",
+          "type": "string",
+          "required": true,
+          "description": "Search phrase or terms to find in COMMUNICATION properties.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of communications to return. Defaults to 10. Max is 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "associations_limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of each associated object type to return. Defaults to 10.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "truncate_big_strings",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to truncate string properties longer than 100 characters. Defaults to False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "next_page_token",
+          "type": "string",
+          "required": false,
+          "description": "The token to get the next page of results. Defaults to None (returns first page of results)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "oauth",
+          "crm.objects.contacts.read",
+          "crm.objects.companies.read",
+          "crm.objects.deals.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Retrieve communication activity data with associated contacts, companies, and deals."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.GetCommunicationDataByKeywords",
+        "parameters": {
+          "search_terms": {
+            "value": "customer feedback",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 20,
+            "type": "integer",
+            "required": false
+          },
+          "associations_limit": {
+            "value": 5,
+            "type": "integer",
+            "required": false
+          },
+          "truncate_big_strings": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "next_page_token": {
+            "value": null,
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetCompanyDataByKeywords",
+      "qualifiedName": "Hubspot.GetCompanyDataByKeywords",
+      "fullyQualifiedName": "Hubspot.GetCompanyDataByKeywords@3.0.0",
+      "description": "Retrieve company data with associated contacts, deals, calls, emails,\nmeetings, notes, and tasks.",
+      "parameters": [
+        {
+          "name": "keywords",
+          "type": "string",
+          "required": true,
+          "description": "The keywords to search for companies. It will match against the company name, phone, and website.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of companies to return. Defaults to 10. Max is 10.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "associations_limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of each associated object type to return. Defaults to 10.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "next_page_token",
+          "type": "string",
+          "required": false,
+          "description": "The token to get the next page of results. Defaults to None (returns first page of results)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "oauth",
+          "crm.objects.companies.read",
+          "crm.objects.contacts.read",
+          "crm.objects.deals.read",
+          "sales-email-read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Retrieve company data with associated contacts, deals, calls, emails, meetings, notes, and tasks."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.GetCompanyDataByKeywords",
+        "parameters": {
+          "keywords": {
+            "value": "tech startups",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 5,
+            "type": "integer",
+            "required": false
+          },
+          "associations_limit": {
+            "value": 8,
+            "type": "integer",
+            "required": false
+          },
+          "next_page_token": {
+            "value": null,
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetContactDataByKeywords",
+      "qualifiedName": "Hubspot.GetContactDataByKeywords",
+      "fullyQualifiedName": "Hubspot.GetContactDataByKeywords@3.0.0",
+      "description": "Retrieve contact data with associated companies, deals, calls, emails,\nmeetings, notes, and tasks.",
+      "parameters": [
+        {
+          "name": "keywords",
+          "type": "string",
+          "required": true,
+          "description": "The keywords to search for contacts. It will match against the contact's first and last name, email addresses, phone numbers, and company name.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of contacts to return. Defaults to 10. Max is 100.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "associations_limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of each associated object type to return. Defaults to 10.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "next_page_token",
+          "type": "string",
+          "required": false,
+          "description": "The token to get the next page of results. Defaults to None (returns first page of results)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "oauth",
+          "crm.objects.contacts.read",
+          "crm.objects.companies.read",
+          "crm.objects.deals.read",
+          "sales-email-read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Retrieve contact data with associated companies, deals, calls, emails, meetings, notes, and tasks."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.GetContactDataByKeywords",
+        "parameters": {
+          "keywords": {
+            "value": "John Doe",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "associations_limit": {
+            "value": 5,
+            "type": "integer",
+            "required": false
+          },
+          "next_page_token": {
+            "value": null,
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetDealById",
+      "qualifiedName": "Hubspot.GetDealById",
+      "fullyQualifiedName": "Hubspot.GetDealById@3.0.0",
+      "description": "Retrieve a specific deal by its ID with associated contacts, companies, calls, emails,\nmeetings, notes, and tasks.",
+      "parameters": [
+        {
+          "name": "deal_id",
+          "type": "integer",
+          "required": true,
+          "description": "The ID of the deal to retrieve",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "associations_limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of each associated object type to return. Defaults to 10.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "oauth",
+          "crm.objects.deals.read",
+          "crm.objects.contacts.read",
+          "crm.objects.companies.read",
+          "sales-email-read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Deal information with associated entities"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.GetDealById",
+        "parameters": {
+          "deal_id": {
+            "value": 123456,
+            "type": "integer",
+            "required": true
+          },
+          "associations_limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetDealDataByKeywords",
+      "qualifiedName": "Hubspot.GetDealDataByKeywords",
+      "fullyQualifiedName": "Hubspot.GetDealDataByKeywords@3.0.0",
+      "description": "Retrieve deal data with associated contacts, companies, calls, emails,\nmeetings, notes, and tasks.",
+      "parameters": [
+        {
+          "name": "keywords",
+          "type": "string",
+          "required": true,
+          "description": "The keywords to search for deals. It will match against the deal name and description.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of deals to return. Defaults to 10. Max is 10.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "associations_limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of each associated object type to return. Defaults to 10.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "next_page_token",
+          "type": "string",
+          "required": false,
+          "description": "The token to get the next page of results. Defaults to None (returns first page of results)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "oauth",
+          "crm.objects.deals.read",
+          "crm.objects.contacts.read",
+          "crm.objects.companies.read",
+          "sales-email-read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Retrieve deal data with associated contacts, companies, calls, emails, meetings, notes, and tasks."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.GetDealDataByKeywords",
+        "parameters": {
+          "keywords": {
+            "value": "Q3 2023 Revenue",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "associations_limit": {
+            "value": 5,
+            "type": "integer",
+            "required": false
+          },
+          "next_page_token": {
+            "value": null,
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetDealPipelines",
+      "qualifiedName": "Hubspot.GetDealPipelines",
+      "fullyQualifiedName": "Hubspot.GetDealPipelines@3.0.0",
+      "description": "List HubSpot deal pipelines with their stages, optionally filtered by a search string.\n\nRecommended to be used before creating a new deal.\n\nFor example updating the stage of a deal without changing the pipeline.",
+      "parameters": [
+        {
+          "name": "search",
+          "type": "string",
+          "required": false,
+          "description": "Optional case-insensitive search string to filter pipelines by id or label",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": ["oauth", "crm.objects.deals.read"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "List up to 30 deal pipelines with their stages"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.GetDealPipelines",
+        "parameters": {
+          "search": {
+            "value": "Sales",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetDealPipelineStages",
+      "qualifiedName": "Hubspot.GetDealPipelineStages",
+      "fullyQualifiedName": "Hubspot.GetDealPipelineStages@3.0.0",
+      "description": "List stages for a specific HubSpot deal pipeline.\n\nUseful to get the stage IDs for a specific pipeline.",
+      "parameters": [
+        {
+          "name": "pipeline_id",
+          "type": "string",
+          "required": true,
+          "description": "The pipeline id (e.g., 'default' or a pipeline GUID)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": ["oauth", "crm.objects.deals.read"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "List stages for a specific deal pipeline"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.GetDealPipelineStages",
+        "parameters": {
+          "pipeline_id": {
+            "value": "default",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetEmailDataByKeywords",
+      "qualifiedName": "Hubspot.GetEmailDataByKeywords",
+      "fullyQualifiedName": "Hubspot.GetEmailDataByKeywords@3.0.0",
+      "description": "Search for email activities with associated contacts, companies, and deals.",
+      "parameters": [
+        {
+          "name": "search_terms",
+          "type": "string",
+          "required": true,
+          "description": "Search phrase or terms to find in EMAIL properties.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of emails to return. Defaults to 10. Max is 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "associations_limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of each associated object type to return. Defaults to 10.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "truncate_big_strings",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to truncate string properties longer than 100 characters. Defaults to False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "next_page_token",
+          "type": "string",
+          "required": false,
+          "description": "The token to get the next page of results. Defaults to None (returns first page of results)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "oauth",
+          "crm.objects.contacts.read",
+          "crm.objects.companies.read",
+          "crm.objects.deals.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Retrieve email activity data with associated contacts, companies, and deals."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.GetEmailDataByKeywords",
+        "parameters": {
+          "search_terms": {
+            "value": "Meeting Follow-Up",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 20,
+            "type": "integer",
+            "required": false
+          },
+          "associations_limit": {
+            "value": 5,
+            "type": "integer",
+            "required": false
+          },
+          "truncate_big_strings": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "next_page_token": {
+            "value": null,
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetMeetingDataByKeywords",
+      "qualifiedName": "Hubspot.GetMeetingDataByKeywords",
+      "fullyQualifiedName": "Hubspot.GetMeetingDataByKeywords@3.0.0",
+      "description": "Search for meeting activities with associated contacts, companies, and deals.",
+      "parameters": [
+        {
+          "name": "search_terms",
+          "type": "string",
+          "required": true,
+          "description": "Search phrase or terms to find in MEETING properties.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of meetings to return. Defaults to 10. Max is 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "associations_limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of each associated object type to return. Defaults to 10.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "truncate_big_strings",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to truncate string properties longer than 100 characters. Defaults to False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "next_page_token",
+          "type": "string",
+          "required": false,
+          "description": "The token to get the next page of results. Defaults to None (returns first page of results)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "oauth",
+          "crm.objects.contacts.read",
+          "crm.objects.companies.read",
+          "crm.objects.deals.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Retrieve meeting activity data with associated contacts, companies, and deals."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.GetMeetingDataByKeywords",
+        "parameters": {
+          "search_terms": {
+            "value": "quarterly review",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 20,
+            "type": "integer",
+            "required": false
+          },
+          "associations_limit": {
+            "value": 5,
+            "type": "integer",
+            "required": false
+          },
+          "truncate_big_strings": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "next_page_token": {
+            "value": "abc123token",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetNoteDataByKeywords",
+      "qualifiedName": "Hubspot.GetNoteDataByKeywords",
+      "fullyQualifiedName": "Hubspot.GetNoteDataByKeywords@3.0.0",
+      "description": "Search for note activities with associated contacts, companies, and deals.",
+      "parameters": [
+        {
+          "name": "search_terms",
+          "type": "string",
+          "required": true,
+          "description": "Search phrase or terms to find in NOTE properties.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of notes to return. Defaults to 10. Max is 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "associations_limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of each associated object type to return. Defaults to 10.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "truncate_big_strings",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to truncate string properties longer than 100 characters. Defaults to False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "next_page_token",
+          "type": "string",
+          "required": false,
+          "description": "The token to get the next page of results. Defaults to None (returns first page of results)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "oauth",
+          "crm.objects.contacts.read",
+          "crm.objects.companies.read",
+          "crm.objects.deals.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Retrieve note activity data with associated contacts, companies, and deals."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.GetNoteDataByKeywords",
+        "parameters": {
+          "search_terms": {
+            "value": "meeting notes",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 20,
+            "type": "integer",
+            "required": false
+          },
+          "associations_limit": {
+            "value": 5,
+            "type": "integer",
+            "required": false
+          },
+          "truncate_big_strings": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "next_page_token": {
+            "value": null,
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetTaskDataByKeywords",
+      "qualifiedName": "Hubspot.GetTaskDataByKeywords",
+      "fullyQualifiedName": "Hubspot.GetTaskDataByKeywords@3.0.0",
+      "description": "Search for task activities with associated contacts, companies, and deals.",
+      "parameters": [
+        {
+          "name": "search_terms",
+          "type": "string",
+          "required": true,
+          "description": "Search phrase or terms to find in TASK properties.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of tasks to return. Defaults to 10. Max is 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "associations_limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of each associated object type to return. Defaults to 10.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "truncate_big_strings",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to truncate string properties longer than 100 characters. Defaults to False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "next_page_token",
+          "type": "string",
+          "required": false,
+          "description": "The token to get the next page of results. Defaults to None (returns first page of results)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "oauth",
+          "crm.objects.contacts.read",
+          "crm.objects.companies.read",
+          "crm.objects.deals.read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Retrieve task activity data with associated contacts, companies, and deals."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.GetTaskDataByKeywords",
+        "parameters": {
+          "search_terms": {
+            "value": "meeting",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 20,
+            "type": "integer",
+            "required": false
+          },
+          "associations_limit": {
+            "value": 5,
+            "type": "integer",
+            "required": false
+          },
+          "truncate_big_strings": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "next_page_token": {
+            "value": null,
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetUserById",
+      "qualifiedName": "Hubspot.GetUserById",
+      "fullyQualifiedName": "Hubspot.GetUserById@3.0.0",
+      "description": "Get detailed information about a specific user/owner by their ID.\n\nThis tool retrieves comprehensive information about a specific user\nin your HubSpot portal using their owner ID.",
+      "parameters": [
+        {
+          "name": "owner_id",
+          "type": "integer",
+          "required": true,
+          "description": "The HubSpot owner/user ID to retrieve",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": ["oauth", "crm.objects.owners.read"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Get detailed information about a specific user/owner by their ID."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.GetUserById",
+        "parameters": {
+          "owner_id": {
+            "value": 123456,
+            "type": "integer",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListCompanies",
+      "qualifiedName": "Hubspot.ListCompanies",
+      "fullyQualifiedName": "Hubspot.ListCompanies@3.0.0",
+      "description": "List companies with associated contacts, deals, calls, emails, meetings, notes, and tasks.",
+      "parameters": [
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of companies to return. Defaults to 10. Max is 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "associations_limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of each associated object type to return. Defaults to 10.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sort_order",
+          "type": "string",
+          "required": false,
+          "description": "Sort order for results. Defaults to LATEST_MODIFIED.",
+          "enum": ["LATEST_MODIFIED", "OLDEST_MODIFIED", "ALPHABETICAL"],
+          "inferrable": true
+        },
+        {
+          "name": "next_page_token",
+          "type": "string",
+          "required": false,
+          "description": "The token to get the next page of results. Defaults to None (returns first page of results)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "oauth",
+          "crm.objects.companies.read",
+          "crm.objects.contacts.read",
+          "crm.objects.deals.read",
+          "sales-email-read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "List companies with associated contacts, deals, calls, emails, meetings, notes, and tasks."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.ListCompanies",
+        "parameters": {
+          "limit": {
+            "value": 20,
+            "type": "integer",
+            "required": false
+          },
+          "associations_limit": {
+            "value": 5,
+            "type": "integer",
+            "required": false
+          },
+          "sort_order": {
+            "value": "ASCENDING",
+            "type": "string",
+            "required": false
+          },
+          "next_page_token": {
+            "value": "abc123token",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListContacts",
+      "qualifiedName": "Hubspot.ListContacts",
+      "fullyQualifiedName": "Hubspot.ListContacts@3.0.0",
+      "description": "List contacts with associated companies, deals, calls, emails, meetings, notes, and tasks.",
+      "parameters": [
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of contacts to return. Defaults to 10. Max is 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "associations_limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of each associated object type to return. Defaults to 10.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "company_id",
+          "type": "integer",
+          "required": false,
+          "description": "Filter contacts by company ID. Defaults to None (no filtering).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "deal_id",
+          "type": "integer",
+          "required": false,
+          "description": "Filter contacts by deal ID. Defaults to None (no filtering).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sort_order",
+          "type": "string",
+          "required": false,
+          "description": "Sort order for results. Defaults to LATEST_MODIFIED.",
+          "enum": ["LATEST_MODIFIED", "OLDEST_MODIFIED", "ALPHABETICAL"],
+          "inferrable": true
+        },
+        {
+          "name": "next_page_token",
+          "type": "string",
+          "required": false,
+          "description": "The token to get the next page of results. Defaults to None (returns first page of results)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "oauth",
+          "crm.objects.contacts.read",
+          "crm.objects.companies.read",
+          "crm.objects.deals.read",
+          "sales-email-read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "List contacts with associated companies, deals, calls, emails, meetings, notes, and tasks."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.ListContacts",
+        "parameters": {
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "associations_limit": {
+            "value": 15,
+            "type": "integer",
+            "required": false
+          },
+          "company_id": {
+            "value": 12345,
+            "type": "integer",
+            "required": false
+          },
+          "deal_id": {
+            "value": 67890,
+            "type": "integer",
+            "required": false
+          },
+          "sort_order": {
+            "value": "OLDEST_MODIFIED",
+            "type": "string",
+            "required": false
+          },
+          "next_page_token": {
+            "value": "abc123token",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListDeals",
+      "qualifiedName": "Hubspot.ListDeals",
+      "fullyQualifiedName": "Hubspot.ListDeals@3.0.0",
+      "description": "List deals with associated contacts, companies, calls, emails, meetings, notes, and tasks.",
+      "parameters": [
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of deals to return. Defaults to 10. Max is 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "associations_limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of each associated object type to return. Defaults to 10.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "contact_id",
+          "type": "integer",
+          "required": false,
+          "description": "Filter deals by contact ID. Defaults to None (no filtering).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "company_id",
+          "type": "integer",
+          "required": false,
+          "description": "Filter deals by company ID. Defaults to None (no filtering).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sort_order",
+          "type": "string",
+          "required": false,
+          "description": "Sort order for results. Defaults to LATEST_MODIFIED.",
+          "enum": ["LATEST_MODIFIED", "OLDEST_MODIFIED", "ALPHABETICAL"],
+          "inferrable": true
+        },
+        {
+          "name": "next_page_token",
+          "type": "string",
+          "required": false,
+          "description": "The token to get the next page of results. Defaults to None (returns first page of results)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "oauth",
+          "crm.objects.deals.read",
+          "crm.objects.contacts.read",
+          "crm.objects.companies.read",
+          "sales-email-read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "List deals with associated contacts, companies, calls, emails, meetings, notes, and tasks."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.ListDeals",
+        "parameters": {
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "associations_limit": {
+            "value": 5,
+            "type": "integer",
+            "required": false
+          },
+          "contact_id": {
+            "value": 12345,
+            "type": "integer",
+            "required": false
+          },
+          "company_id": {
+            "value": 67890,
+            "type": "integer",
+            "required": false
+          },
+          "sort_order": {
+            "value": "OLDEST_MODIFIED",
+            "type": "string",
+            "required": false
+          },
+          "next_page_token": {
+            "value": "abc123xyz",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ToolkitEnviromentGuidance",
+      "qualifiedName": "Hubspot.ToolkitEnviromentGuidance",
+      "fullyQualifiedName": "Hubspot.ToolkitEnviromentGuidance@3.0.0",
+      "description": "Get guidance and considerations for using the HubSpot toolkit effectively.\n\nThis tool provides important context and best practices for working with HubSpot tools.\nBased on all available HubSpot toolkit tools, some suggestions may apply to tools that are not\navailable in the current agent's configuration.",
+      "parameters": [],
+      "auth": null,
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "List of guidance."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.ToolkitEnviromentGuidance",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "UpdateCallActivity",
+      "qualifiedName": "Hubspot.UpdateCallActivity",
+      "fullyQualifiedName": "Hubspot.UpdateCallActivity@3.0.0",
+      "description": "Update a call activity directly by ID or surface matches when searching by keywords.",
+      "parameters": [
+        {
+          "name": "call_id",
+          "type": "integer",
+          "required": false,
+          "description": "The call activity ID to update.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "keywords",
+          "type": "string",
+          "required": false,
+          "description": "Keywords to search for call summaries or titles. Provide when call_id is not known.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Updated call title.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "direction",
+          "type": "string",
+          "required": false,
+          "description": "Updated call direction.",
+          "enum": ["INBOUND", "OUTBOUND"],
+          "inferrable": true
+        },
+        {
+          "name": "summary",
+          "type": "string",
+          "required": false,
+          "description": "Updated call summary.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "duration",
+          "type": "integer",
+          "required": false,
+          "description": "Updated call duration in seconds.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "to_number",
+          "type": "string",
+          "required": false,
+          "description": "Updated number called to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "from_number",
+          "type": "string",
+          "required": false,
+          "description": "Updated number called from.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "when_occurred",
+          "type": "string",
+          "required": false,
+          "description": "Updated call timestamp (ISO format: YYYY-MM-DDTHH:MM:SS).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "matches_limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of calls to return when searching by keywords. Defaults to 5. Max is 20.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "oauth",
+          "crm.objects.contacts.read",
+          "crm.objects.contacts.write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Update a call by ID or list matching calls when searching by keywords."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.UpdateCallActivity",
+        "parameters": {
+          "call_id": {
+            "value": 12345,
+            "type": "integer",
+            "required": false
+          },
+          "keywords": {
+            "value": "client follow-up",
+            "type": "string",
+            "required": false
+          },
+          "title": {
+            "value": "Follow-up with Client A",
+            "type": "string",
+            "required": false
+          },
+          "direction": {
+            "value": "outgoing",
+            "type": "string",
+            "required": false
+          },
+          "summary": {
+            "value": "Discussed project updates and next steps.",
+            "type": "string",
+            "required": false
+          },
+          "duration": {
+            "value": 300,
+            "type": "integer",
+            "required": false
+          },
+          "to_number": {
+            "value": "+1234567890",
+            "type": "string",
+            "required": false
+          },
+          "from_number": {
+            "value": "+0987654321",
+            "type": "string",
+            "required": false
+          },
+          "when_occurred": {
+            "value": "2023-10-01T14:30:00",
+            "type": "string",
+            "required": false
+          },
+          "matches_limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "UpdateCommunicationActivity",
+      "qualifiedName": "Hubspot.UpdateCommunicationActivity",
+      "fullyQualifiedName": "Hubspot.UpdateCommunicationActivity@3.0.0",
+      "description": "Update a communication activity by ID or return matches for keyword searches.",
+      "parameters": [
+        {
+          "name": "communication_id",
+          "type": "integer",
+          "required": false,
+          "description": "The communication activity ID to update.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "keywords",
+          "type": "string",
+          "required": false,
+          "description": "Keywords to search for communication body text. Provide when communication_id is not known.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "channel",
+          "type": "string",
+          "required": false,
+          "description": "Updated communication channel.",
+          "enum": [
+            "SMS",
+            "WHATS_APP",
+            "LINKEDIN_MESSAGE",
+            "PHYSICAL_MAIL",
+            "CUSTOM_CHANNEL_CONVERSATION"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "body_text",
+          "type": "string",
+          "required": false,
+          "description": "Updated message body.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "when_occurred",
+          "type": "string",
+          "required": false,
+          "description": "Updated timestamp (ISO format: YYYY-MM-DDTHH:MM:SS).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "matches_limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of communications to return when searching by keywords. Defaults to 5. Max is 20.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "oauth",
+          "crm.objects.contacts.read",
+          "crm.objects.contacts.write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Update a communication activity by ID or list matching communications when searching by keywords."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.UpdateCommunicationActivity",
+        "parameters": {
+          "communication_id": {
+            "value": 12345,
+            "type": "integer",
+            "required": false
+          },
+          "keywords": {
+            "value": "meeting follow-up",
+            "type": "string",
+            "required": false
+          },
+          "channel": {
+            "value": "email",
+            "type": "string",
+            "required": false
+          },
+          "body_text": {
+            "value": "Looking forward to our next steps after the meeting.",
+            "type": "string",
+            "required": false
+          },
+          "when_occurred": {
+            "value": "2023-10-05T14:30:00",
+            "type": "string",
+            "required": false
+          },
+          "matches_limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "UpdateCompany",
+      "qualifiedName": "Hubspot.UpdateCompany",
+      "fullyQualifiedName": "Hubspot.UpdateCompany@3.0.0",
+      "description": "Update a company directly by ID or surface matches when searching by keywords.",
+      "parameters": [
+        {
+          "name": "company_id",
+          "type": "integer",
+          "required": false,
+          "description": "The ID of the company to update.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "keywords",
+          "type": "string",
+          "required": false,
+          "description": "Keywords to search for the company (name, domain, website). Provide when company_id is not known.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "company_name",
+          "type": "string",
+          "required": false,
+          "description": "The company name.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "web_domain",
+          "type": "string",
+          "required": false,
+          "description": "The company web domain (e.g., example.com).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "industry_type",
+          "type": "string",
+          "required": false,
+          "description": "The company industry type (case-insensitive).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "company_city",
+          "type": "string",
+          "required": false,
+          "description": "The company city location.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "company_state",
+          "type": "string",
+          "required": false,
+          "description": "The company state or province.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "company_country",
+          "type": "string",
+          "required": false,
+          "description": "The company country.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "phone_number",
+          "type": "string",
+          "required": false,
+          "description": "The company main phone number.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "website_url",
+          "type": "string",
+          "required": false,
+          "description": "The company website URL.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "matches_limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of companies to return when searching by keywords. Defaults to 5. Max is 20.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "oauth",
+          "crm.objects.companies.read",
+          "crm.objects.companies.write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Update a company by ID or list matching companies when searching by keywords."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.UpdateCompany",
+        "parameters": {
+          "company_id": {
+            "value": 12345,
+            "type": "integer",
+            "required": false
+          },
+          "keywords": {
+            "value": "Tech Innovations",
+            "type": "string",
+            "required": false
+          },
+          "company_name": {
+            "value": "Tech Innovations LLC",
+            "type": "string",
+            "required": false
+          },
+          "web_domain": {
+            "value": "techinnovations.com",
+            "type": "string",
+            "required": false
+          },
+          "industry_type": {
+            "value": "Technology",
+            "type": "string",
+            "required": false
+          },
+          "company_city": {
+            "value": "San Francisco",
+            "type": "string",
+            "required": false
+          },
+          "company_state": {
+            "value": "CA",
+            "type": "string",
+            "required": false
+          },
+          "company_country": {
+            "value": "USA",
+            "type": "string",
+            "required": false
+          },
+          "phone_number": {
+            "value": "+14155552671",
+            "type": "string",
+            "required": false
+          },
+          "website_url": {
+            "value": "http://www.techinnovations.com",
+            "type": "string",
+            "required": false
+          },
+          "matches_limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "UpdateContact",
+      "qualifiedName": "Hubspot.UpdateContact",
+      "fullyQualifiedName": "Hubspot.UpdateContact@3.0.0",
+      "description": "Update a contact directly by ID or list possible matches when searching by keywords.",
+      "parameters": [
+        {
+          "name": "contact_id",
+          "type": "integer",
+          "required": false,
+          "description": "The ID of the contact to update.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "keywords",
+          "type": "string",
+          "required": false,
+          "description": "Keywords to search for the contact (name, email, phone). Provide when contact_id is not known.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "first_name",
+          "type": "string",
+          "required": false,
+          "description": "The first name of the contact.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "last_name",
+          "type": "string",
+          "required": false,
+          "description": "The last name of the contact.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "required": false,
+          "description": "The email address of the contact.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "phone",
+          "type": "string",
+          "required": false,
+          "description": "The phone number of the contact.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "mobile_phone",
+          "type": "string",
+          "required": false,
+          "description": "The mobile phone number of the contact.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "job_title",
+          "type": "string",
+          "required": false,
+          "description": "The job title of the contact.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "matches_limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of contacts to return when searching by keywords. Defaults to 5. Max is 20.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "oauth",
+          "crm.objects.contacts.read",
+          "crm.objects.contacts.write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Update a contact by ID or list matching contacts when searching by keywords."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.UpdateContact",
+        "parameters": {
+          "contact_id": {
+            "value": 12345,
+            "type": "integer",
+            "required": false
+          },
+          "keywords": {
+            "value": "John Doe",
+            "type": "string",
+            "required": false
+          },
+          "first_name": {
+            "value": "John",
+            "type": "string",
+            "required": false
+          },
+          "last_name": {
+            "value": "Doe",
+            "type": "string",
+            "required": false
+          },
+          "email": {
+            "value": "john.doe@example.com",
+            "type": "string",
+            "required": false
+          },
+          "phone": {
+            "value": "+1234567890",
+            "type": "string",
+            "required": false
+          },
+          "mobile_phone": {
+            "value": "+0987654321",
+            "type": "string",
+            "required": false
+          },
+          "job_title": {
+            "value": "Software Engineer",
+            "type": "string",
+            "required": false
+          },
+          "matches_limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "UpdateDeal",
+      "qualifiedName": "Hubspot.UpdateDeal",
+      "fullyQualifiedName": "Hubspot.UpdateDeal@3.0.0",
+      "description": "Update a deal directly by ID or surface matches when searching by keywords.",
+      "parameters": [
+        {
+          "name": "deal_id",
+          "type": "integer",
+          "required": false,
+          "description": "The ID of the deal to update.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "keywords",
+          "type": "string",
+          "required": false,
+          "description": "Keywords to search for the deal (name, description). Provide when deal_id is not known.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "deal_name",
+          "type": "string",
+          "required": false,
+          "description": "The deal name.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "deal_amount",
+          "type": "number",
+          "required": false,
+          "description": "The deal amount/value.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "deal_stage",
+          "type": "string",
+          "required": false,
+          "description": "The deal stage ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "deal_type",
+          "type": "string",
+          "required": false,
+          "description": "The deal type. Accepts enum values as strings (e.g., 'newbusiness', 'existingbusiness').",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "expected_close_date",
+          "type": "string",
+          "required": false,
+          "description": "Expected close date in YYYY-MM-DD format.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "deal_owner",
+          "type": "string",
+          "required": false,
+          "description": "The deal owner user ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "priority_level",
+          "type": "string",
+          "required": false,
+          "description": "Priority level. Accepts enum values as strings (e.g., 'low', 'medium', 'high').",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "deal_description",
+          "type": "string",
+          "required": false,
+          "description": "The deal description.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "matches_limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of deals to return when searching by keywords. Defaults to 5. Max is 20.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": ["oauth", "crm.objects.deals.read", "crm.objects.deals.write"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Update a deal by ID or list matching deals when searching by keywords."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.UpdateDeal",
+        "parameters": {
+          "deal_id": {
+            "value": 12345,
+            "type": "integer",
+            "required": false
+          },
+          "keywords": {
+            "value": "Project Upgrade",
+            "type": "string",
+            "required": false
+          },
+          "deal_name": {
+            "value": "Project Alpha",
+            "type": "string",
+            "required": false
+          },
+          "deal_amount": {
+            "value": 15000.75,
+            "type": "integer",
+            "required": false
+          },
+          "deal_stage": {
+            "value": "negotiation",
+            "type": "string",
+            "required": false
+          },
+          "deal_type": {
+            "value": "newbusiness",
+            "type": "string",
+            "required": false
+          },
+          "expected_close_date": {
+            "value": "2023-12-31",
+            "type": "string",
+            "required": false
+          },
+          "deal_owner": {
+            "value": "user-6789",
+            "type": "string",
+            "required": false
+          },
+          "priority_level": {
+            "value": "high",
+            "type": "string",
+            "required": false
+          },
+          "deal_description": {
+            "value": "This deal involves upgrading the project scope and deliverables.",
+            "type": "string",
+            "required": false
+          },
+          "matches_limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "UpdateDealCloseDate",
+      "qualifiedName": "Hubspot.UpdateDealCloseDate",
+      "fullyQualifiedName": "Hubspot.UpdateDealCloseDate@3.0.0",
+      "description": "Update the expected close date of an existing deal with associated contacts, companies,\ncalls, emails, meetings, notes, and tasks.",
+      "parameters": [
+        {
+          "name": "deal_id",
+          "type": "integer",
+          "required": true,
+          "description": "The ID of the deal to update",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "expected_close_date",
+          "type": "string",
+          "required": true,
+          "description": "New expected close date in YYYY-MM-DD format",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "associations_limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of each associated object type to return. Defaults to 10.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "oauth",
+          "crm.objects.deals.write",
+          "crm.objects.deals.read",
+          "crm.objects.contacts.read",
+          "crm.objects.companies.read",
+          "sales-email-read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Updated deal information with associated entities"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.UpdateDealCloseDate",
+        "parameters": {
+          "deal_id": {
+            "value": 12345,
+            "type": "integer",
+            "required": true
+          },
+          "expected_close_date": {
+            "value": "2023-12-31",
+            "type": "string",
+            "required": true
+          },
+          "associations_limit": {
+            "value": 5,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "UpdateDealStage",
+      "qualifiedName": "Hubspot.UpdateDealStage",
+      "fullyQualifiedName": "Hubspot.UpdateDealStage@3.0.0",
+      "description": "Updates a deal's stage with associated contacts, companies, calls, emails,\nmeetings, notes, and tasks.\n\nSend current_pipeline_id to skip fetching the deal.\nIf pipeline changes are allowed, updates the stage and HubSpot\nmay move the deal to another pipeline.\n\nIt is recommended have already pipeline data available when\nplanning to call this tool.",
+      "parameters": [
+        {
+          "name": "deal_id",
+          "type": "integer",
+          "required": true,
+          "description": "The ID of the deal to update",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "deal_stage",
+          "type": "string",
+          "required": true,
+          "description": "New deal stage ID",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "associations_limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of each associated object type to return. Defaults to 10.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "current_pipeline_id",
+          "type": "string",
+          "required": false,
+          "description": "Current pipeline id for this deal, if already known (skips fetching the deal)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "allow_pipeline_change",
+          "type": "boolean",
+          "required": false,
+          "description": "If true, allows changing the deal's pipeline when the stage belongs to another pipeline",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "oauth",
+          "crm.objects.deals.write",
+          "crm.objects.deals.read",
+          "crm.objects.contacts.read",
+          "crm.objects.companies.read",
+          "sales-email-read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Updated deal information with associated entities"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.UpdateDealStage",
+        "parameters": {
+          "deal_id": {
+            "value": 12345,
+            "type": "integer",
+            "required": true
+          },
+          "deal_stage": {
+            "value": "qualified_to_buy",
+            "type": "string",
+            "required": true
+          },
+          "associations_limit": {
+            "value": 5,
+            "type": "integer",
+            "required": false
+          },
+          "current_pipeline_id": {
+            "value": "pipeline_67890",
+            "type": "string",
+            "required": false
+          },
+          "allow_pipeline_change": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "UpdateEmailActivity",
+      "qualifiedName": "Hubspot.UpdateEmailActivity",
+      "fullyQualifiedName": "Hubspot.UpdateEmailActivity@3.0.0",
+      "description": "Update an email activity directly by ID or surface matches when searching by keywords.",
+      "parameters": [
+        {
+          "name": "email_id",
+          "type": "integer",
+          "required": false,
+          "description": "The email activity ID to update.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "keywords",
+          "type": "string",
+          "required": false,
+          "description": "Keywords to search for email subjects or body text. Provide when email_id is not known.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "subject",
+          "type": "string",
+          "required": false,
+          "description": "Updated email subject.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "direction",
+          "type": "string",
+          "required": false,
+          "description": "Updated email direction.",
+          "enum": ["EMAIL", "INCOMING_EMAIL", "FORWARDED_EMAIL"],
+          "inferrable": true
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "description": "Updated email status.",
+          "enum": ["BOUNCED", "FAILED", "SCHEDULED", "SENDING", "SENT"],
+          "inferrable": true
+        },
+        {
+          "name": "body_text",
+          "type": "string",
+          "required": false,
+          "description": "Updated plain-text body.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body_html",
+          "type": "string",
+          "required": false,
+          "description": "Updated HTML body.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "when_occurred",
+          "type": "string",
+          "required": false,
+          "description": "Updated email timestamp (ISO format: YYYY-MM-DDTHH:MM:SS).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "matches_limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of emails to return when searching by keywords. Defaults to 5. Max is 20.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "oauth",
+          "crm.objects.contacts.read",
+          "crm.objects.contacts.write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Update an email activity by ID or list matching emails when searching by keywords."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.UpdateEmailActivity",
+        "parameters": {
+          "email_id": {
+            "value": 12345,
+            "type": "integer",
+            "required": false
+          },
+          "keywords": {
+            "value": "newsletter",
+            "type": "string",
+            "required": false
+          },
+          "subject": {
+            "value": "Monthly Newsletter Update",
+            "type": "string",
+            "required": false
+          },
+          "direction": {
+            "value": "outbound",
+            "type": "string",
+            "required": false
+          },
+          "status": {
+            "value": "sent",
+            "type": "string",
+            "required": false
+          },
+          "body_text": {
+            "value": "Hello, this is the update for our monthly newsletter.",
+            "type": "string",
+            "required": false
+          },
+          "body_html": {
+            "value": "<p>Hello, this is the update for our monthly newsletter.</p>",
+            "type": "string",
+            "required": false
+          },
+          "when_occurred": {
+            "value": "2023-10-01T12:30:00",
+            "type": "string",
+            "required": false
+          },
+          "matches_limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "UpdateMeetingActivity",
+      "qualifiedName": "Hubspot.UpdateMeetingActivity",
+      "fullyQualifiedName": "Hubspot.UpdateMeetingActivity@3.0.0",
+      "description": "Update a meeting activity directly by ID or surface matches when searching by keywords.",
+      "parameters": [
+        {
+          "name": "meeting_id",
+          "type": "integer",
+          "required": false,
+          "description": "The meeting activity ID to update.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "keywords",
+          "type": "string",
+          "required": false,
+          "description": "Keywords to search for meeting titles. Provide when meeting_id is not known.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Updated meeting title.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_date",
+          "type": "string",
+          "required": false,
+          "description": "Updated start date (YYYY-MM-DD).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_time",
+          "type": "string",
+          "required": false,
+          "description": "Updated start time (HH:MM or HH:MM:SS).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "duration",
+          "type": "string",
+          "required": false,
+          "description": "Updated duration in HH:MM format.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "location",
+          "type": "string",
+          "required": false,
+          "description": "Updated meeting location.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "outcome",
+          "type": "string",
+          "required": false,
+          "description": "Updated meeting outcome.",
+          "enum": [
+            "SCHEDULED",
+            "COMPLETED",
+            "RESCHEDULED",
+            "NO_SHOW",
+            "CANCELED"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "matches_limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of meetings to return when searching by keywords. Defaults to 5. Max is 20.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "oauth",
+          "crm.objects.contacts.read",
+          "crm.objects.contacts.write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Update a meeting activity by ID or list matching meetings when searching by keywords."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.UpdateMeetingActivity",
+        "parameters": {
+          "meeting_id": {
+            "value": 12345,
+            "type": "integer",
+            "required": false
+          },
+          "keywords": {
+            "value": "team update",
+            "type": "string",
+            "required": false
+          },
+          "title": {
+            "value": "Weekly Team Update",
+            "type": "string",
+            "required": false
+          },
+          "start_date": {
+            "value": "2023-11-01",
+            "type": "string",
+            "required": false
+          },
+          "start_time": {
+            "value": "14:30",
+            "type": "string",
+            "required": false
+          },
+          "duration": {
+            "value": "01:00",
+            "type": "string",
+            "required": false
+          },
+          "location": {
+            "value": "Conference Room A",
+            "type": "string",
+            "required": false
+          },
+          "outcome": {
+            "value": "Follow up on project status",
+            "type": "string",
+            "required": false
+          },
+          "matches_limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "UpdateNoteActivity",
+      "qualifiedName": "Hubspot.UpdateNoteActivity",
+      "fullyQualifiedName": "Hubspot.UpdateNoteActivity@3.0.0",
+      "description": "Update a note directly by ID or surface matches when searching by keywords.",
+      "parameters": [
+        {
+          "name": "note_id",
+          "type": "integer",
+          "required": false,
+          "description": "The note ID to update.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "keywords",
+          "type": "string",
+          "required": false,
+          "description": "Keywords to search for the note content. Provide when note_id is not known.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "required": false,
+          "description": "Updated note content.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "when_occurred",
+          "type": "string",
+          "required": false,
+          "description": "Updated creation timestamp (ISO format: YYYY-MM-DDTHH:MM:SS).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "matches_limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of notes to return when searching by keywords. Defaults to 5. Max is 20.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "oauth",
+          "crm.objects.contacts.read",
+          "crm.objects.contacts.write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Update a note by ID or list matching notes when searching by keywords."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.UpdateNoteActivity",
+        "parameters": {
+          "note_id": {
+            "value": 12345,
+            "type": "integer",
+            "required": false
+          },
+          "keywords": {
+            "value": "meeting notes",
+            "type": "string",
+            "required": false
+          },
+          "body": {
+            "value": "Updated content of the meeting notes with action items.",
+            "type": "string",
+            "required": false
+          },
+          "when_occurred": {
+            "value": "2023-10-01T14:30:00",
+            "type": "string",
+            "required": false
+          },
+          "matches_limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "Hubspot.WhoAmI",
+      "fullyQualifiedName": "Hubspot.WhoAmI@3.0.0",
+      "description": "Get current user information from HubSpot.\n\nThis is typically the first tool called to understand the current user context.\n\nUse this tool when needing information about the current user basic HubSpot information.\nand the associated HubSpot portal.",
+      "parameters": [],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": ["oauth", "crm.objects.owners.read"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Get current user information."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Hubspot.WhoAmI",
+        "parameters": {},
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    }
+  ],
+  "documentationChunks": [
+    {
+      "type": "markdown",
+      "location": "auth",
+      "position": "after",
+      "content": "The Arcade Cloud Platform offers a default [Hubspot auth provider](/references/auth-providers/hubspot). If you use it, there's nothing to configure. Your users will see `Arcade` as the name of the application requesting permission.",
+      "header": "## Auth"
+    }
+  ],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-01-26T17:33:59.461Z",
+  "summary": "Arcade Toolkit for HubSpot enables seamless integration and interaction with HubSpot's CRM functionalities, allowing developers to leverage various activities and data management tools for enhanced customer relationship management.\n\n**Capabilities**\n- Create, update, and manage companies, contacts, and deals within HubSpot.\n- Log and associate various engagement activities such as calls, emails, meetings, and more.\n- Retrieve detailed information about users, deals, and associated data effectively.\n- Access industry types and manage user assignments efficiently.\n\n**OAuth**\n- Provider: Unknown\n- Scopes: crm.objects.companies.read, crm.objects.contacts.write, crm.objects.deals.read, oauth, sales-email-read\n\n**Secrets**\n- No existing secrets."
+}

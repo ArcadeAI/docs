@@ -1,0 +1,657 @@
+{
+  "id": "TicktickApi",
+  "label": "TickTick API",
+  "version": "1.0.0",
+  "description": "Tools that enable LLMs to interact directly with the ticktick API.",
+  "metadata": {
+    "category": "productivity",
+    "iconUrl": "https://design-system.arcade.dev/icons/ticktick.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade_starter",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/productivity/ticktick-api",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": null,
+    "allScopes": ["tasks:read", "tasks:write"]
+  },
+  "tools": [
+    {
+      "name": "CreateProjectInTicktick",
+      "qualifiedName": "TicktickApi.CreateProjectInTicktick",
+      "fullyQualifiedName": "TicktickApi.CreateProjectInTicktick@1.0.0",
+      "description": "Create a new project in Ticktick with optional properties.\n\nUse this tool to create a new project in Ticktick. You can specify the project's name and other optional properties such as color, sort order, view mode, and kind (TASK or NOTE).",
+      "parameters": [
+        {
+          "name": "project_name",
+          "type": "string",
+          "required": true,
+          "description": "Name of the project to be created. This is a required field.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_color",
+          "type": "string",
+          "required": false,
+          "description": "Hex color code representing the project's color (e.g., '#F18181').",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_kind",
+          "type": "string",
+          "required": false,
+          "description": "Specifies the type of items the project will store. Choose 'TASK' for tasks or 'NOTE' for notes.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_sort_order",
+          "type": "integer",
+          "required": false,
+          "description": "The integer value representing the project's sort order.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_view_mode",
+          "type": "string",
+          "required": false,
+          "description": "The display mode for the project: choose from 'list', 'kanban', or 'timeline'.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": ["tasks:write"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'createProject'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "TicktickApi.CreateProjectInTicktick",
+        "parameters": {
+          "project_name": {
+            "value": "Weekly Goals",
+            "type": "string",
+            "required": true
+          },
+          "project_color": {
+            "value": "#4A90E2",
+            "type": "string",
+            "required": false
+          },
+          "project_kind": {
+            "value": "TASK",
+            "type": "string",
+            "required": false
+          },
+          "project_sort_order": {
+            "value": 1,
+            "type": "integer",
+            "required": false
+          },
+          "project_view_mode": {
+            "value": "kanban",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateTaskTicktick",
+      "qualifiedName": "TicktickApi.CreateTaskTicktick",
+      "fullyQualifiedName": "TicktickApi.CreateTaskTicktick@1.0.0",
+      "description": "Create a new task in Ticktick with specified properties.\n\nUse this tool to create a new task in Ticktick by specifying title, content, dates, reminders, subtasks, and the project it belongs to.\n\nNote: Understanding the request schema is necessary to properly create\nthe stringified JSON input object for execution.\n\nModes:\n- GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n  already have it. Do NOT call repeatedly if you already received\n  the schema.\n- EXECUTE: Performs the operation with the provided request body\n  JSON.\n\nIf you need the schema, call with mode='get_request_schema' ONCE, then execute.",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": ["get_request_schema", "execute"],
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": ["tasks:write"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'createTask'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "TicktickApi.CreateTaskTicktick",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "request_body": {
+            "value": "{\"title\": \"Complete Project Report\", \"content\": \"Draft the final report for the project and ensure all sections are covered.\", \"due_date\": \"2023-10-30T17:00:00Z\", \"reminders\": [{\"time\": \"2023-10-29T17:00:00Z\"}], \"subtasks\": [{\"title\": \"Research previous reports\"}, {\"title\": \"Gather data from team members\"}], \"project_id\": \"12345\"}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "DeleteSpecificTask",
+      "qualifiedName": "TicktickApi.DeleteSpecificTask",
+      "fullyQualifiedName": "TicktickApi.DeleteSpecificTask@1.0.0",
+      "description": "Permanently delete a task using project and task IDs.\n\nThis tool is used to permanently remove a specific task by providing its project ID and task ID from Ticktick. Use this when you need to delete a task and ensure it is no longer available in the project.",
+      "parameters": [
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique ID of the project containing the task to be deleted.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "task_identifier_to_delete",
+          "type": "string",
+          "required": true,
+          "description": "The unique ID of the task to permanently delete from a project.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": ["tasks:write"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'deleteTask'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "TicktickApi.DeleteSpecificTask",
+        "parameters": {
+          "project_id": {
+            "value": "proj_12345",
+            "type": "string",
+            "required": true
+          },
+          "task_identifier_to_delete": {
+            "value": "task_67890",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "DeleteTicktickProject",
+      "qualifiedName": "TicktickApi.DeleteTicktickProject",
+      "fullyQualifiedName": "TicktickApi.DeleteTicktickProject@1.0.0",
+      "description": "Permanently delete a project in Ticktick by ID.\n\nUse this tool to permanently remove a specific project and all associated tasks from Ticktick by providing the project's ID. Ensure you no longer need the project, as this action cannot be undone.",
+      "parameters": [
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique ID of the Ticktick project to permanently delete. Ensure the ID is correct, as this action cannot be undone.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": ["tasks:write"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'deleteProject'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "TicktickApi.DeleteTicktickProject",
+        "parameters": {
+          "project_id": {
+            "value": "abcd1234",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetTicktickProjectById",
+      "qualifiedName": "TicktickApi.GetTicktickProjectById",
+      "fullyQualifiedName": "TicktickApi.GetTicktickProjectById@1.0.0",
+      "description": "Retrieve Ticktick project details by project ID.\n\nThis tool retrieves detailed information about a specific project in Ticktick using its ID. It provides the project's name, color, view mode, and kind.",
+      "parameters": [
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique ID of the Ticktick project to retrieve.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": ["tasks:read"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'getProjectById'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "TicktickApi.GetTicktickProjectById",
+        "parameters": {
+          "project_id": {
+            "value": "12345abcde",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetUserProjects",
+      "qualifiedName": "TicktickApi.GetUserProjects",
+      "fullyQualifiedName": "TicktickApi.GetUserProjects@1.0.0",
+      "description": "Retrieve all user-accessible projects from Ticktick.\n\nThis tool fetches a list of all projects that the authenticated user has access to in Ticktick. It should be called when a user wants to view or manage their projects within the platform.",
+      "parameters": [],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": ["tasks:read"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'getUserProjects'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "TicktickApi.GetUserProjects",
+        "parameters": {},
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "MarkTaskComplete",
+      "qualifiedName": "TicktickApi.MarkTaskComplete",
+      "fullyQualifiedName": "TicktickApi.MarkTaskComplete@1.0.0",
+      "description": "Marks a specific task as completed in Ticktick.\n\nUse this tool to mark a task as completed in Ticktick, updating its status and setting the completion time.",
+      "parameters": [
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "Unique ID of the project containing the task to be completed.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "task_identifier",
+          "type": "string",
+          "required": true,
+          "description": "The unique ID of the task to be marked as completed.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": ["tasks:write"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'completeTask'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "TicktickApi.MarkTaskComplete",
+        "parameters": {
+          "project_id": {
+            "value": "abc123",
+            "type": "string",
+            "required": true
+          },
+          "task_identifier": {
+            "value": "task456",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "RetrieveProjectWithTasks",
+      "qualifiedName": "TicktickApi.RetrieveProjectWithTasks",
+      "fullyQualifiedName": "TicktickApi.RetrieveProjectWithTasks@1.0.0",
+      "description": "Retrieve detailed project information and all related tasks.\n\nCall this tool to get a complete view of a project, including tasks and column configurations, especially useful for understanding project status and organization.",
+      "parameters": [
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "The unique ID of the project to retrieve with all data, including tasks and columns.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": ["tasks:read"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'getProjectWithData'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "TicktickApi.RetrieveProjectWithTasks",
+        "parameters": {
+          "project_id": {
+            "value": "12345-abcde-67890-fghij",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "RetrieveTaskDetails",
+      "qualifiedName": "TicktickApi.RetrieveTaskDetails",
+      "fullyQualifiedName": "TicktickApi.RetrieveTaskDetails@1.0.0",
+      "description": "Retrieve detailed information for a specific task.\n\nUse this tool to get detailed information about a task by providing the project ID and task ID. It returns information including subtasks, reminders, and scheduling details.",
+      "parameters": [
+        {
+          "name": "project_identifier",
+          "type": "string",
+          "required": true,
+          "description": "The unique ID of the project containing the task to retrieve.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "task_identifier",
+          "type": "string",
+          "required": true,
+          "description": "Unique identifier for the task to retrieve detailed information including subtasks and reminders.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": ["tasks:read"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'getTaskById'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "TicktickApi.RetrieveTaskDetails",
+        "parameters": {
+          "project_identifier": {
+            "value": "12345",
+            "type": "string",
+            "required": true
+          },
+          "task_identifier": {
+            "value": "67890",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "UpdateProjectProperties",
+      "qualifiedName": "TicktickApi.UpdateProjectProperties",
+      "fullyQualifiedName": "TicktickApi.UpdateProjectProperties@1.0.0",
+      "description": "Update properties of an existing project.\n\nThis tool updates various properties of an existing project, such as name, color, sort order, view mode, and kind. It should be used when changes to these attributes are needed for a project on Ticktick.",
+      "parameters": [
+        {
+          "name": "project_identifier",
+          "type": "string",
+          "required": true,
+          "description": "Unique ID of the project to update.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_color",
+          "type": "string",
+          "required": false,
+          "description": "Hex color code representing the color of the project, such as '#FFFFFF'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_kind",
+          "type": "string",
+          "required": false,
+          "description": "Specify the type of project: TASK or NOTE.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_name",
+          "type": "string",
+          "required": false,
+          "description": "The new name for the project to be updated. This should be a string representing the desired project name.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_sort_order",
+          "type": "integer",
+          "required": false,
+          "description": "Sort order value for the project, default is 0. Determines the project's position relative to others.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_view_mode",
+          "type": "string",
+          "required": false,
+          "description": "Specifies the view mode of the project. Options are 'list', 'kanban', or 'timeline'.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": ["tasks:write"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'updateProject'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "TicktickApi.UpdateProjectProperties",
+        "parameters": {
+          "project_identifier": {
+            "value": "12345",
+            "type": "string",
+            "required": true
+          },
+          "project_color": {
+            "value": "#FF5733",
+            "type": "string",
+            "required": false
+          },
+          "project_kind": {
+            "value": "TASK",
+            "type": "string",
+            "required": false
+          },
+          "project_name": {
+            "value": "Updated Project Name",
+            "type": "string",
+            "required": false
+          },
+          "project_sort_order": {
+            "value": 1,
+            "type": "integer",
+            "required": false
+          },
+          "project_view_mode": {
+            "value": "kanban",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "UpdateTaskProperties",
+      "qualifiedName": "TicktickApi.UpdateTaskProperties",
+      "fullyQualifiedName": "TicktickApi.UpdateTaskProperties@1.0.0",
+      "description": "Update a task's properties in Ticktick.\n\n    Use this tool to update various properties of a task in Ticktick. It requires the task ID and project ID, while other fields are optional. Ideal for modifying task details such as status, title, or due date.\n\n    Note: Understanding the request schema is necessary to properly create\n    the stringified JSON input object for execution.\n\nThis operation also requires path parameters.\n\n    Modes:\n    - GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n      already have it. Do NOT call repeatedly if you already received\n      the schema.\n    - EXECUTE: Performs the operation with the provided request body\n      JSON.\n      Note: You must also provide the required path parameters when executing.\n\n    If you need the schema, call with mode='get_request_schema' ONCE, then execute.\n    ",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": ["get_request_schema", "execute"],
+          "inferrable": true
+        },
+        {
+          "name": "task_identifier",
+          "type": "string",
+          "required": false,
+          "description": "The unique ID of the task to update in Ticktick. This is required to identify the specific task to be updated.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": ["tasks:write"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'updateTask'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "TicktickApi.UpdateTaskProperties",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "task_identifier": {
+            "value": "12345",
+            "type": "string",
+            "required": false
+          },
+          "request_body": {
+            "value": "{\"title\":\"Updated Task Title\",\"status\":\"completed\",\"due\":\"2023-10-10T12:00:00Z\"}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    }
+  ],
+  "documentationChunks": [
+    {
+      "type": "markdown",
+      "location": "auth",
+      "position": "after",
+      "content": "The TicktickApi MCP Server uses the Auth Provider with id `arcade-ticktick` to connect to users' TickTick accounts. In order to use the MCP Server, you will need to configure the `arcade-ticktick` auth provider.\nLearn how to configure the TickTick auth provider in the [TickTick auth provider documentation](/references/auth-providers/ticktick).",
+      "header": "## Auth"
+    }
+  ],
+  "customImports": [
+    "import StarterToolInfo from \"@/app/_components/starter-tool-info\";"
+  ],
+  "subPages": [],
+  "generatedAt": "2026-01-26T17:44:07.537Z"
+}

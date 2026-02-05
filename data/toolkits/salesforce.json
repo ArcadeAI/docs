@@ -1,0 +1,336 @@
+{
+  "id": "Salesforce",
+  "label": "Salesforce",
+  "version": "2.0.1",
+  "description": "Arcade tools designed for LLMs to interact with Salesforce",
+  "metadata": {
+    "category": "sales",
+    "iconUrl": "https://design-system.arcade.dev/icons/salesforce.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/sales/salesforce",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": null,
+    "allScopes": [
+      "read_account",
+      "read_contact",
+      "read_lead",
+      "read_note",
+      "read_opportunity",
+      "read_task",
+      "write_contact"
+    ]
+  },
+  "tools": [
+    {
+      "name": "CreateContact",
+      "qualifiedName": "Salesforce.CreateContact",
+      "fullyQualifiedName": "Salesforce.CreateContact@2.0.1",
+      "description": "Creates a contact in Salesforce.",
+      "parameters": [
+        {
+          "name": "account_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the account to create the contact for.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "last_name",
+          "type": "string",
+          "required": true,
+          "description": "The last name of the contact.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "first_name",
+          "type": "string",
+          "required": false,
+          "description": "The first name of the contact.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "required": false,
+          "description": "The email of the contact.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "phone",
+          "type": "string",
+          "required": false,
+          "description": "The phone number of the contact.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "mobile_phone",
+          "type": "string",
+          "required": false,
+          "description": "The mobile phone number of the contact.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "The title of the contact. E.g. 'CEO', 'Sales Director', 'CTO', etc.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "department",
+          "type": "string",
+          "required": false,
+          "description": "The department of the contact. E.g. 'Marketing', 'Sales', 'IT', etc.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "The description of the contact.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": ["write_contact"]
+      },
+      "secrets": [
+        "SALESFORCE_ORG_SUBDOMAIN",
+        "SALESFORCE_MAX_CONCURRENT_REQUESTS"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SALESFORCE_ORG_SUBDOMAIN",
+          "type": "api_key"
+        },
+        {
+          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The created contact."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Salesforce.CreateContact",
+        "parameters": {
+          "account_id": {
+            "value": "0012b00000TYDmyA1Y",
+            "type": "string",
+            "required": true
+          },
+          "last_name": {
+            "value": "Doe",
+            "type": "string",
+            "required": true
+          },
+          "first_name": {
+            "value": "John",
+            "type": "string",
+            "required": false
+          },
+          "email": {
+            "value": "john.doe@example.com",
+            "type": "string",
+            "required": false
+          },
+          "phone": {
+            "value": "+1234567890",
+            "type": "string",
+            "required": false
+          },
+          "mobile_phone": {
+            "value": "+0987654321",
+            "type": "string",
+            "required": false
+          },
+          "title": {
+            "value": "Sales Director",
+            "type": "string",
+            "required": false
+          },
+          "department": {
+            "value": "Sales",
+            "type": "string",
+            "required": false
+          },
+          "description": {
+            "value": "A key contact for new business opportunities.",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetAccountDataById",
+      "qualifiedName": "Salesforce.GetAccountDataById",
+      "fullyQualifiedName": "Salesforce.GetAccountDataById@2.0.1",
+      "description": "Gets the account with related info: contacts, leads, notes, calls, opportunities, tasks,\nemails, and events (up to 10 items of each type).\n\nAn account is an organization (such as a customer, supplier, or partner, though more commonly\na customer). In some Salesforce account setups, an account can also represent a person.",
+      "parameters": [
+        {
+          "name": "account_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the account to get data for.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "read_account",
+          "read_contact",
+          "read_lead",
+          "read_note",
+          "read_opportunity",
+          "read_task"
+        ]
+      },
+      "secrets": [
+        "SALESFORCE_ORG_SUBDOMAIN",
+        "SALESFORCE_MAX_CONCURRENT_REQUESTS"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SALESFORCE_ORG_SUBDOMAIN",
+          "type": "unknown"
+        },
+        {
+          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The account with related info: contacts, leads, notes, calls, opportunities, tasks, emails, and events (up to 10 items of each type)"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Salesforce.GetAccountDataById",
+        "parameters": {
+          "account_id": {
+            "value": "0012E00000PZT0QAO",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetAccountDataByKeywords",
+      "qualifiedName": "Salesforce.GetAccountDataByKeywords",
+      "fullyQualifiedName": "Salesforce.GetAccountDataByKeywords@2.0.1",
+      "description": "Searches for accounts in Salesforce and returns them with related info: contacts, leads,\nnotes, calls, opportunities, tasks, emails, and events (up to 10 items of each type).\n\nAn account is an organization (such as a customer, supplier, or partner, though more commonly\na customer). In some Salesforce account setups, an account can also represent a person.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": true,
+          "description": "The query to search for accounts. MUST be longer than one character. It will match the keywords against all account fields, such as name, website, phone, address, etc. E.g. 'Acme'",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of accounts to return. Defaults to 10. Maximum allowed is 10.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "page",
+          "type": "integer",
+          "required": false,
+          "description": "The page number to return. Defaults to 1 (first page of results).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": null,
+        "providerType": "oauth2",
+        "scopes": [
+          "read_account",
+          "read_contact",
+          "read_lead",
+          "read_note",
+          "read_opportunity",
+          "read_task"
+        ]
+      },
+      "secrets": [
+        "SALESFORCE_ORG_SUBDOMAIN",
+        "SALESFORCE_MAX_CONCURRENT_REQUESTS"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SALESFORCE_ORG_SUBDOMAIN",
+          "type": "unknown"
+        },
+        {
+          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The accounts matching the query with related info: contacts, leads, notes, calls, opportunities, tasks, emails, and events (up to 10 items of each type)"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Salesforce.GetAccountDataByKeywords",
+        "parameters": {
+          "query": {
+            "value": "Acme Corp",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 5,
+            "type": "integer",
+            "required": false
+          },
+          "page": {
+            "value": 1,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-01-26T17:40:36.720Z",
+  "summary": "The Arcade toolkit for Salesforce empowers developers to harness the capabilities of LLMs for seamless interaction with Salesforce data. It enables efficient data retrieval and modification in a user-friendly manner.\n\n**Capabilities**\n- Create and manage contacts effortlessly.\n- Retrieve comprehensive account information, including related entities.\n- Perform keyword-based searches to find accounts quickly.\n- Facilitate reading and writing of various Salesforce objects.\n\n**OAuth**\n- Provider: Unknown\n- Scopes: read_account, read_contact, read_lead, read_note, read_opportunity, read_task, write_contact\n\n**Secrets**\n- Types: API Key, Unknown\n- Examples: SALESFORCE_ORG_SUBDOMAIN, SALESFORCE_MAX_CONCURRENT_REQUESTS"
+}

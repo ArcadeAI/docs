@@ -1,10 +1,5 @@
 "use client";
-import {
-  Badge,
-  ByocBadge,
-  getToolkitIconByName,
-  ProBadge,
-} from "@arcadeai/design-system";
+import { Badge, ByocBadge, ProBadge } from "@arcadeai/design-system";
 import { usePathname } from "next/navigation";
 import type React from "react";
 import { findToolkitFromPath } from "../en/resources/integrations/components/toolkit-utils";
@@ -63,8 +58,8 @@ const ToolInfo: React.FC<ToolInfoProps> = ({
       : authProviderDocsUrl;
 
   const toolkit = findToolkitFromPath(pathname);
-  const toolkitName = toolkit?.label;
-  const IconComponent = toolkitName ? getToolkitIconByName(toolkitName) : null;
+  // Icon URL comes from the Design System toolkit metadata
+  const iconUrl = toolkit?.publicIconUrl;
 
   const isPro = toolkit?.isPro ?? false;
   const isByoc = toolkit?.isBYOC ?? false;
@@ -77,10 +72,16 @@ const ToolInfo: React.FC<ToolInfoProps> = ({
   return (
     <div className="mt-5 mb-6 rounded-lg border-4 border-neutral-dark-medium p-6 text-text-color shadow-lg sm:p-3">
       <div className="flex flex-col gap-4 sm:flex-row sm:gap-6">
-        {IconComponent && (
+        {iconUrl && (
           <div className="flex items-center justify-center sm:justify-start">
             <div className="rounded-lg bg-neutral-light p-3 dark:bg-neutral-dark-medium">
-              <IconComponent className="h-16 w-16 shrink-0" />
+              <img
+                alt={`${toolkit?.label ?? "Toolkit"} icon`}
+                className="h-16 w-16 shrink-0"
+                height={64}
+                src={iconUrl}
+                width={64}
+              />
             </div>
           </div>
         )}

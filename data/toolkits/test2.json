@@ -1,0 +1,357 @@
+{
+  "id": "Test2",
+  "label": "Test2",
+  "version": "0.1.0",
+  "description": "asdf",
+  "metadata": {
+    "category": "development",
+    "iconUrl": "https://design-system.arcade.dev/icons/test2.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/development/test2",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": null,
+  "tools": [
+    {
+      "name": "CreateEvent",
+      "qualifiedName": "Test2.CreateEvent",
+      "fullyQualifiedName": "Test2.CreateEvent@0.1.0",
+      "description": "Create a calendar event with attendees and location.\n\nNOTE: If you have not already called get_body_scheme('create_event') or are unsure\nabout the body structure, call it first to see the exact schema required.\n\nThe body should include title, startTime, attendees, and location\n(oneOf: physical/virtual/hybrid). Optionally include recurrence and reminders.",
+      "parameters": [
+        {
+          "name": "body",
+          "type": "string",
+          "required": true,
+          "description": "JSON string containing event data. If unsure about structure, call get_body_scheme('create_event') first.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Test2.CreateEvent",
+        "parameters": {
+          "body": {
+            "value": "{\"title\": \"Team Meeting\", \"startTime\": \"2023-10-12T10:00:00Z\", \"attendees\": [\"alice@example.com\", \"bob@example.com\"], \"location\": \"virtual\", \"recurrence\": \"weekly\", \"reminders\": [{\"method\": \"email\", \"minutes\": 10}]}",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "CreateOrder",
+      "qualifiedName": "Test2.CreateOrder",
+      "fullyQualifiedName": "Test2.CreateOrder@0.1.0",
+      "description": "Create a new order with items and payment information.\n\nNOTE: If you have not already called get_body_scheme('create_order') or are unsure\nabout the body structure, call it first to see the exact schema required.\n\nThe body should include customerId, items with complex pricing (anyOf: fixed/discounted/tiered),\npayment method (oneOf: credit_card/paypal/bank_transfer), and shipping information.",
+      "parameters": [
+        {
+          "name": "body",
+          "type": "string",
+          "required": true,
+          "description": "JSON string containing order data. If unsure about structure, call get_body_scheme('create_order') first.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "api_version",
+          "type": "string",
+          "required": true,
+          "description": "API version to use",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "idempotency_key",
+          "type": "string",
+          "required": true,
+          "description": "Unique key to prevent duplicate orders",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Test2.CreateOrder",
+        "parameters": {
+          "body": {
+            "value": "{\"customerId\":\"12345\",\"items\":[{\"productId\":\"56789\",\"quantity\":2,\"pricing\":{\"type\":\"fixed\",\"amount\":19.99}},{\"productId\":\"67890\",\"quantity\":1,\"pricing\":{\"type\":\"discounted\",\"amount\":29.99,\"discount\":5}}],\"paymentMethod\":\"credit_card\",\"shipping\":{\"address\":\"123 Main St\",\"city\":\"Anytown\",\"state\":\"CA\",\"zip\":\"90210\"}}",
+            "type": "string",
+            "required": true
+          },
+          "api_version": {
+            "value": "1.0",
+            "type": "string",
+            "required": true
+          },
+          "idempotency_key": {
+            "value": "order-unique-abc123",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "CreateUser",
+      "qualifiedName": "Test2.CreateUser",
+      "fullyQualifiedName": "Test2.CreateUser@0.1.0",
+      "description": "Create a new user with complex profile information.\n\nNOTE: If you have not already called get_body_scheme('create_user') or are unsure\nabout the body structure, call it first to see the exact schema required.\n\nThe body should include email, profile with contact method (oneOf: phone/email/social),\noptional address, and preferences.",
+      "parameters": [
+        {
+          "name": "body",
+          "type": "string",
+          "required": true,
+          "description": "JSON string containing user data. If unsure about structure, call get_body_scheme('create_user') first.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "tenant_id",
+          "type": "string",
+          "required": true,
+          "description": "The tenant/organization identifier",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "source",
+          "type": "string",
+          "required": false,
+          "description": "Source system or application creating the user",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Test2.CreateUser",
+        "parameters": {
+          "body": {
+            "value": "{\"email\": \"johndoe@example.com\", \"profile\": {\"contact_method\": \"email\", \"address\": {\"street\": \"123 Main St\", \"city\": \"Anytown\", \"state\": \"CA\", \"zip\": \"12345\"}, \"preferences\": {\"newsletter\": true, \"notifications\": false}}}",
+            "type": "string",
+            "required": true
+          },
+          "tenant_id": {
+            "value": "tenant_12345",
+            "type": "string",
+            "required": true
+          },
+          "source": {
+            "value": "web_app",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetBodyScheme",
+      "qualifiedName": "Test2.GetBodyScheme",
+      "fullyQualifiedName": "Test2.GetBodyScheme@0.1.0",
+      "description": "Get the OpenAPI schema for a tool's request body.\n\nThis function returns the complete OpenAPI specification for the body parameter\nof the specified tool, with all references resolved. Use this to understand\nthe exact structure required before calling any of the API tools.\n\nAvailable tools:\n- create_user\n- create_order\n- create_event\n- update_document\n- submit_application",
+      "parameters": [
+        {
+          "name": "tool_name",
+          "type": "string",
+          "required": true,
+          "description": "The name of the tool to get the body schema for",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Test2.GetBodyScheme",
+        "parameters": {
+          "tool_name": {
+            "value": "create_user",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "SubmitApplication",
+      "qualifiedName": "Test2.SubmitApplication",
+      "fullyQualifiedName": "Test2.SubmitApplication@0.1.0",
+      "description": "Submit an application (job, visa, loan, or university).\n\nNOTE: If you have not already called get_body_scheme('submit_application') or are unsure\nabout the body structure, call it first to see the exact schema required.\n\nThe body should include applicationType, personalInfo with identification\n(oneOf: passport/drivers_license/ssn), documents array, and additionalInfo\n(anyOf based on application type).",
+      "parameters": [
+        {
+          "name": "body",
+          "type": "string",
+          "required": true,
+          "description": "JSON string containing application data. If unsure about structure, call get_body_scheme('submit_application') first.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "priority",
+          "type": "string",
+          "required": true,
+          "description": "Processing priority level",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "notification_email",
+          "type": "string",
+          "required": true,
+          "description": "Email for status notifications",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Test2.SubmitApplication",
+        "parameters": {
+          "body": {
+            "value": "{\"applicationType\":\"loan\",\"personalInfo\":{\"identification\":{\"type\":\"passport\",\"number\":\"123456789\"}},\"documents\":[\"income_statement.pdf\",\"bank_statement.pdf\"],\"additionalInfo\":{\"loanAmount\":10000,\"loanPurpose\":\"home_improvement\"}}",
+            "type": "string",
+            "required": true
+          },
+          "priority": {
+            "value": "high",
+            "type": "string",
+            "required": true
+          },
+          "notification_email": {
+            "value": "applicant@example.com",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "UpdateDocument",
+      "qualifiedName": "Test2.UpdateDocument",
+      "fullyQualifiedName": "Test2.UpdateDocument@0.1.0",
+      "description": "Update a document with multiple operations.\n\nNOTE: If you have not already called get_body_scheme('update_document') or are unsure\nabout the body structure, call it first to see the exact schema required.\n\nThe body should include documentId and an array of operations\n(anyOf: insert/delete/replace/format). Each operation type has different required fields.",
+      "parameters": [
+        {
+          "name": "body",
+          "type": "string",
+          "required": true,
+          "description": "JSON string containing document update operations. If unsure about structure, call get_body_scheme('update_document') first.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "workspace_id",
+          "type": "string",
+          "required": true,
+          "description": "The workspace containing the document",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_id",
+          "type": "string",
+          "required": true,
+          "description": "User performing the update",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "track_changes",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to track changes",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Test2.UpdateDocument",
+        "parameters": {
+          "body": {
+            "value": "{\"documentId\":\"12345\",\"operations\":[{\"insert\":{\"text\":\"Hello, World!\"}},{\"delete\":{\"text\":\"Old text\"}}]}",
+            "type": "string",
+            "required": true
+          },
+          "workspace_id": {
+            "value": "ws-67890",
+            "type": "string",
+            "required": true
+          },
+          "user_id": {
+            "value": "user-abc123",
+            "type": "string",
+            "required": true
+          },
+          "track_changes": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-01-26T17:43:54.426Z",
+  "summary": "Test2 provides a streamlined toolkit for developers to create and manage events, orders, users, applications, and documents through a set of versatile API tools. This toolkit simplifies the integration process, allowing for efficient handling of complex data structures without requiring authentication.\n\n**Capabilities**\n- Create and manage calendar events with detailed attendee and location information.\n- Handle orders with dynamic pricing and various payment methods.\n- Create user profiles with comprehensive data and preferences.\n- Submit applications across multiple domains with required and optional documentation.\n- Update existing documents with flexible operations.\n\nNo authentication or secrets are required to utilize this toolkit, enabling straightforward implementation in various applications."
+}

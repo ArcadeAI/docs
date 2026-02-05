@@ -1,0 +1,4930 @@
+{
+  "id": "Github",
+  "label": "GitHub",
+  "version": "2.0.1",
+  "description": "Arcade.dev LLM tools for Github",
+  "metadata": {
+    "category": "development",
+    "iconUrl": "https://design-system.arcade.dev/icons/github.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/development/github",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": "github",
+    "allScopes": []
+  },
+  "tools": [
+    {
+      "name": "AssignPullRequestUser",
+      "qualifiedName": "Github.AssignPullRequestUser",
+      "fullyQualifiedName": "Github.AssignPullRequestUser@2.0.1",
+      "description": "Assign a user to a pull request with intelligent search and fuzzy matching.",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repo",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository without the .git extension.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "pull_request_number",
+          "type": "integer",
+          "required": true,
+          "description": "The number that identifies the pull request.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "assignee_identifier",
+          "type": "string",
+          "required": true,
+          "description": "The user identifier: username, email, name, or ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "search_mode",
+          "type": "string",
+          "required": true,
+          "description": "How to interpret the assignee_identifier.",
+          "enum": ["username", "email", "name", "id"],
+          "inferrable": true
+        },
+        {
+          "name": "auto_accept_matches",
+          "type": "boolean",
+          "required": false,
+          "description": "Auto-accept fuzzy matches above 0.9 confidence. Default is False",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Assignment result with user details or suggestions"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.AssignPullRequestUser",
+        "parameters": {
+          "owner": {
+            "value": "exampleUser",
+            "type": "string",
+            "required": true
+          },
+          "repo": {
+            "value": "exampleRepo",
+            "type": "string",
+            "required": true
+          },
+          "pull_request_number": {
+            "value": 42,
+            "type": "integer",
+            "required": true
+          },
+          "assignee_identifier": {
+            "value": "john.doe@example.com",
+            "type": "string",
+            "required": true
+          },
+          "search_mode": {
+            "value": "email",
+            "type": "string",
+            "required": true
+          },
+          "auto_accept_matches": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CheckPullRequestMergeStatus",
+      "qualifiedName": "Github.CheckPullRequestMergeStatus",
+      "fullyQualifiedName": "Github.CheckPullRequestMergeStatus@2.0.1",
+      "description": "Check if a pull request is ready to merge without attempting the merge.",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repo",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository without the .git extension.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "pull_request_number",
+          "type": "integer",
+          "required": true,
+          "description": "The number that identifies the pull request.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_check_details",
+          "type": "boolean",
+          "required": false,
+          "description": "Include individual check run details in the response. Default is False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "webhook_secret"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Comprehensive merge readiness status"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.CheckPullRequestMergeStatus",
+        "parameters": {
+          "owner": {
+            "value": "exampleUser",
+            "type": "string",
+            "required": true
+          },
+          "repo": {
+            "value": "exampleRepo",
+            "type": "string",
+            "required": true
+          },
+          "pull_request_number": {
+            "value": 42,
+            "type": "integer",
+            "required": true
+          },
+          "include_check_details": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CountStargazers",
+      "qualifiedName": "Github.CountStargazers",
+      "fullyQualifiedName": "Github.CountStargazers@2.0.1",
+      "description": "Count the number of stargazers (stars) for a GitHub repository.",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "string",
+          "required": true,
+          "description": "The owner of the repository",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "integer",
+        "description": "The number of stargazers (stars) for the specified repository"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.CountStargazers",
+        "parameters": {
+          "owner": {
+            "value": "octocat",
+            "type": "string",
+            "required": true
+          },
+          "name": {
+            "value": "Hello-World",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateBranch",
+      "qualifiedName": "Github.CreateBranch",
+      "fullyQualifiedName": "Github.CreateBranch@2.0.1",
+      "description": "Create a new branch in a repository.",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repo",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository without the .git extension.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "branch",
+          "type": "string",
+          "required": true,
+          "description": "The name of the new branch.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "from_branch",
+          "type": "string",
+          "required": false,
+          "description": "The name of the branch to branch off of. Default: repository default branch.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Created branch details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.CreateBranch",
+        "parameters": {
+          "owner": {
+            "value": "exampleUser",
+            "type": "string",
+            "required": true
+          },
+          "repo": {
+            "value": "exampleRepo",
+            "type": "string",
+            "required": true
+          },
+          "branch": {
+            "value": "feature/new-branch",
+            "type": "string",
+            "required": true
+          },
+          "from_branch": {
+            "value": "main",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateFile",
+      "qualifiedName": "Github.CreateFile",
+      "fullyQualifiedName": "Github.CreateFile@2.0.1",
+      "description": "Create a new file or overwrite an existing file in a repository.\n\nThe explicit mode parameter reduces accidental data loss: the default CREATE mode refuses to\ntouch existing files, while OVERWRITE must be chosen intentionally.",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repo",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository without the .git extension.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "path",
+          "type": "string",
+          "required": true,
+          "description": "The content path.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "content",
+          "type": "string",
+          "required": true,
+          "description": "The content of the file.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "message",
+          "type": "string",
+          "required": true,
+          "description": "The commit message.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "branch",
+          "type": "string",
+          "required": true,
+          "description": "The branch name.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "mode",
+          "type": "string",
+          "required": false,
+          "description": "How to handle existing files. Default is FileMode.CREATE",
+          "enum": ["create", "overwrite"],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "File creation/update result"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.CreateFile",
+        "parameters": {
+          "owner": {
+            "value": "exampleUser",
+            "type": "string",
+            "required": true
+          },
+          "repo": {
+            "value": "exampleRepo",
+            "type": "string",
+            "required": true
+          },
+          "path": {
+            "value": "folder/exampleFile.txt",
+            "type": "string",
+            "required": true
+          },
+          "content": {
+            "value": "This is an example content for the file.",
+            "type": "string",
+            "required": true
+          },
+          "message": {
+            "value": "Add new exampleFile.txt",
+            "type": "string",
+            "required": true
+          },
+          "branch": {
+            "value": "main",
+            "type": "string",
+            "required": true
+          },
+          "mode": {
+            "value": "OVERWRITE",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateIssue",
+      "qualifiedName": "Github.CreateIssue",
+      "fullyQualifiedName": "Github.CreateIssue@2.0.1",
+      "description": "Create an issue in a GitHub repository.\n\nOptionally add the created issue to a project by specifying add_to_project_number\nand add_to_project_scope.",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository. The name is not case sensitive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repo",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository without the .git extension. The name is not case sensitive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "The title of the issue.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "required": false,
+          "description": "The contents of the issue.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "assignees",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Logins for Users to assign to this issue.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "milestone",
+          "type": "integer",
+          "required": false,
+          "description": "The number of the milestone to associate this issue with.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "labels",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Labels to associate with this issue.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "add_to_project_number",
+          "type": "integer",
+          "required": false,
+          "description": "Project number to add this issue to",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "add_to_project_scope",
+          "type": "string",
+          "required": false,
+          "description": "Project scope",
+          "enum": ["all", "organization", "user"],
+          "inferrable": true
+        },
+        {
+          "name": "add_to_project_owner",
+          "type": "string",
+          "required": false,
+          "description": "Project owner (defaults to issue owner if not specified)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Created issue details with optional project link status"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.CreateIssue",
+        "parameters": {
+          "owner": {
+            "value": "exampleOwner",
+            "type": "string",
+            "required": true
+          },
+          "repo": {
+            "value": "exampleRepo",
+            "type": "string",
+            "required": true
+          },
+          "title": {
+            "value": "Example Issue Title",
+            "type": "string",
+            "required": true
+          },
+          "body": {
+            "value": "This is a description of the issue.",
+            "type": "string",
+            "required": false
+          },
+          "assignees": {
+            "value": ["user1", "user2"],
+            "type": "array",
+            "required": false
+          },
+          "milestone": {
+            "value": 1,
+            "type": "integer",
+            "required": false
+          },
+          "labels": {
+            "value": ["bug", "urgent"],
+            "type": "array",
+            "required": false
+          },
+          "add_to_project_number": {
+            "value": 123,
+            "type": "integer",
+            "required": false
+          },
+          "add_to_project_scope": {
+            "value": "org",
+            "type": "string",
+            "required": false
+          },
+          "add_to_project_owner": {
+            "value": "exampleOwner",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateIssueComment",
+      "qualifiedName": "Github.CreateIssueComment",
+      "fullyQualifiedName": "Github.CreateIssueComment@2.0.1",
+      "description": "Create a comment on an issue in a GitHub repository.",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository. The name is not case sensitive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repo",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository without the .git extension. The name is not case sensitive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "issue_number",
+          "type": "integer",
+          "required": true,
+          "description": "The number that identifies the issue.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "required": true,
+          "description": "The contents of the comment.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Created comment details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.CreateIssueComment",
+        "parameters": {
+          "owner": {
+            "value": "exampleOwner",
+            "type": "string",
+            "required": true
+          },
+          "repo": {
+            "value": "exampleRepo",
+            "type": "string",
+            "required": true
+          },
+          "issue_number": {
+            "value": 42,
+            "type": "integer",
+            "required": true
+          },
+          "body": {
+            "value": "This is a sample comment on the issue.",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreatePullRequest",
+      "qualifiedName": "Github.CreatePullRequest",
+      "fullyQualifiedName": "Github.CreatePullRequest@2.0.1",
+      "description": "Create a pull request in a GitHub repository.",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repo",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository without the .git extension.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "The title of the pull request.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "head",
+          "type": "string",
+          "required": true,
+          "description": "The name of the branch where your changes are implemented. For cross-repository PRs, use format: username:branch.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "base",
+          "type": "string",
+          "required": true,
+          "description": "The name of the branch you want the changes pulled into.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "required": false,
+          "description": "The contents/description of the pull request.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "draft",
+          "type": "boolean",
+          "required": false,
+          "description": "Create as a draft pull request. Default is False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "maintainer_can_modify",
+          "type": "boolean",
+          "required": false,
+          "description": "Allow repository maintainers to modify the pull request branch. Default is True.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "issue",
+          "type": "integer",
+          "required": false,
+          "description": "Issue number to auto-link. Will prepend 'Closes #{issue}' to the PR body.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "reviewers",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "List of user logins to request reviews from.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team_reviewers",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "List of team slugs to request reviews from.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Created pull request details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.CreatePullRequest",
+        "parameters": {
+          "owner": {
+            "value": "exampleUser",
+            "type": "string",
+            "required": true
+          },
+          "repo": {
+            "value": "exampleRepo",
+            "type": "string",
+            "required": true
+          },
+          "title": {
+            "value": "Add new feature",
+            "type": "string",
+            "required": true
+          },
+          "head": {
+            "value": "feature/new-feature-branch",
+            "type": "string",
+            "required": true
+          },
+          "base": {
+            "value": "main",
+            "type": "string",
+            "required": true
+          },
+          "body": {
+            "value": "This pull request adds a new feature that improves functionality.",
+            "type": "string",
+            "required": false
+          },
+          "draft": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "maintainer_can_modify": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "issue": {
+            "value": 42,
+            "type": "integer",
+            "required": false
+          },
+          "reviewers": {
+            "value": ["user1", "user2"],
+            "type": "array",
+            "required": false
+          },
+          "team_reviewers": {
+            "value": ["dev-team"],
+            "type": "array",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateReplyForReviewComment",
+      "qualifiedName": "Github.CreateReplyForReviewComment",
+      "fullyQualifiedName": "Github.CreateReplyForReviewComment@2.0.1",
+      "description": "Create a reply to a review comment for a pull request.\n\nOptionally resolve the conversation thread after replying by setting resolve_thread=True\nand providing the thread_id (GraphQL Node ID).",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository. The name is not case sensitive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repo",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository without the .git extension. The name is not case sensitive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "pull_number",
+          "type": "integer",
+          "required": true,
+          "description": "The number that identifies the pull request.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "comment_id",
+          "type": "integer",
+          "required": true,
+          "description": "The unique identifier of the comment.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "required": true,
+          "description": "The text of the review comment.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "thread_id",
+          "type": "string",
+          "required": false,
+          "description": "Optional GraphQL Node ID of the review thread to resolve after replying.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "resolve_thread",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to resolve the thread after replying. Default is False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Created reply comment details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.CreateReplyForReviewComment",
+        "parameters": {
+          "owner": {
+            "value": "exampleOwner",
+            "type": "string",
+            "required": true
+          },
+          "repo": {
+            "value": "exampleRepo",
+            "type": "string",
+            "required": true
+          },
+          "pull_number": {
+            "value": 42,
+            "type": "integer",
+            "required": true
+          },
+          "comment_id": {
+            "value": 101,
+            "type": "integer",
+            "required": true
+          },
+          "body": {
+            "value": "Thanks for your feedback! I've made the suggested changes.",
+            "type": "string",
+            "required": true
+          },
+          "thread_id": {
+            "value": "MDExOkNvbW1lbnQxMDE=",
+            "type": "string",
+            "required": false
+          },
+          "resolve_thread": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateReviewComment",
+      "qualifiedName": "Github.CreateReviewComment",
+      "fullyQualifiedName": "Github.CreateReviewComment@2.0.1",
+      "description": "Create a review comment for a pull request in a GitHub repository.\n\nIMPORTANT: Line numbers must be part of the diff (changed lines only).\nGitHub's API requires line numbers that exist in the pull request diff, not just any line\nin the file. If the line wasn't changed in the PR, the comment will fail with 422 error.\n\nIf the subject_type is not 'file', then the start_line and end_line parameters are required.\nIf the subject_type is 'file', then the start_line and end_line parameters are ignored.\nIf the commit_id is not provided, the latest commit SHA from the PR will be used.\n\nTIP: Use subject_type='file' to comment on the entire file if unsure about line positions.",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository. The name is not case sensitive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repo",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository without the .git extension. The name is not case sensitive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "pull_number",
+          "type": "integer",
+          "required": true,
+          "description": "The number that identifies the pull request.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "required": true,
+          "description": "The text of the review comment.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "path",
+          "type": "string",
+          "required": true,
+          "description": "The relative path to the file that necessitates a comment.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "commit_id",
+          "type": "string",
+          "required": false,
+          "description": "The SHA of the commit needing a comment. If not provided, the latest commit SHA from the PR will be used.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_line",
+          "type": "integer",
+          "required": false,
+          "description": "The start line of the range of lines in the pull request diff that the comment applies to. Required unless 'subject_type' is 'file'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_line",
+          "type": "integer",
+          "required": false,
+          "description": "The end line of the range of lines in the pull request diff that the comment applies to. Required unless 'subject_type' is 'file'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "side",
+          "type": "string",
+          "required": false,
+          "description": "The side of the diff that the pull request's changes appear on. Use LEFT for deletions that appear in red. Use RIGHT for additions that appear in green or unchanged lines that appear in white and are shown for context. Default is RIGHT.",
+          "enum": ["LEFT", "RIGHT"],
+          "inferrable": true
+        },
+        {
+          "name": "start_side",
+          "type": "string",
+          "required": false,
+          "description": "The starting side of the diff that the comment applies to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "subject_type",
+          "type": "string",
+          "required": false,
+          "description": "The type of subject that the comment applies to. Default is file.",
+          "enum": ["file", "line"],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Created review comment details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.CreateReviewComment",
+        "parameters": {
+          "owner": {
+            "value": "exampleUser",
+            "type": "string",
+            "required": true
+          },
+          "repo": {
+            "value": "exampleRepo",
+            "type": "string",
+            "required": true
+          },
+          "pull_number": {
+            "value": 42,
+            "type": "integer",
+            "required": true
+          },
+          "body": {
+            "value": "This change looks good, but please revise the variable naming for clarity.",
+            "type": "string",
+            "required": true
+          },
+          "path": {
+            "value": "src/exampleFile.js",
+            "type": "string",
+            "required": true
+          },
+          "commit_id": {
+            "value": "abc123def456ghi789jkl012mno345pq",
+            "type": "string",
+            "required": false
+          },
+          "start_line": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "end_line": {
+            "value": 15,
+            "type": "integer",
+            "required": false
+          },
+          "side": {
+            "value": "RIGHT",
+            "type": "string",
+            "required": false
+          },
+          "start_side": {
+            "value": "RIGHT",
+            "type": "string",
+            "required": false
+          },
+          "subject_type": {
+            "value": "file",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetFileContents",
+      "qualifiedName": "Github.GetFileContents",
+      "fullyQualifiedName": "Github.GetFileContents@2.0.1",
+      "description": "Get the contents of a file in a repository.\n\nReturns the decoded content (if text) along with metadata like SHA, size, and line count.\nFor large files, use start_line and end_line to retrieve specific line ranges.",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repo",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository without the .git extension.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "path",
+          "type": "string",
+          "required": true,
+          "description": "Path within the repository relative to its root; omit owner/repo prefixes.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "ref",
+          "type": "string",
+          "required": false,
+          "description": "The name of the commit/branch/tag. Default: the repository's default branch.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_line",
+          "type": "integer",
+          "required": false,
+          "description": "First line to retrieve (1-indexed). Default: None (entire file).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_line",
+          "type": "integer",
+          "required": false,
+          "description": "Last line to retrieve (1-indexed, inclusive). Default: None (entire file).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "File content and metadata"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.GetFileContents",
+        "parameters": {
+          "owner": {
+            "value": "exampleUser",
+            "type": "string",
+            "required": true
+          },
+          "repo": {
+            "value": "exampleRepo",
+            "type": "string",
+            "required": true
+          },
+          "path": {
+            "value": "src/config.yaml",
+            "type": "string",
+            "required": true
+          },
+          "ref": {
+            "value": "main",
+            "type": "string",
+            "required": false
+          },
+          "start_line": {
+            "value": 1,
+            "type": "integer",
+            "required": false
+          },
+          "end_line": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetIssue",
+      "qualifiedName": "Github.GetIssue",
+      "fullyQualifiedName": "Github.GetIssue@2.0.1",
+      "description": "Get a specific issue from a GitHub repository.",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository. The name is not case sensitive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repo",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository without the .git extension. The name is not case sensitive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "issue_number",
+          "type": "integer",
+          "required": true,
+          "description": "The number that identifies the issue.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Issue details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.GetIssue",
+        "parameters": {
+          "owner": {
+            "value": "octocat",
+            "type": "string",
+            "required": true
+          },
+          "repo": {
+            "value": "hello-world",
+            "type": "string",
+            "required": true
+          },
+          "issue_number": {
+            "value": 42,
+            "type": "integer",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetNotificationSummary",
+      "qualifiedName": "Github.GetNotificationSummary",
+      "fullyQualifiedName": "Github.GetNotificationSummary@2.0.1",
+      "description": "Get a summary of GitHub notifications.\n\nReturns counts grouped by reason, repository, and type without full notification details.",
+      "parameters": [],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL", "GITHUB_CLASSIC_PERSONAL_ACCESS_TOKEN"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "unknown"
+        },
+        {
+          "name": "GITHUB_CLASSIC_PERSONAL_ACCESS_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Summary of user notifications"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.GetNotificationSummary",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetPullRequest",
+      "qualifiedName": "Github.GetPullRequest",
+      "fullyQualifiedName": "Github.GetPullRequest@2.0.1",
+      "description": "Get details of a pull request in a GitHub repository.",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository. The name is not case sensitive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repo",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository without the .git extension. The name is not case sensitive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "pull_number",
+          "type": "integer",
+          "required": true,
+          "description": "The number that identifies the pull request.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_diff_content",
+          "type": "boolean",
+          "required": false,
+          "description": "If true, return the diff content of the pull request. Default is False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Pull request details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.GetPullRequest",
+        "parameters": {
+          "owner": {
+            "value": "exampleUser",
+            "type": "string",
+            "required": true
+          },
+          "repo": {
+            "value": "exampleRepo",
+            "type": "string",
+            "required": true
+          },
+          "pull_number": {
+            "value": 42,
+            "type": "integer",
+            "required": true
+          },
+          "include_diff_content": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetRepository",
+      "qualifiedName": "Github.GetRepository",
+      "fullyQualifiedName": "Github.GetRepository@2.0.1",
+      "description": "Get a repository.\n\nRetrieves detailed information about a repository using the GitHub API.",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository. The name is not case sensitive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repo",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository without the .git extension. The name is not case sensitive.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Repository details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.GetRepository",
+        "parameters": {
+          "owner": {
+            "value": "octocat",
+            "type": "string",
+            "required": true
+          },
+          "repo": {
+            "value": "Hello-World",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetReviewWorkload",
+      "qualifiedName": "Github.GetReviewWorkload",
+      "fullyQualifiedName": "Github.GetReviewWorkload@2.0.1",
+      "description": "Get pull requests awaiting review by the authenticated user.\n\nReturns PRs where user is requested as reviewer and PRs user has recently reviewed.",
+      "parameters": [],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "PR review workload information"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.GetReviewWorkload",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetUserOpenItems",
+      "qualifiedName": "Github.GetUserOpenItems",
+      "fullyQualifiedName": "Github.GetUserOpenItems@2.0.1",
+      "description": "Get user's currently open pull requests and issues across all repositories.\n\nReturns open PRs and issues authored by the authenticated user.",
+      "parameters": [
+        {
+          "name": "per_page",
+          "type": "integer",
+          "required": false,
+          "description": "Number of items per category (PRs and issues). Default is 30, max 100.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "User's currently open pull requests and issues"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.GetUserOpenItems",
+        "parameters": {
+          "per_page": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetUserRecentActivity",
+      "qualifiedName": "Github.GetUserRecentActivity",
+      "fullyQualifiedName": "Github.GetUserRecentActivity@2.0.1",
+      "description": "Get the authenticated user's recent pull requests, reviews, issues, and commits.\n\nReturns PRs they authored, merged PRs, PRs they reviewed, issues they opened, and commits pushed",
+      "parameters": [
+        {
+          "name": "days",
+          "type": "integer",
+          "required": false,
+          "description": "Number of days to look back. Default is 30.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "per_page",
+          "type": "integer",
+          "required": false,
+          "description": "Number of items per category (PRs and issues). Default is 10, max 50.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Recent pull requests, reviews, issues, and commits"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.GetUserRecentActivity",
+        "parameters": {
+          "days": {
+            "value": 14,
+            "type": "integer",
+            "required": false
+          },
+          "per_page": {
+            "value": 20,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListIssues",
+      "qualifiedName": "Github.ListIssues",
+      "fullyQualifiedName": "Github.ListIssues@2.0.1",
+      "description": "List issues in a GitHub repository.",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository. The name is not case sensitive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repo",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository without the .git extension. The name is not case sensitive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "required": false,
+          "description": "Indicates the state of the issues to return. Default: open",
+          "enum": ["open", "closed", "all"],
+          "inferrable": true
+        },
+        {
+          "name": "labels",
+          "type": "string",
+          "required": false,
+          "description": "A list of comma separated label names. Example: bug,ui,@high",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sort",
+          "type": "string",
+          "required": false,
+          "description": "What to sort results by. Default: created",
+          "enum": ["created", "updated", "comments"],
+          "inferrable": true
+        },
+        {
+          "name": "direction",
+          "type": "string",
+          "required": false,
+          "description": "The direction to sort the results by. Default: desc",
+          "enum": ["asc", "desc"],
+          "inferrable": true
+        },
+        {
+          "name": "since",
+          "type": "string",
+          "required": false,
+          "description": "Only show notifications updated after the given time. This is a timestamp in ISO 8601 format: YYYY-MM-DDTHH:MM:SSZ.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "per_page",
+          "type": "integer",
+          "required": false,
+          "description": "The number of results per page (max 100). Default: 30",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "page",
+          "type": "integer",
+          "required": false,
+          "description": "Page number of the results to fetch. Default: 1",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "search_org_wide",
+          "type": "boolean",
+          "required": false,
+          "description": "Search across all organization repositories instead of just one repository. Default is False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "List of issues in the repository"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.ListIssues",
+        "parameters": {
+          "owner": {
+            "value": "octocat",
+            "type": "string",
+            "required": true
+          },
+          "repo": {
+            "value": "Hello-World",
+            "type": "string",
+            "required": true
+          },
+          "state": {
+            "value": "open",
+            "type": "string",
+            "required": false
+          },
+          "labels": {
+            "value": "bug,ui",
+            "type": "string",
+            "required": false
+          },
+          "sort": {
+            "value": "created",
+            "type": "string",
+            "required": false
+          },
+          "direction": {
+            "value": "asc",
+            "type": "string",
+            "required": false
+          },
+          "since": {
+            "value": "2023-01-01T00:00:00Z",
+            "type": "string",
+            "required": false
+          },
+          "per_page": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "page": {
+            "value": 2,
+            "type": "integer",
+            "required": false
+          },
+          "search_org_wide": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListNotifications",
+      "qualifiedName": "Github.ListNotifications",
+      "fullyQualifiedName": "Github.ListNotifications@2.0.1",
+      "description": "List GitHub notifications with pagination.\n\nReturns notifications sorted chronologically by most recent first.",
+      "parameters": [
+        {
+          "name": "page",
+          "type": "integer",
+          "required": false,
+          "description": "Page number to fetch. Default is 1.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "per_page",
+          "type": "integer",
+          "required": false,
+          "description": "Number of notifications per page (max 100). Default is 30.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "all_notifications",
+          "type": "boolean",
+          "required": false,
+          "description": "Include read notifications. Default is False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "participating",
+          "type": "boolean",
+          "required": false,
+          "description": "Only show notifications user is participating in. Default is False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repository_full_name",
+          "type": "string",
+          "required": false,
+          "description": "Filter notifications to owner/name repository. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "subject_types",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "List of notification subject types to include. Default is None (all types).",
+          "enum": ["Issue", "PullRequest", "Release", "Commit", "Discussion"],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL", "GITHUB_CLASSIC_PERSONAL_ACCESS_TOKEN"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "unknown"
+        },
+        {
+          "name": "GITHUB_CLASSIC_PERSONAL_ACCESS_TOKEN",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Paginated list of notifications"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.ListNotifications",
+        "parameters": {
+          "page": {
+            "value": 2,
+            "type": "integer",
+            "required": false
+          },
+          "per_page": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "all_notifications": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "participating": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "repository_full_name": {
+            "value": "owner/repo-name",
+            "type": "string",
+            "required": false
+          },
+          "subject_types": {
+            "value": ["Issue", "PullRequest"],
+            "type": "array",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListOrgRepositories",
+      "qualifiedName": "Github.ListOrgRepositories",
+      "fullyQualifiedName": "Github.ListOrgRepositories@2.0.1",
+      "description": "List repositories for the specified organization.",
+      "parameters": [
+        {
+          "name": "org",
+          "type": "string",
+          "required": true,
+          "description": "The organization name. The name is not case sensitive",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repo_type",
+          "type": "string",
+          "required": false,
+          "description": "The types of repositories you want returned. Default is all repositories.",
+          "enum": ["all", "public", "private", "forks", "sources", "member"],
+          "inferrable": true
+        },
+        {
+          "name": "sort",
+          "type": "string",
+          "required": false,
+          "description": "The property to sort the results by. Default is created.",
+          "enum": ["created", "updated", "pushed", "full_name"],
+          "inferrable": true
+        },
+        {
+          "name": "sort_direction",
+          "type": "string",
+          "required": false,
+          "description": "The order to sort by. Default is asc.",
+          "enum": ["asc", "desc"],
+          "inferrable": true
+        },
+        {
+          "name": "per_page",
+          "type": "integer",
+          "required": false,
+          "description": "The number of results per page. Default is 30.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "page",
+          "type": "integer",
+          "required": false,
+          "description": "The page number of the results to fetch. Default is 1.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "List of organization repositories"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.ListOrgRepositories",
+        "parameters": {
+          "org": {
+            "value": "example-org",
+            "type": "string",
+            "required": true
+          },
+          "repo_type": {
+            "value": "public",
+            "type": "string",
+            "required": false
+          },
+          "sort": {
+            "value": "updated",
+            "type": "string",
+            "required": false
+          },
+          "sort_direction": {
+            "value": "desc",
+            "type": "string",
+            "required": false
+          },
+          "per_page": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "page": {
+            "value": 2,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListProjectFields",
+      "qualifiedName": "Github.ListProjectFields",
+      "fullyQualifiedName": "Github.ListProjectFields@2.0.1",
+      "description": "List fields for a Projects V2 project.\n\nReturns all custom fields configured for the project, including field types\nand available options for select/iteration fields.",
+      "parameters": [
+        {
+          "name": "project_search_mode",
+          "type": "string",
+          "required": true,
+          "description": "Select project lookup by number or name",
+          "enum": ["number", "name"],
+          "inferrable": true
+        },
+        {
+          "name": "project_identifier",
+          "type": "string",
+          "required": true,
+          "description": "Project number or title",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "scope_target",
+          "type": "string",
+          "required": true,
+          "description": "Where the project lives",
+          "enum": ["all", "organization", "user"],
+          "inferrable": true
+        },
+        {
+          "name": "scope_identifier",
+          "type": "string",
+          "required": true,
+          "description": "Owner reference",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "auto_accept_matches",
+          "type": "boolean",
+          "required": false,
+          "description": "Auto-accept fuzzy matches above 0.9 confidence. Default is False",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Project fields with options"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.ListProjectFields",
+        "parameters": {
+          "project_search_mode": {
+            "value": "name",
+            "type": "string",
+            "required": true
+          },
+          "project_identifier": {
+            "value": "My Project",
+            "type": "string",
+            "required": true
+          },
+          "scope_target": {
+            "value": "organization",
+            "type": "string",
+            "required": true
+          },
+          "scope_identifier": {
+            "value": "my-org",
+            "type": "string",
+            "required": true
+          },
+          "auto_accept_matches": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListProjectItems",
+      "qualifiedName": "Github.ListProjectItems",
+      "fullyQualifiedName": "Github.ListProjectItems@2.0.1",
+      "description": "List items for a Projects V2 project with optional filtering.",
+      "parameters": [
+        {
+          "name": "project_search_mode",
+          "type": "string",
+          "required": true,
+          "description": "Select project lookup by number or name",
+          "enum": ["number", "name"],
+          "inferrable": true
+        },
+        {
+          "name": "project_identifier",
+          "type": "string",
+          "required": true,
+          "description": "Project number or title",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "scope_target",
+          "type": "string",
+          "required": true,
+          "description": "Where the project lives",
+          "enum": ["all", "organization", "user"],
+          "inferrable": true
+        },
+        {
+          "name": "scope_identifier",
+          "type": "string",
+          "required": true,
+          "description": "Owner reference",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "filter_assignee",
+          "type": "string",
+          "required": false,
+          "description": "Filter by assignee ('@me' or username)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "filter_status",
+          "type": "string",
+          "required": false,
+          "description": "Filter by status field value",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "filter_labels",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Filter by labels",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "filter_is_open",
+          "type": "boolean",
+          "required": false,
+          "description": "Filter by open/closed state",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "advanced_query",
+          "type": "string",
+          "required": false,
+          "description": "Advanced query (overrides filters)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "per_page",
+          "type": "integer",
+          "required": false,
+          "description": "Items per page (max 100). Default is 30.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Cursor for next page",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "auto_accept_matches",
+          "type": "boolean",
+          "required": false,
+          "description": "Auto-accept fuzzy matches above 0.9 confidence. Default is False",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Project items with summary and pagination"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.ListProjectItems",
+        "parameters": {
+          "project_search_mode": {
+            "value": "name",
+            "type": "string",
+            "required": true
+          },
+          "project_identifier": {
+            "value": "Project Alpha",
+            "type": "string",
+            "required": true
+          },
+          "scope_target": {
+            "value": "organization",
+            "type": "string",
+            "required": true
+          },
+          "scope_identifier": {
+            "value": "my-org",
+            "type": "string",
+            "required": true
+          },
+          "filter_assignee": {
+            "value": "@me",
+            "type": "string",
+            "required": false
+          },
+          "filter_status": {
+            "value": "in_progress",
+            "type": "string",
+            "required": false
+          },
+          "filter_labels": {
+            "value": ["bug", "feature"],
+            "type": "array",
+            "required": false
+          },
+          "filter_is_open": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "advanced_query": {
+            "value": "created:>2023-01-01",
+            "type": "string",
+            "required": false
+          },
+          "per_page": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "abc123",
+            "type": "string",
+            "required": false
+          },
+          "auto_accept_matches": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListProjects",
+      "qualifiedName": "Github.ListProjects",
+      "fullyQualifiedName": "Github.ListProjects@2.0.1",
+      "description": "List Projects V2 across organization or user scopes.",
+      "parameters": [
+        {
+          "name": "search_mode",
+          "type": "string",
+          "required": true,
+          "description": "Select search by number or name",
+          "enum": ["number", "name"],
+          "inferrable": true
+        },
+        {
+          "name": "scope_target",
+          "type": "string",
+          "required": true,
+          "description": "Where the project lives",
+          "enum": ["all", "organization", "user"],
+          "inferrable": true
+        },
+        {
+          "name": "scope_identifier",
+          "type": "string",
+          "required": true,
+          "description": "Owner reference (org name or username)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_identifier",
+          "type": "string",
+          "required": false,
+          "description": "Project number or title",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "query_filter",
+          "type": "string",
+          "required": false,
+          "description": "Filter projects (e.g., 'template')",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "required": false,
+          "description": "Project state filter",
+          "enum": ["open", "closed", "all"],
+          "inferrable": true
+        },
+        {
+          "name": "per_page",
+          "type": "integer",
+          "required": false,
+          "description": "Items per page (max 100). Default is 30.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Cursor for next page",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "auto_accept_matches",
+          "type": "boolean",
+          "required": false,
+          "description": "Auto-accept fuzzy matches above 0.9 confidence. Default is False",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Projects with summary and pagination"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.ListProjects",
+        "parameters": {
+          "search_mode": {
+            "value": "name",
+            "type": "string",
+            "required": true
+          },
+          "scope_target": {
+            "value": "org",
+            "type": "string",
+            "required": true
+          },
+          "scope_identifier": {
+            "value": "example-org",
+            "type": "string",
+            "required": true
+          },
+          "project_identifier": {
+            "value": "Project Alpha",
+            "type": "string",
+            "required": false
+          },
+          "query_filter": {
+            "value": "template",
+            "type": "string",
+            "required": false
+          },
+          "state": {
+            "value": "open",
+            "type": "string",
+            "required": false
+          },
+          "per_page": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "cursor": {
+            "value": "abc123",
+            "type": "string",
+            "required": false
+          },
+          "auto_accept_matches": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListPullRequestCommits",
+      "qualifiedName": "Github.ListPullRequestCommits",
+      "fullyQualifiedName": "Github.ListPullRequestCommits@2.0.1",
+      "description": "List commits (from oldest to newest) on a pull request in a GitHub repository.",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository. The name is not case sensitive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repo",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository without the .git extension. The name is not case sensitive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "pull_number",
+          "type": "integer",
+          "required": true,
+          "description": "The number that identifies the pull request.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "per_page",
+          "type": "integer",
+          "required": false,
+          "description": "The number of results per page (max 100). Default is 30.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "page",
+          "type": "integer",
+          "required": false,
+          "description": "The page number of the results to fetch. Default is 1.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "List of commits on the pull request"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.ListPullRequestCommits",
+        "parameters": {
+          "owner": {
+            "value": "exampleOwner",
+            "type": "string",
+            "required": true
+          },
+          "repo": {
+            "value": "exampleRepo",
+            "type": "string",
+            "required": true
+          },
+          "pull_number": {
+            "value": 42,
+            "type": "integer",
+            "required": true
+          },
+          "per_page": {
+            "value": 30,
+            "type": "integer",
+            "required": false
+          },
+          "page": {
+            "value": 1,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListPullRequests",
+      "qualifiedName": "Github.ListPullRequests",
+      "fullyQualifiedName": "Github.ListPullRequests@2.0.1",
+      "description": "List pull requests in a GitHub repository.\n\nBy default returns newest pull requests first (direction=DESC).",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository. The name is not case sensitive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repo",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository without the .git extension. The name is not case sensitive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "required": false,
+          "description": "The state of the pull requests to return. Default is open.",
+          "enum": ["open", "closed", "all"],
+          "inferrable": true
+        },
+        {
+          "name": "head",
+          "type": "string",
+          "required": false,
+          "description": "Filter pulls by head user or head organization and branch name in the format of user:ref-name or organization:ref-name.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "base",
+          "type": "string",
+          "required": false,
+          "description": "Filter pulls by base branch name. Default is main.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sort",
+          "type": "string",
+          "required": false,
+          "description": "The property to sort the results by.",
+          "enum": ["created", "updated", "popularity", "long-running"],
+          "inferrable": true
+        },
+        {
+          "name": "direction",
+          "type": "string",
+          "required": false,
+          "description": "The direction of the sort.",
+          "enum": ["asc", "desc"],
+          "inferrable": true
+        },
+        {
+          "name": "per_page",
+          "type": "integer",
+          "required": false,
+          "description": "The number of results per page (max 100). Default is 30.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "page",
+          "type": "integer",
+          "required": false,
+          "description": "The page number of the results to fetch. Default is 1.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "search_org_wide",
+          "type": "boolean",
+          "required": false,
+          "description": "Search across all organization repositories instead of just one repository. Default is False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "List of pull requests"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.ListPullRequests",
+        "parameters": {
+          "owner": {
+            "value": "octocat",
+            "type": "string",
+            "required": true
+          },
+          "repo": {
+            "value": "Hello-World",
+            "type": "string",
+            "required": true
+          },
+          "state": {
+            "value": "open",
+            "type": "string",
+            "required": false
+          },
+          "head": {
+            "value": "octocat:feature-branch",
+            "type": "string",
+            "required": false
+          },
+          "base": {
+            "value": "main",
+            "type": "string",
+            "required": false
+          },
+          "sort": {
+            "value": "created",
+            "type": "string",
+            "required": false
+          },
+          "direction": {
+            "value": "DESC",
+            "type": "string",
+            "required": false
+          },
+          "per_page": {
+            "value": 30,
+            "type": "integer",
+            "required": false
+          },
+          "page": {
+            "value": 1,
+            "type": "integer",
+            "required": false
+          },
+          "search_org_wide": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListRepositoryActivities",
+      "qualifiedName": "Github.ListRepositoryActivities",
+      "fullyQualifiedName": "Github.ListRepositoryActivities@2.0.1",
+      "description": "List repository activities.\n\nRetrieves a detailed history of changes to a repository, such as pushes, merges,\nforce pushes, and branch changes, and associates these changes with commits and users.",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository. The name is not case sensitive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repo",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository without the .git extension. The name is not case sensitive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "direction",
+          "type": "string",
+          "required": false,
+          "description": "The direction to sort the results by. Default is desc.",
+          "enum": ["asc", "desc"],
+          "inferrable": true
+        },
+        {
+          "name": "per_page",
+          "type": "integer",
+          "required": false,
+          "description": "The number of results per page (max 100). Default is 30.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "before",
+          "type": "string",
+          "required": false,
+          "description": "A cursor (unique ID, e.g., a SHA of a commit) to search for results before this cursor.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "after",
+          "type": "string",
+          "required": false,
+          "description": "A cursor (unique ID, e.g., a SHA of a commit) to search for results after this cursor.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "ref",
+          "type": "string",
+          "required": false,
+          "description": "The Git reference for the activities you want to list. The ref for a branch can be formatted either as refs/heads/BRANCH_NAME or BRANCH_NAME, where BRANCH_NAME is the name of your branch.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "actor",
+          "type": "string",
+          "required": false,
+          "description": "The GitHub username to filter by the actor who performed the activity.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "time_period",
+          "type": "string",
+          "required": false,
+          "description": "The time period to filter by.",
+          "enum": ["day", "week", "month", "quarter", "year"],
+          "inferrable": true
+        },
+        {
+          "name": "activity_type",
+          "type": "string",
+          "required": false,
+          "description": "The activity type to filter by.",
+          "enum": [
+            "push",
+            "force_push",
+            "branch_creation",
+            "branch_deletion",
+            "pr_merge",
+            "merge_queue_merge"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "List of repository activities"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.ListRepositoryActivities",
+        "parameters": {
+          "owner": {
+            "value": "exampleOwner",
+            "type": "string",
+            "required": true
+          },
+          "repo": {
+            "value": "exampleRepo",
+            "type": "string",
+            "required": true
+          },
+          "direction": {
+            "value": "asc",
+            "type": "string",
+            "required": false
+          },
+          "per_page": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "before": {
+            "value": "abc123",
+            "type": "string",
+            "required": false
+          },
+          "after": {
+            "value": "def456",
+            "type": "string",
+            "required": false
+          },
+          "ref": {
+            "value": "refs/heads/main",
+            "type": "string",
+            "required": false
+          },
+          "actor": {
+            "value": "exampleUser",
+            "type": "string",
+            "required": false
+          },
+          "time_period": {
+            "value": "last_month",
+            "type": "string",
+            "required": false
+          },
+          "activity_type": {
+            "value": "push",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListRepositoryCollaborators",
+      "qualifiedName": "Github.ListRepositoryCollaborators",
+      "fullyQualifiedName": "Github.ListRepositoryCollaborators@2.0.1",
+      "description": "List collaborators for a repository.\n\nReturns users who have access to the repository and can be requested as reviewers\nfor pull requests. Useful for discovering who can review your PR.\n\nDetail levels:\n- basic: Only explicit collaborators (fast, minimal API calls)\n- include_org_members: Add all org members (default, moderate API calls)\n- full_profiles: Add org members + enrich with names/emails (slow, many API calls)",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repo",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository without the .git extension.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "affiliation",
+          "type": "string",
+          "required": false,
+          "description": "Filter by affiliation type. Default is all.",
+          "enum": ["outside", "direct", "all"],
+          "inferrable": true
+        },
+        {
+          "name": "permission",
+          "type": "string",
+          "required": false,
+          "description": "Filter by permission level. Default returns all permission levels.",
+          "enum": ["pull", "triage", "push", "maintain", "admin"],
+          "inferrable": true
+        },
+        {
+          "name": "detail_level",
+          "type": "string",
+          "required": false,
+          "description": "Detail level to include when listing collaborators. Default is include_org_members.",
+          "enum": ["basic", "include_org_members", "full_profiles"],
+          "inferrable": true
+        },
+        {
+          "name": "include_teams",
+          "type": "boolean",
+          "required": false,
+          "description": "Include teams that have access to the repository. Teams can be requested as reviewers using their slug. Default is True.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "per_page",
+          "type": "integer",
+          "required": false,
+          "description": "Number of collaborators per page (max 100). Default is 30.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "page",
+          "type": "integer",
+          "required": false,
+          "description": "Page number of results to fetch. Default is 1.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "List of repository collaborators and teams who can review PRs"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.ListRepositoryCollaborators",
+        "parameters": {
+          "owner": {
+            "value": "exampleUser",
+            "type": "string",
+            "required": true
+          },
+          "repo": {
+            "value": "exampleRepo",
+            "type": "string",
+            "required": true
+          },
+          "affiliation": {
+            "value": "all",
+            "type": "string",
+            "required": false
+          },
+          "permission": {
+            "value": "write",
+            "type": "string",
+            "required": false
+          },
+          "detail_level": {
+            "value": "basic",
+            "type": "string",
+            "required": false
+          },
+          "include_teams": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "per_page": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "page": {
+            "value": 1,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListRepositoryLabels",
+      "qualifiedName": "Github.ListRepositoryLabels",
+      "fullyQualifiedName": "Github.ListRepositoryLabels@2.0.1",
+      "description": "List all labels defined in a repository.",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository. The name is not case sensitive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repo",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository without the .git extension. The name is not case sensitive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "per_page",
+          "type": "integer",
+          "required": false,
+          "description": "The number of results per page (max 100). Default is 100.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "page",
+          "type": "integer",
+          "required": false,
+          "description": "The page number of the results to fetch. Default is 1.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "List of repository labels"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.ListRepositoryLabels",
+        "parameters": {
+          "owner": {
+            "value": "exampleOwner",
+            "type": "string",
+            "required": true
+          },
+          "repo": {
+            "value": "exampleRepo",
+            "type": "string",
+            "required": true
+          },
+          "per_page": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "page": {
+            "value": 2,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListReviewCommentsInARepository",
+      "qualifiedName": "Github.ListReviewCommentsInARepository",
+      "fullyQualifiedName": "Github.ListReviewCommentsInARepository@2.0.1",
+      "description": "List review comments in a GitHub repository.",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository. The name is not case sensitive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repo",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository without the .git extension. The name is not case sensitive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sort",
+          "type": "string",
+          "required": false,
+          "description": "The property to sort the results by. Default is created.",
+          "enum": ["created", "updated"],
+          "inferrable": true
+        },
+        {
+          "name": "direction",
+          "type": "string",
+          "required": false,
+          "description": "The direction to sort results. Ignored without sort parameter. Default is desc.",
+          "enum": ["asc", "desc"],
+          "inferrable": true
+        },
+        {
+          "name": "since",
+          "type": "string",
+          "required": false,
+          "description": "Only show results updated after this time. Supports: relative dates ('today', 'yesterday', 'last_week', 'last_30_days'), ISO 8601 ('2025-11-10T00:00:00Z'), or simple dates ('2025-11-10').",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "per_page",
+          "type": "integer",
+          "required": false,
+          "description": "The number of results per page (max 100). Default is 30.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "page",
+          "type": "integer",
+          "required": false,
+          "description": "The page number of the results to fetch. Default is 1.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "List of review comments in the repository"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.ListReviewCommentsInARepository",
+        "parameters": {
+          "owner": {
+            "value": "exampleUser",
+            "type": "string",
+            "required": true
+          },
+          "repo": {
+            "value": "exampleRepo",
+            "type": "string",
+            "required": true
+          },
+          "sort": {
+            "value": "created",
+            "type": "string",
+            "required": false
+          },
+          "direction": {
+            "value": "asc",
+            "type": "string",
+            "required": false
+          },
+          "since": {
+            "value": "last_week",
+            "type": "string",
+            "required": false
+          },
+          "per_page": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "page": {
+            "value": 2,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListReviewCommentsOnPullRequest",
+      "qualifiedName": "Github.ListReviewCommentsOnPullRequest",
+      "fullyQualifiedName": "Github.ListReviewCommentsOnPullRequest@2.0.1",
+      "description": "List review comments on a pull request in a GitHub repository.",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository. The name is not case sensitive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repo",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository without the .git extension. The name is not case sensitive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "pull_number",
+          "type": "integer",
+          "required": true,
+          "description": "The number that identifies the pull request.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sort",
+          "type": "string",
+          "required": false,
+          "description": "The property to sort the results by. Default is created.",
+          "enum": ["created", "updated"],
+          "inferrable": true
+        },
+        {
+          "name": "direction",
+          "type": "string",
+          "required": false,
+          "description": "The direction to sort results. Default is desc.",
+          "enum": ["asc", "desc"],
+          "inferrable": true
+        },
+        {
+          "name": "since",
+          "type": "string",
+          "required": false,
+          "description": "Only show results updated after this time. Supports: relative dates ('today', 'yesterday', 'last_week', 'last_30_days'), ISO 8601 ('2025-11-10T00:00:00Z'), or simple dates ('2025-11-10').",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "per_page",
+          "type": "integer",
+          "required": false,
+          "description": "The number of results per page (max 100). Default is 30.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "page",
+          "type": "integer",
+          "required": false,
+          "description": "The page number of the results to fetch. Default is 1.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "show_resolved",
+          "type": "boolean",
+          "required": false,
+          "description": "Filter by resolution status. True=resolved only, False=unresolved only, None=all. Default is None.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "List of review comments on the pull request"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.ListReviewCommentsOnPullRequest",
+        "parameters": {
+          "owner": {
+            "value": "exampleUser",
+            "type": "string",
+            "required": true
+          },
+          "repo": {
+            "value": "exampleRepo",
+            "type": "string",
+            "required": true
+          },
+          "pull_number": {
+            "value": 42,
+            "type": "integer",
+            "required": true
+          },
+          "sort": {
+            "value": "created",
+            "type": "string",
+            "required": false
+          },
+          "direction": {
+            "value": "desc",
+            "type": "string",
+            "required": false
+          },
+          "since": {
+            "value": "last_30_days",
+            "type": "string",
+            "required": false
+          },
+          "per_page": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "page": {
+            "value": 2,
+            "type": "integer",
+            "required": false
+          },
+          "show_resolved": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListStargazers",
+      "qualifiedName": "Github.ListStargazers",
+      "fullyQualifiedName": "Github.ListStargazers@2.0.1",
+      "description": "List the stargazers for a GitHub repository.\n\nReturns stargazers in chronological order (oldest first).",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "string",
+          "required": true,
+          "description": "The owner of the repository",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repo",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "page",
+          "type": "integer",
+          "required": false,
+          "description": "The page number of the stargazers to fetch. Default is 1.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "per_page",
+          "type": "integer",
+          "required": false,
+          "description": "The number of stargazers per page (max 100). Default is 30.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "List of stargazers for the repository"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.ListStargazers",
+        "parameters": {
+          "owner": {
+            "value": "octocat",
+            "type": "string",
+            "required": true
+          },
+          "repo": {
+            "value": "Hello-World",
+            "type": "string",
+            "required": true
+          },
+          "page": {
+            "value": 1,
+            "type": "integer",
+            "required": false
+          },
+          "per_page": {
+            "value": 30,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ManageLabels",
+      "qualifiedName": "Github.ManageLabels",
+      "fullyQualifiedName": "Github.ManageLabels@2.0.1",
+      "description": "Add or remove labels from an issue or pull request.\n\nSupports fuzzy matching for typo tolerance. Both issues and pull requests\nsupport labels through the same API. You can add and remove labels in a\nsingle operation.",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repo",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository without the .git extension.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "number",
+          "type": "integer",
+          "required": true,
+          "description": "The number that identifies the issue or pull request.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "entity_type",
+          "type": "string",
+          "required": true,
+          "description": "The type of entity (issue or pull_request).",
+          "enum": ["issue", "pull_request"],
+          "inferrable": true
+        },
+        {
+          "name": "add_labels",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "List of label names to add. Supports fuzzy matching for typo tolerance.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "remove_labels",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "List of label names to remove. Supports fuzzy matching for typo tolerance.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "auto_accept_matches",
+          "type": "boolean",
+          "required": false,
+          "description": "Auto-accept fuzzy matches above 0.9 confidence. Default is False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Label management operation result"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.ManageLabels",
+        "parameters": {
+          "owner": {
+            "value": "exampleUser",
+            "type": "string",
+            "required": true
+          },
+          "repo": {
+            "value": "exampleRepo",
+            "type": "string",
+            "required": true
+          },
+          "number": {
+            "value": 42,
+            "type": "integer",
+            "required": true
+          },
+          "entity_type": {
+            "value": "issue",
+            "type": "string",
+            "required": true
+          },
+          "add_labels": {
+            "value": ["bug", "enhancement"],
+            "type": "array",
+            "required": false
+          },
+          "remove_labels": {
+            "value": ["wip"],
+            "type": "array",
+            "required": false
+          },
+          "auto_accept_matches": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ManagePullRequestReviewers",
+      "qualifiedName": "Github.ManagePullRequestReviewers",
+      "fullyQualifiedName": "Github.ManagePullRequestReviewers@2.0.1",
+      "description": "Manage reviewers for a pull request.",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repo",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository without the .git extension.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "pull_request_number",
+          "type": "integer",
+          "required": true,
+          "description": "The number that identifies the pull request.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "add_reviewers",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "List of user logins to add as reviewers.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "add_team_reviewers",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "List of team slugs to add as reviewers.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "remove_reviewers",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "List of user logins to remove as reviewers.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "remove_team_reviewers",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "List of team slugs to remove as reviewers.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Updated reviewers information"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.ManagePullRequestReviewers",
+        "parameters": {
+          "owner": {
+            "value": "exampleOwner",
+            "type": "string",
+            "required": true
+          },
+          "repo": {
+            "value": "exampleRepo",
+            "type": "string",
+            "required": true
+          },
+          "pull_request_number": {
+            "value": 42,
+            "type": "integer",
+            "required": true
+          },
+          "add_reviewers": {
+            "value": ["user1", "user2"],
+            "type": "array",
+            "required": false
+          },
+          "add_team_reviewers": {
+            "value": ["teamA"],
+            "type": "array",
+            "required": false
+          },
+          "remove_reviewers": {
+            "value": ["user3"],
+            "type": "array",
+            "required": false
+          },
+          "remove_team_reviewers": {
+            "value": ["teamB"],
+            "type": "array",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "MergePullRequest",
+      "qualifiedName": "Github.MergePullRequest",
+      "fullyQualifiedName": "Github.MergePullRequest@2.0.1",
+      "description": "Merge a pull request in a GitHub repository.",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repo",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository without the .git extension.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "pull_request_number",
+          "type": "integer",
+          "required": true,
+          "description": "The number that identifies the pull request.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "merge_method",
+          "type": "string",
+          "required": false,
+          "description": "The merge method to use. Default is merge.",
+          "enum": ["merge", "squash", "rebase"],
+          "inferrable": true
+        },
+        {
+          "name": "commit_title",
+          "type": "string",
+          "required": false,
+          "description": "Title for the merge commit.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "commit_message",
+          "type": "string",
+          "required": false,
+          "description": "Extra detail for the merge commit message.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sha",
+          "type": "string",
+          "required": false,
+          "description": "Expected head SHA to ensure merge safety. Merge fails if SHA doesn't match.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "delete_branch",
+          "type": "boolean",
+          "required": false,
+          "description": "Delete the head branch after successful merge. Default is False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Merge operation status and details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.MergePullRequest",
+        "parameters": {
+          "owner": {
+            "value": "exampleUser",
+            "type": "string",
+            "required": true
+          },
+          "repo": {
+            "value": "example-repo",
+            "type": "string",
+            "required": true
+          },
+          "pull_request_number": {
+            "value": 42,
+            "type": "integer",
+            "required": true
+          },
+          "merge_method": {
+            "value": "squash",
+            "type": "string",
+            "required": false
+          },
+          "commit_title": {
+            "value": "Merge pull request #42",
+            "type": "string",
+            "required": false
+          },
+          "commit_message": {
+            "value": "This merge includes changes from feature branch.",
+            "type": "string",
+            "required": false
+          },
+          "sha": {
+            "value": "abc123def456ghi789jkl",
+            "type": "string",
+            "required": false
+          },
+          "delete_branch": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ResolveReviewThread",
+      "qualifiedName": "Github.ResolveReviewThread",
+      "fullyQualifiedName": "Github.ResolveReviewThread@2.0.1",
+      "description": "Resolve or unresolve a pull request review conversation thread.",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repo",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "thread_id",
+          "type": "string",
+          "required": true,
+          "description": "The GraphQL Node ID of the review thread.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "resolved",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to resolve or unresolve the thread. Default is True.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Thread resolution result"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.ResolveReviewThread",
+        "parameters": {
+          "owner": {
+            "value": "exampleUser",
+            "type": "string",
+            "required": true
+          },
+          "repo": {
+            "value": "exampleRepo",
+            "type": "string",
+            "required": true
+          },
+          "thread_id": {
+            "value": "MDU6UmVmcm93VGhyZWFkMTUyMzY3ODU6UkVTRU5U",
+            "type": "string",
+            "required": true
+          },
+          "resolved": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "SearchMyRepos",
+      "qualifiedName": "Github.SearchMyRepos",
+      "fullyQualifiedName": "Github.SearchMyRepos@2.0.1",
+      "description": "Search repositories accessible to the authenticated user with fuzzy matching.",
+      "parameters": [
+        {
+          "name": "repo_name",
+          "type": "string",
+          "required": true,
+          "description": "Repository name or partial name to search for",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "scope",
+          "type": "string",
+          "required": false,
+          "description": "Where to search. Default is all.",
+          "enum": ["all", "personal", "organization"],
+          "inferrable": true
+        },
+        {
+          "name": "organization",
+          "type": "string",
+          "required": false,
+          "description": "Organization name when scope is 'organization'. If omitted, searches all of your organizations.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "auto_accept_matches",
+          "type": "boolean",
+          "required": false,
+          "description": "Auto-accept fuzzy matches above 0.9 confidence. Default is False",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_recent_branches",
+          "type": "integer",
+          "required": false,
+          "description": "Include up to this many recent branches per repository (0 disables, default 10, max 30).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Fuzzy repository search results"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.SearchMyRepos",
+        "parameters": {
+          "repo_name": {
+            "value": "my-awesome-repo",
+            "type": "string",
+            "required": true
+          },
+          "scope": {
+            "value": "all",
+            "type": "string",
+            "required": false
+          },
+          "organization": {
+            "value": "my-org",
+            "type": "string",
+            "required": false
+          },
+          "auto_accept_matches": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "include_recent_branches": {
+            "value": 5,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "SearchProjectItem",
+      "qualifiedName": "Github.SearchProjectItem",
+      "fullyQualifiedName": "Github.SearchProjectItem@2.0.1",
+      "description": "Search for a specific item in a Projects V2 project.",
+      "parameters": [
+        {
+          "name": "project_search_mode",
+          "type": "string",
+          "required": true,
+          "description": "Select project lookup by number or name",
+          "enum": ["number", "name"],
+          "inferrable": true
+        },
+        {
+          "name": "project_identifier",
+          "type": "string",
+          "required": true,
+          "description": "Project number or title",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "item_search_mode",
+          "type": "string",
+          "required": true,
+          "description": "Select item lookup by ID or title",
+          "enum": ["id", "title"],
+          "inferrable": true
+        },
+        {
+          "name": "item_identifier",
+          "type": "string",
+          "required": true,
+          "description": "Item ID or title",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "scope_target",
+          "type": "string",
+          "required": true,
+          "description": "Where the project lives",
+          "enum": ["all", "organization", "user"],
+          "inferrable": true
+        },
+        {
+          "name": "scope_identifier",
+          "type": "string",
+          "required": true,
+          "description": "Owner reference",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "auto_accept_matches",
+          "type": "boolean",
+          "required": false,
+          "description": "Auto-accept fuzzy matches above 0.9 confidence. Default is False",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Single item or suggestions"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.SearchProjectItem",
+        "parameters": {
+          "project_search_mode": {
+            "value": "name",
+            "type": "string",
+            "required": true
+          },
+          "project_identifier": {
+            "value": "Project Alpha",
+            "type": "string",
+            "required": true
+          },
+          "item_search_mode": {
+            "value": "ID",
+            "type": "string",
+            "required": true
+          },
+          "item_identifier": {
+            "value": "123456",
+            "type": "string",
+            "required": true
+          },
+          "scope_target": {
+            "value": "repository",
+            "type": "string",
+            "required": true
+          },
+          "scope_identifier": {
+            "value": "owner/repo",
+            "type": "string",
+            "required": true
+          },
+          "auto_accept_matches": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "SetStarred",
+      "qualifiedName": "Github.SetStarred",
+      "fullyQualifiedName": "Github.SetStarred@2.0.1",
+      "description": "Star or un-star a GitHub repository.",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "string",
+          "required": true,
+          "description": "The owner of the repository",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "starred",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to star the repository or not. Default is True.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Result of starring/unstarring operation"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.SetStarred",
+        "parameters": {
+          "owner": {
+            "value": "exampleUser",
+            "type": "string",
+            "required": true
+          },
+          "name": {
+            "value": "exampleRepo",
+            "type": "string",
+            "required": true
+          },
+          "starred": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "SubmitPullRequestReview",
+      "qualifiedName": "Github.SubmitPullRequestReview",
+      "fullyQualifiedName": "Github.SubmitPullRequestReview@2.0.1",
+      "description": "Submit a review for a pull request.",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repo",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository without the .git extension.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "pull_request_number",
+          "type": "integer",
+          "required": true,
+          "description": "The number that identifies the pull request.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "event",
+          "type": "string",
+          "required": true,
+          "description": "The review action to perform.",
+          "enum": ["APPROVE", "REQUEST_CHANGES", "COMMENT"],
+          "inferrable": true
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "required": false,
+          "description": "The body text of the review. Required when event is REQUEST_CHANGES or COMMENT.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Submitted review details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.SubmitPullRequestReview",
+        "parameters": {
+          "owner": {
+            "value": "exampleUser",
+            "type": "string",
+            "required": true
+          },
+          "repo": {
+            "value": "exampleRepo",
+            "type": "string",
+            "required": true
+          },
+          "pull_request_number": {
+            "value": 42,
+            "type": "integer",
+            "required": true
+          },
+          "event": {
+            "value": "APPROVE",
+            "type": "string",
+            "required": true
+          },
+          "body": {
+            "value": "Looks good to me!",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "UpdateFileLines",
+      "qualifiedName": "Github.UpdateFileLines",
+      "fullyQualifiedName": "Github.UpdateFileLines@2.0.1",
+      "description": "Replace a block of lines within a file (1-indexed, inclusive). Set mode=FileUpdateMode.APPEND\nto add new content to the end of the file.",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repo",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository without the .git extension.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "path",
+          "type": "string",
+          "required": true,
+          "description": "The content path.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "branch",
+          "type": "string",
+          "required": true,
+          "description": "The branch to update.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "new_content",
+          "type": "string",
+          "required": true,
+          "description": "The replacement lines (no need to include trailing newline).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "message",
+          "type": "string",
+          "required": true,
+          "description": "The commit message describing the change.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_line",
+          "type": "integer",
+          "required": false,
+          "description": "First line to replace (1-indexed). Required when mode is FileUpdateMode.REPLACE; ignored when mode is FileUpdateMode.APPEND.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_line",
+          "type": "integer",
+          "required": false,
+          "description": "Last line to replace (1-indexed, inclusive). Required when mode is FileUpdateMode.REPLACE; ignored when mode is FileUpdateMode.APPEND.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "mode",
+          "type": "string",
+          "required": false,
+          "description": "How to apply the change. Default is FileUpdateMode.REPLACE",
+          "enum": ["replace", "append"],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Partial file update result"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.UpdateFileLines",
+        "parameters": {
+          "owner": {
+            "value": "exampleOwner",
+            "type": "string",
+            "required": true
+          },
+          "repo": {
+            "value": "exampleRepo",
+            "type": "string",
+            "required": true
+          },
+          "path": {
+            "value": "path/to/file.txt",
+            "type": "string",
+            "required": true
+          },
+          "branch": {
+            "value": "main",
+            "type": "string",
+            "required": true
+          },
+          "new_content": {
+            "value": "This is the new content to append.",
+            "type": "string",
+            "required": true
+          },
+          "message": {
+            "value": "Update file to append new content.",
+            "type": "string",
+            "required": true
+          },
+          "start_line": {
+            "value": null,
+            "type": "integer",
+            "required": false
+          },
+          "end_line": {
+            "value": null,
+            "type": "integer",
+            "required": false
+          },
+          "mode": {
+            "value": "FileUpdateMode.APPEND",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "UpdateIssue",
+      "qualifiedName": "Github.UpdateIssue",
+      "fullyQualifiedName": "Github.UpdateIssue@2.0.1",
+      "description": "Update an issue in a GitHub repository.\n\nParameters that are not provided (None) will not be updated or cleared.\nUpdates apply to the issue in the repository. If the issue is in a project,\nthe project item will automatically reflect these changes.",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repo",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "issue_number",
+          "type": "integer",
+          "required": true,
+          "description": "The number that identifies the issue",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "The new title. Not provided = unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "required": false,
+          "description": "The new contents. Not provided = unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "required": false,
+          "description": "State of the issue. Not provided = unchanged.",
+          "enum": ["open", "closed", "all"],
+          "inferrable": true
+        },
+        {
+          "name": "labels",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Labels to set (replaces existing). Not provided = unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "assignees",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Assignees to set (replaces existing). Not provided = unchanged.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "milestone",
+          "type": "integer",
+          "required": false,
+          "description": "Milestone number. Not provided = unchanged.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Updated issue details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.UpdateIssue",
+        "parameters": {
+          "owner": {
+            "value": "exampleUser",
+            "type": "string",
+            "required": true
+          },
+          "repo": {
+            "value": "exampleRepo",
+            "type": "string",
+            "required": true
+          },
+          "issue_number": {
+            "value": 42,
+            "type": "integer",
+            "required": true
+          },
+          "title": {
+            "value": "Updated Issue Title",
+            "type": "string",
+            "required": false
+          },
+          "body": {
+            "value": "This is the updated description of the issue.",
+            "type": "string",
+            "required": false
+          },
+          "state": {
+            "value": "open",
+            "type": "string",
+            "required": false
+          },
+          "labels": {
+            "value": ["bug", "urgent"],
+            "type": "array",
+            "required": false
+          },
+          "assignees": {
+            "value": ["username1", "username2"],
+            "type": "array",
+            "required": false
+          },
+          "milestone": {
+            "value": 1,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "UpdatePullRequest",
+      "qualifiedName": "Github.UpdatePullRequest",
+      "fullyQualifiedName": "Github.UpdatePullRequest@2.0.1",
+      "description": "Update a pull request in a GitHub repository.",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "string",
+          "required": true,
+          "description": "The account owner of the repository. The name is not case sensitive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repo",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository without the .git extension. The name is not case sensitive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "pull_number",
+          "type": "integer",
+          "required": true,
+          "description": "The number that identifies the pull request.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "The title of the pull request.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "required": false,
+          "description": "The contents of the pull request.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "append_body",
+          "type": "boolean",
+          "required": false,
+          "description": "If True, append to existing body instead of replacing it. Default is False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "required": false,
+          "description": "State of this Pull Request.",
+          "enum": ["open", "closed", "all"],
+          "inferrable": true
+        },
+        {
+          "name": "base",
+          "type": "string",
+          "required": false,
+          "description": "The name of the branch you want your changes pulled into.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Updated pull request details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.UpdatePullRequest",
+        "parameters": {
+          "owner": {
+            "value": "exampleUser",
+            "type": "string",
+            "required": true
+          },
+          "repo": {
+            "value": "exampleRepo",
+            "type": "string",
+            "required": true
+          },
+          "pull_number": {
+            "value": 42,
+            "type": "integer",
+            "required": true
+          },
+          "title": {
+            "value": "Update for Feature X",
+            "type": "string",
+            "required": false
+          },
+          "body": {
+            "value": "This pull request addresses the implementation of Feature X.",
+            "type": "string",
+            "required": false
+          },
+          "append_body": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "state": {
+            "value": "open",
+            "type": "string",
+            "required": false
+          },
+          "base": {
+            "value": "main",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "Github.WhoAmI",
+      "fullyQualifiedName": "Github.WhoAmI@2.0.1",
+      "description": "Get information about the authenticated GitHub user.\n\nReturns profile, organizations, and teams.",
+      "parameters": [],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": ["GITHUB_SERVER_URL"],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "User profile with organizations and teams"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.WhoAmI",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    }
+  ],
+  "documentationChunks": [
+    {
+      "type": "warning",
+      "location": "description",
+      "position": "after",
+      "content": "<Callout type=\"warning\">\n  **Critical**: This MCP Server is built for **GitHub Apps**, not OAuth Apps.\n  \n  You **must** create a GitHub App (not an OAuth App) to use this server properly. \n  \n  👉 [Complete GitHub App Setup Guide](/references/auth-providers/github)\n</Callout>"
+    },
+    {
+      "type": "info",
+      "location": "description",
+      "position": "after",
+      "content": "<Callout type=\"info\">\n  **Configuration Required**: All tools require secrets to be configured in Arcade Dashboard. See [Secrets Setup](#secrets-setup) below.\n</Callout>"
+    },
+    {
+      "type": "info",
+      "location": "before_available_tools",
+      "position": "after",
+      "content": "## GitHub Enterprise Support\n\n<Callout type=\"info\">\n  This MCP Server fully supports **GitHub Enterprise Server 2.22+**\n</Callout>\n\n**Default Configuration:**\n- If no `GITHUB_SERVER_URL` is configured, the default is `https://api.github.com` (GitHub.com)\n- All tools work with GitHub.com out of the box\n\n**For GitHub Enterprise Server:**\n\n1. Create your GitHub App on your Enterprise instance (not github.com)\n2. Configure the `GITHUB_SERVER_URL` secret in Arcade Dashboard (see [Secrets Setup](#secrets-setup) below)\n3. Use your Enterprise server's API endpoint\n\n**Example Enterprise Server URLs:**\n- `https://github.yourcompany.com/api/v3`\n- `https://enterprise.yourorg.com/api/v3`\n- `https://git.company.internal/api/v3`\n\n<Callout>\n  **Note**: GitHub Enterprise Server uses the `/api/v3` path after the hostname. GitHub.com uses `https://api.github.com` (no `/api/v3` suffix).\n</Callout>\n\n---",
+      "header": "## GitHub Enterprise Support"
+    },
+    {
+      "type": "section",
+      "location": "before_available_tools",
+      "position": "after",
+      "content": "## GitHub App Permissions Summary\n\nWhen creating your GitHub App, you'll need to grant specific permissions. Here's a quick reference of which tools require which permissions:\n\n### Repository Permissions\n\n| Permission | Level | Required For |\n|------------|-------|--------------|\n| **Contents** | Read | All repository and pull request tools, getting file contents |\n| **Contents** | Write | Creating/updating files, creating branches, merging PRs |\n| **Issues** | Read & Write | Issue management, PR assignments, managing labels (Issues) |\n| **Pull requests** | Read & Write | Pull request management, reviews, managing labels (PRs) |\n| **Metadata** | Read | All tools (automatically granted) |\n| **Statuses** | Read | `CheckPullRequestMergeStatus` |\n\n### Organization Permissions\n\n| Permission | Level | Required For |\n|------------|-------|--------------|\n| **Members** | Read | Projects, collaborators, org repos, user search |\n| **Projects** | Read & Write | All Projects V2 tools |\n\n### User Permissions\n\n| Permission | Level | Required For |\n|------------|-------|--------------|\n| **Read user profile** | Read | User context tools, review workload |\n| **Act on behalf of user** | Enabled | `SetStarred` (starring repositories) |\n\n### Tools by Permission Requirements\n\n<details>\n<summary><b>Basic Repository Access</b> (Contents Read + Metadata)</summary>\n\n- `GetRepository`\n- `CountStargazers`\n- `ListStargazers`\n- `ListRepositoryActivities`\n- `GetFileContents`\n\n</details>\n\n<details>\n<summary><b>Repository Write</b> (Contents Write + Metadata)</summary>\n\n- `CreateBranch`\n- `CreateOrUpdateFile`\n- `UpdateFileLines`\n\n</details>\n\n<details>\n<summary><b>Issue Management</b> (Contents Read + Issues + Metadata)</summary>\n\n- `CreateIssue`\n- `UpdateIssue`\n- `GetIssue`\n- `ListIssues`\n- `CreateIssueComment`\n- `ListRepositoryLabels`\n- `ManageLabels` (for issues)\n\n</details>\n\n<details>\n<summary><b>Pull Request Read</b> (Contents + Pull requests Read + Metadata)</summary>\n\n- `ListPullRequests`\n- `GetPullRequest`\n- `ListPullRequestCommits`\n- `ListReviewCommentsOnPullRequest`\n- `CheckPullRequestMergeStatus` (+ Statuses)\n\n</details>\n\n<details>\n<summary><b>Pull Request Write</b> (Contents Read + Pull requests Write + Metadata)</summary>\n\n- `UpdatePullRequest`\n- `CreatePullRequest`\n- `SubmitPullRequestReview`\n- `ManagePullRequest`\n- `ManagePullRequestReviewers`\n- `CreateReviewComment`\n- `CreateReplyForReviewComment`\n- `ResolveReviewThread`\n- `ManageLabels` (for pull requests)\n- `MergePullRequest` (+ Contents Write)\n\n</details>\n\n<details>\n<summary><b>Organization Tools</b> (Contents + Metadata + Members)</summary>\n\n- `ListOrgRepositories`\n- `SearchMyRepos`\n- `ListRepositoryCollaborators`\n- `AssignPullRequestUser` (+ Issues Write)\n\n</details>\n\n<details>\n<summary><b>Projects V2</b> (Contents + Metadata + Projects + Members)</summary>\n\n- `ListProjects`\n- `ListProjectItems`\n- `SearchProjectItem`\n- `ListProjectFields`\n- `UpdateProjectItem` (Projects Write)\n\n</details>\n\n<details>\n<summary><b>User Context</b> (Contents + Metadata + Read user profile)</summary>\n\n- `WhoAmI` (+ Members)\n- `GetUserRecentActivity`\n- `GetUserOpenItems`\n- `GetReviewWorkload` (+ Pull requests Read)\n\n</details>\n\n<details>\n<summary><b>⚠️ Special: Notifications</b> (Requires Classic PAT)</summary>\n\n- `GetNotificationSummary`\n- `ListNotifications`\n\n**Note**: GitHub Apps cannot access notifications API. Requires classic Personal Access Token with `notifications` scope.\n\n</details>\n\n---",
+      "header": "## GitHub App Permissions Summary"
+    },
+    {
+      "type": "warning",
+      "location": "custom_section",
+      "position": "after",
+      "content": "## Configuration & Setup\n\n### Authentication\n\n<Callout type=\"warning\">\n  **Critical**: This MCP Server uses **GitHub Apps** authentication, not OAuth Apps.\n  \n  You **must** create a GitHub App to use this server. OAuth Apps are not supported.\n</Callout>\n\nThe Arcade GitHub MCP Server uses the [GitHub auth provider](/references/auth-providers/github) to connect to users' GitHub accounts.\n\n**For Arcade Cloud:**\n- No configuration needed\n- Your users will see `Arcade` as the requesting application\n- All tools work out of the box\n\n**For Self-Hosted:**\n- You must [create your own GitHub App](/references/auth-providers/github#creating-a-github-app)\n- [Configure the GitHub auth provider](/references/auth-providers/github#configuring-github-auth-in-arcade) with your app credentials\n- Your users will see your application name\n\n<Callout type=\"info\">\n  **New to GitHub Apps?** Read [Why Arcade Uses GitHub Apps](/references/auth-providers/github#why-arcade-uses-github-apps-not-oauth-apps) \n  to understand the security and compliance benefits.\n</Callout>\n\n### Secrets Setup\n\nAll tools require secrets to be configured in Arcade Dashboard.\n\n**Steps:**\n\n1. Go to [Arcade Dashboard](https://api.arcade.dev/dashboard)\n2. Navigate to **Secrets** in the left sidebar\n3. Click **Add Secret**\n4. Add the following secrets:\n\n| Secret Name | Value | Required For |\n|-------------|-------|--------------|\n| `GITHUB_SERVER_URL` | `https://api.github.com` (default for GitHub.com) | All tools |\n| `GITHUB_CLASSIC_PERSONAL_ACCESS_TOKEN` | Classic PAT with `notifications` scope | Notifications tools only |\n\n<Callout type=\"info\">\n  **Default**: If `GITHUB_SERVER_URL` is not configured, it defaults to `https://api.github.com` (GitHub.com)\n  \n  **GitHub Enterprise Users**: Set `GITHUB_SERVER_URL` to your Enterprise server's API endpoint (e.g., `https://github.yourcompany.com/api/v3`). Note that Enterprise uses `/api/v3` path. See [GitHub Enterprise Support](#github-enterprise-support) for details.\n</Callout>\n\n<Callout type=\"warning\">\n  **For Notifications Tools**: Create a classic Personal Access Token at [github.com/settings/tokens](https://github.com/settings/tokens) with only the `notifications` scope checked. GitHub Apps cannot access the notifications API.\n</Callout>\n\n---",
+      "header": "## Configuration & Setup"
+    }
+  ],
+  "customImports": ["import { Callout, Tabs } from \"nextra/components\";"],
+  "subPages": [],
+  "generatedAt": "2026-01-26T17:29:58.407Z",
+  "summary": "# Arcade Toolkit for GitHub\n\nThe Arcade Toolkit provides a suite of LLM tools designed to streamline interaction with GitHub, enabling developers to automate and enhance their workflows effectively.\n\n## Capabilities\n- Automate pull request and issue management, enabling seamless collaboration.\n- Create, update, and delete files and branches within repositories.\n- Retrieve detailed information about repositories, pull requests, and issues.\n- Efficiently search and manage collaborators and labels across repositories.\n\n## OAuth\n- **Provider**: GitHub\n- **Scopes**: None required.\n\n## Secrets\n- **Types**: webhook_secret, api_key, token.\n- **Examples**: GITHUB_SERVER_URL, GITHUB_CLASSIC_PERSONAL_ACCESS_TOKEN."
+}
