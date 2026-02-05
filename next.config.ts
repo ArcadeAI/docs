@@ -25,6 +25,157 @@ const nextConfig: NextConfig = withLlmsTxt({
       return [
         // Auto-added redirects for deleted pages
         {
+          source: "/:locale/resources/integrations/customer-support/zendesk/reference",
+          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/development/firecrawl/reference",
+          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/productivity/asana/reference",
+          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/productivity/clickup/reference",
+          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/productivity/dropbox/reference",
+          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/productivity/gmail/reference",
+          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/productivity/google-calendar/reference",
+          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/productivity/google-docs/reference",
+          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/productivity/google-drive/reference",
+          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/productivity/google-sheets/reference",
+          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/productivity/jira/environment-variables",
+          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/productivity/jira/reference",
+          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/productivity/outlook-mail/reference",
+          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/sales/hubspot/reference",
+          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/social-communication/discord",
+          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/social-communication/linkedin",
+          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/social-communication/microsoft-teams",
+          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/social-communication/microsoft-teams/reference",
+          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/social-communication/reddit",
+          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/social-communication/slack-api",
+          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/social-communication/slack/environment-variables",
+          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/social-communication/slack/install",
+          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/social-communication/slack",
+          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/social-communication/slack/reference",
+          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/social-communication/teams/reference",
+          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/social-communication/twilio",
+          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/social-communication/twilio/reference",
+          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/social-communication/x",
+          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/social-communication/zoom/install",
+          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/social-communication/zoom",
+          destination: "/:locale/REPLACE_WITH_NEW_PATH",
+          permanent: true,
+        },
+        // Auto-added redirects for deleted pages
+        {
           source:
             "/:locale/guides/create-tools/contribute/registry-early-access",
           destination: "/:locale/resources/registry-early-access",

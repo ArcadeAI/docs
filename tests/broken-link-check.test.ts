@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import fg from "fast-glob";
 import { scanURLs, validateFiles } from "next-validate-link";
@@ -7,6 +7,8 @@ import { expect, test } from "vitest";
 const TIMEOUT = 30_000;
 
 const staticFiles = ["/llms.txt", "/robots.txt", "/sitemap.xml"];
+
+const toolkitDataDir = join(process.cwd(), "data", "toolkits");
 
 // Function to validate anchor fragments by checking file content
 function validateAnchorFragment(filePath: string, fragment: string): boolean {
@@ -40,6 +42,88 @@ function validateAnchorFragment(filePath: string, fragment: string): boolean {
   }
 }
 
+function toToolAnchorId(value: string): string {
+  return value.toLowerCase().replace(/\s+/g, "-").replace(".", "");
+}
+
+const SUPPORTED_LOCALES = ["en", "es", "pt-BR"] as const;
+const SUPPORTED_INTEGRATION_CATEGORIES = [
+  "productivity",
+  "development",
+  "social",
+  "databases",
+  "search",
+  "sales",
+  "payments",
+  "customer-support",
+  "entertainment",
+  "others",
+] as const;
+
+function validateToolkitIntegrationRoute(
+  urlPath: string,
+  fragment?: string
+): boolean {
+  // urlPath can be:
+  // - /resources/integrations/<category>/<toolkitSlug>
+  // - /en/resources/integrations/<category>/<toolkitSlug>
+  // (toolkitSlug is the lowercased toolkit id, e.g. githubapi)
+  const parts = urlPath.split("/").filter(Boolean);
+
+  let cursor = 0;
+  const maybeLocale = parts[cursor];
+  if (
+    maybeLocale &&
+    (SUPPORTED_LOCALES as readonly string[]).includes(maybeLocale)
+  ) {
+    cursor += 1;
+  }
+
+  if (parts[cursor] !== "resources" || parts[cursor + 1] !== "integrations") {
+    return false;
+  }
+
+  const category = parts[cursor + 2];
+  const slug = parts[cursor + 3];
+  if (!(category && slug)) {
+    return false;
+  }
+
+  if (
+    !(SUPPORTED_INTEGRATION_CATEGORIES as readonly string[]).includes(category)
+  ) {
+    return false;
+  }
+
+  const jsonPath = join(toolkitDataDir, `${slug}.json`);
+  if (!existsSync(jsonPath)) {
+    return false;
+  }
+
+  if (!fragment) {
+    return true;
+  }
+
+  const normalized = fragment.toLowerCase();
+  if (normalized === "available-tools" || normalized === "get-building") {
+    return true;
+  }
+
+  try {
+    const content = readFileSync(jsonPath, "utf-8");
+    const toolkit = JSON.parse(content) as {
+      tools?: Array<{ qualifiedName: string }>;
+    };
+    const anchors = new Set<string>();
+    for (const tool of toolkit.tools ?? []) {
+      anchors.add(toToolAnchorId(tool.qualifiedName));
+    }
+    return anchors.has(normalized);
+  } catch {
+    return false;
+  }
+}
+
 test(
   "check for broken links",
   async () => {
@@ -56,6 +140,18 @@ test(
         url.startsWith("/es/") ||
         url.startsWith("/pt-BR/")
       ) {
+        // Special-case dynamic toolkit preview routes (not enumerated by scanURLs).
+        const [path, fragment] = url.split("#");
+        if (path.startsWith("/en/resources/integrations/")) {
+          return validateToolkitIntegrationRoute(path, fragment);
+        }
+        if (path.startsWith("/es/resources/integrations/")) {
+          return validateToolkitIntegrationRoute(path, fragment);
+        }
+        if (path.startsWith("/pt-BR/resources/integrations/")) {
+          return validateToolkitIntegrationRoute(path, fragment);
+        }
+
         return false; // Let the normal validation handle these
       }
 
@@ -66,6 +162,12 @@ test(
       if (url.startsWith("/")) {
         // Split URL and anchor fragment
         const [path, fragment] = url.split("#");
+
+        // Special-case dynamic toolkit integration routes (not enumerated by scanURLs).
+        if (path.startsWith("/resources/integrations/")) {
+          return validateToolkitIntegrationRoute(path, fragment);
+        }
+
         const localeUrl = `/en${path}`;
 
         if (staticFiles.includes(path)) {
