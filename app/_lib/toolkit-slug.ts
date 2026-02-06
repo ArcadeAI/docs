@@ -1,6 +1,7 @@
 import type { Toolkit } from "@arcadeai/design-system";
 
 const TOOLKIT_ID_NORMALIZER = /[^a-z0-9]+/g;
+const CAMEL_BOUNDARY = /([a-z0-9])([A-Z])/g;
 
 export type ToolkitSlugSource = {
   id: string;
@@ -15,8 +16,25 @@ export type ToolkitSlugSource = {
  */
 export type ToolkitWithDocsLink = Toolkit & { docsLink?: string | null };
 
+/**
+ * Strip all non-alphanumeric characters and lowercase.
+ * Used for case-insensitive matching of toolkit IDs to filenames.
+ */
 export function normalizeToolkitId(value: string): string {
   return value.toLowerCase().replace(TOOLKIT_ID_NORMALIZER, "");
+}
+
+/**
+ * Convert a CamelCase toolkit ID to a kebab-case URL slug.
+ *
+ * Examples:
+ *   PosthogApi      → posthog-api
+ *   GoogleCalendar  → google-calendar
+ *   E2b             → e2b
+ *   HubspotCrmApi   → hubspot-crm-api
+ */
+export function toKebabCase(value: string): string {
+  return value.replace(CAMEL_BOUNDARY, "$1-$2").toLowerCase();
 }
 
 const extractSlugFromPath = (path: string): string | null => {
@@ -40,5 +58,5 @@ export function getToolkitSlug({ id, docsLink }: ToolkitSlugSource): string {
     }
   }
 
-  return normalizeToolkitId(id);
+  return toKebabCase(id);
 }

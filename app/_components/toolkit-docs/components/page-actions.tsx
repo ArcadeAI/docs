@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useCallback, useState } from "react";
 
 const GITHUB_JSON_BASE_URL =
-  "https://github.com/ArcadeAI/docs/blob/main/data/toolkits";
+  "https://github.com/ArcadeAI/docs/blob/main/toolkit-docs-generator/data/toolkits";
 const COPY_FEEDBACK_MS = 2000;
 
 /**

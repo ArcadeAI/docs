@@ -25,6 +25,12 @@ const nextConfig: NextConfig = withLlmsTxt({
       return [
         // Auto-added redirects for deleted pages
         {
+          source: "/:locale/resources/integrations/preview",
+          destination: "/:locale/resources/integrations",
+          permanent: true,
+        },
+        // Auto-added redirects for deleted pages
+        {
           source:
             "/:locale/resources/integrations/customer-support/zendesk/reference",
           destination:

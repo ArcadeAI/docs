@@ -8,7 +8,12 @@ const TIMEOUT = 30_000;
 
 const staticFiles = ["/llms.txt", "/robots.txt", "/sitemap.xml"];
 
-const toolkitDataDir = join(process.cwd(), "data", "toolkits");
+const toolkitDataDir = join(
+  process.cwd(),
+  "toolkit-docs-generator",
+  "data",
+  "toolkits"
+);
 const TOOLKIT_ID_NORMALIZER = /[^a-z0-9]+/g;
 const normalizeToolkitSlug = (value: string): string =>
   value.toLowerCase().replace(TOOLKIT_ID_NORMALIZER, "");

@@ -49,15 +49,15 @@ const MIN_TOOLKIT_PATH_SEGMENTS = 5;
 // Valid toolkit categories
 const TOOLKIT_CATEGORIES = [
   "customer-support",
+  "databases",
   "development",
   "entertainment",
+  "others",
   "payments",
   "productivity",
   "sales",
   "search",
-  "social-communication",
-  "preview",
-  "databases",
+  "social",
 ];
 
 type ToolkitMarkdownTarget = {

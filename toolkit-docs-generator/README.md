@@ -4,8 +4,8 @@ This guide explains how Arcade generates toolkit JSON, how the GitHub workflow r
 
 ## What gets generated
 
-- `data/toolkits/<toolkit>.json` for each toolkit
-- `data/toolkits/index.json` with category, type, version, and counts
+- `toolkit-docs-generator/data/toolkits/<toolkit>.json` for each toolkit
+- `toolkit-docs-generator/data/toolkits/index.json` with category, type, version, and counts
 - Run logs under `toolkit-docs-generator-verification/logs` by default
 - Use `--log-dir` to change the log location
 
@@ -27,11 +27,11 @@ do not change unless the toolkit version changes.
 
 ## GitHub workflow: generate and sync
 
-The workflow file is `/.github/workflows/generate-toolkit-docs-porter.yml`.
+The workflow file is `/.github/workflows/generate-toolkit-docs.yml`.
 It runs these steps:
 
 1. Generate toolkit JSON using `toolkit-docs-generator` and the Engine API.
-2. Sync sidebar navigation from `data/toolkits` to the `_meta.tsx` files.
+2. Sync sidebar navigation from `toolkit-docs-generator/data/toolkits` to the `_meta.tsx` files.
 3. Create a pull request if there are changes.
 
 Required secrets:
@@ -47,7 +47,7 @@ Optional secrets:
 
 The docs site consumes the generated JSON directly:
 
-- `app/_lib/toolkit-data.ts` reads `data/toolkits/<toolkit>.json`.
+- `app/_lib/toolkit-data.ts` reads `toolkit-docs-generator/data/toolkits/<toolkit>.json`.
 - `app/_lib/toolkit-static-params.ts` builds routes from `index.json` and the design system catalog.
 - `app/_components/toolkit-docs` renders the toolkit page using `metadata.iconUrl`, `metadata.type`, and auth fields.
 - `app/en/resources/integrations/preview` uses the design system catalog for preview pages.
@@ -57,7 +57,7 @@ The docs site consumes the generated JSON directly:
 
 `.github/scripts/sync-toolkit-sidebar.ts` keeps sidebar navigation aligned with generated JSON:
 
-- Reads `data/toolkits` for available toolkits.
+- Reads `toolkit-docs-generator/data/toolkits` for available toolkits.
 - Uses the design system for category and label, with JSON label fallback.
 - Groups toolkits by category and writes `_meta.tsx` files per category.
 - Uses a fixed category order and alphabetical label order within each nav group.
@@ -87,7 +87,7 @@ pnpm start generate \
   --llm-provider openai \
   --llm-model gpt-4.1-mini \
   --llm-api-key "$OPENAI_API_KEY" \
-  --output ../data/toolkits
+  --output data/toolkits
 ```
 
 Generate all toolkits:
@@ -101,7 +101,7 @@ pnpm start generate \
   --llm-provider openai \
   --llm-model gpt-4.1-mini \
   --llm-api-key "$OPENAI_API_KEY" \
-  --output ../data/toolkits
+  --output data/toolkits
 ```
 
 Generate without LLM output:
@@ -114,7 +114,7 @@ pnpm start generate \
   --skip-examples \
   --skip-summary \
   --skip-overview \
-  --output ../data/toolkits
+  --output data/toolkits
 ```
 
 Sync sidebar navigation locally:
@@ -139,4 +139,4 @@ pnpm dlx tsx .github/scripts/sync-toolkit-sidebar.ts
 
 - **Nothing regenerated**: `--skip-unchanged` exits early when tool definitions did not change.
 - **Missing metadata**: the generator falls back to the metadata JSON file when design system metadata is unavailable.
-- **Verify output fails**: run `pnpm start verify-output --output ../data/toolkits` and fix the reported mismatch.
+- **Verify output fails**: run `pnpm start verify-output --output data/toolkits` and fix the reported mismatch.

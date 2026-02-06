@@ -43,7 +43,12 @@ function normalizeCategory(
     : "others";
 }
 
-const DEFAULT_DATA_DIR = join(process.cwd(), "data", "toolkits");
+const DEFAULT_DATA_DIR = join(
+  process.cwd(),
+  "toolkit-docs-generator",
+  "data",
+  "toolkits"
+);
 
 const resolveDataDir = (dataDir?: string): string =>
   dataDir ?? process.env.TOOLKIT_DATA_DIR ?? DEFAULT_DATA_DIR;
@@ -125,8 +130,10 @@ const resolveToolkitRoute = async (
     id: catalogEntry?.id ?? toolkit.id,
     docsLink: catalogEntry?.docsLink ?? data?.metadata?.docsLink,
   });
+  // Prefer the full JSON data file's category over the index.json summary,
+  // because the index may have stale/incorrect categories.
   const category = normalizeCategory(
-    catalogEntry?.category ?? toolkit.category ?? data?.metadata?.category
+    catalogEntry?.category ?? data?.metadata?.category ?? toolkit.category
   );
   return { toolkitId: slug, category };
 };

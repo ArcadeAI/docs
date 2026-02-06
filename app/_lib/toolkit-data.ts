@@ -23,7 +23,12 @@ type ToolkitDataOptions = {
   dataDir?: string;
 };
 
-const DEFAULT_DATA_DIR = join(process.cwd(), "data", "toolkits");
+const DEFAULT_DATA_DIR = join(
+  process.cwd(),
+  "toolkit-docs-generator",
+  "data",
+  "toolkits"
+);
 
 const resolveDataDir = (options?: ToolkitDataOptions): string =>
   options?.dataDir ?? process.env.TOOLKIT_DATA_DIR ?? DEFAULT_DATA_DIR;

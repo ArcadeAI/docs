@@ -4,7 +4,7 @@
  *
  * Usage: npx ts-node scripts/merge-custom-sections.ts \
  *   --custom-sections ../data/custom_sections_for_merge.json \
- *   --toolkits-dir ../data/toolkits
+ *   --toolkits-dir data/toolkits
  */
 
 import { readdir, readFile, writeFile } from "fs/promises";
@@ -55,7 +55,7 @@ type MergeOutcome = {
 
 const parseArgs = (args: string[]): MergeOptions => {
   let customSectionsPath = "../data/custom_sections_for_merge.json";
-  let toolkitsDir = "../data/toolkits";
+  let toolkitsDir = "data/toolkits";
   let verbose = false;
 
   for (let i = 0; i < args.length; i++) {

@@ -8,7 +8,7 @@
  * @example
  * ```tsx
  * import { ToolkitHeader, DocumentationChunkRenderer } from '@/app/_components/toolkit-docs';
- * import toolkitData from '@/data/toolkits/github.json';
+ * import toolkitData from '@/toolkit-docs-generator/data/toolkits/github.json';
  *
  * export default function GitHubPage() {
  *   return (

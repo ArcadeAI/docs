@@ -57,7 +57,7 @@ It can also verify output consistency with `OutputVerifier`.
 
 The generator output is consumed by the Next.js app:
 
-- The app loads JSON from `data/toolkits/`.
+- The app loads JSON from `toolkit-docs-generator/data/toolkits/`.
 - Toolkit pages are statically generated using those files.
 - Custom documentation chunks are rendered as MDX in the UI.
 

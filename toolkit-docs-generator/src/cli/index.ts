@@ -18,15 +18,10 @@ import ora from "ora";
 import { join, resolve } from "path";
 import {
   detectChanges,
-  detectSummaryChanges,
   formatChangeSummary,
   formatDetailedChanges,
-  formatSummaryChangeSummary,
   getChangedToolkitIds,
-  getChangedToolkitIdsFromSummary,
   hasChanges,
-  hasSummaryChanges,
-  type SummaryToolkit,
 } from "../diff/index.js";
 import {
   createJsonGenerator,
@@ -45,7 +40,6 @@ import type { MergeResult } from "../merger/data-merger.js";
 import { createDataMerger } from "../merger/data-merger.js";
 import { createCustomSectionsFileSource } from "../sources/custom-sections-file.js";
 import { createDesignSystemMetadataSource } from "../sources/design-system-metadata.js";
-import { EngineApiSource } from "../sources/engine-api.js";
 import { createEmptyCustomSectionsSource } from "../sources/in-memory.js";
 import { createMockMetadataSource } from "../sources/mock-metadata.js";
 import { createOverviewInstructionsFileSource } from "../sources/overview-instructions-file.js";
@@ -55,14 +49,7 @@ import {
   createMockToolkitDataSource,
   type IToolkitDataSource,
 } from "../sources/toolkit-data-source.js";
-import {
-  type MergedToolkit,
-  MergedToolkitSchema,
-  type ProviderVersion,
-  ProviderVersionSchema,
-} from "../types/index.js";
 import { normalizeId } from "../utils/fp.js";
-import { resolveSafeOutputDir } from "../utils/output-dir.js";
 import {
   createProgressTracker,
   formatToolkitComplete,
@@ -73,7 +60,21 @@ import {
   readFailedToolsReport,
   writeFailedToolsReport,
 } from "../utils/run-logs.js";
-import { type ApiSource, resolveApiSource } from "./api-source.js";
+
+/**
+ * Supported API sources:
+ * - "list-tools": Uses /v1/tools endpoint (production Arcade API)
+ * - "tool-metadata": Uses /v1/tool_metadata endpoint (Engine API)
+ * - "mock": Uses local mock data files
+ */
+type ApiSource = "list-tools" | "tool-metadata" | "mock";
+
+import {
+  type MergedToolkit,
+  MergedToolkitSchema,
+  type ProviderVersion,
+  ProviderVersionSchema,
+} from "../types/index.js";
 
 const program = new Command();
 
@@ -354,26 +355,15 @@ const buildChangeLogDetails = (
   return details;
 };
 
-const buildSummaryChangeLogDetails = (
-  result: ReturnType<typeof detectSummaryChanges>
-): string[] => {
-  const changed = getChangedToolkitIdsFromSummary(result);
-  const removed = result.toolkitChanges
-    .filter((change) => change.changeType === "removed")
-    .map((change) => change.toolkitId);
-
-  return [
-    `summary=${formatSummaryChangeSummary(result)}`,
-    `changed=${changed.length > 0 ? changed.join(", ") : "none"}`,
-    `removed=${removed.length > 0 ? removed.join(", ") : "none"}`,
-  ];
-};
-
 const clearOutputDir = async (
   outputDir: string,
   verbose: boolean
 ): Promise<void> => {
-  const resolvedDir = await resolveSafeOutputDir(outputDir);
+  const resolvedDir = resolve(outputDir);
+  const repoRoot = resolve(process.cwd());
+  if (resolvedDir === "/" || resolvedDir === repoRoot) {
+    throw new Error(`Refusing to overwrite output directory: ${resolvedDir}`);
+  }
   await rm(resolvedDir, { recursive: true, force: true });
   if (verbose) {
     console.log(chalk.dim(`Cleared output directory: ${resolvedDir}`));
@@ -468,6 +458,51 @@ const resolveLlmConfig = (
   };
 };
 
+const resolveApiSource = (options: {
+  apiSource?: string;
+  toolMetadataUrl?: string;
+  toolMetadataKey?: string;
+  listToolsUrl?: string;
+  listToolsKey?: string;
+}): ApiSource => {
+  // Explicit source takes precedence
+  if (options.apiSource) {
+    const source = options.apiSource.toLowerCase();
+    // Support both old and new names for backwards compatibility
+    if (source === "list-tools" || source === "arcade") {
+      return "list-tools";
+    }
+    if (source === "tool-metadata" || source === "engine") {
+      return "tool-metadata";
+    }
+    if (source === "mock") {
+      return "mock";
+    }
+    throw new Error(
+      `Invalid --api-source "${options.apiSource}". Use "list-tools", "tool-metadata", or "mock".`
+    );
+  }
+
+  // Auto-detect based on provided credentials
+  const hasListToolsKey = !!(
+    options.listToolsKey ?? process.env.ARCADE_API_KEY
+  );
+  const hasToolMetadataKey = !!(
+    options.toolMetadataKey ?? process.env.ENGINE_API_KEY
+  );
+  const hasToolMetadataUrl = !!(
+    options.toolMetadataUrl ?? process.env.ENGINE_API_URL
+  );
+
+  if (hasListToolsKey) {
+    return "list-tools";
+  }
+  if (hasToolMetadataKey && hasToolMetadataUrl) {
+    return "tool-metadata";
+  }
+  return "mock";
+};
+
 interface ToolkitDataSourceOptions {
   apiSource?: string;
   listToolsUrl?: string;
@@ -515,38 +550,6 @@ const resolveToolMetadataConfig = (options: ToolkitDataSourceOptions) => {
   };
 };
 
-const fetchToolMetadataSummary = async (
-  options: ToolkitDataSourceOptions
-): Promise<{
-  toolkits: SummaryToolkit[];
-  totalToolkits: number;
-}> => {
-  const config = resolveToolMetadataConfig(options);
-  if (!config) {
-    throw new Error(
-      "Tool metadata summary requires --tool-metadata-url and --tool-metadata-key."
-    );
-  }
-
-  const source = new EngineApiSource({
-    baseUrl: config.baseUrl,
-    apiKey: config.apiKey,
-    ...(config.pageSize ? { pageSize: config.pageSize } : {}),
-  });
-
-  const summary = await source.fetchToolkitsSummary();
-  return {
-    toolkits: summary.toolkits.map((toolkit) => ({
-      name: toolkit.name,
-      version: toolkit.version,
-      toolCount: toolkit.toolCount,
-      requiresSecrets: toolkit.requiresSecrets,
-      requiresOauth: toolkit.requiresOauth,
-    })),
-    totalToolkits: summary.totalToolkits,
-  };
-};
-
 const createToolkitDataSourceForApi = (
   apiSource: ApiSource,
   options: ToolkitDataSourceOptions,
@@ -586,9 +589,7 @@ const createToolkitDataSourceForApi = (
     }
     if (verbose) {
       console.log(
-        chalk.dim(
-          `Using /v1/tool_metadata and /v1/tool_metadata_summary endpoints: ${config.baseUrl}`
-        )
+        chalk.dim(`Using /v1/tool_metadata endpoint: ${config.baseUrl}`)
       );
     }
     return createEngineToolkitDataSource({
@@ -774,7 +775,7 @@ program
   )
   .option(
     "--api-source <source>",
-    'API source: "tool-metadata" (/v1/tool_metadata + /v1/tool_metadata_summary, default with Engine creds), "list-tools" (/v1/tools, only when --api-source list-tools), or "mock"'
+    'API source: "list-tools" (/v1/tools), "tool-metadata" (/v1/tool_metadata), or "mock" (default: auto-detect)'
   )
   .option(
     "--list-tools-url <url>",
@@ -837,6 +838,7 @@ program
   )
   .option("--skip-examples", "Skip LLM example generation", false)
   .option("--skip-summary", "Skip LLM summary generation", false)
+  .option("--skip-overview", "Skip LLM overview generation", false)
   .option("--skip-overview", "Skip LLM overview generation", false)
   .option("--no-verify-output", "Skip output verification")
   .option("--custom-sections <file>", "Path to custom sections JSON")
@@ -1087,131 +1089,62 @@ program
         // Handle --skip-unchanged: detect changes and only regenerate changed toolkits
         let changedToolkitIds: Set<string> | undefined;
         let changeResult: ReturnType<typeof detectChanges> | undefined;
-        let summaryChangeResult:
-          | ReturnType<typeof detectSummaryChanges>
-          | undefined;
-        let summaryToolkits: SummaryToolkit[] | undefined;
-        let summaryTotalToolkits: number | undefined;
-        let summaryToolkitNameById: Map<string, string> | undefined;
         if (options.skipUnchanged && runAll && !options.overwriteOutput) {
-          if (apiSource === "tool-metadata") {
-            spinner.start("Fetching toolkit summary...");
-            const summary = await fetchToolMetadataSummary(options);
-            summaryToolkits = summary.toolkits;
-            summaryTotalToolkits = summary.totalToolkits;
-            summaryToolkitNameById = new Map(
-              summary.toolkits.map((toolkit) => [
-                normalizeId(toolkit.name),
-                toolkit.name,
-              ])
-            );
+          spinner.start("Detecting changes in tool definitions...");
 
-            const detectedSummaryChanges = detectSummaryChanges(
-              summary.toolkits,
-              previousToolkits ?? new Map()
-            );
-            summaryChangeResult = detectedSummaryChanges;
+          // Fetch all current tools
+          const currentToolkitsData =
+            await toolkitDataSource.fetchAllToolkitsData();
 
-            if (!hasSummaryChanges(detectedSummaryChanges)) {
-              spinner.succeed(
-                "No changes detected. All toolkits are up to date."
-              );
-              console.log(chalk.green("\n✓ Nothing to regenerate.\n"));
+          // Build map of toolkit ID -> tools for comparison
+          const currentToolkitTools = new Map<
+            string,
+            readonly import("../types/index.js").ToolDefinition[]
+          >();
+          for (const [id, data] of currentToolkitsData) {
+            currentToolkitTools.set(id, data.tools);
+          }
 
-              await appendLogEntry(logPaths.runLogPath, {
-                title: "generate --skip-unchanged (no changes)",
-                details: [
-                  `output=${resolve(options.output)}`,
-                  `apiSource=${apiSource}`,
-                  `summary=${formatSummaryChangeSummary(detectedSummaryChanges)}`,
-                ],
-              });
-              await appendLogEntry(logPaths.changeLogPath, {
-                title: "changes (no-op)",
-                details: [formatSummaryChangeSummary(detectedSummaryChanges)],
-              });
-              process.exit(0);
-            }
+          // Detect changes
+          const detectedChanges = detectChanges(
+            currentToolkitTools,
+            previousToolkits ?? new Map()
+          );
 
-            const changedIds = getChangedToolkitIdsFromSummary(
-              detectedSummaryChanges
-            );
-            changedToolkitIds = new Set(
-              changedIds.map((id) => normalizeId(id))
-            );
-
+          if (!hasChanges(detectedChanges)) {
             spinner.succeed(
-              `Detected ${changedIds.length} changed toolkit(s): ${changedIds.join(", ")}`
+              "No changes detected. All toolkits are up to date."
             );
+            console.log(chalk.green("\n✓ Nothing to regenerate.\n"));
 
-            if (options.verbose) {
-              console.log(
-                chalk.dim(
-                  `  Summary: ${formatSummaryChangeSummary(
-                    detectedSummaryChanges
-                  )}`
-                )
-              );
-            }
-          } else {
-            spinner.start("Detecting changes in tool definitions...");
+            await appendLogEntry(logPaths.runLogPath, {
+              title: "generate --skip-unchanged (no changes)",
+              details: [
+                `output=${resolve(options.output)}`,
+                `apiSource=${apiSource}`,
+                `summary=${formatChangeSummary(detectedChanges)}`,
+              ],
+            });
+            await appendLogEntry(logPaths.changeLogPath, {
+              title: "changes (no-op)",
+              details: [formatChangeSummary(detectedChanges)],
+            });
+            process.exit(0);
+          }
 
-            // Fetch all current tools
-            const currentToolkitsData =
-              await toolkitDataSource.fetchAllToolkitsData();
+          // Get IDs of changed toolkits
+          const changedIds = getChangedToolkitIds(detectedChanges);
+          changedToolkitIds = new Set(changedIds.map((id) => id.toLowerCase()));
+          changeResult = detectedChanges;
 
-            // Build map of toolkit ID -> tools for comparison
-            const currentToolkitTools = new Map<
-              string,
-              readonly import("../types/index.js").ToolDefinition[]
-            >();
-            for (const [id, data] of currentToolkitsData) {
-              currentToolkitTools.set(id, data.tools);
-            }
+          spinner.succeed(
+            `Detected ${changedIds.length} changed toolkit(s): ${changedIds.join(", ")}`
+          );
 
-            // Detect changes
-            const detectedChanges = detectChanges(
-              currentToolkitTools,
-              previousToolkits ?? new Map()
+          if (options.verbose) {
+            console.log(
+              chalk.dim(`  Summary: ${formatChangeSummary(detectedChanges)}`)
             );
-
-            if (!hasChanges(detectedChanges)) {
-              spinner.succeed(
-                "No changes detected. All toolkits are up to date."
-              );
-              console.log(chalk.green("\n✓ Nothing to regenerate.\n"));
-
-              await appendLogEntry(logPaths.runLogPath, {
-                title: "generate --skip-unchanged (no changes)",
-                details: [
-                  `output=${resolve(options.output)}`,
-                  `apiSource=${apiSource}`,
-                  `summary=${formatChangeSummary(detectedChanges)}`,
-                ],
-              });
-              await appendLogEntry(logPaths.changeLogPath, {
-                title: "changes (no-op)",
-                details: [formatChangeSummary(detectedChanges)],
-              });
-              process.exit(0);
-            }
-
-            // Get IDs of changed toolkits
-            const changedIds = getChangedToolkitIds(detectedChanges);
-            changedToolkitIds = new Set(
-              changedIds.map((id) => normalizeId(id))
-            );
-            changeResult = detectedChanges;
-
-            spinner.succeed(
-              `Detected ${changedIds.length} changed toolkit(s): ${changedIds.join(", ")}`
-            );
-
-            if (options.verbose) {
-              console.log(
-                chalk.dim(`  Summary: ${formatChangeSummary(detectedChanges)}`)
-              );
-            }
           }
         }
 
@@ -1274,20 +1207,16 @@ program
         // Process toolkits
         let allResults: MergeResult[];
         if (runAll) {
-          let toolkitIds: string[] = [];
-          if (summaryToolkits) {
-            toolkitIds = summaryToolkits.map((toolkit) => toolkit.name);
-          } else {
-            spinner.start("Fetching toolkit list...");
-            const toolkitList = await toolkitDataSource.fetchAllToolkitsData();
-            toolkitIds = Array.from(toolkitList.keys());
-          }
+          // First, get the toolkit count to set up progress tracking
+          spinner.start("Fetching toolkit list...");
+          const toolkitList = await toolkitDataSource.fetchAllToolkitsData();
+          const totalToolkits = toolkitList.size;
 
-          const totalToolkits = summaryTotalToolkits ?? toolkitIds.length;
-
+          // If --skip-unchanged, only process changed toolkits
+          // Add unchanged toolkits to skipToolkitIds
           if (changedToolkitIds) {
-            for (const id of toolkitIds) {
-              const normalizedId = normalizeId(id);
+            for (const [id] of toolkitList) {
+              const normalizedId = id.toLowerCase();
               if (!changedToolkitIds.has(normalizedId)) {
                 skipToolkitIds.add(normalizedId);
               }
@@ -1299,24 +1228,6 @@ program
           if (toProcess === 0) {
             spinner.succeed(`All ${totalToolkits} toolkit(s) already complete`);
             allResults = [];
-          } else if (summaryToolkits && changedToolkitIds) {
-            const skipReason = `(${skipToolkitIds.size} unchanged)`;
-            spinner.succeed(
-              `Found ${totalToolkits} toolkit(s), ${toProcess} to process ${skipReason}`.trim()
-            );
-
-            const providersForSummary = Array.from(changedToolkitIds).map(
-              (id) => ({
-                provider: summaryToolkitNameById?.get(id) ?? id,
-              })
-            );
-
-            allResults = await processProviders(
-              providersForSummary,
-              merger,
-              spinner,
-              options.verbose
-            );
           } else {
             const skipReason = changedToolkitIds
               ? `(${skipToolkitIds.size} unchanged)`
@@ -1535,12 +1446,6 @@ program
             title: "changes",
             details: buildChangeLogDetails(changeResult),
           });
-        } else if (summaryChangeResult) {
-          runDetails.push(...buildSummaryChangeLogDetails(summaryChangeResult));
-          await appendLogEntry(logPaths.changeLogPath, {
-            title: "changes",
-            details: buildSummaryChangeLogDetails(summaryChangeResult),
-          });
         }
 
         await writeFailedToolsReport(logPaths.failedToolsPath, {
@@ -1587,7 +1492,7 @@ program
   )
   .option(
     "--api-source <source>",
-    'API source: "tool-metadata" (/v1/tool_metadata + /v1/tool_metadata_summary, default with Engine creds), "list-tools" (/v1/tools, only when --api-source list-tools), or "mock"'
+    'API source: "list-tools" (/v1/tools), "tool-metadata" (/v1/tool_metadata), or "mock" (default: auto-detect)'
   )
   .option(
     "--list-tools-url <url>",
@@ -2101,7 +2006,7 @@ program
   .option("--metadata-file <file>", "Path to metadata JSON file")
   .option(
     "--api-source <source>",
-    'API source: "tool-metadata" (/v1/tool_metadata + /v1/tool_metadata_summary, default with Engine creds), "list-tools" (/v1/tools, only when --api-source list-tools), or "mock"'
+    'API source: "list-tools" (/v1/tools), "tool-metadata" (/v1/tool_metadata), or "mock" (default: auto-detect)'
   )
   .option(
     "--list-tools-url <url>",
