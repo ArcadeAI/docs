@@ -447,7 +447,7 @@ Travel mode to use in the Google Maps search.
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_google_maps ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Google Jobs](/en/resources/integrations/search/google_jobs.md)
 [Google News](/en/resources/integrations/search/google_news.md)

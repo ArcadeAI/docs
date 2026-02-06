@@ -546,7 +546,7 @@ console.log(
 console.log(respose_send_email.output?.value);
 ```
 
-Last updated on January 30, 2026
+Last updated on February 6, 2026
 
-[Connect Arcade docs to your IDE](/en/get-started/setup/connect-arcade-docs.md)
+[Windows environment setup](/en/get-started/setup/windows-environment.md)
 [Call tools in IDE/MCP clients](/en/get-started/quickstarts/call-tool-client.md)

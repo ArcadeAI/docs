@@ -1635,7 +1635,7 @@ Entity type for label management:
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_github ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Figma](/en/resources/integrations/development/figma.md)
 [Firecrawl](/en/resources/integrations/development/firecrawl.md)

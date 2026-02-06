@@ -156,7 +156,7 @@ The Arcade X MCP Sever uses the [X auth provider](/references/auth-providers/x.m
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_x ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Reference](/en/resources/integrations/social-communication/twilio/reference.md)
 [Zoom](/en/resources/integrations/social-communication/zoom.md)

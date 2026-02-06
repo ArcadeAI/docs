@@ -8,7 +8,7 @@ FreshserviceApi
 
 # FreshserviceApi
 
-Arcade Starter
+Arcade Unoptimized
 
 **Description:** Tools that enable LLMs to interact directly with the Freshservice API.
 
@@ -22,13 +22,13 @@ Arcade Starter
 [![Wheel Status](https://img.shields.io/pypi/wheel/arcade_freshservice_api)](https://pypi.org/project/arcade_freshservice_api/)
 [![Downloads](https://img.shields.io/pypi/dm/arcade_freshservice_api)](https://pypi.org/project/arcade_freshservice_api/)
 
-FreshserviceApi is a [Starter MCP Server](/guides/create-tools/improve/types-of-tools.md#starter-tools)
+FreshserviceApi is a [Unoptimized MCP Server](/guides/create-tools/improve/types-of-tools.md#unoptimized-tools)
 : each tool mirrors one HTTP endpoint and offers LLMs a way to interact with the low-level API.
 
 
 
 Differently from [Optimized MCP Servers](/guides/create-tools/improve/types-of-tools.md#optimized-tools)
-, Starter tools are heavily influenced by the original API design, which is not usually optimized for LLM usage. For this reason, we recommend thoroughly evaluating the tools with your Agents or chatbots before using it in production. [Read more](/guides/create-tools/improve/types-of-tools.md) about Optimized vs Starter tools.
+, Unoptimized tools are heavily influenced by the original API design, which is not usually optimized for LLM usage. For this reason, we recommend thoroughly evaluating the tools with your Agents or chatbots before using it in production. [Read more](/guides/create-tools/improve/types-of-tools.md) about Optimized vs Unoptimized tools.
 
 The FreshserviceApi MCP Server offers a comprehensive set of tools for interacting with Freshservice programmatically. Build agents and AI apps to:
 
@@ -2677,7 +2677,7 @@ This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_freshservice_api ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [CustomerioTrackApi](/en/resources/integrations/customer-support/customerio-track-api.md)
 [IntercomApi](/en/resources/integrations/customer-support/intercom-api.md)

@@ -347,7 +347,7 @@ See PagerDuty auth docs: [PagerDuty API Authentication](https://developer.pagerd
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_pagerduty ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Pylon](/en/resources/integrations/customer-support/pylon.md)
 [CustomerioApi](/en/resources/integrations/customer-support/customerio-api.md)

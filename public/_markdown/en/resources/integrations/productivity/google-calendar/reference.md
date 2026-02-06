@@ -30,7 +30,7 @@ Below is a reference of enumerations used by some tools in the GoogleCalendar MC
 -   **ADD**: `add`
 -   **REMOVE**: `remove`
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Google Calendar](/en/resources/integrations/productivity/google-calendar.md)
 [Google Contacts](/en/resources/integrations/productivity/google-contacts.md)

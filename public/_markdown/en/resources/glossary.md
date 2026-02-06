@@ -73,11 +73,11 @@ _Learn more about [tools](/guides/create-tools/tool-basics/build-mcp-server.md)
 
 [Optimized tools](/guides/create-tools/improve/types-of-tools.md#optimized-tools) are designed from scratch to provide the best performance for LLMs in terms of speed, reliability, accuracy, and cost-effectiveness.
 
-#### Starter tools
+#### Unoptimized tools
 
-[Starter tools](/guides/create-tools/improve/types-of-tools.md#starter-tools) are designed to mirror the original HTTP API design of the upstream service. They are not optimized for LLM usage and are not subject to evaluation suites. We recommend thoroughly evaluating each Starter tool with your Agents or chatbots before using it in production.
+[Unoptimized tools](/guides/create-tools/improve/types-of-tools.md#unoptimized-tools) are designed to mirror the original HTTP API design of the upstream service. They are not optimized for LLM usage and are not subject to evaluation suites. We recommend thoroughly evaluating each Unoptimized tool with your Agents or chatbots before using it in production.
 
-Understand why [LLMs usually perform poorly](/guides/create-tools/improve/types-of-tools.md#why-llms-perform-poorly-when-calling-http-apis) when calling HTTP APIs.
+Understand why \[LLMs perform poorly when\](/guides/create-tools/improve/types-of-tools#why-llms-perform-poorly when-calling-http-apis) calling HTTP APIs.
 
 ### Tool Context
 
@@ -201,7 +201,7 @@ Evaluations are a way to test the LLMs’ ability to select and call your tools.
 _Learn more about evaluations [here](/guides/create-tools/evaluate-tools/why-evaluate.md)
 ._
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Tools](/en/resources/tools.md)
 [FAQ](/en/resources/faq.md)

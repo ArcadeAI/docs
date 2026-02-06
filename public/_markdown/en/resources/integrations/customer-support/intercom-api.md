@@ -8,7 +8,7 @@ IntercomApi
 
 # IntercomApi
 
-Arcade Starter
+Arcade Unoptimized
 
 **Description:** Tools that enable LLMs to interact directly with the Intercom API
 
@@ -22,13 +22,13 @@ Arcade Starter
 [![Wheel Status](https://img.shields.io/pypi/wheel/arcade_intercom_api)](https://pypi.org/project/arcade_intercom_api/)
 [![Downloads](https://img.shields.io/pypi/dm/arcade_intercom_api)](https://pypi.org/project/arcade_intercom_api/)
 
-IntercomApi is a [Starter MCP Server](/guides/create-tools/improve/types-of-tools.md#starter-tools)
+IntercomApi is a [Unoptimized MCP Server](/guides/create-tools/improve/types-of-tools.md#unoptimized-tools)
 : each tool mirrors one HTTP endpoint and offers LLMs a way to interact with the low-level API.
 
 
 
 Differently from [Optimized MCP Servers](/guides/create-tools/improve/types-of-tools.md#optimized-tools)
-, Starter tools are heavily influenced by the original API design, which is not usually optimized for LLM usage. For this reason, we recommend thoroughly evaluating the tools with your Agents or chatbots before using it in production. [Read more](/guides/create-tools/improve/types-of-tools.md) about Optimized vs Starter tools.
+, Unoptimized tools are heavily influenced by the original API design, which is not usually optimized for LLM usage. For this reason, we recommend thoroughly evaluating the tools with your Agents or chatbots before using it in production. [Read more](/guides/create-tools/improve/types-of-tools.md) about Optimized vs Unoptimized tools.
 
 The IntercomApi MCP Server offers a comprehensive suite of tools for managing and interacting with the Intercom platform.
 
@@ -2102,7 +2102,7 @@ The IntercomApi MCP Server uses the Auth Provider with id `arcade-intercom` to c
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_intercom_api ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [FreshserviceApi](/en/resources/integrations/customer-support/freshservice-api.md)
 [Contribute a Server](/en/resources/integrations/contribute-a-server.md)

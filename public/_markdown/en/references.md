@@ -54,7 +54,7 @@ Install with:
 
 Note: \-compatible versions of these clients are in development and will be documented soon.
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Server-Level vs Tool-Level Authorization](/en/learn/server-level-vs-tool-level-auth.md)
 [Changelog](/en/references/changelog.md)

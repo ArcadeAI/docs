@@ -117,7 +117,7 @@ A list of supported language codes can be found [here](#languagecodes).
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_google_jobs ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Google Hotels](/en/resources/integrations/search/google_hotels.md)
 [Google Maps](/en/resources/integrations/search/google_maps.md)

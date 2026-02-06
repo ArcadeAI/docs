@@ -67,7 +67,7 @@ Send a WhatsApp message to a phone number
 -   `phone_number`_(string, required)_ The phone number to send the message to. Use ‘my\_phone\_number’ when a phone number is not specified or when the request implies sending to the user themselves
 -   `message`_(string, required)_ The text content to be sent via WhatsApp
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Twilio](/en/resources/integrations/social-communication/twilio.md)
 [X (Twitter)](/en/resources/integrations/social-communication/x.md)

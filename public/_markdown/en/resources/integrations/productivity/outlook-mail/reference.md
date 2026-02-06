@@ -45,7 +45,7 @@ Below is a reference of enumerations used by some tools in the OutlookMail MCP S
 -   **ENDS\_WITH**: `endsWith`
 -   **CONTAINS**: `contains`
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Outlook Mail](/en/resources/integrations/productivity/outlook-mail.md)
 [AirtableApi](/en/resources/integrations/productivity/airtable-api.md)

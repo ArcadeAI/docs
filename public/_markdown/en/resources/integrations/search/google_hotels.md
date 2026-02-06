@@ -81,7 +81,7 @@ Defines the sorting options for hotel search results.
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_google_hotels ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Google Flights](/en/resources/integrations/search/google_flights.md)
 [Google Jobs](/en/resources/integrations/search/google_jobs.md)

@@ -8,7 +8,7 @@ CursorAgentsApi
 
 # CursorAgentsApi
 
-Arcade Starter
+Arcade Unoptimized
 
 **Description:** Tools that enable LLMs to interact directly with the cursor\_agents API.
 
@@ -22,13 +22,13 @@ Arcade Starter
 [![Wheel Status](https://img.shields.io/pypi/wheel/arcade_cursor_agents_api)](https://pypi.org/project/arcade_cursor_agents_api/)
 [![Downloads](https://img.shields.io/pypi/dm/arcade_cursor_agents_api)](https://pypi.org/project/arcade_cursor_agents_api/)
 
-CursorAgentsApi is a [Starter MCP Server](/guides/create-tools/improve/types-of-tools.md#starter-tools)
+CursorAgentsApi is a [Unoptimized MCP Server](/guides/create-tools/improve/types-of-tools.md#unoptimized-tools)
 : each tool mirrors one HTTP endpoint and offers LLMs a way to interact with the low-level API.
 
 
 
 Differently from [Optimized MCP Servers](/guides/create-tools/improve/types-of-tools.md#optimized-tools)
-, Starter tools are heavily influenced by the original API design, which is not usually optimized for LLM usage. For this reason, we recommend thoroughly evaluating the tools with your Agents or chatbots before using it in production. [Read more](/guides/create-tools/improve/types-of-tools.md) about Optimized vs Starter tools.
+, Unoptimized tools are heavily influenced by the original API design, which is not usually optimized for LLM usage. For this reason, we recommend thoroughly evaluating the tools with your Agents or chatbots before using it in production. [Read more](/guides/create-tools/improve/types-of-tools.md) about Optimized vs Unoptimized tools.
 
 The CursorAgentsApi MCP Server provides tools for managing and inspecting background agents, authentication info, model recommendations, and linked GitHub repos. These tools let users and LLMs:
 
@@ -173,7 +173,7 @@ This tool requires the following secrets: `CURSOR_AGENTS_API_KEY` (learn how to 
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_cursor_agents_api ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Brightdata](/en/resources/integrations/development/brightdata.md)
 [DatadogApi](/en/resources/integrations/development/datadog-api.md)

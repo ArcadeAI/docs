@@ -31,7 +31,7 @@ Below is a reference of enumerations used by some tools in the Teams MCP Server:
 -   **PARTIAL\_ALL**: `match_all_keywords`
 -   **PARTIAL\_ANY**: `match_any_of_the_keywords`
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Slack API](/en/resources/integrations/social-communication/slack-api.md)
 [Twilio](/en/resources/integrations/social-communication/twilio.md)

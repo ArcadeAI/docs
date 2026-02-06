@@ -28,7 +28,7 @@ Below is a reference of enumerations used by some tools in the Zendesk MCP Serve
 -   **CREATED\_AT**: `created_at`
 -   **RELEVANCE**: `relevance`
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Zendesk](/en/resources/integrations/customer-support/zendesk.md)
 [Pylon](/en/resources/integrations/customer-support/pylon.md)

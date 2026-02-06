@@ -238,7 +238,7 @@ The Arcade Stripe MCP Sever uses the \[Stripe Agent Toolkit\]([https://github.co
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_stripe ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [ZohoCreatorApi](/en/resources/integrations/development/zoho-creator-api.md)
 [StripeApi](/en/resources/integrations/payments/stripe_api.md)

@@ -35,7 +35,7 @@ The value must be a numeric string with an integer greater than or equal to 1.
 
 **Default:** `5000`
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Reference](/en/resources/integrations/productivity/jira/reference.md)
 [Linear](/en/resources/integrations/productivity/linear.md)

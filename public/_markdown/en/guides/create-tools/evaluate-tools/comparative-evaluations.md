@@ -757,7 +757,7 @@ suite.add_tool_catalog(catalog_v2, track="Python v2")
 -   [Run evaluations](/guides/create-tools/evaluate-tools/run-evaluations.md)
      with multiple models and tracks
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Capture mode](/en/guides/create-tools/evaluate-tools/capture-mode.md)
 [Types of Tools](/en/guides/create-tools/improve/types-of-tools.md)

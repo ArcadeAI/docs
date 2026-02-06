@@ -220,7 +220,7 @@ Now that you have integrated Arcade  into your Google ADK application, you can:
 
 Enjoy exploring Arcade and building powerful AI-enabled Python applications!
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Overview](/en/get-started/agent-frameworks/google-adk/overview.md)
 [Setup Arcade with LangChain](/en/get-started/agent-frameworks/langchain/use-arcade-with-langchain.md)

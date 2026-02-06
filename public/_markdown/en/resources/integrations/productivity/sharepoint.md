@@ -235,7 +235,7 @@ The Arcade Sharepoint MCP Sever uses the [Microsoft auth provider](/references/a
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_sharepoint ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [MiroApi](/en/resources/integrations/productivity/miro-api.md)
 [SquareupApi](/en/resources/integrations/productivity/squareup-api.md)

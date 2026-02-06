@@ -69,7 +69,7 @@ Explore the versatility of this MCP Sever with the following example prompts:
     _Prompt:_ “Send a WhatsApp message to +19999999999 saying ‘Happy Birthday! Hope you have a fantastic day!’”
 
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Reference](/en/resources/integrations/social-communication/teams/reference.md)
 [Reference](/en/resources/integrations/social-communication/twilio/reference.md)

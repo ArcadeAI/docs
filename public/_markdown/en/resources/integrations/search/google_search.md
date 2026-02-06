@@ -65,7 +65,7 @@ The Arcade Google Search MCP Sever uses the [SerpAPI](https://serpapi.com/)  to
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_google_search ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Google News](/en/resources/integrations/search/google_news.md)
 [Google Shopping](/en/resources/integrations/search/google_shopping.md)

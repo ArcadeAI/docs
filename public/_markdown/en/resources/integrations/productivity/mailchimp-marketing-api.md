@@ -20,13 +20,13 @@ Mailchimp Marketing API
 [![Wheel Status](https://img.shields.io/pypi/wheel/arcade_mailchimp_marketing_api)](https://pypi.org/project/arcade_mailchimp_marketing_api/)
 [![Downloads](https://img.shields.io/pypi/dm/arcade_mailchimp_marketing_api)](https://pypi.org/project/arcade_mailchimp_marketing_api/)
 
-MailchimpMarketingApi is a [Starter MCP Server](/guides/create-tools/improve/types-of-tools.md#starter-tools)
+MailchimpMarketingApi is a [Unoptimized MCP Server](/guides/create-tools/improve/types-of-tools.md#unoptimized-tools)
 : each tool mirrors one HTTP endpoint and offers LLMs a way to interact with the low-level API.
 
 
 
 Differently from [Optimized MCP Servers](/guides/create-tools/improve/types-of-tools.md#optimized-tools)
-, Starter tools are heavily influenced by the original API design, which is not usually optimized for LLM usage. For this reason, we recommend thoroughly evaluating the tools with your Agents or chatbots before using it in production. [Read more](/guides/create-tools/improve/types-of-tools.md) about Optimized vs Starter tools.
+, Unoptimized tools are heavily influenced by the original API design, which is not usually optimized for LLM usage. For this reason, we recommend thoroughly evaluating the tools with your Agents or chatbots before using it in production. [Read more](/guides/create-tools/improve/types-of-tools.md) about Optimized vs Unoptimized tools.
 
 The Mailchimp Marketing API MCP Server offers a comprehensive suite of tools for managing and optimizing email marketing campaigns. Users can leverage these tools to:
 
@@ -4794,7 +4794,7 @@ The Mailchimp OAuth provider enables secure authentication with Mailchimp’s Ma
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_mailchimp_marketing_api ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Linear](/en/resources/integrations/productivity/linear.md)
 [Notion](/en/resources/integrations/productivity/notion.md)

@@ -1,6 +1,6 @@
 ---
 title: "Types of Tools"
-description: "Learn about Optimized and Starter tools"
+description: "Learn about Optimized and Unoptimized tools"
 ---
 [Create tools](/en/guides/create-tools/tool-basics.md)
 Improve an existing toolkitTypes of Tools
@@ -12,7 +12,7 @@ Arcade offers two types of :
 -
 -
 
-The distinction is merely a matter of how they are designed. Both types of  can be used seamlessly in the same way. There is no difference in their interfaces, the way they are called, or how you interact with them through the Arcade [Dashboard](https://api.arcade.dev/dashboard/)  or the Arcade [SDK clients](/references.md).
+The distinction is merely a matter of how Arcade designs them. Both types of  can be used seamlessly in the same way. No difference exists in their interfaces, the way they are called, or how you interact with them through the Arcade [Dashboard](https://api.arcade.dev/dashboard/)  or the Arcade [SDK clients](/references.md).
 
 Before we understand the two types, let’s first understand the background for why we need to differentiate between them.
 
@@ -65,19 +65,19 @@ When a user says “Send a DM to John asking about a  update”, the LLM can dir
 
  dramatically improve the speed, reliability and cost-effectiveness of AI  and chatbots.
 
-Since they require careful design and evaluation, Optimized tools take time and effort to build. We understand that your Agent or chatbot project might need capabilities not yet covered by our Optimized  Servers. For this reason, we also offer low-level Starter .
+Since they require careful design and evaluation, Optimized tools take time and effort to build. Arcade understands that your Agent or chatbot project might need capabilities not yet covered by Arcade’s Optimized  Servers. For this reason, Arcade also offers low-level Unoptimized  (formerly known as Starter MCP Servers).
 
-## Starter tools
+## Unoptimized tools
 
-To provide your Agent or chatbot with more freedom to interact with the upstream services, we offer Starter  Servers.
+To provide your Agent or chatbot with more freedom to interact with upstream services, we offer Unoptimized  Servers.
 
  are heavily influenced by the original API design. Each  mirrors one HTTP endpoint.
 
-Although we redesign the tool name and argument descriptions to make them more suitable for LLMs, Starter tools are still not optimized for LLM usage. Also, they are not subject to evaluation suites like  . For those reasons, we recommend thoroughly evaluating each  with your  or chatbots before using it in production.
+Although we redesign the tool name and argument descriptions to make them more suitable for LLMs,   are still not optimized for LLM usage. Also, they are not subject to evaluation suites like . For those reasons, we recommend thoroughly evaluating each Unoptimized tool with your  or chatbots before using it in production.
 
-When your Agent’s needs are covered by an  , we recommend using it instead of a Starter one. Use  as a complement. Carefully engineer your prompts to ensure your  can call them safely.
+When an Optimized tool covers your Agent’s needs, we recommend using it instead of an Unoptimized one. Use   as a complement. Carefully engineer your prompts to ensure your  can call them safely.
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Comparative evaluations](/en/guides/create-tools/evaluate-tools/comparative-evaluations.md)
 [Overview](/en/guides/create-tools/error-handling.md)

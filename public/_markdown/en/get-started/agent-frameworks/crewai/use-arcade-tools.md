@@ -99,7 +99,7 @@ Now that you have integrated Arcade tools into your CrewAI  team, you can:
 -   Customize the ’s prompts for specific tasks.
 -   Customize the  authorization and execution flow to meet your application’s requirements.
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Setup Arcade with your LLM (Python)](/en/get-started/agent-frameworks/setup-arcade-with-your-llm-python.md)
 [Custom auth flow](/en/get-started/agent-frameworks/crewai/custom-auth-flow.md)

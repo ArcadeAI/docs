@@ -294,7 +294,7 @@ Now that you have integrated Arcade tools into your OpenAI  application, you can
 
 Enjoy exploring Arcade and building powerful AI-enabled Python applications!
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Setup Arcade with OpenAI Agents SDK](/en/get-started/agent-frameworks/openai-agents/use-arcade-with-openai-agents.md)
 [Managing user authorization](/en/get-started/agent-frameworks/openai-agents/user-auth-interrupts.md)

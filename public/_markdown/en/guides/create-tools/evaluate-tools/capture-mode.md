@@ -410,7 +410,7 @@ suite = EvalSuite(
 -   [Create evaluation suites](/guides/create-tools/evaluate-tools/create-evaluation-suite.md)
      with expectations
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Run evaluations](/en/guides/create-tools/evaluate-tools/run-evaluations.md)
 [Comparative evaluations](/en/guides/create-tools/evaluate-tools/comparative-evaluations.md)

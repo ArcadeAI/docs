@@ -20,7 +20,7 @@ We are seeking beta testers who are interested in building, maintaining, and sha
 
 Loading...
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Contact](/en/resources/contact-us.md)
 [MCP Gateways](/en/guides/mcp-gateways.md)

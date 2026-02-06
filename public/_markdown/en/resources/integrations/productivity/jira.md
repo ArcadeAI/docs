@@ -817,7 +817,7 @@ The Arcade Jira MCP Sever uses the [Atlassian auth provider](/references/auth-pr
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_jira ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Google Slides](/en/resources/integrations/productivity/google-slides.md)
 [Reference](/en/resources/integrations/productivity/jira/reference.md)

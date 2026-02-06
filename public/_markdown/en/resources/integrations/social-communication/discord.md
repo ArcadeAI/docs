@@ -138,7 +138,7 @@ async def list_servers(
         return response.json()
 ```
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [XeroApi](/en/resources/integrations/productivity/xero-api.md)
 [LinkedIn](/en/resources/integrations/social-communication/linkedin.md)

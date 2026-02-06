@@ -206,7 +206,7 @@ if (tool.requirements) {
 -   `true`: The secret exists for the
 -   `false`: The secret does not exist for the
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Authorize tool calling](/en/guides/tool-calling/custom-apps/auth-tool-calling.md)
 [Get formatted tool definitions](/en/guides/tool-calling/custom-apps/get-tool-definitions.md)

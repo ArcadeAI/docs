@@ -176,7 +176,7 @@ This tool requires the following secrets: `zendesk_subdomain` (learn how to [con
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_zendesk ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [WeaviateApi](/en/resources/integrations/databases/weaviate-api.md)
 [Reference](/en/resources/integrations/customer-support/zendesk/reference.md)

@@ -274,7 +274,7 @@ middleware = compose_middleware([
 server = MCPServer(catalog=ToolCatalog(), middleware=[middleware])
 ```
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Server](/en/references/mcp/python/server.md)
 [Types](/en/references/mcp/python/types.md)

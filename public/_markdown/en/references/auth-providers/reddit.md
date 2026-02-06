@@ -164,7 +164,7 @@ async def get_user_info(
         return response.json()
 ```
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [PagerDuty](/en/references/auth-providers/pagerduty.md)
 [Salesforce](/en/references/auth-providers/salesforce.md)

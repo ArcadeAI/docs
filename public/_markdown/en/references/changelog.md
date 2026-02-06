@@ -175,7 +175,7 @@ As of December 1, 2025, we have migrated the  servers deployed via `arcade deplo
 
 **Toolkits**
 
--   `[feature - 🚀]` Added new HubSpot Marketing & CRM
+-   `[feature - 🚀]` Added new HubSpot Marketing & CRM starter
 -   `[feature - 🚀]` Added Exa.ai Starter  Server
 -   `[feature - 🚀]` Added Asana starter toolkit
 -   `[feature - 🚀]` Added Github starter toolkit
@@ -285,7 +285,7 @@ This week projects are now generally available! Projects are a new way to organi
 
 **Toolkits**
 
--   `[feature - 🚀]` Introduce [Starter Tools](/guides/create-tools/improve/types-of-tools.md)
+-   `[feature - 🚀]` Introduce [Unoptimized tools](/guides/create-tools/improve/types-of-tools.md)
     , a new type of  that mirrors the original HTTP API design of the upstream service.
 -   `[feature - 🚀]` Release Slack started  Server which contains support for most of the Slack API.
 -   `[feature - 🚀]` Include advanced error handling in the following  Servers: Google, Microsoft, Slack, and Asana. Learn more about handling  errors [here](/guides/create-tools/error-handling/useful-tool-errors.md)
@@ -640,7 +640,7 @@ Self-hosed Arcade developers cannot be grandfathered into the old (insecure) beh
 -   `[feature - 🚀]` Launched status.arcade.dev for monitoring platform status ([link](https://status.arcade.dev)
      )
 
-Last updated on January 30, 2026
+Last updated on February 6, 2026
 
 [Overview](/en/references.md)
 [API](/en/references/api.md)

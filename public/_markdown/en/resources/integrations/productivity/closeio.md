@@ -10,7 +10,7 @@ Close.io
 
 Coming Soon
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Reference](/en/resources/integrations/productivity/clickup/reference.md)
 [Confluence](/en/resources/integrations/productivity/confluence.md)

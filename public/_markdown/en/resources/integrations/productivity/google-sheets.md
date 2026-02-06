@@ -260,7 +260,7 @@ The Arcade GoogleSheets MCP Sever uses the \[Google auth provider\](/references/
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_google_sheets ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Reference](/en/resources/integrations/productivity/google-drive/reference.md)
 [Reference](/en/resources/integrations/productivity/google-sheets/reference.md)

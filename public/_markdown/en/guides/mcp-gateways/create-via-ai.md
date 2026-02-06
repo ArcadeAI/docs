@@ -58,7 +58,7 @@ Follow the same process you used to add the Gateway Assistant - see [Connect to 
 
 The Gateway Assistant creates gateways that use **Arcade Auth** by default. This means you’ll authenticate with your Arcade  to access the gateway. For production use cases with end  who don’t have Arcade accounts, you can modify the gateway’s authentication settings in the [dashboard](https://api.arcade.dev/dashboard/mcp-gateways) .
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Create via Dashboard](/en/guides/mcp-gateways/create-via-dashboard.md)
 [Overview](/en/guides/tool-calling.md)

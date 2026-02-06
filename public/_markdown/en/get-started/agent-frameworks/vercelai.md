@@ -945,7 +945,7 @@ export default function Chat() {
 }
 ```
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Managing user authorization](/en/get-started/agent-frameworks/openai-agents/user-auth-interrupts.md)
 [Overview](/en/get-started/mcp-clients.md)

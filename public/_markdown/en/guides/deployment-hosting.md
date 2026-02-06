@@ -4,7 +4,7 @@ description: "Learn about the different ways to host Arcade"
 ---
 Deployment & hostingOverview
 
-# Hosting Optoions Overview
+# Hosting Options Overview
 
 The easiest and best way to use Arcade is via the Arcade Cloud service - sign up for free at [https://api.arcade.dev](https://api.arcade.dev) . However, you might need to connect your  to local resources (e.g. a local database or filesystem) or keep data within your own infrastructure. Don’t worry, Arcade has you covered via either Arcade Cloud or our on-premise deployment options.
 
@@ -57,7 +57,7 @@ The requirements for deploying Arcade on-premise are:
 -   Cert Manager for securing Redis and Postgres and public ingress (see below)
 -   Nginx Ingress for accessing Arcade.dev from outside the cluster (see below)
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Secure Auth in Production](/en/guides/user-facing-agents/secure-auth-production.md)
 [Arcade Cloud](/en/guides/deployment-hosting/arcade-cloud.md)

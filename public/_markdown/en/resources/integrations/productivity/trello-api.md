@@ -8,7 +8,7 @@ TrelloApi
 
 # TrelloApi
 
-Arcade Starter
+Arcade Unoptimized
 
 **Description:** Tools that enable LLMs to interact directly with the trello API.
 
@@ -22,13 +22,13 @@ Arcade Starter
 [![Wheel Status](https://img.shields.io/pypi/wheel/arcade_trello_api)](https://pypi.org/project/arcade_trello_api/)
 [![Downloads](https://img.shields.io/pypi/dm/arcade_trello_api)](https://pypi.org/project/arcade_trello_api/)
 
-TrelloApi is a [Starter MCP Server](/guides/create-tools/improve/types-of-tools.md#starter-tools)
+TrelloApi is a [Unoptimized MCP Server](/guides/create-tools/improve/types-of-tools.md#unoptimized-tools)
 : each tool mirrors one HTTP endpoint and offers LLMs a way to interact with the low-level API.
 
 
 
 Differently from [Optimized MCP Servers](/guides/create-tools/improve/types-of-tools.md#optimized-tools)
-, Starter tools are heavily influenced by the original API design, which is not usually optimized for LLM usage. For this reason, we recommend thoroughly evaluating the tools with your Agents or chatbots before using it in production. [Read more](/guides/create-tools/improve/types-of-tools.md) about Optimized vs Starter tools.
+, Unoptimized tools are heavily influenced by the original API design, which is not usually optimized for LLM usage. For this reason, we recommend thoroughly evaluating the tools with your Agents or chatbots before using it in production. [Read more](/guides/create-tools/improve/types-of-tools.md) about Optimized vs Unoptimized tools.
 
 The TrelloApi MCP Server offers a comprehensive suite of tools for interacting with Trello, enabling users and AI applications to efficiently manage boards, cards, lists, and members. With this server, you can:
 
@@ -5039,7 +5039,7 @@ Below is a reference of enumerations used by some of the tools in the TrelloApi 
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_trello_api ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [TicktickApi](/en/resources/integrations/productivity/ticktick-api.md)
 [XeroApi](/en/resources/integrations/productivity/xero-api.md)

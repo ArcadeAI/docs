@@ -140,7 +140,7 @@ This workflow ensures your agent has complete information about the database str
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_postgres ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [HubspotUsersApi](/en/resources/integrations/sales/hubspot-users-api.md)
 [MongoDB](/en/resources/integrations/databases/mongodb.md)

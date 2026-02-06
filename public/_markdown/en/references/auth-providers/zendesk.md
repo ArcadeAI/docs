@@ -209,7 +209,7 @@ async def get_tickets(
         return {"tickets": data}
 ```
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [X](/en/references/auth-providers/x.md)
 [Zoho](/en/references/auth-providers/zoho.md)

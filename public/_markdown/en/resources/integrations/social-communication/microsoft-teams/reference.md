@@ -27,7 +27,7 @@ Below is a reference of enumerations used by some tools in the MicrosoftTeams MC
 -   **DIRECT\_MEMBER**: `direct_member_of_the_team`
 -   **MEMBER\_OF\_SHARED\_CHANNEL**: `member_of_a_shared_channel_in_another_team`
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Microsoft Teams](/en/resources/integrations/social-communication/microsoft-teams.md)
 [Reddit](/en/resources/integrations/social-communication/reddit.md)

@@ -1,17 +1,23 @@
 ---
-title: "Arcade Cloud Infrastructure"
-description: "Learn about the infrastructure that powers Arcade Cloud"
+title: "Arcade Cloud infrastructure"
+description: "Learn about the infrastructure, data storage, and data sovereignty options for Arcade Cloud"
 ---
 [Deployment & hosting](/en/guides/deployment-hosting.md)
 Arcade Cloud
 
-# Arcade Cloud Infrastructure
+# Arcade Cloud infrastructure
 
-This page covers the infrastructure that powers Arcade Cloud, and what you might need to know about it.
+Arcade Cloud is Arcade’s fully-managed SaaS platform: Arcade handles hosting, scaling, and operations so you can focus on building. This page covers the infrastructure behind Arcade Cloud, including networking, data storage, data protection, and sovereignty options.
 
-## Egress IP Addresses
+This page applies to **Arcade Cloud** only. If you self-host Arcade, you control your own infrastructure and data residency. See [on-premises deployment](/guides/deployment-hosting.md#on-premise-deployments) for details.
 
-Traffic from Arcade Cloud will be existing our infrastructure from the following IP addresses:
+## Sovereignty
+
+All of Arcade Cloud’s infrastructure is located in the United States, including data storage and processing.
+
+## Egress IP addresses
+
+Traffic from Arcade Cloud exits from the following IP addresses:
 
 ```bash
 # Control Plane (Located in the USA)
@@ -25,11 +31,155 @@ Traffic from Arcade Cloud will be existing our infrastructure from the following
 3.131.234.5
 ```
 
-## VPC Peering
+## VPC peering
 
-VPC Peering is available for our enterprise customers upon request. If you are interested in VPC Peering, please [contact us](/resources/contact-us.md).
+VPC peering is available for enterprise customers upon request. If you want VPC peering, [contact Arcade](/resources/contact-us.md).
 
-Last updated on January 5, 2026
+## Data storage
+
+As part of Arcade’s service, Arcade stores multiple categories of data:
+
+### Application data (user-controlled)
+
+Data stored in application databases where you have direct control over retention and deletion.
+
+Data type
+
+Examples
+
+**User secrets**
+
+OAuth tokens
+
+**User identities**
+
+Email addresses or usernames
+
+**Project secrets**
+
+API keys, OAuth provider configurations
+
+**Execution logs**
+
+Tool execution logs for monitoring and debugging
+
+**Audit trails**
+
+Changes to significant data or configuration for your projects or organization
+
+You can disable log collection, set retention periods, and purge data on demand through your organization or  settings.
+
+### Monitoring and analytics (platform-controlled)
+
+Operational data that Arcade uses for system health, debugging, and analytics.
+
+Data type
+
+Retention
+
+**Application logs**
+
+Up to 1 year
+
+**Audit trails**
+
+Up to 1 year
+
+**Metrics and traces**
+
+Up to 1 year
+
+**Billing and transaction records**
+
+Retained indefinitely for legal and financial compliance
+
+**Vulnerability and security reports**
+
+Up to 6 months
+
+## Training data
+
+### What Training Data Covers
+
+Training data includes data which Arcade uses to improve its ML/AI models. This includes data which could contain personally identifiable information (PII):
+
+-   ** queries** — Natural language inputs sent to tools
+-   ** inputs** — Parameters and arguments passed to
+-   ** results** — Outputs returned from , including data returned from external services
+
+Training consent does **not** apply to:
+
+-   Aggregated, anonymized usage metrics
+-   System performance data
+-   Billing and transaction records
+
+### Consent model
+
+Arcade follows a customer-governed consent model that prioritizes transparency and control:
+
+-   **Opt-out is available anytime** through your organization or  settings—no review process, and it takes effect immediately.
+-   **Consent is scoped to the organization level.** Consent for data training is controlled buy the Arcade customer, and not end-users. For enterprise , an organization admin manages consent for the team.
+
+### When you opt out
+
+When you revoke training consent:
+
+-   Data collection for training stops immediately
+-   Existing data is excluded from future training runs
+
+### Retention
+
+Training data is retained for up to 5 years, which is sufficient for model development and consistent with industry precedent.
+
+## Data protection
+
+### Encryption
+
+Layer
+
+Standard
+
+**At rest**
+
+All production systems use AES-256 encrypted storage volumes
+
+**In transit**
+
+TLS 1.2+ for all API communications
+
+**Application-level**
+
+Sensitive fields (tokens, secrets) use additional AES-256 encryption before persisting to storage
+
+### Deployment options
+
+Deployment mode
+
+Data location control
+
+Best for
+
+**Arcade Cloud**
+
+United States only
+
+Customers without data residency requirements
+
+**Self-hosted**
+
+Full customer control
+
+Regulated industries and strict sovereignty requirements
+
+### Regulated Customers
+
+If your organization has strict data residency requirements—for example, in financial services, healthcare, or government—or you operate within a legal regime that requires data storage in a specific country, you can deploy Arcade on-premises or in your preferred cloud region using a [self-hosted deployment](/guides/deployment-hosting.md#on-premise-deployments). This keeps all sensitive data within your own infrastructure.
+
+## Questions
+
+For compliance inquiries or data protection questions, [contact us](/resources/contact-us.md).
+
+Last updated on February 6, 2026
 
 [Overview](/en/guides/deployment-hosting.md)
 [On-premises MCP servers](/en/guides/deployment-hosting/on-prem.md)

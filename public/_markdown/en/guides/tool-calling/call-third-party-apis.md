@@ -207,7 +207,7 @@ Arcade handles the authorization challenges and tokens, simplifying the process 
 
 Integrate this authorization flow into your application, and explore how you can manage different [auth providers](/references/auth-providers.md) and scopes.
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Handling errors](/en/guides/tool-calling/error-handling.md)
 [Overview](/en/guides/tool-calling/custom-apps.md)

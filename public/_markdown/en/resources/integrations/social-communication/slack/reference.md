@@ -18,7 +18,7 @@ Below is a reference of enumerations used by some tools in the Slack MCP Server:
 -   **MULTI\_PERSON\_DIRECT\_MESSAGE**: `multi_person_direct_message`
 -   **DIRECT\_MESSAGE**: `direct_message`
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Environment Variables](/en/resources/integrations/social-communication/slack/environment-variables.md)
 [Slack API](/en/resources/integrations/social-communication/slack-api.md)

@@ -19,7 +19,7 @@ The LLMs.txt files are available at [`/llms.txt`](/llms.txt).
 
 Learn more about the LLMs.txt file format [here](https://llmstxt.org/) .
 
-Last updated on January 30, 2026
+Last updated on February 6, 2026
 
 [Get an API key](/en/get-started/setup/api-keys.md)
-[Call tools in agents](/en/get-started/quickstarts/call-tool-agent.md)
+[Windows environment setup](/en/get-started/setup/windows-environment.md)

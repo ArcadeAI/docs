@@ -8,7 +8,7 @@ HubspotConversationsApi
 
 # HubspotConversationsApi
 
-Arcade Starter
+Arcade Unoptimized
 
 **Description:** Tools that enable LLMs to interact directly with the Hubspot Conversations API
 
@@ -22,13 +22,13 @@ Arcade Starter
 [![Wheel Status](https://img.shields.io/pypi/wheel/arcade_hubspot_conversations_api)](https://pypi.org/project/arcade_hubspot_conversations_api/)
 [![Downloads](https://img.shields.io/pypi/dm/arcade_hubspot_conversations_api)](https://pypi.org/project/arcade_hubspot_conversations_api/)
 
-HubspotConversationsApi is a [Starter MCP Server](/guides/create-tools/improve/types-of-tools.md#starter-tools)
+HubspotConversationsApi is a [Unoptimized MCP Server](/guides/create-tools/improve/types-of-tools.md#unoptimized-tools)
 : each tool mirrors one HTTP endpoint and offers LLMs a way to interact with the low-level API.
 
 
 
 Differently from [Optimized MCP Servers](/guides/create-tools/improve/types-of-tools.md#optimized-tools)
-, Starter tools are heavily influenced by the original API design, which is not usually optimized for LLM usage. For this reason, we recommend thoroughly evaluating the tools with your Agents or chatbots before using it in production. [Read more](/guides/create-tools/improve/types-of-tools.md) about Optimized vs Starter tools.
+, Unoptimized tools are heavily influenced by the original API design, which is not usually optimized for LLM usage. For this reason, we recommend thoroughly evaluating the tools with your Agents or chatbots before using it in production. [Read more](/guides/create-tools/improve/types-of-tools.md) about Optimized vs Unoptimized tools.
 
 The Hubspot Conversations API MCP Server offers a comprehensive suite of tools for managing and interacting with conversation threads and channels within HubSpot. Users can perform a variety of actions, including:
 
@@ -430,7 +430,7 @@ The HubspotConversationsApi MCP Server uses the Auth Provider with id `arcade-hu
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_hubspot_conversations_api ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [HubspotCmsApi](/en/resources/integrations/sales/hubspot-cms-api.md)
 [HubspotCrmApi](/en/resources/integrations/sales/hubspot-crm-api.md)

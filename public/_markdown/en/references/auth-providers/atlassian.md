@@ -164,7 +164,7 @@ async def list_projects(
         return response.json()
 ```
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Asana](/en/references/auth-providers/asana.md)
 [Calendly](/en/references/auth-providers/calendly.md)

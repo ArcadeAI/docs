@@ -8,7 +8,7 @@ WeaviateApi
 
 # WeaviateApi
 
-Arcade Starter
+Arcade Unoptimized
 
 **Description:** Tools that enable LLMs to interact directly with the weaviate API.
 
@@ -22,13 +22,13 @@ Arcade Starter
 [![Wheel Status](https://img.shields.io/pypi/wheel/arcade_weaviate_api)](https://pypi.org/project/arcade_weaviate_api/)
 [![Downloads](https://img.shields.io/pypi/dm/arcade_weaviate_api)](https://pypi.org/project/arcade_weaviate_api/)
 
-WeaviateApi is a [Starter MCP Server](/guides/create-tools/improve/types-of-tools.md#starter-tools)
+WeaviateApi is a [Unoptimized MCP Server](/guides/create-tools/improve/types-of-tools.md#unoptimized-tools)
 : each tool mirrors one HTTP endpoint and offers LLMs a way to interact with the low-level API.
 
 
 
 Differently from [Optimized MCP Servers](/guides/create-tools/improve/types-of-tools.md#optimized-tools)
-, Starter tools are heavily influenced by the original API design, which is not usually optimized for LLM usage. For this reason, we recommend thoroughly evaluating the tools with your Agents or chatbots before using it in production. [Read more](/guides/create-tools/improve/types-of-tools.md) about Optimized vs Starter tools.
+, Unoptimized tools are heavily influenced by the original API design, which is not usually optimized for LLM usage. For this reason, we recommend thoroughly evaluating the tools with your Agents or chatbots before using it in production. [Read more](/guides/create-tools/improve/types-of-tools.md) about Optimized vs Unoptimized tools.
 
 The WeaviateApi MCP Server offers a comprehensive suite of tools for managing and interacting with Weaviate, a vector search engine. Users can perform a variety of actions, including:
 
@@ -1682,7 +1682,7 @@ Below is a reference of enumerations used by some of the tools in the WeaviateAp
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_weaviate_api ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [ClickHouse](/en/resources/integrations/databases/clickhouse.md)
 [Zendesk](/en/resources/integrations/customer-support/zendesk.md)

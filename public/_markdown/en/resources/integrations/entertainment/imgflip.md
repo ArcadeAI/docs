@@ -102,7 +102,7 @@ This tool creates a custom meme by adding your text to an existing meme template
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_imgflip ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [Zoom](/en/resources/integrations/social-communication/zoom.md)
 [Spotify](/en/resources/integrations/entertainment/spotify.md)

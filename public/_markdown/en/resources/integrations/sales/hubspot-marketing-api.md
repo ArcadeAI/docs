@@ -8,7 +8,7 @@ HubspotMarketingApi
 
 # HubspotMarketingApi
 
-Arcade Starter
+Arcade Unoptimized
 
 **Description:** Tools that enable LLMs to interact directly with the Hubspot Marketing API.
 
@@ -22,13 +22,13 @@ Arcade Starter
 [![Wheel Status](https://img.shields.io/pypi/wheel/arcade_hubspot_marketing_api)](https://pypi.org/project/arcade_hubspot_marketing_api/)
 [![Downloads](https://img.shields.io/pypi/dm/arcade_hubspot_marketing_api)](https://pypi.org/project/arcade_hubspot_marketing_api/)
 
-HubspotMarketingApi is a [Starter MCP Server](/guides/create-tools/improve/types-of-tools.md#starter-tools)
+HubspotMarketingApi is a [Unoptimized MCP Server](/guides/create-tools/improve/types-of-tools.md#unoptimized-tools)
 : each tool mirrors one HTTP endpoint and offers LLMs a way to interact with the low-level API.
 
 
 
 Differently from [Optimized MCP Servers](/guides/create-tools/improve/types-of-tools.md#optimized-tools)
-, Starter tools are heavily influenced by the original API design, which is not usually optimized for LLM usage. For this reason, we recommend thoroughly evaluating the tools with your Agents or chatbots before using it in production. [Read more](/guides/create-tools/improve/types-of-tools.md) about Optimized vs Starter tools.
+, Unoptimized tools are heavily influenced by the original API design, which is not usually optimized for LLM usage. For this reason, we recommend thoroughly evaluating the tools with your Agents or chatbots before using it in production. [Read more](/guides/create-tools/improve/types-of-tools.md) about Optimized vs Unoptimized tools.
 
 The HubspotMarketingApi MCP Server offers a comprehensive suite of tools for managing marketing campaigns within HubSpot. Users can efficiently perform actions such as:
 
@@ -1500,7 +1500,7 @@ The HubspotMarketingApi MCP Server uses the Auth Provider with id `arcade-hubspo
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_hubspot_marketing_api ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on January 5, 2026
+Last updated on February 6, 2026
 
 [HubspotEventsApi](/en/resources/integrations/sales/hubspot-events-api.md)
 [HubspotMeetingsApi](/en/resources/integrations/sales/hubspot-meetings-api.md)
