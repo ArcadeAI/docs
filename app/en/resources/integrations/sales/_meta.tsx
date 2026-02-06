@@ -8,6 +8,9 @@ const meta: MetaRecord = {
       copyPage: true,
     },
   },
+  attio: {
+    title: "Attio",
+  },
   hubspot: {
     title: "HubSpot",
   },
