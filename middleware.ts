@@ -60,7 +60,7 @@ function pathnameIsMissingLocale(pathname: string): boolean {
   );
 }
 
-export function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   // Handle .md requests without locale - redirect to add locale first
@@ -93,10 +93,13 @@ export function proxy(request: NextRequest) {
     }
   }
 
-  const response = NextResponse.next();
+  // Add pathname to request headers for server components
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pathname", pathname);
 
-  // Add pathname to headers for server components
-  response.headers.set("x-pathname", pathname);
+  const response = NextResponse.next({
+    request: { headers: requestHeaders },
+  });
 
   // Persist locale preference from URL if present
   const currentLocale = SUPPORTED_LOCALES.find(
