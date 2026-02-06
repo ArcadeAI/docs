@@ -1,0 +1,329 @@
+---
+title: "Confluence"
+description: "Arcade - AI platform for developers"
+---
+[Integrations](/en/resources/integrations.md)
+[Productivity & Docs](/en/resources/integrations/productivity/asana.md)
+Confluence
+
+# Confluence
+
+Arcade Optimized
+
+**Description:** Enable agents to interact with Confluence.
+
+**Author:** Arcade
+
+**Auth:** User authorization via the [Atlassian auth provider](/references/auth-providers/atlassian.md)
+
+[![PyPI Version](https://img.shields.io/pypi/v/arcade_confluence)](https://pypi.org/project/arcade_confluence/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/arcadeai/arcade-ai/blob/main/LICENSE)
+[![Python Versions](https://img.shields.io/pypi/pyversions/arcade_confluence)](https://pypi.org/project/arcade_confluence/)
+[![Wheel Status](https://img.shields.io/pypi/wheel/arcade_confluence)](https://pypi.org/project/arcade_confluence/)
+[![Downloads](https://img.shields.io/pypi/dm/arcade_confluence)](https://pypi.org/project/arcade_confluence/)
+
+The Arcade Confluence MCP Server provides a pre-built set of tools for interacting with Confluence. These tools make it easy to build agents and AI apps that can:
+
+-   Work with pages, spaces, and attachments
+-   Search for content
+
+## Available tools
+
+These tools are currently available in the Arcade Confluence MCP Sever.
+
+Tool Name
+
+Description
+
+Confluence.CreatePage
+
+Create a new page at the root of the given space.
+
+Confluence.UpdatePageContent
+
+Update a page's content.
+
+Confluence.RenamePage
+
+Rename a page by changing its title.
+
+Confluence.GetPage
+
+Retrieve a SINGLE page's content by its ID or title.
+
+Confluence.GetPagesById
+
+Get the content of MULTIPLE pages by their ID in a single efficient request.
+
+Confluence.ListPages
+
+Get the content of multiple pages by their ID.
+
+Confluence.ListAttachments
+
+List attachments in a workspace.
+
+Confluence.GetAttachmentsForPage
+
+Get attachments for a page by its ID or title.
+
+Confluence.SearchContent
+
+Search for content in Confluence.
+
+Confluence.GetSpace
+
+Get the details of a space by its ID or key.
+
+Confluence.ListSpaces
+
+List all spaces sorted by name in ascending order.
+
+Confluence.GetSpaceHierarchy
+
+Retrieve the full hierarchical structure of a Confluence space as a tree structure.
+
+If you need to perform an action that’s not listed here, you can [get in touch with us](mailto:contact@arcade.dev) to request a new tool, or [create your own tools](/guides/create-tools/tool-basics/build-mcp-server.md) with the [Confluence auth provider](/references/auth-providers/atlassian.md).
+
+## Confluence.CreatePage
+
+Create a new page at the root of the given space.
+
+**Parameters**
+
+-   **`space_identifier`** _(string, required)_: The ID or title of the space to create the page in
+-   **`title`** _(string, required)_: The title of the page
+-   **`content`** _(string, required)_: The content of the page. Only plain text is supported
+-   **`parent_id`** _(string, optional)_: The ID of the parent. If not provided, the page will be created at the root of the space
+-   **`is_private`** _(bool, optional)_: If true, then only the user who creates this page will be able to see it. Defaults to False
+-   **`is_draft`** _(bool, optional)_: If true, then the page will be created as a draft. Defaults to False
+
+
+
+* * *
+
+## Confluence.UpdatePageContent
+
+Update a page’s content.
+
+**Parameters**
+
+-   **`page_identifier`** _(string, required)_: The ID or title of the page to update. Numerical titles are NOT supported
+-   **`content`** _(string, required)_: The content of the page. Only plain text is supported
+-   **`update_mode`** _(enum ([PageUpdateMode](#pageupdatemode)
+    ), optional)_: The mode of update. Defaults to ‘append’
+
+
+
+## Confluence.RenamePage
+
+Rename a page by changing its title.
+
+**Parameters**
+
+-   **`page_identifier`** _(string, required)_: The ID or title of the page to rename. Numerical titles are NOT supported
+-   **`title`** _(string, required)_: The title of the page
+
+
+
+* * *
+
+## Confluence.GetPage
+
+Retrieve a SINGLE page’s content by its ID or title.
+
+If a title is provided, then the first page with an exact matching title will be returned.
+
+IMPORTANT: For retrieving MULTIPLE pages, use `get_pages_by_id` instead for a massive performance and efficiency boost. If you call this function multiple times instead of using `get_pages_by_id`, then the universe will explode.
+
+**Parameters**
+
+-   **`page_identifier`** _(string, required)_: Can be a page’s ID or title. Numerical titles are NOT supported
+
+
+
+* * *
+
+## Confluence.GetPagesById
+
+Get the content of MULTIPLE pages by their ID in a single efficient request.
+
+IMPORTANT: Always use this function when you need to retrieve content from more than one page, rather than making multiple separate calls to get\_page, because this function is significantly more efficient than calling get\_page multiple times.
+
+**Parameters**
+
+-   **`page_ids`** _(list of strings, required)_: The IDs of the pages to get. IDs are numeric. Titles of pages are NOT supported. Maximum of 250 page ids supported
+
+
+
+* * *
+
+## Confluence.ListPages
+
+Get the content of multiple pages by their ID.
+
+**Parameters**
+
+-   **`space_ids`** _(list of strings, optional)_: Restrict the response to only include pages in these spaces. Only space IDs are supported. Titles of spaces are NOT supported. If not provided, then no restriction is applied. Maximum of 100 space ids supported
+-   **`sort_by`** _(enum ([PageSortOrder](#pagesortorder)
+    ), optional)_: The order of the pages to sort by. Defaults to created-date-newest-to-oldest
+-   **`limit`** _(int, optional)_: The maximum number of pages to return. Defaults to 25. Max is 250
+-   **`pagination_token`** _(string, optional)_: The pagination token to use for the next page of results
+
+
+
+* * *
+
+## Confluence.ListAttachments
+
+List attachments in a workspace.
+
+**Parameters**
+
+-   **`sort_order`** _(enum ([AttachmentSortOrder](#attachmentsortorder)
+    ), optional)_: The order of the attachments to sort by. Defaults to created-date-newest-to-oldest
+-   **`limit`** _(int, optional)_: The maximum number of attachments to return. Defaults to 25. Max is 250
+-   **`pagination_token`** _(string, optional)_: The pagination token to use for the next page of results
+
+
+
+* * *
+
+## Confluence.GetAttachmentsForPage
+
+Get attachments for a page by its ID or title.
+
+If a page title is provided, then the first page with an exact matching title will be returned.
+
+**Parameters**
+
+-   **`page_identifier`** _(string, required)_: The ID or title of the page to get attachments for
+-   **`limit`** _(int, optional)_: The maximum number of attachments to return. Defaults to 25. Max is 250
+-   **`pagination_token`** _(string, optional)_: The pagination token to use for the next page of results
+
+
+
+* * *
+
+## Confluence.SearchContent
+
+Search for content in Confluence.
+
+The search is performed across all content in the authenticated user’s Confluence workspace. All search terms in Confluence are case insensitive.
+
+You can use the parameters in different ways:
+
+-   must\_contain\_all: For AND logic - content must contain ALL of these
+-   can\_contain\_any: For OR logic - content can contain ANY of these
+-   Combine them: must\_contain\_all=\[‘banana’\] AND can\_contain\_any=\[‘database’, ‘guide’\]
+
+**Parameters**
+
+-   **`must_contain_all`** _(list of strings, optional)_: Words/phrases that content MUST contain (AND logic). Each item can be:
+    -   Single word: ‘banana’ - content must contain this word
+    -   Multi-word phrase: ‘How to’ - content must contain all these words (in any order)
+    -   All items in this list must be present for content to match
+    -   Example: \[‘banana’, ‘apple’\] finds content containing BOTH ‘banana’ AND ‘apple’
+-   **`can_contain_any`** _(list of strings, optional)_: Words/phrases where content can contain ANY of these (OR logic). Each item can be:
+    -   Single word: ‘project’ - content containing this word will match
+    -   Multi-word phrase: ‘pen & paper’ - content containing all these words will match
+    -   Content matching ANY item in this list will be included
+    -   Example: \[‘project’, ‘documentation’\] finds content with ‘project’ OR ‘documentation’
+-   **`enable_fuzzy`** _(bool, optional)_: Enable fuzzy matching to find similar terms (e.g. ‘roam’ will find ‘foam’). Defaults to True
+-   **`limit`** _(int, optional)_: Maximum number of results to return (1-100). Defaults to 25
+
+
+
+* * *
+
+## Confluence.GetSpace
+
+Get the details of a space by its ID or key.
+
+**Parameters**
+
+-   **`space_identifier`** _(string, required)_: Can be a space’s ID or key. Numerical keys are NOT supported
+
+
+
+* * *
+
+## Confluence.ListSpaces
+
+List all spaces sorted by name in ascending order.
+
+**Parameters**
+
+-   **`limit`** _(int, optional)_: The maximum number of spaces to return. Defaults to 25. Max is 250
+-   **`pagination_token`** _(string, optional)_: The pagination token to use for the next page of results
+
+
+
+* * *
+
+## Confluence.GetSpaceHierarchy
+
+Retrieve the full hierarchical structure of a Confluence space as a tree structure.
+
+Only structural metadata is returned (not content). The response is akin to the sidebar in the Confluence UI.
+
+Includes all pages, folders, whiteboards, databases, smart links, etc. organized by parent-child relationships.
+
+**Parameters**
+
+-   **`space_identifier`** _(string, required)_: Can be a space’s ID or key. Numerical keys are NOT supported
+
+
+
+## Auth
+
+The Arcade Notion MCP Sever uses the [Notion auth provider](/references/auth-providers/notion.md) to connect to users’ Notion accounts.
+
+With the Arcade Cloud Platform, there’s nothing to configure. Your users will see `Arcade` as the name of the application that’s requesting permission.
+
+With a self-hosted installation of Arcade, you need to [configure the Notion auth provider](/references/auth-providers/notion.md#configuring-notion-auth) with your own Notion app credentials.
+
+* * *
+
+## Reference
+
+### PageUpdateMode
+
+The mode of update.
+
+-   **`prepend`** _(string: “prepend”)_
+-   **`append`** _(string: “append”)_
+-   **`replace`** _(string: “replace”)_
+
+### PageSortOrder
+
+The order of the pages to sort by.
+
+-   **`id-ascending`**: Sort by ID in ascending order.
+-   **`id-descending`**: Sort by ID in descending order.
+-   **`title-ascending`**: Sort by title in ascending order.
+-   **`title-descending`**: Sort by title in descending order.
+-   **`created-date-oldest-to-newest`**: Sort by created date from oldest to newest.
+-   **`created-date-newest-to-oldest`**: Sort by created date from newest to oldest.
+-   **`modified-date-oldest-to-newest`**: Sort by modified date from oldest to newest.
+-   **`modified-date-newest-to-oldest`**: Sort by modified date from newest to oldest.
+
+### AttachmentSortOrder
+
+The order of the attachments to sort by.
+
+-   **`created-date-oldest-to-newest`**: Sort by created date from oldest to newest.
+-   **`created-date-newest-to-oldest`**: Sort by created date from newest to oldest.
+-   **`modified-date-oldest-to-newest`**: Sort by modified date from oldest to newest.
+-   **`modified-date-newest-to-oldest`**: Sort by modified date from newest to oldest.
+
+## Get Building
+
+[Use tools hosted on Arcade Cloud Arcade tools are hosted by our cloud platform and ready to be used in your agents. Learn how. Learn more](/get-started/quickstarts/call-tool-agent.md)
+
+[Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_confluence ``` Learn more](/guides/deployment-hosting.md)
+
+Last updated on February 6, 2026
+
+[Close.io](/en/resources/integrations/productivity/closeio.md)
+[Dropbox](/en/resources/integrations/productivity/dropbox.md)

@@ -1,0 +1,468 @@
+---
+title: "Connect Arcade to LLM (Python)"
+description: "Learn how to connect Arcade to your LLM in Python"
+---
+[Agent Frameworks](/en/get-started/agent-frameworks.md)
+Setup Arcade with your LLM (Python)
+
+# Connect Arcade to your LLM
+
+Arcade tools work alongside an LLM. To make that work, you need a small piece of glue code called a “.” The harness orchestrates the back-and-forth between the user, the model, and the . In this guide, you’ll build one so you can wire Arcade into your LLM-powered app.
+
+## Outcomes
+
+Integrate Arcade’s \-calling capabilities into an application that uses an LLM in Python.
+
+### You will Learn
+
+-   Setup an agentic loop
+-   Add Arcade  to your agentic loop
+-   Implement a multi-turn conversation loop
+
+### Prerequisites
+
+-   An [Arcade](https://api.arcade.dev/dashboard/register)
+
+-   An [Arcade API key](/get-started/setup/api-keys.md)
+
+-   An [OpenRouter API key](https://openrouter.ai/docs/guides/overview/auth/provisioning-api-keys)
+     
+-   The [`uv` package manager](https://docs.astral.sh/uv/getting-started/installation/)
+
+
+### Create a new project and install the dependencies
+
+In your terminal, run the following command to create a new `uv`
+
+```bash
+mkdir arcade-llm-example
+cd arcade-llm-example
+uv init
+```
+
+Create a new virtual environment and activate it:
+
+```bash
+uv venv
+source .venv/bin/activate
+```
+
+Install the dependencies:
+
+```bash
+uv add arcadepy openai python-dotenv
+```
+
+Your directory should now look like this:
+
+```bash
+arcade-llm-example/
+├── .git/
+├── .gitignore
+├── python-version
+├── .venv/
+├── main.py
+├── pyproject.toml
+├── main.py
+├── README.md
+└── uv.lock
+```
+
+### Instantiate and use the clients
+
+Create a new file called `.env` and add your  key, as well as your OpenAI :
+
+TEXT
+
+```
+# .env
+ARCADE_API_KEY=YOUR_ARCADE_API_KEY
+ARCADE_USER_ID=YOUR_ARCADE_USER_ID
+OPENROUTER_API_KEY=YOUR_OPENROUTER_API_KEY
+OPENROUTER_MODEL=YOUR_OPENROUTER_MODEL
+```
+
+The `ARCADE_USER_ID` is the email address you used to sign up for Arcade. When your app is ready for production, you can set this dynamically based on your app’s auth system. Learn more about how to achieve secure auth in production [here](/guides/user-facing-agents/secure-auth-production.md).
+
+In this example, you’re using OpenRouter to access the model, as it makes it straightforward to use any model from multiple providers with a single API.
+
+OpenRouter is compliant with the OpenAI API specification, so you can use it with any OpenAI-compatible library.
+
+If you don’t know which model to use, try one of these:
+
+-   `anthropic/claude-haiku-4.5`
+-   `deepseek/deepseek-v3.2`
+-   `google/gemini-3-flash-preview`
+-   `google/gemini-2.5-flash-lite`
+-   `openai/gpt-4o-mini`
+
+Open the `main.py` file in your editor of choice, and replace the contents with the following:
+
+```json
+# main.py
+from arcadepy import Arcade
+from openai import OpenAI
+from dotenv import load_dotenv
+import json
+import os
+
+load_dotenv()
+
+arcade_client = Arcade()
+arcade_user_id = os.getenv("ARCADE_USER_ID")
+llm_client = OpenAI(
+    api_key=os.getenv("OPENROUTER_API_KEY"),
+    base_url="https://openrouter.ai/api/v1"
+)
+
+```
+
+### Select and retrieve the tools from Arcade
+
+In this example, you’re implementing a multi-tool agent that can retrieve and send emails, as well as send messages to Slack. While a  can expose a broad catalog of  to the LLM, it’s best to limit that set to what’s relevant for the task to keep the model efficient.
+
+```python
+# main.py
+# Define the tools for the agent to use
+tool_catalog = [
+    "Gmail.ListEmails",
+    "Gmail.SendEmail",
+    "Slack.SendMessage",
+    "Slack.WhoAmI"
+]
+
+# Get the tool definitions from the Arcade API
+tool_definitions = []
+for tool in tool_catalog:
+    tool_definitions.append(arcade_client.tools.formatted.get(name=tool, format="openai"))
+```
+
+### Write a helper function that handles tool authorization and execution
+
+The model can use any  you give it, and some tools require permission before they work. When this happens, you can either involve the model in the permission step or handle it behind the scenes and continue as if the tool were already authorized. In this guide, authorization happens outside the model so it can act as if the tool is already available. It’s like ordering a coffee: after you place your order, the barista handles payment behind the counter instead of explaining every step of card verification and receipts. The customer (and the model) gets the result without having to think about any of the intermediate steps.
+
+```python
+# main.py
+# Helper function to authorize and run any tool
+def authorize_and_run_tool(tool_name: str, input: str):
+    # Start the authorization process
+    auth_response = arcade_client.tools.authorize(
+        tool_name=tool_name,
+        user_id=arcade_user_id,
+    )
+
+    # If the authorization is not completed, print the authorization URL and wait for the user to authorize the app.
+    # Tools that do not require authorization will have the status "completed" already.
+    if auth_response.status != "completed":
+        print(f"Click this link to authorize {tool_name}: {auth_response.url}. The process will continue once you have authorized the app.")
+        arcade_client.auth.wait_for_completion(auth_response.id)
+
+    # Parse the input
+    input_json = json.loads(input)
+
+    # Run the tool
+    result = arcade_client.tools.execute(
+        tool_name=tool_name,
+        input=input_json,
+        user_id=arcade_user_id,
+    )
+
+    # Return the tool output to the caller as a JSON string
+    return json.dumps(result.output.value)
+```
+
+This helper function adapts to any tool in the catalog and will make sure that the authorization requirements are met before executing the tool. For more complex agentic patterns, this is generally the best place to handle interruptions that may require user interaction, such as when the tool requires a user to approve a request, or to provide additional .
+
+### Write a helper function that handles the LLM’s invocation
+
+There are many orchestration patterns that can be used to handle the LLM invocation. A common pattern is a ReAct architecture, where the user prompt will result in a loop of messages between the LLM and the tools, until the LLM provides a final response (no  calls). This is the pattern we will implement in this example.
+
+To avoid the risk of infinite loops, limit the number of turns (in this case, a maximum of 5). This is a parameter that you can tune to your needs. Set it to a value that is high enough to allow the LLM to complete its task but low enough to prevent infinite loops.
+
+```python
+# main.py
+def invoke_llm(
+    history: list[dict],
+    model: str = "google/gemini-2.5-flash",
+    max_turns: int = 5,
+    tools: list[dict] = None,
+    tool_choice: str = "auto",
+) -> list[dict]:
+    """
+    Multi-turn LLM invocation that processes the conversation until
+    the assistant provides a final response (no tool calls).
+
+    Returns the updated conversation history.
+    """
+    turns = 0
+
+    while turns < max_turns:
+        turns += 1
+
+        response = llm_client.chat.completions.create(
+            model=model,
+            messages=history,
+            tools=tools,
+            tool_choice=tool_choice,
+        )
+
+        assistant_message = response.choices[0].message
+
+        if assistant_message.tool_calls:
+            for tool_call in assistant_message.tool_calls:
+                tool_name = tool_call.function.name
+                tool_args = tool_call.function.arguments
+                print(f"🛠️ Harness: Calling {tool_name} with input {tool_args}")
+                tool_result = authorize_and_run_tool(tool_name, tool_args)
+                print(f"🛠️ Harness: Tool call {tool_name} completed")
+                history.append({
+                    "role": "tool",
+                    "tool_call_id": tool_call.id,
+                    "content": tool_result,
+                })
+
+            continue
+
+        else:
+            history.append({
+                "role": "assistant",
+                "content": assistant_message.content,
+            })
+
+        break
+
+    return history
+```
+
+These two helper functions form the core of your agentic loop. Notice that authorization is handled outside the agentic context, and the  execution is passed back to the LLM in every case. Depending on your needs, you may want to handle tool orchestration within the  and pass only the final result of multiple tool calls to the LLM.
+
+### Write the main agentic loop
+
+Now that you’ve written the helper functions, write an agentic loop that interacts with the . The core pieces of this loop are:
+
+1.  Initialize the conversation history with the system prompt
+2.  Get the  input and add it to the conversation history
+3.  Invoke the LLM with the conversation history, tools, and  choice
+4.  Repeat from step 2 until the  decides to stop the conversation
+
+```python
+# main.py
+def chat():
+    """Interactive multi-turn chat session."""
+    print("Chat started. Type 'quit' or 'exit' to end the session.\n")
+
+    # Initialize the conversation history with the system prompt
+    history: list[dict] = [
+        {"role": "system", "content": "You are a helpful assistant."}
+    ]
+
+    while True:
+        try:
+            user_input = input("😎 You: ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print("\nGoodbye!")
+            break
+
+        if not user_input:
+            continue
+
+        if user_input.lower() in ("quit", "exit"):
+            print("Goodbye!")
+            break
+
+        # Add user message to history
+        history.append({"role": "user", "content": user_input})
+
+        # Get LLM response
+        history = invoke_llm(
+            history, tools=tool_definitions)
+
+        # Print the latest assistant response
+        assistant_response = history[-1]["content"]
+        print(f"\n🤖 Assistant: {assistant_response}\n")
+
+
+if __name__ == "__main__":
+    chat()
+```
+
+### Run the code
+
+It’s time to run the code and see it in action. Run the following command to start the chat:
+
+```bash
+uv run main.py
+```
+
+With the selection of tools above, you should be able to get the  to effectively complete the following prompts:
+
+-   “Please send a message to the #general channel on Slack greeting everyone with a haiku about .”
+-   “Please write a poem about multi- orchestration and send it to the #general channel on Slack, also send it to me in an email.”
+-   “Please summarize my latest 5 emails, then send me a DM on Slack with the summary.”
+
+## Next Steps
+
+-   Learn more about using Arcade with a [framework](/get-started/agent-frameworks.md)
+     or [MCP client](/get-started/mcp-clients.md)
+    .
+-   Learn more about how to [build your own MCP Servers](/guides/create-tools/tool-basics/build-mcp-server.md)
+    .
+
+## Example code
+
+### **main.py** (full file)
+
+```json
+# main.py
+from arcadepy import Arcade
+from dotenv import load_dotenv
+from openai import OpenAI
+import json
+import os
+
+load_dotenv()
+
+arcade_client = Arcade()
+arcade_user_id = os.getenv("ARCADE_USER_ID")
+llm_client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=os.getenv("OPENROUTER_API_KEY"),
+)
+
+# Define the tools to use in the agent
+tool_catalog = [
+    "Gmail.ListEmails",
+    "Gmail.SendEmail",
+    "Slack.SendMessage",
+    "Slack.WhoAmI"
+]
+
+# Get the tool definitions from the Arcade API to expose them to the LLM
+tool_definitions = []
+for tool in tool_catalog:
+    tool_definitions.append(arcade_client.tools.formatted.get(name=tool, format="openai"))
+
+
+# Helper function to authorize and run any tool
+def authorize_and_run_tool(tool_name: str, input: str):
+    # Start the authorization process
+    auth_response = arcade_client.tools.authorize(
+        tool_name=tool_name,
+        user_id=arcade_user_id,
+    )
+
+    # If the authorization is not completed, print the authorization URL and wait for the user to authorize the app.
+    # Tools that do not require authorization will have the status "completed" already.
+    if auth_response.status != "completed":
+        print(f"Click this link to authorize {tool_name}: {auth_response.url}. The process will continue once you have authorized the app.")
+        arcade_client.auth.wait_for_completion(auth_response.id)
+
+    # Parse the input
+    input_json = json.loads(input)
+
+    # Run the tool
+    result = arcade_client.tools.execute(
+        tool_name=tool_name,
+        input=input_json,
+        user_id=arcade_user_id,
+    )
+
+    # Return the tool output to the caller as a JSON string
+    return json.dumps(result.output.value)
+
+
+def invoke_llm(
+    history: list[dict],
+    model: str = "google/gemini-2.5-flash",
+    max_turns: int = 5,
+    tools: list[dict] = None,
+    tool_choice: str = "auto",
+) -> list[dict]:
+    """
+    Multi-turn LLM invocation that processes the conversation until
+    the assistant provides a final response (no tool calls).
+
+    Returns the updated conversation history.
+    """
+    turns = 0
+
+    while turns < max_turns:
+        turns += 1
+
+        response = llm_client.chat.completions.create(
+            model=model,
+            messages=history,
+            tools=tools,
+            tool_choice=tool_choice,
+        )
+
+        assistant_message = response.choices[0].message
+
+        if assistant_message.tool_calls:
+            for tool_call in assistant_message.tool_calls:
+                tool_name = tool_call.function.name
+                tool_args = tool_call.function.arguments
+                print(f"🛠️ Harness: Calling {tool_name} with input {tool_args}")
+                tool_result = authorize_and_run_tool(tool_name, tool_args)
+                print(f"🛠️ Harness: Tool call {tool_name} completed")
+                history.append({
+                    "role": "tool",
+                    "tool_call_id": tool_call.id,
+                    "content": tool_result,
+                })
+
+            continue
+
+        else:
+            history.append({
+                "role": "assistant",
+                "content": assistant_message.content,
+            })
+
+        break
+
+    return history
+
+
+def chat():
+    """Interactive multi-turn chat session."""
+    print("Chat started. Type 'quit' or 'exit' to end the session.\n")
+
+    history: list[dict] = [
+        {"role": "system", "content": "You are a helpful assistant."}
+    ]
+
+    while True:
+        try:
+            user_input = input("😎 You: ").strip()
+        except (EOFError, KeyboardInterrupt):
+            print("\nGoodbye!")
+            break
+
+        if not user_input:
+            continue
+
+        if user_input.lower() in ("quit", "exit"):
+            print("Goodbye!")
+            break
+
+        # Add user message to history
+        history.append({"role": "user", "content": user_input})
+
+        # Get LLM response
+        history = invoke_llm(
+            history, tools=tool_definitions)
+
+        # Print the latest assistant response
+        assistant_response = history[-1]["content"]
+        print(f"\n🤖 Assistant: {assistant_response}\n")
+
+
+if __name__ == "__main__":
+    chat()
+```
+
+Last updated on February 6, 2026
+
+[Overview](/en/get-started/agent-frameworks.md)
+[Using Arcade tools](/en/get-started/agent-frameworks/crewai/use-arcade-tools.md)
