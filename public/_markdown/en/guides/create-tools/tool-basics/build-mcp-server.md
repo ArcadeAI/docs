@@ -1,0 +1,278 @@
+---
+title: "Creating an MCP Server with Arcade"
+description: "Learn how to create, test, deploy, and publish a custom MCP Server with Arcade"
+---
+Create tools[Build a tool](/en/guides/create-tools/tool-basics.md)
+Build an MCP Server to write custom tools
+
+# Creating an MCP Server with Arcade
+
+The `arcade_mcp_server` package is the secure framework to build and run  servers with your Arcade . It is easiest to use with the `arcade-mcp` package (Arcade’s CLI) which can scaffold your  with all the necessary files and dependencies, configure MCP Clients to connect to your server, deploy your server to the cloud, and more. This guide walks you through the complete process of creating a custom MCP server with Arcade.
+
+## Outcomes
+
+Build and run a secure  server with  that you define.
+
+### You will Learn
+
+-   How to run  servers with Arcade  using the [`arcade_mcp_server`](/references/mcp/python.md)
+     package
+-   How to use `arcade new` from the `arcade-mcp` CLI to create your server  with all necessary files and dependencies.
+-   How to run your local  Server with the Arcade CLI and register it with the  so that your  can find and use your .
+
+### Prerequisites
+
+-   The [`uv` package manager](https://docs.astral.sh/uv/getting-started/installation/)
+
+
+## Install the Arcade CLI
+
+In your terminal, run the following command to install the `arcade-mcp` package - Arcade’s CLI:
+
+### uv
+
+```bash
+uv tool install arcade-mcp
+```
+
+This will install the Arcade CLI as a [uv tool](https://docs.astral.sh/uv/guides/tools/#installing-tools) , making it available system wide.
+
+### pip
+
+```bash
+pip install arcade-mcp
+```
+
+## Create Your Server
+
+In your terminal, run the following command to scaffold a new  Server called `my_server`:
+
+```bash
+arcade new my_server
+cd my_server/src/my_server
+```
+
+This generates a Python module with the following structure:
+
+```bash
+my_server/
+├── src/
+│   └── my_server/
+│       ├── __init__.py
+│       ├── .env.example
+│       └── server.py
+└── pyproject.toml
+```
+
+1.  **server.py** Main server file with MCPApp and example . It creates an `MCPApp`, defines tools with `@app.tool`, and will start the server with `app.run()` when the file is executed directly.
+2.  **pyproject.toml** Dependencies and  configuration
+3.  **.env.example** Example `.env` file containing a secret required by one of the generated  in `server.py`. Environments are loaded on server start, so **if you update the `.env` file, you will need to restart your server.**
+
+```python
+# server.py
+#!/usr/bin/env python3
+"""my_server MCP server"""
+
+import sys
+from typing import Annotated
+
+import httpx
+from arcade_mcp_server import Context, MCPApp
+from arcade_mcp_server.auth import Reddit
+
+app = MCPApp(name="my_server", version="1.0.0", log_level="DEBUG")
+
+
+@app.tool
+def greet(name: Annotated[str, "The name of the person to greet"]) -> str:
+    """Greet a person by name."""
+    return f"Hello, {name}!"
+
+
+# To use this tool locally, you need to either set the secret in the .env file or as an environment variable
+@app.tool(requires_secrets=["MY_SECRET_KEY"])
+def whisper_secret(context: Context) -> Annotated[str, "The last 4 characters of the secret"]:
+    """Reveal the last 4 characters of a secret"""
+    # Secrets are injected into the context at runtime.
+    # LLMs and MCP clients cannot see or access your secrets
+    # You can define secrets in a .env file.
+    try:
+        secret = context.get_secret("MY_SECRET_KEY")
+    except Exception as e:
+        return str(e)
+
+    return "The last 4 characters of the secret are: " + secret[-4:]
+
+# To use this tool locally, you need to install the Arcade CLI (uv tool install arcade-mcp)
+# and then run 'arcade login' to authenticate.
+@app.tool(requires_auth=Reddit(scopes=["read"]))
+async def get_posts_in_subreddit(
+    context: Context, subreddit: Annotated[str, "The name of the subreddit"]
+) -> dict:
+    """Get posts from a specific subreddit"""
+    # Normalize the subreddit name
+    subreddit = subreddit.lower().replace("r/", "").replace(" ", "")
+
+    # Prepare the httpx request
+    # OAuth token is injected into the context at runtime.
+    # LLMs and MCP clients cannot see or access your OAuth tokens.
+    oauth_token = context.get_auth_token_or_empty()
+    headers = {
+        "Authorization": f"Bearer {oauth_token}",
+        "User-Agent": "finally-mcp-server",
+    }
+    params = {"limit": 5}
+    url = f"https://oauth.reddit.com/r/{subreddit}/hot"
+
+    # Make the request
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url, headers=headers, params=params)
+        response.raise_for_status()
+
+        # Return the response
+        return response.json()
+
+# Run with specific transport
+if __name__ == "__main__":
+    # Get transport from command line argument, default to "stdio"
+    # - "stdio" (default): Standard I/O for Claude Desktop, CLI tools, etc.
+    #   Supports tools that require_auth or require_secrets out-of-the-box
+    # - "http": HTTPS streaming for Cursor, VS Code, etc.
+    #   Does not support tools that require_auth or require_secrets unless the server is deployed
+    #   using 'arcade deploy' or added in the Arcade Developer Dashboard with 'Arcade' server type
+    transport = sys.argv[1] if len(sys.argv) > 1 else "stdio"
+
+    # Run the server
+    app.run(transport=transport, host="127.0.0.1", port=8000)
+```
+
+## Setup the secrets in your environment
+
+Secrets are sensitive strings like passwords, , or other tokens that grant access to a protected resource or API. Arcade includes the “whisper\_secret”  that requires a secret key to be set in your environment. If the secret is not set, the tool will return an error.
+
+### .env file
+
+You can create a `.env` file at the same directory as your  (`server.py`) and add your secret:
+
+```bash
+# .env
+MY_SECRET_KEY="my-secret-value"
+```
+
+The generated  includes a `.env.example` file with the secret key name and example value. You can rename it to `.env` to start using it.
+
+```bash
+mv .env.example .env
+```
+
+### Environment Variable
+
+You can set the environment variable in your terminal directly with this command:
+
+```bash
+export MY_SECRET_KEY="my-secret-value"
+```
+
+## Connect to Arcade to unlock authorized tool calling
+
+Since the Reddit tool accesses information only available to your Reddit , you’ll need to authorize it. For this, you’ll need to create an Arcade account and connect to it from the terminal, run:
+
+```bash
+arcade login
+```
+
+Follow the instructions in your browser, and once you’ve finished, your terminal will be connected to your Arcade .
+
+## Run your MCP Server
+
+Run your  Server using one of the following commands in your terminal:
+
+### stdio transport (default)
+
+```bash
+uv run server.py stdio
+```
+
+When using the stdio transport,  clients typically launch the  as a subprocess. Because of this, the server may run in a different environment and not have access to secrets defined in your local `.env` file. Please refer to the [create a tool with secrets](/guides/create-tools/tool-basics/create-tool-secrets.md) guide for more information.
+
+### http transport
+
+```bash
+uv run server.py http
+```
+
+For HTTP transport, view your server’s API docs at [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) .
+
+For security reasons, Local HTTP servers do not currently support tool-level authorization and secrets. If you need to use tool-level authorization or secrets locally, you should use the stdio transport and configure the Arcade API key and secrets in your  connection settings. Otherwise, if you intend to expose your HTTP  to the public internet with \-level authorization and secrets, please follow the [deploying to the cloud with Arcade Deploy](/guides/deployment-hosting/arcade-deploy.md) guide or the [on-prem MCP server](/guides/deployment-hosting/on-prem.md) guide for secure remote deployment.
+
+You should see output like this in your terminal:
+
+```bash
+2025-11-03 13:46:11.041 | DEBUG    | arcade_mcp_server.mcp_app:add_tool:242 - Added tool: greet
+2025-11-03 13:46:11.042 | DEBUG    | arcade_mcp_server.mcp_app:add_tool:242 - Added tool: whisper_secret
+2025-11-03 13:46:11.043 | DEBUG    | arcade_mcp_server.mcp_app:add_tool:242 - Added tool: get_posts_in_subreddit
+INFO     | 13:46:11 | arcade_mcp_server.mcp_app:299 | Starting my_server v1.0.0 with 3 tools
+```
+
+## Configure your MCP Client(s)
+
+Now you can connect  Clients to your :
+
+### Cursor IDE
+
+```bash
+# Configure Cursor to use your MCP server with the default transport (stdio)
+arcade configure cursor
+
+# Configure Cursor to use your MCP server with the http transport
+arcade configure cursor --transport http
+```
+
+### VS Code
+
+```bash
+# Configure VS Code to use your MCP server with the default transport (stdio)
+arcade configure vscode
+
+# Configure VS Code to use your MCP server with the http transport
+arcade configure vscode --transport http
+```
+
+### Claude Desktop
+
+```bash
+# Configure Claude Desktop to use your MCP server with the default transport (stdio)
+arcade configure claude
+
+# Configure Claude Desktop to use your MCP server with the http transport
+arcade configure claude --transport http
+```
+
+That’s it! Your  server is running and connected to your AI assistant.
+
+## Key takeaways
+
+-   **Minimal Setup** Create `MCPApp`, define  with `@app.tool`, and run with `app.run()`
+-   **Direct Execution** Run your server file directly with `uv run` or `python`
+-   **Transport Flexibility** Works with both stdio and HTTP
+-   **Type Annotations** Use `Annotated` from the builtin typing library to provide descriptions to the language model for parameters and return values
+-   ** Docstrings** Use docstrings to provide a description of a tool to the language model
+-   **Command Line Arguments** Pass transport type as command line argument
+
+### Next steps
+
+-   **Create custom  that use auth**: [Learn how to create tools with authorization](/guides/create-tools/tool-basics/create-tool-auth.md)
+
+-   **Create custom  that use secrets**: [Learn how to create tools with secrets](/guides/create-tools/tool-basics/create-tool-secrets.md)
+
+-   **Learn the capabilities of the `Context` object**: [Understanding the Context object](/guides/create-tools/tool-basics/runtime-data-access.md)
+
+-   **Evaluate your **: [Explore how to evaluate tool performance](/guides/create-tools/evaluate-tools/why-evaluate.md)
+
+-   **Deploy your  server**: [Learn how to deploy your MCP server](/guides/deployment-hosting/arcade-deploy.md)
+
+
+Last updated on January 5, 2026
+
+[Compare MCP server types](/en/guides/create-tools/tool-basics/compare-server-types.md)
+[Create a tool with auth](/en/guides/create-tools/tool-basics/create-tool-auth.md)

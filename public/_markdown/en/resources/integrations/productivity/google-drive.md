@@ -1,0 +1,325 @@
+---
+title: "Google Drive"
+description: "Arcade - AI platform for developers"
+---
+[Integrations](/en/resources/integrations.md)
+[Productivity & Docs](/en/resources/integrations/productivity/asana.md)
+Google Drive
+
+# Google Drive
+
+Arcade Optimized
+
+**Description:** Enable agents to interact with Google Drive
+
+**Author:** Arcade
+
+**Auth:** User authorization
+
+[![PyPI Version](https://img.shields.io/pypi/v/arcade_google_drive)](https://pypi.org/project/arcade_google_drive/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/arcadeai/arcade-ai/blob/main/LICENSE)
+[![Python Versions](https://img.shields.io/pypi/pyversions/arcade_google_drive)](https://pypi.org/project/arcade_google_drive/)
+[![Wheel Status](https://img.shields.io/pypi/wheel/arcade_google_drive)](https://pypi.org/project/arcade_google_drive/)
+[![Downloads](https://img.shields.io/pypi/dm/arcade_google_drive)](https://pypi.org/project/arcade_google_drive/)
+
+The Google Drive MCP Server provides a set of tools for interacting with Google Drive, enabling users to efficiently manage and access their files. With this MCP Server, users can:
+
+-   Retrieve the file and folder structure of their Google Drive
+-   Search for specific files within Google Drive
+-   Create, rename, and move files and folders
+-   Download and upload files
+-   Share files with other users
+-   Generate a Google File Picker URL for user-driven file selection and authorization
+
+## Available Tools
+
+Tool Name
+
+Description
+
+GoogleDrive.WhoAmI
+
+Get comprehensive user profile and Google Drive environment information.
+
+GoogleDrive.GetFileTreeStructure
+
+Get the file/folder tree structure of the user's Google Drive.
+
+GoogleDrive.GenerateGoogleFilePickerUrl
+
+Generate a Google File Picker URL for user-driven file selection and authorization.
+
+GoogleDrive.SearchFiles
+
+Search for files in Google Drive.
+
+GoogleDrive.CreateFolder
+
+Create a new folder in Google Drive.
+
+GoogleDrive.RenameFile
+
+Rename a file or folder in Google Drive.
+
+GoogleDrive.MoveFile
+
+Move a file or folder to a different folder.
+
+GoogleDrive.DownloadFile
+
+Download a file from Google Drive.
+
+GoogleDrive.DownloadFileChunk
+
+Download a specific byte range of a file (for large files).
+
+GoogleDrive.UploadFile
+
+Upload a file to Google Drive from a URL.
+
+GoogleDrive.ShareFile
+
+Share a file or folder with specific people.
+
+If you need to perform an action that’s not listed here, you can [get in touch with us](mailto:contact@arcade.dev) to request a new tool, or [create your own tools](/guides/create-tools/tool-basics/build-mcp-server.md).
+
+Each tool requires specific Google OAuth scopes to function. You’ll find the required scopes listed in a blue info box at the end of each tool’s documentation below. For more information about configuring OAuth and tips for moving to production, see the \[Google auth provider documentation\](/references/auth-providers/google.
+
+The `drive.file` scope only grants access to files that were created or opened by your application. If you need broader access to a user’s Google Drive (e.g., to access files created by other applications), you’ll need to create your own Google OAuth provider and request the `drive.readonly` or `drive` scope. Note that these broader scopes are **not supported** by Arcade’s default Google OAuth provider.
+
+## Find required scopes
+
+Select the tools you plan to use to see the OAuth scopes your application needs:
+
+### Scope calculator
+
+Select the tools you plan to use to see the required OAuth scopes.
+
+GetFileTreeStructureGenerateGoogleFilePickerUrlSearchFilesCreateFolderRenameFileMoveFileDownloadFileDownloadFileChunkUploadFileShareFileWhoAmI
+
+#### Required scopes
+
+Select tools above to see required scopes
+
+* * *
+
+## GoogleDrive.WhoAmI
+
+
+
+Get comprehensive user profile and Google Drive environment information. This tool provides detailed information about the authenticated user including their name, email, profile picture, Google Drive storage information, and the shared drives (and their IDs) the user has access to.
+
+**Parameters**
+
+This tool does not take any parameters.
+
+-   `https://www.googleapis.com/auth/drive.file`
+-   `https://www.googleapis.com/auth/userinfo.profile`
+-   `https://www.googleapis.com/auth/userinfo.email`
+
+* * *
+
+## GoogleDrive.GetFileTreeStructure
+
+
+
+Get the file/folder tree structure of the user’s Google Drive. This operation can be inefficient for large drives, so use with caution.
+
+**Parameters**
+
+-   **include\_shared\_drives** (`boolean`, optional): Whether to include shared drives in the file tree structure. Defaults to False.
+-   **restrict\_to\_shared\_drive\_id** (`string`, optional): If provided, only include files from this shared drive in the file tree structure. Defaults to None, which will include files and folders from all drives.
+-   **include\_organization\_domain\_documents** (`boolean`, optional): Whether to include documents from the organization’s domain. This is applicable to admin users who have permissions to view organization-wide documents in a Google Workspace account. Defaults to False.
+-   **order\_by** (`Enum` [OrderBy](/resources/integrations/productivity/google-drive/reference.md#OrderBy)
+    , optional): Sort order. Defaults to listing the most recently modified documents first.
+-   **limit** (`integer`, optional): The number of files and folders to list. Defaults to None, which will list all files and folders.
+
+`https://www.googleapis.com/auth/drive.file`
+
+* * *
+
+## GoogleDrive.GenerateGoogleFilePickerUrl
+
+
+
+Generate a Google File Picker URL for user-driven file selection and authorization. This tool generates a URL that directs the end-user to a Google File Picker interface where they can select or upload Google Drive files. Users can grant permission to access their Drive files, providing a secure and authorized way to interact with their files.
+
+This is particularly useful when prior tools encountered failures due to file non-existence or permission errors. Once the user completes the file picker flow, the prior tool can be retried.
+
+**Parameters**
+
+This tool does not take any parameters.
+
+No additional scopes required (uses basic Google authentication).
+
+* * *
+
+## GoogleDrive.SearchFiles
+
+
+
+Search for files in Google Drive. The provided query should only contain the search terms; the tool will construct the full search query for you.
+
+**Parameters**
+
+-   **query** (`string`, required): The search query to find files in Google Drive. Will search for filenames and file contents that match the provided query.
+-   **folder\_path\_or\_id** (`string`, optional): Search only within this specific folder. Provide either a path like `folder/subfolder` or a folder ID. If None, searches across all accessible locations. Defaults to None.
+-   **shared\_drive\_id** (`string`, optional): If provided, search only within this shared drive. Defaults to None (searches My Drive and optionally all shared drives).
+-   **include\_shared\_drives** (`boolean`, optional): If True and shared\_drive\_id is not set, include all shared drives in search. Defaults to False (My Drive only).
+-   **include\_organization\_domain\_documents** (`boolean`, optional): Whether to include documents from the organization’s domain. This is applicable to admin users who have permissions to view organization-wide documents in a Google Workspace account. Defaults to False.
+-   **order\_by** (`Enum` [OrderBy](/resources/integrations/productivity/google-drive/reference.md#OrderBy)
+    , optional): Sort order for search results. Defaults to listing the most recently modified documents first. If the query contains `fullText`, then the order\_by will be ignored.
+-   **limit** (`integer`, optional): The maximum number of search results to return. Defaults to 50.
+-   **file\_types** (`Enum` [GoogleDriveFileType](/resources/integrations/productivity/google-drive/reference.md#GoogleDriveFileType)
+    , optional): Filter by specific file types. Defaults to None, which includes all file types.
+
+`https://www.googleapis.com/auth/drive.file`
+
+* * *
+
+## GoogleDrive.CreateFolder
+
+
+
+Create a new folder in Google Drive. By default, parent folder paths are resolved in My Drive. For shared drives, use folder IDs or provide shared\_drive\_id.
+
+**Parameters**
+
+-   **folder\_name** (`string`, required): The name of the new folder to create.
+-   **parent\_folder\_path\_or\_id** (`string`, optional): The parent folder path like `folder/subfolder` or folder ID where to create. If None, creates at the root of My Drive. If providing a path, it will be resolved within My Drive by default. Do not include the folder to create in this path. Defaults to None.
+-   **shared\_drive\_id** (`string`, optional): If creating in a shared drive and using a parent folder path, provide the shared drive ID. Not needed when using folder IDs or creating in My Drive. Defaults to None.
+
+`https://www.googleapis.com/auth/drive.file`
+
+* * *
+
+## GoogleDrive.RenameFile
+
+
+
+Rename a file or folder in Google Drive. By default, paths are resolved in My Drive. For files in shared drives, either use the file ID directly or provide the shared\_drive\_id parameter.
+
+**Parameters**
+
+-   **file\_path\_or\_id** (`string`, required): The path like `folder/subfolder/filename` or the file ID to rename. If providing a path, it will be resolved within My Drive by default.
+-   **new\_filename** (`string`, required): The new name for the file.
+-   **shared\_drive\_id** (`string`, optional): If the file is in a shared drive and you’re using a path (not ID), provide the shared drive ID to resolve the path within that drive. Not needed when using file IDs. Defaults to None (searches My Drive).
+
+`https://www.googleapis.com/auth/drive.file`
+
+* * *
+
+## GoogleDrive.MoveFile
+
+
+
+Move a file or folder to a different folder within the same Google Drive. Can move to a folder (keeping name), or move and rename in one operation. By default, paths are resolved in My Drive. For shared drives, use file IDs or provide shared\_drive\_id.
+
+**Parameters**
+
+-   **source\_file\_path\_or\_id** (`string`, required): The source file path like `folder/subfolder/filename` or the file ID of the file to move. If providing a path, it will be resolved within My Drive by default.
+-   **destination\_folder\_path\_or\_id** (`string`, required): The path to the file’s parent folder (exclude the file to be moved) or parent folder ID to move the file into.
+-   **new\_filename** (`string`, optional): Optional new name for the file after moving. If None, keeps the original name. Defaults to None.
+-   **shared\_drive\_id** (`string`, optional): If working with paths in a shared drive, provide the shared drive ID. Not needed when using IDs. Defaults to None (uses My Drive).
+
+`https://www.googleapis.com/auth/drive.file`
+
+* * *
+
+## GoogleDrive.DownloadFile
+
+
+
+DO NOT feed this tool’s response to a language model. The response is too large. Instead, let the language model select this tool, and then directly execute the tool, decode its response, and then save the contents to a local file.
+
+This tool is intended to be used in conjunction with `DownloadFileChunk`.
+
+Download a blob file (non-workspace file) from Google Drive as base64 encoded content. For small files (under ~5MB raw), returns the file content directly in the response as base64. For large files, returns metadata with `requires_chunked_download=True` - use `DownloadFileChunk` to retrieve the file in parts.
+
+**Parameters**
+
+-   **file\_path\_or\_id** (`string`, required): The file path like `folder/subfolder/filename` or the file ID of the file to download. Folders NOT supported. If providing a path, it will be resolved within My Drive by default.
+-   **shared\_drive\_id** (`string`, optional): If the file is in a shared drive and using a path, provide the shared drive ID. Not needed when using file IDs. Defaults to None (uses My Drive).
+
+`https://www.googleapis.com/auth/drive.file`
+
+* * *
+
+## GoogleDrive.DownloadFileChunk
+
+
+
+DO NOT feed this tool’s response to a language model. The response is too large. Instead, let the language model select this tool, and then directly execute the tool, decode its response, and then save the contents to a local file.
+
+This tool is intended to be used in conjunction with `DownloadFile`.
+
+Download a specific byte range of a file from Google Drive. Use this for large files that require chunked download (when `DownloadFile` returns `requires_chunked_download=True`). Call repeatedly with increasing `start_byte` values to retrieve the complete file.
+
+Returns the chunk content as base64, along with progress information including whether this is the final chunk.
+
+**Parameters**
+
+-   **file\_path\_or\_id** (`string`, required): The file path like `folder/subfolder/filename` or the file ID to download a chunk from. If providing a path, it will be resolved within My Drive by default.
+-   **start\_byte** (`integer`, required): The starting byte position for this chunk (0-indexed).
+-   **chunk\_size** (`integer`, optional): The size of the chunk to download in bytes. Max 5MB (5242880). Defaults to 5MB (5242880).
+-   **shared\_drive\_id** (`string`, optional): If the file is in a shared drive and using a path, provide the shared drive ID. Not needed when using file IDs. Defaults to None (uses My Drive).
+
+`https://www.googleapis.com/auth/drive.file`
+
+* * *
+
+## GoogleDrive.UploadFile
+
+
+
+Upload a file to Google Drive from a URL. Fetches the file content from the provided URL and uploads it to Google Drive. Supports files of any size - uses resumable upload internally for large files.
+
+This tool cannot upload Google Workspace files (Google Docs, Sheets, Slides). Only regular files are supported.
+
+**Parameters**
+
+-   **file\_name** (`string`, required): The name for the uploaded file.
+-   **source\_url** (`string`, required): The public download URL to fetch the file content from. The tool will download from this URL and upload to Google Drive.
+-   **mime\_type** (`Enum` [UploadMimeType](/resources/integrations/productivity/google-drive/reference.md#UploadMimeType)
+    , optional): The file type. If not provided, will be inferred from the URL or Content-Type header. Supported: text (txt, csv, json, html, md), pdf, images (png, jpeg, gif). Defaults to None (auto-detect).
+-   **destination\_folder\_path\_or\_id** (`string`, optional): The folder path like `folder/subfolder` or folder ID where to upload. If None, uploads to the root of My Drive. If providing a path, it will be resolved within My Drive by default. Defaults to None.
+-   **shared\_drive\_id** (`string`, optional): If uploading to a folder in a shared drive using a path, provide the shared drive ID. Not needed when using folder IDs or uploading to My Drive. Defaults to None (My Drive).
+
+`https://www.googleapis.com/auth/drive.file`
+
+* * *
+
+## GoogleDrive.ShareFile
+
+
+
+Share a file or folder in Google Drive with specific people by granting them permissions. If a user already has permission on the file, their role will be updated to the new role. By default, paths are resolved in My Drive. For shared drives, use file IDs or provide shared\_drive\_id.
+
+**Parameters**
+
+-   **file\_path\_or\_id** (`string`, required): The file path like `folder/subfolder/filename` or the file ID to share. If providing a path, it will be resolved within My Drive by default.
+-   **email\_addresses** (`list[string]`, required): List of email addresses like `user@domain.com` to share with.
+-   **role** (`Enum` [PermissionRole](/resources/integrations/productivity/google-drive/reference.md#PermissionRole)
+    , optional): The permission role to grant. Defaults to `reader` (view-only).
+-   **send\_notification\_email** (`boolean`, optional): Whether to send an email notification to the recipients. Defaults to True.
+-   **message** (`string`, optional): Optional message to include in the notification email. Defaults to None.
+-   **shared\_drive\_id** (`string`, optional): If the file is in a shared drive and using a path, provide the shared drive ID. Not needed when using file IDs. Defaults to None (uses My Drive).
+
+`https://www.googleapis.com/auth/drive.file`
+
+* * *
+
+## Auth
+
+The Arcade Google Drive MCP Server uses the \[Google auth provider\](/references/auth-providers/google to connect to users’ Google Drive accounts. Please refer to the \[Google auth provider\](/references/auth-providers/google documentation to learn how to configure auth.
+
+## Get Building
+
+[Use tools hosted on Arcade Cloud Arcade tools are hosted by our cloud platform and ready to be used in your agents. Learn how. Learn more](/get-started/quickstarts/call-tool-agent.md)
+
+[Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_google_drive ``` Learn more](/guides/deployment-hosting.md)
+
+Last updated on January 5, 2026
+
+[Reference](/en/resources/integrations/productivity/google-docs/reference.md)
+[Reference](/en/resources/integrations/productivity/google-drive/reference.md)

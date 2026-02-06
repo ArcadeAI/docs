@@ -1,0 +1,35 @@
+---
+title: "Arcade Cloud Infrastructure"
+description: "Learn about the infrastructure that powers Arcade Cloud"
+---
+[Deployment & hosting](/en/guides/deployment-hosting.md)
+Arcade Cloud
+
+# Arcade Cloud Infrastructure
+
+This page covers the infrastructure that powers Arcade Cloud, and what you might need to know about it.
+
+## Egress IP Addresses
+
+Traffic from Arcade Cloud will be existing our infrastructure from the following IP addresses:
+
+```bash
+# Control Plane (Located in the USA)
+3.140.92.118
+3.13.58.74
+3.149.34.246
+
+# MCP Server Cluster 1 (Located in the USA)
+3.150.210.23
+3.135.113.210
+3.131.234.5
+```
+
+## VPC Peering
+
+VPC Peering is available for our enterprise customers upon request. If you are interested in VPC Peering, please [contact us](/resources/contact-us.md).
+
+Last updated on January 5, 2026
+
+[Overview](/en/guides/deployment-hosting.md)
+[On-premises MCP servers](/en/guides/deployment-hosting/on-prem.md)

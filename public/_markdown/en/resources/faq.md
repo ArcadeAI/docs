@@ -1,0 +1,157 @@
+---
+title: "Frequently Asked Questions"
+description: "Frequently asked questions about Arcade"
+---
+FAQ
+
+# Frequently Asked Questions
+
+## What if I need a Tool that Arcade doesn’t have?
+
+Arcade makes it easy to build your own ! You can fork our existing tools, or build your own from scratch. Learn more about [building your own MCP Server](/guides/create-tools/tool-basics/build-mcp-server.md).
+
+## How do I contribute back a Tool to the Registry?
+
+We’re always looking for new tools and  Servers! If you have a  that you think would be useful to others, please let us know. You can contribute a tool by submitting a pull request to the [Arcade GitHub repository](https://github.com/ArcadeAI/arcade-ai) .
+
+## What is the difference between the Arcade CLI and the Arcade Clients?
+
+The [Arcade CLI](/references/arcade-cli.md) is a command line  that makes it easy to build, test, and deploy your own tools to production. The [Arcade Client libraries](/references.md) are what you will use within your own  and applications to call the tools.
+
+## What is the difference between personal API keys and project API keys?
+
+Arcade now uses  as the standard way to authenticate with the platform. These keys are tied to a specific project and can be used by all team members with access to that project, making collaboration easier.
+
+**Personal ** were our original authentication method, where each key was tied to an individual developer . We are deprecating personal API keys in favor of  API keys because:
+
+-   **Better team collaboration**:   can be shared across your team, so everyone working on the same project can use the same key.
+-   **Clearer organization**: Keys are organized by , making it easier to manage multiple projects and their respective resources and permissions.
+-   **Simplified key management**: Manage one key per  instead of individual keys for each team member.
+
+If you’re still using a personal API key, we recommend migrating to a  . Learn more about [API keys](/get-started/setup/api-keys.md) and how to create them.
+
+## Auth FAQ
+
+### What is the difference between adding an included provider and adding a custom provider?
+
+This is an important observation. Technically, both included and custom providers are OAuth providers. However, when you add an included provider, the  requires less information from you to configure the provider, because it can use the values defined by that provider on their official documentation. Also, most importantly, the Engine will automatically route  so they connect to the added provider.
+
+### Can my users connect multiple accounts of the same provider?
+
+Please [contact us](mailto:support@arcade.dev) if you need this feature.
+
+### Can I authenticate multiple tools at once?
+
+Yes, as long as they are from the same OAuth provider. You need to collect all the scopes required by the  you need, and then authenticate with that provider with all these scopes. For example, for \[Google Tools\](/references/auth-providers/google, you can use this code to authenticate once:
+
+### Python
+
+```python
+from arcadepy import Arcade
+
+client = Arcade() # Automatically finds the `ARCADE_API_KEY` env variable
+USER_ID = "{arcade_user_id}"
+
+# get the list of tools
+
+tools = client.tools.list(toolkit="Gmail")
+
+# collect the scopes
+
+scopes = set()
+for tool in tools:
+if tool.requirements.authorization.oauth2.scopes:
+scopes |= set(tool.requirements.authorization.oauth2.scopes)
+
+# start auth
+
+auth_response = client.auth.start(user_id=USER_ID, scopes=list(scopes), provider="google")
+
+# show the url to the user if needed
+
+if auth_response.status != "complete":
+print(f"Please click here to authorize: {auth_response.url}") # Wait for the authorization to complete
+client.auth.wait_for_completion(auth_response)
+
+```
+
+### JavaScript
+
+```javascript
+import Arcade from "@arcadeai/arcadejs";
+
+const client = new Arcade();
+const user_id = "{arcade_user_id}";
+
+// get the list of tools
+const googleToolkit = await client.tools.list({toolkit: "gmail"})
+
+// collect scopes
+const scopes = new Set(googleToolkit.items.flatMap(i => i.requirements?.authorization?.oauth2?.scopes ?? []));
+
+// start authentication
+let auth_response = await client.auth.start(user_id, "google", {
+    scopes:[...scopes]
+});
+
+// show the url to the user if needed
+if (auth_response.status !== "completed") {
+    console.log("Please complete the authorization challenge in your browser:");
+    console.log(auth_response.url);
+    // Wait for the authorization to complete
+    auth_response = await client.auth.waitForCompletion(auth_response);
+}
+```
+
+### Can I use broader OAuth scopes than what a tool requires?
+
+Yes! If you need broader permissions than what a  defines as its minimum requirement, you can request additional scopes during authentication.
+
+For example, the `GoogleDrive.SearchFiles`  requires the `/auth/drive.file` scope (which only searches files created by your app or selected via file picker), but if you have approval for the broader `/auth/drive` scope, you can authenticate with both scopes to search all files on Google Drive.
+
+The  will work with the broader permissions while still satisfying its minimum scope requirement. Here’s how to authenticate with multiple scopes:
+
+### Python
+
+```python
+from arcadepy import Arcade
+
+client = Arcade() # Automatically finds the `ARCADE_API_KEY` env variable
+user_id = "{arcade_user_id}"
+
+auth_response = client.auth.start(
+user_id=user_id,
+provider="google",
+scopes=[
+"https://www.googleapis.com/auth/drive.file",
+"https://www.googleapis.com/auth/drive"
+]
+)
+
+```
+
+### JavaScript
+
+```javascript
+import Arcade from "@arcadeai/arcadejs";
+
+const client = new Arcade();
+const user_id = "{arcade_user_id}";
+
+const authResponse = await client.auth.start(user_id, "google", {
+    scopes: ["https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/drive"]
+});
+```
+
+After authentication, call `GoogleDrive.SearchFiles` as usual and it will be able to search all files using the broader token permissions.
+
+## Your question is not here?
+
+Please go to the discussions page on GitHub. Someone else may have asked something similar already. If not, please start a new discussion and we’ll get to it as soon as possible.
+
+[Get Answers on GitHub](https://github.com/ArcadeAI/arcade-ai/discussions)
+
+Last updated on January 5, 2026
+
+[Glossary](/en/resources/glossary.md)
+[Contact](/en/resources/contact-us.md)
