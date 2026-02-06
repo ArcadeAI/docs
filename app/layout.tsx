@@ -4,6 +4,7 @@ import CustomLayout from "@/app/_components/custom-layout";
 import { getDashboardUrl } from "@/app/_components/dashboard-link";
 import { Footer } from "@/app/_components/footer";
 import { Logo } from "@/app/_components/logo";
+import { MarkdownAlternateLink } from "@/app/_components/markdown-alternate-link";
 import NavBarButton from "@/app/_components/nav-bar-button";
 import { TranslationBanner } from "@/app/_components/translation-banner";
 import "@/app/globals.css";
@@ -121,6 +122,7 @@ export default async function RootLayout({
         />
       </Head>
       <body>
+        <MarkdownAlternateLink />
         {lang !== "en" && (
           <TranslationBanner dictionary={dictionary} locale={lang} />
         )}
