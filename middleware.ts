@@ -60,7 +60,7 @@ function pathnameIsMissingLocale(pathname: string): boolean {
   );
 }
 
-export function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   // Handle .md requests without locale - redirect to add locale first
