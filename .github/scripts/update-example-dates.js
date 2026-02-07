@@ -2,7 +2,6 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 
 // Regex patterns defined at top level for performance
 const TITLE_PATTERN = /title="([^"]+)"/;
@@ -97,9 +96,8 @@ async function updateExampleDates() {
   console.log("Parsing repositories from MDX file...");
 
   // Read the current MDX file
-  const currentDir = path.dirname(fileURLToPath(import.meta.url));
   const mdxPath = path.join(
-    currentDir,
+    import.meta.dirname,
     "../../app/en/resources/examples/page.mdx"
   );
   let content = fs.readFileSync(mdxPath, "utf8");
