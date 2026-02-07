@@ -909,7 +909,7 @@ Below is a reference of enumerations used by some of the tools in the ExaApi MCP
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_exa_api ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on February 6, 2026
+Last updated on February 7, 2026
 
 [YouTube](/en/resources/integrations/search/youtube.md)
 [HubSpot](/en/resources/integrations/sales/hubspot.md)

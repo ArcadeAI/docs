@@ -257,7 +257,7 @@ if __name__ == "__main__":
 -   **stdio doesn’t need Resource Server auth** - Local connections are already secure
 -   **Choose based on transport and requirements** - Different scenarios need different combinations
 
-Last updated on February 6, 2026
+Last updated on February 7, 2026
 
 [Security research program](/en/guides/security/security-research-program.md)
 [Overview](/en/references.md)

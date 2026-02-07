@@ -76,7 +76,7 @@ See [Create via Dashboard](/guides/mcp-gateways/create-via-dashboard.md) for det
 -   [Browse available integrations](/resources/integrations.md)
      to see what  you can add to your gateway
 
-Last updated on February 6, 2026
+Last updated on February 7, 2026
 
 [Arcade Registry Early Access](/en/resources/registry-early-access.md)
 [Add remote MCP servers](/en/guides/mcp-gateways/add-remote-servers.md)

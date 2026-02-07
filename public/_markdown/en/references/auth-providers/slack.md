@@ -217,7 +217,7 @@ def send_dm_to_user(
     slackClient.chat_postMessage(channel=dm_channel_id, text=message)
 ```
 
-Last updated on February 6, 2026
+Last updated on February 7, 2026
 
 [Salesforce](/en/references/auth-providers/salesforce.md)
 [Spotify](/en/references/auth-providers/spotify.md)

@@ -539,7 +539,7 @@ If you need these navigation tools, you must create a private OAuth app through 
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_figma ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on February 6, 2026
+Last updated on February 7, 2026
 
 [E2B](/en/resources/integrations/development/e2b.md)
 [GitHub](/en/resources/integrations/development/github.md)

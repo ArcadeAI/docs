@@ -520,7 +520,7 @@ Learn how to configure the Zoho auth provider in the [Zoho auth provider documen
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_zoho_creator_api ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on February 6, 2026
+Last updated on February 7, 2026
 
 [PagerdutyApi](/en/resources/integrations/development/pagerduty-api.md)
 [Stripe](/en/resources/integrations/payments/stripe.md)

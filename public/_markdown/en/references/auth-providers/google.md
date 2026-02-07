@@ -290,7 +290,7 @@ async def list_emails(
     return email_messages
 ```
 
-Last updated on February 6, 2026
+Last updated on February 7, 2026
 
 [GitHub](/en/references/auth-providers/github.md)
 [Hubspot](/en/references/auth-providers/hubspot.md)

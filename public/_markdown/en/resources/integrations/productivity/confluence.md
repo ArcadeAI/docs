@@ -323,7 +323,7 @@ The order of the attachments to sort by.
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_confluence ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on February 6, 2026
+Last updated on February 7, 2026
 
 [Close.io](/en/resources/integrations/productivity/closeio.md)
 [Dropbox](/en/resources/integrations/productivity/dropbox.md)

@@ -72,7 +72,7 @@ This process shows the general outline of the  Augmented Generation (TAG) proces
 -   Build your own [custom MCP Server](/guides/create-tools/tool-basics/build-mcp-server.md)
 
 
-Last updated on February 6, 2026
+Last updated on February 7, 2026
 
 [Create via AI Assistant](/en/guides/mcp-gateways/create-via-ai.md)
 [Handling errors](/en/guides/tool-calling/error-handling.md)

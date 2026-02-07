@@ -36,7 +36,7 @@ Below is a reference of enumerations used by some tools in the GoogleSheets MCP 
 -   **VIEWED\_BY\_ME\_TIME**: `viewedByMeTime`
 -   **VIEWED\_BY\_ME\_TIME\_DESC**: `viewedByMeTime desc`
 
-Last updated on February 6, 2026
+Last updated on February 7, 2026
 
 [Google Sheets](/en/resources/integrations/productivity/google-sheets.md)
 [Google Slides](/en/resources/integrations/productivity/google-slides.md)

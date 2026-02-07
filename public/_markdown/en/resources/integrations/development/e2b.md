@@ -92,7 +92,7 @@ The Arcade E2B MCP Sever uses [E2B](https://e2b.dev/)  to run code in a sandbox
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade-e2b ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on February 6, 2026
+Last updated on February 7, 2026
 
 [Twitch](/en/resources/integrations/entertainment/twitch.md)
 [Figma](/en/resources/integrations/development/figma.md)

@@ -42,7 +42,7 @@ Below is a reference of enumerations used by some tools in the GoogleDocs MCP Se
 -   **HTML**: `html`
 -   **GOOGLE\_API\_JSON**: `google_api_json`
 
-Last updated on February 6, 2026
+Last updated on February 7, 2026
 
 [Google Docs](/en/resources/integrations/productivity/google-docs.md)
 [Google Drive](/en/resources/integrations/productivity/google-drive.md)

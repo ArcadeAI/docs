@@ -149,7 +149,7 @@ This workflow ensures your agent has complete information about the database str
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_clickhouse ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on February 6, 2026
+Last updated on February 7, 2026
 
 [MongoDB](/en/resources/integrations/databases/mongodb.md)
 [WeaviateApi](/en/resources/integrations/databases/weaviate-api.md)

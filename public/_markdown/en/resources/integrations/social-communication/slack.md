@@ -553,7 +553,7 @@ The Arcade Slack MCP Sever uses the [Slack auth provider](/references/auth-provi
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_slack ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on February 6, 2026
+Last updated on February 7, 2026
 
 [Reddit](/en/resources/integrations/social-communication/reddit.md)
 [Environment Variables](/en/resources/integrations/social-communication/slack/environment-variables.md)

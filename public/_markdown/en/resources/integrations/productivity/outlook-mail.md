@@ -280,7 +280,7 @@ The operator to use for the filter.
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_outlook_mail ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on February 6, 2026
+Last updated on February 7, 2026
 
 [Outlook Calendar](/en/resources/integrations/productivity/outlook-calendar.md)
 [Reference](/en/resources/integrations/productivity/outlook-mail/reference.md)

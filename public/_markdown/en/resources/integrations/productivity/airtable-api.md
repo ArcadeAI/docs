@@ -1662,7 +1662,7 @@ With a self-hosted installation of Arcade, you need to [configure the Airtable a
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_airtable_api ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on February 6, 2026
+Last updated on February 7, 2026
 
 [Reference](/en/resources/integrations/productivity/outlook-mail/reference.md)
 [AsanaApi](/en/resources/integrations/productivity/asana-api.md)

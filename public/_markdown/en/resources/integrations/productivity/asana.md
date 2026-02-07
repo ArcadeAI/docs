@@ -382,7 +382,7 @@ With a self-hosted installation of Arcade, you need to [configure the Asana auth
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_asana ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on February 6, 2026
+Last updated on February 7, 2026
 
 [Overview](/en/resources/integrations.md)
 [Reference](/en/resources/integrations/productivity/asana/reference.md)

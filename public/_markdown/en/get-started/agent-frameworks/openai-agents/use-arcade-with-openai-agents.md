@@ -554,7 +554,7 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-Last updated on February 6, 2026
+Last updated on February 7, 2026
 
 [Overview](/en/get-started/agent-frameworks/openai-agents/overview.md)
 [Using Arcade tools](/en/get-started/agent-frameworks/openai-agents/use-arcade-tools.md)

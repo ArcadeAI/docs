@@ -1500,7 +1500,7 @@ The HubspotMarketingApi MCP Server uses the Auth Provider with id `arcade-hubspo
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_hubspot_marketing_api ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on February 6, 2026
+Last updated on February 7, 2026
 
 [HubspotEventsApi](/en/resources/integrations/sales/hubspot-events-api.md)
 [HubspotMeetingsApi](/en/resources/integrations/sales/hubspot-meetings-api.md)

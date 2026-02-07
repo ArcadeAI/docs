@@ -2351,7 +2351,7 @@ With a self-hosted installation of Arcade, you need to [configure the Miro auth 
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_miro_api ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on February 6, 2026
+Last updated on February 7, 2026
 
 [LumaApi](/en/resources/integrations/productivity/luma-api.md)
 [Sharepoint](/en/resources/integrations/productivity/sharepoint.md)

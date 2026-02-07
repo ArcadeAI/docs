@@ -409,7 +409,7 @@ The effort to put into reasoning about document edits.
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_google_docs ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on February 6, 2026
+Last updated on February 7, 2026
 
 [Google Contacts](/en/resources/integrations/productivity/google-contacts.md)
 [Reference](/en/resources/integrations/productivity/google-docs/reference.md)

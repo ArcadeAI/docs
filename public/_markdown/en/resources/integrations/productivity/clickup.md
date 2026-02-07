@@ -515,7 +515,7 @@ The Arcade Clickup MCP Sever uses the [Clickup auth provider](/references/auth-p
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_clickup ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on February 6, 2026
+Last updated on February 7, 2026
 
 [Reference](/en/resources/integrations/productivity/asana/reference.md)
 [Reference](/en/resources/integrations/productivity/clickup/reference.md)
