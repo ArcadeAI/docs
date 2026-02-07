@@ -274,7 +274,7 @@ async def get_teams(
         return teams
 ```
 
-Last updated on February 6, 2026
+Last updated on February 7, 2026
 
 [Hubspot](/en/references/auth-providers/hubspot.md)
 [LinkedIn](/en/references/auth-providers/linkedin.md)

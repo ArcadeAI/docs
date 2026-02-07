@@ -264,7 +264,7 @@ async def create_text_post(
         return f"https://www.linkedin.com/feed/update/{share_id}/"
 ```
 
-Last updated on February 6, 2026
+Last updated on February 7, 2026
 
 [Linear](/en/references/auth-providers/linear.md)
 [Mailchimp](/en/references/auth-providers/mailchimp.md)

@@ -99,7 +99,7 @@ Defines the time window for fetching stock data from Google Finance.
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_google_finance ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on February 6, 2026
+Last updated on February 7, 2026
 
 [ZohoBooksApi](/en/resources/integrations/payments/zoho-books-api.md)
 [Google Flights](/en/resources/integrations/search/google_flights.md)

@@ -77,7 +77,7 @@ Although we redesign the tool name and argument descriptions to make them more s
 
 When an Optimized tool covers your Agent’s needs, we recommend using it instead of an Unoptimized one. Use   as a complement. Carefully engineer your prompts to ensure your  can call them safely.
 
-Last updated on February 6, 2026
+Last updated on February 7, 2026
 
 [Comparative evaluations](/en/guides/create-tools/evaluate-tools/comparative-evaluations.md)
 [Overview](/en/guides/create-tools/error-handling.md)

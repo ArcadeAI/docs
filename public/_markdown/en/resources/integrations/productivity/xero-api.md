@@ -2565,7 +2565,7 @@ Delete a specified Xero connection using its ID.
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_xero_api ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on February 6, 2026
+Last updated on February 7, 2026
 
 [TrelloApi](/en/resources/integrations/productivity/trello-api.md)
 [Discord](/en/resources/integrations/social-communication/discord.md)

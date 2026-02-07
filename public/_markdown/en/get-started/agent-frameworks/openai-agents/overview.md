@@ -166,7 +166,7 @@ Ready to start building with Arcade and OpenAI ? Check out these guides:
 
 Enjoy exploring Arcade and building powerful AI-enabled applications!
 
-Last updated on February 6, 2026
+Last updated on February 7, 2026
 
 [Mastra](/en/get-started/agent-frameworks/mastra.md)
 [Setup Arcade with OpenAI Agents SDK](/en/get-started/agent-frameworks/openai-agents/use-arcade-with-openai-agents.md)

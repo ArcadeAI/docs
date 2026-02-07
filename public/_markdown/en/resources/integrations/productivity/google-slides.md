@@ -254,7 +254,7 @@ Below is a reference of enumerations used by some tools in the GoogleSlides MCP 
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_google_slides ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on February 6, 2026
+Last updated on February 7, 2026
 
 [Reference](/en/resources/integrations/productivity/google-sheets/reference.md)
 [Jira](/en/resources/integrations/productivity/jira.md)

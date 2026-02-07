@@ -131,7 +131,7 @@ With a self-hosted installation of Arcade, you need to [configure the Microsoft 
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_outlook_calendar ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on February 6, 2026
+Last updated on February 7, 2026
 
 [Obsidian](/en/resources/integrations/productivity/obsidian.md)
 [Outlook Mail](/en/resources/integrations/productivity/outlook-mail.md)

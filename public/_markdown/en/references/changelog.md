@@ -8,6 +8,28 @@ Changelog
 
 _Here’s what’s new at Arcade.dev!_
 
+## 2026-02-06
+
+**Arcade  Servers**
+
+-   `[maintenance - 🔧]` Fix Google Docs Edit  to work with documents that have multiple tabs
+-   `[maintenance - 🔧]` Improve LLM Instructions for Google Drive file picker
+
+**Platform and Engine**
+
+-   `[feature - 🚀]` Batch  Reconcile
+-   `[feature - 🚀]` Improve gateway error message
+-   `[maintenance - 🔧]` Hide OAuth UI when server is already authorized (Dashboard)
+-   `[feature - 🚀]` Added grouped overview for toolkits (Dashboard)
+
+**Misc**
+
+-   `[documentation - 📝]` Editorial improvements for Windows environment setup page
+-   `[documentation - 📝]` Add clean markdown generation for LLM-friendly page content
+-   `[documentation - 📝]` Public data storage information
+-   `[documentation - 📝]` Rename `Starter tools` to `Unoptimized tools`
+-   `[documentation - 📝]` Add documentation for remote  servers
+
 ## 2026-01-23
 
 **Arcade  Servers**
@@ -640,7 +662,7 @@ Self-hosed Arcade developers cannot be grandfathered into the old (insecure) beh
 -   `[feature - 🚀]` Launched status.arcade.dev for monitoring platform status ([link](https://status.arcade.dev)
      )
 
-Last updated on February 6, 2026
+Last updated on February 7, 2026
 
 [Overview](/en/references.md)
 [API](/en/references/api.md)

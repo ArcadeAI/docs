@@ -166,7 +166,7 @@ async def list_files(
         return response.json()
 ```
 
-Last updated on February 6, 2026
+Last updated on February 7, 2026
 
 [Discord](/en/references/auth-providers/discord.md)
 [Figma](/en/references/auth-providers/figma.md)

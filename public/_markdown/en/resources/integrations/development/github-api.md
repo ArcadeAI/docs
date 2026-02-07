@@ -13576,7 +13576,7 @@ For detailed information on configuring the GitHub OAuth provider with Arcade, s
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_github_api ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on February 6, 2026
+Last updated on February 7, 2026
 
 [DatadogApi](/en/resources/integrations/development/datadog-api.md)
 [PagerdutyApi](/en/resources/integrations/development/pagerduty-api.md)

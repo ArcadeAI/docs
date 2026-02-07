@@ -98,7 +98,7 @@ If you have any questions or need assistance:
 -   [Contact our support team](/resources/contact-us.md)
 
 
-Last updated on February 6, 2026
+Last updated on February 7, 2026
 
 [Zoom](/en/resources/integrations/social-communication/zoom.md)
 [Spotify](/en/resources/integrations/entertainment/spotify.md)

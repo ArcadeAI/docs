@@ -88,7 +88,7 @@ Supported file types for uploading to Google Drive. This tool can only upload re
 -   **WEBP**: `image/webp` - .webp images
 -   **SVG**: `image/svg+xml` - .svg vector graphics
 
-Last updated on February 6, 2026
+Last updated on February 7, 2026
 
 [Google Drive](/en/resources/integrations/productivity/google-drive.md)
 [Google Sheets](/en/resources/integrations/productivity/google-sheets.md)

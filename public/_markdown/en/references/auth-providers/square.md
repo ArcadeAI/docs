@@ -273,7 +273,7 @@ Square supports various OAuth scopes that determine the level of access your app
 
 For a complete list of available scopes, refer to the [Square OAuth Permissions documentation](https://developer.squareup.com/docs/oauth-api/square-permissions) .
 
-Last updated on February 6, 2026
+Last updated on February 7, 2026
 
 [Spotify](/en/references/auth-providers/spotify.md)
 [TickTick](/en/references/auth-providers/ticktick.md)
