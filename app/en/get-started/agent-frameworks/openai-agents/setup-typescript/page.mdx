@@ -3,7 +3,7 @@ title: "Setup Arcade with OpenAI Agents (TypeScript)"
 description: "Build an agent with Arcade tools using the OpenAI Agents SDK for JavaScript/TypeScript"
 ---
 
-import { Steps, Callout } from "nextra/components";
+import { Steps, Tabs, Callout } from "nextra/components";
 
 # Setup Arcade with OpenAI Agents (TypeScript)
 
@@ -37,7 +37,7 @@ Build an agent that uses Arcade tools to help users with Gmail and Slack
 
 The OpenAI Agents JS SDK uses [Zod](https://zod.dev) schemas for tool definitions. Arcade's `toZod()` function converts Arcade tool definitions to Zod schemas, and the `executeFactory` parameter determines how tools execute.
 
-The key difference from Python: instead of using `functools.partial` to bind context to tool functions, TypeScript uses a **factory pattern**. The `executeFactory` receives tool context (client, userId, tool definition) and returns an execute function with that context "baked in".
+TypeScript uses a **factory pattern** to bind context to tool functions. `executeFactory` receives tool context (`client`, `userId`, `tool definition`) and returns an execute function with that context "baked in".
 
 ## Build the agent
 
@@ -60,20 +60,21 @@ Create a `.env` file with your API keys:
 # Arcade API key from https://app.arcade.dev
 ARCADE_API_KEY=YOUR_ARCADE_API_KEY
 # Your Arcade user ID (the email you used to sign up)
-ARCADE_USER_ID={arcade_user_id}
+ARCADE_USER_ID=your-email@example.com
 # OpenAI API key
 OPENAI_API_KEY=YOUR_OPENAI_API_KEY
 ```
 
-### Write the agent code
+### Create agent file
 
 Create `index.ts` (or `index.mjs` for plain JavaScript):
 
 ```typescript filename="index.ts"
 import Arcade from "@arcadeai/arcadejs";
-import { executeOrAuthorizeZodTool, toZod } from "@arcadeai/arcadejs/lib";
+import { executeOrAuthorizeZodTool, toZod } from "@arcadeai/arcadejs/lib/index";
 import { Agent, run, tool } from "@openai/agents";
 import "dotenv/config";
+import readline from "node:readline/promises";
 
 // Configuration
 const ARCADE_USER_ID = process.env.ARCADE_USER_ID || "default-user";
@@ -127,7 +128,7 @@ async function getArcadeTools(client: Arcade, userId: string) {
 ```
 
 <Callout type="info">
-**Understanding the factory pattern**: In Python, you'd use `functools.partial(invoke_tool, client=client, tool_name=name)` to bind context to a function. In TypeScript, `executeFactory` serves the same purpose - it receives the tool context and returns an execute function with that context already bound.
+**Understanding the factory pattern**: In TypeScript, `executeFactory` binds context to a function. It receives the tool context (`client`, `userId`, `tool definition`) and returns an execute function with that context already bound.
 </Callout>
 
 ### Create and run the agent
@@ -148,9 +149,40 @@ async function main() {
     tools,
   });
 
-  // Run a single query
-  const result = await run(agent, "What are my latest emails?");
-  console.log(result.finalOutput);
+  // Set up interactive chat
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
+  console.log("Hello! I'm your helpful OpenAI Agent! I use Arcade Tools to access your Gmail and Slack. Try asking me to summarize your recent emails or DM you on Slack!\n\nType 'exit' to quit.\n");
+
+  // Track conversation history for multi-turn context
+  let conversationHistory: any[] = [];
+
+  while (true) {
+    const input = await rl.question("> ");
+    if (input.toLowerCase() === "exit") {
+      break;
+    }
+
+    try {
+      // Pass conversation history for context, add new user message
+      const result = await run(
+        agent,
+        conversationHistory.concat({ role: "user", content: input })
+      );
+      // Update history with full conversation
+      conversationHistory = result.history;
+      console.log(`\n${result.finalOutput}\n`);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  }
+
+  console.log("Goodbye!");
+  rl.close();
+  process.exit(0);
 }
 
 main().catch(console.error);
@@ -158,11 +190,10 @@ main().catch(console.error);
 
 ### Handle authorization
 
-The `executeOrAuthorizeZodTool` factory automatically handles authorization. When a tool needs OAuth authorization (like Gmail), instead of throwing an error, it returns a response with the authorization URL:
+The `executeOrAuthorizeZodTool` factory automatically handles authorization. When a tool needs OAuth authorization (like Gmail), instead of throwing an error, it returns a response with the authorization URL. The agent's output will include something like the following:
 
-```typescript
-// The agent's output will include something like:
-// "Please authorize access: https://accounts.google.com/..."
+```bash
+Please authorize access: https://accounts.google.com/...
 ```
 
 After the user visits the URL and authorizes, running the same request again will succeed.
@@ -170,7 +201,7 @@ After the user visits the URL and authorizes, running the same request again wil
 For more control over authorization flow, you can create a custom execute factory:
 
 ```typescript filename="index.ts"
-import { isAuthorizationRequiredError, executeZodTool } from "@arcadeai/arcadejs/lib";
+import { isAuthorizationRequiredError, executeZodTool } from "@arcadeai/arcadejs/lib/index";
 
 // Custom factory that waits for authorization
 function executeWithWait({ zodToolSchema, toolDefinition, client, userId }) {
@@ -209,11 +240,25 @@ const zodTools = toZod({
 
 ### Run the agent
 
+<Tabs items={["npx", "bun"]} storageKey="ts-runner">
+
+<Tabs.Tab>
+
 ```bash
 npx tsx index.ts
-# or with Bun
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```bash
 bun run index.ts
 ```
+
+</Tabs.Tab>
+
+</Tabs>
 
 </Steps>
 
@@ -224,14 +269,16 @@ bun run index.ts
 - **`executeOrAuthorizeZodTool`** automatically returns authorization URLs when tools need OAuth
 - **`isAuthorizationRequiredError`** lets you detect and handle authorization errors in custom factories
 - The **`userId`** parameter tracks authorization per user - use a consistent ID for each user
+- **`result.history`** contains the full conversation history - pass it back to `run()` for multi-turn context
 
 ## Complete code
 
 ```typescript filename="index.ts"
 import Arcade from "@arcadeai/arcadejs";
-import { executeOrAuthorizeZodTool, toZod } from "@arcadeai/arcadejs/lib";
+import { executeOrAuthorizeZodTool, toZod } from "@arcadeai/arcadejs/lib/index";
 import { Agent, run, tool } from "@openai/agents";
 import "dotenv/config";
+import readline from "node:readline/promises";
 
 // Configuration
 const ARCADE_USER_ID = process.env.ARCADE_USER_ID || "default-user";
@@ -286,8 +333,38 @@ async function main() {
     tools,
   });
 
-  const result = await run(agent, "What are my latest emails?");
-  console.log(result.finalOutput);
+  // Set up interactive chat
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
+  console.log("Hello! I'm your helpful OpenAI Agent! I use Arcade Tools to access your Gmail and Slack. Try asking me to summarize your recent emails or DM you on Slack!\n\nType 'exit' to quit.\n");
+
+  // Track conversation history for multi-turn context
+  let conversationHistory: any[] = [];
+
+  while (true) {
+    const input = await rl.question("> ");
+    if (input.toLowerCase() === "exit") {
+      break;
+    }
+
+    try {
+      const result = await run(
+        agent,
+        conversationHistory.concat({ role: "user", content: input })
+      );
+      conversationHistory = result.history;
+      console.log(`\n${result.finalOutput}\n`);
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  }
+
+  console.log("Goodbye!");
+  rl.close();
+  process.exit(0);
 }
 
 main().catch(console.error);
