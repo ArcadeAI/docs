@@ -13,6 +13,7 @@ import { Callout } from "nextra/components";
   description="Enable agents to interact with Attio CRM"
   author="Arcade"
   authType="OAuth2"
+  authProviderName="Attio"
   versions={["0.1.0"]}
 />
 
@@ -48,6 +49,7 @@ The Attio MCP Server is an [Arcade Optimized](/guides/create-tools/improve/types
     ["Attio.GetDealTranscript", "Get a call transcript for a deal in one step"],
     ["Attio.WhoAmI", "Get the authenticated user's profile and workspace context"],
     ["Attio.ListWorkspaceMembers", "Get all members in the workspace"],
+    ["Attio.CreateReport", "Generate a report from records for export to Google Sheets"],
   ]}
 />
 
@@ -326,6 +328,25 @@ Useful for task assignment and understanding who owns records.
 **Parameters**
 
 This tool takes no parameters.
+
+---
+
+## Reporting tools
+
+### Attio.CreateReport
+
+Generate a report from Attio records for export to Google Sheets.
+
+Returns data formatted for easy insertion into a spreadsheet: headers (column names), rows (values aligned with headers), and a dict format for the Google Sheets API. Use this output with Google Sheets tools to create a spreadsheet.
+
+**Parameters**
+
+- **object_type** (`string`, required) Object slug (e.g., `people`, `companies`, `deals`, or custom)
+- **attributes** (`array[string]`, _optional_) Attributes to include in the report (defaults to all available)
+- **filter_json** (`array[string]`, _optional_) Filter strings: `{"attribute": "x", "operator": "equals", "value": "y"}`
+- **sort_by** (`string`, _optional_) Attribute to sort by
+- **sort_direction** (`string`, _optional_) Sort direction: `asc` or `desc`
+- **limit** (`integer`, _optional_) Max records to include (1–500)
 
 ---
 
