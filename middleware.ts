@@ -50,7 +50,7 @@ const AI_AGENT_PATTERNS = [
  * Check if the request prefers markdown content via Accept header
  */
 function prefersMarkdown(request: NextRequest): boolean {
-  const acceptHeader = request.headers.get("accept") || "";
+  const acceptHeader = (request.headers.get("accept") || "").toLowerCase();
   // Check for explicit text/markdown preference
   return acceptHeader.includes("text/markdown");
 }
