@@ -9,6 +9,9 @@ const MD_EXTENSION_REGEX = /\.md$/;
 const TOOLKIT_MARKDOWN_ROOT = join(process.cwd(), "public", "toolkit-markdown");
 const APP_ROOT = join(process.cwd(), "app");
 
+// Directory containing pre-generated clean markdown files
+const CLEAN_MARKDOWN_DIR = join(process.cwd(), "public", "_markdown");
+
 /**
  * Validates that a resolved path is within the allowed directory.
  * Prevents path traversal attacks (e.g., ../../../etc/passwd).
@@ -172,7 +175,29 @@ export async function GET(
         filePath = join(APP_ROOT, `${sanitizedPath}/page.mdx`);
       }
     } else {
-      // Non-toolkit page - use MDX file
+      // Try clean markdown first (preferred, from main's generate:markdown)
+      // e.g., /en/home/quickstart -> public/_markdown/en/home/quickstart.md
+      const cleanMarkdownPath = join(CLEAN_MARKDOWN_DIR, `${sanitizedPath}.md`);
+
+      try {
+        await access(cleanMarkdownPath);
+        if (isPathWithinDirectory(cleanMarkdownPath, CLEAN_MARKDOWN_DIR)) {
+          const content = await readFile(cleanMarkdownPath, "utf-8");
+
+          return new NextResponse(content, {
+            status: 200,
+            headers: {
+              "Content-Type": "text/plain; charset=utf-8",
+              "Content-Disposition": "inline",
+              "Cache-Control": "public, max-age=3600",
+            },
+          });
+        }
+      } catch {
+        // Clean markdown not found, fall back to raw MDX
+      }
+
+      // Fallback: raw MDX file
       filePath = join(APP_ROOT, `${sanitizedPath}/page.mdx`);
     }
 
@@ -200,7 +225,6 @@ export async function GET(
       headers: {
         "Content-Type": "text/plain; charset=utf-8",
         "Content-Disposition": "inline",
-        // Add cache headers for better performance
         "Cache-Control": "public, max-age=3600, stale-while-revalidate=86400",
       },
     });

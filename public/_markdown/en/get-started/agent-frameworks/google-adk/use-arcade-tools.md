@@ -1,0 +1,226 @@
+---
+title: "Use Arcade with Google ADK"
+description: "Integrate Arcade tools into your Google ADK applications"
+---
+[Agent Frameworks](/en/get-started/agent-frameworks.md)
+[Google ADK](/en/get-started/agent-frameworks/google-adk/overview.md)
+Using Arcade tools
+
+## Use Arcade with Google ADK
+
+In this guide, let’s explore how to integrate Arcade  into your Google ADK application. Follow the step-by-step instructions below.
+
+### Prerequisites
+
+-   [Obtain an Arcade API key](/get-started/setup/api-keys.md)
+
+
+### Set up your environment
+
+Install the required packages, and ensure your environment variables are set with your  key:
+
+```bash
+pip install google-adk-arcade
+```
+
+### Configure API keys
+
+Provide your Arcade and Google . You can store it in environment variables or directly in your code:
+
+> Need an  key? Visit the [Get an API key](/get-started/setup/api-keys.md) page to create one.
+
+```bash
+export ARCADE_API_KEY='YOUR_ARCADE_API_KEY'
+export GOOGLE_API_KEY='YOUR_GOOGLE_API_KEY'
+export GOOGLE_GENAI_USE_VERTEXAI=FALSE
+```
+
+### Create and manage Arcade tools
+
+Use the `get_arcade_tools` function to retrieve tools from specific  Servers:
+
+```python
+from arcadepy import AsyncArcade
+from google_adk_arcade.tools import get_arcade_tools
+
+# Initialize the Arcade client
+client = AsyncArcade()
+
+# Get all tools from the "Gmail" MCP Server
+tools = await get_arcade_tools(client, toolkits=["gmail"])
+
+# You can request multiple MCP Servers at once
+tools = await get_arcade_tools(client, toolkits=["gmail", "github", "linkedin"])
+
+# You can request specific tools
+tools = await get_arcade_tools(client, tools=["Gmail_ListEmails", "Slack_ListUsers", "Slack_SendDmToUser"])
+```
+
+### Authorize the tools
+
+Enable the tools for your :
+
+```python
+# authorize the tools
+for tool in google_tools:
+    result = await client.tools.authorize(
+        tool_name=tool.name,
+        user_id=user_id
+    )
+    if result.status != "completed":
+        print(f"Click this link to authorize {tool.name}:\n{result.url}")
+    await client.auth.wait_for_completion(result)
+```
+
+### Set up the agent with Arcade tools
+
+Create an  and provide it with the Arcade :
+
+```python
+# import the Google ADK requirements
+from google.adk import Agent, Runner
+from google.adk.artifacts import InMemoryArtifactService
+from google.adk.sessions import InMemorySessionService
+from google.genai import types
+
+# create a new session and artifact services
+session_service = InMemorySessionService()
+artifact_service = InMemoryArtifactService()
+
+# Create an agent with Gmail tools
+google_agent = Agent(
+    model="gemini-2.0-flash",
+    name="google_tool_agent",
+    instruction="I can use Gmail tools to manage an inbox!",
+    description="An agent equipped with tools to read Gmail emails."
+    tools=tools,
+)
+```
+
+### Run the agent with user context
+
+Run the , providing a user\_id for  authorization:
+
+```python
+# create a new session and pass the user id into the context
+session = await session_service.create_session(
+    app_name=app_name, user_id=user_id, state={
+        "user_id": user_id,
+    }
+)
+
+# create a new runner with the agent and services
+runner = Runner(
+    app_name=app_name,
+    agent=google_agent,
+    artifact_service=artifact_service,
+    session_service=session_service,
+)
+
+# pass a prompt to the agent and stream the response
+user_input = "summarize my latest 3 emails"
+content = types.Content(
+    role='user', parts=[types.Part.from_text(text=user_input)]
+)
+for event in runner.run(
+    user_id=user_id,
+    session_id=session.id,
+    new_message=content,
+):
+    if event.content.parts and event.content.parts[0].text:
+        print(f'** {event.author}: {event.content.parts[0].text}')
+```
+
+### Complete example
+
+Here’s a complete example putting everything together:
+
+```python
+import asyncio
+
+from arcadepy import AsyncArcade
+from google.adk import Agent, Runner
+from google.adk.artifacts import InMemoryArtifactService
+from google.adk.sessions import InMemorySessionService
+from google.genai import types
+
+from google_adk_arcade.tools import get_arcade_tools
+
+
+async def main():
+    app_name = 'my_app'
+    user_id = 'mateo@arcade.dev'
+    session_service = InMemorySessionService()
+    artifact_service = InMemoryArtifactService()
+    client = AsyncArcade()
+
+    google_tools = await get_arcade_tools(client, tools=["Gmail.ListEmails"])
+
+    # authorize the tools
+    for tool in google_tools:
+        result = await client.tools.authorize(
+            tool_name=tool.name,
+            user_id=user_id
+        )
+        if result.status != "completed":
+            print(f"Click this link to authorize {tool.name}:\n{result.url}")
+        await client.auth.wait_for_completion(result)
+
+    google_agent = Agent(
+        model="gemini-2.0-flash",
+        name="google_tool_agent",
+        instruction="I can use Gmail tools to manage an inbox!",
+        description="An agent equipped with tools to read Gmail emails. "
+                    "Make sure to call gmail_listemails to read and summarize"
+                    " emails",
+        tools=google_tools,
+    )
+    session = await session_service.create_session(
+        app_name=app_name, user_id=user_id, state={
+            "user_id": user_id,
+        }
+    )
+    runner = Runner(
+        app_name=app_name,
+        agent=google_agent,
+        artifact_service=artifact_service,
+        session_service=session_service,
+    )
+
+    user_input = "summarize my latest 3 emails"
+    content = types.Content(
+        role='user', parts=[types.Part.from_text(text=user_input)]
+    )
+    for event in runner.run(
+        user_id=user_id,
+        session_id=session.id,
+        new_message=content,
+    ):
+        if event.content.parts and event.content.parts[0].text:
+            print(f'** {event.author}: {event.content.parts[0].text}')
+
+if __name__ == '__main__':
+    asyncio.run(main())
+
+```
+
+## Tips for selecting tools
+
+-   **Relevance**: Pick only the  you need. Avoid using all tools at once.
+-   ** identification**: Always provide a unique and consistent `user_id` for each user. Use your internal or database user ID, not something entered by the user.
+
+## Next steps
+
+Now that you have integrated Arcade  into your Google ADK application, you can:
+
+-   Experiment with different  Servers, such as “Github” or “LinkedIn”
+-   Customize the ’s instructions for specific tasks
+-   Try out multi- systems using different Arcade
+-   Build your own custom tools with the Arcade  SDK
+
+Enjoy exploring Arcade and building powerful AI-enabled Python applications!
+
+Last updated on February 7, 2026
+
+[Overview](/en/get-started/agent-frameworks/google-adk/overview.md)
+[Setup Arcade with LangChain](/en/get-started/agent-frameworks/langchain/use-arcade-with-langchain.md)

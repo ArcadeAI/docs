@@ -13,63 +13,61 @@ import { toolkitDataToSearchMarkdown } from "../toolkit-docs-generator/scripts/p
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Regex patterns for cleaning MDX content
-const FRONTMATTER_REGEX = /^---\n[\s\S]*?\n---\n?/m;
-const IMPORT_REGEX = /^import\s+.*?from\s+['"].*?['"];?\n?/gm;
-const EXPORT_REGEX = /^export\s+(?:const|function|class|default|{).*?;?\n?/gm;
-const JSX_SELF_CLOSING_REGEX = /<[A-Z]\w*(?:\s+[^>]*)?\/>/g;
-const JSX_COMPONENT_REGEX = /<[A-Z]\w*(?:\s+[^>]*)?>[\s\S]*?<\/[A-Z]\w*>/g;
-const JSX_CUSTOM_COMPONENT_REGEX =
-  /<[A-Z][\w.]*(?:\s+[^>]*)?>[\s\S]*?<\/[A-Z][\w.]*>/g;
+// Directory containing pre-generated clean markdown files
+const CLEAN_MARKDOWN_DIR = path.join(__dirname, "..", "public", "_markdown");
 
 /**
- * Converts MDX content to simple HTML by stripping MDX-specific syntax
- * and converting markdown to HTML. Skips what can't be rendered.
+ * Converts clean markdown to HTML for Pagefind indexing.
+ * This function expects pre-cleaned markdown (no MDX syntax).
  */
-async function markdownToHtml(mdxContent: string): Promise<string> {
+async function markdownToHtml(markdownContent: string): Promise<string> {
   try {
-    let content = mdxContent;
-
-    // Remove frontmatter (---\n...\n---)
-    content = content.replace(FRONTMATTER_REGEX, "");
-
-    // Remove import statements
-    content = content.replace(IMPORT_REGEX, "");
-
-    // Remove export statements (but keep default exports that might be content)
-    content = content.replace(EXPORT_REGEX, "");
-
-    // Remove JSX components (both self-closing and with children)
-    // This regex matches <Component /> and <Component>...</Component>
-    content = content.replace(JSX_SELF_CLOSING_REGEX, "");
-    content = content.replace(JSX_COMPONENT_REGEX, "");
-
-    // Remove remaining JSX-like tags that might be custom components
-    content = content.replace(JSX_CUSTOM_COMPONENT_REGEX, "");
-
-    // Convert markdown to HTML using remark/rehype (same ecosystem as Nextra)
     const result = await remark()
       .use(remarkRehype)
       .use(rehypeStringify)
-      .process(content);
+      .process(markdownContent);
 
     return String(result);
   } catch (error) {
-    // If markdown parsing fails, return the cleaned content as plain text
-    // This ensures we still index the content even if HTML conversion fails
     console.warn(
       `Warning: Failed to convert markdown to HTML, using plain text: ${error}`
     );
-    // Return the cleaned content (without MDX syntax) as fallback
-    let cleaned = mdxContent;
-    cleaned = cleaned.replace(FRONTMATTER_REGEX, "");
-    cleaned = cleaned.replace(IMPORT_REGEX, "");
-    cleaned = cleaned.replace(EXPORT_REGEX, "");
-    cleaned = cleaned.replace(JSX_SELF_CLOSING_REGEX, "");
-    cleaned = cleaned.replace(JSX_COMPONENT_REGEX, "");
-    cleaned = cleaned.replace(JSX_CUSTOM_COMPONENT_REGEX, "");
-    return cleaned;
+    return markdownContent;
   }
+}
+
+/**
+ * Checks if clean markdown files exist and returns the appropriate source directory
+ */
+async function getMarkdownSource(language: string): Promise<{
+  dir: string;
+  pattern: string;
+  isClean: boolean;
+}> {
+  const cleanDir = path.join(CLEAN_MARKDOWN_DIR, language);
+
+  try {
+    await fs.access(cleanDir);
+    const files = await fs.readdir(cleanDir);
+    if (files.length > 0) {
+      return { dir: cleanDir, pattern: "**/*.md", isClean: true };
+    }
+  } catch {
+    // Clean markdown directory doesn't exist
+  }
+
+  // Fallback to raw MDX (with warning)
+  console.warn(
+    `⚠️  Clean markdown not found for ${language}, falling back to raw MDX`
+  );
+  console.warn(
+    `   Run "pnpm run generate:markdown" first to generate clean files`
+  );
+  return {
+    dir: path.join(__dirname, "..", "app", language),
+    pattern: "**/*.mdx",
+    isClean: false,
+  };
 }
 
 const { index } = await createIndex();
@@ -98,23 +96,37 @@ let page_count = 0;
 console.log("Building search index for languages: ", languages.join(", "));
 
 for (const language of languages) {
-  const searchPath = path.join(__dirname, "..", "app", language);
+  const source = await getMarkdownSource(language);
 
-  console.log(`Adding directory: ${searchPath}`);
+  console.log(
+    `Adding directory: ${source.dir} (${source.isClean ? "clean markdown" : "raw MDX"})`
+  );
 
-  for (const entry of glob.sync("**/*.mdx", { cwd: searchPath })) {
+  for (const entry of glob.sync(source.pattern, { cwd: source.dir })) {
     // Skip dynamic templates (we index concrete toolkit pages separately).
     if (
+      !source.isClean &&
       entry.includes("resources/integrations") &&
       entry.includes("[toolkitId]/page.mdx")
     ) {
       continue;
     }
 
-    const filePath = path.join(searchPath, entry);
-    const url = `/${language}/${entry.split("/page.mdx")[0]}`;
-    const mdxContent = await fs.readFile(filePath, "utf-8");
-    const htmlContent = await markdownToHtml(mdxContent);
+    const filePath = path.join(source.dir, entry);
+
+    // Build URL from file path
+    // Clean markdown: "home/quickstart.md" -> "/en/home/quickstart"
+    // Raw MDX: "home/quickstart/page.mdx" -> "/en/home/quickstart"
+    let urlPath: string;
+    if (source.isClean) {
+      urlPath = entry.replace(/\.md$/, "");
+    } else {
+      urlPath = entry.split("/page.mdx")[0];
+    }
+    const url = `/${language}/${urlPath}`;
+
+    const markdownContent = await fs.readFile(filePath, "utf-8");
+    const htmlContent = await markdownToHtml(markdownContent);
 
     const { errors, file } = await index.addHTMLFile({
       url,
