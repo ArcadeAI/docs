@@ -515,25 +515,8 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
     };
   }, []);
 
-  const rawTools = data.tools ?? [];
+  const tools = data.tools ?? [];
   const documentationChunks = data.documentationChunks ?? [];
-  // Temporary UI fallback for toolkit-level secrets that are documented but not yet
-  // emitted by the Engine tool metadata endpoint.
-  //
-  // Example: GitHub toolkit docs require `GITHUB_SERVER_URL` for all tools.
-  const toolkitSecretOverrides =
-    data.id.toLowerCase() === "github" ? (["GITHUB_SERVER_URL"] as const) : [];
-  const tools = rawTools.map((tool) => {
-    if (toolkitSecretOverrides.length === 0) {
-      return tool;
-    }
-    return {
-      ...tool,
-      secrets: Array.from(
-        new Set([...(tool.secrets ?? []), ...toolkitSecretOverrides])
-      ),
-    };
-  });
   const [selectedTools, setSelectedTools] = useState<Set<string>>(new Set());
   const selectionTools = tools.map((tool) => {
     const secrets =
