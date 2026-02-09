@@ -37,6 +37,7 @@ export async function GET(
           "Content-Type": "text/markdown; charset=utf-8",
           "Content-Disposition": "inline",
           "Cache-Control": "public, max-age=3600", // Cache for 1 hour
+          Vary: "Accept",
         },
       });
     } catch {
@@ -62,6 +63,7 @@ export async function GET(
         "Content-Type": "text/markdown; charset=utf-8",
         "Content-Disposition": "inline",
         "X-Content-Source": "raw-mdx", // Indicate this is raw MDX, not clean markdown
+        Vary: "Accept",
       },
     });
   } catch (error) {
