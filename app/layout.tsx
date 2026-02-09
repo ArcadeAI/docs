@@ -23,52 +23,72 @@ import {
 
 const REGEX_LOCALE = /^\/([a-z]{2}(?:-[A-Z]{2})?)(?:\/|$)/;
 
-export const metadata = {
-  title: {
-    default: "Arcade Docs",
-    template: "%s | Arcade Docs",
-  },
-  description: "Arcade - AI platform for developers",
-  metadataBase: new URL("https://docs.arcade.dev"),
-  manifest: "/site.webmanifest",
-  icons: {
-    icon: [
-      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
-      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-      { url: "/favicon.ico" },
-    ],
-    apple: { url: "/apple-touch-icon.png", sizes: "180x180" },
-    other: [
-      { rel: "mask-icon", url: "/safari-pinned-tab.svg", color: "#5bbad5" },
-    ],
-  },
-  openGraph: {
-    type: "website",
-    url: "https://docs.arcade.dev",
-    siteName: "Arcade Docs",
-    images: [
-      {
-        url: "/images/logo/arcade_og-logo.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Arcade",
+function getMarkdownAlternatePath(pathname: string): string {
+  // Handle root paths
+  if (pathname === "/" || pathname === "") {
+    return "/index.md";
+  }
+  // Remove trailing slash if present, then add .md extension
+  const cleanPath = pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
+  return `${cleanPath}.md`;
+}
+
+export async function generateMetadata() {
+  const headersList = await headers();
+  const pathname = headersList.get("x-pathname") || "/";
+
+  return {
+    title: {
+      default: "Arcade Docs",
+      template: "%s | Arcade Docs",
+    },
+    description: "Arcade - AI platform for developers",
+    metadataBase: new URL("https://docs.arcade.dev"),
+    manifest: "/site.webmanifest",
+    icons: {
+      icon: [
+        { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+        { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+        { url: "/favicon.ico" },
+      ],
+      apple: { url: "/apple-touch-icon.png", sizes: "180x180" },
+      other: [
+        { rel: "mask-icon", url: "/safari-pinned-tab.svg", color: "#5bbad5" },
+      ],
+    },
+    openGraph: {
+      type: "website",
+      url: "https://docs.arcade.dev",
+      siteName: "Arcade Docs",
+      images: [
+        {
+          url: "/images/logo/arcade_og-logo.jpg",
+          width: 1200,
+          height: 630,
+          alt: "Arcade",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      site: "@TryArcade",
+      images: ["/images/logo/arcade_og-logo.jpg"],
+    },
+    appleWebApp: {
+      title: "Arcade Documentation",
+    },
+    alternates: {
+      types: {
+        "text/markdown": getMarkdownAlternatePath(pathname),
       },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    site: "@TryArcade",
-    images: ["/images/logo/arcade_og-logo.jpg"],
-  },
-  appleWebApp: {
-    title: "Arcade Documentation",
-  },
-  other: {
-    "apple-mobile-web-app-title": "Arcade Documentation",
-    "twitter:url": "https://docs.arcade.dev",
-    "twitter:site:domain": "docs.arcade.dev",
-  },
-};
+    },
+    other: {
+      "apple-mobile-web-app-title": "Arcade Documentation",
+      "twitter:url": "https://docs.arcade.dev",
+      "twitter:site:domain": "docs.arcade.dev",
+    },
+  };
+}
 
 function getLocaleFromPathname(pathname: string): string {
   const localeMatch = pathname.match(REGEX_LOCALE);
