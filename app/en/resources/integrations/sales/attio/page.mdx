@@ -1,0 +1,357 @@
+---
+asIndexPage: true
+---
+
+# Attio
+
+import ToolInfo from "@/app/_components/tool-info";
+import TableOfContents from "@/app/_components/table-of-contents";
+import ToolFooter from "@/app/_components/tool-footer";
+import { Callout } from "nextra/components";
+
+<ToolInfo
+  description="Enable agents to interact with Attio CRM"
+  author="Arcade"
+  authType="OAuth2"
+  authProviderName="Attio"
+  versions={["0.1.0"]}
+/>
+
+The Attio MCP Server is an [Arcade Optimized](/guides/create-tools/improve/types-of-tools#optimized-tools) toolkit that provides tools for interacting with Attio CRM.
+
+- **Records** — Query, get, create (upsert), and update records for people, companies, deals, and custom objects
+- **Lists** — Browse lists, get entries, add records to lists, and remove entries
+- **Activity** — Create notes and tasks linked to records
+- **Meetings** — List meetings for a record, get meeting details, and retrieve call transcripts
+- **Workspace** — Get workspace member info and identify the authenticated user
+
+## Available tools
+
+<TableOfContents
+  headers={["Tool Name", "Description"]}
+  data={[
+    ["Attio.ListObjects", "List all objects (tables) in the workspace"],
+    ["Attio.GetObjectSchema", "Get the schema/attributes for an object"],
+    ["Attio.QueryRecords", "Query records with filtering, sorting, and pagination"],
+    ["Attio.GetRecord", "Get a single record by ID"],
+    ["Attio.AssertRecord", "Create or update (upsert) a record"],
+    ["Attio.UpdateRecord", "Update a record directly by ID"],
+    ["Attio.ListLists", "Get all lists in the workspace"],
+    ["Attio.GetListEntries", "Get entries from a list"],
+    ["Attio.AddToList", "Add a record to a list"],
+    ["Attio.RemoveFromList", "Remove an entry from a list"],
+    ["Attio.CreateNote", "Add a note to a record"],
+    ["Attio.CreateTask", "Create a task linked to records"],
+    ["Attio.ListTasks", "Get tasks with optional filtering"],
+    ["Attio.ListRecordMeetings", "List meetings associated with a record"],
+    ["Attio.GetMeeting", "Get details of a specific meeting"],
+    ["Attio.GetCallTranscript", "Get the full transcript from a call recording"],
+    ["Attio.GetDealTranscript", "Get a call transcript for a deal in one step"],
+    ["Attio.WhoAmI", "Get the authenticated user's profile and workspace context"],
+    ["Attio.ListWorkspaceMembers", "Get all members in the workspace"],
+    ["Attio.CreateReport", "Generate a report from records for export to Google Sheets"],
+  ]}
+/>
+
+<Callout>
+  If you need to perform an action that's not listed here, you can [get in touch
+  with us](mailto:contact@arcade.dev) to request a new tool, or [create your own
+  tools](/guides/create-tools/tool-basics/build-mcp-server).
+</Callout>
+
+---
+
+## Record tools
+
+### Attio.ListObjects
+
+List all objects (tables) in the Attio workspace.
+
+Call this first to discover what objects exist. Standard objects include `people`, `companies`, `deals`, `users`. Custom objects will also appear.
+
+**Parameters**
+
+This tool takes no parameters.
+
+---
+
+### Attio.GetObjectSchema
+
+Get the schema/attributes for an Attio object.
+
+Call `ListObjects` first to see available objects, then call this to see their attributes for filtering. Returns attribute names, types, filter syntax hints, and for select/status fields, the available option values to use in filters.
+
+**Parameters**
+
+- **object_type** (`string`, required) Object slug from `ListObjects` (e.g., `people`, `companies`, `deals`)
+
+---
+
+### Attio.QueryRecords
+
+Query Attio records with filtering, sorting, and pagination.
+
+Recommended workflow: 1) `ListObjects`, 2) `GetObjectSchema`, 3) `QueryRecords` with fields.
+
+**Parameters**
+
+- **object_type** (`string`, required) Object slug (e.g., `people`, `companies`, `deals`)
+- **fields** (`array[string]`, required) Fields to return (call `GetObjectSchema` to see available fields)
+- **filter_json** (`string`, _optional_) JSON filter with operators: `$eq`, `$contains`, `$gt`, `$lt`
+- **sort_by** (`string`, _optional_) Attribute to sort by
+- **sort_direction** (`string`, _optional_) Sort direction: `asc` or `desc` (default `desc`)
+- **limit** (`integer`, _optional_) Max records to return (default 25, max 100)
+- **offset** (`integer`, _optional_) Number of records to skip (default 0)
+
+---
+
+### Attio.GetRecord
+
+Get a single Attio record by ID.
+
+Returns the record with flattened values and a direct web URL.
+
+**Parameters**
+
+- **object_type** (`string`, required) Object slug (e.g., `people`, `companies`, `deals`)
+- **record_id** (`string`, required) Record UUID
+
+---
+
+### Attio.AssertRecord
+
+Create or update (upsert) a record using Attio's assert endpoint.
+
+This is idempotent — safe to retry. If a record matching the attribute exists, it will be updated. Otherwise, a new record is created. The `matching_attribute` must be a unique attribute on the object (e.g., `email_addresses` for people, `domains` for companies).
+
+**Parameters**
+
+- **object_type** (`string`, required) Object slug (e.g., `people`, `companies`, `deals`)
+- **matching_attribute** (`string`, required) Unique attribute for upsert match (e.g., `email_addresses`, `domains`)
+- **values** (`object`, required) Attribute values to set on the record
+
+---
+
+### Attio.UpdateRecord
+
+Update a record directly by ID.
+
+Unlike `AssertRecord`, this doesn't require a unique matching attribute. For status fields like `stage`, pass the status title as a string (e.g., `{"stage": "Closed Won"}`).
+
+**Parameters**
+
+- **object_type** (`string`, required) Object slug (e.g., `people`, `companies`, `deals`)
+- **record_id** (`string`, required) Record UUID to update
+- **values** (`object`, required) Attribute values to update on the record
+
+---
+
+## List tools
+
+### Attio.ListLists
+
+Get all lists in the Attio workspace with pagination.
+
+Returns list metadata including ID, name, and parent object type.
+
+**Parameters**
+
+- **limit** (`integer`, _optional_) Max lists to return (default 25)
+- **offset** (`integer`, _optional_) Number of lists to skip (default 0)
+
+---
+
+### Attio.GetListEntries
+
+Get entries from an Attio list with pagination.
+
+Returns entries with their record IDs and flattened list-specific values.
+
+**Parameters**
+
+- **list_id** (`string`, required) List UUID
+- **limit** (`integer`, _optional_) Max entries to return (default 25)
+- **offset** (`integer`, _optional_) Number of entries to skip (default 0)
+
+---
+
+### Attio.AddToList
+
+Add a record to an Attio list.
+
+Optionally set list-specific attribute values via the `entry_values` parameter.
+
+**Parameters**
+
+- **list_id** (`string`, required) List UUID
+- **record_id** (`string`, required) Record UUID to add to the list
+- **entry_values** (`object`, _optional_) List-specific attribute values
+
+---
+
+### Attio.RemoveFromList
+
+Remove a record from an Attio list.
+
+Note: Use the `entry_id`, not the `record_id`. Get entry IDs from `GetListEntries`.
+
+**Parameters**
+
+- **list_id** (`string`, required) List UUID
+- **entry_id** (`string`, required) Entry UUID (not record ID)
+
+---
+
+## Activity tools
+
+### Attio.CreateNote
+
+Add a note to an Attio record.
+
+Notes are useful for logging activities, meeting notes, and outreach history.
+
+**Parameters**
+
+- **parent_object** (`string`, required) Object type to attach note to (`people`, `companies`, or `deals`)
+- **parent_record_id** (`string`, required) Record UUID to attach note to
+- **title** (`string`, required) Note title
+- **content** (`string`, required) Note body text
+- **format_type** (`string`, _optional_) Note format: `plaintext` (default) or `markdown`
+
+---
+
+### Attio.CreateTask
+
+Create a task in Attio.
+
+Tasks are useful for follow-ups, reminders, and action items. Optionally link to a record by providing both `linked_record_id` and `linked_record_object`.
+
+**Parameters**
+
+- **content** (`string`, required) Task description
+- **assignee_id** (`string`, required) Workspace member UUID
+- **deadline** (`string`, required) Due date in ISO 8601 format
+- **linked_record_id** (`string`, _optional_) Record UUID to link to the task
+- **linked_record_object** (`string`, _optional_) Object type of linked record
+
+---
+
+### Attio.ListTasks
+
+Get tasks from Attio with optional filtering and pagination.
+
+**Parameters**
+
+- **assignee_id** (`string`, _optional_) Filter by assignee UUID
+- **is_completed** (`boolean`, _optional_) Filter by completion status
+- **limit** (`integer`, _optional_) Max tasks to return (default 25)
+- **offset** (`integer`, _optional_) Number of tasks to skip (default 0)
+
+---
+
+## Meeting tools
+
+### Attio.ListRecordMeetings
+
+List meetings associated with an Attio record.
+
+Returns meetings linked to a deal, company, or person including meeting ID, title, type, start/end times, and whether the meeting has a call recording.
+
+**Parameters**
+
+- **object_type** (`string`, required) Object type (`people`, `companies`, or `deals`)
+- **record_id** (`string`, required) Record UUID
+- **limit** (`integer`, _optional_) Max meetings to return (default 20)
+- **offset** (`integer`, _optional_) Number of meetings to skip (default 0)
+
+---
+
+### Attio.GetMeeting
+
+Get details of a specific meeting.
+
+Returns meeting metadata, participants, and call recording info if available. Use `call_recording_id` with `GetCallTranscript` to fetch the transcript.
+
+**Parameters**
+
+- **meeting_id** (`string`, required) Meeting UUID
+
+---
+
+### Attio.GetCallTranscript
+
+Get the full transcript from a call recording.
+
+Returns the transcript with speaker labels. Use this after finding a meeting with a call recording via `ListRecordMeetings` or `GetMeeting`.
+
+**Parameters**
+
+- **meeting_id** (`string`, required) Meeting UUID
+- **call_recording_id** (`string`, required) Call recording UUID
+- **include_timestamps** (`boolean`, _optional_) Include start/end times for each segment (default `false`)
+
+---
+
+### Attio.GetDealTranscript
+
+Convenience tool to get a call transcript for a deal in one step.
+
+Finds meetings for the deal, gets the specified meeting's call recording, and returns the full transcript. Combines `ListRecordMeetings` + `GetCallTranscript` into one call.
+
+**Parameters**
+
+- **deal_record_id** (`string`, required) Deal record UUID
+- **meeting_index** (`integer`, _optional_) Which meeting: 0 = most recent, 1 = second most recent (default 0)
+
+---
+
+## Workspace tools
+
+### Attio.WhoAmI
+
+Get the authenticated user's profile and workspace context.
+
+Call this first to understand your identity and permissions. Returns the current user's name, email, and workspace membership info.
+
+**Parameters**
+
+This tool takes no parameters.
+
+---
+
+### Attio.ListWorkspaceMembers
+
+Get all members in the Attio workspace.
+
+Useful for task assignment and understanding who owns records.
+
+**Parameters**
+
+This tool takes no parameters.
+
+---
+
+## Reporting tools
+
+### Attio.CreateReport
+
+Generate a report from Attio records for export to Google Sheets.
+
+Returns data formatted for easy insertion into a spreadsheet: headers (column names), rows (values aligned with headers), and a dict format for the Google Sheets API. Use this output with Google Sheets tools to create a spreadsheet.
+
+**Parameters**
+
+- **object_type** (`string`, required) Object slug (e.g., `people`, `companies`, `deals`, or custom)
+- **attributes** (`array[string]`, _optional_) Attributes to include in the report (defaults to all available)
+- **filter_json** (`array[string]`, _optional_) Filter strings: `{"attribute": "x", "operator": "equals", "value": "y"}`
+- **sort_by** (`string`, _optional_) Attribute to sort by
+- **sort_direction** (`string`, _optional_) Sort direction: `asc` or `desc`
+- **limit** (`integer`, _optional_) Max records to include (1–500)
+
+---
+
+## Auth
+
+The Arcade Cloud Platform offers a default [Attio auth provider](/references/auth-providers/attio). If you use it, there's nothing to configure. Your users will see `Arcade` as the name of the application requesting permission.
+
+<ToolFooter pipPackageName="arcade_attio" />
