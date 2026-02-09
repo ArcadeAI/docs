@@ -20,7 +20,7 @@ Create and use an   that requires OAuth to access Reddit, prompting  to authoriz
 
 ### Prerequisites
 
--   [Arcade account](https://api.arcade.dev/dashboard/register)
+-   [Arcade account](https://app.arcade.dev/register)
 
 -   [uv package manager](https://docs.astral.sh/uv/getting-started/installation/)
      
@@ -320,7 +320,7 @@ if __name__ == "__main__":
 
 ```
 
-Last updated on February 7, 2026
+Last updated on February 9, 2026
 
 [Build an MCP Server to write custom tools](/en/guides/create-tools/tool-basics/build-mcp-server.md)
 [Create a tool with secrets](/en/guides/create-tools/tool-basics/create-tool-secrets.md)

@@ -213,7 +213,7 @@ for await (const event of events) {
 
 Now you’re ready to explore more LangChain tools with Arcade. Try integrating additional  Servers and crafting more complex queries to enhance your AI workflows.
 
-Last updated on February 7, 2026
+Last updated on February 9, 2026
 
 [Setup Arcade with LangChain](/en/get-started/agent-frameworks/langchain/use-arcade-with-langchain.md)
 [Mastra](/en/get-started/agent-frameworks/mastra.md)

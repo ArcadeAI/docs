@@ -289,7 +289,7 @@ async def run_http():
 asyncio.run(run_http())
 ```
 
-Last updated on February 7, 2026
+Last updated on February 9, 2026
 
 [Transports](/en/references/mcp/python/transports.md)
 [Middleware](/en/references/mcp/python/middleware.md)

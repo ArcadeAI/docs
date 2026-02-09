@@ -144,7 +144,7 @@ Arcade also allows you to [build your own tools](/guides/create-tools/tool-basic
 
 Your  can use the [service providers supported by Arcade](/references/auth-providers.md) or you can integrate with any [OAuth2-compatible service](/references/auth-providers/oauth2.md).
 
-Last updated on February 7, 2026
+Last updated on February 9, 2026
 
 [Overview](/en/guides/tool-calling/custom-apps.md)
 [Check authorization status](/en/guides/tool-calling/custom-apps/check-auth-status.md)

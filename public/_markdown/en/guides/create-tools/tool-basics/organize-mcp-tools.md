@@ -19,7 +19,7 @@ Learn best practices for organizing your  server and , how to import tools from 
 
 ### Prerequisites
 
--   [Arcade account](https://api.arcade.dev/dashboard/register)
+-   [Arcade account](https://app.arcade.dev/register)
 
 -   [An MCP Server](/guides/create-tools/tool-basics/build-mcp-server.md)
 
@@ -198,7 +198,7 @@ uv run server.py http
 
 For HTTP transport, view your server’s API docs at [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) .
 
-Last updated on February 7, 2026
+Last updated on February 9, 2026
 
 [Call tools from MCP clients](/en/guides/create-tools/tool-basics/call-tools-mcp.md)
 [Overview](/en/guides/create-tools/evaluate-tools.md)

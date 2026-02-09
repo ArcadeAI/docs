@@ -11,7 +11,7 @@ In this guide, you’ll learn how to connect Visual Studio Code to an Arcade  Ga
 
 ### Prerequisites
 
-1.  Create an [Arcade](https://api.arcade.dev/dashboard/register)
+1.  Create an [Arcade](https://app.arcade.dev/register)
 
 2.  Create an [Arcade MCP Gateway](/guides/mcp-gateways.md)
      and select the  you want to use
@@ -62,7 +62,7 @@ Note: if you are using the Arcade Header auth mode for your  Gateway, you will m
 
 You will not see the authentication prompts when you start the  Server in Visual Studio Code because the  is passed directly.
 
-Last updated on February 7, 2026
+Last updated on February 9, 2026
 
 [Claude Desktop](/en/get-started/mcp-clients/claude-desktop.md)
 [Microsoft Copilot Studio](/en/get-started/mcp-clients/copilot-studio.md)

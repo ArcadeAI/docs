@@ -156,7 +156,7 @@ from arcade_mcp_server.settings import MCPSettings
 settings = MCPSettings()
 ```
 
-Last updated on February 7, 2026
+Last updated on February 9, 2026
 
 [Errors](/en/references/mcp/python/errors.md)
 [Telemetry](/en/references/mcp/telemetry.md)

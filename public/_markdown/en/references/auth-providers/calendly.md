@@ -9,7 +9,7 @@ Calendly
 
 The Calendly  enables tools and  to call [Calendly APIs](https://developer.calendly.com/api-docs)  on behalf of a  using OAuth 2.0 authentication.
 
-Want to quickly get started with Calendly in your  or AI app? The pre-built [Arcade Calendly MCP Server](/resources/integrations/productivity/calendly-api.md) is what you want!
+Want to quickly get started with Calendly in your  or AI app? The pre-built [Arcade Calendly MCP Server](/resources/integrations/productivity/calendlyapi.md) is what you want!
 
 ### What’s documented here
 
@@ -17,7 +17,7 @@ This page describes how to use and configure Calendly auth with Arcade.
 
 This  is used by:
 
--   The [Arcade Calendly MCP Server](/resources/integrations/productivity/calendly-api.md)
+-   The [Arcade Calendly MCP Server](/resources/integrations/productivity/calendlyapi.md)
     , which provides pre-built  for interacting with Calendly
 -   Your [app code](#using-calendly-auth-in-app-code)
      that needs to call the Calendly API
@@ -206,7 +206,7 @@ const token = authResponse.context.token;
 
 ## Using Calendly auth in custom tools
 
-You can use the pre-built [Arcade Calendly MCP Server](/resources/integrations/productivity/calendly-api.md) to quickly build  and AI apps that interact with Calendly.
+You can use the pre-built [Arcade Calendly MCP Server](/resources/integrations/productivity/calendlyapi.md) to quickly build  and AI apps that interact with Calendly.
 
 If the pre-built tools in the Calendly  Server don’t meet your needs, you can author your own [custom tools](/guides/create-tools/tool-basics/build-mcp-server.md) that interact with the Calendly API.
 
@@ -242,7 +242,7 @@ async def get_user_info(
 
 For more details about Calendly’s authentication, refer to the [Calendly Authentication documentation](https://developer.calendly.com/how-to-guides/authentication) .
 
-Last updated on February 7, 2026
+Last updated on February 9, 2026
 
 [Atlassian](/en/references/auth-providers/atlassian.md)
 [ClickUp](/en/references/auth-providers/clickup.md)

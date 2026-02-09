@@ -13,7 +13,7 @@ Connect Cursor to an Arcade  Gateway.
 
 ### Prerequisites
 
-1.  Create an [Arcade](https://api.arcade.dev/dashboard/register)
+1.  Create an [Arcade](https://app.arcade.dev/register)
 
 2.  Get an [Arcade API key](/get-started/setup/api-keys.md)
 
@@ -63,7 +63,7 @@ Cursor will open the  settings file, and you can add a new entry to the `mcpServ
 2.  Make sure you are in  mode
 3.  Ask the  to use a !
 
-Last updated on February 7, 2026
+Last updated on February 9, 2026
 
 [Overview](/en/get-started/mcp-clients.md)
 [Claude Desktop](/en/get-started/mcp-clients/claude-desktop.md)

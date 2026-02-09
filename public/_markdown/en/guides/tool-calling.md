@@ -14,9 +14,9 @@ To solve this, many AI models support  calling (sometimes referred to as ‘func
 
 Say a colleague shares a document with you on Google Drive, and you’d like an LLM to help you analyze it.
 
-You could go to your Drive/Docs, open the document, copy its contents, and paste it into your chat. But what if the LLM could do this for you? The Arcade Google Docs  Server provides a [`SearchAndRetrieveDocuments`](/resources/integrations/productivity/google-docs.md#googledocssearchandretrievedocuments) . By calling it, the LLM can find and read the document without you having to do anything.
+You could go to your Drive/Docs, open the document, copy its contents, and paste it into your chat. But what if the LLM could do this for you? The Arcade Google Docs  Server provides a [`SearchAndRetrieveDocuments`](/resources/integrations/productivity/googledocs.md#googledocssearchandretrievedocuments) . By calling it, the LLM can find and read the document without you having to do anything.
 
-After analyzing the document, you decide that a meeting is needed with your colleague. You can ask the LLM to schedule a meeting and it will use the [Google Calendar MCP Server](/resources/integrations/productivity/google-calendar.md) to do it without you needing to leave the chat.
+After analyzing the document, you decide that a meeting is needed with your colleague. You can ask the LLM to schedule a meeting and it will use the [Google Calendar MCP Server](/resources/integrations/productivity/googlecalendar.md) to do it without you needing to leave the chat.
 
 Or you could ask the LLM to send a summary of the analysis to your colleague by email and it would use the [Gmail MCP Server](/resources/integrations/productivity/gmail.md) for that.
 
@@ -72,7 +72,7 @@ This process shows the general outline of the  Augmented Generation (TAG) proces
 -   Build your own [custom MCP Server](/guides/create-tools/tool-basics/build-mcp-server.md)
 
 
-Last updated on February 7, 2026
+Last updated on February 9, 2026
 
 [Create via AI Assistant](/en/guides/mcp-gateways/create-via-ai.md)
 [Handling errors](/en/guides/tool-calling/error-handling.md)

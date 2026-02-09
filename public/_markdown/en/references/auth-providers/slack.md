@@ -9,7 +9,7 @@ Slack
 
 The Slack  enables tools and  to call [Slack APIs](https://api.slack.com/docs)  on behalf of a .
 
-Want to quickly get started with Slack in your  or AI app? The pre-built [Arcade Slack MCP Server](/resources/integrations/social-communication/slack.md) is what you want!
+Want to quickly get started with Slack in your  or AI app? The pre-built [Arcade Slack MCP Server](/resources/integrations/social/slack.md) is what you want!
 
 ### What’s documented here
 
@@ -17,7 +17,7 @@ This page describes how to use and configure Slack auth with Arcade.
 
 This  is used by:
 
--   The [Arcade Slack MCP Server](/resources/integrations/social-communication/slack.md)
+-   The [Arcade Slack MCP Server](/resources/integrations/social/slack.md)
     , which provides pre-built  for interacting with Slack
 -   Your [app code](#using-slack-auth-in-app-code)
      that needs to call the Slack API
@@ -36,11 +36,11 @@ Before showing how to configure your Slack app credentials, let’s go through t
 
 In May 29, 2025, [Slack announced](https://api.slack.com/changelog/2025-05-terms-rate-limit-update-and-faq)  changes to their API rate-limits and terms of service for apps that are not approved for the Slack Marketplace.
 
-The `conversations.history` and `conversations.replies` endpoints are now limited to 1 request/minute and up to 15 objects returned per request. This affects various  in the [Arcade Slack MCP Server](/resources/integrations/social-communication/slack.md). Additionally, the [API Terms of Service](https://slack.com/terms-of-service/api)  now requires [Slack Marketplace](https://api.slack.com/slack-marketplace/using)  approval for commercial distribution.
+The `conversations.history` and `conversations.replies` endpoints are now limited to 1 request/minute and up to 15 objects returned per request. This affects various  in the [Arcade Slack MCP Server](/resources/integrations/social/slack.md). Additionally, the [API Terms of Service](https://slack.com/terms-of-service/api)  now requires [Slack Marketplace](https://api.slack.com/slack-marketplace/using)  approval for commercial distribution.
 
 -   Follow Slack’s guide to [registering a Slack app](https://api.slack.com/quickstart)
      
--   If you plan to use the [Arcade Slack MCP Server](/resources/integrations/social-communication/slack.md)
+-   If you plan to use the [Arcade Slack MCP Server](/resources/integrations/social/slack.md)
     , select the scopes below (include additional scopes for your application’s authorization needs or custom , in any):
     -   `channels:history`
     -   `channels:read`
@@ -157,7 +157,7 @@ const token = authResponse.context.token;
 
 ## Using Slack auth in custom tools
 
-You can use the pre-built [Arcade Slack MCP Server](/resources/integrations/social-communication/slack.md) to quickly build  and AI apps that interact with Slack.
+You can use the pre-built [Arcade Slack MCP Server](/resources/integrations/social/slack.md) to quickly build  and AI apps that interact with Slack.
 
 If the pre-built tools in the Slack  Server don’t meet your needs, you can author your own [custom tools](/guides/create-tools/tool-basics/build-mcp-server.md) that interact with the Slack API.
 
@@ -217,7 +217,7 @@ def send_dm_to_user(
     slackClient.chat_postMessage(channel=dm_channel_id, text=message)
 ```
 
-Last updated on February 7, 2026
+Last updated on February 9, 2026
 
 [Salesforce](/en/references/auth-providers/salesforce.md)
 [Spotify](/en/references/auth-providers/spotify.md)

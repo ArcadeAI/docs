@@ -9,7 +9,7 @@ Square
 
 The Square  enables tools and  to call [Square APIs](https://developer.squareup.com/reference/square)  on behalf of a  using OAuth 2.0 authentication.
 
-Want to quickly get started with Square in your  or AI app? The pre-built [Arcade Square MCP Server](/resources/integrations/productivity/squareup-api.md) is what you want!
+Want to quickly get started with Square in your  or AI app? The pre-built [Arcade Square MCP Server](/resources/integrations/productivity/squareupapi.md) is what you want!
 
 ### What’s documented here
 
@@ -17,7 +17,7 @@ This page describes how to use and configure Square auth with Arcade.
 
 This  is used by:
 
--   The [Arcade Square MCP Server](/resources/integrations/productivity/squareup-api.md)
+-   The [Arcade Square MCP Server](/resources/integrations/productivity/squareupapi.md)
     , which provides pre-built  for interacting with Square
 -   Your [app code](#using-square-auth-in-app-code)
      that needs to call the Square API
@@ -199,11 +199,10 @@ const client = new Arcade();
 const userId = "{arcade_user_id}";
 
 // Start the authorization process
-const authResponse = await client.auth.start(
-  userId,
-  "arcade-square",
-  ["MERCHANT_PROFILE_READ", "PAYMENTS_READ"]
-);
+const authResponse = await client.auth.start(userId, "arcade-square", [
+  "MERCHANT_PROFILE_READ",
+  "PAYMENTS_READ",
+]);
 
 if (authResponse.status !== "completed") {
   console.log("Please complete the authorization challenge in your browser:");
@@ -219,7 +218,7 @@ const token = authResponse.context.token;
 
 ## Using Square auth in custom tools
 
-You can use the pre-built [Arcade Square MCP Server](/resources/integrations/productivity/squareup-api.md) to quickly build  and AI apps that interact with Square.
+You can use the pre-built [Arcade Square MCP Server](/resources/integrations/productivity/squareupapi.md) to quickly build  and AI apps that interact with Square.
 
 If the pre-built tools in the Square  Server don’t meet your needs, you can author your own [custom tools](/guides/create-tools/tool-basics/build-mcp-server.md) that interact with the Square API.
 
@@ -273,7 +272,7 @@ Square supports various OAuth scopes that determine the level of access your app
 
 For a complete list of available scopes, refer to the [Square OAuth Permissions documentation](https://developer.squareup.com/docs/oauth-api/square-permissions) .
 
-Last updated on February 7, 2026
+Last updated on February 9, 2026
 
 [Spotify](/en/references/auth-providers/spotify.md)
 [TickTick](/en/references/auth-providers/ticktick.md)

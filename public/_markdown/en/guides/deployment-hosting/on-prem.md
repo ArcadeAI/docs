@@ -20,7 +20,7 @@ An on-premises  server deployment allows you to execute tools in your own enviro
 
 ### Prerequisites
 
--   [Arcade account](https://api.arcade.dev/dashboard/register)
+-   [Arcade account](https://app.arcade.dev/register)
 
 -   [Arcade CLI](/get-started/quickstarts/call-tool-agent.md)
 
@@ -304,7 +304,7 @@ You can now test your  Server by making requests using the Playground, or an MCP
 -   [Configure secrets](/guides/create-tools/tool-basics/create-tool-secrets.md)
      for your  Server
 
-Last updated on February 7, 2026
+Last updated on February 9, 2026
 
 [Arcade Cloud](/en/guides/deployment-hosting/arcade-cloud.md)
 [Configure Arcade's engine](/en/guides/deployment-hosting/configure-engine.md)

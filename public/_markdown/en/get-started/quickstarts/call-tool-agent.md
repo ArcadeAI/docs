@@ -23,7 +23,7 @@ Install and use the  to call Arcade Hosted .
 
 ### Prerequisites
 
--   An [Arcade](https://api.arcade.dev/dashboard/register)
+-   An [Arcade](https://app.arcade.dev/register)
 
 -   An [Arcade API key](/get-started/setup/api-keys.md)
 
@@ -546,7 +546,7 @@ console.log(
 console.log(respose_send_email.output?.value);
 ```
 
-Last updated on February 7, 2026
+Last updated on February 9, 2026
 
 [Windows environment setup](/en/get-started/setup/windows-environment.md)
 [Call tools in IDE/MCP clients](/en/get-started/quickstarts/call-tool-client.md)

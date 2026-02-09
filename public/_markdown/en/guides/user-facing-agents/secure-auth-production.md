@@ -233,7 +233,7 @@ In the [Auth > Settings section](https://api.arcade.dev/dashboard/auth/settings)
 
 Arcade’s default OAuth apps _only_ support the Arcade  verifier. Authorization flows using Arcade’s default OAuth apps will use the Arcade user verifier even if you have a custom verifier route set up.
 
-Last updated on February 7, 2026
+Last updated on February 9, 2026
 
 [Migrate from toolkits to MCP servers](/en/guides/create-tools/migrate-toolkits.md)
 [Overview](/en/guides/deployment-hosting.md)

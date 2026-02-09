@@ -483,8 +483,8 @@ Use track name `"default"` to reference  registered without a track.
 
 Capture  calls from each track separately:
 
-```json
-arcade evals . --capture --file captures/comparison --format json
+```bash
+arcade evals . --capture -o captures/comparison.json
 ```
 
 Output includes track names:
@@ -515,9 +515,7 @@ Output includes track names:
 Combine comparative tracks with multiple models:
 
 ```bash
-arcade evals . \
-  --use-provider openai:gpt-4o,gpt-4o-mini \
-  --use-provider anthropic:claude-sonnet-4-5-20250929
+arcade evals . -p "openai:gpt-4o,gpt-4o-mini anthropic:claude-sonnet-4-5-20250929"
 ```
 
 Results show:
@@ -757,7 +755,7 @@ suite.add_tool_catalog(catalog_v2, track="Python v2")
 -   [Run evaluations](/guides/create-tools/evaluate-tools/run-evaluations.md)
      with multiple models and tracks
 
-Last updated on February 7, 2026
+Last updated on February 9, 2026
 
 [Capture mode](/en/guides/create-tools/evaluate-tools/capture-mode.md)
 [Types of Tools](/en/guides/create-tools/improve/types-of-tools.md)

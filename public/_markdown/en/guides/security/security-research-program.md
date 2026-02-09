@@ -52,7 +52,7 @@ While we’re a small team with limited resources, we appreciate the effort rese
 
 For questions about this program, please contact [security@arcade.dev](mailto:security@arcade.dev).
 
-Last updated on February 7, 2026
+Last updated on February 9, 2026
 
 [Secure your MCP server](/en/guides/security/secure-your-mcp-server.md)
 [Server-Level vs Tool-Level Authorization](/en/learn/server-level-vs-tool-level-auth.md)

@@ -535,7 +535,7 @@ Ensure your evaluation files:
 -   Learn about [comparative evaluations](/guides/create-tools/evaluate-tools/comparative-evaluations.md)
      for comparing  sources
 
-Last updated on February 7, 2026
+Last updated on February 9, 2026
 
 [Create an evaluation suite](/en/guides/create-tools/evaluate-tools/create-evaluation-suite.md)
 [Capture mode](/en/guides/create-tools/evaluate-tools/capture-mode.md)

@@ -12,7 +12,7 @@ The use of this API is subject to our [Terms of Service](https://arcade.dev/term
 
 Our OpenAPI 3.0 specification is [available here](https://api.arcade.dev/v1/swagger) .
 
-Last updated on February 7, 2026
+Last updated on February 9, 2026
 
 [Changelog](/en/references/changelog.md)
 [Overview](/en/references/mcp/python.md)

@@ -21,7 +21,7 @@ This guide shows you how to deploy your  Server with Arcade Deploy.
 
 ### Prerequisites
 
--   [Arcade account](https://api.arcade.dev/dashboard/register)
+-   [Arcade account](https://app.arcade.dev/register)
 
 -   [uv package manager](https://docs.astral.sh/uv/getting-started/installation/)
      
@@ -143,7 +143,7 @@ You can use any of the available [Arcade clients](/references.md) to call the to
 
 Your  Server is now deployed and managed by Arcade, and ready to be used in your MCP clients!
 
-Last updated on February 7, 2026
+Last updated on February 9, 2026
 
 [Configure Arcade's engine](/en/guides/deployment-hosting/configure-engine.md)
 [Overview](/en/guides/security.md)

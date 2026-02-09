@@ -21,7 +21,7 @@ Create a coding agent using an  Gateway to call tools from multiple .
 
 ### Prerequisites
 
--   An [Arcade](https://api.arcade.dev/dashboard/register)
+-   An [Arcade](https://app.arcade.dev/register)
 
 
 ### Create an MCP Gateway
@@ -91,7 +91,7 @@ As you interact with the agent, it will call the tools from the  Gateway. Your  
 -   Build your own  servers with [arcade-mcp](/get-started/quickstarts/mcp-server-quickstart.md)
     .
 
-Last updated on February 7, 2026
+Last updated on February 9, 2026
 
 [Call tools in agents](/en/get-started/quickstarts/call-tool-agent.md)
 [Build an MCP server for custom tools](/en/get-started/quickstarts/mcp-server-quickstart.md)
