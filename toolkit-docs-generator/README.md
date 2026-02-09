@@ -1,6 +1,6 @@
 # Generate toolkit docs
 
-This guide explains how Arcade generates toolkit JSON, how the GitHub workflow runs, and how the docs site renders the output. Use this file as the single source of truth for toolkit generation in this repo.
+This guide explains how Arcade generates toolkit JSON, how the GitHub workflow runs, and how the docs site renders the output. Use this file as the single source of truth for toolkit generation in this repository.
 
 ## What gets generated
 
