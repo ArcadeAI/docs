@@ -733,7 +733,11 @@ async function discoverPages(): Promise<
     const searchPath = path.join(appDir, language);
     const mdxFiles = glob.sync("**/*.mdx", {
       cwd: searchPath,
-      ignore: ["**/_*.mdx"],
+      ignore: [
+        "**/_*.mdx",
+        // Skip dynamic route templates — they render from JSON, not static MDX
+        "**/\\[*\\]/**",
+      ],
     });
 
     for (const entry of mdxFiles) {
