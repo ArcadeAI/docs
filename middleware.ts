@@ -155,13 +155,25 @@ function handleContentNegotiation(
   request: NextRequest,
   pathname: string
 ): NextResponse | null {
+  // Only handle GET and HEAD requests
+  const method = request.method.toUpperCase();
+  if (method !== "GET" && method !== "HEAD") {
+    return null;
+  }
+
   const shouldServeMarkdown = prefersMarkdown(request) || isAIAgent(request);
   if (!shouldServeMarkdown || pathname.endsWith(".md")) {
     return null;
   }
 
-  const locale = getLocaleFromPathname(pathname, request);
-  const mdPath = buildMarkdownPath(pathname, locale);
+  // Normalize trailing slashes to avoid paths like /en/home/.md
+  const normalizedPathname =
+    pathname.endsWith("/") && pathname !== "/"
+      ? pathname.slice(0, -1)
+      : pathname;
+
+  const locale = getLocaleFromPathname(normalizedPathname, request);
+  const mdPath = buildMarkdownPath(normalizedPathname, locale);
   const url = request.nextUrl.clone();
   url.pathname = `/api/markdown${mdPath}`;
   return NextResponse.rewrite(url);
