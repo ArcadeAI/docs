@@ -1,0 +1,326 @@
+---
+title: "Add user authorization to your MCP tools"
+description: "Learn how to build custom MCP tools that require user authorization using Arcade, auth providers, and OAuth."
+---
+Create tools[Build a tool](/en/guides/create-tools/tool-basics.md)
+Create a tool with auth
+
+# Add user authorization to your MCP tools
+
+## Outcomes
+
+Create and use an   that requires OAuth to access Reddit, prompting  to authorize the action when called. Jump to [Example Code](#example-code) to see the complete code.
+
+### You will Learn
+
+-   How  work.
+-   How to add user authorization to your custom  with Arcade.
+-   How to use the  to make authenticated requests to external APIs.
+-   How to use the Reddit  to authorize your .
+
+### Prerequisites
+
+-   [Arcade account](https://app.arcade.dev/register)
+
+-   [uv package manager](https://docs.astral.sh/uv/getting-started/installation/)
+     
+-   [Create an MCP Server](/guides/create-tools/tool-basics/build-mcp-server.md)
+
+
+An  is the service that issues and manages the OAuth token your  uses. It is the identity “source of truth” your tool integrates with to request permissions and obtain OAuth tokens.
+
+When you create a  with `requires_auth`, you specify which provider to use. In this example, **`arcade_mcp_server.auth.Reddit` specifies the Reddit .**
+
+## How auth providers work during execution
+
+1.  When the  is invoked, Arcade checks if the  has already authorized the scopes required by the tool.
+
+2.  If the ’s requirements are not met, Arcade initiates the provider-specific OAuth flow for the requested scopes.
+
+    > 2a). The  is presented with a URL to complete the OAuth challenge. The user will need to visit this URL and log in and explicitly grant consent for the action to be performed on their behalf. This is the “OAuth challenge”.
+
+    > 2b). The provider issues the token, and Arcade will securely inject it into the ’s [`Context`](/guides/create-tools/tool-basics/runtime-data-access.md) on its next invocation. The client and the LLM will never see the token.
+
+    > 2c). The  needs to be re-invoked - this time its requirements will be met.
+
+3.  The  is executed, and uses the token injected into its `Context` to call the provider’s API (e.g., `https://oauth.reddit.com`), without the LLM or client ever seeing the token.
+
+
+The  defines where the identity lives, what permissions are available (scopes), and how tokens are issued and refreshed. In code, it’s the class you pass to `requires_auth` (e.g., `Reddit(scopes=["read"])`) that encodes the OAuth details for that service.
+
+## Add user authorization to your MCP tools
+
+### Import the necessary modules
+
+Create a new Python file, e.g., `auth_tools.py`, and import the necessary modules and classes:
+
+```python
+# auth_tools.py
+import sys
+from typing import Annotated
+
+import httpx
+from arcade_mcp_server import Context, MCPApp
+from arcade_mcp_server.auth import Reddit
+```
+
+### Create the MCP Server
+
+Create an instance of the `MCPApp` class:
+
+```python
+# auth_tools.py
+app = MCPApp(name="auth_example", version="1.0.0", log_level="DEBUG")
+```
+
+### Define your MCP tool
+
+Now, define your  using the `@app.tool` decorator and specify the required authorization, in this case, by using [Arcade’s Reddit auth provider](/references/auth-providers/reddit.md).
+
+Specifying the `requires_auth` parameter in the `@app.tool` decorator indicates that the  needs  authorization. In this example, we’re using the `Reddit`  with the `read` scope:
+
+```python
+# auth_tools.py
+@app.tool(
+  requires_auth=Reddit(
+    scopes=["read"]
+   )
+)
+async def get_posts_in_subreddit(
+    context: Context, subreddit: Annotated[str, "The name of the subreddit"]
+) -> dict:
+    """Get posts from a specific subreddit"""
+    # Normalize the subreddit name
+    subreddit = subreddit.lower().replace("r/", "").replace(" ", "")
+
+    # Prepare the httpx request
+    # OAuth token is injected into the context at runtime.
+    # LLMs and MCP clients cannot see or access your OAuth tokens.
+    oauth_token = context.get_auth_token_or_empty()
+    headers = {
+        "Authorization": f"Bearer {oauth_token}",
+        "User-Agent": "mcp_server-mcp-server",
+    }
+    params = {"limit": 5}
+    url = f"https://oauth.reddit.com/r/{subreddit}/hot"
+
+    # Make the request
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url, headers=headers, params=params)
+        response.raise_for_status()
+
+        # Return the response
+        return response.json()
+```
+
+To use this , you need to install the Arcade CLI and run ‘arcade login’ to authenticate:
+
+```bash
+uv tool install arcade-mcp
+arcade login
+```
+
+Arcade offers a number of [built-in auth providers](/references/auth-providers.md), including Slack, Google, and GitHub. You can also require authorization with a custom , using the `OAuth2` class, a subclass of the `ToolAuthorization` class:
+
+```python
+@app.tool(
+  requires_auth=OAuth2(
+    id="your-oauth-provider-id",
+    scopes=["scope1", "scope2"],
+  )
+)
+```
+
+The `OAuth2` class requires an `id` parameter to identify the  in the . For built-in providers like `Slack`, you can skip the `id`. The Arcade Engine will find the right provider using your credentials. While you can specify an `id` for built-in providers, only do this for private  that won’t be shared.
+
+### Specify OAuth scopes
+
+Specify the OAuth scopes you need for your . In this example, you already are using the `read` scope, but you can specify multiple scopes for more permissions (like `identity`):
+
+```python
+# auth_tools.py
+# Multiple scopes for more permissions
+@app.tool(requires_auth=Reddit(scopes=["read", "identity"]))
+async def identity_tool(context: Context) -> dict:
+    """Tool that accesses user identity."""
+    pass
+```
+
+Scopes are defined by the , and they vary between providers. Each service exposes its own set of scopes that determine what your  can access. You’ll need to review the provider’s documentation to see which scopes are available and what permissions each one grants.
+
+### Run the MCP Server
+
+```python
+# auth_tools.py
+if __name__ == "__main__":
+    # Get transport from command line argument, default to "stdio"
+    transport = sys.argv[1] if len(sys.argv) > 1 else "stdio"
+
+    print(f"Starting auth example server with {transport} transport")
+    print("Prerequisites:")
+    print("  1. Install: uv tool install arcade-mcp")
+    print("  2. Login: arcade login\n")
+
+    # Run the server
+    # - "stdio" (default): Standard I/O transport
+    # - "http": HTTP streamable transport
+    app.run(transport=transport, host="127.0.0.1", port=8000)
+```
+
+Verify your  Server can run successfully by executing the following command in your terminal:
+
+```bash
+uv run auth_tools.py stdio
+```
+
+## Configure your MCP Client(s)
+
+Now you can connect your  server to apps that support MCP Clients, like AI assistants and IDEs. :
+
+### Claude Desktop
+
+```bash
+arcade configure claude
+```
+
+### Cursor IDE
+
+```bash
+arcade configure cursor
+```
+
+### VS Code
+
+```bash
+arcade configure vscode
+```
+
+Now restart your  Client and try calling your .
+
+### Handle authorization
+
+Since the  requires authorization, the first time a  uses it, the user will go through an OAuth flow to authorize the tool to act on their behalf. Once the user has completed the OAuth flow, the tool will need to be re-invoked. See the [how auth providers work during execution](#how-auth-providers-work-during-execution) section for more details.
+
+## How it works
+
+Arcade manages the OAuth flow, and provides the token via `context.get_auth_token_or_empty()`. Arcade also remembers the ’s authorization tokens, so they won’t have to go through the authorization process again until the token is revoked by the user.
+
+### Accessing OAuth tokens
+
+To get the authorization token, use the `context.get_auth_token_or_empty()` method.
+
+```python
+# auth_tools.py
+# Get the token (returns empty string if not authenticated)
+oauth_token = context.get_auth_token_or_empty()
+
+# Use token in API requests
+headers = {
+    "Authorization": f"Bearer {oauth_token}",
+    "User-Agent": "my-app",
+}
+```
+
+### Making Authenticated API Requests
+
+Use the OAuth token with httpx or other HTTP clients:
+
+```python
+# auth_tools.py
+import httpx
+
+async with httpx.AsyncClient() as client:
+    response = await client.get(
+        "https://oauth.reddit.com/api/endpoint",
+        headers={"Authorization": f"Bearer {oauth_token}"}
+    )
+    response.raise_for_status()
+    return response.json()
+```
+
+## Security Best Practices
+
+-   Never log tokens: OAuth tokens should never be logged or exposed
+-   Use appropriate scopes: Request only the scopes your  actually needs
+
+## Key takeaways
+
+-   **OAuth Support:** Arcade handles OAuth flows and token management
+-   **Secure Token Injection:** Tokens are injected into  at runtime
+-   **Scope Management:** Specify exactly which permissions your  needs
+-   **Provider Support:** Multiple OAuth providers available out of the box
+-   ** Privacy:** LLMs and  clients never see OAuth tokens
+
+## Next steps
+
+-   Try adding more authorized
+-   Explore how to handle different authorization providers and scopes
+-   Learn how to [build a tool with secrets](/guides/create-tools/tool-basics/create-tool-secrets.md)
+
+
+## Example Code
+
+```python
+# auth_tools.py
+#!/usr/bin/env python3
+import sys
+from typing import Annotated
+
+import httpx
+from arcade_mcp_server import Context, MCPApp
+from arcade_mcp_server.auth import Reddit
+
+# Create the app
+app = MCPApp(name="auth_example", version="1.0.0", log_level="DEBUG")
+
+
+# To use this tool, you need to use the Arcade CLI (uv pip install arcade-mcp)
+# and run 'arcade login' to authenticate.
+@app.tool(requires_auth=Reddit(scopes=["read"]))
+async def get_posts_in_subreddit(
+    context: Context, subreddit: Annotated[str, "The name of the subreddit"]
+) -> dict:
+    """Get posts from a specific subreddit"""
+    # Normalize the subreddit name
+    subreddit = subreddit.lower().replace("r/", "").replace(" ", "")
+
+    # Prepare the httpx request
+    # OAuth token is injected into the context at runtime.
+    # LLMs and MCP clients cannot see or access your OAuth tokens.
+    oauth_token = context.get_auth_token_or_empty()
+    headers = {
+        "Authorization": f"Bearer {oauth_token}",
+        "User-Agent": "mcp_server-mcp-server",
+    }
+    params = {"limit": 5}
+    url = f"https://oauth.reddit.com/r/{subreddit}/hot"
+
+    # Make the request
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url, headers=headers, params=params)
+        response.raise_for_status()
+
+        # Return the response
+        return response.json()
+
+
+if __name__ == "__main__":
+    # Get transport from command line argument, default to "stdio"
+    transport = sys.argv[1] if len(sys.argv) > 1 else "stdio"
+
+    print(f"Starting auth example server with {transport} transport")
+    print("Prerequisites:")
+    print("  1. Install: uv tool install arcade-mcp")
+    print("  2. Login: arcade login\n")
+
+    # Run the server
+    # - "stdio" (default): Standard I/O transport
+    # - "http": HTTP streamable transport
+    app.run(transport=transport, host="127.0.0.1", port=8000)
+
+```
+
+Last updated on February 10, 2026
+
+[Build an MCP Server to write custom tools](/en/guides/create-tools/tool-basics/build-mcp-server.md)
+[Create a tool with secrets](/en/guides/create-tools/tool-basics/create-tool-secrets.md)

@@ -1,0 +1,713 @@
+---
+title: "Engine Configuration Templates"
+description: "Arcade Engine Configuration Templates"
+---
+[Deployment & hosting](/en/guides/deployment-hosting.md)
+Configure Arcade's engine
+
+# Engine Configuration
+
+This page is for enterprise customers who are self-hosting the . This is page contains advanced configuration options that are not applicable for most customers.
+
+## Getting the Engine
+
+### macOS (Homebrew)
+
+```bash
+brew install ArcadeAI/tap/arcade-engine
+```
+
+Run it with: `arcade-engine`
+
+Troubleshooting:
+
+```bash
+❌ Engine binary not found
+```
+
+or
+
+```bash
+command not found: arcade-engine
+```
+
+This means that the  cannot be found in your path. Brew and Apt will automatically add the binary to your path.
+
+Check that the binary has been properly installed. These are the common installation locations):
+
+**Brew**
+
+```bash
+ls $HOMEBREW_REPOSITORY/Cellar/arcade-engine/<version>/bin/arcade-engine
+```
+
+**Apt**
+
+```bash
+ls /usr/bin/arcade-engine
+```
+
+If the binary is found, add it to your path with:
+
+```bash
+export PATH=$PATH:/path/to/your/binary
+```
+
+### Ubuntu/Debian (APT)
+
+```bash
+wget -qO - https://deb.arcade.dev/public-key.asc | sudo apt-key add -
+echo "deb https://deb.arcade.dev/ubuntu stable main" | sudo tee /etc/apt/sources.list.d/arcade-ai.list
+sudo apt update
+sudo apt install arcade-engine
+```
+
+### Docker
+
+The docker image for the engine can be pulled with
+
+```bash
+docker pull ghcr.io/arcadeai/engine:latest
+```
+
+The engine can be run with:
+
+```bash
+docker run -d -p 9099:9099 -v ./engine.yaml:/bin/engine.yaml ghcr.io/arcadeai/engine:latest
+```
+
+where config.yaml is the path to the [configuration file](/guides/deployment-hosting/configure-engine.md).
+
+Arcade uses configuration files to manage engine settings and default values. When you install the , two files are created:
+
+-   The `engine.yaml` file for engine configuration.
+-   The `engine.env` file for environment variables. Let’s explore each file to understand their purpose and how to locate them.
+
+## Engine configuration file
+
+The `engine.yaml` file controls  settings. It supports variable expansion so you can integrate secrets and environment values seamlessly. You can customize this file to suit your setup. For more details, check the [Engine Configuration](/guides/deployment-hosting/configure-engine.md) page.
+
+Choose your installation method to view the default location of `engine.yaml`:
+
+### macOS (Homebrew)
+
+```bash
+$HOMEBREW_REPOSITORY/etc/arcade-engine/engine.yaml
+```
+
+### Ubuntu/Debian (APT)
+
+```bash
+/etc/arcade-ai/engine.yaml
+```
+
+### Manual Download
+
+```bash
+$HOME/.arcade/engine.yaml
+```
+
+To manually download the engine.yaml, you can get an example from the [Configuration Templates](/guides/deployment-hosting/configure-engine.md#engineyaml)
+ and add it to `$HOME/.arcade/engine.yaml`.
+
+## Engine environment file
+
+The `engine.env` file contains default environment variables that power . You can override these defaults by exporting your own variables or by editing the file directly.
+
+Select your installation method below to see the default path for `engine.env`:
+
+### macOS (Homebrew)
+
+```bash
+$HOMEBREW_REPOSITORY/etc/arcade-engine/engine.env
+```
+
+### Ubuntu/Debian (APT)
+
+```bash
+/etc/arcade-ai/engine.env
+```
+
+### Manual Download
+
+```bash
+$HOME/.arcade/engine.env
+```
+
+To manually download the `engine.env`, refer to the [Configuration Templates](/guides/deployment-hosting/configure-engine.md#engineenv)
+.
+
+’s configuration is a [YAML file](https://yaml.org/)  with the following sections:
+
+Section
+
+Description
+
+API Configuration
+
+Configures the server for specific protocols
+
+Auth Configuration
+
+Configures user authorization providers and token storage
+
+Cache Configuration
+
+Configures the short-lived cache
+
+Security Configuration
+
+Configures security and encryption
+
+Storage Configuration
+
+Configures persistent storage
+
+Telemetry Configuration
+
+Configures telemetry and observability (OTEL)
+
+Tools Configuration
+
+Configures tools for AI models to use
+
+## Specify a config file
+
+To start the , pass a config file with `-c` or `--config`:
+
+```bash
+# engine.yaml
+arcade-engine -c /path/to/config.yaml
+```
+
+## Dotenv files
+
+ automatically loads environment variables from `.env` files in the directory where it was called. Use the `-e` or`--env` flag to specify a path:
+
+```bash
+# engine.yaml
+arcade-engine -e .env.dev -c config.yaml
+```
+
+## Secrets
+
+ supports two ways of passing sensitive information like  without storing them directly in the config file.
+
+Environment variables:
+
+```yaml
+# engine.yaml
+topic:
+  area:
+    - id: primary
+      vendor:
+        api_key: ${env:OPENAI_API_KEY}
+```
+
+External files (useful in cloud setups):
+
+```yaml
+# engine.yaml
+topic:
+  area:
+    - id: primary
+      vendor:
+        api_key: ${file:/path/to/secret}
+```
+
+## API configuration
+
+HTTP is the supported protocol for ’s API. The following configuration options are available:
+
+-   `api.development` _(optional, default: `false`)_ - Enable development mode, with more logging.
+-   `api.host` _(default: `localhost`)_ - Address to which  binds its server (e.g., `localhost` or `0.0.0.0`)
+-   `api.port` _(default: `9099`)_ - Port to which  binds its server (e.g., `9099` or `8080`)
+-   `api.public_host` _(optional)_ - External hostname of the API (e.g., `my-public-host.com`), if it differs from `api.host` (for example, when  is behind a reverse proxy)
+-   `api.read_timeout` _(optional, default: `30s`)_ - Timeout for reading data from clients
+-   `api.write_timeout` _(optional, default: `1m`)_ - Timeout for writing data to clients
+-   `api.idle_timeout` _(optional, default: `30s`)_ - Timeout for idle connections
+-   `api.max_request_body_size` _(optional, default: `4Mb`)_ - Maximum request body size
+
+A typical configuration for production looks like:
+
+```yaml
+# engine.yaml
+api:
+  development: false
+  host: localhost
+  port: 9099
+```
+
+When the  is hosted in a container or behind a reverse proxy, set `api.public_host` to the external hostname of the API:
+
+```yaml
+# engine.yaml
+api:
+  development: false
+  host: localhost
+  port: 9099
+  public_host: my-public-host.com
+```
+
+For local development, set `api.development = true`.
+
+## Auth configuration
+
+ manages auth for [AI tools](/guides/tool-calling/custom-apps/auth-tool-calling.md) and [direct API calls](/guides/tool-calling/call-third-party-apis.md). It supports many built-in [auth providers](/references/auth-providers.md), and can also connect to any [OAuth 2.0](/references/auth-providers/oauth2.md) authorization server.
+
+The `auth.providers` section defines the providers that  can authorize with. Each provider must have a unique `id` in the array. There are two ways to configure a provider:
+
+For [built-in providers](/references/auth-providers.md), use the `provider_id` field to reference the pre-built configuration. For example:
+
+```yaml
+# engine.yaml
+auth:
+  providers:
+    - id: default-github
+      description: The default GitHub provider
+      enabled: true
+      type: oauth2
+      provider_id: github
+      client_id: ${env:GITHUB_CLIENT_ID}
+      client_secret: ${env:GITHUB_CLIENT_SECRET}
+```
+
+For custom OAuth 2.0 providers, specify the full connection details in the `oauth2` sub-section. For full documentation on the custom provider configuration, see the [OAuth 2.0 provider configuration](/references/auth-providers/oauth2.md) page.
+
+You can specify a mix of built-in and custom providers.
+
+## Cache configuration
+
+The `cache` section configures the short-lived cache.
+
+Configuring the cache is optional. If not configured, the cache will default to an in-memory cache implementation suitable for a single-node  deployment.
+
+The `cache` section has the following configuration options:
+
+-   `api_key_ttl` _(optional, default: `10s`)_ - The time-to-live for  in the cache
+
+Two cache implementations are available:
+
+-   `in_memory` - _(default)_ An in-memory cache implementation suitable for a single-node  deployment.
+-   `redis` - A Redis cache implementation suitable for a multi-node  deployment:
+
+```yaml
+# engine.yaml
+cache:
+  api_key_ttl: 10s
+  redis:
+    addr: "localhost:6379"
+    password: ""
+    db: 0
+```
+
+## Security configuration
+
+The `security` section configures the root encryption keys that the  uses to encrypt and decrypt data at rest. See the [storage configuration](#storage-configuration) section below to configure where data is stored.
+
+A typical configuration looks like this:
+
+```yaml
+# engine.yaml
+security:
+  root_keys:
+    - id: key1
+      default: true
+      value: ${env:ROOT_KEY_1}
+    - id: key2
+      value: ${env:ROOT_KEY_2}
+```
+
+Keys should be a long random string of characters. For example:
+
+```bash
+# engine.yaml
+openssl rand -base64 32
+```
+
+### Default root key
+
+When you [install Arcade Engine locally](/guides/deployment-hosting/configure-engine.md), an `engine.env` file is created with a default root key:
+
+```bash
+# engine.yaml
+# Encryption keys (change this when deploying to production)
+ROOT_KEY_1=default-key-value
+```
+
+This default value can only be used in development mode (see [API configuration](#api-configuration) above).
+
+You **must** replace the value of `ROOT_KEY_1` in `engine.env` before deploying to production.
+
+## Storage configuration
+
+The `storage` section configures the storage backend that the  uses to store persistent data.
+
+There are three storage implementations available:
+
+-   `in_memory` - _(default)_ An in-memory database, suitable for testing.
+-   `sqlite` - A SQLite file on disk, suitable for local development:
+
+```yaml
+# engine.yaml
+storage:
+  sqlite:
+    # Stores DB in ~/.arcade/arcade-engine.sqlite3
+    connection_string: "@ARCADE_HOME/arcade-engine.sqlite3"
+```
+
+-   `postgres` - A PostgreSQL database, suitable for production:
+
+```yaml
+# engine.yaml
+storage:
+  postgres:
+    user: ${env:POSTGRES_USER}
+    password: ${env:POSTGRES_PASSWORD}
+    host: ${env:POSTGRES_HOST}
+    port: ${env:POSTGRES_PORT}
+    db: ${env:POSTGRES_DB}
+    sslmode: require
+```
+
+## Telemetry configuration
+
+Arcade supports logs, metrics, and traces with [OpenTelemetry](https://opentelemetry.io/) .
+
+If you are using the  locally, you can set the `environment` field to `local`. This will only output logs to the console:
+
+```yaml
+# engine.yaml
+telemetry:
+  environment: local
+  logging:
+    # debug, info, warn, error, fatal
+    level: debug
+    encoding: console
+```
+
+To connect to OpenTelemetry compatible collectors, set the necessary [OpenTelemetry environment variables](https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/)  in the `engine.env` file. `environment` and `version` are fields that are added to the telemetry attributes, which can be filtered on later.
+
+```yaml
+# engine.yaml
+telemetry:
+  environment: prod
+  logging:
+    level: info
+    encoding: console
+```
+
+### Notes
+
+-   The Engine service name is set to `arcade_engine`
+-   Traces currently cover the `/v1/health` endpoints, as well as authentication attempts
+
+## Tools configuration
+
+ orchestrates [tools](/guides/tool-calling.md) that AI models can use.
+
+The `tools.directors` section configures the  servers that are available to service  calls:
+
+```yaml
+# engine.yaml
+tools:
+  directors:
+    - id: default
+      enabled: true
+      max_tools: 64
+      workers:
+        - id: local_worker
+          enabled: true
+          http:
+            uri: "http://localhost:8002"
+            timeout: 30
+            retry: 3
+            secret: ${env:ARCADE_WORKER_SECRET}
+```
+
+When an  server is added to an enabled director, all of the tools hosted by that  will be available to the model and through the .
+
+### HTTP MCP Server configuration
+
+The `http` sub-section configures the HTTP client used to call the  Server’s :
+
+-   `uri` _(required)_ - The base URL of the  Server’s
+-   `secret` _(required)_ - Secret used to authenticate with the  Server
+-   `timeout` _(optional, default: `30s`)_ - Timeout for calling the  Server’s
+-   `retry` _(optional, default: `3`)_ - Number of times to retry a failed  call
+
+ Servers must be configured with a `secret` that is used to authenticate with the . This ensures that MCP Servers are not exposed to the public internet without security.
+
+If `api.development = true`, the secret will default to `"dev"` for local development **only**. In production, the secret must be set to a random value.
+
+## Config file version history
+
+-   1.0: [Full example](https://raw.githubusercontent.com/ArcadeAI/docs/refs/heads/main/examples/code/home/configuration/engine/full_config.1.0.yaml)
+      and [schema](https://raw.githubusercontent.com/ArcadeAI/schemas/refs/heads/main/engine/config/1.0/schema.json)
+     
+
+## Engine Config Templates
+
+### engine.yaml
+
+```yaml
+# engine.yaml
+# yaml-language-server: $schema=https://raw.githubusercontent.com/ArcadeAI/schemas/main/engine/config/1.0/schema.json
+$schema: https://raw.githubusercontent.com/ArcadeAI/schemas/main/engine/config/1.0/schema.json
+
+api:
+  development: ${env:API_DEVELOPMENT}
+  host: ${env:ARCADE_API_HOST}
+  port: ${env:ARCADE_API_PORT}
+  # Optionally set public_host, in case the Arcade Engine is hosted in a container or behind a reverse proxy
+  #public_host: ${env:ARCADE_API_PUBLIC_HOST}
+
+auth:
+  providers:
+    - id: default-atlassian
+      description: "The default Atlassian provider"
+      enabled: false
+      type: oauth2
+      provider_id: atlassian
+      client_id: ${env:ATLASSIAN_CLIENT_ID}
+      client_secret: ${env:ATLASSIAN_CLIENT_SECRET}
+
+    - id: default-discord
+      description: "The default Discord provider"
+      enabled: false
+      type: oauth2
+      provider_id: discord
+      client_id: ${env:DISCORD_CLIENT_ID}
+      client_secret: ${env:DISCORD_CLIENT_SECRET}
+
+    - id: default-dropbox
+      description: "The default Dropbox provider"
+      enabled: false
+      type: oauth2
+      provider_id: dropbox
+      client_id: ${env:DROPBOX_CLIENT_ID}
+      client_secret: ${env:DROPBOX_CLIENT_SECRET}
+
+    - id: default-github
+      description: "The default GitHub provider"
+      enabled: false
+      type: oauth2
+      provider_id: github
+      client_id: ${env:GITHUB_CLIENT_ID}
+      client_secret: ${env:GITHUB_CLIENT_SECRET}
+
+    - id: default-google
+      description: "The default Google provider"
+      enabled: false
+      type: oauth2
+      provider_id: google
+      client_id: ${env:GOOGLE_CLIENT_ID}
+      client_secret: ${env:GOOGLE_CLIENT_SECRET}
+
+    - id: default-linkedin
+      description: "The default LinkedIn provider"
+      enabled: false
+      type: oauth2
+      provider_id: linkedin
+      client_id: ${env:LINKEDIN_CLIENT_ID}
+      client_secret: ${env:LINKEDIN_CLIENT_SECRET}
+
+    - id: default-microsoft
+      description: "The default Microsoft provider"
+      enabled: false
+      type: oauth2
+      provider_id: microsoft
+      client_id: ${env:MICROSOFT_CLIENT_ID}
+      client_secret: ${env:MICROSOFT_CLIENT_SECRET}
+
+    - id: default-reddit
+      description: "The default Reddit provider"
+      enabled: false
+      type: oauth2
+      provider_id: reddit
+      client_id: ${env:REDDIT_CLIENT_ID}
+      client_secret: ${env:REDDIT_CLIENT_SECRET}
+
+    - id: default-slack
+      description: "The default Slack provider"
+      enabled: false
+      type: oauth2
+      provider_id: slack
+      client_id: ${env:SLACK_CLIENT_ID}
+      client_secret: ${env:SLACK_CLIENT_SECRET}
+
+    - id: default-spotify
+      description: "The default Spotify provider"
+      enabled: false
+      type: oauth2
+      provider_id: spotify
+      client_id: ${env:SPOTIFY_CLIENT_ID}
+      client_secret: ${env:SPOTIFY_CLIENT_SECRET}
+
+    - id: default-twitch
+      description: "The default Twitch provider"
+      enabled: false
+      type: oauth2
+      provider_id: twitch
+      client_id: ${env:TWITCH_CLIENT_ID}
+      client_secret: ${env:TWITCH_CLIENT_SECRET}
+
+    - id: default-x
+      description: "The default X provider"
+      enabled: false
+      type: oauth2
+      provider_id: x
+      client_id: ${env:X_CLIENT_ID}
+      client_secret: ${env:X_CLIENT_SECRET}
+
+    - id: default-zoom
+      description: "The default Zoom provider"
+      enabled: false
+      type: oauth2
+      provider_id: zoom
+      client_id: ${env:ZOOM_CLIENT_ID}
+      client_secret: ${env:ZOOM_CLIENT_SECRET}
+
+llm:
+  models:
+    - id: my-openai-model-provider
+      openai:
+        api_key: ${env:OPENAI_API_KEY}
+    #- id: my-anthropic-model-provider
+    #  anthropic:
+    #    api_key: ${env:ANTHROPIC_API_KEY}
+    # - id: my-ollama-model-provider
+    #   openai:
+    #     base_url: http://localhost:11434
+    #     chat_endpoint: /v1/chat/completions
+    #     model: llama3.2
+    #     api_key: ollama
+    #- id: my-groq-model-provider
+    #  openai:
+    #    base_url: 'https://api.groq.com/openai/v1'
+    #    api_key: ${env:GROQ_API_KEY}
+
+security:
+  root_keys:
+    - id: key1
+      default: true
+      value: ${env:ROOT_KEY_1}
+
+storage:
+  postgres:
+    user: ${env:POSTGRES_USER}
+    password: ${env:POSTGRES_PASSWORD}
+    host: ${env:POSTGRES_HOST}
+    port: ${env:POSTGRES_PORT}
+    db: ${env:POSTGRES_DB}
+    sslmode: require
+
+telemetry:
+  environment: ${env:TELEMETRY_ENVIRONMENT}
+  logging:
+    # debug, info, warn, error
+    level: ${env:TELEMETRY_LOGGING_LEVEL}
+    encoding: ${env:TELEMETRY_LOGGING_ENCODING}
+
+tools:
+  directors:
+    - id: default
+      enabled: true
+      max_tools: 64
+      workers:
+        - id: worker
+          enabled: true
+          http:
+            uri: ${env:ARCADE_WORKER_URI}
+            timeout: 30
+            retry: 3
+            secret: ${env:ARCADE_WORKER_SECRET}
+```
+
+### engine.env
+
+```bash
+# engine.yaml
+### Engine configuration ###
+API_DEVELOPMENT=true
+ARCADE_API_HOST=localhost
+ARCADE_API_PORT=9099
+ANALYTICS_ENABLED=true
+
+# Encryption keys (change this when deploying to production)
+ROOT_KEY_1=default-key-value
+
+### Model Provider API keys ###
+# OPENAI_API_KEY=
+# ANTHROPIC_API_KEY=
+# GROQ_API_KEY=
+
+
+### Security configuration ###
+ROOT_KEY_1=
+
+
+### Storage configuration ###
+# POSTGRES_USER=
+# POSTGRES_PASSWORD=
+# POSTGRES_HOST=
+# POSTGRES_PORT=
+# POSTGRES_DB=
+
+
+### Telemetry (OTEL) configuration ###
+TELEMETRY_ENVIRONMENT=local
+TELEMETRY_LOGGING_LEVEL=debug
+TELEMETRY_LOGGING_ENCODING=console
+
+
+### Worker Configuration ###
+ARCADE_WORKER_URI=http://localhost:8002
+ARCADE_WORKER_SECRET=dev
+
+
+# OAuth Providers
+ATLASSIAN_CLIENT_ID=""
+ATLASSIAN_CLIENT_SECRET=
+
+DISCORD_CLIENT_ID=""
+DISCORD_CLIENT_SECRET=
+
+DROPBOX_CLIENT_ID=""
+DROPBOX_CLIENT_SECRET=
+
+GITHUB_CLIENT_ID=""
+GITHUB_CLIENT_SECRET=
+
+GOOGLE_CLIENT_ID=""
+GOOGLE_CLIENT_SECRET=
+
+LINKEDIN_CLIENT_ID=""
+LINKEDIN_CLIENT_SECRET=
+
+MICROSOFT_CLIENT_ID=""
+MICROSOFT_CLIENT_SECRET=
+
+REDDIT_CLIENT_ID=""
+REDDIT_CLIENT_SECRET=
+
+SLACK_CLIENT_ID=""
+SLACK_CLIENT_SECRET=
+
+SPOTIFY_CLIENT_ID=""
+SPOTIFY_CLIENT_SECRET=
+
+TWITCH_CLIENT_ID=""
+SPOTIFY_CLIENT_SECRET=
+
+X_CLIENT_ID=""
+X_CLIENT_SECRET=
+
+ZOOM_CLIENT_ID=""
+ZOOM_CLIENT_SECRET=
+```
+
+Last updated on February 10, 2026
+
+[On-premises MCP servers](/en/guides/deployment-hosting/on-prem.md)
+[Arcade Deploy](/en/guides/deployment-hosting/arcade-deploy.md)

@@ -1,0 +1,755 @@
+{
+  "id": "GoogleCalendar",
+  "label": "Google Calendar",
+  "version": "3.2.2",
+  "description": "Arcade.dev LLM tools for Google Calendar",
+  "metadata": {
+    "category": "productivity",
+    "iconUrl": "https://design-system.arcade.dev/icons/google-calendar.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/productivity/google-calendar",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": "google",
+    "allScopes": [
+      "https://www.googleapis.com/auth/calendar.events",
+      "https://www.googleapis.com/auth/calendar.readonly",
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/userinfo.profile"
+    ]
+  },
+  "tools": [
+    {
+      "name": "CreateEvent",
+      "qualifiedName": "GoogleCalendar.CreateEvent",
+      "fullyQualifiedName": "GoogleCalendar.CreateEvent@3.2.2",
+      "description": "Create a new event/meeting/sync/meetup in the specified calendar.",
+      "parameters": [
+        {
+          "name": "summary",
+          "type": "string",
+          "required": true,
+          "description": "The title of the event",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_datetime",
+          "type": "string",
+          "required": true,
+          "description": "The datetime when the event starts in ISO 8601 format, e.g., '2024-12-31T15:30:00'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_datetime",
+          "type": "string",
+          "required": true,
+          "description": "The datetime when the event ends in ISO 8601 format, e.g., '2024-12-31T17:30:00'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "calendar_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the calendar to create the event in, usually 'primary'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "The description of the event",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "location",
+          "type": "string",
+          "required": false,
+          "description": "The location of the event",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "visibility",
+          "type": "string",
+          "required": false,
+          "description": "The visibility of the event",
+          "enum": ["default", "public", "private", "confidential"],
+          "inferrable": true
+        },
+        {
+          "name": "attendee_emails",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The list of attendee emails. Must be valid email addresses e.g., username@domain.com.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "send_notifications_to_attendees",
+          "type": "string",
+          "required": false,
+          "description": "Should attendees be notified by email of the invitation? (none, all, external_only)",
+          "enum": ["none", "all", "externalOnly"],
+          "inferrable": true
+        },
+        {
+          "name": "add_google_meet",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to add a Google Meet link to the event. Defaults to False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/calendar.readonly",
+          "https://www.googleapis.com/auth/calendar.events"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing the created event details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleCalendar.CreateEvent",
+        "parameters": {
+          "summary": {
+            "value": "Project Kickoff Meeting",
+            "type": "string",
+            "required": true
+          },
+          "start_datetime": {
+            "value": "2024-05-15T10:00:00",
+            "type": "string",
+            "required": true
+          },
+          "end_datetime": {
+            "value": "2024-05-15T11:00:00",
+            "type": "string",
+            "required": true
+          },
+          "calendar_id": {
+            "value": "primary",
+            "type": "string",
+            "required": false
+          },
+          "description": {
+            "value": "Kickoff meeting for the new project to discuss goals and deadlines.",
+            "type": "string",
+            "required": false
+          },
+          "location": {
+            "value": "Conference Room A",
+            "type": "string",
+            "required": false
+          },
+          "visibility": {
+            "value": "default",
+            "type": "string",
+            "required": false
+          },
+          "attendee_emails": {
+            "value": ["alice@example.com", "bob@example.com"],
+            "type": "array",
+            "required": false
+          },
+          "send_notifications_to_attendees": {
+            "value": "all",
+            "type": "string",
+            "required": false
+          },
+          "add_google_meet": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "DeleteEvent",
+      "qualifiedName": "GoogleCalendar.DeleteEvent",
+      "fullyQualifiedName": "GoogleCalendar.DeleteEvent@3.2.2",
+      "description": "Delete an event from Google Calendar.",
+      "parameters": [
+        {
+          "name": "event_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the event to delete",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "calendar_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the calendar containing the event",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "send_updates",
+          "type": "string",
+          "required": false,
+          "description": "Specifies which attendees to notify about the deletion",
+          "enum": ["none", "all", "externalOnly"],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": ["https://www.googleapis.com/auth/calendar.events"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "string",
+        "description": "A string containing the deletion confirmation message"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleCalendar.DeleteEvent",
+        "parameters": {
+          "event_id": {
+            "value": "abc123xyz",
+            "type": "string",
+            "required": true
+          },
+          "calendar_id": {
+            "value": "primary",
+            "type": "string",
+            "required": false
+          },
+          "send_updates": {
+            "value": "all",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "FindTimeSlotsWhenEveryoneIsFree",
+      "qualifiedName": "GoogleCalendar.FindTimeSlotsWhenEveryoneIsFree",
+      "fullyQualifiedName": "GoogleCalendar.FindTimeSlotsWhenEveryoneIsFree@3.2.2",
+      "description": "Provides time slots when everyone is free within a given date range and time boundaries.",
+      "parameters": [
+        {
+          "name": "email_addresses",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The list of email addresses from people in the same organization domain (apart from the currently logged in user) to search for free time slots. Defaults to None, which will return free time slots for the current user only.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_date",
+          "type": "string",
+          "required": false,
+          "description": "The start date to search for time slots in the format 'YYYY-MM-DD'. Defaults to today's date. It will search starting from this date at the time 00:00:00.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_date",
+          "type": "string",
+          "required": false,
+          "description": "The end date to search for time slots in the format 'YYYY-MM-DD'. Defaults to seven days from the start date. It will search until this date at the time 23:59:59.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_time_boundary",
+          "type": "string",
+          "required": false,
+          "description": "Will return free slots in any given day starting from this time in the format 'HH:MM'. Defaults to '08:00', which is a usual business hour start time.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_time_boundary",
+          "type": "string",
+          "required": false,
+          "description": "Will return free slots in any given day until this time in the format 'HH:MM'. Defaults to '18:00', which is a usual business hour end time.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": ["https://www.googleapis.com/auth/calendar.readonly"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary with the free slots and the timezone in which time slots are represented."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleCalendar.FindTimeSlotsWhenEveryoneIsFree",
+        "parameters": {
+          "email_addresses": {
+            "value": ["jane.doe@example.com", "john.smith@example.com"],
+            "type": "array",
+            "required": false
+          },
+          "start_date": {
+            "value": "2023-10-01",
+            "type": "string",
+            "required": false
+          },
+          "end_date": {
+            "value": "2023-10-07",
+            "type": "string",
+            "required": false
+          },
+          "start_time_boundary": {
+            "value": "09:00",
+            "type": "string",
+            "required": false
+          },
+          "end_time_boundary": {
+            "value": "17:00",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListCalendars",
+      "qualifiedName": "GoogleCalendar.ListCalendars",
+      "fullyQualifiedName": "GoogleCalendar.ListCalendars@3.2.2",
+      "description": "List all calendars accessible by the user.",
+      "parameters": [
+        {
+          "name": "max_results",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of calendars to return. Up to 250 calendars, defaults to 10.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "show_deleted",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to show deleted calendars. Defaults to False",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "show_hidden",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to show hidden calendars. Defaults to False",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "next_page_token",
+          "type": "string",
+          "required": false,
+          "description": "The token to retrieve the next page of calendars. Optional.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/calendar.readonly",
+          "https://www.googleapis.com/auth/calendar.events"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing the calendars accessible by the end user"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleCalendar.ListCalendars",
+        "parameters": {
+          "max_results": {
+            "value": 15,
+            "type": "integer",
+            "required": false
+          },
+          "show_deleted": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "show_hidden": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "next_page_token": {
+            "value": "token1234",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListEvents",
+      "qualifiedName": "GoogleCalendar.ListEvents",
+      "fullyQualifiedName": "GoogleCalendar.ListEvents@3.2.2",
+      "description": "List events from the specified calendar within the given datetime range.\n\nmin_end_datetime serves as the lower bound (exclusive) for an event's end time.\nmax_start_datetime serves as the upper bound (exclusive) for an event's start time.\n\nFor example:\nIf min_end_datetime is set to 2024-09-15T09:00:00 and max_start_datetime\nis set to 2024-09-16T17:00:00, the function will return events that:\n1. End after 09:00 on September 15, 2024 (exclusive)\n2. Start before 17:00 on September 16, 2024 (exclusive)\nThis means an event starting at 08:00 on September 15 and\nending at 10:00 on September 15 would be included, but an\nevent starting at 17:00 on September 16 would not be included.",
+      "parameters": [
+        {
+          "name": "min_end_datetime",
+          "type": "string",
+          "required": true,
+          "description": "Filter by events that end on or after this datetime in ISO 8601 format, e.g., '2024-09-15T09:00:00'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_start_datetime",
+          "type": "string",
+          "required": true,
+          "description": "Filter by events that start before this datetime in ISO 8601 format, e.g., '2024-09-16T17:00:00'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "calendar_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the calendar to list events from",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_results",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of events to return",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/calendar.readonly",
+          "https://www.googleapis.com/auth/calendar.events"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing the list of events"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleCalendar.ListEvents",
+        "parameters": {
+          "min_end_datetime": {
+            "value": "2024-09-15T09:00:00",
+            "type": "string",
+            "required": true
+          },
+          "max_start_datetime": {
+            "value": "2024-09-16T17:00:00",
+            "type": "string",
+            "required": true
+          },
+          "calendar_id": {
+            "value": "primary",
+            "type": "string",
+            "required": false
+          },
+          "max_results": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "UpdateEvent",
+      "qualifiedName": "GoogleCalendar.UpdateEvent",
+      "fullyQualifiedName": "GoogleCalendar.UpdateEvent@3.2.2",
+      "description": "Update an existing event in the specified calendar with the provided details.\nOnly the provided fields will be updated; others will remain unchanged.\n\n`updated_start_datetime` and `updated_end_datetime` are\nindependent and can be provided separately.",
+      "parameters": [
+        {
+          "name": "event_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the event to update",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "updated_start_datetime",
+          "type": "string",
+          "required": false,
+          "description": "The updated datetime that the event starts in ISO 8601 format, e.g., '2024-12-31T15:30:00'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "updated_end_datetime",
+          "type": "string",
+          "required": false,
+          "description": "The updated datetime that the event ends in ISO 8601 format, e.g., '2024-12-31T17:30:00'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "updated_calendar_id",
+          "type": "string",
+          "required": false,
+          "description": "The updated ID of the calendar containing the event.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "updated_summary",
+          "type": "string",
+          "required": false,
+          "description": "The updated title of the event",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "updated_description",
+          "type": "string",
+          "required": false,
+          "description": "The updated description of the event",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "updated_location",
+          "type": "string",
+          "required": false,
+          "description": "The updated location of the event",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "updated_visibility",
+          "type": "string",
+          "required": false,
+          "description": "The visibility of the event",
+          "enum": ["default", "public", "private", "confidential"],
+          "inferrable": true
+        },
+        {
+          "name": "attendee_emails_to_add",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The list of attendee emails to add. Must be valid email addresses e.g., username@domain.com.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "attendee_emails_to_remove",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The list of attendee emails to remove. Must be valid email addresses e.g., username@domain.com.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "send_notifications_to_attendees",
+          "type": "string",
+          "required": false,
+          "description": "Should attendees be notified of the update? (none, all, external_only)",
+          "enum": ["none", "all", "externalOnly"],
+          "inferrable": true
+        },
+        {
+          "name": "updated_google_meet",
+          "type": "string",
+          "required": false,
+          "description": "Whether to update the Google Meet link to the event. (none, add, remove)",
+          "enum": ["none", "add", "remove"],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": ["https://www.googleapis.com/auth/calendar.events"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "string",
+        "description": "A string containing the updated event details, including the event ID, update timestamp, and a link to view the updated event."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleCalendar.UpdateEvent",
+        "parameters": {
+          "event_id": {
+            "value": "abc123456",
+            "type": "string",
+            "required": true
+          },
+          "updated_start_datetime": {
+            "value": "2024-12-31T15:30:00",
+            "type": "string",
+            "required": false
+          },
+          "updated_end_datetime": {
+            "value": "2024-12-31T17:30:00",
+            "type": "string",
+            "required": false
+          },
+          "updated_calendar_id": {
+            "value": "calendar_12345",
+            "type": "string",
+            "required": false
+          },
+          "updated_summary": {
+            "value": "New Year Celebration",
+            "type": "string",
+            "required": false
+          },
+          "updated_description": {
+            "value": "Celebrating the New Year with friends and family.",
+            "type": "string",
+            "required": false
+          },
+          "updated_location": {
+            "value": "123 Celebration St, Party Town, NY",
+            "type": "string",
+            "required": false
+          },
+          "updated_visibility": {
+            "value": "public",
+            "type": "string",
+            "required": false
+          },
+          "attendee_emails_to_add": {
+            "value": ["friend1@example.com", "friend2@example.com"],
+            "type": "array",
+            "required": false
+          },
+          "attendee_emails_to_remove": {
+            "value": ["oldfriend@example.com"],
+            "type": "array",
+            "required": false
+          },
+          "send_notifications_to_attendees": {
+            "value": "all",
+            "type": "string",
+            "required": false
+          },
+          "updated_google_meet": {
+            "value": "add",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "GoogleCalendar.WhoAmI",
+      "fullyQualifiedName": "GoogleCalendar.WhoAmI@3.2.2",
+      "description": "Get comprehensive user profile and Google Calendar environment information.\n\nThis tool provides detailed information about the authenticated user including\ntheir name, email, profile picture, Google Calendar access permissions, and other\nimportant profile details from Google services.",
+      "parameters": [],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/calendar.readonly",
+          "https://www.googleapis.com/auth/userinfo.profile",
+          "https://www.googleapis.com/auth/userinfo.email"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Get comprehensive user profile and Google Calendar environment information."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleCalendar.WhoAmI",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    }
+  ],
+  "documentationChunks": [
+    {
+      "type": "markdown",
+      "location": "auth",
+      "position": "after",
+      "content": "The Arcade Google Calendar MCP Server uses the [Google auth provider](/references/auth-providers/google) to connect to users' Google accounts.\n---",
+      "header": "## Auth"
+    },
+    {
+      "type": "section",
+      "location": "custom_section",
+      "position": "after",
+      "content": "## UpdateGoogleMeetOptions\n\n- **`NONE`**: No action is taken.\n- **`ADD`**: Add the Google Meet link to the event.\n- **`REMOVE`**: Remove the Google Meet link from the event.\n\n<ToolFooter pipPackageName=\"arcade_google_calendar\" />",
+      "header": "## UpdateGoogleMeetOptions"
+    }
+  ],
+  "customImports": [
+    "import ScopePicker from \"@/app/_components/scope-picker\";"
+  ],
+  "subPages": [],
+  "generatedAt": "2026-01-26T17:31:57.612Z",
+  "summary": "Arcade.dev offers a toolkit for Google Calendar that streamlines event management and calendar interaction through powerful APIs. This toolkit enables developers to effectively create, update, and manage calendar events while accessing user calendars.\n\n**Capabilities:**\n- Create and delete events seamlessly.\n- Fetch user calendars and events within specified date ranges.\n- Identify time slots when all participants are available.\n- Retrieve user profile information from Google services.\n\n**OAuth:**\n- Provider: Google\n- Scopes: `https://www.googleapis.com/auth/calendar.events`, `https://www.googleapis.com/auth/calendar.readonly`, `https://www.googleapis.com/auth/userinfo.email`, `https://www.googleapis.com/auth/userinfo.profile`."
+}

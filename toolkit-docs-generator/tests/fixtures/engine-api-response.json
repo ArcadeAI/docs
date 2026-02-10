@@ -1,0 +1,335 @@
+{
+  "items": [
+    {
+      "fully_qualified_name": "Github.CreateIssue@1.0.0",
+      "qualified_name": "Github.CreateIssue",
+      "name": "CreateIssue",
+      "description": "Create a new issue in a GitHub repository. Optionally add the issue to a project by specifying the project number.",
+      "toolkit": {
+        "name": "Github",
+        "version": "1.0.0",
+        "description": "GitHub repository and collaboration tools"
+      },
+      "input": {
+        "parameters": [
+          {
+            "name": "owner",
+            "required": true,
+            "description": "The owner (user or organization) of the repository",
+            "value_schema": {
+              "val_type": "string",
+              "inner_val_type": null,
+              "enum": null
+            },
+            "inferrable": true
+          },
+          {
+            "name": "repo",
+            "required": true,
+            "description": "The name of the repository",
+            "value_schema": {
+              "val_type": "string",
+              "inner_val_type": null,
+              "enum": null
+            },
+            "inferrable": true
+          },
+          {
+            "name": "title",
+            "required": true,
+            "description": "The title of the issue",
+            "value_schema": {
+              "val_type": "string",
+              "inner_val_type": null,
+              "enum": null
+            },
+            "inferrable": true
+          },
+          {
+            "name": "body",
+            "required": false,
+            "description": "The body content of the issue (supports Markdown)",
+            "value_schema": {
+              "val_type": "string",
+              "inner_val_type": null,
+              "enum": null
+            },
+            "inferrable": true
+          },
+          {
+            "name": "labels",
+            "required": false,
+            "description": "Labels to add to the issue",
+            "value_schema": {
+              "val_type": "array",
+              "inner_val_type": "string",
+              "enum": null
+            },
+            "inferrable": true
+          }
+        ]
+      },
+      "output": {
+        "available_modes": ["value"],
+        "description": "The created issue object with id, number, url, and other details",
+        "value_schema": {
+          "val_type": "object",
+          "inner_val_type": null,
+          "enum": null
+        }
+      },
+      "requirements": {
+        "authorization": {
+          "id": "github_oauth",
+          "provider_id": "github",
+          "provider_type": "oauth2",
+          "scopes": ["repo"]
+        },
+        "secrets": null
+      }
+    },
+    {
+      "fully_qualified_name": "Github.SetStarred@1.0.0",
+      "qualified_name": "Github.SetStarred",
+      "name": "SetStarred",
+      "description": "Star or unstar a GitHub repository for the authenticated user.",
+      "toolkit": {
+        "name": "Github",
+        "version": "1.0.0",
+        "description": "GitHub repository and collaboration tools"
+      },
+      "input": {
+        "parameters": [
+          {
+            "name": "owner",
+            "required": true,
+            "description": "The owner of the repository to star/unstar",
+            "value_schema": {
+              "val_type": "string",
+              "inner_val_type": null,
+              "enum": null
+            },
+            "inferrable": true
+          },
+          {
+            "name": "repo",
+            "required": true,
+            "description": "The name of the repository to star/unstar",
+            "value_schema": {
+              "val_type": "string",
+              "inner_val_type": null,
+              "enum": null
+            },
+            "inferrable": true
+          },
+          {
+            "name": "starred",
+            "required": true,
+            "description": "True to star the repository, false to unstar it",
+            "value_schema": {
+              "val_type": "boolean",
+              "inner_val_type": null,
+              "enum": null
+            },
+            "inferrable": true
+          }
+        ]
+      },
+      "output": {
+        "available_modes": ["value"],
+        "description": "Confirmation of the star/unstar action",
+        "value_schema": {
+          "val_type": "object",
+          "inner_val_type": null,
+          "enum": null
+        }
+      },
+      "requirements": {
+        "authorization": {
+          "id": "github_oauth",
+          "provider_id": "github",
+          "provider_type": "oauth2",
+          "scopes": ["public_repo"]
+        },
+        "secrets": null
+      }
+    },
+    {
+      "fully_qualified_name": "Github.ListPullRequests@1.0.0",
+      "qualified_name": "Github.ListPullRequests",
+      "name": "ListPullRequests",
+      "description": "List pull requests in a GitHub repository with optional filtering.",
+      "toolkit": {
+        "name": "Github",
+        "version": "1.0.0",
+        "description": "GitHub repository and collaboration tools"
+      },
+      "input": {
+        "parameters": [
+          {
+            "name": "owner",
+            "required": true,
+            "description": "The owner of the repository",
+            "value_schema": {
+              "val_type": "string",
+              "inner_val_type": null,
+              "enum": null
+            },
+            "inferrable": true
+          },
+          {
+            "name": "repo",
+            "required": true,
+            "description": "The name of the repository",
+            "value_schema": {
+              "val_type": "string",
+              "inner_val_type": null,
+              "enum": null
+            },
+            "inferrable": true
+          },
+          {
+            "name": "state",
+            "required": false,
+            "description": "Filter by pull request state",
+            "value_schema": {
+              "val_type": "string",
+              "inner_val_type": null,
+              "enum": ["open", "closed", "all"]
+            },
+            "inferrable": true
+          },
+          {
+            "name": "per_page",
+            "required": false,
+            "description": "Number of results per page (max 100)",
+            "value_schema": {
+              "val_type": "integer",
+              "inner_val_type": null,
+              "enum": null
+            },
+            "inferrable": true
+          }
+        ]
+      },
+      "output": {
+        "available_modes": ["value"],
+        "description": "List of pull request objects",
+        "value_schema": {
+          "val_type": "array",
+          "inner_val_type": null,
+          "enum": null
+        }
+      },
+      "requirements": {
+        "authorization": {
+          "id": "github_oauth",
+          "provider_id": "github",
+          "provider_type": "oauth2",
+          "scopes": ["repo"]
+        },
+        "secrets": null
+      }
+    },
+    {
+      "fully_qualified_name": "Slack.SendMessage@1.2.0",
+      "qualified_name": "Slack.SendMessage",
+      "name": "SendMessage",
+      "description": "Send a message to a Slack channel or direct message.",
+      "toolkit": {
+        "name": "Slack",
+        "version": "1.2.0",
+        "description": "Slack communication tools"
+      },
+      "input": {
+        "parameters": [
+          {
+            "name": "channel_id",
+            "required": true,
+            "description": "The ID of the channel or conversation",
+            "value_schema": {
+              "val_type": "string",
+              "inner_val_type": null,
+              "enum": null
+            },
+            "inferrable": true
+          },
+          {
+            "name": "text",
+            "required": true,
+            "description": "The message text",
+            "value_schema": {
+              "val_type": "string",
+              "inner_val_type": null,
+              "enum": null
+            },
+            "inferrable": true
+          }
+        ]
+      },
+      "output": {
+        "available_modes": ["value"],
+        "description": "Message send confirmation",
+        "value_schema": {
+          "val_type": "object",
+          "inner_val_type": null,
+          "enum": null
+        }
+      },
+      "requirements": {
+        "authorization": {
+          "id": "slack_oauth",
+          "provider_id": "slack",
+          "provider_type": "oauth2",
+          "scopes": ["chat:write"]
+        },
+        "secrets": null
+      }
+    },
+    {
+      "fully_qualified_name": "Slack.ListChannels@1.2.0",
+      "qualified_name": "Slack.ListChannels",
+      "name": "ListChannels",
+      "description": "List channels in the workspace.",
+      "toolkit": {
+        "name": "Slack",
+        "version": "1.2.0",
+        "description": "Slack communication tools"
+      },
+      "input": {
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "description": "Maximum number of channels to return",
+            "value_schema": {
+              "val_type": "integer",
+              "inner_val_type": null,
+              "enum": null
+            },
+            "inferrable": true
+          }
+        ]
+      },
+      "output": {
+        "available_modes": ["value"],
+        "description": "List of channel objects",
+        "value_schema": {
+          "val_type": "array",
+          "inner_val_type": null,
+          "enum": null
+        }
+      },
+      "requirements": {
+        "authorization": {
+          "id": "slack_oauth",
+          "provider_id": "slack",
+          "provider_type": "oauth2",
+          "scopes": ["channels:read"]
+        },
+        "secrets": null
+      }
+    }
+  ],
+  "total_count": 5
+}

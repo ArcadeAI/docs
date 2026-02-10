@@ -12,7 +12,7 @@ export const TYPE_CONFIG: Record<
     color: "text-emerald-500",
   },
   arcade_starter: {
-    label: "Arcade Starter",
+    label: "Arcade Unoptimized",
     icon: Terminal,
     color: "text-orange-500",
   },
@@ -47,7 +47,7 @@ export const TOOL_CARD_TYPE_CONFIG: Record<
   arcade_starter: {
     className:
       "border-orange-600/20 hover:border-primary bg-orange-600/[0.02] hover:bg-orange-600/[0.03]",
-    label: "Arcade Starter MCP Server",
+    label: "Arcade Unoptimized MCP Server",
     icon: Terminal,
     color: "text-orange-400",
   },
@@ -90,11 +90,11 @@ export const TYPE_DESCRIPTIONS: Record<ToolkitType, React.ReactNode> = {
   ),
   arcade_starter: (
     <>
-      Auto-generated MCP Servers developed by Arcade that may require
-      customization.{" "}
+      Unoptimized (auto-generated) MCP Servers developed by Arcade that may
+      require customization.{" "}
       <a
         className="text-blue-600 underline decoration-blue-600/30 underline-offset-2 transition-colors hover:text-blue-700 hover:decoration-blue-700/50 dark:text-blue-400 dark:decoration-blue-400/30 dark:hover:text-blue-300 dark:hover:decoration-blue-300/50"
-        href="/guides/create-tools/improve/types-of-tools#starter-tools"
+        href="/guides/create-tools/improve/types-of-tools#unoptimized-tools"
       >
         Learn more
       </a>

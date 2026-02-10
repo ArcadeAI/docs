@@ -1,0 +1,88 @@
+name: Generate Clean Markdown
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "app/**/*.mdx"
+      - "app/**/_meta.tsx"
+      - "scripts/generate-clean-markdown.ts"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  generate-markdown:
+    name: Generate Clean Markdown
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref || github.ref }}
+          token: ${{ secrets.DOCS_PUBLISHABLE_GH_TOKEN }}
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build Next.js
+        run: pnpm build
+        env:
+          # Skip postbuild to avoid circular dependency
+          SKIP_POSTBUILD: "true"
+
+      - name: Generate clean markdown
+        run: pnpm generate:markdown
+
+      - name: Check for changes
+        id: check-changes
+        run: |
+          if [ -n "$(git status --porcelain public/_markdown/)" ]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit changes to PR
+        if: steps.check-changes.outputs.has_changes == 'true' && github.event_name == 'pull_request'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/_markdown/
+          git commit -m "Regenerate clean markdown files"
+          git push
+
+      - name: Create Pull Request (for manual runs)
+        if: steps.check-changes.outputs.has_changes == 'true' && github.event_name != 'pull_request'
+        id: cpr
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.DOCS_PUBLISHABLE_GH_TOKEN }}
+          commit-message: Regenerate clean markdown files
+          branch: auto-update-clean-markdown
+          delete-branch: true
+          title: "Regenerate clean markdown files"
+          reviewers: >
+            evantahler
+            torresmateo
+
+      - name: Enable Pull Request Automerge
+        if: steps.check-changes.outputs.has_changes == 'true' && github.event_name != 'pull_request'
+        run: gh pr merge --squash --auto ${{ steps.cpr.outputs.pull-request-number }}
+        env:
+          GH_TOKEN: ${{ secrets.DOCS_PUBLISHABLE_GH_TOKEN }}
