@@ -283,8 +283,9 @@ export function sortChunksDeterministically(
       return 1;
     }
 
-    // Finally, sort by content for stability
-    return a.content.localeCompare(b.content);
+    // Finally, sort by content for stability.
+    // Some call sites pass lightweight chunk objects where content is optional.
+    return (a.content ?? "").localeCompare(b.content ?? "");
   });
 }
 
