@@ -11,7 +11,7 @@ The PagerDuty  enables tools and  to call [PagerDuty APIs](https://developer.pag
 
 Arcade currently supports **Classic** PagerDuty OAuth apps only. Choose Classic and select either **read-only** or **read/write** access. Newer Web App or other models are not supported. See [PagerDuty OAuth functionality](https://developer.pagerduty.com/docs/oauth-functionality) .
 
-Want to quickly get started with PagerDuty in your  or AI app? The pre-built [Arcade PagerDuty MCP Server](/resources/integrations/development/pagerduty-api.md) is what you want!
+Want to quickly get started with PagerDuty in your  or AI app? The pre-built [Arcade PagerDuty MCP Server](/resources/integrations/development/pagerdutyapi.md) is what you want!
 
 ### What’s documented here
 
@@ -19,7 +19,7 @@ This page describes how to use and configure PagerDuty auth with Arcade.
 
 This  is used by:
 
--   The [Arcade PagerDuty MCP Server](/resources/integrations/development/pagerduty-api.md)
+-   The [Arcade PagerDuty MCP Server](/resources/integrations/development/pagerdutyapi.md)
     , which provides pre-built  for interacting with PagerDuty
 -   Your [app code](#using-pagerduty-auth-in-app-code)
      that needs to call the PagerDuty API
@@ -214,7 +214,7 @@ const token = authResponse.context.token;
 
 ## Using PagerDuty auth in custom tools
 
-You can use the pre-built [Arcade PagerDuty MCP Server](/resources/integrations/development/pagerduty-api.md) to quickly build  and AI apps that interact with PagerDuty.
+You can use the pre-built [Arcade PagerDuty MCP Server](/resources/integrations/development/pagerdutyapi.md) to quickly build  and AI apps that interact with PagerDuty.
 
 If the pre-built tools in the PagerDuty  Server don’t meet your needs, you can author your own [custom tools](/guides/create-tools/tool-basics/build-mcp-server.md) that interact with the PagerDuty API.
 
@@ -258,7 +258,7 @@ PagerDuty Classic apps use two permission levels:
 
 For more details about PagerDuty’s OAuth permissions, refer to the [PagerDuty OAuth functionality docs](https://developer.pagerduty.com/docs/oauth-functionality#scopes) .
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [Notion](/en/references/auth-providers/notion.md)
 [Reddit](/en/references/auth-providers/reddit.md)

@@ -170,7 +170,7 @@ Use the Salesforce  to get a user authorization token and call Salesforce API en
 
 ### Prerequisites
 
-1.  Create an [Arcade](https://api.arcade.dev/dashboard/register)
+1.  Create an [Arcade](https://app.arcade.dev/register)
 
 2.  Get an [Arcade API key](/get-started/setup/api-keys.md)
     .
@@ -380,7 +380,7 @@ The code implemented in the Arcade Salesforce  is the best guide for you to unde
 
 PLAINTEXT
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [Reddit](/en/references/auth-providers/reddit.md)
 [Slack](/en/references/auth-providers/slack.md)

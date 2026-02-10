@@ -9,7 +9,9 @@ Zoho
 
 The Zoho  enables tools and  to call [Zoho APIs](https://www.zoho.com/developer/)  on behalf of a  using OAuth 2.0 authentication.
 
-Want to quickly get started with Zoho in your agent or AI app? Check out the pre-built Arcade Zoho  Servers: - [Zoho Books API MCP Server](/resources/integrations/payments/zoho-books-api.md) - [Zoho Creator API MCP Server](/resources/integrations/development/zoho-creator-api.md)
+Want to quickly get started with Zoho in your agent or AI app? Check out the pre-built Arcade Zoho  Servers: - [Zoho Books API MCP Server](/resources/integrations/payments/zoho-books-api.md)
+
+-   Zoho Creator API  Server (coming soon)
 
 ### What’s documented here
 
@@ -19,8 +21,7 @@ This  is used by:
 
 -   The [Arcade Zoho Books API MCP Server](/resources/integrations/payments/zoho-books-api.md)
     , which provides pre-built  for interacting with Zoho Books
--   The [Arcade Zoho Creator API MCP Server](/resources/integrations/development/zoho-creator-api.md)
-    , which provides pre-built  for interacting with Zoho Creator
+-   The Arcade Zoho Creator API  Server (coming soon), which will provide pre-built  for interacting with Zoho Creator
 -   Your [app code](#using-zoho-auth-in-app-code)
      that needs to call Zoho APIs
 -   Or, your [custom tools](#using-zoho-auth-in-custom-tools)
@@ -243,7 +244,7 @@ const token = authResponse.context.token;
 
 ## Using Zoho auth in custom tools
 
-You can use the pre-built Arcade Zoho  Servers ([Zoho Books](/resources/integrations/payments/zoho-books-api.md), [Zoho Creator](/resources/integrations/development/zoho-creator-api.md)) to quickly build  and AI apps that interact with Zoho.
+You can use the pre-built Arcade Zoho  Servers ([Zoho Books](/resources/integrations/payments/zoho-books-api.md), Zoho Creator (coming soon)) to quickly build  and AI apps that interact with Zoho.
 
 If the pre-built  don’t meet your needs, you can author your own [custom tools](/guides/create-tools/tool-basics/build-mcp-server.md) that interact with Zoho APIs.
 
@@ -354,7 +355,7 @@ China
 
 Make sure to configure your OAuth provider and API calls to use the correct domain for your ’s data center.
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [Zendesk](/en/references/auth-providers/zendesk.md)
 [Zoom](/en/references/auth-providers/zoom.md)

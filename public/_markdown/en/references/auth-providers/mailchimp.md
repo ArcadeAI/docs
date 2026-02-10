@@ -9,7 +9,7 @@ Mailchimp
 
 The Mailchimp  enables tools and  to call [Mailchimp Marketing APIs](https://mailchimp.com/developer/marketing/api/)  on behalf of a  using OAuth 2.0 authentication.
 
-Want to quickly get started with Mailchimp in your  or AI app? The pre-built [Arcade Mailchimp Marketing MCP Server](/resources/integrations/productivity/mailchimp-marketing-api.md) is what you want!
+Want to quickly get started with Mailchimp in your  or AI app? The pre-built [Arcade Mailchimp Marketing MCP Server](/resources/integrations/productivity/mailchimp-api.md) is what you want!
 
 ### What’s documented here
 
@@ -17,7 +17,7 @@ This page describes how to use and configure Mailchimp auth with Arcade.
 
 This  is used by:
 
--   The [Arcade Mailchimp Marketing MCP Server](/resources/integrations/productivity/mailchimp-marketing-api.md)
+-   The [Arcade Mailchimp Marketing MCP Server](/resources/integrations/productivity/mailchimp-api.md)
     , which provides pre-built  for interacting with Mailchimp
 -   Your [app code](#using-mailchimp-auth-in-app-code)
      that needs to call the Mailchimp API
@@ -248,7 +248,7 @@ const apiEndpoint = metadata.api_endpoint;
 
 ## Using Mailchimp auth in custom tools
 
-You can use the pre-built [Arcade Mailchimp Marketing MCP Server](/resources/integrations/productivity/mailchimp-marketing-api.md) to quickly build  and AI apps that interact with Mailchimp.
+You can use the pre-built [Arcade Mailchimp Marketing MCP Server](/resources/integrations/productivity/mailchimp-api.md) to quickly build  and AI apps that interact with Mailchimp.
 
 If the pre-built tools in the Mailchimp  Server don’t meet your needs, you can author your own [custom tools](/guides/create-tools/tool-basics/build-mcp-server.md) that interact with the Mailchimp API.
 
@@ -292,7 +292,7 @@ async def get_mailchimp_lists(
 
 For more details about Mailchimp’s authentication, refer to the [Mailchimp OAuth 2.0 documentation](https://mailchimp.com/developer/marketing/guides/access-user-data-oauth-2/) .
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [LinkedIn](/en/references/auth-providers/linkedin.md)
 [Microsoft](/en/references/auth-providers/microsoft.md)

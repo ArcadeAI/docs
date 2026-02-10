@@ -71,12 +71,12 @@ See [Create via Dashboard](/guides/mcp-gateways/create-via-dashboard.md) for det
 
 ## Next Steps
 
--   [Create an Arcade](https://api.arcade.dev/dashboard/register)
+-   [Create an Arcade](https://app.arcade.dev/register)
      if you haven’t already
 -   [Browse available integrations](/resources/integrations.md)
      to see what  you can add to your gateway
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [Arcade Registry Early Access](/en/resources/registry-early-access.md)
 [Add remote MCP servers](/en/guides/mcp-gateways/add-remote-servers.md)

@@ -21,7 +21,7 @@ Register a remote  server and use its  in gateways and SDKs.
 
 ### Prerequisites
 
--   An [Arcade](https://api.arcade.dev/dashboard/register)
+-   An [Arcade](https://app.arcade.dev/register)
 
 -   A remote  server URL that Arcade can reach
 -   Access to any auth credentials your server requires
@@ -124,7 +124,7 @@ Remote servers must be reachable from Arcade and must support the Streamable HTT
 -   [Connect to MCP clients](/get-started/mcp-clients.md)
 
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [MCP Gateways](/en/guides/mcp-gateways.md)
 [Create via Dashboard](/en/guides/mcp-gateways/create-via-dashboard.md)

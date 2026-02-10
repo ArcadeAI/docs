@@ -1,0 +1,898 @@
+{
+  "id": "Pylon",
+  "label": "Pylon",
+  "version": "0.2.0",
+  "description": "Arcade tools designed for LLMs to interact with Pylon",
+  "metadata": {
+    "category": "development",
+    "iconUrl": "https://design-system.arcade.dev/icons/pylon.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/development/pylon",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": null,
+  "tools": [
+    {
+      "name": "AddInternalNote",
+      "qualifiedName": "Pylon.AddInternalNote",
+      "fullyQualifiedName": "Pylon.AddInternalNote@0.2.0",
+      "description": "Add an internal note to a Pylon issue.",
+      "parameters": [
+        {
+          "name": "issue_id",
+          "type": "string",
+          "required": true,
+          "description": "The issue ID (UUID) or issue number to add message to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "required": true,
+          "description": "The message content to add.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "as_html",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether body is already HTML formatted. Default is False (plain text).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["PYLON_API_TOKEN"],
+      "secretsInfo": [
+        {
+          "name": "PYLON_API_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Created internal note details."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Pylon.AddInternalNote",
+        "parameters": {
+          "issue_id": {
+            "value": "123e4567-e89b-12d3-a456-426614174000",
+            "type": "string",
+            "required": true
+          },
+          "body": {
+            "value": "This is an internal note regarding the issue.",
+            "type": "string",
+            "required": true
+          },
+          "as_html": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "AssignIssue",
+      "qualifiedName": "Pylon.AssignIssue",
+      "fullyQualifiedName": "Pylon.AssignIssue@0.2.0",
+      "description": "Assign a Pylon issue to a user.\n\nFor issue search: uses BM25 ranking. Use word stems ('auth', 'config') and AND/OR/NOT.\nFor user search: uses fuzzy name matching.",
+      "parameters": [
+        {
+          "name": "issue_lookup_by",
+          "type": "string",
+          "required": true,
+          "description": "How to find the issue: 'id' for direct lookup, 'search' for keyword search.",
+          "enum": ["id", "search"],
+          "inferrable": true
+        },
+        {
+          "name": "issue_value",
+          "type": "string",
+          "required": true,
+          "description": "Issue ID/number (if issue_lookup_by=id) or search keywords (if issue_lookup_by=search).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_lookup_by",
+          "type": "string",
+          "required": true,
+          "description": "How to find the user: 'id' for direct lookup, 'name' for fuzzy name search.",
+          "enum": ["id", "name"],
+          "inferrable": true
+        },
+        {
+          "name": "user_value",
+          "type": "string",
+          "required": true,
+          "description": "User ID (if user_lookup_by=id) or user name (if user_lookup_by=name).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "auto_accept_matches",
+          "type": "boolean",
+          "required": false,
+          "description": "Auto-accept fuzzy/BM25 matches above 90% confidence. Default is False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["PYLON_API_TOKEN"],
+      "secretsInfo": [
+        {
+          "name": "PYLON_API_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Updated issue with assignment details."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Pylon.AssignIssue",
+        "parameters": {
+          "issue_lookup_by": {
+            "value": "search",
+            "type": "string",
+            "required": true
+          },
+          "issue_value": {
+            "value": "auth config issue",
+            "type": "string",
+            "required": true
+          },
+          "user_lookup_by": {
+            "value": "name",
+            "type": "string",
+            "required": true
+          },
+          "user_value": {
+            "value": "john doe",
+            "type": "string",
+            "required": true
+          },
+          "auto_accept_matches": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetIssue",
+      "qualifiedName": "Pylon.GetIssue",
+      "fullyQualifiedName": "Pylon.GetIssue@0.2.0",
+      "description": "Get detailed information about a Pylon issue.\n\nFor search: uses BM25 ranking. Use word stems ('auth', 'config') and AND/OR/NOT operators.",
+      "parameters": [
+        {
+          "name": "lookup_by",
+          "type": "string",
+          "required": true,
+          "description": "How to find the issue: 'id' for direct lookup, 'search' for keyword search.",
+          "enum": ["id", "search"],
+          "inferrable": true
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "required": true,
+          "description": "Issue ID/number (if lookup_by=id) or search keywords (if lookup_by=search). For search: use word stems like 'auth' or 'config' for broader matches.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "auto_accept_matches",
+          "type": "boolean",
+          "required": false,
+          "description": "Auto-accept search matches above 85% confidence gap. Only used with lookup_by=search. Default is False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["PYLON_API_TOKEN"],
+      "secretsInfo": [
+        {
+          "name": "PYLON_API_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Detailed issue information."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Pylon.GetIssue",
+        "parameters": {
+          "lookup_by": {
+            "value": "search",
+            "type": "string",
+            "required": true
+          },
+          "value": {
+            "value": "auth config",
+            "type": "string",
+            "required": true
+          },
+          "auto_accept_matches": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetTeamAndAssignment",
+      "qualifiedName": "Pylon.GetTeamAndAssignment",
+      "fullyQualifiedName": "Pylon.GetTeamAndAssignment@0.2.0",
+      "description": "Get detailed information about a Pylon team including members.",
+      "parameters": [
+        {
+          "name": "lookup_by",
+          "type": "string",
+          "required": true,
+          "description": "How to find the team: 'id' for direct lookup, 'name' for fuzzy name search.",
+          "enum": ["id", "name"],
+          "inferrable": true
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "required": true,
+          "description": "Team ID (if lookup_by=id) or team name (if lookup_by=name).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "auto_accept_matches",
+          "type": "boolean",
+          "required": false,
+          "description": "Auto-accept fuzzy matches above 90% confidence. Only used when lookup_by=name. Default is False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["PYLON_API_TOKEN"],
+      "secretsInfo": [
+        {
+          "name": "PYLON_API_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Detailed team information."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Pylon.GetTeamAndAssignment",
+        "parameters": {
+          "lookup_by": {
+            "value": "name",
+            "type": "string",
+            "required": true
+          },
+          "value": {
+            "value": "Engineering Team",
+            "type": "string",
+            "required": true
+          },
+          "auto_accept_matches": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "ListContacts",
+      "qualifiedName": "Pylon.ListContacts",
+      "fullyQualifiedName": "Pylon.ListContacts@0.2.0",
+      "description": "List contacts in Pylon.",
+      "parameters": [
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Pagination cursor from previous response. Default is None (first page).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of contacts to return per page. Default is 20.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["PYLON_API_TOKEN"],
+      "secretsInfo": [
+        {
+          "name": "PYLON_API_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "List of contacts with pagination."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Pylon.ListContacts",
+        "parameters": {
+          "cursor": {
+            "value": "abc123",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "ListIssues",
+      "qualifiedName": "Pylon.ListIssues",
+      "fullyQualifiedName": "Pylon.ListIssues@0.2.0",
+      "description": "List Pylon issues with optional filtering by state, assignee, team, and tags.",
+      "parameters": [
+        {
+          "name": "state",
+          "type": "string",
+          "required": false,
+          "description": "Filter by issue state. Default is None (all states).",
+          "enum": [
+            "new",
+            "open",
+            "waiting_on_customer",
+            "waiting_on_you",
+            "on_hold",
+            "closed",
+            "snoozed"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "assignee_id",
+          "type": "string",
+          "required": false,
+          "description": "Filter by assignee user ID. Default is None (all assignees).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team_id",
+          "type": "string",
+          "required": false,
+          "description": "Filter by team ID. Default is None (all teams).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "tags",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Filter by tags (issues must have all listed tags). Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_time",
+          "type": "string",
+          "required": false,
+          "description": "Start of date range in RFC3339 format (YYYY-MM-DDTHH:MM:SSZ). Default is 7 days ago.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_time",
+          "type": "string",
+          "required": false,
+          "description": "End of date range in RFC3339 format (YYYY-MM-DDTHH:MM:SSZ). Default is now.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Pagination cursor from previous response. Default is None.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["PYLON_API_TOKEN"],
+      "secretsInfo": [
+        {
+          "name": "PYLON_API_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "List of issues matching the filters."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Pylon.ListIssues",
+        "parameters": {
+          "state": {
+            "value": "open",
+            "type": "string",
+            "required": false
+          },
+          "assignee_id": {
+            "value": "12345",
+            "type": "string",
+            "required": false
+          },
+          "team_id": {
+            "value": "teamA",
+            "type": "string",
+            "required": false
+          },
+          "tags": {
+            "value": ["bug", "urgent"],
+            "type": "array",
+            "required": false
+          },
+          "start_time": {
+            "value": "2023-10-01T00:00:00Z",
+            "type": "string",
+            "required": false
+          },
+          "end_time": {
+            "value": "2023-10-08T00:00:00Z",
+            "type": "string",
+            "required": false
+          },
+          "cursor": {
+            "value": "abc123",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "ListTeams",
+      "qualifiedName": "Pylon.ListTeams",
+      "fullyQualifiedName": "Pylon.ListTeams@0.2.0",
+      "description": "List all teams in the Pylon workspace.",
+      "parameters": [
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Pagination cursor from previous response. Default is None.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["PYLON_API_TOKEN"],
+      "secretsInfo": [
+        {
+          "name": "PYLON_API_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "List of teams in the workspace."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Pylon.ListTeams",
+        "parameters": {
+          "cursor": {
+            "value": "eyJzdGFydF90aW1lIjoxNjY4NTEwNjA4fQ==",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "ListUsers",
+      "qualifiedName": "Pylon.ListUsers",
+      "fullyQualifiedName": "Pylon.ListUsers@0.2.0",
+      "description": "List all users/team members in the Pylon workspace.",
+      "parameters": [
+        {
+          "name": "cursor",
+          "type": "string",
+          "required": false,
+          "description": "Pagination cursor from previous response. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of users to return. Default is 20.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["PYLON_API_TOKEN"],
+      "secretsInfo": [
+        {
+          "name": "PYLON_API_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "List of users in the workspace."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Pylon.ListUsers",
+        "parameters": {
+          "cursor": {
+            "value": "abc123",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "SearchContacts",
+      "qualifiedName": "Pylon.SearchContacts",
+      "fullyQualifiedName": "Pylon.SearchContacts@0.2.0",
+      "description": "Search for contacts by name or email using fuzzy matching.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": true,
+          "description": "Name or email to search for.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "auto_accept_matches",
+          "type": "boolean",
+          "required": false,
+          "description": "Auto-accept fuzzy matches above 0.9 confidence. Default is False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_pages",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum pages to scan when searching contacts. Default is 10.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["PYLON_API_TOKEN"],
+      "secretsInfo": [
+        {
+          "name": "PYLON_API_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Matching contacts with confidence scores."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Pylon.SearchContacts",
+        "parameters": {
+          "query": {
+            "value": "john.doe@example.com",
+            "type": "string",
+            "required": true
+          },
+          "auto_accept_matches": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "max_pages": {
+            "value": 5,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "SearchIssues",
+      "qualifiedName": "Pylon.SearchIssues",
+      "fullyQualifiedName": "Pylon.SearchIssues@0.2.0",
+      "description": "Search issues recently created by keywords in title and description.\n\nNote: This indexes up to 400 issues from the last 30 days.\n\nUses BM25 ranking. Use word stems ('auth', 'config') and AND/OR/NOT operators.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": true,
+          "description": "Keywords to search in issue titles and descriptions. Use word stems like 'auth' or 'config' for broader matches. Supports AND, OR, NOT operators.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "auto_accept_matches",
+          "type": "boolean",
+          "required": false,
+          "description": "Auto-accept high-confidence matches above 85% score gap. Default is False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["PYLON_API_TOKEN"],
+      "secretsInfo": [
+        {
+          "name": "PYLON_API_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Search results or matched issue."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Pylon.SearchIssues",
+        "parameters": {
+          "query": {
+            "value": "auth OR config NOT deprecated",
+            "type": "string",
+            "required": true
+          },
+          "auto_accept_matches": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "SearchUsers",
+      "qualifiedName": "Pylon.SearchUsers",
+      "fullyQualifiedName": "Pylon.SearchUsers@0.2.0",
+      "description": "Search for users by name using fuzzy matching.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": true,
+          "description": "The name or partial name to search for.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "auto_accept_matches",
+          "type": "boolean",
+          "required": false,
+          "description": "Auto-accept fuzzy matches above 90% confidence. Default is False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["PYLON_API_TOKEN"],
+      "secretsInfo": [
+        {
+          "name": "PYLON_API_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Users matching the search query."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Pylon.SearchUsers",
+        "parameters": {
+          "query": {
+            "value": "John Doe",
+            "type": "string",
+            "required": true
+          },
+          "auto_accept_matches": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "UpdateIssueStatus",
+      "qualifiedName": "Pylon.UpdateIssueStatus",
+      "fullyQualifiedName": "Pylon.UpdateIssueStatus@0.2.0",
+      "description": "Change the state of a Pylon issue.\n\nFor search: uses BM25 ranking. Use word stems ('auth', 'config') and AND/OR/NOT operators.",
+      "parameters": [
+        {
+          "name": "state",
+          "type": "string",
+          "required": true,
+          "description": "The new state for the issue.",
+          "enum": [
+            "new",
+            "open",
+            "waiting_on_customer",
+            "waiting_on_you",
+            "on_hold",
+            "closed",
+            "snoozed"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "lookup_by",
+          "type": "string",
+          "required": true,
+          "description": "How to find the issue: 'id' for direct lookup, 'search' for keyword search.",
+          "enum": ["id", "search"],
+          "inferrable": true
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "required": true,
+          "description": "Issue ID/number (if lookup_by=id) or search keywords (if lookup_by=search).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "auto_accept_matches",
+          "type": "boolean",
+          "required": false,
+          "description": "Auto-accept BM25 search matches above 85% confidence gap. Default is False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["PYLON_API_TOKEN"],
+      "secretsInfo": [
+        {
+          "name": "PYLON_API_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Updated issue with state change details."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Pylon.UpdateIssueStatus",
+        "parameters": {
+          "state": {
+            "value": "resolved",
+            "type": "string",
+            "required": true
+          },
+          "lookup_by": {
+            "value": "search",
+            "type": "string",
+            "required": true
+          },
+          "value": {
+            "value": "auth config",
+            "type": "string",
+            "required": true
+          },
+          "auto_accept_matches": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "Pylon.WhoAmI",
+      "fullyQualifiedName": "Pylon.WhoAmI@0.2.0",
+      "description": "Get the authenticated user's profile.\n\nNOTE: This returns the API token owner (service account), not the human user.",
+      "parameters": [],
+      "auth": null,
+      "secrets": ["PYLON_API_TOKEN"],
+      "secretsInfo": [
+        {
+          "name": "PYLON_API_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Authenticated user's profile."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Pylon.WhoAmI",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    }
+  ],
+  "documentationChunks": [
+    {
+      "type": "warning",
+      "location": "description",
+      "position": "after",
+      "content": "<Callout type=\"warning\" title=\"Admin token required\">\n  Pylon API tokens are admin-scoped and created in Pylon by an org admin. Store\n  the token as `PYLON_API_TOKEN` in Arcade secrets. There is no user OAuth.\n</Callout>"
+    },
+    {
+      "type": "markdown",
+      "location": "auth",
+      "position": "after",
+      "content": "Pylon uses Bearer tokens created by an org admin. There is **no OAuth flow**. Generate an API token in the Pylon dashboard and store it as the secret `PYLON_API_TOKEN` in Arcade. All tools require this secret.\n**Auth header**\n```\nAuthorization: Bearer <token>\n```\n<Callout type=\"warning\" title=\"Admin-only token\">\n  Pylon tokens are generated by admins in the Pylon UI and grant org-level\n  access. Rotate tokens regularly and scope storage to your Arcade project’s\n  secrets.\n</Callout>\nRefer to Pylon’s authentication docs: [Pylon API Authentication](https://docs.usepylon.com/pylon-docs/developer/api/authentication).",
+      "header": "## Auth"
+    }
+  ],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-01-26T17:39:36.930Z",
+  "summary": "The Arcade toolkit for Pylon enables seamless interaction with Pylon's issue tracking system and team management. Designed for developers, this toolkit facilitates issue management and user interaction through various tools.\n\n**Capabilities**  \n- Manage Pylon issues including assigning and updating statuses.  \n- Retrieve detailed information about teams, issues, and users.  \n- Perform advanced searches using BM25 ranking and fuzzy matching techniques.  \n- Efficiently list and filter contacts, issues, and teams based on various criteria.\n\n**Secrets**  \nUtilize the PYLON_API_TOKEN for secure API access to the Pylon services."
+}

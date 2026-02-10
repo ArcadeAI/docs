@@ -6,7 +6,7 @@ SetupGet an API key
 
 # Getting Your API Key
 
-Before you begin, you’ll need an Arcade  - if you haven’t created one yet, you can [sign up here](https://api.arcade.dev/dashboard/register). Once you have an account, you can generate  through either the dashboard or CLI.
+Before you begin, you’ll need an Arcade  - if you haven’t created one yet, you can [sign up here](https://app.arcade.dev/register). Once you have an account, you can generate  through either the dashboard or CLI.
 
 ### Dashboard
 
@@ -74,7 +74,7 @@ Once you have your , you can:
 -   [Create custom tools](/guides/create-tools/tool-basics/build-mcp-server.md)
 
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [About Arcade](/en/get-started/about-arcade.md)
 [Connect Arcade docs to your IDE](/en/get-started/setup/connect-arcade-docs.md)

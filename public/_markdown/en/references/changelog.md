@@ -294,9 +294,9 @@ This week projects are now generally available! Projects are a new way to organi
 
 **Toolkits**
 
--   `[feature - 🚀]` Box.com Starter  Server released ([docs](/resources/integrations/productivity/box-api.md)
+-   `[feature - 🚀]` Box.com Starter  Server released ([docs](/resources/integrations/productivity/boxapi.md)
     )
--   `[feature - 🚀]` Stripe Starter  Server released ([docs](/resources/integrations/payments/stripe_api.md)
+-   `[feature - 🚀]` Stripe Starter  Server released ([docs](/resources/integrations/payments/stripeapi.md)
     )
 
 **Misc**
@@ -662,7 +662,7 @@ Self-hosed Arcade developers cannot be grandfathered into the old (insecure) beh
 -   `[feature - 🚀]` Launched status.arcade.dev for monitoring platform status ([link](https://status.arcade.dev)
      )
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [Overview](/en/references.md)
 [API](/en/references/api.md)

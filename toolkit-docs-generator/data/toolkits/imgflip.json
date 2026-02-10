@@ -1,0 +1,263 @@
+{
+  "id": "Imgflip",
+  "label": "Imgflip",
+  "version": "1.0.1",
+  "description": "Arcade tools designed for LLMs to interact with Imgflip",
+  "metadata": {
+    "category": "entertainment",
+    "iconUrl": "https://design-system.arcade.dev/icons/imgflip.svg",
+    "isBYOC": true,
+    "isPro": true,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/entertainment/imgflip",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": null,
+  "tools": [
+    {
+      "name": "CreateMeme",
+      "qualifiedName": "Imgflip.CreateMeme",
+      "fullyQualifiedName": "Imgflip.CreateMeme@1.0.1",
+      "description": "Create a custom meme using an Imgflip template\n\nThis tool creates a custom meme by adding your text to an existing\nmeme template. You can specify top and bottom text, choose fonts,\nand control text sizing.",
+      "parameters": [
+        {
+          "name": "template_id",
+          "type": "string",
+          "required": true,
+          "description": "The meme template ID to use for creation. You can get this from get_popular_memes.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "top_text",
+          "type": "string",
+          "required": false,
+          "description": "Text to display at the top of the meme. Leave empty if not needed.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "bottom_text",
+          "type": "string",
+          "required": false,
+          "description": "Text to display at the bottom of the meme. Leave empty if not needed.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "font",
+          "type": "string",
+          "required": false,
+          "description": "Font family to use for the text",
+          "enum": [
+            "impact",
+            "arial",
+            "roboto",
+            "open-sans",
+            "lato",
+            "montserrat",
+            "source-sans-pro",
+            "ubuntu",
+            "nunito",
+            "poppins",
+            "inter",
+            "work-sans"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "max_font_size",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum font size for the text. Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "no_watermark",
+          "type": "boolean",
+          "required": false,
+          "description": "Remove the Imgflip watermark. Defaults to False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["IMGFLIP_USERNAME", "IMGFLIP_PASSWORD"],
+      "secretsInfo": [
+        {
+          "name": "IMGFLIP_USERNAME",
+          "type": "unknown"
+        },
+        {
+          "name": "IMGFLIP_PASSWORD",
+          "type": "password"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Created meme information with URLs"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Imgflip.CreateMeme",
+        "parameters": {
+          "template_id": {
+            "value": "123456",
+            "type": "string",
+            "required": true
+          },
+          "top_text": {
+            "value": "When you realize",
+            "type": "string",
+            "required": false
+          },
+          "bottom_text": {
+            "value": "it's Monday again",
+            "type": "string",
+            "required": false
+          },
+          "font": {
+            "value": "impact",
+            "type": "string",
+            "required": false
+          },
+          "max_font_size": {
+            "value": 45,
+            "type": "integer",
+            "required": false
+          },
+          "no_watermark": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetPopularMemes",
+      "qualifiedName": "Imgflip.GetPopularMemes",
+      "fullyQualifiedName": "Imgflip.GetPopularMemes@1.0.1",
+      "description": "Get popular meme templates from Imgflip\n\nThis tool retrieves a list of popular meme templates that can be used\nto create custom memes. These templates are ordered by popularity\nbased on how many times they've been captioned.",
+      "parameters": [
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of meme templates to return. Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["IMGFLIP_USERNAME", "IMGFLIP_PASSWORD"],
+      "secretsInfo": [
+        {
+          "name": "IMGFLIP_USERNAME",
+          "type": "unknown"
+        },
+        {
+          "name": "IMGFLIP_PASSWORD",
+          "type": "password"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "List of popular meme templates"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Imgflip.GetPopularMemes",
+        "parameters": {
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "SearchMemes",
+      "qualifiedName": "Imgflip.SearchMemes",
+      "fullyQualifiedName": "Imgflip.SearchMemes@1.0.1",
+      "description": "Search for meme templates by query\n\nThis tool searches through Imgflip's database of over 1 million meme templates\nto find ones that match your search query.\n\nWhat this tool provides:\n- Search results matching your query\n- Template information including IDs, names, and URLs\n- Caption count to show popularity\n- Ready-to-use template IDs for meme creation\n\nWhen to use this tool:\n- When you're looking for specific meme types or themes\n- When you want to find memes related to particular topics\n- When you need a specific meme format that's not in popular memes\n- When you want to discover niche or specialized meme templates\n\nWhen NOT to use this tool:\n- Do NOT use this if you just want popular memes (use get_popular_memes instead)\n- Do NOT use this if you want to create a meme (use create_meme instead)",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": true,
+          "description": "Search query to find meme templates. Be specific for better results.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_nsfw",
+          "type": "boolean",
+          "required": false,
+          "description": "Include not-safe-for-work memes in search results. Defaults to False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of meme templates to return. Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["IMGFLIP_USERNAME", "IMGFLIP_PASSWORD"],
+      "secretsInfo": [
+        {
+          "name": "IMGFLIP_USERNAME",
+          "type": "unknown"
+        },
+        {
+          "name": "IMGFLIP_PASSWORD",
+          "type": "password"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Search results for meme templates"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Imgflip.SearchMemes",
+        "parameters": {
+          "query": {
+            "value": "cats",
+            "type": "string",
+            "required": true
+          },
+          "include_nsfw": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-01-26T17:36:22.738Z",
+  "summary": "Arcade provides a toolkit for seamless interaction with Imgflip, empowering developers to create and manage custom memes efficiently. Users can leverage powerful tools to search, retrieve, and create memes from a vast database.\n\n**Capabilities**\n- Create personalized memes using various templates.\n- Retrieve a list of trending meme templates.\n- Search over 1 million templates based on specific queries.\n- Access detailed template information including popularity metrics.\n\n**Secrets**\n- Use IMGFLIP_USERNAME and IMGFLIP_PASSWORD for authentication needs, allowing secure access to the Imgflip platform."
+}

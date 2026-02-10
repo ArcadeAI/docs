@@ -56,6 +56,7 @@ tool_name="GoogleSearch.Search",
 input={"query": "Latest AI advancements"},
 )
 print(response.output.value)
+
 ```
 
 ### JavaScript
@@ -73,7 +74,7 @@ const response = await client.tools.execute({
 console.log(response.output.value);
 ```
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [Docs Home](/en/home.md)
 [Get an API key](/en/get-started/setup/api-keys.md)

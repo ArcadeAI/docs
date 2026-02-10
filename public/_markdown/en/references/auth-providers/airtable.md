@@ -9,7 +9,7 @@ Airtable
 
 The Airtable  enables tools and  to call [Airtable APIs](https://airtable.com/developers/web/api/introduction)  on behalf of a  using OAuth 2.0 authentication.
 
-Want to quickly get started with Airtable in your  or AI app? The pre-built [Arcade Airtable MCP Server](/resources/integrations/productivity/airtable-api.md) is what you want!
+Want to quickly get started with Airtable in your  or AI app? The pre-built [Arcade Airtable MCP Server](/resources/integrations/productivity/airtableapi.md) is what you want!
 
 ### What’s documented here
 
@@ -17,7 +17,7 @@ This page describes how to use and configure Airtable auth with Arcade.
 
 This  is used by:
 
--   The [Arcade Airtable MCP Server](/resources/integrations/productivity/airtable-api.md)
+-   The [Arcade Airtable MCP Server](/resources/integrations/productivity/airtableapi.md)
     , which provides pre-built  for interacting with Airtable
 -   Your [app code](#using-airtable-auth-in-app-code)
      that needs to call the Airtable API
@@ -219,7 +219,7 @@ const token = authResponse.context.token;
 
 ## Using Airtable auth in custom tools
 
-You can use the pre-built [Arcade Airtable MCP Server](/resources/integrations/productivity/airtable-api.md) to quickly build  and AI apps that interact with Airtable.
+You can use the pre-built [Arcade Airtable MCP Server](/resources/integrations/productivity/airtableapi.md) to quickly build  and AI apps that interact with Airtable.
 
 If the pre-built tools in the Airtable  Server don’t meet your needs, you can author your own [custom tools](/guides/create-tools/tool-basics/build-mcp-server.md) that interact with the Airtable API.
 
@@ -271,7 +271,7 @@ Airtable supports various OAuth scopes that determine the level of access your a
 
 For a complete list of available scopes, refer to the [Airtable Scopes documentation](https://airtable.com/developers/web/api/scopes) .
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [OAuth 2.0](/en/references/auth-providers/oauth2.md)
 [Asana](/en/references/auth-providers/asana.md)

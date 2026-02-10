@@ -29,7 +29,7 @@ PLAINTEXT
 ```
 1. Create suite with empty expected_tool_calls
    ↓
-2. Run: arcade evals . --capture --format json
+2. Run: arcade evals . --capture -o captures.json
    ↓
 3. Review captured tool calls in output file
    ↓
@@ -78,8 +78,8 @@ async def capture_weather_suite():
 
 Run evaluations with the `--capture` flag:
 
-```json
-arcade evals . --capture --file captures/weather --format json
+```bash
+arcade evals . --capture -o captures/weather.json
 ```
 
 This creates `captures/weather.json` with all  calls.
@@ -140,16 +140,16 @@ suite.add_case(
 
 Record  calls to JSON:
 
-```json
-arcade evals . --capture --file captures/baseline --format json
+```bash
+arcade evals . --capture -o captures/baseline.json
 ```
 
 ### Include conversation context
 
 Capture system messages and conversation history:
 
-```json
-arcade evals . --capture --include-context --file captures/detailed --format json
+```bash
+arcade evals . --capture --include-context -o captures/detailed.json
 ```
 
 Output includes:
@@ -172,7 +172,7 @@ Output includes:
 Save captures in multiple formats:
 
 ```bash
-arcade evals . --capture --file captures/out --format json,md
+arcade evals . --capture -o captures/out.json -o captures/out.md
 ```
 
 Markdown format is more readable for quick review:
@@ -197,11 +197,12 @@ Markdown format is more readable for quick review:
 
 Capture from multiple providers to compare behavior:
 
-```json
+```bash
 arcade evals . --capture \
-  --use-provider openai:gpt-4o \
-  --use-provider anthropic:claude-sonnet-4-5-20250929 \
-  --file captures/comparison --format json
+  -p "openai:gpt-4o anthropic:claude-sonnet-4-5-20250929" \
+  -k openai:sk-... \
+  -k anthropic:sk-ant-... \
+  -o captures/comparison.json
 ```
 
 ## Capture with comparative tracks
@@ -239,8 +240,8 @@ async def capture_comparative():
 
 Run capture:
 
-```json
-arcade evals . --capture --file captures/apis --format json
+```bash
+arcade evals . --capture -o captures/apis.json
 ```
 
 Output shows captures per track:
@@ -313,9 +314,10 @@ Compare how different models interpret your :
 
 ```bash
 arcade evals . --capture \
-  --use-provider openai:gpt-4o,gpt-4o-mini \
-  --use-provider anthropic:claude-sonnet-4-5-20250929 \
-  --file captures/models --format json,md
+  -p "openai:gpt-4o,gpt-4o-mini anthropic:claude-sonnet-4-5-20250929" \
+  -k openai:sk-... \
+  -k anthropic:sk-ant-... \
+  -o captures/models.json -o captures/models.md
 ```
 
 ## Converting captures to tests
@@ -410,7 +412,7 @@ suite = EvalSuite(
 -   [Create evaluation suites](/guides/create-tools/evaluate-tools/create-evaluation-suite.md)
      with expectations
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [Run evaluations](/en/guides/create-tools/evaluate-tools/run-evaluations.md)
 [Comparative evaluations](/en/guides/create-tools/evaluate-tools/comparative-evaluations.md)

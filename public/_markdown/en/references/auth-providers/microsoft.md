@@ -60,7 +60,7 @@ Required Permissions
 `Mail.ReadWrite`
 `Mail.Send`
 
-[Teams](/resources/integrations/social-communication/microsoft-teams.md)
+[Teams](/resources/integrations/social/microsoft-teams.md)
 
 `Channel.ReadBasic.All`
 `ChannelMessage.Read.All`
@@ -204,7 +204,7 @@ async def get_file_contents(
         return response.json()
 ```
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [Mailchimp](/en/references/auth-providers/mailchimp.md)
 [Miro](/en/references/auth-providers/miro.md)

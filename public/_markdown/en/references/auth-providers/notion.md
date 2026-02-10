@@ -125,7 +125,7 @@ const token = authResponse.context.token;
 
 ## Using Notion auth in custom tools
 
-You can use the pre-built [Arcade Notion MCP Server](/resources/integrations/productivity/notion.md) to quickly build  and AI apps that interact with Notion.
+You can use the pre-built [Arcade Notion MCP Server](/resources/integrations/productivity/notiontoolkit.md) to quickly build  and AI apps that interact with Notion.
 
 If the pre-built tools in the Notion  Server don’t meet your needs, you can author your own [custom tools](/guides/create-tools/tool-basics/build-mcp-server.md) that interact with the Notion API.
 
@@ -161,7 +161,7 @@ async def search_page_by_title(
         return dict(response.json())
 ```
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [Miro](/en/references/auth-providers/miro.md)
 [PagerDuty](/en/references/auth-providers/pagerduty.md)

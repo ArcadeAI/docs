@@ -24,7 +24,7 @@ Build a Next.js chatbot that integrates Arcade  with the Vercel AI SDK
 
 ### Prerequisites
 
--   [Arcade account](https://api.arcade.dev/dashboard/register)
+-   [Arcade account](https://app.arcade.dev/register)
 
 -   [Node.js 18+](https://nodejs.org/)
      
@@ -945,7 +945,7 @@ export default function Chat() {
 }
 ```
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [Managing user authorization](/en/get-started/agent-frameworks/openai-agents/user-auth-interrupts.md)
 [Overview](/en/get-started/mcp-clients.md)

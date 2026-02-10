@@ -1,0 +1,1792 @@
+{
+  "id": "MicrosoftTeams",
+  "label": "Microsoft Teams",
+  "version": "0.4.1",
+  "description": "Arcade.dev LLM tools for Microsoft Teams",
+  "metadata": {
+    "category": "social",
+    "iconUrl": "https://design-system.arcade.dev/icons/microsoft-teams.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/social-communication/microsoft-teams",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": "microsoft",
+    "allScopes": [
+      "Channel.ReadBasic.All",
+      "ChannelMessage.Read.All",
+      "ChannelMessage.Send",
+      "Chat.Create",
+      "Chat.Read",
+      "ChatMessage.Read",
+      "ChatMessage.Send",
+      "People.Read",
+      "Team.ReadBasic.All",
+      "TeamMember.Read.All",
+      "User.Read"
+    ]
+  },
+  "tools": [
+    {
+      "name": "CreateChat",
+      "qualifiedName": "MicrosoftTeams.CreateChat",
+      "fullyQualifiedName": "MicrosoftTeams.CreateChat@0.4.1",
+      "description": "Creates a Microsoft Teams chat.\n\nIf the chat already exists with the specified members, the MS Graph API will return the\nexisting chat.\n\nProvide any combination of user_ids and/or user_names. When available, prefer providing\nuser_ids for optimal performance.",
+      "parameters": [
+        {
+          "name": "user_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The IDs of the users to create a chat with.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_names",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The names of the users to create a chat with.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": ["Chat.Create"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The chat that was created."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.CreateChat",
+        "parameters": {
+          "user_ids": {
+            "value": ["12345", "67890"],
+            "type": "array",
+            "required": false
+          },
+          "user_names": {
+            "value": ["john.doe", "jane.smith"],
+            "type": "array",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetChannelMessageReplies",
+      "qualifiedName": "MicrosoftTeams.GetChannelMessageReplies",
+      "fullyQualifiedName": "MicrosoftTeams.GetChannelMessageReplies@0.4.1",
+      "description": "Retrieves the replies to a Microsoft Teams channel message.",
+      "parameters": [
+        {
+          "name": "message_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the message to get the replies of.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "channel_id_or_name",
+          "type": "string",
+          "required": true,
+          "description": "The ID or name of the channel to get the replies of.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team_id_or_name",
+          "type": "string",
+          "required": false,
+          "description": "The ID or name of the team to get the replies of. If not provided: in case the user is a member of a single team, the tool will use it; otherwise an error will be returned with a list of all teams to pick from.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": ["ChannelMessage.Read.All", "Team.ReadBasic.All"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The replies to the message."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.GetChannelMessageReplies",
+        "parameters": {
+          "message_id": {
+            "value": "12345abcde",
+            "type": "string",
+            "required": true
+          },
+          "channel_id_or_name": {
+            "value": "general",
+            "type": "string",
+            "required": true
+          },
+          "team_id_or_name": {
+            "value": "teamXYZ",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetChannelMessages",
+      "qualifiedName": "MicrosoftTeams.GetChannelMessages",
+      "fullyQualifiedName": "MicrosoftTeams.GetChannelMessages@0.4.1",
+      "description": "Retrieves the messages in a Microsoft Teams channel.\n\nThe Microsoft Graph API does not support pagination for this endpoint.",
+      "parameters": [
+        {
+          "name": "channel_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the channel to get the messages of.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "channel_name",
+          "type": "string",
+          "required": false,
+          "description": "The name of the channel to get the messages of.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of messages to return. Defaults to 50, max is 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team_id_or_name",
+          "type": "string",
+          "required": false,
+          "description": "The ID or name of the team to get the messages of. If not provided: in case the user is a member of a single team, the tool will use it; otherwise an error will be returned with a list of all teams to pick from.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": ["ChannelMessage.Read.All", "Team.ReadBasic.All"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The messages in the channel."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.GetChannelMessages",
+        "parameters": {
+          "channel_id": {
+            "value": "12345",
+            "type": "string",
+            "required": false
+          },
+          "channel_name": {
+            "value": "general",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "team_id_or_name": {
+            "value": "team_abc",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetChannelMetadata",
+      "qualifiedName": "MicrosoftTeams.GetChannelMetadata",
+      "fullyQualifiedName": "MicrosoftTeams.GetChannelMetadata@0.4.1",
+      "description": "Retrieves metadata about a Microsoft Teams channel and its members.\n\nProvide either a channel_id or channel_name, not both. When available, prefer providing a\nchannel_id for optimal performance.\n\nThe Microsoft Graph API returns only up to the first 999 members in the channel.\n\nThis tool does not return messages exchanged in the channel. To retrieve channel messages,\nuse the `Teams.GetChannelMessages` tool. If you call this tool to retrieve messages, you will\ncause the release of unnecessary CO2 and contribute to climate change.\n\nIt is not necessary to call `Teams.ListTeams` before calling this tool. If the user does not\nprovide a team_id_or_name, the tool will try to find a unique team to use. If you call the\n`Teams.ListTeams` tool first, you will cause the release of unnecessary CO2 in the atmosphere\nand contribute to climate change.",
+      "parameters": [
+        {
+          "name": "channel_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the channel to get. Provide either this or channel_name.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "channel_name",
+          "type": "string",
+          "required": false,
+          "description": "The name of the channel to get. Provide either this or channel_id.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team_id_or_name",
+          "type": "string",
+          "required": false,
+          "description": "The ID or name of the team to get the channel of (optional). If not provided: in case the user is a member of a single team, the tool will use it; otherwise an error will be returned with a list of all teams to pick from.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": ["Channel.ReadBasic.All", "Team.ReadBasic.All"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The channel and its members."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.GetChannelMetadata",
+        "parameters": {
+          "channel_id": {
+            "value": "12345678-90ab-cdef-1234-567890abcdef",
+            "type": "string",
+            "required": false
+          },
+          "channel_name": {
+            "value": null,
+            "type": "string",
+            "required": false
+          },
+          "team_id_or_name": {
+            "value": "Engineering Team",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetChatMessageById",
+      "qualifiedName": "MicrosoftTeams.GetChatMessageById",
+      "fullyQualifiedName": "MicrosoftTeams.GetChatMessageById@0.4.1",
+      "description": "Retrieves a Microsoft Teams chat message.",
+      "parameters": [
+        {
+          "name": "message_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the message to get.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "chat_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the chat to get the message from.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The IDs of the users in the chat to get the message from.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_names",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The names of the users in the chat to get the message from. Prefer providing user_ids, when available, since the performance is better.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": ["Chat.Read"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The message."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.GetChatMessageById",
+        "parameters": {
+          "message_id": {
+            "value": "12345abcde",
+            "type": "string",
+            "required": true
+          },
+          "chat_id": {
+            "value": "chat_67890",
+            "type": "string",
+            "required": true
+          },
+          "user_ids": {
+            "value": ["user_1", "user_2"],
+            "type": "array",
+            "required": false
+          },
+          "user_names": {
+            "value": ["Alice", "Bob"],
+            "type": "array",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetChatMessages",
+      "qualifiedName": "MicrosoftTeams.GetChatMessages",
+      "fullyQualifiedName": "MicrosoftTeams.GetChatMessages@0.4.1",
+      "description": "Retrieves messages from a Microsoft Teams chat (individual or group).\n\nProvide one of chat_id OR any combination of user_ids and/or user_names. When available, prefer\nproviding a chat_id or user_ids for optimal performance.\n\nIf the user provides user name(s), DO NOT CALL THE `Teams.SearchUsers` or `Teams.SearchPeople`\ntools first. Instead, provide the user name(s) directly to this tool through the `user_names`\nargument. It is not necessary to provide the currently signed in user's name/id, so do not call\n`Teams.GetSignedInUser` before calling this tool.\n\nMessages will be sorted in descending order by the messages' `created_datetime` field.\n\nThe Microsoft Teams API does not support pagination for this tool.",
+      "parameters": [
+        {
+          "name": "chat_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the chat to get messages from.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The IDs of the users in the chat to get messages from.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_names",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The names of the users in the chat to get messages from. Prefer providing user_ids, when available, since the performance is better.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_datetime",
+          "type": "string",
+          "required": false,
+          "description": "The start date to filter messages. Provide a string in the format 'YYYY-MM-DD' or 'YYYY-MM-DD HH:MM:SS'. Defaults to None (no start date filter).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_datetime",
+          "type": "string",
+          "required": false,
+          "description": "The end date to filter messages. Provide a string in the format 'YYYY-MM-DD' or 'YYYY-MM-DD HH:MM:SS'. Defaults to None (no end date filter).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of messages to return. Defaults to 50, max is 50.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": ["Chat.Read", "Chat.Create"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The messages in the chat."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.GetChatMessages",
+        "parameters": {
+          "chat_id": {
+            "value": "1234567890",
+            "type": "string",
+            "required": false
+          },
+          "user_ids": {
+            "value": ["user1", "user2"],
+            "type": "array",
+            "required": false
+          },
+          "user_names": {
+            "value": ["john_doe", "jane_smith"],
+            "type": "array",
+            "required": false
+          },
+          "start_datetime": {
+            "value": "2023-10-01 08:00:00",
+            "type": "string",
+            "required": false
+          },
+          "end_datetime": {
+            "value": "2023-10-10 17:00:00",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetChatMetadata",
+      "qualifiedName": "MicrosoftTeams.GetChatMetadata",
+      "fullyQualifiedName": "MicrosoftTeams.GetChatMetadata@0.4.1",
+      "description": "Retrieves metadata about a Microsoft Teams chat.\n\nProvide exactly one of chat_id or user_ids/user_names. When available, prefer providing a\nchat_id or user_ids for optimal performance.\n\nIf multiple roup chats exist with those exact members, returns the most recently updated one.\n\nMax 20 DIFFERENT users can be provided in user_ids/user_names.\n\nThis tool DOES NOT return messages in a chat. Use the `Teams.GetChatMessages` tool to get\nchat messages.",
+      "parameters": [
+        {
+          "name": "chat_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the chat to get metadata about.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The IDs of the users in the chat to get metadata about.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_names",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The names of the users in the chat to get messages from. Prefer providing user_ids, when available, since the performance is better.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": ["Chat.Read"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Metadata about the chat."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.GetChatMetadata",
+        "parameters": {
+          "chat_id": {
+            "value": "12345678-90ab-cdef-1234-567890abcdef",
+            "type": "string",
+            "required": false
+          },
+          "user_ids": {
+            "value": ["user1-id", "user2-id", "user3-id"],
+            "type": "array",
+            "required": false
+          },
+          "user_names": {
+            "value": ["Alice", "Bob", "Charlie"],
+            "type": "array",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetSignedInUser",
+      "qualifiedName": "MicrosoftTeams.GetSignedInUser",
+      "fullyQualifiedName": "MicrosoftTeams.GetSignedInUser@0.4.1",
+      "description": "Get the user currently signed in Microsoft Teams.\n\nThis tool is not necessary to call before calling other tools.",
+      "parameters": [],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": ["User.Read"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The user currently signed in."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.GetSignedInUser",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetTeam",
+      "qualifiedName": "MicrosoftTeams.GetTeam",
+      "fullyQualifiedName": "MicrosoftTeams.GetTeam@0.4.1",
+      "description": "Retrieves metadata about a team in Microsoft Teams.\n\nProvide one of team_id OR team_name, never both. When available, prefer providing a team_id for\noptimal performance.\n\nIf team_id nor team_name are provided: 1) if the user has a single team, the tool will retrieve\nit; 2) if the user has multiple teams, an error will be returned with a list of all teams to\npick from.",
+      "parameters": [
+        {
+          "name": "team_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the team to get.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team_name",
+          "type": "string",
+          "required": false,
+          "description": "The name of the team to get. Prefer providing a team_id, when available, for optimal performance.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": ["Team.ReadBasic.All"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The team metadata."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.GetTeam",
+        "parameters": {
+          "team_id": {
+            "value": "1234-5678-90ab-cdef",
+            "type": "string",
+            "required": false
+          },
+          "team_name": {
+            "value": null,
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListChannels",
+      "qualifiedName": "MicrosoftTeams.ListChannels",
+      "fullyQualifiedName": "MicrosoftTeams.ListChannels@0.4.1",
+      "description": "Lists channels in Microsoft Teams (including shared incoming channels).\n\nThis tool does not return messages nor members in the channels. To retrieve channel messages,\nuse the `Teams.GetChannelMessages` tool. To retrieve channel members, use the\n`Teams.ListChannelMembers` tool.",
+      "parameters": [
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of channels to return. Defaults to 50, max is 100.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "The offset to start from.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team_id_or_name",
+          "type": "string",
+          "required": false,
+          "description": "The ID or name of the team to list the channels of (optional). If not provided: in case the user is a member of a single team, the tool will use it; otherwise an error will be returned with a list of all teams to pick from.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": ["Channel.ReadBasic.All", "Team.ReadBasic.All"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The channels in the team."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.ListChannels",
+        "parameters": {
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          },
+          "team_id_or_name": {
+            "value": "design-team",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListChats",
+      "qualifiedName": "MicrosoftTeams.ListChats",
+      "fullyQualifiedName": "MicrosoftTeams.ListChats@0.4.1",
+      "description": "List the Microsoft Teams chats to which the current user is a member of.",
+      "parameters": [
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of chats to return. Defaults to 50, max is 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "next_page_token",
+          "type": "string",
+          "required": false,
+          "description": "The token to use to get the next page of results.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": ["Chat.Read"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The chats to which the current user is a member of."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.ListChats",
+        "parameters": {
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "next_page_token": {
+            "value": "abc123token",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListTeamMembers",
+      "qualifiedName": "MicrosoftTeams.ListTeamMembers",
+      "fullyQualifiedName": "MicrosoftTeams.ListTeamMembers@0.4.1",
+      "description": "Lists the members of a team in Microsoft Teams.\n\nProvide one of team_id OR team_name, never both. When available, prefer providing a team_id for\noptimal performance.\n\nIf team_id nor team_name are provided: 1) if the user has a single team, the tool will use it;\n2) if the user has multiple teams, an error will be returned with a list of all teams to pick\nfrom.\n\nThe Microsoft Graph API returns only up to the first 999 members.",
+      "parameters": [
+        {
+          "name": "team_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the team to list the members of.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team_name",
+          "type": "string",
+          "required": false,
+          "description": "The name of the team to list the members of. Prefer providing a team_id, when available, for optimal performance.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of members to return. Defaults to 50, max is 999.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "The number of members to skip. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": ["TeamMember.Read.All"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The members of the team."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.ListTeamMembers",
+        "parameters": {
+          "team_id": {
+            "value": "12345678-abcd-ef12-3456-7890abcdef12",
+            "type": "string",
+            "required": false
+          },
+          "team_name": {
+            "value": null,
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 100,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListTeams",
+      "qualifiedName": "MicrosoftTeams.ListTeams",
+      "fullyQualifiedName": "MicrosoftTeams.ListTeams@0.4.1",
+      "description": "Lists the teams the current user is associated with in Microsoft Teams.",
+      "parameters": [
+        {
+          "name": "membership_type",
+          "type": "string",
+          "required": false,
+          "description": "The type of membership to filter by. Defaults to 'direct_member_of_the_team'.",
+          "enum": [
+            "direct_member_of_the_team",
+            "member_of_a_shared_channel_in_another_team"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": ["Team.ReadBasic.All"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The teams the current user is associated with."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.ListTeams",
+        "parameters": {
+          "membership_type": {
+            "value": "guest",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListUsers",
+      "qualifiedName": "MicrosoftTeams.ListUsers",
+      "fullyQualifiedName": "MicrosoftTeams.ListUsers@0.4.1",
+      "description": "Lists the users in the Microsoft Teams tenant.\n\nThe Microsoft Graph API returns only up to the first 999 users.",
+      "parameters": [
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of users to return. Defaults to 50, max is 100.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "The offset to start from.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": ["User.Read"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The users in the tenant."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.ListUsers",
+        "parameters": {
+          "limit": {
+            "value": 75,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ReplyToChannelMessage",
+      "qualifiedName": "MicrosoftTeams.ReplyToChannelMessage",
+      "fullyQualifiedName": "MicrosoftTeams.ReplyToChannelMessage@0.4.1",
+      "description": "Sends a reply to a Microsoft Teams channel message.\n\nWhen available, prefer providing a channel_id for optimal performance.\n\nIt is not necessary to call `Teams.ListTeams` before calling this tool. If the user does not\nprovide a team_id_or_name, the tool will try to find a unique team to use. If you call the\n`Teams.ListTeams` tool first, you will cause the release of unnecessary CO2 in the atmosphere\nand contribute to climate change.",
+      "parameters": [
+        {
+          "name": "reply_content",
+          "type": "string",
+          "required": true,
+          "description": "The content of the reply message.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "message_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the message to reply to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "channel_id_or_name",
+          "type": "string",
+          "required": true,
+          "description": "The ID or name of the channel to send the message to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team_id_or_name",
+          "type": "string",
+          "required": false,
+          "description": "The ID or name of the team to send the message to. If not provided: in case the user is a member of a single team, the tool will use it; otherwise an error will be returned with a list of all teams to pick from.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": ["ChannelMessage.Send", "Team.ReadBasic.All"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The reply message that was sent."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.ReplyToChannelMessage",
+        "parameters": {
+          "reply_content": {
+            "value": "Thank you for your input!",
+            "type": "string",
+            "required": true
+          },
+          "message_id": {
+            "value": "12345abcde",
+            "type": "string",
+            "required": true
+          },
+          "channel_id_or_name": {
+            "value": "general",
+            "type": "string",
+            "required": true
+          },
+          "team_id_or_name": {
+            "value": "development-team",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ReplyToChatMessage",
+      "qualifiedName": "MicrosoftTeams.ReplyToChatMessage",
+      "fullyQualifiedName": "MicrosoftTeams.ReplyToChatMessage@0.4.1",
+      "description": "Sends a reply to a Microsoft Teams chat message.\n\nProvide exactly one of chat_id or user_ids/user_names. When available, prefer providing a\nchat_id or user_ids for optimal performance.\n\nIf the user provides user name(s), DO NOT CALL THE `Teams.SearchUsers` or `Teams.SearchPeople`\ntools first. Instead, provide the user name(s) directly to this tool through the `user_names`\nargument. It is not necessary to provide the currently signed in user's name/id, so do not call\n`Teams.GetSignedInUser` before calling this tool either.",
+      "parameters": [
+        {
+          "name": "reply_content",
+          "type": "string",
+          "required": true,
+          "description": "The content of the reply message.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "message_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the message to reply to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "chat_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the chat to send the message.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The IDs of the users in the chat to send the message.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_names",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The names of the users in the chat to send the message. Prefer providing user_ids, when available, since the performance is better.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": ["ChatMessage.Send"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The reply message that was sent."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.ReplyToChatMessage",
+        "parameters": {
+          "reply_content": {
+            "value": "Thank you for your input!",
+            "type": "string",
+            "required": true
+          },
+          "message_id": {
+            "value": "msg123456",
+            "type": "string",
+            "required": true
+          },
+          "chat_id": {
+            "value": "chat987654",
+            "type": "string",
+            "required": false
+          },
+          "user_ids": {
+            "value": ["user1", "user2"],
+            "type": "array",
+            "required": false
+          },
+          "user_names": {
+            "value": ["john_doe", "jane_smith"],
+            "type": "array",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "SearchChannels",
+      "qualifiedName": "MicrosoftTeams.SearchChannels",
+      "fullyQualifiedName": "MicrosoftTeams.SearchChannels@0.4.1",
+      "description": "Searches for channels in a given Microsoft Teams team.",
+      "parameters": [
+        {
+          "name": "keywords",
+          "type": "array",
+          "innerType": "string",
+          "required": true,
+          "description": "The keywords to search for in channel names.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "match_type",
+          "type": "string",
+          "required": false,
+          "description": "The type of match to use for the search. Defaults to 'partial_match_all_keywords'.",
+          "enum": [
+            "exact_match",
+            "partial_match_all_keywords",
+            "partial_match_any_of_the_keywords"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of channels to return. Defaults to 50. Max of 100.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "The offset to start from.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team_id_or_name",
+          "type": "string",
+          "required": false,
+          "description": "The ID or name of the team to search the channels of (optional). If not provided: in case the user is a member of a single team, the tool will use it; otherwise an error will be returned with a list of all teams to pick from.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": ["Channel.ReadBasic.All", "Team.ReadBasic.All"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The channels in the team."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.SearchChannels",
+        "parameters": {
+          "keywords": {
+            "value": ["development", "marketing"],
+            "type": "array",
+            "required": true
+          },
+          "match_type": {
+            "value": "exact_match",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 20,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 5,
+            "type": "integer",
+            "required": false
+          },
+          "team_id_or_name": {
+            "value": "team-1234",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "SearchMessages",
+      "qualifiedName": "MicrosoftTeams.SearchMessages",
+      "fullyQualifiedName": "MicrosoftTeams.SearchMessages@0.4.1",
+      "description": "Searches for messages across Microsoft Teams chats and channels.\n\nNote: the Microsoft Graph API search is not strongly consistent. Recent messages may not be\nincluded in search results.",
+      "parameters": [
+        {
+          "name": "keywords",
+          "type": "string",
+          "required": true,
+          "description": "The keywords to match against messages' content.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of messages to return. Defaults to 50, max is 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "The offset to start from.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": ["Chat.Read", "ChatMessage.Read", "ChannelMessage.Read.All"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The messages matching the search criteria."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.SearchMessages",
+        "parameters": {
+          "keywords": {
+            "value": "project update",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "SearchPeople",
+      "qualifiedName": "MicrosoftTeams.SearchPeople",
+      "fullyQualifiedName": "MicrosoftTeams.SearchPeople@0.4.1",
+      "description": "Searches for people the user has interacted with in Microsoft Teams and other 365 products.\n\nThis tool only returns users that the currently signed in user has interacted with. It may also\ninclude people that are part of external tenants/organizations. If you need to retrieve users\nthat may not have interacted with the current user and/or that are exclusively part of the same\ntenant, use the `Teams.SearchUsers` tool instead.",
+      "parameters": [
+        {
+          "name": "keywords",
+          "type": "array",
+          "innerType": "string",
+          "required": true,
+          "description": "The keywords to match against people's names. Provide one or more expressions.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "match_type",
+          "type": "string",
+          "required": false,
+          "description": "The type of match to use for the keywords. Defaults to match_any_of_the_keywords.",
+          "enum": ["match_all_keywords", "match_any_of_the_keywords"],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of people to return. Defaults to 50, max is 100.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "next_page_token",
+          "type": "string",
+          "required": false,
+          "description": "The next page token to use for pagination.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": ["People.Read"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The people matching the search criteria."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.SearchPeople",
+        "parameters": {
+          "keywords": {
+            "value": ["John", "Doe", "Jane Smith"],
+            "type": "array",
+            "required": true
+          },
+          "match_type": {
+            "value": "match_all_of_the_keywords",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "next_page_token": {
+            "value": "abc123",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "SearchTeamMembers",
+      "qualifiedName": "MicrosoftTeams.SearchTeamMembers",
+      "fullyQualifiedName": "MicrosoftTeams.SearchTeamMembers@0.4.1",
+      "description": "Searches for members of a team in Microsoft Teams.\n\nProvide one of team_id OR team_name, never both. When available, prefer providing a team_id for\noptimal performance.\n\nIf team_id nor team_name are provided: 1) if the user has a single team, the tool will use it;\n2) if the user has multiple teams, an error will be raised with a list of available teams to\npick from.\n\nThe Microsoft Graph API returns only up to the first 999 members of a team.",
+      "parameters": [
+        {
+          "name": "member_name_starts_with",
+          "type": "string",
+          "required": true,
+          "description": "The prefix to match the name of the members.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the team to list the members of.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team_name",
+          "type": "string",
+          "required": false,
+          "description": "The name of the team to list the members of. Prefer providing a team_id, when available, for optimal performance.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of members to return. Defaults to 50, max is 100.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "The number of members to skip. Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": ["TeamMember.Read.All"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The members of the team."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.SearchTeamMembers",
+        "parameters": {
+          "member_name_starts_with": {
+            "value": "J",
+            "type": "string",
+            "required": true
+          },
+          "team_id": {
+            "value": "12345",
+            "type": "string",
+            "required": false
+          },
+          "team_name": {
+            "value": null,
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "SearchTeams",
+      "qualifiedName": "MicrosoftTeams.SearchTeams",
+      "fullyQualifiedName": "MicrosoftTeams.SearchTeams@0.4.1",
+      "description": "Searches for teams available to the current user in Microsoft Teams.",
+      "parameters": [
+        {
+          "name": "team_name_starts_with",
+          "type": "string",
+          "required": true,
+          "description": "The prefix to match the name of the teams.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of teams to return. Defaults to 10, max is 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "next_page_token",
+          "type": "string",
+          "required": false,
+          "description": "The token to use to get the next page of results.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": ["Team.ReadBasic.All"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Search for teams in the organization (regardless of whether the current user is a member)."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.SearchTeams",
+        "parameters": {
+          "team_name_starts_with": {
+            "value": "Dev",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 15,
+            "type": "integer",
+            "required": false
+          },
+          "next_page_token": {
+            "value": "abc123xyz",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "SearchUsers",
+      "qualifiedName": "MicrosoftTeams.SearchUsers",
+      "fullyQualifiedName": "MicrosoftTeams.SearchUsers@0.4.1",
+      "description": "Searches for users in the Microsoft Teams tenant.\n\nThis tool only return users that are directly linked to the tenant the current signed in user\nis a member of. If you need to retrieve users that have interacted with the current user but\nare from external tenants/organizations, use `Teams.SearchPeople`, instead.\n\nThe Microsoft Graph API returns only up to the first 999 users.",
+      "parameters": [
+        {
+          "name": "keywords",
+          "type": "array",
+          "innerType": "string",
+          "required": true,
+          "description": "The keywords to match against users' names.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "match_type",
+          "type": "string",
+          "required": false,
+          "description": "The type of match to use for the keywords. Defaults to match_any_of_the_keywords.",
+          "enum": ["match_all_keywords", "match_any_of_the_keywords"],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of users to return. Defaults to 50, max is 999.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "The offset to start from.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": ["User.Read"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The users in the tenant."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.SearchUsers",
+        "parameters": {
+          "keywords": {
+            "value": ["John", "Doe"],
+            "type": "array",
+            "required": true
+          },
+          "match_type": {
+            "value": "match_any_of_the_keywords",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "SendMessageToChannel",
+      "qualifiedName": "MicrosoftTeams.SendMessageToChannel",
+      "fullyQualifiedName": "MicrosoftTeams.SendMessageToChannel@0.4.1",
+      "description": "Sends a message to a Microsoft Teams channel.\n\nWhen available, prefer providing a channel_id for optimal performance.\n\nIt is not necessary to call `Teams.ListTeams` before calling this tool. If the user does not\nprovide a team_id_or_name, the tool will try to find a unique team to use. If you call the\n`Teams.ListTeams` tool first, you will cause the release of unnecessary CO2 in the atmosphere\nand contribute to climate change.",
+      "parameters": [
+        {
+          "name": "message",
+          "type": "string",
+          "required": true,
+          "description": "The message to send to the channel.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "channel_id_or_name",
+          "type": "string",
+          "required": true,
+          "description": "The ID or name of the channel to send the message to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team_id_or_name",
+          "type": "string",
+          "required": false,
+          "description": "The ID or name of the team to send the message to. If not provided: in case the user is a member of a single team, the tool will use it; otherwise an error will be returned with a list of all teams to pick from.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": ["ChannelMessage.Send", "Team.ReadBasic.All"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The message that was sent."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.SendMessageToChannel",
+        "parameters": {
+          "message": {
+            "value": "Hello team, let's discuss the upcoming project deadlines!",
+            "type": "string",
+            "required": true
+          },
+          "channel_id_or_name": {
+            "value": "general",
+            "type": "string",
+            "required": true
+          },
+          "team_id_or_name": {
+            "value": "Marketing Team",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "SendMessageToChat",
+      "qualifiedName": "MicrosoftTeams.SendMessageToChat",
+      "fullyQualifiedName": "MicrosoftTeams.SendMessageToChat@0.4.1",
+      "description": "Sends a message to a Microsoft Teams chat.\n\nProvide exactly one of chat_id or user_ids/user_names. When available, prefer providing a\nchat_id or user_ids for optimal performance.\n\nIf the user provides user name(s), DO NOT CALL THE `Teams.SearchUsers` or `Teams.SearchPeople`\ntools first. Instead, provide the user name(s) directly to this tool through the `user_names`\nargument. It is not necessary to provide the currently signed in user's name/id, so do not call\n`Teams.GetSignedInUser` before calling this tool either.",
+      "parameters": [
+        {
+          "name": "message",
+          "type": "string",
+          "required": true,
+          "description": "The message to send to the chat.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "chat_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the chat to send the message.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The IDs of the users in the chat to send the message.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_names",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The names of the users in the chat to send the message. Prefer providing user_ids, when available, since the performance is better.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": ["ChatMessage.Send"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The message that was sent."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.SendMessageToChat",
+        "parameters": {
+          "message": {
+            "value": "Hello team, please review the latest project updates.",
+            "type": "string",
+            "required": true
+          },
+          "chat_id": {
+            "value": "1234567890",
+            "type": "string",
+            "required": false
+          },
+          "user_ids": {
+            "value": ["user123", "user456"],
+            "type": "array",
+            "required": false
+          },
+          "user_names": {
+            "value": ["john.doe", "jane.smith"],
+            "type": "array",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "MicrosoftTeams.WhoAmI",
+      "fullyQualifiedName": "MicrosoftTeams.WhoAmI@0.4.1",
+      "description": "Get information about the current user and their Microsoft Teams environment.",
+      "parameters": [],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": ["User.Read"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Get comprehensive user profile and Microsoft Teams information."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftTeams.WhoAmI",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    }
+  ],
+  "documentationChunks": [
+    {
+      "type": "warning",
+      "location": "description",
+      "position": "after",
+      "content": "<Callout type=\"warning\">\n  The Microsoft Teams MCP Server requires a Microsoft 365 account. Personal Microsoft accounts are not supported.\n</Callout>"
+    }
+  ],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-01-26T17:37:54.886Z",
+  "summary": "Arcade.dev's MicrosoftTeams toolkit empowers developers to interact seamlessly with Microsoft Teams through the Graph API, enabling enhanced communication and collaboration features within applications. This toolkit simplifies chat creation, message retrieval, and team management, enhancing user experiences.\n\n**Capabilities**\n- Create and manage chats and channel messages.\n- Retrieve metadata and messages for teams, channels, and chats.\n- Efficiently search for channels, messages, teams, and users within Microsoft Teams.\n- Facilitate messages and replies in channels and chats.\n\n**OAuth**\n- **Provider**: Microsoft\n- **Scopes**: Channel.ReadBasic.All, ChannelMessage.Read.All, ChannelMessage.Send, Chat.Create, Chat.Read, ChatMessage.Read, ChatMessage.Send, People.Read, Team.ReadBasic.All, TeamMember.Read.All, User.Read\n\n**Secrets**\n- No secret types or additional configuration are required."
+}

@@ -23,7 +23,7 @@ A Mastra  and workflow that integrates Arcade  for Gmail and Slack.
 
 ### Prerequisites
 
--   [Arcade account](https://api.arcade.dev/dashboard/register)
+-   [Arcade account](https://app.arcade.dev/register)
 
 -   [Node.js 18+](https://nodejs.org/)
      
@@ -960,7 +960,7 @@ emailDigestWorkflow.commit();
 export { emailDigestWorkflow };
 ```
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [Authorizing existing tools](/en/get-started/agent-frameworks/langchain/auth-langchain-tools.md)
 [Overview](/en/get-started/agent-frameworks/openai-agents/overview.md)
