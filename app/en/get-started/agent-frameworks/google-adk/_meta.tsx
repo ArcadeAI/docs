@@ -1,4 +1,4 @@
 export default {
   overview: "Overview",
-  "use-arcade-tools": "Using Arcade tools",
+  "use-arcade-tools": "Setup Arcade with Google ADK (Python)",
 };
