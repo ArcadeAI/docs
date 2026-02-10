@@ -858,5 +858,5 @@ if __name__ == "__main__":
 
 Last updated on February 10, 2026
 
-[Using Arcade tools](/en/get-started/agent-frameworks/google-adk/use-arcade-tools.md)
+[Setup Arcade with Google ADK (Python)](/en/get-started/agent-frameworks/google-adk/use-arcade-tools.md)
 [Setup Arcade with LangChain (TypeScript)](/en/get-started/agent-frameworks/langchain/use-arcade-with-langchain-ts.md)
