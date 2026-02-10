@@ -8,7 +8,9 @@ Setup (TypeScript)
 
 # Setup Arcade with LangChain
 
-LangChain is a popular agentic framework that abstracts a lot of the complexity of building AI agents. It is built on top of LangGraph, a lower level orchestration framework that offers more control over the inner flow of the .
+Learn how to integrate Arcade tools using LangChain primitives to build AI .
+
+LangChain is a popular agentic framework that abstracts a lot of the complexity of building AI agents. LangGraph, a lower level orchestration framework, builds it and offers more control over the inner flow of the .
 
 ## Outcomes
 
@@ -30,13 +32,13 @@ Learn how to integrate Arcade  using LangChain primitives
 
 ## LangChain primitives you will use in this guide
 
-LangChain provides multiple abstractions for building AI , and it’s very useful to internalize how some of these primitives work, so you can understand and extend the different agentic patterns LangChain supports.
+LangChain provides multiple abstractions for building AI , and it’s useful to internalize how some of these primitives work, so you can understand and extend the different agentic patterns LangChain supports.
 
 -   : Most agentic frameworks, including LangChain, provide an abstraction for a .
 -   [_Interrupts_](https://docs.langchain.com/oss/javascript/langgraph/interrupts)
-    : Interrupts in LangChain are a way to control the flow of the agentic loop when something needs to be done outside of the normal ReAct flow. For example, if a tool requires authorization, you can interrupt the  and ask the user to authorize the  before continuing.
+    : Interrupts in LangChain are a way to control the flow of the agentic loop when something needs to occur outside of the normal ReAct flow. For example, if a tool requires authorization, you can interrupt the  and ask the user to authorize the  before continuing.
 -   [_Checkpointers_](https://docs.langchain.com/oss/javascript/langgraph/persistence)
-    : Checkpointers are how LangChain implements persistence. A checkpointer stores the ’s state in a “checkpoint” that can be resumed later. Those checkpoints are saved to a _thread_, which can be accessed after the agent’s execution, making it very simlpe for long-running agents and for handling interruptions and more sophisticated flows such as branching, time travel, and more.
+    : Checkpointers are how LangChain implements persistence. A checkpointer stores the ’s state in a “checkpoint” that you can resume later. Those checkpoints are saved to a _thread_, which you can access after the agent’s execution, making it simple for long-running agents and for handling interruptions and more sophisticated flows such as branching, time travel, and more.
 
 ## Integrate Arcade tools into a LangChain agent
 
@@ -82,7 +84,7 @@ import chalk from "chalk";
 import readline from "node:readline/promises";
 ```
 
-This is quite a number of imports, let’s break them down:
+This is a number of imports, examine them:
 
 -   Arcade imports:
     -   `Arcade`: This is the , used to interact with the .
@@ -120,7 +122,7 @@ const toolLimit = 30;
 // This prompt defines the behavior of the agent.
 const systemPrompt =
   "You are a helpful assistant that can use Gmail tools. Your main task is to help the user with anything they may need.";
-// This determines which LLM will be used inside the agent
+// This determines which LLM the agent uses
 const agentModel = "gpt-4o-mini";
 // This allows LangChain to retain the context of the session
 const threadID = "1";
@@ -128,7 +130,7 @@ const threadID = "1";
 
 ### Write a helper function to execute Arcade tools
 
-This is a wrapper around the `executeZodTool` function. When it fails, you interrupt the flow and send the authorization request for the  to handle. If the user authorizes the , the harness will reply with an `{authorized: true}` object, and the tool call will be retried without interrupting the flow.
+This is a wrapper around the `executeZodTool` function. When it fails, you interrupt the flow and send the authorization request for the  to handle. If the user authorizes the , the harness will reply with an `{authorized: true}` object, and the system will retry the tool call without interrupting the flow.
 
 ```typescript
 // main.ts
@@ -176,7 +178,7 @@ function executeOrInterruptTool({
           })(input);
           return result;
         } else {
-          // If the user didn't authorize the tool, throw an error, which will be handled by LangChain
+          // If the user didn't authorize the tool, the system handles errors through LangChain
           throw new Error(
             `Authorization required for tool call ${toolName}, but user didn't authorize.`,
           );
@@ -192,7 +194,7 @@ function executeOrInterruptTool({
 
 Here you get the Arcade tools you want the agent to use, and transform them into LangChain tools. The first step is to initialize the , and get the  you want to use. Then, use the `toZod` function to convert the Arcade tools into a Zod schema, and pass it to the `executeOrInterruptTool` function to create a LangChain tool.
 
-This helper function is fairly long, here’s a breakdown of what it does for clarity:
+This helper function is long, here’s a breakdown of what it does for clarity:
 
 -   retrieve tools from all configured  servers (defined in the `MCPServers` variable)
 -   retrieve individual  (defined in the `individualTools` variable)
@@ -282,7 +284,7 @@ const tools = await getTools({
 
 ### Write the interrupt handler
 
-In LangChain, each interrupt needs to be “resolved” for the flow to continue. In response to an interrupt, you need to return a decision object with the information needed to resolve the interrupt. In this case, the decision is whether the authorization was successful, in which case the tool call will be retried, or if the authorization failed, the flow will be interrupted with an error, and the  will decide what to do next.
+In LangChain, each interrupt needs to be “resolved” for the flow to continue. In response to an interrupt, you need to return a decision object with the information needed to resolve the interrupt. In this case, the decision is whether the authorization was successful, in which case the system will retry the tool call, or if the authorization failed, the flow will be interrupted with an error, and the  will decide what to do next.
 
 This helper function receives an interrupt and returns a decision object. Decision objects can be of any serializable type (convertible to JSON). In this case, you return an object with a boolean flag indicating if the authorization was successful.
 
@@ -333,7 +335,7 @@ const agent = createAgent({
 
 ### Write the invoke helper
 
-This last helper function handles the streaming of the ’s response, and captures the interrupts. When an interrupt is detected, it is added to the `interrupts` array, and the flow is interrupted. If there are no interrupts, it will just stream the agent’s to your console.
+This last helper function handles the streaming of the ’s response, and captures the interrupts. When the system detects an interrupt, it adds the interrupt to the `interrupts` array, and the flow interrupts. If there are no interrupts, it will just stream the agent’s to your console.
 
 ```typescript
 // main.ts
@@ -368,7 +370,7 @@ async function streamAgent(
 
 Finally, write the main function that will call the  and handle the  input.
 
-Here the `config` object is used to configure the `thread_id`, which tells the  to store the state of the conversation into that specific thread. Like any typical agent loop, you:
+Here the `config` object configures the `thread_id`, which tells the  to store the state of the conversation into that specific thread. Like any typical agent loop, you:
 
 1.  Capture the  input
 2.  Stream the ’s response
@@ -386,7 +388,7 @@ async function main() {
     output: process.stdout,
   });
 
-  console.log(chalk.green("Welcome to the chatbot! Type 'exit' to quit."));
+  console.log(chalk.green("Welcome to the chatbot Type 'exit' to quit."));
   while (true) {
     const input = await rl.question("> ");
     if (input.toLowerCase() === "exit") {
@@ -410,7 +412,7 @@ async function main() {
         // Handle all interrupts
         const decisions: any[] = [];
         for (const interrupt of interrupts) {
-          decisions.push(await handleAuthInterrupt(interrupt, rl));
+          decisions.push(await handleAuthInterrupt(interrupt));
         }
 
         // Resume with decisions, then loop to check for more interrupts
@@ -446,7 +448,7 @@ You should see the  responding to your prompts like any model, as well as handli
 
 ## Key takeaways
 
--   Arcade  can be integrated into any agentic framework like LangChain, all you need is to transform the Arcade tools into LangChain tools and handle the authorization flow.
+-   You can integrate Arcade  into any agentic framework like LangChain, all you need is to transform the Arcade tools into LangChain tools and handle the authorization flow.
 -    isolation: By handling the authorization flow outside of the ’s context, you remove the risk of the LLM replacing the authorization URL or leaking it, and you keep the context free from any authorization-related traces, which reduces the risk of hallucinations.
 -   You can leverage the interrupts mechanism to handle human intervention in the ’s flow, useful for authorization flows, policy enforcement, or anything else that requires input from the .
 
@@ -494,7 +496,7 @@ const toolLimit = 30;
 // This prompt defines the behavior of the agent.
 const systemPrompt =
 "You are a helpful assistant that can use Gmail tools. Your main task is to help the user with anything they may need.";
-// This determines which LLM will be used inside the agent
+// This determines which LLM the agent uses
 const agentModel = "gpt-4o-mini";
 // This allows LangChain to retain the context of the session
 const threadID = "1";
@@ -518,14 +520,14 @@ userId,
 })(input);
 return result;
 } catch (error) {
-// If the tool requires authorization, we interrupt the flow and ask the user to authorize the tool
+// If the tool requires authorization, interrupt the flow and ask the user to authorize the tool
 if (error instanceof Error && isAuthorizationRequiredError(error)) {
 const response = await client.tools.authorize({
 tool_name: toolName,
 user_id: userId,
 });
 
-        // We interrupt the flow here, and pass everything the handler needs to get the user's authorization
+        // Interrupt the flow here, and pass everything the handler needs to get the user's authorization
         const interrupt_response = interrupt({
           authorization_required: true,
           authorization_response: response,
@@ -533,7 +535,7 @@ user_id: userId,
           url: response.url ?? "",
         });
 
-        // If the user authorized the tool, we retry the tool call without interrupting the flow
+        // If the user authorized the tool, retry the tool call without interrupting the flow
         if (interrupt_response.authorized) {
           const result = await executeZodTool({
             zodToolSchema,
@@ -543,7 +545,7 @@ user_id: userId,
           })(input);
           return result;
         } else {
-          // If the user didn't authorize the tool, we throw an error, which will be handled by LangChain
+          // If the user didn't authorize the tool, the system handles errors through LangChain
           throw new Error(
             `Authorization required for tool call ${toolName}, but user didn't authorize.`
           );
@@ -692,7 +694,7 @@ input: process.stdin,
 output: process.stdout,
 });
 
-console.log(chalk.green("Welcome to the chatbot! Type 'exit' to quit."));
+console.log(chalk.green("Welcome to the chatbot Type 'exit' to quit."));
 while (true) {
 const input = await rl.question("> ");
 if (input.toLowerCase() === "exit") {
@@ -716,7 +718,7 @@ rl.pause();
         // Handle all interrupts
         const decisions: any[] = [];
         for (const interrupt of interrupts) {
-          decisions.push(await handleAuthInterrupt(interrupt, rl));
+          decisions.push(await handleAuthInterrupt(interrupt));
         }
 
         // Resume with decisions, then loop to check for more interrupts
@@ -741,8 +743,6 @@ main().catch((err) => console.error(err));
 
 ```
 
-
-PLAINTEXT
 
 Last updated on February 10, 2026
 
