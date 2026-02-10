@@ -22,7 +22,7 @@ Build an  that uses Arcade  to help  with Gmail and Slack
 
 ### Prerequisites
 
--   [Arcade account](https://api.arcade.dev/dashboard/register)
+-   [Arcade account](https://app.arcade.dev/register)
 
 -   [Obtain an Arcade API key](/get-started/setup/api-keys.md)
 
