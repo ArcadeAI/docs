@@ -631,6 +631,17 @@ const nextConfig: NextConfig = withLlmsTxt({
           destination: "/:locale/get-started/agent-frameworks/vercelai",
           permanent: true,
         },
+        // Legacy /integrations path
+        {
+          source: "/:locale/integrations",
+          destination: "/:locale/resources/integrations",
+          permanent: true,
+        },
+        {
+          source: "/:locale/integrations/:path*",
+          destination: "/:locale/resources/integrations/:path*",
+          permanent: true,
+        },
         // MCP servers to integrations
         {
           source: "/:locale/mcp-servers",
