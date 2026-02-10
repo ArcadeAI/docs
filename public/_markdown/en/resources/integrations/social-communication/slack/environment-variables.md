@@ -29,7 +29,7 @@ Controls the maximum number of seconds any given Slack tool should wait while pa
 
 **Default:** `30` (expressed in seconds)
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [Slack](/en/resources/integrations/social-communication/slack.md)
 [Reference](/en/resources/integrations/social-communication/slack/reference.md)

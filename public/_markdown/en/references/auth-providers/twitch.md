@@ -191,7 +191,7 @@ async def create_poll(
         return response.json()
 ```
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [TickTick](/en/references/auth-providers/ticktick.md)
 [X](/en/references/auth-providers/x.md)

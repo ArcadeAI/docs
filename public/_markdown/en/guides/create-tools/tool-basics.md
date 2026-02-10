@@ -25,7 +25,7 @@ Building tools with Arcade allows you to extend AI agents with custom capabiliti
 -   [Organize your MCP server and tools](/guides/create-tools/tool-basics/organize-mcp-tools.md)
 
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [Get formatted tool definitions](/en/guides/tool-calling/custom-apps/get-tool-definitions.md)
 [Compare MCP server types](/en/guides/create-tools/tool-basics/compare-server-types.md)

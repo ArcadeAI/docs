@@ -3595,7 +3595,7 @@ For detailed information on configuring the Asana OAuth provider with Arcade, se
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_asana_api ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [AirtableApi](/en/resources/integrations/productivity/airtable-api.md)
 [AshbyApi](/en/resources/integrations/productivity/ashby-api.md)

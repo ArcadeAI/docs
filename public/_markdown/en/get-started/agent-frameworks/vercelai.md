@@ -945,7 +945,7 @@ export default function Chat() {
 }
 ```
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
-[Managing user authorization](/en/get-started/agent-frameworks/openai-agents/user-auth-interrupts.md)
+[Setup (TypeScript)](/en/get-started/agent-frameworks/openai-agents/setup-typescript.md)
 [Overview](/en/get-started/mcp-clients.md)

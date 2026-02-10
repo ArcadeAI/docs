@@ -109,7 +109,7 @@ At this time, Arcade Cloud does not support Salesforce auth.
 
 In order to use the Salesforce MCP Sever (or develop custom tools for Salesforce), you have to [self-host the Arcade Engine](/guides/deployment-hosting/configure-engine.md) and [configure the Salesforce auth provider](/references/auth-providers/salesforce.md) in your engine configuration.
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [Reference](/en/resources/integrations/sales/hubspot/reference.md)
 [HubspotAutomationApi](/en/resources/integrations/sales/hubspot-automation-api.md)

@@ -173,7 +173,7 @@ This tool requires the following secrets: `CURSOR_AGENTS_API_KEY` (learn how to 
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_cursor_agents_api ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [Brightdata](/en/resources/integrations/development/brightdata.md)
 [DatadogApi](/en/resources/integrations/development/datadog-api.md)

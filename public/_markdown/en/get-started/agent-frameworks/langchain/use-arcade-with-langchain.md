@@ -737,7 +737,7 @@ async function main() {
 main().catch((err) => console.error(err));
 ```
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [Using Arcade tools](/en/get-started/agent-frameworks/google-adk/use-arcade-tools.md)
 [Authorizing existing tools](/en/get-started/agent-frameworks/langchain/auth-langchain-tools.md)

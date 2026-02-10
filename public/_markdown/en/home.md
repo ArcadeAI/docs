@@ -54,7 +54,7 @@ Pre-built MCP servers ready to use with your agents.
 Arcade integrates with popular agent frameworks and LLM providers.
 
 [![LangChain](/images/icons/langchain.svg) LangChain](/guides/agent-frameworks/langchain/use-arcade-tools.md)
-[![OpenAI Agents](/images/icons/openai.png) OpenAI Agents](/guides/agent-frameworks/openai-agents/use-arcade-tools.md)
+[![OpenAI Agents](/images/icons/openai.png) OpenAI Agents](/get-started/agent-frameworks/openai-agents/overview.md)
 [![CrewAI](https://avatars.githubusercontent.com/u/170677839?s=200&v=4) CrewAI](/guides/agent-frameworks/crewai/use-arcade-tools.md)
 [![Vercel AI](/images/icons/vercel.svg) Vercel AI](/guides/agent-frameworks/vercelai.md)
 [![Google ADK](/images/icons/google.png) Google ADK](/guides/agent-frameworks/google-adk/use-arcade-tools.md)
@@ -91,6 +91,6 @@ See Arcade in action with these example applications.
 [FAQ](/resources/faq.md)
 [Changelog](/references/changelog.md)
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [About Arcade](/en/get-started/about-arcade.md)
