@@ -37,7 +37,10 @@ const isValidToolkitData = (parsed: unknown): parsed is ToolkitData =>
   typeof parsed === "object" &&
   parsed !== null &&
   "id" in parsed &&
-  ("label" in parsed || "name" in parsed);
+  ("label" in parsed || "name" in parsed) &&
+  "metadata" in parsed &&
+  typeof (parsed as Record<string, unknown>).metadata === "object" &&
+  (parsed as Record<string, unknown>).metadata !== null;
 
 const readToolkitFile = async (
   filePath: string

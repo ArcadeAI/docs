@@ -487,11 +487,10 @@ export function sortTools(
   }
 }
 
-export function filterTools(
+function filterTools(
   tools: AvailableToolsTableProps["tools"],
   query: string,
-  filter: AvailableToolsFilter,
-  selectedScopes: string[]
+  filter: AvailableToolsFilter
 ): AvailableToolsTableProps["tools"] {
   const normalizedQuery = query.trim().toLowerCase();
 
@@ -506,18 +505,9 @@ export function filterTools(
       return false;
     }
 
-    const toolScopes = buildScopeDisplayItems(tool.scopes ?? []);
-    const hasScopes = toolScopes.length > 0;
+    const hasScopes = buildScopeDisplayItems(tool.scopes ?? []).length > 0;
     const hasSecrets =
       (tool.secretsInfo?.length ?? 0) > 0 || (tool.secrets?.length ?? 0) > 0;
-
-    const matchesScopes =
-      selectedScopes.length === 0 ||
-      selectedScopes.some((scope) => toolScopes.includes(scope));
-
-    if (!matchesScopes) {
-      return false;
-    }
 
     switch (filter) {
       case "has_scopes":
@@ -562,10 +552,9 @@ export function AvailableToolsTable({
   const [sort, setSort] = useState<AvailableToolsSort>("name_asc");
   const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
   const [page, setPage] = useState<number>(1);
-  const selectedScopes: string[] = [];
 
   const filteredTools = useMemo(() => {
-    const filtered = filterTools(safeTools, query, filter, selectedScopes);
+    const filtered = filterTools(safeTools, query, filter);
     return sortTools(filtered, sort, selectedTools);
   }, [safeTools, query, filter, sort, selectedTools]);
 

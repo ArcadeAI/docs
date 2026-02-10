@@ -553,7 +553,7 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
   const metadata = useMemo(
     () => ({
       ...data.metadata,
-      type: inferToolkitType(data.id, data.metadata.type),
+      type: inferToolkitType(data.id, data.metadata?.type),
     }),
     [data.id, data.metadata]
   );
@@ -578,7 +578,7 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
     <div className="w-full">
       {/* Overview section */}
       <section className="scroll-mt-20" id={TOOLKIT_PAGE_OVERVIEW_LINK.id}>
-        <BreadcrumbBar category={data.metadata.category} label={data.label} />
+        <BreadcrumbBar category={data.metadata?.category} label={data.label} />
         <PageActionsBar toolkitId={data.id} />
         <h1 className="mb-6 font-bold text-4xl text-foreground tracking-tight">
           {data.label}
