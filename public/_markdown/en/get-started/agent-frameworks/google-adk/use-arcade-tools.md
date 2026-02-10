@@ -223,4 +223,4 @@ Enjoy exploring Arcade and building powerful AI-enabled Python applications!
 Last updated on February 10, 2026
 
 [Overview](/en/get-started/agent-frameworks/google-adk/overview.md)
-[Setup Arcade with LangChain](/en/get-started/agent-frameworks/langchain/use-arcade-with-langchain.md)
+[Setup Arcade with LangChain (Python)](/en/get-started/agent-frameworks/langchain/use-arcade-with-langchain-py.md)
