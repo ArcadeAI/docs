@@ -13,7 +13,7 @@ You can connect [Arcade MCP servers](/resources/integrations.md) to \-compatible
 [![Visual Studio Code logo](/images/icons/vscode.svg) Visual Studio Code Microsoft's code editor with MCP extensions](/guides/tool-calling/mcp-clients/visual-studio-code.md)
 [![Microsoft Copilot Studio logo](/images/icons/microsoft-copilot-studio.png) Microsoft Copilot Studio Microsoft's AI agent platform with MCP integration](/guides/tool-calling/mcp-clients/copilot-studio.md)
 
-Last updated on February 9, 2026
+Last updated on February 10, 2026
 
 [Vercel AI SDK](/en/get-started/agent-frameworks/vercelai.md)
 [Cursor](/en/get-started/mcp-clients/cursor.md)

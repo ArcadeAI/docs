@@ -43,7 +43,7 @@ Once you’ve created a gateway, you’ll need to add it to your chat client. Th
 
 See [Connect to MCP clients](/get-started/mcp-clients.md) for setup instructions specific to your client.
 
-Last updated on February 9, 2026
+Last updated on February 10, 2026
 
 [Add remote MCP servers](/en/guides/mcp-gateways/add-remote-servers.md)
 [Create via AI Assistant](/en/guides/mcp-gateways/create-via-ai.md)
