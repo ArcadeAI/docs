@@ -2826,7 +2826,7 @@ Below is a reference of enumerations used by some of the tools in the AshbyApi M
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_ashby_api ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [AsanaApi](/en/resources/integrations/productivity/asana-api.md)
 [BoxApi](/en/resources/integrations/productivity/box-api.md)

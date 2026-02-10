@@ -391,7 +391,7 @@ Below is a reference of enumerations used by some of the tools in the Customerio
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_customerio_track_api ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [CustomerioPipelinesApi](/en/resources/integrations/customer-support/customerio-pipelines-api.md)
 [FreshserviceApi](/en/resources/integrations/customer-support/freshservice-api.md)

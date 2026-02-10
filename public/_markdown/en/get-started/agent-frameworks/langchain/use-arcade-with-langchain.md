@@ -177,7 +177,7 @@ function executeOrInterruptTool({
         } else {
           // If the user didn't authorize the tool, throw an error, which will be handled by LangChain
           throw new Error(
-            `Authorization required for tool call ${toolName}, but user didn't authorize.`
+            `Authorization required for tool call ${toolName}, but user didn't authorize.`,
           );
         }
       }
@@ -233,20 +233,20 @@ export async function getTools({
         limit: limit,
       });
       return definitions.items;
-    })
+    }),
   );
 
   // Get the individual tools
   const from_individualTools = await Promise.all(
     individualTools.map(async (toolName) => {
       return await arcade.tools.get(toolName);
-    })
+    }),
   );
 
   // Combine the tools from the MCP servers and the individual tools
   const all_tools = [...from_mcpServers.flat(), ...from_individualTools];
   const unique_tools = Array.from(
-    new Map(all_tools.map((tool) => [tool.qualified_name, tool])).values()
+    new Map(all_tools.map((tool) => [tool.qualified_name, tool])).values(),
   );
 
   // Convert the Arcade tools to Zod tools
@@ -264,7 +264,7 @@ export async function getTools({
         name,
         description,
         schema: parameters,
-      })
+      }),
   );
 
   return langchainTools;
@@ -285,12 +285,12 @@ In LangChain, each interrupt needs to be “resolved” for the flow to continue
 
 This helper function receives an interrupt and returns a decision object. Decision objects can be of any serializable type (convertible to JSON). In this case, you return an object with a boolean flag indicating if the authorization was successful.
 
-This function captures the authorization flow outside of the agent’s context, which is a good practice for security and context engineering. By handling everything in the , you remove the risk of the LLM replacing the authorization URL or leaking it, and you keep the  free from any authorization-related traces, which reduces the risk of hallucinations.
+This function captures the authorization flow outside of the agent’s context, which is a good practice for security and context engineering. By handling everything in the , you remove the risk of the LLM replacing the authorization URL or leaking it, and you keep the  free from any authorization-related traces, which reduces the risk of hallucinations, and reduces context bloat.
 
 ```typescript
 // main.ts
 async function handleAuthInterrupt(
-  interrupt: Interrupt
+  interrupt: Interrupt,
 ): Promise<{ authorized: boolean }> {
   const value = interrupt.value;
   const authorization_required = value.authorization_required;
@@ -300,7 +300,7 @@ async function handleAuthInterrupt(
     console.log("⚙️: Authorization required for tool call", tool_name);
     console.log(
       "⚙️: Please authorize in your browser",
-      authorization_response.url
+      authorization_response.url,
     );
     console.log("⚙️: Waiting for you to complete authorization...");
     try {
@@ -339,7 +339,7 @@ This last helper function handles the streaming of the ’s response, and captur
 async function streamAgent(
   agent: any,
   input: any,
-  config: any
+  config: any,
 ): Promise<Interrupt[]> {
   const stream = await agent.stream(input, {
     ...config,
@@ -492,37 +492,37 @@ const individualTools = ["Gmail_ListEmails", "Gmail_SendEmail", "Gmail_WhoAmI"];
 const toolLimit = 30;
 // This prompt defines the behavior of the agent.
 const systemPrompt =
-  "You are a helpful assistant that can use Gmail tools. Your main task is to help the user with anything they may need.";
+"You are a helpful assistant that can use Gmail tools. Your main task is to help the user with anything they may need.";
 // This determines which LLM will be used inside the agent
 const agentModel = "gpt-4o-mini";
 // This allows LangChain to retain the context of the session
 const threadID = "1";
 
 function executeOrInterruptTool({
-  zodToolSchema,
-  toolDefinition,
-  client,
-  userId,
+zodToolSchema,
+toolDefinition,
+client,
+userId,
 }: ToolExecuteFunctionFactoryInput): ToolExecuteFunction<any> {
-  const { name: toolName } = zodToolSchema;
+const { name: toolName } = zodToolSchema;
 
-  return async (input: unknown) => {
-    try {
-      // Try to execute the tool
-      const result = await executeZodTool({
-        zodToolSchema,
-        toolDefinition,
-        client,
-        userId,
-      })(input);
-      return result;
-    } catch (error) {
-      // If the tool requires authorization, we interrupt the flow and ask the user to authorize the tool
-      if (error instanceof Error && isAuthorizationRequiredError(error)) {
-        const response = await client.tools.authorize({
-          tool_name: toolName,
-          user_id: userId,
-        });
+return async (input: unknown) => {
+try {
+// Try to execute the tool
+const result = await executeZodTool({
+zodToolSchema,
+toolDefinition,
+client,
+userId,
+})(input);
+return result;
+} catch (error) {
+// If the tool requires authorization, we interrupt the flow and ask the user to authorize the tool
+if (error instanceof Error && isAuthorizationRequiredError(error)) {
+const response = await client.tools.authorize({
+tool_name: toolName,
+user_id: userId,
+});
 
         // We interrupt the flow here, and pass everything the handler needs to get the user's authorization
         const interrupt_response = interrupt({
@@ -550,7 +550,8 @@ function executeOrInterruptTool({
       }
       throw error;
     }
-  };
+
+};
 }
 
 // Initialize the Arcade client
@@ -575,128 +576,128 @@ export async function getTools({
     throw new Error("At least one tool or toolkit must be provided");
   }
 
-  const from_mcpServers = await Promise.all(
-    mcpServers.map(async (mcpServerName) => {
-      const definitions = await arcade.tools.list({
-        toolkit: mcpServerName,
-        limit: limit,
-      });
-      return definitions.items;
-    })
-  );
+const from_mcpServers = await Promise.all(
+mcpServers.map(async (mcpServerName) => {
+const definitions = await arcade.tools.list({
+toolkit: mcpServerName,
+limit: limit,
+});
+return definitions.items;
+})
+);
 
-  const from_individualTools = await Promise.all(
-    individualTools.map(async (toolName) => {
-      return await arcade.tools.get(toolName);
-    })
-  );
+const from_individualTools = await Promise.all(
+individualTools.map(async (toolName) => {
+return await arcade.tools.get(toolName);
+})
+);
 
-  const all_tools = [...from_mcpServers.flat(), ...from_individualTools];
-  const unique_tools = Array.from(
-    new Map(all_tools.map((tool) => [tool.qualified_name, tool])).values()
-  );
+const all_tools = [...from_mcpServers.flat(), ...from_individualTools];
+const unique_tools = Array.from(
+new Map(all_tools.map((tool) => [tool.qualified_name, tool])).values()
+);
 
-  const arcadeTools = toZod({
-    tools: unique_tools,
-    client: arcade,
-    executeFactory: executeOrInterruptTool,
-    userId: userId,
-  });
+const arcadeTools = toZod({
+tools: unique_tools,
+client: arcade,
+executeFactory: executeOrInterruptTool,
+userId: userId,
+});
 
-  // Convert Arcade tools to LangGraph tools
-  const langchainTools = arcadeTools.map(
-    ({ name, description, execute, parameters }) =>
-      (tool as Function)(execute, {
-        name,
-        description,
-        schema: parameters,
-      })
-  );
+// Convert Arcade tools to LangGraph tools
+const langchainTools = arcadeTools.map(
+({ name, description, execute, parameters }) =>
+(tool as Function)(execute, {
+name,
+description,
+schema: parameters,
+})
+);
 
-  return langchainTools;
+return langchainTools;
 }
 
 const tools = await getTools({
-  arcade,
-  mcpServers: MCPServers,
-  individualTools: individualTools,
-  userId: arcadeUserID,
-  limit: toolLimit,
+arcade,
+mcpServers: MCPServers,
+individualTools: individualTools,
+userId: arcadeUserID,
+limit: toolLimit,
 });
 
 async function handleAuthInterrupt(
-  interrupt: Interrupt
+interrupt: Interrupt
 ): Promise<{ authorized: boolean }> {
-  const value = interrupt.value;
-  const authorization_required = value.authorization_required;
-  if (authorization_required) {
-    const tool_name = value.tool_name;
-    const authorization_response = value.authorization_response;
-    console.log("⚙️: Authorization required for tool call", tool_name);
-    console.log(
-      "⚙️: Please authorize in your browser",
-      authorization_response.url
-    );
-    console.log("⚙️: Waiting for you to complete authorization...");
-    try {
-      await arcade.auth.waitForCompletion(authorization_response.id);
-      console.log("⚙️: Authorization granted. Resuming execution...");
-      return { authorized: true };
-    } catch (error) {
-      console.error("⚙️: Error waiting for authorization to complete:", error);
-      return { authorized: false };
-    }
-  }
-  return { authorized: false };
+const value = interrupt.value;
+const authorization_required = value.authorization_required;
+if (authorization_required) {
+const tool_name = value.tool_name;
+const authorization_response = value.authorization_response;
+console.log("⚙️: Authorization required for tool call", tool_name);
+console.log(
+"⚙️: Please authorize in your browser",
+authorization_response.url
+);
+console.log("⚙️: Waiting for you to complete authorization...");
+try {
+await arcade.auth.waitForCompletion(authorization_response.id);
+console.log("⚙️: Authorization granted. Resuming execution...");
+return { authorized: true };
+} catch (error) {
+console.error("⚙️: Error waiting for authorization to complete:", error);
+return { authorized: false };
+}
+}
+return { authorized: false };
 }
 
 const agent = createAgent({
-  systemPrompt: systemPrompt,
-  model: agentModel,
-  tools: tools,
-  checkpointer: new MemorySaver(),
+systemPrompt: systemPrompt,
+model: agentModel,
+tools: tools,
+checkpointer: new MemorySaver(),
 });
 
 async function streamAgent(
-  agent: any,
-  input: any,
-  config: any
+agent: any,
+input: any,
+config: any
 ): Promise<Interrupt[]> {
-  const stream = await agent.stream(input, {
-    ...config,
-    streamMode: "updates",
-  });
-  const interrupts: Interrupt[] = [];
+const stream = await agent.stream(input, {
+...config,
+streamMode: "updates",
+});
+const interrupts: Interrupt[] = [];
 
-  for await (const chunk of stream) {
-    if (chunk.__interrupt__) {
-      interrupts.push(...(chunk.__interrupt__ as Interrupt[]));
-      continue;
-    }
-    for (const update of Object.values(chunk)) {
-      for (const msg of (update as any)?.messages ?? []) {
-        console.log("🤖: ", msg.toFormattedString());
-      }
-    }
-  }
+for await (const chunk of stream) {
+if (chunk.**interrupt**) {
+interrupts.push(...(chunk.**interrupt** as Interrupt[]));
+continue;
+}
+for (const update of Object.values(chunk)) {
+for (const msg of (update as any)?.messages ?? []) {
+console.log("🤖: ", msg.toFormattedString());
+}
+}
+}
 
-  return interrupts;
+return interrupts;
 }
 
 async function main() {
-  const config = { configurable: { thread_id: threadID } };
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
+const config = { configurable: { thread_id: threadID } };
+const rl = readline.createInterface({
+input: process.stdin,
+output: process.stdout,
+});
 
-  console.log(chalk.green("Welcome to the chatbot! Type 'exit' to quit."));
-  while (true) {
-    const input = await rl.question("> ");
-    if (input.toLowerCase() === "exit") {
-      break;
-    }
-    rl.pause();
+console.log(chalk.green("Welcome to the chatbot! Type 'exit' to quit."));
+while (true) {
+const input = await rl.question("> ");
+if (input.toLowerCase() === "exit") {
+break;
+}
+rl.pause();
 
     try {
       let agentInput: any = {
@@ -728,16 +729,21 @@ async function main() {
     }
 
     rl.resume();
-  }
-  console.log(chalk.red("👋 Bye..."));
-  process.exit(0);
+
+}
+console.log(chalk.red("👋 Bye..."));
+process.exit(0);
 }
 
 // Run the main function
 main().catch((err) => console.error(err));
+
 ```
+
+
+PLAINTEXT
 
 Last updated on February 10, 2026
 
-[Using Arcade tools](/en/get-started/agent-frameworks/google-adk/use-arcade-tools.md)
+[Setup Arcade with Google ADK (Python)](/en/get-started/agent-frameworks/google-adk/use-arcade-tools.md)
 [Authorizing existing tools](/en/get-started/agent-frameworks/langchain/auth-langchain-tools.md)

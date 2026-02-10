@@ -19,7 +19,7 @@ Reference
 -   **FOLDER**: `'folder'`
 -   **PAPER**: `'paper'`
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [Dropbox](/en/resources/integrations/productivity/dropbox.md)
 [Gmail](/en/resources/integrations/productivity/gmail.md)

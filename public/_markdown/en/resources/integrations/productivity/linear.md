@@ -1059,7 +1059,7 @@ The Arcade Linear MCP Server uses the [Linear auth provider](/references/auth-pr
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_linear ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [Environment Variables](/en/resources/integrations/productivity/jira/environment-variables.md)
 [Mailchimp Marketing API](/en/resources/integrations/productivity/mailchimp-marketing-api.md)

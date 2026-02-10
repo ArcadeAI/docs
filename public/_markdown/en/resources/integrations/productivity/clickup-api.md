@@ -2326,7 +2326,7 @@ For detailed information on configuring the ClickUp OAuth provider with Arcade, 
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_clickup_api ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [CalendlyApi](/en/resources/integrations/productivity/calendly-api.md)
 [FigmaApi](/en/resources/integrations/productivity/figma-api.md)

@@ -20,7 +20,7 @@ The format of the scraped web page.
 -   **`SCREENSHOT`**: Takes a screenshot of the scraped web page.
 -   **`SCREENSHOT_AT_FULL_PAGE`**: Takes a full-page screenshot of the scraped web page.
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [Firecrawl](/en/resources/integrations/development/firecrawl.md)
 [Vercel API](/en/resources/integrations/development/vercel-api.md)

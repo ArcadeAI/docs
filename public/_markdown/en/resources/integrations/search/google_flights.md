@@ -105,7 +105,7 @@ Defines the travel class options for flights.
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_google_flights ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [Google Finance](/en/resources/integrations/search/google_finance.md)
 [Google Hotels](/en/resources/integrations/search/google_hotels.md)

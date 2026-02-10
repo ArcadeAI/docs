@@ -69,7 +69,7 @@ If you have any questions or need assistance:
 -   [Contact our support team](/resources/contact-us.md)
 
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [Slack](/en/resources/integrations/social-communication/slack.md)
 [Reference](/en/resources/integrations/social-communication/slack/reference.md)
