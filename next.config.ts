@@ -28,7 +28,7 @@ const nextConfig: NextConfig = withLlmsTxt({
           source:
             "/:locale/get-started/agent-frameworks/google-adk/use-arcade-tools",
           destination:
-            "/:locale/get-started/agent-frameworks/google-adk/setup-python",
+            "/:locale/get-started/agent-frameworks/google-adk/overview",
           permanent: true,
         },
         // Auto-added redirects for deleted pages
