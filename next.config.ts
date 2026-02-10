@@ -23,6 +23,14 @@ const nextConfig: NextConfig = withLlmsTxt({
   withNextra({
     async redirects() {
       return [
+        // Google ADK tutorial consolidation - redirect old URL to new
+        {
+          source:
+            "/:locale/get-started/agent-frameworks/google-adk/use-arcade-tools",
+          destination:
+            "/:locale/get-started/agent-frameworks/google-adk/setup-python",
+          permanent: true,
+        },
         // Auto-added redirects for deleted pages
         {
           source: "/:locale/resources/integrations/preview",
@@ -513,7 +521,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/home/google-adk/use-arcade-tools",
           destination:
-            "/:locale/get-started/agent-frameworks/google-adk/use-arcade-tools",
+            "/:locale/get-started/agent-frameworks/google-adk/setup-python",
           permanent: true,
         },
         {
@@ -715,7 +723,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/guides/agent-frameworks/google-adk/python",
           destination:
-            "/:locale/get-started/agent-frameworks/google-adk/use-arcade-tools",
+            "/:locale/get-started/agent-frameworks/google-adk/setup-python",
           permanent: true,
         },
         {
