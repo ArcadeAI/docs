@@ -177,7 +177,10 @@ export async function GET(
     } else {
       // Try clean markdown first (preferred)
       // e.g., /en/home/quickstart -> public/_markdown/en/home/quickstart.md
-      const cleanMarkdownPath = join(CLEAN_MARKDOWN_DIR, `${sanitizedPath}.md`);
+      const cleanMarkdownPath = join(
+        CLEAN_MARKDOWN_DIR,
+        `${sanitizedPath}.md`
+      );
 
       try {
         await access(cleanMarkdownPath);
