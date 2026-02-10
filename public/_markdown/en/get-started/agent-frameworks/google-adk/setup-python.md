@@ -8,7 +8,7 @@ Setup (Python)
 
 # Setup Arcade with Google ADK (Python)
 
-Google ADK is a modular framework for building and deploying AI . It is optimized for Gemini and the Google Ecosystem, but supports any model and is built with compatibility with other frameworks in mind.
+Google ADK is a modular framework for building and deploying AI . It optimizes for Gemini and the Google Ecosystem, but supports any model.
 
 ## Outcomes
 
@@ -30,7 +30,7 @@ Learn how to integrate Arcade  using Google ADK primitives
 
 ## The agent architecture you will build in this guide
 
-In this guide, you will build a simple  that can use Arcade  to help the  with their requests. It will follow the ReAct pattern, where the agent thinks about what to do, plans the steps, and then executes the steps, calling tools as needed.
+In this guide, you will build an  that can use Arcade  to help the  with their requests. It will follow the ReAct pattern, where the agent thinks about what to do, plans the steps, and then executes the steps, calling tools as needed.
 
 ### Create a new project
 
@@ -95,7 +95,7 @@ import logging
 import os
 ```
 
-This includes several imports, here’s a breakdown:
+This includes multiple imports, here’s a breakdown:
 
 -   Arcade imports:
     -   `AsyncArcade`: The , used to interact with the .
@@ -124,7 +124,7 @@ This includes several imports, here’s a breakdown:
 
 ### Configure the agent
 
-These variables are used in the rest of the code to customize the  and manage the . Feel free to configure them to your liking. Set the `google_genai.types` logging level to `ERROR` to avoid a lot of noise in the console. Load the environment variables from the `.env` file using `load_dotenv()`.
+These variables set the configuration for the rest of the code to customize the  and manage the . Feel free to configure them to your liking. Set the `google_genai.types` logging level to `ERROR` to avoid a lot of noise in the console. Load the environment variables from the `.env` file using `load_dotenv()`.
 
 ```python
 # main.py
@@ -148,7 +148,7 @@ AGENT_NAME = "AwesomeAgent"
 
 ### Write a utility function to transform Arcade tool definitions into Pydantic models
 
-In this utility function, you use Pydantic to transform an Arcade  definition into a Pydantic model. Later, you will use these models to construct tools in the format expected by Google ADK. The `tool_definition_to_pydantic_model` function extracts the tools’ parameters, name, and description, and maps them to a Pydantic model.
+In this utility function, you transform an Arcade  definition into a Pydantic model. Later, you will transform these models to construct tools in the format expected by Google ADK. The `tool_definition_to_pydantic_model` function extracts the tools’ parameters, name, and description, and maps them to a Pydantic model.
 
 ```python
 # main.py
@@ -193,13 +193,13 @@ def tool_definition_to_pydantic_model(tool_def: ToolDefinition) -> type[BaseMode
 
 ### Write a custom class that extends the Google ADK FunctionTool class
 
-Here, you define the `ArcadeTool` class that extends the Google ADK `FunctionTool` class to add the following functionality:
+Here, you define the `ArcadeTool` class that extends the Google ADK `FunctionTool` class to add the following capability:
 
--   Authorize the tool using the  with the `_authorize_tool` helper function
--   Execute the tool using the  with the `_async_invoke_arcade_tool` helper function
--   Map the Pydantic model to the Google ADK schema using the `_map_pydantic_type_to_property_schema` utility function
+-   Authorize the tool with the  with the `_authorize_tool` helper function
+-   Execute the tool with the  with the `_async_invoke_arcade_tool` helper function
+-   Map the Pydantic model to the Google ADK schema with the `_map_pydantic_type_to_property_schema` utility function
 
-You also define a `ToolError` class to handle errors from the Arcade . It wraps the `ExecuteToolResponse` and provides an informative error message that can be handled in the agentic loop in case anything goes wrong.
+You also define a `ToolError` class to handle errors from the Arcade . It wraps the `ExecuteToolResponse` and provides an informative error message that the system can handle in the agentic loop in case anything goes wrong.
 
 This class captures the authorization flow outside of the agent’s , which is a good practice for security and context engineering. By handling everything in the `ArcadeTool` class, you remove the risk of the LLM replacing the authorization URL or leaking it, and you keep the context free from any authorization-related traces, which reduces the risk of hallucinations, and reduces context bloat.
 
@@ -305,13 +305,13 @@ class ArcadeTool(FunctionTool):
 
 ### Retrieve Arcade tools and transform them into Google ADK tools
 
-Here you get the Arcade tools you want the agent to use, and transform them into Google ADK tools. The first step is to initialize the , and get the  you want to use.
+Here you get the Arcade tools you want the agent to utilize, and transform them into Google ADK tools. The first step is to initialize the , and get the  you want to work with.
 
 This helper function is long, here’s a breakdown of what it does for clarity:
 
 -   retrieve tools from all configured  servers (defined in the `MCP_SERVERS` variable)
 -   retrieve individual  (defined in the `TOOLS` variable)
--   transform the Arcade  to Google ADK tools using the `ArcadeTool` class you defined earlier
+-   transform the Arcade  to Google ADK tools with the `ArcadeTool` class you defined earlier
 
 ```python
 # main.py
@@ -365,12 +365,12 @@ async def get_arcade_tools(
 The main function is where you:
 
 -   Initialize the session and artifact services
--   Get the Arcade tools from the configured  Servers
+-   Get the Arcade tools from the configured  servers
 -   Create an  with the Arcade
 -   Initialize the conversation
 -   Run the loop
 
-Google ADK provides a `Runner` class that manages the agentic loop, and will use the session and artifact services you created earlier to store the conversation history and  state. Therefore, you don’t need to manually store the conversation history or agent state, and you can just pass the latest  message to the runner.
+Google ADK provides a `Runner` class that manages the agentic loop, and will employ the session and artifact services you created earlier to store the conversation history and  state. Therefore, you don’t need to manually store the conversation history or agent state, and you can just pass the latest  message to the runner.
 
 ```python
 # main.py
@@ -443,19 +443,17 @@ You should see the  responding to your prompts like any model, as well as handli
 
 ## Tips for selecting tools
 
--   **Relevance**: Pick only the  you need. Avoid using all tools at once.
--   ** identification**: Always provide a unique and consistent `user_id` for each user. Use your internal or database user ID, not something entered by the user.
+-   **Relevance**: Pick only the  you need. Avoid utilizing all tools at once.
+-   ** identification**: Always provide a unique and consistent `user_id` for each user. Apply your internal or database user ID, not something entered by the user.
 
 ## Next steps
 
 Now that you have integrated Arcade  into your Google ADK application, you can:
 
--   Experiment with different  Servers, such as “Github” or “LinkedIn”
+-   Experiment with different  servers, such as “Github” or “LinkedIn”
 -   Customize the ’s instructions for specific tasks
--   Try out multi- systems using different Arcade
+-   Try out multi- systems with different Arcade
 -   Build your own custom tools with the Arcade  SDK
-
-Enjoy exploring Arcade and building powerful AI-enabled Python applications!
 
 ## Example code
 
@@ -511,7 +509,8 @@ TYPE_MAPPING = {
 
 
 def get_python_type(val_type: str) -> Any:
-    _type = TYPE_MAPPING.get(val_type) if _type is None:
+    _type = TYPE_MAPPING.get(val_type)
+    if _type is None:
         raise ValueError(f"Invalid value type: {val_type}")
     return _type
 

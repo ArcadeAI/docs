@@ -185,7 +185,7 @@ async function getArcadeTools(client: Arcade, userId: string): Promise<FunctionT
 
 -   `toZod` converts Arcade  definitions to Zod schemas with proper parameter types
 -   `executeFactory` creates the execution function that handles authorization and  calls
--   Each Zod  is wrapped in a Google ADK `FunctionTool`
+-   Each Zod  wraps in a Google ADK `FunctionTool`
 
 ### Create and run the agent
 
@@ -276,7 +276,7 @@ npx tsx index.ts
 bun run index.ts
 ```
 
-Google ADK for TypeScript is relatively new. Check the [official documentation](https://google.github.io/adk-docs)  and [samples repository](https://github.com/google/adk-samples)  for the latest API updates.
+Google ADK for TypeScript is still changing. Check the [official documentation](https://google.github.io/adk-docs)  and [samples repository](https://github.com/google/adk-samples)  for the latest API updates.
 
 ## Key takeaways
 
@@ -284,7 +284,7 @@ Google ADK for TypeScript is relatively new. Check the [official documentation](
 -   **`FunctionTool`** wraps the Zod  for Google ADK
 -   **`Runner`** manages the ’s conversation loop with `runAsync()`
 -   **`InMemorySessionService`** handles session state between messages
--   **Authorization** is handled in the execute factory - the auth URL is displayed when needed
+-   **Authorization** occurs in the execute factory. The auth URL appears when needed
 -   **`userId`** tracks authorization per  - use a consistent ID for each user in your application
 
 ## Example code
