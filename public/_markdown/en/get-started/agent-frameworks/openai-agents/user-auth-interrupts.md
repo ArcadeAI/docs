@@ -397,7 +397,7 @@ Key points to remember:
 
 By handling Arcade’s authorization flow correctly, you can build AI-driven applications that securely integrate with various services while respecting  permissions. Have fun exploring Arcade!
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [Using Arcade tools](/en/get-started/agent-frameworks/openai-agents/use-arcade-tools.md)
 [Vercel AI SDK](/en/get-started/agent-frameworks/vercelai.md)

@@ -22,7 +22,7 @@ Learn how to integrate Arcade  using LangChain primitives
 
 ### Prerequisites
 
--   [Arcade account](https://api.arcade.dev/dashboard/register)
+-   [Arcade account](https://app.arcade.dev/register)
 
 -   The [`bun` runtime](https://bun.com/)
 

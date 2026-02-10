@@ -21,7 +21,7 @@ Integrate Arcade’s \-calling capabilities into an application that uses an LLM
 
 ### Prerequisites
 
--   An [Arcade](https://api.arcade.dev/dashboard/register)
+-   An [Arcade](https://app.arcade.dev/register)
 
 -   An [Arcade API key](/get-started/setup/api-keys.md)
 

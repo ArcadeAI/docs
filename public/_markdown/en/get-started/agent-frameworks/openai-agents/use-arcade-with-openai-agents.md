@@ -23,7 +23,7 @@ Learn how to integrate Arcade tools using OpenAI Agents primitives. You will imp
 
 ### Prerequisites
 
--   [Arcade account](https://api.arcade.dev/dashboard/register)
+-   [Arcade account](https://app.arcade.dev/register)
 
 -   [Obtain an Arcade API key](/get-started/setup/api-keys.md)
 
@@ -554,7 +554,7 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [Overview](/en/get-started/agent-frameworks/openai-agents/overview.md)
 [Using Arcade tools](/en/get-started/agent-frameworks/openai-agents/use-arcade-tools.md)

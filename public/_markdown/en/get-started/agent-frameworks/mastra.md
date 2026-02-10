@@ -23,7 +23,7 @@ A Mastra  and workflow that integrates Arcade  for Gmail and Slack.
 
 ### Prerequisites
 
--   [Arcade account](https://api.arcade.dev/dashboard/register)
+-   [Arcade account](https://app.arcade.dev/register)
 
 -   [Node.js 18+](https://nodejs.org/)
      

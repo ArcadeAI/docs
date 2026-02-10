@@ -1,0 +1,741 @@
+{
+  "id": "GoogleSheets",
+  "label": "Google Sheets",
+  "version": "5.1.0",
+  "description": "Arcade.dev LLM tools for Google Sheets.",
+  "metadata": {
+    "category": "productivity",
+    "iconUrl": "https://design-system.arcade.dev/icons/google-sheets.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/productivity/google-sheets",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": "google",
+    "allScopes": [
+      "https://www.googleapis.com/auth/drive.file",
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/userinfo.profile"
+    ]
+  },
+  "tools": [
+    {
+      "name": "AddNoteToCell",
+      "qualifiedName": "GoogleSheets.AddNoteToCell",
+      "fullyQualifiedName": "GoogleSheets.AddNoteToCell@5.1.0",
+      "description": "Add a note to a specific cell in a spreadsheet. A note is a small\npiece of text attached to a cell (shown with a black triangle) that\nappears when you hover over the cell.\n\nsheet_id_or_name takes precedence over sheet_position. If a sheet is not mentioned,\nthen always assume the default sheet_position is sufficient.",
+      "parameters": [
+        {
+          "name": "spreadsheet_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the spreadsheet to add a comment to",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "column",
+          "type": "string",
+          "required": true,
+          "description": "The column string to add a note to. For example, 'A', 'F', or 'AZ'",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "row",
+          "type": "integer",
+          "required": true,
+          "description": "The row number to add a note to",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "note_text",
+          "type": "string",
+          "required": true,
+          "description": "The text for the note to add",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sheet_position",
+          "type": "integer",
+          "required": false,
+          "description": "The position/tab of the sheet in the spreadsheet to write to. A value of 1 represents the first (leftmost/Sheet1) sheet. Defaults to 1.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sheet_id_or_name",
+          "type": "string",
+          "required": false,
+          "description": "The id or name of the sheet to write to. If provided, takes precedence over sheet_position.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": ["https://www.googleapis.com/auth/drive.file"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The status of the operation"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleSheets.AddNoteToCell",
+        "parameters": {
+          "spreadsheet_id": {
+            "value": "1A2B3C4D5E6F7G8H9I0J",
+            "type": "string",
+            "required": true
+          },
+          "column": {
+            "value": "B",
+            "type": "string",
+            "required": true
+          },
+          "row": {
+            "value": 5,
+            "type": "integer",
+            "required": true
+          },
+          "note_text": {
+            "value": "This is a note regarding the data in this cell.",
+            "type": "string",
+            "required": true
+          },
+          "sheet_position": {
+            "value": 2,
+            "type": "integer",
+            "required": false
+          },
+          "sheet_id_or_name": {
+            "value": "Monthly Report",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateSpreadsheet",
+      "qualifiedName": "GoogleSheets.CreateSpreadsheet",
+      "fullyQualifiedName": "GoogleSheets.CreateSpreadsheet@5.1.0",
+      "description": "Create a new spreadsheet with the provided title and data in its first sheet\n\nReturns the newly created spreadsheet's id and title",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "The title of the new spreadsheet",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "data",
+          "type": "string",
+          "required": false,
+          "description": "The data to write to the spreadsheet. A JSON string (property names enclosed in double quotes) representing a dictionary that maps row numbers to dictionaries that map column letters to cell values. For example, data[23]['C'] would be the value of the cell in row 23, column C. Type hint: dict[int, dict[str, Union[int, float, str, bool]]]",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": ["https://www.googleapis.com/auth/drive.file"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The created spreadsheet's id and title"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleSheets.CreateSpreadsheet",
+        "parameters": {
+          "title": {
+            "value": "Monthly Budget Report",
+            "type": "string",
+            "required": false
+          },
+          "data": {
+            "value": "{\"1\":{\"A\":\"Item\",\"B\":\"Amount\",\"C\":\"Category\"},\"2\":{\"A\":\"Rent\",\"B\":1200,\"C\":\"Housing\"},\"3\":{\"A\":\"Groceries\",\"B\":400,\"C\":\"Food\"},\"4\":{\"A\":\"Utilities\",\"B\":150,\"C\":\"Housing\"},\"5\":{\"A\":\"Internet\",\"B\":60,\"C\":\"Utilities\"}}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GenerateGoogleFilePickerUrl",
+      "qualifiedName": "GoogleSheets.GenerateGoogleFilePickerUrl",
+      "fullyQualifiedName": "GoogleSheets.GenerateGoogleFilePickerUrl@5.1.0",
+      "description": "Generate a Google File Picker URL for user-driven file selection and authorization.\n\nThis tool generates a URL that directs the end-user to a Google File Picker interface where\nwhere they can select or upload Google Drive files. Users can grant permission to access their\nDrive files, providing a secure and authorized way to interact with their files.\n\nThis is particularly useful when prior tools (e.g., those accessing or modifying\nGoogle Docs, Google Sheets, etc.) encountered failures due to file non-existence\n(Requested entity was not found) or permission errors. Once the user completes the file\npicker flow, the prior tool can be retried.\n\nSuggest this tool to users when they are surprised or confused that the file they are\nsearching for or attempting to access cannot be found.",
+      "parameters": [],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Google File Picker URL for user file selection and permission granting"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleSheets.GenerateGoogleFilePickerUrl",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetSpreadsheet",
+      "qualifiedName": "GoogleSheets.GetSpreadsheet",
+      "fullyQualifiedName": "GoogleSheets.GetSpreadsheet@5.1.0",
+      "description": "Gets the specified range of cells from a single sheet in the spreadsheet.\n\nsheet_id_or_name takes precedence over sheet_position. If a sheet is not mentioned,\nthen always assume the default sheet_position is sufficient.",
+      "parameters": [
+        {
+          "name": "spreadsheet_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the spreadsheet to get",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sheet_position",
+          "type": "integer",
+          "required": false,
+          "description": "The position/tab of the sheet in the spreadsheet to get. A value of 1 represents the first (leftmost/Sheet1) sheet . Defaults to 1.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sheet_id_or_name",
+          "type": "string",
+          "required": false,
+          "description": "The id or name of the sheet to get. Defaults to None, which means sheet_position will be used instead.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_row",
+          "type": "integer",
+          "required": false,
+          "description": "Starting row number (1-indexed, defaults to 1)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_col",
+          "type": "string",
+          "required": false,
+          "description": "Starting column letter(s) or 1-based column number (defaults to 'A')",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_rows",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of rows to fetch for each sheet in the spreadsheet. Must be between 1 and 1000. Defaults to 1000.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_cols",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of columns to fetch for each sheet in the spreadsheet. Must be between 1 and 100. Defaults to 100.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": ["https://www.googleapis.com/auth/drive.file"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The spreadsheet properties and data for the specified sheet in the spreadsheet"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleSheets.GetSpreadsheet",
+        "parameters": {
+          "spreadsheet_id": {
+            "value": "12345abcde",
+            "type": "string",
+            "required": true
+          },
+          "sheet_position": {
+            "value": 1,
+            "type": "integer",
+            "required": false
+          },
+          "sheet_id_or_name": {
+            "value": "SalesData",
+            "type": "string",
+            "required": false
+          },
+          "start_row": {
+            "value": 2,
+            "type": "integer",
+            "required": false
+          },
+          "start_col": {
+            "value": "B",
+            "type": "string",
+            "required": false
+          },
+          "max_rows": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "max_cols": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetSpreadsheetMetadata",
+      "qualifiedName": "GoogleSheets.GetSpreadsheetMetadata",
+      "fullyQualifiedName": "GoogleSheets.GetSpreadsheetMetadata@5.1.0",
+      "description": "Gets the metadata for a spreadsheet including the metadata for the sheets in the spreadsheet.\n\nUse this tool to get the name, position, ID, and URL of all sheets in a spreadsheet as well as\nthe number of rows and columns in each sheet.\n\nDoes not return the content/data of the sheets in the spreadsheet - only the metadata.\nExcludes spreadsheets that are in the trash.",
+      "parameters": [
+        {
+          "name": "spreadsheet_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the spreadsheet to get metadata for",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": ["https://www.googleapis.com/auth/drive.file"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The spreadsheet metadata for the specified spreadsheet"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleSheets.GetSpreadsheetMetadata",
+        "parameters": {
+          "spreadsheet_id": {
+            "value": "1BxiMVs0x8gXj8lQySYqE3g5bQs8D_rPG6lXErnKPZsg",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "SearchSpreadsheets",
+      "qualifiedName": "GoogleSheets.SearchSpreadsheets",
+      "fullyQualifiedName": "GoogleSheets.SearchSpreadsheets@5.1.0",
+      "description": "Searches for spreadsheets in the user's Google Drive based on the titles and content and\nreturns the title, ID, and URL for each matching spreadsheet.\n\nDoes not return the content/data of the sheets in the spreadsheets - only the metadata.\nExcludes spreadsheets that are in the trash.",
+      "parameters": [
+        {
+          "name": "spreadsheet_contains",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Keywords or phrases that must be in the spreadsheet title. Provide a list of keywords or phrases if needed.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "spreadsheet_not_contains",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Keywords or phrases that must NOT be in the spreadsheet title. Provide a list of keywords or phrases if needed.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "search_only_in_shared_drive_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the shared drive to restrict the search to. If provided, the search will only return spreadsheets from this drive. Defaults to None, which searches across all drives.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_shared_drives",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to include spreadsheets from shared drives. Defaults to False (searches only in the user's 'My Drive').",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_organization_domain_spreadsheets",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to include spreadsheets from the organization's domain. This is applicable to admin users who have permissions to view organization-wide spreadsheets in a Google Workspace account. Defaults to False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "order_by",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Sort order. Defaults to listing the most recently modified spreadsheets first. If spreadsheet_contains or spreadsheet_not_contains is provided, then the order_by will be ignored.",
+          "enum": [
+            "createdTime",
+            "createdTime desc",
+            "folder",
+            "folder desc",
+            "modifiedByMeTime",
+            "modifiedByMeTime desc",
+            "modifiedTime",
+            "modifiedTime desc",
+            "name",
+            "name desc",
+            "name_natural",
+            "name_natural desc",
+            "quotaBytesUsed",
+            "quotaBytesUsed desc",
+            "recency",
+            "recency desc",
+            "sharedWithMeTime",
+            "sharedWithMeTime desc",
+            "starred",
+            "starred desc",
+            "viewedByMeTime",
+            "viewedByMeTime desc"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of spreadsheets to list. Defaults to 10. Max is 50",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "pagination_token",
+          "type": "string",
+          "required": false,
+          "description": "The pagination token to continue a previous request",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": ["https://www.googleapis.com/auth/drive.file"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing the title, ID, and URL for each matching spreadsheet. Also contains a pagination token if there are more spreadsheets to list."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleSheets.SearchSpreadsheets",
+        "parameters": {
+          "spreadsheet_contains": {
+            "value": ["financial", "budget"],
+            "type": "array",
+            "required": false
+          },
+          "spreadsheet_not_contains": {
+            "value": ["draft", "old"],
+            "type": "array",
+            "required": false
+          },
+          "search_only_in_shared_drive_id": {
+            "value": "1A2B3C4D5E",
+            "type": "string",
+            "required": false
+          },
+          "include_shared_drives": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "include_organization_domain_spreadsheets": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "order_by": {
+            "value": ["lastModifiedTime"],
+            "type": "array",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "pagination_token": {
+            "value": "abcd1234",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "UpdateCells",
+      "qualifiedName": "GoogleSheets.UpdateCells",
+      "fullyQualifiedName": "GoogleSheets.UpdateCells@5.1.0",
+      "description": "Write values to a Google Sheet using a flexible data format.\n\nsheet_id_or_name takes precedence over sheet_position. If a sheet is not mentioned,\nthen always assume the default sheet_position is sufficient.",
+      "parameters": [
+        {
+          "name": "spreadsheet_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the spreadsheet to write to",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "data",
+          "type": "string",
+          "required": true,
+          "description": "The data to write. A JSON string (property names enclosed in double quotes) representing a dictionary that maps row numbers to dictionaries that map column letters to cell values. For example, data[23]['C'] is the value for cell C23. This is the same format accepted by create_spreadsheet. Type hint: dict[int, dict[str, int | float | str | bool]]",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sheet_position",
+          "type": "integer",
+          "required": false,
+          "description": "The position/tab of the sheet in the spreadsheet to write to. A value of 1 represents the first (leftmost/Sheet1) sheet. Defaults to 1.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sheet_id_or_name",
+          "type": "string",
+          "required": false,
+          "description": "The id or name of the sheet to write to. If provided, takes precedence over sheet_position.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": ["https://www.googleapis.com/auth/drive.file"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The status of the operation, including updated ranges and counts"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleSheets.UpdateCells",
+        "parameters": {
+          "spreadsheet_id": {
+            "value": "1A2B3C4D5E6F7G8H9I0J",
+            "type": "string",
+            "required": true
+          },
+          "data": {
+            "value": "{\"23\":{\"A\":\"Value1\",\"B\":123,\"C\":45.67,\"D\":true}}",
+            "type": "string",
+            "required": true
+          },
+          "sheet_position": {
+            "value": 1,
+            "type": "integer",
+            "required": false
+          },
+          "sheet_id_or_name": {
+            "value": "SalesData",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "GoogleSheets.WhoAmI",
+      "fullyQualifiedName": "GoogleSheets.WhoAmI@5.1.0",
+      "description": "Get comprehensive user profile and Google Sheets environment information.\n\nThis tool provides detailed information about the authenticated user including\ntheir name, email, profile picture, Google Sheets access permissions, and other\nimportant profile details from Google services.",
+      "parameters": [],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": [
+          "https://www.googleapis.com/auth/drive.file",
+          "https://www.googleapis.com/auth/userinfo.profile",
+          "https://www.googleapis.com/auth/userinfo.email"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Get comprehensive user profile and Google Sheets environment information."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleSheets.WhoAmI",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "WriteToCell",
+      "qualifiedName": "GoogleSheets.WriteToCell",
+      "fullyQualifiedName": "GoogleSheets.WriteToCell@5.1.0",
+      "description": "Write a value to a single cell in a spreadsheet.",
+      "parameters": [
+        {
+          "name": "spreadsheet_id",
+          "type": "string",
+          "required": true,
+          "description": "The id of the spreadsheet to write to",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "column",
+          "type": "string",
+          "required": true,
+          "description": "The column string to write to. For example, 'A', 'F', or 'AZ'",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "row",
+          "type": "integer",
+          "required": true,
+          "description": "The row number to write to",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "required": true,
+          "description": "The value to write to the cell",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sheet_name",
+          "type": "string",
+          "required": false,
+          "description": "The name of the sheet to write to. Defaults to 'Sheet1'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "google",
+        "providerType": "oauth2",
+        "scopes": ["https://www.googleapis.com/auth/drive.file"]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The status of the operation"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "GoogleSheets.WriteToCell",
+        "parameters": {
+          "spreadsheet_id": {
+            "value": "1aBcD2EfGhIjKlMnOqRsTuVwXyZ",
+            "type": "string",
+            "required": true
+          },
+          "column": {
+            "value": "B",
+            "type": "string",
+            "required": true
+          },
+          "row": {
+            "value": 10,
+            "type": "integer",
+            "required": true
+          },
+          "value": {
+            "value": "Hello, World!",
+            "type": "string",
+            "required": true
+          },
+          "sheet_name": {
+            "value": "Data",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "google",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [
+    "import ScopePicker from \"@/app/_components/scope-picker\";"
+  ],
+  "subPages": [],
+  "generatedAt": "2026-01-26T17:33:21.516Z",
+  "summary": "Arcade.dev provides LLM tools for Google Sheets, enabling seamless interactions with spreadsheet data through API integration. This toolkit allows developers to automate tasks, manage files, and enhance user experience in Google Sheets.\n\n### Capabilities\n- Create and manage spreadsheets with flexible data formats.\n- Retrieve and update cell contents efficiently.\n- Access user profile information and permissions.\n- Generate file picker URLs for user-driven file selection and authorization.\n\n### OAuth\n- **Provider**: Google  \n- **Scopes**:  \n  - `https://www.googleapis.com/auth/drive.file`  \n  - `https://www.googleapis.com/auth/userinfo.email`  \n  - `https://www.googleapis.com/auth/userinfo.profile`\n\n### Secrets\n- No secret types or names are specified."
+}

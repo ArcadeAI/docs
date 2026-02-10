@@ -9,7 +9,7 @@ Miro
 
 The Miro  enables tools and  to call [Miro APIs](https://developers.miro.com/reference/api-reference)  on behalf of a  using OAuth 2.0 authentication.
 
-Want to quickly get started with Miro in your  or AI app? The pre-built [Arcade Miro MCP Server](/resources/integrations/productivity/miro-api.md) is what you want!
+Want to quickly get started with Miro in your  or AI app? The pre-built [Arcade Miro MCP Server](/resources/integrations/productivity/miroapi.md) is what you want!
 
 ### What’s documented here
 
@@ -17,7 +17,7 @@ This page describes how to use and configure Miro auth with Arcade.
 
 This  is used by:
 
--   The [Arcade Miro MCP Server](/resources/integrations/productivity/miro-api.md)
+-   The [Arcade Miro MCP Server](/resources/integrations/productivity/miroapi.md)
     , which provides pre-built  for interacting with Miro
 -   Your [app code](#using-miro-auth-in-app-code)
      that needs to call the Miro API
@@ -197,11 +197,10 @@ const client = new Arcade();
 const userId = "{arcade_user_id}";
 
 // Start the authorization process
-const authResponse = await client.auth.start(
-  userId,
-  "arcade-miro",
-  ["boards:read", "boards:write"]
-);
+const authResponse = await client.auth.start(userId, "arcade-miro", [
+  "boards:read",
+  "boards:write",
+]);
 
 if (authResponse.status !== "completed") {
   console.log("Please complete the authorization challenge in your browser:");
@@ -217,7 +216,7 @@ const token = authResponse.context.token;
 
 ## Using Miro auth in custom tools
 
-You can use the pre-built [Arcade Miro MCP Server](/resources/integrations/productivity/miro-api.md) to quickly build  and AI apps that interact with Miro.
+You can use the pre-built [Arcade Miro MCP Server](/resources/integrations/productivity/miroapi.md) to quickly build  and AI apps that interact with Miro.
 
 If the pre-built tools in the Miro  Server don’t meet your needs, you can author your own [custom tools](/guides/create-tools/tool-basics/build-mcp-server.md) that interact with the Miro API.
 

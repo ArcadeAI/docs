@@ -19,7 +19,7 @@ Learn best practices for organizing your  server and , how to import tools from 
 
 ### Prerequisites
 
--   [Arcade account](https://api.arcade.dev/dashboard/register)
+-   [Arcade account](https://app.arcade.dev/register)
 
 -   [An MCP Server](/guides/create-tools/tool-basics/build-mcp-server.md)
 

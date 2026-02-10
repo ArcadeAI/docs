@@ -21,7 +21,7 @@ This guide shows you how to deploy your  Server with Arcade Deploy.
 
 ### Prerequisites
 
--   [Arcade account](https://api.arcade.dev/dashboard/register)
+-   [Arcade account](https://app.arcade.dev/register)
 
 -   [uv package manager](https://docs.astral.sh/uv/getting-started/installation/)
      

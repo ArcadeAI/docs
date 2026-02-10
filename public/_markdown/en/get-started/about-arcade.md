@@ -56,6 +56,7 @@ tool_name="GoogleSearch.Search",
 input={"query": "Latest AI advancements"},
 )
 print(response.output.value)
+
 ```
 
 ### JavaScript

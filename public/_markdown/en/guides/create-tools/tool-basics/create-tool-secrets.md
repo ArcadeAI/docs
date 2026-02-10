@@ -18,7 +18,7 @@ Build an  tool that can read a secret from  and return a masked confirmation str
 
 ### Prerequisites
 
--   [Arcade account](https://api.arcade.dev/dashboard/register)
+-   [Arcade account](https://app.arcade.dev/register)
 
 -   [Arcade CLI](/get-started/quickstarts/call-tool-agent.md)
 

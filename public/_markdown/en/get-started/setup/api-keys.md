@@ -6,7 +6,7 @@ SetupGet an API key
 
 # Getting Your API Key
 
-Before you begin, you’ll need an Arcade  - if you haven’t created one yet, you can [sign up here](https://api.arcade.dev/dashboard/register). Once you have an account, you can generate  through either the dashboard or CLI.
+Before you begin, you’ll need an Arcade  - if you haven’t created one yet, you can [sign up here](https://app.arcade.dev/register). Once you have an account, you can generate  through either the dashboard or CLI.
 
 ### Dashboard
 

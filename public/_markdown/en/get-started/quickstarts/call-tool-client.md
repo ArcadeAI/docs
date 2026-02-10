@@ -21,7 +21,7 @@ Create a coding agent using an  Gateway to call tools from multiple .
 
 ### Prerequisites
 
--   An [Arcade](https://api.arcade.dev/dashboard/register)
+-   An [Arcade](https://app.arcade.dev/register)
 
 
 ### Create an MCP Gateway

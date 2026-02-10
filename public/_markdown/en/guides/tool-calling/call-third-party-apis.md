@@ -17,7 +17,7 @@ This can be useful when you need to manage authorization flows in your applicati
 
 ### Prerequisites
 
--   Sign up for an [Arcade](https://api.arcade.dev/dashboard/register)
+-   Sign up for an [Arcade](https://app.arcade.dev/register)
      if you haven’t already
 -   Generate an [Arcade API key](/get-started/setup/api-keys.md)
      and take note of it

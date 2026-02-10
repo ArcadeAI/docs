@@ -294,9 +294,9 @@ This week projects are now generally available! Projects are a new way to organi
 
 **Toolkits**
 
--   `[feature - 🚀]` Box.com Starter  Server released ([docs](/resources/integrations/productivity/box-api.md)
+-   `[feature - 🚀]` Box.com Starter  Server released ([docs](/resources/integrations/productivity/boxapi.md)
     )
--   `[feature - 🚀]` Stripe Starter  Server released ([docs](/resources/integrations/payments/stripe_api.md)
+-   `[feature - 🚀]` Stripe Starter  Server released ([docs](/resources/integrations/payments/stripeapi.md)
     )
 
 **Misc**

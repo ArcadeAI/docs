@@ -1,8 +1,4 @@
-import {
-  TOOLKITS,
-  type Toolkit,
-  type ToolkitType,
-} from "@arcadeai/design-system";
+import type { Toolkit, ToolkitType } from "@arcadeai/design-system";
 import { useDebounce } from "@uidotdev/usehooks";
 import { useMemo } from "react";
 import { create } from "zustand";
@@ -84,7 +80,7 @@ export const useFilterStore = create<FilterState>((set) => ({
     }),
 }));
 
-export function useToolkitFilters() {
+export function useToolkitFilters(toolkits: Toolkit[]) {
   const {
     selectedCategory,
     selectedType,
@@ -98,31 +94,34 @@ export function useToolkitFilters() {
   const filteredToolkits = useMemo(() => {
     const searchLower = debouncedSearchQuery.toLowerCase();
 
-    return TOOLKITS.filter((toolkit) => {
-      if (toolkit.isHidden) {
-        return false;
-      }
+    return toolkits
+      .filter((toolkit) => {
+        if (toolkit.isHidden) {
+          return false;
+        }
 
-      const haystack = `${toolkit.label} ${toolkit.category} ${
-        TYPE_LABELS[toolkit.type as ToolkitType] ?? ""
-      }`.toLowerCase();
+        const haystack = `${toolkit.label} ${toolkit.category} ${
+          TYPE_LABELS[toolkit.type as ToolkitType] ?? ""
+        }`.toLowerCase();
 
-      const conditions = [
-        selectedCategory === "all" || toolkit.category === selectedCategory,
-        selectedType === "all" || toolkit.type === selectedType,
-        !filterByPro || toolkit.isPro,
-        !filterByByoc || toolkit.isBYOC,
-        searchLower === "" || haystack.includes(searchLower),
-      ];
+        const conditions = [
+          selectedCategory === "all" || toolkit.category === selectedCategory,
+          selectedType === "all" || toolkit.type === selectedType,
+          !filterByPro || toolkit.isPro,
+          !filterByByoc || toolkit.isBYOC,
+          searchLower === "" || haystack.includes(searchLower),
+        ];
 
-      return conditions.every(Boolean);
-    }).sort(compareToolkits);
+        return conditions.every(Boolean);
+      })
+      .sort(compareToolkits);
   }, [
     selectedCategory,
     selectedType,
     filterByPro,
     filterByByoc,
     debouncedSearchQuery,
+    toolkits,
   ]);
 
   const hasActiveFilters =

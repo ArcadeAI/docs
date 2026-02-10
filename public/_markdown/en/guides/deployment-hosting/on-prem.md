@@ -20,7 +20,7 @@ An on-premises  server deployment allows you to execute tools in your own enviro
 
 ### Prerequisites
 
--   [Arcade account](https://api.arcade.dev/dashboard/register)
+-   [Arcade account](https://app.arcade.dev/register)
 
 -   [Arcade CLI](/get-started/quickstarts/call-tool-agent.md)
 

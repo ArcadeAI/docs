@@ -23,7 +23,7 @@ Install and use the  to call Arcade Hosted .
 
 ### Prerequisites
 
--   An [Arcade](https://api.arcade.dev/dashboard/register)
+-   An [Arcade](https://app.arcade.dev/register)
 
 -   An [Arcade API key](/get-started/setup/api-keys.md)
 

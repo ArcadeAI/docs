@@ -1,6 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 const SUPPORTED_LOCALES = ["en", "es", "pt-BR"];
+const TOOLKIT_DETAIL_SEGMENTS_WITH_LOCALE = 5;
+const TOOLKIT_DETAIL_SEGMENTS_WITHOUT_LOCALE = 4;
 
 // Regex pattern for removing .md extension
 const MD_EXTENSION_REGEX = /\.md$/;
@@ -46,32 +48,21 @@ const AI_AGENT_PATTERNS = [
   /readable/i,
 ];
 
-/**
- * Check if the request prefers markdown content via Accept header
- */
 function prefersMarkdown(request: NextRequest): boolean {
   const acceptHeader = (request.headers.get("accept") || "").toLowerCase();
-  // Check for explicit text/markdown preference
   return acceptHeader.includes("text/markdown");
 }
 
-/**
- * Check if the request is from a known AI/LLM agent
- */
 function isAIAgent(request: NextRequest): boolean {
   const userAgent = request.headers.get("user-agent") || "";
   return AI_AGENT_PATTERNS.some((pattern) => pattern.test(userAgent));
 }
 
-/**
- * Parse Accept-Language header and normalize locale codes
- */
 function parseAcceptLanguageHeader(acceptLanguage: string): string[] {
   return acceptLanguage
     .split(",")
     .map((lang) => lang.split(";")[0].trim())
     .map((lang) => {
-      // Handle both 'es' and 'es-ES' format
       if (lang.startsWith("es")) {
         return "es";
       }
@@ -82,18 +73,13 @@ function parseAcceptLanguageHeader(acceptLanguage: string): string[] {
     });
 }
 
-/**
- * Get the preferred locale from cookie or Accept-Language header
- */
 function getPreferredLocale(request: NextRequest): string {
   const cookieLocale = request.cookies.get("NEXT_LOCALE")?.value;
 
-  // First priority: check if user has a saved locale preference in cookie
   if (cookieLocale && SUPPORTED_LOCALES.includes(cookieLocale)) {
     return cookieLocale;
   }
 
-  // Second priority: check browser's Accept-Language header
   const acceptLanguage = request.headers.get("accept-language");
   if (acceptLanguage) {
     const languages = parseAcceptLanguageHeader(acceptLanguage);
@@ -105,26 +91,20 @@ function getPreferredLocale(request: NextRequest): string {
     }
   }
 
-  // Default fallback
   return "en";
 }
 
-/**
- * Check if the pathname is missing a locale prefix
- */
 function pathnameIsMissingLocale(pathname: string): boolean {
   return SUPPORTED_LOCALES.every(
     (locale) => !pathname.startsWith(`/${locale}/`) && pathname !== `/${locale}`
   );
 }
 
-/**
- * Get locale from pathname or fall back to preferred locale
- */
 function getLocaleFromPathname(pathname: string, request: NextRequest): string {
   if (pathnameIsMissingLocale(pathname)) {
     return getPreferredLocale(request);
   }
+
   return (
     SUPPORTED_LOCALES.find(
       (loc) => pathname.startsWith(`/${loc}/`) || pathname === `/${loc}`
@@ -132,9 +112,6 @@ function getLocaleFromPathname(pathname: string, request: NextRequest): string {
   );
 }
 
-/**
- * Build markdown API path from request pathname
- */
 function buildMarkdownPath(pathname: string, locale: string): string {
   if (pathname === "/" || pathname === "") {
     return `/${locale}/home.md`;
@@ -148,14 +125,33 @@ function buildMarkdownPath(pathname: string, locale: string): string {
   return `${pathname}.md`;
 }
 
-/**
- * Handle content negotiation for AI agents and Accept: text/markdown requests
- */
+function isToolkitDetailPath(pathname: string): boolean {
+  const segments = pathname.split("/").filter(Boolean);
+
+  if (
+    segments.length === TOOLKIT_DETAIL_SEGMENTS_WITH_LOCALE &&
+    SUPPORTED_LOCALES.includes(segments[0]) &&
+    segments[1] === "resources" &&
+    segments[2] === "integrations"
+  ) {
+    return true;
+  }
+
+  if (
+    segments.length === TOOLKIT_DETAIL_SEGMENTS_WITHOUT_LOCALE &&
+    segments[0] === "resources" &&
+    segments[1] === "integrations"
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
 function handleContentNegotiation(
   request: NextRequest,
   pathname: string
 ): NextResponse | null {
-  // Only handle GET and HEAD requests
   const method = request.method.toUpperCase();
   if (method !== "GET" && method !== "HEAD") {
     return null;
@@ -166,11 +162,14 @@ function handleContentNegotiation(
     return null;
   }
 
-  // Normalize trailing slashes to avoid paths like /en/home/.md
   const normalizedPathname =
     pathname.endsWith("/") && pathname !== "/"
       ? pathname.slice(0, -1)
       : pathname;
+
+  if (isToolkitDetailPath(normalizedPathname)) {
+    return null;
+  }
 
   const locale = getLocaleFromPathname(normalizedPathname, request);
   const mdPath = buildMarkdownPath(normalizedPathname, locale);
@@ -182,7 +181,6 @@ function handleContentNegotiation(
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
-  // Content negotiation: serve markdown for AI agents or Accept: text/markdown
   const contentNegotiationResponse = handleContentNegotiation(
     request,
     pathname
@@ -191,7 +189,6 @@ export function middleware(request: NextRequest) {
     return contentNegotiationResponse;
   }
 
-  // Handle .md requests without locale - redirect to add locale first
   if (pathname.endsWith(".md") && pathnameIsMissingLocale(pathname)) {
     const locale = getPreferredLocale(request);
     const pathWithoutMd = pathname.replace(MD_EXTENSION_REGEX, "");
@@ -199,14 +196,12 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(redirectPath, request.url));
   }
 
-  // Rewrite .md requests (with locale) to the markdown API route
   if (pathname.endsWith(".md") && !pathname.startsWith("/api/")) {
     const url = request.nextUrl.clone();
     url.pathname = `/api/markdown${pathname}`;
     return NextResponse.rewrite(url);
   }
 
-  // Redirect if there is no locale
   if (pathnameIsMissingLocale(pathname)) {
     const locale = getPreferredLocale(request);
     const redirectPath =
@@ -214,14 +209,12 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(redirectPath, request.url));
   }
 
-  // Handle direct locale access (e.g., /en -> /en/home)
   for (const locale of SUPPORTED_LOCALES) {
     if (pathname === `/${locale}`) {
       return NextResponse.redirect(new URL(`/${locale}/home`, request.url));
     }
   }
 
-  // Add pathname to request headers for server components
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-pathname", pathname);
 
@@ -229,20 +222,18 @@ export function middleware(request: NextRequest) {
     request: { headers: requestHeaders },
   });
 
-  // Persist locale preference from URL if present
   const currentLocale = SUPPORTED_LOCALES.find(
     (locale) => pathname.startsWith(`/${locale}/`) || pathname === `/${locale}`
   );
   if (currentLocale) {
     response.cookies.set("NEXT_LOCALE", currentLocale, {
-      maxAge: 31_536_000, // 1 year
+      maxAge: 31_536_000,
       path: "/",
       sameSite: "lax",
       httpOnly: false,
     });
   }
 
-  // Redirect /toolkits to /mcp-servers
   if (pathname.includes("/toolkits")) {
     return NextResponse.redirect(
       new URL(pathname.replace("/toolkits", "/mcp-servers"), request.url)
@@ -253,8 +244,7 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Matcher ignoring static assets and API routes
   matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico|manifest|_pagefind|public|.*\\.svg|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.gif|.*\\.webp|.*\\.ico|.*\\.css|.*\\.js|.*\\.woff|.*\\.woff2|.*\\.ttf|.*\\.eot|.*\\.otf|.*\\.pdf|.*\\.txt|.*\\.xml|.*\\.json|.*\\.py|.*\\.mp4).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|manifest|_pagefind|public|.*.svg|.*.png|.*.jpg|.*.jpeg|.*.gif|.*.webp|.*.ico|.*.css|.*.js|.*.woff|.*.woff2|.*.ttf|.*.eot|.*.otf|.*.pdf|.*.txt|.*.xml|.*.json|.*.py|.*.mp4).*)",
   ],
 };

@@ -13,7 +13,7 @@ Create and manage  gateways directly from your chat interface using natural lang
 
 ### Prerequisites
 
-1.  Create an [Arcade](https://api.arcade.dev/dashboard/register)
+1.  Create an [Arcade](https://app.arcade.dev/register)
 
 2.  An \-compatible chat client ([Cursor](/get-started/mcp-clients/cursor.md)
     , [Claude Desktop](/get-started/mcp-clients/claude-desktop.md)
