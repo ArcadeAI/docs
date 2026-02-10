@@ -4794,7 +4794,7 @@ The Mailchimp OAuth provider enables secure authentication with Mailchimp’s Ma
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_mailchimp_marketing_api ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [Linear](/en/resources/integrations/productivity/linear.md)
 [Notion](/en/resources/integrations/productivity/notion.md)

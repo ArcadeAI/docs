@@ -205,7 +205,7 @@ The Arcade Web MCP Sever uses [Firecrawl](https://www.firecrawl.dev/)  to scrap
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_firecrawl ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [GitHub](/en/resources/integrations/development/github.md)
 [Reference](/en/resources/integrations/development/firecrawl/reference.md)

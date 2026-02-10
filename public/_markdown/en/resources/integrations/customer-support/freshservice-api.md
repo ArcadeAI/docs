@@ -2677,7 +2677,7 @@ This tool requires the following secrets: `FRESHSERVICE_API_KEY`, `FRESHSERVICE_
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_freshservice_api ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [CustomerioTrackApi](/en/resources/integrations/customer-support/customerio-track-api.md)
 [IntercomApi](/en/resources/integrations/customer-support/intercom-api.md)

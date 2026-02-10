@@ -135,4 +135,4 @@ Enjoy exploring Arcade and building powerful AI-enabled applications.
 Last updated on February 10, 2026
 
 [Custom auth flow](/en/get-started/agent-frameworks/crewai/custom-auth-flow.md)
-[Using Arcade tools](/en/get-started/agent-frameworks/google-adk/use-arcade-tools.md)
+[Setup Arcade with Google ADK (Python)](/en/get-started/agent-frameworks/google-adk/use-arcade-tools.md)

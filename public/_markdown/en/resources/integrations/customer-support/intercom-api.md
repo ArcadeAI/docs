@@ -2102,7 +2102,7 @@ The IntercomApi MCP Server uses the Auth Provider with id `arcade-intercom` to c
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_intercom_api ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [FreshserviceApi](/en/resources/integrations/customer-support/freshservice-api.md)
 [Contribute a Server](/en/resources/integrations/contribute-a-server.md)

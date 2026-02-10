@@ -26,7 +26,7 @@ Below is a reference of enumerations used by some tools in the Gmail MCP Server:
 -   **LAST\_MONTH**: `last_month`
 -   **THIS\_YEAR**: `this_year`
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [Gmail](/en/resources/integrations/productivity/gmail.md)
 [Google Calendar](/en/resources/integrations/productivity/google-calendar.md)

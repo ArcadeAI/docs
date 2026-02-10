@@ -44,7 +44,7 @@ Below is a reference of enumerations used by some tools in the Asana MCP Server:
 -   **ASCENDING**: `'ascending'`
 -   **DESCENDING**: `'descending'`
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [Asana](/en/resources/integrations/productivity/asana.md)
 [ClickUp](/en/resources/integrations/productivity/clickup.md)

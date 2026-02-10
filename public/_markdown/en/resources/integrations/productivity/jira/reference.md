@@ -33,7 +33,7 @@ Sprint states are used in the `Jira.ListSprints` tool to filter sprints. The fol
 -   **CREATED\_DATE\_ASCENDING**: `created_date_ascending`
 -   **CREATED\_DATE\_DESCENDING**: `created_date_descending`
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [Jira](/en/resources/integrations/productivity/jira.md)
 [Environment Variables](/en/resources/integrations/productivity/jira/environment-variables.md)

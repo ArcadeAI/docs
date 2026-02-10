@@ -44,7 +44,7 @@ Comment resolution values are used in the comment tools to set the resolution of
 -   **SET\_AS\_RESOLVED**: `resolved`
 -   **SET\_AS\_UNRESOLVED**: `unresolved`
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [ClickUp](/en/resources/integrations/productivity/clickup.md)
 [Close.io](/en/resources/integrations/productivity/closeio.md)

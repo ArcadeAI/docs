@@ -43,6 +43,7 @@ Create a new directory for your  and initialize a new virtual environment:
 ```bash
 mkdir openai-agents-arcade-example
 cd openai-agents-arcade-example
+uv init
 uv venv
 source .venv/bin/activate
 ```
@@ -50,7 +51,7 @@ source .venv/bin/activate
 Install the necessary packages:
 
 ```bash
-uv pip install openai-agents arcadepy
+uv add openai-agents arcadepy
 ```
 
 Create a new file called `.env` and add the following environment variables:

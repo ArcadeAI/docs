@@ -397,7 +397,7 @@ A list of supported country codes can be found [here](#countrycodes).
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_youtube ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [Walmart](/en/resources/integrations/search/walmart.md)
 [ExaApi](/en/resources/integrations/search/exa-api.md)
