@@ -13,7 +13,7 @@ This page is coming soon. The team is working on comprehensive documentation for
 
 In the meantime, if you need help setting up Arcade on Windows, please reach out on [Discord](https://discord.gg/GUZEMpEZ9p) .
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [Connect Arcade docs to your IDE](/en/get-started/setup/connect-arcade-docs.md)
 [Call tools in agents](/en/get-started/quickstarts/call-tool-agent.md)

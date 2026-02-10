@@ -283,7 +283,7 @@ async def get_figma_file(
 
 For a complete list of available Figma OAuth scopes and their descriptions, refer to the [Figma OAuth Scopes documentation](https://developers.figma.com/docs/rest-api/scopes/) .
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [Dropbox](/en/references/auth-providers/dropbox.md)
 [GitHub](/en/references/auth-providers/github.md)

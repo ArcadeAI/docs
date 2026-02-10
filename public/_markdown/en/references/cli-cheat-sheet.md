@@ -771,7 +771,7 @@ Standard development cycle for building  servers:
 9.  **`arcade deploy`** — Deploy to cloud (requires `server.py` entrypoint)
 10.  **`arcade server logs -f`** — Monitor logs
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [Arcade CLI](/en/references/arcade-cli.md)
 [Overview](/en/references/auth-providers.md)

@@ -128,7 +128,7 @@ Don't see what you need? Use Arcade's SDK to integrate with any service or API.
 [Jira Auth Provider](/en/resources/integrations/productivity/jira.md)
 [Twitch Auth Provider](/en/resources/integrations/entertainment/twitch.md)
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [Microsoft Copilot Studio](/en/get-started/mcp-clients/copilot-studio.md)
 [Asana](/en/resources/integrations/productivity/asana.md)

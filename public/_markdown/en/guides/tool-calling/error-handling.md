@@ -199,7 +199,7 @@ As of now,  Clients do not return structured error information, only an error me
 
 To learn more about how to build  with error handling, see the [Build Tools](/guides/create-tools/error-handling/useful-tool-errors.md) section.
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [Overview](/en/guides/tool-calling.md)
 [Call third-party APIs](/en/guides/tool-calling/call-third-party-apis.md)

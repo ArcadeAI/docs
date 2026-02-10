@@ -166,7 +166,7 @@ This workflow ensures your agent has complete information about the database str
 
 [Self Host Arcade tools Arcade tools can be self-hosted on your own infrastructure. Learn more about self-hosting. ``` pip install arcade_mongodb ``` Learn more](/guides/deployment-hosting.md)
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [Postgres](/en/resources/integrations/databases/postgres.md)
 [ClickHouse](/en/resources/integrations/databases/clickhouse.md)

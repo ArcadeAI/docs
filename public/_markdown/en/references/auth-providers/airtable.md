@@ -271,7 +271,7 @@ Airtable supports various OAuth scopes that determine the level of access your a
 
 For a complete list of available scopes, refer to the [Airtable Scopes documentation](https://airtable.com/developers/web/api/scopes) .
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [OAuth 2.0](/en/references/auth-providers/oauth2.md)
 [Asana](/en/references/auth-providers/asana.md)

@@ -43,6 +43,7 @@ Create a new directory for your  and initialize a new virtual environment:
 ```bash
 mkdir openai-agents-arcade-example
 cd openai-agents-arcade-example
+uv init
 uv venv
 source .venv/bin/activate
 ```
@@ -50,7 +51,7 @@ source .venv/bin/activate
 Install the necessary packages:
 
 ```bash
-uv pip install openai-agents arcadepy
+uv add openai-agents arcadepy
 ```
 
 Create a new file called `.env` and add the following environment variables:
@@ -554,7 +555,7 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-Last updated on February 7, 2026
+Last updated on February 10, 2026
 
 [Overview](/en/get-started/agent-frameworks/openai-agents/overview.md)
 [Using Arcade tools](/en/get-started/agent-frameworks/openai-agents/use-arcade-tools.md)
