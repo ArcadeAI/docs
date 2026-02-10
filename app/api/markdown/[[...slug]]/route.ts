@@ -34,9 +34,10 @@ export async function GET(
       return new NextResponse(content, {
         status: 200,
         headers: {
-          "Content-Type": "text/plain; charset=utf-8",
+          "Content-Type": "text/markdown; charset=utf-8",
           "Content-Disposition": "inline",
           "Cache-Control": "public, max-age=3600", // Cache for 1 hour
+          Vary: "Accept, User-Agent",
         },
       });
     } catch {
@@ -59,9 +60,10 @@ export async function GET(
     return new NextResponse(content, {
       status: 200,
       headers: {
-        "Content-Type": "text/plain; charset=utf-8",
+        "Content-Type": "text/markdown; charset=utf-8",
         "Content-Disposition": "inline",
         "X-Content-Source": "raw-mdx", // Indicate this is raw MDX, not clean markdown
+        Vary: "Accept, User-Agent",
       },
     });
   } catch (error) {
