@@ -483,8 +483,8 @@ Use track name `"default"` to reference  registered without a track.
 
 Capture  calls from each track separately:
 
-```json
-arcade evals . --capture --file captures/comparison --format json
+```bash
+arcade evals . --capture -o captures/comparison.json
 ```
 
 Output includes track names:
@@ -515,9 +515,7 @@ Output includes track names:
 Combine comparative tracks with multiple models:
 
 ```bash
-arcade evals . \
-  --use-provider openai:gpt-4o,gpt-4o-mini \
-  --use-provider anthropic:claude-sonnet-4-5-20250929
+arcade evals . -p "openai:gpt-4o,gpt-4o-mini anthropic:claude-sonnet-4-5-20250929"
 ```
 
 Results show:

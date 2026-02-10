@@ -60,7 +60,7 @@ Required Permissions
 `Mail.ReadWrite`
 `Mail.Send`
 
-[Teams](/resources/integrations/social-communication/microsoft-teams.md)
+[Teams](/resources/integrations/social/microsoft-teams.md)
 
 `Channel.ReadBasic.All`
 `ChannelMessage.Read.All`

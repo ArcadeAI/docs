@@ -21,7 +21,7 @@ Register a remote  server and use its  in gateways and SDKs.
 
 ### Prerequisites
 
--   An [Arcade](https://api.arcade.dev/dashboard/register)
+-   An [Arcade](https://app.arcade.dev/register)
 
 -   A remote  server URL that Arcade can reach
 -   Access to any auth credentials your server requires

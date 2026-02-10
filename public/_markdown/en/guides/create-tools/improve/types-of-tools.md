@@ -59,7 +59,7 @@ Even the most powerful LLMs usually perform poorly when they need to reason such
 
 Arcade’s Optimized  Servers are designed to match the typical data models expected in AI-powered chat interfaces and are subject to evaluation suites to ensure LLMs can safely use them.
 
-Following the example above, our Slack  Server offers the [`Slack.SendMessage`](/resources/integrations/social-communication/slack.md#slacksendmessage) , which accepts a `username` as argument, matching exactly both the action and argument value expected to be present in the LLM  window.
+Following the example above, our Slack  Server offers the [`Slack.SendMessage`](/resources/integrations/social/slack.md#slacksendmessage) , which accepts a `username` as argument, matching exactly both the action and argument value expected to be present in the LLM  window.
 
 When a user says “Send a DM to John asking about a  update”, the LLM can directly call the `Slack.SendMessage`  with the `username` argument, and the tool will take care of the rest.
 

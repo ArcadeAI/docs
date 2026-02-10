@@ -18,7 +18,7 @@ Configure your  clients to call tools from your .
 
 ### Prerequisites
 
--   [Arcade account](https://api.arcade.dev/dashboard/register)
+-   [Arcade account](https://app.arcade.dev/register)
 
 -   [Arcade CLI](/references/arcade-cli.md)
 

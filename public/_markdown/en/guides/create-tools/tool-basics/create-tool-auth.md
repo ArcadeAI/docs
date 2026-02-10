@@ -20,7 +20,7 @@ Create and use an   that requires OAuth to access Reddit, prompting  to authoriz
 
 ### Prerequisites
 
--   [Arcade account](https://api.arcade.dev/dashboard/register)
+-   [Arcade account](https://app.arcade.dev/register)
 
 -   [uv package manager](https://docs.astral.sh/uv/getting-started/installation/)
      

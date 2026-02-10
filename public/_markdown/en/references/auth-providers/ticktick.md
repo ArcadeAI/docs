@@ -9,7 +9,7 @@ TickTick
 
 The TickTick  enables tools and  to call [TickTick APIs](https://developer.ticktick.com/docs)  on behalf of a  using OAuth 2.0 authentication.
 
-Want to quickly get started with TickTick in your  or AI app? The pre-built [Arcade TickTick API MCP Server](/resources/integrations/productivity/ticktick-api.md) is what you want!
+Want to quickly get started with TickTick in your  or AI app? The pre-built [Arcade TickTick API MCP Server](/resources/integrations/productivity/ticktickapi.md) is what you want!
 
 ### What’s documented here
 
@@ -17,7 +17,7 @@ This page describes how to use and configure TickTick auth with Arcade.
 
 This  is used by:
 
--   The [Arcade TickTick API MCP Server](/resources/integrations/productivity/ticktick-api.md)
+-   The [Arcade TickTick API MCP Server](/resources/integrations/productivity/ticktickapi.md)
     , which provides pre-built  for interacting with TickTick
 -   Your [app code](#using-ticktick-auth-in-app-code)
      that needs to call the TickTick API
@@ -221,7 +221,7 @@ const token = authResponse.context.token;
 
 ## Using TickTick auth in custom tools
 
-You can use the pre-built [Arcade TickTick API MCP Server](/resources/integrations/productivity/ticktick-api.md) to quickly build  and AI apps that interact with TickTick.
+You can use the pre-built [Arcade TickTick API MCP Server](/resources/integrations/productivity/ticktickapi.md) to quickly build  and AI apps that interact with TickTick.
 
 If the pre-built tools in the TickTick  Server don’t meet your needs, you can author your own [custom tools](/guides/create-tools/tool-basics/build-mcp-server.md) that interact with the TickTick API.
 

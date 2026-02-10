@@ -71,7 +71,7 @@ See [Create via Dashboard](/guides/mcp-gateways/create-via-dashboard.md) for det
 
 ## Next Steps
 
--   [Create an Arcade](https://api.arcade.dev/dashboard/register)
+-   [Create an Arcade](https://app.arcade.dev/register)
      if you haven’t already
 -   [Browse available integrations](/resources/integrations.md)
      to see what  you can add to your gateway

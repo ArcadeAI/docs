@@ -14,7 +14,7 @@ Connect Microsoft Copilot Studio to an Arcade  Gateway.
 ### Prerequisites
 
 1.  A Microsoft 365 subscription with access to Copilot Studio
-2.  Create an [Arcade](https://api.arcade.dev/dashboard/register)
+2.  Create an [Arcade](https://app.arcade.dev/register)
 
 3.  Get an [Arcade API key](/get-started/setup/api-keys.md)
 

@@ -56,7 +56,11 @@ describe("Clean Markdown Files", () => {
     "every MDX page has a corresponding clean markdown file",
     async () => {
       const mdxFiles = await fg("app/**/page.mdx", {
-        ignore: ["app/_*/**"],
+        ignore: [
+          "app/_*/**",
+          // Skip dynamic toolkit routes — they render from JSON, not MDX
+          "app/**/\\[toolkitId\\]/**",
+        ],
       });
 
       const missing: string[] = [];

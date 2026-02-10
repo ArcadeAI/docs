@@ -22,7 +22,7 @@ Learn how to integrate Arcade  using LangChain primitives
 
 ### Prerequisites
 
--   [Arcade account](https://api.arcade.dev/dashboard/register)
+-   [Arcade account](https://app.arcade.dev/register)
 
 -   The [`bun` runtime](https://bun.com/)
 
@@ -740,6 +740,7 @@ main().catch((err) => console.error(err));
 
 ```
 
+Last updated on February 10, 2026
 
 PLAINTEXT
 

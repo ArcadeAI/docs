@@ -23,7 +23,7 @@ Learn how to integrate Arcade tools using OpenAI Agents primitives. You will imp
 
 ### Prerequisites
 
--   [Arcade account](https://api.arcade.dev/dashboard/register)
+-   [Arcade account](https://app.arcade.dev/register)
 
 -   [Obtain an Arcade API key](/get-started/setup/api-keys.md)
 

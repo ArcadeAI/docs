@@ -9,7 +9,7 @@ X
 
 The X  enables tools and  to call the X (Twitter) API on behalf of a .
 
-Want to quickly get started with X services in your  or AI app? The pre-built [Arcade X MCP Server](/resources/integrations/social-communication/x.md) is what you want!
+Want to quickly get started with X services in your  or AI app? The pre-built [Arcade X MCP Server](/resources/integrations/social/x.md) is what you want!
 
 ### What’s documented here
 
@@ -17,7 +17,7 @@ This page describes how to use and configure X auth with Arcade.
 
 This  is used by:
 
--   The [Arcade X MCP Server](/resources/integrations/social-communication/x.md)
+-   The [Arcade X MCP Server](/resources/integrations/social/x.md)
     , which provides pre-built  for interacting with X
 -   Your [app code](#using-x-auth-in-app-code)
      that needs to call X APIs
@@ -135,7 +135,7 @@ const token = authResponse.context.token;
 
 ## Using X auth in custom tools
 
-You can use the pre-built [Arcade X MCP Server](/resources/integrations/social-communication/x.md) to quickly build  and AI apps that interact with X.
+You can use the pre-built [Arcade X MCP Server](/resources/integrations/social/x.md) to quickly build  and AI apps that interact with X.
 
 If the pre-built tools in the X  Server don’t meet your needs, you can author your own [custom tools](/guides/create-tools/tool-basics/build-mcp-server.md) that interact with the X API.
 

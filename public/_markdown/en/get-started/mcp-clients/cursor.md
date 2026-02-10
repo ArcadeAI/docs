@@ -13,7 +13,7 @@ Connect Cursor to an Arcade  Gateway.
 
 ### Prerequisites
 
-1.  Create an [Arcade](https://api.arcade.dev/dashboard/register)
+1.  Create an [Arcade](https://app.arcade.dev/register)
 
 2.  Get an [Arcade API key](/get-started/setup/api-keys.md)
 

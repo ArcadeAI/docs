@@ -11,7 +11,7 @@ In this guide, you’ll learn how to connect Visual Studio Code to an Arcade  Ga
 
 ### Prerequisites
 
-1.  Create an [Arcade](https://api.arcade.dev/dashboard/register)
+1.  Create an [Arcade](https://app.arcade.dev/register)
 
 2.  Create an [Arcade MCP Gateway](/guides/mcp-gateways.md)
      and select the  you want to use

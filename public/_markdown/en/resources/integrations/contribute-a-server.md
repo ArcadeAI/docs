@@ -29,5 +29,5 @@ After submitting your pull request:
 
 Last updated on February 10, 2026
 
-[IntercomApi](/en/resources/integrations/customer-support/intercom-api.md)
+[Overview](/en/resources/integrations.md)
 [Examples](/en/resources/examples.md)
