@@ -130,7 +130,7 @@ Arcade offers three ways to convert your  into Zod schemas, each for different u
 This method returns an array of  with Zod validation.
 
 ```typescript
-import { toZod } from "@arcadeai/arcadejs/lib"
+import { toZod } from "@arcadeai/arcadejs/lib/index"
 
 const googleToolkit = await arcade.tools.list({
     limit: 20,
@@ -149,7 +149,7 @@ const tools = toZod({
 This method returns an object with  names as keys, allowing direct access to tools by name:
 
 ```typescript
-import { toZodToolSet } from "@arcadeai/arcadejs/lib"
+import { toZodToolSet } from "@arcadeai/arcadejs/lib/index"
 
 const googleToolkit = await arcade.tools.list({
     limit: 20,
@@ -172,7 +172,7 @@ const emails = await tools.Gmail_ListEmails.execute({
 When you only need to work with a specific , use this method to convert just that tool to a Zod schema:
 
 ```typescript
-import { createZodTool } from "@arcadeai/arcadejs/lib"
+import { createZodTool } from "@arcadeai/arcadejs/lib/index"
 
 const listEmails = await arcade.tools.get("Gmail_ListEmails");
 

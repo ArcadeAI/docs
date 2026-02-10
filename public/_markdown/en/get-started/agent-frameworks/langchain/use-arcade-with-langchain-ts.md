@@ -71,7 +71,7 @@ import {
   executeZodTool,
   isAuthorizationRequiredError,
   toZod,
-} from "@arcadeai/arcadejs/lib";
+} from "@arcadeai/arcadejs/lib/index";
 import { type ToolExecuteFunction } from "@arcadeai/arcadejs/lib/zod/types";
 import { createAgent, tool } from "langchain";
 import {
@@ -471,7 +471,7 @@ import {
   executeZodTool,
   isAuthorizationRequiredError,
   toZod,
-} from "@arcadeai/arcadejs/lib";
+} from "@arcadeai/arcadejs/lib/index";
 import { type ToolExecuteFunction } from "@arcadeai/arcadejs/lib/zod/types";
 import { createAgent, tool } from "langchain";
 import {
