@@ -5,6 +5,64 @@ const SUPPORTED_LOCALES = ["en", "es", "pt-BR"];
 // Regex pattern for removing .md extension
 const MD_EXTENSION_REGEX = /\.md$/;
 
+// Known AI/LLM agent User-Agent patterns (case-insensitive matching)
+const AI_AGENT_PATTERNS = [
+  /claude/i,
+  /anthropic/i,
+  /chatgpt/i,
+  /openai/i,
+  /gpt-4/i,
+  /gpt-3/i,
+  /cursor/i,
+  /copilot/i,
+  /github.copilot/i,
+  /codeium/i,
+  /tabnine/i,
+  /amazonq/i,
+  /amazon-q/i,
+  /gemini/i,
+  /bard/i,
+  /perplexity/i,
+  /phind/i,
+  /you\.com/i,
+  /cohere/i,
+  /ai21/i,
+  /huggingface/i,
+  /langchain/i,
+  /llamaindex/i,
+  /autogpt/i,
+  /agentgpt/i,
+  /babyagi/i,
+  /superagent/i,
+  /fixie/i,
+  /dust\.tt/i,
+  /respell/i,
+  /lindy\.ai/i,
+  /kapa\.ai/i,
+  /mendable/i,
+  /inkeep/i,
+  /glean/i,
+  /devdocs/i,
+  /readable/i,
+];
+
+/**
+ * Check if the request prefers markdown content via Accept header
+ */
+function prefersMarkdown(request: NextRequest): boolean {
+  const acceptHeader = (request.headers.get("accept") || "").toLowerCase();
+  // Check for explicit text/markdown preference
+  return acceptHeader.includes("text/markdown");
+}
+
+/**
+ * Check if the request is from a known AI/LLM agent
+ */
+function isAIAgent(request: NextRequest): boolean {
+  const userAgent = request.headers.get("user-agent") || "";
+  return AI_AGENT_PATTERNS.some((pattern) => pattern.test(userAgent));
+}
+
 /**
  * Parse Accept-Language header and normalize locale codes
  */
@@ -60,8 +118,78 @@ function pathnameIsMissingLocale(pathname: string): boolean {
   );
 }
 
+/**
+ * Get locale from pathname or fall back to preferred locale
+ */
+function getLocaleFromPathname(pathname: string, request: NextRequest): string {
+  if (pathnameIsMissingLocale(pathname)) {
+    return getPreferredLocale(request);
+  }
+  return (
+    SUPPORTED_LOCALES.find(
+      (loc) => pathname.startsWith(`/${loc}/`) || pathname === `/${loc}`
+    ) || "en"
+  );
+}
+
+/**
+ * Build markdown API path from request pathname
+ */
+function buildMarkdownPath(pathname: string, locale: string): string {
+  if (pathname === "/" || pathname === "") {
+    return `/${locale}/home.md`;
+  }
+  if (pathnameIsMissingLocale(pathname)) {
+    return `/${locale}${pathname}.md`;
+  }
+  if (SUPPORTED_LOCALES.some((loc) => pathname === `/${loc}`)) {
+    return `${pathname}/home.md`;
+  }
+  return `${pathname}.md`;
+}
+
+/**
+ * Handle content negotiation for AI agents and Accept: text/markdown requests
+ */
+function handleContentNegotiation(
+  request: NextRequest,
+  pathname: string
+): NextResponse | null {
+  // Only handle GET and HEAD requests
+  const method = request.method.toUpperCase();
+  if (method !== "GET" && method !== "HEAD") {
+    return null;
+  }
+
+  const shouldServeMarkdown = prefersMarkdown(request) || isAIAgent(request);
+  if (!shouldServeMarkdown || pathname.endsWith(".md")) {
+    return null;
+  }
+
+  // Normalize trailing slashes to avoid paths like /en/home/.md
+  const normalizedPathname =
+    pathname.endsWith("/") && pathname !== "/"
+      ? pathname.slice(0, -1)
+      : pathname;
+
+  const locale = getLocaleFromPathname(normalizedPathname, request);
+  const mdPath = buildMarkdownPath(normalizedPathname, locale);
+  const url = request.nextUrl.clone();
+  url.pathname = `/api/markdown${mdPath}`;
+  return NextResponse.rewrite(url);
+}
+
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+
+  // Content negotiation: serve markdown for AI agents or Accept: text/markdown
+  const contentNegotiationResponse = handleContentNegotiation(
+    request,
+    pathname
+  );
+  if (contentNegotiationResponse) {
+    return contentNegotiationResponse;
+  }
 
   // Handle .md requests without locale - redirect to add locale first
   if (pathname.endsWith(".md") && pathnameIsMissingLocale(pathname)) {
