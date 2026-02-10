@@ -227,14 +227,14 @@ const nextConfig: NextConfig = withLlmsTxt({
           source:
             "/:locale/get-started/agent-frameworks/langchain/use-arcade-tools",
           destination:
-            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain",
+            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain-py",
           permanent: true,
         },
         {
           source:
             "/:locale/get-started/agent-frameworks/langchain/user-auth-interrupts",
           destination:
-            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain",
+            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain-py",
           permanent: true,
         },
         // Mastra tutorial consolidation
@@ -255,6 +255,28 @@ const nextConfig: NextConfig = withLlmsTxt({
           destination: "/:locale/get-started/agent-frameworks/mastra",
           permanent: true,
         },
+        // OpenAI Agents tutorial consolidation
+        {
+          source:
+            "/:locale/get-started/agent-frameworks/openai-agents/use-arcade-with-openai-agents",
+          destination:
+            "/:locale/get-started/agent-frameworks/openai-agents/overview",
+          permanent: true,
+        },
+        {
+          source:
+            "/:locale/get-started/agent-frameworks/openai-agents/use-arcade-tools",
+          destination:
+            "/:locale/get-started/agent-frameworks/openai-agents/overview",
+          permanent: true,
+        },
+        {
+          source:
+            "/:locale/get-started/agent-frameworks/openai-agents/user-auth-interrupts",
+          destination:
+            "/:locale/get-started/agent-frameworks/openai-agents/overview",
+          permanent: true,
+        },
         // Moved from guides to get-started
         {
           source:
@@ -267,32 +289,39 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/home/langchain/use-arcade-tools",
           destination:
-            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain",
+            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain-py",
           permanent: true,
         },
         {
           source: "/:locale/guides/agent-frameworks/langchain/use-arcade-tools",
           destination:
-            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain",
+            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain-py",
           permanent: true,
         },
         {
           source: "/:locale/home/langchain/user-auth-interrupts",
           destination:
-            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain",
+            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain-py",
           permanent: true,
         },
         {
           source:
             "/:locale/guides/agent-frameworks/langchain/user-auth-interrupts",
           destination:
+            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain-py",
+          permanent: true,
+        },
+        {
+          source:
             "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain",
+          destination:
+            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain-py",
           permanent: true,
         },
         {
           source: "/:locale/home/oai-agents/user-auth-interrupts",
           destination:
-            "/:locale/get-started/agent-frameworks/openai-agents/user-auth-interrupts",
+            "/:locale/get-started/agent-frameworks/openai-agents/overview",
           permanent: true,
         },
         {
@@ -553,7 +582,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/home/oai-agents/use-arcade-tools",
           destination:
-            "/:locale/get-started/agent-frameworks/openai-agents/use-arcade-tools",
+            "/:locale/get-started/agent-frameworks/openai-agents/overview",
           permanent: true,
         },
         {
@@ -691,7 +720,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/guides/agent-frameworks/langchain/python",
           destination:
-            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain",
+            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain-py",
           permanent: true,
         },
         {
@@ -714,7 +743,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/guides/agent-frameworks/openai/python",
           destination:
-            "/:locale/get-started/agent-frameworks/openai-agents/use-arcade-tools",
+            "/:locale/get-started/agent-frameworks/openai-agents/overview",
           permanent: true,
         },
         {
