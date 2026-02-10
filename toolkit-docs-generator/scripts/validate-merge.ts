@@ -11,7 +11,7 @@
  */
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -28,98 +28,192 @@ type ToolkitJson = {
   subPages?: Record<string, unknown>[];
 };
 
-function main(): void {
-  console.log("🔍 Validating Merged Custom Sections\n");
+export type ToolkitValidationDetail = {
+  file: string;
+  label: string;
+  hasDocChunks: boolean;
+  hasImports: boolean;
+  hasSubPages: boolean;
+  docChunksCount: number;
+  importsCount: number;
+  subPagesCount: number;
+};
 
-  if (!existsSync(DATA_DIR)) {
-    console.error("❌ Data directory not found:", DATA_DIR);
-    process.exit(1);
+export type MergeValidationResult = {
+  totalToolkits: number;
+  withDocChunks: number;
+  withCustomImports: number;
+  withSubPages: number;
+  detailedResults: ToolkitValidationDetail[];
+  errors: string[];
+};
+
+function getToolkitFiles(dataDir: string): string[] {
+  return readdirSync(dataDir).filter(
+    (fileName) => fileName.endsWith(".json") && fileName !== "index.json"
+  );
+}
+
+function getToolkitCounts(json: ToolkitJson) {
+  const docChunksCount = json.documentationChunks?.length ?? 0;
+  const importsCount = json.customImports?.length ?? 0;
+  const subPagesCount = json.subPages?.length ?? 0;
+
+  return {
+    docChunksCount,
+    importsCount,
+    subPagesCount,
+    hasDocChunks: docChunksCount > 0,
+    hasImports: importsCount > 0,
+    hasSubPages: subPagesCount > 0,
+  };
+}
+
+function buildDetail(
+  file: string,
+  json: ToolkitJson,
+  counts: ReturnType<typeof getToolkitCounts>
+): ToolkitValidationDetail | null {
+  if (!(counts.hasDocChunks || counts.hasImports || counts.hasSubPages)) {
+    return null;
   }
 
-  const files = readdirSync(DATA_DIR).filter(
-    (f) => f.endsWith(".json") && f !== "index.json"
-  );
+  return {
+    file,
+    label: json.label || json.id,
+    hasDocChunks: counts.hasDocChunks,
+    hasImports: counts.hasImports,
+    hasSubPages: counts.hasSubPages,
+    docChunksCount: counts.docChunksCount,
+    importsCount: counts.importsCount,
+    subPagesCount: counts.subPagesCount,
+  };
+}
 
-  let totalToolkits = 0;
-  let withDocChunks = 0;
-  let withCustomImports = 0;
-  let withSubPages = 0;
-  const detailedResults: Array<{
-    file: string;
-    label: string;
-    hasDocChunks: boolean;
-    hasImports: boolean;
-    hasSubPages: boolean;
-    docChunksCount: number;
-    importsCount: number;
-    subPagesCount: number;
-  }> = [];
+export function validateMergedCustomSections(
+  dataDir: string = DATA_DIR
+): MergeValidationResult {
+  if (!existsSync(dataDir)) {
+    throw new Error(`Data directory not found: ${dataDir}`);
+  }
+
+  const files = getToolkitFiles(dataDir);
+  const result: MergeValidationResult = {
+    totalToolkits: 0,
+    withDocChunks: 0,
+    withCustomImports: 0,
+    withSubPages: 0,
+    detailedResults: [],
+    errors: [],
+  };
 
   for (const file of files) {
     try {
-      const content = readFileSync(join(DATA_DIR, file), "utf-8");
+      const content = readFileSync(join(dataDir, file), "utf-8");
       const json = JSON.parse(content) as ToolkitJson;
-      totalToolkits++;
+      const counts = getToolkitCounts(json);
 
-      const hasDocChunks = (json.documentationChunks?.length ?? 0) > 0;
-      const hasImports = (json.customImports?.length ?? 0) > 0;
-      const hasSubPages = (json.subPages?.length ?? 0) > 0;
+      result.totalToolkits += 1;
+      if (counts.hasDocChunks) {
+        result.withDocChunks += 1;
+      }
+      if (counts.hasImports) {
+        result.withCustomImports += 1;
+      }
+      if (counts.hasSubPages) {
+        result.withSubPages += 1;
+      }
 
-      if (hasDocChunks) withDocChunks++;
-      if (hasImports) withCustomImports++;
-      if (hasSubPages) withSubPages++;
-
-      if (hasDocChunks || hasImports || hasSubPages) {
-        detailedResults.push({
-          file,
-          label: json.label || json.id,
-          hasDocChunks,
-          hasImports,
-          hasSubPages,
-          docChunksCount: json.documentationChunks?.length ?? 0,
-          importsCount: json.customImports?.length ?? 0,
-          subPagesCount: json.subPages?.length ?? 0,
-        });
+      const detail = buildDetail(file, json, counts);
+      if (detail) {
+        result.detailedResults.push(detail);
       }
     } catch (error) {
-      console.error(`⚠️  Error reading ${file}:`, error);
+      result.errors.push(`⚠️  Error reading ${file}: ${String(error)}`);
     }
   }
 
-  // Summary
-  console.log("=".repeat(60));
-  console.log("📊 Summary");
-  console.log("=".repeat(60));
-  console.log(`Total toolkit JSON files: ${totalToolkits}`);
-  console.log(`With documentation chunks: ${withDocChunks}`);
-  console.log(`With custom imports: ${withCustomImports}`);
-  console.log(`With sub-pages: ${withSubPages}`);
-  console.log(`Total with custom sections: ${detailedResults.length}`);
-  console.log("=".repeat(60));
-
-  if (detailedResults.length > 0) {
-    console.log("\n📝 Toolkits with Custom Sections:\n");
-
-    for (const result of detailedResults.sort((a, b) =>
-      a.label.localeCompare(b.label)
-    )) {
-      const badges: string[] = [];
-      if (result.hasDocChunks)
-        badges.push(`📄 ${result.docChunksCount} doc chunks`);
-      if (result.hasImports) badges.push(`📦 ${result.importsCount} imports`);
-      if (result.hasSubPages)
-        badges.push(`📑 ${result.subPagesCount} sub-pages`);
-
-      console.log(`   ${result.label}`);
-      console.log(`      ${badges.join(" | ")}`);
-    }
-  } else {
-    console.log("\n⚠️  No toolkits found with custom sections.");
-    console.log("   Did you run the merge script? Run:");
-    console.log("   npm run merge-custom-sections");
-  }
-
-  console.log("\n✅ Validation complete!");
+  return result;
 }
 
-main();
+function buildBadges(detail: ToolkitValidationDetail): string[] {
+  const badges: string[] = [];
+  if (detail.hasDocChunks) {
+    badges.push(`📄 ${detail.docChunksCount} doc chunks`);
+  }
+  if (detail.hasImports) {
+    badges.push(`📦 ${detail.importsCount} imports`);
+  }
+  if (detail.hasSubPages) {
+    badges.push(`📑 ${detail.subPagesCount} sub-pages`);
+  }
+  return badges;
+}
+
+export function buildValidationOutputLines(
+  result: MergeValidationResult
+): string[] {
+  const lines: string[] = [
+    "=".repeat(60),
+    "📊 Summary",
+    "=".repeat(60),
+    `Total toolkit JSON files: ${result.totalToolkits}`,
+    `With documentation chunks: ${result.withDocChunks}`,
+    `With custom imports: ${result.withCustomImports}`,
+    `With sub-pages: ${result.withSubPages}`,
+    `Total with custom sections: ${result.detailedResults.length}`,
+    "=".repeat(60),
+  ];
+
+  if (result.detailedResults.length > 0) {
+    lines.push("", "📝 Toolkits with Custom Sections:", "");
+
+    const sortedDetails = [...result.detailedResults].sort((a, b) =>
+      a.label.localeCompare(b.label)
+    );
+    for (const detail of sortedDetails) {
+      lines.push(`   ${detail.label}`);
+      lines.push(`      ${buildBadges(detail).join(" | ")}`);
+    }
+  } else {
+    lines.push(
+      "",
+      "⚠️  No toolkits found with custom sections.",
+      "   Did you run the merge script? Run:",
+      "   npm run merge-custom-sections"
+    );
+  }
+
+  if (result.errors.length > 0) {
+    lines.push(
+      "",
+      "⚠️  Files with errors:",
+      ...result.errors.map((e) => `   ${e}`)
+    );
+  }
+
+  return lines;
+}
+
+export function main(): void {
+  console.log("🔍 Validating Merged Custom Sections\n");
+
+  try {
+    const result = validateMergedCustomSections();
+    const lines = buildValidationOutputLines(result);
+    for (const line of lines) {
+      console.log(line);
+    }
+    console.log("\n✅ Validation complete!");
+  } catch (error) {
+    console.error("❌ Data directory not found:", DATA_DIR);
+    console.error(error);
+    process.exit(1);
+  }
+}
+
+const currentFile = fileURLToPath(import.meta.url);
+const entryFile = process.argv[1];
+if (entryFile && resolve(entryFile) === resolve(currentFile)) {
+  main();
+}

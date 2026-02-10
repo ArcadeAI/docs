@@ -175,7 +175,7 @@ export async function GET(
         filePath = join(APP_ROOT, `${sanitizedPath}/page.mdx`);
       }
     } else {
-      // Try clean markdown first (preferred, from main's generate:markdown)
+      // Try clean markdown first (preferred)
       // e.g., /en/home/quickstart -> public/_markdown/en/home/quickstart.md
       const cleanMarkdownPath = join(CLEAN_MARKDOWN_DIR, `${sanitizedPath}.md`);
 
@@ -187,9 +187,10 @@ export async function GET(
           return new NextResponse(content, {
             status: 200,
             headers: {
-              "Content-Type": "text/plain; charset=utf-8",
+              "Content-Type": "text/markdown; charset=utf-8",
               "Content-Disposition": "inline",
               "Cache-Control": "public, max-age=3600",
+              Vary: "Accept, User-Agent",
             },
           });
         }
@@ -223,9 +224,11 @@ export async function GET(
     return new NextResponse(content, {
       status: 200,
       headers: {
-        "Content-Type": "text/plain; charset=utf-8",
+        "Content-Type": "text/markdown; charset=utf-8",
         "Content-Disposition": "inline",
         "Cache-Control": "public, max-age=3600, stale-while-revalidate=86400",
+        "X-Content-Source": "raw-mdx",
+        Vary: "Accept, User-Agent",
       },
     });
   } catch (error) {

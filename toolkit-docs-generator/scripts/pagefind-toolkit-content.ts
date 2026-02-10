@@ -33,37 +33,49 @@ function formatToolkitAuth(auth: ToolkitAuth | null): string[] {
   }
 
   const lines: string[] = ["", "## Authentication", ""];
-
-  if (auth.type === "oauth2") {
-    lines.push("**Type:** OAuth 2.0");
-    if (auth.providerId) {
-      lines.push(`**Provider:** ${auth.providerId}`);
-    }
-    if (auth.allScopes && auth.allScopes.length > 0) {
-      lines.push("", "**Required scopes:**");
-      for (const scope of auth.allScopes) {
-        lines.push(`- \`${scope}\``);
-      }
-    }
-  } else if (auth.type === "api_key") {
-    lines.push("**Type:** API Key");
-    if (auth.providerId) {
-      lines.push(`**Provider:** ${auth.providerId}`);
-    }
-  } else if (auth.type === "mixed") {
-    lines.push("**Type:** Mixed (OAuth 2.0 and API Keys)");
-    if (auth.providerId) {
-      lines.push(`**Provider:** ${auth.providerId}`);
-    }
-    if (auth.allScopes && auth.allScopes.length > 0) {
-      lines.push("", "**OAuth scopes used:**");
-      for (const scope of auth.allScopes) {
-        lines.push(`- \`${scope}\``);
-      }
-    }
-  }
+  lines.push(getToolkitAuthTypeLabel(auth.type));
+  appendProviderLine(lines, auth.providerId);
+  appendScopesSection(lines, auth.type, auth.allScopes);
 
   return lines;
+}
+
+function getToolkitAuthTypeLabel(authType: ToolkitAuth["type"]): string {
+  if (authType === "oauth2") {
+    return "**Type:** OAuth 2.0";
+  }
+  if (authType === "api_key") {
+    return "**Type:** API Key";
+  }
+  return "**Type:** Mixed (OAuth 2.0 and API Keys)";
+}
+
+function appendProviderLine(lines: string[], providerId?: string | null): void {
+  if (providerId) {
+    lines.push(`**Provider:** ${providerId}`);
+  }
+}
+
+function appendScopesSection(
+  lines: string[],
+  authType: ToolkitAuth["type"],
+  allScopes?: string[] | null
+): void {
+  if (!allScopes || allScopes.length === 0) {
+    return;
+  }
+
+  if (authType === "oauth2") {
+    lines.push("", "**Required scopes:**");
+  } else if (authType === "mixed") {
+    lines.push("", "**OAuth scopes used:**");
+  } else {
+    return;
+  }
+
+  for (const scope of allScopes) {
+    lines.push(`- \`${scope}\``);
+  }
 }
 
 /**
@@ -279,81 +291,112 @@ function formatToolDefinition(tool: ToolDefinition): string[] {
  */
 export function toolkitDataToSearchMarkdown(toolkit: ToolkitData): string {
   const title = toolkit.label || toolkit.id;
-  const sections: string[] = [];
-
-  // Title
-  sections.push(`# ${title}`);
-
-  // Version
-  if (toolkit.version) {
-    sections.push(`**Version:** ${toolkit.version}`);
-  }
-
-  // Description
-  if (toolkit.description) {
-    sections.push("", toolkit.description);
-  }
-
-  // Summary (LLM-generated overview)
-  if (toolkit.summary) {
-    sections.push("", "## Overview", "", toolkit.summary);
-  }
-
-  // Authentication
+  const sections: string[] = buildToolkitHeaderSections(toolkit, title);
   sections.push(...formatToolkitAuth(toolkit.auth));
+  sections.push(...buildDocumentationChunkSections(toolkit));
 
-  // Toolkit-level documentation chunks
-  if (toolkit.documentationChunks && toolkit.documentationChunks.length > 0) {
-    for (const chunk of toolkit.documentationChunks) {
-      if (chunk.content) {
-        sections.push("", chunk.content);
-      }
-    }
-  }
-
-  // Tools section
   const toolsToInclude = toolkit.tools.slice(0, TOOL_LIMIT);
   const truncatedCount = Math.max(
     0,
     toolkit.tools.length - toolsToInclude.length
   );
 
-  sections.push("", "## Tools", "");
-  sections.push(`This toolkit provides **${toolkit.tools.length} tools**:`);
-  sections.push("");
+  sections.push(
+    ...buildToolsSummarySections(
+      toolkit.tools.length,
+      toolsToInclude,
+      truncatedCount
+    )
+  );
+  sections.push(...buildToolDetailsSections(toolsToInclude));
+  sections.push(...buildGeneratedAtSection(toolkit.generatedAt));
 
-  // Quick reference list
-  sections.push("### Quick Reference");
-  sections.push("");
+  return sections.join("\n");
+}
+
+function buildToolkitHeaderSections(
+  toolkit: ToolkitData,
+  title: string
+): string[] {
+  const sections: string[] = [`# ${title}`];
+
+  if (toolkit.version) {
+    sections.push(`**Version:** ${toolkit.version}`);
+  }
+
+  if (toolkit.description) {
+    sections.push("", toolkit.description);
+  }
+
+  if (toolkit.summary) {
+    sections.push("", "## Overview", "", toolkit.summary);
+  }
+
+  return sections;
+}
+
+function buildDocumentationChunkSections(toolkit: ToolkitData): string[] {
+  if (
+    !toolkit.documentationChunks ||
+    toolkit.documentationChunks.length === 0
+  ) {
+    return [];
+  }
+
+  const sections: string[] = [];
+  for (const chunk of toolkit.documentationChunks) {
+    if (chunk.content) {
+      sections.push("", chunk.content);
+    }
+  }
+  return sections;
+}
+
+function buildToolsSummarySections(
+  totalTools: number,
+  toolsToInclude: ToolDefinition[],
+  truncatedCount: number
+): string[] {
+  const sections: string[] = [
+    "",
+    "## Tools",
+    "",
+    `This toolkit provides **${totalTools} tools**:`,
+    "",
+    "### Quick Reference",
+    "",
+  ];
+
   for (const tool of toolsToInclude) {
-    const desc = tool.description
-      ? ` — ${tool.description.split("\n")[0]}`
-      : "";
-    sections.push(
-      `- [\`${tool.qualifiedName}\`](#${tool.qualifiedName.toLowerCase().replace(/\./g, "")})${desc}`
-    );
+    sections.push(buildQuickReferenceLine(tool));
   }
 
   if (truncatedCount > 0) {
-    sections.push("");
-    sections.push(`*... and ${truncatedCount} more tools.*`);
+    sections.push("", `*... and ${truncatedCount} more tools.*`);
   }
 
-  // Detailed tool definitions
-  sections.push("", "---", "");
-  sections.push("## Tool Details");
-  sections.push("");
+  return sections;
+}
 
+function buildQuickReferenceLine(tool: ToolDefinition): string {
+  const description = tool.description
+    ? ` — ${tool.description.split("\n")[0]}`
+    : "";
+  const anchor = tool.qualifiedName.toLowerCase().replace(/\./g, "");
+  return `- [\`${tool.qualifiedName}\`](#${anchor})${description}`;
+}
+
+function buildToolDetailsSections(toolsToInclude: ToolDefinition[]): string[] {
+  const sections: string[] = ["", "---", "", "## Tool Details", ""];
   for (const tool of toolsToInclude) {
-    sections.push(...formatToolDefinition(tool));
-    sections.push("---", "");
+    sections.push(...formatToolDefinition(tool), "---", "");
   }
+  return sections;
+}
 
-  // Footer
-  if (toolkit.generatedAt) {
-    sections.push("");
-    sections.push(`*Documentation generated: ${toolkit.generatedAt}*`);
+function buildGeneratedAtSection(generatedAt?: string): string[] {
+  if (!generatedAt) {
+    return [];
   }
-
-  return sections.join("\n");
+  return ["", `*Documentation generated: ${generatedAt}*`];
 }

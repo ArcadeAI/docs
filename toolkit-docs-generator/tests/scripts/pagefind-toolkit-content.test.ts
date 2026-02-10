@@ -105,6 +105,40 @@ describe("toolkitDataToSearchMarkdown", () => {
     expect(markdown).toContain("- `user:email`");
   });
 
+  it("includes API key authentication details", () => {
+    const markdown = toolkitDataToSearchMarkdown(
+      makeToolkit([makeTool("Stripe.CreateCustomer")], {
+        auth: {
+          type: "api_key",
+          providerId: "stripe",
+          allScopes: null,
+        },
+      })
+    );
+
+    expect(markdown).toContain("## Authentication");
+    expect(markdown).toContain("**Type:** API Key");
+    expect(markdown).toContain("**Provider:** stripe");
+  });
+
+  it("includes mixed authentication details with OAuth scopes", () => {
+    const markdown = toolkitDataToSearchMarkdown(
+      makeToolkit([makeTool("Github.CreateIssue")], {
+        auth: {
+          type: "mixed",
+          providerId: "github",
+          allScopes: ["repo"],
+        },
+      })
+    );
+
+    expect(markdown).toContain("## Authentication");
+    expect(markdown).toContain("**Type:** Mixed (OAuth 2.0 and API Keys)");
+    expect(markdown).toContain("**Provider:** github");
+    expect(markdown).toContain("**OAuth scopes used:**");
+    expect(markdown).toContain("- `repo`");
+  });
+
   it("includes overview summary when available", () => {
     const markdown = toolkitDataToSearchMarkdown(
       makeToolkit([makeTool("Github.CreateIssue")], {
