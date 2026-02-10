@@ -947,5 +947,5 @@ export default function Chat() {
 
 Last updated on February 10, 2026
 
-[Setup (TypeScript)](/en/get-started/agent-frameworks/openai-agents/setup-typescript.md)
+[Setup Arcade with OpenAI Agents SDK](/en/get-started/agent-frameworks/openai-agents/use-arcade-with-openai-agents.md)
 [Overview](/en/get-started/mcp-clients.md)
