@@ -255,6 +255,28 @@ const nextConfig: NextConfig = withLlmsTxt({
           destination: "/:locale/get-started/agent-frameworks/mastra",
           permanent: true,
         },
+        // OpenAI Agents tutorial consolidation
+        {
+          source:
+            "/:locale/get-started/agent-frameworks/openai-agents/use-arcade-with-openai-agents",
+          destination:
+            "/:locale/get-started/agent-frameworks/openai-agents/overview",
+          permanent: true,
+        },
+        {
+          source:
+            "/:locale/get-started/agent-frameworks/openai-agents/use-arcade-tools",
+          destination:
+            "/:locale/get-started/agent-frameworks/openai-agents/overview",
+          permanent: true,
+        },
+        {
+          source:
+            "/:locale/get-started/agent-frameworks/openai-agents/user-auth-interrupts",
+          destination:
+            "/:locale/get-started/agent-frameworks/openai-agents/overview",
+          permanent: true,
+        },
         // Moved from guides to get-started
         {
           source:
@@ -299,7 +321,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/home/oai-agents/user-auth-interrupts",
           destination:
-            "/:locale/get-started/agent-frameworks/openai-agents/user-auth-interrupts",
+            "/:locale/get-started/agent-frameworks/openai-agents/overview",
           permanent: true,
         },
         {
@@ -560,7 +582,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/home/oai-agents/use-arcade-tools",
           destination:
-            "/:locale/get-started/agent-frameworks/openai-agents/use-arcade-tools",
+            "/:locale/get-started/agent-frameworks/openai-agents/overview",
           permanent: true,
         },
         {
@@ -721,7 +743,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/guides/agent-frameworks/openai/python",
           destination:
-            "/:locale/get-started/agent-frameworks/openai-agents/use-arcade-tools",
+            "/:locale/get-started/agent-frameworks/openai-agents/overview",
           permanent: true,
         },
         {
