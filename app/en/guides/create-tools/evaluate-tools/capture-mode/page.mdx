@@ -7,11 +7,13 @@ import { Callout, Steps } from "nextra/components";
 
 # Capture mode
 
-Capture mode records tool calls without evaluating them. Use it to bootstrap test expectations or debug model behavior.
+Capture mode records tool calls without evaluating them to bootstrap test expectations or debug model behavior.
+
+Capture mode helps you understand how models interact with your tools when you don't know what to expect. You can use it to create initial test cases, debug unexpected evaluation failures, or explore how models interpret new tools. This guide covers how to set up capture mode, review the output, and convert captured calls into proper test expectations.
 
 <Callout type="info">
   **Backward compatibility**: Capture mode works with existing evaluation
-  suites. Simply add the `--capture` flag to any `arcade evals` command. No code
+  suites. Add the `--capture` flag to any `arcade evals` command. No code
   changes needed.
 </Callout>
 
@@ -63,7 +65,7 @@ async def capture_weather_suite():
 
     # Add cases without expected tool calls
     suite.add_case(
-        name="Simple weather query",
+        name="Basic weather query",
         user_message="What's the weather in Seattle?",
         expected_tool_calls=[],  # Empty for capture
     )
@@ -98,7 +100,7 @@ Open the JSON file to see what the model called:
   "provider": "openai",
   "captured_cases": [
     {
-      "case_name": "Simple weather query",
+      "case_name": "Basic weather query",
       "user_message": "What's the weather in Seattle?",
       "tool_calls": [
         {
@@ -118,7 +120,7 @@ If you set `--num-runs` > 1, each case also includes `runs`:
 
 ```json
 {
-  "case_name": "Simple weather query",
+  "case_name": "Basic weather query",
   "tool_calls": [{"name": "Weather_GetCurrent", "args": {"location": "Seattle"}}],
   "runs": [
     {"tool_calls": [{"name": "Weather_GetCurrent", "args": {"location": "Seattle"}}]},
@@ -137,7 +139,7 @@ Copy the captured calls into your evaluation suite:
 from arcade_evals import ExpectedMCPToolCall, BinaryCritic
 
 suite.add_case(
-    name="Simple weather query",
+    name="Basic weather query",
     user_message="What's the weather in Seattle?",
     expected_tool_calls=[
         ExpectedMCPToolCall(
@@ -214,11 +216,11 @@ Markdown format is more readable for quick review:
 
 ### Model: gpt-4o
 
-#### Case: Simple weather query
+#### Case: Basic weather query
 
 **Input:** What's the weather in Seattle?
 
-**Tool Calls:**
+**tool calls:**
 
 - `Weather_GetCurrent`
   - location: Seattle
@@ -354,7 +356,7 @@ arcade evals . --capture \
   -o captures/models.json -o captures/models.md
 ```
 
-## Converting captures to tests
+## Convert captures to tests
 
 ### Step 1: Identify patterns
 
@@ -374,7 +376,7 @@ Review captured tool calls to find patterns:
 Create expected tool calls based on patterns:
 
 ```python
-# Default to fahrenheit for US cities
+# Default to fahrenheit for domestic cities
 ExpectedMCPToolCall("GetWeather", {"location": "Seattle", "units": "fahrenheit"})
 
 # Use celsius for international cities
@@ -411,7 +413,7 @@ Use failures to refine:
 **Possible causes:**
 
 1. Model didn't call any tools
-2. Tools not properly registered
+2. tools not properly registered
 3. System message doesn't encourage tool use
 
 **Solution:**
