@@ -58,39 +58,8 @@ function isAIAgent(request: NextRequest): boolean {
   return AI_AGENT_PATTERNS.some((pattern) => pattern.test(userAgent));
 }
 
-function parseAcceptLanguageHeader(acceptLanguage: string): string[] {
-  return acceptLanguage
-    .split(",")
-    .map((lang) => lang.split(";")[0].trim())
-    .map((lang) => {
-      if (lang.startsWith("es")) {
-        return "es";
-      }
-      if (lang.startsWith("pt")) {
-        return "pt-BR";
-      }
-      return lang;
-    });
-}
-
-function getPreferredLocale(request: NextRequest): string {
-  const cookieLocale = request.cookies.get("NEXT_LOCALE")?.value;
-
-  if (cookieLocale && SUPPORTED_LOCALES.includes(cookieLocale)) {
-    return cookieLocale;
-  }
-
-  const acceptLanguage = request.headers.get("accept-language");
-  if (acceptLanguage) {
-    const languages = parseAcceptLanguageHeader(acceptLanguage);
-    const preferredLocale = languages.find((lang) =>
-      SUPPORTED_LOCALES.includes(lang)
-    );
-    if (preferredLocale) {
-      return preferredLocale;
-    }
-  }
-
+function getPreferredLocale(_request: NextRequest): string {
+  // We don't currently support other translations, so always use English.
   return "en";
 }
 
