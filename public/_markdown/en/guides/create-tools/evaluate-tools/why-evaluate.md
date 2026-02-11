@@ -81,7 +81,7 @@ Test the same cases against different  sources (tracks) with isolated registries
 
 Save results in multiple formats (txt, md, html, json) for reporting and analysis. Specify output files with extensions or use no extension for all formats. [Learn more →](/guides/create-tools/evaluate-tools/run-evaluations.md#output-formats)
 
-Last updated on January 30, 2026
+Last updated on February 10, 2026
 
 [Overview](/en/guides/create-tools/evaluate-tools.md)
 [Create an evaluation suite](/en/guides/create-tools/evaluate-tools/create-evaluation-suite.md)

@@ -60,7 +60,7 @@ Arcade provides just-in-time authorization. When you use a  that requires access
 
 ![Step 4: Chat with your agent using Arcade tools](/_next/image?url=%2Fimages%2Fmcp-gateway%2Fcopilot-studio%2Fstep-4.png&w=1920&q=75)
 
-Last updated on January 30, 2026
+Last updated on February 10, 2026
 
 [Visual Studio Code](/en/get-started/mcp-clients/visual-studio-code.md)
 [Overview](/en/resources/integrations.md)

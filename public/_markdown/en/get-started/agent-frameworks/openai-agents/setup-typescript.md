@@ -381,7 +381,7 @@ main().catch(console.error);
 -   Explore [creating custom tools](/guides/create-tools/tool-basics/build-mcp-server.md)
      with the Arcade  SDK
 
-Last updated on January 30, 2026
+Last updated on February 10, 2026
 
 [Setup (Python)](/en/get-started/agent-frameworks/openai-agents/setup-python.md)
 [Setup Arcade with OpenAI Agents SDK](/en/get-started/agent-frameworks/openai-agents/use-arcade-with-openai-agents.md)

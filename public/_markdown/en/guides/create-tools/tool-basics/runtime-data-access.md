@@ -279,7 +279,7 @@ For HTTP transport, view your server’s API docs at [http://127.0.0.1:8000/docs
 -   [Build a custom tool with secrets](/guides/create-tools/tool-basics/create-tool-secrets.md)
 
 
-Last updated on January 30, 2026
+Last updated on February 10, 2026
 
 [Create a tool with secrets](/en/guides/create-tools/tool-basics/create-tool-secrets.md)
 [Call tools from MCP clients](/en/guides/create-tools/tool-basics/call-tools-mcp.md)
