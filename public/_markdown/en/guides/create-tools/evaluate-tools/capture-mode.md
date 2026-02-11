@@ -14,13 +14,13 @@ Capture mode records  calls without evaluating them. Use it to bootstrap test ex
 
 ## When to use capture mode
 
-**Bootstrapping test expectations**: When you don’t know what  calls to expect, run capture mode to see what the model actually calls.
+**Bootstrapping test expectations**: when you don’t know what  calls to expect, run capture mode to see what the model actually calls.
 
-**Debugging model behavior**: When evaluations fail unexpectedly, capture mode shows exactly what the model is doing.
+**Debugging model behavior**: when evaluations fail unexpectedly, capture mode shows exactly what the model is doing.
 
-**Exploring new **: When adding new tools, capture mode helps you understand how models interpret them.
+**Exploring new **: when adding new tools, capture mode helps you understand how models interpret them.
 
-**Documenting  usage**: Create examples of how models use your tools in different scenarios.
+**Documenting  usage**: create examples of how models use your tools in different scenarios.
 
 ### Typical workflow
 
@@ -111,6 +111,21 @@ Open the JSON file to see what the model called:
 }
 ```
 
+If you set `--num-runs` > 1, each case also includes `runs`:
+
+```json
+{
+  "case_name": "Simple weather query",
+  "tool_calls": [{"name": "Weather_GetCurrent", "args": {"location": "Seattle"}}],
+  "runs": [
+    {"tool_calls": [{"name": "Weather_GetCurrent", "args": {"location": "Seattle"}}]},
+    {"tool_calls": [{"name": "Weather_GetCurrent", "args": {"location": "Seattle"}}]}
+  ]
+}
+```
+
+Arcade keeps `tool_calls` for backward compatibility. It matches the first run.
+
 ### Convert to test expectations
 
 Copy the captured calls into your evaluation suite:
@@ -143,6 +158,16 @@ Record  calls to JSON:
 ```bash
 arcade evals . --capture -o captures/baseline.json
 ```
+
+### Multi-run capture
+
+Run each case multiple times:
+
+```bash
+arcade evals . --capture --num-runs 3 --seed random -o captures/multi-run.json
+```
+
+`--seed` only affects OpenAI runs. Arcade ignores it for Anthropic.
 
 ### Include conversation context
 
@@ -199,7 +224,8 @@ Capture from multiple providers to compare behavior:
 
 ```bash
 arcade evals . --capture \
-  -p "openai:gpt-4o anthropic:claude-sonnet-4-5-20250929" \
+  -p openai:gpt-4o \
+  -p anthropic:claude-sonnet-4-5-20250929 \
   -k openai:sk-... \
   -k anthropic:sk-ant-... \
   -o captures/comparison.json
@@ -314,7 +340,8 @@ Compare how different models interpret your :
 
 ```bash
 arcade evals . --capture \
-  -p "openai:gpt-4o,gpt-4o-mini anthropic:claude-sonnet-4-5-20250929" \
+  -p openai:gpt-4o,gpt-4o-mini \
+  -p anthropic:claude-sonnet-4-5-20250929 \
   -k openai:sk-... \
   -k anthropic:sk-ant-... \
   -o captures/models.json -o captures/models.md
@@ -372,7 +399,7 @@ Use failures to refine:
 
 ### No tool calls captured
 
-**Symptom:** Empty `tool_calls` arrays
+**Symptom:** empty `tool_calls` arrays
 
 **Possible causes:**
 
@@ -391,19 +418,19 @@ suite = EvalSuite(
 
 ### Missing parameters
 
-**Symptom:** Some parameters are missing from captured calls
+**Symptom:** some parameters are missing from captured calls
 
-**Explanation:** Models may omit optional parameters.
+**Explanation:** models may omit optional parameters.
 
-**Solution:** Check if parameters have defaults in your schema. The evaluation framework applies defaults automatically.
+**Solution:** check if parameters have defaults in your schema. The evaluation framework applies defaults automatically.
 
 ### Different results per provider
 
-**Symptom:** OpenAI and Anthropic capture different  calls
+**Symptom:**  calls differ between OpenAI and Anthropic
 
-**Explanation:** Providers interpret  descriptions differently.
+**Explanation:** providers interpret  descriptions differently.
 
-**Solution:** This is expected. Use captures to understand provider-specific behavior, then create provider-agnostic tests.
+**Solution:** use captures to understand provider-specific behavior, then create provider-agnostic tests.
 
 ## Next steps
 

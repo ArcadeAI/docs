@@ -10,7 +10,7 @@ Run evaluations
 
 The `arcade evals` command discovers and executes evaluation suites with support for multiple providers, models, and output formats.
 
-**Backward compatibility**: All new features (multi-provider support, capture mode, output formats) work with existing evaluation suites. No code changes required.
+**Backward compatibility**: All new features (multi-provider support, multi-run evaluation, capture mode, output formats) work with existing evaluation suites. No code changes required.
 
 ## Basic usage
 
@@ -63,17 +63,18 @@ Specify one or more models for a provider:
 
 ```bash
 # results.txtresults.mdresults.htmlresults.json
-arcade evals . --use-provider "openai:gpt-4o,gpt-4o-mini"
+arcade evals . --use-provider openai:gpt-4o,gpt-4o-mini
 ```
 
 ### Multiple providers
 
-Compare performance across providers (space-separated):
+Compare performance across providers (repeat `--use-provider`):
 
 ```bash
 # results.txtresults.mdresults.htmlresults.json
 arcade evals . \
-  --use-provider "openai:gpt-4o anthropic:claude-sonnet-4-5-20250929" \
+  --use-provider openai:gpt-4o \
+  --use-provider anthropic:claude-sonnet-4-5-20250929 \
   --api-key openai:sk-... \
   --api-key anthropic:sk-ant-...
 ```
@@ -195,6 +196,74 @@ All formats
 
 Generates all four formats
 
+## Multi-run evaluation
+
+Run each case multiple times to measure stability:
+
+```bash
+# results.txtresults.mdresults.htmlresults.json
+# Run each case 5 times with random seeds
+# Pass if the majority of runs pass
+arcade evals . \
+  --num-runs 5 \
+  --seed random \
+  --multi-run-pass-rule majority \
+  --details \
+  -o results.html
+```
+
+When you use `--num-runs` > 1, Arcade adds per-case `run_stats` to results. If your case has critics, Arcade also adds `critic_stats`.
+
+`--seed` only affects OpenAI runs. Arcade ignores it for Anthropic.
+
+Valid values:
+
+-   `--seed`: `constant` (default), `random`, or a non-negative integer
+-   `--multi-run-pass-rule`: `last` (default), `mean`, or `majority`
+
+### What multi-run returns
+
+In JSON output, each case includes multi-run data:
+
+```json
+# results.txtresults.mdresults.htmlresults.json
+{
+  "name": "Get weather for city",
+  "status": "passed",
+  "score": 93.0,
+  "passed": true,
+  "warning": false,
+  "run_stats": {
+    "num_runs": 3,
+    "scores": [1.0, 0.8, 1.0],
+    "mean_score": 0.93,
+    "std_deviation": 0.09,
+    "passed": [true, false, true],
+    "warned": [false, true, false],
+    "seed_policy": "random",
+    "run_seeds": [123, 456, 789],
+    "pass_rule": "majority",
+    "runs": [
+      {"score": 1.0, "passed": true, "warning": false, "failure_reason": null, "details": []},
+      {"score": 0.8, "passed": false, "warning": true, "failure_reason": null, "details": []},
+      {"score": 1.0, "passed": true, "warning": false, "failure_reason": null, "details": []}
+    ]
+  },
+  "critic_stats": {
+    "location": {
+      "run_scores": [0.7, 0.56, 0.7],
+      "weight": 0.7,
+      "mean_score_normalized": 0.95,
+      "std_deviation_normalized": 0.07,
+      "mean_score": 0.67,
+      "std_deviation": 0.05
+    }
+  }
+}
+```
+
+Arcade uses `--multi-run-pass-rule` to set the overall `status`, `passed`, and `warning` fields. It sets `run_stats.mean_score` to the average raw score across runs, and the top-level `score` is that aggregate score in percent.
+
 ## Command options
 
 ### Quick reference
@@ -213,7 +282,7 @@ Example
 
 Select provider/model
 
-`-p "openai:gpt-4o"`
+`-p openai:gpt-4o`
 
 `--api-key`
 
@@ -251,7 +320,7 @@ Filter failures
 
 `-o`
 
-Output file(s)
+Output file (repeatable)
 
 `-o results.md`
 
@@ -271,6 +340,30 @@ Parallel limit
 
 `-c 10`
 
+`--num-runs`
+
+`-n`
+
+Run each case multiple times
+
+`-n 5`
+
+`--seed`
+
+\-
+
+Seed policy for OpenAI runs
+
+`--seed random`
+
+`--multi-run-pass-rule`
+
+\-
+
+Pass/warn rule for multi-run
+
+`--multi-run-pass-rule majority`
+
 `--debug`
 
 \-
@@ -281,11 +374,11 @@ Debug info
 
 ### `--use-provider`, `-p`
 
-Specify provider(s) and model(s) (space-separated):
+Specify a provider and optional model list. Repeat the flag for multiple providers:
 
 ```bash
 # results.txtresults.mdresults.htmlresults.json
---use-provider "<provider>[:<models>] [<provider2>[:<models2>]]"
+--use-provider <provider>[:<model1>,<model2>]
 ```
 
 **Supported providers:**
@@ -303,13 +396,13 @@ Anthropic model names include date stamps. Check [Anthropic’s model documentat
 arcade evals . -p anthropic
 
 # Specific model
-arcade evals . -p "openai:gpt-4o-mini"
+arcade evals . -p openai:gpt-4o-mini
 
 # Multiple models from same provider
-arcade evals . -p "openai:gpt-4o,gpt-4o-mini"
+arcade evals . -p openai:gpt-4o,gpt-4o-mini
 
-# Multiple providers (space-separated)
-arcade evals . -p "openai:gpt-4o anthropic:claude-sonnet-4-5-20250929"
+# Multiple providers (repeat `-p`)
+arcade evals . -p openai:gpt-4o -p anthropic:claude-sonnet-4-5-20250929
 ```
 
 ### `--api-key`, `-k`
@@ -341,7 +434,7 @@ arcade evals . --include-context --output results.md
 
 ### `--output`, `-o`
 
-Specify output file(s). Format is auto-detected from extension:
+Specify one or more output files. Format is auto-detected from extension:
 
 ```bash
 # results.txtresults.mdresults.htmlresults.json
@@ -415,6 +508,7 @@ Summary -- Total: 5 -- Passed: 4 -- Failed: 1
 -   `--details`: Adds per-critic breakdown for each case
 -   `--only-failed`: Filters to show only failed cases (summary shows original totals)
 -   `--include-context`: Includes system messages and conversation history
+-   `--num-runs`: Adds per-run statistics and aggregate scores
 -   Multiple models: Switches to comparison table format
 -   Comparative tracks: Shows side-by-side track comparison
 
@@ -426,8 +520,8 @@ PLAINTEXT
 
 ```
 # results.txtresults.mdresults.htmlresults.json
-PASSED Get weather for city -- Score: 1.00
-FAILED Weather with invalid city -- Score: 0.65
+PASSED Get weather for city -- Score: 100.00%
+FAILED Weather with invalid city -- Score: 65.00%
 ```
 
 ### Detailed feedback
@@ -456,8 +550,8 @@ PLAINTEXT
 ```
 # results.txtresults.mdresults.htmlresults.json
 Case: Get weather for city
-  Model: gpt-4o -- Score: 1.00 -- PASSED
-  Model: gpt-4o-mini -- Score: 0.95 -- WARNED
+  Model: gpt-4o -- Score: 100.00% -- PASSED
+  Model: gpt-4o-mini -- Score: 95.00% -- WARNED
 ```
 
 ## Advanced usage
@@ -533,7 +627,7 @@ Ensure your evaluation files:
 -   Explore [capture mode](/guides/create-tools/evaluate-tools/capture-mode.md)
      for recording  calls
 -   Learn about [comparative evaluations](/guides/create-tools/evaluate-tools/comparative-evaluations.md)
-     for comparing  sources
+     for comparing  sources $$
 
 Last updated on February 10, 2026
 

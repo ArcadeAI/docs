@@ -105,10 +105,13 @@ arcade evals . -p anthropic
 arcade evals . -p anthropic -k anthropic:<your_api_key>
 
 # Multiple models
-arcade evals . -p "openai:gpt-4o,gpt-4o-mini"
+arcade evals . -p openai:gpt-4o,gpt-4o-mini
 
-# Multiple providers (space-separated)
-arcade evals . -p "openai anthropic" -k openai:sk-... -k anthropic:sk-ant-...
+# Multiple providers (repeat `-p`)
+arcade evals . -p openai -p anthropic -k openai:sk-... -k anthropic:sk-ant-...
+
+# Multi-run evaluation
+arcade evals . --num-runs 3 --seed random --multi-run-pass-rule majority
 ```
 
 See [Run evaluations](/guides/create-tools/evaluate-tools/run-evaluations.md) for all available options.
@@ -128,7 +131,7 @@ PLAINTEXT
 ```
 Suite: Weather Tools
   Model: gpt-4o
-    PASSED Get weather for city -- Score: 1.00
+    PASSED Get weather for city -- Score: 100.00%
 
 Summary -- Total: 1 -- Passed: 1 -- Failed: 0
 ```
@@ -144,7 +147,7 @@ Detailed output includes per-critic scores:
 PLAINTEXT
 
 ```
-PASSED Get weather for city -- Score: 1.00
+PASSED Get weather for city -- Score: 100.00%
   Details:
     location:
       Match: True, Score: 0.70/0.70
