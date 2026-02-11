@@ -115,7 +115,7 @@ import { Arcade } from "@arcadeai/arcadejs";
 import {
   toZodToolSet,
   executeOrAuthorizeZodTool,
-} from "@arcadeai/arcadejs/lib";
+} from "@arcadeai/arcadejs/lib/index";
 ```
 
 **What these imports do:**
@@ -596,7 +596,7 @@ import { Arcade } from "@arcadeai/arcadejs";
 import {
   toZodToolSet,
   executeOrAuthorizeZodTool,
-} from "@arcadeai/arcadejs/lib";
+} from "@arcadeai/arcadejs/lib/index";
 
 const config = {
   mcpServers: ["Slack"],
