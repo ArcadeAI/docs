@@ -8,13 +8,15 @@ import ToggleContent from "@/app/_components/toggle-content";
 
 # Get Formatted Tool Definitions
 
-When calling tools directly, it can be useful to get tool definitions in a specific model provider's format. The Arcade Client provides methods for getting a tool's definition and also for listing the definitions of multiple tools in a specific model provider's format.
+Learn how to get tool definitions formatted for specific model providers using the Arcade Client.
+
+When calling tools directly, you can get tool definitions in a specific model provider's format. The Arcade Client provides methods for getting a tool's definition and also for listing the definitions of multiple tools in a specific model provider's format. This is useful when you need to integrate with different AI frameworks or when building custom applications that consume tool definitions in standardized formats. You'll use these methods when working with model providers like OpenAI or when you need type-safe tool definitions with Zod schemas.
 
 ## Get a single tool definition formatted for a model
 
-It can be useful to get a tool's definition in a specific model provider's format. For example, you may want to get the `Github.SetStarred` tool's definition in OpenAI's format.
+You can get a tool's definition in a specific model provider's format. For example, you may want to get the `Github.SetStarred` tool's definition in OpenAI's format.
 
-To do this, you can use the `client.tools.formatted.get` method and specify the tool name and format.
+Use the `client.tools.formatted.get` method and specify the tool name and format.
 
 <Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
 <Tabs.Tab>
@@ -78,11 +80,11 @@ console.log(githubStarRepo);
 
 </ToggleContent>
 
-## Get all tool definitions in a MCP Server formatted for a model
+## Get all tool definitions in an MCP server formatted for a model
 
-It can be useful to list tool definitions for a MCP Server in a specific model provider's format. For example, you may want to get the definitions of tools in the `Github` MCP Server in OpenAI's format.
+You can list tool definitions for an MCP server in a specific model provider's format. For example, you may want to get the definitions of tools in the `Github` MCP server in OpenAI's format.
 
-To do this, you can use the `client.tools.formatted.list` method and specify the MCP Server and format. Since this method returns an iterator of pages, you can cast to a list to get all the tools.
+Use the `client.tools.formatted.list` method and specify the MCP server and format. Since this method returns an iterator of pages, you can cast to a list to get all the tools.
 
 <Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
 <Tabs.Tab>
@@ -91,10 +93,10 @@ from arcadepy import Arcade
 
 client = Arcade()
 
-# Get all tools in the Github MCP Server formatted for OpenAI
+# Get all tools in the Github MCP server formatted for OpenAI
 github_tools = list(client.tools.formatted.list(format="openai", toolkit="github"))
 
-# Print the number of tools in the Github MCP Server
+# Print the number of tools in the Github MCP server
 print(len(github_tools))
 ```
 </Tabs.Tab>
@@ -104,13 +106,13 @@ import Arcade from "@arcadeai/arcadejs";
 
 const client = new Arcade();
 
-// Get all tools in the Github MCP Server formatted for OpenAI
+// Get all tools in the Github MCP server formatted for OpenAI
 const githubTools = await client.tools.formatted.list({
   format: "openai",
   toolkit: "github",
 });
 
-// Print the number of tools in the Github MCP Server
+// Print the number of tools in the Github MCP server
 console.log(githubTools.total_count);
 ```
 
@@ -119,7 +121,7 @@ console.log(githubTools.total_count);
 
 ## Get all tool definitions formatted for a model
 
-To get all tools formatted for OpenAI, you can use the `client.tools.formatted.list` method without specifying a MCP Server.
+To get all tools formatted for OpenAI, use the `client.tools.formatted.list` method without specifying an MCP server.
 
 <Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
 <Tabs.Tab>
@@ -150,15 +152,15 @@ console.log(allTools.total_count);
 </Tabs.Tab>
 </Tabs>
 
-## Get Zod Tool Definitions
+## Get Zod tool definitions
 
-[Zod](https://zod.dev) is a TypeScript-first schema validation library that helps you define and validate data structures. The [Arcade JS](https://github.com/ArcadeAI/arcade-js) client offers methods to convert Arcade tool definitions into Zod schemas, providing type safety and validation while enabling seamless integration with AI frameworks like LangChain, Vercel AI SDK, and Mastra AI. Using Zod with Arcade provides:
+[Zod](https://zod.dev) is a TypeScript-first schema validation library that helps you define and validate data structures. The [Arcade JS](https://github.com/ArcadeAI/arcade-js) client offers methods to convert Arcade tool definitions into Zod schemas, providing type safety and validation while enabling integration with AI frameworks like LangChain, Vercel AI SDK, and Mastra AI. Using Zod with Arcade provides:
 
 1. **Type Safety**: Runtime validation of tool inputs and outputs against their defined types
-2. **TypeScript Integration**: Provides excellent TypeScript support with automatic type inference
+2. **TypeScript Integration**: Provides outstanding TypeScript support with automatic type inference
 3. **Framework Compatibility**: Direct integration with LangChain, Vercel AI SDK, and Mastra AI
 
-### Convert to Zod Format
+### Convert to Zod format
 
 Arcade offers three ways to convert your tools into Zod schemas, each for different use cases:
 
@@ -224,7 +226,7 @@ const emails = await listEmailsTool.execute({
 });
 ```
 
-### Handle Authorization
+### Handle authorization
 When working with tools that require user authorization (like Gmail, GitHub, Slack, etc.), Arcade provides two approaches to handle the authorization flow when using Zod-converted tools:
 
 #### Option 1: Manual handling
@@ -265,7 +267,7 @@ try {
 
 Arcade offers a more convenient way to handle tool execution and initial authorization steps. When converting tools to Zod, you can add the `executeOrAuthorizeZodTool` helper to the `executeFactory`. With this helper, your code no longer needs to catch a `PermissionDeniedError` for tools requiring permissions (as shown in Option 1). Instead, if the user hasn't yet granted access, the `execute` method will return an `ToolAuthorizationResponse` object that contains the authorization URL.
 
-This approach simplifies your code by:
+This approach improves your code by:
 
 1. Attempting to execute the tool.
 2. If permissions are missing, it returns an object containing the authorization URL. This eliminates the need for both a `try...catch` block for `PermissionDeniedError` and a separate call (like `arcade.tools.authorize`) just to retrieve this URL.
@@ -294,4 +296,3 @@ if ("authorization_required" in result && result.authorization_required) {
 } else {
 	console.log(result);
 }
-```
