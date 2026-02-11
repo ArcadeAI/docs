@@ -5,7 +5,9 @@ description: "Learn how to evaluate your tools using Arcade"
 
 # Create an evaluation suite
 
-Evaluation suites help you test whether AI models use your tools correctly. This guide shows you how to create test cases that measure tool selection and parameter accuracy.
+Learn how to create test cases that measure tool selection and parameter accuracy for your tools.
+
+Evaluation suites help you test whether AI models use your tools correctly. This guide covers creating an evaluation file, defining test cases with expected tool calls, and running evaluations across different providers. You'll need this when validating tool behavior before deployment or when comparing model performance. You'll work in your MCP server directory and use the Arcade CLI to execute tests. By the end, you'll have a working evaluation suite that automatically tests your tools.
 
 import { Steps, Tabs, Callout } from "nextra/components";
 
@@ -164,7 +166,7 @@ PASSED Get weather for city -- Score: 100.00%
 
 ## Loading tools
 
-You can load tools from different sources. All methods are async and must be awaited in your `@tool_eval()` decorated function.
+You can load tools from different sources. All methods are async and you must await them in your `@tool_eval()` decorated function.
 
 ### From MCP HTTP server
 
@@ -245,7 +247,7 @@ await suite.add_mcp_server("http://server2.example")
 suite.add_tool_definitions([{"name": "CustomTool", ...}])
 ```
 
-All tools are accumulated in the suite's registry and available to the model.
+The suite accumulates all tools in its registry and makes them available to the model.
 
 ## Expected tool calls
 
@@ -259,14 +261,14 @@ ExpectedMCPToolCall(
 ```
 
 <Callout type="warning">
-  Tool names are normalized for compatibility with model tool calling. Dots
+  The system normalizes tool names for compatibility with model tool calling. Dots
   (`.`) become underscores (`_`). For example, `Weather.GetCurrent` becomes
   `Weather_GetCurrent`.
 </Callout>
 
 ## Critics
 
-Critics validate tool call parameters. Each critic type handles different validation needs:
+Validation experts evaluate tool call parameters. Each critic type handles different validation needs:
 
 | Critic             | Use case        | Example                                                            |
 | ------------------ | --------------- | ------------------------------------------------------------------ |
@@ -284,7 +286,7 @@ critics=[
 ]
 ```
 
-All weights are normalized proportionally to sum to 1.0. Use numeric values or `FuzzyWeight` (`CRITICAL`, `HIGH`, `MEDIUM`, `LOW`).
+The system normalizes all weights proportionally to sum to 1.0. Use numeric values or `FuzzyWeight` (`CRITICAL`, `HIGH`, `MEDIUM`, `LOW`).
 
 ## Multiple tool calls
 
@@ -314,7 +316,7 @@ suite.add_case(
     ],
     additional_messages=[
         {"role": "user", "content": "I'm planning to visit Tokyo next week."},
-        {"role": "assistant", "content": "That sounds exciting! What would you like to know about Tokyo?"},
+        {"role": "assistant", "content": "That would you like to know about Tokyo?"},
     ],
 )
 ```
