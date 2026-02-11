@@ -5,7 +5,9 @@ description: "Learn how to run evaluations using Arcade"
 
 # Run evaluations
 
-The `arcade evals` command discovers and executes evaluation suites with support for multiple providers, models, and output formats.
+Run evaluations using the `arcade evals` command to discover and execute evaluation suites with support for multiple providers, models, and output formats.
+
+The `arcade evals` command searches for files starting with `eval_` and ending with `.py`, then executes them against your specified models and providers. You can compare performance across different models, capture tool calls for debugging, and generate reports in multiple formats. This is essential when you need to validate tool performance, compare model capabilities, or establish baseline expectations for your tools.
 
 import { Callout } from "nextra/components";
 
@@ -34,7 +36,7 @@ arcade evals . --details
 Filter to show only failures:
 
 ```bash
-arcade evals . --only-failed
+arcade evals . --only failed
 ```
 
 ## Multi-provider support
@@ -79,7 +81,7 @@ When you specify multiple models, results show side-by-side comparisons.
 
 ## API keys
 
-API keys are resolved in the following order:
+The system resolves API keys in the following order:
 
 | Priority | Format |
 |----------|--------|
@@ -230,7 +232,7 @@ Arcade uses `--multi-run-pass-rule` to set the overall `status`, `passed`, and `
 | `--api-key` | `-k` | Provider API key | `-k openai:sk-...` |
 | `--capture` | - | Record without scoring | `--capture` |
 | `--details` | `-d` | Show critic feedback | `--details` |
-| `--only-failed` | `-f` | Filter failures | `--only-failed` |
+| `--only failed` | `-f` | Filter failures | `--only failed` |
 | `--output` | `-o` | Output file (repeatable) | `-o results.md` |
 | `--include-context` | - | Add messages to output | `--include-context` |
 | `--max-concurrent` | `-c` | Parallel limit | `-c 10` |
@@ -320,12 +322,12 @@ Show detailed results including critic feedback:
 arcade evals . --details
 ```
 
-### `--only-failed`, `-f`
+### `--only failed`, `-f`
 
 Show only failed test cases:
 
 ```bash
-arcade evals . --only-failed
+arcade evals . --only failed
 ```
 
 ### `--max-concurrent`, `-c`
@@ -350,7 +352,7 @@ Displays detailed error traces and connection information.
 
 ## Understanding results
 
-Results are formatted based on evaluation type (regular, multi-model, or comparative) and selected flags.
+The system formats results based on evaluation type (regular, multi-model, or comparative) and selected flags.
 
 ### Summary format
 
@@ -363,7 +365,7 @@ Summary -- Total: 5 -- Passed: 4 -- Failed: 1
 **How flags affect output:**
 
 - `--details`: Adds per-critic breakdown for each case
-- `--only-failed`: Filters to show only failed cases (summary shows original totals)
+- `--only failed`: Filters to show only failed cases (summary shows original totals)
 - `--include-context`: Includes system messages and conversation history
 - `--num-runs`: Adds per-run statistics and aggregate scores
 - Multiple models: Switches to comparison table format
@@ -435,7 +437,7 @@ This creates:
 
 ### Missing dependencies
 
-If you see `ImportError: MCP SDK is required`, install the full package:
+If you see `ImportError: MCP SDK requires installation`, install the full package:
 
 ```bash
 pip install 'arcade-mcp[evals]'
@@ -449,7 +451,7 @@ pip install anthropic
 
 ### Tool name mismatches
 
-Tool names are normalized (dots become underscores). Check your tool definitions if you see unexpected names.
+The system normalizes tool names (dots become underscores). Check your tool definitions if you see unexpected names.
 
 ### API rate limits
 
