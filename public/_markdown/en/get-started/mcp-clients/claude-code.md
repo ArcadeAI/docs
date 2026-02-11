@@ -9,7 +9,7 @@ Claude Code
 
 ## Outcomes
 
-Connect Claude Code to an Arcade MCP Gateway using the Arcade Headers authentication mode.
+Connect Claude Code to an Arcade  Gateway using the Arcade Headers authentication mode.
 
 ### Prerequisites
 
@@ -17,13 +17,14 @@ Connect Claude Code to an Arcade MCP Gateway using the Arcade Headers authentica
 
 2.  Get an [Arcade API key](/get-started/setup/api-keys.md)
 
-3.  Create an [Arcade MCP Gateway](/guides/mcp-gateways.md) and select the tools you want to use
+3.  Create an [Arcade MCP Gateway](/guides/mcp-gateways.md)
+     and select the  you want to use
 
 For Claude Code, we recommend setting your gateway auth mode to **Arcade Headers** so you can authenticate via HTTP headers (no browser-based OAuth flow required).
 
 ### Add your Arcade MCP Gateway
 
-Run the following to add your Arcade Gateway as a remote HTTP MCP server in Claude Code:
+Run the following to add your Arcade Gateway as a remote HTTP  server in Claude Code:
 
 ```bash
 claude mcp add --transport http arcade "<YOUR_ARCADE_GATEWAY_URL>" \
@@ -40,9 +41,9 @@ claude mcp list
 
 ### Try it out
 
-Open Claude Code in your project and ask it to use one of the tools from your gateway.
+Open Claude Code in your  and ask it to use one of the  from your gateway.
 
 Last updated on February 11, 2026
 
-[Overview](/en/get-started/mcp-clients.md)
-[Cursor](/en/get-started/mcp-clients/cursor.md)
+[Claude Desktop](/en/get-started/mcp-clients/claude-desktop.md)
+[Visual Studio Code](/en/get-started/mcp-clients/visual-studio-code.md)
