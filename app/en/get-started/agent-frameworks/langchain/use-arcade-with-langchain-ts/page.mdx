@@ -7,7 +7,9 @@ import { Steps, Tabs, Callout } from "nextra/components";
 
 # Setup Arcade with LangChain
 
-Learn how to integrate Arcade tools using LangChain primitives to build AI agents.
+Integrate Arcade tools using LangChain primitives to build AI agents.
+
+This page explains how to use Arcade tools within the LangChain agentic framework. You'll learn to transform Arcade tool definitions into LangChain-compatible tools, manage authorization flows, and create agents that can execute external APIs through Arcade's MCP servers. This integration is useful when you want to leverage LangChain's abstractions while accessing Arcade's extensive tool ecosystem.
 
 LangChain is a popular agentic framework that abstracts a lot of the complexity of building AI agents. LangGraph, a lower level orchestration framework, builds it and offers more control over the inner flow of the agent.
 
@@ -41,7 +43,7 @@ LangChain provides multiple abstractions for building AI agents, and it's useful
 
 - [_Agents_](https://docs.langchain.com/oss/javascript/langchain/agents): Most agentic frameworks, including LangChain, provide an abstraction for a ReAct agent.
 - [_Interrupts_](https://docs.langchain.com/oss/javascript/langgraph/interrupts): Interrupts in LangChain are a way to control the flow of the agentic loop when something needs to occur outside of the normal ReAct flow. For example, if a tool requires authorization, you can interrupt the agent and ask the user to authorize the tool before continuing.
-- [_Checkpointers_](https://docs.langchain.com/oss/javascript/langgraph/persistence): Checkpointers are how LangChain implements persistence. A checkpointer stores the agent's state in a "checkpoint" that you can resume later. Those checkpoints are saved to a _thread_, which you can access after the agent's execution, making it simple for long-running agents and for handling interruptions and more sophisticated flows such as branching, time travel, and more.
+- [_Checkpointers_](https://docs.langchain.com/oss/javascript/langgraph/persistence): Checkpointers are how LangChain implements persistence. A checkpointer stores the agent's state in a "checkpoint" that you can resume later. The system saves those checkpoints to a _thread_, which you can access after the agent's execution, making it straightforward for long-running agents and for handling interruptions and more sophisticated flows such as branching, time travel, and more.
 
 ## Integrate Arcade tools into a LangChain agent
 
@@ -87,7 +89,7 @@ import chalk from "chalk";
 import readline from "node:readline/promises";
 ```
 
-This is a number of imports, examine them:
+This represents several imports, examine them:
 
 - Arcade imports:
   - `Arcade`: This is the Arcade client, used to interact with the Arcade API.
@@ -100,14 +102,14 @@ This is a number of imports, examine them:
   - `tool`: Turns an Arcade tool definition into a LangChain tool.
   - `interrupt`: Interrupts the ReAct flow and asks the user for input.
   - `Command`: Communicates the user's decisions to the agent's interrupts.
-  - `MemorySaver`: Stores the agent's state, and is required for checkpointing and interrupts.
+  - `MemorySaver`: Stores the agent's state, and you need it for checkpointing and interrupts.
 - Other imports:
   - `chalk`: This is a library to colorize the console output.
   - `readline`: This is a library to read input from the console.
 
 ### Configure the agent
 
-These variables are used in the rest of the code to customize the agent and manage the tools. Feel free to configure them to your liking.
+These variables serve to customize the agent and manage the tools throughout the rest of the code. Feel free to configure them to your liking.
 
 ```ts filename="main.ts"
 // configure your own values to customize your agent
@@ -456,7 +458,7 @@ You should see the agent responding to your prompts like any model, as well as h
 - Context isolation: By handling the authorization flow outside of the agent's context, you remove the risk of the LLM replacing the authorization URL or leaking it, and you keep the context free from any authorization-related traces, which reduces the risk of hallucinations.
 - You can leverage the interrupts mechanism to handle human intervention in the agent's flow, useful for authorization flows, policy enforcement, or anything else that requires input from the user.
 
-## Next Steps
+## Next steps
 
 1. Try adding additional tools to the agent or modifying the tools in the catalog for a different use case by modifying the `MCPServers` and `individualTools` variables.
 2. Try refactoring the `handleAuthInterrupt` function to handle more complex flows, such as human-in-the-loop.
@@ -715,7 +717,7 @@ rl.pause();
         const interrupts = await streamAgent(agent, agentInput, config);
 
         if (interrupts.length === 0) {
-          break; // No more interrupts, we're done
+          break; // No more interrupts, you're done
         }
 
         // Handle all interrupts
