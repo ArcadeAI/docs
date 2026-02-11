@@ -5,9 +5,11 @@ description: "Create a TypeScript agent that uses Arcade tools to access Gmail a
 
 import { Steps, Tabs, Callout } from "nextra/components";
 
+This guide walks you through building an AI agent and workflow that integrates Gmail and Slack using Arcade's MCP tools in a conversational interface.
+
 [Mastra](https://mastra.ai/docs) is an open-source, TypeScript agent framework for building AI applications. It provides agents with memory, tool calling, workflows, and RAG capabilities. This guide uses **Mastra v1.x**.
 
-In this guide, you'll build an agent lets you read emails, send messages, and interact with Gmail and Slack using Arcade's MCP tools in a conversational interface with built-in authentication. You will also build a workflow that summarizes emails and sends them to Slack.
+You'll build an agent that lets you read emails, send messages, and interact with Gmail and Slack using Arcade's MCP tools in a conversational interface with built-in authentication. You will also build a workflow that summarizes emails and sends them to Slack.
 
 <GuideOverview>
 <GuideOverview.Outcomes>
@@ -29,7 +31,7 @@ A Mastra agent and workflow that integrates Arcade tools for Gmail and Slack.
 - How to retrieve Arcade tools and convert them to Mastra format
 - How to create an agent with tool calling capabilities
 - How to create a workflow with multiple steps
-- How to handle Arcade's authorization flow in your application
+- How to handle Arcade's user authorization flow in your application
 - How to test your agent and workflow with Mastra Studio
 
 </GuideOverview.YouWillLearn>
@@ -56,7 +58,7 @@ Before diving into the code, here are the key Mastra concepts you'll use:
 npx create-mastra@latest arcade-agent
 ```
 
-Select your preferred model provider when prompted (we recommend OpenAI). Enter your API key when asked.
+Select your preferred model provider when prompted (recommend OpenAI). Enter your API key when asked.
 
 Then navigate to the project directory and install the Arcade client:
 
@@ -230,7 +232,7 @@ You might select your tools individually for a few reasons:
 * **Cost** Each tool's schema consumes tokens. Loading all Gmail tools (~20 tools) uses more tokens than loading just the 3 you need. This matters for rate limits and cost.
 
 <Callout type="info">
-  Browse the [complete MCP server catalog](/resources/integrations) to see available servers and their tools.
+  Browse the [complete MCP server catalog](/resources/integrations) to see available MCP servers and their tools.
 </Callout>
 
 ##### Arcade SDK functions
@@ -238,11 +240,11 @@ You might select your tools individually for a few reasons:
 - `arcade.tools.list({ toolkit })`: Fetches all tools from an MCP server
 - `arcade.tools.get(toolName)`: Fetches a single tool by its full name
 - `toZodToolSet`: Converts Arcade tools to [Zod](https://zod.dev) schemas that Mastra requires
-- `executeOrAuthorizeZodTool`: Handles tool execution and returns authorization URLs when needed
+- `executeOrAuthorizeZodTool`: Handles tool execution and returns user authorization URLs when required
 
 ### Output handling
 
-- `truncateDeep`: Recursively limits all strings to 300 characters to prevent token overflow when tool results are passed back to the LLM
+- `truncateDeep`: Recursively limits all strings to 300 characters to prevent token overflow when tool results pass back to the LLM
 
 ### Create the agent
 
@@ -292,7 +294,7 @@ For Slack:
 
 After completing any action, always confirm what you did with specific details.
 
-IMPORTANT: When a tool returns an authorization response with a URL, tell the user to visit that URL to grant access. After they authorize, they can retry their request.`,
+IMPORTANT: When a tool returns a user authorization response with a URL, tell the user to visit that URL to grant access. After they authorize, they can retry their request.`,
   model: openai("gpt-4o"),
   tools: arcadeTools,
   memory,
@@ -362,7 +364,7 @@ Open [http://localhost:4111](http://localhost:4111) to access Mastra Studio. Sel
 - "Send a Slack DM to myself saying hello"
 - "What's my Gmail address?"
 
-On first use, the agent will return an authorization URL. Visit the URL to connect your Gmail or Slack account, then retry your request. Arcade remembers this authorization for future requests.
+On first use, the agent will return a user authorization URL. Visit the URL to connect your Gmail or Slack account, then retry your request. Arcade remembers this user authorization for future requests.
 
 </Steps>
 
@@ -379,7 +381,7 @@ This workflow does the following:
 
 This also demonstrates how workflows:
 * handle **large data** the full email content stays internal to the workflow, and only the compact summary gets sent to Slack.
-* handle **authorization errors**
+* handle **user authorization errors**
 * **pass auth URLs** through multiple workflow steps
 
 <Steps>
@@ -432,7 +434,7 @@ const fetchEmails = createStep({
 
       return { emails, userId };
     } catch (error: any) {
-      // Handle authorization required error
+      // Handle user authorization requirement
       if (error.status === 403 || error.message?.includes("authorization")) {
         const authResponse = await arcade.auth.start({
           user_id: userId,
@@ -512,11 +514,11 @@ const sendToSlack = createStep({
   execute: async ({ inputData }) => {
     const { summary, userId, authRequired, authUrl } = inputData!;
 
-    // Return auth URL if authorization is needed
+    // Return auth URL if user authorization takes place
     if (authRequired) {
       return {
         success: false,
-        message: `Authorization required. Please visit this URL to grant access: ${authUrl}`,
+        message: `User authorization required. Please visit this URL to grant access: ${authUrl}`,
         authUrl,
       };
     }
@@ -545,7 +547,7 @@ const sendToSlack = createStep({
 
       return { success: true, message: "Digest sent as DM" };
     } catch (error: any) {
-      // Handle Slack authorization required
+      // Handle Slack user authorization requirement
       if (error.status === 403 || error.message?.includes("authorization")) {
         const slackAuth = await arcade.auth.start({
           user_id: userId,
@@ -554,7 +556,7 @@ const sendToSlack = createStep({
         });
         return {
           success: false,
-          message: `Slack authorization required. Please visit: ${slackAuth.url}`,
+          message: `Slack user authorization required. Please visit: ${slackAuth.url}`,
           authUrl: slackAuth.url,
         };
       }
@@ -608,7 +610,7 @@ export const mastra = new Mastra({
 
 1. Restart the dev server and open Mastra Studio. In the sidebar, open **Workflows**. Select **email-digest**.
 2. In the right sidebar, select "run" to run the workflow.
-3. If authorization is required, the workflow returns an auth URL. Visit the URL, complete authorization, then run the workflow again.
+3. If user authorization takes place, the workflow returns an auth URL. Visit the URL, complete user authorization, then run the workflow again.
 4. Check your Slack DMs for the digest.
 
 </Steps>
@@ -620,7 +622,7 @@ export const mastra = new Mastra({
 - **Arcade tools work seamlessly with Mastra**: Use `toZodToolSet` to convert Arcade tools to the Zod schema format Mastra expects.
 - **Agent vs Workflow**: The agent handles open-ended requests ("help me with my emails"). The workflow handles repeatable processes ("every morning, summarize and send to Slack"). Use both together for powerful automation.
 - **Truncate large outputs**: Tools like Gmail can return 200KB+ of data. Wrap tool execution with truncation to prevent token overflow in the agentic loop.
-- **Authorization is automatic**: The `executeOrAuthorizeZodTool` factory handles auth flows. When a tool needs authorization, it returns a URL for the user to visit.
+- **User authorization is automatic**: The `executeOrAuthorizeZodTool` factory handles auth flows. When a tool needs user authorization, it returns a URL for the user to visit.
 - **Workflows need explicit auth handling**: Unlike agents, workflows don't have built-in auth handling. Catch 403 errors, call `arcade.auth.start()`, and pass the auth URL through your workflow steps.
 
 ## Next steps
@@ -630,7 +632,7 @@ export const mastra = new Mastra({
 - **Deploy to production**: Follow Mastra's [deployment guides](https://mastra.ai/docs/deployment/overview) to deploy your agent and workflows.
 
 <Callout type="info">
-  **Building a multi-user app?** This tutorial uses a single `ARCADE_USER_ID` for simplicity. For production apps where each user needs their own OAuth tokens, see [Secure auth for production](/guides/user-facing-agents/secure-auth-production) to learn how to dynamically pass user IDs and handle per-user authorization.
+  **Building a multi-user app?** This tutorial uses a single `ARCADE_USER_ID` for simplicity. For production apps where each user needs their own OAuth tokens, see [Secure auth for production](/guides/user-facing-agents/secure-auth-production) to learn how to dynamically pass user IDs and handle per-user user authorization.
 </Callout>
 
 ## Complete code
@@ -765,7 +767,7 @@ For Slack:
 
 After completing any action, always confirm what you did with specific details.
 
-IMPORTANT: When a tool returns an authorization response with a URL, tell the user to visit that URL to grant access. After they authorize, they can retry their request.`,
+IMPORTANT: When a tool returns a user authorization response with a URL, tell the user to visit that URL to grant access. After they authorize, they can retry their request.`,
   model: openai("gpt-4o"),
   tools: arcadeTools,
   memory,
@@ -895,95 +897,4 @@ const summarizeEmails = createStep({
     ).join("\n\n");
 
     const response = await agent!.generate(
-      `Summarize these emails in 2-3 bullet points:\n\n${emailList}`
-    );
-
-    return { summary: response.text, userId };
-  },
-});
-
-const sendToSlack = createStep({
-  id: "send-to-slack",
-  inputSchema: z.object({
-    summary: z.string(),
-    userId: z.string(),
-    authRequired: z.boolean().optional(),
-    authUrl: z.string().optional(),
-  }),
-  outputSchema: z.object({
-    success: z.boolean(),
-    message: z.string(),
-    authUrl: z.string().optional(),
-  }),
-  execute: async ({ inputData }) => {
-    const { summary, userId, authRequired, authUrl } = inputData!;
-
-    if (authRequired) {
-      return {
-        success: false,
-        message: `Authorization required. Please visit this URL to grant access: ${authUrl}`,
-        authUrl,
-      };
-    }
-
-    const arcade = new Arcade();
-
-    try {
-      const whoAmI = await arcade.tools.execute({
-        tool_name: "Slack_WhoAmI",
-        user_id: userId,
-        input: {},
-      });
-
-      const slackUserId = (whoAmI as any)?.output?.value?.user_id;
-
-      await arcade.tools.execute({
-        tool_name: "Slack_SendMessage",
-        user_id: userId,
-        input: {
-          message: `📬 *Email Digest*\n\n${summary}`,
-          user_ids: [slackUserId],
-        },
-      });
-
-      return { success: true, message: "Digest sent as DM" };
-    } catch (error: any) {
-      if (error.status === 403 || error.message?.includes("authorization")) {
-        const slackAuth = await arcade.auth.start({
-          user_id: userId,
-          provider: "slack",
-          scopes: ["chat:write", "users:read"],
-        });
-        return {
-          success: false,
-          message: `Slack authorization required. Please visit: ${slackAuth.url}`,
-          authUrl: slackAuth.url,
-        };
-      }
-      throw error;
-    }
-  },
-});
-
-const emailDigestWorkflow = createWorkflow({
-  id: "email-digest",
-  inputSchema: z.object({
-    userId: z.string().default(defaultUserId),
-    maxEmails: z.number().default(5),
-  }),
-  outputSchema: z.object({
-    success: z.boolean(),
-    message: z.string(),
-    authUrl: z.string().optional(),
-  }),
-})
-  .then(fetchEmails)
-  .then(summarizeEmails)
-  .then(sendToSlack);
-
-emailDigestWorkflow.commit();
-
-export { emailDigestWorkflow };
-```
-
-</details>
+      `Summarize these emails in 2-3
