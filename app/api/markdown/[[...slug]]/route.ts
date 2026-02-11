@@ -1,6 +1,7 @@
 import { access, readdir, readFile } from "node:fs/promises";
 import { join, normalize, resolve } from "node:path";
 import { type NextRequest, NextResponse } from "next/server";
+import { captureServerPageView } from "@/app/_lib/posthog-server";
 
 export const dynamic = "force-dynamic";
 
@@ -63,10 +64,80 @@ const TOOLKIT_CATEGORIES = [
   "social",
 ];
 
+// Length of base64 slice for generating distinct IDs
+const DISTINCT_ID_LENGTH = 32;
+
+/**
+ * Track markdown request for AI agent analytics.
+ * Non-blocking - errors don't affect response.
+ */
+async function trackMarkdownRequest(request: NextRequest, pathname: string) {
+  try {
+    const userAgent = request.headers.get("user-agent") || "";
+    const referer = request.headers.get("referer") || undefined;
+    const acceptHeader = request.headers.get("accept") || undefined;
+    const acceptLanguage = request.headers.get("accept-language") || undefined;
+
+    // Use IP or a hash as distinct_id for anonymous tracking
+    const ip =
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      request.headers.get("x-real-ip") ||
+      "unknown";
+
+    // Create a semi-stable ID from IP + user agent
+    const distinctId = `server_${Buffer.from(`${ip}:${userAgent}`).toString("base64").slice(0, DISTINCT_ID_LENGTH)}`;
+
+    await captureServerPageView({
+      distinctId,
+      pathname,
+      userAgent,
+      referer,
+      ip,
+      acceptHeader,
+      acceptLanguage,
+    });
+  } catch {
+    // Silently fail - tracking errors should not affect the response
+  }
+}
+
 type ToolkitMarkdownTarget = {
   category: string;
   toolkitId: string;
 };
+
+/**
+ * Try to serve clean pre-generated markdown.
+ * Returns NextResponse if found, null otherwise.
+ */
+async function tryServeCleanMarkdown(
+  request: NextRequest,
+  sanitizedPath: string
+): Promise<NextResponse | null> {
+  const cleanMarkdownPath = join(CLEAN_MARKDOWN_DIR, `${sanitizedPath}.md`);
+
+  try {
+    await access(cleanMarkdownPath);
+    if (!isPathWithinDirectory(cleanMarkdownPath, CLEAN_MARKDOWN_DIR)) {
+      return null;
+    }
+
+    const content = await readFile(cleanMarkdownPath, "utf-8");
+    await trackMarkdownRequest(request, sanitizedPath);
+
+    return new NextResponse(content, {
+      status: 200,
+      headers: {
+        "Content-Type": "text/markdown; charset=utf-8",
+        "Content-Disposition": "inline",
+        "Cache-Control": "public, max-age=3600",
+        Vary: "Accept, User-Agent",
+      },
+    });
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Check if a path matches the toolkit documentation pattern.
@@ -176,26 +247,9 @@ export async function GET(
       }
     } else {
       // Try clean markdown first (preferred)
-      // e.g., /en/home/quickstart -> public/_markdown/en/home/quickstart.md
-      const cleanMarkdownPath = join(CLEAN_MARKDOWN_DIR, `${sanitizedPath}.md`);
-
-      try {
-        await access(cleanMarkdownPath);
-        if (isPathWithinDirectory(cleanMarkdownPath, CLEAN_MARKDOWN_DIR)) {
-          const content = await readFile(cleanMarkdownPath, "utf-8");
-
-          return new NextResponse(content, {
-            status: 200,
-            headers: {
-              "Content-Type": "text/markdown; charset=utf-8",
-              "Content-Disposition": "inline",
-              "Cache-Control": "public, max-age=3600",
-              Vary: "Accept, User-Agent",
-            },
-          });
-        }
-      } catch {
-        // Clean markdown not found, fall back to raw MDX
+      const cleanResponse = await tryServeCleanMarkdown(request, sanitizedPath);
+      if (cleanResponse) {
+        return cleanResponse;
       }
 
       // Fallback: raw MDX file
@@ -220,6 +274,13 @@ export async function GET(
 
     const content = await readFile(filePath, "utf-8");
 
+    // Track server-side pageview for AI agent analytics
+    await trackMarkdownRequest(request, sanitizedPath);
+
+    const contentSource = filePath.includes(TOOLKIT_MARKDOWN_ROOT)
+      ? "toolkit-markdown"
+      : "raw-mdx";
+
     // Return the raw markdown with proper headers
     return new NextResponse(content, {
       status: 200,
@@ -227,7 +288,7 @@ export async function GET(
         "Content-Type": "text/markdown; charset=utf-8",
         "Content-Disposition": "inline",
         "Cache-Control": "public, max-age=3600, stale-while-revalidate=86400",
-        "X-Content-Source": "raw-mdx",
+        "X-Content-Source": contentSource,
         Vary: "Accept, User-Agent",
       },
     });
