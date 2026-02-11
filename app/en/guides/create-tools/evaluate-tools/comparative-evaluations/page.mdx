@@ -5,13 +5,17 @@ description: "Compare different tool implementations with the same test cases"
 
 # Comparative evaluations
 
+Compare different tool implementations with the same test cases using isolated tool sources.
+
 Comparative evaluations let you test how well AI models select and use tools from different, isolated tool sources. Each "track" represents a separate tool registry, allowing you to compare implementations side-by-side.
+
+This page explains how to create comparative evaluations, when to use them versus regular evaluations, and how to structure track-specific test cases. You'll use comparative evaluations when testing multiple implementations of the same feature, comparing different tool providers, or running A/B tests on alternative tool designs.
 
 import { Callout, Steps } from "nextra/components";
 
 ## What are tracks?
 
-**Tracks are isolated tool registries** within a single evaluation suite. Each track has its own set of tools that are **not shared** with other tracks. This isolation lets you test how models perform when given different tool options for the same task.
+**Tracks isolate tool registries** within a single evaluation suite. Each track has its own set of tools that are **not shared** with other tracks. This isolation lets you test how models perform when given different tool options for the same task.
 
 **Key concept**: Comparative evaluations test tool **selection** across different tool sets. Each track provides a different context (set of tools) to the model.
 
@@ -187,7 +191,7 @@ suite.add_tool_definitions(
 ```
 
 <Callout type="info">
-  Tools must be registered before creating comparative cases that reference
+  You must register tools before creating comparative cases that reference
   their tracks.
 </Callout>
 
@@ -318,7 +322,7 @@ async def search_comparison():
         track="DuckDuckGo",
     )
 
-    # Simple query
+    # Basic query
     suite.add_comparative_case(
         name="basic_search",
         user_message="Search for Python tutorials",
@@ -410,7 +414,7 @@ Case: search_with_filters
 
 ## Result structure
 
-Comparative results are organized by track:
+Comparative results use tracks to organize data:
 
 ```python
 {
@@ -555,7 +559,7 @@ Model: claude-sonnet-4-5-20250929
 
 ### Use descriptive track names
 
-Choose clear names that indicate what's being compared:
+Choose clear names that indicate what you're comparing:
 
 ```python
 # ✅ Good
@@ -689,7 +693,7 @@ Use the exact tool names from the output.
 
 **Symptom:** Same user message produces different scores across tracks
 
-**Explanation:** This is expected. Different tool implementations may work differently.
+**Explanation:** This design works as expected. Different tool implementations may work differently.
 
 **Solution:** Adjust expectations and critics per track to account for implementation differences.
 
