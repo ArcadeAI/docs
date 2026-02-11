@@ -18,7 +18,7 @@ Contact
 
 [System Status Check the current status of Arcade's services, view incident history, and subscribe to updates. Learn more](https://status.arcade.dev)
 
-Last updated on February 10, 2026
+Last updated on February 11, 2026
 
 [FAQ](/en/resources/faq.md)
 [Arcade Registry Early Access](/en/resources/registry-early-access.md)
