@@ -483,7 +483,7 @@ async def reticulate_splines(
     user_id = context.authorization.user_info.get("sub")
 ```
 
-Last updated on February 10, 2026
+Last updated on February 11, 2026
 
 [Overview](/en/references/auth-providers.md)
 [Airtable](/en/references/auth-providers/airtable.md)
