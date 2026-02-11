@@ -70,7 +70,7 @@ const POPULAR_INTEGRATIONS_ROW1 = [
   {
     name: "HubSpot",
     icon: "/images/icons/hubspot.png",
-    href: "/resources/integrations/crm/hubspot",
+    href: "/resources/integrations/sales/hubspot",
   },
   {
     name: "Linear",
