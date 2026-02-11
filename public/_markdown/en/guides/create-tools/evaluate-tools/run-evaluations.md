@@ -627,7 +627,7 @@ Ensure your evaluation files:
 -   Explore [capture mode](/guides/create-tools/evaluate-tools/capture-mode.md)
      for recording  calls
 -   Learn about [comparative evaluations](/guides/create-tools/evaluate-tools/comparative-evaluations.md)
-     for comparing  sources $$
+     for comparing  sources
 
 Last updated on February 10, 2026
 
