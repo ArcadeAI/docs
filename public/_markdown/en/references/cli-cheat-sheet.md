@@ -1,10 +1,10 @@
 ---
-title: "Arcade CLI Cheat Sheet"
-description: "Quick reference for all Arcade CLI commands - perfect for printing!"
+title: "Arcade CLI cheat sheet"
+description: "Quick reference for all Arcade CLI commands, perfect for printing."
 ---
 CLI Cheat Sheet
 
-# Arcade CLI Cheat Sheet
+# Arcade CLI cheat sheet
 
 **📄 Print-friendly!** Use your browser’s print function (Ctrl/Cmd + P) to get a landscape-oriented version perfect for events and quick reference. The layout will automatically adjust for optimal printing.
 
@@ -501,6 +501,9 @@ arcade evals --only-failed -d
 # Full report with context
 arcade evals -d --include-context -o report.html
 
+# Multi-run stability check
+arcade evals --num-runs 5 --seed random --multi-run-pass-rule majority -o stability.html
+
 # Parallel execution
 arcade evals --max-concurrent 5
 
@@ -545,6 +548,20 @@ Select provider/model
 `-k`
 
 Provider API key
+
+`--num-runs`
+
+`-n`
+
+Runs per case
+
+`--seed`
+
+Seed policy for OpenAI runs
+
+`--multi-run-pass-rule`
+
+Pass rule for multi-run
 
 `--capture`
 
