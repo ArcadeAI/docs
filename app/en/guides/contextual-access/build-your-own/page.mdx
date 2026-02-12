@@ -5,11 +5,13 @@ description: "Build your own Logic Extensions webhook server from the OpenAPI sp
 
 # Build Your Own Contextual Access Server
 
-This guide walks through implementing a webhook server that satisfies the Contextual Access Webhook contract. You can write it in any language — the contract is defined by an OpenAPI 3.0 spec.
+You can implement a webhook server that satisfies the Contextual Access Webhook contract in any language using the OpenAPI 3.0 spec.
+
+This guide explains how to build a custom contextual access server from scratch. You'll learn to implement the webhook endpoints, handle authentication, and integrate with Arcade's contextual access system. Use this approach when you need full control over your server implementation or want to use a language not covered by existing examples.
 
 ## OpenAPI spec
 
-The canonical contract is maintained in the [ArcadeAI/schemas](https://github.com/ArcadeAI/schemas) repository:
+The canonical contract lives in the [ArcadeAI/schemas](https://github.com/ArcadeAI/schemas) repository:
 
 - **OpenAPI 3.0 spec:** [logic_extensions/http/1.0/schema.yaml](https://github.com/ArcadeAI/schemas/blob/main/logic_extensions/http/1.0/schema.yaml)
 
@@ -32,11 +34,11 @@ curl -sL https://raw.githubusercontent.com/ArcadeAI/schemas/main/logic_extension
 oapi-codegen -generate types,server -package server schema.yaml
 ```
 
-The [logic-extensions-examples](https://github.com/ArcadeAI/logic-extensions-examples) repo uses this approach — see `pkg/server/` for the generated types.
+The [logic-extensions-examples](https://github.com/ArcadeAI/logic-extensions-examples) repo uses this approach—see `pkg/server/` for the generated types.
 
 ## Endpoints to implement
 
-Your server needs to expose HTTP POST endpoints for each hook point you want to handle. Endpoint paths are fully configurable in the Dashboard — the defaults are shown below.
+Your server needs to expose HTTP POST endpoints for each hook point you want to handle. Endpoint paths are fully configurable in the Dashboard—the defaults show below.
 
 | Endpoint | Hook point | Required |
 | --- | --- | --- |
@@ -109,17 +111,17 @@ Return either an allow list or a deny list (not both):
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `only` | object | If present, **only** these tools are allowed (deny list ignored) |
-| `deny` | object | Tools listed here are denied (ignored if `only` is present) |
+| `only` | object | If present, **only** these tools can be accessed (deny list ignored) |
+| `deny` | object | Tools listed here cannot be accessed (ignored if `only` is present) |
 
-If you return neither field, the Arcade treats it as "no change" — all tools remain allowed at this hook.
+If you return neither field, Arcade treats it as "no change"—all tools remain allowed at this hook.
 
 ## Response codes (pre and post)
 
 | Code | Meaning |
 | --- | --- |
-| `OK` | Proceed; optional `override` is applied |
-| `CHECK_FAILED` | Deny the operation; `error_message` is shown to the agent |
+| `OK` | Proceed; system applies optional `override` |
+| `CHECK_FAILED` | Deny the operation; system displays `error_message` to the agent |
 | `RATE_LIMIT_EXCEEDED` | Deny with rate-limit semantics |
 
 
@@ -134,11 +136,11 @@ Configure the auth method when creating your extension in the Dashboard.
 
 ## Failure handling and retries
 
-- **Timeout:** Configurable per extension (default 5s); can be overridden per hook. On timeout, the hook's failure mode applies (Fail closed = block, Fail open = allow).
+- **Timeout:** Configurable per extension (default 5 s); can be overridden per hook. On timeout, the hook's failure mode applies (Fail closed = block, Fail open = allow).
 - **Retries:** Optional at the extension level; only for transient failures (5xx, timeout, connection error). 4xx responses are not retried.
 
 ## Next steps
 
-- [API Reference](/references/contextual-access-webhook-api) — Interactive Swagger documentation for the full schema
-- [Run an extension](/guides/contextual-access/examples) — Try the open-source example servers as reference
-- [How Hooks Work](/guides/contextual-access/how-hooks-work) — Understand execution order, phases, and failure modes
+- [API Reference](/references/contextual-access-webhook-api)—Interactive Swagger documentation for the full schema
+- [Run an extension](/guides/contextual-access/examples)—Try the open-source example servers as reference
+- [How Hooks Work](/guides/contextual-access/how-hooks-work)—Understand execution order, phases, and failure modes
