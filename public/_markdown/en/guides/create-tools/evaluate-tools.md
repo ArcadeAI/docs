@@ -20,7 +20,7 @@ Learn how to systematically test and improve your  to ensure they work reliably 
 -   [Comparative evaluations](/guides/create-tools/evaluate-tools/comparative-evaluations.md)
 
 
-Last updated on January 5, 2026
+Last updated on February 10, 2026
 
 [Organize your MCP server and tools](/en/guides/create-tools/tool-basics/organize-mcp-tools.md)
 [Why evaluate tools?](/en/guides/create-tools/evaluate-tools/why-evaluate.md)

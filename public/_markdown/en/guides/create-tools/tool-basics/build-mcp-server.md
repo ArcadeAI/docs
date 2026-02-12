@@ -272,7 +272,7 @@ That’s it! Your  server is running and connected to your AI assistant.
 -   **Deploy your  server**: [Learn how to deploy your MCP server](/guides/deployment-hosting/arcade-deploy.md)
 
 
-Last updated on January 5, 2026
+Last updated on February 10, 2026
 
 [Compare MCP server types](/en/guides/create-tools/tool-basics/compare-server-types.md)
 [Create a tool with auth](/en/guides/create-tools/tool-basics/create-tool-auth.md)
