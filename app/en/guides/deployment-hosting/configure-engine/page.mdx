@@ -8,8 +8,10 @@ import TableOfContents from "@/app/_components/table-of-contents";
 
 # Engine Configuration
 
+This page explains how to configure the Arcade Engine for self-hosted deployments.
+
 <Callout type="warning">
-  This page is for enterprise customers who are self-hosting the Arcade Engine.  This is page contains advanced configuration options that are not applicable for most customers.
+  This page is for enterprise customers who are self-hosting the Arcade Engine. This page contains advanced configuration options that are not applicable for most customers.
 </Callout>
 
 ## Getting the Engine
@@ -34,9 +36,9 @@ or
 command not found: arcade-engine
 ```
 
-This means that the Arcade Engine cannot be found in your path. Brew and Apt will automatically add the binary to your path.
+This means that you cannot find the Arcade Engine in your path. Brew and Apt will automatically add the binary to your path.
 
-Check that the binary has been properly installed.  These are the common installation locations):
+Check that you have properly installed the binary. These are the common installation locations):
 
 **Brew**
 
@@ -50,7 +52,7 @@ ls $HOMEBREW_REPOSITORY/Cellar/arcade-engine/<version>/bin/arcade-engine
 ls /usr/bin/arcade-engine
 ```
 
-If the binary is found, add it to your path with:
+If you find the binary, add it to your path with:
 
 ```bash
 export PATH=$PATH:/path/to/your/binary
@@ -65,13 +67,13 @@ export PATH=$PATH:/path/to/your/binary
   ```
   </Tabs.Tab>
   <Tabs.Tab>
-  The docker image for the engine can be pulled with
+  You can pull the docker image for the engine with
 
   ```bash
   docker pull ghcr.io/arcadeai/engine:latest
   ```
 
-  The engine can be run with:
+  You can run the engine with:
 
   ```bash
   docker run -d -p 9099:9099 -v ./engine.yaml:/bin/engine.yaml ghcr.io/arcadeai/engine:latest
@@ -81,14 +83,14 @@ export PATH=$PATH:/path/to/your/binary
   </Tabs.Tab>
 </Tabs>
 
-Arcade uses configuration files to manage engine settings and default values. When you install the Arcade Engine, two files are created:
+When you install Arcade, it creates configuration files to manage engine settings and default values. The installation creates two files:
 - The `engine.yaml` file for engine configuration.
 - The `engine.env` file for environment variables.
-Let's explore each file to understand their purpose and how to locate them.
+Explore each file to understand their purpose and how to locate them.
 
 ## Engine configuration file
 
-The `engine.yaml` file controls Arcade Engine settings. It supports variable expansion so you can integrate secrets and environment values seamlessly. You can customize this file to suit your setup. For more details, check the [Engine Configuration](/guides/deployment-hosting/configure-engine) page.
+The `engine.yaml` file controls Arcade Engine settings. It supports variable expansion so you can integrate secrets and environment values. You can customize this file to suit your setup. For more details, check the [Engine Configuration](/guides/deployment-hosting/configure-engine) page.
 
 Choose your installation method to view the default location of `engine.yaml`:
 
@@ -168,7 +170,7 @@ arcade-engine -c /path/to/config.yaml
 
 ## Dotenv files
 
-Arcade Engine automatically loads environment variables from `.env` files in the directory where it was called. Use the `-e` or`--env` flag to specify a path:
+Arcade Engine automatically loads environment variables from `.env` files in the directory where it called the executable. Use the `-e` or`--env` flag to specify a path:
 
 ```bash
 arcade-engine -e .env.dev -c config.yaml
@@ -203,12 +205,12 @@ topic:
 HTTP is the supported protocol for Arcade Engine's API. The following configuration options are available:
 
 - `api.development` _(optional, default: `false`)_ - Enable development mode, with more logging.
-- `api.host` _(default: `localhost`)_ - Address to which Arcade Engine binds its server (e.g., `localhost` or `0.0.0.0`)
-- `api.port` _(default: `9099`)_ - Port to which Arcade Engine binds its server (e.g., `9099` or `8080`)
-- `api.public_host` _(optional)_ - External hostname of the API (e.g., `my-public-host.com`), if it differs from `api.host` (for example, when Arcade Engine is behind a reverse proxy)
-- `api.read_timeout` _(optional, default: `30s`)_ - Timeout for reading data from clients
+- `api.host` _(default: `localhost`)_ - Address to which Arcade Engine binds its server (for example, `localhost` or `0.0.0.0`)
+- `api.port` _(default: `9099`)_ - Port to which Arcade Engine binds its server (for example, `9099` or `8080`)
+- `api.public_host` _(optional)_ - External hostname of the API (for example, `my-public-host.com`), if it differs from `api.host` (for example, when Arcade Engine is behind a reverse proxy)
+- `api.read_timeout` _(optional, default: `30 s`)_ - Timeout for reading data from clients
 - `api.write_timeout` _(optional, default: `1m`)_ - Timeout for writing data to clients
-- `api.idle_timeout` _(optional, default: `30s`)_ - Timeout for idle connections
+- `api.idle_timeout` _(optional, default: `30 s`)_ - Timeout for idle connections
 - `api.max_request_body_size` _(optional, default: `4Mb`)_ - Maximum request body size
 
 A typical configuration for production looks like:
@@ -220,7 +222,7 @@ api:
   port: 9099
 ```
 
-When the Arcade Engine is hosted in a container or behind a reverse proxy, set `api.public_host` to the external hostname of the API:
+When a container hosts the Arcade Engine or places it behind a reverse proxy, set `api.public_host` to the external hostname of the API:
 
 ```yaml
 api:
@@ -232,11 +234,9 @@ api:
 
 For local development, set `api.development = true`.
 
-## Auth configuration
+You can configure auth for [AI tools](/guides/tool-calling/custom-apps/auth-tool-calling) and [direct API calls](/guides/tool-calling/call-third-party-apis) through Arcade Engine. It supports many built-in [auth providers](/references/auth-providers), and can also connect to any [OAuth 2.0](/references/auth-providers/oauth2) authorization server.
 
-Arcade Engine manages auth for [AI tools](/guides/tool-calling/custom-apps/auth-tool-calling) and [direct API calls](/guides/tool-calling/call-third-party-apis). It supports many built-in [auth providers](/references/auth-providers), and can also connect to any [OAuth 2.0](/references/auth-providers/oauth2) authorization server.
-
-The `auth.providers` section defines the providers that users can authorize with. Each provider must have a unique `id` in the array. There are two ways to configure a provider:
+The `auth.providers` section defines the providers that users can authorize with. Each provider must have a unique `id` in the array. You can configure a provider in two ways:
 
 For [built-in providers](/references/auth-providers), use the `provider_id` field to reference the pre-built configuration. For example:
 
@@ -268,7 +268,7 @@ The `cache` section configures the short-lived cache.
 
 The `cache` section has the following configuration options:
 
-- `api_key_ttl` _(optional, default: `10s`)_ - The time-to-live for API keys in the cache
+- `api_key_ttl` _(optional, default: `10 s`)_ - The time-to-live for API keys in the cache
 
 Two cache implementations are available:
 
@@ -286,7 +286,7 @@ cache:
 
 ## Security configuration
 
-The `security` section configures the root encryption keys that the Arcade Engine uses to encrypt and decrypt data at rest. See the [storage configuration](#storage-configuration) section below to configure where data is stored.
+The `security` section configures the root encryption keys that Arcade Engine uses to encrypt and decrypt data at rest. See the [storage configuration](#storage-configuration) section below to configure where the system stores data.
 
 A typical configuration looks like this:
 
@@ -308,14 +308,14 @@ openssl rand -base64 32
 
 ### Default root key
 
-When you [install Arcade Engine locally](/guides/deployment-hosting/configure-engine), an `engine.env` file is created with a default root key:
+When you [install Arcade Engine locally](/guides/deployment-hosting/configure-engine), the system creates an `engine.env` file with a default root key:
 
 ```bash
 # Encryption keys (change this when deploying to production)
 ROOT_KEY_1=default-key-value
 ```
 
-This default value can only be used in development mode (see [API configuration](#api-configuration) above).
+You can only use this default value in development mode (see [API configuration](#api-configuration) above).
 
 <Callout type="warning">
   You **must** replace the value of `ROOT_KEY_1` in `engine.env` before
@@ -324,9 +324,9 @@ This default value can only be used in development mode (see [API configuration]
 
 ## Storage configuration
 
-The `storage` section configures the storage backend that the Arcade Engine uses to store persistent data.
+The `storage` section configures the storage backend that Arcade Engine uses to store persistent data.
 
-There are three storage implementations available:
+These storage implementations are available:
 
 - `in_memory` - _(default)_ An in-memory database, suitable for testing.
 - `sqlite` - A SQLite file on disk, suitable for local development:
@@ -355,7 +355,7 @@ storage:
 
 Arcade supports logs, metrics, and traces with [OpenTelemetry](https://opentelemetry.io/).
 
-If you are using the Arcade Engine locally, you can set the `environment` field to `local`. This will only output logs to the console:
+If you use the Arcade Engine locally, you can set the `environment` field to `local`. This will only output logs to the console:
 
 ```yaml
 telemetry:
@@ -367,7 +367,7 @@ telemetry:
 ```
 
 To connect to OpenTelemetry compatible collectors, set the necessary [OpenTelemetry environment variables](https://opentelemetry.io/docs/specs/otel/configuration/sdk-environment-variables/) in the `engine.env` file.
-`environment` and `version` are fields that are added to the telemetry attributes, which can be filtered on later.
+`environment` and `version` are fields that the system adds to the telemetry attributes, which you can filter on later.
 
 ```yaml
 telemetry:
@@ -386,7 +386,7 @@ telemetry:
 
 Arcade Engine orchestrates [tools](/guides/tool-calling) that AI models can use.
 
-The `tools.directors` section configures the mcp servers that are available to service tool calls:
+The `tools.directors` section configures the MCP servers that are available to service tool calls:
 
 ```yaml
 tools:
@@ -404,23 +404,23 @@ tools:
             secret: ${env:ARCADE_WORKER_SECRET}
 ```
 
-When an MCP server is added to an enabled director, all of the tools hosted by that MCP server will be available to the model and through the Arcade API.
+When the system adds an MCP server to an enabled director, all of the tools that MCP server hosts will be available to the model and through the Arcade API.
 
-### HTTP MCP Server configuration
+### HTTP MCP server configuration
 
-The `http` sub-section configures the HTTP client used to call the MCP Server's tools:
+The `http` sub-section configures the HTTP client that you use to call the MCP server's tools:
 
-- `uri` _(required)_ - The base URL of the MCP Server's tools
-- `secret` _(required)_ - Secret used to authenticate with the MCP Server
-- `timeout` _(optional, default: `30s`)_ - Timeout for calling the MCP Server's tools
+- `uri` _(required)_ - The base URL of the MCP server's tools
+- `secret` _(required)_ - Secret that you use to authenticate with the MCP server
+- `timeout` _(optional, default: `30 s`)_ - Timeout for calling the MCP server's tools
 - `retry` _(optional, default: `3`)_ - Number of times to retry a failed tool call
 
 <Callout type="info">
-  MCP Servers must be configured with a `secret` that is used to authenticate with
-  the MCP Server. This ensures that MCP Servers are not exposed to the public internet
+  You must configure MCP servers with a `secret` to authenticate with
+  the MCP server. This ensures that MCP servers are not exposed to the public internet
   without security.
 
-If `api.development = true`, the secret will default to `"dev"` for local development **only**. In production, the secret must be set to a random value.
+If `api.development = true`, the secret will default to `"dev"` for local development **only**. In production, you must set the secret to a random value.
 
 </Callout>
 
@@ -429,7 +429,7 @@ If `api.development = true`, the secret will default to `"dev"` for local develo
 - 1.0: [schema](https://raw.githubusercontent.com/ArcadeAI/schemas/refs/heads/main/engine/config/1.0/schema.json)
 
 
-## Engine Config Templates
+## Engine config templates
 
 ### engine.yaml
 
@@ -686,4 +686,3 @@ X_CLIENT_SECRET=
 
 ZOOM_CLIENT_ID=""
 ZOOM_CLIENT_SECRET=
-```
