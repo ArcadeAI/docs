@@ -74,7 +74,7 @@ const response = await client.tools.execute({
 console.log(response.output.value);
 ```
 
-Last updated on February 10, 2026
+Last updated on January 5, 2026
 
 [Docs Home](/en/home.md)
 [Get an API key](/en/get-started/setup/api-keys.md)
