@@ -258,7 +258,7 @@ PagerDuty Classic apps use two permission levels:
 
 For more details about PagerDuty’s OAuth permissions, refer to the [PagerDuty OAuth functionality docs](https://developer.pagerduty.com/docs/oauth-functionality#scopes) .
 
-Last updated on January 5, 2026
+Last updated on January 30, 2026
 
 [Notion](/en/references/auth-providers/notion.md)
 [Reddit](/en/references/auth-providers/reddit.md)

@@ -16,7 +16,7 @@ Robust error handling is crucial for building reliable  that provide great  expe
 -   [Provide Useful Tool Errors](/guides/create-tools/error-handling/useful-tool-errors.md)
 
 
-Last updated on January 5, 2026
+Last updated on January 30, 2026
 
 [Types of Tools](/en/guides/create-tools/improve/types-of-tools.md)
 [Retry Tools with Improved Prompt](/en/guides/create-tools/error-handling/retry-tools.md)

@@ -61,7 +61,7 @@ result = CallToolResult(
 )
 ```
 
-Last updated on January 5, 2026
+Last updated on January 30, 2026
 
 [Middleware](/en/references/mcp/python/middleware.md)
 [Errors](/en/references/mcp/python/errors.md)

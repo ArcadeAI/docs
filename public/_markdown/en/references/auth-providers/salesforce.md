@@ -41,9 +41,9 @@ When creating your app, make sure to:
 -   Check “Enable Refresh Token Rotation”
 -   Leave all other settings as default and save your app
 
-Right after creating the app, Salesforce will redirect you to the app’s page. In the “Settings” tab, under “OAuth Settings”, click on the “Consumer Key and Secret” button. It will opwn a page showing the the **Consumer Key** and **Consumer Secret** values. Take note of these values, you will need them to configure Salesforce  in Arcade.
+Right after creating the app, Salesforce will redirect you to the app’s page. In the “Settings” tab, under “OAuth Settings”, click the “Consumer Key and Secret” button. It will open a page showing the **Consumer Key** and **Consumer Secret** values. Take note of these values, you will need them to configure Salesforce  in Arcade.
 
-Go back to the App’s page and click on the **Policies** tab and follow the instructions below:
+Go back to the App’s page and click the **Policies** tab and follow the instructions below:
 
 -   Under “OAuth Settings”, select the custom OAuth scopes listed in the [Create and Assign Custom Scopes to your External Client App](#create-and-assign-custom-scopes-to-your-external-client-app)
      section.
@@ -118,7 +118,7 @@ Go to the [Arcade Dashboard](https://api.arcade.dev/dashboard)  and log in with
 
 #### Enter the provider details
 
--   Enter `salesforce` as the **ID** for your provider (the ID must be `salesforce` in order to use the [Arcade Salesforce MCP Server](/resources/integrations/sales/salesforce.md)
+-   Enter `salesforce` as the **ID** for your provider (the ID must be `salesforce` to use the [Arcade Salesforce MCP Server](/resources/integrations/sales/salesforce.md)
     ).
 -   Optionally enter a **Description**.
 -   Enter your **Client ID** (Consumer Key) and **Client Secret** (Consumer Secret) from your Salesforce External Client App.
@@ -384,7 +384,7 @@ The code implemented in the Arcade Salesforce  is the best guide for you to unde
 
 PLAINTEXT
 
-Last updated on January 5, 2026
+Last updated on January 30, 2026
 
 [Reddit](/en/references/auth-providers/reddit.md)
 [Slack](/en/references/auth-providers/slack.md)

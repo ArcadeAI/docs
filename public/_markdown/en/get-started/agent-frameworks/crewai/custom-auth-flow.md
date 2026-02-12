@@ -141,7 +141,7 @@ print(result)
 
 Now you’re ready to integrate Arcade tools with a custom auth flow into your own CrewAI  team.
 
-Last updated on January 5, 2026
+Last updated on January 30, 2026
 
 [Using Arcade tools](/en/get-started/agent-frameworks/crewai/use-arcade-tools.md)
 [Overview](/en/get-started/agent-frameworks/google-adk/overview.md)

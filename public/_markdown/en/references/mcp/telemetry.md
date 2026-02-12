@@ -60,7 +60,7 @@ export ARCADE_USAGE_TRACKING=0
 
 Or to permanently opt out, you can set this environment variable in your shell’s configuration file (for example, `~/.zshrc` for zsh or `~/.bashrc` for bash).
 
-Last updated on January 5, 2026
+Last updated on January 30, 2026
 
 [Settings](/en/references/mcp/python/settings.md)
 [Arcade CLI](/en/references/arcade-cli.md)

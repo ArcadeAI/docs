@@ -74,7 +74,7 @@ Once you have your , you can:
 -   [Create custom tools](/guides/create-tools/tool-basics/build-mcp-server.md)
 
 
-Last updated on January 5, 2026
+Last updated on January 30, 2026
 
 [About Arcade](/en/get-started/about-arcade.md)
 [Connect Arcade docs to your IDE](/en/get-started/setup/connect-arcade-docs.md)
