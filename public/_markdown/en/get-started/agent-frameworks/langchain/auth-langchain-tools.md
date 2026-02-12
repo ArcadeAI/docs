@@ -3,8 +3,8 @@ title: "Authorize Existing Tools"
 description: "Use Arcade to authorize existing tools"
 ---
 [Agent Frameworks](/en/get-started/agent-frameworks.md)
-[LangChain](/en/get-started/agent-frameworks/langchain/use-arcade-with-langchain-py.md)
-Authorizing existing tools
+[LangChain](/en/get-started/agent-frameworks/langchain/overview.md)
+Authorizing Existing Tools
 
 ## Authorize Existing Tools
 
@@ -215,5 +215,5 @@ Now you’re ready to explore more LangChain tools with Arcade. Try integrating 
 
 Last updated on February 11, 2026
 
-[Setup Arcade with LangChain (TypeScript)](/en/get-started/agent-frameworks/langchain/use-arcade-with-langchain-ts.md)
+[Setup (TypeScript)](/en/get-started/agent-frameworks/langchain/use-arcade-with-langchain-ts.md)
 [Mastra](/en/get-started/agent-frameworks/mastra.md)

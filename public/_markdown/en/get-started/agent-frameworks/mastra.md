@@ -962,5 +962,5 @@ export { emailDigestWorkflow };
 
 Last updated on February 11, 2026
 
-[Authorizing existing tools](/en/get-started/agent-frameworks/langchain/auth-langchain-tools.md)
+[Authorizing Existing Tools](/en/get-started/agent-frameworks/langchain/auth-langchain-tools.md)
 [Overview](/en/get-started/agent-frameworks/openai-agents/overview.md)
