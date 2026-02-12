@@ -2,7 +2,7 @@
 title: "How Hooks Work"
 description: "Understand hook points, execution order, extensions, failure modes, and how the Engine calls your webhook server"
 ---
-[Logic Extensions](/en/guides/logic-extensions.md)
+[Contextual Access](/en/guides/contextual-access.md)
 How Hooks Work
 
 # How Hooks Work
@@ -147,14 +147,14 @@ You configure extensions and hook points from the **Arcade Dashboard**:
 
 ## Next steps
 
--   [Run an extension](/guides/logic-extensions/examples.md)
+-   [Run an extension](/guides/contextual-access/examples.md)
      — Try the open-source example servers
--   [Build your own](/guides/logic-extensions/build-your-own.md)
+-   [Build your own](/guides/contextual-access/build-your-own.md)
      — Implement the webhook contract from the OpenAPI spec
--   [API Reference](/references/logic-extensions-api.md)
+-   [API Reference](/references/contextual-access-api.md)
      — Interactive schema documentation for the webhook contract
 
 Last updated on February 10, 2026
 
-[Logic Extensions](/en/guides/logic-extensions.md)
-[Running an Extension](/en/guides/logic-extensions/examples.md)
+[Contextual Access](/en/guides/contextual-access.md)
+[Running an Extension](/en/guides/contextual-access/examples.md)

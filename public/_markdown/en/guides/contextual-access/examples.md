@@ -2,7 +2,7 @@
 title: "Running an Extension"
 description: "Run open-source example webhook servers to get started with Logic Extensions"
 ---
-[Logic Extensions](/en/guides/logic-extensions.md)
+[Contextual Access](/en/guides/contextual-access.md)
 Running an Extension
 
 # Running an Extension
@@ -106,16 +106,16 @@ Once your server is running:
 2.  Click **Create Extension** and enter your server’s base URL and endpoint paths
 3.  Create **hook configurations** to attach the extension to the hook points you want
 
-See [How Hooks Work](/guides/logic-extensions/how-hooks-work.md) for details on configuring extensions and hook points.
+See [How Hooks Work](/guides/contextual-access/how-hooks-work.md) for details on configuring extensions and hook points.
 
 ## Next steps
 
--   [Build your own](/guides/logic-extensions/build-your-own.md)
+-   [Build your own](/guides/contextual-access/build-your-own.md)
      — Implement the webhook contract in any language
 -   [API Reference](/references/logic-extensions-api.md)
      — Interactive schema documentation for the webhook contract
 
 Last updated on February 10, 2026
 
-[How Hooks Work](/en/guides/logic-extensions/how-hooks-work.md)
-[Build Your Own](/en/guides/logic-extensions/build-your-own.md)
+[How Hooks Work](/en/guides/contextual-access/how-hooks-work.md)
+[Build Your Own](/en/guides/contextual-access/build-your-own.md)

@@ -78,5 +78,5 @@ See [Create via Dashboard](/guides/mcp-gateways/create-via-dashboard.md) for det
 
 Last updated on February 10, 2026
 
-[Build Your Own](/en/guides/logic-extensions/build-your-own.md)
+[Build Your Own](/en/guides/contextual-access/build-your-own.md)
 [Add remote MCP servers](/en/guides/mcp-gateways/add-remote-servers.md)

@@ -23,4 +23,4 @@ Loading...
 Last updated on February 10, 2026
 
 [Contact](/en/resources/contact-us.md)
-[Logic Extensions](/en/guides/logic-extensions.md)
+[Contextual Access](/en/guides/contextual-access.md)

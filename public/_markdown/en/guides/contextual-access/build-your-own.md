@@ -2,7 +2,7 @@
 title: "Build Your Own"
 description: "Build your own Logic Extensions webhook server from the OpenAPI spec"
 ---
-[Logic Extensions](/en/guides/logic-extensions.md)
+[Contextual Access](/en/guides/contextual-access.md)
 Build Your Own
 
 # Build Your Own Extension Server
@@ -331,12 +331,12 @@ Configure the auth method when creating your extension in the Dashboard.
 
 -   [API Reference](/references/logic-extensions-api.md)
      — Interactive Swagger documentation for the full schema
--   [Run an extension](/guides/logic-extensions/examples.md)
+-   [Run an extension](/guides/contextual-access/examples.md)
      — Try the open-source example servers as reference
--   [How Hooks Work](/guides/logic-extensions/how-hooks-work.md)
+-   [How Hooks Work](/guides/contextual-access/how-hooks-work.md)
      — Understand execution order, phases, and failure modes
 
 Last updated on February 10, 2026
 
-[Running an Extension](/en/guides/logic-extensions/examples.md)
+[Running an Extension](/en/guides/contextual-access/examples.md)
 [MCP Gateways](/en/guides/mcp-gateways.md)
