@@ -33,6 +33,33 @@ const nextConfig: NextConfig = withLlmsTxt({
         },
         // Auto-added redirects for deleted pages
         {
+          source: "/:locale/references/logic-extensions-api",
+          destination: "/:locale/references/contextual-access-webhook-api",
+          permanent: true,
+        },
+        // Auto-added redirects for deleted pages
+        {
+          source: "/:locale/guides/logic-extensions",
+          destination: "/:locale/guides/contextual-access",
+          permanent: true,
+        },
+        {
+          source: "/:locale/guides/logic-extensions/build-your-own",
+          destination: "/:locale/guides/contextual-access/build-your-own",
+          permanent: true,
+        },
+        {
+          source: "/:locale/guides/logic-extensions/examples",
+          destination: "/:locale/guides/contextual-access/examples",
+          permanent: true,
+        },
+        {
+          source: "/:locale/guides/logic-extensions/how-hooks-work",
+          destination: "/:locale/guides/contextual-access/how-hooks-work",
+          permanent: true,
+        },
+        // Auto-added redirects for deleted pages
+        {
           source: "/:locale/resources/integrations/preview",
           destination: "/:locale/resources/integrations",
           permanent: true,

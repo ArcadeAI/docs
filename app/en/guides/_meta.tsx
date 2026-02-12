@@ -1,6 +1,9 @@
 import type { MetaRecord } from "nextra";
 
 export const meta: MetaRecord = {
+  "contextual-access": {
+    title: "Contextual Access",
+  },
   "mcp-gateways": {
     title: "MCP Gateways",
   },

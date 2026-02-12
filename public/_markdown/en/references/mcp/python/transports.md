@@ -227,7 +227,7 @@ async def shutdown_handler():
     print("Server shutting down...")
 ```
 
-Last updated on February 11, 2026
+Last updated on February 10, 2026
 
 [Overview](/en/references/mcp/python.md)
 [Server](/en/references/mcp/python/server.md)

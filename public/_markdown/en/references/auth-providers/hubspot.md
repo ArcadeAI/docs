@@ -267,7 +267,7 @@ const response = await client.tools.execute({
 console.log(response.output.value);
 ```
 
-Last updated on February 11, 2026
+Last updated on February 10, 2026
 
 [Google](/en/references/auth-providers/google.md)
 [Linear](/en/references/auth-providers/linear.md)

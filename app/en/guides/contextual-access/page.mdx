@@ -1,0 +1,54 @@
+---
+title: "Contextual Access"
+description: "Control who can see and use which tools, validate requests, and filter outputs — per user, per org, per project"
+---
+
+import { Cards } from "nextra/components";
+
+# Contextual Access
+
+Agents have broad access to tools, but enterprises need fine-grained control. Arcade's contextual access lets you govern tool visibility and behavior at every stage of execution — who can see a tool, what inputs are allowed, and what comes back.
+
+You connect your own access-control, compliance, or transformation logic to the Arcade Engine. Your rules run inline during tool execution with no changes to your tools or agents required.
+
+## What you can do
+
+- **Control tool visibility** — Decide which tools each user can see based on role, team, entitlement, or any signal from your IDP
+- **Validate requests** — Enforce policies before execution (e.g., block certain domains, require org-scoped inputs)
+- **Transform payloads** — Enrich inputs, inject secrets, redact PII from outputs, or filter content
+- **Audit every interaction** — Route all tool calls through your security and logging infrastructure
+
+## How it works
+
+Contextual access is powered by **Logic Extensions**, a framework that allows you to hook in and add logic directly to Arcade's execution flow. Arcade calls your server at three predefined hook points in the tool lifecycle:
+
+![Contextual Access Flow Diagram](/images/logic-extensions/flow_diagram.png)
+
+| Hook point | When it runs | What it can do |
+| --- | --- | --- |
+| **Access Hook** | When listing tools for a user | Allow or deny tools the user can see |
+| **Pre-Execution Hook** | Before each tool execution | Allow, deny, or modify inputs |
+| **Post-Execution Hook** | After tool execution | Allow, deny, or modify the output |
+
+You only implement the hooks you need. Configure everything through the Dashboard.
+
+## Get started
+
+<Cards>
+  <Cards.Card
+    title="How Hooks Work"
+    href="/guides/contextual-access/how-hooks-work"
+  />
+  <Cards.Card
+    title="Run an Extension"
+    href="/guides/contextual-access/examples"
+  />
+  <Cards.Card
+    title="Build Your Own"
+    href="/guides/contextual-access/build-your-own"
+  />
+  <Cards.Card
+    title="API Reference"
+    href="/references/contextual-access-webhook-api"
+  />
+</Cards>
