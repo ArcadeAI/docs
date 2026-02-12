@@ -856,7 +856,7 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-Last updated on February 10, 2026
+Last updated on February 11, 2026
 
 [Setup Arcade with Google ADK (Python)](/en/get-started/agent-frameworks/google-adk/use-arcade-tools.md)
 [Setup Arcade with LangChain (TypeScript)](/en/get-started/agent-frameworks/langchain/use-arcade-with-langchain-ts.md)
