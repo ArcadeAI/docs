@@ -175,7 +175,7 @@ async def post_tweet(
         return f"Tweet with id {tweet_id} posted successfully. URL: https://x.com/x/status/{tweet_id}"
 ```
 
-Last updated on February 10, 2026
+Last updated on January 5, 2026
 
 [Twitch](/en/references/auth-providers/twitch.md)
 [Zendesk](/en/references/auth-providers/zendesk.md)

@@ -380,7 +380,7 @@ The code implemented in the Arcade Salesforce  is the best guide for you to unde
 
 PLAINTEXT
 
-Last updated on February 10, 2026
+Last updated on January 5, 2026
 
 [Reddit](/en/references/auth-providers/reddit.md)
 [Slack](/en/references/auth-providers/slack.md)

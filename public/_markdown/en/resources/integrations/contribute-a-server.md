@@ -27,7 +27,7 @@ After submitting your pull request:
 -   Address any feedback from the reviewers.
 -   Once approved, your MCP Server will be added to the Arcade documentation for other developers to discover and use!
 
-Last updated on February 10, 2026
+Last updated on January 5, 2026
 
 [Overview](/en/resources/integrations.md)
 [Examples](/en/resources/examples.md)

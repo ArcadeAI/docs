@@ -115,7 +115,7 @@ See [How Hooks Work](/guides/contextual-access/how-hooks-work.md) for details on
 -   [API Reference](/references/contextual-access-webhook-api.md)
      — Interactive schema documentation for the webhook contract
 
-Last updated on February 10, 2026
+Last updated on January 5, 2026
 
 [How Hooks Work](/en/guides/contextual-access/how-hooks-work.md)
 [Build Your Own](/en/guides/contextual-access/build-your-own.md)

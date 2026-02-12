@@ -216,7 +216,7 @@ Ensure you have set the environment variable in your terminal or `.env` file, an
 -   **Learn how to deploy your  server**: [Deploy your MCP server](/guides/deployment-hosting/arcade-deploy.md)
 
 
-Last updated on February 10, 2026
+Last updated on January 5, 2026
 
 [Call tools in IDE/MCP clients](/en/get-started/quickstarts/call-tool-client.md)
 [Overview](/en/get-started/agent-frameworks.md)
