@@ -21,10 +21,6 @@ const SKIP_PATTERNS: RegExp[] = [
   // Requires authentication (dashboard is a SPA behind login)
   /api\.arcade\.dev/,
 
-  // Private repo — returns 404 for unauthenticated requests
-  /github\.com\/ArcadeAI\/arcade-ai/, // biome-ignore: not a dupe
-  /raw\.githubusercontent\.com\/ArcadeAI/,
-
   // Sites that block automated / bot requests
   /discord\.gg/,
   /reddit\.com/,
