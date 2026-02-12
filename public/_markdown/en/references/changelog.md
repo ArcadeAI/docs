@@ -633,8 +633,7 @@ Self-hosed Arcade developers cannot be grandfathered into the old (insecure) beh
 **Frameworks**
 
 -   `[feature - 🚀]` Support for OpenAI  SDK in Typescript ([docs](/get-started/agent-frameworks/openai-agents/overview.md)
-     and [example](https://github.com/ArcadeAI/arcade-ai/tree/main/examples/openai-agents-ts)
-     )
+    )
 
 **Toolkits**
 
@@ -662,7 +661,7 @@ Self-hosed Arcade developers cannot be grandfathered into the old (insecure) beh
 -   `[feature - 🚀]` Launched status.arcade.dev for monitoring platform status ([link](https://status.arcade.dev)
      )
 
-Last updated on January 30, 2026
+Last updated on January 5, 2026
 
 [Overview](/en/references.md)
 [API](/en/references/api.md)
