@@ -1,4 +1,4 @@
-import { type ChildProcess, execSync, spawn } from "node:child_process";
+import { type ChildProcess, spawn } from "node:child_process";
 import fs from "node:fs/promises";
 import path, { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -57,99 +57,6 @@ const META_DESCRIPTION_PATTERN =
 const META_DESCRIPTION_ALT_PATTERN =
   /<meta\s+content=["']([^"']*)["']\s+name=["']description["']/i;
 const TITLE_SUFFIX_PATTERN = /\s*[|–-]\s*Arcade.*$/i;
-
-// Git diff base for comparing changes (default: origin/main)
-const GIT_DIFF_BASE = process.env.GIT_DIFF_BASE || "origin/main";
-
-// Check if running in full rebuild mode
-const FULL_REBUILD = process.env.FULL_REBUILD === "true";
-
-/**
- * Gets the list of changed/added MDX files from git diff
- */
-function getChangedMdxFiles(): string[] {
-  try {
-    const output = execSync(
-      `git diff ${GIT_DIFF_BASE} --name-only --diff-filter=AM -- "app/**/*.mdx"`,
-      { encoding: "utf-8", cwd: path.join(__dirname, "..") }
-    );
-    return output
-      .trim()
-      .split("\n")
-      .filter((line) => line.length > 0);
-  } catch (error) {
-    console.warn(
-      pc.yellow(`⚠ Could not get git diff, falling back to full rebuild: ${error}`)
-    );
-    return [];
-  }
-}
-
-/**
- * Gets the list of deleted MDX files from git diff
- */
-function getDeletedMdxFiles(): string[] {
-  try {
-    const output = execSync(
-      `git diff ${GIT_DIFF_BASE} --name-only --diff-filter=D -- "app/**/*.mdx"`,
-      { encoding: "utf-8", cwd: path.join(__dirname, "..") }
-    );
-    return output
-      .trim()
-      .split("\n")
-      .filter((line) => line.length > 0);
-  } catch (error) {
-    console.warn(pc.yellow(`⚠ Could not get deleted files from git: ${error}`));
-    return [];
-  }
-}
-
-/**
- * Converts an MDX file path to its corresponding markdown output path
- * e.g., "app/en/home/quickstart/page.mdx" -> "public/_markdown/en/home/quickstart.md"
- */
-function mdxPathToOutputPath(mdxPath: string): string {
-  // Remove "app/" prefix
-  let relativePath = mdxPath.replace(/^app\//, "");
-  // Remove "/page.mdx" or ".mdx" suffix and add .md
-  relativePath = relativePath
-    .replace(/\/page\.mdx$/, ".md")
-    .replace(/\.mdx$/, ".md");
-  return path.join(OUTPUT_DIR, relativePath);
-}
-
-/**
- * Converts an MDX file path to its route
- * e.g., "app/en/home/quickstart/page.mdx" -> "/en/home/quickstart"
- */
-function mdxPathToRoute(mdxPath: string): string {
-  // Remove "app/" prefix
-  let route = mdxPath.replace(/^app\//, "");
-  // Remove "/page.mdx" or ".mdx" suffix
-  route = route.replace(/\/page\.mdx$/, "").replace(/\.mdx$/, "");
-  return `/${route}`;
-}
-
-/**
- * Deletes markdown files for deleted MDX sources
- */
-async function deleteMarkdownForDeletedMdx(
-  deletedMdxFiles: string[]
-): Promise<{ deleted: number; paths: string[] }> {
-  const deletedPaths: string[] = [];
-
-  for (const mdxPath of deletedMdxFiles) {
-    const outputPath = mdxPathToOutputPath(mdxPath);
-    try {
-      await fs.unlink(outputPath);
-      deletedPaths.push(outputPath);
-    } catch (error) {
-      // File may not exist, that's ok
-    }
-  }
-
-  return { deleted: deletedPaths.length, paths: deletedPaths };
-}
 
 // Initialize Turndown with options for clean markdown
 const turndown = new TurndownService({
@@ -1041,106 +948,33 @@ async function main() {
   let server: ChildProcess | null = null;
 
   try {
-    // Determine which pages to process
-    let pagesToProcess: Array<{
-      route: string;
-      language: string;
-      outputPath: string;
-    }>;
-    let deletedCount = 0;
-    let deletedPaths: string[] = [];
-
-    if (FULL_REBUILD) {
-      console.log(pc.blue("📦 Full rebuild mode enabled\n"));
-      pagesToProcess = await discoverPages();
-      console.log(pc.green(`✓ Found ${pagesToProcess.length} pages to process`));
-    } else {
-      console.log(pc.blue(`📊 Diff-based mode (comparing to ${GIT_DIFF_BASE})\n`));
-
-      // Get changed and deleted MDX files
-      const changedMdxFiles = getChangedMdxFiles();
-      const deletedMdxFiles = getDeletedMdxFiles();
-
-      console.log(
-        pc.gray(`  Changed/added MDX files: ${changedMdxFiles.length}`)
-      );
-      console.log(pc.gray(`  Deleted MDX files: ${deletedMdxFiles.length}`));
-
-      // Delete markdown files for deleted MDX sources
-      if (deletedMdxFiles.length > 0) {
-        const result = await deleteMarkdownForDeletedMdx(deletedMdxFiles);
-        deletedCount = result.deleted;
-        deletedPaths = result.paths;
-      }
-
-      // If no changes, we're done
-      if (changedMdxFiles.length === 0) {
-        console.log(pc.green("\n✓ No MDX changes detected, nothing to generate"));
-        if (deletedCount > 0) {
-          console.log(pc.yellow(`  🗑️  Deleted ${deletedCount} markdown files`));
-          for (const deletedPath of deletedPaths) {
-            console.log(pc.gray(`     - ${path.relative(OUTPUT_DIR, deletedPath)}`));
-          }
-        }
-        console.log(pc.bold(pc.green("\n✨ Done!\n")));
-        process.exit(0);
-      }
-
-      // Filter to only changed pages (skip dynamic routes)
-      pagesToProcess = changedMdxFiles
-        .filter((mdxPath) => !mdxPath.includes("["))
-        .map((mdxPath) => {
-          const route = mdxPathToRoute(mdxPath);
-          const language = mdxPath.split("/")[1] || "en";
-          const outputPath = mdxPathToOutputPath(mdxPath);
-          return { route, language, outputPath };
-        });
-
-      console.log(
-        pc.green(`\n✓ ${pagesToProcess.length} pages to regenerate`)
-      );
-    }
-
-    // Skip server startup if no pages to process
-    if (pagesToProcess.length === 0) {
-      console.log(pc.green("\n✓ No pages to process"));
-      console.log(pc.bold(pc.green("\n✨ Done!\n")));
-      process.exit(0);
-    }
+    const pages = await discoverPages();
+    console.log(pc.green(`✓ Found ${pages.length} pages to process`));
 
     server = startServer();
     await waitForServer(`${SERVER_URL}/en/home`);
 
     console.log(pc.blue("\n📝 Converting pages to markdown...\n"));
-    const { successCount, errorCount } = await processAllPages(pagesToProcess);
+    const { successCount, errorCount } = await processAllPages(pages);
 
     console.log(pc.bold(pc.blue("\n📊 Results:")));
     console.log(pc.green(`  ✓ Successfully converted: ${successCount}`));
     if (errorCount > 0) {
       console.log(pc.red(`  ✗ Errors: ${errorCount}`));
     }
-    if (deletedCount > 0) {
-      console.log(pc.yellow(`  🗑️  Deleted markdown files: ${deletedCount}`));
-      for (const deletedPath of deletedPaths) {
-        console.log(pc.gray(`     - ${path.relative(OUTPUT_DIR, deletedPath)}`));
-      }
-    }
     console.log(pc.gray(`  📁 Output directory: ${OUTPUT_DIR}`));
 
-    // Only run validation in full rebuild mode
-    if (FULL_REBUILD) {
-      const validation = await validateGeneratedContent();
-      if (!validation.passed) {
-        console.log(pc.bold(pc.red("\n⚠️  Validation errors:")));
-        for (const error of validation.errors) {
-          console.log(pc.red(`  • ${error}`));
-        }
-        console.log(
-          pc.yellow(
-            "\nNote: Some validation failures may indicate the HTML extraction needs adjustment."
-          )
-        );
+    const validation = await validateGeneratedContent();
+    if (!validation.passed) {
+      console.log(pc.bold(pc.red("\n⚠️  Validation errors:")));
+      for (const error of validation.errors) {
+        console.log(pc.red(`  • ${error}`));
       }
+      console.log(
+        pc.yellow(
+          "\nNote: Some validation failures may indicate the HTML extraction needs adjustment."
+        )
+      );
     }
 
     console.log(pc.bold(pc.green("\n✨ Done!\n")));
