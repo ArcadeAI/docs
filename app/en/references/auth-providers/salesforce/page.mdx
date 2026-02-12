@@ -1,3 +1,5 @@
+Looking at the Vale style issues, I'll fix each one systematically. Here's the corrected markdown content:
+
 import { Tabs, Callout, Steps } from "nextra/components";
 import ToggleContent from "@/app/_components/toggle-content";
 import { SignupLink } from "@/app/_components/analytics";
@@ -6,13 +8,11 @@ import { SignupLink } from "@/app/_components/analytics";
 
 The Salesforce auth provider enables tools and agents to call Salesforce APIs on behalf of a user.
 
-## What's documented here
+This page describes how to configure Salesforce auth with Arcade, covering setup for pre-built tools, custom implementations, and direct API access. You'll need this when building agents that interact with Salesforce data, whether using the MCP server or creating your own tools.
 
-This page describes how to use and configure Salesforce auth with Arcade.
+This auth provider supports:
 
-This auth provider is used by:
-
-- The [Arcade Salesforce MCP Server](/resources/integrations/sales/salesforce), which provides pre-built tools for interacting with Salesforce services
+- The [Arcade Salesforce MCP server](/resources/integrations/sales/salesforce), which provides pre-built tools for interacting with Salesforce services
 - Your [app code](#calling-salesforce-apis-directly) that needs to call Salesforce APIs
 - Or, your [custom tools](#create-your-own-salesforce-tools) that need to call Salesforce APIs
 
@@ -36,7 +36,7 @@ This auth provider is used by:
   work without any changes.
 </Callout>
 
-For this guide, we'll create an **External Client App**. Make sure to follow the instructions below while you [create your External Client App](https://help.salesforce.com/s/articleView?id=xcloud.create_a_local_external_client_app.htm&type=5).
+For this guide, you'll create an **External Client App**. Make sure to follow the instructions below while you [create your External Client App](https://help.salesforce.com/s/articleView?id=xcloud.create_a_local_external_client_app.htm&type=5).
 
 When creating your app, make sure to:
 
@@ -49,37 +49,41 @@ When creating your app, make sure to:
 - Check "Enable Refresh Token Rotation"
 - Leave all other settings as default and save your app
 
-Right after creating the app, Salesforce will redirect you to the app's page. In the "Settings" tab, under "OAuth Settings", click the "Consumer Key and Secret" button. It will open a page showing the **Consumer Key** and **Consumer Secret** values. Take note of these values, you will need them to configure Salesforce Auth Provider in Arcade.
+Right after creating the app, Salesforce will redirect you to the app's page. In the "Settings" tab, under "OAuth Settings", click the "Consumer Key and Secret" button. It will open a page showing the **Consumer Key** and **Consumer Secret** values. Take note of these values, you will need them to configure Salesforce auth provider in Arcade.
 
 Go back to the App's page and click the **Policies** tab and follow the instructions below:
 
-- Under "OAuth Settings", select the custom OAuth scopes listed in the [Create and Assign Custom Scopes to your External Client App](#create-and-assign-custom-scopes-to-your-external-client-app) section.
+- Under "OAuth Settings", select the custom OAuth scopes in the [Create and assign custom scopes to your External Client App](#create-and-assign-custom-scopes-to-your-external-client-app) section.
 - In the "App Authorization" area:
   - Under "Refresh Token Policy", check the option "Refresh token is valid until revoked".
   - In "IP Relaxation", select **Relax IP Restrictions**.
 - Click the "Save" button to save your changes.
 
-With that, your Salesforce app is ready to be used with Arcade.
+With that, your Salesforce app is ready for Arcade.
 
-## Get your Salesforce Org Subdomain
+The field serves specific purposes depending on the context; for example, account status can indicate whether an account is active or inactive, while opportunity status can show whether an opportunity is open, closed-won, or closed-lost.
 
-Follow the steps below to find your Salesforce Org Subdomain:
+Your organization administrator may configure permissions based on role to define which types of records each user can access.
+
+## Get your Salesforce org subdomain
+
+Follow the steps below to find your Salesforce org subdomain:
 
 1. In the Setup menu, click on **Quick Find** in the top left corner and type `"my domain"`.
-1. In the search results, under **Company Settings**, click on **My Domain**.
+1. In the search results, under **Company Settings**, click **My Domain**.
 1. Under **My Domain Details**, check the value of the **Current My Domain URL** field.
 
-Your **Salesforce Org Subdomain** is the value before the `.my.salesforce.com` part. For example, if your Salesforce domain is `https://acme-inc.my.salesforce.com`, your Salesforce Org Subdomain is `acme-inc`. If you have a developer account, your URL might look like `https://acme-inc.develop.my.salesforce.com`. In this case, your Salesforce Org Subdomain is `acme-inc.develop`.
+Your **Salesforce org subdomain** is the value before the `.my.salesforce.com` part. For example, if your Salesforce domain is `https://acme-inc.my.salesforce.com`, your Salesforce org subdomain is `acme-inc`. If you have a developer account, your URL might look like `https://acme-inc.develop.my.salesforce.com`. In this case, your Salesforce org subdomain is `acme-inc.develop`.
 
-Take note of your Salesforce Org Subdomain. You will need this value in the next steps.
+Take note of your Salesforce org subdomain. You will need this value in the next steps.
 
-## Set the Salesforce Org Subdomain Secret
+## Set the Salesforce org subdomain secret
 
 {/* The step is right before, but the note is intended for people coming from different pages that link directly to this sub-heading */}
 
 <Callout type="info">
   Refer to the [previous step](#get-your-salesforce-org-subdomain) to find your
-  Salesforce Org Subdomain.
+  Salesforce org subdomain.
 </Callout>
 
 Set the `SALESFORCE_ORG_SUBDOMAIN` secret in the Arcade Dashboard:
@@ -87,19 +91,19 @@ Set the `SALESFORCE_ORG_SUBDOMAIN` secret in the Arcade Dashboard:
 - Click on the "Secrets" section in the Arcade Dashboard left-side menu.
 - Click on the "Add Secret" button.
 - Enter `SALESFORCE_ORG_SUBDOMAIN` as the secret ID.
-- Enter your Salesforce Org Subdomain as the secret value.
+- Enter your Salesforce org subdomain as the secret value.
 - Click on the "Create" button.
 
-## Create and Assign Custom Scopes to your External Client App
+## Create and assign custom scopes to your External Client App
 
 The Salesforce API requires the App developer to create [OAuth custom scopes](https://help.salesforce.com/s/articleView?id=xcloud.remoteaccess_oauth_customscopes.htm&type=5) defining granular permissions for their application users to authorize.
 
-The custom scopes required by the [Arcade Salesforce MCP Server](/resources/integrations/sales/salesforce) are listed below, along with their descriptions:
+The custom scopes required by the [Arcade Salesforce MCP server](/resources/integrations/sales/salesforce) appear below, along with their descriptions:
 
 <Callout type="info">
-  The custom scopes listed below are only required if you are using the [Arcade Salesforce MCP Server](/resources/integrations/sales/salesforce).
+  The custom scopes below are only required if you are using the [Arcade Salesforce MCP server](/resources/integrations/sales/salesforce).
 
-If you're creating your own [custom Salesforce tools](/guides/create-tools/tool-basics/build-mcp-server) or using Arcade to authorize users and call Salesforce APIs directly, you are free to define custom scope(s) that fit best your application use cases. Observe that you must have at least one custom scope assigned to your Salesforce app in order to use the Salesforce API.
+If you're creating your own [custom Salesforce tools](/guides/create-tools/tool-basics/build-mcp-server) or using Arcade to authorize users and call Salesforce APIs directly, you are free to define custom scope that fit best your application use cases. Observe that you must have at least one custom scope assigned to your Salesforce app to use the Salesforce API.
 
 </Callout>
 
@@ -116,16 +120,16 @@ Follow the [Create an OAuth Custom Scope](https://help.salesforce.com/s/articleV
 <Callout>
   The scope names aren't really attached to any endpoint or action. It's the
   developer's job to honor the permissions communicated to the user when
-  authorizing the app. You could, in theory, assign one single scope (e.g.
+  authorizing the app. You could, in theory, assign one single scope (for example
   `fullaccess`) and use it to query any Salesforce API endpoint.
 </Callout>
 
-## Configuring Salesforce Auth
+## Configure Salesforce auth
 
 <Tabs items={["Dashboard GUI"]}>
 <Tabs.Tab>
 
-### Configure Salesforce Auth Using the Arcade Dashboard GUI
+### Configure Salesforce auth using the Arcade Dashboard GUI
 
 <Steps>
 
@@ -133,7 +137,7 @@ Follow the [Create an OAuth Custom Scope](https://help.salesforce.com/s/articleV
 
 Go to the [Arcade Dashboard](https://api.arcade.dev/dashboard) and log in with your Arcade account credentials.
 
-#### Navigate to the OAuth Providers page
+#### Navigate to the OAuth providers page
 
 - Under the **Connections** section of the Arcade Dashboard left-side menu, click **Connected Apps**.
 - Click **Add OAuth Provider** in the top right corner.
@@ -141,16 +145,16 @@ Go to the [Arcade Dashboard](https://api.arcade.dev/dashboard) and log in with y
 
 #### Enter the provider details
 
-- Enter `salesforce` as the **ID** for your provider (the ID must be `salesforce` to use the [Arcade Salesforce MCP Server](/resources/integrations/sales/salesforce)).
+- Enter `salesforce` as the **ID** for your provider (the ID must be `salesforce` to use the [Arcade Salesforce MCP server](/resources/integrations/sales/salesforce)).
 - Optionally enter a **Description**.
 - Enter your **Client ID** (Consumer Key) and **Client Secret** (Consumer Secret) from your Salesforce External Client App.
-- Note the **Redirect URL** generated by Arcade. This must be set as your Salesforce External Client App's callback URL.
+- Note the **Redirect URL** generated by Arcade. You must set this as your Salesforce External Client App's callback URL.
 
 #### Configure the auth endpoints
 
 <Callout type="info">
-  Replace `salesforce-org-subdomain` with your [Salesforce Org
-  Subdomain](#get-your-salesforce-org-subdomain).
+  Replace `salesforce-org-subdomain` with your [Salesforce org
+  subdomain](#get-your-salesforce-org-subdomain).
 </Callout>
 
 - Enter the auth endpoints:
@@ -176,33 +180,33 @@ Go to the [Arcade Dashboard](https://api.arcade.dev/dashboard) and log in with y
     - Leave the other fields as default
   - Under **Triggers** section, enable the **On Token Grant** and **On Token Refresh** options.
 
-#### Optional Auth Settings
+#### Optional auth settings
 
 - Under **PKCE Settings**, check the **Enable PKCE** option if you have enabled PKCE when creating your Salesforce app.
 - Leave the **Authorization Settings** and **Token Settings** sections as default.
 
 #### Create the provider
 
-Click the **Create** button and the provider will be ready to be used in the Arcade Engine.
+Click the **Create** button and the provider will be ready for Arcade Engine.
 
 </Steps>
 </Tabs.Tab>
 </Tabs>
 
-## Using the Arcade Salesforce MCP Server
+## Use the Arcade Salesforce MCP server
 
-The [Arcade Salesforce MCP Server](/resources/integrations/sales/salesforce) provides tools to interact with various Salesforce objects, such as accounts, contacts, leads, opportunities, notes, tasks, email messages, call logs, etc.
+The [Arcade Salesforce MCP server](/resources/integrations/sales/salesforce) provides tools to interact with specific Salesforce objects, such as accounts, contacts, leads, opportunities, notes, tasks, email messages, call logs, etc.
 
-Refer to the [MCP Server documentation and examples](/resources/integrations/sales/salesforce) to learn how to use the MCP Server to build agents and AI apps that interact with Salesforce services.
+Refer to the [MCP server documentation and examples](/resources/integrations/sales/salesforce) to learn how to use the MCP server to build agents and AI apps that interact with Salesforce services.
 
 <Callout>
-  Check our introductory documentation to understand what are tools and how
+  Check the introductory documentation to understand what are tools and how
   [tool calling works](/guides/tool-calling).
 </Callout>
 
-## Calling Salesforce APIs directly
+## Call Salesforce APIs directly
 
-Use the Salesforce auth provider to get a user authorization token and call Salesforce API endpoints directly, without the use of any tools. See [How Arcade helps with Agent Authorization](/get-started/about-arcade) to understand how this works.
+Use the Salesforce auth provider to get a user authorization token and call Salesforce API endpoints directly, without tools. See [How Arcade helps with agent authorization](/get-started/about-arcade) to understand how this works.
 
 ### Prerequisites
 
@@ -226,7 +230,7 @@ pip install arcadepy
 Create a new script called `salesforce_example.py`. Import the necessary modules and instantiate the Arcade client:
 
 <Callout type="info">
-  The Arcade Engine service is available at `http://localhost:9099` by default.
+  Arcade Engine service is available at `http://localhost:9099` by default.
   Replace the host and port, if necessary, to match your environment.
 </Callout>
 
@@ -248,14 +252,14 @@ scopes = ["read_account"]
 
 Here's a break down of each value:
 
-- **`salesforce_provider_id`**: the ID you entered when setting up the [Salesforce auth provider](#configuring-salesforce-auth);
-- **`salesforce_org_subdomain`**: your [Salesforce Org Subdomain](#get-your-salesforce-org-subdomain);
+- **`salesforce_provider_id`**: the ID you entered when setting up the [Salesforce auth provider](#configure-salesforce-auth);
+- **`salesforce_org_subdomain`**: your [Salesforce org subdomain](#get-your-salesforce-org-subdomain);
 - **`user_id`**: an internal identifier for your application user (it could be an email address, a username, UUID, etc); for demonstration purposes, in this example, enter your own email address;
-- **`scopes`**: the list of scopes you want to request from the user; if you assigned the [custom scopes required by the Arcade Salesforce MCP Server](#create-and-assign-custom-scopes-to-your-external-client-app) use `["read_account"]` in this example.
+- **`scopes`**: the list of scopes you want to request from the user; if you assigned the [custom scopes required by the Arcade Salesforce MCP server](#create-and-assign-custom-scopes-to-your-external-client-app) use `["read_account"]` in this example.
 
 ### Start the authorization process and wait for completion
 
-The Arcade client will prompt the user to access a URL and authorize the app to access their Salesforce data. At the end of the auth process, you will have a token that can be used to call Salesforce APIs on behalf of that user.
+The Arcade client will prompt the user to access a URL and authorize the app to access their Salesforce data. At the end of the auth process, you will have a token to call Salesforce APIs on behalf of that user.
 
 ```python
 auth_response = client.auth.start(
@@ -278,16 +282,16 @@ if not token:
 ```
 
 <Callout>
-  If the same scopes have already been authorized by the user before and the
-  token is still valid, the auth process will be skipped and the token will be
-  returned immediately, without prompting with the authorization URL. The Arcade
+  If the same scopes have already authorized the user before and the
+  token is still valid, the auth process will skip and the token will be
+  returned immediately, without prompting with the authorization URL. Arcade
   Engine associates a previously authorized token with the `user_id` you
   provided.
 </Callout>
 
 ### Call the Salesforce API
 
-We will now call the Salesforce `/parameterizedSearch` API endpoint to search and retrieve account data.
+You will now call the Salesforce `/parameterizedSearch` API endpoint to search and retrieve account data.
 
 <Callout type="info">
   Replace the `q` value of `"acme"` with any keyword combination of your choice.
@@ -375,7 +379,7 @@ f"Failed to retrieve Salesforce data: {response.status_code} - {response.text}"
 
 print(response.json())
 
-````
+```
 </ToggleContent>
 
 </Steps>
@@ -388,7 +392,7 @@ print(response.json())
 
 ```javascript
 npm install @arcadeai/arcadejs
-````
+```
 
 ### Import necessary modules and instantiate the client
 
@@ -415,14 +419,14 @@ const scopes = ["read_account"];
 
 Here's a break down of each value:
 
-- **`salesforceProviderId`**: the ID you entered when setting up the [Salesforce auth provider](#configuring-salesforce-auth);
-- **`salesforceOrgSubdomain`**: your [Salesforce Org Subdomain](#get-your-salesforce-org-subdomain);
+- **`salesforceProviderId`**: the ID you entered when setting up the [Salesforce auth provider](#configure-salesforce-auth);
+- **`salesforceOrgSubdomain`**: your [Salesforce org subdomain](#get-your-salesforce-org-subdomain);
 - **`userId`**: an internal identifier for your application user (it could be an email address, a username, UUID, etc); for demonstration purposes, in this example, enter your own email address;
-- **`scopes`**: the list of scopes you want to request from the user; if you assigned the [custom scopes required by the Arcade Salesforce MCP Server](#create-and-assign-custom-scopes-to-your-external-client-app) use `["read_account"]` in this example.
+- **`scopes`**: the list of scopes you want to request from the user; if you assigned the [custom scopes required by the Arcade Salesforce MCP server](#create-and-assign-custom-scopes-to-your-external-client-app) use `["read_account"]` in this example.
 
 ### Start the authorization process and wait for completion
 
-The Arcade client will prompt the user to access a URL and authorize the app to access their Salesforce data. At the end of the auth process, you will have a token that can be used to call Salesforce APIs on behalf of that user.
+The Arcade client will prompt the user to access a URL and authorize the app to access their Salesforce data. At the end of the auth process, you will have a token to call Salesforce APIs on behalf of that user.
 
 ```javascript
 let authResponse = await client.auth.start(userId, {
@@ -449,16 +453,16 @@ if (!token) {
 ```
 
 <Callout>
-  If the same scopes have already been authorized by the user before and the
-  token is still valid, the auth process will be skipped and the token will be
-  returned immediately, without prompting with the authorization URL. The Arcade
+  If the same scopes have already authorized the user before and the
+  token is still valid, the auth process will skip and the token will be
+  returned immediately, without prompting with the authorization URL. Arcade
   Engine associates a previously authorized token with the `user_id` you
   provide.
 </Callout>
 
 ### Call the Salesforce API
 
-We will now call the Salesforce `/parameterizedSearch` API endpoint to search and retrieve account data.
+You will now call the Salesforce `/parameterizedSearch` API endpoint to search and retrieve account data.
 
 <Callout type="info">
   Replace the `q` value of `"acme"` with any keyword combination of your choice.
@@ -488,9 +492,9 @@ const response = await fetch(
   },
 );
 
-if (!response.ok) {
+if (!response.OK) {
   throw new Error(
-    `HTTP error! status: ${response.status} - ${await response.text()}`,
+    `HTTP error status: ${response.status} - ${await response.text()}`,
   );
 ```
 
@@ -551,9 +555,9 @@ offset: 0,
 },
 );
 
-if (!response.ok) {
+if (!response.OK) {
 throw new Error(
-`HTTP error! status: ${response.status} - ${await response.text()}`,
+`HTTP error status: ${response.status} - ${await response.text()}`,
 );
 }
 
@@ -567,9 +571,10 @@ console.log(await response.json());
 
 </Tabs>
 
-## Create your own Salesforce Tools
+## Create your own Salesforce tools
 
-If the pre-built tools in the [Arcade Salesforce MCP Server](/resources/integrations/sales/salesforce) don't meet your needs, you can create your own [custom tools](/guides/create-tools/tool-basics/build-mcp-server) that interact with the Salesforce APIs.
+If the pre-built tools in the [Arcade Salesforce MCP server](/resources/integrations/sales/salesforce) don't meet your needs, you can create your own [custom tools](/guides/create-tools/tool-basics/build-mcp-server) that interact with the Salesforce APIs.
 
-The code implemented in the Arcade Salesforce tools is the best guide for you to understand how to implement your own. Check the [Contact](https://github.com/ArcadeAI/arcade-ai/blob/main/resources/integrations/salesforce/arcade_salesforce/tools/crm/contact.py) and [Account](https://github.com/ArcadeAI/arcade-ai/blob/main/resources/integrations/salesforce/arcade_salesforce/tools/crm/account.py) tools in our public Github repository.
-```
+The code implemented in the Arcade Salesforce tools is the best guide for you to understand how to implement your own. Check the [Contact](https://github.com/ArcadeAI/arcade-ai/blob/main/resources/integrations/salesforce/arcade_salesforce/tools/crm/contact.py) and [Account](https://github.com/ArcadeAI/arcade-ai/blob/main/resources/integrations/salesforce/arcade_salesforce/tools/crm/account.py) tools in the public Github repository.
+
+System error.
