@@ -62,7 +62,7 @@ Note: if you are using the Arcade Header auth mode for your  Gateway, you will m
 
 You will not see the authentication prompts when you start the  Server in Visual Studio Code because the  is passed directly.
 
-Last updated on February 10, 2026
+Last updated on January 5, 2026
 
 [Claude Desktop](/en/get-started/mcp-clients/claude-desktop.md)
 [Microsoft Copilot Studio](/en/get-started/mcp-clients/copilot-studio.md)

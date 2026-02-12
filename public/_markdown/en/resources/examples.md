@@ -57,7 +57,7 @@ Built something with Arcade? The team would love to feature it! Submit your app 
 
 If you have questions about submitting your app, feel free to [contact the team](/resources/contact-us.md) or open an issue in the docs repository.
 
-Last updated on February 10, 2026
+Last updated on January 5, 2026
 
 [Contribute a Server](/en/resources/integrations/contribute-a-server.md)
 [Tools](/en/resources/tools.md)
