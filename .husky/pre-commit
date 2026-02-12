@@ -2,16 +2,6 @@
 # Exit on any error
 set -e
 
-# Detect merge/rebase state — used later to skip the stash+format block
-# which conflicts with merge state and corrupts it.
-GIT_DIR="$(git rev-parse --git-dir)"
-IS_MERGING=false
-if [ -f "$GIT_DIR/MERGE_HEAD" ] || \
-   [ -d "$GIT_DIR/rebase-merge" ] || \
-   [ -d "$GIT_DIR/rebase-apply" ]; then
-  IS_MERGING=true
-fi
-
 # Check if there are any staged files
 if [ -z "$(git diff --cached --name-only)" ]; then
   echo "No staged files to check"
@@ -133,15 +123,6 @@ fi
 
 # --- Lint Staged (formatting) ---
 pnpm dlx lint-staged
-
-# --- Stash + Format ---
-# Skip this block during merge/rebase: git stash --keep-index destroys
-# MERGE_HEAD and corrupts the merge state, causing repeated failures.
-# lint-staged (above) already handles formatting for staged files safely.
-if [ "$IS_MERGING" = true ]; then
-  echo "⏭️  Skipping stash+format (merge/rebase in progress)"
-  exit 0
-fi
 
 # Store the hash of staged changes to detect modifications
 STAGED_HASH=$(git diff --cached | sha256sum | cut -d' ' -f1)
