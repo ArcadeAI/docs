@@ -63,6 +63,24 @@ function getPreferredLocale(_request: NextRequest): string {
   return "en";
 }
 
+function getEnglishLocaleRedirectPath(pathname: string): string | null {
+  for (const locale of SUPPORTED_LOCALES) {
+    if (locale === "en") {
+      continue;
+    }
+
+    if (pathname === `/${locale}` || pathname === `/${locale}/`) {
+      return "/en/home";
+    }
+
+    if (pathname.startsWith(`/${locale}/`)) {
+      return `/en${pathname.slice(locale.length + 1)}`;
+    }
+  }
+
+  return null;
+}
+
 function pathnameIsMissingLocale(pathname: string): boolean {
   return SUPPORTED_LOCALES.every(
     (locale) => !pathname.startsWith(`/${locale}/`) && pathname !== `/${locale}`
@@ -149,6 +167,13 @@ function handleContentNegotiation(
 
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+
+  const englishLocaleRedirectPath = getEnglishLocaleRedirectPath(pathname);
+  if (englishLocaleRedirectPath) {
+    const url = request.nextUrl.clone();
+    url.pathname = englishLocaleRedirectPath;
+    return NextResponse.redirect(url);
+  }
 
   const contentNegotiationResponse = handleContentNegotiation(
     request,
