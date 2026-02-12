@@ -3,8 +3,8 @@ title: "Setup Arcade with LangChain"
 description: "Learn how to use Arcade tools in LangChain agents"
 ---
 [Agent Frameworks](/en/get-started/agent-frameworks.md)
-[LangChain](/en/get-started/agent-frameworks/langchain/use-arcade-with-langchain-py.md)
-Setup Arcade with LangChain (TypeScript)
+[LangChain](/en/get-started/agent-frameworks/langchain/overview.md)
+Setup (TypeScript)
 
 # Setup Arcade with LangChain
 
@@ -746,5 +746,5 @@ main().catch((err) => console.error(err));
 
 Last updated on February 11, 2026
 
-[Setup Arcade with LangChain (Python)](/en/get-started/agent-frameworks/langchain/use-arcade-with-langchain-py.md)
-[Authorizing existing tools](/en/get-started/agent-frameworks/langchain/auth-langchain-tools.md)
+[Setup (Python)](/en/get-started/agent-frameworks/langchain/use-arcade-with-langchain-py.md)
+[Authorizing Existing Tools](/en/get-started/agent-frameworks/langchain/auth-langchain-tools.md)
