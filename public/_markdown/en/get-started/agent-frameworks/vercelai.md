@@ -115,7 +115,7 @@ import { Arcade } from "@arcadeai/arcadejs";
 import {
   toZodToolSet,
   executeOrAuthorizeZodTool,
-} from "@arcadeai/arcadejs/lib";
+} from "@arcadeai/arcadejs/lib/index";
 ```
 
 **What these imports do:**
@@ -184,10 +184,10 @@ function toVercelTools(arcadeTools: Record<string, unknown>): Record<string, unk
   const vercelTools: Record<string, unknown> = {};
 
   for (const [name, tool] of Object.entries(arcadeTools)) {
-    const t = tool as { description: string; parameters: unknown; execute: Function };
+    const t = tool as { description: string; parameters: unknown; execute: Function; };
     vercelTools[name] = {
       description: t.description,
-      inputSchema: t.parameters,  // AI SDK v6 uses inputSchema, not parameters
+      inputSchema: t.parameters, // AI SDK v6 uses inputSchema, not parameters
       execute: async (input: Record<string, unknown>) => {
         const cleanedInput = stripNullValues(input);
         return t.execute(cleanedInput);
@@ -209,7 +209,7 @@ async function getArcadeTools(userId: string) {
         limit: config.toolLimit,
       });
       return response.items;
-    })
+    }),
   );
 
   // Fetch individual tools
@@ -339,7 +339,7 @@ import {
   PromptInputFooter,
   PromptInputSubmit,
 } from "@/components/ai-elements/prompt-input";
-import { Loader } from "@/components/ai-elements/loader";
+import { Spinner } from "@/components/ui/spinner";
 
 // Component that handles Arcade's OAuth authorization flow
 function AuthPendingUI({
@@ -479,7 +479,7 @@ export default function Chat() {
                 <MessageContent>
                   {/* Show loader while assistant is thinking */}
                   {message.role === "assistant" && !textContent && !authPart && isLoading ? (
-                    <Loader />
+                    <Spinner />
                   ) : authPart ? (
                     // Show auth UI when Arcade needs authorization
                     (() => {
@@ -596,7 +596,7 @@ import { Arcade } from "@arcadeai/arcadejs";
 import {
   toZodToolSet,
   executeOrAuthorizeZodTool,
-} from "@arcadeai/arcadejs/lib";
+} from "@arcadeai/arcadejs/lib/index";
 
 const config = {
   mcpServers: ["Slack"],
@@ -633,7 +633,7 @@ function toVercelTools(arcadeTools: Record<string, unknown>): Record<string, unk
     const t = tool as { description: string; parameters: unknown; execute: Function };
     vercelTools[name] = {
       description: t.description,
-      inputSchema: t.parameters,  // AI SDK v6 uses inputSchema, not parameters
+      inputSchema: t.parameters, // AI SDK v6 uses inputSchema, not parameters
       execute: async (input: Record<string, unknown>) => {
         const cleanedInput = stripNullValues(input);
         return t.execute(cleanedInput);
@@ -654,7 +654,7 @@ async function getArcadeTools(userId: string) {
         limit: config.toolLimit,
       });
       return response.items;
-    })
+    }),
   );
 
   const individualToolDefs = await Promise.all(
@@ -763,7 +763,7 @@ import {
   PromptInputFooter,
   PromptInputSubmit,
 } from "@/components/ai-elements/prompt-input";
-import { Loader } from "@/components/ai-elements/loader";
+import { Spinner } from "@/components/ui/spinner";
 
 // Component that handles Arcade's OAuth authorization flow
 function AuthPendingUI({
@@ -775,9 +775,7 @@ function AuthPendingUI({
   toolName: string;
   onAuthComplete: () => void;
 }) {
-  const [status, setStatus] = useState<"initial" | "waiting" | "completed">(
-    "initial"
-  );
+  const [status, setStatus] = useState<"initial" | "waiting" | "completed">("initial");
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const hasCompletedRef = useRef(false);
@@ -893,7 +891,7 @@ export default function Chat() {
                 <MessageContent>
                   {/* Show loader while assistant is thinking */}
                   {message.role === "assistant" && !textContent && !authPart && isLoading ? (
-                    <Loader />
+                    <Spinner />
                   ) : authPart ? (
                     // Show auth UI when Arcade needs authorization
                     (() => {
@@ -945,7 +943,7 @@ export default function Chat() {
 }
 ```
 
-Last updated on February 10, 2026
+Last updated on February 11, 2026
 
 [Setup Arcade with OpenAI Agents SDK](/en/get-started/agent-frameworks/openai-agents/use-arcade-with-openai-agents.md)
 [Overview](/en/get-started/mcp-clients.md)

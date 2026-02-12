@@ -49,9 +49,9 @@ Example output:
 PLAINTEXT
 
 ```
-PASSED Get weather for city -- Score: 1.00
-WARNED Send message with typo -- Score: 0.85
-FAILED Wrong tool selected -- Score: 0.50
+PASSED Get weather for city -- Score: 100.00%
+WARNED Send message with typo -- Score: 85.00%
+FAILED Wrong tool selected -- Score: 50.00%
 ```
 
 ## Next steps
@@ -81,7 +81,7 @@ Test the same cases against different  sources (tracks) with isolated registries
 
 Save results in multiple formats (txt, md, html, json) for reporting and analysis. Specify output files with extensions or use no extension for all formats. [Learn more →](/guides/create-tools/evaluate-tools/run-evaluations.md#output-formats)
 
-Last updated on February 10, 2026
+Last updated on February 11, 2026
 
 [Overview](/en/guides/create-tools/evaluate-tools.md)
 [Create an evaluation suite](/en/guides/create-tools/evaluate-tools/create-evaluation-suite.md)

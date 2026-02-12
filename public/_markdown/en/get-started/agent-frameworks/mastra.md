@@ -112,7 +112,7 @@ import { Arcade } from "@arcadeai/arcadejs";
 import {
   toZodToolSet,
   executeOrAuthorizeZodTool,
-} from "@arcadeai/arcadejs/lib";
+} from "@arcadeai/arcadejs/lib/index";
 
 const config = {
   // Get all tools from these MCP servers
@@ -620,7 +620,7 @@ import { Arcade } from "@arcadeai/arcadejs";
 import {
   toZodToolSet,
   executeOrAuthorizeZodTool,
-} from "@arcadeai/arcadejs/lib";
+} from "@arcadeai/arcadejs/lib/index";
 
 const config = {
   mcpServers: ["Slack"],
@@ -960,7 +960,7 @@ emailDigestWorkflow.commit();
 export { emailDigestWorkflow };
 ```
 
-Last updated on February 10, 2026
+Last updated on February 11, 2026
 
-[Authorizing existing tools](/en/get-started/agent-frameworks/langchain/auth-langchain-tools.md)
+[Authorizing Existing Tools](/en/get-started/agent-frameworks/langchain/auth-langchain-tools.md)
 [Overview](/en/get-started/agent-frameworks/openai-agents/overview.md)

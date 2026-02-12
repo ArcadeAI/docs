@@ -19,14 +19,14 @@ Comparative evaluations let you test how well AI models select and use tools fro
 **Common use cases:**
 
 -   **Compare  providers**: Test Google Weather vs OpenWeather API
--   **Implementation comparison**: Test different  servers offering similar functionality
+-   **Implementation comparison**: Test different  servers offering similar features
 -   **A/B testing**: Evaluate alternative  designs
 
 ### When to use comparative evaluations
 
 Use **comparative evaluations** when:
 
--   ✅ Testing multiple implementations of the same functionality
+-   ✅ Testing multiple implementations of the same feature
 -   ✅ Comparing different  providers
 -   ✅ Evaluating how models choose between different  sets
 
@@ -135,8 +135,8 @@ PLAINTEXT
 ```
 Suite: Weather API Comparison
   Case: get_current_weather
-    Track: Weather v1 -- Score: 1.00 -- PASSED
-    Track: Weather v2 -- Score: 1.00 -- PASSED
+    Track: Weather v1 -- Score: 100.00% -- PASSED
+    Track: Weather v2 -- Score: 100.00% -- PASSED
 ```
 
 ## Track registration
@@ -396,14 +396,14 @@ PLAINTEXT
 Suite: Search API Comparison
 
 Case: basic_search
-  Track: Google -- Score: 1.00 -- PASSED
-  Track: Bing -- Score: 1.00 -- PASSED
-  Track: DuckDuckGo -- Score: 1.00 -- PASSED
+  Track: Google -- Score: 100.00% -- PASSED
+  Track: Bing -- Score: 100.00% -- PASSED
+  Track: DuckDuckGo -- Score: 100.00% -- PASSED
 
 Case: search_with_filters
-  Track: Google -- Score: 1.00 -- PASSED
-  Track: Bing -- Score: 0.85 -- WARNED
-  Track: DuckDuckGo -- Score: 0.90 -- WARNED
+  Track: Google -- Score: 100.00% -- PASSED
+  Track: Bing -- Score: 85.00% -- WARNED
+  Track: DuckDuckGo -- Score: 90.00% -- WARNED
 ```
 
 ## Result structure
@@ -515,8 +515,10 @@ Output includes track names:
 Combine comparative tracks with multiple models:
 
 ```bash
-arcade evals . -p "openai:gpt-4o,gpt-4o-mini anthropic:claude-sonnet-4-5-20250929"
+arcade evals . -p openai:gpt-4o,gpt-4o-mini -p anthropic:claude-sonnet-4-5-20250929
 ```
+
+Multi-run flags (`--num-runs`, `--seed`, `--multi-run-pass-rule`) also work with comparative tracks. See [Run evaluations](/guides/create-tools/evaluate-tools/run-evaluations.md).
 
 Results show:
 
@@ -533,18 +535,18 @@ Suite: Weather API Comparison
 
 Model: gpt-4o
   Case: get_weather
-    Track: Weather v1 -- Score: 1.00 -- PASSED
-    Track: Weather v2 -- Score: 1.00 -- PASSED
+    Track: Weather v1 -- Score: 100.00% -- PASSED
+    Track: Weather v2 -- Score: 100.00% -- PASSED
 
 Model: gpt-4o-mini
   Case: get_weather
-    Track: Weather v1 -- Score: 0.90 -- WARNED
-    Track: Weather v2 -- Score: 0.95 -- PASSED
+    Track: Weather v1 -- Score: 90.00% -- WARNED
+    Track: Weather v2 -- Score: 95.00% -- PASSED
 
 Model: claude-sonnet-4-5-20250929
   Case: get_weather
-    Track: Weather v1 -- Score: 1.00 -- PASSED
-    Track: Weather v2 -- Score: 0.85 -- WARNED
+    Track: Weather v1 -- Score: 100.00% -- PASSED
+    Track: Weather v2 -- Score: 85.00% -- WARNED
 ```
 
 ## Best practices
@@ -755,7 +757,7 @@ suite.add_tool_catalog(catalog_v2, track="Python v2")
 -   [Run evaluations](/guides/create-tools/evaluate-tools/run-evaluations.md)
      with multiple models and tracks
 
-Last updated on February 10, 2026
+Last updated on February 11, 2026
 
 [Capture mode](/en/guides/create-tools/evaluate-tools/capture-mode.md)
 [Types of Tools](/en/guides/create-tools/improve/types-of-tools.md)

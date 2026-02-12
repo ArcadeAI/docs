@@ -23,6 +23,14 @@ const nextConfig: NextConfig = withLlmsTxt({
   withNextra({
     async redirects() {
       return [
+        // Google ADK tutorial consolidation - redirect old URL to new
+        {
+          source:
+            "/:locale/get-started/agent-frameworks/google-adk/use-arcade-tools",
+          destination:
+            "/:locale/get-started/agent-frameworks/google-adk/overview",
+          permanent: true,
+        },
         // Auto-added redirects for deleted pages
         {
           source: "/:locale/references/logic-extensions-api",
@@ -562,7 +570,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/home/google-adk/use-arcade-tools",
           destination:
-            "/:locale/get-started/agent-frameworks/google-adk/use-arcade-tools",
+            "/:locale/get-started/agent-frameworks/google-adk/setup-python",
           permanent: true,
         },
         {
@@ -656,6 +664,17 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/home/vercelai/using-arcade-tools",
           destination: "/:locale/get-started/agent-frameworks/vercelai",
+          permanent: true,
+        },
+        // Legacy /integrations path
+        {
+          source: "/:locale/integrations",
+          destination: "/:locale/resources/integrations",
+          permanent: true,
+        },
+        {
+          source: "/:locale/integrations/:path*",
+          destination: "/:locale/resources/integrations/:path*",
           permanent: true,
         },
         // MCP servers to integrations
@@ -764,7 +783,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/guides/agent-frameworks/google-adk/python",
           destination:
-            "/:locale/get-started/agent-frameworks/google-adk/use-arcade-tools",
+            "/:locale/get-started/agent-frameworks/google-adk/setup-python",
           permanent: true,
         },
         {

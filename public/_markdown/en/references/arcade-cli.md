@@ -66,7 +66,7 @@ pip install arcade-mcp
  Pro tip: use --help after any command to see command-specific options.
 ```
 
-You can learn more about any of the commands by running `arcade <command> --help`, e.g. `arcade new --help`.
+You can learn more about any of the commands by running `arcade <command> --help`, for example, `arcade new --help`.
 
 ## `arcade login`
 
@@ -252,28 +252,22 @@ You can learn more about any of the commands by running `arcade <command> --help
 │                               [default: .]                               │
 ╰──────────────────────────────────────────────────────────────────────────╯
 ╭─ Options ────────────────────────────────────────────────────────────────╮
-│ --details           -d                Show detailed results              │
-│ --max-concurrent    -c      INTEGER   Maximum number of concurrent       │
-│                                       evaluations (default: 1)           │
-│                                       [default: 1]                       │
-│ --models            -m      TEXT      The models to use for evaluation   │
-│                                       (default: gpt-4o). Use commas to   │
-│                                       separate multiple models. All      │
-│                                       models must belong to the same     │
-│                                       provider.                          │
-│                                       [default: gpt-4o]                  │
-│ --provider          -p      [openai]  The provider of the models to use  │
-│                                       for evaluation.                    │
-│                                       [default: openai]                  │
-│ --provider-api-key  -k      TEXT      The model provider API key. If not │
-│                                       provided, will look for the        │
-│                                       appropriate environment variable   │
-│                                       based on the provider (e.g.,       │
-│                                       OPENAI_API_KEY for openai          │
-│                                       provider), first in the current    │
-│                                       environment, then in the current   │
-│                                       working directory's .env file.     │
-│                                       [default: None]                    │
+│ --details              -d                Show detailed results            │
+│ --only-failed          -f                Show only failed cases           │
+│ --capture                                Record tool calls without scoring│
+│ --include-context                        Include conversation context     │
+│ --output               -o      TEXT      Output file(s) (repeatable)      │
+│ --use-provider          -p      TEXT      Provider and models (repeatable)│
+│ --api-key               -k      TEXT      Provider API key (repeatable)   │
+│ --max-concurrent        -c      INTEGER   Maximum number of concurrent    │
+│                                          evaluations (default: 1)         │
+│                                          [default: 1]                     │
+│ --num-runs              -n      INTEGER   Number of runs per case          │
+│                                          [default: 1]                     │
+│ --seed                         TEXT      Seed policy for OpenAI runs      │
+│                                          [default: constant]              │
+│ --multi-run-pass-rule           TEXT      Pass/warn aggregation rule       │
+│                                          [default: last]                  │
 │ --debug                               Show debug information             │
 │ --help              -h                Show this message and exit.        │
 ╰──────────────────────────────────────────────────────────────────────────╯
@@ -461,7 +455,7 @@ Usage: arcade secret [OPTIONS] COMMAND [ARGS]...
 ╰────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
-Last updated on February 10, 2026
+Last updated on February 11, 2026
 
 [Telemetry](/en/references/mcp/telemetry.md)
 [CLI Cheat Sheet](/en/references/cli-cheat-sheet.md)

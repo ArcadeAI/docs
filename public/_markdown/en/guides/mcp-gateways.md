@@ -76,7 +76,7 @@ See [Create via Dashboard](/guides/mcp-gateways/create-via-dashboard.md) for det
 -   [Browse available integrations](/resources/integrations.md)
      to see what  you can add to your gateway
 
-Last updated on February 10, 2026
+Last updated on February 11, 2026
 
 [Build Your Own](/en/guides/contextual-access/build-your-own.md)
 [Add remote MCP servers](/en/guides/mcp-gateways/add-remote-servers.md)

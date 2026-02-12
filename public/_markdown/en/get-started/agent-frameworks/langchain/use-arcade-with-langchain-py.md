@@ -3,7 +3,8 @@ title: "Setup Arcade with LangChain"
 description: "Learn how to use Arcade tools in LangChain agents"
 ---
 [Agent Frameworks](/en/get-started/agent-frameworks.md)
-LangChainSetup Arcade with LangChain (Python)
+[LangChain](/en/get-started/agent-frameworks/langchain/overview.md)
+Setup (Python)
 
 # Setup Arcade with LangChain
 
@@ -856,7 +857,7 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-Last updated on February 10, 2026
+Last updated on February 11, 2026
 
-[Setup Arcade with Google ADK (Python)](/en/get-started/agent-frameworks/google-adk/use-arcade-tools.md)
-[Setup Arcade with LangChain (TypeScript)](/en/get-started/agent-frameworks/langchain/use-arcade-with-langchain-ts.md)
+[Overview](/en/get-started/agent-frameworks/langchain/overview.md)
+[Setup (TypeScript)](/en/get-started/agent-frameworks/langchain/use-arcade-with-langchain-ts.md)
