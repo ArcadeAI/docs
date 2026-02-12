@@ -115,7 +115,7 @@ See [How Hooks Work](/guides/logic-extensions/how-hooks-work.md) for details on 
 -   [API Reference](/references/logic-extensions-api.md)
      — Interactive schema documentation for the webhook contract
 
-Last updated on February 11, 2026
+Last updated on February 10, 2026
 
 [How Hooks Work](/en/guides/logic-extensions/how-hooks-work.md)
 [Build Your Own](/en/guides/logic-extensions/build-your-own.md)

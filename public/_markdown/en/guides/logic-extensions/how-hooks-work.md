@@ -154,7 +154,7 @@ You configure extensions and hook points from the **Arcade Dashboard**:
 -   [API Reference](/references/logic-extensions-api.md)
      — Interactive schema documentation for the webhook contract
 
-Last updated on February 11, 2026
+Last updated on February 10, 2026
 
 [Logic Extensions](/en/guides/logic-extensions.md)
 [Running an Extension](/en/guides/logic-extensions/examples.md)

@@ -21,6 +21,8 @@ You deploy a webhook server that implements the Logic Extensions contract, then 
 
 The Engine defines three hook points in the  execution flow. At each point you configure, the Engine calls out to your webhook server and acts on the response:
 
+![Logic Extensions Flow Diagram](/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fflow_diagram.60cf61a4.png&w=3840&q=75)
+
 Hook point
 
 When it runs
@@ -52,7 +54,7 @@ Allow, deny, or modify the output
 [Build Your Own](/guides/logic-extensions/build-your-own.md)
 [API Reference](/references/logic-extensions-api.md)
 
-Last updated on February 11, 2026
+Last updated on February 10, 2026
 
 [Arcade Registry Early Access](/en/resources/registry-early-access.md)
 [How Hooks Work](/en/guides/logic-extensions/how-hooks-work.md)

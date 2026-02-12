@@ -336,7 +336,7 @@ Configure the auth method when creating your extension in the Dashboard.
 -   [How Hooks Work](/guides/logic-extensions/how-hooks-work.md)
      — Understand execution order, phases, and failure modes
 
-Last updated on February 11, 2026
+Last updated on February 10, 2026
 
 [Running an Extension](/en/guides/logic-extensions/examples.md)
 [MCP Gateways](/en/guides/mcp-gateways.md)
