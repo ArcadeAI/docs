@@ -86,7 +86,7 @@ def send_dm_to_user(
     return "DM sent successfully"
 ```
 
-Last updated on February 11, 2026
+Last updated on February 10, 2026
 
 [Overview](/en/guides/create-tools/error-handling.md)
 [Provide Useful Tool Errors](/en/guides/create-tools/error-handling/useful-tool-errors.md)

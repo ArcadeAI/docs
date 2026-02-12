@@ -19,7 +19,7 @@ You connect your own access-control, compliance, or transformation logic to the 
 
 ## How it works
 
-Contextual access is powered by **Logic Extensions** — webhook servers you deploy that implement a simple contract. The  calls your server at three predefined hook points in the  lifecycle:
+Contextual access is powered by **Logic Extensions**, a framework that allows you to hook in and add logic directly to Arcade’s execution flow. Arcade calls your server at three predefined hook points in the  lifecycle:
 
 ![Contextual Access Flow Diagram](/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fflow_diagram.60cf61a4.png&w=3840&q=75)
 
@@ -39,7 +39,7 @@ Allow or deny tools the user can see
 
 Before each tool execution
 
-Allow, deny, or modify inputs and secrets
+Allow, deny, or modify inputs
 
 **Post-Execution Hook**
 
@@ -47,14 +47,14 @@ After tool execution
 
 Allow, deny, or modify the output
 
-You only implement the hooks you need. Configure everything through the Arcade Dashboard.
+You only implement the hooks you need. Configure everything through the Dashboard.
 
 ## Get started
 
 [How Hooks Work](/guides/contextual-access/how-hooks-work.md)
 [Run an Extension](/guides/contextual-access/examples.md)
 [Build Your Own](/guides/contextual-access/build-your-own.md)
-[API Reference](/references/logic-extensions-api.md)
+[API Reference](/references/contextual-access-webhook-api.md)
 
 Last updated on February 10, 2026
 

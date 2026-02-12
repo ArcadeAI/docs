@@ -1,17 +1,17 @@
 ---
 title: "How Hooks Work"
-description: "Understand hook points, execution order, extensions, failure modes, and how the Engine calls your webhook server"
+description: "Understand hook points, execution order, extensions, failure modes, and how the Arcade calls your webhook server"
 ---
 [Contextual Access](/en/guides/contextual-access.md)
 How Hooks Work
 
 # How Hooks Work
 
-This page explains how the Arcade Engine invokes your external logic at each stage of  execution, how you configure extensions and hook points, and how the Engine handles ordering and failures.
+This page explains how Arcade invokes your external logic at each stage of  execution, how you configure extensions and hook points, and how ordering and failures are handled.
 
 ## Hook points
 
-The Engine defines three hook points. You do not create new ones — you configure behavior at the ones that exist:
+Arcade defines three hook points. You do not create new ones, you configure behavior at the ones that exist:
 
 Hook point
 
@@ -41,7 +41,7 @@ You only need to implement the hook points you care about. If you only need post
 
 ## Extensions
 
-An **extension** is the connection between the Engine and your webhook server. It stores:
+A Webhook **extension** is the connection between Arcade and your webhook server. It stores:
 
 -   **Endpoint URLs** for each hook point you implement (access, pre-execution, post-execution)
 -   **Authentication** method (Bearer token or mTLS)
@@ -79,21 +79,20 @@ A **hook configuration** attaches an extension to a specific hook point and cont
 -   **Phase** — `before` or `after` (organization hooks only; see execution order below)
 -   **Priority** — Order within the same phase and extension scope (lower number = runs first)
 -   **Failure mode** — What happens when the webhook is unreachable
--   ** filter** — Optional include/exclude patterns to limit which tools trigger this hook
 
 You can have multiple configurations on the same hook point (e.g. an organization access check and a \-level access check). They all run in a defined order.
 
 ## Execution order
 
-Hooks at both organization and  scope run — there is no override. The Engine executes them in this fixed order:
+Hooks at both organization and  scope run together. Arcade executes them in this fixed order:
 
 1.  **Organization before** — Organization-scoped hook configs with phase `before`, ordered by priority
 2.   — Project-scoped hook configs, ordered by priority
 3.  **Organization after** — Organization-scoped hook configs with phase `after`, ordered by priority
 
-Organization hooks have a **phase** setting (`before` or `after`) that controls whether they run before or after  hooks. Project hooks always run in the middle — they do not have a phase setting.
+Organization hooks have a **phase** setting (`before` or `after`) that controls whether they run before or after  hooks. Project hooks always run in the middle and do not have a phase setting.
 
-Within each group, lower priority numbers run first. Each hook sees the accumulated result from all previous hooks (e.g. modified inputs from an earlier hook). **Any denial stops the entire pipeline** — the operation fails immediately.
+Within each group, lower priority numbers run first. Each hook sees the accumulated result from all previous hooks (e.g. modified inputs from an earlier hook). **Any denial stops the entire pipeline** and the operation fails immediately.
 
 Goal
 
@@ -121,7 +120,7 @@ No phase needed
 
 ## Failure modes
 
-When your webhook is unreachable (timeout, 5xx, connection error), the Engine applies the hook’s failure mode:
+When your webhook is unreachable (timeout, 5xx, connection error, etc), Arcade applies the hook’s failure mode:
 
 Mode
 
@@ -141,9 +140,8 @@ Set the failure mode per hook configuration. Timeout can be overridden per hook;
 
 You configure extensions and hook points from the **Arcade Dashboard**:
 
-1.  **Create an extension** — Navigate to **Logic Extensions**, click **Create Extension**, fill in endpoint URLs, auth, scope, and timeout/retry settings.
+1.  **Create an extension** — Navigate to **Contextual Access**, click **Create Extension**, fill in endpoint URLs, auth, scope, and timeout/retry settings.
 2.  **Create a hook configuration** — Navigate to **Logic Extensions → Hook Points**, click **Create Hook Configuration**, select the extension, hook point, phase, priority, and failure mode.
-3.  **Test connectivity** — Open your extension and click **Test Connection** to verify the Engine can reach your server before going live.
 
 ## Next steps
 
@@ -151,7 +149,7 @@ You configure extensions and hook points from the **Arcade Dashboard**:
      — Try the open-source example servers
 -   [Build your own](/guides/contextual-access/build-your-own.md)
      — Implement the webhook contract from the OpenAPI spec
--   [API Reference](/references/logic-extensions-api.md)
+-   [API Reference](/references/contextual-access-webhook-api.md)
      — Interactive schema documentation for the webhook contract
 
 Last updated on February 10, 2026
