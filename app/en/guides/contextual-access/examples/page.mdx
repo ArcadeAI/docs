@@ -1,21 +1,21 @@
 ---
-title: "Running an Extension"
-description: "Run open-source example webhook servers to get started with Logic Extensions"
+title: "Running a Server"
+description: "Run open-source example webhook servers to get started with Contextual Access"
 ---
 
-# Running an Extension
+# Running an Server
 
-The fastest way to get started with Logic Extensions is to run one of the open-source example servers. These are production-quality Go implementations you can use as-is or as a starting point for your own server.
+The fastest way to get started with Contextual Access is to run one of the open-source example servers. These are example Go implementations you can use as-is or as a starting point for your own server.
 
 ## Example servers
 
-The [ArcadeAI/logic-extensions-examples](https://github.com/ArcadeAI/logic-extensions-examples) repository contains runnable servers that implement the Logic Extensions webhook contract.
+The [ArcadeAI/logic-extensions-examples](https://github.com/ArcadeAI/logic-extensions-examples) repository contains runnable servers that implement the Contextual Access webhook contract.
 
 ### Advanced Server (full-featured)
 
 A single server that demonstrates access control, PII redaction, A/B testing, and includes a browser-based dashboard for configuration.
 
-- **Location:** [examples/advanced_server/](https://github.com/ArcadeAI/logic-extensions-examples/tree/main/examples/advanced_server)
+- **Location:** [examples/contextual_access/advanced_server/](https://github.com/ArcadeAI/logic-extensions-examples/tree/main/examples/contextual_access/advanced_server)
 - **Features:** Access rules, PII redaction, A/B testing, web UI
 - **Hook points:** Access, Pre-Execution, Post-Execution
 
@@ -25,11 +25,11 @@ Minimal servers, each demonstrating one capability:
 
 | Example | Description | Hook points |
 | --- | --- | --- |
-| **[user_blocking](https://github.com/ArcadeAI/logic-extensions-examples/tree/main/examples/user_blocking)** | Block specific users from tools | Access, Pre |
-| **[content_filter](https://github.com/ArcadeAI/logic-extensions-examples/tree/main/examples/content_filter)** | Filter or block based on content | Access, Pre, Post |
-| **[pii_redactor](https://github.com/ArcadeAI/logic-extensions-examples/tree/main/examples/pii_redactor)** | Detect and redact PII in tool outputs | Post |
-| **[ab_testing](https://github.com/ArcadeAI/logic-extensions-examples/tree/main/examples/ab_testing)** | A/B and canary test tool versions | Pre |
-| **[basic_rules](https://github.com/ArcadeAI/logic-extensions-examples/tree/main/examples/basic_rules)** | Configurable rules for all hooks (YAML/config) | Access, Pre, Post |
+| **[user_blocking](https://github.com/ArcadeAI/logic-extensions-examples/tree/main/examples/contextual_access/user_blocking)** | Block specific users from tools | Access, Pre |
+| **[content_filter](https://github.com/ArcadeAI/logic-extensions-examples/tree/main/examples/contextual_access/content_filter)** | Filter or block based on content | Access, Pre, Post |
+| **[pii_redactor](https://github.com/ArcadeAI/logic-extensions-examples/tree/main/examples/contextual_access/pii_redactor)** | Detect and redact PII in tool outputs | Post |
+| **[ab_testing](https://github.com/ArcadeAI/logic-extensions-examples/tree/main/examples/contextual_access/ab_testing)** | A/B and canary test tool versions | Pre |
+| **[basic_rules](https://github.com/ArcadeAI/logic-extensions-examples/tree/main/examples/contextual_access/basic_rules)** | Configurable rules for all hooks (YAML/config) | Access, Pre, Post |
 
 ## Quick start
 
@@ -37,32 +37,32 @@ Clone the repo and run a server:
 
 ```bash
 git clone https://github.com/ArcadeAI/logic-extensions-examples.git
-cd logic-extensions-examples
+cd logic-extensions-examples/
 ```
 
 **Advanced server (with web dashboard):**
 
 ```bash
-go run ./examples/advanced_server -config ./examples/advanced_server/example-config.yaml
+go run ./examples/contextual_access/advanced_server -config ./examples/advanced_server/example-config.yaml
 ```
 
 **Focused examples:**
 
 ```bash
 # PII redactor (post-hook only)
-go run ./examples/pii_redactor -types "email,ssn,credit_card"
+go run ./examples/contextual_access/pii_redactor -types "email,ssn,credit_card"
 
 # User blocking (access + pre)
-go run ./examples/user_blocking -block "user1,user2"
+go run ./examples/contextual_access/user_blocking -block "user1,user2"
 
 # Content filter (access, pre, post)
-go run ./examples/content_filter -config ./examples/content_filter/example-config.yaml
+go run ./examples/contextual_access/content_filter -config ./examples/content_filter/example-config.yaml
 
 # A/B testing (pre-hook)
-go run ./examples/ab_testing -config ./examples/ab_testing/example-config.yaml
+go run ./examples/contextual_access/ab_testing -config ./examples/ab_testing/example-config.yaml
 
 # Basic rules (all hooks, configurable via YAML)
-go run ./examples/basic_rules -config ./examples/basic_rules/example-config.yaml
+go run ./examples/contextual_access/basic_rules -config ./examples/basic_rules/example-config.yaml
 ```
 
 Each server exposes `GET /health`, `POST /access`, `POST /pre`, and `POST /post` (or a subset, depending on which hook points it implements).
@@ -71,7 +71,7 @@ Each server exposes `GET /health`, `POST /access`, `POST /pre`, and `POST /post`
 
 Once your server is running:
 
-1. Open the **Arcade Dashboard** and navigate to **Logic Extensions**
+1. Open the **Arcade Dashboard** and navigate to **Contextual Access**
 2. Click **Create Extension** and enter your server's base URL and endpoint paths
 4. Create **hook configurations** to attach the extension to the hook points you want
 
@@ -80,4 +80,4 @@ See [How Hooks Work](/guides/contextual-access/how-hooks-work) for details on co
 ## Next steps
 
 - [Build your own](/guides/contextual-access/build-your-own) — Implement the webhook contract in any language
-- [API Reference](/references/logic-extensions-api) — Interactive schema documentation for the webhook contract
+- [API Reference](/references/contextual-access-webhook-api) — Interactive schema documentation for the webhook contract

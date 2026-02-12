@@ -19,8 +19,8 @@ export const meta: MetaRecord = {
   "cli-cheat-sheet": {
     title: "CLI Cheat Sheet",
   },
-  "logic-extensions-api": {
-    title: "Logic Extensions API",
+  "contextual-access-webhook-api": {
+    title: "Contextual Access Webhook API",
   },
   "auth-providers": {
     title: "Auth Providers",

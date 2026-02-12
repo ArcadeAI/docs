@@ -25,6 +25,12 @@ const nextConfig: NextConfig = withLlmsTxt({
       return [
         // Auto-added redirects for deleted pages
         {
+          source: "/:locale/references/logic-extensions-api",
+          destination: "/:locale/references/contextual-access-webhook-api",
+          permanent: true,
+        },
+        // Auto-added redirects for deleted pages
+        {
           source: "/:locale/guides/logic-extensions",
           destination: "/:locale/guides/contextual-access",
           permanent: true,
