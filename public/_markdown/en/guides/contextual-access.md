@@ -56,7 +56,7 @@ You only implement the hooks you need. Configure everything through the Dashboar
 [Build Your Own](/guides/contextual-access/build-your-own.md)
 [API Reference](/references/contextual-access-webhook-api.md)
 
-Last updated on January 5, 2026
+Last updated on February 10, 2026
 
 [Arcade Registry Early Access](/en/resources/registry-early-access.md)
 [How Hooks Work](/en/guides/contextual-access/how-hooks-work.md)
