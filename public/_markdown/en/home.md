@@ -34,7 +34,7 @@ Pre-built MCP servers ready to use with your agents.
 [![Slack](/_next/image?url=%2Fimages%2Ficons%2Fslack.png&w=64&q=75) Slack](/resources/integrations/social-communication/slack.md)
 [![Google Docs](/_next/image?url=%2Fimages%2Ficons%2Fgoogle_docs.png&w=64&q=75) Google Docs](/resources/integrations/productivity/google-docs.md)
 [![Google Slides](/_next/image?url=%2Fimages%2Ficons%2Fgoogle_slides.png&w=64&q=75) Google Slides](/resources/integrations/productivity/google-slides.md)
-[![HubSpot](/_next/image?url=%2Fimages%2Ficons%2Fhubspot.png&w=64&q=75) HubSpot](/resources/integrations/crm/hubspot.md)
+[![HubSpot](/_next/image?url=%2Fimages%2Ficons%2Fhubspot.png&w=64&q=75) HubSpot](/resources/integrations/sales/hubspot.md)
 [![Linear](/images/icons/linear.svg) Linear](/resources/integrations/productivity/linear.md)
 [![Google Drive](/_next/image?url=%2Fimages%2Ficons%2Fgoogle_drive.png&w=64&q=75) Google Drive](/resources/integrations/productivity/google-drive.md)
 
