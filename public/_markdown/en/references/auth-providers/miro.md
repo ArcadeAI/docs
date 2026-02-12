@@ -266,7 +266,7 @@ Miro supports various OAuth scopes that determine the level of access your appli
 
 For a complete list of available scopes, refer to the [Miro Scopes documentation](https://developers.miro.com/docs/scopes) .
 
-Last updated on February 12, 2026
+Last updated on February 10, 2026
 
 [Microsoft](/en/references/auth-providers/microsoft.md)
 [Notion](/en/references/auth-providers/notion.md)

@@ -56,7 +56,7 @@ You only implement the hooks you need. Configure everything through the Arcade D
 [Build Your Own](/guides/contextual-access/build-your-own.md)
 [API Reference](/references/logic-extensions-api.md)
 
-Last updated on February 12, 2026
+Last updated on February 10, 2026
 
 [Arcade Registry Early Access](/en/resources/registry-early-access.md)
 [How Hooks Work](/en/guides/contextual-access/how-hooks-work.md)

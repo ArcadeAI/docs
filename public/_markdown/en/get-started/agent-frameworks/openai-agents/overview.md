@@ -30,7 +30,7 @@ With Arcade and OpenAI , your agents can:
 
 Browse the [full MCP server catalog](/resources/integrations.md) to see all available .
 
-Last updated on February 12, 2026
+Last updated on February 10, 2026
 
 [Mastra](/en/get-started/agent-frameworks/mastra.md)
 [Setup (Python)](/en/get-started/agent-frameworks/openai-agents/setup-python.md)

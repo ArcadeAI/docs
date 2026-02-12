@@ -23,7 +23,7 @@ These guides are for developers building AI applications who need to connect Arc
 [![Mastra logo](/images/icons/mastra.svg) Mastra Agent Framework](/guides/agent-frameworks/mastra/overview.md)
 [![Vercel AI logo](/images/icons/vercel.svg) Vercel AI Agent Framework](/guides/agent-frameworks/vercelai.md)
 
-Last updated on February 12, 2026
+Last updated on February 10, 2026
 
 [Build an MCP server for custom tools](/en/get-started/quickstarts/mcp-server-quickstart.md)
 [Setup Arcade with your LLM (Python)](/en/get-started/agent-frameworks/setup-arcade-with-your-llm-python.md)

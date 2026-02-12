@@ -18,7 +18,7 @@ Building custom applications with Arcade tools requires understanding how to man
 -   [Get formatted tool definitions](/guides/tool-calling/custom-apps/get-tool-definitions.md)
 
 
-Last updated on February 12, 2026
+Last updated on February 10, 2026
 
 [Call third-party APIs](/en/guides/tool-calling/call-third-party-apis.md)
 [Authorize tool calling](/en/guides/tool-calling/custom-apps/auth-tool-calling.md)

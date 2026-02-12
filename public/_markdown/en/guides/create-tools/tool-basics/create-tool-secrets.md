@@ -249,7 +249,7 @@ For HTTP transport, view your server’s API docs at [http://127.0.0.1:8000/docs
 
 For security reasons, Local HTTP servers do not currently support tool-level authorization and secrets. If you need to use tool-level authorization or secrets locally, you should use the stdio transport and configure the Arcade API key and secrets in your  connection settings. Otherwise, if you intend to expose your HTTP  to the public internet with \-level authorization and secrets, please follow the [deploying to the cloud with Arcade Deploy](/guides/deployment-hosting/arcade-deploy.md) guide or the [on-prem MCP server](/guides/deployment-hosting/on-prem.md) guide for secure remote deployment.
 
-Last updated on February 12, 2026
+Last updated on February 10, 2026
 
 [Create a tool with auth](/en/guides/create-tools/tool-basics/create-tool-auth.md)
 [Access runtime data](/en/guides/create-tools/tool-basics/runtime-data-access.md)

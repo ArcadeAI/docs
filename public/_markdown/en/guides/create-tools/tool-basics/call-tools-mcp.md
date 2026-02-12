@@ -240,7 +240,7 @@ Then, your  client’s configuration file should look like this:
 
 For security reasons, Local HTTP servers do not currently support managed authorization and secrets. If you need to use authorization or secrets, you should use the stdio transport and configure the Arcade API key and secrets in your  connection settings. If you intend to expose your HTTP  to the public internet, please follow the [on-prem MCP server](/guides/deployment-hosting/on-prem.md) guide for secure remote deployment.
 
-Last updated on February 12, 2026
+Last updated on February 10, 2026
 
 [Access runtime data](/en/guides/create-tools/tool-basics/runtime-data-access.md)
 [Organize your MCP server and tools](/en/guides/create-tools/tool-basics/organize-mcp-tools.md)

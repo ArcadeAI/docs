@@ -157,7 +157,7 @@ async def get_my_workspaces(context: ToolContext) -> dict:
             }
 ```
 
-Last updated on February 12, 2026
+Last updated on February 10, 2026
 
 [Calendly](/en/references/auth-providers/calendly.md)
 [Discord](/en/references/auth-providers/discord.md)

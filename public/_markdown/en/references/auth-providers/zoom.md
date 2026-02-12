@@ -166,6 +166,6 @@ async def list_upcoming_meetings(
         return response.json()
 ```
 
-Last updated on February 12, 2026
+Last updated on February 10, 2026
 
 [Zoho](/en/references/auth-providers/zoho.md)
