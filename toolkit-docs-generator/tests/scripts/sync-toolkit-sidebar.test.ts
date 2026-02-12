@@ -532,3 +532,131 @@ describe("syncToolkitSidebar", () => {
     });
   });
 });
+
+// ============================================================================
+// Category move / cleanup logic
+// ============================================================================
+
+describe("category move cleanup logic", () => {
+  it("toolkit moved to a new category is removed from the old one", () => {
+    // Simulate: Pylon was in "others", now design system says "development"
+    const toolkits: ToolkitInfo[] = [
+      {
+        id: "Pylon",
+        slug: "pylon",
+        label: "Pylon",
+        category: "development",
+        navGroup: "optimized",
+      },
+      {
+        id: "Github",
+        slug: "github",
+        label: "GitHub",
+        category: "development",
+        navGroup: "optimized",
+      },
+    ];
+
+    const grouped = groupByCategory(toolkits);
+    const activeCategories = Array.from(grouped.keys());
+
+    // "others" is no longer an active category
+    expect(activeCategories).not.toContain("others");
+    expect(activeCategories).toContain("development");
+
+    // The development category contains Pylon
+    const devToolkits = grouped.get("development");
+    expect(devToolkits?.some((t) => t.id === "Pylon")).toBe(true);
+  });
+
+  it("old category directory is identified for removal when empty", () => {
+    const toolkits: ToolkitInfo[] = [
+      {
+        id: "Pylon",
+        slug: "pylon",
+        label: "Pylon",
+        category: "development",
+        navGroup: "optimized",
+      },
+    ];
+
+    const grouped = groupByCategory(toolkits);
+    const activeCategories = Array.from(grouped.keys());
+
+    // Simulate existing directories on disk
+    const existingDirs = ["development", "others", "productivity"];
+
+    // Directories not in activeCategories should be removed
+    const toRemove = existingDirs.filter(
+      (dir) => !activeCategories.includes(dir)
+    );
+
+    expect(toRemove).toContain("others");
+    expect(toRemove).toContain("productivity");
+    expect(toRemove).not.toContain("development");
+  });
+
+  it("category with remaining toolkits is NOT removed when one toolkit moves out", () => {
+    // "others" still has CustomTool, even though Pylon moved to "development"
+    const toolkits: ToolkitInfo[] = [
+      {
+        id: "Pylon",
+        slug: "pylon",
+        label: "Pylon",
+        category: "development",
+        navGroup: "optimized",
+      },
+      {
+        id: "CustomTool",
+        slug: "custom-tool",
+        label: "Custom Tool",
+        category: "others",
+        navGroup: "optimized",
+      },
+    ];
+
+    const grouped = groupByCategory(toolkits);
+    const activeCategories = Array.from(grouped.keys());
+
+    expect(activeCategories).toContain("others");
+    expect(activeCategories).toContain("development");
+
+    // "others" still has one toolkit so it won't be pruned
+    expect(grouped.get("others")).toHaveLength(1);
+
+    // But Pylon is NOT in "others" anymore
+    const othersToolkits = grouped.get("others");
+    expect(othersToolkits?.some((t) => t.id === "Pylon")).toBe(false);
+  });
+
+  it("generateCategoryMeta only includes current toolkits (not stale ones)", () => {
+    // After Pylon moves, the "others" _meta.tsx should only contain remaining toolkits
+    const othersToolkits: ToolkitInfo[] = [
+      {
+        id: "CustomTool",
+        slug: "custom-tool",
+        label: "Custom Tool",
+        category: "others",
+        navGroup: "optimized",
+      },
+    ];
+
+    const meta = generateCategoryMeta(
+      othersToolkits,
+      "others",
+      "/en/resources/integrations"
+    );
+
+    expect(meta).toContain("custom-tool");
+    expect(meta).not.toContain("pylon");
+  });
+
+  it("main _meta.tsx excludes categories with zero toolkits", () => {
+    const activeCategories = ["development", "productivity"];
+    const mainMeta = generateMainMeta(activeCategories);
+
+    expect(mainMeta).toContain("development:");
+    expect(mainMeta).toContain("productivity:");
+    expect(mainMeta).not.toContain("others:");
+  });
+});

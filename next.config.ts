@@ -23,6 +23,12 @@ const nextConfig: NextConfig = withLlmsTxt({
   withNextra({
     async redirects() {
       return [
+        // "others" category removed — toolkits moved to proper categories
+        {
+          source: "/:locale/resources/integrations/others/:path*",
+          destination: "/:locale/resources/integrations",
+          permanent: false,
+        },
         // Auto-added redirects for deleted pages
         {
           source: "/:locale/resources/integrations/preview",
