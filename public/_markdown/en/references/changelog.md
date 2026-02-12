@@ -661,7 +661,7 @@ Self-hosed Arcade developers cannot be grandfathered into the old (insecure) beh
 -   `[feature - 🚀]` Launched status.arcade.dev for monitoring platform status ([link](https://status.arcade.dev)
      )
 
-Last updated on January 5, 2026
+Last updated on February 10, 2026
 
 [Overview](/en/references.md)
 [API](/en/references/api.md)
