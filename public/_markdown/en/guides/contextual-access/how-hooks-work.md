@@ -152,7 +152,7 @@ You configure extensions and hook points from the **Arcade Dashboard**:
 -   [API Reference](/references/contextual-access-webhook-api.md)
      — Interactive schema documentation for the webhook contract
 
-Last updated on February 10, 2026
+Last updated on January 30, 2026
 
 [Contextual Access](/en/guides/contextual-access.md)
 [Running an Extension](/en/guides/contextual-access/examples.md)

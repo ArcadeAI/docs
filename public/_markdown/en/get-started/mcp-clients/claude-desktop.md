@@ -62,7 +62,7 @@ In this configuration pane, you can configure which tools are available to Claud
 
 You can now open a new chat within Claude Desktop. Ensure that your connector is enabled, and the ask the  to use a !
 
-Last updated on February 10, 2026
+Last updated on January 30, 2026
 
 [Cursor](/en/get-started/mcp-clients/cursor.md)
 [Visual Studio Code](/en/get-started/mcp-clients/visual-studio-code.md)
