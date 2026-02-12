@@ -292,7 +292,7 @@ async def get_mailchimp_lists(
 
 For more details about Mailchimp’s authentication, refer to the [Mailchimp OAuth 2.0 documentation](https://mailchimp.com/developer/marketing/guides/access-user-data-oauth-2/) .
 
-Last updated on February 10, 2026
+Last updated on February 12, 2026
 
 [LinkedIn](/en/references/auth-providers/linkedin.md)
 [Microsoft](/en/references/auth-providers/microsoft.md)

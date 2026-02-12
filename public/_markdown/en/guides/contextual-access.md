@@ -6,20 +6,20 @@ Contextual AccessContextual Access
 
 # Contextual Access
 
-Agents have broad access to tools, but enterprises need fine-grained control. Arcade's contextual access lets you govern tool visibility and behavior at every stage of execution — who can see a tool, what inputs are allowed, and what comes back.
+ have broad access to tools, but enterprises need fine-grained control. Arcade’s contextual access lets you govern  visibility and behavior at every stage of execution — who can see a tool, what inputs are allowed, and what comes back.
 
-You connect your own access-control, compliance, or transformation logic to the Arcade Engine. Your rules run inline during tool execution with no changes to your tools or agents required.
+You connect your own access-control, compliance, or transformation logic to the Arcade Engine. Your rules run inline during  execution with no changes to your tools or  required.
 
 ## What you can do
 
--   **Control tool visibility** — Decide which tools each user can see based on role, team, entitlement, or any signal from your IDP
+-   **Control  visibility** — Decide which tools each  can see based on role, team, entitlement, or any signal from your IDP
 -   **Validate requests** — Enforce policies before execution (e.g., block certain domains, require org-scoped inputs)
 -   **Transform payloads** — Enrich inputs, inject secrets, redact PII from outputs, or filter content
--   **Audit every interaction** — Route all tool calls through your security and logging infrastructure
+-   **Audit every interaction** — Route all  calls through your security and logging infrastructure
 
 ## How it works
 
-Contextual access is powered by **Logic Extensions** — webhook servers you deploy that implement a simple contract. The Arcade Engine calls your server at three predefined hook points in the tool lifecycle:
+Contextual access is powered by **Logic Extensions** — webhook servers you deploy that implement a simple contract. The  calls your server at three predefined hook points in the  lifecycle:
 
 ![Contextual Access Flow Diagram](/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fflow_diagram.60cf61a4.png&w=3840&q=75)
 
@@ -56,7 +56,7 @@ You only implement the hooks you need. Configure everything through the Arcade D
 [Build Your Own](/guides/contextual-access/build-your-own.md)
 [API Reference](/references/logic-extensions-api.md)
 
-Last updated on February 11, 2026
+Last updated on February 12, 2026
 
 [Arcade Registry Early Access](/en/resources/registry-early-access.md)
 [How Hooks Work](/en/guides/contextual-access/how-hooks-work.md)

@@ -36,7 +36,7 @@ Learn more about adding front-door OAuth to your  server [here](/guides/security
 
 Coming soon, you will be able to secure your  server using Client ID Metadata Documents (CIMD) for authorization. Learn more about how MCP integrates with OAuth [here](https://blog.modelcontextprotocol.io/posts/client_registration/) .
 
-Last updated on February 10, 2026
+Last updated on February 12, 2026
 
 [Overview](/en/guides/security.md)
 [Secure your MCP server](/en/guides/security/secure-your-mcp-server.md)

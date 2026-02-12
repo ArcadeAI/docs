@@ -239,7 +239,7 @@ if __name__ == "__main__":
 python server.py
 ```
 
-Last updated on February 10, 2026
+Last updated on February 12, 2026
 
 [API](/en/references/api.md)
 [Transports](/en/references/mcp/python/transports.md)

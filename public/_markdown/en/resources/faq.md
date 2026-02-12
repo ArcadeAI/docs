@@ -151,7 +151,7 @@ Please go to the discussions page on GitHub. Someone else may have asked somethi
 
 [Get Answers on GitHub](https://github.com/ArcadeAI/arcade-ai/discussions)
 
-Last updated on February 10, 2026
+Last updated on February 12, 2026
 
 [Glossary](/en/resources/glossary.md)
 [Contact](/en/resources/contact-us.md)
