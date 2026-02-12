@@ -629,7 +629,7 @@ Ensure your evaluation files:
 -   Learn about [comparative evaluations](/guides/create-tools/evaluate-tools/comparative-evaluations.md)
      for comparing  sources
 
-Last updated on January 30, 2026
+Last updated on January 5, 2026
 
 [Create an evaluation suite](/en/guides/create-tools/evaluate-tools/create-evaluation-suite.md)
 [Capture mode](/en/guides/create-tools/evaluate-tools/capture-mode.md)

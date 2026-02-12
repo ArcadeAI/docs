@@ -960,7 +960,7 @@ emailDigestWorkflow.commit();
 export { emailDigestWorkflow };
 ```
 
-Last updated on January 30, 2026
+Last updated on January 5, 2026
 
 [Authorizing Existing Tools](/en/get-started/agent-frameworks/langchain/auth-langchain-tools.md)
 [Overview](/en/get-started/agent-frameworks/openai-agents/overview.md)

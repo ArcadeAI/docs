@@ -15,7 +15,7 @@ The OpenAPI 3.0 spec is also available to download for code generation:
 -   **GitHub:** [logic\_extensions/http/1.0/schema.yaml](https://github.com/ArcadeAI/schemas/blob/main/logic_extensions/http/1.0/schema.yaml)
      
 
-Last updated on January 30, 2026
+Last updated on January 5, 2026
 
 [CLI Cheat Sheet](/en/references/cli-cheat-sheet.md)
 [Overview](/en/references/auth-providers.md)

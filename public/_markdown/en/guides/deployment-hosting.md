@@ -57,7 +57,7 @@ The requirements for deploying Arcade on-premise are:
 -   Cert Manager for securing Redis and Postgres and public ingress (see below)
 -   Nginx Ingress for accessing Arcade.dev from outside the cluster (see below)
 
-Last updated on January 30, 2026
+Last updated on January 5, 2026
 
 [Secure Auth in Production](/en/guides/user-facing-agents/secure-auth-production.md)
 [Arcade Cloud](/en/guides/deployment-hosting/arcade-cloud.md)

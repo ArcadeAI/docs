@@ -452,7 +452,7 @@ AuthorizationServerEntry(
 -   **Use secrets securely**: [Create tools with secrets](/guides/create-tools/tool-basics/create-tool-secrets.md)
 
 
-Last updated on January 30, 2026
+Last updated on January 5, 2026
 
 [Securing Arcade MCP](/en/guides/security/securing-arcade-mcp.md)
 [Security research program](/en/guides/security/security-research-program.md)

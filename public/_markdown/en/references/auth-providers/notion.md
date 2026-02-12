@@ -161,7 +161,7 @@ async def search_page_by_title(
         return dict(response.json())
 ```
 
-Last updated on January 30, 2026
+Last updated on January 5, 2026
 
 [Miro](/en/references/auth-providers/miro.md)
 [PagerDuty](/en/references/auth-providers/pagerduty.md)

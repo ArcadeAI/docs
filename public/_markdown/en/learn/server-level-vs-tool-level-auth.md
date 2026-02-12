@@ -257,7 +257,7 @@ if __name__ == "__main__":
 -   **stdio doesn’t need Resource Server auth** - Local connections are already secure
 -   **Choose based on transport and requirements** - Different scenarios need different combinations
 
-Last updated on January 30, 2026
+Last updated on January 5, 2026
 
 [Build Your Own](/en/guides/logic-extensions/build-your-own.md)
 [Overview](/en/references.md)

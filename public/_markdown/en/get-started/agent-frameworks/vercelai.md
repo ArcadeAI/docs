@@ -943,7 +943,7 @@ export default function Chat() {
 }
 ```
 
-Last updated on January 30, 2026
+Last updated on January 5, 2026
 
 [Setup Arcade with OpenAI Agents SDK](/en/get-started/agent-frameworks/openai-agents/use-arcade-with-openai-agents.md)
 [Overview](/en/get-started/mcp-clients.md)

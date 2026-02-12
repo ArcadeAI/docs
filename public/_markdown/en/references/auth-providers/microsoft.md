@@ -204,7 +204,7 @@ async def get_file_contents(
         return response.json()
 ```
 
-Last updated on January 30, 2026
+Last updated on January 5, 2026
 
 [Mailchimp](/en/references/auth-providers/mailchimp.md)
 [Miro](/en/references/auth-providers/miro.md)

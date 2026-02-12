@@ -744,7 +744,7 @@ main().catch((err) => console.error(err));
 ```
 
 
-Last updated on January 30, 2026
+Last updated on January 5, 2026
 
 [Setup (Python)](/en/get-started/agent-frameworks/langchain/use-arcade-with-langchain-py.md)
 [Authorizing Existing Tools](/en/get-started/agent-frameworks/langchain/auth-langchain-tools.md)
