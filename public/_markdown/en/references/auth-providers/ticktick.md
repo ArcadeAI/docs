@@ -293,7 +293,7 @@ Authorization: Bearer {access_token}
 
 For detailed API documentation, including request/response formats and examples, visit the [TickTick API Reference](https://developer.ticktick.com/docs) .
 
-Last updated on February 10, 2026
+Last updated on February 11, 2026
 
 [Square](/en/references/auth-providers/square.md)
 [Twitch](/en/references/auth-providers/twitch.md)

@@ -91,6 +91,6 @@ See Arcade in action with these example applications.
 [FAQ](/resources/faq.md)
 [Changelog](/references/changelog.md)
 
-Last updated on February 10, 2026
+Last updated on February 11, 2026
 
 [About Arcade](/en/get-started/about-arcade.md)

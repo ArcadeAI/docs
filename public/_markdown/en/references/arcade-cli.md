@@ -455,7 +455,7 @@ Usage: arcade secret [OPTIONS] COMMAND [ARGS]...
 ╰────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
-Last updated on February 10, 2026
+Last updated on February 11, 2026
 
 [Telemetry](/en/references/mcp/telemetry.md)
 [CLI Cheat Sheet](/en/references/cli-cheat-sheet.md)

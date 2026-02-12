@@ -560,6 +560,11 @@ const nextConfig: NextConfig = withLlmsTxt({
           permanent: true,
         },
         {
+          source: "/:locale/home/mcp-clients/claude-code",
+          destination: "/:locale/get-started/mcp-clients/claude-code",
+          permanent: true,
+        },
+        {
           source: "/:locale/home/mcp-clients/cursor",
           destination: "/:locale/get-started/mcp-clients/cursor",
           permanent: true,

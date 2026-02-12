@@ -124,7 +124,7 @@ Remote servers must be reachable from Arcade and must support the Streamable HTT
 -   [Connect to MCP clients](/get-started/mcp-clients.md)
 
 
-Last updated on February 10, 2026
+Last updated on February 11, 2026
 
 [MCP Gateways](/en/guides/mcp-gateways.md)
 [Create via Dashboard](/en/guides/mcp-gateways/create-via-dashboard.md)
