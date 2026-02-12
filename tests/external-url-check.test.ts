@@ -22,10 +22,12 @@ const SKIP_PATTERNS: RegExp[] = [
   /api\.arcade\.dev/,
 
   // Private repo — returns 404 for unauthenticated requests
+  /github\.com\/ArcadeAI\/arcade-ai/, // biome-ignore: not a dupe
   /raw\.githubusercontent\.com\/ArcadeAI/,
 
   // Sites that block automated / bot requests
   /discord\.gg/,
+  /reddit\.com/,
   /platform\.openai\.com/,
   /support\.google\.com/,
   /developer\.squareup\.com/,
