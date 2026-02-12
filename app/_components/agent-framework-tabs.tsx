@@ -8,7 +8,7 @@ export function AgentFrameworkTabs() {
         <div className="mt-6 grid gap-3 sm:grid-cols-2 sm:gap-4 md:gap-5 lg:grid-cols-3">
           <PlatformCard
             icon="/images/icons/python.svg"
-            link="/guides/agent-frameworks/setup-arcade-with-your-llm-python"
+            link="/get-started/agent-frameworks/setup-arcade-with-your-llm-python"
             name="Vanilla Python"
             type="MCP Client"
           />
