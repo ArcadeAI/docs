@@ -71,7 +71,7 @@ This is similar to the pattern used in the generic OAuth2 provider, but instead 
 
 See the docs about [Authoring Tools](/guides/create-tools/tool-basics/build-mcp-server.md) for more information on how to create and serve a  Server.
 
-Last updated on January 5, 2026
+Last updated on February 10, 2026
 
 [Contextual Access Webhook API](/en/references/contextual-access-webhook-api.md)
 [OAuth 2.0](/en/references/auth-providers/oauth2.md)

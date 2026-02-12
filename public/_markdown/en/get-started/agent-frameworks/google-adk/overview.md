@@ -30,7 +30,7 @@ With Arcade and Google ADK, your  can:
 
 Browse the [full MCP server catalog](/resources/integrations.md) to see all available .
 
-Last updated on January 5, 2026
+Last updated on February 10, 2026
 
 [Custom auth flow](/en/get-started/agent-frameworks/crewai/custom-auth-flow.md)
 [Setup (Python)](/en/get-started/agent-frameworks/google-adk/setup-python.md)

@@ -198,7 +198,7 @@ uv run server.py http
 
 For HTTP transport, view your server’s API docs at [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) .
 
-Last updated on January 5, 2026
+Last updated on February 10, 2026
 
 [Call tools from MCP clients](/en/guides/create-tools/tool-basics/call-tools-mcp.md)
 [Overview](/en/guides/create-tools/evaluate-tools.md)

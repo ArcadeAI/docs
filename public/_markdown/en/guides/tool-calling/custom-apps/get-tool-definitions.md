@@ -260,7 +260,7 @@ if ("authorization_required" in result && result.authorization_required) {
 }
 ```
 
-Last updated on January 5, 2026
+Last updated on February 10, 2026
 
 [Check authorization status](/en/guides/tool-calling/custom-apps/check-auth-status.md)
 [Overview](/en/guides/create-tools/tool-basics.md)
