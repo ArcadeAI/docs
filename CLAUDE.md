@@ -34,7 +34,7 @@ pnpm vitest run tests/broken-link-check.test.ts
 - **`scripts/`** — Build/CI scripts (clean markdown export, Vale style fixes, redirect checking, pagefind indexing, i18n sync).
 - **`tests/`** — Vitest tests (broken links, internal link validation, sitemap, smoke tests).
 - **`lib/`** — Next.js utilities (glossary remark plugin, llmstxt plugin).
-- **`next.config.ts`** — Contains ~142 redirect rules.
+- **`next.config.ts`** — Contains ~138 redirect rules.
 
 ## Content Authoring
 
