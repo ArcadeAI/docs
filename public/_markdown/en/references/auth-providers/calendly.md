@@ -242,7 +242,7 @@ async def get_user_info(
 
 For more details about Calendly’s authentication, refer to the [Calendly Authentication documentation](https://developer.calendly.com/how-to-guides/authentication) .
 
-Last updated on February 11, 2026
+Last updated on February 10, 2026
 
 [Atlassian](/en/references/auth-providers/atlassian.md)
 [ClickUp](/en/references/auth-providers/clickup.md)
