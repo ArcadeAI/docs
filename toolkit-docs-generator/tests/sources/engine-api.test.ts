@@ -34,13 +34,13 @@ type ToolMetadataItem = {
     } | null;
   } | null;
   requirements?: {
-    authorization: {
+    authorization: Array<{
       id?: string | null;
       provider_id: string | null;
       provider_type: string | null;
       scopes: string[];
-    } | null;
-    secrets: Array<{ key: string }> | null;
+    }>;
+    secrets: Array<{ key: string }>;
   } | null;
 };
 
@@ -58,11 +58,13 @@ const createItems = (): ToolMetadataItem[] => [
     input: { parameters: [] },
     output: null,
     requirements: {
-      authorization: {
-        provider_id: "github",
-        provider_type: "oauth2",
-        scopes: ["repo"],
-      },
+      authorization: [
+        {
+          provider_id: "github",
+          provider_type: "oauth2",
+          scopes: ["repo"],
+        },
+      ],
       secrets: [{ key: "GITHUB_API_KEY" }],
     },
   },
@@ -82,12 +84,14 @@ const createItems = (): ToolMetadataItem[] => [
       value_schema: null,
     },
     requirements: {
-      authorization: {
-        provider_id: null,
-        provider_type: "oauth2",
-        scopes: ["chat:write"],
-      },
-      secrets: null,
+      authorization: [
+        {
+          provider_id: null,
+          provider_type: "oauth2",
+          scopes: ["chat:write"],
+        },
+      ],
+      secrets: [],
     },
   },
 ];
@@ -103,16 +107,18 @@ const createFetchStub =
     const limit = Number(url.searchParams.get("limit") ?? items.length);
     const offset = Number(url.searchParams.get("offset") ?? 0);
     const toolkit = url.searchParams.get("toolkit");
-    const providerId = url.searchParams.get("provider_id");
+    const authProvider = url.searchParams.get("auth_provider");
     const version = url.searchParams.get("version");
 
     let filtered = items;
     if (toolkit) {
       filtered = filtered.filter((item) => item.toolkit.name === toolkit);
     }
-    if (providerId) {
-      filtered = filtered.filter(
-        (item) => item.requirements?.authorization?.provider_id === providerId
+    if (authProvider) {
+      filtered = filtered.filter((item) =>
+        item.requirements?.authorization?.some(
+          (auth) => auth.provider_id === authProvider
+        )
       );
     }
     if (version) {
@@ -253,12 +259,12 @@ describe("EngineApiSource", () => {
     await source.fetchAllTools();
   });
 
-  it("forces include_all_versions when filtering by version", async () => {
+  it("sets latest_only=false when filtering by version", async () => {
     const source = new EngineApiSource({
       baseUrl: "https://api.arcade.dev",
       apiKey: "test",
       fetchFn: createInspectFetchStub((params) => {
-        expect(params.get("include_all_versions")).toBe("true");
+        expect(params.get("latest_only")).toBe("false");
         expect(params.get("version")).toBe("0.1.3");
       }),
     });
