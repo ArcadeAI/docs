@@ -2,27 +2,27 @@ import { Tabs, Callout, Steps } from "nextra/components";
 
 # Figma
 
-The Figma auth provider enables tools and agents to call [Figma APIs](https://developers.figma.com/docs/rest-api/) on behalf of a user using OAuth 2.0 authentication.
+Arcade's Figma auth provider enables tools and agents to call [Figma APIs](https://developers.figma.com/docs/rest-api/) on behalf of a user using OAuth 2.0 authentication.
 
 <Callout>
   Want to quickly get started with Figma in your agent or AI app? The pre-built
-  [Arcade Figma MCP Server](/resources/integrations/development/figma) is what you
-  want!
+  [Arcade Figma MCP server](/resources/integrations/development/figma) is what you
+  want.
 </Callout>
 
 ### What's documented here
 
 This page describes how to use and configure Figma auth with Arcade.
 
-This auth provider is used by:
+This auth provider uses:
 
-- The [Arcade Figma MCP Server](/resources/integrations/development/figma), which provides pre-built tools for interacting with Figma
+- The [Arcade Figma MCP server](/resources/integrations/development/figma), which provides pre-built tools for interacting with Figma
 - Your [app code](#using-figma-auth-in-app-code) that needs to call the Figma API
 - Or, your [custom tools](#using-figma-auth-in-custom-tools) that need to call the Figma API
 
-### Required scopes for the Figma MCP Server
+### Required scopes for the Figma MCP server
 
-If you're using the [Arcade Figma MCP Server](/resources/integrations/development/figma), you'll need to configure these scopes based on which tools you plan to use:
+If you're using the [Arcade Figma MCP server](/resources/integrations/development/figma), you'll need to configure these scopes based on which tools you plan to use:
 
 - `file_content:read` - File structure, pages, nodes, and image exports
 - `library_content:read` - Published components, styles, and component sets from files
@@ -52,7 +52,7 @@ For detailed descriptions of all available Figma OAuth scopes, refer to the [Fig
 
 In a production environment, you will most likely want to use your own Figma app credentials. This way, your users will see your application's name requesting permission.
 
-Before showing how to configure your Figma app credentials, let's go through the steps to create a Figma app.
+Before showing how to configure your Figma app credentials, review the steps to create a Figma app.
 
 ### Create a Figma app
 
@@ -95,12 +95,12 @@ For detailed instructions, refer to Figma's official [Authentication documentati
 
 Next, add the Figma app to Arcade.
 
-## Configuring your own Figma Auth Provider in Arcade
+## Configure your own Figma auth provider in Arcade
 
 <Tabs items={["Dashboard GUI", "Configuration File"]}>
 <Tabs.Tab>
 
-### Configure Figma Auth Using the Arcade Dashboard GUI
+### Configure Figma auth using the Arcade Dashboard GUI
 
 <Steps>
 
@@ -116,7 +116,7 @@ To access the Arcade Cloud dashboard, go to [api.arcade.dev/dashboard](https://a
 
 #### Enter the provider details
 
-- Choose a unique **ID** for your provider (e.g. "figma").
+- Choose a unique **ID** for your provider (for example "figma").
 - Optionally enter a **Description**.
 - Enter the **Client ID** and **Client Secret** from your Figma app.
 - Configure the OAuth 2.0 endpoints:
@@ -136,7 +136,7 @@ Hit the **Create** button and the provider will be ready to be used.
 
 <Tabs.Tab>
 
-### Configure Figma Auth Using Configuration File
+### Configure Figma auth using configuration file
 
 <Callout type="info">
   This method is only available when you are [self-hosting the
@@ -161,7 +161,7 @@ FIGMA_CLIENT_ID="<your client ID>"
 FIGMA_CLIENT_SECRET="<your client secret>"
 ```
 
-#### Edit the Engine configuration
+#### Edit the Arcade Engine configuration
 
 Edit the `engine.yaml` file and add a new item to the `auth.providers` section:
 
@@ -219,7 +219,7 @@ auth:
 
 When you use tools that require Figma auth using your Arcade account credentials, Arcade will automatically use this Figma OAuth provider. If you have multiple Figma providers, see [using multiple auth providers of the same type](/references/auth-providers#using-multiple-providers-of-the-same-type) for more information.
 
-## Using Figma auth in app code
+## Use Figma auth in app code
 
 Use the Figma auth provider in your own agents and AI apps to get a user token for the Figma API. See [authorizing agents with Arcade](/get-started/about-arcade) to understand how this works.
 
@@ -286,13 +286,13 @@ const token = authResponse.context.token;
 
 </Tabs>
 
-## Using Figma auth in custom tools
+## Use Figma auth in custom tools
 
-You can use the pre-built [Arcade Figma MCP Server](/resources/integrations/development/figma) to quickly build agents and AI apps that interact with Figma.
+You can use the pre-built [Arcade Figma MCP server](/resources/integrations/development/figma) to quickly build agents and AI apps that interact with Figma.
 
-If the pre-built tools in the Figma MCP Server don't meet your needs, you can author your own [custom tools](/guides/create-tools/tool-basics/build-mcp-server) that interact with the Figma API.
+If the pre-built tools in the Figma MCP server don't meet your needs, you can author your own [custom tools](/guides/create-tools/tool-basics/build-mcp-server) that interact with the Figma API.
 
-Use the `Figma()` auth class to specify that a tool requires authorization with Figma. The `context.authorization.token` field will be automatically populated with the user's Figma token:
+Use the `Figma()` auth class to specify that a tool requires authorization with Figma. The `context.authorization.token` field will automatically contain the user's Figma token:
 
 ```python {5,8}
 from typing import Annotated
