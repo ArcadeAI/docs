@@ -96,8 +96,10 @@ async function trackMarkdownRequest(request: NextRequest, pathname: string) {
       acceptHeader,
       acceptLanguage,
     });
-  } catch {
-    // Silently fail - tracking errors should not affect the response
+  } catch (error) {
+    // Log but don't throw - tracking errors should not affect the response
+    // biome-ignore lint/suspicious/noConsole: intentional error logging for debugging
+    console.error("[PostHog] Failed to track markdown request:", error);
   }
 }
 
