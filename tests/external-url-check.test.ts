@@ -26,6 +26,7 @@ const SKIP_PATTERNS: RegExp[] = [
   /reddit\.com/,
   /platform\.openai\.com/,
   /support\.google\.com/,
+  /developers\.google\.com/,
   /developer\.squareup\.com/,
   /developer\.ticktick\.com/,
   /api-console\.zoho\.com/,
