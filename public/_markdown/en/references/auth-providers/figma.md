@@ -2,50 +2,49 @@
 title: "Figma"
 description: "Arcade - AI platform for developers"
 ---
-
 [Auth Providers](/en/references/auth-providers.md)
 Figma
 
 # Figma
 
-The Figma enables tools and to call [Figma APIs](https://developers.figma.com/docs/rest-api/)  on behalf of a using OAuth 2.0 authentication.
+The Figma  enables tools and  to call [Figma APIs](https://developers.figma.com/docs/rest-api/)  on behalf of a  using OAuth 2.0 authentication.
 
-Want to quickly get started with Figma in your or AI app? The pre-built [Arcade Figma MCP Server](/resources/integrations/development/figma.md) is what you want!
+Want to quickly get started with Figma in your  or AI app? The pre-built [Arcade Figma MCP Server](/resources/integrations/development/figma.md) is what you want!
 
 ### What’s documented here
 
 This page describes how to use and configure Figma auth with Arcade.
 
-This is used by:
+This  is used by:
 
-- The [Arcade Figma MCP Server](/resources/integrations/development/figma.md)
-  , which provides pre-built for interacting with Figma
-- Your [app code](#using-figma-auth-in-app-code)
-  that needs to call the Figma API
-- Or, your [custom tools](#using-figma-auth-in-custom-tools)
-  that need to call the Figma API
+-   The [Arcade Figma MCP Server](/resources/integrations/development/figma.md)
+    , which provides pre-built  for interacting with Figma
+-   Your [app code](#using-figma-auth-in-app-code)
+     that needs to call the Figma API
+-   Or, your [custom tools](#using-figma-auth-in-custom-tools)
+     that need to call the Figma API
 
 ### Required scopes for the Figma MCP Server
 
-If you’re using the [Arcade Figma MCP Server](/resources/integrations/development/figma.md), you’ll need to configure these scopes based on which you plan to use:
+If you’re using the [Arcade Figma MCP Server](/resources/integrations/development/figma.md), you’ll need to configure these scopes based on which  you plan to use:
 
-- `file_content:read` - File structure, pages, nodes, and image exports
-- `library_content:read` - Published components, styles, and component sets from files
-- `team_library_content:read` - Team library content
-- `library_assets:read` - Individual component, style, and component set metadata
-- `file_comments:read` / `file_comments:write` - Reading and creating comments
-- `current_user:read` - profile information
-- `projects:read` - Team and files (**requires private OAuth app**)
+-   `file_content:read` - File structure, pages, nodes, and image exports
+-   `library_content:read` - Published components, styles, and component sets from files
+-   `team_library_content:read` - Team library content
+-   `library_assets:read` - Individual component, style, and component set metadata
+-   `file_comments:read` / `file_comments:write` - Reading and creating comments
+-   `current_user:read` -  profile information
+-   `projects:read` - Team  and files (**requires private OAuth app**)
 
-The `projects:read` scope is **only available in private Figma OAuth apps**. If you need to access team and files, you must create a private OAuth app through your Figma organization.
+The `projects:read` scope is **only available in private Figma OAuth apps**. If you need to access team  and files, you must create a private OAuth app through your Figma organization.
 
 For detailed descriptions of all available Figma OAuth scopes, refer to the [Figma OAuth Scopes documentation](https://developers.figma.com/docs/rest-api/scopes/) .
 
 ## Configuring Figma auth
 
-When using your own app credentials, make sure you configure your to use a [custom user verifier](/guides/user-facing-agents/secure-auth-production.md#build-a-custom-user-verifier). Without this, your end-users will not be able to use your app or in production.
+When using your own app credentials, make sure you configure your  to use a [custom user verifier](/guides/user-facing-agents/secure-auth-production.md#build-a-custom-user-verifier). Without this, your end-users will not be able to use your app or  in production.
 
-In a production environment, you will most likely want to use your own Figma app credentials. This way, your will see your application’s name requesting permission.
+In a production environment, you will most likely want to use your own Figma app credentials. This way, your  will see your application’s name requesting permission.
 
 Before showing how to configure your Figma app credentials, let’s go through the steps to create a Figma app.
 
@@ -62,23 +61,23 @@ Navigate to the [Figma Developer Portal](https://www.figma.com/developers/)  an
 1.  Once logged in, go to your developer dashboard and select “My Apps”
 2.  Click on “Create a new app”
 3.  Fill in the required details:
-    - **App Name**: Choose a descriptive name for your application
-    - **Website**: Provide the URL of your application’s website
-    - **App Logo**: Upload a 100x100px PNG image representing your app
+    -   **App Name**: Choose a descriptive name for your application
+    -   **Website**: Provide the URL of your application’s website
+    -   **App Logo**: Upload a 100x100px PNG image representing your app
 
 #### Set up OAuth configuration
 
 1.  After creating your app, you’ll receive a `client_id` and `client_secret`
 2.  Set the redirect URI to the redirect URL generated by Arcade (see configuration section below)
-3.  Configure the required scopes for your application based on the you need:
-    - `file_content:read` - Read access to file content and structure
-    - `library_content:read` - Read access to published library content
-    - `team_library_content:read` - Read access to team library content
-    - `library_assets:read` - Read access to individual library assets
-    - `file_comments:read` - Read access to file comments
-    - `file_comments:write` - Write access to file comments
-    - `current_user:read` - Read access to profile
-    - `projects:read` - Read access to team (private apps only)
+3.  Configure the required scopes for your application based on the  you need:
+    -   `file_content:read` - Read access to file content and structure
+    -   `library_content:read` - Read access to published library content
+    -   `team_library_content:read` - Read access to team library content
+    -   `library_assets:read` - Read access to individual library assets
+    -   `file_comments:read` - Read access to file comments
+    -   `file_comments:write` - Write access to file comments
+    -   `current_user:read` - Read access to  profile
+    -   `projects:read` - Read access to team  (private apps only)
 
 For a complete list of available scopes, refer to the [Figma OAuth Scopes documentation](https://developers.figma.com/docs/rest-api/scopes/) 
 
@@ -98,21 +97,21 @@ To access the Arcade Cloud dashboard, go to [api.arcade.dev/dashboard](https://a
 
 #### Navigate to the OAuth Providers page
 
-- Under the **Connections** section of the Arcade Dashboard left-side menu, click **Connected Apps**.
-- Click **Add OAuth Provider** in the top right corner.
-- Select the **OAuth 2.0** tab at the top.
+-   Under the **Connections** section of the Arcade Dashboard left-side menu, click **Connected Apps**.
+-   Click **Add OAuth Provider** in the top right corner.
+-   Select the **OAuth 2.0** tab at the top.
 
 #### Enter the provider details
 
-- Choose a unique **ID** for your provider (e.g. “figma”).
-- Optionally enter a **Description**.
-- Enter the **Client ID** and **Client Secret** from your Figma app.
-- Configure the OAuth 2.0 endpoints:
-  - **Authorization URL**: `https://www.figma.com/oauth`
-  - **Token URL**: `https://api.figma.com/v1/oauth/token`
-  - **Scope Delimiter**: (space)
-  - **Use PKCE**: Enabled (S256)
-- Note the **Redirect URL** generated by Arcade. This must be set as your Figma app’s redirect URI.
+-   Choose a unique **ID** for your provider (e.g. “figma”).
+-   Optionally enter a **Description**.
+-   Enter the **Client ID** and **Client Secret** from your Figma app.
+-   Configure the OAuth 2.0 endpoints:
+    -   **Authorization URL**: `https://www.figma.com/oauth`
+    -   **Token URL**: `https://api.figma.com/v1/oauth/token`
+    -   **Scope Delimiter**: (space)
+    -   **Use PKCE**: Enabled (S256)
+-   Note the **Redirect URL** generated by Arcade. This must be set as your Figma app’s redirect URI.
 
 #### Create the provider
 
@@ -183,15 +182,15 @@ auth:
           response_content_type: application/json
 ```
 
-**Note on `projects:read` scope:** If you need access to the `projects:read` scope for team and files navigation, you must create a **private Figma OAuth app**. This scope is not available in public OAuth apps. Learn more in the [Figma OAuth Scopes documentation](https://developers.figma.com/docs/rest-api/scopes/) .
+**Note on `projects:read` scope:** If you need access to the `projects:read` scope for team  and files navigation, you must create a **private Figma OAuth app**. This scope is not available in public OAuth apps. Learn more in the [Figma OAuth Scopes documentation](https://developers.figma.com/docs/rest-api/scopes/) .
 
-When you use tools that require Figma auth using your Arcade credentials, Arcade will automatically use this Figma OAuth provider. If you have multiple Figma providers, see [using multiple auth providers of the same type](/references/auth-providers.md#using-multiple-providers-of-the-same-type) for more information.
+When you use tools that require Figma auth using your Arcade  credentials, Arcade will automatically use this Figma OAuth provider. If you have multiple Figma providers, see [using multiple auth providers of the same type](/references/auth-providers.md#using-multiple-providers-of-the-same-type) for more information.
 
 ## Using Figma auth in app code
 
-Use the Figma in your own and AI apps to get a token for the Figma API. See [authorizing agents with Arcade](/get-started/about-arcade.md) to understand how this works.
+Use the Figma  in your own  and AI apps to get a  token for the Figma API. See [authorizing agents with Arcade](/get-started/about-arcade.md) to understand how this works.
 
-Use `client.auth.start()` to get a token for the Figma API:
+Use `client.auth.start()` to get a  token for the Figma API:
 
 ### Python
 
@@ -249,11 +248,11 @@ const token = authResponse.context.token;
 
 ## Using Figma auth in custom tools
 
-You can use the pre-built [Arcade Figma MCP Server](/resources/integrations/development/figma.md) to quickly build and AI apps that interact with Figma.
+You can use the pre-built [Arcade Figma MCP Server](/resources/integrations/development/figma.md) to quickly build  and AI apps that interact with Figma.
 
-If the pre-built tools in the Figma Server don’t meet your needs, you can author your own [custom tools](/guides/create-tools/tool-basics/build-mcp-server.md) that interact with the Figma API.
+If the pre-built tools in the Figma  Server don’t meet your needs, you can author your own [custom tools](/guides/create-tools/tool-basics/build-mcp-server.md) that interact with the Figma API.
 
-Use the `Figma()` auth class to specify that a requires authorization with Figma. The `context.authorization.token` field will be automatically populated with the ’s Figma token:
+Use the `Figma()` auth class to specify that a  requires authorization with Figma. The `context.authorization.token` field will be automatically populated with the ’s Figma token:
 
 ```python
 from typing import Annotated
