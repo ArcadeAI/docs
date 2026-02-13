@@ -97,7 +97,7 @@ Arcade Cloud
 
 ✅
 
-Last updated on February 11, 2026
+Last updated on January 30, 2026
 
 [Overview](/en/guides/create-tools/tool-basics.md)
 [Build an MCP Server to write custom tools](/en/guides/create-tools/tool-basics/build-mcp-server.md)

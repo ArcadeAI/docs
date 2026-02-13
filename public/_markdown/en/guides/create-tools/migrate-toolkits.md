@@ -304,7 +304,7 @@ After migrating your toolkit to an  server:
 -   **Configure  clients**: Connect your server to [MCP clients](/guides/create-tools/tool-basics/call-tools-mcp.md)
      like Claude Desktop, Cursor, or VS Code
 
-Last updated on February 11, 2026
+Last updated on January 30, 2026
 
 [Provide Useful Tool Errors](/en/guides/create-tools/error-handling/useful-tool-errors.md)
 [Secure Auth in Production](/en/guides/user-facing-agents/secure-auth-production.md)

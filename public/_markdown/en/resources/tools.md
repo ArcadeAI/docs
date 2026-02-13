@@ -40,7 +40,7 @@ Share your tools with the Arcade community and help expand our ecosystem. Submit
 3.  **Customize**: Create your own  when you need specific functionality
 4.  **Share**: Contribute back to the community by adding your  to our catalog
 
-Last updated on February 11, 2026
+Last updated on January 30, 2026
 
 [Examples](/en/resources/examples.md)
 [Glossary](/en/resources/glossary.md)

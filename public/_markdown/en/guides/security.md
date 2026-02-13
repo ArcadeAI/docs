@@ -17,7 +17,7 @@ Security is crucial when building  that interact with external services, handle 
 -   [Security research program](/guides/security/security-research-program.md)
 
 
-Last updated on February 11, 2026
+Last updated on January 30, 2026
 
 [Arcade Deploy](/en/guides/deployment-hosting/arcade-deploy.md)
 [Securing Arcade MCP](/en/guides/security/securing-arcade-mcp.md)

@@ -8,7 +8,7 @@ Authorizing Existing Tools
 
 ## Authorize Existing Tools
 
-In this guide, we’ll show you how to authorize LangChain  like the `GmailToolkit` using Arcade. You may already have tools you want to use, and this guide will show you how to authorize them. Arcade handles retrieving, authorizing, and managing tokens so you don’t have to. For complete working examples, see our [Python](https://github.com/ArcadeAI/arcade-ai/blob/main/examples/langchain/langchain_tool_arcade_auth.py)  and [JavaScript](https://github.com/ArcadeAI/arcade-ai/blob/main/examples/langchain-ts/langchain-tool-arcade-auth.ts)  examples.
+In this guide, we’ll show you how to authorize LangChain  like the `GmailToolkit` using Arcade. You may already have tools you want to use, and this guide will show you how to authorize them. Arcade handles retrieving, authorizing, and managing tokens so you don’t have to.
 
 ### Prerequisites
 
@@ -213,7 +213,7 @@ for await (const event of events) {
 
 Now you’re ready to explore more LangChain tools with Arcade. Try integrating additional  Servers and crafting more complex queries to enhance your AI workflows.
 
-Last updated on February 11, 2026
+Last updated on February 10, 2026
 
 [Setup (TypeScript)](/en/get-started/agent-frameworks/langchain/use-arcade-with-langchain-ts.md)
 [Mastra](/en/get-started/agent-frameworks/mastra.md)
