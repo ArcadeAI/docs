@@ -15,7 +15,10 @@ import type {
   ICustomSectionsSource,
   IOverviewInstructionsSource,
 } from "../sources/interfaces.js";
-import type { IToolkitDataSource } from "../sources/toolkit-data-source.js";
+import type {
+  IToolkitDataSource,
+  ToolkitData,
+} from "../sources/toolkit-data-source.js";
 import type {
   CustomSections,
   DocumentationChunk,
@@ -29,6 +32,10 @@ import type {
   ToolkitMetadata,
 } from "../types/index.js";
 import { mapWithConcurrency } from "../utils/concurrency.js";
+import {
+  detectMetadataChanges,
+  formatFreshnessWarnings,
+} from "./metadata-freshness.js";
 
 // ============================================================================
 // Merger Configuration
@@ -59,6 +66,8 @@ export interface DataMergerConfig {
   onToolkitComplete?: ((result: MergeResult) => Promise<void>) | undefined;
   /** Set of toolkit IDs to skip (for resume support) */
   skipToolkitIds?: ReadonlySet<string> | undefined;
+  /** Fallback resolver: toolkit ID → OAuth provider ID (design system) */
+  resolveProviderId?: ((toolkitId: string) => string | null) | undefined;
 }
 
 export interface FailedTool {
@@ -94,6 +103,8 @@ interface MergeToolkitOptions {
   overviewGenerator?: ToolkitOverviewGenerator;
   overviewInstructions?: ToolkitOverviewInstructions | null;
   skipOverview?: boolean;
+  /** Fallback resolver: toolkit ID → OAuth provider ID (design system) */
+  resolveProviderId?: (toolkitId: string) => string | null;
 }
 
 // ============================================================================
@@ -702,7 +713,40 @@ export const mergeToolkit = async (
 
   const description = getToolkitDescription(tools);
 
-  const auth = buildToolkitAuth(tools);
+  // Fallback: resolve OAuth provider IDs from the design system when Engine API returns null.
+  // We apply this at the tool level (so examples/signatures stay consistent) and then at the
+  // toolkit level (as a final guard).
+  const resolvedProviderId =
+    options.resolveProviderId &&
+    tools.some(
+      (tool) =>
+        tool.auth?.providerType === "oauth2" && tool.auth.providerId == null
+    )
+      ? options.resolveProviderId(toolkitId)
+      : null;
+
+  const toolsWithResolvedProviderId =
+    resolvedProviderId !== null
+      ? tools.map((tool) => {
+          if (
+            tool.auth?.providerType === "oauth2" &&
+            tool.auth.providerId == null
+          ) {
+            return {
+              ...tool,
+              auth: { ...tool.auth, providerId: resolvedProviderId },
+            };
+          }
+          return tool;
+        })
+      : tools;
+
+  let auth = buildToolkitAuth(toolsWithResolvedProviderId);
+
+  // Fallback: resolve provider ID from design system when Engine API returns null
+  if (auth && !auth.providerId && resolvedProviderId) {
+    auth = { ...auth, providerId: resolvedProviderId };
+  }
 
   const toolChunks = (customSections?.toolChunks ?? {}) as {
     [key: string]: DocumentationChunk[];
@@ -712,7 +756,7 @@ export const mergeToolkit = async (
     options.previousToolkit
   );
   const mergedTools = await buildMergedTools({
-    tools,
+    tools: toolsWithResolvedProviderId,
     toolChunks,
     toolExampleGenerator,
     warnings,
@@ -731,6 +775,17 @@ export const mergeToolkit = async (
     customSections,
     previousToolkit: options.previousToolkit,
   });
+
+  // Modular step: detect design system metadata drifts
+  const freshnessResult = detectMetadataChanges(
+    toolkitId,
+    toolkit.metadata,
+    toolkit.label,
+    options.previousToolkit
+  );
+  if (freshnessResult) {
+    warnings.push(...formatFreshnessWarnings(freshnessResult));
+  }
 
   await applyOverviewIfNeeded({
     toolkit,
@@ -773,6 +828,9 @@ export class DataMerger {
     | ((result: MergeResult) => Promise<void>)
     | undefined;
   private readonly skipToolkitIds: ReadonlySet<string>;
+  private readonly resolveProviderId:
+    | ((toolkitId: string) => string | null)
+    | undefined;
 
   constructor(config: DataMergerConfig) {
     this.toolkitDataSource = config.toolkitDataSource;
@@ -790,6 +848,7 @@ export class DataMerger {
     this.onToolkitProgress = config.onToolkitProgress;
     this.onToolkitComplete = config.onToolkitComplete;
     this.skipToolkitIds = config.skipToolkitIds ?? new Set();
+    this.resolveProviderId = config.resolveProviderId;
   }
 
   private getPreviousToolkit(toolkitId: string): MergedToolkit | undefined {
@@ -801,6 +860,84 @@ export class DataMerger {
       this.previousToolkits.get(toolkitId.toLowerCase()) ??
       this.previousToolkits.get(toolkitId)
     );
+  }
+
+  private buildMergeErrorResult(
+    toolkitId: string,
+    message: string
+  ): MergeResult {
+    return {
+      toolkit: {
+        id: toolkitId,
+        label: toolkitId,
+        version: "0.0.0",
+        description: null,
+        metadata: {
+          category: "development",
+          iconUrl: "",
+          isBYOC: false,
+          isPro: false,
+          type: isStarterToolkitId(toolkitId) ? "arcade_starter" : "arcade",
+          docsLink: "",
+          isComingSoon: false,
+          isHidden: false,
+        },
+        auth: null,
+        tools: [],
+        documentationChunks: [],
+        customImports: [],
+        subPages: [],
+        generatedAt: new Date().toISOString(),
+      },
+      warnings: [`Error processing toolkit: ${message}`],
+      failedTools: [],
+    };
+  }
+
+  private async mergeToolkitEntry(
+    toolkitId: string,
+    toolkitData: ToolkitData
+  ): Promise<MergeResult> {
+    try {
+      const customSections =
+        await this.customSectionsSource.getCustomSections(toolkitId);
+      const overviewInstructions =
+        await this.overviewInstructionsSource.getOverviewInstructions(
+          toolkitId
+        );
+
+      const previousToolkit = this.getPreviousToolkit(toolkitId);
+      const result = await mergeToolkit(
+        toolkitId,
+        toolkitData.tools,
+        toolkitData.metadata,
+        customSections,
+        this.toolExampleGenerator,
+        {
+          ...(previousToolkit ? { previousToolkit } : {}),
+          llmConcurrency: this.llmConcurrency,
+          ...(this.overviewGenerator
+            ? { overviewGenerator: this.overviewGenerator }
+            : {}),
+          overviewInstructions,
+          skipOverview: this.skipOverview,
+          ...(this.resolveProviderId
+            ? { resolveProviderId: this.resolveProviderId }
+            : {}),
+        }
+      );
+      await this.maybeGenerateSummary(result, previousToolkit);
+
+      // Write immediately if callback provided (incremental mode)
+      if (this.onToolkitComplete) {
+        await this.onToolkitComplete(result);
+      }
+
+      return result;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      return this.buildMergeErrorResult(toolkitId, message);
+    }
   }
 
   private async maybeGenerateSummary(
@@ -865,9 +1002,14 @@ export class DataMerger {
       {
         ...(previousToolkit ? { previousToolkit } : {}),
         llmConcurrency: this.llmConcurrency,
-        overviewGenerator: this.overviewGenerator,
+        ...(this.overviewGenerator
+          ? { overviewGenerator: this.overviewGenerator }
+          : {}),
         overviewInstructions,
         skipOverview: this.skipOverview,
+        ...(this.resolveProviderId
+          ? { resolveProviderId: this.resolveProviderId }
+          : {}),
       }
     );
     await this.maybeGenerateSummary(result, previousToolkit);
@@ -893,80 +1035,15 @@ export class DataMerger {
       async ([toolkitId, toolkitData]) => {
         this.onToolkitProgress?.(toolkitId, "start");
 
-        try {
-          const customSections =
-            await this.customSectionsSource.getCustomSections(toolkitId);
-          const overviewInstructions =
-            await this.overviewInstructionsSource.getOverviewInstructions(
-              toolkitId
-            );
+        const result = await this.mergeToolkitEntry(toolkitId, toolkitData);
 
-          const previousToolkit = this.getPreviousToolkit(toolkitId);
-          const result = await mergeToolkit(
-            toolkitId,
-            toolkitData.tools,
-            toolkitData.metadata,
-            customSections,
-            this.toolExampleGenerator,
-            {
-              ...(previousToolkit ? { previousToolkit } : {}),
-              llmConcurrency: this.llmConcurrency,
-              overviewGenerator: this.overviewGenerator,
-              overviewInstructions,
-              skipOverview: this.skipOverview,
-            }
-          );
-          await this.maybeGenerateSummary(result, previousToolkit);
+        this.onToolkitProgress?.(
+          toolkitId,
+          "done",
+          result.toolkit.tools.length
+        );
 
-          // Write immediately if callback provided (incremental mode)
-          if (this.onToolkitComplete) {
-            await this.onToolkitComplete(result);
-          }
-
-          this.onToolkitProgress?.(
-            toolkitId,
-            "done",
-            result.toolkit.tools.length
-          );
-
-          return result;
-        } catch (error) {
-          // Report error but don't stop processing other toolkits
-          const message =
-            error instanceof Error ? error.message : String(error);
-          const errorResult: MergeResult = {
-            toolkit: {
-              id: toolkitId,
-              label: toolkitId,
-              version: "0.0.0",
-              description: null,
-              metadata: {
-                category: "development",
-                iconUrl: "",
-                isBYOC: false,
-                isPro: false,
-                type: isStarterToolkitId(toolkitId)
-                  ? "arcade_starter"
-                  : "arcade",
-                docsLink: "",
-                isComingSoon: false,
-                isHidden: false,
-              },
-              auth: null,
-              tools: [],
-              documentationChunks: [],
-              customImports: [],
-              subPages: [],
-              generatedAt: new Date().toISOString(),
-            },
-            warnings: [`Error processing toolkit: ${message}`],
-            failedTools: [],
-          };
-
-          this.onToolkitProgress?.(toolkitId, "done", 0);
-
-          return errorResult;
-        }
+        return result;
       },
       this.toolkitConcurrency
     );

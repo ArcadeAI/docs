@@ -9,7 +9,7 @@ Figma
 
 The Figma  enables tools and  to call [Figma APIs](https://developers.figma.com/docs/rest-api/)  on behalf of a  using OAuth 2.0 authentication.
 
-Want to quickly get started with Figma in your  or AI app? The pre-built [Arcade Figma MCP Server](/resources/integrations/others/figma.md) is what you want!
+Want to quickly get started with Figma in your  or AI app? The pre-built [Arcade Figma MCP Server](/resources/integrations/development/figma.md) is what you want!
 
 ### What’s documented here
 
@@ -17,7 +17,7 @@ This page describes how to use and configure Figma auth with Arcade.
 
 This  is used by:
 
--   The [Arcade Figma MCP Server](/resources/integrations/others/figma.md)
+-   The [Arcade Figma MCP Server](/resources/integrations/development/figma.md)
     , which provides pre-built  for interacting with Figma
 -   Your [app code](#using-figma-auth-in-app-code)
      that needs to call the Figma API
@@ -26,7 +26,7 @@ This  is used by:
 
 ### Required scopes for the Figma MCP Server
 
-If you’re using the [Arcade Figma MCP Server](/resources/integrations/others/figma.md), you’ll need to configure these scopes based on which  you plan to use:
+If you’re using the [Arcade Figma MCP Server](/resources/integrations/development/figma.md), you’ll need to configure these scopes based on which  you plan to use:
 
 -   `file_content:read` - File structure, pages, nodes, and image exports
 -   `library_content:read` - Published components, styles, and component sets from files
@@ -248,7 +248,7 @@ const token = authResponse.context.token;
 
 ## Using Figma auth in custom tools
 
-You can use the pre-built [Arcade Figma MCP Server](/resources/integrations/others/figma.md) to quickly build  and AI apps that interact with Figma.
+You can use the pre-built [Arcade Figma MCP Server](/resources/integrations/development/figma.md) to quickly build  and AI apps that interact with Figma.
 
 If the pre-built tools in the Figma  Server don’t meet your needs, you can author your own [custom tools](/guides/create-tools/tool-basics/build-mcp-server.md) that interact with the Figma API.
 
@@ -283,7 +283,7 @@ async def get_figma_file(
 
 For a complete list of available Figma OAuth scopes and their descriptions, refer to the [Figma OAuth Scopes documentation](https://developers.figma.com/docs/rest-api/scopes/) .
 
-Last updated on January 30, 2026
+Last updated on February 10, 2026
 
 [Dropbox](/en/references/auth-providers/dropbox.md)
 [GitHub](/en/references/auth-providers/github.md)

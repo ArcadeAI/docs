@@ -724,6 +724,141 @@ describe("mergeToolkit", () => {
   });
 });
 
+// ============================================================================
+// mergeToolkit provider ID fallback tests
+// ============================================================================
+
+describe("mergeToolkit resolveProviderId fallback", () => {
+  it("uses resolveProviderId when tools have null providerId", async () => {
+    const tools = [
+      createTool({
+        name: "ReadAccount",
+        qualifiedName: "Salesforce.ReadAccount",
+        fullyQualifiedName: "Salesforce.ReadAccount@2.0.1",
+        auth: { providerId: null, providerType: "oauth2", scopes: ["read"] },
+      }),
+    ];
+
+    const result = await mergeToolkit(
+      "Salesforce",
+      tools,
+      createMetadata({ id: "Salesforce", label: "Salesforce" }),
+      null,
+      undefined,
+      {
+        resolveProviderId: (toolkitId) =>
+          toolkitId === "Salesforce" ? "salesforce" : null,
+      }
+    );
+
+    expect(result.toolkit.auth?.providerId).toBe("salesforce");
+    expect(result.toolkit.tools[0]?.auth?.providerId).toBe("salesforce");
+  });
+
+  it("does NOT override an existing non-null providerId from tools", async () => {
+    const tools = [
+      createTool({
+        name: "CreateIssue",
+        qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@2.0.1",
+        auth: {
+          providerId: "github",
+          providerType: "oauth2",
+          scopes: ["repo"],
+        },
+      }),
+    ];
+
+    const result = await mergeToolkit(
+      "Github",
+      tools,
+      createMetadata({ id: "Github", label: "GitHub" }),
+      null,
+      undefined,
+      {
+        resolveProviderId: () => "should-not-be-used",
+      }
+    );
+
+    expect(result.toolkit.auth?.providerId).toBe("github");
+  });
+
+  it("does NOT call resolver when tools have no auth at all", async () => {
+    let resolverCalled = false;
+    const tools = [
+      createTool({
+        name: "PublicTool",
+        qualifiedName: "NoAuth.PublicTool",
+        fullyQualifiedName: "NoAuth.PublicTool@1.0.0",
+        auth: null,
+        secrets: [],
+      }),
+    ];
+
+    const result = await mergeToolkit(
+      "NoAuth",
+      tools,
+      createMetadata({ id: "NoAuth", label: "No Auth" }),
+      null,
+      undefined,
+      {
+        resolveProviderId: () => {
+          resolverCalled = true;
+          return "unexpected";
+        },
+      }
+    );
+
+    expect(result.toolkit.auth).toBeNull();
+    expect(resolverCalled).toBe(false);
+  });
+
+  it("leaves providerId null when resolver returns null", async () => {
+    const tools = [
+      createTool({
+        name: "SomeTool",
+        qualifiedName: "Unknown.SomeTool",
+        fullyQualifiedName: "Unknown.SomeTool@1.0.0",
+        auth: { providerId: null, providerType: "oauth2", scopes: [] },
+      }),
+    ];
+
+    const result = await mergeToolkit(
+      "Unknown",
+      tools,
+      createMetadata({ id: "Unknown", label: "Unknown" }),
+      null,
+      undefined,
+      {
+        resolveProviderId: () => null,
+      }
+    );
+
+    expect(result.toolkit.auth?.providerId).toBeNull();
+  });
+
+  it("leaves providerId null when no resolver is provided", async () => {
+    const tools = [
+      createTool({
+        name: "SomeTool",
+        qualifiedName: "Unknown.SomeTool",
+        fullyQualifiedName: "Unknown.SomeTool@1.0.0",
+        auth: { providerId: null, providerType: "oauth2", scopes: [] },
+      }),
+    ];
+
+    const result = await mergeToolkit(
+      "Unknown",
+      tools,
+      createMetadata({ id: "Unknown", label: "Unknown" }),
+      null,
+      undefined
+    );
+
+    expect(result.toolkit.auth?.providerId).toBeNull();
+  });
+});
+
 describe("mergeToolkit overview handling", () => {
   it("replaces existing overview when instructions are present", async () => {
     const tool = createTool();

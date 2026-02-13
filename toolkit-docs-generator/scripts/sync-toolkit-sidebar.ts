@@ -467,7 +467,7 @@ export default meta;
 export function syncToolkitSidebar(
   options: { dryRun?: boolean; verbose?: boolean; prune?: boolean } = {}
 ): SyncResult {
-  const { dryRun = false, verbose = false, prune = false } = options;
+  const { dryRun = false, verbose = false } = options;
 
   const result: SyncResult = {
     categoriesUpdated: [],
@@ -548,17 +548,19 @@ export function syncToolkitSidebar(
       }
     }
 
-    // Remove empty categories (optional; off by default for safety).
-    if (prune) {
-      for (const existingDir of existingDirs) {
-        if (!activeCategories.includes(existingDir)) {
-          const categoryDir = join(CONFIG.integrationsDir, existingDir);
-          log(`Removing empty category: ${existingDir}`);
-          if (!dryRun) {
-            rmSync(categoryDir, { recursive: true });
-          }
-          result.categoriesRemoved.push(existingDir);
+    // Remove category directories that no longer have any toolkits.
+    // This handles the case where toolkits move between categories (e.g. from
+    // "others" to "development") and the old category becomes empty.
+    // The --prune flag is accepted for backward compatibility but cleanup
+    // always runs to prevent stale sidebar entries and orphaned routes.
+    for (const existingDir of existingDirs) {
+      if (!activeCategories.includes(existingDir)) {
+        const categoryDir = join(CONFIG.integrationsDir, existingDir);
+        log(`Removing empty category: ${existingDir}`);
+        if (!dryRun) {
+          rmSync(categoryDir, { recursive: true });
         }
+        result.categoriesRemoved.push(existingDir);
       }
     }
 

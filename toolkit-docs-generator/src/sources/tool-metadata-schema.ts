@@ -49,7 +49,10 @@ const ToolMetadataSecretSchema = z.union([
 
 const ToolMetadataRequirementsSchema = z
   .object({
-    authorization: ToolMetadataAuthorizationSchema.optional(),
+    authorization: z
+      .array(ToolMetadataAuthorizationSchema)
+      .nullable()
+      .optional(),
     secrets: z.array(ToolMetadataSecretSchema).nullable().optional(),
   })
   .nullable()
@@ -68,6 +71,9 @@ const ToolMetadataItemSchema = z.object({
 
 export const ToolMetadataResponseSchema = z.object({
   items: z.array(ToolMetadataItemSchema),
+  limit: z.number().optional(),
+  offset: z.number().optional(),
+  page_count: z.number().optional(),
   total_count: z.number(),
 });
 
@@ -135,29 +141,33 @@ const normalizeSecrets = (
 
 export const transformToolMetadataItem = (
   apiTool: ToolMetadataItem
-): ToolDefinition => ({
-  name: apiTool.name,
-  qualifiedName: apiTool.qualified_name,
-  fullyQualifiedName: apiTool.fully_qualified_name,
-  description: apiTool.description,
-  toolkitDescription: apiTool.toolkit.description,
-  parameters: apiTool.input.parameters.map(transformParameter),
-  auth: apiTool.requirements?.authorization
-    ? {
-        providerId: apiTool.requirements.authorization.provider_id ?? null,
-        providerType:
-          apiTool.requirements.authorization.provider_type ?? "unknown",
-        scopes: apiTool.requirements.authorization.scopes ?? [],
-      }
-    : null,
-  secrets: normalizeSecrets(apiTool.requirements?.secrets),
-  output: apiTool.output
-    ? {
-        type: apiTool.output.value_schema?.val_type ?? "unknown",
-        description: apiTool.output.description ?? null,
-      }
-    : null,
-});
+): ToolDefinition => {
+  // authorization is now an array; pick the first entry (most tools have 0 or 1)
+  const authEntry = apiTool.requirements?.authorization?.[0] ?? null;
+
+  return {
+    name: apiTool.name,
+    qualifiedName: apiTool.qualified_name,
+    fullyQualifiedName: apiTool.fully_qualified_name,
+    description: apiTool.description,
+    toolkitDescription: apiTool.toolkit.description,
+    parameters: apiTool.input.parameters.map(transformParameter),
+    auth: authEntry
+      ? {
+          providerId: authEntry.provider_id ?? null,
+          providerType: authEntry.provider_type ?? "unknown",
+          scopes: authEntry.scopes ?? [],
+        }
+      : null,
+    secrets: normalizeSecrets(apiTool.requirements?.secrets),
+    output: apiTool.output
+      ? {
+          type: apiTool.output.value_schema?.val_type ?? "unknown",
+          description: apiTool.output.description ?? null,
+        }
+      : null,
+  };
+};
 
 export const parseToolMetadataResponse = (
   payload: unknown

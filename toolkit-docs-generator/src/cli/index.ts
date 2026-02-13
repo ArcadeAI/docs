@@ -42,6 +42,7 @@ import { createCustomSectionsFileSource } from "../sources/custom-sections-file.
 import { createDesignSystemMetadataSource } from "../sources/design-system-metadata.js";
 import { createEmptyCustomSectionsSource } from "../sources/in-memory.js";
 import { createMockMetadataSource } from "../sources/mock-metadata.js";
+import { createDesignSystemProviderIdResolver } from "../sources/oauth-provider-resolver.js";
 import { createOverviewInstructionsFileSource } from "../sources/overview-instructions-file.js";
 import {
   createArcadeToolkitDataSource,
@@ -839,7 +840,6 @@ program
   .option("--skip-examples", "Skip LLM example generation", false)
   .option("--skip-summary", "Skip LLM summary generation", false)
   .option("--skip-overview", "Skip LLM overview generation", false)
-  .option("--skip-overview", "Skip LLM overview generation", false)
   .option("--no-verify-output", "Skip output verification")
   .option("--custom-sections <file>", "Path to custom sections JSON")
   .option(
@@ -1059,6 +1059,10 @@ program
               allowMissing: true,
             });
 
+        // Build provider ID resolver from design system OAuth catalogue
+        const resolveProviderId =
+          (await createDesignSystemProviderIdResolver()) ?? undefined;
+
         spinner.succeed("Data sources initialized");
 
         // Create generator (needed early for resume check)
@@ -1202,6 +1206,7 @@ program
           ...(runAll ? { onToolkitProgress } : {}),
           ...(skipToolkitIds.size > 0 ? { skipToolkitIds } : {}),
           ...(onToolkitComplete ? { onToolkitComplete } : {}),
+          ...(resolveProviderId ? { resolveProviderId } : {}),
         });
 
         // Process toolkits
@@ -1284,6 +1289,7 @@ program
               onToolkitProgress,
               ...(skipToolkitIds.size > 0 ? { skipToolkitIds } : {}),
               ...(onToolkitComplete ? { onToolkitComplete } : {}),
+              ...(resolveProviderId ? { resolveProviderId } : {}),
             });
 
             spinner.start(progressTracker.getProgressString());
@@ -1687,6 +1693,10 @@ program
               allowMissing: true,
             });
 
+        // Build provider ID resolver from design system OAuth catalogue
+        const resolveProviderId =
+          (await createDesignSystemProviderIdResolver()) ?? undefined;
+
         spinner.succeed("Data sources initialized");
 
         // Create generator (needed early for resume check)
@@ -1799,6 +1809,7 @@ program
             onToolkitProgress,
             ...(skipToolkitIds.size > 0 ? { skipToolkitIds } : {}),
             ...(onToolkitComplete ? { onToolkitComplete } : {}),
+            ...(resolveProviderId ? { resolveProviderId } : {}),
           });
 
           spinner.start(progressTracker.getProgressString());
