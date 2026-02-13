@@ -142,9 +142,11 @@ export async function captureServerPageView(event: ServerPageViewEvent) {
   const posthog = getPostHogServer();
   const classification = classifyAIAgent(event.userAgent);
 
+  // Use distinct event name to avoid double-counting with client-side $pageview
+  // This tracks server-side markdown requests (primarily from AI agents)
   posthog.capture({
     distinctId: event.distinctId,
-    event: "$pageview",
+    event: "server_markdown_request",
     properties: {
       $current_url: event.pathname,
       $pathname: event.pathname,
