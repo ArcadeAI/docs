@@ -1,10 +1,6 @@
-# CLAUDE.md
+# Arcade Docs
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
-## Project Overview
-
-Arcade documentation site built with **Next.js 16 + Nextra 4** (App Router), using pnpm as the package manager. Content is authored in MDX with custom React components.
+Arcade documentation site built with Next.js + Nextra (App Router), using pnpm as the package manager. Content is authored in MDX with custom React components. Check `package.json` for current framework versions.
 
 ## Commands
 
@@ -25,8 +21,7 @@ pnpm vitest run tests/broken-link-check.test.ts
 
 ## Architecture
 
-- **`app/en/`** — English docs content (MDX pages). Nextra file-based routing with `_meta.tsx` for navigation order.
-- **`app/es/`, `app/pt-BR/`** — Translated content. i18n handled via middleware (`middleware.ts`).
+- **`app/en/`** — English docs content (MDX pages). Nextra file-based routing with `_meta.tsx` for navigation order. i18n handled via `middleware.ts`.
 - **`app/_components/`** — Shared React components (tabbed code blocks, toolkit docs, callouts, etc.).
 - **`app/_lib/`** — Data-fetching utilities (toolkit catalog, slug generation, static params).
 - **`app/api/`** — API routes (markdown export, toolkit-data, glossary).
@@ -48,15 +43,17 @@ Follow **STYLEGUIDE.md** for writing standards and **AUTHORING.md** for formatti
 
 ## Pre-commit Hooks
 
-Husky runs on commit: Vale style checks on `.md/.mdx`, `_meta.tsx` key validation, redirect checking for deleted/renamed pages, internal link updates, and Ultracite formatting.
+Husky runs on commit: Vale style checks on `.md/.mdx`, `_meta.tsx` key validation, redirect checking for deleted/renamed pages, internal link updates, and Ultracite formatting. You MUST fix any issues surfaced by the pre-commit hooks. NEVER bypass hooks with `--no-verify` or similar flags.
 
 ## Key Config Files
 
 - `biome.jsonc` — Linter/formatter rules (Biome via Ultracite)
 - `.vale.ini` — Vale style checker config (Google style base + Arcade vocabulary)
-- `.nvmrc` — Node 22.x required
-- `pnpm-lock.yaml` — pnpm 10.11.0 (lockfile version)
+- `.nvmrc` — Required Node version
+- `tsconfig.json` — TypeScript compiler configuration
+- `components.json` — shadcn/ui component config
+- `postcss.config.mjs` — PostCSS/Tailwind config
 
-## LLM-Aware Features
+## Code Quality
 
-Middleware detects LLM user agents and serves optimized markdown instead of HTML. The build generates `llms.txt` and clean markdown exports for AI consumption.
+NEVER add suppression comments (`// @ts-ignore`, `// @ts-expect-error`, `// biome-ignore`, `eslint-disable`, `{/* prettier-ignore */}`, etc.) to bypass TypeScript or linter errors. Fix the underlying issue instead.
