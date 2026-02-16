@@ -287,16 +287,17 @@ export function LandingPage() {
       {/* LLM-friendly docs banner (desktop only) */}
       <div className="hidden justify-center px-4 md:flex">
         <Link
-          className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50/80 px-4 py-1.5 text-gray-500 text-xs transition-colors hover:border-gray-300 hover:text-gray-700 dark:border-gray-700 dark:bg-gray-800/50 dark:text-gray-400 dark:hover:border-gray-600 dark:hover:text-gray-300"
+          className="group inline-flex items-center gap-2.5 rounded-full border border-[#ee175e]/30 bg-gradient-to-r from-[#ee175e]/10 to-[#9089fc]/10 px-5 py-2 font-medium text-[#ee175e] text-sm shadow-sm transition-all hover:border-[#ee175e]/50 hover:shadow-md hover:shadow-[#ee175e]/10 dark:border-[#ee175e]/40 dark:from-[#ee175e]/15 dark:to-[#9089fc]/15 dark:text-[#ff6b8a]"
           href="/get-started/setup/connect-arcade-docs"
           onClick={trackClick(
             "llm_banner_clicked",
             "/get-started/setup/connect-arcade-docs"
           )}
         >
-          <Bot className="h-3.5 w-3.5" />
+          <Bot className="h-4 w-4" />
           These docs are LLM-friendly — AI agents get clean markdown
           automatically
+          <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
         </Link>
       </div>
 
