@@ -681,6 +681,24 @@ export function LandingPage() {
         </div>
       </section>
 
+      {/* ASCII Art Logo */}
+      <section className="pb-8 pt-4">
+        <pre
+          aria-hidden="true"
+          className="mx-auto select-none text-center font-mono text-[0.45rem] leading-[1.1] text-gray-300 sm:text-[0.55rem] md:text-xs dark:text-gray-700"
+        >
+          {[
+            "     ██████╗                                              ██╗",
+            "    ██╔═══██╗                                             ██║",
+            "   ██║    ╚██╗  ██╗██╗  ██████╗  ██████╗   ████████╗  ██████║  ██████╗",
+            "  ████████████║ ███╔═╝ ██╔════╝ ██╔═══██║  ██╔═══██║ ██╔═══╝ ██╔═══██╗",
+            " ██╔═══════██║ ██╔╝   ██║      ████████╔╝  ██║   ██║ ██║     ████████╔╝",
+            "██╔╝       ██║ ██║    ╚██████╗ ██╔═════╝   ████████║ ╚██████╗╚██████╗",
+            "╚═╝       ╚══╝╚══╝    ╚══════╝╚══╝        ╚═══════╝  ╚══════╝ ╚═════╝",
+          ].join("\n")}
+        </pre>
+      </section>
+
       {/* Background decoration at bottom */}
       <div
         aria-hidden="true"
