@@ -3,6 +3,7 @@ import { Button } from "@arcadeai/design-system";
 import {
   ArrowRight,
   BookOpen,
+  Bot,
   Code,
   Cog,
   FileText,
@@ -283,6 +284,22 @@ export function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* LLM-friendly docs banner (desktop only) */}
+      <div className="hidden justify-center px-4 md:flex">
+        <Link
+          className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50/80 px-4 py-1.5 text-gray-500 text-xs transition-colors hover:border-gray-300 hover:text-gray-700 dark:border-gray-700 dark:bg-gray-800/50 dark:text-gray-400 dark:hover:border-gray-600 dark:hover:text-gray-300"
+          href="/get-started/setup/connect-arcade-docs"
+          onClick={trackClick(
+            "llm_banner_clicked",
+            "/get-started/setup/connect-arcade-docs"
+          )}
+        >
+          <Bot className="h-3.5 w-3.5" />
+          These docs are LLM-friendly — AI agents get clean markdown
+          automatically
+        </Link>
+      </div>
 
       {/* Choose Your Path Section */}
       <section className="py-16">
