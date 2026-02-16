@@ -681,6 +681,24 @@ export function LandingPage() {
         </div>
       </section>
 
+      {/* ASCII Art Logo */}
+      <section className="border-gray-200 border-t py-12 dark:border-gray-800">
+        <div className="container mx-auto px-4">
+          <pre
+            aria-hidden="true"
+            className="mx-auto select-none text-center font-mono text-[0.45rem] leading-[0.5rem] text-gray-300 sm:text-[0.55rem] sm:leading-[0.6rem] md:text-xs md:leading-[0.7rem] dark:text-gray-700"
+          >
+            {[
+              "           ___                          __",
+              "          /   |   _____  _____ ____ ___/ /__",
+              "         / /| |  / ___/ / ___// __ `// _  / _ \\",
+              "        / ___ | / /    / /__ / /_/ // /_/ /  __/",
+              "       /_/  |_|/_/     \\___/ \\__,_/ \\__,_/\\___/",
+            ].join("\n")}
+          </pre>
+        </div>
+      </section>
+
       {/* Background decoration at bottom */}
       <div
         aria-hidden="true"
