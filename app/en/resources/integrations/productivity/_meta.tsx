@@ -57,9 +57,21 @@ const meta: MetaRecord = {
     title: "Linear",
     href: "/en/resources/integrations/productivity/linear",
   },
+  "microsoft-powerpoint": {
+    title: "Microsoft PowerPoint",
+    href: "/en/resources/integrations/productivity/microsoft-powerpoint",
+  },
   sharepoint: {
     title: "Microsoft SharePoint",
     href: "/en/resources/integrations/productivity/sharepoint",
+  },
+  "microsoft-word": {
+    title: "Microsoft Word",
+    href: "/en/resources/integrations/productivity/microsoft-word",
+  },
+  onedrive: {
+    title: "OneDrive",
+    href: "/en/resources/integrations/productivity/onedrive",
   },
   "outlook-calendar": {
     title: "Outlook Calendar",
