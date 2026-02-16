@@ -12,7 +12,6 @@ import {
   Puzzle,
   Rocket,
   Shield,
-  Sparkles,
   ToolCase,
   Wrench,
 } from "lucide-react";
@@ -627,37 +626,6 @@ export function LandingPage() {
               title="YouTube Podcast Summarizer"
             />
           </div>
-        </div>
-      </section>
-
-      {/* Agentic Development Callout */}
-      <section className="py-12">
-        <div className="container mx-auto px-4">
-          <Link
-            className="mx-auto block max-w-2xl rounded-xl border border-[#ee175e]/20 bg-linear-to-r from-[#ee175e]/5 to-transparent p-6 transition-all hover:border-[#ee175e]/40 hover:shadow-lg"
-            href="/get-started/setup/connect-arcade-docs"
-            onClick={trackClick(
-              "agentic_development_clicked",
-              "/get-started/setup/connect-arcade-docs"
-            )}
-          >
-            <div className="flex items-start gap-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#ee175e]/10">
-                <Sparkles className="h-5 w-5 text-[#ee175e]" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900 text-lg dark:text-white">
-                  Connect Your IDE with Arcade&apos;s LLMs.txt
-                </h3>
-                <p className="mt-1 text-gray-600 text-sm dark:text-gray-400">
-                  Give Cursor, Claude Code, and other AI IDEs access to
-                  Arcade&apos;s documentation so they can write integration code
-                  for you.
-                </p>
-              </div>
-              <ArrowRight className="mt-1 h-5 w-5 shrink-0 text-[#ee175e]" />
-            </div>
-          </Link>
         </div>
       </section>
 
