@@ -124,6 +124,13 @@ export default async function RootLayout({
         <meta content="width=device-width, initial-scale=1" name="viewport" />
         <link href="https://www.googletagmanager.com" rel="preconnect" />
         <link href="https://www.googletagmanager.com" rel="dns-prefetch" />
+        {pathname !== "/" && (
+          <link
+            href={`https://docs.arcade.dev${pathname}.md`}
+            rel="alternate"
+            type="text/markdown"
+          />
+        )}
       </Head>
       <body>
         {lang !== "en" && (
