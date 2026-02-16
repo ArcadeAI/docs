@@ -14,7 +14,7 @@ Every page on the Arcade docs site renders as clean markdown. When an AI  or cod
 
 This means you can point your  directly at any docs page—no need to copy and paste or use the `llms.txt` file. The agent will receive well-formatted markdown out of the box.
 
-For example, you can tell your  to visit `https://docs.arcade.dev/get-started/quickstarts/call-tool-agent` and it will automatically get the markdown version of that page.
+For example, you can tell your  to visit `docs.arcade.dev/get-started/quickstarts/call-tool-agent` and it will automatically get the markdown version of that page.
 
 ## LLMs.txt
 
