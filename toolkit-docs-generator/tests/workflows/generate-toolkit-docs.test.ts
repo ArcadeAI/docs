@@ -24,6 +24,10 @@ test("porter workflow generates docs and opens a PR", () => {
   expect(workflowContents).toContain("--api-source tool-metadata");
   expect(workflowContents).toContain("--tool-metadata-url");
   expect(workflowContents).toContain("--tool-metadata-key");
+  expect(workflowContents).toContain("--llm-provider openai");
+  expect(workflowContents).toContain("--llm-model");
+  expect(workflowContents).toContain("--llm-api-key");
   expect(workflowContents).toContain("peter-evans/create-pull-request");
+  expect(workflowContents).toContain("HUSKY: 0");
   expect(workflowContents).toContain("pull-requests: write");
 });
