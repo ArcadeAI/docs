@@ -692,6 +692,41 @@ const formatPreviousToolkitLoadStats = (
     `${stats.failedFiles.length} failed`,
   ].join(", ");
 
+const addLoadedPreviousToolkit = (
+  previousToolkits: Map<string, MergedToolkit>,
+  stats: PreviousToolkitLoadStats,
+  loaded: PreviousToolkitLoadOutcome
+): boolean => {
+  if (!loaded.toolkit) {
+    return false;
+  }
+  previousToolkits.set(normalizeToolkitKey(loaded.toolkit.id), loaded.toolkit);
+  stats.loadedFiles += 1;
+  if (loaded.usedFallback) {
+    stats.fallbackFiles += 1;
+  }
+  return true;
+};
+
+const getPreviousToolkitFailureReason = (
+  loaded: PreviousToolkitLoadOutcome
+): string => loaded.reason ?? "unable to parse previous output";
+
+const logFallbackToolkitLoad = (
+  itemLabel: string,
+  loaded: PreviousToolkitLoadOutcome,
+  verbose: boolean
+): void => {
+  if (!(verbose && loaded.usedFallback)) {
+    return;
+  }
+  console.log(
+    chalk.dim(
+      `Loaded ${itemLabel} with fallback parser (${loaded.reason ?? "schema mismatch"}).`
+    )
+  );
+};
+
 const loadPreviousToolkitsForProviders = async (
   dir: string,
   providers: ProviderVersion[],
@@ -702,43 +737,29 @@ const loadPreviousToolkitsForProviders = async (
 
   for (const provider of providers) {
     stats.scannedFiles += 1;
-    const filePath = join(dir, `${provider.provider.toLowerCase()}.json`);
+    const providerName = provider.provider;
+    const filePath = join(dir, `${providerName.toLowerCase()}.json`);
     const loaded = await loadPreviousToolkit(filePath);
 
-    if (loaded.toolkit) {
-      previousToolkits.set(
-        normalizeToolkitKey(loaded.toolkit.id),
-        loaded.toolkit
-      );
-      stats.loadedFiles += 1;
-      if (loaded.usedFallback) {
-        stats.fallbackFiles += 1;
-        if (verbose) {
-          console.log(
-            chalk.dim(
-              `Loaded ${provider.provider} with fallback parser (${loaded.reason ?? "schema mismatch"}).`
-            )
-          );
-        }
-      }
+    if (addLoadedPreviousToolkit(previousToolkits, stats, loaded)) {
+      logFallbackToolkitLoad(providerName, loaded, verbose);
       continue;
     }
 
     if (loaded.missing) {
       stats.missingFiles += 1;
       if (verbose) {
-        console.log(
-          chalk.dim(`No previous output found for ${provider.provider}.`)
-        );
+        console.log(chalk.dim(`No previous output found for ${providerName}.`));
       }
       continue;
     }
 
-    const failure = `${provider.provider}: ${loaded.reason ?? "unable to parse previous output"}`;
-    stats.failedFiles.push(failure);
+    stats.failedFiles.push(
+      `${providerName}: ${getPreviousToolkitFailureReason(loaded)}`
+    );
     if (verbose) {
       console.log(
-        chalk.dim(`Failed to parse previous output for ${provider.provider}.`)
+        chalk.dim(`Failed to parse previous output for ${providerName}.`)
       );
     }
   }
@@ -763,22 +784,8 @@ const loadPreviousToolkitsFromDir = async (
       stats.scannedFiles += 1;
       const filePath = join(dir, fileName);
       const loaded = await loadPreviousToolkit(filePath);
-      if (loaded.toolkit) {
-        previousToolkits.set(
-          normalizeToolkitKey(loaded.toolkit.id),
-          loaded.toolkit
-        );
-        stats.loadedFiles += 1;
-        if (loaded.usedFallback) {
-          stats.fallbackFiles += 1;
-          if (verbose) {
-            console.log(
-              chalk.dim(
-                `Loaded ${fileName} with fallback parser (${loaded.reason ?? "schema mismatch"}).`
-              )
-            );
-          }
-        }
+      if (addLoadedPreviousToolkit(previousToolkits, stats, loaded)) {
+        logFallbackToolkitLoad(fileName, loaded, verbose);
         continue;
       }
 
@@ -788,7 +795,7 @@ const loadPreviousToolkitsFromDir = async (
       }
 
       stats.failedFiles.push(
-        `${fileName}: ${loaded.reason ?? "unable to parse previous output"}`
+        `${fileName}: ${getPreviousToolkitFailureReason(loaded)}`
       );
     }
   } catch (error) {
@@ -1584,9 +1591,11 @@ program
             };
             spinner.text = `${phaseLabels[progress.phase]} ${progress.current}/${progress.total}: ${progress.fileName ?? ""}`;
           };
+          const allowLegacyFallback = !options.overwriteOutput;
           const verification = await verifyOutputDir(
             resolve(options.output),
-            onVerifyProgress
+            onVerifyProgress,
+            { allowLegacyFallback }
           );
           if (!verification.valid) {
             spinner.fail("Output verification failed.");
@@ -2118,9 +2127,11 @@ program
             };
             spinner.text = `${phaseLabels[progress.phase]} ${progress.current}/${progress.total}: ${progress.fileName ?? ""}`;
           };
+          const allowLegacyFallback = !options.overwriteOutput;
           const verification = await verifyOutputDir(
             resolve(options.output),
-            onVerifyProgress
+            onVerifyProgress,
+            { allowLegacyFallback }
           );
           if (!verification.valid) {
             spinner.fail("Output verification failed.");
