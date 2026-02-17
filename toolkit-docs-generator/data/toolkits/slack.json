@@ -1,7 +1,7 @@
 {
   "id": "Slack",
   "label": "Slack",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Arcade.dev LLM tools for Slack",
   "metadata": {
     "category": "social",
@@ -9,7 +9,7 @@
     "isBYOC": false,
     "isPro": false,
     "type": "arcade",
-    "docsLink": "https://docs.arcade.dev/en/mcp-servers/social-communication/slack",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/social-communication/slack",
     "isComingSoon": false,
     "isHidden": false
   },
@@ -19,9 +19,11 @@
     "allScopes": [
       "channels:history",
       "channels:read",
+      "channels:write",
       "chat:write",
       "groups:history",
       "groups:read",
+      "groups:write",
       "im:history",
       "im:read",
       "im:write",
@@ -35,7 +37,7 @@
     {
       "name": "GetConversationMetadata",
       "qualifiedName": "Slack.GetConversationMetadata",
-      "fullyQualifiedName": "Slack.GetConversationMetadata@2.0.0",
+      "fullyQualifiedName": "Slack.GetConversationMetadata@2.1.0",
       "description": "Get metadata of a Channel, a Direct Message (IM / DM) or a Multi-Person (MPIM) conversation.\n\nUse this tool to retrieve metadata about a conversation with a conversation_id, a channel name,\nor by the user_id(s), username(s), and/or email(s) of the user(s) in the conversation.\n\nThis tool does not return the messages in a conversation. To get the messages, use the\n'Slack.GetMessages' tool instead.\n\nProvide exactly one of:\n- conversation_id; or\n- channel_name; or\n- any combination of user_ids, usernames, and/or emails.",
       "parameters": [
         {
@@ -105,27 +107,27 @@
         "toolName": "Slack.GetConversationMetadata",
         "parameters": {
           "conversation_id": {
-            "value": "C1234567890",
+            "value": "C0123456789",
             "type": "string",
             "required": false
           },
           "channel_name": {
-            "value": "general",
+            "value": null,
             "type": "string",
             "required": false
           },
           "usernames": {
-            "value": ["john_doe", "jane_smith"],
+            "value": null,
             "type": "array",
             "required": false
           },
           "emails": {
-            "value": ["john@example.com", "jane@example.com"],
+            "value": null,
             "type": "array",
             "required": false
           },
           "user_ids": {
-            "value": ["U123456", "U098765"],
+            "value": null,
             "type": "array",
             "required": false
           }
@@ -138,7 +140,7 @@
     {
       "name": "GetMessages",
       "qualifiedName": "Slack.GetMessages",
-      "fullyQualifiedName": "Slack.GetMessages@2.0.0",
+      "fullyQualifiedName": "Slack.GetMessages@2.1.0",
       "description": "Get messages in a Slack Channel, DM (direct message) or MPIM (multi-person) conversation.\n\nProvide exactly one of:\n- conversation_id; or\n- channel_name; or\n- any combination of user_ids, usernames, and/or emails.\n\nTo filter messages by an absolute datetime, use 'oldest_datetime' and/or 'latest_datetime'. If\nonly 'oldest_datetime' is provided, it will return messages from the oldest_datetime to the\ncurrent time. If only 'latest_datetime' is provided, it will return messages since the\nbeginning of the conversation to the latest_datetime.\n\nTo filter messages by a relative datetime (e.g. 3 days ago, 1 hour ago, etc.), use\n'oldest_relative' and/or 'latest_relative'. If only 'oldest_relative' is provided, it will\nreturn messages from the oldest_relative to the current time. If only 'latest_relative' is\nprovided, it will return messages from the current time to the latest_relative.\n\nDo not provide both 'oldest_datetime' and 'oldest_relative' or both 'latest_datetime' and\n'latest_relative'.\n\nLeave all arguments with the default None to get messages without date/time filtering",
       "parameters": [
         {
@@ -260,7 +262,7 @@
         "toolName": "Slack.GetMessages",
         "parameters": {
           "conversation_id": {
-            "value": "C1234567890",
+            "value": "C0123456789",
             "type": "string",
             "required": false
           },
@@ -285,12 +287,12 @@
             "required": false
           },
           "oldest_relative": {
-            "value": "01:00:00",
+            "value": "07:00:00",
             "type": "string",
             "required": false
           },
           "latest_relative": {
-            "value": "00:30:00",
+            "value": null,
             "type": "string",
             "required": false
           },
@@ -310,7 +312,7 @@
             "required": false
           },
           "next_cursor": {
-            "value": null,
+            "value": "dXNlcjpVMDYxTkYx",
             "type": "string",
             "required": false
           }
@@ -323,7 +325,7 @@
     {
       "name": "GetUsersInConversation",
       "qualifiedName": "Slack.GetUsersInConversation",
-      "fullyQualifiedName": "Slack.GetUsersInConversation@2.0.0",
+      "fullyQualifiedName": "Slack.GetUsersInConversation@2.1.0",
       "description": "Get the users in a Slack conversation (Channel, DM/IM, or MPIM) by its ID or by channel name.\n\nProvide exactly one of conversation_id or channel_name. Prefer providing a conversation_id,\nwhen available, since the performance is better.",
       "parameters": [
         {
@@ -397,7 +399,7 @@
             "required": false
           },
           "next_cursor": {
-            "value": "abc123token",
+            "value": "dXNlcjpVMEc5V0ZYTlo=",
             "type": "string",
             "required": false
           }
@@ -410,7 +412,7 @@
     {
       "name": "GetUsersInfo",
       "qualifiedName": "Slack.GetUsersInfo",
-      "fullyQualifiedName": "Slack.GetUsersInfo@2.0.0",
+      "fullyQualifiedName": "Slack.GetUsersInfo@2.1.0",
       "description": "Get the information of one or more users in Slack by ID, username, and/or email.\n\nProvide any combination of user_ids, usernames, and/or emails. If you need to retrieve\ndata about multiple users, DO NOT CALL THE TOOL MULTIPLE TIMES. Instead, call it once\nwith all the user_ids, usernames, and/or emails. IF YOU CALL THIS TOOL MULTIPLE TIMES\nUNNECESSARILY, YOU WILL RELEASE MORE CO2 IN THE ATMOSPHERE AND CONTRIBUTE TO GLOBAL WARMING.\n\nIf you need to get metadata or messages of a conversation, use the\n`Slack.GetConversationMetadata` or `Slack.GetMessages` tool instead. These\ntools accept user_ids, usernames, and/or emails. Do not retrieve users' info first,\nas it is inefficient, releases more CO2 in the atmosphere, and contributes to climate change.",
       "parameters": [
         {
@@ -444,7 +446,10 @@
       "auth": {
         "providerId": "slack",
         "providerType": "oauth2",
-        "scopes": ["users:read", "users:read.email"]
+        "scopes": [
+          "users:read",
+          "users:read.email"
+        ]
       },
       "secrets": [],
       "secretsInfo": [],
@@ -457,17 +462,132 @@
         "toolName": "Slack.GetUsersInfo",
         "parameters": {
           "user_ids": {
-            "value": ["U12345", "U67890"],
+            "value": [
+              "U12345678",
+              "U23456789"
+            ],
             "type": "array",
             "required": false
           },
           "usernames": {
-            "value": ["john_doe", "jane_smith"],
+            "value": [
+              "alice",
+              "bob.smith"
+            ],
             "type": "array",
             "required": false
           },
           "emails": {
-            "value": ["john@example.com", "jane@example.com"],
+            "value": [
+              "alice@example.com",
+              "bob.smith@example.org"
+            ],
+            "type": "array",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "slack",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "InviteUsersToChannel",
+      "qualifiedName": "Slack.InviteUsersToChannel",
+      "fullyQualifiedName": "Slack.InviteUsersToChannel@2.1.0",
+      "description": "Invite users to a Slack channel or MPIM (multi-person direct message).\n\nThis tool invites specified users to join a Slack conversation. It works with:\n- Public channels\n- Private channels\n- MPIMs (multi-person direct messages / group DMs)\n\nYou can specify users by their user IDs, usernames, or email addresses.\n\nProvide exactly one of channel_id or channel_name, and at least one of user_ids, usernames,\nor emails.\n\nThe tool will resolve usernames and emails to user IDs before inviting them.\nUp to 100 users may be invited at once.",
+      "parameters": [
+        {
+          "name": "channel_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the Slack channel or MPIM (multi-person direct message) to invite users to. Provide exactly one of channel_id OR channel_name.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "channel_name",
+          "type": "string",
+          "required": false,
+          "description": "The name of the channel to invite users to. Prefer providing a channel_id when available for better performance. Note: MPIMs don't have names, so use channel_id for MPIMs.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "user_ids",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The Slack user IDs of the people to invite. Up to 100 users may be listed. Provide at least one of user_ids, usernames, or emails.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "usernames",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The Slack usernames of the people to invite. Prefer providing user_ids and/or emails when available for better performance.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "emails",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The email addresses of the people to invite.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "slack",
+        "providerType": "oauth2",
+        "scopes": [
+          "channels:read",
+          "groups:read",
+          "channels:write",
+          "groups:write",
+          "users:read",
+          "users:read.email"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The response from inviting users to the conversation"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Slack.InviteUsersToChannel",
+        "parameters": {
+          "channel_id": {
+            "value": "C1234567890",
+            "type": "string",
+            "required": false
+          },
+          "channel_name": {
+            "value": null,
+            "type": "string",
+            "required": false
+          },
+          "user_ids": {
+            "value": [
+              "U2345678901",
+              "U3456789012"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "usernames": {
+            "value": null,
+            "type": "array",
+            "required": false
+          },
+          "emails": {
+            "value": null,
             "type": "array",
             "required": false
           }
@@ -480,7 +600,7 @@
     {
       "name": "ListConversations",
       "qualifiedName": "Slack.ListConversations",
-      "fullyQualifiedName": "Slack.ListConversations@2.0.0",
+      "fullyQualifiedName": "Slack.ListConversations@2.1.0",
       "description": "List metadata for Slack conversations (channels, DMs, MPIMs) the user is a member of.\n\nThis tool does not return the messages in a conversation. To get the messages, use the\n'Slack.GetMessages' tool instead. Calling this tool when the user is asking for messages\nwill release too much CO2 in the atmosphere and contribute to global warming.",
       "parameters": [
         {
@@ -517,7 +637,12 @@
       "auth": {
         "providerId": "slack",
         "providerType": "oauth2",
-        "scopes": ["channels:read", "groups:read", "im:read", "mpim:read"]
+        "scopes": [
+          "channels:read",
+          "groups:read",
+          "im:read",
+          "mpim:read"
+        ]
       },
       "secrets": [],
       "secretsInfo": [],
@@ -530,7 +655,12 @@
         "toolName": "Slack.ListConversations",
         "parameters": {
           "conversation_types": {
-            "value": ["channel", "im"],
+            "value": [
+              "public_channel",
+              "private_channel",
+              "im",
+              "mpim"
+            ],
             "type": "array",
             "required": false
           },
@@ -540,7 +670,7 @@
             "required": false
           },
           "next_cursor": {
-            "value": "dXNlcl9mNTc3ZGQ1YjBlZDdmYzViZTA1NGUx",
+            "value": "dGVzdF9jdXJzb3JfMTIzNDU=",
             "type": "string",
             "required": false
           }
@@ -553,7 +683,7 @@
     {
       "name": "ListUsers",
       "qualifiedName": "Slack.ListUsers",
-      "fullyQualifiedName": "Slack.ListUsers@2.0.0",
+      "fullyQualifiedName": "Slack.ListUsers@2.1.0",
       "description": "List all users in the authenticated user's Slack team.\n\nIf you need to get metadata or messages of a conversation, use the\n`Slack.GetConversationMetadata` tool or `Slack.GetMessages` tool instead. These\ntools accept a user_id, username, and/or email. Do not use this tool to first retrieve user(s),\nas it is inefficient and releases more CO2 in the atmosphere, contributing to climate change.",
       "parameters": [
         {
@@ -584,7 +714,10 @@
       "auth": {
         "providerId": "slack",
         "providerType": "oauth2",
-        "scopes": ["users:read", "users:read.email"]
+        "scopes": [
+          "users:read",
+          "users:read.email"
+        ]
       },
       "secrets": [],
       "secretsInfo": [],
@@ -607,7 +740,7 @@
             "required": false
           },
           "next_cursor": {
-            "value": "abc123",
+            "value": "dXNlcjE6MQ==",
             "type": "string",
             "required": false
           }
@@ -620,7 +753,7 @@
     {
       "name": "SendMessage",
       "qualifiedName": "Slack.SendMessage",
-      "fullyQualifiedName": "Slack.SendMessage@2.0.0",
+      "fullyQualifiedName": "Slack.SendMessage@2.1.0",
       "description": "Send a message to a Channel, Direct Message (IM/DM), or Multi-Person (MPIM) conversation\n\nProvide exactly one of:\n- channel_name; or\n- conversation_id; or\n- any combination of user_ids, usernames, and/or emails.\n\nIn case multiple user_ids, usernames, and/or emails are provided, the tool will open a\nmulti-person conversation with the specified people and send the message to it.",
       "parameters": [
         {
@@ -700,22 +833,22 @@
         "toolName": "Slack.SendMessage",
         "parameters": {
           "message": {
-            "value": "Hello team, please check the latest updates!",
+            "value": "Hi team — the build has completed successfully. Please review the deployment dashboard when you have a moment.",
             "type": "string",
             "required": true
           },
           "channel_name": {
-            "value": "general",
-            "type": "string",
-            "required": false
-          },
-          "conversation_id": {
             "value": null,
             "type": "string",
             "required": false
           },
+          "conversation_id": {
+            "value": "C1234567890",
+            "type": "string",
+            "required": false
+          },
           "user_ids": {
-            "value": ["U12345678", "U87654321"],
+            "value": null,
             "type": "array",
             "required": false
           },
@@ -738,13 +871,16 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "Slack.WhoAmI",
-      "fullyQualifiedName": "Slack.WhoAmI@2.0.0",
+      "fullyQualifiedName": "Slack.WhoAmI@2.1.0",
       "description": "Get comprehensive user profile and Slack information.\n\nThis tool provides detailed information about the authenticated user including\ntheir name, email, profile picture, and other important profile details from\nSlack services.",
       "parameters": [],
       "auth": {
         "providerId": "slack",
         "providerType": "oauth2",
-        "scopes": ["users:read", "users:read.email"]
+        "scopes": [
+          "users:read",
+          "users:read.email"
+        ]
       },
       "secrets": [],
       "secretsInfo": [],
@@ -764,18 +900,7 @@
   ],
   "documentationChunks": [],
   "customImports": [],
-  "subPages": [
-    {
-      "type": "install",
-      "content": "# Arcade for Slack\n\nimport { Steps, Callout } from \"nextra/components\";\nimport { SignupLink } from \"@/app/_components/analytics\";\nimport { SlackAuthLink } from \"./slack-auth-link\";\n\n## Integrate Arcade with your Slack workspace\n\nArcade securely connects your AI agents to APIs, data, code, and other systems via Tools. Our integration for Slack allows Arcade's tools to connect to your Slack workspace, helping your team work more efficiently.\n\nYou can leverage this app in Arcade's Playground when you log in to the Arcade Dashboard, or in your own applications.\n\nWhile the Arcade app for Slack does not directly expose a Large Language Model (LLM) to you, you will likely use Arcade's tools in conjunction with an LLM. When using LLMs, there's always potential to generate inaccurate responses, summaries, or other output.\n\nArcade's sample app for Slack brings Arcade's powerful AI tool-calling capabilities to your team's everyday conversations. The Arcade app for Slack can:\n\n- Send messages to your Slack channels and direct messages on your behalf\n- Find information in your Slack channels and direct messages\n- Generate content, summaries, and responses for messages you receive\n- and more!\n\nFor more details on what tools are available and what scopes they require, see the [Slack MCP Server documentation](/resources/integrations/social-communication/slack).\n\n<Callout type=\"info\">\n  The Arcade app for Slack requires an active Arcade account. If you don't have\n  one yet,{\" \"}\n  <SignupLink linkLocation=\"docs:slack-app-install\">\n    sign up for free\n  </SignupLink>\n  .\n</Callout>\n\n## How it works\n\n<Steps>\n### Install the Arcade app for Slack\nClick the \"Add to Slack\" button below to install Arcade in your workspace.\n\n<SlackAuthLink />\n\n<Callout type=\"warning\">\n  You'll need to be a workspace admin or have permission to install apps to add\n  Arcade to your Slack workspace.\n</Callout>\n\n### Invite Arcade to your channels\n\nInvite Arcade to any channel or direct message by typing `/invite @Arcade` to allow it to read and interact with content in that channel.\n\n### Start using Arcade's Slack tools\n\nUse Arcade's [tools for Slack](/resources/integrations/social-communication/slack) to:\n\n- Send messages to channels and DMs\n- Find information in conversations\n- Generate summaries of discussions\n\nTry leveraging the Arcade tools for Slack in the Arcade Playground by [chatting with an LLM](https://api.arcade.dev/dashboard/playground/chat) asking, \"What are the last 5 messages in the general Slack channel?\" or [executing Slack tools directly](https://api.arcade.dev/dashboard/playground/execute?toolId=GetMessagesInChannelByName&toolkits=%5B%5D&authProviders=%5B%5D&secrets=%5B%5D&input=%7B%22owner%22%3A%22ArcadeAI%22%2C%22name%22%3A%22arcade-ai%22%2C%22starred%22%3A%22true%22%2C%22channel_name%22%3A%22general%22%2C%22limit%22%3A%225%22%7D) without interacting with an LLM.\n\n<Callout type=\"warning\">\n  When using LLMs with Slack, responses may sometimes contain inaccuracies.\n  Always review AI-generated content before taking action.\n</Callout>\n\n</Steps>\n\n## Next steps\n\nThe Arcade app for Slack is a sample for what Arcade can do with your Slack workspace. It's likely that for your own applications you'll need to [create your own app for Slack](/references/auth-providers/slack). Creating your own application for Slack will allow you to brand the app, customize the permissions, and more.\n\n## Need help?\n\nIf you have any questions or need assistance:\n\n- Check our [Slack MCP Server documentation](/resources/integrations/social-communication/slack)\n- [Contact our support team](/resources/contact-us)\n",
-      "relativePath": "install/page.mdx"
-    },
-    {
-      "type": "environment-variables",
-      "content": "# Environment Variables\n\n### `SLACK_MAX_CONCURRENT_REQUESTS`\n\nArcade uses asynchronous calls to request Slack API endpoints. In some tools, multiple concurrent HTTP requests may be issued to speed up execution. This environment variable controls the maximum number of concurrent requests to Slack API in any tool execution.\n\nThe value must be a numeric string with an integer greater than or equal to 1.\n\n**Default:** `3`\n\n\n### `MAX_PAGINATION_SIZE_LIMIT`\n\nThis environment variable controls the maximum number of items requested in a single call to a Slack API endpoint. Some of the Slack tools allow the tool caller to request a larger number of items per tool call, but the tool will paginate the results internally while respecting the `MAX_PAGINATION_SIZE_LIMIT`.\n\n**Default:** `200` (Slack supports, but discourages a limit larger than 200)\n\n\n### `MAX_PAGINATION_TIMEOUT_SECONDS`\n\nControls the maximum number of seconds any given Slack tool should wait while paginating responses from the Slack API.\n\n**Default:** `30` (expressed in seconds)\n",
-      "relativePath": "environment-variables/page.mdx"
-    }
-  ],
-  "generatedAt": "2026-01-26T17:41:10.378Z",
-  "summary": "Arcade.dev provides a toolkit for integrating with Slack, enabling developers to enhance their applications with powerful Slack features. This toolkit allows for seamless communication, conversation management, and user interactions within Slack's ecosystem.\n\n**Capabilities**\n- Access conversation metadata, messages, and user information.\n- List users and conversations associated with the authenticated user.\n- Send messages to channels or direct conversations.\n\n**OAuth**\n- Provider: Slack  \n- Scopes: channels:history, channels:read, chat:write, groups:history, groups:read, im:history, im:read, im:write, mpim:history, mpim:read, users:read, users:read.email\n\n**Secrets**\n- No secrets are required for this integration."
+  "subPages": [],
+  "generatedAt": "2026-02-17T22:26:36.513Z",
+  "summary": "Arcade's Slack toolkit connects LLM agents to Slack, enabling programmatic access to conversations, users, and messaging workflows. It enables reading messages and metadata, resolving users, listing channels, inviting members, and sending messages with date/range filters and batched operations.\n\n**Capabilities**\n- Unified conversation and message access using IDs, channel names, or user identifiers with flexible time-based filtering.\n- Batched user resolution and profile retrieval to reduce API calls and improve efficiency.\n- Conversation management (listing membership, inviting participants, opening group DMs) and targeted message sending.\n- Context-aware message composition and delivery on behalf of the authenticated user.\n\n**OAuth**\nProvider: slack\nScopes: channels:history, channels:read, channels:write, chat:write, groups:history, groups:read, groups:write, im:history, im:read, im:write, mpim:history, mpim:read, users:read, users:read.email"
 }

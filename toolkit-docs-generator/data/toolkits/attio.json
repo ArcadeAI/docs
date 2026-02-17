@@ -1,0 +1,1305 @@
+{
+  "id": "Attio",
+  "label": "Attio",
+  "version": "1.0.1",
+  "description": "Arcade tools designed for LLMs to interact with Attio CRM",
+  "metadata": {
+    "category": "development",
+    "iconUrl": "https://design-system.arcade.dev/icons/attio.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/development/attio",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": "attio",
+    "allScopes": [
+      "call_recording:read",
+      "list_configuration:read",
+      "list_entry:read",
+      "list_entry:read-write",
+      "meeting:read",
+      "note:read-write",
+      "object_configuration:read",
+      "record_permission:read",
+      "record_permission:read-write",
+      "task:read-write",
+      "user_management:read"
+    ]
+  },
+  "tools": [
+    {
+      "name": "AddToList",
+      "qualifiedName": "Attio.AddToList",
+      "fullyQualifiedName": "Attio.AddToList@1.0.1",
+      "description": "Add a record to an Attio list.\n\nOptionally set list-specific attribute values via entry_values parameter.",
+      "parameters": [
+        {
+          "name": "list_id",
+          "type": "string",
+          "required": true,
+          "description": "List UUID",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "record_id",
+          "type": "string",
+          "required": true,
+          "description": "Record UUID to add to the list",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "entry_values",
+          "type": "json",
+          "required": false,
+          "description": "List-specific attribute values",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "attio",
+        "providerType": "oauth2",
+        "scopes": [
+          "list_entry:read-write",
+          "list_configuration:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Created entry info"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Attio.AddToList",
+        "parameters": {
+          "list_id": {
+            "value": "b6d9a8f2-1c3e-4f7b-9d6a-2e3f4b5c6d7e",
+            "type": "string",
+            "required": true
+          },
+          "record_id": {
+            "value": "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
+            "type": "string",
+            "required": true
+          },
+          "entry_values": {
+            "value": {
+              "role": "Investor",
+              "status": "active",
+              "added_by": "jane.doe@example.com",
+              "priority": "high",
+              "notes": "Follow up in 2 weeks",
+              "score": 85
+            },
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "attio",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "AssertRecord",
+      "qualifiedName": "Attio.AssertRecord",
+      "fullyQualifiedName": "Attio.AssertRecord@1.0.1",
+      "description": "Create or update (upsert) a record using Attio's assert endpoint.\n\nThis is idempotent - safe to retry. If a record matching the attribute exists,\nit will be updated. Otherwise, a new record is created.\n\nIMPORTANT: The matching_attribute MUST be a unique attribute on the object.\nCommon unique attributes:\n- people: 'email_addresses'\n- companies: 'domains'\n- deals: 'record_id' (name is NOT unique by default)\n\nTo update a deal by name, first query to get the record_id, then use update_record.",
+      "parameters": [
+        {
+          "name": "object_type",
+          "type": "string",
+          "required": true,
+          "description": "The type of object to upsert a record for. Standard object types are 'people', 'companies', and 'deals'. Custom object types are the API slug of the object.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "matching_attribute",
+          "type": "string",
+          "required": true,
+          "description": "Unique attribute for upsert match (e.g., 'email_addresses', 'domains')",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "values",
+          "type": "json",
+          "required": true,
+          "description": "Attribute values to set on the record",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "attio",
+        "providerType": "oauth2",
+        "scopes": [
+          "record_permission:read-write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Created or updated record info"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Attio.AssertRecord",
+        "parameters": {
+          "object_type": {
+            "value": "people",
+            "type": "string",
+            "required": true
+          },
+          "matching_attribute": {
+            "value": "email_addresses",
+            "type": "string",
+            "required": true
+          },
+          "values": {
+            "value": {
+              "first_name": "Ava",
+              "last_name": "Garcia",
+              "email_addresses": [
+                "ava.garcia@example.com"
+              ],
+              "phone_numbers": [
+                "+1-415-555-0123"
+              ],
+              "title": "Product Manager",
+              "company": "Example Corp",
+              "notes": "Met at Tech Conference 2026; follow up about partnership opportunities."
+            },
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "attio",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateNote",
+      "qualifiedName": "Attio.CreateNote",
+      "fullyQualifiedName": "Attio.CreateNote@1.0.1",
+      "description": "Add a note to an Attio record.\n\nNotes are useful for logging activities, meeting notes, and outreach history.",
+      "parameters": [
+        {
+          "name": "parent_object",
+          "type": "string",
+          "required": true,
+          "description": "The type of object to attach the note to. Standard object types are 'people', 'companies', and 'deals'. Custom object types are the API slug of the object.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "parent_record_id",
+          "type": "string",
+          "required": true,
+          "description": "Record UUID to attach note to",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "Note title",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "content",
+          "type": "string",
+          "required": true,
+          "description": "Note body text",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "format_type",
+          "type": "string",
+          "required": false,
+          "description": "Note format (default plaintext)",
+          "enum": [
+            "plaintext",
+            "markdown"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "attio",
+        "providerType": "oauth2",
+        "scopes": [
+          "note:read-write",
+          "object_configuration:read",
+          "record_permission:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Created note info"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Attio.CreateNote",
+        "parameters": {
+          "parent_object": {
+            "value": "people",
+            "type": "string",
+            "required": true
+          },
+          "parent_record_id": {
+            "value": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "type": "string",
+            "required": true
+          },
+          "title": {
+            "value": "Intro call recap — Q1 planning",
+            "type": "string",
+            "required": true
+          },
+          "content": {
+            "value": "Met with Alex Johnson to discuss Q1 priorities and potential collaboration. Key points:\n- Objectives: streamline onboarding, improve data sync reliability\n- Next steps: send integration spec by 2026-02-20; schedule technical follow-up\n- Action items: Alex to share current API docs; our team to prepare timeline and estimate\nOverall tone: positive; interested in pilot with a 3-month evaluation.",
+            "type": "string",
+            "required": true
+          },
+          "format_type": {
+            "value": "markdown",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "attio",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateTask",
+      "qualifiedName": "Attio.CreateTask",
+      "fullyQualifiedName": "Attio.CreateTask@1.0.1",
+      "description": "Create a task in Attio.\n\nTasks are useful for follow-ups, reminders, and action items.\nOptionally link to a record by providing both linked_record_id and linked_record_object.",
+      "parameters": [
+        {
+          "name": "content",
+          "type": "string",
+          "required": true,
+          "description": "Task description",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "assignee_id",
+          "type": "string",
+          "required": true,
+          "description": "Workspace member UUID",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "deadline",
+          "type": "string",
+          "required": true,
+          "description": "Due date in ISO 8601 format",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "linked_record_id",
+          "type": "string",
+          "required": false,
+          "description": "Record UUID to link to the task",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "linked_record_object",
+          "type": "string",
+          "required": false,
+          "description": "The type of object to link to the task. Standard object types are 'people', 'companies', and 'deals'. Custom object types are the API slug of the object.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "attio",
+        "providerType": "oauth2",
+        "scopes": [
+          "task:read-write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Created task info"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Attio.CreateTask",
+        "parameters": {
+          "content": {
+            "value": "Follow up on Q1 contract review and gather signatures.",
+            "type": "string",
+            "required": true
+          },
+          "assignee_id": {
+            "value": "a1b2c3d4-5678-90ab-cdef-1234567890ab",
+            "type": "string",
+            "required": true
+          },
+          "deadline": {
+            "value": "2026-03-01T09:00:00Z",
+            "type": "string",
+            "required": true
+          },
+          "linked_record_id": {
+            "value": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+            "type": "string",
+            "required": false
+          },
+          "linked_record_object": {
+            "value": "deals",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "attio",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetCallTranscript",
+      "qualifiedName": "Attio.GetCallTranscript",
+      "fullyQualifiedName": "Attio.GetCallTranscript@1.0.1",
+      "description": "Get the full transcript from a call recording.\n\nReturns the transcript with speaker labels. Use this after finding a meeting\nwith a call recording via list_record_meetings or get_meeting.\n\nThe transcript includes:\n- Full raw transcript text\n- Segmented transcript with speaker names\n- Call duration and participant info",
+      "parameters": [
+        {
+          "name": "meeting_id",
+          "type": "string",
+          "required": true,
+          "description": "Meeting UUID",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "call_recording_id",
+          "type": "string",
+          "required": true,
+          "description": "Call recording UUID",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_timestamps",
+          "type": "boolean",
+          "required": false,
+          "description": "Include start/end times for each segment (default false)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "attio",
+        "providerType": "oauth2",
+        "scopes": [
+          "meeting:read",
+          "call_recording:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Call transcript with speaker labels"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Attio.GetCallTranscript",
+        "parameters": {
+          "meeting_id": {
+            "value": "3f9a1b2c-7e6f-4d2b-9c3a-1e2f3a4b5c6d",
+            "type": "string",
+            "required": true
+          },
+          "call_recording_id": {
+            "value": "8b7c6d5e-1f2a-4b3c-9d0e-4f5a6b7c8d9e",
+            "type": "string",
+            "required": true
+          },
+          "include_timestamps": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "attio",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetDealTranscript",
+      "qualifiedName": "Attio.GetDealTranscript",
+      "fullyQualifiedName": "Attio.GetDealTranscript@1.0.1",
+      "description": "Convenience tool to get a call transcript for a deal in one step.\n\nFinds meetings for the deal, gets the specified meeting's call recording,\nand returns the full transcript. Defaults to the most recent meeting.\n\nThis combines list_record_meetings + get_call_transcript into one call.\nReturns an error if no meetings with recordings are found.",
+      "parameters": [
+        {
+          "name": "deal_record_id",
+          "type": "string",
+          "required": true,
+          "description": "Deal record UUID",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "meeting_index",
+          "type": "integer",
+          "required": false,
+          "description": "Which meeting (0=most recent, 1=second most recent, default 0)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "attio",
+        "providerType": "oauth2",
+        "scopes": [
+          "meeting:read",
+          "call_recording:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Call transcript for the specified deal meeting"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Attio.GetDealTranscript",
+        "parameters": {
+          "deal_record_id": {
+            "value": "a1b2c3d4-5e6f-7a8b-9c0d-ef1234567890",
+            "type": "string",
+            "required": true
+          },
+          "meeting_index": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "attio",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetListEntries",
+      "qualifiedName": "Attio.GetListEntries",
+      "fullyQualifiedName": "Attio.GetListEntries@1.0.1",
+      "description": "Get entries from an Attio list with pagination.\n\nReturns entries with their record IDs and flattened list-specific values.",
+      "parameters": [
+        {
+          "name": "list_id",
+          "type": "string",
+          "required": true,
+          "description": "List UUID",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Max entries to return (default 25)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Number of entries to skip (default 0)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "attio",
+        "providerType": "oauth2",
+        "scopes": [
+          "list_entry:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "List entries with pagination info"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Attio.GetListEntries",
+        "parameters": {
+          "list_id": {
+            "value": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "attio",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetMeeting",
+      "qualifiedName": "Attio.GetMeeting",
+      "fullyQualifiedName": "Attio.GetMeeting@1.0.1",
+      "description": "Get details of a specific meeting.\n\nReturns meeting metadata and call recording info if available.\nUse call_recording_id with get_call_transcript to fetch the transcript.",
+      "parameters": [
+        {
+          "name": "meeting_id",
+          "type": "string",
+          "required": true,
+          "description": "Meeting UUID",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "attio",
+        "providerType": "oauth2",
+        "scopes": [
+          "meeting:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Meeting details including call recording info"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Attio.GetMeeting",
+        "parameters": {
+          "meeting_id": {
+            "value": "3f7a9b64-2e8b-4d1a-9c2e-123456789abc",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "attio",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetObjectSchema",
+      "qualifiedName": "Attio.GetObjectSchema",
+      "fullyQualifiedName": "Attio.GetObjectSchema@1.0.1",
+      "description": "Get the schema/attributes for an Attio object.\n\nCall list_objects first to see available objects, then call this to see\ntheir attributes for filtering. Returns attribute names, types, filter syntax hints,\nand for select/status fields, the available option values to use in filters.\n\nIMPORTANT: Location and personal-name fields require NESTED filter syntax.",
+      "parameters": [
+        {
+          "name": "object_type",
+          "type": "string",
+          "required": true,
+          "description": "The type of object to get the schema for. Standard object types are 'people', 'companies', and 'deals'. Custom object types are the API slug of the object.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "attio",
+        "providerType": "oauth2",
+        "scopes": [
+          "object_configuration:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Object schema with filterable attributes and their types"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Attio.GetObjectSchema",
+        "parameters": {
+          "object_type": {
+            "value": "people",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "attio",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetRecord",
+      "qualifiedName": "Attio.GetRecord",
+      "fullyQualifiedName": "Attio.GetRecord@1.0.1",
+      "description": "Get a single Attio record by ID.\n\nReturns the record with flattened values and a direct web URL.",
+      "parameters": [
+        {
+          "name": "object_type",
+          "type": "string",
+          "required": true,
+          "description": "The type of object to get a record for. Standard object types are 'people', 'companies', and 'deals'. Custom object types are the API slug of the object.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "record_id",
+          "type": "string",
+          "required": true,
+          "description": "Record UUID",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "attio",
+        "providerType": "oauth2",
+        "scopes": [
+          "record_permission:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Single record with flattened values"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Attio.GetRecord",
+        "parameters": {
+          "object_type": {
+            "value": "people",
+            "type": "string",
+            "required": true
+          },
+          "record_id": {
+            "value": "a3f1c9e2-4b7f-4e2a-9d7a-1234567890ab",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "attio",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListLists",
+      "qualifiedName": "Attio.ListLists",
+      "fullyQualifiedName": "Attio.ListLists@1.0.1",
+      "description": "Get all lists in the Attio workspace with pagination.\n\nReturns list metadata including ID, name, and parent object type.",
+      "parameters": [
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Max lists to return (default 25)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Number of lists to skip (default 0)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "attio",
+        "providerType": "oauth2",
+        "scopes": [
+          "list_configuration:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Lists with pagination info"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Attio.ListLists",
+        "parameters": {
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "attio",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListObjects",
+      "qualifiedName": "Attio.ListObjects",
+      "fullyQualifiedName": "Attio.ListObjects@1.0.1",
+      "description": "List all objects (tables) in the Attio workspace.\n\nCALL THIS FIRST to discover what objects exist. Standard objects include\n'people', 'companies', 'deals', 'users'. Custom objects will also appear.\n\nReturns object slugs (API names) and titles (display names).",
+      "parameters": [],
+      "auth": {
+        "providerId": "attio",
+        "providerType": "oauth2",
+        "scopes": [
+          "object_configuration:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "List of all objects in the workspace"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Attio.ListObjects",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "attio",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListRecordMeetings",
+      "qualifiedName": "Attio.ListRecordMeetings",
+      "fullyQualifiedName": "Attio.ListRecordMeetings@1.0.1",
+      "description": "List meetings associated with an Attio record.\n\nReturns meetings linked to a deal, company, or person including:\n- Meeting ID and title\n- Meeting type (e.g., 'Discovery', 'Demo')\n- Start/end times\n- Whether the meeting has a call recording\n\nUse this to find meetings before fetching transcripts.",
+      "parameters": [
+        {
+          "name": "object_type",
+          "type": "string",
+          "required": true,
+          "description": "The type of object to get meetings for. Standard object types are 'people', 'companies', and 'deals'. Custom object types are the API slug of the object.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "record_id",
+          "type": "string",
+          "required": true,
+          "description": "Record UUID to get meetings for",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Max meetings to return (default 20)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Number of meetings to skip (default 0)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "attio",
+        "providerType": "oauth2",
+        "scopes": [
+          "meeting:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Meetings with pagination info"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Attio.ListRecordMeetings",
+        "parameters": {
+          "object_type": {
+            "value": "deals",
+            "type": "string",
+            "required": true
+          },
+          "record_id": {
+            "value": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "attio",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListTasks",
+      "qualifiedName": "Attio.ListTasks",
+      "fullyQualifiedName": "Attio.ListTasks@1.0.1",
+      "description": "Get tasks from Attio with optional filtering and pagination.\n\nCan filter by assignee and/or completion status.",
+      "parameters": [
+        {
+          "name": "assignee_id",
+          "type": "string",
+          "required": false,
+          "description": "Filter by assignee UUID",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "is_completed",
+          "type": "boolean",
+          "required": false,
+          "description": "Filter by completion status",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Max tasks to return (default 25)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Number of tasks to skip (default 0)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "attio",
+        "providerType": "oauth2",
+        "scopes": [
+          "task:read-write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Tasks with pagination info"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Attio.ListTasks",
+        "parameters": {
+          "assignee_id": {
+            "value": "a3f5d2e4-9b8c-4f12-9347-1c2d3e4f5a67",
+            "type": "string",
+            "required": false
+          },
+          "is_completed": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "attio",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListWorkspaceMembers",
+      "qualifiedName": "Attio.ListWorkspaceMembers",
+      "fullyQualifiedName": "Attio.ListWorkspaceMembers@1.0.1",
+      "description": "Get all members in the Attio workspace.\n\nUseful for task assignment and understanding who owns records.",
+      "parameters": [],
+      "auth": {
+        "providerId": "attio",
+        "providerType": "oauth2",
+        "scopes": [
+          "user_management:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "All workspace members"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Attio.ListWorkspaceMembers",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "attio",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "QueryRecords",
+      "qualifiedName": "Attio.QueryRecords",
+      "fullyQualifiedName": "Attio.QueryRecords@1.0.1",
+      "description": "Query Attio records with filtering and pagination.\n\nWorkflow: 1) list_objects, 2) get_object_schema, 3) query_records with fields.",
+      "parameters": [
+        {
+          "name": "object_type",
+          "type": "string",
+          "required": true,
+          "description": "The type of object to query. Standard object types are 'people', 'companies', and 'deals'. Custom object types are the API slug of the object.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "fields",
+          "type": "array",
+          "innerType": "string",
+          "required": true,
+          "description": "Fields to return (call get_object_schema to see available fields)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "filter_json",
+          "type": "string",
+          "required": false,
+          "description": "JSON filter with operators: $eq, $contains, $gt, $lt",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sort_by",
+          "type": "string",
+          "required": false,
+          "description": "Attribute to sort by",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sort_direction",
+          "type": "string",
+          "required": false,
+          "description": "Sort direction (default desc)",
+          "enum": [
+            "asc",
+            "desc"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Max records to return (default 25, max 100)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Number of records to skip (default 0)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "attio",
+        "providerType": "oauth2",
+        "scopes": [
+          "record_permission:read",
+          "object_configuration:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Query results with pagination info"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Attio.QueryRecords",
+        "parameters": {
+          "object_type": {
+            "value": "people",
+            "type": "string",
+            "required": true
+          },
+          "fields": {
+            "value": [
+              "name",
+              "email",
+              "company",
+              "title",
+              "created_at"
+            ],
+            "type": "array",
+            "required": true
+          },
+          "filter_json": {
+            "value": "{\"$and\":[{\"company\":{\"$eq\":\"Acme Inc\"}},{\"title\":{\"$contains\":\"Engineer\"}}]}",
+            "type": "string",
+            "required": false
+          },
+          "sort_by": {
+            "value": "created_at",
+            "type": "string",
+            "required": false
+          },
+          "sort_direction": {
+            "value": "asc",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "attio",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "RemoveFromList",
+      "qualifiedName": "Attio.RemoveFromList",
+      "fullyQualifiedName": "Attio.RemoveFromList@1.0.1",
+      "description": "Remove a record from an Attio list.\n\nNote: Use the entry_id, not the record_id. Get entry_id from get_list_entries.",
+      "parameters": [
+        {
+          "name": "list_id",
+          "type": "string",
+          "required": true,
+          "description": "List UUID",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "entry_id",
+          "type": "string",
+          "required": true,
+          "description": "Entry UUID (not record ID)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "attio",
+        "providerType": "oauth2",
+        "scopes": [
+          "list_entry:read-write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Removal confirmation"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Attio.RemoveFromList",
+        "parameters": {
+          "list_id": {
+            "value": "8f14e45f-ea6b-4d2f-8b3a-1a2b3c4d5e6f",
+            "type": "string",
+            "required": true
+          },
+          "entry_id": {
+            "value": "3b5d5c37-3e4f-4a2b-b6c7-9d8e7f6a5b4c",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "attio",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "UpdateRecord",
+      "qualifiedName": "Attio.UpdateRecord",
+      "fullyQualifiedName": "Attio.UpdateRecord@1.0.1",
+      "description": "Update a record directly by ID.\n\nUse this when you have the record_id and want to update specific fields.\nUnlike assert_record, this doesn't require a unique matching attribute.\n\nFor status fields like 'stage', pass the status title as a string:\n{\"stage\": \"Closed Won\"}\n\nFor date fields, use ISO format:\n{\"close_date\": \"2024-01-15\"}",
+      "parameters": [
+        {
+          "name": "object_type",
+          "type": "string",
+          "required": true,
+          "description": "The type of object to update a record for. Standard object types are 'people', 'companies', and 'deals'. Custom object types are the API slug of the object.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "record_id",
+          "type": "string",
+          "required": true,
+          "description": "Record UUID to update",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "values",
+          "type": "json",
+          "required": true,
+          "description": "Attribute values to update on the record",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "attio",
+        "providerType": "oauth2",
+        "scopes": [
+          "record_permission:read-write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Updated record info"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Attio.UpdateRecord",
+        "parameters": {
+          "object_type": {
+            "value": "deals",
+            "type": "string",
+            "required": true
+          },
+          "record_id": {
+            "value": "c1a5f3d2-9b6e-4f2a-8c2d-0f1a2b3c4d5e",
+            "type": "string",
+            "required": true
+          },
+          "values": {
+            "value": {
+              "stage": "Closed Won",
+              "close_date": "2024-01-15",
+              "amount": 150000,
+              "title": "Acme Corp Renewal",
+              "renewal_probability": 0.85
+            },
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "attio",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "Attio.WhoAmI",
+      "fullyQualifiedName": "Attio.WhoAmI@1.0.1",
+      "description": "Get the authenticated user's profile and workspace context.\n\nCALL THIS FIRST to understand your identity and permissions.\nReturns the current user's name, email, and workspace membership info.",
+      "parameters": [],
+      "auth": {
+        "providerId": "attio",
+        "providerType": "oauth2",
+        "scopes": [
+          "user_management:read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Authenticated user profile and workspace context"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Attio.WhoAmI",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "attio",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    }
+  ],
+  "documentationChunks": [
+    {
+      "type": "markdown",
+      "location": "header",
+      "position": "before",
+      "content": "## Overview\n\nAttio (Attio) provides Arcade tools that let LLMs interact with an Attio CRM workspace to discover objects and schemas, manage records and lists, access meetings and call transcripts, and create notes and tasks.\n\n**Capabilities**\n\n- Discover workspace objects and schemas (ListObjects, GetObjectSchema) to inform queries and filters.\n- Retrieve, create, and upsert records; list entries and add records to lists (GetRecord, AssertRecord, GetListEntries, AddToList).\n- Access meetings and call recordings and retrieve full transcripts with speaker labels (GetMeeting, GetCallTranscript, GetDealTranscript).\n- Create contextual notes and tasks linked to records (CreateNote, CreateTask).\n- List and paginate workspace lists and objects (ListLists, pagination-aware endpoints).\n\n**OAuth**\n\n- Provider: attio\n- Scopes:\n  - call_recording:read\n  - list_configuration:read\n  - list_entry:read\n  - list_entry:read-write\n  - meeting:read\n  - note:read-write\n  - object_configuration:read\n  - record_permission:read\n  - record_permission:read-write\n  - task:read-write\n  - user_management:read"
+    }
+  ],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-02-17T22:25:08.344Z",
+  "summary": "Attio Arcade toolkit enables LLMs to interact programmatically with Attio CRM, performing record and list management, task and note creation, meeting queries, and call transcript retrieval. It exposes high-level operations for querying, updating, and idempotent upserts while surfacing schema and workspace metadata.\n\n**Capabilities**\n- Unified record lifecycle: query, assert (idempotent upsert), update, and list membership management across objects.\n- Discovery-first workflows: list objects, fetch object schemas, then query with filters and pagination.\n- Activity and context management: create tasks/notes, list meetings, fetch call transcripts, and enumerate workspace members.\n- Permission- and pagination-aware operations suitable for automation and integrations.\n\n**OAuth**\nProvider: attio\nScopes: call_recording:read, list_configuration:read, list_entry:read, list_entry:read-write, meeting:read, note:read-write, object_configuration:read, record_permission:read, record_permission:read-write, task:read-write, user_management:read"
+}
