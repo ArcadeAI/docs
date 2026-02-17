@@ -72,9 +72,12 @@ type ApiSource = "list-tools" | "tool-metadata" | "mock";
 
 import {
   type MergedToolkit,
+  MergedToolkitAuthSchema,
+  MergedToolkitMetadataSchema,
   MergedToolkitSchema,
   type ProviderVersion,
   ProviderVersionSchema,
+  ToolDefinitionSchema,
 } from "../types/index.js";
 
 const program = new Command();
@@ -610,49 +613,262 @@ const createToolkitDataSourceForApi = (
 const normalizeToolkitKey = (toolkitId: string): string =>
   toolkitId.toLowerCase();
 
+interface PreviousToolkitLoadStats {
+  scannedFiles: number;
+  loadedFiles: number;
+  fallbackFiles: number;
+  missingFiles: number;
+  failedFiles: string[];
+}
+
+interface PreviousToolkitLoadResult {
+  toolkits: ReadonlyMap<string, MergedToolkit>;
+  stats: PreviousToolkitLoadStats;
+}
+
+const createPreviousToolkitLoadStats = (): PreviousToolkitLoadStats => ({
+  scannedFiles: 0,
+  loadedFiles: 0,
+  fallbackFiles: 0,
+  missingFiles: 0,
+  failedFiles: [],
+});
+
+const DEFAULT_PREVIOUS_TOOLKIT_METADATA = {
+  category: "development" as const,
+  iconUrl: "",
+  isBYOC: false,
+  isPro: false,
+  type: "arcade" as const,
+  docsLink: "",
+  isComingSoon: false,
+  isHidden: false,
+};
+
+const toRecord = (value: unknown): Record<string, unknown> | null =>
+  typeof value === "object" && value !== null && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
+
+const getFileStem = (filePath: string): string => {
+  const fileName = filePath.split("/").pop() ?? "unknown.json";
+  return fileName.replace(/\.json$/i, "");
+};
+
+const getVersionFromFullyQualifiedName = (
+  fullyQualifiedName: string | undefined
+): string | undefined => {
+  if (!fullyQualifiedName) return;
+  const version = fullyQualifiedName.split("@")[1];
+  return version && version.length > 0 ? version : undefined;
+};
+
+const buildToolkitForDiffFromRaw = (
+  payload: unknown,
+  fallbackId: string
+): {
+  toolkit: MergedToolkit | null;
+  usedFallback: boolean;
+  reason?: string;
+} => {
+  const strictResult = MergedToolkitSchema.safeParse(payload);
+  if (strictResult.success) {
+    return { toolkit: strictResult.data, usedFallback: false };
+  }
+
+  const record = toRecord(payload);
+  if (!record) {
+    return {
+      toolkit: null,
+      usedFallback: true,
+      reason: "Previous output file is not a JSON object",
+    };
+  }
+
+  const toolkitId =
+    typeof record.id === "string" && record.id.length > 0
+      ? record.id
+      : fallbackId;
+  const label =
+    typeof record.label === "string" && record.label.length > 0
+      ? record.label
+      : toolkitId;
+  const description =
+    typeof record.description === "string" ? record.description : null;
+
+  const firstIssue = strictResult.error.issues[0];
+  const fallbackReason = firstIssue
+    ? `${firstIssue.path.join(".")}: ${firstIssue.message}`
+    : strictResult.error.message;
+
+  const rawTools = Array.isArray(record.tools) ? record.tools : [];
+  const tools = rawTools.flatMap((rawTool) => {
+    const parsedTool = ToolDefinitionSchema.safeParse(rawTool);
+    if (!parsedTool.success) {
+      return [];
+    }
+    return [
+      {
+        ...parsedTool.data,
+        secretsInfo: [],
+        documentationChunks: [],
+      },
+    ];
+  });
+
+  const versionFromTools = getVersionFromFullyQualifiedName(
+    tools[0]?.fullyQualifiedName
+  );
+  const version =
+    typeof record.version === "string" && record.version.length > 0
+      ? record.version
+      : (versionFromTools ?? "0.0.0");
+
+  const metadataResult = MergedToolkitMetadataSchema.safeParse(record.metadata);
+  const authResult = MergedToolkitAuthSchema.safeParse(record.auth);
+  const summary =
+    typeof record.summary === "string" ? record.summary : undefined;
+  const generatedAt =
+    typeof record.generatedAt === "string" ? record.generatedAt : undefined;
+
+  return {
+    toolkit: {
+      id: toolkitId,
+      label,
+      version,
+      description,
+      ...(summary ? { summary } : {}),
+      metadata: metadataResult.success
+        ? metadataResult.data
+        : DEFAULT_PREVIOUS_TOOLKIT_METADATA,
+      auth: authResult.success ? authResult.data : null,
+      tools,
+      documentationChunks: [],
+      customImports: [],
+      subPages: [],
+      ...(generatedAt ? { generatedAt } : {}),
+    },
+    usedFallback: true,
+    reason: fallbackReason,
+  };
+};
+
+interface PreviousToolkitLoadOutcome {
+  toolkit: MergedToolkit | null;
+  missing: boolean;
+  usedFallback: boolean;
+  reason?: string;
+}
+
 const loadPreviousToolkit = async (
   filePath: string
-): Promise<MergedToolkit | null> => {
+): Promise<PreviousToolkitLoadOutcome> => {
   try {
     const content = await readFile(filePath, "utf-8");
     const parsed = JSON.parse(content) as unknown;
-    const result = MergedToolkitSchema.safeParse(parsed);
-    if (!result.success) {
-      return null;
+    const parsedToolkit = buildToolkitForDiffFromRaw(
+      parsed,
+      getFileStem(filePath)
+    );
+    return {
+      toolkit: parsedToolkit.toolkit,
+      missing: false,
+      usedFallback: parsedToolkit.usedFallback,
+      ...(parsedToolkit.reason ? { reason: parsedToolkit.reason } : {}),
+    };
+  } catch (error) {
+    const errorWithCode =
+      error && typeof error === "object" && "code" in error
+        ? (error as { code?: string })
+        : undefined;
+    if (errorWithCode?.code === "ENOENT") {
+      return {
+        toolkit: null,
+        missing: true,
+        usedFallback: false,
+      };
     }
-    return result.data;
-  } catch {
-    return null;
+
+    return {
+      toolkit: null,
+      missing: false,
+      usedFallback: false,
+      reason: error instanceof Error ? error.message : String(error),
+    };
   }
 };
+
+const formatPreviousToolkitLoadStats = (
+  stats: PreviousToolkitLoadStats
+): string =>
+  [
+    `${stats.scannedFiles} scanned`,
+    `${stats.loadedFiles} loaded`,
+    `${stats.fallbackFiles} fallback`,
+    `${stats.missingFiles} missing`,
+    `${stats.failedFiles.length} failed`,
+  ].join(", ");
 
 const loadPreviousToolkitsForProviders = async (
   dir: string,
   providers: ProviderVersion[],
   verbose: boolean
-): Promise<ReadonlyMap<string, MergedToolkit>> => {
+): Promise<PreviousToolkitLoadResult> => {
   const previousToolkits = new Map<string, MergedToolkit>();
+  const stats = createPreviousToolkitLoadStats();
 
   for (const provider of providers) {
+    stats.scannedFiles += 1;
     const filePath = join(dir, `${provider.provider.toLowerCase()}.json`);
-    const toolkit = await loadPreviousToolkit(filePath);
-    if (toolkit) {
-      previousToolkits.set(normalizeToolkitKey(toolkit.id), toolkit);
-    } else if (verbose) {
+    const loaded = await loadPreviousToolkit(filePath);
+
+    if (loaded.toolkit) {
+      previousToolkits.set(
+        normalizeToolkitKey(loaded.toolkit.id),
+        loaded.toolkit
+      );
+      stats.loadedFiles += 1;
+      if (loaded.usedFallback) {
+        stats.fallbackFiles += 1;
+        if (verbose) {
+          console.log(
+            chalk.dim(
+              `Loaded ${provider.provider} with fallback parser (${loaded.reason ?? "schema mismatch"}).`
+            )
+          );
+        }
+      }
+      continue;
+    }
+
+    if (loaded.missing) {
+      stats.missingFiles += 1;
+      if (verbose) {
+        console.log(
+          chalk.dim(`No previous output found for ${provider.provider}.`)
+        );
+      }
+      continue;
+    }
+
+    const failure = `${provider.provider}: ${loaded.reason ?? "unable to parse previous output"}`;
+    stats.failedFiles.push(failure);
+    if (verbose) {
       console.log(
-        chalk.dim(`No previous output found for ${provider.provider}.`)
+        chalk.dim(`Failed to parse previous output for ${provider.provider}.`)
       );
     }
   }
 
-  return previousToolkits;
+  return { toolkits: previousToolkits, stats };
 };
 
 const loadPreviousToolkitsFromDir = async (
   dir: string,
   verbose: boolean
-): Promise<ReadonlyMap<string, MergedToolkit>> => {
+): Promise<PreviousToolkitLoadResult> => {
   const previousToolkits = new Map<string, MergedToolkit>();
+  const stats = createPreviousToolkitLoadStats();
 
   try {
     const entries = await readdir(dir);
@@ -661,11 +877,36 @@ const loadPreviousToolkitsFromDir = async (
     );
 
     for (const fileName of jsonFiles) {
+      stats.scannedFiles += 1;
       const filePath = join(dir, fileName);
-      const toolkit = await loadPreviousToolkit(filePath);
-      if (toolkit) {
-        previousToolkits.set(normalizeToolkitKey(toolkit.id), toolkit);
+      const loaded = await loadPreviousToolkit(filePath);
+      if (loaded.toolkit) {
+        previousToolkits.set(
+          normalizeToolkitKey(loaded.toolkit.id),
+          loaded.toolkit
+        );
+        stats.loadedFiles += 1;
+        if (loaded.usedFallback) {
+          stats.fallbackFiles += 1;
+          if (verbose) {
+            console.log(
+              chalk.dim(
+                `Loaded ${fileName} with fallback parser (${loaded.reason ?? "schema mismatch"}).`
+              )
+            );
+          }
+        }
+        continue;
       }
+
+      if (loaded.missing) {
+        stats.missingFiles += 1;
+        continue;
+      }
+
+      stats.failedFiles.push(
+        `${fileName}: ${loaded.reason ?? "unable to parse previous output"}`
+      );
     }
   } catch (error) {
     if (verbose) {
@@ -673,7 +914,7 @@ const loadPreviousToolkitsFromDir = async (
     }
   }
 
-  return previousToolkits;
+  return { toolkits: previousToolkits, stats };
 };
 
 const processProviders = async (
@@ -1032,7 +1273,7 @@ program
           ? undefined
           : (options.previousOutput ??
             (options.overwriteOutput ? undefined : options.output));
-        const previousToolkits = previousOutputDir
+        const previousToolkitLoad = previousOutputDir
           ? runAll
             ? await loadPreviousToolkitsFromDir(
                 previousOutputDir,
@@ -1044,6 +1285,28 @@ program
                 options.verbose
               )
           : undefined;
+        const previousToolkits = previousToolkitLoad?.toolkits;
+        if (previousToolkitLoad) {
+          if (options.verbose) {
+            console.log(
+              chalk.dim(
+                `Loaded previous output: ${formatPreviousToolkitLoadStats(previousToolkitLoad.stats)}`
+              )
+            );
+          }
+          if (previousToolkitLoad.stats.failedFiles.length > 0) {
+            console.log(
+              chalk.yellow(
+                `⚠ Skipped ${previousToolkitLoad.stats.failedFiles.length} previous toolkit file(s) during diffing.`
+              )
+            );
+            if (options.verbose) {
+              for (const failure of previousToolkitLoad.stats.failedFiles) {
+                console.log(chalk.dim(`  - ${failure}`));
+              }
+            }
+          }
+        }
 
         // Custom sections source
         const customSectionsSource = options.customSections
@@ -1097,8 +1360,17 @@ program
           spinner.start("Detecting changes in tool definitions...");
 
           // Fetch all current tools
+          const fetchStartedAt = Date.now();
           const currentToolkitsData =
             await toolkitDataSource.fetchAllToolkitsData();
+          const fetchDurationMs = Date.now() - fetchStartedAt;
+          if (options.verbose) {
+            console.log(
+              chalk.dim(
+                `  Fetched ${currentToolkitsData.size} toolkit(s) from ${apiSource} in ${fetchDurationMs}ms`
+              )
+            );
+          }
 
           // Build map of toolkit ID -> tools for comparison
           const currentToolkitTools = new Map<
@@ -1110,10 +1382,19 @@ program
           }
 
           // Detect changes
+          const compareStartedAt = Date.now();
           const detectedChanges = detectChanges(
             currentToolkitTools,
             previousToolkits ?? new Map()
           );
+          const compareDurationMs = Date.now() - compareStartedAt;
+          if (options.verbose) {
+            console.log(
+              chalk.dim(
+                `  Compared ${currentToolkitTools.size} current toolkit(s) against ${previousToolkits?.size ?? 0} previous toolkit(s) in ${compareDurationMs}ms`
+              )
+            );
+          }
 
           if (!hasChanges(detectedChanges)) {
             spinner.succeed(
@@ -1140,15 +1421,24 @@ program
           const changedIds = getChangedToolkitIds(detectedChanges);
           changedToolkitIds = new Set(changedIds.map((id) => id.toLowerCase()));
           changeResult = detectedChanges;
+          const changedPreview =
+            changedIds.length <= 20
+              ? changedIds.join(", ")
+              : `${changedIds.slice(0, 20).join(", ")} ... +${changedIds.length - 20} more`;
 
           spinner.succeed(
-            `Detected ${changedIds.length} changed toolkit(s): ${changedIds.join(", ")}`
+            `Detected ${changedIds.length} changed toolkit(s): ${changedPreview}`
           );
 
           if (options.verbose) {
             console.log(
               chalk.dim(`  Summary: ${formatChangeSummary(detectedChanges)}`)
             );
+            if (changedIds.length > 20) {
+              console.log(
+                chalk.dim(`  Full changed list: ${changedIds.join(", ")}`)
+              );
+            }
           }
         }
 
@@ -1214,8 +1504,18 @@ program
         if (runAll) {
           // First, get the toolkit count to set up progress tracking
           spinner.start("Fetching toolkit list...");
+          const fetchToolkitListStartedAt = Date.now();
           const toolkitList = await toolkitDataSource.fetchAllToolkitsData();
+          const fetchToolkitListDurationMs =
+            Date.now() - fetchToolkitListStartedAt;
           const totalToolkits = toolkitList.size;
+          if (options.verbose) {
+            console.log(
+              chalk.dim(
+                `  Toolkit list fetched in ${fetchToolkitListDurationMs}ms (${totalToolkits} toolkit(s))`
+              )
+            );
+          }
 
           // If --skip-unchanged, only process changed toolkits
           // Add unchanged toolkits to skipToolkitIds
@@ -1242,6 +1542,18 @@ program
             spinner.succeed(
               `Found ${totalToolkits} toolkit(s), ${toProcess} to process ${skipReason}`.trim()
             );
+            if (options.verbose) {
+              console.log(
+                chalk.dim(
+                  `  Starting merge with toolkitConcurrency=${options.toolkitConcurrency ?? 3}, llmConcurrency=${options.llmConcurrency ?? 5}`
+                )
+              );
+              console.log(
+                chalk.dim(
+                  `  LLM steps: examples=${needsExamples}, summary=${needsSummary}, overview=${needsOverview}`
+                )
+              );
+            }
 
             // Set up progress tracker
             const progressTracker = createProgressTracker({
@@ -1673,12 +1985,34 @@ program
           ? undefined
           : (options.previousOutput ??
             (options.overwriteOutput ? undefined : options.output));
-        const previousToolkits = previousOutputDir
+        const previousToolkitLoad = previousOutputDir
           ? await loadPreviousToolkitsFromDir(
               previousOutputDir,
               options.verbose
             )
           : undefined;
+        const previousToolkits = previousToolkitLoad?.toolkits;
+        if (previousToolkitLoad) {
+          if (options.verbose) {
+            console.log(
+              chalk.dim(
+                `Loaded previous output: ${formatPreviousToolkitLoadStats(previousToolkitLoad.stats)}`
+              )
+            );
+          }
+          if (previousToolkitLoad.stats.failedFiles.length > 0) {
+            console.log(
+              chalk.yellow(
+                `⚠ Skipped ${previousToolkitLoad.stats.failedFiles.length} previous toolkit file(s) during diffing.`
+              )
+            );
+            if (options.verbose) {
+              for (const failure of previousToolkitLoad.stats.failedFiles) {
+                console.log(chalk.dim(`  - ${failure}`));
+              }
+            }
+          }
+        }
 
         const customSectionsSource = options.customSections
           ? createCustomSectionsFileSource(options.customSections)
@@ -1752,9 +2086,19 @@ program
 
         // First, get the toolkit count to set up progress tracking
         spinner.start("Fetching toolkit list...");
+        const fetchToolkitListStartedAt = Date.now();
         const toolkitList = await toolkitDataSource.fetchAllToolkitsData();
+        const fetchToolkitListDurationMs =
+          Date.now() - fetchToolkitListStartedAt;
         const totalToolkits = toolkitList.size;
         const toProcess = totalToolkits - skipToolkitIds.size;
+        if (options.verbose) {
+          console.log(
+            chalk.dim(
+              `  Toolkit list fetched in ${fetchToolkitListDurationMs}ms (${totalToolkits} toolkit(s))`
+            )
+          );
+        }
 
         if (toProcess === 0) {
           spinner.succeed(`All ${totalToolkits} toolkit(s) already complete`);
@@ -1762,6 +2106,18 @@ program
           spinner.succeed(
             `Found ${totalToolkits} toolkit(s), ${toProcess} to process${skipToolkitIds.size > 0 ? ` (${skipToolkitIds.size} skipped)` : ""}`
           );
+          if (options.verbose) {
+            console.log(
+              chalk.dim(
+                `  Starting merge with toolkitConcurrency=${options.toolkitConcurrency ?? 3}, llmConcurrency=${options.llmConcurrency ?? 5}`
+              )
+            );
+            console.log(
+              chalk.dim(
+                `  LLM steps: examples=${needsExamples}, summary=${needsSummary}, overview=${needsOverview}`
+              )
+            );
+          }
 
           // Set up progress tracker
           const progressTracker = createProgressTracker({
@@ -2081,8 +2437,10 @@ program
 
         // Fetch current data from API
         spinner.text = "Fetching current tool definitions from API...";
+        const fetchStartedAt = Date.now();
         const currentToolkitsData =
           await toolkitDataSource.fetchAllToolkitsData();
+        const fetchDurationMs = Date.now() - fetchStartedAt;
 
         // Build map of toolkit ID -> tools
         const currentToolkitTools = new Map<
@@ -2095,25 +2453,68 @@ program
 
         // Load previous output
         spinner.text = "Loading previous output...";
-        const previousToolkits = await loadPreviousToolkitsFromDir(
+        const loadPreviousStartedAt = Date.now();
+        const previousToolkitLoad = await loadPreviousToolkitsFromDir(
           resolve(options.output),
-          false
+          options.verbose
         );
+        const loadPreviousDurationMs = Date.now() - loadPreviousStartedAt;
+        const previousToolkits = previousToolkitLoad.toolkits;
 
         // Detect changes
         spinner.text = "Comparing tool definitions...";
+        const compareStartedAt = Date.now();
         const changeResult = detectChanges(
           currentToolkitTools,
           previousToolkits
         );
+        const compareDurationMs = Date.now() - compareStartedAt;
 
         spinner.stop();
+
+        if (options.verbose) {
+          console.log(chalk.dim("\nDiagnostics:"));
+          console.log(
+            chalk.dim(
+              `  Fetched ${currentToolkitTools.size} current toolkit(s) in ${fetchDurationMs}ms`
+            )
+          );
+          console.log(
+            chalk.dim(
+              `  Loaded previous output in ${loadPreviousDurationMs}ms (${formatPreviousToolkitLoadStats(previousToolkitLoad.stats)})`
+            )
+          );
+          console.log(
+            chalk.dim(`  Compared signatures in ${compareDurationMs}ms`)
+          );
+          if (previousToolkitLoad.stats.failedFiles.length > 0) {
+            console.log(
+              chalk.yellow(
+                `  ⚠ ${previousToolkitLoad.stats.failedFiles.length} previous file(s) could not be parsed and were excluded from diffing.`
+              )
+            );
+            for (const failure of previousToolkitLoad.stats.failedFiles) {
+              console.log(chalk.dim(`    - ${failure}`));
+            }
+          }
+          console.log();
+        } else if (previousToolkitLoad.stats.failedFiles.length > 0) {
+          console.log(
+            chalk.yellow(
+              `⚠ Excluded ${previousToolkitLoad.stats.failedFiles.length} previous toolkit file(s) from diffing. Run with --verbose for details.`
+            )
+          );
+        }
 
         await appendLogEntry(logPaths.runLogPath, {
           title: "check-changes",
           details: [
             `output=${resolve(options.output)}`,
             `apiSource=${apiSource}`,
+            `fetchDurationMs=${fetchDurationMs}`,
+            `loadPreviousDurationMs=${loadPreviousDurationMs}`,
+            `compareDurationMs=${compareDurationMs}`,
+            `previousLoadStats=${formatPreviousToolkitLoadStats(previousToolkitLoad.stats)}`,
             ...buildChangeLogDetails(changeResult),
           ],
         });
@@ -2124,7 +2525,25 @@ program
 
         // Output results
         if (options.json) {
-          console.log(JSON.stringify(changeResult, null, 2));
+          console.log(
+            JSON.stringify(
+              {
+                ...changeResult,
+                diagnostics: {
+                  currentToolkitCount: currentToolkitTools.size,
+                  previousToolkitCount: previousToolkits.size,
+                  previousLoad: previousToolkitLoad.stats,
+                  timingMs: {
+                    fetch: fetchDurationMs,
+                    loadPrevious: loadPreviousDurationMs,
+                    compare: compareDurationMs,
+                  },
+                },
+              },
+              null,
+              2
+            )
+          );
         } else {
           console.log(chalk.bold("\n📋 Change Detection Results\n"));
 
