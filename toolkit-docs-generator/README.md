@@ -84,8 +84,8 @@ Generate a single toolkit:
 ```bash
 pnpm dlx tsx src/cli/index.ts generate \
   --providers "Github:1.0.0" \
-  --engine-api-url "$ENGINE_API_URL" \
-  --engine-api-key "$ENGINE_API_KEY" \
+  --tool-metadata-url "$ENGINE_API_URL" \
+  --tool-metadata-key "$ENGINE_API_KEY" \
   --llm-provider openai \
   --llm-model gpt-4.1-mini \
   --llm-api-key "$OPENAI_API_KEY" \
@@ -98,8 +98,8 @@ Generate all toolkits:
 pnpm dlx tsx src/cli/index.ts generate \
   --all \
   --skip-unchanged \
-  --engine-api-url "$ENGINE_API_URL" \
-  --engine-api-key "$ENGINE_API_KEY" \
+  --tool-metadata-url "$ENGINE_API_URL" \
+  --tool-metadata-key "$ENGINE_API_KEY" \
   --llm-provider openai \
   --llm-model gpt-4.1-mini \
   --llm-api-key "$OPENAI_API_KEY" \
@@ -111,8 +111,8 @@ Generate without LLM output:
 ```bash
 pnpm dlx tsx src/cli/index.ts generate \
   --providers "Asana:0.1.3" \
-  --engine-api-url "$ENGINE_API_URL" \
-  --engine-api-key "$ENGINE_API_KEY" \
+  --tool-metadata-url "$ENGINE_API_URL" \
+  --tool-metadata-key "$ENGINE_API_KEY" \
   --skip-examples \
   --skip-summary \
   --skip-overview \
