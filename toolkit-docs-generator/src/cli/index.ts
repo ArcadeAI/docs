@@ -23,6 +23,7 @@ import {
   getChangedToolkitIds,
   hasChanges,
 } from "../diff/index.js";
+import { parsePreviousToolkitForDiff } from "../diff/previous-output.js";
 import {
   createJsonGenerator,
   type VerificationProgress,
@@ -72,12 +73,8 @@ type ApiSource = "list-tools" | "tool-metadata" | "mock";
 
 import {
   type MergedToolkit,
-  MergedToolkitAuthSchema,
-  MergedToolkitMetadataSchema,
-  MergedToolkitSchema,
   type ProviderVersion,
   ProviderVersionSchema,
-  ToolDefinitionSchema,
 } from "../types/index.js";
 
 const program = new Command();
@@ -634,123 +631,9 @@ const createPreviousToolkitLoadStats = (): PreviousToolkitLoadStats => ({
   failedFiles: [],
 });
 
-const DEFAULT_PREVIOUS_TOOLKIT_METADATA = {
-  category: "development" as const,
-  iconUrl: "",
-  isBYOC: false,
-  isPro: false,
-  type: "arcade" as const,
-  docsLink: "",
-  isComingSoon: false,
-  isHidden: false,
-};
-
-const toRecord = (value: unknown): Record<string, unknown> | null =>
-  typeof value === "object" && value !== null && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : null;
-
 const getFileStem = (filePath: string): string => {
   const fileName = filePath.split("/").pop() ?? "unknown.json";
   return fileName.replace(/\.json$/i, "");
-};
-
-const getVersionFromFullyQualifiedName = (
-  fullyQualifiedName: string | undefined
-): string | undefined => {
-  if (!fullyQualifiedName) return;
-  const version = fullyQualifiedName.split("@")[1];
-  return version && version.length > 0 ? version : undefined;
-};
-
-const buildToolkitForDiffFromRaw = (
-  payload: unknown,
-  fallbackId: string
-): {
-  toolkit: MergedToolkit | null;
-  usedFallback: boolean;
-  reason?: string;
-} => {
-  const strictResult = MergedToolkitSchema.safeParse(payload);
-  if (strictResult.success) {
-    return { toolkit: strictResult.data, usedFallback: false };
-  }
-
-  const record = toRecord(payload);
-  if (!record) {
-    return {
-      toolkit: null,
-      usedFallback: true,
-      reason: "Previous output file is not a JSON object",
-    };
-  }
-
-  const toolkitId =
-    typeof record.id === "string" && record.id.length > 0
-      ? record.id
-      : fallbackId;
-  const label =
-    typeof record.label === "string" && record.label.length > 0
-      ? record.label
-      : toolkitId;
-  const description =
-    typeof record.description === "string" ? record.description : null;
-
-  const firstIssue = strictResult.error.issues[0];
-  const fallbackReason = firstIssue
-    ? `${firstIssue.path.join(".")}: ${firstIssue.message}`
-    : strictResult.error.message;
-
-  const rawTools = Array.isArray(record.tools) ? record.tools : [];
-  const tools = rawTools.flatMap((rawTool) => {
-    const parsedTool = ToolDefinitionSchema.safeParse(rawTool);
-    if (!parsedTool.success) {
-      return [];
-    }
-    return [
-      {
-        ...parsedTool.data,
-        secretsInfo: [],
-        documentationChunks: [],
-      },
-    ];
-  });
-
-  const versionFromTools = getVersionFromFullyQualifiedName(
-    tools[0]?.fullyQualifiedName
-  );
-  const version =
-    typeof record.version === "string" && record.version.length > 0
-      ? record.version
-      : (versionFromTools ?? "0.0.0");
-
-  const metadataResult = MergedToolkitMetadataSchema.safeParse(record.metadata);
-  const authResult = MergedToolkitAuthSchema.safeParse(record.auth);
-  const summary =
-    typeof record.summary === "string" ? record.summary : undefined;
-  const generatedAt =
-    typeof record.generatedAt === "string" ? record.generatedAt : undefined;
-
-  return {
-    toolkit: {
-      id: toolkitId,
-      label,
-      version,
-      description,
-      ...(summary ? { summary } : {}),
-      metadata: metadataResult.success
-        ? metadataResult.data
-        : DEFAULT_PREVIOUS_TOOLKIT_METADATA,
-      auth: authResult.success ? authResult.data : null,
-      tools,
-      documentationChunks: [],
-      customImports: [],
-      subPages: [],
-      ...(generatedAt ? { generatedAt } : {}),
-    },
-    usedFallback: true,
-    reason: fallbackReason,
-  };
 };
 
 interface PreviousToolkitLoadOutcome {
@@ -766,7 +649,7 @@ const loadPreviousToolkit = async (
   try {
     const content = await readFile(filePath, "utf-8");
     const parsed = JSON.parse(content) as unknown;
-    const parsedToolkit = buildToolkitForDiffFromRaw(
+    const parsedToolkit = parsePreviousToolkitForDiff(
       parsed,
       getFileStem(filePath)
     );
