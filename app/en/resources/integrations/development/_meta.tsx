@@ -5,6 +5,10 @@ const meta: MetaRecord = {
     type: "separator",
     title: "Optimized",
   },
+  attio: {
+    title: "Attio",
+    href: "/en/resources/integrations/development/attio",
+  },
   brightdata: {
     title: "Bright Data",
     href: "/en/resources/integrations/development/brightdata",
@@ -44,6 +48,18 @@ const meta: MetaRecord = {
   microsoft: {
     title: "Microsoft",
     href: "/en/resources/integrations/development/microsoft",
+  },
+  microsoftonedrive: {
+    title: "MicrosoftOnedrive",
+    href: "/en/resources/integrations/development/microsoftonedrive",
+  },
+  microsoftpowerpoint: {
+    title: "MicrosoftPowerpoint",
+    href: "/en/resources/integrations/development/microsoftpowerpoint",
+  },
+  microsoftword: {
+    title: "MicrosoftWord",
+    href: "/en/resources/integrations/development/microsoftword",
   },
   pagerduty: {
     title: "Pagerduty",
