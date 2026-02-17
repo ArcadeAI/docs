@@ -93,7 +93,10 @@ describe("Scenario: Skip unchanged toolkits", () => {
           createTool({
             name: "Tool1",
             qualifiedName: "Github.Tool1",
-            description: "Updated",
+            output: {
+              type: "array",
+              description: null,
+            },
           }),
         ],
       ],

@@ -21,6 +21,7 @@ test("porter workflow generates docs and opens a PR", () => {
   expect(workflowContents).toContain("pnpm dlx tsx src/cli/index.ts generate");
   expect(workflowContents).toContain("--skip-unchanged");
   expect(workflowContents).toContain("--verbose");
+  expect(workflowContents).toContain("--api-source tool-metadata");
   expect(workflowContents).toContain("--tool-metadata-url");
   expect(workflowContents).toContain("--tool-metadata-key");
   expect(workflowContents).toContain("peter-evans/create-pull-request");

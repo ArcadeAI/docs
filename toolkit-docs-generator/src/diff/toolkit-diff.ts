@@ -5,7 +5,11 @@
  * Used to determine which toolkits need regeneration.
  */
 
-import { buildToolSignature, extractVersion } from "../merger/data-merger.js";
+import {
+  buildToolSignatureInput,
+  extractVersion,
+  stableStringify,
+} from "../merger/data-merger.js";
 import type { MergedToolkit, ToolDefinition } from "../types/index.js";
 
 // ============================================================================
@@ -77,8 +81,80 @@ export interface ChangeSummary {
  * Build a signature for a ToolDefinition (from API)
  * This is different from MergedTool signatures as it uses the raw API format
  */
+const normalizeOutputTypeForDiff = (value: string): string =>
+  value === "unknown" ? "string" : value;
+
+type ToolSignatureInput = {
+  name: string;
+  qualifiedName: string;
+  description: string | null;
+  parameters: Array<{
+    name: string;
+    type: string;
+    innerType: string | null;
+    required: boolean;
+    description: string | null;
+    enum: string[] | null;
+    inferrable: boolean;
+  }>;
+  auth: {
+    providerId: string | null;
+    providerType: string;
+    scopes: string[];
+  } | null;
+  secrets: string[];
+  output: {
+    type: string;
+    description: string | null;
+  } | null;
+};
+
+const normalizeToolSignatureInputForDiff = (
+  tool: ToolDefinition | MergedToolkit["tools"][number]
+): Record<string, unknown> => {
+  const signatureInput = buildToolSignatureInput(tool) as ToolSignatureInput;
+  const parameters = signatureInput.parameters.map((parameter) => ({
+    ...parameter,
+    // Parameter descriptions are not stable across /v1/tools and /v1/tool_metadata.
+    description: null,
+    // tool_metadata may emit [] while list-tools uses null for "no enum values".
+    enum: parameter.enum && parameter.enum.length > 0 ? parameter.enum : null,
+  }));
+  const auth = signatureInput.auth
+    ? {
+        ...signatureInput.auth,
+        // OAuth provider IDs can differ by endpoint shape; scopes/type are stable.
+        providerId:
+          signatureInput.auth.providerType === "oauth2"
+            ? null
+            : signatureInput.auth.providerId,
+      }
+    : null;
+  const output = signatureInput.output
+    ? {
+        ...signatureInput.output,
+        type: normalizeOutputTypeForDiff(signatureInput.output.type),
+        // Output descriptions are not stable across endpoints.
+        description: null,
+      }
+    : null;
+
+  return {
+    ...signatureInput,
+    // Tool descriptions are documentation metadata and vary by source.
+    description: null,
+    parameters,
+    auth,
+    output,
+  };
+};
+
+const buildDiffToolSignature = (
+  tool: ToolDefinition | MergedToolkit["tools"][number]
+): string => stableStringify(normalizeToolSignatureInputForDiff(tool));
+
 export const buildToolDefinitionSignature = (tool: ToolDefinition): string =>
-  buildToolSignature(tool);
+  buildDiffToolSignature(tool);
 
 /**
  * Build a map of tool signatures for quick lookup
@@ -101,7 +177,7 @@ const buildMergedToolSignatureMap = (
 ): ReadonlyMap<string, string> => {
   const map = new Map<string, string>();
   for (const tool of toolkit.tools) {
-    map.set(tool.qualifiedName, buildToolSignature(tool));
+    map.set(tool.qualifiedName, buildDiffToolSignature(tool));
   }
   return map;
 };
