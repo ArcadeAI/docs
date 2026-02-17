@@ -77,10 +77,12 @@ This step does not change JSON output. It only updates navigation files.
 
 ## Local usage
 
+Run these commands from the `toolkit-docs-generator` directory.
+
 Generate a single toolkit:
 
 ```bash
-pnpm start generate \
+pnpm dlx tsx src/cli/index.ts generate \
   --providers "Github:1.0.0" \
   --engine-api-url "$ENGINE_API_URL" \
   --engine-api-key "$ENGINE_API_KEY" \
@@ -93,7 +95,7 @@ pnpm start generate \
 Generate all toolkits:
 
 ```bash
-pnpm start generate \
+pnpm dlx tsx src/cli/index.ts generate \
   --all \
   --skip-unchanged \
   --engine-api-url "$ENGINE_API_URL" \
@@ -107,7 +109,7 @@ pnpm start generate \
 Generate without LLM output:
 
 ```bash
-pnpm start generate \
+pnpm dlx tsx src/cli/index.ts generate \
   --providers "Asana:0.1.3" \
   --engine-api-url "$ENGINE_API_URL" \
   --engine-api-key "$ENGINE_API_KEY" \
@@ -139,4 +141,4 @@ pnpm dlx tsx .github/scripts/sync-toolkit-sidebar.ts
 
 - **Nothing regenerated**: `--skip-unchanged` exits early when tool definitions did not change.
 - **Missing metadata**: the generator falls back to the metadata JSON file when design system metadata is unavailable.
-- **Verify output fails**: run `pnpm start verify-output --output data/toolkits` and fix the reported mismatch.
+- **Verify output fails**: run `pnpm dlx tsx src/cli/index.ts verify-output --output data/toolkits` and fix the reported mismatch.

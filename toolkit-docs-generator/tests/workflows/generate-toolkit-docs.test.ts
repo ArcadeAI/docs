@@ -18,7 +18,7 @@ test("porter workflow includes required triggers", () => {
 });
 
 test("porter workflow generates docs and opens a PR", () => {
-  expect(workflowContents).toContain("pnpm start generate");
+  expect(workflowContents).toContain("pnpm dlx tsx src/cli/index.ts generate");
   expect(workflowContents).toContain("--skip-unchanged");
   expect(workflowContents).toContain("peter-evans/create-pull-request");
   expect(workflowContents).toContain("pull-requests: write");
