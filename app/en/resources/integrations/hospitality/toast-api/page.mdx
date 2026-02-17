@@ -1,0 +1,492 @@
+# ToastApi
+
+import StarterToolInfo from "@/app/_components/starter-tool-info";
+import ToolInfo from "@/app/_components/tool-info";
+import TableOfContents from "@/app/_components/table-of-contents";
+import ToolFooter from "@/app/_components/tool-footer";
+import { Callout } from "nextra/components";
+
+<ToolInfo
+  description="Tools that enable LLMs to interact directly with the Toast POS API for restaurant operations."
+  author="Arcade"
+  authType="API Key"
+  versions={["0.1.0"]}
+/>
+
+<StarterToolInfo toolkitName="ToastApi" />
+
+The ToastApi MCP Server provides a comprehensive suite of tools for managing restaurant operations through the Toast POS platform. Users can efficiently perform actions such as:
+
+- **Orders**: Create, retrieve, void orders, and manage discounts
+- **Menus**: Access menu configurations, items, and pricing
+- **Kitchen**: Manage prep stations and kitchen display configurations
+- **Labor**: Handle employee data, shifts, jobs, and time entries
+- **Inventory**: Track and update stock levels for menu items
+- **Cash Management**: View cash drawer entries and bank deposits
+- **Restaurants**: Access restaurant configurations and management groups
+
+This server is designed to streamline restaurant management and enable AI-powered automation of hospitality operations.
+
+## Authentication
+
+The Arcade Toast API MCP Server requires credentials from the [Toast Developer Portal](https://doc.toasttab.com/doc/devguide/authentication.html). Toast uses a **client credentials** OAuth 2.0 flow. Arcade handles authentication automatically - you just need to provide your client credentials.
+
+### Required Secrets
+
+| Secret | Description |
+|--------|-------------|
+| `TOAST_CLIENT_ID` | Your Toast API client identifier |
+| `TOAST_CLIENT_SECRET` | Your Toast API client secret |
+
+<Callout type="info">
+  Bearer tokens are fetched automatically for each API request using your client credentials.
+  You don't need to manage token expiration or refresh - it's handled for you!
+</Callout>
+
+### How to Obtain Your Credentials
+
+1. **Apply for Toast API Access**
+   - Visit the [Toast Developer Portal](https://pos.toasttab.com/developers)
+   - Submit an integration request for API access
+   - Toast will review and approve your application
+
+2. **Receive API Credentials**
+   - Once approved, you'll receive your `clientId` and `clientSecret`
+   - These credentials identify your integration to Toast
+   - Configure them as `TOAST_CLIENT_ID` and `TOAST_CLIENT_SECRET` secrets in Arcade
+
+3. **Restaurant External ID**
+   - Most API calls require a `restaurant_external_id` parameter
+   - This is the Toast GUID for the specific restaurant location
+   - Obtain this from your Toast account or via `get_restaurants_in_group`
+
+<Callout type="warning">
+  Toast API access requires approval from Toast and is typically available to
+  registered Toast partners and integrators. Contact Toast directly for access.
+</Callout>
+
+For more details, see the [Toast API Authentication Guide](https://doc.toasttab.com/doc/devguide/authentication.html).
+
+## Toast API Scope Coverage
+
+This toolkit supports the following Toast API scopes:
+
+| Scope | Supported | Tools |
+|-------|-----------|-------|
+| `cash_management:read` | Yes | `get_cash_entries`, `get_cash_deposits` |
+| `configuration:read` | Yes | `get_restaurant_info`, `get_restaurants_in_group` |
+| `menus:read` | Yes | `get_menus`, `get_menu_metadata` |
+| `restaurant_availability:read` | Yes | `get_online_ordering_availability` |
+| `orders:read` / `orders:write` | Yes | `get_order`, `get_orders_bulk`, `create_order`, `void_order` |
+| `kitchen:read` | Yes | `get_prep_stations`, `get_prep_station` |
+| `labor:read` | Yes | `get_employees`, `get_employee`, `get_shifts`, `get_jobs`, `get_time_entries` |
+| `stock:read` / `stock:write` | Yes | `get_inventory`, `update_inventory` |
+| `loyalty:read` | Not supported | See note below |
+
+<Callout type="warning">
+  **Loyalty API Limitation**: The `loyalty:read` scope is not currently supported. The Toast Loyalty Integration API is a **webhook-based** system where Toast sends loyalty transaction events to your endpoint - it is not a read API that can be called to retrieve loyalty data. If you need loyalty functionality, contact Toast directly about their loyalty data access options.
+</Callout>
+
+## Available Tools
+
+<TableOfContents
+  headers={["Tool Name", "Description"]}
+  data={[
+    ["ToastApi.get_order", "Retrieve detailed information about a single order."],
+    ["ToastApi.get_orders_bulk", "Retrieve multiple orders with filtering and pagination."],
+    ["ToastApi.create_order", "Create a new order in Toast POS."],
+    ["ToastApi.void_order", "Void an existing order."],
+    ["ToastApi.get_applicable_discounts", "Get discounts applicable to an order."],
+    ["ToastApi.get_prep_stations", "Retrieve all prep station configurations."],
+    ["ToastApi.get_prep_station", "Get details for a specific prep station."],
+    ["ToastApi.get_menus", "Retrieve all menus with items and pricing."],
+    ["ToastApi.get_menu_metadata", "Get menu last modified timestamp."],
+    ["ToastApi.get_restaurant_info", "Retrieve restaurant configuration details."],
+    ["ToastApi.get_restaurants_in_group", "Get all restaurants in a management group."],
+    ["ToastApi.get_employees", "Retrieve all employees for a restaurant."],
+    ["ToastApi.get_employee", "Get details for a specific employee."],
+    ["ToastApi.get_shifts", "Retrieve scheduled shifts with date filtering."],
+    ["ToastApi.get_jobs", "Get all job types configured for a restaurant."],
+    ["ToastApi.get_time_entries", "Retrieve clock-in/clock-out records."],
+    ["ToastApi.get_inventory", "Get inventory status for menu items."],
+    ["ToastApi.update_inventory", "Update stock status for menu items."],
+    ["ToastApi.get_online_ordering_availability", "Check online ordering availability."],
+    ["ToastApi.get_cash_entries", "Get cash drawer entries (cash-in, cash-out, pay-outs, tip-outs)."],
+    ["ToastApi.get_cash_deposits", "Get bank deposit records for a business date."],
+  ]}
+/>
+
+<Callout>
+  If you need to perform an action that's not listed here, you can [get in touch
+  with us](mailto:contact@arcade.dev) to request a new tool, or [create your own
+  tools](/guides/create-tools/tool-basics/build-mcp-server).
+</Callout>
+
+## ToastApi.get_order
+
+Retrieve detailed information about a single order from Toast POS.
+
+Returns comprehensive order data including checks, items, payments, and other order details for a specific order identified by its GUID.
+
+**Parameters**
+
+- **order_guid** (`string`, required): The unique Toast platform identifier (GUID) for the order.
+- **restaurant_external_id** (`string`, required): The Toast platform GUID for the restaurant.
+
+**Secrets**
+
+This tool requires the following secrets: `TOAST_CLIENT_ID`, `TOAST_CLIENT_SECRET`.
+
+---
+
+## ToastApi.get_orders_bulk
+
+Retrieve multiple orders from Toast POS in bulk.
+
+Returns an array of orders based on filter criteria such as business date, time range, or modification date. Useful for syncing order data or generating reports.
+
+**Parameters**
+
+- **restaurant_external_id** (`string`, required): The Toast platform GUID for the restaurant.
+- **business_date** (`string`, optional): Business date in YYYYMMDD format.
+- **start_date** (`string`, optional): Start of date/time range in ISO 8601 format.
+- **end_date** (`string`, optional): End of date/time range in ISO 8601 format.
+- **page_token** (`string`, optional): Pagination token from previous response.
+- **page_size** (`integer`, optional): Number of orders per page (max 100).
+
+**Secrets**
+
+This tool requires the following secrets: `TOAST_CLIENT_ID`, `TOAST_CLIENT_SECRET`.
+
+---
+
+## ToastApi.create_order
+
+Create a new order in Toast POS.
+
+Submits a new order to the Toast platform. The order can include checks, menu items, modifiers, and other order details.
+
+**Parameters**
+
+- **restaurant_external_id** (`string`, required): The Toast platform GUID for the restaurant.
+- **order_data** (`object`, required): Order data including checks, entityType, and other properties.
+
+**Secrets**
+
+This tool requires the following secrets: `TOAST_CLIENT_ID`, `TOAST_CLIENT_SECRET`.
+
+---
+
+## ToastApi.void_order
+
+Void an existing order in Toast POS.
+
+Marks an order as voided, which cancels the order and removes it from active operations. The order record is retained for reporting purposes.
+
+**Parameters**
+
+- **order_guid** (`string`, required): The unique Toast platform identifier (GUID) for the order to void.
+- **restaurant_external_id** (`string`, required): The Toast platform GUID for the restaurant.
+
+**Secrets**
+
+This tool requires the following secrets: `TOAST_CLIENT_ID`, `TOAST_CLIENT_SECRET`.
+
+---
+
+## ToastApi.get_applicable_discounts
+
+Retrieve discounts that can be applied to an order.
+
+Returns a list of discounts that are eligible to be applied to a given order or check based on the current order state and restaurant configuration.
+
+**Parameters**
+
+- **restaurant_external_id** (`string`, required): The Toast platform GUID for the restaurant.
+- **discount_request** (`object`, required): Order context for determining applicable discounts.
+
+**Secrets**
+
+This tool requires the following secrets: `TOAST_CLIENT_ID`, `TOAST_CLIENT_SECRET`.
+
+---
+
+## ToastApi.get_prep_stations
+
+Retrieve all prep stations configured for a restaurant.
+
+Returns the configuration for every prep station (kitchen printer or KDS device location) that has been created for the specified restaurant.
+
+**Parameters**
+
+- **restaurant_external_id** (`string`, required): The Toast platform GUID for the restaurant.
+- **page_token** (`string`, optional): Pagination token from previous response.
+- **last_modified** (`string`, optional): Filter by modification date (ISO 8601).
+
+**Secrets**
+
+This tool requires the following secrets: `TOAST_CLIENT_ID`, `TOAST_CLIENT_SECRET`.
+
+---
+
+## ToastApi.get_prep_station
+
+Retrieve configuration for a single prep station.
+
+Returns detailed configuration for a specific prep station (kitchen printer or KDS device location) identified by its GUID.
+
+**Parameters**
+
+- **prep_station_guid** (`string`, required): The unique Toast platform identifier (GUID) for the prep station.
+- **restaurant_external_id** (`string`, required): The Toast platform GUID for the restaurant.
+
+**Secrets**
+
+This tool requires the following secrets: `TOAST_CLIENT_ID`, `TOAST_CLIENT_SECRET`.
+
+---
+
+## ToastApi.get_menus
+
+Retrieve all menus for a restaurant.
+
+Returns a fully resolved set of menus for the specified restaurant location, including menu groups, menu items, modifiers, and pricing information.
+
+**Parameters**
+
+- **restaurant_external_id** (`string`, required): The Toast platform GUID for the restaurant.
+- **last_modified** (`string`, optional): Return only menus modified after this timestamp.
+
+**Secrets**
+
+This tool requires the following secrets: `TOAST_CLIENT_ID`, `TOAST_CLIENT_SECRET`.
+
+---
+
+## ToastApi.get_menu_metadata
+
+Retrieve the last modified timestamp for restaurant menus.
+
+Returns metadata about when the menus were last updated. Useful for determining if menu data needs to be refreshed without fetching the full menu payload.
+
+**Parameters**
+
+- **restaurant_external_id** (`string`, required): The Toast platform GUID for the restaurant.
+
+**Secrets**
+
+This tool requires the following secrets: `TOAST_CLIENT_ID`, `TOAST_CLIENT_SECRET`.
+
+---
+
+## ToastApi.get_restaurant_info
+
+Retrieve detailed configuration information for a restaurant.
+
+Returns comprehensive restaurant data including name, location, hours, schedules, delivery settings, online ordering configuration, and prep times.
+
+**Parameters**
+
+- **restaurant_guid** (`string`, required): The Toast GUID of the restaurant.
+- **restaurant_external_id** (`string`, required): The Toast platform GUID for the restaurant.
+- **include_archived** (`boolean`, optional): Include archived restaurants.
+
+**Secrets**
+
+This tool requires the following secrets: `TOAST_CLIENT_ID`, `TOAST_CLIENT_SECRET`.
+
+---
+
+## ToastApi.get_restaurants_in_group
+
+Retrieve all restaurants in a management group.
+
+Returns an array of restaurant identifiers for all restaurants that belong to a specified restaurant management group.
+
+**Parameters**
+
+- **management_group_guid** (`string`, required): The GUID of the restaurant management group.
+- **restaurant_external_id** (`string`, required): The Toast GUID of one restaurant in the management group.
+
+**Secrets**
+
+This tool requires the following secrets: `TOAST_CLIENT_ID`, `TOAST_CLIENT_SECRET`.
+
+---
+
+## ToastApi.get_employees
+
+Retrieve all employees for a restaurant.
+
+Returns a list of all employees configured at the restaurant, including their basic information, job assignments, and wage settings.
+
+**Parameters**
+
+- **restaurant_external_id** (`string`, required): The Toast platform GUID for the restaurant.
+
+**Secrets**
+
+This tool requires the following secrets: `TOAST_CLIENT_ID`, `TOAST_CLIENT_SECRET`.
+
+---
+
+## ToastApi.get_employee
+
+Retrieve detailed information about a single employee.
+
+Returns comprehensive details about a specific employee including their personal information, job assignments, and wage configurations.
+
+**Parameters**
+
+- **employee_id** (`string`, required): The unique Toast identifier for the employee.
+- **restaurant_external_id** (`string`, required): The Toast platform GUID for the restaurant.
+
+**Secrets**
+
+This tool requires the following secrets: `TOAST_CLIENT_ID`, `TOAST_CLIENT_SECRET`.
+
+---
+
+## ToastApi.get_shifts
+
+Retrieve scheduled shifts for a restaurant.
+
+Returns shift data for employees at the restaurant, filtered by date range. Useful for scheduling and labor management.
+
+**Parameters**
+
+- **restaurant_external_id** (`string`, required): The Toast platform GUID for the restaurant.
+- **start_date** (`string`, optional): Filter shifts starting on or after this date (YYYY-MM-DD).
+- **end_date** (`string`, optional): Filter shifts ending on or before this date (YYYY-MM-DD).
+
+**Secrets**
+
+This tool requires the following secrets: `TOAST_CLIENT_ID`, `TOAST_CLIENT_SECRET`.
+
+---
+
+## ToastApi.get_jobs
+
+Retrieve all job types configured for a restaurant.
+
+Returns a list of job roles defined for the restaurant, such as Server, Cook, Manager, etc. These jobs are used to define employee positions and wages.
+
+**Parameters**
+
+- **restaurant_external_id** (`string`, required): The Toast platform GUID for the restaurant.
+
+**Secrets**
+
+This tool requires the following secrets: `TOAST_CLIENT_ID`, `TOAST_CLIENT_SECRET`.
+
+---
+
+## ToastApi.get_time_entries
+
+Retrieve time entries (clock-in/clock-out records) for a restaurant.
+
+Returns time tracking records for employees, useful for payroll processing and labor cost analysis.
+
+**Parameters**
+
+- **restaurant_external_id** (`string`, required): The Toast platform GUID for the restaurant.
+- **start_date** (`string`, optional): Filter entries starting on or after this date (YYYY-MM-DD).
+- **end_date** (`string`, optional): Filter entries ending on or before this date (YYYY-MM-DD).
+
+**Secrets**
+
+This tool requires the following secrets: `TOAST_CLIENT_ID`, `TOAST_CLIENT_SECRET`.
+
+---
+
+## ToastApi.get_inventory
+
+Retrieve inventory status for menu items at a restaurant.
+
+Returns the current inventory status for menu items, including quantity on hand and whether items are marked as out of stock.
+
+**Parameters**
+
+- **restaurant_external_id** (`string`, required): The Toast platform GUID for the restaurant.
+- **status** (`string`, optional): Filter by status: `IN_STOCK`, `OUT_OF_STOCK`, or `QUANTITY`.
+
+**Secrets**
+
+This tool requires the following secrets: `TOAST_CLIENT_ID`, `TOAST_CLIENT_SECRET`.
+
+---
+
+## ToastApi.update_inventory
+
+Update inventory status for menu items at a restaurant.
+
+Allows you to update the stock status or quantity for one or more menu items. Useful for marking items as out of stock or adjusting quantity levels.
+
+**Parameters**
+
+- **restaurant_external_id** (`string`, required): The Toast platform GUID for the restaurant.
+- **inventory_updates** (`array`, required): Array of inventory update objects with `menuItemGuid` and `status`.
+
+**Secrets**
+
+This tool requires the following secrets: `TOAST_CLIENT_ID`, `TOAST_CLIENT_SECRET`.
+
+---
+
+## ToastApi.get_online_ordering_availability
+
+Retrieve online ordering availability for a restaurant.
+
+Returns information about whether a restaurant is currently accepting online orders, including hours and any temporary closures or busy periods.
+
+**Parameters**
+
+- **restaurant_external_id** (`string`, required): The Toast platform GUID for the restaurant.
+
+**Secrets**
+
+This tool requires the following secrets: `TOAST_CLIENT_ID`, `TOAST_CLIENT_SECRET`.
+
+---
+
+## ToastApi.get_cash_entries
+
+Retrieve cash entries for a restaurant on a specific business date.
+
+Returns information about cash added to or removed from cash drawers, including cash-in, cash-out, pay-outs, tip-outs, no-sale events, and drawer close-out records. Each entry includes the amount, reason, type, and associated employees.
+
+Cash entry types include:
+- `CASH_IN`: Cash added to drawer
+- `CASH_OUT`: Cash removed and stored elsewhere
+- `PAY_OUT`: Cash removed for restaurant expenses
+- `TIP_OUT`: Cash removed to distribute tips
+- `NO_SALE`: Drawer opened with no cash change
+- `CLOSE_OUT_EXACT/OVERAGE/SHORTAGE`: Drawer closing records
+
+**Parameters**
+
+- **restaurant_external_id** (`string`, required): The Toast platform GUID for the restaurant.
+- **business_date** (`string`, required): The business date in YYYYMMDD format (e.g., 20240115).
+
+**Secrets**
+
+This tool requires the following secrets: `TOAST_CLIENT_ID`, `TOAST_CLIENT_SECRET`.
+
+---
+
+## ToastApi.get_cash_deposits
+
+Retrieve cash deposits for a restaurant on a specific business date.
+
+Returns information about cash removed from the restaurant to be deposited at a bank or other financial institution. Each deposit record includes the amount, date, and the employee who created it.
+
+**Parameters**
+
+- **restaurant_external_id** (`string`, required): The Toast platform GUID for the restaurant.
+- **business_date** (`string`, required): The business date in YYYYMMDD format (e.g., 20240115).
+
+**Secrets**
+
+This tool requires the following secrets: `TOAST_CLIENT_ID`, `TOAST_CLIENT_SECRET`.
+
+<ToolFooter pipPackageName="arcade_toast_api" />
