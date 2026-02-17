@@ -13,6 +13,8 @@
  *   npx tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts
  *   npx tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts --dry-run
  *   npx tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts --verbose
+ *   npx tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts --remove-empty-sections
+ *   npx tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts --remove-empty-sections=false
  */
 
 import {
@@ -138,6 +140,36 @@ export type SyncResult = {
   categoriesRemoved: string[];
   toolkitCount: number;
   errors: string[];
+};
+
+type SyncOptions = {
+  dryRun?: boolean;
+  verbose?: boolean;
+  /** Preferred flag name (default: false) */
+  removeEmptySections?: boolean;
+  /** Backward-compatible alias for removeEmptySections */
+  prune?: boolean;
+};
+
+export const resolveRemoveEmptySections = (options: SyncOptions): boolean =>
+  options.removeEmptySections ?? options.prune ?? false;
+
+export const parseBooleanCliFlag = (
+  args: readonly string[],
+  flagName: string
+): boolean | undefined => {
+  const valueArg = args.find((arg) => arg.startsWith(`${flagName}=`));
+  if (valueArg) {
+    const rawValue = valueArg.slice(flagName.length + 1).toLowerCase();
+    if (rawValue === "true") {
+      return true;
+    }
+    if (rawValue === "false") {
+      return false;
+    }
+  }
+
+  return args.includes(flagName) ? true : undefined;
 };
 
 /**
@@ -464,10 +496,9 @@ export default meta;
  * Sync toolkit sidebar with available JSON files
  */
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Main orchestration function requires multiple steps
-export function syncToolkitSidebar(
-  options: { dryRun?: boolean; verbose?: boolean; prune?: boolean } = {}
-): SyncResult {
+export function syncToolkitSidebar(options: SyncOptions = {}): SyncResult {
   const { dryRun = false, verbose = false } = options;
+  const removeEmptySections = resolveRemoveEmptySections(options);
 
   const result: SyncResult = {
     categoriesUpdated: [],
@@ -548,20 +579,21 @@ export function syncToolkitSidebar(
       }
     }
 
-    // Remove category directories that no longer have any toolkits.
-    // This handles the case where toolkits move between categories (e.g. from
-    // "others" to "development") and the old category becomes empty.
-    // The --prune flag is accepted for backward compatibility but cleanup
-    // always runs to prevent stale sidebar entries and orphaned routes.
-    for (const existingDir of existingDirs) {
-      if (!activeCategories.includes(existingDir)) {
-        const categoryDir = join(CONFIG.integrationsDir, existingDir);
-        log(`Removing empty category: ${existingDir}`);
-        if (!dryRun) {
-          rmSync(categoryDir, { recursive: true });
+    // Remove category directories only when explicitly enabled.
+    // This prevents automatic route removals during regular sync runs.
+    if (removeEmptySections) {
+      for (const existingDir of existingDirs) {
+        if (!activeCategories.includes(existingDir)) {
+          const categoryDir = join(CONFIG.integrationsDir, existingDir);
+          log(`Removing empty category: ${existingDir}`);
+          if (!dryRun) {
+            rmSync(categoryDir, { recursive: true });
+          }
+          result.categoriesRemoved.push(existingDir);
         }
-        result.categoriesRemoved.push(existingDir);
       }
+    } else {
+      log("Skipping empty category removal (--remove-empty-sections=false)");
     }
 
     // Update main _meta.tsx
@@ -636,13 +668,16 @@ if (isMainModule) {
   const args = process.argv.slice(2);
   const dryRun = args.includes("--dry-run");
   const verbose = args.includes("--verbose") || args.includes("-v");
-  const prune = args.includes("--prune");
+  const removeEmptySections =
+    parseBooleanCliFlag(args, "--remove-empty-sections") ??
+    parseBooleanCliFlag(args, "--prune") ??
+    false;
 
   if (dryRun) {
     console.log("Running in dry-run mode (no changes will be made)\n");
   }
 
-  const result = syncToolkitSidebar({ dryRun, verbose, prune });
+  const result = syncToolkitSidebar({ dryRun, verbose, removeEmptySections });
   printResults(result);
 
   if (result.errors.length > 0) {

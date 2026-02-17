@@ -46,21 +46,23 @@ jobs:
           pnpm dlx tsx src/cli/index.ts generate \
             --all \
             --skip-unchanged \
-            --skip-examples \
-            --skip-summary \
-            --skip-overview \
             --verbose \
             --api-source tool-metadata \
             --tool-metadata-url "$ENGINE_API_URL" \
             --tool-metadata-key "$ENGINE_API_KEY" \
+            --llm-provider openai \
+            --llm-model "$OPENAI_MODEL" \
+            --llm-api-key "$OPENAI_API_KEY" \
             --output data/toolkits
         working-directory: toolkit-docs-generator
         env:
           ENGINE_API_URL: ${{ secrets.ENGINE_API_URL }}
           ENGINE_API_KEY: ${{ secrets.ENGINE_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL || 'gpt-4o-mini' }}
 
       - name: Sync toolkit sidebar navigation
-        run: pnpm dlx tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts --prune --verbose
+        run: pnpm dlx tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts --remove-empty-sections=false --verbose
 
       - name: Check for changes
         id: check-changes
@@ -78,8 +80,8 @@ jobs:
           HUSKY: 0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore: update toolkit docs after Porter deploy"
-          title: "Update toolkit docs after Porter deploy"
+          commit-message: "[AUTO] Adding MCP Servers docs update"
+          title: "[AUTO] Adding MCP Servers docs update"
           body: |
             This PR was generated after a Porter deploy succeeded.
 

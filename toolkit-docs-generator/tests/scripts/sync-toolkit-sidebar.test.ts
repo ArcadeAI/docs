@@ -17,6 +17,8 @@ import {
   getToolkitLabel,
   getToolkitLabelFromJson,
   groupByCategory,
+  parseBooleanCliFlag,
+  resolveRemoveEmptySections,
   syncToolkitSidebar,
   type ToolkitInfo,
 } from "../../scripts/sync-toolkit-sidebar";
@@ -346,6 +348,60 @@ describe("groupByCategory", () => {
     const result = groupByCategory(toolkits);
     expect(result.has("others")).toBe(true);
     expect(result.get("others")).toHaveLength(1);
+  });
+});
+
+// ============================================================================
+// Unit Tests: remove empty section flags
+// ============================================================================
+
+describe("remove empty section flags", () => {
+  it("defaults to false when no flag is provided", () => {
+    expect(resolveRemoveEmptySections({})).toBe(false);
+  });
+
+  it("supports the explicit removeEmptySections option", () => {
+    expect(resolveRemoveEmptySections({ removeEmptySections: true })).toBe(
+      true
+    );
+    expect(resolveRemoveEmptySections({ removeEmptySections: false })).toBe(
+      false
+    );
+  });
+
+  it("supports prune as a backward-compatible alias", () => {
+    expect(resolveRemoveEmptySections({ prune: true })).toBe(true);
+    expect(resolveRemoveEmptySections({ prune: false })).toBe(false);
+  });
+
+  it("prefers removeEmptySections over prune when both are set", () => {
+    expect(
+      resolveRemoveEmptySections({ removeEmptySections: false, prune: true })
+    ).toBe(false);
+    expect(
+      resolveRemoveEmptySections({ removeEmptySections: true, prune: false })
+    ).toBe(true);
+  });
+
+  it("parses boolean CLI flags in value and shorthand formats", () => {
+    expect(
+      parseBooleanCliFlag(
+        ["--remove-empty-sections=true"],
+        "--remove-empty-sections"
+      )
+    ).toBe(true);
+    expect(
+      parseBooleanCliFlag(
+        ["--remove-empty-sections=false"],
+        "--remove-empty-sections"
+      )
+    ).toBe(false);
+    expect(
+      parseBooleanCliFlag(
+        ["--remove-empty-sections"],
+        "--remove-empty-sections"
+      )
+    ).toBe(true);
   });
 });
 
