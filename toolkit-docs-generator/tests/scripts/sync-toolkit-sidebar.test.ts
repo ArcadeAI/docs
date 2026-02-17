@@ -7,7 +7,7 @@
 
 import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   buildToolkitInfoList,
   generateCategoryMeta,
@@ -19,30 +19,28 @@ import {
   groupByCategory,
   parseBooleanCliFlag,
   resolveRemoveEmptySections,
+  setToolkitsForTesting,
   syncToolkitSidebar,
   type ToolkitInfo,
 } from "../../scripts/sync-toolkit-sidebar";
 
-// Mock the design system
-vi.mock("@arcadeai/design-system", () => ({
-  TOOLKITS: [
-    { id: "Gmail", label: "Gmail", category: "productivity" },
-    { id: "Slack", label: "Slack", category: "social" },
-    { id: "Github", label: "GitHub", category: "development" },
-    { id: "Stripe", label: "Stripe", category: "payments" },
-    { id: "Zendesk", label: "Zendesk", category: "customer-support" },
-    { id: "GoogleSearch", label: "Google Search", category: "search" },
-    { id: "Hubspot", label: "HubSpot", category: "sales" },
-    { id: "Spotify", label: "Spotify", category: "entertainment" },
-    { id: "Postgres", label: "Postgres", category: "databases" },
-    {
-      id: "HiddenToolkit",
-      label: "Hidden",
-      category: "productivity",
-      isHidden: true,
-    },
-  ],
-}));
+setToolkitsForTesting([
+  { id: "Gmail", label: "Gmail", category: "productivity" },
+  { id: "Slack", label: "Slack", category: "social" },
+  { id: "Github", label: "GitHub", category: "development" },
+  { id: "Stripe", label: "Stripe", category: "payments" },
+  { id: "Zendesk", label: "Zendesk", category: "customer-support" },
+  { id: "GoogleSearch", label: "Google Search", category: "search" },
+  { id: "Hubspot", label: "HubSpot", category: "sales" },
+  { id: "Spotify", label: "Spotify", category: "entertainment" },
+  { id: "Postgres", label: "Postgres", category: "databases" },
+  {
+    id: "HiddenToolkit",
+    label: "Hidden",
+    category: "productivity",
+    isHidden: true,
+  },
+]);
 
 // Test directory setup
 const TEST_DIR = join(process.cwd(), ".test-sync-sidebar");

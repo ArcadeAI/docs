@@ -25,27 +25,42 @@ import {
   rmSync,
   writeFileSync,
 } from "node:fs";
+import { createRequire } from "node:module";
 import { dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 // Import design system toolkits
-let TOOLKITS: Array<{
+type DesignSystemToolkit = {
   id: string;
   label: string;
   category?: string;
   isHidden?: boolean;
-}> = [];
+};
+
+let TOOLKITS: DesignSystemToolkit[] = [];
+const require = createRequire(import.meta.url);
 
 try {
-  const designSystem = await import("@arcadeai/design-system");
+  const designSystemEntry = require.resolve("@arcadeai/design-system");
+  const designSystem = (await import(
+    pathToFileURL(designSystemEntry).href
+  )) as {
+    TOOLKITS?: DesignSystemToolkit[];
+  };
   TOOLKITS = designSystem.TOOLKITS || [];
 } catch {
-  console.warn(
-    "Warning: @arcadeai/design-system not found, using fallback category detection"
-  );
+  if (!process.env.VITEST) {
+    console.warn(
+      "Warning: @arcadeai/design-system not found, using fallback category detection"
+    );
+  }
+}
+
+export function setToolkitsForTesting(toolkits: DesignSystemToolkit[]): void {
+  TOOLKITS = toolkits;
 }
 
 // Get project root (two levels up from toolkit-docs-generator/scripts)

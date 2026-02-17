@@ -443,6 +443,46 @@ describe("mergeToolkit", () => {
     );
   });
 
+  it("infers a readable label from toolkit description without metadata", async () => {
+    const tools = [
+      createTool({
+        qualifiedName: "MicrosoftOnedrive.ListFolderItems",
+        fullyQualifiedName: "MicrosoftOnedrive.ListFolderItems@1.0.0",
+        toolkitDescription: "Arcade.dev LLM tools for Microsoft OneDrive",
+      }),
+    ];
+
+    const result = await mergeToolkit(
+      "MicrosoftOnedrive",
+      tools,
+      null,
+      null,
+      undefined
+    );
+
+    expect(result.toolkit.label).toBe("Microsoft OneDrive");
+  });
+
+  it("humanizes toolkit ID when metadata and description label are unavailable", async () => {
+    const tools = [
+      createTool({
+        qualifiedName: "MyCustomApi.Run",
+        fullyQualifiedName: "MyCustomApi.Run@1.0.0",
+        toolkitDescription: "",
+      }),
+    ];
+
+    const result = await mergeToolkit(
+      "MyCustomApi",
+      tools,
+      null,
+      null,
+      undefined
+    );
+
+    expect(result.toolkit.label).toBe("My Custom API");
+  });
+
   it("marks *Api toolkits as arcade_starter", async () => {
     const tools = [
       createTool({

@@ -287,9 +287,53 @@ export const extractVersion = (fullyQualifiedName: string): string => {
  * Create default metadata for toolkits not found in Design System
  */
 const TOOLKIT_ID_NORMALIZER = /[^a-z0-9]/g;
+const TOOLKIT_ID_ACRONYM_BOUNDARY = /([A-Z]+)([A-Z][a-z])/g;
+const TOOLKIT_ID_WORD_BOUNDARY = /([a-z0-9])([A-Z])/g;
+const TOOLKIT_DESCRIPTION_LABEL_PREFIX = "Arcade.dev LLM tools for ";
 
 const normalizeToolkitId = (toolkitId: string): string =>
   toolkitId.toLowerCase().replace(TOOLKIT_ID_NORMALIZER, "");
+
+const humanizeToolkitId = (toolkitId: string): string =>
+  toolkitId
+    .replace(TOOLKIT_ID_ACRONYM_BOUNDARY, "$1 $2")
+    .replace(TOOLKIT_ID_WORD_BOUNDARY, "$1 $2")
+    .replace(/\bApi\b/g, "API")
+    .trim();
+
+const extractLabelFromDescription = (
+  description: string | null
+): string | null => {
+  if (!description) {
+    return null;
+  }
+
+  const trimmed = description.trim();
+  if (!trimmed.startsWith(TOOLKIT_DESCRIPTION_LABEL_PREFIX)) {
+    return null;
+  }
+
+  const suffix = trimmed.slice(TOOLKIT_DESCRIPTION_LABEL_PREFIX.length).trim();
+  if (suffix.length === 0) {
+    return null;
+  }
+
+  const periodIndex = suffix.indexOf(".");
+  const candidate = (
+    periodIndex >= 0 ? suffix.slice(0, periodIndex) : suffix
+  ).trim();
+
+  return candidate.length > 0 ? candidate : null;
+};
+
+const resolveToolkitLabel = (options: {
+  toolkitId: string;
+  metadata: ToolkitMetadata | null;
+  description: string | null;
+}): string =>
+  options.metadata?.label ??
+  extractLabelFromDescription(options.description) ??
+  humanizeToolkitId(options.toolkitId);
 
 const isStarterToolkitId = (toolkitId: string): boolean =>
   normalizeToolkitId(toolkitId).endsWith("api");
@@ -519,7 +563,11 @@ const buildMergedToolkit = (options: {
 
   return {
     id: options.toolkitId,
-    label: options.metadata?.label ?? options.toolkitId,
+    label: resolveToolkitLabel({
+      toolkitId: options.toolkitId,
+      metadata: options.metadata,
+      description: options.description,
+    }),
     version: options.version,
     description: options.description,
     metadata: mergedMetadata,
