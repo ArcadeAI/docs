@@ -16,7 +16,7 @@ test("porter workflow includes required triggers", () => {
   expect(workflowContents).toContain("porter_deploy_succeeded");
   expect(workflowContents).toContain("workflow_dispatch");
   expect(workflowContents).toContain("schedule:");
-  expect(workflowContents).toContain('cron: "0 9,10 * * *"');
+  expect(workflowContents).toContain('cron: "0 11 * * *"');
 });
 
 test("porter workflow generates docs and opens a PR", () => {
