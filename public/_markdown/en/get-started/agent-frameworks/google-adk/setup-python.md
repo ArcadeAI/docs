@@ -307,7 +307,7 @@ class ArcadeTool(FunctionTool):
 
 Here you get the Arcade tools you want the agent to utilize, and transform them into Google ADK tools. The first step is to initialize the , and get the  you want to work with.
 
-This helper function is long, here’s a breakdown of what it does for clarity:
+Here’s a breakdown of what it does for clarity:
 
 -   retrieve tools from all configured  servers (defined in the `MCP_SERVERS` variable)
 -   retrieve individual  (defined in the `TOOLS` variable)
