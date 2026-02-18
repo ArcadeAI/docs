@@ -1,7 +1,7 @@
 {
   "id": "Sharepoint",
   "label": "Microsoft SharePoint",
-  "version": "0.4.1",
+  "version": "0.7.0",
   "description": "Arcade.dev LLM tools for Microsoft SharePoint",
   "metadata": {
     "category": "productivity",
@@ -9,20 +9,763 @@
     "isBYOC": false,
     "isPro": false,
     "type": "arcade",
-    "docsLink": "https://docs.arcade.dev/en/mcp-servers/productivity/sharepoint",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/productivity/sharepoint",
     "isComingSoon": false,
     "isHidden": false
   },
   "auth": {
     "type": "oauth2",
     "providerId": "microsoft",
-    "allScopes": ["Sites.Read.All", "User.Read"]
+    "allScopes": [
+      "Sites.Read.All",
+      "Sites.ReadWrite.All",
+      "User.Read"
+    ]
   },
   "tools": [
     {
+      "name": "CopyItem",
+      "qualifiedName": "Sharepoint.CopyItem",
+      "fullyQualifiedName": "Sharepoint.CopyItem@0.7.0",
+      "description": "Copy a file or folder. Returns a completed item or an operation id.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the drive where the item lives.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the item to copy.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "destination_folder_id",
+          "type": "string",
+          "required": false,
+          "description": "Optional destination folder ID. If omitted, the item is copied to the same folder.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "new_name",
+          "type": "string",
+          "required": false,
+          "description": "Optional new name for the copied item.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.ReadWrite.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Copy status and result."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Sharepoint.CopyItem",
+        "parameters": {
+          "drive_id": {
+            "value": "b!a1B2c3D4e5F6g7H8",
+            "type": "string",
+            "required": true
+          },
+          "item_id": {
+            "value": "01ABCDEF23456789!345",
+            "type": "string",
+            "required": true
+          },
+          "destination_folder_id": {
+            "value": "0123456789abcdef!678",
+            "type": "string",
+            "required": false
+          },
+          "new_name": {
+            "value": "Quarterly_Report_Copy.xlsx",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateFolder",
+      "qualifiedName": "Sharepoint.CreateFolder",
+      "fullyQualifiedName": "Sharepoint.CreateFolder@0.7.0",
+      "description": "Create a new folder in a SharePoint drive.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the drive where the folder will be created.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "folder_name",
+          "type": "string",
+          "required": true,
+          "description": "The name of the new folder.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "parent_folder_id",
+          "type": "string",
+          "required": false,
+          "description": "Optional parent folder ID. If omitted, creates in the drive root.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.ReadWrite.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The created folder metadata."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Sharepoint.CreateFolder",
+        "parameters": {
+          "drive_id": {
+            "value": "b1a4f6e2-3c5d-4f7a-9b8c-1d2e3f4a5b6c",
+            "type": "string",
+            "required": true
+          },
+          "folder_name": {
+            "value": "Project Documents",
+            "type": "string",
+            "required": true
+          },
+          "parent_folder_id": {
+            "value": "d4c3b2a1-9f8e-4d3c-b2a1-0f9e8d7c6b5a",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreatePresentation",
+      "qualifiedName": "Sharepoint.CreatePresentation",
+      "fullyQualifiedName": "Sharepoint.CreatePresentation@0.7.0",
+      "description": "Create a new PowerPoint presentation in a SharePoint drive.\n\nThe presentation will be created with a title slide containing the specified title.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the SharePoint drive to create the presentation in.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "The title for the new presentation.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "folder_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the folder to create the presentation in. If not provided, the presentation will be created in the root of the drive.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.ReadWrite.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The created presentation details."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Sharepoint.CreatePresentation",
+        "parameters": {
+          "drive_id": {
+            "value": "b!a1B2c3D4e5F6g7H8i9J0K",
+            "type": "string",
+            "required": true
+          },
+          "title": {
+            "value": "Q3 2026 Marketing Strategy",
+            "type": "string",
+            "required": true
+          },
+          "folder_id": {
+            "value": "01AB2C3D4E5F6G7H8I9J0",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateShareLink",
+      "qualifiedName": "Sharepoint.CreateShareLink",
+      "fullyQualifiedName": "Sharepoint.CreateShareLink@0.7.0",
+      "description": "Create a share link for a SharePoint drive item.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the drive where the item lives.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the file or folder to share.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.ReadWrite.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Sharing link information."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Sharepoint.CreateShareLink",
+        "parameters": {
+          "drive_id": {
+            "value": "b!f3a1e2b-4c6d-7f8e-9012-3456789abcde",
+            "type": "string",
+            "required": true
+          },
+          "item_id": {
+            "value": "01a2b3c4-5d6e-7f8g-901h-234567ijklmn",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateSlide",
+      "qualifiedName": "Sharepoint.CreateSlide",
+      "fullyQualifiedName": "Sharepoint.CreateSlide@0.7.0",
+      "description": "Append a new slide to the end of an existing PowerPoint presentation in a SharePoint drive.\n\nThe slide will be added at the end of the presentation. Both title and body\nare optional to support layouts like BLANK or TITLE_ONLY.\n\nFor presentations larger than 4 MB, the upload uses a resumable session.\nConcurrency protection (etag check) is best-effort in that case, since\nMicrosoft Graph upload sessions do not support If-Match headers.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the SharePoint drive containing the presentation.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the PowerPoint presentation to add a slide to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "slide_title",
+          "type": "string",
+          "required": false,
+          "description": "The title for the new slide. Optional for layouts like BLANK.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "slide_body",
+          "type": "string",
+          "required": false,
+          "description": "The body content for the new slide. Supports markdown: **bold**, *italic*, __underline__, and bullet points (- item, indented with spaces for nesting). Optional for layouts like TITLE_ONLY or BLANK.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "layout",
+          "type": "string",
+          "required": false,
+          "description": "The layout to use for the slide. For TWO_CONTENT layout, use create_two_content_slide.",
+          "enum": [
+            "TITLE",
+            "TITLE_AND_CONTENT",
+            "SECTION_HEADER",
+            "TITLE_ONLY",
+            "BLANK",
+            "CONTENT_WITH_CAPTION",
+            "PICTURE_WITH_CAPTION",
+            "TITLE_AND_VERTICAL_TEXT",
+            "VERTICAL_TITLE_AND_TEXT"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.ReadWrite.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The updated presentation details with new slide info."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Sharepoint.CreateSlide",
+        "parameters": {
+          "drive_id": {
+            "value": "b1a2c3d4-e5f6-7890-ab12-345cdef67890",
+            "type": "string",
+            "required": true
+          },
+          "item_id": {
+            "value": "f9e8d7c6-b5a4-3210-9fed-cba987654321",
+            "type": "string",
+            "required": true
+          },
+          "slide_title": {
+            "value": "Q4 Business Review",
+            "type": "string",
+            "required": false
+          },
+          "slide_body": {
+            "value": "**Highlights**\n\n- Revenue increased by **15%**\n  - North America: *8%*\n  - Europe: *5%*\n- Key initiatives:\n  - __Product Launch__\n  - Marketing Campaign\n\n- Next steps:\n  - Finalize roadmap\n  - Allocate budget",
+            "type": "string",
+            "required": false
+          },
+          "layout": {
+            "value": "TITLE_AND_BODY",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateTwoContentSlide",
+      "qualifiedName": "Sharepoint.CreateTwoContentSlide",
+      "fullyQualifiedName": "Sharepoint.CreateTwoContentSlide@0.7.0",
+      "description": "Append a TWO_CONTENT slide with side-by-side content areas to the end of a SharePoint PowerPoint.\n\nThis layout is useful for comparisons, pros/cons lists, or any content that\nbenefits from a two-column layout.\n\nFor presentations larger than 4 MB, the upload uses a resumable session.\nConcurrency protection (etag check) is best-effort in that case, since\nMicrosoft Graph upload sessions do not support If-Match headers.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the SharePoint drive containing the presentation.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the PowerPoint presentation to add a slide to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "slide_title",
+          "type": "string",
+          "required": false,
+          "description": "The title for the new slide.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "left_body",
+          "type": "string",
+          "required": false,
+          "description": "Content for the left side of the slide. Supports markdown: **bold**, *italic*, __underline__, and bullet points (- item, indented with spaces for nesting).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "right_body",
+          "type": "string",
+          "required": false,
+          "description": "Content for the right side of the slide. Supports markdown: **bold**, *italic*, __underline__, and bullet points (- item, indented with spaces for nesting).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.ReadWrite.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The updated presentation details with new slide info."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Sharepoint.CreateTwoContentSlide",
+        "parameters": {
+          "drive_id": {
+            "value": "b!g4h5i6j7k8l9m0n",
+            "type": "string",
+            "required": true
+          },
+          "item_id": {
+            "value": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+            "type": "string",
+            "required": true
+          },
+          "slide_title": {
+            "value": "Two-Option Comparison",
+            "type": "string",
+            "required": false
+          },
+          "left_body": {
+            "value": "**Pros**\n- **Cost-effective**: Lower ongoing expenses\n- *Easy to implement*\n- __Scalable__\n  - Supports regional scaling\n  - Automated provisioning\n- Summary: Good for short-term deployments",
+            "type": "string",
+            "required": false
+          },
+          "right_body": {
+            "value": "**Cons**\n- Higher initial investment\n- *Longer ramp-up time*\n- __Vendor lock-in__\n  - Integration complexity\n  - Migration effort\n- Risk mitigation:\n  - Start with a pilot\n  - Define exit strategy\n\nConclusion: Choose based on timeline and budget.",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateWordDocument",
+      "qualifiedName": "Sharepoint.CreateWordDocument",
+      "fullyQualifiedName": "Sharepoint.CreateWordDocument@0.7.0",
+      "description": "Create a new Word document in a SharePoint drive (4MB upload limit). Optionally include text content.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the SharePoint drive to create the document in.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "File name without extension, or with .docx. The .docx extension is normalized.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "text_content",
+          "type": "string",
+          "required": false,
+          "description": "Optional text content to include in the new document. If omitted, an empty document is created.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "folder_id",
+          "type": "string",
+          "required": false,
+          "description": "Optional parent folder DriveItem ID. If omitted, the document is created in the root.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "conflict_behavior",
+          "type": "string",
+          "required": false,
+          "description": "Optional conflict behavior when a file with the same name exists. One of: fail, rename, replace.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.ReadWrite.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The created Word document metadata."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Sharepoint.CreateWordDocument",
+        "parameters": {
+          "drive_id": {
+            "value": "b!XyZ12345AaBbCcDdEeF",
+            "type": "string",
+            "required": true
+          },
+          "title": {
+            "value": "Project Plan.docx",
+            "type": "string",
+            "required": true
+          },
+          "text_content": {
+            "value": "Project Plan\n\nGoals:\n- Define scope\n- Assign owners\n- Timeline: Q2\n\nThis document was created via API.",
+            "type": "string",
+            "required": false
+          },
+          "folder_id": {
+            "value": "01T2ABCDEFghiJKLmnOPqrsTUvwxYZ",
+            "type": "string",
+            "required": false
+          },
+          "conflict_behavior": {
+            "value": "rename",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "DeleteItem",
+      "qualifiedName": "Sharepoint.DeleteItem",
+      "fullyQualifiedName": "Sharepoint.DeleteItem@0.7.0",
+      "description": "Delete a file or folder from a SharePoint drive.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the drive where the item lives.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the file or folder to delete.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.ReadWrite.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Deletion confirmation."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Sharepoint.DeleteItem",
+        "parameters": {
+          "drive_id": {
+            "value": "b!0123456789abcdef",
+            "type": "string",
+            "required": true
+          },
+          "item_id": {
+            "value": "0123456789abcdef!123",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetAllSlideNotes",
+      "qualifiedName": "Sharepoint.GetAllSlideNotes",
+      "fullyQualifiedName": "Sharepoint.GetAllSlideNotes@0.7.0",
+      "description": "Get all speaker notes from every slide in a SharePoint PowerPoint presentation.\n\nReturns notes for all slides in one call, which is more efficient than\ncalling get_slide_notes for each slide individually. Notes are returned\nin markdown format.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the SharePoint drive containing the presentation.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the PowerPoint presentation.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "All speaker notes from the presentation."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Sharepoint.GetAllSlideNotes",
+        "parameters": {
+          "drive_id": {
+            "value": "b!a1b2c3d4e5f6g7h8i9j0",
+            "type": "string",
+            "required": true
+          },
+          "item_id": {
+            "value": "01ab23cd-45ef-6789-0abc-def123456789",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetCopyStatus",
+      "qualifiedName": "Sharepoint.GetCopyStatus",
+      "fullyQualifiedName": "Sharepoint.GetCopyStatus@0.7.0",
+      "description": "Check status of an async copy operation using the full monitor URL.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the drive where the copy operation runs.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "operation_url",
+          "type": "string",
+          "required": true,
+          "description": "The full monitor URL returned by copy_item (Location/Operation-Location header). DO NOT PROVIDE ONLY THE OPERATION ID, BUT THE FULL URL.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Copy operation status."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Sharepoint.GetCopyStatus",
+        "parameters": {
+          "drive_id": {
+            "value": "b!a1B2c3D4e5F6g7H8i9J0kLmNoPqRsTu",
+            "type": "string",
+            "required": true
+          },
+          "operation_url": {
+            "value": "https://graph.microsoft.com/v1.0/drives/b!a1B2c3D4e5F6g7H8i9J0kLmNoPqRsTu/items/01ABCD2345EFGH6789/operations/3f5e2a7b-9cde-4f12-8a34-6b7c9d0e1f2a",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
       "name": "GetDrivesFromSite",
       "qualifiedName": "Sharepoint.GetDrivesFromSite",
-      "fullyQualifiedName": "Sharepoint.GetDrivesFromSite@0.4.1",
+      "fullyQualifiedName": "Sharepoint.GetDrivesFromSite@0.7.0",
       "description": "Retrieve drives / document libraries from a SharePoint site.\n\nIf you have a site name, it is not necessary to call Sharepoint.SearchSites first. You can simply\ncall this tool with the site name / keywords.",
       "parameters": [
         {
@@ -37,7 +780,9 @@
       "auth": {
         "providerId": "microsoft",
         "providerType": "oauth2",
-        "scopes": ["Sites.Read.All"]
+        "scopes": [
+          "Sites.Read.All"
+        ]
       },
       "secrets": [],
       "secretsInfo": [],
@@ -63,7 +808,7 @@
     {
       "name": "GetItemsFromList",
       "qualifiedName": "Sharepoint.GetItemsFromList",
-      "fullyQualifiedName": "Sharepoint.GetItemsFromList@0.4.1",
+      "fullyQualifiedName": "Sharepoint.GetItemsFromList@0.7.0",
       "description": "Retrieve items from a list in a SharePoint site.\n\nNote: The Microsoft Graph API does not offer endpoints to retrieve list item attachments.\nBecause of that, the only information we can get is whether the item has attachments or not.",
       "parameters": [
         {
@@ -86,7 +831,9 @@
       "auth": {
         "providerId": "microsoft",
         "providerType": "oauth2",
-        "scopes": ["Sites.Read.All"]
+        "scopes": [
+          "Sites.Read.All"
+        ]
       },
       "secrets": [],
       "secretsInfo": [],
@@ -117,7 +864,7 @@
     {
       "name": "GetListsFromSite",
       "qualifiedName": "Sharepoint.GetListsFromSite",
-      "fullyQualifiedName": "Sharepoint.GetListsFromSite@0.4.1",
+      "fullyQualifiedName": "Sharepoint.GetListsFromSite@0.7.0",
       "description": "Retrieve lists from a SharePoint site.",
       "parameters": [
         {
@@ -132,7 +879,9 @@
       "auth": {
         "providerId": "microsoft",
         "providerType": "oauth2",
-        "scopes": ["Sites.Read.All"]
+        "scopes": [
+          "Sites.Read.All"
+        ]
       },
       "secrets": [],
       "secretsInfo": [],
@@ -158,7 +907,7 @@
     {
       "name": "GetPage",
       "qualifiedName": "Sharepoint.GetPage",
-      "fullyQualifiedName": "Sharepoint.GetPage@0.4.1",
+      "fullyQualifiedName": "Sharepoint.GetPage@0.7.0",
       "description": "Retrieve metadata and the contents of a page in a SharePoint site.\n\nPage content is a list of Microsoft Sharepoint web part objects, such as text, images, banners,\nbuttons, etc.\n\nIf `include_page_content` is set to False, the tool will return only the page metadata.",
       "parameters": [
         {
@@ -189,7 +938,9 @@
       "auth": {
         "providerId": "microsoft",
         "providerType": "oauth2",
-        "scopes": ["Sites.Read.All"]
+        "scopes": [
+          "Sites.Read.All"
+        ]
       },
       "secrets": [],
       "secretsInfo": [],
@@ -223,9 +974,65 @@
       }
     },
     {
+      "name": "GetPresentationAsMarkdown",
+      "qualifiedName": "Sharepoint.GetPresentationAsMarkdown",
+      "fullyQualifiedName": "Sharepoint.GetPresentationAsMarkdown@0.7.0",
+      "description": "Get the content of a PowerPoint presentation stored in a SharePoint drive as markdown.\n\nThis tool downloads the presentation and converts it to a markdown representation,\npreserving text content, tables, and chart data. Images and other media are\nrepresented as placeholders.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the SharePoint drive containing the presentation.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the PowerPoint presentation to read.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The presentation content as markdown."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Sharepoint.GetPresentationAsMarkdown",
+        "parameters": {
+          "drive_id": {
+            "value": "b!4f8e2c7a9d6b1e3f",
+            "type": "string",
+            "required": true
+          },
+          "item_id": {
+            "value": "01A234BC-567D-89EF-01AB-234CDE567890",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
       "name": "GetSite",
       "qualifiedName": "Sharepoint.GetSite",
-      "fullyQualifiedName": "Sharepoint.GetSite@0.4.1",
+      "fullyQualifiedName": "Sharepoint.GetSite@0.7.0",
       "description": "Retrieve information about a specific SharePoint site by its ID, URL, or name.",
       "parameters": [
         {
@@ -240,7 +1047,9 @@
       "auth": {
         "providerId": "microsoft",
         "providerType": "oauth2",
-        "scopes": ["Sites.Read.All"]
+        "scopes": [
+          "Sites.Read.All"
+        ]
       },
       "secrets": [],
       "secretsInfo": [],
@@ -264,9 +1073,216 @@
       }
     },
     {
+      "name": "GetSlideNotes",
+      "qualifiedName": "Sharepoint.GetSlideNotes",
+      "fullyQualifiedName": "Sharepoint.GetSlideNotes@0.7.0",
+      "description": "Get the speaker notes from a specific slide in a SharePoint PowerPoint presentation.\n\nSpeaker notes are returned in markdown format, preserving basic formatting\nlike bold, italic, and bullet points.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the SharePoint drive containing the presentation.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the PowerPoint presentation.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "slide_index",
+          "type": "integer",
+          "required": true,
+          "description": "The 1-based index of the slide to get notes from.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The speaker notes for the specified slide."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Sharepoint.GetSlideNotes",
+        "parameters": {
+          "drive_id": {
+            "value": "b!a1B2c3D4e5F6g7H8i9J0kLmN",
+            "type": "string",
+            "required": true
+          },
+          "item_id": {
+            "value": "01234567-89ab-cdef-0123-456789abcdef",
+            "type": "string",
+            "required": true
+          },
+          "slide_index": {
+            "value": 3,
+            "type": "integer",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetWordDocument",
+      "qualifiedName": "Sharepoint.GetWordDocument",
+      "fullyQualifiedName": "Sharepoint.GetWordDocument@0.7.0",
+      "description": "Get a Word document's metadata and content from a SharePoint drive (supports only `.docx`). Returns the document content as Markdown by default, or just metadata when metadata_only is True.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the SharePoint drive containing the document.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The DriveItem ID of the Word document.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "metadata_only",
+          "type": "boolean",
+          "required": false,
+          "description": "If True, return only the document metadata without downloading the content. Defaults to False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.Read.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The Word document metadata and optionally its content."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Sharepoint.GetWordDocument",
+        "parameters": {
+          "drive_id": {
+            "value": "b!a1B2c3D4e5F6G7H8I9J0K",
+            "type": "string",
+            "required": true
+          },
+          "item_id": {
+            "value": "01a234bc-56de-78f9-0abc-123def456789",
+            "type": "string",
+            "required": true
+          },
+          "metadata_only": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "InsertTextAtEndOfWordDocument",
+      "qualifiedName": "Sharepoint.InsertTextAtEndOfWordDocument",
+      "fullyQualifiedName": "Sharepoint.InsertTextAtEndOfWordDocument@0.7.0",
+      "description": "Append text to the end of an existing Word document.\n\nThis tool only supports files with the `.docx` extension and enforces the 4MB limit.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the SharePoint drive containing the document.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The DriveItem ID of the Word document.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "text_content",
+          "type": "string",
+          "required": true,
+          "description": "The text content to append to the document.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.ReadWrite.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The updated Word document metadata."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Sharepoint.InsertTextAtEndOfWordDocument",
+        "parameters": {
+          "drive_id": {
+            "value": "b!f3a9d2e-4c1b-4f8a-9d2b-7c6e5f4a3b2c",
+            "type": "string",
+            "required": true
+          },
+          "item_id": {
+            "value": "01XYZABCDEF1234567890",
+            "type": "string",
+            "required": true
+          },
+          "text_content": {
+            "value": "Append: This is the appended text. Please review the latest changes and confirm by EOD.\n- Summary: updated figures\n- Action: approve or provide feedback\nRegards,\nTeam",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
       "name": "ListItemsInFolder",
       "qualifiedName": "Sharepoint.ListItemsInFolder",
-      "fullyQualifiedName": "Sharepoint.ListItemsInFolder@0.4.1",
+      "fullyQualifiedName": "Sharepoint.ListItemsInFolder@0.7.0",
       "description": "Retrieve items from a folder in a drive in a SharePoint site.\n\nNote: Due to how the Microsoft Graph API is designed, we have to retrieve all items, including the ones\nskipped by offset. For this reason, the tool execution time tends to increase with the offset value.",
       "parameters": [
         {
@@ -305,7 +1321,9 @@
       "auth": {
         "providerId": "microsoft",
         "providerType": "oauth2",
-        "scopes": ["Sites.Read.All"]
+        "scopes": [
+          "Sites.Read.All"
+        ]
       },
       "secrets": [],
       "secretsInfo": [],
@@ -346,7 +1364,7 @@
     {
       "name": "ListPages",
       "qualifiedName": "Sharepoint.ListPages",
-      "fullyQualifiedName": "Sharepoint.ListPages@0.4.1",
+      "fullyQualifiedName": "Sharepoint.ListPages@0.7.0",
       "description": "Retrieve pages from a SharePoint site.\n\nThe Microsoft Graph API does not support pagination on this endpoint.",
       "parameters": [
         {
@@ -369,7 +1387,9 @@
       "auth": {
         "providerId": "microsoft",
         "providerType": "oauth2",
-        "scopes": ["Sites.Read.All"]
+        "scopes": [
+          "Sites.Read.All"
+        ]
       },
       "secrets": [],
       "secretsInfo": [],
@@ -400,7 +1420,7 @@
     {
       "name": "ListRootItemsInDrive",
       "qualifiedName": "Sharepoint.ListRootItemsInDrive",
-      "fullyQualifiedName": "Sharepoint.ListRootItemsInDrive@0.4.1",
+      "fullyQualifiedName": "Sharepoint.ListRootItemsInDrive@0.7.0",
       "description": "Retrieve items from the root of a drive in a SharePoint site.\n\nNote: Due to how the Microsoft Graph API is designed, we have to retrieve all items, including the ones\nskipped by offset. For this reason, the tool execution time tends to increase with the offset value.",
       "parameters": [
         {
@@ -431,7 +1451,9 @@
       "auth": {
         "providerId": "microsoft",
         "providerType": "oauth2",
-        "scopes": ["Sites.Read.All"]
+        "scopes": [
+          "Sites.Read.All"
+        ]
       },
       "secrets": [],
       "secretsInfo": [],
@@ -467,7 +1489,7 @@
     {
       "name": "ListSites",
       "qualifiedName": "Sharepoint.ListSites",
-      "fullyQualifiedName": "Sharepoint.ListSites@0.4.1",
+      "fullyQualifiedName": "Sharepoint.ListSites@0.7.0",
       "description": "List all SharePoint sites accessible to the current user.",
       "parameters": [
         {
@@ -490,7 +1512,9 @@
       "auth": {
         "providerId": "microsoft",
         "providerType": "oauth2",
-        "scopes": ["Sites.Read.All"]
+        "scopes": [
+          "Sites.Read.All"
+        ]
       },
       "secrets": [],
       "secretsInfo": [],
@@ -519,9 +1543,78 @@
       }
     },
     {
+      "name": "MoveItem",
+      "qualifiedName": "Sharepoint.MoveItem",
+      "fullyQualifiedName": "Sharepoint.MoveItem@0.7.0",
+      "description": "Move a file or folder to a new location in a SharePoint drive.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the drive where the item lives.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the item to move.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "new_parent_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the destination folder.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.ReadWrite.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The updated item metadata."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Sharepoint.MoveItem",
+        "parameters": {
+          "drive_id": {
+            "value": "b!a1b2c3d4e5f6g7h8i9j0k",
+            "type": "string",
+            "required": true
+          },
+          "item_id": {
+            "value": "01ABCD2345EFGH6789!123",
+            "type": "string",
+            "required": true
+          },
+          "new_parent_id": {
+            "value": "01ABCD2345EFGH6789!456",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
       "name": "SearchDriveItems",
       "qualifiedName": "Sharepoint.SearchDriveItems",
-      "fullyQualifiedName": "Sharepoint.SearchDriveItems@0.4.1",
+      "fullyQualifiedName": "Sharepoint.SearchDriveItems@0.7.0",
       "description": "Search for items in one or more Sharepoint drives.\n\nNote: when searching within a single Drive and/or Folder, due to how the Microsoft Graph API is designed,\nwe have to retrieve all items, including the ones skipped by offset. For this reason, the tool execution\ntime tends to increase with the offset value.",
       "parameters": [
         {
@@ -568,7 +1661,9 @@
       "auth": {
         "providerId": "microsoft",
         "providerType": "oauth2",
-        "scopes": ["Sites.Read.All"]
+        "scopes": [
+          "Sites.Read.All"
+        ]
       },
       "secrets": [],
       "secretsInfo": [],
@@ -614,7 +1709,7 @@
     {
       "name": "SearchSites",
       "qualifiedName": "Sharepoint.SearchSites",
-      "fullyQualifiedName": "Sharepoint.SearchSites@0.4.1",
+      "fullyQualifiedName": "Sharepoint.SearchSites@0.7.0",
       "description": "Search for SharePoint sites by name or description.\n\nIn case you need to retrieve a specific site by its name, ID or SharePoint URL, use the\n`Sharepoint.GetSite` tool instead, passing the ID, name or SharePoint URL to it. If you use\nthe `Sharepoint.SearchSites` tool to retrieve a single site by its name, too much CO2 will be\nreleased in the atmosphere and you will contribute to catastrophic climate change.",
       "parameters": [
         {
@@ -645,7 +1740,9 @@
       "auth": {
         "providerId": "microsoft",
         "providerType": "oauth2",
-        "scopes": ["Sites.Read.All"]
+        "scopes": [
+          "Sites.Read.All"
+        ]
       },
       "secrets": [],
       "secretsInfo": [],
@@ -679,15 +1776,99 @@
       }
     },
     {
+      "name": "SetSlideNotes",
+      "qualifiedName": "Sharepoint.SetSlideNotes",
+      "fullyQualifiedName": "Sharepoint.SetSlideNotes@0.7.0",
+      "description": "Set or update the speaker notes on a specific slide in a SharePoint PowerPoint.\n\nNotes can be formatted using markdown:\n- **bold** for bold text\n- *italic* for italic text\n- __underline__ for underlined text\n- Lines starting with - or * become bullet points\n- Indent with spaces for nested bullets\n\nFor presentations larger than 4 MB, the upload uses a resumable session.\nConcurrency protection (etag check) is best-effort in that case, since\nMicrosoft Graph upload sessions do not support If-Match headers.",
+      "parameters": [
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the SharePoint drive containing the presentation.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the PowerPoint presentation.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "slide_index",
+          "type": "integer",
+          "required": true,
+          "description": "The 1-based index of the slide to set notes on.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "required": true,
+          "description": "The speaker notes in markdown format. Supports **bold**, *italic*, __underline__, and bullet points (- or *).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Sites.ReadWrite.All"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Confirmation of the notes update."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Sharepoint.SetSlideNotes",
+        "parameters": {
+          "drive_id": {
+            "value": "b1a2c3d4-e5f6-7890-abcd-ef1234567890",
+            "type": "string",
+            "required": true
+          },
+          "item_id": {
+            "value": "a9f8e7d6-c5b4-3210-0fed-cba987654321",
+            "type": "string",
+            "required": true
+          },
+          "slide_index": {
+            "value": 3,
+            "type": "integer",
+            "required": true
+          },
+          "notes": {
+            "value": "**Meeting Summary**\n\n*Reviewed Q1 results and action items.*\n\n__Key Decisions__\n- Approve budget increase\n- Launch pilot program\n  - *Marketing* to prepare assets\n  - *Product* to finalize specs\n\nNext steps:\n- Schedule follow-up meeting\n- Assign owners and deadlines\n\nPresented by: *Alex Johnson*",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
       "name": "WhoAmI",
       "qualifiedName": "Sharepoint.WhoAmI",
-      "fullyQualifiedName": "Sharepoint.WhoAmI@0.4.1",
+      "fullyQualifiedName": "Sharepoint.WhoAmI@0.7.0",
       "description": "Get information about the current user and their SharePoint environment.",
       "parameters": [],
       "auth": {
         "providerId": "microsoft",
         "providerType": "oauth2",
-        "scopes": ["User.Read"]
+        "scopes": [
+          "User.Read"
+        ]
       },
       "secrets": [],
       "secretsInfo": [],
@@ -715,6 +1896,6 @@
   ],
   "customImports": [],
   "subPages": [],
-  "generatedAt": "2026-01-26T17:41:02.555Z",
-  "summary": "Arcade.dev's SharePoint toolkit enables seamless integration with Microsoft SharePoint, enhancing productivity through advanced LLM tools. This toolkit provides developers with the capability to efficiently manage and retrieve information across various SharePoint resources.\n\n## Capabilities\n- Retrieve site, list, and drive information seamlessly.\n- Access and manage page content and associated metadata.\n- Execute specific searches for items within drives and sites.\n- Identify and list all accessible SharePoint sites for users.\n\n## OAuth\n**Provider:** Microsoft  \n**Scopes:** Sites.Read.All, User.Read\n\n## Secrets\nNo secret types or names are required for this toolkit."
+  "generatedAt": "2026-02-18T21:01:53.510Z",
+  "summary": "Arcade's SharePoint toolkit provides LLM-driven access to Microsoft SharePoint via Microsoft Graph, enabling document, presentation, page, and site management directly from prompts. It supports automating content creation, retrieval, transformation and administrative actions for workflows and bots.\n\n**Capabilities**\n- Robust file and folder operations (create, move, copy, delete, sharing, and metadata management).\n- Create and edit Word and PowerPoint assets, append slides/notes, and export presentations or documents as Markdown.\n- Discover and retrieve site resources, drives, lists, pages, and search results with pagination/large-file handling.\n- Asynchronous operation monitoring and user/context queries to integrate workflows reliably.\n\n**OAuth**\nProvider: microsoft\nScopes: Sites.Read.All, Sites.ReadWrite.All, User.Read"
 }
