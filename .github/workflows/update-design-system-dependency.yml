@@ -31,40 +31,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Check current vs latest version
-        id: check-version
-        run: |
-          current_raw="$(node -p "const pkg = require('./package.json'); pkg.dependencies?.['@arcadeai/design-system'] ?? ''")"
-          current="$(printf '%s' "$current_raw" | sed -E 's/^[^0-9]*//')"
-          latest="$(pnpm view @arcadeai/design-system version)"
-
-          echo "current_raw=$current_raw" >> "$GITHUB_OUTPUT"
-          echo "current=$current" >> "$GITHUB_OUTPUT"
-          echo "latest=$latest" >> "$GITHUB_OUTPUT"
-
-          if [ "$current" = "$latest" ]; then
-            echo "needs_update=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "needs_update=true" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Update @arcadeai/design-system to latest
-        if: steps.check-version.outputs.needs_update == 'true'
-        run: pnpm up @arcadeai/design-system@latest
-
-      - name: Capture updated version
-        if: steps.check-version.outputs.needs_update == 'true'
-        id: updated-version
-        run: |
-          updated_raw="$(node -p "const pkg = require('./package.json'); pkg.dependencies?.['@arcadeai/design-system'] ?? ''")"
-          echo "updated_raw=$updated_raw" >> "$GITHUB_OUTPUT"
+        run: pnpm install @arcadeai/design-system@latest
 
       - name: Check for changes
         id: check-changes
         run: |
-          if [ "${{ steps.check-version.outputs.needs_update }}" != "true" ]; then
-            echo "has_changes=false" >> "$GITHUB_OUTPUT"
-          elif [ -n "$(git status --porcelain package.json pnpm-lock.yaml)" ]; then
+          if [ -n "$(git status --porcelain package.json pnpm-lock.yaml)" ]; then
             echo "has_changes=true" >> "$GITHUB_OUTPUT"
           else
             echo "has_changes=false" >> "$GITHUB_OUTPUT"
@@ -83,10 +56,10 @@ jobs:
           body: |
             This PR updates `@arcadeai/design-system` to the latest published version.
 
-            - Previous: `${{ steps.check-version.outputs.current_raw }}`
-            - Latest: `${{ steps.check-version.outputs.latest }}`
-            - Updated range: `${{ steps.updated-version.outputs.updated_raw }}`
             - Trigger: `${{ github.event_name }}`
             - Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          add-paths: |
+            package.json
+            pnpm-lock.yaml
           branch: automation/update-design-system-${{ github.run_id }}
           delete-branch: true
