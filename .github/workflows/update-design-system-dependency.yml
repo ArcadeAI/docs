@@ -1,0 +1,92 @@
+name: Update design system dependency
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 9 * * 1"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-design-system:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check current vs latest version
+        id: check-version
+        run: |
+          current_raw="$(node -p "const pkg = require('./package.json'); pkg.dependencies?.['@arcadeai/design-system'] ?? ''")"
+          current="$(printf '%s' "$current_raw" | sed -E 's/^[^0-9]*//')"
+          latest="$(pnpm view @arcadeai/design-system version)"
+
+          echo "current_raw=$current_raw" >> "$GITHUB_OUTPUT"
+          echo "current=$current" >> "$GITHUB_OUTPUT"
+          echo "latest=$latest" >> "$GITHUB_OUTPUT"
+
+          if [ "$current" = "$latest" ]; then
+            echo "needs_update=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "needs_update=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Update @arcadeai/design-system to latest
+        if: steps.check-version.outputs.needs_update == 'true'
+        run: pnpm up @arcadeai/design-system@latest
+
+      - name: Capture updated version
+        if: steps.check-version.outputs.needs_update == 'true'
+        id: updated-version
+        run: |
+          updated_raw="$(node -p "const pkg = require('./package.json'); pkg.dependencies?.['@arcadeai/design-system'] ?? ''")"
+          echo "updated_raw=$updated_raw" >> "$GITHUB_OUTPUT"
+
+      - name: Check for changes
+        id: check-changes
+        run: |
+          if [ "${{ steps.check-version.outputs.needs_update }}" != "true" ]; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          elif [ -n "$(git status --porcelain package.json pnpm-lock.yaml)" ]; then
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create pull request
+        if: steps.check-changes.outputs.has_changes == 'true'
+        uses: peter-evans/create-pull-request@v7
+        env:
+          HUSKY: 0
+          SKIP_HUSKY: 1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: update @arcadeai/design-system to latest"
+          title: "chore: update @arcadeai/design-system to latest"
+          body: |
+            This PR updates `@arcadeai/design-system` to the latest published version.
+
+            - Previous: `${{ steps.check-version.outputs.current_raw }}`
+            - Latest: `${{ steps.check-version.outputs.latest }}`
+            - Updated range: `${{ steps.updated-version.outputs.updated_raw }}`
+            - Trigger: `${{ github.event_name }}`
+            - Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          branch: automation/update-design-system-${{ github.run_id }}
+          delete-branch: true
