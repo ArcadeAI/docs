@@ -200,6 +200,77 @@ const getVersionFromTool = (
   return version && version.length > 0 ? version : undefined;
 };
 
+const getNonEmptyString = (value: unknown): string | undefined =>
+  typeof value === "string" && value.length > 0 ? value : undefined;
+
+const getFallbackReason = (error: {
+  issues: Array<{ path: Array<string | number>; message: string }>;
+  message: string;
+}): string => {
+  const firstIssue = error.issues[0];
+  return firstIssue
+    ? `${firstIssue.path.join(".")}: ${firstIssue.message}`
+    : error.message;
+};
+
+const normalizeFallbackTools = (
+  record: Record<string, unknown>,
+  toolkitId: string,
+  declaredVersion: string
+): ToolDefinition[] => {
+  const rawTools = Array.isArray(record.tools) ? record.tools : [];
+  return rawTools.flatMap((rawTool, index) => {
+    const normalized = normalizeTool(
+      rawTool,
+      toolkitId,
+      declaredVersion,
+      index + 1
+    );
+    return normalized ? [normalized] : [];
+  });
+};
+
+const buildFallbackToolkit = (
+  record: Record<string, unknown>,
+  fallbackId: string
+): MergedToolkit => {
+  const toolkitId = getNonEmptyString(record.id) ?? fallbackId;
+  const label = getNonEmptyString(record.label) ?? toolkitId;
+  const description = toStringOrNull(record.description);
+  const declaredVersion = getNonEmptyString(record.version) ?? "0.0.0";
+
+  const tools = normalizeFallbackTools(record, toolkitId, declaredVersion);
+  const version = getVersionFromTool(tools[0]) ?? declaredVersion;
+
+  const metadataResult = MergedToolkitMetadataSchema.safeParse(record.metadata);
+  const authResult = MergedToolkitAuthSchema.safeParse(record.auth);
+  const summary =
+    typeof record.summary === "string" ? record.summary : undefined;
+  const generatedAt =
+    typeof record.generatedAt === "string" ? record.generatedAt : undefined;
+
+  return {
+    id: toolkitId,
+    label,
+    version,
+    description,
+    ...(summary ? { summary } : {}),
+    metadata: metadataResult.success
+      ? metadataResult.data
+      : DEFAULT_PREVIOUS_TOOLKIT_METADATA,
+    auth: authResult.success ? authResult.data : null,
+    tools: tools.map((tool) => ({
+      ...tool,
+      secretsInfo: [],
+      documentationChunks: [],
+    })),
+    documentationChunks: [],
+    customImports: [],
+    subPages: [],
+    ...(generatedAt ? { generatedAt } : {}),
+  };
+};
+
 export type PreviousToolkitParseResult = {
   toolkit: MergedToolkit | null;
   usedFallback: boolean;
@@ -224,67 +295,9 @@ export const parsePreviousToolkitForDiff = (
     };
   }
 
-  const toolkitId =
-    typeof record.id === "string" && record.id.length > 0
-      ? record.id
-      : fallbackId;
-  const label =
-    typeof record.label === "string" && record.label.length > 0
-      ? record.label
-      : toolkitId;
-  const description = toStringOrNull(record.description);
-
-  const firstIssue = strictResult.error.issues[0];
-  const fallbackReason = firstIssue
-    ? `${firstIssue.path.join(".")}: ${firstIssue.message}`
-    : strictResult.error.message;
-
-  const declaredVersion =
-    typeof record.version === "string" && record.version.length > 0
-      ? record.version
-      : "0.0.0";
-
-  const rawTools = Array.isArray(record.tools) ? record.tools : [];
-  const tools = rawTools.flatMap((rawTool, index) => {
-    const normalized = normalizeTool(
-      rawTool,
-      toolkitId,
-      declaredVersion,
-      index + 1
-    );
-    return normalized ? [normalized] : [];
-  });
-
-  const version = getVersionFromTool(tools[0]) ?? declaredVersion;
-
-  const metadataResult = MergedToolkitMetadataSchema.safeParse(record.metadata);
-  const authResult = MergedToolkitAuthSchema.safeParse(record.auth);
-  const summary =
-    typeof record.summary === "string" ? record.summary : undefined;
-  const generatedAt =
-    typeof record.generatedAt === "string" ? record.generatedAt : undefined;
-
+  const fallbackReason = getFallbackReason(strictResult.error);
   return {
-    toolkit: {
-      id: toolkitId,
-      label,
-      version,
-      description,
-      ...(summary ? { summary } : {}),
-      metadata: metadataResult.success
-        ? metadataResult.data
-        : DEFAULT_PREVIOUS_TOOLKIT_METADATA,
-      auth: authResult.success ? authResult.data : null,
-      tools: tools.map((tool) => ({
-        ...tool,
-        secretsInfo: [],
-        documentationChunks: [],
-      })),
-      documentationChunks: [],
-      customImports: [],
-      subPages: [],
-      ...(generatedAt ? { generatedAt } : {}),
-    },
+    toolkit: buildFallbackToolkit(record, fallbackId),
     usedFallback: true,
     reason: fallbackReason,
   };

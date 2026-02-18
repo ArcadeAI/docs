@@ -9,6 +9,7 @@
 import { z } from "zod";
 import type { ToolkitMetadata } from "../types/index.js";
 import { ToolkitMetadataSchema } from "../types/index.js";
+import { loadDesignSystemModule } from "./design-system-loader.js";
 import type { IMetadataSource } from "./internal.js";
 
 // ============================================================================
@@ -131,10 +132,9 @@ export function createDesignSystemMetadataSourceFromToolkits(
 }
 
 export async function createDesignSystemMetadataSource(): Promise<IMetadataSource> {
-  // Use a dynamic import so the generator can still run in contexts where
-  // @arcadeai/design-system isn't installed.
-  const designSystem = await import("@arcadeai/design-system");
-  const maybeToolkits = (designSystem as { TOOLKITS?: unknown }).TOOLKITS;
+  const designSystem = await loadDesignSystemModule();
+  const maybeToolkits = (designSystem as { TOOLKITS?: unknown } | null)
+    ?.TOOLKITS;
   const toolkits = Array.isArray(maybeToolkits) ? maybeToolkits : [];
 
   const parsed: ToolkitMetadata[] = [];

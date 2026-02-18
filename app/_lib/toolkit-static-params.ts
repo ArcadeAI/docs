@@ -1,6 +1,7 @@
 import { readdir, readFile } from "node:fs/promises";
+import { createRequire } from "node:module";
 import { join } from "node:path";
-import { TOOLKITS as DESIGN_SYSTEM_TOOLKITS } from "@arcadeai/design-system";
+import { pathToFileURL } from "node:url";
 import { readToolkitData, readToolkitIndex } from "./toolkit-data";
 import { getToolkitSlug, normalizeToolkitId } from "./toolkit-slug";
 
@@ -29,6 +30,45 @@ export type ToolkitCatalogEntry = {
 export type ToolkitRouteEntry = {
   toolkitId: string; // docs slug (e.g. "github-api") or normalized id
   category: IntegrationCategory;
+};
+
+const require = createRequire(import.meta.url);
+let cachedDesignSystemToolkits: ToolkitCatalogEntry[] | null = null;
+
+const isToolkitCatalogEntry = (
+  value: unknown
+): value is ToolkitCatalogEntry => {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return false;
+  }
+  const entry = value as Record<string, unknown>;
+  return typeof entry.id === "string";
+};
+
+const loadDesignSystemToolkits = async (): Promise<ToolkitCatalogEntry[]> => {
+  if (cachedDesignSystemToolkits) {
+    return cachedDesignSystemToolkits;
+  }
+
+  try {
+    const designSystemEntry = require.resolve("@arcadeai/design-system");
+    const designSystem = (await import(
+      pathToFileURL(designSystemEntry).href
+    )) as {
+      TOOLKITS?: unknown;
+    };
+    const toolkits = Array.isArray(designSystem.TOOLKITS)
+      ? designSystem.TOOLKITS
+      : [];
+
+    cachedDesignSystemToolkits = toolkits.flatMap((toolkit) =>
+      isToolkitCatalogEntry(toolkit) ? [toolkit] : []
+    );
+  } catch {
+    cachedDesignSystemToolkits = [];
+  }
+
+  return cachedDesignSystemToolkits;
 };
 
 function normalizeCategory(
@@ -150,7 +190,8 @@ export async function listToolkitRoutes(options?: {
     return await listToolkitRoutesFromDataDir(options);
   }
 
-  const toolkitsCatalog = options?.toolkitsCatalog ?? DESIGN_SYSTEM_TOOLKITS;
+  const toolkitsCatalog =
+    options?.toolkitsCatalog ?? (await loadDesignSystemToolkits());
   const catalogByNormalizedId = new Map(
     toolkitsCatalog.map((toolkit) => [normalizeToolkitId(toolkit.id), toolkit])
   );

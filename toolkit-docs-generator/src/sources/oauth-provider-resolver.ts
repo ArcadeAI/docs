@@ -1,3 +1,5 @@
+import { loadDesignSystemModule } from "./design-system-loader.js";
+
 /**
  * OAuth Provider ID Resolver
  *
@@ -97,21 +99,17 @@ export function buildProviderIdResolver(
  * `@arcadeai/design-system` is not installed (returns null in that case).
  */
 export async function createDesignSystemProviderIdResolver(): Promise<ProviderIdResolver | null> {
-  try {
-    const designSystem = await import("@arcadeai/design-system");
-    const catalogue = (
-      designSystem as {
-        OAUTH_PROVIDER_CATALOGUE?: Record<string, unknown>;
-      }
-    ).OAUTH_PROVIDER_CATALOGUE;
+  const designSystem = await loadDesignSystemModule();
+  const catalogue = (
+    designSystem as {
+      OAUTH_PROVIDER_CATALOGUE?: Record<string, unknown>;
+    } | null
+  )?.OAUTH_PROVIDER_CATALOGUE;
 
-    if (!catalogue || typeof catalogue !== "object") {
-      return null;
-    }
-
-    const knownIds = new Set(Object.keys(catalogue));
-    return buildProviderIdResolver(knownIds);
-  } catch {
+  if (!catalogue || typeof catalogue !== "object") {
     return null;
   }
+
+  const knownIds = new Set(Object.keys(catalogue));
+  return buildProviderIdResolver(knownIds);
 }
