@@ -15,6 +15,8 @@ test("porter workflow includes required triggers", () => {
   expect(workflowContents).toContain("repository_dispatch");
   expect(workflowContents).toContain("porter_deploy_succeeded");
   expect(workflowContents).toContain("workflow_dispatch");
+  expect(workflowContents).toContain("schedule:");
+  expect(workflowContents).toContain('cron: "0 9,10 * * *"');
 });
 
 test("porter workflow generates docs and opens a PR", () => {
@@ -32,5 +34,6 @@ test("porter workflow generates docs and opens a PR", () => {
   expect(workflowContents).toContain("peter-evans/create-pull-request");
   expect(workflowContents).toContain("HUSKY: 0");
   expect(workflowContents).toContain("[AUTO] Adding MCP Servers docs update");
+  expect(workflowContents).toContain("team-reviewers: engineering");
   expect(workflowContents).toContain("pull-requests: write");
 });

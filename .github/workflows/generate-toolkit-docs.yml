@@ -10,6 +10,10 @@ on:
   repository_dispatch:
     types: [porter_deploy_succeeded]
   workflow_dispatch:
+  # GitHub cron is UTC. 09:00/10:00 UTC spans 2 AM America/Los_Angeles
+  # across DST changes; a gate step below ensures only true 2 AM runs proceed.
+  schedule:
+    - cron: "0 9,10 * * *"
 
 permissions:
   contents: write
@@ -20,28 +24,46 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Gate schedule to 2 AM San Francisco
+        id: schedule-gate
+        if: github.event_name == 'schedule'
+        run: |
+          SF_HOUR="$(TZ=America/Los_Angeles date +%H)"
+          if [ "$SF_HOUR" = "02" ]; then
+            echo "should_run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "should_run=false" >> "$GITHUB_OUTPUT"
+            echo "Skipping run outside 2 AM America/Los_Angeles (current hour: $SF_HOUR)."
+          fi
+
       - name: Checkout repository
+        if: github.event_name != 'schedule' || steps.schedule-gate.outputs.should_run == 'true'
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Install pnpm
+        if: github.event_name != 'schedule' || steps.schedule-gate.outputs.should_run == 'true'
         uses: pnpm/action-setup@v4
 
       - name: Setup Node.js
+        if: github.event_name != 'schedule' || steps.schedule-gate.outputs.should_run == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: pnpm
 
       - name: Install dependencies
+        if: github.event_name != 'schedule' || steps.schedule-gate.outputs.should_run == 'true'
         run: pnpm install --frozen-lockfile
 
       - name: Build toolkit docs generator
+        if: github.event_name != 'schedule' || steps.schedule-gate.outputs.should_run == 'true'
         run: pnpm build
         working-directory: toolkit-docs-generator
 
       - name: Generate toolkit docs
+        if: github.event_name != 'schedule' || steps.schedule-gate.outputs.should_run == 'true'
         run: |
           pnpm dlx tsx src/cli/index.ts generate \
             --all \
@@ -63,9 +85,11 @@ jobs:
           OPENAI_MODEL: ${{ secrets.OPENAI_MODEL || 'gpt-4o-mini' }}
 
       - name: Sync toolkit sidebar navigation
+        if: github.event_name != 'schedule' || steps.schedule-gate.outputs.should_run == 'true'
         run: pnpm dlx tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts --remove-empty-sections=false --verbose
 
       - name: Check for changes
+        if: github.event_name != 'schedule' || steps.schedule-gate.outputs.should_run == 'true'
         id: check-changes
         run: |
           if [ -n "$(git status --porcelain)" ]; then
@@ -75,7 +99,7 @@ jobs:
           fi
 
       - name: Create pull request
-        if: steps.check-changes.outputs.has_changes == 'true'
+        if: (github.event_name != 'schedule' || steps.schedule-gate.outputs.should_run == 'true') && steps.check-changes.outputs.has_changes == 'true'
         uses: peter-evans/create-pull-request@v7
         env:
           HUSKY: 0
@@ -90,5 +114,6 @@ jobs:
             - Deploy env: ${{ github.event.client_payload.env || 'unknown' }}
             - Deploy SHA: ${{ github.event.client_payload.deploy_sha || 'unknown' }}
             - Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          team-reviewers: engineering
           branch: automation/toolkit-docs-${{ github.run_id }}
           delete-branch: true
