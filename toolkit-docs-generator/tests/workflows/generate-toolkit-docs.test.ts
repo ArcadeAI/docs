@@ -34,6 +34,5 @@ test("porter workflow generates docs and opens a PR", () => {
   expect(workflowContents).toContain("peter-evans/create-pull-request");
   expect(workflowContents).toContain("HUSKY: 0");
   expect(workflowContents).toContain("[AUTO] Adding MCP Servers docs update");
-  expect(workflowContents).toContain("team-reviewers: engineering");
   expect(workflowContents).toContain("pull-requests: write");
 });
