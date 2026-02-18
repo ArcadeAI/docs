@@ -50,6 +50,7 @@ import {
   createEngineToolkitDataSource,
   createMockToolkitDataSource,
   type IToolkitDataSource,
+  type ToolkitData,
 } from "../sources/toolkit-data-source.js";
 import { normalizeId } from "../utils/fp.js";
 import {
@@ -181,6 +182,13 @@ const buildLogPaths = (logDir: string) => ({
   failedToolsPath: join(logDir, "failed-tools.json"),
 });
 
+const getToolkitIdsWithoutMetadata = (
+  toolkitsData: ReadonlyMap<string, ToolkitData>
+): string[] =>
+  Array.from(toolkitsData.entries())
+    .filter(([, toolkitData]) => toolkitData.metadata === null)
+    .map(([toolkitId]) => toolkitId);
+
 const createMetadataSource = async (options: {
   metadataFile: string;
   useMetadataFile: boolean;
@@ -238,6 +246,35 @@ type OverviewInitOptions = {
 };
 
 type MetadataSource = Awaited<ReturnType<typeof createMetadataSource>>;
+
+const filterProvidersByMetadataPresence = async (
+  providers: readonly ProviderVersion[],
+  metadataSource: MetadataSource
+): Promise<{ included: ProviderVersion[]; excluded: string[] }> => {
+  const source = metadataSource as {
+    getToolkitMetadata?: (
+      toolkitId: string
+    ) => Promise<{ id: string; label: string } | null>;
+  };
+
+  if (!source.getToolkitMetadata) {
+    return { included: [...providers], excluded: [] };
+  }
+
+  const included: ProviderVersion[] = [];
+  const excluded: string[] = [];
+
+  for (const provider of providers) {
+    const metadata = await source.getToolkitMetadata(provider.provider);
+    if (metadata) {
+      included.push(provider);
+    } else {
+      excluded.push(provider.provider);
+    }
+  }
+
+  return { included, excluded };
+};
 
 const getOverviewInitToolkits = (options: OverviewInitOptions): string[] => {
   if (!options.toolkits) {
@@ -988,6 +1025,11 @@ program
     "Only regenerate toolkits with changed tool definitions",
     false
   )
+  .option(
+    "--require-complete",
+    "Require complete metadata. Only include toolkits with data in Engine and Design System.",
+    false
+  )
   .option("--verbose", "Enable verbose logging", false)
   .action(
     async (options: {
@@ -1029,11 +1071,13 @@ program
       resume: boolean;
       incremental: boolean;
       skipUnchanged: boolean;
+      requireComplete: boolean;
       verbose: boolean;
       // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: legacy CLI flow
     }) => {
       const spinner = ora("Parsing input...").start();
       const logPaths = buildLogPaths(resolve(options.logDir));
+      const requireComplete = options.requireComplete;
 
       try {
         const runAll = options.all;
@@ -1112,6 +1156,36 @@ program
         // Resolve provider names to canonical toolkit IDs (best effort).
         if (providers && providers.length > 0) {
           providers = await resolveProviderIds(providers, metadataSource);
+        }
+
+        if (requireComplete && providers && providers.length > 0) {
+          const { included, excluded } =
+            await filterProvidersByMetadataPresence(providers, metadataSource);
+          providers = included;
+
+          if (excluded.length > 0) {
+            const label = excluded.length === 1 ? "provider" : "providers";
+            console.log(
+              chalk.yellow(
+                `Skipping ${excluded.length} ${label} not found in metadata source: ${excluded.join(", ")}`
+              )
+            );
+          }
+
+          if (providers.length === 0) {
+            spinner.succeed(
+              "No providers left after metadata filtering. Nothing to generate."
+            );
+            await appendLogEntry(logPaths.runLogPath, {
+              title: "generate (metadata-filter no-op)",
+              details: [
+                `output=${resolve(options.output)}`,
+                "mode=providers",
+                "reason=no providers matched metadata source",
+              ],
+            });
+            process.exit(0);
+          }
         }
 
         // Create toolkit data source based on API source
@@ -1262,12 +1336,29 @@ program
             );
           }
 
+          const metadataExcludedToolkitIds = requireComplete
+            ? getToolkitIdsWithoutMetadata(currentToolkitsData)
+            : [];
+          const metadataExcludedToolkitIdSet = new Set(
+            metadataExcludedToolkitIds.map((id) => id.toLowerCase())
+          );
+          if (options.verbose && metadataExcludedToolkitIds.length > 0) {
+            console.log(
+              chalk.dim(
+                `  Excluding ${metadataExcludedToolkitIds.length} toolkit(s) without metadata before change detection`
+              )
+            );
+          }
+
           // Build map of toolkit ID -> tools for comparison
           const currentToolkitTools = new Map<
             string,
             readonly import("../types/index.js").ToolDefinition[]
           >();
           for (const [id, data] of currentToolkitsData) {
+            if (metadataExcludedToolkitIdSet.has(id.toLowerCase())) {
+              continue;
+            }
             currentToolkitTools.set(id, data.tools);
           }
 
@@ -1385,6 +1476,7 @@ program
             : {}),
           ...(runAll ? { onToolkitProgress } : {}),
           ...(skipToolkitIds.size > 0 ? { skipToolkitIds } : {}),
+          requireCompleteData: requireComplete,
           ...(onToolkitComplete ? { onToolkitComplete } : {}),
           ...(resolveProviderId ? { resolveProviderId } : {}),
         });
@@ -1407,6 +1499,21 @@ program
             );
           }
 
+          if (requireComplete) {
+            const metadataExcludedToolkitIds =
+              getToolkitIdsWithoutMetadata(toolkitList);
+            for (const toolkitId of metadataExcludedToolkitIds) {
+              skipToolkitIds.add(toolkitId.toLowerCase());
+            }
+            if (options.verbose && metadataExcludedToolkitIds.length > 0) {
+              console.log(
+                chalk.dim(
+                  `  Excluding ${metadataExcludedToolkitIds.length} toolkit(s) without metadata`
+                )
+              );
+            }
+          }
+
           // If --skip-unchanged, only process changed toolkits
           // Add unchanged toolkits to skipToolkitIds
           if (changedToolkitIds) {
@@ -1421,14 +1528,11 @@ program
           const toProcess = totalToolkits - skipToolkitIds.size;
 
           if (toProcess === 0) {
-            spinner.succeed(`All ${totalToolkits} toolkit(s) already complete`);
+            spinner.succeed("No toolkits to process after applying filters");
             allResults = [];
           } else {
-            const skipReason = changedToolkitIds
-              ? `(${skipToolkitIds.size} unchanged)`
-              : skipToolkitIds.size > 0
-                ? `(${skipToolkitIds.size} skipped)`
-                : "";
+            const skipReason =
+              skipToolkitIds.size > 0 ? `(${skipToolkitIds.size} skipped)` : "";
             spinner.succeed(
               `Found ${totalToolkits} toolkit(s), ${toProcess} to process ${skipReason}`.trim()
             );
@@ -1490,6 +1594,7 @@ program
                 : {}),
               onToolkitProgress,
               ...(skipToolkitIds.size > 0 ? { skipToolkitIds } : {}),
+              requireCompleteData: requireComplete,
               ...(onToolkitComplete ? { onToolkitComplete } : {}),
               ...(resolveProviderId ? { resolveProviderId } : {}),
             });
@@ -1628,6 +1733,7 @@ program
           `apiSource=${apiSource}`,
           `mode=${runAll ? "all" : "providers"}`,
           `skipUnchanged=${options.skipUnchanged}`,
+          `requireComplete=${requireComplete}`,
           `filesWritten=${filesWritten.length}`,
           `warnings=${warningCount}`,
           `writeErrors=${writeErrors.length}`,
@@ -1777,6 +1883,11 @@ program
     "Write each toolkit immediately after processing (default when --resume)",
     false
   )
+  .option(
+    "--require-complete",
+    "Require complete metadata. Only include toolkits with data in Engine and Design System.",
+    false
+  )
   .option("--verbose", "Enable verbose logging", false)
   .action(
     async (options: {
@@ -1813,10 +1924,12 @@ program
       customSections?: string;
       resume: boolean;
       incremental: boolean;
+      requireComplete: boolean;
       verbose: boolean;
       // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: legacy CLI flow
     }) => {
       const spinner = ora("Initializing...").start();
+      const requireComplete = options.requireComplete;
 
       try {
         const mockDataDir = options.mockDataDir ?? getDefaultMockDataDir();
@@ -1983,7 +2096,6 @@ program
         const fetchToolkitListDurationMs =
           Date.now() - fetchToolkitListStartedAt;
         const totalToolkits = toolkitList.size;
-        const toProcess = totalToolkits - skipToolkitIds.size;
         if (options.verbose) {
           console.log(
             chalk.dim(
@@ -1992,8 +2104,25 @@ program
           );
         }
 
+        if (requireComplete) {
+          const metadataExcludedToolkitIds =
+            getToolkitIdsWithoutMetadata(toolkitList);
+          for (const toolkitId of metadataExcludedToolkitIds) {
+            skipToolkitIds.add(toolkitId.toLowerCase());
+          }
+          if (options.verbose && metadataExcludedToolkitIds.length > 0) {
+            console.log(
+              chalk.dim(
+                `  Excluding ${metadataExcludedToolkitIds.length} toolkit(s) without metadata`
+              )
+            );
+          }
+        }
+
+        const toProcess = totalToolkits - skipToolkitIds.size;
+
         if (toProcess === 0) {
-          spinner.succeed(`All ${totalToolkits} toolkit(s) already complete`);
+          spinner.succeed("No toolkits to process after applying filters");
         } else {
           spinner.succeed(
             `Found ${totalToolkits} toolkit(s), ${toProcess} to process${skipToolkitIds.size > 0 ? ` (${skipToolkitIds.size} skipped)` : ""}`
@@ -2056,6 +2185,7 @@ program
               : {}),
             onToolkitProgress,
             ...(skipToolkitIds.size > 0 ? { skipToolkitIds } : {}),
+            requireCompleteData: requireComplete,
             ...(onToolkitComplete ? { onToolkitComplete } : {}),
             ...(resolveProviderId ? { resolveProviderId } : {}),
           });

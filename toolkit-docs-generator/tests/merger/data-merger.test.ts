@@ -25,7 +25,11 @@ import {
   InMemoryMetadataSource,
   InMemoryToolDataSource,
 } from "../../src/sources/in-memory.js";
-import { createCombinedToolkitDataSource } from "../../src/sources/toolkit-data-source.js";
+import {
+  createCombinedToolkitDataSource,
+  type IToolkitDataSource,
+  type ToolkitData,
+} from "../../src/sources/toolkit-data-source.js";
 import type {
   CustomSections,
   ToolDefinition,
@@ -1247,6 +1251,65 @@ describe("DataMerger", () => {
 
       expect(githubResult?.toolkit.tools).toHaveLength(2);
       expect(slackResult?.toolkit.tools).toHaveLength(1);
+    });
+
+    it("skips toolkits missing metadata or tools when requireCompleteData is true", async () => {
+      const completeToolkitData: ToolkitData = {
+        tools: [githubTool1],
+        metadata: githubMetadata,
+      };
+      const missingMetadataToolkitData: ToolkitData = {
+        tools: [
+          createTool({
+            name: "Lookup",
+            qualifiedName: "Unknown.Lookup",
+            fullyQualifiedName: "Unknown.Lookup@1.0.0",
+          }),
+        ],
+        metadata: null,
+      };
+      const missingToolsToolkitData: ToolkitData = {
+        tools: [],
+        metadata: slackMetadata,
+      };
+
+      const toolkitDataSource: IToolkitDataSource = {
+        fetchToolkitData: async (toolkitId: string) => {
+          if (toolkitId === "Github") {
+            return completeToolkitData;
+          }
+          if (toolkitId === "Unknown") {
+            return missingMetadataToolkitData;
+          }
+          if (toolkitId === "Slack") {
+            return missingToolsToolkitData;
+          }
+          return { tools: [], metadata: null };
+        },
+        fetchAllToolkitsData: async () =>
+          new Map([
+            ["Github", completeToolkitData],
+            ["Unknown", missingMetadataToolkitData],
+            ["Slack", missingToolsToolkitData],
+          ]),
+        isAvailable: async () => true,
+      };
+
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        requireCompleteData: true,
+      });
+
+      const count = await merger.getToolkitCount();
+      const results = await merger.mergeAllToolkits();
+
+      expect(count.total).toBe(3);
+      expect(count.toProcess).toBe(1);
+      expect(count.skipped).toBe(2);
+      expect(results).toHaveLength(1);
+      expect(results[0]?.toolkit.id).toBe("Github");
     });
 
     it("should return empty array when no tools", async () => {

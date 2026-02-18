@@ -66,6 +66,8 @@ export interface DataMergerConfig {
   onToolkitComplete?: ((result: MergeResult) => Promise<void>) | undefined;
   /** Set of toolkit IDs to skip (for resume support) */
   skipToolkitIds?: ReadonlySet<string> | undefined;
+  /** When true, only process toolkits with metadata and tools */
+  requireCompleteData?: boolean;
   /** Fallback resolver: toolkit ID → OAuth provider ID (design system) */
   resolveProviderId?: ((toolkitId: string) => string | null) | undefined;
 }
@@ -876,6 +878,7 @@ export class DataMerger {
     | ((result: MergeResult) => Promise<void>)
     | undefined;
   private readonly skipToolkitIds: ReadonlySet<string>;
+  private readonly requireCompleteData: boolean;
   private readonly resolveProviderId:
     | ((toolkitId: string) => string | null)
     | undefined;
@@ -896,6 +899,7 @@ export class DataMerger {
     this.onToolkitProgress = config.onToolkitProgress;
     this.onToolkitComplete = config.onToolkitComplete;
     this.skipToolkitIds = config.skipToolkitIds ?? new Set();
+    this.requireCompleteData = config.requireCompleteData ?? false;
     this.resolveProviderId = config.resolveProviderId;
   }
 
@@ -1075,7 +1079,10 @@ export class DataMerger {
 
     // Filter out toolkits that should be skipped (for resume support)
     const filteredEntries = toolkitEntries.filter(
-      ([toolkitId]) => !this.skipToolkitIds.has(toolkitId.toLowerCase())
+      ([toolkitId, toolkitData]) =>
+        !this.skipToolkitIds.has(toolkitId.toLowerCase()) &&
+        (!this.requireCompleteData ||
+          (toolkitData.metadata !== null && toolkitData.tools.length > 0))
     );
 
     const results = await mapWithConcurrency(
@@ -1109,8 +1116,11 @@ export class DataMerger {
   }> {
     const allToolkitsData = await this.toolkitDataSource.fetchAllToolkitsData();
     const total = allToolkitsData.size;
-    const skipped = Array.from(allToolkitsData.keys()).filter((id) =>
-      this.skipToolkitIds.has(id.toLowerCase())
+    const skipped = Array.from(allToolkitsData.entries()).filter(
+      ([id, toolkitData]) =>
+        this.skipToolkitIds.has(id.toLowerCase()) ||
+        (this.requireCompleteData &&
+          (toolkitData.metadata === null || toolkitData.tools.length === 0))
     ).length;
     return {
       total,
