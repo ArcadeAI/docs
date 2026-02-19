@@ -1,0 +1,287 @@
+{
+  "id": "MicrosoftWord",
+  "label": "Microsoft Word",
+  "version": "0.1.3",
+  "description": "Arcade.dev LLM tools for Microsoft Word",
+  "metadata": {
+    "category": "productivity",
+    "iconUrl": "https://design-system.arcade.dev/icons/microsoft-word.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/productivity/microsoft-word",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": "microsoft",
+    "allScopes": [
+      "Files.Read",
+      "Files.ReadWrite",
+      "User.Read"
+    ]
+  },
+  "tools": [
+    {
+      "name": "CreateDocument",
+      "qualifiedName": "MicrosoftWord.CreateDocument",
+      "fullyQualifiedName": "MicrosoftWord.CreateDocument@0.1.3",
+      "description": "Create a new Word document in OneDrive (4MB upload limit). Optionally include text content.",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "File name without extension, or with .docx. The .docx extension is normalized.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "text_content",
+          "type": "string",
+          "required": false,
+          "description": "Optional text content to include in the new document. If omitted, an empty document is created.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "folder_id",
+          "type": "string",
+          "required": false,
+          "description": "Optional parent folder ID. If omitted, the document is created in the root.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "conflict_behavior",
+          "type": "string",
+          "required": false,
+          "description": "Optional conflict behavior when a file with the same name exists. One of: fail, rename, replace.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Files.ReadWrite"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The created Word document metadata."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftWord.CreateDocument",
+        "parameters": {
+          "title": {
+            "value": "Meeting Notes - Q1 Planning.docx",
+            "type": "string",
+            "required": true
+          },
+          "text_content": {
+            "value": "Meeting attendees: Alice, Bob, Carol.\nAgenda:\n1. Q1 goals\n2. Budget allocation\n3. Action items and owners\n\nDecisions:\n- Approve budget with minor revisions.\n- Assign Bob to lead implementation.\n",
+            "type": "string",
+            "required": false
+          },
+          "folder_id": {
+            "value": "01A2B3C4D5E6F7G8!12345",
+            "type": "string",
+            "required": false
+          },
+          "conflict_behavior": {
+            "value": "rename",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetDocument",
+      "qualifiedName": "MicrosoftWord.GetDocument",
+      "fullyQualifiedName": "MicrosoftWord.GetDocument@0.1.3",
+      "description": "Get a Word document's metadata and content (supports only `.docx`). Returns the document content as Markdown by default, or just metadata when metadata_only is True.",
+      "parameters": [
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the Word document to retrieve.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": false,
+          "description": "Optional drive ID for shared items. If omitted, uses the user's default drive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "metadata_only",
+          "type": "boolean",
+          "required": false,
+          "description": "If True, return only the document metadata without downloading the content. Defaults to False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Files.Read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The Word document metadata and optionally its content."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftWord.GetDocument",
+        "parameters": {
+          "item_id": {
+            "value": "0b1a2c3d-4e5f-6789-abcd-ef0123456789",
+            "type": "string",
+            "required": true
+          },
+          "drive_id": {
+            "value": "b!0r1v2e3IdExample",
+            "type": "string",
+            "required": false
+          },
+          "metadata_only": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "InsertTextAtEnd",
+      "qualifiedName": "MicrosoftWord.InsertTextAtEnd",
+      "fullyQualifiedName": "MicrosoftWord.InsertTextAtEnd@0.1.3",
+      "description": "Append text to the end of a Word document (supports only `.docx`, 4MB limit).",
+      "parameters": [
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the Word document to update.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "text_content",
+          "type": "string",
+          "required": true,
+          "description": "The text content to append to the document.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": false,
+          "description": "Optional drive ID for shared items. If omitted, uses the user's default drive.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Files.ReadWrite"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The updated Word document metadata."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftWord.InsertTextAtEnd",
+        "parameters": {
+          "item_id": {
+            "value": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "type": "string",
+            "required": true
+          },
+          "text_content": {
+            "value": "Please find the updated section appended below:\n\n- Summary of changes\n- Next steps\n\nRegards,\nProject Team",
+            "type": "string",
+            "required": true
+          },
+          "drive_id": {
+            "value": "b!3XyZ9aBcDeFgHiJkLMnOp",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "MicrosoftWord.WhoAmI",
+      "fullyQualifiedName": "MicrosoftWord.WhoAmI@0.1.3",
+      "description": "Get information about the current user and their Microsoft Word environment.",
+      "parameters": [],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "User.Read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Get comprehensive user profile and Microsoft Word environment information."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftWord.WhoAmI",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    }
+  ],
+  "documentationChunks": [
+    {
+      "type": "markdown",
+      "location": "header",
+      "position": "before",
+      "content": "## Overview\n\nArcade.dev LLM tools for Microsoft Word that let an authenticated agent create, read, and modify .docx files stored in a user's OneDrive and query the current user/environment.\n\n**Capabilities**\n\n- Create a new Word document in OneDrive (4MB upload limit); optionally include initial text.\n- Retrieve a .docx document's metadata and content (returns content as Markdown by default; supports metadata_only=True).\n- Append text to the end of a .docx document (4MB limit).\n- Query information about the current user and their Microsoft Word environment (WhoAmI).\n\n**OAuth**\n\nProvider: microsoft\n\nScopes: Files.Read, Files.ReadWrite, User.Read"
+    }
+  ],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-02-19T22:07:01.217Z",
+  "summary": "Microsoft Word toolkit provides Arcade.dev LLM integrations for Microsoft Word through Microsoft Graph. It enables creating, reading, and appending .docx documents in OneDrive and querying user context to drive document workflows.\n\n**Capabilities**\n- Create and modify .docx files in OneDrive with content updates and append operations.\n- Retrieve document content or metadata; content is returned as Markdown by default.\n- Access user and environment information to support permission-aware flows.\n- Respect .docx-only support and a ~4MB per-file transfer limit for uploads/downloads.\n\n**OAuth**\nProvider: microsoft\nScopes: Files.Read, Files.ReadWrite, User.Read"
+}
