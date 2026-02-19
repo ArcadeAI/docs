@@ -101,10 +101,6 @@ const meta: MetaRecord = {
     title: "Vercel API",
     href: "/en/resources/integrations/development/vercel-api",
   },
-  "weaviate-api": {
-    title: "Weaviate API",
-    href: "/en/resources/integrations/development/weaviate-api",
-  },
 };
 
 export default meta;
