@@ -1,20 +1,7 @@
-import { createRequire } from "node:module";
 import type { NextConfig } from "next";
 import nextra from "nextra";
 import { withLlmsTxt } from "./lib/next-plugin-llmstxt";
 import { remarkGlossary } from "./lib/remark-glossary";
-
-const require = createRequire(import.meta.url);
-const designSystemMainPath = require.resolve("@arcadeai/design-system");
-const designSystemUtilsPath = require.resolve(
-  "@arcadeai/design-system/lib/utils"
-);
-const designSystemVariablesPath = require.resolve(
-  "@arcadeai/design-system/assets/variables.css"
-);
-const designSystemArcadeLogoPath = require.resolve(
-  "@arcadeai/design-system/assets/images/arcade-logo"
-);
 
 // Set up Nextra with its configuration
 const withNextra = nextra({
@@ -856,23 +843,6 @@ const nextConfig: NextConfig = withLlmsTxt({
           permanent: true,
         },
       ];
-    },
-    webpack: (config) => {
-      config.resolve ??= {};
-      config.resolve.alias ??= {};
-
-      if (typeof config.resolve.alias === "object") {
-        config.resolve.alias["@arcadeai/design-system$"] = designSystemMainPath;
-        config.resolve.alias["@arcadeai/design-system/lib/utils"] =
-          designSystemUtilsPath;
-        config.resolve.alias["@arcadeai/design-system/assets/variables.css"] =
-          designSystemVariablesPath;
-        config.resolve.alias[
-          "@arcadeai/design-system/assets/images/arcade-logo"
-        ] = designSystemArcadeLogoPath;
-      }
-
-      return config;
     },
     headers: async () => [
       {
