@@ -1,0 +1,1952 @@
+{
+  "id": "Daytona",
+  "label": "Daytona",
+  "version": "0.1.0",
+  "description": "Use this server to create, manage, and interact with Daytona sandboxes. Provides isolated environments for code execution, file management, and git operations.",
+  "metadata": {
+    "category": "development",
+    "iconUrl": "https://design-system.arcade.dev/icons/daytona.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/development/daytona",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": null,
+  "tools": [
+    {
+      "name": "ArchiveSandbox",
+      "qualifiedName": "Daytona.ArchiveSandbox",
+      "fullyQualifiedName": "Daytona.ArchiveSandbox@0.1.0",
+      "description": "Archive a stopped sandbox to reduce storage costs.\n\nThe sandbox must be stopped first (use stop_sandbox). Can be started again\nlater, though startup takes longer than from stopped state.",
+      "parameters": [
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": true,
+          "description": "Sandbox name or ID",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Updated sandbox info after archiving"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "ConfigureSandboxAuto",
+      "qualifiedName": "Daytona.ConfigureSandboxAuto",
+      "fullyQualifiedName": "Daytona.ConfigureSandboxAuto@0.1.0",
+      "description": "Configure auto-stop, auto-archive, and/or auto-delete intervals.\n\nOnly provided values are updated. WARNING: auto_delete_minutes=0 means\nimmediate deletion upon stop -- use -1 to disable.",
+      "parameters": [
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": true,
+          "description": "Sandbox name or ID",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "auto_stop_minutes",
+          "type": "integer",
+          "required": false,
+          "description": "Auto-stop after N minutes of inactivity. 0 disables auto-stop. Default: unchanged",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "auto_archive_minutes",
+          "type": "integer",
+          "required": false,
+          "description": "Auto-archive after N minutes of being stopped. 0 uses the maximum interval. Default: unchanged",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "auto_delete_minutes",
+          "type": "integer",
+          "required": false,
+          "description": "Auto-delete after N minutes of being stopped. 0 deletes IMMEDIATELY. Use -1 to disable. Default: unchanged",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Updated sandbox info"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "CreateFolder",
+      "qualifiedName": "Daytona.CreateFolder",
+      "fullyQualifiedName": "Daytona.CreateFolder@0.1.0",
+      "description": "Create a folder (with parent directories) in the sandbox.",
+      "parameters": [
+        {
+          "name": "path",
+          "type": "string",
+          "required": true,
+          "description": "Folder path to create",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": false,
+          "description": "Sandbox name or ID. Omit to auto-select when only one sandbox exists",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "mode",
+          "type": "string",
+          "required": false,
+          "description": "Unix permission mode (e.g. '755'). Default: '755'",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Creation confirmation"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "CreateSandbox",
+      "qualifiedName": "Daytona.CreateSandbox",
+      "fullyQualifiedName": "Daytona.CreateSandbox@0.1.0",
+      "description": "Create a new isolated sandbox for code execution.\n\nTwo creation modes: from a Daytona snapshot or from a Docker image.\nIf neither snapshot nor image is specified, uses the standard base image.\nResource params (cpu, memory_gb, disk_gb, gpu) only apply to image-based creation.\nReturns sandbox name, ID, and status. Ready for run_code / run_command immediately.\n\nNote: A ``region`` parameter is deferred -- the Daytona SDK's\n``CreateSandboxFromImageParams`` / ``CreateSandboxFromSnapshotParams`` do not\ncurrently expose a ``target``/``region`` field.",
+      "parameters": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "Human-readable name for the sandbox",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "language",
+          "type": "string",
+          "required": false,
+          "description": "Programming language. Default: python",
+          "enum": ["python", "typescript", "javascript"],
+          "inferrable": true
+        },
+        {
+          "name": "snapshot",
+          "type": "string",
+          "required": false,
+          "description": "Daytona snapshot name or ID. Mutually exclusive with image. Default: standard base image",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "image",
+          "type": "string",
+          "required": false,
+          "description": "Docker image to create from. Mutually exclusive with snapshot",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "env_vars",
+          "type": "json",
+          "required": false,
+          "description": "Environment variables to set in the sandbox. Default: None",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "auto_stop_minutes",
+          "type": "integer",
+          "required": false,
+          "description": "Auto-stop after N minutes of inactivity. 0 disables auto-stop. Default: 15",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "cpu",
+          "type": "integer",
+          "required": false,
+          "description": "vCPUs (1-16). Only for image-based creation (ignored for snapshots). Default: 2",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "memory_gb",
+          "type": "integer",
+          "required": false,
+          "description": "RAM in GB (1-64). Only for image-based creation (ignored for snapshots). Default: 4",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "disk_gb",
+          "type": "integer",
+          "required": false,
+          "description": "Disk in GB (1-200). Only for image-based creation (ignored for snapshots). Default: 20",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "gpu",
+          "type": "integer",
+          "required": false,
+          "description": "GPUs (0-8). Only for image-based creation (ignored for snapshots). Default: 0",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "labels",
+          "type": "json",
+          "required": false,
+          "description": "Key-value labels for organization. Default: None",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "ephemeral",
+          "type": "boolean",
+          "required": false,
+          "description": "Auto-delete sandbox when it stops. Default: False",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The created sandbox details"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "CreateSession",
+      "qualifiedName": "Daytona.CreateSession",
+      "fullyQualifiedName": "Daytona.CreateSession@0.1.0",
+      "description": "Create a persistent background session for long-running processes.\n\nSessions persist across tool calls -- useful for dev servers, watchers, or\nmulti-step workflows where you need to run commands sequentially.",
+      "parameters": [
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": false,
+          "description": "Sandbox name or ID. Omit to auto-select when only one sandbox exists",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "session_id",
+          "type": "string",
+          "required": false,
+          "description": "Custom session ID. Auto-generated if omitted",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Created session details"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "CreateSnapshot",
+      "qualifiedName": "Daytona.CreateSnapshot",
+      "fullyQualifiedName": "Daytona.CreateSnapshot@0.1.0",
+      "description": "Create a new sandbox snapshot (image template).\n\nSnapshots define the base environment for new sandboxes.\nThe image parameter is required -- it specifies the base Docker image.\nNote: snapshot creation can take several minutes as the image must be built.",
+      "parameters": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "description": "Name for the snapshot",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "image",
+          "type": "string",
+          "required": true,
+          "description": "Base Docker image to build from (required)",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "entrypoint",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Entrypoint command as a list of strings (e.g. ['python', 'app.py']). Default: None",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "resources",
+          "type": "json",
+          "required": false,
+          "description": "Default resources for sandboxes (keys: cpu, memory, disk, gpu). Default: platform defaults",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "region_id",
+          "type": "string",
+          "required": false,
+          "description": "Region to build the snapshot in. Default: closest region",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Created snapshot details"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "CreateSshAccess",
+      "qualifiedName": "Daytona.CreateSshAccess",
+      "fullyQualifiedName": "Daytona.CreateSshAccess@0.1.0",
+      "description": "Create SSH access credentials for the sandbox.\n\nReturns connection details including host, port, username, and access token\nfor direct SSH access. Use the token to authenticate SSH connections.",
+      "parameters": [
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": true,
+          "description": "Sandbox name or ID",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "expires_in_minutes",
+          "type": "integer",
+          "required": false,
+          "description": "Token validity in minutes. Default: no expiration",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "SSH connection details"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "DeleteFile",
+      "qualifiedName": "Daytona.DeleteFile",
+      "fullyQualifiedName": "Daytona.DeleteFile@0.1.0",
+      "description": "Delete a file or empty directory. Set recursive=True to delete non-empty directories.",
+      "parameters": [
+        {
+          "name": "path",
+          "type": "string",
+          "required": true,
+          "description": "Path to file or directory to delete",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": false,
+          "description": "Sandbox name or ID. Omit to auto-select when only one sandbox exists",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "recursive",
+          "type": "boolean",
+          "required": false,
+          "description": "Allow recursive deletion of directories. Must be True to delete non-empty directories. Default: False",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Deletion confirmation"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "DeleteSandbox",
+      "qualifiedName": "Daytona.DeleteSandbox",
+      "fullyQualifiedName": "Daytona.DeleteSandbox@0.1.0",
+      "description": "Permanently delete a sandbox and all its contents.",
+      "parameters": [
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": true,
+          "description": "Sandbox name or ID to delete",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Confirmation of deletion"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "FindFiles",
+      "qualifiedName": "Daytona.FindFiles",
+      "fullyQualifiedName": "Daytona.FindFiles@0.1.0",
+      "description": "Search for files by name pattern (glob). Returns matching file paths.\n\nResponse includes total count and has_more flag for pagination.",
+      "parameters": [
+        {
+          "name": "pattern",
+          "type": "string",
+          "required": true,
+          "description": "Glob pattern to match file names",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "path",
+          "type": "string",
+          "required": false,
+          "description": "Directory to search in. Default: sandbox root",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": false,
+          "description": "Sandbox name or ID. Omit to auto-select when only one sandbox exists",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "max_items",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum results (1-200). Default: 50",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Number of items to skip for pagination. Default: 0",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Matching file paths with pagination"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "GetFileInfo",
+      "qualifiedName": "Daytona.GetFileInfo",
+      "fullyQualifiedName": "Daytona.GetFileInfo@0.1.0",
+      "description": "Get metadata about a file: size, permissions, modified time, type.",
+      "parameters": [
+        {
+          "name": "path",
+          "type": "string",
+          "required": true,
+          "description": "File or directory path",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": false,
+          "description": "Sandbox name or ID. Omit to auto-select when only one sandbox exists",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "File metadata"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "GetPortPreviewUrl",
+      "qualifiedName": "Daytona.GetPortPreviewUrl",
+      "fullyQualifiedName": "Daytona.GetPortPreviewUrl@0.1.0",
+      "description": "Get a preview URL for a web service running in the sandbox.\n\nStandard URLs require an auth token in the x-daytona-preview-token header.\nSigned URLs embed authentication in the URL itself -- useful for sharing.",
+      "parameters": [
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": true,
+          "description": "Sandbox name or ID",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "port",
+          "type": "integer",
+          "required": true,
+          "description": "Port number (e.g. 3000, 8080)",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "signed",
+          "type": "boolean",
+          "required": false,
+          "description": "Generate a signed URL with embedded auth. Default: False",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "expires_in_seconds",
+          "type": "integer",
+          "required": false,
+          "description": "Expiry for signed URLs in seconds. Only used when signed=True. Default: 3600",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Preview URL details"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "GetSandbox",
+      "qualifiedName": "Daytona.GetSandbox",
+      "fullyQualifiedName": "Daytona.GetSandbox@0.1.0",
+      "description": "Get detailed information about a sandbox.\n\nReturns state, resources, labels, auto-stop/archive settings, and timestamps.",
+      "parameters": [
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": true,
+          "description": "Sandbox name or ID",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Detailed sandbox information"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "GetSessionCommandLogs",
+      "qualifiedName": "Daytona.GetSessionCommandLogs",
+      "fullyQualifiedName": "Daytona.GetSessionCommandLogs@0.1.0",
+      "description": "Get output logs from a command running in a session.\n\nUseful for checking output of async commands (servers, builds).",
+      "parameters": [
+        {
+          "name": "session_id",
+          "type": "string",
+          "required": true,
+          "description": "Session ID",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "command_id",
+          "type": "string",
+          "required": true,
+          "description": "Command ID to get logs for",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": false,
+          "description": "Sandbox name or ID. Omit to auto-select when only one sandbox exists",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Command logs"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "GetSnapshot",
+      "qualifiedName": "Daytona.GetSnapshot",
+      "fullyQualifiedName": "Daytona.GetSnapshot@0.1.0",
+      "description": "Get detailed information about a snapshot.\n\nAccepts a snapshot name or ID. Returns full details including state,\nimage, resources, entrypoint, and timestamps.",
+      "parameters": [
+        {
+          "name": "snapshot",
+          "type": "string",
+          "required": true,
+          "description": "Snapshot name or ID",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Detailed snapshot information"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "GitAdd",
+      "qualifiedName": "Daytona.GitAdd",
+      "fullyQualifiedName": "Daytona.GitAdd@0.1.0",
+      "description": "Stage files for the next commit. Accepts file paths or '.' for all changes.",
+      "parameters": [
+        {
+          "name": "files",
+          "type": "array",
+          "innerType": "string",
+          "required": true,
+          "description": "Files to stage. Use ['.'] for all files",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "path",
+          "type": "string",
+          "required": false,
+          "description": "Path to git repository",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": false,
+          "description": "Sandbox name or ID. Omit to auto-select when only one sandbox exists",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Staging confirmation"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "GitBranches",
+      "qualifiedName": "Daytona.GitBranches",
+      "fullyQualifiedName": "Daytona.GitBranches@0.1.0",
+      "description": "List all branches. Indicates which branch is currently checked out.",
+      "parameters": [
+        {
+          "name": "path",
+          "type": "string",
+          "required": false,
+          "description": "Path to git repository",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": false,
+          "description": "Sandbox name or ID. Omit to auto-select when only one sandbox exists",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Branch listing with current indicator"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "GitCheckout",
+      "qualifiedName": "Daytona.GitCheckout",
+      "fullyQualifiedName": "Daytona.GitCheckout@0.1.0",
+      "description": "Switch to an existing branch, tag, or commit.\n\nThis tool only switches to refs that already exist in the repository.\n\nYOU DO NOT NEED TO CHECKOUT A BRANCH TO CREATE A NEW ONE OFF OF IT. YOU CAN\nCALL THE `Daytona_GitCreateBranch` TOOL DIRECTLY PROVIDING THE STARTING POINT\nAS THE `start_point` PARAMETER. IF YOU CALL THIS TOOL TO CHECKOUT THE STARTING\nPOINT FIRST, YOU WILL CAUSE THE RELEASE OF EXCESSIVE CO2 INTO THE ATMOSPHERE AND\nYOU WILL CONTRIBUTE TO GLOBAL WARMING.\n\nDO NOT USE THIS TOOL TO CREATE NEW BRANCHES. IF YOU CALL THIS TOOL TO CREATE\nA NEW BRANCH, TOO MUCH CO2 WILL BE RELEASED IN THE ATMOSPHERE AND YOU WILL\nCONTRIBUTE TO GLOBAL WARMING. USE THE `Daytona_GitCreateBranch` TOOL DIRECTLY\nINSTEAD.",
+      "parameters": [
+        {
+          "name": "ref",
+          "type": "string",
+          "required": true,
+          "description": "Existing branch name, tag, or commit hash to switch to",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "path",
+          "type": "string",
+          "required": false,
+          "description": "Path to git repository",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": false,
+          "description": "Sandbox name or ID. Omit to auto-select when only one sandbox exists",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Checkout result"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "GitClone",
+      "qualifiedName": "Daytona.GitClone",
+      "fullyQualifiedName": "Daytona.GitClone@0.1.0",
+      "description": "Clone a Git repository into the sandbox.\n\nFor public repos, no credentials needed. For private repos, provide username + PAT.",
+      "parameters": [
+        {
+          "name": "url",
+          "type": "string",
+          "required": true,
+          "description": "Repository URL to clone",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": false,
+          "description": "Sandbox name or ID. Omit to auto-select when only one sandbox exists",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "path",
+          "type": "string",
+          "required": false,
+          "description": "Destination path. Default: derived from repository URL",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "branch",
+          "type": "string",
+          "required": false,
+          "description": "Branch to clone. Default: repository default branch",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "commit_id",
+          "type": "string",
+          "required": false,
+          "description": "Specific commit SHA to check out after cloning. Default: HEAD of branch",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "username",
+          "type": "string",
+          "required": false,
+          "description": "Username for HTTPS authentication (private repos). Default: None",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "password",
+          "type": "string",
+          "required": false,
+          "description": "Personal access token (PAT) for HTTPS authentication (private repos). Default: None",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Clone result with path and branch info"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "GitCommit",
+      "qualifiedName": "Daytona.GitCommit",
+      "fullyQualifiedName": "Daytona.GitCommit@0.1.0",
+      "description": "Commit staged changes. Requires files to be staged first with git_add.",
+      "parameters": [
+        {
+          "name": "message",
+          "type": "string",
+          "required": true,
+          "description": "Commit message",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "path",
+          "type": "string",
+          "required": false,
+          "description": "Path to git repository",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": false,
+          "description": "Sandbox name or ID. Omit to auto-select when only one sandbox exists",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "author_name",
+          "type": "string",
+          "required": false,
+          "description": "Author name. Default: from sandbox git config",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "author_email",
+          "type": "string",
+          "required": false,
+          "description": "Author email. Default: from sandbox git config",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Commit result with SHA"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "GitCreateBranch",
+      "qualifiedName": "Daytona.GitCreateBranch",
+      "fullyQualifiedName": "Daytona.GitCreateBranch@0.1.0",
+      "description": "Create a new branch and check it out.",
+      "parameters": [
+        {
+          "name": "branch",
+          "type": "string",
+          "required": true,
+          "description": "Name for the new branch",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "path",
+          "type": "string",
+          "required": false,
+          "description": "Path to git repository",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": false,
+          "description": "Sandbox name or ID. Omit to auto-select when only one sandbox exists",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "start_point",
+          "type": "string",
+          "required": false,
+          "description": "Branch/commit to branch from. Default: HEAD",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Branch creation result"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "GitDeleteBranch",
+      "qualifiedName": "Daytona.GitDeleteBranch",
+      "fullyQualifiedName": "Daytona.GitDeleteBranch@0.1.0",
+      "description": "Delete a local branch.",
+      "parameters": [
+        {
+          "name": "branch",
+          "type": "string",
+          "required": true,
+          "description": "Branch name to delete",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "path",
+          "type": "string",
+          "required": false,
+          "description": "Path to git repository",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": false,
+          "description": "Sandbox name or ID. Omit to auto-select when only one sandbox exists",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "force",
+          "type": "boolean",
+          "required": false,
+          "description": "Force delete unmerged branch. Default: False",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Deletion confirmation"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "GitLog",
+      "qualifiedName": "Daytona.GitLog",
+      "fullyQualifiedName": "Daytona.GitLog@0.1.0",
+      "description": "Get commit history. Returns commit hash, author, date, and message.",
+      "parameters": [
+        {
+          "name": "path",
+          "type": "string",
+          "required": false,
+          "description": "Path to git repository",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": false,
+          "description": "Sandbox name or ID. Omit to auto-select when only one sandbox exists",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "max_count",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of commits. Default: 20",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "branch",
+          "type": "string",
+          "required": false,
+          "description": "Branch to show log for. Default: current",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Commit history"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "GitPull",
+      "qualifiedName": "Daytona.GitPull",
+      "fullyQualifiedName": "Daytona.GitPull@0.1.0",
+      "description": "Pull latest changes from the remote repository.",
+      "parameters": [
+        {
+          "name": "path",
+          "type": "string",
+          "required": false,
+          "description": "Path to git repository",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": false,
+          "description": "Sandbox name or ID. Omit to auto-select when only one sandbox exists",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "branch",
+          "type": "string",
+          "required": false,
+          "description": "Branch to pull. Default: current tracking branch",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Pull result"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "GitPush",
+      "qualifiedName": "Daytona.GitPush",
+      "fullyQualifiedName": "Daytona.GitPush@0.1.0",
+      "description": "Push local commits to the remote repository.",
+      "parameters": [
+        {
+          "name": "path",
+          "type": "string",
+          "required": false,
+          "description": "Path to git repository",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": false,
+          "description": "Sandbox name or ID. Omit to auto-select when only one sandbox exists",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "branch",
+          "type": "string",
+          "required": false,
+          "description": "Branch to push. Default: current branch",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "force",
+          "type": "boolean",
+          "required": false,
+          "description": "Force push (overwrites remote history -- use with caution). Default: False",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Push result"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "GitStatus",
+      "qualifiedName": "Daytona.GitStatus",
+      "fullyQualifiedName": "Daytona.GitStatus@0.1.0",
+      "description": "Get repository status: branch, staged/modified/untracked files, ahead/behind counts.",
+      "parameters": [
+        {
+          "name": "path",
+          "type": "string",
+          "required": false,
+          "description": "Path to git repository",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": false,
+          "description": "Sandbox name or ID. Omit to auto-select when only one sandbox exists",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Repository status"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "ListFiles",
+      "qualifiedName": "Daytona.ListFiles",
+      "fullyQualifiedName": "Daytona.ListFiles@0.1.0",
+      "description": "List files and directories. Returns name, type (file/dir), and size.\n\nResponse includes total count and has_more flag for pagination.",
+      "parameters": [
+        {
+          "name": "path",
+          "type": "string",
+          "required": false,
+          "description": "Directory path relative to sandbox root. Default: sandbox root",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": false,
+          "description": "Sandbox name or ID. Omit to auto-select when only one sandbox exists",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "pattern",
+          "type": "string",
+          "required": false,
+          "description": "Glob pattern to filter results within the directory",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "max_items",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum items to return (1-200). Default: 50",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Number of items to skip for pagination. Default: 0",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Directory listing with pagination"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "ListPorts",
+      "qualifiedName": "Daytona.ListPorts",
+      "fullyQualifiedName": "Daytona.ListPorts@0.1.0",
+      "description": "List active ports in the sandbox.\n\nReturns port number, state, and name for each active port.\nUse this to discover running services before calling get_port_preview_url.",
+      "parameters": [
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": false,
+          "description": "Sandbox name or ID. Omit to auto-select when only one sandbox exists",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "List of active ports"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "ListRegions",
+      "qualifiedName": "Daytona.ListRegions",
+      "fullyQualifiedName": "Daytona.ListRegions@0.1.0",
+      "description": "List available regions for sandbox creation.\n\nReturns region ID, name, and location (country, city).\nUseful for choosing where to create sandboxes or snapshots.",
+      "parameters": [],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Available regions"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "ListSandboxes",
+      "qualifiedName": "Daytona.ListSandboxes",
+      "fullyQualifiedName": "Daytona.ListSandboxes@0.1.0",
+      "description": "List sandboxes with optional filtering.\n\nReturns concise summary: name, state, created time, resources.\nResponse includes total count, current page, and total_pages for pagination.",
+      "parameters": [
+        {
+          "name": "state",
+          "type": "string",
+          "required": false,
+          "description": "Filter by sandbox state",
+          "enum": ["started", "stopped", "archived", "error"],
+          "inferrable": true
+        },
+        {
+          "name": "labels",
+          "type": "json",
+          "required": false,
+          "description": "Filter by labels. Only sandboxes matching all key-value pairs are returned. Default: None",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "page",
+          "type": "integer",
+          "required": false,
+          "description": "Page number (1-indexed). Default: 1",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "page_size",
+          "type": "integer",
+          "required": false,
+          "description": "Items per page (1-100). Default: 20",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Paginated list of sandboxes"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "ListSessions",
+      "qualifiedName": "Daytona.ListSessions",
+      "fullyQualifiedName": "Daytona.ListSessions@0.1.0",
+      "description": "List all active sessions in a sandbox with their status and recent commands.\n\nResult set is expected to be small (typically < 10); no pagination.",
+      "parameters": [
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": false,
+          "description": "Sandbox name or ID. Omit to auto-select when only one sandbox exists",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "List of active sessions"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "ListSnapshots",
+      "qualifiedName": "Daytona.ListSnapshots",
+      "fullyQualifiedName": "Daytona.ListSnapshots@0.1.0",
+      "description": "List available snapshots with their status and creation date.\n\nReturns snapshot name, state, image, and resource defaults.\nResponse includes total count, current page, and total_pages for pagination.",
+      "parameters": [
+        {
+          "name": "page",
+          "type": "integer",
+          "required": false,
+          "description": "Page number (1-indexed). Default: 1",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "page_size",
+          "type": "integer",
+          "required": false,
+          "description": "Items per page (1-100). Default: 20",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Paginated list of snapshots"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "MoveFile",
+      "qualifiedName": "Daytona.MoveFile",
+      "fullyQualifiedName": "Daytona.MoveFile@0.1.0",
+      "description": "Move or rename a file or directory.",
+      "parameters": [
+        {
+          "name": "source",
+          "type": "string",
+          "required": true,
+          "description": "Source path",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "destination",
+          "type": "string",
+          "required": true,
+          "description": "Destination path",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": false,
+          "description": "Sandbox name or ID. Omit to auto-select when only one sandbox exists",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Move confirmation"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "ReadFile",
+      "qualifiedName": "Daytona.ReadFile",
+      "fullyQualifiedName": "Daytona.ReadFile@0.1.0",
+      "description": "Read file contents from the sandbox.\n\nFor large files, use start_line and end_line to read specific sections.\nOmit both to read the entire file.",
+      "parameters": [
+        {
+          "name": "path",
+          "type": "string",
+          "required": true,
+          "description": "File path relative to sandbox root",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": false,
+          "description": "Sandbox name or ID. Omit to auto-select when only one sandbox exists",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "start_line",
+          "type": "integer",
+          "required": false,
+          "description": "First line to read (1-indexed). Default: None (start of file)",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "end_line",
+          "type": "integer",
+          "required": false,
+          "description": "Last line to read (1-indexed, inclusive). Default: None (end of file)",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "File contents with line info"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "ReplaceInFiles",
+      "qualifiedName": "Daytona.ReplaceInFiles",
+      "fullyQualifiedName": "Daytona.ReplaceInFiles@0.1.0",
+      "description": "Find and replace text across multiple files.\n\nAccepts explicit file paths and glob patterns. Glob patterns are expanded\nin the tool layer before passing concrete paths to the SDK.\nReturns per-file success/error status and count of files modified.",
+      "parameters": [
+        {
+          "name": "pattern",
+          "type": "string",
+          "required": true,
+          "description": "Text or regex pattern to find",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "replacement",
+          "type": "string",
+          "required": true,
+          "description": "Replacement text",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "files",
+          "type": "array",
+          "innerType": "string",
+          "required": true,
+          "description": "File paths or glob patterns (e.g. 'src/**/*.py'). Globs are expanded before replacing",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": false,
+          "description": "Sandbox name or ID. Omit to auto-select when only one sandbox exists",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Replacement results"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "ResizeSandbox",
+      "qualifiedName": "Daytona.ResizeSandbox",
+      "fullyQualifiedName": "Daytona.ResizeSandbox@0.1.0",
+      "description": "Resize sandbox resources. At least one param required.\n\nCPU and memory can increase while running; disk changes require a stopped sandbox.\nDisk can never decrease. GPU cannot be resized -- it is set at creation only.",
+      "parameters": [
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": true,
+          "description": "Sandbox name or ID",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "cpu",
+          "type": "integer",
+          "required": false,
+          "description": "New vCPU count (1-16). While running: increase only. While stopped: increase or decrease",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "memory_gb",
+          "type": "integer",
+          "required": false,
+          "description": "New RAM in GB (1-64). While running: increase only. While stopped: increase or decrease",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "disk_gb",
+          "type": "integer",
+          "required": false,
+          "description": "New disk in GB (1-200). Can only increase, never decrease. Requires sandbox to be stopped",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Updated sandbox info after resizing"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "RunCode",
+      "qualifiedName": "Daytona.RunCode",
+      "fullyQualifiedName": "Daytona.RunCode@0.1.0",
+      "description": "Execute code directly in the sandbox.\n\nNo shell escaping needed -- code is passed directly to the interpreter.\nThe language is determined by the sandbox's configured language at creation time.\nReturns output, exit code, and any generated charts as metadata.\n\nNote: Stateful execution via ``context_id`` is deferred to P1.\nThe SDK supports ``code_interpreter.run_code(context=...)`` but it\nrequires separate integration testing.",
+      "parameters": [
+        {
+          "name": "code",
+          "type": "string",
+          "required": true,
+          "description": "Code to execute",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": false,
+          "description": "Sandbox name or ID. Omit to auto-select when only one sandbox exists",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "timeout_seconds",
+          "type": "integer",
+          "required": false,
+          "description": "Max execution time in seconds (1-300). Default: 30",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Code execution results"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "RunCommand",
+      "qualifiedName": "Daytona.RunCommand",
+      "fullyQualifiedName": "Daytona.RunCommand@0.1.0",
+      "description": "Execute a shell command in the sandbox.\n\nUse for installing packages, running scripts, or system operations.\nFor direct code execution, prefer run_code.",
+      "parameters": [
+        {
+          "name": "command",
+          "type": "string",
+          "required": true,
+          "description": "Shell command to execute",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": false,
+          "description": "Sandbox name or ID. Omit to auto-select when only one sandbox exists",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "cwd",
+          "type": "string",
+          "required": false,
+          "description": "Working directory relative to sandbox root. Default: sandbox working directory",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "env",
+          "type": "json",
+          "required": false,
+          "description": "Extra environment variables for this command. Default: None",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "timeout_seconds",
+          "type": "integer",
+          "required": false,
+          "description": "Max execution time in seconds (1-600). Default: 60",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Command execution results"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "RunSessionCommand",
+      "qualifiedName": "Daytona.RunSessionCommand",
+      "fullyQualifiedName": "Daytona.RunSessionCommand@0.1.0",
+      "description": "Execute a command inside an existing session.\n\nFor long-running commands (servers, watchers), set async_exec=True and\ncheck output later with get_session_command_logs.",
+      "parameters": [
+        {
+          "name": "session_id",
+          "type": "string",
+          "required": true,
+          "description": "Session ID to execute in",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "command",
+          "type": "string",
+          "required": true,
+          "description": "Command to execute",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": false,
+          "description": "Sandbox name or ID. Omit to auto-select when only one sandbox exists",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "async_exec",
+          "type": "boolean",
+          "required": false,
+          "description": "Run asynchronously (don't wait for completion). Default: False",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Command execution results"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "SearchContent",
+      "qualifiedName": "Daytona.SearchContent",
+      "fullyQualifiedName": "Daytona.SearchContent@0.1.0",
+      "description": "Search file contents for a text pattern. Shell-backed using grep.\n\nReturns matching files with line numbers (up to 50 matches per file).\nUse context_lines > 0 to include surrounding lines for each match.\nSupports basic regex syntax.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": true,
+          "description": "Text or regex pattern to search for in file contents (grep regex syntax)",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "path",
+          "type": "string",
+          "required": false,
+          "description": "Directory to search in. Default: sandbox root",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": false,
+          "description": "Sandbox name or ID. Omit to auto-select when only one sandbox exists",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "file_pattern",
+          "type": "string",
+          "required": false,
+          "description": "Glob pattern to limit which files are searched (e.g. '*.py')",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "context_lines",
+          "type": "integer",
+          "required": false,
+          "description": "Number of lines to show before and after each match (0-5). Default: 0",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "max_items",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum matching files to return (1-200). Default: 50",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Number of items to skip for pagination. Default: 0",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Search results with line numbers"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "SendSessionInput",
+      "qualifiedName": "Daytona.SendSessionInput",
+      "fullyQualifiedName": "Daytona.SendSessionInput@0.1.0",
+      "description": "Send input to a running interactive command in a session.\n\nUseful for commands that prompt for input (e.g., confirmation prompts).\nA newline is automatically appended to the input.",
+      "parameters": [
+        {
+          "name": "session_id",
+          "type": "string",
+          "required": true,
+          "description": "Session ID",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "command_id",
+          "type": "string",
+          "required": true,
+          "description": "Command ID to send input to",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "input",
+          "type": "string",
+          "required": true,
+          "description": "Input text to send (newline appended automatically)",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": false,
+          "description": "Sandbox name or ID. Omit to auto-select when only one sandbox exists",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Input sent confirmation"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "SetSandboxLabels",
+      "qualifiedName": "Daytona.SetSandboxLabels",
+      "fullyQualifiedName": "Daytona.SetSandboxLabels@0.1.0",
+      "description": "Replace all labels on a sandbox. Useful for tagging and filtering.",
+      "parameters": [
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": true,
+          "description": "Sandbox name or ID",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "labels",
+          "type": "json",
+          "required": true,
+          "description": "Labels to set (replaces all existing labels)",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Updated sandbox info"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "StartSandbox",
+      "qualifiedName": "Daytona.StartSandbox",
+      "fullyQualifiedName": "Daytona.StartSandbox@0.1.0",
+      "description": "Start a stopped or archived sandbox. Returns updated sandbox info.",
+      "parameters": [
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": true,
+          "description": "Sandbox name or ID",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Updated sandbox info after starting"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "StopSandbox",
+      "qualifiedName": "Daytona.StopSandbox",
+      "fullyQualifiedName": "Daytona.StopSandbox@0.1.0",
+      "description": "Stop a running sandbox, preserving its state for later restart.",
+      "parameters": [
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": true,
+          "description": "Sandbox name or ID",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Updated sandbox info after stopping"
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "Daytona.WhoAmI",
+      "fullyQualifiedName": "Daytona.WhoAmI@0.1.0",
+      "description": "Get the authenticated user's profile.\n\nReturns the user ID, name, and email associated with the current API key.\nUseful for confirming connectivity and identifying the API key owner.",
+      "parameters": [],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Authenticated user's profile."
+      },
+      "documentationChunks": []
+    },
+    {
+      "name": "WriteFile",
+      "qualifiedName": "Daytona.WriteFile",
+      "fullyQualifiedName": "Daytona.WriteFile@0.1.0",
+      "description": "Write content to a file in the sandbox. Creates the file and parent dirs if needed.",
+      "parameters": [
+        {
+          "name": "path",
+          "type": "string",
+          "required": true,
+          "description": "File path relative to sandbox root",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "content",
+          "type": "string",
+          "required": true,
+          "description": "File content to write",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "sandbox",
+          "type": "string",
+          "required": false,
+          "description": "Sandbox name or ID. Omit to auto-select when only one sandbox exists",
+          "enum": [],
+          "inferrable": true
+        },
+        {
+          "name": "create_parents",
+          "type": "boolean",
+          "required": false,
+          "description": "Create parent directories if needed. Default: True",
+          "enum": [],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["DAYTONA_API_KEY"],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Write confirmation"
+      },
+      "documentationChunks": []
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-02-16T18:29:05.337Z"
+}
