@@ -209,6 +209,74 @@ export const buildToolSignatureInput = (
 export const buildToolSignature = (tool: ToolDefinition | MergedTool): string =>
   stableStringify(buildToolSignatureInput(tool));
 
+const normalizeOutputTypeForReuse = (value: string): string =>
+  value === "unknown" ? "string" : value;
+
+type ToolReuseSignatureInput = {
+  name: string;
+  qualifiedName: string;
+  description: string | null;
+  parameters: Array<{
+    name: string;
+    type: string;
+    innerType: string | null;
+    required: boolean;
+    description: string | null;
+    enum: string[] | null;
+    inferrable: boolean;
+  }>;
+  auth: {
+    providerId: string | null;
+    providerType: string;
+    scopes: string[];
+  } | null;
+  secrets: string[];
+  output: {
+    type: string;
+    description: string | null;
+  } | null;
+};
+
+const buildToolReuseSignature = (tool: ToolDefinition | MergedTool): string => {
+  const signatureInput = buildToolSignatureInput(
+    tool
+  ) as ToolReuseSignatureInput;
+  const parameters = signatureInput.parameters.map((parameter) => ({
+    ...parameter,
+    // Descriptions can vary by API source and should not force regeneration.
+    description: null,
+    // Treat [] and null as equivalent enum representations.
+    enum: parameter.enum && parameter.enum.length > 0 ? parameter.enum : null,
+  }));
+  const auth = signatureInput.auth
+    ? {
+        ...signatureInput.auth,
+        // OAuth provider IDs can vary by endpoint shape.
+        providerId:
+          signatureInput.auth.providerType === "oauth2"
+            ? null
+            : signatureInput.auth.providerId,
+      }
+    : null;
+  const output = signatureInput.output
+    ? {
+        ...signatureInput.output,
+        type: normalizeOutputTypeForReuse(signatureInput.output.type),
+        // Output descriptions vary by source and should not force regeneration.
+        description: null,
+      }
+    : null;
+
+  return stableStringify({
+    ...signatureInput,
+    // Tool descriptions are metadata and should not force regeneration.
+    description: null,
+    parameters,
+    auth,
+    output,
+  });
+};
+
 export const buildToolkitSummarySignature = (toolkit: MergedToolkit): string =>
   stableStringify({
     id: toolkit.id,
@@ -239,7 +307,9 @@ const shouldReuseExample = (
     return false;
   }
 
-  return buildToolSignature(tool) === buildToolSignature(previousTool);
+  return (
+    buildToolReuseSignature(tool) === buildToolReuseSignature(previousTool)
+  );
 };
 
 /**

@@ -1114,7 +1114,7 @@ describe("DataMerger", () => {
       );
     });
 
-    it("calls the generator when the tool definition changes", async () => {
+    it("does not call the generator when only descriptions change", async () => {
       const updatedTool = createTool({
         name: "CreateIssue",
         qualifiedName: "Github.CreateIssue",
@@ -1145,9 +1145,71 @@ describe("DataMerger", () => {
         previousToolkits: new Map([["github", previousResult.toolkit]]),
       });
 
-      await merger.mergeToolkit("Github");
+      const result = await merger.mergeToolkit("Github");
+
+      expect(counting.getCalls()).toBe(0);
+      expect(result.toolkit.tools[0]?.codeExample).toEqual(
+        previousResult.toolkit.tools[0]?.codeExample
+      );
+    });
+
+    it("calls the generator only for changed tools in mixed toolkits", async () => {
+      const unchangedTool = createTool({
+        name: "ListIssues",
+        qualifiedName: "Github.ListIssues",
+        fullyQualifiedName: "Github.ListIssues@1.0.0",
+      });
+      const changedToolPrevious = createTool({
+        name: "CreateIssue",
+        qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@1.0.0",
+      });
+      const changedToolCurrent = createTool({
+        name: "CreateIssue",
+        qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@1.0.0",
+        output: {
+          type: "array",
+          description: "Result",
+        },
+      });
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([
+          unchangedTool,
+          changedToolCurrent,
+        ]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
+      });
+      const previousResult = await mergeToolkit(
+        "Github",
+        [unchangedTool, changedToolPrevious],
+        githubMetadata,
+        null,
+        createStubGenerator()
+      );
+      const counting = createCountingGenerator();
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: counting.generator,
+        previousToolkits: new Map([["github", previousResult.toolkit]]),
+      });
+
+      const result = await merger.mergeToolkit("Github");
+      const toolByQualifiedName = new Map(
+        result.toolkit.tools.map((tool) => [tool.qualifiedName, tool])
+      );
+      const previousByQualifiedName = new Map(
+        previousResult.toolkit.tools.map((tool) => [tool.qualifiedName, tool])
+      );
 
       expect(counting.getCalls()).toBe(1);
+      expect(toolByQualifiedName.get("Github.ListIssues")?.codeExample).toEqual(
+        previousByQualifiedName.get("Github.ListIssues")?.codeExample
+      );
+      expect(
+        toolByQualifiedName.get("Github.CreateIssue")?.codeExample
+      ).toBeDefined();
     });
 
     it("should merge data using unified toolkit data source", async () => {
