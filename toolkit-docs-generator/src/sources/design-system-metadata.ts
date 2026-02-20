@@ -132,16 +132,12 @@ export function createDesignSystemMetadataSourceFromToolkits(
 }
 
 export async function createDesignSystemMetadataSource(): Promise<IMetadataSource> {
-  let maybeToolkits: unknown;
-  try {
-    const designSystem = (await import(DESIGN_SYSTEM_PACKAGE)) as {
-      TOOLKITS?: unknown;
-    };
-    maybeToolkits = designSystem.TOOLKITS;
-  } catch {
-    maybeToolkits = [];
-  }
-  const toolkits = Array.isArray(maybeToolkits) ? maybeToolkits : [];
+  const designSystem = (await import(DESIGN_SYSTEM_PACKAGE)) as {
+    TOOLKITS?: unknown;
+  };
+  const toolkits = Array.isArray(designSystem.TOOLKITS)
+    ? designSystem.TOOLKITS
+    : [];
 
   const parsed: ToolkitMetadata[] = [];
   for (const raw of toolkits) {

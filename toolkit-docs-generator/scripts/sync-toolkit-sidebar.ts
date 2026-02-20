@@ -42,17 +42,11 @@ const DESIGN_SYSTEM_PACKAGE = "@arcadeai/design-system";
 
 let TOOLKITS: DesignSystemToolkit[] = [];
 
-try {
+if (!process.env.VITEST) {
   const designSystem = (await import(DESIGN_SYSTEM_PACKAGE)) as {
     TOOLKITS?: DesignSystemToolkit[];
   };
   TOOLKITS = designSystem.TOOLKITS || [];
-} catch {
-  if (!process.env.VITEST) {
-    console.warn(
-      "Warning: @arcadeai/design-system not found, using fallback category detection"
-    );
-  }
 }
 
 export function setToolkitsForTesting(toolkits: DesignSystemToolkit[]): void {

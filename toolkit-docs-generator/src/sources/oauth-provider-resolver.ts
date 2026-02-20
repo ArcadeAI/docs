@@ -8,7 +8,7 @@
  * Resolution strategy:
  * 1. Exact match (normalized toolkit ID against catalogue keys)
  * 2. Strip "api" suffix and try again
- * 3. Longest-prefix match (e.g. "hubspotcrm" → "hubspot")
+ * 3. Longest-prefix match (e.g. "hubspotcrm" -> "hubspot")
  */
 
 // ============================================================================
@@ -69,7 +69,7 @@ export function buildProviderIdResolver(
         return base;
       }
 
-      // 3. Longest-prefix match on the base (e.g. "hubspotcrm" → "hubspot")
+      // 3. Longest-prefix match on the base (e.g. "hubspotcrm" -> "hubspot")
       //    Require the prefix to be at least 3 chars to avoid false positives
       //    (e.g. "xero" should NOT match "x").
       for (const providerId of sortedByLength) {
@@ -93,26 +93,12 @@ export function buildProviderIdResolver(
 
 /**
  * Create a provider ID resolver from the design system's OAUTH_PROVIDER_CATALOGUE.
- *
- * Uses a dynamic import so the generator can still run in environments where
- * `@arcadeai/design-system` is not installed (returns null in that case).
  */
 export async function createDesignSystemProviderIdResolver(): Promise<ProviderIdResolver | null> {
-  let designSystem: {
+  const designSystem = (await import(DESIGN_SYSTEM_PACKAGE)) as {
     OAUTH_PROVIDER_CATALOGUE?: Record<string, unknown>;
-  } | null = null;
-  try {
-    designSystem = (await import(DESIGN_SYSTEM_PACKAGE)) as {
-      OAUTH_PROVIDER_CATALOGUE?: Record<string, unknown>;
-    };
-  } catch {
-    designSystem = null;
-  }
-  const catalogue = (
-    designSystem as {
-      OAUTH_PROVIDER_CATALOGUE?: Record<string, unknown>;
-    } | null
-  )?.OAUTH_PROVIDER_CATALOGUE;
+  };
+  const catalogue = designSystem.OAUTH_PROVIDER_CATALOGUE;
 
   if (!catalogue || typeof catalogue !== "object") {
     return null;

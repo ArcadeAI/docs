@@ -48,20 +48,16 @@ const loadDesignSystemToolkits = async (): Promise<ToolkitCatalogEntry[]> => {
     return cachedDesignSystemToolkits;
   }
 
-  try {
-    const designSystem = (await import(DESIGN_SYSTEM_PACKAGE)) as {
-      TOOLKITS?: unknown;
-    };
-    const toolkits = Array.isArray(designSystem.TOOLKITS)
-      ? designSystem.TOOLKITS
-      : [];
+  const designSystem = (await import(DESIGN_SYSTEM_PACKAGE)) as {
+    TOOLKITS?: unknown;
+  };
+  const toolkits = Array.isArray(designSystem.TOOLKITS)
+    ? designSystem.TOOLKITS
+    : [];
 
-    cachedDesignSystemToolkits = toolkits.flatMap((toolkit) =>
-      isToolkitCatalogEntry(toolkit) ? [toolkit] : []
-    );
-  } catch {
-    cachedDesignSystemToolkits = [];
-  }
+  cachedDesignSystemToolkits = toolkits.flatMap((toolkit) =>
+    isToolkitCatalogEntry(toolkit) ? [toolkit] : []
+  );
 
   return cachedDesignSystemToolkits;
 };
