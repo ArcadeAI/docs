@@ -6,6 +6,7 @@
  * This is the preferred metadata source when running the generator inside the
  * Arcade docs repo.
  */
+import { TOOLKITS as DESIGN_SYSTEM_TOOLKITS } from "@arcadeai/design-system/metadata/toolkits";
 import { z } from "zod";
 import type { ToolkitMetadata } from "../types/index.js";
 import { ToolkitMetadataSchema } from "../types/index.js";
@@ -38,7 +39,6 @@ type DesignSystemToolkit = z.infer<typeof DesignSystemToolkitSchema>;
 // ============================================================================
 
 const LOOKUP_KEY_REGEX = /[^a-z0-9]/g;
-const DESIGN_SYSTEM_PACKAGE = "@arcadeai/design-system";
 
 function normalizeLookupKey(value: string): string {
   return value.toLowerCase().replace(LOOKUP_KEY_REGEX, "");
@@ -132,15 +132,8 @@ export function createDesignSystemMetadataSourceFromToolkits(
 }
 
 export async function createDesignSystemMetadataSource(): Promise<IMetadataSource> {
-  const designSystem = (await import(DESIGN_SYSTEM_PACKAGE)) as {
-    TOOLKITS?: unknown;
-  };
-  const toolkits = Array.isArray(designSystem.TOOLKITS)
-    ? designSystem.TOOLKITS
-    : [];
-
   const parsed: ToolkitMetadata[] = [];
-  for (const raw of toolkits) {
+  for (const raw of DESIGN_SYSTEM_TOOLKITS) {
     const dsParsed = DesignSystemToolkitSchema.safeParse(raw);
     if (!dsParsed.success) continue;
     const mapped = toToolkitMetadata(dsParsed.data);

@@ -1,5 +1,6 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { TOOLKITS as DESIGN_SYSTEM_TOOLKITS } from "@arcadeai/design-system";
 import { readToolkitData, readToolkitIndex } from "./toolkit-data";
 import { getToolkitSlug, normalizeToolkitId } from "./toolkit-slug";
 
@@ -30,37 +31,16 @@ export type ToolkitRouteEntry = {
   category: IntegrationCategory;
 };
 
-const DESIGN_SYSTEM_PACKAGE = "@arcadeai/design-system";
-let cachedDesignSystemToolkits: ToolkitCatalogEntry[] | null = null;
+const DESIGN_SYSTEM_TOOLKITS_FOR_ROUTES: ToolkitCatalogEntry[] =
+  DESIGN_SYSTEM_TOOLKITS.map((toolkit) => ({
+    id: toolkit.id,
+    category: toolkit.category,
+    isHidden: toolkit.isHidden,
+    docsLink: toolkit.docsLink,
+  }));
 
-const isToolkitCatalogEntry = (
-  value: unknown
-): value is ToolkitCatalogEntry => {
-  if (typeof value !== "object" || value === null || Array.isArray(value)) {
-    return false;
-  }
-  const entry = value as Record<string, unknown>;
-  return typeof entry.id === "string";
-};
-
-const loadDesignSystemToolkits = async (): Promise<ToolkitCatalogEntry[]> => {
-  if (cachedDesignSystemToolkits) {
-    return cachedDesignSystemToolkits;
-  }
-
-  const designSystem = (await import(DESIGN_SYSTEM_PACKAGE)) as {
-    TOOLKITS?: unknown;
-  };
-  const toolkits = Array.isArray(designSystem.TOOLKITS)
-    ? designSystem.TOOLKITS
-    : [];
-
-  cachedDesignSystemToolkits = toolkits.flatMap((toolkit) =>
-    isToolkitCatalogEntry(toolkit) ? [toolkit] : []
-  );
-
-  return cachedDesignSystemToolkits;
-};
+const loadDesignSystemToolkits = async (): Promise<ToolkitCatalogEntry[]> =>
+  DESIGN_SYSTEM_TOOLKITS_FOR_ROUTES;
 
 function normalizeCategory(
   value: string | null | undefined

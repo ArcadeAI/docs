@@ -10,6 +10,7 @@
  * 2. Strip "api" suffix and try again
  * 3. Longest-prefix match (e.g. "hubspotcrm" -> "hubspot")
  */
+import { OAUTH_PROVIDER_CATALOGUE } from "@arcadeai/design-system/metadata/oauth-providers";
 
 // ============================================================================
 // Types
@@ -23,7 +24,6 @@ export type ProviderIdResolver = (toolkitId: string) => string | null;
 // ============================================================================
 
 const NORMALIZER = /[^a-z0-9]/g;
-const DESIGN_SYSTEM_PACKAGE = "@arcadeai/design-system";
 
 /**
  * Minimum provider ID length for prefix matching.
@@ -95,10 +95,7 @@ export function buildProviderIdResolver(
  * Create a provider ID resolver from the design system's OAUTH_PROVIDER_CATALOGUE.
  */
 export async function createDesignSystemProviderIdResolver(): Promise<ProviderIdResolver | null> {
-  const designSystem = (await import(DESIGN_SYSTEM_PACKAGE)) as {
-    OAUTH_PROVIDER_CATALOGUE?: Record<string, unknown>;
-  };
-  const catalogue = designSystem.OAUTH_PROVIDER_CATALOGUE;
+  const catalogue = OAUTH_PROVIDER_CATALOGUE;
 
   if (!catalogue || typeof catalogue !== "object") {
     return null;

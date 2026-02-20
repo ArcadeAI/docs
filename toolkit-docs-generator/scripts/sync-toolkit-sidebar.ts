@@ -27,6 +27,7 @@ import {
 } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { TOOLKITS as DESIGN_SYSTEM_TOOLKITS } from "@arcadeai/design-system";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -38,16 +39,8 @@ type DesignSystemToolkit = {
   category?: string;
   isHidden?: boolean;
 };
-const DESIGN_SYSTEM_PACKAGE = "@arcadeai/design-system";
-
-let TOOLKITS: DesignSystemToolkit[] = [];
-
-if (!process.env.VITEST) {
-  const designSystem = (await import(DESIGN_SYSTEM_PACKAGE)) as {
-    TOOLKITS?: DesignSystemToolkit[];
-  };
-  TOOLKITS = designSystem.TOOLKITS || [];
-}
+let TOOLKITS: DesignSystemToolkit[] =
+  DESIGN_SYSTEM_TOOLKITS as DesignSystemToolkit[];
 
 export function setToolkitsForTesting(toolkits: DesignSystemToolkit[]): void {
   TOOLKITS = toolkits;
