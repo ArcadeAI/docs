@@ -194,7 +194,6 @@ const getToolkitVersion = (tools: readonly ToolDefinition[]): string => {
 type ComparableMetadataSnapshot = {
   label: string;
   category: string;
-  docsLink: string;
   isHidden: boolean;
   type: string;
 };
@@ -209,7 +208,6 @@ const buildCurrentMetadataSnapshot = (
   return {
     label: metadata.label,
     category: metadata.category,
-    docsLink: metadata.docsLink,
     isHidden: metadata.isHidden,
     type: metadata.type,
   };
@@ -225,7 +223,6 @@ const buildPreviousMetadataSnapshot = (
   return {
     label: toolkit.label,
     category: toolkit.metadata.category,
-    docsLink: toolkit.metadata.docsLink,
     isHidden: toolkit.metadata.isHidden,
     type: toolkit.metadata.type,
   };
@@ -248,7 +245,6 @@ const hasRelevantMetadataChanges = (
   return (
     current.label !== previous.label ||
     current.category !== previous.category ||
-    current.docsLink !== previous.docsLink ||
     current.isHidden !== previous.isHidden ||
     current.type !== previous.type
   );
