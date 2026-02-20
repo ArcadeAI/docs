@@ -1,0 +1,501 @@
+{
+  "id": "MicrosoftPowerpoint",
+  "label": "Microsoft PowerPoint",
+  "version": "0.1.0",
+  "description": "Arcade.dev LLM tools for Microsoft PowerPoint",
+  "metadata": {
+    "category": "productivity",
+    "iconUrl": "https://design-system.arcade.dev/icons/microsoft-powerpoint.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/productivity/microsoft-powerpoint",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": "microsoft",
+    "allScopes": [
+      "Files.Read",
+      "Files.ReadWrite",
+      "User.Read"
+    ]
+  },
+  "tools": [
+    {
+      "name": "CreatePresentation",
+      "qualifiedName": "MicrosoftPowerpoint.CreatePresentation",
+      "fullyQualifiedName": "MicrosoftPowerpoint.CreatePresentation@0.1.0",
+      "description": "Create a new PowerPoint presentation in OneDrive.\n\nThe presentation will be created with a title slide containing the specified title.",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "The title for the new presentation.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "parent_folder_id",
+          "type": "string",
+          "required": false,
+          "description": "The ID of the folder to create the presentation in. If not provided, the presentation will be created in the root of the user's OneDrive.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Files.ReadWrite"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The created presentation details."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftPowerpoint.CreatePresentation",
+        "parameters": {
+          "title": {
+            "value": "Quarterly Sales Update — Q2 2026",
+            "type": "string",
+            "required": true
+          },
+          "parent_folder_id": {
+            "value": "01A2BCD3EF45GHIJK!678",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateSlide",
+      "qualifiedName": "MicrosoftPowerpoint.CreateSlide",
+      "fullyQualifiedName": "MicrosoftPowerpoint.CreateSlide@0.1.0",
+      "description": "Append a new slide to the end of an existing PowerPoint presentation in OneDrive.\n\nThe slide will be added at the end of the presentation. Both title and body\nare optional to support layouts like BLANK or TITLE_ONLY.\n\nFor presentations larger than 4 MB, the upload uses a resumable session.\nConcurrency protection (etag check) is best-effort in that case, since\nMicrosoft Graph upload sessions do not support If-Match headers.",
+      "parameters": [
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the PowerPoint presentation to add a slide to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "slide_title",
+          "type": "string",
+          "required": false,
+          "description": "The title for the new slide. Optional for layouts like BLANK.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "slide_body",
+          "type": "string",
+          "required": false,
+          "description": "The body content for the new slide. Supports markdown: **bold**, *italic*, __underline__, and bullet points (- item, indented with spaces for nesting). Optional for layouts like TITLE_ONLY or BLANK.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "layout",
+          "type": "string",
+          "required": false,
+          "description": "The layout to use for the slide. For TWO_CONTENT layout, use create_two_content_slide.",
+          "enum": [
+            "TITLE",
+            "TITLE_AND_CONTENT",
+            "SECTION_HEADER",
+            "TITLE_ONLY",
+            "BLANK",
+            "CONTENT_WITH_CAPTION",
+            "PICTURE_WITH_CAPTION",
+            "TITLE_AND_VERTICAL_TEXT",
+            "VERTICAL_TITLE_AND_TEXT"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Files.ReadWrite"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The updated presentation details with new slide info."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftPowerpoint.CreateSlide",
+        "parameters": {
+          "item_id": {
+            "value": "01234567-89ab-cdef-0123-456789abcdef",
+            "type": "string",
+            "required": true
+          },
+          "slide_title": {
+            "value": "Q1 Sales Update",
+            "type": "string",
+            "required": false
+          },
+          "slide_body": {
+            "value": "**Q1 Highlights**\n- **Revenue:** Increased by 15% year-over-year\n- *New customers:* 120\n- __Key wins__\n  - Expanded into two new markets\n  - Launched partnership program\n\n**Next steps**\n- Finalize hiring plan\n- Optimize onboarding flow",
+            "type": "string",
+            "required": false
+          },
+          "layout": {
+            "value": "TITLE_AND_CONTENT",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateTwoContentSlide",
+      "qualifiedName": "MicrosoftPowerpoint.CreateTwoContentSlide",
+      "fullyQualifiedName": "MicrosoftPowerpoint.CreateTwoContentSlide@0.1.0",
+      "description": "Append a TWO_CONTENT slide with side-by-side content areas to the end of a PowerPoint presentation.\n\nThis layout is useful for comparisons, pros/cons lists, or any content that\nbenefits from a two-column layout.\n\nFor presentations larger than 4 MB, the upload uses a resumable session.\nConcurrency protection (etag check) is best-effort in that case, since\nMicrosoft Graph upload sessions do not support If-Match headers.",
+      "parameters": [
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the PowerPoint presentation to add a slide to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "slide_title",
+          "type": "string",
+          "required": false,
+          "description": "The title for the new slide.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "left_body",
+          "type": "string",
+          "required": false,
+          "description": "Content for the left side of the slide. Supports markdown: **bold**, *italic*, __underline__, and bullet points (- item, indented with spaces for nesting).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "right_body",
+          "type": "string",
+          "required": false,
+          "description": "Content for the right side of the slide. Supports markdown: **bold**, *italic*, __underline__, and bullet points (- item, indented with spaces for nesting).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Files.ReadWrite"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The updated presentation details with new slide info."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftPowerpoint.CreateTwoContentSlide",
+        "parameters": {
+          "item_id": {
+            "value": "a1b2c3d4-5678-90ab-cdef-1234567890ab",
+            "type": "string",
+            "required": true
+          },
+          "slide_title": {
+            "value": "Product Comparison: Alpha vs Beta",
+            "type": "string",
+            "required": false
+          },
+          "left_body": {
+            "value": "**Product Alpha**\n- Easy setup\n- *Cross-platform*\n- __Secure__\n  - AES-256 encryption\n  - Regular backups\n- Scalable\n- Ideal for small to medium teams",
+            "type": "string",
+            "required": false
+          },
+          "right_body": {
+            "value": "**Product Beta**\n- Advanced feature set\n- *Cloud-native*\n- __Enterprise-grade__\n  - Single sign-on (SSO)\n  - Dedicated support\n- Pricing options:\n  - Free tier\n  - Pro: $9/mo\n    - Priority support\n    - Advanced analytics\n  - Enterprise: Contact sales\n\n**Quick pros/cons**\n- Pros\n  - Flexible deployment\n  - Rich integrations\n- Cons\n  - Higher cost for enterprise plans",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetAllSlideNotes",
+      "qualifiedName": "MicrosoftPowerpoint.GetAllSlideNotes",
+      "fullyQualifiedName": "MicrosoftPowerpoint.GetAllSlideNotes@0.1.0",
+      "description": "Get all speaker notes from every slide in a PowerPoint presentation.\n\nReturns notes for all slides in one call, which is more efficient than\ncalling get_slide_notes for each slide individually. Notes are returned\nin markdown format.",
+      "parameters": [
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the PowerPoint presentation.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Files.Read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "All speaker notes from the presentation."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftPowerpoint.GetAllSlideNotes",
+        "parameters": {
+          "item_id": {
+            "value": "b1f2c3d4-5e6f-7a8b-9c0d-123456789abc",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetPresentationAsMarkdown",
+      "qualifiedName": "MicrosoftPowerpoint.GetPresentationAsMarkdown",
+      "fullyQualifiedName": "MicrosoftPowerpoint.GetPresentationAsMarkdown@0.1.0",
+      "description": "Get the content of a PowerPoint presentation as markdown.\n\nThis tool downloads the presentation and converts it to a markdown representation,\npreserving text content, tables, and chart data. Images and other media are\nrepresented as placeholders.",
+      "parameters": [
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the PowerPoint presentation to read.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Files.Read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The presentation content as markdown."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftPowerpoint.GetPresentationAsMarkdown",
+        "parameters": {
+          "item_id": {
+            "value": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetSlideNotes",
+      "qualifiedName": "MicrosoftPowerpoint.GetSlideNotes",
+      "fullyQualifiedName": "MicrosoftPowerpoint.GetSlideNotes@0.1.0",
+      "description": "Get the speaker notes from a specific slide in a PowerPoint presentation.\n\nSpeaker notes are returned in markdown format, preserving basic formatting\nlike bold, italic, and bullet points.",
+      "parameters": [
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the PowerPoint presentation.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "slide_index",
+          "type": "integer",
+          "required": true,
+          "description": "The 1-based index of the slide to get notes from.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Files.Read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The speaker notes for the specified slide."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftPowerpoint.GetSlideNotes",
+        "parameters": {
+          "item_id": {
+            "value": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "type": "string",
+            "required": true
+          },
+          "slide_index": {
+            "value": 3,
+            "type": "integer",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "SetSlideNotes",
+      "qualifiedName": "MicrosoftPowerpoint.SetSlideNotes",
+      "fullyQualifiedName": "MicrosoftPowerpoint.SetSlideNotes@0.1.0",
+      "description": "Set or update the speaker notes on a specific slide in a PowerPoint presentation.\n\nNotes can be formatted using markdown:\n- **bold** for bold text\n- *italic* for italic text\n- __underline__ for underlined text\n- Lines starting with - or * become bullet points\n\nFor presentations larger than 4 MB, the upload uses a resumable session.\nConcurrency protection (etag check) is best-effort in that case, since\nMicrosoft Graph upload sessions do not support If-Match headers.\n- Indent with spaces for nested bullets",
+      "parameters": [
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the PowerPoint presentation.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "slide_index",
+          "type": "integer",
+          "required": true,
+          "description": "The 1-based index of the slide to set notes on.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "notes",
+          "type": "string",
+          "required": true,
+          "description": "The speaker notes in markdown format. Supports **bold**, *italic*, __underline__, and bullet points (- or *).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Files.ReadWrite"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Confirmation of the notes update."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftPowerpoint.SetSlideNotes",
+        "parameters": {
+          "item_id": {
+            "value": "123e4567-e89b-12d3-a456-426614174000",
+            "type": "string",
+            "required": true
+          },
+          "slide_index": {
+            "value": 3,
+            "type": "integer",
+            "required": true
+          },
+          "notes": {
+            "value": "Project Kickoff - Overview\n\n**Objectives:**\n- Align on scope\n- Set milestones\n- Assign owners\n\n*Highlights:*\n- __Timeline__: Q2 launch\n- *Budget*: Approved up to $75k\n\nNext steps:\n  - Product: prepare prototype by May 10\n  - Marketing: draft launch plan by May 17\n\nContact the project lead if anything is unclear.",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "MicrosoftPowerpoint.WhoAmI",
+      "fullyQualifiedName": "MicrosoftPowerpoint.WhoAmI@0.1.0",
+      "description": "Get information about the current user and their PowerPoint environment.",
+      "parameters": [],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "User.Read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Get comprehensive user profile and PowerPoint environment information."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftPowerpoint.WhoAmI",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-02-20T04:20:06.880Z",
+  "summary": "The Microsoft PowerPoint provider for Arcade.dev exposes LLM-driven tools to create and modify OneDrive-hosted PowerPoint presentations. It enables programmatic slide and note management, content export to Markdown, and user-context operations via Microsoft Graph.\n\n**Capabilities**\n\n- Create and append slides and structured layouts, and update slide content and speaker notes using Markdown formatting.\n- Bulk read/write of speaker notes and per-slide note operations; export entire presentations to Markdown preserving text, tables, and chart data.\n- Support resumable uploads for large presentations and best-effort concurrency (etag) handling when using Graph upload sessions.\n- Retrieve user and environment metadata to operate in the authenticated user context.\n\n**OAuth**\n\nProvider: microsoft\n\nScopes: Files.Read, Files.ReadWrite, User.Read"
+}
