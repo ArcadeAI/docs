@@ -673,24 +673,28 @@ const nextConfig: NextConfig = withLlmsTxt({
           permanent: true,
         },
         // Legacy /integrations path
+        // NOTE: :locale is constrained to actual locale values to prevent
+        // collisions with locale-less paths like /resources/integrations,
+        // which would otherwise match with :locale="resources" and redirect
+        // to /resources/resources/integrations (a 404).
         {
-          source: "/:locale/integrations",
+          source: "/:locale(en|es|pt-BR)/integrations",
           destination: "/:locale/resources/integrations",
           permanent: true,
         },
         {
-          source: "/:locale/integrations/:path*",
+          source: "/:locale(en|es|pt-BR)/integrations/:path*",
           destination: "/:locale/resources/integrations/:path*",
           permanent: true,
         },
         // MCP servers to integrations
         {
-          source: "/:locale/mcp-servers",
+          source: "/:locale(en|es|pt-BR)/mcp-servers",
           destination: "/:locale/resources/integrations",
           permanent: true,
         },
         {
-          source: "/:locale/mcp-servers/:path*",
+          source: "/:locale(en|es|pt-BR)/mcp-servers/:path*",
           destination: "/:locale/resources/integrations/:path*",
           permanent: true,
         },
