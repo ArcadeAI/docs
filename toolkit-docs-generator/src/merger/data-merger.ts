@@ -767,7 +767,7 @@ export const mergeToolkit = async (
   const toolChunks = (customSections?.toolChunks ?? {}) as {
     [key: string]: DocumentationChunk[];
   };
-  const llmConcurrency = options.llmConcurrency ?? 5;
+  const llmConcurrency = options.llmConcurrency ?? 10;
   const previousToolByQualifiedName = buildPreviousToolMap(
     options.previousToolkit
   );
@@ -845,8 +845,8 @@ export class DataMerger {
     this.toolExampleGenerator = config.toolExampleGenerator;
     this.toolkitSummaryGenerator = config.toolkitSummaryGenerator;
     this.previousToolkits = config.previousToolkits;
-    this.llmConcurrency = config.llmConcurrency ?? 5;
-    this.toolkitConcurrency = config.toolkitConcurrency ?? 3;
+    this.llmConcurrency = config.llmConcurrency ?? 10;
+    this.toolkitConcurrency = config.toolkitConcurrency ?? 5;
     this.onToolkitProgress = config.onToolkitProgress;
     this.onToolkitComplete = config.onToolkitComplete;
     this.skipToolkitIds = config.skipToolkitIds ?? new Set();

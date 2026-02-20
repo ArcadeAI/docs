@@ -803,12 +803,12 @@ program
   )
   .option(
     "--llm-concurrency <number>",
-    "Max concurrent LLM calls per toolkit (default: 5)",
+    "Max concurrent LLM calls per toolkit (default: 10)",
     (value) => Number.parseInt(value, 10)
   )
   .option(
     "--toolkit-concurrency <number>",
-    "Max concurrent toolkit processing (default: 3)",
+    "Max concurrent toolkit processing (default: 5)",
     (value) => Number.parseInt(value, 10)
   )
   .option(
@@ -1319,7 +1319,7 @@ program
             if (options.verbose) {
               console.log(
                 chalk.dim(
-                  `  Starting merge with toolkitConcurrency=${options.toolkitConcurrency ?? 3}, llmConcurrency=${options.llmConcurrency ?? 5}`
+                  `  Starting merge with toolkitConcurrency=${options.toolkitConcurrency ?? 5}, llmConcurrency=${options.llmConcurrency ?? 10}`
                 )
               );
               console.log(
@@ -1625,12 +1625,12 @@ program
   )
   .option(
     "--llm-concurrency <number>",
-    "Max concurrent LLM calls per toolkit (default: 5)",
+    "Max concurrent LLM calls per toolkit (default: 10)",
     (value) => Number.parseInt(value, 10)
   )
   .option(
     "--toolkit-concurrency <number>",
-    "Max concurrent toolkit processing (default: 3)",
+    "Max concurrent toolkit processing (default: 5)",
     (value) => Number.parseInt(value, 10)
   )
   .option(
@@ -1875,7 +1875,7 @@ program
           if (options.verbose) {
             console.log(
               chalk.dim(
-                `  Starting merge with toolkitConcurrency=${options.toolkitConcurrency ?? 3}, llmConcurrency=${options.llmConcurrency ?? 5}`
+                `  Starting merge with toolkitConcurrency=${options.toolkitConcurrency ?? 5}, llmConcurrency=${options.llmConcurrency ?? 10}`
               )
             );
             console.log(
