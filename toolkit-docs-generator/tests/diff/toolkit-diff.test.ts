@@ -15,6 +15,7 @@ import type {
   MergedTool,
   MergedToolkit,
   ToolDefinition,
+  ToolkitMetadata,
 } from "../../src/types/index.js";
 
 // ============================================================================
@@ -109,6 +110,22 @@ const createMergedToolkit = (
   customImports: [],
   subPages: [],
   generatedAt: new Date().toISOString(),
+  ...overrides,
+});
+
+const createToolkitMetadata = (
+  overrides: Partial<ToolkitMetadata> = {}
+): ToolkitMetadata => ({
+  id: "TestKit",
+  label: "Test Kit",
+  category: "development",
+  iconUrl: "https://example.com/icon.svg",
+  isBYOC: false,
+  isPro: false,
+  type: "arcade",
+  docsLink: "https://docs.example.com/test",
+  isComingSoon: false,
+  isHidden: false,
   ...overrides,
 });
 
@@ -520,6 +537,26 @@ describe("compareToolkit", () => {
     expect(change.currentVersion).toBe("2.0.0");
     expect(change.previousVersion).toBe("1.0.0");
   });
+
+  it("should return modified when metadata changes but tools do not", () => {
+    const currentTools = [createToolDefinition()];
+    const previousToolkit = createMergedToolkit();
+
+    const change = compareToolkit(
+      "TestKit",
+      currentTools,
+      previousToolkit,
+      createToolkitMetadata({
+        category: "databases",
+        docsLink: "https://docs.example.com/databases/test-kit",
+      })
+    );
+
+    expect(change.changeType).toBe("modified");
+    expect(change.toolChanges).toHaveLength(0);
+    expect(change.versionChanged).toBe(false);
+    expect(change.metadataChanged).toBe(true);
+  });
 });
 
 // ============================================================================
@@ -680,6 +717,30 @@ describe("detectChanges", () => {
 
     expect(result.summary.modifiedToolkits).toBe(1);
     expect(result.summary.versionOnlyToolkits).toBe(1);
+  });
+
+  it("should detect metadata-only changes", () => {
+    const currentToolkitData = new Map([
+      [
+        "TestKit",
+        {
+          tools: [createToolDefinition()],
+          metadata: createToolkitMetadata({
+            category: "databases",
+            docsLink: "https://docs.example.com/databases/test-kit",
+          }),
+        },
+      ],
+    ]);
+    const previousToolkits = new Map([["TestKit", createMergedToolkit()]]);
+
+    const result = detectChanges(currentToolkitData, previousToolkits);
+
+    expect(result.summary.modifiedToolkits).toBe(1);
+    expect(result.summary.versionOnlyToolkits).toBe(0);
+    expect(result.toolkitChanges[0]?.changeType).toBe("modified");
+    expect(result.toolkitChanges[0]?.metadataChanged).toBe(true);
+    expect(result.toolkitChanges[0]?.toolChanges).toHaveLength(0);
   });
 });
 
@@ -896,6 +957,27 @@ describe("formatDetailedChanges", () => {
 
     expect(lines.some((l) => l.includes("version 1.0.0 -> 2.0.0"))).toBe(true);
     expect(lines.some((l) => l.includes("version update only"))).toBe(true);
+  });
+
+  it("should annotate metadata-only updates", () => {
+    const result = detectChanges(
+      new Map([
+        [
+          "TestKit",
+          {
+            tools: [createToolDefinition()],
+            metadata: createToolkitMetadata({
+              category: "databases",
+              docsLink: "https://docs.example.com/databases/test-kit",
+            }),
+          },
+        ],
+      ]),
+      new Map([["TestKit", createMergedToolkit()]])
+    );
+
+    const lines = formatDetailedChanges(result);
+    expect(lines.some((l) => l.includes("metadata update only"))).toBe(true);
   });
 
   it("should skip unchanged toolkits", () => {

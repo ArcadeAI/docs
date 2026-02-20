@@ -321,8 +321,10 @@ function resolveToolkitInfo(
     return null;
   }
 
+  // Keep sidebar routes aligned with static params: toolkit JSON is source of
+  // truth for category, with design system as fallback when JSON is missing.
   const category =
-    designSystemToolkit?.category ?? jsonData?.metadata?.category ?? "others";
+    jsonData?.metadata?.category ?? designSystemToolkit?.category ?? "others";
   const labelFromDesignSystem = designSystemToolkit?.label ?? null;
   const labelFromJson = jsonData?.label ?? jsonData?.name ?? null;
   const typeFromJson = jsonData?.metadata?.type ?? null;

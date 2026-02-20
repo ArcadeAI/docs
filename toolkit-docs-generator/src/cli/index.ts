@@ -251,7 +251,8 @@ const buildChangeLogDetails = (
       (change) =>
         change.changeType === "modified" &&
         change.toolChanges.length === 0 &&
-        change.versionChanged
+        change.versionChanged &&
+        !change.metadataChanged
     )
     .map((change) => change.toolkitId);
 
@@ -1152,29 +1153,26 @@ program
             );
           }
 
-          // Build map of toolkit ID -> tools for comparison
-          const currentToolkitTools = new Map<
-            string,
-            readonly import("../types/index.js").ToolDefinition[]
-          >();
+          // Build map of toolkit ID -> current toolkit data for comparison
+          const currentToolkitDataForDiff = new Map<string, ToolkitData>();
           for (const [id, data] of currentToolkitsData) {
             if (metadataExcludedToolkitIdSet.has(id.toLowerCase())) {
               continue;
             }
-            currentToolkitTools.set(id, data.tools);
+            currentToolkitDataForDiff.set(id, data);
           }
 
           // Detect changes
           const compareStartedAt = Date.now();
           const detectedChanges = detectChanges(
-            currentToolkitTools,
+            currentToolkitDataForDiff,
             previousToolkits ?? new Map()
           );
           const compareDurationMs = Date.now() - compareStartedAt;
           if (options.verbose) {
             console.log(
               chalk.dim(
-                `  Compared ${currentToolkitTools.size} current toolkit(s) against ${previousToolkits?.size ?? 0} previous toolkit(s) in ${compareDurationMs}ms`
+                `  Compared ${currentToolkitDataForDiff.size} current toolkit(s) against ${previousToolkits?.size ?? 0} previous toolkit(s) in ${compareDurationMs}ms`
               )
             );
           }
@@ -2227,13 +2225,10 @@ program
           await toolkitDataSource.fetchAllToolkitsData();
         const fetchDurationMs = Date.now() - fetchStartedAt;
 
-        // Build map of toolkit ID -> tools
-        const currentToolkitTools = new Map<
-          string,
-          readonly import("../types/index.js").ToolDefinition[]
-        >();
+        // Build map of toolkit ID -> current toolkit data
+        const currentToolkitDataForDiff = new Map<string, ToolkitData>();
         for (const [id, data] of currentToolkitsData) {
-          currentToolkitTools.set(id, data.tools);
+          currentToolkitDataForDiff.set(id, data);
         }
 
         // Load previous output
@@ -2250,7 +2245,7 @@ program
         spinner.text = "Comparing tool definitions...";
         const compareStartedAt = Date.now();
         const changeResult = detectChanges(
-          currentToolkitTools,
+          currentToolkitDataForDiff,
           previousToolkits
         );
         const compareDurationMs = Date.now() - compareStartedAt;
@@ -2261,7 +2256,7 @@ program
           console.log(chalk.dim("\nDiagnostics:"));
           console.log(
             chalk.dim(
-              `  Fetched ${currentToolkitTools.size} current toolkit(s) in ${fetchDurationMs}ms`
+              `  Fetched ${currentToolkitDataForDiff.size} current toolkit(s) in ${fetchDurationMs}ms`
             )
           );
           console.log(
@@ -2315,7 +2310,7 @@ program
               {
                 ...changeResult,
                 diagnostics: {
-                  currentToolkitCount: currentToolkitTools.size,
+                  currentToolkitCount: currentToolkitDataForDiff.size,
                   previousToolkitCount: previousToolkits.size,
                   previousLoad: previousToolkitLoad.stats,
                   timingMs: {
