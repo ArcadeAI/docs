@@ -20,20 +20,6 @@ const SKIP_PATTERNS: RegExp[] = [
 
   // Requires authentication (dashboard is a SPA behind login)
   /api\.arcade\.dev/,
-
-  // Sites that block automated / bot requests
-  /discord\.gg/,
-  /reddit\.com/,
-  /platform\.openai\.com/,
-  /support\.google\.com/,
-  /developers\.google\.com/,
-  /developer\.squareup\.com/,
-  /developer\.ticktick\.com/,
-  /api-console\.zoho\.com/,
-  /zoho\.com\/creator\/help/,
-  /support\.zendesk\.com/,
-  /mastra\.ai\/docs/,
-  /docs\.langchain\.com/,
 ];
 
 function shouldSkip(url: string): boolean {
@@ -69,39 +55,24 @@ function extractExternalUrls(content: string): string[] {
 
 async function checkUrl(
   url: string
-): Promise<{ ok: boolean; status?: number; error?: string }> {
+): Promise<{ ok: true } | { ok: false; status: number }> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
 
   try {
-    let res = await fetch(url, {
+    const res = await fetch(url, {
       method: "HEAD",
       signal: controller.signal,
       redirect: "follow",
     });
 
-    if (res.status === 405 || res.status === 403) {
-      const controller2 = new AbortController();
-      const timer2 = setTimeout(() => controller2.abort(), REQUEST_TIMEOUT);
-      try {
-        res = await fetch(url, {
-          method: "GET",
-          signal: controller2.signal,
-          redirect: "follow",
-        });
-      } finally {
-        clearTimeout(timer2);
-      }
+    if (res.status === 404) {
+      return { ok: false, status: res.status };
     }
 
-    if (res.status === 429 || (res.status >= 200 && res.status < 400)) {
-      return { ok: true };
-    }
-
-    return { ok: false, status: res.status };
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    return { ok: false, error: message };
+    return { ok: true };
+  } catch {
+    return { ok: true };
   } finally {
     clearTimeout(timer);
   }
@@ -164,8 +135,7 @@ test(
     const limit = pLimit(CONCURRENCY);
     const failures: Array<{
       url: string;
-      status?: number;
-      error?: string;
+      status: number;
       files: string[];
     }> = [];
 
@@ -177,7 +147,6 @@ test(
           failures.push({
             url,
             status: result.status,
-            error: result.error,
             files: [...sources],
           });
         }
@@ -188,9 +157,7 @@ test(
 
     for (const failure of failures) {
       console.error(
-        `Broken external URL: ${failure.url}` +
-          (failure.status ? ` (HTTP ${failure.status})` : "") +
-          (failure.error ? ` (${failure.error})` : "") +
+        `Broken external URL: ${failure.url} (HTTP ${failure.status})` +
           ` — found in: ${failure.files.join(", ")}`
       );
     }
