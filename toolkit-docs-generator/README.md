@@ -115,7 +115,6 @@ pnpm dlx tsx src/cli/index.ts generate \
   --tool-metadata-key "$ENGINE_API_KEY" \
   --skip-examples \
   --skip-summary \
-  --skip-overview \
   --output data/toolkits
 ```
 
@@ -134,7 +133,7 @@ pnpm dlx tsx .github/scripts/sync-toolkit-sidebar.ts
   (only with the explicit flag), or `mock`
 - `--previous-output` compare against a previous output directory
 - `--custom-sections` load curated docs sections
-- `--skip-examples`, `--skip-summary`, `--skip-overview` disable LLM steps
+- `--skip-examples`, `--skip-summary` disable LLM steps
 - `--no-verify-output` skip output verification
 
 ## Troubleshooting

@@ -16,12 +16,9 @@ import {
   type ToolExampleGenerator,
   type ToolkitSummaryGenerator,
 } from "../../src/merger/data-merger.js";
-import type {
-  ToolkitOverviewGenerator,
-  ToolkitOverviewInstructions,
-} from "../../src/overview/types.js";
 import {
   EmptyCustomSectionsSource,
+  InMemoryCustomSectionsSource,
   InMemoryMetadataSource,
   InMemoryToolDataSource,
 } from "../../src/sources/in-memory.js";
@@ -903,66 +900,87 @@ describe("mergeToolkit resolveProviderId fallback", () => {
   });
 });
 
-describe("mergeToolkit overview handling", () => {
-  it("replaces existing overview when instructions are present", async () => {
-    const tool = createTool();
-    const metadata = createMetadata();
+describe("mergeToolkit overview chunk handling", () => {
+  it("keeps toolkit-level overview chunks from source custom sections", async () => {
+    const result = await mergeToolkit(
+      "TestKit",
+      [createTool()],
+      createMetadata(),
+      createCustomSections({
+        documentationChunks: [
+          {
+            type: "markdown",
+            location: "header",
+            position: "before",
+            content: "## Overview\n\nOverview text.",
+          },
+          {
+            type: "warning",
+            location: "header",
+            position: "after",
+            content: "Keep this warning.",
+          },
+        ],
+      }),
+      undefined
+    );
 
+    expect(result.toolkit.documentationChunks).toHaveLength(2);
+    expect(
+      result.toolkit.documentationChunks[0]?.content
+        .toLowerCase()
+        .startsWith("## overview")
+    ).toBe(true);
+    expect(result.toolkit.documentationChunks[1]?.content).toBe(
+      "Keep this warning."
+    );
+  });
+
+  it("preserves previous toolkit overview chunks when source is empty", async () => {
+    const tools = [createTool({ qualifiedName: "TestKit.Tool1" })];
     const previous = await mergeToolkit(
       "TestKit",
-      [tool],
-      metadata,
-      null,
-      undefined,
-      {}
-    );
-    previous.toolkit.documentationChunks = [
-      {
-        type: "markdown",
-        location: "header",
-        position: "before",
-        content: "## Overview\n\nOld overview.",
-      },
-    ];
-
-    const overviewGenerator: ToolkitOverviewGenerator = {
-      generate: async () => ({
-        chunk: {
-          type: "markdown",
-          location: "header",
-          position: "before",
-          content: "## Overview\n\nNew overview.",
-        },
+      tools,
+      createMetadata(),
+      createCustomSections({
+        documentationChunks: [
+          {
+            type: "markdown",
+            location: "header",
+            position: "before",
+            content: "## Overview\n\nOld overview.",
+          },
+          {
+            type: "info",
+            location: "header",
+            position: "after",
+            content: "Old tip.",
+          },
+        ],
       }),
-    };
-
-    const overviewInstructions: ToolkitOverviewInstructions = {
-      toolkitId: "TestKit",
-      instructions: "Write a new overview.",
-      sources: [],
-    };
+      createStubGenerator()
+    );
 
     const result = await mergeToolkit(
       "TestKit",
-      [tool],
-      metadata,
+      tools,
+      createMetadata(),
       null,
       undefined,
-      {
-        previousToolkit: previous.toolkit,
-        overviewGenerator,
-        overviewInstructions,
-      }
+      { previousToolkit: previous.toolkit }
     );
 
-    expect(result.toolkit.documentationChunks[0]?.content).toBe(
-      "## Overview\n\nNew overview."
-    );
+    expect(result.toolkit.documentationChunks).toHaveLength(2);
+    expect(
+      result.toolkit.documentationChunks.some(
+        (chunk) => chunk.content === "Old tip."
+      )
+    ).toBe(true);
     expect(
       result.toolkit.documentationChunks.some((chunk) =>
-        chunk.content.includes("Old overview")
+        chunk.content.toLowerCase().startsWith("## overview")
       )
-    ).toBe(false);
+    ).toBe(true);
   });
 });
 
@@ -1040,7 +1058,7 @@ describe("DataMerger", () => {
       expect(result.toolkit.auth?.allScopes).toContain("public_repo");
     });
 
-    it("adds a summary when a summary generator is provided", async () => {
+    it("adds a summary when no overview chunk is present", async () => {
       const toolkitDataSource = createCombinedToolkitDataSource({
         toolSource: new InMemoryToolDataSource([githubTool1]),
         metadataSource: new InMemoryMetadataSource([githubMetadata]),
@@ -1055,6 +1073,42 @@ describe("DataMerger", () => {
       const result = await merger.mergeToolkit("Github");
 
       expect(result.toolkit.summary).toBe("Toolkit summary (Github)");
+    });
+
+    it("skips summary generation when an overview chunk is present", async () => {
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
+      });
+      const countingSummary = createCountingSummaryGenerator();
+      const overviewCustomSectionsSource = new InMemoryCustomSectionsSource({
+        Github: createCustomSections({
+          documentationChunks: [
+            {
+              type: "markdown",
+              location: "header",
+              position: "before",
+              content: "## Overview\n\nGenerated overview.",
+            },
+          ],
+        }),
+      });
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: overviewCustomSectionsSource,
+        toolExampleGenerator: createStubGenerator(),
+        toolkitSummaryGenerator: countingSummary.generator,
+      });
+
+      const result = await merger.mergeToolkit("Github");
+
+      expect(
+        result.toolkit.documentationChunks.some((chunk) =>
+          chunk.content.toLowerCase().startsWith("## overview")
+        )
+      ).toBe(true);
+      expect(countingSummary.getCalls()).toBe(0);
+      expect(result.toolkit.summary).toBeUndefined();
     });
 
     it("reuses the previous summary when toolkit input is unchanged", async () => {
@@ -1084,6 +1138,51 @@ describe("DataMerger", () => {
 
       expect(countingSummary.getCalls()).toBe(0);
       expect(result.toolkit.summary).toBe("Cached summary");
+    });
+
+    it("does not reuse previous summary when current toolkit has an overview chunk", async () => {
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
+      });
+      const previousResult = await mergeToolkit(
+        "Github",
+        [githubTool1],
+        githubMetadata,
+        null,
+        createStubGenerator()
+      );
+      previousResult.toolkit.summary = "Cached summary";
+      const countingSummary = createCountingSummaryGenerator();
+      const overviewCustomSectionsSource = new InMemoryCustomSectionsSource({
+        Github: createCustomSections({
+          documentationChunks: [
+            {
+              type: "markdown",
+              location: "header",
+              position: "before",
+              content: "## Overview\n\nGenerated overview.",
+            },
+          ],
+        }),
+      });
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: overviewCustomSectionsSource,
+        toolExampleGenerator: createStubGenerator(),
+        toolkitSummaryGenerator: countingSummary.generator,
+        previousToolkits: new Map([["github", previousResult.toolkit]]),
+      });
+
+      const result = await merger.mergeToolkit("Github");
+
+      expect(
+        result.toolkit.documentationChunks.some((chunk) =>
+          chunk.content.toLowerCase().startsWith("## overview")
+        )
+      ).toBe(true);
+      expect(countingSummary.getCalls()).toBe(0);
+      expect(result.toolkit.summary).toBeUndefined();
     });
 
     it("reuses previous examples when the tool is unchanged", async () => {
