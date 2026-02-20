@@ -204,42 +204,72 @@ const getNonEmptyString = (value: unknown): string | undefined =>
   typeof value === "string" && value.length > 0 ? value : undefined;
 
 const getFallbackReason = (error: {
-  issues: Array<{ path: Array<string | number>; message: string }>;
+  issues: ReadonlyArray<{ path: readonly PropertyKey[]; message: string }>;
   message: string;
 }): string => {
   const firstIssue = error.issues[0];
   return firstIssue
-    ? `${firstIssue.path.join(".")}: ${firstIssue.message}`
+    ? `${firstIssue.path.map(String).join(".")}: ${firstIssue.message}`
     : error.message;
+};
+
+type FallbackToolsResult = {
+  tools: ToolDefinition[];
+  droppedToolCount: number;
+  droppedParameterCount: number;
 };
 
 const normalizeFallbackTools = (
   record: Record<string, unknown>,
   toolkitId: string,
   declaredVersion: string
-): ToolDefinition[] => {
+): FallbackToolsResult => {
   const rawTools = Array.isArray(record.tools) ? record.tools : [];
-  return rawTools.flatMap((rawTool, index) => {
+  let droppedToolCount = 0;
+  let droppedParameterCount = 0;
+
+  const tools = rawTools.flatMap((rawTool, index) => {
+    const rawRecord = toRecord(rawTool);
+    const rawParamCount =
+      rawRecord && Array.isArray(rawRecord.parameters)
+        ? rawRecord.parameters.length
+        : 0;
+
     const normalized = normalizeTool(
       rawTool,
       toolkitId,
       declaredVersion,
       index + 1
     );
-    return normalized ? [normalized] : [];
+    if (!normalized) {
+      droppedToolCount += 1;
+      return [];
+    }
+
+    droppedParameterCount += rawParamCount - normalized.parameters.length;
+    return [normalized];
   });
+
+  return { tools, droppedToolCount, droppedParameterCount };
+};
+
+type FallbackToolkitResult = {
+  toolkit: MergedToolkit;
+  droppedToolCount: number;
+  droppedParameterCount: number;
 };
 
 const buildFallbackToolkit = (
   record: Record<string, unknown>,
   fallbackId: string
-): MergedToolkit => {
+): FallbackToolkitResult => {
   const toolkitId = getNonEmptyString(record.id) ?? fallbackId;
   const label = getNonEmptyString(record.label) ?? toolkitId;
   const description = toStringOrNull(record.description);
   const declaredVersion = getNonEmptyString(record.version) ?? "0.0.0";
 
-  const tools = normalizeFallbackTools(record, toolkitId, declaredVersion);
+  const { tools, droppedToolCount, droppedParameterCount } =
+    normalizeFallbackTools(record, toolkitId, declaredVersion);
   const version = getVersionFromTool(tools[0]) ?? declaredVersion;
 
   const metadataResult = MergedToolkitMetadataSchema.safeParse(record.metadata);
@@ -250,24 +280,28 @@ const buildFallbackToolkit = (
     typeof record.generatedAt === "string" ? record.generatedAt : undefined;
 
   return {
-    id: toolkitId,
-    label,
-    version,
-    description,
-    ...(summary ? { summary } : {}),
-    metadata: metadataResult.success
-      ? metadataResult.data
-      : DEFAULT_PREVIOUS_TOOLKIT_METADATA,
-    auth: authResult.success ? authResult.data : null,
-    tools: tools.map((tool) => ({
-      ...tool,
-      secretsInfo: [],
+    toolkit: {
+      id: toolkitId,
+      label,
+      version,
+      description,
+      ...(summary ? { summary } : {}),
+      metadata: metadataResult.success
+        ? metadataResult.data
+        : DEFAULT_PREVIOUS_TOOLKIT_METADATA,
+      auth: authResult.success ? authResult.data : null,
+      tools: tools.map((tool) => ({
+        ...tool,
+        secretsInfo: [],
+        documentationChunks: [],
+      })),
       documentationChunks: [],
-    })),
-    documentationChunks: [],
-    customImports: [],
-    subPages: [],
-    ...(generatedAt ? { generatedAt } : {}),
+      customImports: [],
+      subPages: [],
+      ...(generatedAt ? { generatedAt } : {}),
+    },
+    droppedToolCount,
+    droppedParameterCount,
   };
 };
 
@@ -275,6 +309,8 @@ export type PreviousToolkitParseResult = {
   toolkit: MergedToolkit | null;
   usedFallback: boolean;
   reason?: string;
+  droppedToolCount?: number;
+  droppedParameterCount?: number;
 };
 
 export const parsePreviousToolkitForDiff = (
@@ -296,9 +332,13 @@ export const parsePreviousToolkitForDiff = (
   }
 
   const fallbackReason = getFallbackReason(strictResult.error);
+  const { toolkit, droppedToolCount, droppedParameterCount } =
+    buildFallbackToolkit(record, fallbackId);
   return {
-    toolkit: buildFallbackToolkit(record, fallbackId),
+    toolkit,
     usedFallback: true,
     reason: fallbackReason,
+    droppedToolCount,
+    droppedParameterCount,
   };
 };

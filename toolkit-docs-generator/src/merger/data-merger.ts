@@ -158,9 +158,34 @@ export const stableStringify = (value: unknown): string => {
   return JSON.stringify(value);
 };
 
+export type ToolSignatureInput = {
+  name: string;
+  qualifiedName: string;
+  description: string | null;
+  parameters: Array<{
+    name: string;
+    type: string;
+    innerType: string | null;
+    required: boolean;
+    description: string | null;
+    enum: string[] | null;
+    inferrable: boolean;
+  }>;
+  auth: {
+    providerId: string | null;
+    providerType: string;
+    scopes: string[];
+  } | null;
+  secrets: string[];
+  output: {
+    type: string;
+    description: string | null;
+  } | null;
+};
+
 export const buildToolSignatureInput = (
   tool: ToolDefinition | MergedTool
-): Record<string, unknown> => ({
+): ToolSignatureInput => ({
   name: tool.name,
   qualifiedName: tool.qualifiedName,
   description: tool.description ?? null,
@@ -197,35 +222,8 @@ export const buildToolSignature = (tool: ToolDefinition | MergedTool): string =>
 const normalizeOutputTypeForReuse = (value: string): string =>
   value === "unknown" ? "string" : value;
 
-type ToolReuseSignatureInput = {
-  name: string;
-  qualifiedName: string;
-  description: string | null;
-  parameters: Array<{
-    name: string;
-    type: string;
-    innerType: string | null;
-    required: boolean;
-    description: string | null;
-    enum: string[] | null;
-    inferrable: boolean;
-  }>;
-  auth: {
-    providerId: string | null;
-    providerType: string;
-    scopes: string[];
-  } | null;
-  secrets: string[];
-  output: {
-    type: string;
-    description: string | null;
-  } | null;
-};
-
 const buildToolReuseSignature = (tool: ToolDefinition | MergedTool): string => {
-  const signatureInput = buildToolSignatureInput(
-    tool
-  ) as ToolReuseSignatureInput;
+  const signatureInput = buildToolSignatureInput(tool);
   const parameters = signatureInput.parameters.map((parameter) => ({
     ...parameter,
     // Descriptions can vary by API source and should not force regeneration.

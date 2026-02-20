@@ -104,21 +104,6 @@ const parseProviders = (input: string): ProviderVersion[] => {
   });
 };
 
-const resolveProviderIds = async (
-  providers: ProviderVersion[],
-  metadataSource: unknown
-): Promise<ProviderVersion[]> => {
-  const source = metadataSource as {
-    getAllToolkitsMetadata?: () => Promise<
-      readonly { id: string; label: string }[]
-    >;
-  };
-  if (!source.getAllToolkitsMetadata) return providers;
-
-  const all = await source.getAllToolkitsMetadata();
-  return resolveProviderIdsFromMetadata(providers, all);
-};
-
 /**
  * Get the default fixture paths (for mock mode)
  */
@@ -210,25 +195,23 @@ const createMetadataSource = async (options: {
 
 type MetadataSource = Awaited<ReturnType<typeof createMetadataSource>>;
 
+const resolveProviderIds = async (
+  providers: ProviderVersion[],
+  metadataSource: MetadataSource
+): Promise<ProviderVersion[]> => {
+  const all = await metadataSource.getAllToolkitsMetadata();
+  return resolveProviderIdsFromMetadata(providers, all);
+};
+
 const filterProvidersByMetadataPresence = async (
   providers: readonly ProviderVersion[],
   metadataSource: MetadataSource
 ): Promise<{ included: ProviderVersion[]; excluded: string[] }> => {
-  const source = metadataSource as {
-    getToolkitMetadata?: (
-      toolkitId: string
-    ) => Promise<{ id: string; label: string } | null>;
-  };
-
-  if (!source.getToolkitMetadata) {
-    return { included: [...providers], excluded: [] };
-  }
-
   const included: ProviderVersion[] = [];
   const excluded: string[] = [];
 
   for (const provider of providers) {
-    const metadata = await source.getToolkitMetadata(provider.provider);
+    const metadata = await metadataSource.getToolkitMetadata(provider.provider);
     if (metadata) {
       included.push(provider);
     } else {

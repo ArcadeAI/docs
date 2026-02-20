@@ -110,35 +110,10 @@ const isCurrentToolkitData = (
 const normalizeOutputTypeForDiff = (value: string): string =>
   value === "unknown" ? "string" : value;
 
-type ToolSignatureInput = {
-  name: string;
-  qualifiedName: string;
-  description: string | null;
-  parameters: Array<{
-    name: string;
-    type: string;
-    innerType: string | null;
-    required: boolean;
-    description: string | null;
-    enum: string[] | null;
-    inferrable: boolean;
-  }>;
-  auth: {
-    providerId: string | null;
-    providerType: string;
-    scopes: string[];
-  } | null;
-  secrets: string[];
-  output: {
-    type: string;
-    description: string | null;
-  } | null;
-};
-
 const normalizeToolSignatureInputForDiff = (
   tool: ToolDefinition | MergedToolkit["tools"][number]
 ): Record<string, unknown> => {
-  const signatureInput = buildToolSignatureInput(tool) as ToolSignatureInput;
+  const signatureInput = buildToolSignatureInput(tool);
   const parameters = signatureInput.parameters.map((parameter) => ({
     ...parameter,
     // Parameter descriptions are not stable across /v1/tools and /v1/tool_metadata.
@@ -262,6 +237,10 @@ const hasRelevantMetadataChanges = (
 ): boolean => {
   const current = buildCurrentMetadataSnapshot(currentMetadata);
   const previous = buildPreviousMetadataSnapshot(previousToolkit);
+  // When either side lacks metadata (new toolkit or metadata not yet available),
+  // treat as "no metadata change" — the toolkit is already flagged as added/removed
+  // by the tool-level diff, so a missing metadata snapshot should not independently
+  // trigger regeneration.
   if (!(current && previous)) {
     return false;
   }
