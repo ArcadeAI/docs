@@ -5,16 +5,7 @@
  * into the final MergedToolkit format.
  */
 
-import type {
-  OverviewGenerationInput,
-  ToolkitOverviewGenerator,
-  ToolkitOverviewInstructions,
-} from "../overview/types.js";
-import { createEmptyOverviewInstructionsSource } from "../sources/in-memory.js";
-import type {
-  ICustomSectionsSource,
-  IOverviewInstructionsSource,
-} from "../sources/interfaces.js";
+import type { ICustomSectionsSource } from "../sources/interfaces.js";
 import type {
   IToolkitDataSource,
   ToolkitData,
@@ -44,9 +35,6 @@ import {
 export interface DataMergerConfig {
   toolkitDataSource: IToolkitDataSource;
   customSectionsSource: ICustomSectionsSource;
-  overviewInstructionsSource?: IOverviewInstructionsSource;
-  overviewGenerator?: ToolkitOverviewGenerator;
-  skipOverview?: boolean;
   toolExampleGenerator?: ToolExampleGenerator;
   toolkitSummaryGenerator?: ToolkitSummaryGenerator;
   previousToolkits?: ReadonlyMap<string, MergedToolkit>;
@@ -100,9 +88,6 @@ interface MergeToolkitOptions {
   previousToolkit?: MergedToolkit;
   /** Maximum concurrent LLM calls for tool examples (default: 5) */
   llmConcurrency?: number;
-  overviewGenerator?: ToolkitOverviewGenerator;
-  overviewInstructions?: ToolkitOverviewInstructions | null;
-  skipOverview?: boolean;
   /** Fallback resolver: toolkit ID → OAuth provider ID (design system) */
   resolveProviderId?: (toolkitId: string) => string | null;
 }
@@ -371,38 +356,8 @@ const isOverviewChunk = (chunk: DocumentationChunk): boolean =>
   chunk.type === "markdown" &&
   chunk.content.trim().toLowerCase().startsWith("## overview");
 
-const getPreviousOverview = (toolkit?: MergedToolkit): string | null => {
-  if (!toolkit) {
-    return null;
-  }
-  const overviewChunk = toolkit.documentationChunks.find(isOverviewChunk);
-  return overviewChunk?.content ?? null;
-};
-
-const applyOverviewChunk = (
-  chunks: DocumentationChunk[],
-  chunk: DocumentationChunk
-): DocumentationChunk[] => {
-  const filtered = chunks.filter((item) => !isOverviewChunk(item));
-  return [chunk, ...filtered];
-};
-
-const shouldAttemptOverview = (
-  hasInstructions: boolean,
-  isNewToolkit: boolean
-): boolean => hasInstructions || isNewToolkit;
-
-const buildOverviewInput = (
-  toolkit: MergedToolkit,
-  instructions: ToolkitOverviewInstructions | null,
-  previousOverview: string | null,
-  mode: OverviewGenerationInput["mode"]
-): OverviewGenerationInput => ({
-  toolkit,
-  instructions,
-  previousOverview,
-  mode,
-});
+const hasToolkitOverviewChunk = (toolkit: MergedToolkit): boolean =>
+  toolkit.documentationChunks.some(isOverviewChunk);
 
 const mergeCustomSectionsArrays = <T>(
   fromSource: readonly T[] | undefined,
@@ -539,63 +494,6 @@ const buildMergedToolkit = (options: {
     ),
     generatedAt: new Date().toISOString(),
   };
-};
-
-const applyOverviewIfNeeded = async (options: {
-  toolkit: MergedToolkit;
-  toolkitId: string;
-  mergeOptions: MergeToolkitOptions;
-  warnings: string[];
-}): Promise<void> => {
-  const { toolkit, toolkitId, mergeOptions, warnings } = options;
-  const isNewToolkit = !mergeOptions.previousToolkit;
-  const hasInstructions = Boolean(mergeOptions.overviewInstructions);
-
-  if (
-    mergeOptions.skipOverview ||
-    !shouldAttemptOverview(hasInstructions, isNewToolkit)
-  ) {
-    return;
-  }
-
-  if (!mergeOptions.overviewGenerator) {
-    if (hasInstructions) {
-      warnings.push(
-        `Overview generation skipped for ${toolkitId}: missing LLM configuration`
-      );
-    }
-    return;
-  }
-
-  const previousOverview = getPreviousOverview(mergeOptions.previousToolkit);
-  const mode: OverviewGenerationInput["mode"] = hasInstructions
-    ? "file"
-    : "auto";
-  try {
-    const overviewResult = await mergeOptions.overviewGenerator.generate(
-      buildOverviewInput(
-        toolkit,
-        mergeOptions.overviewInstructions ?? null,
-        previousOverview,
-        mode
-      )
-    );
-    if (overviewResult?.chunk) {
-      toolkit.documentationChunks = applyOverviewChunk(
-        toolkit.documentationChunks,
-        overviewResult.chunk
-      );
-      return;
-    }
-    if (hasInstructions) {
-      warnings.push(
-        `Overview generation skipped for ${toolkitId}: no overview produced`
-      );
-    }
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    warnings.push(`Overview generation failed for ${toolkitId}: ${message}`);
-  }
 };
 
 /**
@@ -787,13 +685,6 @@ export const mergeToolkit = async (
     warnings.push(...formatFreshnessWarnings(freshnessResult));
   }
 
-  await applyOverviewIfNeeded({
-    toolkit,
-    toolkitId,
-    mergeOptions: options,
-    warnings,
-  });
-
   return { toolkit, warnings, failedTools };
 };
 
@@ -807,9 +698,6 @@ export const mergeToolkit = async (
 export class DataMerger {
   private readonly toolkitDataSource: IToolkitDataSource;
   private readonly customSectionsSource: ICustomSectionsSource;
-  private readonly overviewInstructionsSource: IOverviewInstructionsSource;
-  private readonly overviewGenerator: ToolkitOverviewGenerator | undefined;
-  private readonly skipOverview: boolean;
   private readonly toolExampleGenerator: ToolExampleGenerator | undefined;
   private readonly toolkitSummaryGenerator: ToolkitSummaryGenerator | undefined;
   private readonly previousToolkits:
@@ -835,11 +723,6 @@ export class DataMerger {
   constructor(config: DataMergerConfig) {
     this.toolkitDataSource = config.toolkitDataSource;
     this.customSectionsSource = config.customSectionsSource;
-    this.overviewInstructionsSource =
-      config.overviewInstructionsSource ??
-      createEmptyOverviewInstructionsSource();
-    this.overviewGenerator = config.overviewGenerator;
-    this.skipOverview = config.skipOverview ?? false;
     this.toolExampleGenerator = config.toolExampleGenerator;
     this.toolkitSummaryGenerator = config.toolkitSummaryGenerator;
     this.previousToolkits = config.previousToolkits;
@@ -901,10 +784,6 @@ export class DataMerger {
     try {
       const customSections =
         await this.customSectionsSource.getCustomSections(toolkitId);
-      const overviewInstructions =
-        await this.overviewInstructionsSource.getOverviewInstructions(
-          toolkitId
-        );
 
       const previousToolkit = this.getPreviousToolkit(toolkitId);
       const result = await mergeToolkit(
@@ -916,11 +795,6 @@ export class DataMerger {
         {
           ...(previousToolkit ? { previousToolkit } : {}),
           llmConcurrency: this.llmConcurrency,
-          ...(this.overviewGenerator
-            ? { overviewGenerator: this.overviewGenerator }
-            : {}),
-          overviewInstructions,
-          skipOverview: this.skipOverview,
           ...(this.resolveProviderId
             ? { resolveProviderId: this.resolveProviderId }
             : {}),
@@ -944,6 +818,12 @@ export class DataMerger {
     result: MergeResult,
     previousToolkit?: MergedToolkit
   ): Promise<void> {
+    if (hasToolkitOverviewChunk(result.toolkit)) {
+      // Keep overview as the canonical toolkit-level narrative.
+      result.toolkit.summary = undefined;
+      return;
+    }
+
     if (previousToolkit?.summary) {
       const currentSignature = buildToolkitSummarySignature(result.toolkit);
       const previousSignature = buildToolkitSummarySignature(previousToolkit);
@@ -989,8 +869,6 @@ export class DataMerger {
     // Fetch custom sections
     const customSections =
       await this.customSectionsSource.getCustomSections(toolkitId);
-    const overviewInstructions =
-      await this.overviewInstructionsSource.getOverviewInstructions(toolkitId);
 
     const previousToolkit = this.getPreviousToolkit(toolkitId);
     const result = await mergeToolkit(
@@ -1002,11 +880,6 @@ export class DataMerger {
       {
         ...(previousToolkit ? { previousToolkit } : {}),
         llmConcurrency: this.llmConcurrency,
-        ...(this.overviewGenerator
-          ? { overviewGenerator: this.overviewGenerator }
-          : {}),
-        overviewInstructions,
-        skipOverview: this.skipOverview,
         ...(this.resolveProviderId
           ? { resolveProviderId: this.resolveProviderId }
           : {}),

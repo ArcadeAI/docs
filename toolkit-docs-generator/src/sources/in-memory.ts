@@ -5,17 +5,13 @@
  * avoiding mocks while enabling isolated testing.
  */
 
-import type { ToolkitOverviewInstructions } from "../overview/types.js";
 import type {
   CustomSections,
   ToolDefinition,
   ToolkitMetadata,
 } from "../types/index.js";
 import { normalizeId } from "../utils/fp.js";
-import type {
-  ICustomSectionsSource,
-  IOverviewInstructionsSource,
-} from "./interfaces.js";
+import type { ICustomSectionsSource } from "./interfaces.js";
 import type {
   FetchOptions,
   IMetadataSource,
@@ -213,56 +209,6 @@ export class InMemoryCustomSectionsSource implements ICustomSectionsSource {
 }
 
 // ============================================================================
-// In-Memory Overview Instructions Source
-// ============================================================================
-
-export class InMemoryOverviewInstructionsSource
-  implements IOverviewInstructionsSource
-{
-  private readonly instructions: ReadonlyMap<
-    string,
-    ToolkitOverviewInstructions
-  >;
-
-  constructor(
-    instructions: Readonly<Record<string, ToolkitOverviewInstructions>>
-  ) {
-    const map = new Map<string, ToolkitOverviewInstructions>();
-    for (const [key, value] of Object.entries(instructions)) {
-      map.set(key, value);
-      map.set(normalizeId(key), value);
-    }
-    this.instructions = map;
-  }
-
-  async getOverviewInstructions(
-    toolkitId: string
-  ): Promise<ToolkitOverviewInstructions | null> {
-    const exact = this.instructions.get(toolkitId);
-    if (exact) return exact;
-
-    const normalized = this.instructions.get(normalizeId(toolkitId));
-    return normalized ?? null;
-  }
-
-  async getAllOverviewInstructions(): Promise<
-    Readonly<Record<string, ToolkitOverviewInstructions>>
-  > {
-    const result: Record<string, ToolkitOverviewInstructions> = {};
-    const seen = new Set<string>();
-
-    for (const [key, value] of this.instructions) {
-      if (!seen.has(normalizeId(key))) {
-        seen.add(normalizeId(key));
-        result[key] = value;
-      }
-    }
-
-    return result;
-  }
-}
-
-// ============================================================================
 // Empty Custom Sections Source
 // ============================================================================
 
@@ -277,26 +223,6 @@ export class EmptyCustomSectionsSource implements ICustomSectionsSource {
 
   async getAllCustomSections(): Promise<
     Readonly<Record<string, CustomSections>>
-  > {
-    return {};
-  }
-}
-
-// ============================================================================
-// Empty Overview Instructions Source
-// ============================================================================
-
-export class EmptyOverviewInstructionsSource
-  implements IOverviewInstructionsSource
-{
-  async getOverviewInstructions(
-    _toolkitId: string
-  ): Promise<ToolkitOverviewInstructions | null> {
-    return null;
-  }
-
-  async getAllOverviewInstructions(): Promise<
-    Readonly<Record<string, ToolkitOverviewInstructions>>
   > {
     return {};
   }
@@ -332,9 +258,3 @@ export const createInMemoryCustomSectionsSource = (
  */
 export const createEmptyCustomSectionsSource = (): ICustomSectionsSource =>
   new EmptyCustomSectionsSource();
-
-/**
- * Create an empty overview instructions source
- */
-export const createEmptyOverviewInstructionsSource =
-  (): IOverviewInstructionsSource => new EmptyOverviewInstructionsSource();
