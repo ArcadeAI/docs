@@ -6,9 +6,8 @@
  */
 
 import {
-  buildToolSignatureInput,
+  buildComparableToolSignature,
   extractVersion,
-  stableStringify,
 } from "../merger/data-merger.js";
 import type {
   MergedToolkit,
@@ -105,57 +104,10 @@ const isCurrentToolkitData = (
 
 /**
  * Build a signature for a ToolDefinition (from API)
- * This is different from MergedTool signatures as it uses the raw API format
+ * and normalize endpoint-specific representation differences.
  */
-const normalizeOutputTypeForDiff = (value: string): string =>
-  value === "unknown" ? "string" : value;
-
-const normalizeToolSignatureInputForDiff = (
-  tool: ToolDefinition | MergedToolkit["tools"][number]
-): Record<string, unknown> => {
-  const signatureInput = buildToolSignatureInput(tool);
-  const parameters = signatureInput.parameters.map((parameter) => ({
-    ...parameter,
-    // Parameter descriptions are not stable across /v1/tools and /v1/tool_metadata.
-    description: null,
-    // tool_metadata may emit [] while list-tools uses null for "no enum values".
-    enum: parameter.enum && parameter.enum.length > 0 ? parameter.enum : null,
-  }));
-  const auth = signatureInput.auth
-    ? {
-        ...signatureInput.auth,
-        // OAuth provider IDs can differ by endpoint shape; scopes/type are stable.
-        providerId:
-          signatureInput.auth.providerType === "oauth2"
-            ? null
-            : signatureInput.auth.providerId,
-      }
-    : null;
-  const output = signatureInput.output
-    ? {
-        ...signatureInput.output,
-        type: normalizeOutputTypeForDiff(signatureInput.output.type),
-        // Output descriptions are not stable across endpoints.
-        description: null,
-      }
-    : null;
-
-  return {
-    ...signatureInput,
-    // Tool descriptions are documentation metadata and vary by source.
-    description: null,
-    parameters,
-    auth,
-    output,
-  };
-};
-
-const buildDiffToolSignature = (
-  tool: ToolDefinition | MergedToolkit["tools"][number]
-): string => stableStringify(normalizeToolSignatureInputForDiff(tool));
-
 export const buildToolDefinitionSignature = (tool: ToolDefinition): string =>
-  buildDiffToolSignature(tool);
+  buildComparableToolSignature(tool);
 
 /**
  * Build a map of tool signatures for quick lookup
@@ -178,7 +130,7 @@ const buildMergedToolSignatureMap = (
 ): ReadonlyMap<string, string> => {
   const map = new Map<string, string>();
   for (const tool of toolkit.tools) {
-    map.set(tool.qualifiedName, buildDiffToolSignature(tool));
+    map.set(tool.qualifiedName, buildComparableToolSignature(tool));
   }
   return map;
 };

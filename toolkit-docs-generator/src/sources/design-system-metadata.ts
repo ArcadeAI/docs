@@ -9,7 +9,6 @@
 import { z } from "zod";
 import type { ToolkitMetadata } from "../types/index.js";
 import { ToolkitMetadataSchema } from "../types/index.js";
-import { loadDesignSystemModule } from "./design-system-loader.js";
 import type { IMetadataSource } from "./internal.js";
 
 // ============================================================================
@@ -39,6 +38,7 @@ type DesignSystemToolkit = z.infer<typeof DesignSystemToolkitSchema>;
 // ============================================================================
 
 const LOOKUP_KEY_REGEX = /[^a-z0-9]/g;
+const DESIGN_SYSTEM_PACKAGE = "@arcadeai/design-system";
 
 function normalizeLookupKey(value: string): string {
   return value.toLowerCase().replace(LOOKUP_KEY_REGEX, "");
@@ -132,9 +132,15 @@ export function createDesignSystemMetadataSourceFromToolkits(
 }
 
 export async function createDesignSystemMetadataSource(): Promise<IMetadataSource> {
-  const designSystem = await loadDesignSystemModule();
-  const maybeToolkits = (designSystem as { TOOLKITS?: unknown } | null)
-    ?.TOOLKITS;
+  let maybeToolkits: unknown;
+  try {
+    const designSystem = (await import(DESIGN_SYSTEM_PACKAGE)) as {
+      TOOLKITS?: unknown;
+    };
+    maybeToolkits = designSystem.TOOLKITS;
+  } catch {
+    maybeToolkits = [];
+  }
   const toolkits = Array.isArray(maybeToolkits) ? maybeToolkits : [];
 
   const parsed: ToolkitMetadata[] = [];

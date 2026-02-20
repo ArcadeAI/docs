@@ -219,10 +219,12 @@ export const buildToolSignatureInput = (
 export const buildToolSignature = (tool: ToolDefinition | MergedTool): string =>
   stableStringify(buildToolSignatureInput(tool));
 
-const normalizeOutputTypeForReuse = (value: string): string =>
+const normalizeOutputTypeForComparison = (value: string): string =>
   value === "unknown" ? "string" : value;
 
-const buildToolReuseSignature = (tool: ToolDefinition | MergedTool): string => {
+export const buildComparableToolSignatureInput = (
+  tool: ToolDefinition | MergedTool
+): Record<string, unknown> => {
   const signatureInput = buildToolSignatureInput(tool);
   const parameters = signatureInput.parameters.map((parameter) => ({
     ...parameter,
@@ -244,21 +246,28 @@ const buildToolReuseSignature = (tool: ToolDefinition | MergedTool): string => {
   const output = signatureInput.output
     ? {
         ...signatureInput.output,
-        type: normalizeOutputTypeForReuse(signatureInput.output.type),
+        type: normalizeOutputTypeForComparison(signatureInput.output.type),
         // Output descriptions vary by source and should not force regeneration.
         description: null,
       }
     : null;
 
-  return stableStringify({
+  return {
     ...signatureInput,
     // Tool descriptions are metadata and should not force regeneration.
     description: null,
     parameters,
     auth,
     output,
-  });
+  };
 };
+
+export const buildComparableToolSignature = (
+  tool: ToolDefinition | MergedTool
+): string => stableStringify(buildComparableToolSignatureInput(tool));
+
+const buildToolReuseSignature = (tool: ToolDefinition | MergedTool): string =>
+  buildComparableToolSignature(tool);
 
 export const buildToolkitSummarySignature = (toolkit: MergedToolkit): string =>
   stableStringify({

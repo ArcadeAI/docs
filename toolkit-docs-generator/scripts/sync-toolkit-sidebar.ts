@@ -25,9 +25,8 @@ import {
   rmSync,
   writeFileSync,
 } from "node:fs";
-import { createRequire } from "node:module";
 import { dirname, join, resolve } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -39,15 +38,12 @@ type DesignSystemToolkit = {
   category?: string;
   isHidden?: boolean;
 };
+const DESIGN_SYSTEM_PACKAGE = "@arcadeai/design-system";
 
 let TOOLKITS: DesignSystemToolkit[] = [];
-const require = createRequire(import.meta.url);
 
 try {
-  const designSystemEntry = require.resolve("@arcadeai/design-system");
-  const designSystem = (await import(
-    pathToFileURL(designSystemEntry).href
-  )) as {
+  const designSystem = (await import(DESIGN_SYSTEM_PACKAGE)) as {
     TOOLKITS?: DesignSystemToolkit[];
   };
   TOOLKITS = designSystem.TOOLKITS || [];

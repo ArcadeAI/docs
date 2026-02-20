@@ -1,7 +1,5 @@
 import { readdir, readFile } from "node:fs/promises";
-import { createRequire } from "node:module";
 import { join } from "node:path";
-import { pathToFileURL } from "node:url";
 import { readToolkitData, readToolkitIndex } from "./toolkit-data";
 import { getToolkitSlug, normalizeToolkitId } from "./toolkit-slug";
 
@@ -32,7 +30,7 @@ export type ToolkitRouteEntry = {
   category: IntegrationCategory;
 };
 
-const require = createRequire(import.meta.url);
+const DESIGN_SYSTEM_PACKAGE = "@arcadeai/design-system";
 let cachedDesignSystemToolkits: ToolkitCatalogEntry[] | null = null;
 
 const isToolkitCatalogEntry = (
@@ -51,10 +49,7 @@ const loadDesignSystemToolkits = async (): Promise<ToolkitCatalogEntry[]> => {
   }
 
   try {
-    const designSystemEntry = require.resolve("@arcadeai/design-system");
-    const designSystem = (await import(
-      pathToFileURL(designSystemEntry).href
-    )) as {
+    const designSystem = (await import(DESIGN_SYSTEM_PACKAGE)) as {
       TOOLKITS?: unknown;
     };
     const toolkits = Array.isArray(designSystem.TOOLKITS)
