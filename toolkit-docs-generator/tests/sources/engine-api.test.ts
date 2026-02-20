@@ -198,8 +198,88 @@ describe("EngineApiSource", () => {
     expect(tools).toHaveLength(2);
     expect(tools[0]?.toolkitDescription).toBe("GitHub toolkit");
     expect(tools[0]?.secrets).toEqual(["GITHUB_API_KEY"]);
-    expect(tools[1]?.output?.type).toBe("unknown");
+    expect(tools[1]?.output?.type).toBe("string");
     expect(tools[1]?.auth?.providerId).toBeNull();
+  });
+
+  it("handles tool metadata output objects with missing fields", async () => {
+    const items: ToolMetadataItem[] = [
+      {
+        fully_qualified_name: "Github.CreateIssue@1.0.0",
+        qualified_name: "Github.CreateIssue",
+        name: "CreateIssue",
+        description: "Create issue",
+        toolkit: {
+          name: "Github",
+          version: "1.0.0",
+          description: "GitHub toolkit",
+        },
+        input: { parameters: [] },
+        output: {} as ToolMetadataItem["output"],
+        requirements: {
+          authorization: null,
+          secrets: [],
+        },
+      },
+    ];
+    const source = new EngineApiSource({
+      baseUrl: "https://api.arcade.dev",
+      apiKey: "test",
+      fetchFn: createFetchStub(items),
+    });
+
+    const tools = await source.fetchAllTools();
+
+    expect(tools).toHaveLength(1);
+    expect(tools[0]?.output).toEqual({
+      type: "string",
+      description: null,
+    });
+  });
+
+  it("normalizes empty enum arrays to null", async () => {
+    const items: ToolMetadataItem[] = [
+      {
+        fully_qualified_name: "Github.CreateIssue@1.0.0",
+        qualified_name: "Github.CreateIssue",
+        name: "CreateIssue",
+        description: "Create issue",
+        toolkit: {
+          name: "Github",
+          version: "1.0.0",
+          description: "GitHub toolkit",
+        },
+        input: {
+          parameters: [
+            {
+              name: "mode",
+              required: true,
+              description: "Execution mode",
+              value_schema: {
+                val_type: "string",
+                inner_val_type: null,
+                enum: [],
+              },
+              inferrable: true,
+            },
+          ],
+        },
+        output: null,
+        requirements: {
+          authorization: null,
+          secrets: [],
+        },
+      },
+    ];
+    const source = new EngineApiSource({
+      baseUrl: "https://api.arcade.dev",
+      apiKey: "test",
+      fetchFn: createFetchStub(items),
+    });
+
+    const tools = await source.fetchAllTools();
+
+    expect(tools[0]?.parameters[0]?.enum).toBeNull();
   });
 
   it("filters tools by toolkit and provider", async () => {
