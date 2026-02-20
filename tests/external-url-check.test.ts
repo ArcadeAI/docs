@@ -55,7 +55,7 @@ function extractExternalUrls(content: string): string[] {
 
 async function checkUrl(
   url: string
-): Promise<{ ok: true } | { ok: false; status: number }> {
+): Promise<{ ok: true } | { ok: false; status?: number; error?: string }> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
 
@@ -71,8 +71,9 @@ async function checkUrl(
     }
 
     return { ok: true };
-  } catch {
-    return { ok: true };
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return { ok: false, error: message };
   } finally {
     clearTimeout(timer);
   }
@@ -135,7 +136,8 @@ test(
     const limit = pLimit(CONCURRENCY);
     const failures: Array<{
       url: string;
-      status: number;
+      status?: number;
+      error?: string;
       files: string[];
     }> = [];
 
@@ -147,6 +149,7 @@ test(
           failures.push({
             url,
             status: result.status,
+            error: result.error,
             files: [...sources],
           });
         }
@@ -157,7 +160,9 @@ test(
 
     for (const failure of failures) {
       console.error(
-        `Broken external URL: ${failure.url} (HTTP ${failure.status})` +
+        `Broken external URL: ${failure.url}` +
+          (failure.status ? ` (HTTP ${failure.status})` : "") +
+          (failure.error ? ` (${failure.error})` : "") +
           ` — found in: ${failure.files.join(", ")}`
       );
     }
