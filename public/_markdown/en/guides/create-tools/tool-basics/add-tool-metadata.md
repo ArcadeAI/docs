@@ -346,7 +346,7 @@ Only set `strict=False` when you understand and accept the apparent contradictio
 -   [Handle errors](/guides/create-tools/error-handling.md)
      — Return useful errors from your
 
-Last updated on February 12, 2026
+Last updated on February 10, 2026
 
 [Organize your MCP server and tools](/en/guides/create-tools/tool-basics/organize-mcp-tools.md)
 [Overview](/en/guides/create-tools/evaluate-tools.md)
