@@ -1,19 +1,35 @@
 ---
 title: "Errors"
-description: "Domain-specific error types raised by the MCP server and components"
+description: "Exception types raised by the MCP server and re-exported from arcade-core"
 ---
 Arcade MCP[Python](/en/references/mcp/python.md)
 Errors
 
 # Errors
 
-Domain-specific error types raised by the  server and components.
+Domain-specific exception types for the  server. All exceptions are defined in `arcade_mcp_server.exceptions`.
 
-## `arcade_mcp_server.exceptions`
+## MCP exception hierarchy
 
- Exception Hierarchy
+PLAINTEXT
 
-Provides domain-specific exceptions for better error handling and debugging.
+```
+MCPError (base)
+├── MCPRuntimeError
+│   ├── ServerError
+│   │   ├── SessionError
+│   │   ├── RequestError
+│   │   │   └── ServerRequestError
+│   │   ├── ResponseError
+│   │   └── LifespanError
+│   ├── TransportError
+│   └── ProtocolError
+└── MCPContextError
+    ├── NotFoundError
+    ├── AuthorizationError
+    ├── PromptError
+    └── ResourceError
+```
 
 ### `MCPError`
 
@@ -25,7 +41,7 @@ Base error for all \-related exceptions.
 
 **Bases:** `MCPError`
 
-Runtime error for all \-related exceptions.
+Runtime error for  operations.
 
 ### `MCPContextError`
 
@@ -39,35 +55,11 @@ Error in  management.
 
 Error in server operations.
 
-### `AuthorizationError`
-
-**Bases:** `MCPContextError`
-
-Authorization failure.
-
-### `LifespanError`
+### `SessionError`
 
 **Bases:** `ServerError`
 
-Error in lifespan management.
-
-### `NotFoundError`
-
-**Bases:** `MCPContextError`
-
-Requested entity not found.
-
-### `PromptError`
-
-**Bases:** `MCPContextError`
-
-Error in prompt management.
-
-### `ProtocolError`
-
-**Bases:** `MCPRuntimeError`
-
-Error in  protocol handling.
+Error in session management.
 
 ### `RequestError`
 
@@ -75,69 +67,141 @@ Error in  protocol handling.
 
 Error in request processing from client to server.
 
+### `ResponseError`
+
+**Bases:** `ServerError`
+
+Error in response processing from server to client.
+
+### `ServerRequestError`
+
+**Bases:** `RequestError`
+
+Error in sending a request from the server to the client (server-initiated).
+
+### `LifespanError`
+
+**Bases:** `ServerError`
+
+Error in lifespan management (startup/shutdown hooks).
+
+### `NotFoundError`
+
+**Bases:** `MCPContextError`
+
+Requested entity (, resource, prompt) not found.
+
+### `AuthorizationError`
+
+**Bases:** `MCPContextError`
+
+Authorization failure.
+
+### `PromptError`
+
+**Bases:** `MCPContextError`
+
+Error in prompt management.
+
 ### `ResourceError`
 
 **Bases:** `MCPContextError`
 
 Error in resource management.
 
-### `ResponseError`
-
-**Bases:** `ServerError`
-
-Error in request processing from server to client.
-
-### `ServerRequestError`
-
-**Bases:** `RequestError`
-
-Error in sending request from server to client initiated by the server.
-
-### `SessionError`
-
-**Bases:** `ServerError`
-
-Error in session management.
-
 ### `TransportError`
 
 **Bases:** `MCPRuntimeError`
 
-Error in transport layer (stdio, HTTP, etc).
+Error in the transport layer (stdio, HTTP).
+
+### `ProtocolError`
+
+**Bases:** `MCPRuntimeError`
+
+Error in  protocol handling.
+
+## Re-exported from arcade-core
+
+The following exceptions are re-exported from `arcade_core.errors` for convenience. Import them from `arcade_mcp_server.exceptions`.
+
+### `ToolRuntimeError`
+
+General runtime error during  execution.
+
+### `ToolExecutionError`
+
+Error during  execution (wraps the underlying exception).
+
+### `FatalToolError`
+
+A fatal error that should not be retried.
+
+### `RetryableToolError`
+
+An error that the caller may retry.
+
+### `UpstreamError`
+
+Error from an upstream service the  depends on.
+
+### `UpstreamRateLimitError`
+
+Rate limit error from an upstream service.
+
+### `ContextRequiredToolError`
+
+Error raised when a tool requires a  that was not provided.
+
+### `ErrorKind`
+
+An enum classifying error types (for example, `ErrorKind.FATAL`, `ErrorKind.RETRYABLE`).
 
 ## Examples
 
-### Raising exceptions for common error scenarios
+### Handling errors in tool code
+
+```python
+from arcade_mcp_server.exceptions import (
+    NotFoundError,
+    ToolRuntimeError,
+)
+
+
+async def read_resource_or_fail(uri: str) -> str:
+    resource = await lookup(uri)
+    if resource is None:
+        raise NotFoundError(f"Resource not found: {uri}")
+    return resource
+
+
+async def call_external_api() -> dict:
+    try:
+        return await fetch_data()
+    except Exception as e:
+        raise ToolRuntimeError(f"External API call failed: {e}") from e
+```
+
+### Catching specific error types
 
 ```python
 from arcade_mcp_server.exceptions import (
     MCPError,
     NotFoundError,
-    ValidationError,
-    ToolError,
+    TransportError,
 )
 
-# Raising a not-found when a resource is missing
-async def read_resource_or_fail(uri: str) -> str:
-    if not await exists(uri):
-        raise NotFoundError(f"Resource not found: {uri}")
-    return await read(uri)
-
-# Validating input
-def validate_age(age: int) -> None:
-    if age < 0:
-        raise ValidationError("age must be non-negative")
-
-# Handling tool execution errors in middleware or handlers
-async def call_tool_safely(call):
-    try:
-        return await call()
-    except ToolError as e:
-        # Convert to an error result or re-raise
-        raise MCPError(f"Tool failed: {e}")
+try:
+    result = await server.handle_message(message, session=session)
+except NotFoundError:
+    print("Entity not found")
+except TransportError:
+    print("Transport layer error")
+except MCPError:
+    print("General MCP error")
 ```
 
-Last updated on January 30, 2026
+Last updated on February 10, 2026
 
-[Types](/en/references/mcp/python/types.md)
-[Settings](/en/references/mcp/python/settings.md)
+[Middleware](/en/references/mcp/python/middleware.md)
+[Telemetry](/en/references/mcp/telemetry.md)
