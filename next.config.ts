@@ -22,11 +22,11 @@ const nextConfig: NextConfig = withLlmsTxt({
 })(
   withNextra({
     transpilePackages: ["@arcadeai/design-system"],
-    webpack: (config) => {
-      config.resolve.symlinks = true;
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-      };
+    webpack: (config, { dev }) => {
+      if (dev) {
+        config.cache = false;
+      }
+      config.resolve.symlinks = false;
       return config;
     },
     async redirects() {
