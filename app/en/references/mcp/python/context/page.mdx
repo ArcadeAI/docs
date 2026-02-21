@@ -7,6 +7,8 @@ import { Callout } from "nextra/components";
 
 # Context
 
+Reference for the `Context` class used by MCP tools to interact with the server, client, and runtime environment.
+
 The `Context` class is the primary interface for MCP tools to interact with the server, client, and runtime environment. Tools receive a populated `Context` instance as a parameter and should not create instances directly.
 
 `Context` extends `ToolContext` (from `arcade_core`), combining runtime capabilities with tool-specific data.
@@ -34,7 +36,7 @@ These fields inherit from `arcade_core.schema.ToolContext` and the server popula
 | Property | Type | Description |
 |----------|------|-------------|
 | `user_id` | `str \| None` | The user ID for this tool execution |
-| `secrets` | `list` | Secrets available to this tool |
+| `secrets` | `list` | secrets available to this tool |
 | `authorization` | `ToolAuthorizationContext \| None` | Authorization context (token and user info) if the tool requires auth |
 | `metadata` | `dict` | Additional metadata for the tool execution |
 
@@ -162,12 +164,12 @@ Create messages using the connected client's language model.
 
 | Name | Type | Description | Default |
 |------|------|-------------|---------|
-| `messages` | `str \| list[str \| SamplingMessage]` | Messages to send. A plain string is converted to a single user message. | _required_ |
+| `messages` | `str \| list[str \| SamplingMessage]` | Messages to send. The system converts a plain string to a single user message. | _required_ |
 | `system_prompt` | `str \| None` | System prompt | `None` |
 | `include_context` | `str \| None` | Context inclusion (`"none"`, `"thisServer"`, `"allServers"`) | `None` |
 | `temperature` | `float \| None` | Sampling temperature | `None` |
 | `max_tokens` | `int \| None` | Maximum tokens to generate | `None` (defaults to `512`) |
-| `model_preferences` | `ModelPreferences \| str \| list[str] \| None` | Model hints. A string or list of strings is converted to `ModelPreferences` with `ModelHint` entries. | `None` |
+| `model_preferences` | `ModelPreferences \| str \| list[str] \| None` | Model hints. The system converts a string or list of strings to `ModelPreferences` with `ModelHint` entries. | `None` |
 
 ```python
 @tool
@@ -185,7 +187,7 @@ async def summarize(context: Context, text: str) -> str:
 Elicit input from the user through the connected client.
 
 <Callout type="warning">
-  Elicitation requires client support. The schema must have `type: "object"` and properties can only use primitive types (`string`, `number`, `integer`, `boolean`). String properties support `format` values: `email`, `uri`, `date`, `date-time`.
+  Elicitation requires client support. The schema must have `type: "object"` and properties can only use simple types (`string`, `number`, `integer`, `boolean`). String properties support `format` values: `email`, `uri`, `date`, `date-time`.
 </Callout>
 
 **Methods:**
@@ -236,7 +238,7 @@ Send notifications to the connected client, such as list-changed events.
 async def register_new_tool(context: Context) -> str:
     # ... register a tool at runtime ...
     await context.notifications.tools.list_changed()
-    return "Tool registered"
+    return "tool registered"
 ```
 
 ## Additional properties

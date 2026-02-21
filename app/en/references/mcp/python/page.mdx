@@ -7,6 +7,8 @@ import { Callout } from "nextra/components";
 
 # Arcade MCP Server - Python overview
 
+This page covers the arcade-mcp-server Python package and its main MCPApp class.
+
 `arcade-mcp-server` is Arcade's framework for building MCP servers. It provides a clean, minimal API
 to build MCP servers programmatically. The main entry point is `MCPApp`, which handles tool
 collection, server configuration, and transport setup.
@@ -34,7 +36,7 @@ if __name__ == "__main__":
 **`arcade_mcp_server.mcp_app.MCPApp`**
 
 A FastAPI-like interface for building MCP servers. The app collects tools and configuration, then
-lazily creates the server and transport when `run()` is called.
+lazily creates the server and transport when `run()` calls them.
 
 ### `__init__`
 
@@ -69,7 +71,7 @@ Initialize the MCP app.
 | `host` | `str` | Host for HTTP transport | `'127.0.0.1'` |
 | `port` | `int` | Port for HTTP transport | `8000` |
 | `reload` | `bool` | Enable auto-reload for development (HTTP only) | `False` |
-| `auth` | `ResourceServerValidator \| None` | Resource Server validator for front-door authentication (HTTP only) | `None` |
+| `auth` | `ResourceServerValidator \| None` | Resource server validator for front-door authentication (HTTP only) | `None` |
 | `**kwargs` | `Any` | Additional server configuration passed to the underlying `MCPServer` | `{}` |
 
 ### Properties
@@ -79,7 +81,7 @@ Initialize the MCP app.
 Runtime and build-time tools API. Returns a `_ToolsAPI` object with async methods: `add()`, `update()`, `remove()`, `list()`.
 
 <Callout type="warning">
-  The runtime tools API (`app.tools.add()`, etc.) requires a server to be bound via `app.server`. It is only available after the server has started. Use the `@app.tool` decorator or `app.add_tool()` for build-time tool registration.
+  The runtime tools API (`app.tools.add()`, etc.) requires you to bind a server via `app.server`. It is only available after the server has started. Use the `@app.tool` decorator or `app.add_tool()` for build-time tool registration.
 </Callout>
 
 #### `prompts`
@@ -104,7 +106,7 @@ def my_tool(...) -> ...:
     ...
 ```
 
-Decorator for registering tools. Can be used with or without arguments.
+Decorator for registering tools. Can use with or without arguments.
 
 **Parameters:**
 
@@ -142,7 +144,7 @@ Add a tool for build-time materialization (before the server starts). Accepts th
 app.add_tools_from_module(module)
 ```
 
-Add all `@tool`-decorated functions from a Python module to the catalog.
+Add all `@tool`-decorated functions from a Python module to the catalog that has already registered them.
 
 **Parameters:**
 
@@ -295,4 +297,3 @@ app.add_tools_from_module(my_tools)
 
 if __name__ == "__main__":
     app.run()
-```

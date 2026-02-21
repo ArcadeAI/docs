@@ -11,13 +11,15 @@ import { Callout } from "nextra/components";
   Most users should use [`MCPApp`](/references/mcp/python) instead of `MCPServer` directly. `MCPServer` is a low-level API for advanced use cases.
 </Callout>
 
+This reference covers the low-level `MCPServer` class for advanced MCP server implementations.
+
 The `MCPServer` class is the core server implementation that handles MCP protocol messages, middleware orchestration, and component management for tools, resources, and prompts.
 
 ## `MCPServer`
 
 **`arcade_mcp_server.server.MCPServer`**
 
-MCP Server with middleware and context support.
+MCP server with middleware and context support.
 
 This server provides:
 - Middleware chain for extensible request processing
@@ -57,14 +59,14 @@ Initialize the MCP server.
 | `title` | `str \| None` | Server title for display. Falls back to settings, then to `name`. | `None` |
 | `instructions` | `str \| None` | Server instructions sent to clients during initialization | `None` |
 | `settings` | `MCPSettings \| None` | MCP settings. Loaded from environment if not provided. | `None` |
-| `middleware` | `list[Middleware] \| None` | Custom middleware to add to the chain (appended after built-in middleware) | `None` |
+| `middleware` | `list[Middleware] \| None` | Custom middleware to add to the chain (appends after built-in middleware) | `None` |
 | `lifespan` | `Callable \| None` | Lifespan manager function for startup/shutdown hooks | `None` |
 | `auth_disabled` | `bool` | Disable authentication | `False` |
 | `arcade_api_key` | `str \| None` | Arcade API key. Overrides settings and credentials file. | `None` |
 | `arcade_api_url` | `str \| None` | Arcade API URL. Overrides settings. | `None` |
 
 <Callout type="info">
-  The server automatically adds `ErrorHandlingMiddleware` and (if enabled in settings) `LoggingMiddleware` to the middleware chain. Custom middleware is appended after these built-in middleware.
+  The server automatically adds `ErrorHandlingMiddleware` and (if enabled in settings) `LoggingMiddleware` to the middleware chain. Custom middleware appends after these built-in middleware.
 </Callout>
 
 ### Properties
@@ -177,4 +179,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-```
