@@ -32,6 +32,9 @@ const meta: MetaRecord = {
   "organize-mcp-tools": {
     title: "Organize your MCP server and tools",
   },
+  "add-tool-metadata": {
+    title: "Add metadata to your tools",
+  },
 };
 
 export default meta;
