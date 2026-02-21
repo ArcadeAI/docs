@@ -1,9 +1,9 @@
 "use client";
 
-import { cn } from "@arcadeai/design-system/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Banner } from "nextra/components";
+import { cn } from "../_lib/utils";
 
 type TranslationBannerProps = {
   dictionary: {

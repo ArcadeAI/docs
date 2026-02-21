@@ -1,8 +1,8 @@
 "use client";
 import { Card, CardContent } from "@arcadeai/design-system";
-import { cn } from "@arcadeai/design-system/lib/utils";
 import type { LucideIcon } from "lucide-react";
 import posthog from "posthog-js";
+import { cn } from "../_lib/utils";
 
 type IntegrationCardProps = {
   id: string;

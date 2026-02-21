@@ -8,7 +8,6 @@ import {
   CardFooter,
   CardHeader,
 } from "@arcadeai/design-system";
-import { cn } from "@arcadeai/design-system/lib/utils";
 import { Home, SearchX } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
@@ -16,6 +15,7 @@ import posthog from "posthog-js";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import type { Dictionary } from "@/_dictionaries/i18n-config";
 import { BackButton } from "@/app/_components/back-button";
+import { cn } from "./_lib/utils";
 
 const LOCALE_PATH_REGEX = /^\/([a-z]{2}(?:-[A-Z]{2})?)(?:\/.+|$)/;
 const LOCALE_PREFIX_REGEX = /^\/[a-z]{2}(?:-[A-Z]{2})?/;

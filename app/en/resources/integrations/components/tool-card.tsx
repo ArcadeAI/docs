@@ -8,12 +8,12 @@ import {
   ProBadge,
   type ToolkitType,
 } from "@arcadeai/design-system";
-import { cn } from "@arcadeai/design-system/lib/utils";
 import { Package } from "lucide-react";
 import Link from "next/link";
 import posthog from "posthog-js";
 import type React from "react";
 import { useState } from "react";
+import { cn } from "../../../../_lib/utils";
 import { ComingSoonModal } from "./coming-soon-modal";
 import { TOOL_CARD_TYPE_CONFIG } from "./type-config";
 

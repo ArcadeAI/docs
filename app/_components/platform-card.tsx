@@ -1,8 +1,8 @@
 "use client";
 import { Card, CardHeader, CardTitle } from "@arcadeai/design-system";
-import { cn } from "@arcadeai/design-system/lib/utils";
 import Link from "next/link";
 import type React from "react";
+import { cn } from "../_lib/utils";
 
 type PlatformCardProps = {
   name: string;

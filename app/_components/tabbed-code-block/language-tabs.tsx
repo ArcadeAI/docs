@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@arcadeai/design-system";
-import { cn } from "@arcadeai/design-system/lib/utils";
+import { cn } from "../../_lib/utils";
 
 export function LanguageTabs({
   languages,

@@ -21,6 +21,14 @@ const nextConfig: NextConfig = withLlmsTxt({
   enabled: false, // disabled for now, we will recreate this every week
 })(
   withNextra({
+    transpilePackages: ["@arcadeai/design-system"],
+    webpack: (config) => {
+      config.resolve.symlinks = true;
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+      };
+      return config;
+    },
     async redirects() {
       return [
         // "others" category removed — toolkits moved to proper categories

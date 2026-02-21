@@ -5,7 +5,6 @@ import {
   getToolkitIcon,
   Separator,
 } from "@arcadeai/design-system";
-import { cn } from "@arcadeai/design-system/lib/utils";
 import { Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { ComingSoonProvider } from "@/app/_components/coming-soon-context";
@@ -13,6 +12,7 @@ import {
   getToolkitSlug,
   type ToolkitWithDocsLink,
 } from "@/app/_lib/toolkit-slug";
+import { cn } from "../../../../_lib/utils";
 import { FiltersBar } from "./filters-bar";
 import { ToolCard } from "./tool-card";
 import { TYPE_CONFIG, TYPE_DESCRIPTIONS } from "./type-config";

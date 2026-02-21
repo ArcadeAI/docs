@@ -1,5 +1,5 @@
-import { cn } from "@arcadeai/design-system/lib/utils";
 import React from "react";
+import { cn } from "../_lib/utils";
 
 type GuideOverviewProps = {
   children: React.ReactNode;

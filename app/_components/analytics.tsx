@@ -1,7 +1,7 @@
 "use client";
-import { cn } from "@arcadeai/design-system/lib/utils";
 import Link from "next/link";
 import posthog from "posthog-js";
+import { cn } from "../_lib/utils";
 import { getDashboardUrl } from "./dashboard-link";
 
 export type LinkClickedProps = {
