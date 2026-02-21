@@ -14,7 +14,7 @@ The [OpenAI Agents SDK](https://openai.github.io/openai-agents-python/) is a pop
 <GuideOverview>
 <GuideOverview.Outcomes>
 
-You will implement a CLI agent that can use Arcade tools to help the user with their requests. The harness handles tools that require authorization automatically, so users don't need to worry about it.
+You will implement a CLI agent that can use Arcade tools to help the user with their requests. The harness handles tools that require user authorization automatically, so users don't need to worry about it.
 
 </GuideOverview.Outcomes>
 
@@ -167,7 +167,7 @@ def convert_output_to_json(output: Any) -> str:
 
 ### Write a helper function to authorize Arcade tools
 
-This helper function implements "just in time" (JIT) tool authorization using Arcade's client. When the agent tries to execute a tool that requires authorization, the `result` object's `status` will be `"pending"`, and you can use the `authorize` method to get an authorization URL. You then wait for the user to complete the authorization and retry the tool call. If the user has already authorized the tool, the `status` will be `"completed"`, and the OAuth dance skips silently, which improves the user experience.
+This helper function implements "just in time" (JIT) tool authorization using Arcade's client. When the agent tries to execute a tool that requires user authorization, the `result` object's `status` will be `"pending"`, and you can use the `authorize` method to get an authorization URL. You then wait for the user to complete the authorization and retry the tool call. If the user has already authorized the tool, the `status` will be `"completed"`, and the OAuth dance skips silently, which improves the user experience.
 
 <Callout type="info">
   This function captures the authorization flow outside of the agent's context,
@@ -369,11 +369,11 @@ You should see the agent responding to your prompts like any model, as well as h
 ## Next steps
 
 1. Try adding additional tools to the agent or modifying the tools in the catalog for a different use case by modifying the `MCP_SERVERS` and `TOOLS` variables.
-2. Try implementing a fully deterministic flow before the agentic loop, you can use this deterministic phase to prepare the context for the agent, adding things like the current date, time, or any other information that is relevant to the task at hand.
+2. Try implementing a fully deterministic flow before the agentic loop, you can implement this deterministic phase to prepare the context for the agent, adding things like the current date, time, or any other information that is relevant to the task at hand.
 
 ## Example code
 
-The team provides example code for you to reference:
+The team includes example code for you to reference:
 
 ```python filename="main.py"
 from agents import Agent, Runner, TResponseInputItem
