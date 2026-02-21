@@ -5,8 +5,15 @@
  * Used to determine which toolkits need regeneration.
  */
 
-import { buildToolSignature, extractVersion } from "../merger/data-merger.js";
-import type { MergedToolkit, ToolDefinition } from "../types/index.js";
+import {
+  buildComparableToolSignature,
+  extractVersion,
+} from "../merger/data-merger.js";
+import type {
+  MergedToolkit,
+  ToolDefinition,
+  ToolkitMetadata,
+} from "../types/index.js";
 
 // ============================================================================
 // Types
@@ -37,6 +44,8 @@ export interface ToolkitChange {
   readonly previousVersion: string;
   /** Whether the toolkit version changed */
   readonly versionChanged: boolean;
+  /** Whether relevant metadata fields changed */
+  readonly metadataChanged: boolean;
   /** Current tool count (0 if removed) */
   readonly currentToolCount: number;
   /** Previous tool count (0 if new) */
@@ -69,16 +78,36 @@ export interface ChangeSummary {
   readonly modifiedTools: number;
 }
 
+export interface CurrentToolkitData {
+  /** Tool definitions fetched from the API */
+  readonly tools: readonly ToolDefinition[];
+  /** Toolkit metadata fetched from Design System */
+  readonly metadata: ToolkitMetadata | null;
+}
+
+export type CurrentToolkitDiffInput =
+  | readonly ToolDefinition[]
+  | CurrentToolkitData;
+
+const isCurrentToolkitData = (
+  value: CurrentToolkitDiffInput
+): value is CurrentToolkitData =>
+  !Array.isArray(value) &&
+  typeof value === "object" &&
+  value !== null &&
+  "tools" in value &&
+  "metadata" in value;
+
 // ============================================================================
 // Signature Building for Tool Definitions
 // ============================================================================
 
 /**
  * Build a signature for a ToolDefinition (from API)
- * This is different from MergedTool signatures as it uses the raw API format
+ * and normalize endpoint-specific representation differences.
  */
 export const buildToolDefinitionSignature = (tool: ToolDefinition): string =>
-  buildToolSignature(tool);
+  buildComparableToolSignature(tool);
 
 /**
  * Build a map of tool signatures for quick lookup
@@ -101,7 +130,7 @@ const buildMergedToolSignatureMap = (
 ): ReadonlyMap<string, string> => {
   const map = new Map<string, string>();
   for (const tool of toolkit.tools) {
-    map.set(tool.qualifiedName, buildToolSignature(tool));
+    map.set(tool.qualifiedName, buildComparableToolSignature(tool));
   }
   return map;
 };
@@ -112,6 +141,65 @@ const buildMergedToolSignatureMap = (
 const getToolkitVersion = (tools: readonly ToolDefinition[]): string => {
   const firstTool = tools[0];
   return firstTool ? extractVersion(firstTool.fullyQualifiedName) : "0.0.0";
+};
+
+type ComparableMetadataSnapshot = {
+  label: string;
+  category: string;
+  isHidden: boolean;
+  type: string;
+};
+
+const buildCurrentMetadataSnapshot = (
+  metadata: ToolkitMetadata | null
+): ComparableMetadataSnapshot | null => {
+  if (!metadata) {
+    return null;
+  }
+
+  return {
+    label: metadata.label,
+    category: metadata.category,
+    isHidden: metadata.isHidden,
+    type: metadata.type,
+  };
+};
+
+const buildPreviousMetadataSnapshot = (
+  toolkit: MergedToolkit | undefined
+): ComparableMetadataSnapshot | null => {
+  if (!toolkit) {
+    return null;
+  }
+
+  return {
+    label: toolkit.label,
+    category: toolkit.metadata.category,
+    isHidden: toolkit.metadata.isHidden,
+    type: toolkit.metadata.type,
+  };
+};
+
+const hasRelevantMetadataChanges = (
+  currentMetadata: ToolkitMetadata | null,
+  previousToolkit: MergedToolkit | undefined
+): boolean => {
+  const current = buildCurrentMetadataSnapshot(currentMetadata);
+  const previous = buildPreviousMetadataSnapshot(previousToolkit);
+  // When either side lacks metadata (new toolkit or metadata not yet available),
+  // treat as "no metadata change" — the toolkit is already flagged as added/removed
+  // by the tool-level diff, so a missing metadata snapshot should not independently
+  // trigger regeneration.
+  if (!(current && previous)) {
+    return false;
+  }
+
+  return (
+    current.label !== previous.label ||
+    current.category !== previous.category ||
+    current.isHidden !== previous.isHidden ||
+    current.type !== previous.type
+  );
 };
 
 // ============================================================================
@@ -190,13 +278,18 @@ export const compareTools = (
 export const compareToolkit = (
   toolkitId: string,
   currentTools: readonly ToolDefinition[],
-  previousToolkit: MergedToolkit | undefined
+  previousToolkit: MergedToolkit | undefined,
+  currentMetadata: ToolkitMetadata | null = null
 ): ToolkitChange => {
   const toolChanges = compareTools(currentTools, previousToolkit);
   const currentVersion = getToolkitVersion(currentTools);
   const previousVersion = previousToolkit?.version ?? "0.0.0";
   const versionChanged =
     Boolean(previousToolkit) && currentVersion !== previousVersion;
+  const metadataChanged = hasRelevantMetadataChanges(
+    currentMetadata,
+    previousToolkit
+  );
 
   // Determine overall change type
   let changeType: ToolkitChangeType;
@@ -205,7 +298,7 @@ export const compareToolkit = (
   } else if (currentTools.length === 0 && previousToolkit.tools.length > 0) {
     // This shouldn't happen normally, but handle it
     changeType = "removed";
-  } else if (toolChanges.length === 0 && !versionChanged) {
+  } else if (toolChanges.length === 0 && !versionChanged && !metadataChanged) {
     changeType = "unchanged";
   } else {
     changeType = "modified";
@@ -218,9 +311,19 @@ export const compareToolkit = (
     currentVersion,
     previousVersion,
     versionChanged,
+    metadataChanged,
     currentToolCount: currentTools.length,
     previousToolCount: previousToolkit?.tools.length ?? 0,
   };
+};
+
+const normalizeCurrentToolkitData = (
+  value: CurrentToolkitDiffInput
+): CurrentToolkitData => {
+  if (isCurrentToolkitData(value)) {
+    return { tools: value.tools, metadata: value.metadata };
+  }
+  return { tools: value, metadata: null };
 };
 
 /**
@@ -230,7 +333,7 @@ export const compareToolkit = (
  * @param previousToolkits - Map of toolkit ID to previous merged output
  */
 export const detectChanges = (
-  currentToolkitTools: ReadonlyMap<string, readonly ToolDefinition[]>,
+  currentToolkitData: ReadonlyMap<string, CurrentToolkitDiffInput>,
   previousToolkits: ReadonlyMap<string, MergedToolkit>
 ): ChangeDetectionResult => {
   const toolkitChanges: ToolkitChange[] = [];
@@ -248,7 +351,8 @@ export const detectChanges = (
   const seenPreviousIds = new Set<string>();
 
   // Check current toolkits
-  for (const [toolkitId, tools] of currentToolkitTools) {
+  for (const [toolkitId, current] of currentToolkitData) {
+    const normalizedCurrent = normalizeCurrentToolkitData(current);
     const normalizedId = normalizeKey(toolkitId);
     const previousToolkit = previousByNormalizedId.get(normalizedId);
 
@@ -256,7 +360,12 @@ export const detectChanges = (
       seenPreviousIds.add(normalizedId);
     }
 
-    const change = compareToolkit(toolkitId, tools, previousToolkit);
+    const change = compareToolkit(
+      toolkitId,
+      normalizedCurrent.tools,
+      previousToolkit,
+      normalizedCurrent.metadata
+    );
     toolkitChanges.push(change);
   }
 
@@ -275,6 +384,7 @@ export const detectChanges = (
         currentVersion: "0.0.0",
         previousVersion: toolkit.version,
         versionChanged: false,
+        metadataChanged: false,
         currentToolCount: 0,
         previousToolCount: toolkit.tools.length,
       });
@@ -324,7 +434,11 @@ const calculateSummary = (
         break;
       case "modified":
         modifiedToolkits++;
-        if (change.toolChanges.length === 0 && change.versionChanged) {
+        if (
+          change.toolChanges.length === 0 &&
+          change.versionChanged &&
+          !change.metadataChanged
+        ) {
           versionOnlyToolkits++;
         }
         for (const toolChange of change.toolChanges) {
@@ -441,7 +555,14 @@ const shouldListToolChanges = (toolkitChange: ToolkitChange): boolean =>
 const shouldNoteVersionOnlyUpdate = (toolkitChange: ToolkitChange): boolean =>
   toolkitChange.changeType === "modified" &&
   toolkitChange.toolChanges.length === 0 &&
-  toolkitChange.versionChanged;
+  toolkitChange.versionChanged &&
+  !toolkitChange.metadataChanged;
+
+const shouldNoteMetadataOnlyUpdate = (toolkitChange: ToolkitChange): boolean =>
+  toolkitChange.changeType === "modified" &&
+  toolkitChange.toolChanges.length === 0 &&
+  !toolkitChange.versionChanged &&
+  toolkitChange.metadataChanged;
 
 const formatToolkitLine = (toolkitChange: ToolkitChange): string => {
   const changeLabel = TOOLKIT_CHANGE_LABELS[toolkitChange.changeType];
@@ -458,6 +579,9 @@ const appendToolChanges = (
   }
   if (shouldNoteVersionOnlyUpdate(toolkitChange)) {
     lines.push("  ~ version update only");
+  }
+  if (shouldNoteMetadataOnlyUpdate(toolkitChange)) {
+    lines.push("  ~ metadata update only");
   }
   for (const toolChange of toolkitChange.toolChanges) {
     const toolLabel = TOOL_CHANGE_LABELS[toolChange.changeType];

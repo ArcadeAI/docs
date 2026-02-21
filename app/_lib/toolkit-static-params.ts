@@ -1,6 +1,6 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { TOOLKITS as DESIGN_SYSTEM_TOOLKITS } from "@arcadeai/design-system";
+import { TOOLKITS as DESIGN_SYSTEM_TOOLKITS } from "@arcadeai/design-system/metadata/toolkits";
 import { readToolkitData, readToolkitIndex } from "./toolkit-data";
 import { getToolkitSlug, normalizeToolkitId } from "./toolkit-slug";
 
@@ -30,6 +30,17 @@ export type ToolkitRouteEntry = {
   toolkitId: string; // docs slug (e.g. "github-api") or normalized id
   category: IntegrationCategory;
 };
+
+const DESIGN_SYSTEM_TOOLKITS_FOR_ROUTES: ToolkitCatalogEntry[] =
+  DESIGN_SYSTEM_TOOLKITS.map((toolkit) => ({
+    id: toolkit.id,
+    category: toolkit.category,
+    isHidden: toolkit.isHidden,
+    docsLink: toolkit.docsLink,
+  }));
+
+const loadDesignSystemToolkits = async (): Promise<ToolkitCatalogEntry[]> =>
+  DESIGN_SYSTEM_TOOLKITS_FOR_ROUTES;
 
 function normalizeCategory(
   value: string | null | undefined
@@ -98,18 +109,6 @@ const listToolkitRoutesFromDataDir = async (options?: {
   return [...unique.values()];
 };
 
-const shouldReadToolkitData = (entry?: ToolkitCatalogEntry): boolean => {
-  if (!entry) {
-    return true;
-  }
-
-  // Read toolkit data if we need a docsLink or hidden flag.
-  return (
-    typeof entry.docsLink === "undefined" ||
-    typeof entry.isHidden === "undefined"
-  );
-};
-
 const resolveToolkitRoute = async (
   toolkit: { id: string; category?: string },
   catalogByNormalizedId: Map<string, ToolkitCatalogEntry>,
@@ -117,23 +116,28 @@ const resolveToolkitRoute = async (
 ): Promise<ToolkitRouteEntry | null> => {
   const normalizedId = normalizeToolkitId(toolkit.id);
   const catalogEntry = catalogByNormalizedId.get(normalizedId);
-  const data = shouldReadToolkitData(catalogEntry)
-    ? await readToolkitData(toolkit.id, dataDir ? { dataDir } : undefined)
-    : null;
+  // Always read the JSON file — it is the source of truth for category, docsLink,
+  // and isHidden. The design system catalog is only used as a fallback for
+  // visibility when the JSON file is absent.
+  const data = await readToolkitData(
+    toolkit.id,
+    dataDir ? { dataDir } : undefined
+  );
 
-  const isHidden = catalogEntry?.isHidden ?? data?.metadata?.isHidden ?? false;
+  const isHidden = data?.metadata?.isHidden ?? catalogEntry?.isHidden ?? false;
   if (isHidden) {
     return null;
   }
 
   const slug = getToolkitSlug({
-    id: catalogEntry?.id ?? toolkit.id,
-    docsLink: catalogEntry?.docsLink ?? data?.metadata?.docsLink,
+    id: toolkit.id,
+    docsLink: data?.metadata?.docsLink ?? catalogEntry?.docsLink,
   });
-  // Prefer the full JSON data file's category over the index.json summary,
-  // because the index may have stale/incorrect categories.
+  // JSON file is the source of truth for category. The generator is responsible
+  // for writing the correct value; the design system catalog and index.json are
+  // only used as a last resort when the JSON is missing.
   const category = normalizeCategory(
-    catalogEntry?.category ?? data?.metadata?.category ?? toolkit.category
+    data?.metadata?.category ?? catalogEntry?.category ?? toolkit.category
   );
   return { toolkitId: slug, category };
 };
@@ -150,7 +154,8 @@ export async function listToolkitRoutes(options?: {
     return await listToolkitRoutesFromDataDir(options);
   }
 
-  const toolkitsCatalog = options?.toolkitsCatalog ?? DESIGN_SYSTEM_TOOLKITS;
+  const toolkitsCatalog =
+    options?.toolkitsCatalog ?? (await loadDesignSystemToolkits());
   const catalogByNormalizedId = new Map(
     toolkitsCatalog.map((toolkit) => [normalizeToolkitId(toolkit.id), toolkit])
   );

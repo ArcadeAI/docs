@@ -93,7 +93,10 @@ describe("Scenario: Skip unchanged toolkits", () => {
           createTool({
             name: "Tool1",
             qualifiedName: "Github.Tool1",
-            description: "Updated",
+            output: {
+              type: "array",
+              description: null,
+            },
           }),
         ],
       ],
@@ -191,5 +194,40 @@ describe("Scenario: Skip unchanged toolkits", () => {
     expect(result.summary.versionOnlyToolkits).toBe(1);
     expect(result.toolkitChanges[0]?.versionChanged).toBe(true);
     expect(result.toolkitChanges[0]?.toolChanges).toHaveLength(0); // No tool-level changes
+  });
+
+  it("includes metadata-only changes in changed IDs", () => {
+    const currentToolkitData = new Map([
+      [
+        "Github",
+        {
+          tools: [createTool({ name: "Tool1", qualifiedName: "Github.Tool1" })],
+          metadata: {
+            id: "Github",
+            label: "Github",
+            category: "databases",
+            iconUrl: "https://example.com/icon.svg",
+            isBYOC: false,
+            isPro: false,
+            type: "arcade",
+            docsLink: "https://docs.example.com/databases/github",
+            isComingSoon: false,
+            isHidden: false,
+          },
+        },
+      ],
+    ]);
+    const previousToolkits = new Map([
+      ["Github", createMergedToolkit("Github")],
+    ]);
+
+    const result = detectChanges(currentToolkitData, previousToolkits);
+
+    const changedIds = getChangedToolkitIds(result);
+    expect(changedIds).toContain("Github");
+    expect(result.summary.modifiedToolkits).toBe(1);
+    expect(result.summary.versionOnlyToolkits).toBe(0);
+    expect(result.toolkitChanges[0]?.toolChanges).toHaveLength(0);
+    expect(result.toolkitChanges[0]?.metadataChanged).toBe(true);
   });
 });

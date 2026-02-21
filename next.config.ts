@@ -23,6 +23,14 @@ const nextConfig: NextConfig = withLlmsTxt({
   withNextra({
     async redirects() {
       return [
+        // CrewAI custom auth flow redirect to use-arcade-tools
+        {
+          source:
+            "/:locale/get-started/agent-frameworks/crewai/custom-auth-flow",
+          destination:
+            "/:locale/get-started/agent-frameworks/crewai/use-arcade-tools",
+          permanent: true,
+        },
         // "others" category removed — toolkits moved to proper categories
         {
           source: "/:locale/resources/integrations/others/:path*",
@@ -516,7 +524,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/home/crewai/custom-auth-flow",
           destination:
-            "/:locale/get-started/agent-frameworks/crewai/custom-auth-flow",
+            "/:locale/get-started/agent-frameworks/crewai/use-arcade-tools",
           permanent: true,
         },
         {
@@ -673,24 +681,28 @@ const nextConfig: NextConfig = withLlmsTxt({
           permanent: true,
         },
         // Legacy /integrations path
+        // NOTE: :locale is constrained to actual locale values to prevent
+        // collisions with locale-less paths like /resources/integrations,
+        // which would otherwise match with :locale="resources" and redirect
+        // to /resources/resources/integrations (a 404).
         {
-          source: "/:locale/integrations",
+          source: "/:locale(en|es|pt-BR)/integrations",
           destination: "/:locale/resources/integrations",
           permanent: true,
         },
         {
-          source: "/:locale/integrations/:path*",
+          source: "/:locale(en|es|pt-BR)/integrations/:path*",
           destination: "/:locale/resources/integrations/:path*",
           permanent: true,
         },
         // MCP servers to integrations
         {
-          source: "/:locale/mcp-servers",
+          source: "/:locale(en|es|pt-BR)/mcp-servers",
           destination: "/:locale/resources/integrations",
           permanent: true,
         },
         {
-          source: "/:locale/mcp-servers/:path*",
+          source: "/:locale(en|es|pt-BR)/mcp-servers/:path*",
           destination: "/:locale/resources/integrations/:path*",
           permanent: true,
         },

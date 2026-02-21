@@ -8,6 +8,28 @@ Changelog
 
 _Here’s what’s new at Arcade.dev!_
 
+## 2026-02-20
+
+Contextual Access for  Executions is Live! Learn more [here](/guides/contextual-access.md)
+
+**Arcade  Servers**
+
+-   `[feature - 🚀]` Add Tool Metadata for  Servers
+-   `[feature - 🚀]` Add Attio  Server
+-   `[documentation - 📝]` Arcade  Server documentation now includes per- scope documentation and tool to help build needed OAuth Provide scopes
+
+**Platform and Engine**
+
+-   `[feature - 🚀]` Audit logs clear filters button
+-   `[maintenance - 🔧]` Cleanup and DI improvements
+
+**Misc**
+
+-   `[documentation - 📝]` Update Salesforce  docs with new External Client App (\[docs PR #761\])
+-   `[documentation - 📝]` OpenAI  tutorial rewrite (\[docs PR #743\])
+-   `[documentation - 📝]` Consolidate Google ADK tutorials and add TypeScript setup (\[docs PR #746\])
+-   `[documentation - 📝]` Fixing the links in the framework overview (\[docs PR #772\])
+
 ## 2026-02-06
 
 **Arcade  Servers**

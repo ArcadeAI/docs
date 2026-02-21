@@ -78,12 +78,31 @@ describe("toolkit static params", () => {
     });
   });
 
-  it("prefers the design system category when available", async () => {
+  it("uses catalog category as fallback when JSON file is absent", async () => {
     await withTempDir(async (dir) => {
       await writeIndex(dir, [{ id: "Github", category: "development" }]);
 
       const toolkitsCatalog: ToolkitCatalogEntry[] = [
         { id: "Github", category: "social" },
+      ];
+
+      // No JSON file written — catalog is the only source for category
+      const routes = await listToolkitRoutes({ dataDir: dir, toolkitsCatalog });
+      expect(routes).toEqual([{ toolkitId: "github", category: "social" }]);
+    });
+  });
+
+  it("prefers JSON category over catalog when JSON file is present", async () => {
+    await withTempDir(async (dir) => {
+      await writeIndex(dir, [{ id: "Github", category: "development" }]);
+      // JSON says "social"; catalog says "development" — JSON wins
+      await writeToolkitData(dir, {
+        id: "Github",
+        metadata: { category: "social" },
+      });
+
+      const toolkitsCatalog: ToolkitCatalogEntry[] = [
+        { id: "Github", category: "development" },
       ];
 
       const routes = await listToolkitRoutes({ dataDir: dir, toolkitsCatalog });
@@ -94,6 +113,35 @@ describe("toolkit static params", () => {
         toolkitsCatalog,
       });
       expect(params).toEqual([{ toolkitId: "github" }]);
+    });
+  });
+
+  it("reads correct category from JSON for *Api toolkit with stale index", async () => {
+    await withTempDir(async (dir) => {
+      // Simulates WeaviateApi: index.json says "development" (stale), JSON says "databases"
+      await writeIndex(dir, [{ id: "WeaviateApi", category: "development" }]);
+      await writeToolkitData(dir, {
+        id: "WeaviateApi",
+        metadata: {
+          category: "databases",
+          docsLink:
+            "https://docs.arcade.dev/en/resources/integrations/databases/weaviate-api",
+        },
+      });
+
+      const routes = await listToolkitRoutes({
+        dataDir: dir,
+        toolkitsCatalog: [],
+      });
+      expect(routes).toEqual([
+        { toolkitId: "weaviate-api", category: "databases" },
+      ]);
+
+      const params = await getToolkitStaticParamsForCategory("databases", {
+        dataDir: dir,
+        toolkitsCatalog: [],
+      });
+      expect(params).toEqual([{ toolkitId: "weaviate-api" }]);
     });
   });
 

@@ -9,10 +9,7 @@ const meta: MetaRecord = {
     },
   },
   "use-arcade-tools": {
-    title: "Using Arcade tools",
-  },
-  "custom-auth-flow": {
-    title: "Custom auth flow",
+    title: "Setup Arcade tools with CrewAI",
   },
 };
 

@@ -10,6 +10,9 @@ on:
   repository_dispatch:
     types: [porter_deploy_succeeded]
   workflow_dispatch:
+  # 11:00 UTC = 3 AM PST / 4 AM PDT — late enough that DST drift doesn't matter.
+  schedule:
+    - cron: "0 11 * * *"
 
 permissions:
   contents: write
@@ -27,8 +30,6 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -45,14 +46,19 @@ jobs:
 
       - name: Generate toolkit docs
         run: |
-          pnpm start generate \
+          pnpm dlx tsx src/cli/index.ts generate \
             --all \
             --skip-unchanged \
-            --engine-api-url "$ENGINE_API_URL" \
-            --engine-api-key "$ENGINE_API_KEY" \
+            --require-complete \
+            --verbose \
+            --api-source tool-metadata \
+            --tool-metadata-url "$ENGINE_API_URL" \
+            --tool-metadata-key "$ENGINE_API_KEY" \
             --llm-provider openai \
             --llm-model "$OPENAI_MODEL" \
             --llm-api-key "$OPENAI_API_KEY" \
+            --toolkit-concurrency 8 \
+            --llm-concurrency 15 \
             --output data/toolkits
         working-directory: toolkit-docs-generator
         env:
@@ -62,7 +68,7 @@ jobs:
           OPENAI_MODEL: ${{ secrets.OPENAI_MODEL || 'gpt-4o-mini' }}
 
       - name: Sync toolkit sidebar navigation
-        run: pnpm dlx tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts --prune --verbose
+        run: pnpm dlx tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts --remove-empty-sections=false --verbose
 
       - name: Check for changes
         id: check-changes
@@ -76,10 +82,12 @@ jobs:
       - name: Create pull request
         if: steps.check-changes.outputs.has_changes == 'true'
         uses: peter-evans/create-pull-request@v7
+        env:
+          HUSKY: 0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "chore: update toolkit docs after Porter deploy"
-          title: "Update toolkit docs after Porter deploy"
+          commit-message: "[AUTO] Adding MCP Servers docs update"
+          title: "[AUTO] Adding MCP Servers docs update"
           body: |
             This PR was generated after a Porter deploy succeeded.
 
