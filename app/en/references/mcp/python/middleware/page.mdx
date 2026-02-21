@@ -5,7 +5,11 @@ description: "Base interfaces and built-in middleware for intercepting and modif
 
 # Middleware
 
-Middleware allows you to intercept and modify requests and responses at various stages of processing. Each handler receives a `MiddlewareContext` and a `call_next` function to invoke the next handler in the chain.
+Middleware intercepts and modifies requests and responses at specific stages of processing.
+
+This reference covers the base middleware classes, built-in middleware implementations, and utility functions for composing middleware chains. You'll use this when building custom middleware for logging, error handling, authentication, or request modification. The middleware system provides typed handlers for each MCP method and supports chaining multiple middleware together.
+
+Each handler receives a `MiddlewareContext` and a `call_next` function to invoke the next handler in the chain.
 
 ## Base classes
 
@@ -25,7 +29,7 @@ Each handler receives the context and a `call_next` function. Call `await call_n
 async __call__(context, call_next)
 ```
 
-Main entry point. Orchestrates the middleware chain by building a handler chain from method-specific and type-specific handlers, then invoking it.
+Main entry point. Orchestrates the middleware chain by building a handler chain from method-specific and type-specific handlers, then invokes it.
 
 ##### `on_message`
 
@@ -111,16 +115,16 @@ Handle `prompts/list` requests. Override to filter or modify the prompt list.
 
 **`arcade_mcp_server.middleware.base.MiddlewareContext`**
 
-A generic dataclass (`Generic[T]`) passed through the middleware chain. Contains the message being processed and metadata about the request.
+A generic dataclass (`Generic[T]`) passed through the middleware chain. Contains the message that the system processes and metadata about the request.
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `message` | `T` | The message being processed |
+| `message` | `T` | The message that the system processes |
 | `mcp_context` | `Any \| None` | The MCP `Context` instance (when in a request context) |
 | `source` | `"client" \| "server"` | Message origin |
 | `type` | `"request" \| "notification"` | Message type |
-| `method` | `str \| None` | MCP method name (e.g., `"tools/call"`) |
-| `timestamp` | `datetime` | When the context was created (UTC) |
+| `method` | `str \| None` | MCP method name (for example, `"tools/call"`) |
+| `timestamp` | `datetime` | When the developer created the context (UTC) |
 | `request_id` | `str \| None` | JSON-RPC request ID |
 | `session_id` | `str \| None` | MCP session ID |
 | `metadata` | `dict[str, Any]` | Additional metadata that middleware can add to |
@@ -149,7 +153,7 @@ A `Protocol` representing the next handler in the middleware chain. Signature: `
 arcade_mcp_server.middleware.base.compose_middleware(*middleware)
 ```
 
-Compose multiple `Middleware` instances into a single handler function. The middleware are applied in reverse order, so the **first** middleware in the argument list is the outermost (runs first on request, last on response).
+Compose multiple `Middleware` instances into a single handler function. The system applies the middleware in reverse order, so the **first** middleware in the argument list is the outermost (runs first on request, last on response).
 
 **Parameters:**
 
@@ -197,7 +201,7 @@ Overrides:
 
 ## Examples
 
-### Creating custom middleware
+### Create custom middleware
 
 ```python
 import time
@@ -215,7 +219,7 @@ class TimingMiddleware(Middleware):
             context.metadata["elapsed_ms"] = round(elapsed_ms, 2)
 ```
 
-### Passing custom middleware to MCPServer
+### Pass custom middleware to MCPServer
 
 ```python
 from arcade_core.catalog import ToolCatalog
@@ -232,7 +236,7 @@ server = MCPServer(
 )
 ```
 
-### Using compose_middleware
+### Use compose_middleware
 
 ```python
 from arcade_mcp_server.middleware.base import compose_middleware
@@ -244,4 +248,3 @@ composed = compose_middleware(
     LoggingMiddleware(log_level="INFO"),
     TimingMiddleware(),
 )
-```
