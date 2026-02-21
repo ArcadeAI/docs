@@ -12,23 +12,20 @@ const meta: MetaRecord = {
   index: {
     title: "Overview",
   },
-  transports: {
-    title: "Transports",
+  context: {
+    title: "Context",
   },
   server: {
     title: "Server",
   },
+  settings: {
+    title: "Settings",
+  },
   middleware: {
     title: "Middleware",
   },
-  types: {
-    title: "Types",
-  },
   errors: {
     title: "Errors",
-  },
-  settings: {
-    title: "Settings",
   },
 };
 

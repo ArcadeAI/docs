@@ -23,6 +23,17 @@ const nextConfig: NextConfig = withLlmsTxt({
   withNextra({
     async redirects() {
       return [
+        // Auto-added redirects for deleted pages
+        {
+          source: "/:locale/references/mcp/python/transports",
+          destination: "/:locale/references/mcp/python",
+          permanent: true,
+        },
+        {
+          source: "/:locale/references/mcp/python/types",
+          destination: "/:locale/references/mcp/python",
+          permanent: true,
+        },
         // CrewAI custom auth flow redirect to use-arcade-tools
         {
           source:
