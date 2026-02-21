@@ -1,13 +1,15 @@
 ---
 title: "Server"
-description: "Reference documentation for the Arcade MCP Server class"
+description: "Reference documentation for the low-level MCPServer class"
 ---
 Arcade MCP[Python](/en/references/mcp/python.md)
 Server
 
 # Server
 
-Low-level server for hosting Arcade tools over .
+Most  should use [`MCPApp`](/references/mcp/python.md) instead of `MCPServer` directly. `MCPServer` is a low-level API for advanced use cases.
+
+The `MCPServer` class is the core server implementation that handles  protocol messages, middleware orchestration, and component management for , resources, and prompts.
 
 ## `MCPServer`
 
@@ -20,32 +22,17 @@ This server provides:
 -   Middleware chain for extensible request processing
 -    injection for
 -   Component managers for , resources, and prompts
--   Bidirectional communication support to  clients
+-   Bidirectional communication with  clients
+-   Authorization and secret management for  execution
 
-### Properties
-
-#### `prompts`
-
-Access the PromptManager for runtime prompt operations.
-
-#### `resources`
-
-Access the ResourceManager for runtime resource operations.
-
-#### `tools`
-
-Access the ToolManager for runtime  operations.
-
-### Methods
-
-#### `__init__`
+### `__init__`
 
 ```python
-__init__(
+MCPServer(
     catalog,
     *,
-    name='ArcadeMCP',
-    version='0.1.0',
+    name=None,
+    version=None,
     title=None,
     instructions=None,
     settings=None,
@@ -53,11 +40,11 @@ __init__(
     lifespan=None,
     auth_disabled=False,
     arcade_api_key=None,
-    arcade_api_url=None
+    arcade_api_url=None,
 )
 ```
 
-Initialize  server.
+Initialize the  server.
 
 **Parameters:**
 
@@ -73,31 +60,31 @@ Default
 
 `ToolCatalog`
 
-Tool catalog
+Tool catalog containing tools to serve
 
 _required_
 
 `name`
 
-`str`
+`str | None`
 
-Server name
+Server name. Falls back to the value in `settings.server.name` if not provided.
 
-`'ArcadeMCP'`
+`None`
 
 `version`
 
-`str`
+`str | None`
 
-Server version
+Server version. Falls back to the value in `settings.server.version` if not provided.
 
-`'0.1.0'`
+`None`
 
 `title`
 
 `str | None`
 
-Server title for display
+Server title for display. Falls back to settings, then to `name`.
 
 `None`
 
@@ -105,7 +92,7 @@ Server title for display
 
 `str | None`
 
-Server instructions
+Server instructions sent to clients during initialization
 
 `None`
 
@@ -113,7 +100,7 @@ Server instructions
 
 `MCPSettings | None`
 
-MCP settings (uses env if not provided)
+MCP settings. Loaded from environment if not provided.
 
 `None`
 
@@ -121,15 +108,15 @@ MCP settings (uses env if not provided)
 
 `list[Middleware] | None`
 
-List of middleware to apply
+Custom middleware to add to the chain (appended after built-in middleware)
 
 `None`
 
 `lifespan`
 
-`Callable[[Any], Any] | None`
+`Callable | None`
 
-Lifespan manager function
+Lifespan manager function for startup/shutdown hooks
 
 `None`
 
@@ -145,7 +132,7 @@ Disable authentication
 
 `str | None`
 
-Arcade API key (overrides settings)
+Arcade API key. Overrides settings and credentials file.
 
 `None`
 
@@ -153,61 +140,51 @@ Arcade API key (overrides settings)
 
 `str | None`
 
-Arcade API URL (overrides settings)
+Arcade API URL. Overrides settings.
 
 `None`
 
-#### `handle_message`
+The server automatically adds `ErrorHandlingMiddleware` and (if enabled in settings) `LoggingMiddleware` to the middleware chain. Custom middleware is appended after these built-in middleware.
+
+### Properties
+
+#### `tools`
+
+Access the `ToolManager` for runtime  operations: `add_tool()`, `update_tool()`, `remove_tool()`, `list_tools()`, `get_tool()`.
+
+#### `resources`
+
+Access the `ResourceManager` for runtime resource operations: `add_resource()`, `remove_resource()`, `list_resources()`, `read_resource()`.
+
+#### `prompts`
+
+Access the `PromptManager` for runtime prompt operations: `add_prompt()`, `remove_prompt()`, `list_prompts()`, `get_prompt()`.
+
+### Methods
+
+#### `start`
 
 ```python
-async handle_message(message, session=None)
+async server.start()
 ```
 
-Handle an incoming message.
+Start the server and all component managers. Loads  from the initial catalog, starts the lifespan manager, and checks for missing secrets. Safe to call multiple times (subsequent calls are no-ops).
 
-**Parameters:**
+#### `stop`
 
-Name
+```python
+async server.stop()
+```
 
-Type
-
-Description
-
-Default
-
-`message`
-
-`Any`
-
-Message to handle
-
-_required_
-
-`session`
-
-`ServerSession | None`
-
-Server session
-
-`None`
-
-**Returns:**
-
-Type
-
-Description
-
-`MCPMessage | None`
-
-Response message or None
+Stop the server and all component managers. Shuts down the lifespan manager and cleans up sessions.
 
 #### `run_connection`
 
 ```python
-async run_connection(read_stream, write_stream, init_options=None)
+async server.run_connection(read_stream, write_stream, init_options=None)
 ```
 
-Run a single  connection.
+Run a single  connection. Creates a `ServerSession`, registers it, and processes messages until the connection ends.
 
 **Parameters:**
 
@@ -223,7 +200,7 @@ Default
 
 `Any`
 
-Stream for reading messages
+Stream for reading messages from the client
 
 _required_
 
@@ -231,7 +208,7 @@ _required_
 
 `Any`
 
-Stream for writing messages
+Stream for writing messages to the client
 
 _required_
 
@@ -239,57 +216,136 @@ _required_
 
 `Any`
 
-Connection initialization options
+Connection initialization options (for example, `{"transport_type": "stdio"}`)
 
 `None`
 
-### Examples
+#### `handle_message`
 
-#### Basic server with tool catalog and stdio transport
+```python
+async server.handle_message(message, session=None, resource_owner=None)
+```
+
+Handle an incoming  message. Validates the message, applies middleware, dispatches to the appropriate handler, and returns a response.
+
+**Parameters:**
+
+Name
+
+Type
+
+Description
+
+Default
+
+`message`
+
+`Any`
+
+JSON-RPC message dict to handle
+
+_required_
+
+`session`
+
+`ServerSession | None`
+
+The server session for this connection
+
+`None`
+
+`resource_owner`
+
+`ResourceOwner | None`
+
+Authenticated resource owner from front-door auth
+
+`None`
+
+**Returns:**
+
+Type
+
+Description
+
+`MCPMessage | None`
+
+JSON-RPC response, error, or `None` for notifications
+
+### Supported MCP methods
+
+The server handles the following  protocol methods:
+
+Method
+
+Description
+
+`initialize`
+
+Initialize the session and exchange capabilities
+
+`ping`
+
+Health check
+
+`tools/list`
+
+List available tools
+
+`tools/call`
+
+Execute a tool
+
+`resources/list`
+
+List available resources
+
+`resources/read`
+
+Read a resource
+
+`resources/templates/list`
+
+List resource templates
+
+`prompts/list`
+
+List available prompts
+
+`prompts/get`
+
+Get a specific prompt
+
+`logging/setLevel`
+
+Set the server log level
+
+### Example
 
 ```python
 import asyncio
-from arcade_mcp_server.server import MCPServer
+
 from arcade_core.catalog import ToolCatalog
-from arcade_mcp_server.transports.stdio import StdioTransport
+from arcade_mcp_server.server import MCPServer
 
 async def main():
     catalog = ToolCatalog()
     server = MCPServer(catalog=catalog, name="example", version="1.0.0")
-    await server._start()
+
+    await server.start()
     try:
-        # Run stdio transport loop
-        transport = StdioTransport()
-        await transport.run(server)
+        # The server is now ready to handle connections.
+        # In practice, a transport (stdio or HTTP) feeds
+        # read_stream/write_stream into server.run_connection().
+        pass
     finally:
-        await server._stop()
+        await server.stop()
 
 if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-#### Handling a single HTTP streamable connection
+Last updated on February 10, 2026
 
-```python
-import asyncio
-from arcade_mcp_server.server import MCPServer
-from arcade_core.catalog import ToolCatalog
-from arcade_mcp_server.transports.http_streamable import HTTPStreamableTransport
-
-async def run_http():
-    catalog = ToolCatalog()
-    server = MCPServer(catalog=catalog)
-    await server._start()
-    try:
-        transport = HTTPStreamableTransport(host="0.0.0.0", port=8000)
-        await transport.run(server)
-    finally:
-        await server._stop()
-
-asyncio.run(run_http())
-```
-
-Last updated on January 30, 2026
-
-[Transports](/en/references/mcp/python/transports.md)
-[Middleware](/en/references/mcp/python/middleware.md)
+[Context](/en/references/mcp/python/context.md)
+[Settings](/en/references/mcp/python/settings.md)
