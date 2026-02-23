@@ -15,11 +15,24 @@ test("porter workflow includes required triggers", () => {
   expect(workflowContents).toContain("repository_dispatch");
   expect(workflowContents).toContain("porter_deploy_succeeded");
   expect(workflowContents).toContain("workflow_dispatch");
+  expect(workflowContents).toContain("schedule:");
+  expect(workflowContents).toContain('cron: "0 11 * * *"');
 });
 
 test("porter workflow generates docs and opens a PR", () => {
-  expect(workflowContents).toContain("pnpm start generate");
+  expect(workflowContents).toContain("pnpm dlx tsx src/cli/index.ts generate");
   expect(workflowContents).toContain("--skip-unchanged");
+  expect(workflowContents).toContain("--require-complete");
+  expect(workflowContents).toContain("--verbose");
+  expect(workflowContents).toContain("--api-source tool-metadata");
+  expect(workflowContents).toContain("--tool-metadata-url");
+  expect(workflowContents).toContain("--tool-metadata-key");
+  expect(workflowContents).toContain("--llm-provider openai");
+  expect(workflowContents).toContain("--llm-model");
+  expect(workflowContents).toContain("--llm-api-key");
+  expect(workflowContents).toContain("--remove-empty-sections=false");
   expect(workflowContents).toContain("peter-evans/create-pull-request");
+  expect(workflowContents).toContain("HUSKY: 0");
+  expect(workflowContents).toContain("[AUTO] Adding MCP Servers docs update");
   expect(workflowContents).toContain("pull-requests: write");
 });

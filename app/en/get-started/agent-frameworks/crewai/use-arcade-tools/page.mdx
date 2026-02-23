@@ -1,138 +1,337 @@
 ---
-title: "Use Arcade tools with CrewAI"
-description: "Integrate Arcade tools into your CrewAI applications"
+title: "Setup Arcade tools with CrewAI"
+description: "Learn how to use Arcade tools in CrewAI applications"
 ---
 
-import { Steps } from "nextra/components";
-import ToggleContent from "@/app/_components/toggle-content";
+import { Steps, Callout } from "nextra/components";
 
-## Use CrewAI with Arcade
+# Use Arcade tools with CrewAI
 
-This guide explains how to integrate Arcade tools into your CrewAI application. Follow the step-by-step instructions below. If a tool requires authorization, an authorization URL will appear in the console, waiting for your approval. This process ensures that only the tools you choose to authorize execute.
+[CrewAI](https://www.crewai.com/) is an agentic framework optimized for building task-oriented multi-agent systems. This guide explains how to integrate Arcade tools into your CrewAI applications.
 
-To tailor the tool authorization flow to meet your application's specific needs, check out the [Custom Auth Flow with CrewAI](/get-started/agent-frameworks/crewai/custom-auth-flow) guide.
+<GuideOverview>
+<GuideOverview.Outcomes>
+
+You will build a CrewAI agent that uses Arcade tools to help users with Gmail and Slack.
+
+</GuideOverview.Outcomes>
+
+<GuideOverview.Prerequisites>
+
+- <DashboardLink path="register" />
+- [Obtain an Arcade API key](/get-started/setup/api-keys)
+- The [`uv` package manager](https://docs.astral.sh/uv/)
+
+</GuideOverview.Prerequisites>
+
+<GuideOverview.YouWillLearn>
+
+- How to retrieve Arcade tools and convert them to CrewAI format
+- How to build a CrewAI agent with Arcade tools
+- How to implement "just in time" (JIT) tool authorization using Arcade's client
+
+</GuideOverview.YouWillLearn>
+</GuideOverview>
+
+## The agent architecture you will build in this guide
+
+CrewAI provides a [Crew](https://docs.crewai.com/reference/crew) class that implements a multi-agent system. It provides an interface for you to define the agents, tasks, and memory. In this guide, you will manually keep track of the agent's history and state, and use the `kickoff` method to invoke the agent in an agentic loop.
+
+## Integrate Arcade tools into a CrewAI agent
 
 <Steps>
 
-### Prerequisites
+### Create a new project
 
-- [Obtain an Arcade API key](/get-started/setup/api-keys)
-
-### Set up your environment
-
-Install the required package, and ensure your environment variables are set with your Arcade and OpenAI API keys:
+Create a new directory for your project and initialize a new virtual environment:
 
 ```bash
-pip install crewai-arcade
+mkdir crewai-arcade-example
+cd crewai-arcade-example
+uv init
+uv venv
+source .venv/bin/activate
 ```
 
-### Configure API keys
-
-Provide your Arcade and OpenAI API keys. You can store them in environment variables like so:
+Install the necessary packages:
 
 ```bash
-export ARCADE_API_KEY="your_arcade_api_key"
-export OPENAI_API_KEY="your_openai_api_key"
+uv add 'crewai[tools]' arcadepy
 ```
 
-### Get Arcade tools
+Create a new file called `.env` and add the following environment variables:
 
-Use the `ArcadeToolManager` to initialize, add, and get Arcade tools:
-
-```python
-from crewai_arcade import ArcadeToolManager
-
-manager = ArcadeToolManager(default_user_id="{arcade_user_id}")
-
-"""
-Retrieves the provided tools and/or MCP Servers as CrewAI StructuredTools.
-"""
-tools = manager.get_tools(tools=["Gmail.ListEmails"], toolkits=["Slack"])
+```env filename=".env"
+# Arcade API key
+ARCADE_API_KEY=YOUR_ARCADE_API_KEY
+# Arcade user ID (this is the email address you used to login to Arcade)
+ARCADE_USER_ID={arcade_user_id}
+# OpenAI API key
+OPENAI_API_KEY=YOUR_OPENAI_API_KEY
 ```
 
-### Use tools in your CrewAI agent team
+### Import the necessary packages
 
-Create a Crew that uses your tools. When the tool is called, you will be prompted to go visit an authorization page to authorize the tool before it executes.
+Create a new file called `main.py` and add the following code:
 
-```python
-from crewai import Agent, Crew, Task
-from crewai.llm import LLM
+```python filename="main.py"
+from typing import Any
+from arcadepy import Arcade
+from arcadepy.types import ToolDefinition
+from crewai.tools import BaseTool
+from crewai import Agent
+from crewai.events.event_listener import EventListener
+from pydantic import BaseModel, Field, create_model
+from dotenv import load_dotenv
+import os
 
-crew_agent = Agent(
-    role="Main Agent",
-    backstory="You are a helpful assistant",
-    goal="Help the user with their requests",
-    tools=tools,
-    allow_delegation=False,
-    verbose=True,
-    llm=LLM(model="gpt-4o"),
-)
-
-task = Task(
-    description="Get the 5 most recent emails from the user's inbox and summarize them and recommend a response for each.",
-    expected_output="A bulleted list with a one sentence summary of each email and a recommended response to the email.",
-    agent=crew_agent,
-    tools=crew_agent.tools,
-)
-
-crew = Crew(
-    agents=[crew_agent],
-    tasks=[task],
-    verbose=True,
-    memory=True,
-)
-
-result = crew.kickoff()
-
-print("\n\n\n ------------ Result ------------ \n\n\n")
-print(result)
 ```
+
+This includes many imports, here's a breakdown:
+
+- Arcade imports:
+  - `Arcade`: The Arcade client, used to interact with the Arcade API.
+  - `ToolDefinition`: The tool definition type, used to define the input and output of a tool.
+- CrewAI imports:
+  - `BaseTool`: The base tool class, used to create custom CrewAI tools.
+  - `Agent`: The CrewAI agent class, used to create an agent.
+  - `EventListener`: The event listener class, used to suppress CrewAI's rich panel output.
+- Other imports:
+  - `pydantic` imports: Used for data validation and model creation when converting Arcade tools to LangChain tools.
+  - `typing.Any`: A type hint for the any type.
+  - `load_dotenv`: Loads the environment variables from the `.env` file.
+  - `os`: The operating system module, used to interact with the operating system.
+
+### Configure the agent
+
+The rest of the code uses these variables to customize the agent and manage the tools. Feel free to configure them to your liking. Here, the `EventListener` class is used to suppress CrewAI's rich panel output, which is useful for debugging but verbose for an interactive session like the one you're building.
+
+```python filename="main.py"
+# Load environment variables from the .env file
+load_dotenv()
+
+# The Arcade User ID identifies who is authorizing each service.
+ARCADE_USER_ID = os.getenv("ARCADE_USER_ID")
+# This determines which MCP server is providing the tools, you can customize this to make a Notion agent. All tools from the MCP servers defined in the array will be used.
+MCP_SERVERS = ["Slack"]
+# This determines individual tools. Useful to pick specific tools when you don't need all of them.
+TOOLS = ["Gmail_ListEmails", "Gmail_SendEmail", "Gmail_WhoAmI"]
+# This determines the maximum number of tool definitions Arcade will return per MCP server
+TOOL_LIMIT = 30
+# This determines which LLM model will be used inside the agent
+MODEL = "openai/gpt-5-mini"
+# The individual objective that guides the agent's decision-making
+AGENT_GOAL = "Help the user with all their requests"
+# Provides context and personality to the agent, enriching interactions
+AGENT_BACKSTORY = "You are a helpful assistant that can assist with Gmail and Slack."
+# This defines the Agent's role. A short description of its function and expertise
+AGENT_NAME = "Communication Manager"
+
+# Suppress CrewAI's rich panel output
+EventListener().formatter.verbose = False
+```
+
+### Write a utility function to transform Arcade tool definitions into Pydantic models
+
+In this utility function, you transform an Arcade tool definition into a Pydantic model. Later, you will transform these models to construct tools in the format expected by CrewAI. The `_build_args_model` function extracts the tools' parameters, name, and description, and maps them to a Pydantic model.
+
+```python filename="main.py"
+TYPE_MAP: dict[str, type] = {
+    "string": str,
+    "number": float,
+    "integer": int,
+    "boolean": bool,
+    "array": list,
+    "json": dict,
+}
+
+
+def _python_type(val_type: str) -> type:
+    t = TYPE_MAP.get(val_type)
+    if t is None:
+        raise ValueError(f"Unsupported Arcade value type: {val_type}")
+    return t
+
+
+def _build_args_model(tool_def: ToolDefinition) -> type[BaseModel]:
+    fields: dict[str, Any] = {}
+    for param in tool_def.input.parameters or []:
+        param_type = _python_type(param.value_schema.val_type)
+        if param_type is list and param.value_schema.inner_val_type:
+            inner = _python_type(param.value_schema.inner_val_type)
+            param_type = list[inner]  # type: ignore[valid-type]
+        default = ... if param.required else None
+        fields[param.name] = (
+            param_type,
+            Field(default=default, description=param.description or ""),
+        )
+    return create_model(f"{tool_def.name}Input", **fields)
+```
+
+### Write a custom class that extends the CrewAI BaseTool class
+
+Here, you define the `ArcadeTool` class that extends the CrewAI `BaseTool` class to add the following capability:
+
+- Authorize the tool with the Arcade client with the `_auth_tool` helper function
+- Execute the tool with the Arcade client with the `_run` method
+
+<Callout type="info">
+  This class captures the authorization flow outside of the agent's context,
+  which is a good practice for security and context engineering. By handling
+  everything in the `ArcadeTool` class, you remove the risk of the LLM replacing
+  the authorization URL or leaking it, and you keep the context free from any
+  authorization-related traces, which reduces the risk of hallucinations, and
+  reduces context bloat.
+</Callout>
+
+```python filename="main.py"
+class ArcadeTool(BaseTool):
+    """A CrewAI tool backed by an Arcade tool definition."""
+
+    name: str
+    description: str
+    args_schema: type[BaseModel]
+
+    # Internal fields (not exposed to the agent)
+    arcade_tool_name: str = ""
+    user_id: str = ""
+    _client: Arcade | None = None
+
+    def _auth_tool(self):
+        auth = self._client.tools.authorize(
+            tool_name=self.arcade_tool_name,
+            user_id=self.user_id,
+        )
+        if auth.status != "completed":
+            print(f"Authorization required. Visit: {auth.url}")
+            self._client.auth.wait_for_completion(auth)
+
+    def _run(self, **kwargs: Any) -> str:
+        if self._client is None:
+            self._client = Arcade()
+
+        self._auth_tool()
+
+        print(f"Calling {self.arcade_tool_name}...")
+
+        result = self._client.tools.execute(
+            tool_name=self.arcade_tool_name,
+            input=kwargs,
+            user_id=self.user_id,
+        )
+
+        if not result.success:
+            return f"Tool error: {result.output.error.message}"
+
+        print(f"Call to {self.arcade_tool_name} successful, the agent will now process the result...")
+        return result.output.value
+```
+
+### Retrieve Arcade tools and transform them into CrewAI tools
+
+Here you get the Arcade tools you want the agent to utilize, and transform them into CrewAI tools. The first step is to initialize the Arcade client, and get the tools you want to work with.
+
+Here's a breakdown of what it does for clarity:
+
+- retrieve tools from all configured MCP servers (defined in the `MCP_SERVERS` variable)
+- retrieve individual tools (defined in the `TOOLS` variable)
+- transform the Arcade tools to CrewAI tools with the `ArcadeTool` class you defined earlier
+
+```python filename="main.py"
+def get_arcade_tools(
+    client: Arcade,
+    *,
+    tools: list[str] | None = None,
+    mcp_servers: list[str] | None = None,
+    user_id: str = "",
+) -> list[ArcadeTool]:
+    if not tools and not mcp_servers:
+        raise ValueError("Provide at least one tool name or toolkit name")
+
+    definitions: list[ToolDefinition] = []
+
+    if tools:
+        for name in tools:
+            definitions.append(client.tools.get(name=name))
+
+    if mcp_servers:
+        for tk in mcp_servers:
+            page = client.tools.list(toolkit=tk)
+            definitions.extend(page.items)
+
+    result: list[ArcadeTool] = []
+    for defn in definitions:
+        sanitized_name = defn.qualified_name.replace(".", "_")
+        t = ArcadeTool(
+            client=client,
+            name=sanitized_name,
+            description=defn.description,
+            args_schema=_build_args_model(defn),
+            arcade_tool_name=defn.qualified_name,
+            user_id=user_id,
+        )
+        result.append(t)
+
+    return result
+```
+
+### Create the main function
+
+The main function is where you:
+
+- Get the Arcade tools from the configured MCP servers
+- Create an agent with the Arcade tools
+- Initialize the conversation
+- Run the loop
+
+```python filename="main.py"
+def main():
+    client = Arcade()
+
+    arcade_tools = get_arcade_tools(
+        client,
+        tools=TOOLS,
+        mcp_servers=MCP_SERVERS,
+        user_id=ARCADE_USER_ID,
+    )
+
+    agent = Agent(
+        role=AGENT_NAME,
+        goal=AGENT_GOAL,
+        backstory=AGENT_BACKSTORY,
+        tools=arcade_tools,
+    )
+
+    history = []
+    print("Agent ready. Type 'exit' to quit.\n")
+
+    while True:
+        user_input = input("> ")
+        if user_input.strip().lower() in ("exit", "quit"):
+            break
+
+        history.append({"role": "user", "content": user_input})
+        result = agent.kickoff(history)
+        history.append({"role": "assistant", "content": result.raw})
+        print(f"\n{result.raw}\n")
+
+
+if __name__ == "__main__":
+    main()
+```
+
+### Run the agent
+
+```bash
+uv run main.py
+```
+
+You should see the agent responding to your prompts like any model, as well as handling any tool calls and authorization requests. Here are some example prompts you can try:
+
+- "Send me an email with a random haiku about OpenAI Agents"
+- "Summarize my latest 3 emails"
 
 </Steps>
-
-<ToggleContent showText="Click to view a full example" hideText="Hide example">
-
-```python
-from crewai import Agent, Crew, Task
-from crewai.llm import LLM
-from crewai_arcade import ArcadeToolManager
-
-manager = ArcadeToolManager(default_user_id="{arcade_user_id}")
-
-tools = manager.get_tools(tools=["Gmail.ListEmails"])
-
-
-crew_agent = Agent(
-    role="Main Agent",
-    backstory="You are a helpful assistant",
-    goal="Help the user with their requests",
-    tools=tools,
-    allow_delegation=False,
-    verbose=True,
-    llm=LLM(model="gpt-4o"),
-)
-
-task = Task(
-    description="Get the 5 most recent emails from the user's inbox and summarize them and recommend a response for each.",
-    expected_output="A bulleted list with a one sentence summary of each email and a recommended response to the email.",
-    agent=crew_agent,
-    tools=crew_agent.tools,
-)
-
-crew = Crew(
-    agents=[crew_agent],
-    tasks=[task],
-    verbose=True,
-    memory=True,
-)
-
-result = crew.kickoff()
-
-print("\n\n\n ------------ Result ------------ \n\n\n")
-print(result)
-```
-
-</ToggleContent>
 
 ## Tips for selecting tools
 
@@ -146,3 +345,192 @@ Now that you have integrated Arcade tools into your CrewAI agent team, you can:
 - Experiment with different toolkits, such as "Math" or "Search."
 - Customize the agent's prompts for specific tasks.
 - Customize the tool authorization and execution flow to meet your application's requirements.
+
+## Example code
+
+<details>
+<summary>**main.py** (full file)</summary>
+
+```python filename="main.py"
+from typing import Any
+from arcadepy import Arcade
+from arcadepy.types import ToolDefinition
+from crewai.tools import BaseTool
+from crewai import Agent
+from crewai.events.event_listener import EventListener
+from pydantic import BaseModel, Field, create_model
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from the .env file
+load_dotenv()
+
+# The Arcade User ID identifies who is authorizing each service.
+ARCADE_USER_ID = os.getenv("ARCADE_USER_ID")
+# This determines which MCP server is providing the tools, you can customize this to make a Notion agent. All tools from the MCP servers defined in the array will be used.
+MCP_SERVERS = ["Slack"]
+# This determines individual tools. Useful to pick specific tools when you don't need all of them.
+TOOLS = ["Gmail_ListEmails", "Gmail_SendEmail", "Gmail_WhoAmI"]
+# This determines the maximum number of tool definitions Arcade will return per MCP server
+TOOL_LIMIT = 30
+# This determines which LLM model will be used inside the agent
+MODEL = "openai/gpt-5-mini"
+# The individual objective that guides the agent's decision-making
+AGENT_GOAL = "Help the user with all their requests"
+# Provides context and personality to the agent, enriching interactions
+AGENT_BACKSTORY = "You are a helpful assistant that can assist with Gmail and Slack."
+# This defines the Agent's role. A short description of its function and expertise
+AGENT_NAME = "Communication Manager"
+
+# Suppress CrewAI's rich panel output
+EventListener().formatter.verbose = False
+
+TYPE_MAP: dict[str, type] = {
+    "string": str,
+    "number": float,
+    "integer": int,
+    "boolean": bool,
+    "array": list,
+    "json": dict,
+}
+
+
+def _python_type(val_type: str) -> type:
+    t = TYPE_MAP.get(val_type)
+    if t is None:
+        raise ValueError(f"Unsupported Arcade value type: {val_type}")
+    return t
+
+
+def _build_args_model(tool_def: ToolDefinition) -> type[BaseModel]:
+    fields: dict[str, Any] = {}
+    for param in tool_def.input.parameters or []:
+        param_type = _python_type(param.value_schema.val_type)
+        if param_type is list and param.value_schema.inner_val_type:
+            inner = _python_type(param.value_schema.inner_val_type)
+            param_type = list[inner]  # type: ignore[valid-type]
+        default = ... if param.required else None
+        fields[param.name] = (
+            param_type,
+            Field(default=default, description=param.description or ""),
+        )
+    return create_model(f"{tool_def.name}Input", **fields)
+
+
+class ArcadeTool(BaseTool):
+    """A CrewAI tool backed by an Arcade tool definition."""
+
+    name: str
+    description: str
+    args_schema: type[BaseModel]
+
+    # Internal fields (not exposed to the agent)
+    arcade_tool_name: str = ""
+    user_id: str = ""
+    _client: Arcade | None = None
+
+    def _auth_tool(self):
+        auth = self._client.tools.authorize(
+            tool_name=self.arcade_tool_name,
+            user_id=self.user_id,
+        )
+        if auth.status != "completed":
+            print(f"Authorization required. Visit: {auth.url}")
+            self._client.auth.wait_for_completion(auth)
+
+    def _run(self, **kwargs: Any) -> str:
+        if self._client is None:
+            self._client = Arcade()
+
+        self._auth_tool()
+
+        print(f"Calling {self.arcade_tool_name}...")
+
+        result = self._client.tools.execute(
+            tool_name=self.arcade_tool_name,
+            input=kwargs,
+            user_id=self.user_id,
+        )
+
+        if not result.success:
+            return f"Tool error: {result.output.error.message}"
+
+        print(f"Call to {self.arcade_tool_name} successful, the agent will now process the result...")
+        return result.output.value
+
+
+def get_arcade_tools(
+    client: Arcade,
+    *,
+    tools: list[str] | None = None,
+    mcp_servers: list[str] | None = None,
+    user_id: str = "",
+) -> list[ArcadeTool]:
+    if not tools and not mcp_servers:
+        raise ValueError("Provide at least one tool name or toolkit name")
+
+    definitions: list[ToolDefinition] = []
+
+    if tools:
+        for name in tools:
+            definitions.append(client.tools.get(name=name))
+
+    if mcp_servers:
+        for tk in mcp_servers:
+            page = client.tools.list(toolkit=tk)
+            definitions.extend(page.items)
+
+    result: list[ArcadeTool] = []
+    for defn in definitions:
+        sanitized_name = defn.qualified_name.replace(".", "_")
+        t = ArcadeTool(
+            client=client,
+            name=sanitized_name,
+            description=defn.description,
+            args_schema=_build_args_model(defn),
+            arcade_tool_name=defn.qualified_name,
+            user_id=user_id,
+        )
+        result.append(t)
+
+    return result
+
+
+def main():
+    client = Arcade()
+
+    arcade_tools = get_arcade_tools(
+        client,
+        tools=TOOLS,
+        mcp_servers=MCP_SERVERS,
+        user_id=ARCADE_USER_ID,
+    )
+
+    agent = Agent(
+        role=AGENT_NAME,
+        goal=AGENT_GOAL,
+        backstory=AGENT_BACKSTORY,
+        tools=arcade_tools,
+    )
+
+    history = []
+    print("Agent ready. Type 'exit' to quit.\n")
+
+    while True:
+        user_input = input("> ")
+        if user_input.strip().lower() in ("exit", "quit"):
+            break
+
+        history.append({"role": "user", "content": user_input})
+        result = agent.kickoff(history)
+        history.append({"role": "assistant", "content": result.raw})
+        print(f"\n{result.raw}\n")
+
+
+if __name__ == "__main__":
+    main()
+
+
+```
+
+</details>

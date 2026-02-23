@@ -3,6 +3,7 @@ import { Button } from "@arcadeai/design-system";
 import {
   ArrowRight,
   BookOpen,
+  Bot,
   Code,
   Cog,
   FileText,
@@ -11,7 +12,6 @@ import {
   Puzzle,
   Rocket,
   Shield,
-  Sparkles,
   ToolCase,
   Wrench,
 } from "lucide-react";
@@ -28,6 +28,7 @@ const ANIMATION_DELAYS = {
   secondary: 0.4,
   buttons: 0.6,
 } as const;
+const INTEGRATIONS_PAGE_HREF = "/en/resources/integrations";
 
 // Popular integrations to showcase (row 1: productivity/work)
 const POPULAR_INTEGRATIONS_ROW1 = [
@@ -55,7 +56,7 @@ const POPULAR_INTEGRATIONS_ROW1 = [
   {
     name: "Slack",
     icon: "/images/icons/slack.png",
-    href: "/resources/integrations/social-communication/slack",
+    href: "/resources/integrations/social/slack",
   },
   {
     name: "Google Docs",
@@ -70,7 +71,7 @@ const POPULAR_INTEGRATIONS_ROW1 = [
   {
     name: "HubSpot",
     icon: "/images/icons/hubspot.png",
-    href: "/resources/integrations/crm/hubspot",
+    href: "/resources/integrations/sales/hubspot",
   },
   {
     name: "Linear",
@@ -95,12 +96,12 @@ const POPULAR_INTEGRATIONS_ROW2 = [
   {
     name: "X",
     icon: "/images/icons/twitter.png",
-    href: "/resources/integrations/social-communication/x",
+    href: "/resources/integrations/social/x",
   },
   {
     name: "MS Teams",
     icon: "/images/icons/ms_teams.png",
-    href: "/resources/integrations/social-communication/microsoft-teams",
+    href: "/resources/integrations/social/microsoft-teams",
   },
   {
     name: "Outlook",
@@ -125,7 +126,7 @@ const POPULAR_INTEGRATIONS_ROW2 = [
   {
     name: "Reddit",
     icon: "/images/icons/reddit.png",
-    href: "/resources/integrations/social-communication/reddit",
+    href: "/resources/integrations/social/reddit",
   },
   {
     name: "YouTube",
@@ -149,7 +150,7 @@ const FRAMEWORKS = [
   },
   {
     name: "OpenAI Agents",
-    href: "/guides/agent-frameworks/openai-agents/use-arcade-tools",
+    href: "/get-started/agent-frameworks/openai-agents/overview",
     icon: "/images/icons/openai.png",
   },
   {
@@ -269,10 +270,10 @@ export function LandingPage() {
                 variant="outline"
               >
                 <Link
-                  href="/resources/integrations"
+                  href={INTEGRATIONS_PAGE_HREF}
                   onClick={trackClick(
                     "hero_explore_tools_clicked",
-                    "/resources/integrations"
+                    INTEGRATIONS_PAGE_HREF
                   )}
                 >
                   <Puzzle className="mr-2 h-5 w-5" />
@@ -283,6 +284,23 @@ export function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* LLM-friendly docs banner (desktop only) */}
+      <div className="flex justify-center px-4">
+        <Link
+          className="group inline-flex items-center gap-2.5 rounded-full border border-[#ee175e]/30 bg-gradient-to-r from-[#ee175e]/10 to-[#9089fc]/10 px-5 py-2 font-medium text-[#ee175e] text-sm shadow-sm transition-all hover:border-[#ee175e]/50 hover:shadow-md hover:shadow-[#ee175e]/10 dark:border-[#ee175e]/40 dark:from-[#ee175e]/15 dark:to-[#9089fc]/15 dark:text-[#ff6b8a]"
+          href="/get-started/setup/connect-arcade-docs"
+          onClick={trackClick(
+            "llm_banner_clicked",
+            "/get-started/setup/connect-arcade-docs"
+          )}
+        >
+          <Bot className="h-4 w-4" />
+          These docs are LLM-friendly — AI agents get clean markdown
+          automatically
+          <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+        </Link>
+      </div>
 
       {/* Choose Your Path Section */}
       <section className="py-16">
@@ -296,7 +314,7 @@ export function LandingPage() {
               <div className="space-y-4">
                 <QuickStartCard
                   description="Browse 100+ ready-to-use integrations for Gmail, Slack, GitHub, and more."
-                  href="/resources/integrations"
+                  href={INTEGRATIONS_PAGE_HREF}
                   icon={Puzzle}
                   logos={[
                     { src: "/images/icons/gmail.png", alt: "Gmail" },
@@ -415,10 +433,10 @@ export function LandingPage() {
               variant="outline"
             >
               <Link
-                href="/resources/integrations"
+                href={INTEGRATIONS_PAGE_HREF}
                 onClick={trackClick(
                   "view_all_integrations_clicked",
-                  "/resources/integrations"
+                  INTEGRATIONS_PAGE_HREF
                 )}
               >
                 See all 100+
@@ -549,7 +567,7 @@ export function LandingPage() {
             />
             <QuickStartCard
               description="Catalog of pre-built tools and integrations. Browse 100+ ready-to-use MCP servers."
-              href="/resources/integrations"
+              href={INTEGRATIONS_PAGE_HREF}
               icon={ToolCase}
               title="Tool Catalog"
             />
@@ -610,37 +628,6 @@ export function LandingPage() {
               title="YouTube Podcast Summarizer"
             />
           </div>
-        </div>
-      </section>
-
-      {/* Agentic Development Callout */}
-      <section className="py-12">
-        <div className="container mx-auto px-4">
-          <Link
-            className="mx-auto block max-w-2xl rounded-xl border border-[#ee175e]/20 bg-linear-to-r from-[#ee175e]/5 to-transparent p-6 transition-all hover:border-[#ee175e]/40 hover:shadow-lg"
-            href="/get-started/setup/connect-arcade-docs"
-            onClick={trackClick(
-              "agentic_development_clicked",
-              "/get-started/setup/connect-arcade-docs"
-            )}
-          >
-            <div className="flex items-start gap-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#ee175e]/10">
-                <Sparkles className="h-5 w-5 text-[#ee175e]" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900 text-lg dark:text-white">
-                  Connect Your IDE with Arcade&apos;s LLMs.txt
-                </h3>
-                <p className="mt-1 text-gray-600 text-sm dark:text-gray-400">
-                  Give Cursor, Claude Code, and other AI IDEs access to
-                  Arcade&apos;s documentation so they can write integration code
-                  for you.
-                </p>
-              </div>
-              <ArrowRight className="mt-1 h-5 w-5 shrink-0 text-[#ee175e]" />
-            </div>
-          </Link>
         </div>
       </section>
 

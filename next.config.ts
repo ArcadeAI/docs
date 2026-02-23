@@ -25,6 +25,66 @@ const nextConfig: NextConfig = withLlmsTxt({
       return [
         // Auto-added redirects for deleted pages
         {
+          source: "/:locale/references/mcp/python/transports",
+          destination: "/:locale/references/mcp/python",
+          permanent: true,
+        },
+        {
+          source: "/:locale/references/mcp/python/types",
+          destination: "/:locale/references/mcp/python",
+          permanent: true,
+        },
+        // CrewAI custom auth flow redirect to use-arcade-tools
+        {
+          source:
+            "/:locale/get-started/agent-frameworks/crewai/custom-auth-flow",
+          destination:
+            "/:locale/get-started/agent-frameworks/crewai/use-arcade-tools",
+          permanent: true,
+        },
+        // "others" category removed — toolkits moved to proper categories
+        {
+          source: "/:locale/resources/integrations/others/:path*",
+          destination: "/:locale/resources/integrations",
+          permanent: false,
+        },
+        // Google ADK tutorial consolidation - redirect old URL to new
+        {
+          source:
+            "/:locale/get-started/agent-frameworks/google-adk/use-arcade-tools",
+          destination:
+            "/:locale/get-started/agent-frameworks/google-adk/overview",
+          permanent: true,
+        },
+        // Auto-added redirects for deleted pages
+        {
+          source: "/:locale/references/logic-extensions-api",
+          destination: "/:locale/references/contextual-access-webhook-api",
+          permanent: true,
+        },
+        // Auto-added redirects for deleted pages
+        {
+          source: "/:locale/guides/logic-extensions",
+          destination: "/:locale/guides/contextual-access",
+          permanent: true,
+        },
+        {
+          source: "/:locale/guides/logic-extensions/build-your-own",
+          destination: "/:locale/guides/contextual-access/build-your-own",
+          permanent: true,
+        },
+        {
+          source: "/:locale/guides/logic-extensions/examples",
+          destination: "/:locale/guides/contextual-access/examples",
+          permanent: true,
+        },
+        {
+          source: "/:locale/guides/logic-extensions/how-hooks-work",
+          destination: "/:locale/guides/contextual-access/how-hooks-work",
+          permanent: true,
+        },
+        // Auto-added redirects for deleted pages
+        {
           source: "/:locale/resources/integrations/preview",
           destination: "/:locale/resources/integrations",
           permanent: true,
@@ -255,6 +315,28 @@ const nextConfig: NextConfig = withLlmsTxt({
           destination: "/:locale/get-started/agent-frameworks/mastra",
           permanent: true,
         },
+        // OpenAI Agents tutorial consolidation
+        {
+          source:
+            "/:locale/get-started/agent-frameworks/openai-agents/use-arcade-with-openai-agents",
+          destination:
+            "/:locale/get-started/agent-frameworks/openai-agents/overview",
+          permanent: true,
+        },
+        {
+          source:
+            "/:locale/get-started/agent-frameworks/openai-agents/use-arcade-tools",
+          destination:
+            "/:locale/get-started/agent-frameworks/openai-agents/overview",
+          permanent: true,
+        },
+        {
+          source:
+            "/:locale/get-started/agent-frameworks/openai-agents/user-auth-interrupts",
+          destination:
+            "/:locale/get-started/agent-frameworks/openai-agents/overview",
+          permanent: true,
+        },
         // Moved from guides to get-started
         {
           source:
@@ -299,7 +381,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/home/oai-agents/user-auth-interrupts",
           destination:
-            "/:locale/get-started/agent-frameworks/openai-agents/user-auth-interrupts",
+            "/:locale/get-started/agent-frameworks/openai-agents/overview",
           permanent: true,
         },
         {
@@ -453,7 +535,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/home/crewai/custom-auth-flow",
           destination:
-            "/:locale/get-started/agent-frameworks/crewai/custom-auth-flow",
+            "/:locale/get-started/agent-frameworks/crewai/use-arcade-tools",
           permanent: true,
         },
         {
@@ -513,7 +595,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/home/google-adk/use-arcade-tools",
           destination:
-            "/:locale/get-started/agent-frameworks/google-adk/use-arcade-tools",
+            "/:locale/get-started/agent-frameworks/google-adk/setup-python",
           permanent: true,
         },
         {
@@ -560,7 +642,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/home/oai-agents/use-arcade-tools",
           destination:
-            "/:locale/get-started/agent-frameworks/openai-agents/use-arcade-tools",
+            "/:locale/get-started/agent-frameworks/openai-agents/overview",
           permanent: true,
         },
         {
@@ -609,14 +691,29 @@ const nextConfig: NextConfig = withLlmsTxt({
           destination: "/:locale/get-started/agent-frameworks/vercelai",
           permanent: true,
         },
-        // MCP servers to integrations
+        // Legacy /integrations path
+        // NOTE: :locale is constrained to actual locale values to prevent
+        // collisions with locale-less paths like /resources/integrations,
+        // which would otherwise match with :locale="resources" and redirect
+        // to /resources/resources/integrations (a 404).
         {
-          source: "/:locale/mcp-servers",
+          source: "/:locale(en|es|pt-BR)/integrations",
           destination: "/:locale/resources/integrations",
           permanent: true,
         },
         {
-          source: "/:locale/mcp-servers/:path*",
+          source: "/:locale(en|es|pt-BR)/integrations/:path*",
+          destination: "/:locale/resources/integrations/:path*",
+          permanent: true,
+        },
+        // MCP servers to integrations
+        {
+          source: "/:locale(en|es|pt-BR)/mcp-servers",
+          destination: "/:locale/resources/integrations",
+          permanent: true,
+        },
+        {
+          source: "/:locale(en|es|pt-BR)/mcp-servers/:path*",
           destination: "/:locale/resources/integrations/:path*",
           permanent: true,
         },
@@ -715,13 +812,13 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/guides/agent-frameworks/google-adk/python",
           destination:
-            "/:locale/get-started/agent-frameworks/google-adk/use-arcade-tools",
+            "/:locale/get-started/agent-frameworks/google-adk/setup-python",
           permanent: true,
         },
         {
           source: "/:locale/guides/agent-frameworks/openai/python",
           destination:
-            "/:locale/get-started/agent-frameworks/openai-agents/use-arcade-tools",
+            "/:locale/get-started/agent-frameworks/openai-agents/overview",
           permanent: true,
         },
         {

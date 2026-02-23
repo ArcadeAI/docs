@@ -5,6 +5,7 @@
  */
 import { mkdir, readFile, stat, writeFile } from "fs/promises";
 import { dirname, join } from "path";
+import { parsePreviousToolkitForDiff } from "../diff/previous-output.js";
 import type {
   MergedToolkit,
   ToolkitIndex,
@@ -108,7 +109,9 @@ export class JsonGenerator {
   async getCompletedToolkitIds(): Promise<Set<string>> {
     const completedIds = new Set<string>();
     try {
-      const result = await readToolkitsFromDir(this.outputDir);
+      const result = await readToolkitsFromDir(this.outputDir, undefined, {
+        allowLegacyFallback: true,
+      });
       for (const toolkit of result.toolkits) {
         completedIds.add(toolkit.id.toLowerCase());
       }
@@ -131,7 +134,8 @@ export class JsonGenerator {
       if (result.success) {
         return result.data;
       }
-      return null;
+      const fallback = parsePreviousToolkitForDiff(parsed, toolkitId);
+      return fallback.toolkit;
     } catch {
       return null;
     }
@@ -210,7 +214,9 @@ export class JsonGenerator {
   private async getToolkitsFromOutputDir(
     errors: string[]
   ): Promise<MergedToolkit[]> {
-    const readResult = await readToolkitsFromDir(this.outputDir);
+    const readResult = await readToolkitsFromDir(this.outputDir, undefined, {
+      allowLegacyFallback: true,
+    });
     if (readResult.errors.length > 0) {
       errors.push(...readResult.errors);
     }

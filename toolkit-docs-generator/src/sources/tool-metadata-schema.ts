@@ -27,8 +27,8 @@ const ToolMetadataInputSchema = z.object({
 
 const ToolMetadataOutputSchema = z
   .object({
-    description: z.string().nullable(),
-    value_schema: ToolMetadataValueSchema.nullable(),
+    description: z.string().nullable().optional(),
+    value_schema: ToolMetadataValueSchema.nullable().optional(),
   })
   .nullable()
   .optional();
@@ -49,7 +49,10 @@ const ToolMetadataSecretSchema = z.union([
 
 const ToolMetadataRequirementsSchema = z
   .object({
-    authorization: ToolMetadataAuthorizationSchema.optional(),
+    authorization: z
+      .array(ToolMetadataAuthorizationSchema)
+      .nullable()
+      .optional(),
     secrets: z.array(ToolMetadataSecretSchema).nullable().optional(),
   })
   .nullable()
@@ -68,6 +71,9 @@ const ToolMetadataItemSchema = z.object({
 
 export const ToolMetadataResponseSchema = z.object({
   items: z.array(ToolMetadataItemSchema),
+  limit: z.number().optional(),
+  offset: z.number().optional(),
+  page_count: z.number().optional(),
   total_count: z.number(),
 });
 
@@ -109,6 +115,9 @@ export type ToolMetadataSummary = {
   }>;
 };
 
+const normalizeEnum = (values: string[] | null | undefined): string[] | null =>
+  values && values.length > 0 ? values : null;
+
 const transformParameter = (
   apiParam: z.infer<typeof ToolMetadataParameterSchema>
 ): ToolParameter => ({
@@ -117,7 +126,7 @@ const transformParameter = (
   innerType: apiParam.value_schema.inner_val_type ?? undefined,
   required: apiParam.required,
   description: apiParam.description,
-  enum: apiParam.value_schema.enum ?? null,
+  enum: normalizeEnum(apiParam.value_schema.enum),
   inferrable: apiParam.inferrable,
 });
 
@@ -135,29 +144,36 @@ const normalizeSecrets = (
 
 export const transformToolMetadataItem = (
   apiTool: ToolMetadataItem
-): ToolDefinition => ({
-  name: apiTool.name,
-  qualifiedName: apiTool.qualified_name,
-  fullyQualifiedName: apiTool.fully_qualified_name,
-  description: apiTool.description,
-  toolkitDescription: apiTool.toolkit.description,
-  parameters: apiTool.input.parameters.map(transformParameter),
-  auth: apiTool.requirements?.authorization
-    ? {
-        providerId: apiTool.requirements.authorization.provider_id ?? null,
-        providerType:
-          apiTool.requirements.authorization.provider_type ?? "unknown",
-        scopes: apiTool.requirements.authorization.scopes ?? [],
-      }
-    : null,
-  secrets: normalizeSecrets(apiTool.requirements?.secrets),
-  output: apiTool.output
-    ? {
-        type: apiTool.output.value_schema?.val_type ?? "unknown",
-        description: apiTool.output.description ?? null,
-      }
-    : null,
-});
+): ToolDefinition => {
+  // authorization is now an array; pick the first entry (most tools have 0 or 1)
+  const authEntry = apiTool.requirements?.authorization?.[0] ?? null;
+  const providerType = authEntry?.provider_type ?? null;
+
+  return {
+    name: apiTool.name,
+    qualifiedName: apiTool.qualified_name,
+    fullyQualifiedName: apiTool.fully_qualified_name,
+    description: apiTool.description,
+    toolkitDescription: apiTool.toolkit.description,
+    parameters: apiTool.input.parameters.map(transformParameter),
+    auth:
+      authEntry && providerType
+        ? {
+            providerId: authEntry.provider_id ?? null,
+            providerType,
+            scopes: authEntry.scopes ?? [],
+          }
+        : null,
+    secrets: normalizeSecrets(apiTool.requirements?.secrets),
+    output: apiTool.output
+      ? {
+          // Keep parity with /v1/tools normalization for source-agnostic diffs.
+          type: apiTool.output.value_schema?.val_type ?? "string",
+          description: apiTool.output.description ?? null,
+        }
+      : null,
+  };
+};
 
 export const parseToolMetadataResponse = (
   payload: unknown

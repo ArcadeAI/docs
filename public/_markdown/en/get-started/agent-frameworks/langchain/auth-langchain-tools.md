@@ -3,12 +3,12 @@ title: "Authorize Existing Tools"
 description: "Use Arcade to authorize existing tools"
 ---
 [Agent Frameworks](/en/get-started/agent-frameworks.md)
-[LangChain](/en/get-started/agent-frameworks/langchain/use-arcade-with-langchain-py.md)
-Authorizing existing tools
+[LangChain](/en/get-started/agent-frameworks/langchain/overview.md)
+Authorizing Existing Tools
 
 ## Authorize Existing Tools
 
-In this guide, we’ll show you how to authorize LangChain  like the `GmailToolkit` using Arcade. You may already have tools you want to use, and this guide will show you how to authorize them. Arcade handles retrieving, authorizing, and managing tokens so you don’t have to. For complete working examples, see our [Python](https://github.com/ArcadeAI/arcade-ai/blob/main/examples/langchain/langchain_tool_arcade_auth.py)  and [JavaScript](https://github.com/ArcadeAI/arcade-ai/blob/main/examples/langchain-ts/langchain-tool-arcade-auth.ts)  examples.
+In this guide, we’ll show you how to authorize LangChain  like the `GmailToolkit` using Arcade. You may already have tools you want to use, and this guide will show you how to authorize them. Arcade handles retrieving, authorizing, and managing tokens so you don’t have to.
 
 ### Prerequisites
 
@@ -215,5 +215,5 @@ Now you’re ready to explore more LangChain tools with Arcade. Try integrating 
 
 Last updated on February 10, 2026
 
-[Setup Arcade with LangChain (TypeScript)](/en/get-started/agent-frameworks/langchain/use-arcade-with-langchain-ts.md)
+[Setup (TypeScript)](/en/get-started/agent-frameworks/langchain/use-arcade-with-langchain-ts.md)
 [Mastra](/en/get-started/agent-frameworks/mastra.md)

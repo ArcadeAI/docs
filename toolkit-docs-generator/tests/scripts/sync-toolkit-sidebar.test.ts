@@ -7,7 +7,8 @@
 
 import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { getToolkitStaticParamsForCategory } from "../../../app/_lib/toolkit-static-params";
 import {
   buildToolkitInfoList,
   generateCategoryMeta,
@@ -17,30 +18,31 @@ import {
   getToolkitLabel,
   getToolkitLabelFromJson,
   groupByCategory,
+  parseBooleanCliFlag,
+  resolveRemoveEmptySections,
+  setToolkitsForTesting,
   syncToolkitSidebar,
   type ToolkitInfo,
 } from "../../scripts/sync-toolkit-sidebar";
 
-// Mock the design system
-vi.mock("@arcadeai/design-system", () => ({
-  TOOLKITS: [
-    { id: "Gmail", label: "Gmail", category: "productivity" },
-    { id: "Slack", label: "Slack", category: "social" },
-    { id: "Github", label: "GitHub", category: "development" },
-    { id: "Stripe", label: "Stripe", category: "payments" },
-    { id: "Zendesk", label: "Zendesk", category: "customer-support" },
-    { id: "GoogleSearch", label: "Google Search", category: "search" },
-    { id: "Hubspot", label: "HubSpot", category: "sales" },
-    { id: "Spotify", label: "Spotify", category: "entertainment" },
-    { id: "Postgres", label: "Postgres", category: "databases" },
-    {
-      id: "HiddenToolkit",
-      label: "Hidden",
-      category: "productivity",
-      isHidden: true,
-    },
-  ],
-}));
+setToolkitsForTesting([
+  { id: "Gmail", label: "Gmail", category: "productivity" },
+  { id: "Slack", label: "Slack", category: "social" },
+  { id: "Github", label: "GitHub", category: "development" },
+  { id: "Stripe", label: "Stripe", category: "payments" },
+  { id: "Zendesk", label: "Zendesk", category: "customer-support" },
+  { id: "GoogleSearch", label: "Google Search", category: "search" },
+  { id: "Hubspot", label: "HubSpot", category: "sales" },
+  { id: "Spotify", label: "Spotify", category: "entertainment" },
+  { id: "Postgres", label: "Postgres", category: "databases" },
+  { id: "WeaviateApi", label: "Weaviate API", category: "development" },
+  {
+    id: "HiddenToolkit",
+    label: "Hidden",
+    category: "productivity",
+    isHidden: true,
+  },
+]);
 
 // Test directory setup
 const TEST_DIR = join(process.cwd(), ".test-sync-sidebar");
@@ -292,6 +294,59 @@ describe("buildToolkitInfoList", () => {
     const matches = result.filter((item) => item.slug === "clickup-api");
     expect(matches).toHaveLength(1);
   });
+
+  it("keeps sidebar href categories consistent with static params", async () => {
+    createToolkitJson("weaviateapi", {
+      id: "WeaviateApi",
+      label: "Weaviate API",
+      metadata: {
+        category: "databases",
+        docsLink:
+          "https://docs.arcade.dev/en/mcp-servers/databases/weaviate-api",
+      },
+    });
+
+    const result = buildToolkitInfoList(TEST_DATA_DIR);
+    const weaviate = result.find((item) => item.id === "WeaviateApi");
+    expect(weaviate).toBeDefined();
+    if (!weaviate) {
+      throw new Error("Expected WeaviateApi toolkit in sidebar data");
+    }
+    expect(weaviate.category).toBe("databases");
+    expect(weaviate.slug).toBe("weaviate-api");
+
+    const sidebarMeta = generateCategoryMeta(
+      [weaviate],
+      weaviate.category,
+      "/en/resources/integrations"
+    );
+    expect(sidebarMeta).toContain(
+      'href: "/en/resources/integrations/databases/weaviate-api"'
+    );
+
+    const toolkitsCatalog = [
+      { id: "WeaviateApi", category: "development", docsLink: undefined },
+    ];
+    const databasesParams = await getToolkitStaticParamsForCategory(
+      "databases",
+      {
+        dataDir: TEST_DATA_DIR,
+        toolkitsCatalog,
+      }
+    );
+    const developmentParams = await getToolkitStaticParamsForCategory(
+      "development",
+      {
+        dataDir: TEST_DATA_DIR,
+        toolkitsCatalog,
+      }
+    );
+
+    expect(databasesParams).toContainEqual({ toolkitId: "weaviate-api" });
+    expect(developmentParams).not.toContainEqual({
+      toolkitId: "weaviate-api",
+    });
+  });
 });
 
 // ============================================================================
@@ -346,6 +401,60 @@ describe("groupByCategory", () => {
     const result = groupByCategory(toolkits);
     expect(result.has("others")).toBe(true);
     expect(result.get("others")).toHaveLength(1);
+  });
+});
+
+// ============================================================================
+// Unit Tests: remove empty section flags
+// ============================================================================
+
+describe("remove empty section flags", () => {
+  it("defaults to false when no flag is provided", () => {
+    expect(resolveRemoveEmptySections({})).toBe(false);
+  });
+
+  it("supports the explicit removeEmptySections option", () => {
+    expect(resolveRemoveEmptySections({ removeEmptySections: true })).toBe(
+      true
+    );
+    expect(resolveRemoveEmptySections({ removeEmptySections: false })).toBe(
+      false
+    );
+  });
+
+  it("supports prune as a backward-compatible alias", () => {
+    expect(resolveRemoveEmptySections({ prune: true })).toBe(true);
+    expect(resolveRemoveEmptySections({ prune: false })).toBe(false);
+  });
+
+  it("prefers removeEmptySections over prune when both are set", () => {
+    expect(
+      resolveRemoveEmptySections({ removeEmptySections: false, prune: true })
+    ).toBe(false);
+    expect(
+      resolveRemoveEmptySections({ removeEmptySections: true, prune: false })
+    ).toBe(true);
+  });
+
+  it("parses boolean CLI flags in value and shorthand formats", () => {
+    expect(
+      parseBooleanCliFlag(
+        ["--remove-empty-sections=true"],
+        "--remove-empty-sections"
+      )
+    ).toBe(true);
+    expect(
+      parseBooleanCliFlag(
+        ["--remove-empty-sections=false"],
+        "--remove-empty-sections"
+      )
+    ).toBe(false);
+    expect(
+      parseBooleanCliFlag(
+        ["--remove-empty-sections"],
+        "--remove-empty-sections"
+      )
+    ).toBe(true);
   });
 });
 
@@ -530,5 +639,133 @@ describe("syncToolkitSidebar", () => {
       toolkitCount: expect.any(Number),
       errors: expect.any(Array),
     });
+  });
+});
+
+// ============================================================================
+// Category move / cleanup logic
+// ============================================================================
+
+describe("category move cleanup logic", () => {
+  it("toolkit moved to a new category is removed from the old one", () => {
+    // Simulate: Pylon was in "others", now design system says "development"
+    const toolkits: ToolkitInfo[] = [
+      {
+        id: "Pylon",
+        slug: "pylon",
+        label: "Pylon",
+        category: "development",
+        navGroup: "optimized",
+      },
+      {
+        id: "Github",
+        slug: "github",
+        label: "GitHub",
+        category: "development",
+        navGroup: "optimized",
+      },
+    ];
+
+    const grouped = groupByCategory(toolkits);
+    const activeCategories = Array.from(grouped.keys());
+
+    // "others" is no longer an active category
+    expect(activeCategories).not.toContain("others");
+    expect(activeCategories).toContain("development");
+
+    // The development category contains Pylon
+    const devToolkits = grouped.get("development");
+    expect(devToolkits?.some((t) => t.id === "Pylon")).toBe(true);
+  });
+
+  it("old category directory is identified for removal when empty", () => {
+    const toolkits: ToolkitInfo[] = [
+      {
+        id: "Pylon",
+        slug: "pylon",
+        label: "Pylon",
+        category: "development",
+        navGroup: "optimized",
+      },
+    ];
+
+    const grouped = groupByCategory(toolkits);
+    const activeCategories = Array.from(grouped.keys());
+
+    // Simulate existing directories on disk
+    const existingDirs = ["development", "others", "productivity"];
+
+    // Directories not in activeCategories should be removed
+    const toRemove = existingDirs.filter(
+      (dir) => !activeCategories.includes(dir)
+    );
+
+    expect(toRemove).toContain("others");
+    expect(toRemove).toContain("productivity");
+    expect(toRemove).not.toContain("development");
+  });
+
+  it("category with remaining toolkits is NOT removed when one toolkit moves out", () => {
+    // "others" still has CustomTool, even though Pylon moved to "development"
+    const toolkits: ToolkitInfo[] = [
+      {
+        id: "Pylon",
+        slug: "pylon",
+        label: "Pylon",
+        category: "development",
+        navGroup: "optimized",
+      },
+      {
+        id: "CustomTool",
+        slug: "custom-tool",
+        label: "Custom Tool",
+        category: "others",
+        navGroup: "optimized",
+      },
+    ];
+
+    const grouped = groupByCategory(toolkits);
+    const activeCategories = Array.from(grouped.keys());
+
+    expect(activeCategories).toContain("others");
+    expect(activeCategories).toContain("development");
+
+    // "others" still has one toolkit so it won't be pruned
+    expect(grouped.get("others")).toHaveLength(1);
+
+    // But Pylon is NOT in "others" anymore
+    const othersToolkits = grouped.get("others");
+    expect(othersToolkits?.some((t) => t.id === "Pylon")).toBe(false);
+  });
+
+  it("generateCategoryMeta only includes current toolkits (not stale ones)", () => {
+    // After Pylon moves, the "others" _meta.tsx should only contain remaining toolkits
+    const othersToolkits: ToolkitInfo[] = [
+      {
+        id: "CustomTool",
+        slug: "custom-tool",
+        label: "Custom Tool",
+        category: "others",
+        navGroup: "optimized",
+      },
+    ];
+
+    const meta = generateCategoryMeta(
+      othersToolkits,
+      "others",
+      "/en/resources/integrations"
+    );
+
+    expect(meta).toContain("custom-tool");
+    expect(meta).not.toContain("pylon");
+  });
+
+  it("main _meta.tsx excludes categories with zero toolkits", () => {
+    const activeCategories = ["development", "productivity"];
+    const mainMeta = generateMainMeta(activeCategories);
+
+    expect(mainMeta).toContain("development:");
+    expect(mainMeta).toContain("productivity:");
+    expect(mainMeta).not.toContain("others:");
   });
 });

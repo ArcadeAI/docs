@@ -167,13 +167,17 @@ export class CombinedToolkitDataSource implements IToolkitDataSource {
       metadataMap.set(metadata.id, metadata);
     }
 
-    // Combine into ToolkitData map
+    // Combine into ToolkitData map.
+    // Use getToolkitMetadata for toolkits without a direct match so that
+    // fallback logic (e.g. "WeaviateApi" → "Weaviate") is applied consistently,
+    // matching the behaviour of fetchToolkitData.
     const result = new Map<string, ToolkitData>();
     for (const [toolkitId, tools] of toolkitGroups) {
-      result.set(toolkitId, {
-        tools,
-        metadata: metadataMap.get(toolkitId) ?? null,
-      });
+      const directMetadata = metadataMap.get(toolkitId) ?? null;
+      const metadata =
+        directMetadata ??
+        (await this.metadataSource.getToolkitMetadata(toolkitId));
+      result.set(toolkitId, { tools, metadata });
     }
 
     return result;

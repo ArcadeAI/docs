@@ -16,16 +16,17 @@ import {
   type ToolExampleGenerator,
   type ToolkitSummaryGenerator,
 } from "../../src/merger/data-merger.js";
-import type {
-  ToolkitOverviewGenerator,
-  ToolkitOverviewInstructions,
-} from "../../src/overview/types.js";
 import {
   EmptyCustomSectionsSource,
+  InMemoryCustomSectionsSource,
   InMemoryMetadataSource,
   InMemoryToolDataSource,
 } from "../../src/sources/in-memory.js";
-import { createCombinedToolkitDataSource } from "../../src/sources/toolkit-data-source.js";
+import {
+  createCombinedToolkitDataSource,
+  type IToolkitDataSource,
+  type ToolkitData,
+} from "../../src/sources/toolkit-data-source.js";
 import type {
   CustomSections,
   ToolDefinition,
@@ -443,6 +444,46 @@ describe("mergeToolkit", () => {
     );
   });
 
+  it("infers a readable label from toolkit description without metadata", async () => {
+    const tools = [
+      createTool({
+        qualifiedName: "MicrosoftOnedrive.ListFolderItems",
+        fullyQualifiedName: "MicrosoftOnedrive.ListFolderItems@1.0.0",
+        toolkitDescription: "Arcade.dev LLM tools for Microsoft OneDrive",
+      }),
+    ];
+
+    const result = await mergeToolkit(
+      "MicrosoftOnedrive",
+      tools,
+      null,
+      null,
+      undefined
+    );
+
+    expect(result.toolkit.label).toBe("Microsoft OneDrive");
+  });
+
+  it("humanizes toolkit ID when metadata and description label are unavailable", async () => {
+    const tools = [
+      createTool({
+        qualifiedName: "MyCustomApi.Run",
+        fullyQualifiedName: "MyCustomApi.Run@1.0.0",
+        toolkitDescription: "",
+      }),
+    ];
+
+    const result = await mergeToolkit(
+      "MyCustomApi",
+      tools,
+      null,
+      null,
+      undefined
+    );
+
+    expect(result.toolkit.label).toBe("My Custom API");
+  });
+
   it("marks *Api toolkits as arcade_starter", async () => {
     const tools = [
       createTool({
@@ -724,66 +765,222 @@ describe("mergeToolkit", () => {
   });
 });
 
-describe("mergeToolkit overview handling", () => {
-  it("replaces existing overview when instructions are present", async () => {
-    const tool = createTool();
-    const metadata = createMetadata();
+// ============================================================================
+// mergeToolkit provider ID fallback tests
+// ============================================================================
 
-    const previous = await mergeToolkit(
-      "TestKit",
-      [tool],
-      metadata,
-      null,
-      undefined,
-      {}
-    );
-    previous.toolkit.documentationChunks = [
-      {
-        type: "markdown",
-        location: "header",
-        position: "before",
-        content: "## Overview\n\nOld overview.",
-      },
+describe("mergeToolkit resolveProviderId fallback", () => {
+  it("uses resolveProviderId when tools have null providerId", async () => {
+    const tools = [
+      createTool({
+        name: "ReadAccount",
+        qualifiedName: "Salesforce.ReadAccount",
+        fullyQualifiedName: "Salesforce.ReadAccount@2.0.1",
+        auth: { providerId: null, providerType: "oauth2", scopes: ["read"] },
+      }),
     ];
 
-    const overviewGenerator: ToolkitOverviewGenerator = {
-      generate: async () => ({
-        chunk: {
-          type: "markdown",
-          location: "header",
-          position: "before",
-          content: "## Overview\n\nNew overview.",
-        },
-      }),
-    };
-
-    const overviewInstructions: ToolkitOverviewInstructions = {
-      toolkitId: "TestKit",
-      instructions: "Write a new overview.",
-      sources: [],
-    };
-
     const result = await mergeToolkit(
-      "TestKit",
-      [tool],
-      metadata,
+      "Salesforce",
+      tools,
+      createMetadata({ id: "Salesforce", label: "Salesforce" }),
       null,
       undefined,
       {
-        previousToolkit: previous.toolkit,
-        overviewGenerator,
-        overviewInstructions,
+        resolveProviderId: (toolkitId) =>
+          toolkitId === "Salesforce" ? "salesforce" : null,
       }
     );
 
-    expect(result.toolkit.documentationChunks[0]?.content).toBe(
-      "## Overview\n\nNew overview."
+    expect(result.toolkit.auth?.providerId).toBe("salesforce");
+    expect(result.toolkit.tools[0]?.auth?.providerId).toBe("salesforce");
+  });
+
+  it("does NOT override an existing non-null providerId from tools", async () => {
+    const tools = [
+      createTool({
+        name: "CreateIssue",
+        qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@2.0.1",
+        auth: {
+          providerId: "github",
+          providerType: "oauth2",
+          scopes: ["repo"],
+        },
+      }),
+    ];
+
+    const result = await mergeToolkit(
+      "Github",
+      tools,
+      createMetadata({ id: "Github", label: "GitHub" }),
+      null,
+      undefined,
+      {
+        resolveProviderId: () => "should-not-be-used",
+      }
     );
+
+    expect(result.toolkit.auth?.providerId).toBe("github");
+  });
+
+  it("does NOT call resolver when tools have no auth at all", async () => {
+    let resolverCalled = false;
+    const tools = [
+      createTool({
+        name: "PublicTool",
+        qualifiedName: "NoAuth.PublicTool",
+        fullyQualifiedName: "NoAuth.PublicTool@1.0.0",
+        auth: null,
+        secrets: [],
+      }),
+    ];
+
+    const result = await mergeToolkit(
+      "NoAuth",
+      tools,
+      createMetadata({ id: "NoAuth", label: "No Auth" }),
+      null,
+      undefined,
+      {
+        resolveProviderId: () => {
+          resolverCalled = true;
+          return "unexpected";
+        },
+      }
+    );
+
+    expect(result.toolkit.auth).toBeNull();
+    expect(resolverCalled).toBe(false);
+  });
+
+  it("leaves providerId null when resolver returns null", async () => {
+    const tools = [
+      createTool({
+        name: "SomeTool",
+        qualifiedName: "Unknown.SomeTool",
+        fullyQualifiedName: "Unknown.SomeTool@1.0.0",
+        auth: { providerId: null, providerType: "oauth2", scopes: [] },
+      }),
+    ];
+
+    const result = await mergeToolkit(
+      "Unknown",
+      tools,
+      createMetadata({ id: "Unknown", label: "Unknown" }),
+      null,
+      undefined,
+      {
+        resolveProviderId: () => null,
+      }
+    );
+
+    expect(result.toolkit.auth?.providerId).toBeNull();
+  });
+
+  it("leaves providerId null when no resolver is provided", async () => {
+    const tools = [
+      createTool({
+        name: "SomeTool",
+        qualifiedName: "Unknown.SomeTool",
+        fullyQualifiedName: "Unknown.SomeTool@1.0.0",
+        auth: { providerId: null, providerType: "oauth2", scopes: [] },
+      }),
+    ];
+
+    const result = await mergeToolkit(
+      "Unknown",
+      tools,
+      createMetadata({ id: "Unknown", label: "Unknown" }),
+      null,
+      undefined
+    );
+
+    expect(result.toolkit.auth?.providerId).toBeNull();
+  });
+});
+
+describe("mergeToolkit overview chunk handling", () => {
+  it("keeps toolkit-level overview chunks from source custom sections", async () => {
+    const result = await mergeToolkit(
+      "TestKit",
+      [createTool()],
+      createMetadata(),
+      createCustomSections({
+        documentationChunks: [
+          {
+            type: "markdown",
+            location: "header",
+            position: "before",
+            content: "## Overview\n\nOverview text.",
+          },
+          {
+            type: "warning",
+            location: "header",
+            position: "after",
+            content: "Keep this warning.",
+          },
+        ],
+      }),
+      undefined
+    );
+
+    expect(result.toolkit.documentationChunks).toHaveLength(2);
+    expect(
+      result.toolkit.documentationChunks[0]?.content
+        .toLowerCase()
+        .startsWith("## overview")
+    ).toBe(true);
+    expect(result.toolkit.documentationChunks[1]?.content).toBe(
+      "Keep this warning."
+    );
+  });
+
+  it("preserves previous toolkit overview chunks when source is empty", async () => {
+    const tools = [createTool({ qualifiedName: "TestKit.Tool1" })];
+    const previous = await mergeToolkit(
+      "TestKit",
+      tools,
+      createMetadata(),
+      createCustomSections({
+        documentationChunks: [
+          {
+            type: "markdown",
+            location: "header",
+            position: "before",
+            content: "## Overview\n\nOld overview.",
+          },
+          {
+            type: "info",
+            location: "header",
+            position: "after",
+            content: "Old tip.",
+          },
+        ],
+      }),
+      createStubGenerator()
+    );
+
+    const result = await mergeToolkit(
+      "TestKit",
+      tools,
+      createMetadata(),
+      null,
+      undefined,
+      { previousToolkit: previous.toolkit }
+    );
+
+    expect(result.toolkit.documentationChunks).toHaveLength(2);
+    expect(
+      result.toolkit.documentationChunks.some(
+        (chunk) => chunk.content === "Old tip."
+      )
+    ).toBe(true);
     expect(
       result.toolkit.documentationChunks.some((chunk) =>
-        chunk.content.includes("Old overview")
+        chunk.content.toLowerCase().startsWith("## overview")
       )
-    ).toBe(false);
+    ).toBe(true);
   });
 });
 
@@ -861,7 +1058,7 @@ describe("DataMerger", () => {
       expect(result.toolkit.auth?.allScopes).toContain("public_repo");
     });
 
-    it("adds a summary when a summary generator is provided", async () => {
+    it("adds a summary when no overview chunk is present", async () => {
       const toolkitDataSource = createCombinedToolkitDataSource({
         toolSource: new InMemoryToolDataSource([githubTool1]),
         metadataSource: new InMemoryMetadataSource([githubMetadata]),
@@ -876,6 +1073,42 @@ describe("DataMerger", () => {
       const result = await merger.mergeToolkit("Github");
 
       expect(result.toolkit.summary).toBe("Toolkit summary (Github)");
+    });
+
+    it("skips summary generation when an overview chunk is present", async () => {
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
+      });
+      const countingSummary = createCountingSummaryGenerator();
+      const overviewCustomSectionsSource = new InMemoryCustomSectionsSource({
+        Github: createCustomSections({
+          documentationChunks: [
+            {
+              type: "markdown",
+              location: "header",
+              position: "before",
+              content: "## Overview\n\nGenerated overview.",
+            },
+          ],
+        }),
+      });
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: overviewCustomSectionsSource,
+        toolExampleGenerator: createStubGenerator(),
+        toolkitSummaryGenerator: countingSummary.generator,
+      });
+
+      const result = await merger.mergeToolkit("Github");
+
+      expect(
+        result.toolkit.documentationChunks.some((chunk) =>
+          chunk.content.toLowerCase().startsWith("## overview")
+        )
+      ).toBe(true);
+      expect(countingSummary.getCalls()).toBe(0);
+      expect(result.toolkit.summary).toBeUndefined();
     });
 
     it("reuses the previous summary when toolkit input is unchanged", async () => {
@@ -907,6 +1140,51 @@ describe("DataMerger", () => {
       expect(result.toolkit.summary).toBe("Cached summary");
     });
 
+    it("does not reuse previous summary when current toolkit has an overview chunk", async () => {
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
+      });
+      const previousResult = await mergeToolkit(
+        "Github",
+        [githubTool1],
+        githubMetadata,
+        null,
+        createStubGenerator()
+      );
+      previousResult.toolkit.summary = "Cached summary";
+      const countingSummary = createCountingSummaryGenerator();
+      const overviewCustomSectionsSource = new InMemoryCustomSectionsSource({
+        Github: createCustomSections({
+          documentationChunks: [
+            {
+              type: "markdown",
+              location: "header",
+              position: "before",
+              content: "## Overview\n\nGenerated overview.",
+            },
+          ],
+        }),
+      });
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: overviewCustomSectionsSource,
+        toolExampleGenerator: createStubGenerator(),
+        toolkitSummaryGenerator: countingSummary.generator,
+        previousToolkits: new Map([["github", previousResult.toolkit]]),
+      });
+
+      const result = await merger.mergeToolkit("Github");
+
+      expect(
+        result.toolkit.documentationChunks.some((chunk) =>
+          chunk.content.toLowerCase().startsWith("## overview")
+        )
+      ).toBe(true);
+      expect(countingSummary.getCalls()).toBe(0);
+      expect(result.toolkit.summary).toBeUndefined();
+    });
+
     it("reuses previous examples when the tool is unchanged", async () => {
       const toolkitDataSource = createCombinedToolkitDataSource({
         toolSource: new InMemoryToolDataSource([githubTool1]),
@@ -935,7 +1213,7 @@ describe("DataMerger", () => {
       );
     });
 
-    it("calls the generator when the tool definition changes", async () => {
+    it("does not call the generator when only descriptions change", async () => {
       const updatedTool = createTool({
         name: "CreateIssue",
         qualifiedName: "Github.CreateIssue",
@@ -966,9 +1244,71 @@ describe("DataMerger", () => {
         previousToolkits: new Map([["github", previousResult.toolkit]]),
       });
 
-      await merger.mergeToolkit("Github");
+      const result = await merger.mergeToolkit("Github");
+
+      expect(counting.getCalls()).toBe(0);
+      expect(result.toolkit.tools[0]?.codeExample).toEqual(
+        previousResult.toolkit.tools[0]?.codeExample
+      );
+    });
+
+    it("calls the generator only for changed tools in mixed toolkits", async () => {
+      const unchangedTool = createTool({
+        name: "ListIssues",
+        qualifiedName: "Github.ListIssues",
+        fullyQualifiedName: "Github.ListIssues@1.0.0",
+      });
+      const changedToolPrevious = createTool({
+        name: "CreateIssue",
+        qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@1.0.0",
+      });
+      const changedToolCurrent = createTool({
+        name: "CreateIssue",
+        qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@1.0.0",
+        output: {
+          type: "array",
+          description: "Result",
+        },
+      });
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([
+          unchangedTool,
+          changedToolCurrent,
+        ]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
+      });
+      const previousResult = await mergeToolkit(
+        "Github",
+        [unchangedTool, changedToolPrevious],
+        githubMetadata,
+        null,
+        createStubGenerator()
+      );
+      const counting = createCountingGenerator();
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: counting.generator,
+        previousToolkits: new Map([["github", previousResult.toolkit]]),
+      });
+
+      const result = await merger.mergeToolkit("Github");
+      const toolByQualifiedName = new Map(
+        result.toolkit.tools.map((tool) => [tool.qualifiedName, tool])
+      );
+      const previousByQualifiedName = new Map(
+        previousResult.toolkit.tools.map((tool) => [tool.qualifiedName, tool])
+      );
 
       expect(counting.getCalls()).toBe(1);
+      expect(toolByQualifiedName.get("Github.ListIssues")?.codeExample).toEqual(
+        previousByQualifiedName.get("Github.ListIssues")?.codeExample
+      );
+      expect(
+        toolByQualifiedName.get("Github.CreateIssue")?.codeExample
+      ).toBeDefined();
     });
 
     it("should merge data using unified toolkit data source", async () => {
@@ -1072,6 +1412,65 @@ describe("DataMerger", () => {
 
       expect(githubResult?.toolkit.tools).toHaveLength(2);
       expect(slackResult?.toolkit.tools).toHaveLength(1);
+    });
+
+    it("skips toolkits missing metadata or tools when requireCompleteData is true", async () => {
+      const completeToolkitData: ToolkitData = {
+        tools: [githubTool1],
+        metadata: githubMetadata,
+      };
+      const missingMetadataToolkitData: ToolkitData = {
+        tools: [
+          createTool({
+            name: "Lookup",
+            qualifiedName: "Unknown.Lookup",
+            fullyQualifiedName: "Unknown.Lookup@1.0.0",
+          }),
+        ],
+        metadata: null,
+      };
+      const missingToolsToolkitData: ToolkitData = {
+        tools: [],
+        metadata: slackMetadata,
+      };
+
+      const toolkitDataSource: IToolkitDataSource = {
+        fetchToolkitData: async (toolkitId: string) => {
+          if (toolkitId === "Github") {
+            return completeToolkitData;
+          }
+          if (toolkitId === "Unknown") {
+            return missingMetadataToolkitData;
+          }
+          if (toolkitId === "Slack") {
+            return missingToolsToolkitData;
+          }
+          return { tools: [], metadata: null };
+        },
+        fetchAllToolkitsData: async () =>
+          new Map([
+            ["Github", completeToolkitData],
+            ["Unknown", missingMetadataToolkitData],
+            ["Slack", missingToolsToolkitData],
+          ]),
+        isAvailable: async () => true,
+      };
+
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        requireCompleteData: true,
+      });
+
+      const count = await merger.getToolkitCount();
+      const results = await merger.mergeAllToolkits();
+
+      expect(count.total).toBe(3);
+      expect(count.toProcess).toBe(1);
+      expect(count.skipped).toBe(2);
+      expect(results).toHaveLength(1);
+      expect(results[0]?.toolkit.id).toBe("Github");
     });
 
     it("should return empty array when no tools", async () => {

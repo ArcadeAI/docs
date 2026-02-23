@@ -58,40 +58,27 @@ function isAIAgent(request: NextRequest): boolean {
   return AI_AGENT_PATTERNS.some((pattern) => pattern.test(userAgent));
 }
 
-function parseAcceptLanguageHeader(acceptLanguage: string): string[] {
-  return acceptLanguage
-    .split(",")
-    .map((lang) => lang.split(";")[0].trim())
-    .map((lang) => {
-      if (lang.startsWith("es")) {
-        return "es";
-      }
-      if (lang.startsWith("pt")) {
-        return "pt-BR";
-      }
-      return lang;
-    });
+function getPreferredLocale(_request: NextRequest): string {
+  // We don't currently support other translations, so always use English.
+  return "en";
 }
 
-function getPreferredLocale(request: NextRequest): string {
-  const cookieLocale = request.cookies.get("NEXT_LOCALE")?.value;
+function getEnglishLocaleRedirectPath(pathname: string): string | null {
+  for (const locale of SUPPORTED_LOCALES) {
+    if (locale === "en") {
+      continue;
+    }
 
-  if (cookieLocale && SUPPORTED_LOCALES.includes(cookieLocale)) {
-    return cookieLocale;
-  }
+    if (pathname === `/${locale}` || pathname === `/${locale}/`) {
+      return "/en/home";
+    }
 
-  const acceptLanguage = request.headers.get("accept-language");
-  if (acceptLanguage) {
-    const languages = parseAcceptLanguageHeader(acceptLanguage);
-    const preferredLocale = languages.find((lang) =>
-      SUPPORTED_LOCALES.includes(lang)
-    );
-    if (preferredLocale) {
-      return preferredLocale;
+    if (pathname.startsWith(`/${locale}/`)) {
+      return `/en${pathname.slice(locale.length + 1)}`;
     }
   }
 
-  return "en";
+  return null;
 }
 
 function pathnameIsMissingLocale(pathname: string): boolean {
@@ -180,6 +167,13 @@ function handleContentNegotiation(
 
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+
+  const englishLocaleRedirectPath = getEnglishLocaleRedirectPath(pathname);
+  if (englishLocaleRedirectPath) {
+    const url = request.nextUrl.clone();
+    url.pathname = englishLocaleRedirectPath;
+    return NextResponse.redirect(url);
+  }
 
   const contentNegotiationResponse = handleContentNegotiation(
     request,

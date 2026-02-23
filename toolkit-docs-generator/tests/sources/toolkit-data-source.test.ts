@@ -5,6 +5,7 @@
  * abstraction returns tools + metadata together.
  */
 import { describe, expect, it } from "vitest";
+import { createDesignSystemMetadataSourceFromToolkits } from "../../src/sources/design-system-metadata.js";
 import {
   InMemoryMetadataSource,
   InMemoryToolDataSource,
@@ -123,6 +124,40 @@ describe("CombinedToolkitDataSource", () => {
     expect(result.size).toBe(2);
     expect(result.get("Github")?.metadata?.label).toBe("GitHub");
     expect(result.get("Slack")?.metadata?.label).toBe("Slack");
+  });
+
+  it("fetchAllToolkitsData resolves metadata for *Api toolkits whose design system id omits the Api suffix", async () => {
+    // Simulates WeaviateApi (Engine API name) vs Weaviate (design system id).
+    // getAllToolkitsMetadata returns { id: "Weaviate" }, but the toolkit group key
+    // is "WeaviateApi" — the direct map lookup misses and must fall through to
+    // getToolkitMetadata which has the "api" suffix fallback.
+    const toolSource = new InMemoryToolDataSource([
+      createTool({
+        qualifiedName: "WeaviateApi.ActivateUser",
+        fullyQualifiedName: "WeaviateApi.ActivateUser@2.0.0",
+      }),
+    ]);
+
+    const metadataSource = createDesignSystemMetadataSourceFromToolkits([
+      createMetadata({
+        id: "Weaviate",
+        label: "Weaviate",
+        category: "databases",
+        iconUrl: "https://design-system.arcade.dev/icons/weaviate.svg",
+      }),
+    ]);
+
+    const dataSource = createCombinedToolkitDataSource({
+      toolSource,
+      metadataSource,
+    });
+
+    const result = await dataSource.fetchAllToolkitsData();
+    const weaviate = result.get("WeaviateApi");
+
+    expect(weaviate).toBeDefined();
+    expect(weaviate?.metadata?.category).toBe("databases");
+    expect(weaviate?.metadata?.label).toBe("Weaviate API");
   });
 
   it("should fall back to providerId metadata for *Api toolkits", async () => {

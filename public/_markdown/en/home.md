@@ -34,7 +34,7 @@ Pre-built MCP servers ready to use with your agents.
 [![Slack](/_next/image?url=%2Fimages%2Ficons%2Fslack.png&w=64&q=75) Slack](/resources/integrations/social-communication/slack.md)
 [![Google Docs](/_next/image?url=%2Fimages%2Ficons%2Fgoogle_docs.png&w=64&q=75) Google Docs](/resources/integrations/productivity/google-docs.md)
 [![Google Slides](/_next/image?url=%2Fimages%2Ficons%2Fgoogle_slides.png&w=64&q=75) Google Slides](/resources/integrations/productivity/google-slides.md)
-[![HubSpot](/_next/image?url=%2Fimages%2Ficons%2Fhubspot.png&w=64&q=75) HubSpot](/resources/integrations/crm/hubspot.md)
+[![HubSpot](/_next/image?url=%2Fimages%2Ficons%2Fhubspot.png&w=64&q=75) HubSpot](/resources/integrations/sales/hubspot.md)
 [![Linear](/images/icons/linear.svg) Linear](/resources/integrations/productivity/linear.md)
 [![Google Drive](/_next/image?url=%2Fimages%2Ficons%2Fgoogle_drive.png&w=64&q=75) Google Drive](/resources/integrations/productivity/google-drive.md)
 
@@ -54,7 +54,7 @@ Pre-built MCP servers ready to use with your agents.
 Arcade integrates with popular agent frameworks and LLM providers.
 
 [![LangChain](/images/icons/langchain.svg) LangChain](/guides/agent-frameworks/langchain/use-arcade-tools.md)
-[![OpenAI Agents](/images/icons/openai.png) OpenAI Agents](/guides/agent-frameworks/openai-agents/use-arcade-tools.md)
+[![OpenAI Agents](/images/icons/openai.png) OpenAI Agents](/get-started/agent-frameworks/openai-agents/overview.md)
 [![CrewAI](https://avatars.githubusercontent.com/u/170677839?s=200&v=4) CrewAI](/guides/agent-frameworks/crewai/use-arcade-tools.md)
 [![Vercel AI](/images/icons/vercel.svg) Vercel AI](/guides/agent-frameworks/vercelai.md)
 [![Google ADK](/images/icons/google.png) Google ADK](/guides/agent-frameworks/google-adk/use-arcade-tools.md)
@@ -91,6 +91,6 @@ See Arcade in action with these example applications.
 [FAQ](/resources/faq.md)
 [Changelog](/references/changelog.md)
 
-Last updated on February 10, 2026
+Last updated on January 30, 2026
 
 [About Arcade](/en/get-started/about-arcade.md)
