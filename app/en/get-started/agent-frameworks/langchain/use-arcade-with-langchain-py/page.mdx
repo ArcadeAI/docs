@@ -7,8 +7,6 @@ import { Steps, Tabs, Callout } from "nextra/components";
 
 # Setup Arcade with LangChain
 
-Learn how to integrate Arcade tools using LangChain primitives.
-
 LangChain is a popular agentic framework that abstracts a lot of the complexity of building AI agents. LangGraph builds on top of LangGraph, a lower level orchestration framework that offers more control over the inner flow of the agent.
 
 <GuideOverview>
@@ -87,7 +85,7 @@ from langgraph.types import Command, interrupt
 from pydantic import BaseModel, Field, create_model
 ```
 
-This is a significant number of imports, so you can break them down:
+This is a significant number of imports, here's a breakdown:
 
 - Arcade imports:
   - `AsyncArcade`: The Arcade client, interacts with the Arcade API.
@@ -104,7 +102,7 @@ This is a significant number of imports, so you can break them down:
   - `interrupt`: Interrupts the ReAct flow and asks the user for input.
 - Other imports:
   - `load_dotenv`: Loads the environment variables from the `.env` file.
-  - `os`: The operating system module, you use to interact with the operating system.
+  - `os`: The operating system module, you use it to interact with the operating system.
   - `typing` imports: These help with type hints, which are not required but recommended for type safety.
   - `pydantic` imports: You use these for data validation and model creation when converting Arcade tools to LangChain tools.
 
@@ -161,7 +159,7 @@ def arcade_schema_to_pydantic(tool_def: ToolDefinition) -> type[BaseModel]:
             if param_type is list and param.value_schema.inner_val_type:
                 inner_type: type[Any] = get_python_type(param.value_schema.inner_val_type)
                 param_type = list[inner_type]
-            param_description = param.description or "We provide no description."
+            param_description = param.description or "No description provided."
             default = ... if param.required else None
             fields[param.name] = (
                 param_type,
