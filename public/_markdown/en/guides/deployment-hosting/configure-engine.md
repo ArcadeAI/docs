@@ -708,7 +708,7 @@ ZOOM_CLIENT_ID=""
 ZOOM_CLIENT_SECRET=
 ```
 
-Last updated on February 12, 2026
+Last updated on January 30, 2026
 
 [On-premises MCP servers](/en/guides/deployment-hosting/on-prem.md)
 [Arcade Deploy](/en/guides/deployment-hosting/arcade-deploy.md)
