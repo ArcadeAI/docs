@@ -54,13 +54,21 @@ You may opt-out by setting the `ARCADE_USAGE_TRACKING` environment variable.
 
 For example, to opt out for the lifetime of your terminal session, you can enter
 
+### Bash
+
 ```bash
 export ARCADE_USAGE_TRACKING=0
 ```
 
-Or to permanently opt out, you can set this environment variable in your shell’s configuration file (for example, `~/.zshrc` for zsh or `~/.bashrc` for bash).
+### PowerShell
 
-Last updated on January 30, 2026
+```bash
+$env:ARCADE_USAGE_TRACKING=0
+```
 
-[Settings](/en/references/mcp/python/settings.md)
+To permanently opt out, set this environment variable in your shell configuration file (for example, `~/.zshrc`, `~/.bashrc`, or your PowerShell profile).
+
+Last updated on February 12, 2026
+
+[Errors](/en/references/mcp/python/errors.md)
 [Arcade CLI](/en/references/arcade-cli.md)

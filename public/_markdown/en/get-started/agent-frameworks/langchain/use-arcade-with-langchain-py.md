@@ -47,7 +47,21 @@ mkdir langchain-arcade-example
 cd langchain-arcade-example
 uv init
 uv venv
+```
+
+### Bash
+
+```bash
 source .venv/bin/activate
+```
+
+### PowerShell
+
+```bash
+. ".venv\Scripts\Activate.ps1"
+```
+
+```bash
 uv add arcadepy langchain langchain-openai python-dotenv
 ```
 
@@ -857,7 +871,7 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-Last updated on January 30, 2026
+Last updated on February 12, 2026
 
 [Overview](/en/get-started/agent-frameworks/langchain/overview.md)
 [Setup (TypeScript)](/en/get-started/agent-frameworks/langchain/use-arcade-with-langchain-ts.md)

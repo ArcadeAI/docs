@@ -161,16 +161,32 @@ MY_SECRET_KEY="my-secret-value"
 
 The generated  includes a `.env.example` file with the secret key name and example value. You can rename it to `.env` to start using it.
 
+### Bash
+
 ```bash
 mv .env.example .env
+```
+
+### PowerShell
+
+```bash
+Copy-Item .env.example .env
 ```
 
 ### Environment Variable
 
 You can set the environment variable in your terminal directly with this command:
 
+### Bash
+
 ```bash
 export MY_SECRET_KEY="my-secret-value"
+```
+
+### PowerShell
+
+```bash
+$env:MY_SECRET_KEY="my-secret-value"
 ```
 
 ## Connect to Arcade to unlock authorized tool calling
@@ -272,7 +288,7 @@ That’s it! Your  server is running and connected to your AI assistant.
 -   **Deploy your  server**: [Learn how to deploy your MCP server](/guides/deployment-hosting/arcade-deploy.md)
 
 
-Last updated on January 30, 2026
+Last updated on February 12, 2026
 
 [Compare MCP server types](/en/guides/create-tools/tool-basics/compare-server-types.md)
 [Create a tool with auth](/en/guides/create-tools/tool-basics/create-tool-auth.md)

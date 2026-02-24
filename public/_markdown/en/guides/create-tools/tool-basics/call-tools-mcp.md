@@ -215,8 +215,16 @@ When configuring your  client using the Streamable HTTP transport, ensure the  i
 
 Activate the virtual environment:
 
+### Bash
+
 ```bash
 source /path/to/your/project/.venv/bin/activate
+```
+
+### PowerShell
+
+```bash
+. "/path/to/your/project/.venv/Scripts/Activate.ps1"
 ```
 
 run the  server using the http transport. The secrets will be loaded from the `.env` file that is located at the directory of your :
@@ -240,7 +248,7 @@ Then, your  client’s configuration file should look like this:
 
 For security reasons, Local HTTP servers do not currently support managed authorization and secrets. If you need to use authorization or secrets, you should use the stdio transport and configure the Arcade API key and secrets in your  connection settings. If you intend to expose your HTTP  to the public internet, please follow the [on-prem MCP server](/guides/deployment-hosting/on-prem.md) guide for secure remote deployment.
 
-Last updated on January 30, 2026
+Last updated on February 12, 2026
 
 [Access runtime data](/en/guides/create-tools/tool-basics/runtime-data-access.md)
 [Organize your MCP server and tools](/en/guides/create-tools/tool-basics/organize-mcp-tools.md)

@@ -78,6 +78,8 @@ docker run -d -p 9099:9099 -v ./engine.yaml:/bin/engine.yaml ghcr.io/arcadeai/en
 
 where config.yaml is the path to the [configuration file](/guides/deployment-hosting/configure-engine.md).
 
+The Homebrew tab is macOS-only. For native Windows environments, use Docker for . For Arcade CLI setup on Windows, see [Windows environment setup](/get-started/setup/windows-environment.md).
+
 Arcade uses configuration files to manage engine settings and default values. When you install the , two files are created:
 
 -   The `engine.yaml` file for engine configuration.
@@ -706,7 +708,7 @@ ZOOM_CLIENT_ID=""
 ZOOM_CLIENT_SECRET=
 ```
 
-Last updated on February 10, 2026
+Last updated on February 12, 2026
 
 [On-premises MCP servers](/en/guides/deployment-hosting/on-prem.md)
 [Arcade Deploy](/en/guides/deployment-hosting/arcade-deploy.md)

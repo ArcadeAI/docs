@@ -44,7 +44,18 @@ Create a new virtual environment and activate it:
 
 ```bash
 uv venv
+```
+
+### Bash
+
+```bash
 source .venv/bin/activate
+```
+
+### PowerShell
+
+```bash
+. ".venv\Scripts\Activate.ps1"
 ```
 
 Install the dependencies:
@@ -462,7 +473,7 @@ if __name__ == "__main__":
     chat()
 ```
 
-Last updated on January 30, 2026
+Last updated on February 12, 2026
 
 [Overview](/en/get-started/agent-frameworks.md)
-[Using Arcade tools](/en/get-started/agent-frameworks/crewai/use-arcade-tools.md)
+[Setup Arcade tools with CrewAI](/en/get-started/agent-frameworks/crewai/use-arcade-tools.md)

@@ -41,7 +41,18 @@ mkdir google-adk-arcade-example
 cd google-adk-arcade-example
 uv init
 uv venv
+```
+
+### Bash
+
+```bash
 source .venv/bin/activate
+```
+
+### PowerShell
+
+```bash
+. ".venv\Scripts\Activate.ps1"
 ```
 
 Install the necessary packages:
@@ -734,7 +745,7 @@ if __name__ == '__main__':
     asyncio.run(main())
 ```
 
-Last updated on February 10, 2026
+Last updated on February 12, 2026
 
 [Overview](/en/get-started/agent-frameworks/google-adk/overview.md)
 [Setup (TypeScript)](/en/get-started/agent-frameworks/google-adk/setup-typescript.md)

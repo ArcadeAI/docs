@@ -178,7 +178,7 @@ Use the Salesforce  to get a user authorization token and call Salesforce API en
 
 2.  Get an [Arcade API key](/get-started/setup/api-keys.md)
     .
-3.  Set the `ARCADE_API_KEY` environment variable with `export ARCADE_API_KEY=<your-api-key>`.
+3.  Set the `ARCADE_API_KEY` environment variable (`export ARCADE_API_KEY=<your-api-key>` on Bash, `$env:ARCADE_API_KEY="<your-api-key>"` on PowerShell).
 4.  Make sure to have Python 3.10+ or Node.js 18+ installed.
 
 ### Python
@@ -384,7 +384,7 @@ The code implemented in the Arcade Salesforce  is the best guide for you to unde
 
 PLAINTEXT
 
-Last updated on February 10, 2026
+Last updated on February 12, 2026
 
 [Reddit](/en/references/auth-providers/reddit.md)
 [Slack](/en/references/auth-providers/slack.md)

@@ -43,7 +43,18 @@ mkdir crewai-arcade-example
 cd crewai-arcade-example
 uv init
 uv venv
+```
+
+### Bash
+
+```bash
 source .venv/bin/activate
+```
+
+### PowerShell
+
+```bash
+. ".venv\Scripts\Activate.ps1"
 ```
 
 Install the necessary packages:
@@ -526,7 +537,7 @@ if __name__ == "__main__":
 
 
 
-Last updated on February 10, 2026
+Last updated on February 12, 2026
 
 [Setup Arcade with your LLM (Python)](/en/get-started/agent-frameworks/setup-arcade-with-your-llm-python.md)
 [Overview](/en/get-started/agent-frameworks/google-adk/overview.md)

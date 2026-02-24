@@ -87,8 +87,17 @@ async def weather_eval_suite() -> EvalSuite:
 
 Set your OpenAI  and run the evaluation:
 
+### Bash
+
 ```bash
 export OPENAI_API_KEY=<your_api_key>
+arcade evals .
+```
+
+### PowerShell
+
+```bash
+$env:OPENAI_API_KEY="<your_api_key>"
 arcade evals .
 ```
 
@@ -358,7 +367,7 @@ If you want stricter suites, increase thresholds (for example `fail_threshold=0.
 -   Compare  sources with [comparative evaluations](/guides/create-tools/evaluate-tools/comparative-evaluations.md)
 
 
-Last updated on January 30, 2026
+Last updated on February 12, 2026
 
 [Why evaluate tools?](/en/guides/create-tools/evaluate-tools/why-evaluate.md)
 [Run evaluations](/en/guides/create-tools/evaluate-tools/run-evaluations.md)

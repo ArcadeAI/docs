@@ -40,6 +40,8 @@ arcade <command> --help
 
 Use `uv` for faster installs and better dependency management
 
+Using Windows and PowerShell? See [Windows environment setup](/get-started/setup/windows-environment.md) for install options with and without `uv`.
+
 🔐Authentication
 
 Authenticate with Arcade Cloud for deployments and secrets management.
@@ -72,7 +74,7 @@ Open Arcade web UI in browser
 
 Open local dashboard
 
-Credentials are stored in `~/.arcade/credentials.yaml`
+Credentials are stored in `~/.arcade/credentials.yaml` (or `%USERPROFILE%\.arcade\credentials.yaml` on Windows).
 
 🏢Organizations & Projects
 
@@ -692,6 +694,13 @@ OPENAI_API_KEY=sk-...
 ANTHROPIC_API_KEY=sk-ant-...
 ```
 
+PowerShell session example:
+
+```bash
+$env:OPENAI_API_KEY="sk-..."
+$env:ANTHROPIC_API_KEY="sk-ant-..."
+```
+
 📂Project Structure
 
 ### Minimal Template (`arcade new my_server`)
@@ -788,7 +797,7 @@ Standard development cycle for building  servers:
 9.  **`arcade deploy`** — Deploy to cloud (requires `server.py` entrypoint)
 10.  **`arcade server logs -f`** — Monitor logs
 
-Last updated on January 30, 2026
+Last updated on February 12, 2026
 
 [Arcade CLI](/en/references/arcade-cli.md)
 [Contextual Access Webhook API](/en/references/contextual-access-webhook-api.md)
