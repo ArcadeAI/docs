@@ -124,6 +124,30 @@ Sync sidebar navigation locally:
 pnpm dlx tsx .github/scripts/sync-toolkit-sidebar.ts
 ```
 
+## Excluding toolkits
+
+Pass `--exclude-file <path>` to skip specific toolkits during generation and
+remove their output files if they already exist.
+
+Create a plain-text file with one toolkit ID per line:
+
+```text
+# toolkits to exclude from docs generation
+Jira
+Confluence
+SomeInternalTool
+```
+
+Lines that are blank or start with `#` are ignored. IDs are case-insensitive.
+
+```bash
+pnpm dlx tsx src/cli/index.ts generate --all \
+  --exclude-file ./excluded-toolkits.txt
+```
+
+If a toolkit listed in the file already has an output `.json` file, that file
+is deleted and `index.json` is rebuilt to exclude it.
+
 ## Key CLI options
 
 - `--all` generate all toolkits
