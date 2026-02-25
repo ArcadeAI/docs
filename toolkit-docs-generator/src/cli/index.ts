@@ -50,6 +50,8 @@ import {
   type IToolkitDataSource,
   type ToolkitData,
 } from "../sources/toolkit-data-source.js";
+import { removeExcludedToolkitFiles } from "../utils/excluded-output-cleanup.js";
+import { readExclusionList } from "../utils/exclusion-list.js";
 import {
   createProgressTracker,
   formatToolkitComplete,
@@ -839,6 +841,10 @@ program
     "Require complete metadata. Only include toolkits with data in Engine and Design System.",
     false
   )
+  .option(
+    "--exclude-file <file>",
+    "Path to a .txt file with toolkit IDs to exclude from generation (one per line)"
+  )
   .option("--verbose", "Enable verbose logging", false)
   .action(
     async (options: {
@@ -878,12 +884,29 @@ program
       incremental: boolean;
       skipUnchanged: boolean;
       requireComplete: boolean;
+      excludeFile?: string;
       verbose: boolean;
       // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: legacy CLI flow
     }) => {
       const spinner = ora("Parsing input...").start();
       const logPaths = buildLogPaths(resolve(options.logDir));
       const requireComplete = options.requireComplete;
+
+      let excludedToolkitIds = new Set<string>();
+      if (options.excludeFile) {
+        spinner.start(`Loading exclusion list from ${options.excludeFile}...`);
+        const loaded = await readExclusionList(options.excludeFile);
+        if (loaded === null) {
+          spinner.fail(`Exclusion file not found: ${options.excludeFile}`);
+          process.exit(1);
+        }
+        excludedToolkitIds = loaded;
+        spinner.succeed(
+          excludedToolkitIds.size > 0
+            ? `Excluding ${excludedToolkitIds.size} toolkit(s) from generation`
+            : "Exclusion file loaded (no toolkits excluded)"
+        );
+      }
 
       try {
         const runAll = options.all;
@@ -1101,6 +1124,10 @@ program
           } else {
             spinner.succeed("No previously completed toolkits found");
           }
+        }
+
+        for (const id of excludedToolkitIds) {
+          skipToolkitIds.add(id);
         }
 
         // Handle --skip-unchanged: detect changes and only regenerate changed toolkits
@@ -1440,6 +1467,23 @@ program
             } catch (error) {
               spinner.warn(`Failed to generate index: ${error}`);
             }
+          }
+        }
+
+        if (excludedToolkitIds.size > 0) {
+          const deleted = await removeExcludedToolkitFiles(
+            resolve(options.output),
+            excludedToolkitIds
+          );
+          if (deleted.length > 0) {
+            if (options.verbose) {
+              console.log(
+                chalk.dim(
+                  `  Deleted ${deleted.length} excluded toolkit file(s): ${deleted.join(", ")}`
+                )
+              );
+            }
+            await generator.rebuildIndexFromOutput();
           }
         }
 

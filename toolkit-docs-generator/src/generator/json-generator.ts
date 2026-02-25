@@ -222,6 +222,15 @@ export class JsonGenerator {
     }
     return readResult.toolkits;
   }
+
+  /**
+   * Rebuild index.json from the toolkit files currently in the output directory.
+   */
+  async rebuildIndexFromOutput(): Promise<string> {
+    const errors: string[] = [];
+    const toolkits = await this.getToolkitsFromOutputDir(errors);
+    return this.generateIndexFile(toolkits);
+  }
 }
 
 // ============================================================================
