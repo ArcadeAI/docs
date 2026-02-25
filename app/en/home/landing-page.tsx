@@ -175,6 +175,11 @@ const FRAMEWORKS = [
     icon: "/images/icons/mastra.svg",
     invertInDark: true,
   },
+  {
+    name: "TanStack AI",
+    href: "/get-started/agent-frameworks/tanstack-ai",
+    icon: "https://avatars.githubusercontent.com/u/72518640?s=200&v=4",
+  },
 ];
 
 // Helper function to get theme-aware invert classes
@@ -406,6 +411,10 @@ export function LandingPage() {
                       alt: "Mastra",
                       invertInDark: true,
                     },
+                    {
+                      src: "https://avatars.githubusercontent.com/u/72518640?s=200&v=4",
+                      alt: "TanStack AI",
+                    },
                   ]}
                   title="Power Your Agent"
                 />
@@ -517,7 +526,7 @@ export function LandingPage() {
               Arcade integrates with popular agent frameworks and LLM providers.
             </p>
           </div>
-          <div className="mx-auto mt-10 grid max-w-3xl grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-6">
+          <div className="mx-auto mt-10 grid max-w-4xl grid-cols-2 gap-4 sm:grid-cols-4 md:grid-cols-7">
             {FRAMEWORKS.map((framework) => (
               <Link
                 className="flex flex-col items-center gap-2 rounded-lg border border-none p-4 transition-all hover:shadow-md dark:hover:bg-gray-800"

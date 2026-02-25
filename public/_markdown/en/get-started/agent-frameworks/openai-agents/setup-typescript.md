@@ -377,11 +377,12 @@ main().catch(console.error);
 -   Add more  by modifying `MCP_SERVERS` and `INDIVIDUAL_TOOLS`
 -   Build a web interface using frameworks like Next.js or Express
 -   See the [Vercel AI SDK tutorial](/get-started/agent-frameworks/vercelai.md)
-     for a complete web chatbot example
+     or [TanStack AI tutorial](/get-started/agent-frameworks/tanstack-ai.md)
+     for complete web chatbot examples
 -   Explore [creating custom tools](/guides/create-tools/tool-basics/build-mcp-server.md)
      with the Arcade  SDK
 
-Last updated on January 30, 2026
+Last updated on February 10, 2026
 
 [Setup (Python)](/en/get-started/agent-frameworks/openai-agents/setup-python.md)
-[Setup Arcade with OpenAI Agents SDK](/en/get-started/agent-frameworks/openai-agents/use-arcade-with-openai-agents.md)
+[TanStack AI](/en/get-started/agent-frameworks/tanstack-ai.md)
