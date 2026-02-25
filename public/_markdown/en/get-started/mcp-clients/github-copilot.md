@@ -81,7 +81,7 @@ In Visual Studio,
 4.  This will open another dialog. Fill in the information for your  server. You will need to choose:
 
     -   **Destination**: The path to the  configuration file, if you choose “Global”, the  will be added to all solutions. If you choose “Solution”, the MCP gateway will be added to the current solution only.
-    -   **Server ID**: The ID of the the  server you’re adding, this is how it will be displayed in the list of servers.
+    -   **Server ID**: The ID of the  server you’re adding, this is how it will be displayed in the list of servers.
     -   **Type**: For  gateways, you must select “HTTP”.
     -   **URL**: The URL of the  gateway.
     -   **Headers**: The headers to pass to the  gateway.
@@ -127,7 +127,7 @@ Coming soon…
 
 1.  Open the chat pane (typically command-l)
 2.  Make sure you are in  mode
-3.  Ask the  to use a !
+3.  Ask the  to use a .
 
 Last updated on February 10, 2026
 
