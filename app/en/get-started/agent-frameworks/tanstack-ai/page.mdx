@@ -7,9 +7,11 @@ import { Steps, Tabs, Callout } from "nextra/components";
 
 # Build an AI Chatbot with Arcade and TanStack AI
 
+You'll build a browser-based chatbot using [TanStack Start](https://tanstack.com/start) that uses Arcade's Gmail and Slack tools.
+
 [TanStack AI](https://tanstack.com/ai/latest/docs) is a type-safe, provider-agnostic SDK for building AI applications in JavaScript and TypeScript. It provides streaming responses, tool calling, and framework-agnostic primitives for React, Solid, and vanilla JavaScript. Provider adapters let you switch between OpenAI, Anthropic, Google Gemini, and Ollama without rewriting your code.
 
-In this guide, you'll build a browser-based chatbot using [TanStack Start](https://tanstack.com/start) that uses Arcade's Gmail and Slack tools. Your users can read emails, send messages, and interact with Slack through a conversational interface with built-in authentication.
+Your users can read emails, send messages, and interact with Slack through a conversational interface with built-in authentication.
 
 <GuideOverview>
 <GuideOverview.Outcomes>
@@ -360,7 +362,7 @@ export const Route = createFileRoute("/api/chat")({
 </Callout>
 
 <Callout type="warning">
-  **Handling large tool outputs:** Tools like `Gmail.ListEmails` can return 200KB+ of email content. When the agent passes this data back to the LLM in the agentic loop, it may exceed token limits. The code above includes `truncateDeep` to limit all strings to 300 characters and `prepareMessages` to keep only the last 10 messages.
+  **Handling large tool outputs:** tools like `Gmail.ListEmails` can return 200KB+ of email content. When the agent passes this data back to the LLM in the agentic loop, it may exceed token limits. The code above includes `truncateDeep` to limit all strings to 300 characters and `prepareMessages` to keep only the last 10 messages.
 </Callout>
 
 ### Create the auth status server function
@@ -390,7 +392,7 @@ export const checkAuthStatus = createServerFn({ method: "POST" })
   });
 ```
 
-This server function allows the frontend to poll for authorization completion, creating a seamless experience where the chatbot automatically retries after the user authorizes.
+This server function allows the frontend to poll for authorization completion, creating a seamless experience where the chatbot automatically retries after you authorize.
 
 ### Build the chat route
 
@@ -635,7 +637,7 @@ export const Route = createFileRoute("/")({
 });
 ```
 
-The `AuthPendingUI` component polls for OAuth completion using the `checkAuthStatus` server function and calls `onAuthComplete` when the user finishes authorizing, triggering a reload to retry the tool call.
+The `AuthPendingUI` component polls for OAuth completion using the `checkAuthStatus` server function and calls `onAuthComplete` when you finish authorizing, triggering a reload to retry the tool call.
 
 ### Run the chatbot
 
@@ -690,7 +692,7 @@ On first use, you'll see an authorization button. Click it to connect your Gmail
 - **Full TanStack stack**: TanStack Start + TanStack Router + TanStack AI work together seamlessly with server routes and file-based routing.
 - **Server routes keep secrets safe**: The `server.handlers` property ensures your API keys never reach the client while handling streaming responses.
 - **Authorization is automatic**: Check `authorization_required` in tool results and display the authorization UI. Poll for completion to retry automatically.
-- **Truncate large outputs**: Tools like Gmail can return 200KB+ of data. Wrap tool execution with truncation to prevent token overflow in the agentic loop.
+- **Truncate large outputs**: tools like Gmail can return 200KB+ of data. Wrap tool execution with truncation to prevent token overflow in the agentic loop.
 - **Provider flexibility**: Switch between OpenAI, Anthropic, Gemini, or Ollama by changing the adapter. No code rewrites needed.
 
 ## Next steps
@@ -911,200 +913,4 @@ export const checkAuthStatus = createServerFn({ method: "POST" })
 <summary>**src/routes/index.tsx** (full file)</summary>
 
 ```tsx filename="src/routes/index.tsx"
-import { createFileRoute } from "@tanstack/react-router";
-import { useChat, fetchServerSentEvents } from "@tanstack/ai-react";
-import { useState, useRef, useEffect } from "react";
-import ReactMarkdown from "react-markdown";
-import { checkAuthStatus } from "../functions/auth";
-
-function AuthPendingUI({
-  authUrl,
-  toolName,
-  onAuthComplete,
-}: {
-  authUrl: string;
-  toolName: string;
-  onAuthComplete: () => void;
-}) {
-  const [status, setStatus] = useState<"initial" | "waiting" | "completed">(
-    "initial"
-  );
-  const pollingRef = useRef<NodeJS.Timeout | null>(null);
-  const hasCompletedRef = useRef(false);
-  const onAuthCompleteRef = useRef(onAuthComplete);
-
-  useEffect(() => {
-    onAuthCompleteRef.current = onAuthComplete;
-  }, [onAuthComplete]);
-
-  useEffect(() => {
-    if (status !== "waiting" || !toolName || hasCompletedRef.current) return;
-
-    const pollStatus = async () => {
-      try {
-        const result = await checkAuthStatus({ data: { toolName } });
-
-        if (result.status === "completed" && !hasCompletedRef.current) {
-          hasCompletedRef.current = true;
-          if (pollingRef.current) clearInterval(pollingRef.current);
-          setStatus("completed");
-          setTimeout(() => onAuthCompleteRef.current(), 1500);
-        }
-      } catch (error) {
-        console.error("Polling error:", error);
-      }
-    };
-
-    pollingRef.current = setInterval(pollStatus, 2000);
-    return () => {
-      if (pollingRef.current) clearInterval(pollingRef.current);
-    };
-  }, [status, toolName]);
-
-  const displayName = toolName.split("_")[0] || toolName;
-
-  const handleAuthClick = () => {
-    if (!authUrl) return;
-    window.open(authUrl, "_blank");
-    setStatus("waiting");
-  };
-
-  return (
-    <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-      {status === "completed" ? (
-        <p className="text-green-600 font-medium">
-          {displayName} authorized successfully
-        </p>
-      ) : !authUrl ? (
-        <p className="text-red-600">Authorization URL not available</p>
-      ) : (
-        <div className="flex items-center gap-3">
-          <span>Authorize access to {displayName}?</span>
-          <button
-            onClick={handleAuthClick}
-            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium"
-          >
-            {status === "waiting" ? "Retry" : "Authorize"}
-          </button>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function Chat() {
-  const [input, setInput] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const { messages, sendMessage, reload, isLoading } = useChat({
-    connection: fetchServerSentEvents("/api/chat"),
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (input.trim() && !isLoading) {
-      sendMessage(input);
-      setInput("");
-    }
-  };
-
-  useEffect(() => {
-    if (!isLoading && inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, [isLoading]);
-
-  return (
-    <div className="flex flex-col h-screen max-w-2xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Arcade + TanStack AI Chat</h1>
-
-      <div className="flex-1 overflow-y-auto space-y-4 mb-4">
-        {messages.map((message) => {
-          // Extract text content and tool results from parts
-          const textParts = (message.parts || []).filter(
-            (p: { type: string }) => p.type === "text"
-          );
-          const toolResultParts = (message.parts || []).filter(
-            (p: { type: string }) => p.type === "tool-result"
-          );
-          const textContent = textParts
-            .map((p: { content?: string }) => p.content || "")
-            .join("");
-          const authRequired = toolResultParts.find(
-            (result: { output?: { authorization_required?: boolean } }) =>
-              result.output?.authorization_required
-          );
-
-          return (
-            <div
-              key={message.id}
-              className={`p-4 rounded-lg ${
-                message.role === "assistant"
-                  ? "bg-gray-100"
-                  : "bg-blue-100 ml-8"
-              }`}
-            >
-              <div className="font-semibold text-sm text-gray-500 mb-1">
-                {message.role === "assistant" ? "Assistant" : "You"}
-              </div>
-
-              {authRequired ? (
-                <AuthPendingUI
-                  authUrl={
-                    (
-                      authRequired as {
-                        output?: { authorization_response?: { url?: string } };
-                      }
-                    )?.output?.authorization_response?.url || ""
-                  }
-                  toolName={
-                    (authRequired as { output?: { tool_name?: string } })
-                      ?.output?.tool_name || ""
-                  }
-                  onAuthComplete={() => reload()}
-                />
-              ) : (
-                <div className="whitespace-pre-wrap">{textContent}</div>
-              )}
-            </div>
-          );
-        })}
-
-        {isLoading && (
-          <div className="p-4 rounded-lg bg-gray-100">
-            <div className="font-semibold text-sm text-gray-500 mb-1">
-              Assistant
-            </div>
-            <div className="animate-pulse">Thinking...</div>
-          </div>
-        )}
-      </div>
-
-      <form onSubmit={handleSubmit} className="flex gap-2">
-        <input
-          ref={inputRef}
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask about your emails or Slack..."
-          disabled={isLoading}
-          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <button
-          type="submit"
-          disabled={isLoading || !input.trim()}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Send
-        </button>
-      </form>
-    </div>
-  );
-}
-
-export const Route = createFileRoute("/")({
-  component: Chat,
-});
-```
-
-</details>
+import { createFileRoute } from "@tanstack
