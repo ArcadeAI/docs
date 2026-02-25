@@ -360,6 +360,7 @@ In this example, we call the tool methods directly. In your real applications an
 [![Google ADK logo](https://avatars.githubusercontent.com/u/1342004?s=200&v=4) Google ADK Agent Framework](/en/get-started/agent-frameworks/google-adk/setup-typescript.md)
 [![Mastra logo](/images/icons/mastra.svg) Mastra Agent Framework](/en/get-started/agent-frameworks/mastra.md)
 [![Vercel AI logo](/images/icons/vercel.svg) Vercel AI Agent Framework](/en/get-started/agent-frameworks/vercelai.md)
+[![TanStack AI logo](https://avatars.githubusercontent.com/u/72518640?s=200&v=4) TanStack AI Agent Framework](/en/get-started/agent-frameworks/tanstack-ai.md)
 
 ## Full Example Code
 

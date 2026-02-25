@@ -253,7 +253,7 @@ If you are following a guide that uses Homebrew, treat it as optional unless you
 -   [Browse the Arcade CLI reference](/references/arcade-cli.md)
 
 
-Last updated on February 24, 2026
+Last updated on February 10, 2026
 
 [Connect Arcade docs to your IDE](/en/get-started/setup/connect-arcade-docs.md)
 [Call tools in agents](/en/get-started/quickstarts/call-tool-agent.md)
