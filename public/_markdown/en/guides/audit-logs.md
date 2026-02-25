@@ -608,7 +608,7 @@ When the record was persisted
 
 -   Standard error envelope with `code` and `msg` fields. Common failures are `401` (unauthenticated), `403` (not a member of the org/), and `429` (rate limited).
 
-Last updated on January 30, 2026
+Last updated on February 10, 2026
 
 [Arcade Registry Early Access](/en/resources/registry-early-access.md)
 [Contextual Access](/en/guides/contextual-access.md)
