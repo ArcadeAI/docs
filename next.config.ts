@@ -23,6 +23,233 @@ const nextConfig: NextConfig = withLlmsTxt({
   withNextra({
     async redirects() {
       return [
+        // "others" category removed — toolkits moved to proper categories
+        {
+          source: "/:locale/resources/integrations/others/:path*",
+          destination: "/:locale/resources/integrations",
+          permanent: false,
+        },
+        // Google ADK tutorial consolidation - redirect old URL to new
+        {
+          source:
+            "/:locale/get-started/agent-frameworks/google-adk/use-arcade-tools",
+          destination:
+            "/:locale/get-started/agent-frameworks/google-adk/overview",
+          permanent: true,
+        },
+        // Auto-added redirects for deleted pages
+        {
+          source: "/:locale/references/logic-extensions-api",
+          destination: "/:locale/references/contextual-access-webhook-api",
+          permanent: true,
+        },
+        // Auto-added redirects for deleted pages
+        {
+          source: "/:locale/guides/logic-extensions",
+          destination: "/:locale/guides/contextual-access",
+          permanent: true,
+        },
+        {
+          source: "/:locale/guides/logic-extensions/build-your-own",
+          destination: "/:locale/guides/contextual-access/build-your-own",
+          permanent: true,
+        },
+        {
+          source: "/:locale/guides/logic-extensions/examples",
+          destination: "/:locale/guides/contextual-access/examples",
+          permanent: true,
+        },
+        {
+          source: "/:locale/guides/logic-extensions/how-hooks-work",
+          destination: "/:locale/guides/contextual-access/how-hooks-work",
+          permanent: true,
+        },
+        // Auto-added redirects for deleted pages
+        {
+          source: "/:locale/resources/integrations/preview",
+          destination: "/:locale/resources/integrations",
+          permanent: true,
+        },
+        // Auto-added redirects for deleted pages
+        {
+          source:
+            "/:locale/resources/integrations/customer-support/zendesk/reference",
+          destination:
+            "/:locale/resources/integrations/customer-support/zendesk",
+          permanent: true,
+        },
+        {
+          source:
+            "/:locale/resources/integrations/development/firecrawl/reference",
+          destination: "/:locale/resources/integrations/development/firecrawl",
+          permanent: true,
+        },
+        {
+          source:
+            "/:locale/resources/integrations/productivity/asana/reference",
+          destination: "/:locale/resources/integrations/productivity/asana",
+          permanent: true,
+        },
+        {
+          source:
+            "/:locale/resources/integrations/productivity/clickup/reference",
+          destination: "/:locale/resources/integrations/productivity/clickup",
+          permanent: true,
+        },
+        {
+          source:
+            "/:locale/resources/integrations/productivity/dropbox/reference",
+          destination: "/:locale/resources/integrations/productivity/dropbox",
+          permanent: true,
+        },
+        {
+          source:
+            "/:locale/resources/integrations/productivity/gmail/reference",
+          destination: "/:locale/resources/integrations/productivity/gmail",
+          permanent: true,
+        },
+        {
+          source:
+            "/:locale/resources/integrations/productivity/google-calendar/reference",
+          destination:
+            "/:locale/resources/integrations/productivity/google-calendar",
+          permanent: true,
+        },
+        {
+          source:
+            "/:locale/resources/integrations/productivity/google-docs/reference",
+          destination:
+            "/:locale/resources/integrations/productivity/google-docs",
+          permanent: true,
+        },
+        {
+          source:
+            "/:locale/resources/integrations/productivity/google-drive/reference",
+          destination:
+            "/:locale/resources/integrations/productivity/google-drive",
+          permanent: true,
+        },
+        {
+          source:
+            "/:locale/resources/integrations/productivity/google-sheets/reference",
+          destination:
+            "/:locale/resources/integrations/productivity/google-sheets",
+          permanent: true,
+        },
+        {
+          source:
+            "/:locale/resources/integrations/productivity/jira/environment-variables",
+          destination: "/:locale/resources/integrations/productivity/jira",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/productivity/jira/reference",
+          destination: "/:locale/resources/integrations/productivity/jira",
+          permanent: true,
+        },
+        {
+          source:
+            "/:locale/resources/integrations/productivity/outlook-mail/reference",
+          destination:
+            "/:locale/resources/integrations/productivity/outlook-mail",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/sales/hubspot/reference",
+          destination: "/:locale/resources/integrations/sales/hubspot",
+          permanent: true,
+        },
+        {
+          source:
+            "/:locale/resources/integrations/social-communication/discord",
+          destination: "/:locale/resources/integrations",
+          permanent: true,
+        },
+        {
+          source:
+            "/:locale/resources/integrations/social-communication/linkedin",
+          destination: "/:locale/resources/integrations/social/linkedin",
+          permanent: true,
+        },
+        {
+          source:
+            "/:locale/resources/integrations/social-communication/microsoft-teams",
+          destination: "/:locale/resources/integrations/social/microsoft-teams",
+          permanent: true,
+        },
+        {
+          source:
+            "/:locale/resources/integrations/social-communication/microsoft-teams/reference",
+          destination: "/:locale/resources/integrations/social/microsoft-teams",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/social-communication/reddit",
+          destination: "/:locale/resources/integrations/social/reddit",
+          permanent: true,
+        },
+        {
+          source:
+            "/:locale/resources/integrations/social-communication/slack-api",
+          destination: "/:locale/resources/integrations/social/slack-api",
+          permanent: true,
+        },
+        {
+          source:
+            "/:locale/resources/integrations/social-communication/slack/environment-variables",
+          destination: "/:locale/resources/integrations/social/slack",
+          permanent: true,
+        },
+        {
+          source:
+            "/:locale/resources/integrations/social-communication/slack/install",
+          destination: "/:locale/resources/integrations/social/slack",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/social-communication/slack",
+          destination: "/:locale/resources/integrations/social/slack",
+          permanent: true,
+        },
+        {
+          source:
+            "/:locale/resources/integrations/social-communication/slack/reference",
+          destination: "/:locale/resources/integrations/social/slack",
+          permanent: true,
+        },
+        {
+          source:
+            "/:locale/resources/integrations/social-communication/teams/reference",
+          destination: "/:locale/resources/integrations/social/microsoft-teams",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/social-communication/twilio",
+          destination: "/:locale/resources/integrations",
+          permanent: true,
+        },
+        {
+          source:
+            "/:locale/resources/integrations/social-communication/twilio/reference",
+          destination: "/:locale/resources/integrations",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/social-communication/x",
+          destination: "/:locale/resources/integrations/social/x",
+          permanent: true,
+        },
+        {
+          source:
+            "/:locale/resources/integrations/social-communication/zoom/install",
+          destination: "/:locale/resources/integrations/social/zoom",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/social-communication/zoom",
+          destination: "/:locale/resources/integrations/social/zoom",
+          permanent: true,
+        },
         // Auto-added redirects for deleted pages
         {
           source:
@@ -41,14 +268,14 @@ const nextConfig: NextConfig = withLlmsTxt({
           source:
             "/:locale/get-started/agent-frameworks/langchain/use-arcade-tools",
           destination:
-            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain",
+            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain-py",
           permanent: true,
         },
         {
           source:
             "/:locale/get-started/agent-frameworks/langchain/user-auth-interrupts",
           destination:
-            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain",
+            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain-py",
           permanent: true,
         },
         // Mastra tutorial consolidation
@@ -69,6 +296,28 @@ const nextConfig: NextConfig = withLlmsTxt({
           destination: "/:locale/get-started/agent-frameworks/mastra",
           permanent: true,
         },
+        // OpenAI Agents tutorial consolidation
+        {
+          source:
+            "/:locale/get-started/agent-frameworks/openai-agents/use-arcade-with-openai-agents",
+          destination:
+            "/:locale/get-started/agent-frameworks/openai-agents/overview",
+          permanent: true,
+        },
+        {
+          source:
+            "/:locale/get-started/agent-frameworks/openai-agents/use-arcade-tools",
+          destination:
+            "/:locale/get-started/agent-frameworks/openai-agents/overview",
+          permanent: true,
+        },
+        {
+          source:
+            "/:locale/get-started/agent-frameworks/openai-agents/user-auth-interrupts",
+          destination:
+            "/:locale/get-started/agent-frameworks/openai-agents/overview",
+          permanent: true,
+        },
         // Moved from guides to get-started
         {
           source:
@@ -81,32 +330,39 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/home/langchain/use-arcade-tools",
           destination:
-            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain",
+            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain-py",
           permanent: true,
         },
         {
           source: "/:locale/guides/agent-frameworks/langchain/use-arcade-tools",
           destination:
-            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain",
+            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain-py",
           permanent: true,
         },
         {
           source: "/:locale/home/langchain/user-auth-interrupts",
           destination:
-            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain",
+            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain-py",
           permanent: true,
         },
         {
           source:
             "/:locale/guides/agent-frameworks/langchain/user-auth-interrupts",
           destination:
+            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain-py",
+          permanent: true,
+        },
+        {
+          source:
             "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain",
+          destination:
+            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain-py",
           permanent: true,
         },
         {
           source: "/:locale/home/oai-agents/user-auth-interrupts",
           destination:
-            "/:locale/get-started/agent-frameworks/openai-agents/user-auth-interrupts",
+            "/:locale/get-started/agent-frameworks/openai-agents/overview",
           permanent: true,
         },
         {
@@ -320,7 +576,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/home/google-adk/use-arcade-tools",
           destination:
-            "/:locale/get-started/agent-frameworks/google-adk/use-arcade-tools",
+            "/:locale/get-started/agent-frameworks/google-adk/setup-python",
           permanent: true,
         },
         {
@@ -367,7 +623,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/home/oai-agents/use-arcade-tools",
           destination:
-            "/:locale/get-started/agent-frameworks/openai-agents/use-arcade-tools",
+            "/:locale/get-started/agent-frameworks/openai-agents/overview",
           permanent: true,
         },
         {
@@ -414,6 +670,17 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/home/vercelai/using-arcade-tools",
           destination: "/:locale/get-started/agent-frameworks/vercelai",
+          permanent: true,
+        },
+        // Legacy /integrations path
+        {
+          source: "/:locale/integrations",
+          destination: "/:locale/resources/integrations",
+          permanent: true,
+        },
+        {
+          source: "/:locale/integrations/:path*",
+          destination: "/:locale/resources/integrations/:path*",
           permanent: true,
         },
         // MCP servers to integrations
@@ -505,7 +772,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/guides/agent-frameworks/langchain/python",
           destination:
-            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain",
+            "/:locale/get-started/agent-frameworks/langchain/use-arcade-with-langchain-py",
           permanent: true,
         },
         {
@@ -522,13 +789,13 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/guides/agent-frameworks/google-adk/python",
           destination:
-            "/:locale/get-started/agent-frameworks/google-adk/use-arcade-tools",
+            "/:locale/get-started/agent-frameworks/google-adk/setup-python",
           permanent: true,
         },
         {
           source: "/:locale/guides/agent-frameworks/openai/python",
           destination:
-            "/:locale/get-started/agent-frameworks/openai-agents/use-arcade-tools",
+            "/:locale/get-started/agent-frameworks/openai-agents/overview",
           permanent: true,
         },
         {

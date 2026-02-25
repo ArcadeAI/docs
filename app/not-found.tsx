@@ -13,8 +13,8 @@ import { Home, SearchX } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import posthog from "posthog-js";
-import { use, useEffect, useMemo, useRef } from "react";
-import { getDictionaryClient } from "@/_dictionaries/get-dictionary-client";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import type { Dictionary } from "@/_dictionaries/i18n-config";
 import { BackButton } from "@/app/_components/back-button";
 
 const LOCALE_PATH_REGEX = /^\/([a-z]{2}(?:-[A-Z]{2})?)(?:\/.+|$)/;
@@ -33,10 +33,27 @@ function getReferrerInfo(): { referrer: string; referringDomain: string } {
   }
 }
 
-export default function NotFound() {
+// Default dictionary for fallback during SSR
+const defaultDict: Dictionary["notFoundPage"] = {
+  title: "Page not found",
+  description: "This page doesn't exist or may have moved.",
+  notAvailablePrefix: "Not available in",
+  tryEnglish: "Try English version",
+  translationHint: "This page may not be translated yet.",
+  viewOriginalEnglish: "View the original in English",
+  goHome: "Go to homepage",
+  goBack: "Go back",
+  needHelp: "Need help? Try these popular pages:",
+  quickstart: "Quickstart",
+  mcpServers: "MCP Servers",
+  createMcpServer: "Create a MCP Server",
+};
+
+function NotFoundContent() {
   const pathname = usePathname() || "/";
   const searchParams = useSearchParams();
   const lastCapturedPathRef = useRef<string | null>(null);
+  const [dict, setDict] = useState<Dictionary["notFoundPage"]>(defaultDict);
 
   const { currentLocale, englishPath, showEnglishLink } = useMemo(() => {
     const locale = pathname.match(LOCALE_PATH_REGEX)?.[1] || "en";
@@ -50,7 +67,26 @@ export default function NotFound() {
     };
   }, [pathname]);
 
-  const dict = use(getDictionaryClient(currentLocale));
+  // Load dictionary on client side
+  useEffect(() => {
+    const loadDict = async () => {
+      try {
+        type DictModule = { default: Dictionary };
+        let dictModule: DictModule;
+        if (currentLocale === "es") {
+          dictModule = await import("@/_dictionaries/es");
+        } else if (currentLocale === "pt-BR") {
+          dictModule = await import("@/_dictionaries/pt-BR");
+        } else {
+          dictModule = await import("@/_dictionaries/en");
+        }
+        setDict(dictModule.default.notFoundPage);
+      } catch {
+        // Keep default English dictionary on error
+      }
+    };
+    loadDict();
+  }, [currentLocale]);
 
   useEffect(() => {
     const search = searchParams?.toString();
@@ -93,22 +129,22 @@ export default function NotFound() {
             {/* Content */}
             <div className="space-y-3 text-center">
               <h1 className="font-bold text-2xl text-foreground tracking-tight sm:text-3xl">
-                {dict.notFoundPage.title}
+                {dict.title}
               </h1>
               <p className="mx-auto max-w-sm text-base text-muted-foreground leading-relaxed">
-                {dict.notFoundPage.description}
+                {dict.description}
               </p>
             </div>
 
             {/* English fallback */}
             {showEnglishLink && (
               <div className="text-center text-muted-foreground text-sm">
-                <span>{dict.notFoundPage.translationHint} </span>
+                <span>{dict.translationHint} </span>
                 <Link
                   className="font-medium text-orange-600 underline-offset-2 hover:underline dark:text-orange-400"
                   href={englishPath}
                 >
-                  {dict.notFoundPage.viewOriginalEnglish}
+                  {dict.viewOriginalEnglish}
                 </Link>
                 .
               </div>
@@ -119,18 +155,16 @@ export default function NotFound() {
               <Button asChild size="lg">
                 <Link href={`/${currentLocale}/home`}>
                   <Home className="mr-2 h-5 w-5" />
-                  {dict.notFoundPage.goHome}
+                  {dict.goHome}
                 </Link>
               </Button>
-              <BackButton goBackText={dict.notFoundPage.goBack} />
+              <BackButton goBackText={dict.goBack} />
             </div>
           </CardContent>
 
           <CardFooter className="border-border border-t pt-6">
             <div className="w-full space-y-3 text-center">
-              <p className="text-muted-foreground text-sm">
-                {dict.notFoundPage.needHelp}
-              </p>
+              <p className="text-muted-foreground text-sm">{dict.needHelp}</p>
               <div className="flex flex-wrap items-center justify-center gap-2">
                 <Link
                   className={cn(
@@ -139,7 +173,7 @@ export default function NotFound() {
                   )}
                   href={`/${currentLocale}/home/quickstart`}
                 >
-                  {dict.notFoundPage.quickstart}
+                  {dict.quickstart}
                 </Link>
                 <Link
                   className={cn(
@@ -148,7 +182,7 @@ export default function NotFound() {
                   )}
                   href={`/${currentLocale}/mcp-servers`}
                 >
-                  {dict.notFoundPage.mcpServers}
+                  {dict.mcpServers}
                 </Link>
                 <Link
                   className={cn(
@@ -157,7 +191,7 @@ export default function NotFound() {
                   )}
                   href={`/${currentLocale}/home/build-tools/create-a-mcp-server`}
                 >
-                  {dict.notFoundPage.createMcpServer}
+                  {dict.createMcpServer}
                 </Link>
               </div>
             </div>
@@ -165,5 +199,17 @@ export default function NotFound() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function NotFound() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center py-16">Loading...</div>
+      }
+    >
+      <NotFoundContent />
+    </Suspense>
   );
 }

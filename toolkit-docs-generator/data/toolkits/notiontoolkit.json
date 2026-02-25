@@ -1,0 +1,438 @@
+{
+  "id": "NotionToolkit",
+  "label": "Notion",
+  "version": "1.2.1",
+  "description": "Arcade.dev LLM tools for Notion",
+  "metadata": {
+    "category": "productivity",
+    "iconUrl": "https://design-system.arcade.dev/icons/notion.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/productivity/notion",
+    "isComingSoon": false,
+    "isHidden": true
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": "notion",
+    "allScopes": []
+  },
+  "tools": [
+    {
+      "name": "AppendContentToEndOfPage",
+      "qualifiedName": "NotionToolkit.AppendContentToEndOfPage",
+      "fullyQualifiedName": "NotionToolkit.AppendContentToEndOfPage@1.2.1",
+      "description": "Append markdown content to the end of a Notion page by its ID or title",
+      "parameters": [
+        {
+          "name": "page_id_or_title",
+          "type": "string",
+          "required": true,
+          "description": "ID or title of the page to append content to",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "content",
+          "type": "string",
+          "required": true,
+          "description": "The markdown content to append to the end of the page",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "notion",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing a success message and the URL to the page"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "NotionToolkit.AppendContentToEndOfPage",
+        "parameters": {
+          "page_id_or_title": {
+            "value": "12345678-9abc-def0-1234-56789abcdef0",
+            "type": "string",
+            "required": true
+          },
+          "content": {
+            "value": "# New Section\nThis is the new content appended to the page.",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "notion",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreatePage",
+      "qualifiedName": "NotionToolkit.CreatePage",
+      "fullyQualifiedName": "NotionToolkit.CreatePage@1.2.1",
+      "description": "Create a new Notion page by the title of the new page's parent.",
+      "parameters": [
+        {
+          "name": "parent_title",
+          "type": "string",
+          "required": true,
+          "description": "Title of an existing page/database within which the new page will be created. ",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "Title of the new page",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "content",
+          "type": "string",
+          "required": false,
+          "description": "The content of the new page",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "notion",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "string",
+        "description": "The ID of the new page"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "NotionToolkit.CreatePage",
+        "parameters": {
+          "parent_title": {
+            "value": "Marketing Strategy",
+            "type": "string",
+            "required": true
+          },
+          "title": {
+            "value": "Q4 Campaign Plan",
+            "type": "string",
+            "required": true
+          },
+          "content": {
+            "value": "This page contains the detailed plan for the Q4 marketing campaign.",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "notion",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetObjectMetadata",
+      "qualifiedName": "NotionToolkit.GetObjectMetadata",
+      "fullyQualifiedName": "NotionToolkit.GetObjectMetadata@1.2.1",
+      "description": "Get the metadata of a Notion object (page or database) from its title or ID.\n\nOne of `object_title` or `object_id` MUST be provided, but both cannot be provided.\nThe title is case-insensitive and outer whitespace is ignored.\n\nAn object's metadata includes it's id, various timestamps, properties, url, and more.",
+      "parameters": [
+        {
+          "name": "object_title",
+          "type": "string",
+          "required": false,
+          "description": "Title of the page or database whose metadata to get",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "object_id",
+          "type": "string",
+          "required": false,
+          "description": "ID of the page or database whose metadata to get",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "object_type",
+          "type": "string",
+          "required": false,
+          "description": "The type of object to match title to. Only used if `object_title` is provided. Defaults to both",
+          "enum": ["page", "database"],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "notion",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The metadata of the object"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "NotionToolkit.GetObjectMetadata",
+        "parameters": {
+          "object_title": {
+            "value": "Project Plan",
+            "type": "string",
+            "required": false
+          },
+          "object_id": {
+            "value": "",
+            "type": "string",
+            "required": false
+          },
+          "object_type": {
+            "value": "page",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "notion",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetPageContentById",
+      "qualifiedName": "NotionToolkit.GetPageContentById",
+      "fullyQualifiedName": "NotionToolkit.GetPageContentById@1.2.1",
+      "description": "Get the content of a Notion page as markdown with the page's ID",
+      "parameters": [
+        {
+          "name": "page_id",
+          "type": "string",
+          "required": true,
+          "description": "ID of the page to get content from",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "notion",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "string",
+        "description": "The markdown content of the page"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "NotionToolkit.GetPageContentById",
+        "parameters": {
+          "page_id": {
+            "value": "123e4567-e89b-12d3-a456-426614174000",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "notion",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetPageContentByTitle",
+      "qualifiedName": "NotionToolkit.GetPageContentByTitle",
+      "fullyQualifiedName": "NotionToolkit.GetPageContentByTitle@1.2.1",
+      "description": "Get the content of a Notion page as markdown with the page's title",
+      "parameters": [
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "Title of the page to get content from",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "notion",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "string",
+        "description": "The markdown content of the page"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "NotionToolkit.GetPageContentByTitle",
+        "parameters": {
+          "title": {
+            "value": "Project Overview",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "notion",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetWorkspaceStructure",
+      "qualifiedName": "NotionToolkit.GetWorkspaceStructure",
+      "fullyQualifiedName": "NotionToolkit.GetWorkspaceStructure@1.2.1",
+      "description": "Get the workspace structure of the user's Notion workspace.\nIdeal for finding where an object is located in the workspace.",
+      "parameters": [],
+      "auth": {
+        "providerId": "notion",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The workspace structure"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "NotionToolkit.GetWorkspaceStructure",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "notion",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "SearchByTitle",
+      "qualifiedName": "NotionToolkit.SearchByTitle",
+      "fullyQualifiedName": "NotionToolkit.SearchByTitle@1.2.1",
+      "description": "Search for similar titles of pages, databases, or both within the user's workspace.\nDoes not include content.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": false,
+          "description": "A substring to search for within page and database titles. If not provided (default), all pages and/or databases are returned.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "select",
+          "type": "string",
+          "required": false,
+          "description": "Limit the results to either only pages or only databases. Defaults to both.",
+          "enum": ["page", "database"],
+          "inferrable": true
+        },
+        {
+          "name": "order_by",
+          "type": "string",
+          "required": false,
+          "description": "The direction to sort search results by last edited time. Defaults to 'descending'.",
+          "enum": ["ascending", "descending"],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of results to return. Defaults to 100. Set to -1 for no limit.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "notion",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing minimal information about the pages and/or databases that have titles that are the best match for the query. Does not include content or location."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "NotionToolkit.SearchByTitle",
+        "parameters": {
+          "query": {
+            "value": "project",
+            "type": "string",
+            "required": false
+          },
+          "select": {
+            "value": "pages",
+            "type": "string",
+            "required": false
+          },
+          "order_by": {
+            "value": "ascending",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "notion",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "NotionToolkit.WhoAmI",
+      "fullyQualifiedName": "NotionToolkit.WhoAmI@1.2.1",
+      "description": "Get information about the current user and their Notion workspace.\n\nThis tool provides detailed information about the authenticated user's\nNotion workspace including workspace statistics, user context, and\nintegration details.",
+      "parameters": [],
+      "auth": {
+        "providerId": "notion",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Get comprehensive user profile and Notion workspace information."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "NotionToolkit.WhoAmI",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "notion",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    }
+  ],
+  "documentationChunks": [
+    {
+      "type": "markdown",
+      "location": "auth",
+      "position": "after",
+      "content": "The Arcade Notion MCP Server uses the [Notion auth provider](/references/auth-providers/notion) to connect to users' Notion accounts.",
+      "header": "## Auth"
+    }
+  ],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-01-26T17:38:03.552Z",
+  "summary": "NotionToolkit is a powerful set of tools from Arcade.dev that facilitates interaction with Notion's API, enabling developers to easily manage and manipulate their Notion workspaces. It streamlines operations such as creating pages, appending content, and retrieving metadata or content from existing Notion pages.\n\n### Capabilities\n- Effortlessly create and modify pages within Notion.\n- Access detailed metadata and content from various Notion objects.\n- Search and navigate workspace structures and content efficiently.\n- Retrieve user information and workspace statistics.\n\n### OAuth\n- **Provider:** Notion\n- **Scopes:** None"
+}

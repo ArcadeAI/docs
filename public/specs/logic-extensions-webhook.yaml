@@ -1,0 +1,465 @@
+openapi: 3.0.3
+info:
+  title: Logical Extensions Webhook API (Beta)
+  description: |
+    Webhook contract between Arcade Engine and external hook servers for tool execution control.
+
+    **Note:** All endpoint paths are fully configurable. The paths shown (/pre, /post, etc.) are just defaults. You specify the actual paths when configuring your hooks in Arcade. The payloads described below remain the same.
+  version: 1.0.0-beta
+
+paths:
+  /pre:
+    post:
+      operationId: preHook
+      summary: Pre-execution hook
+      description: |
+        Gate and potentially modify tool execution requests. Run before a tool is executed.
+      tags:
+        - Hooks
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PreHookRequest'
+      responses:
+        '200':
+          description: Hook evaluation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreHookResult'
+        '400':
+          description: Bad request - malformed request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized - invalid or missing bearer token
+
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /post:
+    post:
+      operationId: postHook
+      summary: Post-execution hook
+      description: |
+        Validate and potentially modify tool responses before returning to agent. Called after tool execution.
+      tags:
+        - Hooks
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostHookRequest'
+      responses:
+        '200':
+          description: Hook evaluation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostHookResult'
+        '400':
+          description: Bad request - malformed request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized - invalid or missing bearer token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /access:
+    post:
+      operationId: accessHook
+      summary: Access control hook
+      description: |
+        Determine which tools a user can see before they try to use them. Supports batch requests for efficiency.
+      tags:
+        - Hooks
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccessHookRequest'
+      responses:
+        '200':
+          description: Access control result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessHookResult'
+        '400':
+          description: Bad request - malformed request body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized - invalid or missing bearer token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /health:
+    get:
+      operationId: healthCheck
+      summary: Health check endpoint
+      description: |
+        Arcade performs periodic health checks on configured webhook endpoints.
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Service unavailable - webhook server unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: Simple token-based auth via Authorization header. mTLS is also supported at the transport layer.
+
+  schemas:
+    ToolInfo:
+      type: object
+      description: Tool identification information
+      required:
+        - name
+        - toolkit
+        - version
+      properties:
+        name:
+          type: string
+          description: Tool name
+        toolkit:
+          type: string
+          description: Toolkit name
+        version:
+          type: string
+          description: Tool version
+
+    OAuth2Details:
+      type: object
+      description: OAuth2 authorization details
+      properties:
+        scopes:
+          type: array
+          items:
+            type: string
+          description: OAuth scopes (always available from token response)
+        at:
+          type: object
+          additionalProperties: true
+          description: Access token claims (only present when token is a JWT; absent for opaque tokens)
+        user_info:
+          type: object
+          additionalProperties: true
+          description: User information from oauth2 provider
+
+    Authorization:
+      type: object
+      description: Authorization information
+      properties:
+        provider_id:
+          type: string
+          description: ID of the OAuth provider
+        oauth2:
+          $ref: '#/components/schemas/OAuth2Details'
+
+    ToolContext:
+      type: object
+      description: Tool execution context
+      properties:
+        authorization:
+          type: array
+          items:
+            $ref: '#/components/schemas/Authorization'
+        secrets:
+          type: array
+          items:
+            type: string
+          description: Required secrets (key only, no values)
+        metadata:
+          type: object
+          additionalProperties: true
+          description: Arbitrary metadata from tool
+        user_id:
+          type: string
+          description: User ID for access checks
+
+    PreHookRequest:
+      type: object
+      description: Pre-hook request from engine to hook server
+      required:
+        - execution_id
+        - tool
+        - inputs
+        - context
+      properties:
+        execution_id:
+          type: string
+          description: Allows tracking requests and responses
+        tool:
+          $ref: '#/components/schemas/ToolInfo'
+        inputs:
+          type: object
+          additionalProperties: true
+          description: Tool inputs (name -> value)
+        context:
+          $ref: '#/components/schemas/ToolContext'
+
+    PreHookOverride:
+      type: object
+      description: Override execution parameters
+      properties:
+        inputs:
+          type: object
+          additionalProperties: true
+          description: Override tool inputs
+        secrets:
+          type: array
+          items:
+            type: object
+            additionalProperties:
+              type: string
+          description: Override secrets
+
+    PreHookResult:
+      type: object
+      description: Pre-hook response from hook server to engine
+      required:
+        - code
+      properties:
+        code:
+          $ref: '#/components/schemas/ResponseCode'
+        error_message:
+          type: string
+          description: Error message for the Agent
+        override:
+          $ref: '#/components/schemas/PreHookOverride'
+
+    PostHookRequest:
+      type: object
+      description: Post-hook request from engine to hook server
+      required:
+        - execution_id
+        - tool
+        - context
+      properties:
+        execution_id:
+          type: string
+          description: Allows tracking requests and responses
+        tool:
+          $ref: '#/components/schemas/ToolInfo'
+        inputs:
+          type: object
+          additionalProperties: true
+          description: Tool inputs (name -> value)
+        success:
+          type: boolean
+          description: Whether the tool succeeded
+        output:
+          description: The tool's output value (any JSON type — string, number, object, array, etc.)
+        execution_code:
+          type: string
+          description: Status code from the server
+        execution_error:
+          type: string
+          description: Execution error from the tool call
+        context:
+          $ref: '#/components/schemas/ToolContext'
+
+    PostHookOverride:
+      type: object
+      description: Override response parameters
+      properties:
+        output:
+          description: Override the output value (any JSON type — string, number, object, array, etc.)
+
+    PostHookResult:
+      type: object
+      description: Post-hook response from hook server to engine
+      required:
+        - code
+      properties:
+        code:
+          $ref: '#/components/schemas/ResponseCode'
+        error_message:
+          type: string
+          description: Error message for the Agent
+        override:
+          $ref: '#/components/schemas/PostHookOverride'
+
+    ToolAuthRequirements:
+      type: object
+      description: Authorization requirements for a tool
+      properties:
+        provider_id:
+          type: string
+          description: Provider ID
+        provider_type:
+          type: string
+          description: Provider type
+        oauth2:
+          type: object
+          properties:
+            scopes:
+              type: array
+              items:
+                type: string
+              description: Required scopes
+
+    SecretRequirement:
+      type: object
+      description: Required secret definition
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: Secret name
+
+    ToolkitRequirements:
+      type: object
+      description: Requirements for a toolkit (group of tools)
+      properties:
+        authorization:
+          type: array
+          items:
+            $ref: '#/components/schemas/ToolAuthRequirements'
+          description: Authorization requirements for a tool
+        secrets:
+          type: array
+          items:
+            $ref: '#/components/schemas/SecretRequirement'
+          description: Required secrets
+
+    ToolVersionInfo:
+      type: object
+      description: Version-specific information for a tool
+      properties:
+        requirements:
+          $ref: '#/components/schemas/ToolkitRequirements'
+        version:
+          type: string
+          description: Tool version
+
+    ToolkitInfo:
+      type: object
+      description: Information about a group of tools
+      properties:
+        tools:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/ToolVersionInfo'
+          description: Map of tool name to array of tool version info (there may be multiple versions of tools)
+
+    Toolkits:
+      type: object
+      description: Map of a group of tools
+      additionalProperties:
+        $ref: '#/components/schemas/ToolkitInfo'
+
+    AccessHookRequest:
+      type: object
+      description: Access-hook request from engine to hook server
+      required:
+        - user_id
+        - toolkits
+      properties:
+        user_id:
+          type: string
+          description: User ID
+        toolkits:
+          $ref: '#/components/schemas/Toolkits'
+
+    AccessHookResult:
+      type: object
+      description: Access-hook response from hook server to engine. If 'only' is included, ONLY those are allowed (deny list ignored).
+      properties:
+        only:
+          $ref: '#/components/schemas/Toolkits'
+          description: If included, ONLY these are allowed (deny list ignored)
+        deny:
+          $ref: '#/components/schemas/Toolkits'
+          description: Tools to deny (ignored if 'only' is used)
+
+    ResponseCode:
+      type: string
+      description: Response code from hook server
+      enum:
+        - OK
+        - CHECK_FAILED
+        - RATE_LIMIT_EXCEEDED
+
+    HealthResponse:
+      type: object
+      description: Health check response
+      properties:
+        status:
+          type: string
+          enum:
+            - healthy
+            - degraded
+            - unhealthy
+          description: Health status
+
+    ErrorResponse:
+      type: object
+      description: Error response from webhook server
+      properties:
+        error:
+          type: string
+          description: Human-readable error message
+        code:
+          $ref: '#/components/schemas/ResponseCode'
+          description: Machine-readable error code for programmatic handling

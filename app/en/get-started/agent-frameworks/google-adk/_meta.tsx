@@ -1,4 +1,5 @@
 export default {
   overview: "Overview",
-  "use-arcade-tools": "Using Arcade tools",
+  "setup-python": "Setup (Python)",
+  "setup-typescript": "Setup (TypeScript)",
 };

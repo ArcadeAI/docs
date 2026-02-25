@@ -27,6 +27,7 @@ type LlmsTxtMetadata = {
 
 const BASE_URL = "https://docs.arcade.dev";
 const OUTPUT_PATH = path.join(process.cwd(), "public", "llms.txt");
+const CLEAN_MARKDOWN_DIR = path.join(process.cwd(), "public", "_markdown");
 
 // Regex patterns used in path processing
 const APP_EN_PREFIX_REGEX = /^app\/en\//;
@@ -153,11 +154,76 @@ async function extractExistingSummaries(): Promise<
 }
 
 /**
- * Discovers all MDX pages in the documentation
+ * Checks if clean markdown files are available
+ */
+async function hasCleanMarkdown(): Promise<boolean> {
+  const cleanEnDir = path.join(CLEAN_MARKDOWN_DIR, "en");
+  try {
+    const files = await fs.readdir(cleanEnDir);
+    return files.length > 0;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Discovers all pages in the documentation
+ * Prefers clean markdown files if available, falls back to raw MDX
  */
 async function discoverPages(): Promise<PageMetadata[]> {
-  console.log(pc.blue("📄 Discovering MDX pages..."));
+  const useCleanMarkdown = await hasCleanMarkdown();
 
+  if (useCleanMarkdown) {
+    console.log(pc.blue("📄 Discovering pages from clean markdown..."));
+    return discoverCleanMarkdownPages();
+  }
+
+  console.log(pc.blue("📄 Discovering pages from raw MDX..."));
+  console.log(pc.yellow("   ⚠ Clean markdown not found, using raw MDX files"));
+  console.log(
+    pc.yellow('   Run "pnpm run generate:markdown" to generate clean files')
+  );
+  return discoverMdxPages();
+}
+
+/**
+ * Discovers pages from clean markdown files
+ */
+async function discoverCleanMarkdownPages(): Promise<PageMetadata[]> {
+  const cleanEnDir = path.join(CLEAN_MARKDOWN_DIR, "en");
+  const mdFiles = glob.sync("**/*.md", {
+    cwd: cleanEnDir,
+    ignore: ["**/node_modules/**"],
+  });
+
+  const pages: PageMetadata[] = [];
+
+  for (const filePath of mdFiles) {
+    const fullPath = path.join(cleanEnDir, filePath);
+    const content = await fs.readFile(fullPath, "utf-8");
+
+    // Convert file path to URL (with .md extension for raw markdown access)
+    // Clean markdown: "home/quickstart.md" -> "home/quickstart"
+    const relativePath = filePath.replace(MD_EXTENSION_REGEX, "");
+
+    // Add locale prefix and .md extension for raw markdown access
+    const url = `${BASE_URL}/en/${relativePath}.md`;
+
+    pages.push({
+      path: `public/_markdown/en/${filePath}`,
+      url,
+      content,
+    });
+  }
+
+  console.log(pc.green(`✓ Found ${pages.length} pages (clean markdown)`));
+  return pages;
+}
+
+/**
+ * Discovers pages from raw MDX files (fallback)
+ */
+async function discoverMdxPages(): Promise<PageMetadata[]> {
   const mdxFiles = glob.sync("app/en/**/*.mdx", {
     cwd: process.cwd(),
     ignore: ["**/node_modules/**", "**/_*.mdx"],
@@ -185,7 +251,7 @@ async function discoverPages(): Promise<PageMetadata[]> {
     });
   }
 
-  console.log(pc.green(`✓ Found ${pages.length} pages`));
+  console.log(pc.green(`✓ Found ${pages.length} pages (raw MDX)`));
   return pages;
 }
 
@@ -196,17 +262,32 @@ async function summarizePage(
   page: PageMetadata
 ): Promise<{ title: string; description: string }> {
   try {
+    // Determine file extension for title extraction
+    const isCleanMarkdown = page.path.includes("_markdown");
+    const fileExt = isCleanMarkdown ? ".md" : ".mdx";
+
     // Extract title from content (first H1)
     const titleMatch = page.content.match(TITLE_H1_REGEX);
     const title = titleMatch
       ? titleMatch[1].trim()
-      : path.basename(page.path, ".mdx");
+      : path.basename(page.path, fileExt);
 
     // Prepare content for summarization (remove code blocks for better summarization)
-    const contentForSummary = page.content
-      .replace(/```[\s\S]*?```/g, "[code block]")
-      .replace(/import\s+.*from\s+['"].*['"]/g, "")
-      .slice(0, MAX_CONTENT_LENGTH);
+    // For clean markdown, we don't need to remove imports (they're already gone)
+    let contentForSummary = page.content.replace(
+      /```[\s\S]*?```/g,
+      "[code block]"
+    );
+
+    // Only remove imports if using raw MDX
+    if (!isCleanMarkdown) {
+      contentForSummary = contentForSummary.replace(
+        /import\s+.*from\s+['"].*['"]/g,
+        ""
+      );
+    }
+
+    contentForSummary = contentForSummary.slice(0, MAX_CONTENT_LENGTH);
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
