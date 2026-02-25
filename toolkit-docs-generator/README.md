@@ -138,15 +138,15 @@ Confluence
 SomeInternalTool
 ```
 
-Lines that are blank or start with `#` are ignored. IDs are case-insensitive.
+The parser ignores blank lines and lines starting with `#`. IDs are case-insensitive.
 
 ```bash
 pnpm dlx tsx src/cli/index.ts generate --all \
   --exclude-file ./excluded-toolkits.txt
 ```
 
-If a toolkit listed in the file already has an output `.json` file, that file
-is deleted and `index.json` is rebuilt to exclude it.
+If a toolkit in the file already has an output `.json` file, the generator
+deletes it and rebuilds `index.json`.
 
 ## Key CLI options
 
