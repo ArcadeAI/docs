@@ -175,6 +175,11 @@ const FRAMEWORKS = [
     icon: "/images/icons/mastra.svg",
     invertInDark: true,
   },
+  {
+    name: "TanStack AI",
+    href: "/get-started/agent-frameworks/tanstack-ai",
+    icon: "https://avatars.githubusercontent.com/u/72518640?s=200&v=4",
+  },
 ];
 
 // Helper function to get theme-aware invert classes
@@ -405,6 +410,10 @@ export function LandingPage() {
                       src: "/images/icons/mastra.svg",
                       alt: "Mastra",
                       invertInDark: true,
+                    },
+                    {
+                      src: "https://avatars.githubusercontent.com/u/72518640?s=200&v=4",
+                      alt: "TanStack AI",
                     },
                   ]}
                   title="Power Your Agent"
