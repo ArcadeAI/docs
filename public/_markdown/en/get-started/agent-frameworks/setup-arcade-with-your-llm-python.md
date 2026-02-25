@@ -5,7 +5,7 @@ description: "Learn how to connect Arcade to your LLM in Python"
 [Agent Frameworks](/en/get-started/agent-frameworks.md)
 Setup Arcade with your LLM (Python)
 
-# Connect Arcade to your LLM
+# Connect Arcade to your LLM with Python
 
 Arcade tools work alongside an LLM. To make that work, you need a small piece of glue code called a “.” The harness orchestrates the back-and-forth between the user, the model, and the . In this guide, you’ll build one so you can wire Arcade into your LLM-powered app.
 
@@ -462,7 +462,7 @@ if __name__ == "__main__":
     chat()
 ```
 
-Last updated on January 30, 2026
+Last updated on January 5, 2026
 
 [Overview](/en/get-started/agent-frameworks.md)
-[Using Arcade tools](/en/get-started/agent-frameworks/crewai/use-arcade-tools.md)
+[Setup Arcade with your LLM (TypeScript)](/en/get-started/agent-frameworks/setup-arcade-with-your-llm-typescript.md)
