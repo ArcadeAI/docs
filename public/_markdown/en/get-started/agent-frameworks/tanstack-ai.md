@@ -1,0 +1,1174 @@
+---
+title: "Build an AI Chatbot with Arcade and TanStack AI"
+description: "Create a browser-based chatbot that uses Arcade tools to access Gmail and Slack"
+---
+[Agent Frameworks](/en/get-started/agent-frameworks.md)
+TanStack AI
+
+# Build an AI Chatbot with Arcade and TanStack AI
+
+[TanStack AI](https://tanstack.com/ai/latest/docs)  is a type-safe, provider-agnostic SDK for building AI applications in JavaScript and TypeScript. It provides streaming responses,  calling with Zod schemas, and framework-agnostic primitives for React, Solid, and vanilla JavaScript. Provider adapters let you switch between OpenAI, Anthropic, Google Gemini, and Ollama without rewriting your code.
+
+In this guide, you’ll build a browser-based chatbot using [TanStack Start](https://tanstack.com/start)  that uses Arcade’s Gmail and Slack . Your  can read emails, send messages, and interact with Slack through a conversational interface with built-in authentication.
+
+## Outcomes
+
+Build a TanStack Start chatbot that integrates Arcade  with TanStack AI
+
+### You will Learn
+
+-   How to retrieve Arcade  and convert them to TanStack AI format
+-   How to build a streaming chatbot with server functions
+-   How to handle Arcade’s authorization flow in a web app
+-   How to combine tools from different Arcade  servers
+
+### Prerequisites
+
+-   [Arcade account](https://app.arcade.dev/register)
+
+-   [Node.js 18+](https://nodejs.org/)
+     
+-   An [OpenAI API key](https://platform.openai.com/api-keys)
+     
+
+## TanStack concepts
+
+Before diving into the code, here are the key TanStack concepts you’ll use:
+
+-   [chat](https://tanstack.com/ai/latest/docs/reference/functions/chat)
+      The server-side function that streams AI responses with support for  calling. Returns an `AsyncIterable` stream for real-time responses.
+-   [useChat](https://tanstack.com/ai/latest/docs/api/ai-react)
+      A React hook that manages chat state, handles streaming via Server-Sent Events, and renders  results automatically.
+-   [Server routes](https://tanstack.com/start/latest/docs/framework/react/guide/server-routes)
+      TanStack Start’s server routes run exclusively on the server using the `server.handlers` property, keeping  secure while handling streaming responses.
+-   [toolDefinition](https://tanstack.com/ai/latest/docs/guides/tools#option-1-zod-schemas-recommended)
+      Defines  with Zod schemas for type-safe parameters. Tools can run on server, client, or both.
+
+## Build the chatbot
+
+### Create a new TanStack Start project
+
+### pnpm
+
+```bash
+pnpm create @tanstack/start@latest arcade-chatbot
+cd arcade-chatbot
+```
+
+### npm
+
+```bash
+npx @tanstack/create-start@latest arcade-chatbot
+cd arcade-chatbot
+```
+
+### yarn
+
+```bash
+yarn create @tanstack/start arcade-chatbot
+cd arcade-chatbot
+```
+
+### bun
+
+```bash
+bunx @tanstack/create-start@latest arcade-chatbot
+cd arcade-chatbot
+```
+
+Follow the prompts to configure your . Select the defaults or customize as needed.
+
+Install the required dependencies:
+
+### pnpm
+
+```bash
+pnpm add @tanstack/ai @tanstack/ai-react @tanstack/ai-openai @arcadeai/arcadejs zod react-markdown
+pnpm add -D @tailwindcss/typography
+```
+
+### npm
+
+```bash
+npm install @tanstack/ai @tanstack/ai-react @tanstack/ai-openai @arcadeai/arcadejs zod react-markdown
+npm install -D @tailwindcss/typography
+```
+
+### yarn
+
+```bash
+yarn add @tanstack/ai @tanstack/ai-react @tanstack/ai-openai @arcadeai/arcadejs zod react-markdown
+yarn add -D @tailwindcss/typography
+```
+
+### bun
+
+```bash
+bun add @tanstack/ai @tanstack/ai-react @tanstack/ai-openai @arcadeai/arcadejs zod react-markdown
+bun add -D @tailwindcss/typography
+```
+
+Then add the typography plugin to your **src/styles.css**:
+
+src/styles.css
+
+```css
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+```
+
+### Set up environment variables
+
+Create a **.env** file with your :
+
+```bash
+# .env
+ARCADE_API_KEY={arcade_api_key}
+ARCADE_USER_ID={arcade_user_id}
+OPENAI_API_KEY=your_openai_api_key
+```
+
+The `ARCADE_USER_ID` is your app’s internal identifier for the  (often the email you signed up with, a UUID, etc.). Arcade uses this to track authorizations per user.
+
+### Create the chat API route
+
+Create the directory and file **src/routes/api/chat.ts**. This server route handles chat requests and streams AI responses:
+
+src/routes/api/chat.ts
+
+```json
+import { createFileRoute } from "@tanstack/react-router";
+import { chat, toServerSentEventsResponse, toolDefinition } from "@tanstack/ai";
+import { openaiText } from "@tanstack/ai-openai";
+import { Arcade } from "@arcadeai/arcadejs";
+import { z } from "zod";
+
+const config = {
+  // Get all tools from these MCP servers
+  mcpServers: ["Slack"],
+  // Add specific individual tools
+  individualTools: [
+    "Gmail.ListEmails",
+    "Gmail.SendEmail",
+    "Gmail.WhoAmI",
+  ],
+  // Maximum tools to fetch per MCP server
+  toolLimit: 30,
+  // System prompt defining the assistant's behavior
+  systemPrompt: `You are a helpful assistant that can access Gmail and Slack.
+Always use the available tools to fulfill user requests. Do not tell users to authorize manually - just call the tool and the system will handle authorization if needed.
+
+For Gmail:
+- To find sent emails, use the query parameter with "in:sent"
+- To find received emails, use "in:inbox" or no query
+
+For Slack:
+- Use Slack.ListConversations to see channels and DMs
+- Use Slack.ListMessages to read messages from a channel or DM
+- Use Slack.SendDmToUser to send a direct message
+- Use Slack.SendMessageToChannel to post in a channel
+
+After completing any action, always confirm what you did with specific details.
+
+IMPORTANT: When calling tools, if an argument is optional, do not set it. Never pass null for optional parameters.`,
+};
+
+// Convert JSON Schema to Zod schema (simplified version)
+function jsonSchemaToZod(schema: Record<string, unknown>): z.ZodType {
+  if (!schema || typeof schema !== "object") {
+    return z.object({});
+  }
+
+  const type = schema.type as string;
+
+  // Handle tools with no parameters (type: "None" or missing type)
+  if (!type || type === "None" || type === "null") {
+    return z.object({});
+  }
+
+  const properties = schema.properties as Record<string, unknown> | undefined;
+  const required = (schema.required as string[]) || [];
+
+  if (type === "object" && properties) {
+    const shape: Record<string, z.ZodType> = {};
+    for (const [key, prop] of Object.entries(properties)) {
+      const propSchema = prop as Record<string, unknown>;
+      let zodType = jsonSchemaToZod(propSchema);
+
+      if (propSchema.description) {
+        zodType = zodType.describe(propSchema.description as string);
+      }
+
+      if (!required.includes(key)) {
+        zodType = zodType.optional();
+      }
+
+      shape[key] = zodType;
+    }
+    return z.object(shape);
+  }
+
+  switch (type) {
+    case "string":
+      return z.string();
+    case "number":
+    case "integer":
+      return z.number();
+    case "boolean":
+      return z.boolean();
+    case "array":
+      return z.array(jsonSchemaToZod(schema.items as Record<string, unknown>));
+    case "object":
+      return z.object({});
+    default:
+      return z.object({});
+  }
+}
+
+// Strip null values from tool inputs
+function stripNullValues(obj: Record<string, unknown>): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (value !== null && value !== undefined) {
+      result[key] = value;
+    }
+  }
+  return result;
+}
+
+// Maximum characters for any string field in tool output
+const MAX_STRING_CHARS = 300;
+
+/**
+ * Recursively truncates all large strings in objects/arrays.
+ * This prevents token overflow when tool results pass back to the LLM.
+ */
+function truncateDeep(obj: unknown): unknown {
+  if (obj === null || obj === undefined) return obj;
+
+  if (typeof obj === "string") {
+    if (obj.length > MAX_STRING_CHARS) {
+      return obj.slice(0, MAX_STRING_CHARS) + "...";
+    }
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(truncateDeep);
+  }
+
+  if (typeof obj === "object") {
+    const result: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+      result[key] = truncateDeep(value);
+    }
+    return result;
+  }
+
+  return obj;
+}
+
+// Maximum number of recent messages to keep in context
+const MAX_MESSAGES = 10;
+
+/**
+ * Truncates message content and limits message history to prevent context overflow.
+ */
+function prepareMessages(messages: unknown[]): unknown[] {
+  const recentMessages = messages.slice(-MAX_MESSAGES);
+  return recentMessages.map((msg) => truncateDeep(msg));
+}
+
+async function getArcadeTools(userId: string) {
+  const arcade = new Arcade();
+
+  // Fetch tools from MCP servers
+  const mcpServerTools = await Promise.all(
+    config.mcpServers.map(async (serverName) => {
+      const response = await arcade.tools.list({
+        toolkit: serverName,
+        limit: config.toolLimit,
+      });
+      return response.items;
+    })
+  );
+
+  // Fetch individual tools
+  const individualToolDefs = await Promise.all(
+    config.individualTools.map((toolName) => arcade.tools.get(toolName))
+  );
+
+  // Combine and deduplicate
+  const allTools = [...mcpServerTools.flat(), ...individualToolDefs];
+  const uniqueTools = Array.from(
+    new Map(allTools.map((tool) => [tool.qualified_name, tool])).values()
+  );
+
+  // Convert to TanStack AI tool format
+  return uniqueTools.map((tool) => {
+    const inputSchema = tool.input?.parameters
+      ? jsonSchemaToZod(tool.input.parameters as Record<string, unknown>)
+      : z.object({});
+
+    return toolDefinition({
+      name: tool.qualified_name.replace(".", "_"),
+      description: tool.description || "",
+      inputSchema,
+    }).server(async (input: unknown) => {
+      const typedInput = input as Record<string, unknown>;
+      const cleanedInput = stripNullValues(typedInput);
+
+      try {
+        // Check authorization status first
+        const authResponse = await arcade.tools.authorize({
+          tool_name: tool.qualified_name,
+          user_id: userId,
+        });
+
+        if (authResponse.status !== "completed") {
+          return {
+            authorization_required: true,
+            authorization_response: {
+              url: authResponse.url,
+            },
+            tool_name: tool.qualified_name,
+          };
+        }
+
+        // Execute the tool
+        const result = await arcade.tools.execute({
+          tool_name: tool.qualified_name,
+          user_id: userId,
+          input: cleanedInput,
+        });
+
+        // Truncate large strings to prevent context window overflow
+        const output = result.output?.value ?? result;
+        return truncateDeep(output);
+      } catch (error) {
+        console.error(`Tool execution error for ${tool.qualified_name}:`, error);
+        throw error;
+      }
+    });
+  });
+}
+
+// Server route with POST handler for chat streaming
+export const Route = createFileRoute("/api/chat")({
+  server: {
+    handlers: {
+      POST: async ({ request }) => {
+        const body = await request.json();
+        const userId = process.env.ARCADE_USER_ID || "default-user";
+        const tools = await getArcadeTools(userId);
+
+        // Prepare messages: limit history and truncate large content
+        const preparedMessages = prepareMessages(body.messages || []);
+
+        const stream = chat({
+          adapter: openaiText("gpt-4o"),
+          systemPrompts: [config.systemPrompt],
+          messages: preparedMessages,
+          tools,
+        });
+
+        return toServerSentEventsResponse(stream);
+      },
+    },
+  },
+});
+```
+
+You can mix  servers (which give you all their ) with individual tools. Browse the [complete MCP server catalog](/resources/integrations.md) to see what’s available.
+
+**Handling large  outputs:** Tools like `Gmail.ListEmails` can return 200KB+ of email content. When the  passes this data back to the LLM in the agentic loop, it may exceed token limits. The code above includes `truncateDeep` to limit all strings to 300 characters and `prepareMessages` to keep only the last 10 messages.
+
+### Create the auth status server function
+
+Create **src/functions/auth.ts** to check authorization status:
+
+src/functions/auth.ts
+
+```typescript
+import { createServerFn } from "@tanstack/react-start";
+import { Arcade } from "@arcadeai/arcadejs";
+
+export const checkAuthStatus = createServerFn({ method: "POST" })
+  .inputValidator((data: { toolName: string }) => data)
+  .handler(async ({ data }) => {
+    if (!data.toolName) {
+      throw new Error("toolName required");
+    }
+
+    const arcade = new Arcade();
+    const userId = process.env.ARCADE_USER_ID || "default-user";
+
+    const authResponse = await arcade.tools.authorize({
+      tool_name: data.toolName,
+      user_id: userId,
+    });
+
+    return { status: authResponse.status };
+  });
+```
+
+This server function allows the frontend to poll for authorization completion, creating a seamless experience where the chatbot automatically retries after the  authorizes.
+
+### Build the chat route
+
+Update **src/routes/index.tsx** with the chat interface. TanStack AI’s `useChat` hook manages messages, streaming, and loading states:
+
+TSX
+
+src/routes/index.tsx
+
+```
+import { createFileRoute } from "@tanstack/react-router";
+import { useChat, fetchServerSentEvents } from "@tanstack/ai-react";
+import { useState, useRef, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
+import { checkAuthStatus } from "../functions/auth";
+
+// Component that handles Arcade's OAuth authorization flow
+function AuthPendingUI({
+  authUrl,
+  toolName,
+  onAuthComplete,
+}: {
+  authUrl: string;
+  toolName: string;
+  onAuthComplete: () => void;
+}) {
+  const [status, setStatus] = useState<"initial" | "waiting" | "completed">(
+    "initial"
+  );
+  const pollingRef = useRef<NodeJS.Timeout | null>(null);
+  const hasCompletedRef = useRef(false);
+  const onAuthCompleteRef = useRef(onAuthComplete);
+
+  useEffect(() => {
+    onAuthCompleteRef.current = onAuthComplete;
+  }, [onAuthComplete]);
+
+  // Poll for auth completion after user clicks authorize
+  useEffect(() => {
+    if (status !== "waiting" || !toolName || hasCompletedRef.current) return;
+
+    const pollStatus = async () => {
+      try {
+        const result = await checkAuthStatus({ data: { toolName } });
+
+        if (result.status === "completed" && !hasCompletedRef.current) {
+          hasCompletedRef.current = true;
+          if (pollingRef.current) clearInterval(pollingRef.current);
+          setStatus("completed");
+          setTimeout(() => onAuthCompleteRef.current(), 1500);
+        }
+      } catch (error) {
+        console.error("Polling error:", error);
+      }
+    };
+
+    pollingRef.current = setInterval(pollStatus, 2000);
+    return () => {
+      if (pollingRef.current) clearInterval(pollingRef.current);
+    };
+  }, [status, toolName]);
+
+  const displayName = toolName.split("_")[0] || toolName;
+
+  const handleAuthClick = () => {
+    if (!authUrl) return;
+    window.open(authUrl, "_blank");
+    setStatus("waiting");
+  };
+
+  return (
+    <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+      {status === "completed" ? (
+        <p className="text-green-600 font-medium">
+          {displayName} authorized successfully
+        </p>
+      ) : !authUrl ? (
+        <p className="text-red-600">Authorization URL not available</p>
+      ) : (
+        <div className="flex items-center gap-3">
+          <span>Authorize access to {displayName}?</span>
+          <button
+            onClick={handleAuthClick}
+            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium"
+          >
+            {status === "waiting" ? "Retry" : "Authorize"}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Chat() {
+  const [input, setInput] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const { messages, sendMessage, reload, isLoading } = useChat({
+    connection: fetchServerSentEvents("/api/chat"),
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (input.trim() && !isLoading) {
+      sendMessage(input);
+      setInput("");
+    }
+  };
+
+  // Refocus input after response completes
+  useEffect(() => {
+    if (!isLoading && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isLoading]);
+
+  return (
+    <div className="flex flex-col h-screen max-w-2xl mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Arcade + TanStack AI Chat</h1>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto space-y-4 mb-4">
+        {messages
+          .filter((message) => {
+            // Filter out empty assistant messages (tool calls without text)
+            if (message.role === "assistant") {
+              const textParts = (message.parts || []).filter(
+                (p: { type: string }) => p.type === "text"
+              );
+              const textContent = textParts
+                .map((p: any) => p.content || "")
+                .join("")
+                .trim();
+              const toolResultParts = (message.parts || []).filter(
+                (p: { type: string }) => p.type === "tool-result"
+              );
+              const authRequired = toolResultParts.find(
+                (result: any) => result.output?.authorization_required
+              );
+              return textContent.length > 0 || authRequired;
+            }
+            return true;
+          })
+          .map((message) => {
+            const textParts = (message.parts || []).filter(
+              (p: { type: string }) => p.type === "text"
+            );
+            const toolResultParts = (message.parts || []).filter(
+              (p: { type: string }) => p.type === "tool-result"
+            );
+            const textContent = textParts
+              .map((p: { content?: string }) => p.content || "")
+              .join("");
+            const authRequired = toolResultParts.find(
+              (result: { output?: { authorization_required?: boolean } }) =>
+                result.output?.authorization_required
+            );
+
+            return (
+              <div
+                key={message.id}
+                className={`p-4 rounded-lg ${
+                  message.role === "assistant"
+                    ? "bg-gray-100"
+                    : "bg-blue-100 ml-8"
+                }`}
+              >
+                <div className="font-semibold text-sm text-gray-500 mb-1">
+                  {message.role === "assistant" ? "Assistant" : "You"}
+                </div>
+
+                {authRequired ? (
+                  <AuthPendingUI
+                    authUrl={
+                      (
+                        authRequired as {
+                          output?: {
+                            authorization_response?: { url?: string };
+                          };
+                        }
+                      )?.output?.authorization_response?.url || ""
+                    }
+                    toolName={
+                      (authRequired as { output?: { tool_name?: string } })
+                        ?.output?.tool_name || ""
+                    }
+                    onAuthComplete={() => reload()}
+                  />
+                ) : (
+                  <div className="prose prose-sm max-w-none">
+                    <ReactMarkdown>{textContent}</ReactMarkdown>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+
+        {isLoading &&
+          (() => {
+            // Only show loading if there's no assistant message with content
+            const lastMessage = messages[messages.length - 1];
+            const hasAssistantContent =
+              lastMessage?.role === "assistant" &&
+              (lastMessage.parts || [])
+                .filter((p: { type: string }) => p.type === "text")
+                .some((p: any) => (p.content || "").trim().length > 0);
+
+            if (hasAssistantContent) return null;
+
+            return (
+              <div className="p-4 rounded-lg bg-gray-100">
+                <div className="font-semibold text-sm text-gray-500 mb-1">
+                  Assistant
+                </div>
+                <div className="animate-pulse">Thinking...</div>
+              </div>
+            );
+          })()}
+      </div>
+
+      {/* Input form */}
+      <form onSubmit={handleSubmit} className="flex gap-2">
+        <input
+          ref={inputRef}
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Ask about your emails or Slack..."
+          disabled={isLoading}
+          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <button
+          type="submit"
+          disabled={isLoading || !input.trim()}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Send
+        </button>
+      </form>
+    </div>
+  );
+}
+
+export const Route = createFileRoute("/")({
+  component: Chat,
+});
+```
+
+The `AuthPendingUI` component polls for OAuth completion using the `checkAuthStatus` server function and calls `onAuthComplete` when the user finishes authorizing, triggering a reload to retry the  call.
+
+### Run the chatbot
+
+### pnpm
+
+```bash
+pnpm dev
+```
+
+### npm
+
+```bash
+npm run dev
+```
+
+### yarn
+
+```bash
+yarn dev
+```
+
+### bun
+
+```bash
+bun dev
+```
+
+Open [http://localhost:3000](http://localhost:3000)  and try prompts like:
+
+-   “Summarize my last 3 emails”
+-   “Send a Slack DM to myself saying hello”
+-   “Email me a summary of this slack channel’s activity since yesterday…”
+
+On first use, you’ll see an authorization button. Click it to connect your Gmail or Slack  (Arcade remembers this for future requests).
+
+## Key takeaways
+
+-   **Full TanStack stack**: TanStack Start + TanStack Router + TanStack AI work together seamlessly with server routes and file-based routing.
+-   **Server routes keep secrets safe**: The `server.handlers` property ensures your  never reach the client while handling streaming responses.
+-   **Authorization is automatic**: Check `authorization_required` in  results and display the authorization UI. Poll for completion to retry automatically.
+-   **Truncate large outputs**: Tools like Gmail can return 200KB+ of data. Wrap  execution with truncation to prevent token overflow in the agentic loop.
+-   **Provider flexibility**: Switch between OpenAI, Anthropic, Gemini, or Ollama by changing the adapter. No code rewrites needed.
+
+## Next steps
+
+1.  **Add more **: Browse the [MCP server catalog](/resources/integrations.md)
+     and add tools for GitHub, Notion, Linear, and more.
+2.  **Try different providers**: Swap `@tanstack/ai-openai` for `@tanstack/ai-anthropic` or `@tanstack/ai-gemini` to use different AI models.
+3.  **Add  authentication**: In production, get `userId` from your auth system instead of environment variables. See [Security](/guides/security.md)
+     for best practices.
+4.  **Deploy your chatbot**: TanStack Start supports deployment to Vercel, Netlify, Cloudflare, and Node.js servers.
+
+## Complete code
+
+### **src/routes/api/chat.ts** (full file)
+
+src/routes/api/chat.ts
+
+```json
+import { createFileRoute } from "@tanstack/react-router";
+import { chat, toServerSentEventsResponse, toolDefinition } from "@tanstack/ai";
+import { openaiText } from "@tanstack/ai-openai";
+import { Arcade } from "@arcadeai/arcadejs";
+import { z } from "zod";
+
+const config = {
+  mcpServers: ["Slack"],
+  individualTools: [
+    "Gmail.ListEmails",
+    "Gmail.SendEmail",
+    "Gmail.WhoAmI",
+  ],
+  toolLimit: 30,
+  systemPrompt: `You are a helpful assistant that can access Gmail and Slack.
+Always use the available tools to fulfill user requests. Do not tell users to authorize manually - just call the tool and the system will handle authorization if needed.
+
+For Gmail:
+- To find sent emails, use the query parameter with "in:sent"
+- To find received emails, use "in:inbox" or no query
+
+For Slack:
+- Use Slack.ListConversations to see channels and DMs
+- Use Slack.ListMessages to read messages from a channel or DM
+- Use Slack.SendDmToUser to send a direct message
+- Use Slack.SendMessageToChannel to post in a channel
+
+After completing any action, always confirm what you did with specific details.
+
+IMPORTANT: When calling tools, if an argument is optional, do not set it. Never pass null for optional parameters.`,
+};
+
+function jsonSchemaToZod(schema: Record<string, unknown>): z.ZodType {
+  if (!schema || typeof schema !== "object") {
+    return z.object({});
+  }
+
+  const type = schema.type as string;
+
+  if (!type || type === "None" || type === "null") {
+    return z.object({});
+  }
+
+  const properties = schema.properties as Record<string, unknown> | undefined;
+  const required = (schema.required as string[]) || [];
+
+  if (type === "object" && properties) {
+    const shape: Record<string, z.ZodType> = {};
+    for (const [key, prop] of Object.entries(properties)) {
+      const propSchema = prop as Record<string, unknown>;
+      let zodType = jsonSchemaToZod(propSchema);
+
+      if (propSchema.description) {
+        zodType = zodType.describe(propSchema.description as string);
+      }
+
+      if (!required.includes(key)) {
+        zodType = zodType.optional();
+      }
+
+      shape[key] = zodType;
+    }
+    return z.object(shape);
+  }
+
+  switch (type) {
+    case "string":
+      return z.string();
+    case "number":
+    case "integer":
+      return z.number();
+    case "boolean":
+      return z.boolean();
+    case "array":
+      return z.array(jsonSchemaToZod(schema.items as Record<string, unknown>));
+    case "object":
+      return z.object({});
+    default:
+      return z.object({});
+  }
+}
+
+function stripNullValues(obj: Record<string, unknown>): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (value !== null && value !== undefined) {
+      result[key] = value;
+    }
+  }
+  return result;
+}
+
+const MAX_STRING_CHARS = 300;
+
+function truncateDeep(obj: unknown): unknown {
+  if (obj === null || obj === undefined) return obj;
+
+  if (typeof obj === "string") {
+    if (obj.length > MAX_STRING_CHARS) {
+      return obj.slice(0, MAX_STRING_CHARS) + "...";
+    }
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(truncateDeep);
+  }
+
+  if (typeof obj === "object") {
+    const result: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+      result[key] = truncateDeep(value);
+    }
+    return result;
+  }
+
+  return obj;
+}
+
+const MAX_MESSAGES = 10;
+
+function prepareMessages(messages: unknown[]): unknown[] {
+  const recentMessages = messages.slice(-MAX_MESSAGES);
+  return recentMessages.map((msg) => truncateDeep(msg));
+}
+
+async function getArcadeTools(userId: string) {
+  const arcade = new Arcade();
+
+  const mcpServerTools = await Promise.all(
+    config.mcpServers.map(async (serverName) => {
+      const response = await arcade.tools.list({
+        toolkit: serverName,
+        limit: config.toolLimit,
+      });
+      return response.items;
+    })
+  );
+
+  const individualToolDefs = await Promise.all(
+    config.individualTools.map((toolName) => arcade.tools.get(toolName))
+  );
+
+  const allTools = [...mcpServerTools.flat(), ...individualToolDefs];
+  const uniqueTools = Array.from(
+    new Map(allTools.map((tool) => [tool.qualified_name, tool])).values()
+  );
+
+  return uniqueTools.map((tool) => {
+    const inputSchema = tool.input?.parameters
+      ? jsonSchemaToZod(tool.input.parameters as Record<string, unknown>)
+      : z.object({});
+
+    return toolDefinition({
+      name: tool.qualified_name.replace(".", "_"),
+      description: tool.description || "",
+      inputSchema,
+    }).server(async (input: unknown) => {
+      const typedInput = input as Record<string, unknown>;
+      const cleanedInput = stripNullValues(typedInput);
+
+      try {
+        const authResponse = await arcade.tools.authorize({
+          tool_name: tool.qualified_name,
+          user_id: userId,
+        });
+
+        if (authResponse.status !== "completed") {
+          return {
+            authorization_required: true,
+            authorization_response: {
+              url: authResponse.url,
+            },
+            tool_name: tool.qualified_name,
+          };
+        }
+
+        const result = await arcade.tools.execute({
+          tool_name: tool.qualified_name,
+          user_id: userId,
+          input: cleanedInput,
+        });
+
+        const output = result.output?.value ?? result;
+        return truncateDeep(output);
+      } catch (error) {
+        console.error(`Tool execution error for ${tool.qualified_name}:`, error);
+        throw error;
+      }
+    });
+  });
+}
+
+export const Route = createFileRoute("/api/chat")({
+  server: {
+    handlers: {
+      POST: async ({ request }) => {
+        const body = await request.json();
+        const userId = process.env.ARCADE_USER_ID || "default-user";
+        const tools = await getArcadeTools(userId);
+
+        const preparedMessages = prepareMessages(body.messages || []);
+
+        const stream = chat({
+          adapter: openaiText("gpt-4o"),
+          systemPrompts: [config.systemPrompt],
+          messages: preparedMessages,
+          tools,
+        });
+
+        return toServerSentEventsResponse(stream);
+      },
+    },
+  },
+});
+```
+
+### **src/functions/auth.ts** (full file)
+
+src/functions/auth.ts
+
+```typescript
+import { createServerFn } from "@tanstack/react-start";
+import { Arcade } from "@arcadeai/arcadejs";
+
+export const checkAuthStatus = createServerFn({ method: "POST" })
+  .inputValidator((data: { toolName: string }) => data)
+  .handler(async ({ data }) => {
+    if (!data.toolName) {
+      throw new Error("toolName required");
+    }
+
+    const arcade = new Arcade();
+    const userId = process.env.ARCADE_USER_ID || "default-user";
+
+    const authResponse = await arcade.tools.authorize({
+      tool_name: data.toolName,
+      user_id: userId,
+    });
+
+    return { status: authResponse.status };
+  });
+```
+
+### **src/routes/index.tsx** (full file)
+
+TSX
+
+src/routes/index.tsx
+
+```
+import { createFileRoute } from "@tanstack/react-router";
+import { useChat, fetchServerSentEvents } from "@tanstack/ai-react";
+import { useState, useRef, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
+import { checkAuthStatus } from "../functions/auth";
+
+function AuthPendingUI({
+  authUrl,
+  toolName,
+  onAuthComplete,
+}: {
+  authUrl: string;
+  toolName: string;
+  onAuthComplete: () => void;
+}) {
+  const [status, setStatus] = useState<"initial" | "waiting" | "completed">(
+    "initial"
+  );
+  const pollingRef = useRef<NodeJS.Timeout | null>(null);
+  const hasCompletedRef = useRef(false);
+  const onAuthCompleteRef = useRef(onAuthComplete);
+
+  useEffect(() => {
+    onAuthCompleteRef.current = onAuthComplete;
+  }, [onAuthComplete]);
+
+  useEffect(() => {
+    if (status !== "waiting" || !toolName || hasCompletedRef.current) return;
+
+    const pollStatus = async () => {
+      try {
+        const result = await checkAuthStatus({ data: { toolName } });
+
+        if (result.status === "completed" && !hasCompletedRef.current) {
+          hasCompletedRef.current = true;
+          if (pollingRef.current) clearInterval(pollingRef.current);
+          setStatus("completed");
+          setTimeout(() => onAuthCompleteRef.current(), 1500);
+        }
+      } catch (error) {
+        console.error("Polling error:", error);
+      }
+    };
+
+    pollingRef.current = setInterval(pollStatus, 2000);
+    return () => {
+      if (pollingRef.current) clearInterval(pollingRef.current);
+    };
+  }, [status, toolName]);
+
+  const displayName = toolName.split("_")[0] || toolName;
+
+  const handleAuthClick = () => {
+    if (!authUrl) return;
+    window.open(authUrl, "_blank");
+    setStatus("waiting");
+  };
+
+  return (
+    <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+      {status === "completed" ? (
+        <p className="text-green-600 font-medium">
+          {displayName} authorized successfully
+        </p>
+      ) : !authUrl ? (
+        <p className="text-red-600">Authorization URL not available</p>
+      ) : (
+        <div className="flex items-center gap-3">
+          <span>Authorize access to {displayName}?</span>
+          <button
+            onClick={handleAuthClick}
+            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium"
+          >
+            {status === "waiting" ? "Retry" : "Authorize"}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function Chat() {
+  const [input, setInput] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const { messages, sendMessage, reload, isLoading } = useChat({
+    connection: fetchServerSentEvents("/api/chat"),
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (input.trim() && !isLoading) {
+      sendMessage(input);
+      setInput("");
+    }
+  };
+
+  useEffect(() => {
+    if (!isLoading && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isLoading]);
+
+  return (
+    <div className="flex flex-col h-screen max-w-2xl mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Arcade + TanStack AI Chat</h1>
+
+      <div className="flex-1 overflow-y-auto space-y-4 mb-4">
+        {messages.map((message) => {
+          // Extract text content and tool results from parts
+          const textParts = (message.parts || []).filter(
+            (p: { type: string }) => p.type === "text"
+          );
+          const toolResultParts = (message.parts || []).filter(
+            (p: { type: string }) => p.type === "tool-result"
+          );
+          const textContent = textParts
+            .map((p: { content?: string }) => p.content || "")
+            .join("");
+          const authRequired = toolResultParts.find(
+            (result: { output?: { authorization_required?: boolean } }) =>
+              result.output?.authorization_required
+          );
+
+          return (
+            <div
+              key={message.id}
+              className={`p-4 rounded-lg ${
+                message.role === "assistant"
+                  ? "bg-gray-100"
+                  : "bg-blue-100 ml-8"
+              }`}
+            >
+              <div className="font-semibold text-sm text-gray-500 mb-1">
+                {message.role === "assistant" ? "Assistant" : "You"}
+              </div>
+
+              {authRequired ? (
+                <AuthPendingUI
+                  authUrl={
+                    (
+                      authRequired as {
+                        output?: { authorization_response?: { url?: string } };
+                      }
+                    )?.output?.authorization_response?.url || ""
+                  }
+                  toolName={
+                    (authRequired as { output?: { tool_name?: string } })
+                      ?.output?.tool_name || ""
+                  }
+                  onAuthComplete={() => reload()}
+                />
+              ) : (
+                <div className="whitespace-pre-wrap">{textContent}</div>
+              )}
+            </div>
+          );
+        })}
+
+        {isLoading && (
+          <div className="p-4 rounded-lg bg-gray-100">
+            <div className="font-semibold text-sm text-gray-500 mb-1">
+              Assistant
+            </div>
+            <div className="animate-pulse">Thinking...</div>
+          </div>
+        )}
+      </div>
+
+      <form onSubmit={handleSubmit} className="flex gap-2">
+        <input
+          ref={inputRef}
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Ask about your emails or Slack..."
+          disabled={isLoading}
+          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <button
+          type="submit"
+          disabled={isLoading || !input.trim()}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Send
+        </button>
+      </form>
+    </div>
+  );
+}
+
+export const Route = createFileRoute("/")({
+  component: Chat,
+});
+```
+
+Last updated on February 10, 2026
+
+[Setup (TypeScript)](/en/get-started/agent-frameworks/openai-agents/setup-typescript.md)
+[Vercel AI SDK](/en/get-started/agent-frameworks/vercelai.md)
