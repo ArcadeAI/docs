@@ -115,11 +115,11 @@ console.log(allTools.total_count);
 
 ## Get Zod Tool Definitions
 
-[Zod](https://zod.dev)  is a TypeScript-first schema validation library that helps you define and validate data structures. The [Arcade JS](https://github.com/ArcadeAI/arcade-js)  client offers methods to convert Arcade  definitions into Zod schemas, providing type safety and validation while enabling seamless integration with AI frameworks like LangChain, Vercel AI SDK, and Mastra AI. Using Zod with Arcade provides:
+[Zod](https://zod.dev)  is a TypeScript-first schema validation library that helps you define and validate data structures. The [Arcade JS](https://github.com/ArcadeAI/arcade-js)  client offers methods to convert Arcade  definitions into Zod schemas, providing type safety and validation while enabling seamless integration with AI frameworks like LangChain, Vercel AI SDK, Mastra AI, and TanStack AI. Using Zod with Arcade provides:
 
 1.  **Type Safety**: Runtime validation of  inputs and outputs against their defined types
-2.  **TypeScript Integration**: Provides excellent TypeScript support with automatic type inference
-3.  **Framework Compatibility**: Direct integration with LangChain, Vercel AI SDK, and Mastra AI
+2.  **TypeScript Integration**: Provides TypeScript support with automatic type inference
+3.  **Framework Compatibility**: Direct integration with LangChain, Vercel AI SDK, Mastra AI, and TanStack AI
 
 ### Convert to Zod Format
 
