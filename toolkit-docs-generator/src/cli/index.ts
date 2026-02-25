@@ -1700,6 +1700,10 @@ program
     "Require complete metadata. Only include toolkits with data in Engine and Design System.",
     false
   )
+  .option(
+    "--exclude-file <file>",
+    "Path to a .txt file with toolkit IDs to exclude from generation (one per line)"
+  )
   .option("--verbose", "Enable verbose logging", false)
   .action(
     async (options: {
@@ -1733,12 +1737,29 @@ program
       customSections?: string;
       resume: boolean;
       incremental: boolean;
+      excludeFile?: string;
       requireComplete: boolean;
       verbose: boolean;
       // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: legacy CLI flow
     }) => {
       const spinner = ora("Initializing...").start();
       const requireComplete = options.requireComplete;
+
+      let excludedToolkitIds = new Set<string>();
+      if (options.excludeFile) {
+        spinner.start(`Loading exclusion list from ${options.excludeFile}...`);
+        const loaded = await readExclusionList(options.excludeFile);
+        if (loaded === null) {
+          spinner.fail(`Exclusion file not found: ${options.excludeFile}`);
+          process.exit(1);
+        }
+        excludedToolkitIds = loaded;
+        spinner.succeed(
+          excludedToolkitIds.size > 0
+            ? `Excluding ${excludedToolkitIds.size} toolkit(s) from generation`
+            : "Exclusion file loaded (no toolkits excluded)"
+        );
+      }
 
       try {
         const mockDataDir = options.mockDataDir ?? getDefaultMockDataDir();
@@ -1850,6 +1871,10 @@ program
           } else {
             spinner.succeed("No previously completed toolkits found");
           }
+        }
+
+        for (const id of excludedToolkitIds) {
+          skipToolkitIds.add(id);
         }
 
         if (options.overwriteOutput) {
@@ -2030,6 +2055,23 @@ program
             } catch (error) {
               spinner.warn(`Failed to generate index: ${error}`);
             }
+          }
+        }
+
+        if (excludedToolkitIds.size > 0) {
+          const deleted = await removeExcludedToolkitFiles(
+            resolve(options.output),
+            excludedToolkitIds
+          );
+          if (deleted.length > 0) {
+            if (options.verbose) {
+              console.log(
+                chalk.dim(
+                  `  Deleted ${deleted.length} excluded toolkit file(s): ${deleted.join(", ")}`
+                )
+              );
+            }
+            await generator.rebuildIndexFromOutput();
           }
         }
 
