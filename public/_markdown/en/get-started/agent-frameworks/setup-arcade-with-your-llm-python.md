@@ -462,7 +462,7 @@ if __name__ == "__main__":
     chat()
 ```
 
-Last updated on January 5, 2026
+Last updated on February 10, 2026
 
 [Overview](/en/get-started/agent-frameworks.md)
 [Setup Arcade with your LLM (TypeScript)](/en/get-started/agent-frameworks/setup-arcade-with-your-llm-typescript.md)
