@@ -7,7 +7,7 @@ TanStack AI
 
 # Build an AI Chatbot with Arcade and TanStack AI
 
-[TanStack AI](https://tanstack.com/ai/latest/docs)  is a type-safe, provider-agnostic SDK for building AI applications in JavaScript and TypeScript. It provides streaming responses,  calling with Zod schemas, and framework-agnostic primitives for React, Solid, and vanilla JavaScript. Provider adapters let you switch between OpenAI, Anthropic, Google Gemini, and Ollama without rewriting your code.
+[TanStack AI](https://tanstack.com/ai/latest/docs)  is a type-safe, provider-agnostic SDK for building AI applications in JavaScript and TypeScript. It provides streaming responses,  calling, and framework-agnostic primitives for React, Solid, and vanilla JavaScript. Provider adapters let you switch between OpenAI, Anthropic, Google Gemini, and Ollama without rewriting your code.
 
 In this guide, you’ll build a browser-based chatbot using [TanStack Start](https://tanstack.com/start)  that uses Arcade’s Gmail and Slack . Your  can read emails, send messages, and interact with Slack through a conversational interface with built-in authentication.
 
@@ -41,8 +41,8 @@ Before diving into the code, here are the key TanStack concepts you’ll use:
       A React hook that manages chat state, handles streaming via Server-Sent Events, and renders  results automatically.
 -   [Server routes](https://tanstack.com/start/latest/docs/framework/react/guide/server-routes)
       TanStack Start’s server routes run exclusively on the server using the `server.handlers` property, keeping  secure while handling streaming responses.
--   [toolDefinition](https://tanstack.com/ai/latest/docs/guides/tools#option-1-zod-schemas-recommended)
-      Defines  with Zod schemas for type-safe parameters. Tools can run on server, client, or both.
+-   [toolDefinition](https://tanstack.com/ai/latest/docs/guides/tools)
+      Defines  with type-safe parameters. Tools can run on server, client, or both.
 
 ## Build the chatbot
 
@@ -83,28 +83,28 @@ Install the required dependencies:
 ### pnpm
 
 ```bash
-pnpm add @tanstack/ai @tanstack/ai-react @tanstack/ai-openai @arcadeai/arcadejs zod react-markdown
+pnpm add @tanstack/ai @tanstack/ai-react @tanstack/ai-openai @arcadeai/arcadejs react-markdown
 pnpm add -D @tailwindcss/typography
 ```
 
 ### npm
 
 ```bash
-npm install @tanstack/ai @tanstack/ai-react @tanstack/ai-openai @arcadeai/arcadejs zod react-markdown
+npm install @tanstack/ai @tanstack/ai-react @tanstack/ai-openai @arcadeai/arcadejs react-markdown
 npm install -D @tailwindcss/typography
 ```
 
 ### yarn
 
 ```bash
-yarn add @tanstack/ai @tanstack/ai-react @tanstack/ai-openai @arcadeai/arcadejs zod react-markdown
+yarn add @tanstack/ai @tanstack/ai-react @tanstack/ai-openai @arcadeai/arcadejs react-markdown
 yarn add -D @tailwindcss/typography
 ```
 
 ### bun
 
 ```bash
-bun add @tanstack/ai @tanstack/ai-react @tanstack/ai-openai @arcadeai/arcadejs zod react-markdown
+bun add @tanstack/ai @tanstack/ai-react @tanstack/ai-openai @arcadeai/arcadejs react-markdown
 bun add -D @tailwindcss/typography
 ```
 
@@ -138,10 +138,10 @@ src/routes/api/chat.ts
 
 ```json
 import { createFileRoute } from "@tanstack/react-router";
-import { chat, toServerSentEventsResponse, toolDefinition } from "@tanstack/ai";
+import { toServerSentEventsResponse, chat, toolDefinition } from "@tanstack/ai";
+import type { JSONSchema } from "@tanstack/ai";
 import { openaiText } from "@tanstack/ai-openai";
 import { Arcade } from "@arcadeai/arcadejs";
-import { z } from "zod";
 
 const config = {
   // Get all tools from these MCP servers
@@ -173,57 +173,8 @@ After completing any action, always confirm what you did with specific details.
 IMPORTANT: When calling tools, if an argument is optional, do not set it. Never pass null for optional parameters.`,
 };
 
-// Convert JSON Schema to Zod schema (simplified version)
-function jsonSchemaToZod(schema: Record<string, unknown>): z.ZodType {
-  if (!schema || typeof schema !== "object") {
-    return z.object({});
-  }
-
-  const type = schema.type as string;
-
-  // Handle tools with no parameters (type: "None" or missing type)
-  if (!type || type === "None" || type === "null") {
-    return z.object({});
-  }
-
-  const properties = schema.properties as Record<string, unknown> | undefined;
-  const required = (schema.required as string[]) || [];
-
-  if (type === "object" && properties) {
-    const shape: Record<string, z.ZodType> = {};
-    for (const [key, prop] of Object.entries(properties)) {
-      const propSchema = prop as Record<string, unknown>;
-      let zodType = jsonSchemaToZod(propSchema);
-
-      if (propSchema.description) {
-        zodType = zodType.describe(propSchema.description as string);
-      }
-
-      if (!required.includes(key)) {
-        zodType = zodType.optional();
-      }
-
-      shape[key] = zodType;
-    }
-    return z.object(shape);
-  }
-
-  switch (type) {
-    case "string":
-      return z.string();
-    case "number":
-    case "integer":
-      return z.number();
-    case "boolean":
-      return z.boolean();
-    case "array":
-      return z.array(jsonSchemaToZod(schema.items as Record<string, unknown>));
-    case "object":
-      return z.object({});
-    default:
-      return z.object({});
-  }
-}
+// Empty JSON Schema for tools with no parameters
+const emptySchema: JSONSchema = { type: "object", properties: {} };
 
 // Strip null values from tool inputs
 function stripNullValues(obj: Record<string, unknown>): Record<string, unknown> {
@@ -306,9 +257,10 @@ async function getArcadeTools(userId: string) {
 
   // Convert to TanStack AI tool format
   return uniqueTools.map((tool) => {
-    const inputSchema = tool.input?.parameters
-      ? jsonSchemaToZod(tool.input.parameters as Record<string, unknown>)
-      : z.object({});
+    // Use Arcade's JSON Schema directly - TanStack AI accepts it natively
+    const params = tool.input?.parameters as JSONSchema | undefined;
+    const hasValidSchema = params && params.type && params.type !== "None";
+    const inputSchema = hasValidSchema ? params : emptySchema;
 
     return toolDefinition({
       name: tool.qualified_name.replace(".", "_"),
@@ -722,10 +674,10 @@ src/routes/api/chat.ts
 
 ```json
 import { createFileRoute } from "@tanstack/react-router";
-import { chat, toServerSentEventsResponse, toolDefinition } from "@tanstack/ai";
+import { toServerSentEventsResponse, chat, toolDefinition } from "@tanstack/ai";
+import type { JSONSchema } from "@tanstack/ai";
 import { openaiText } from "@tanstack/ai-openai";
 import { Arcade } from "@arcadeai/arcadejs";
-import { z } from "zod";
 
 const config = {
   mcpServers: ["Slack"],
@@ -753,55 +705,8 @@ After completing any action, always confirm what you did with specific details.
 IMPORTANT: When calling tools, if an argument is optional, do not set it. Never pass null for optional parameters.`,
 };
 
-function jsonSchemaToZod(schema: Record<string, unknown>): z.ZodType {
-  if (!schema || typeof schema !== "object") {
-    return z.object({});
-  }
-
-  const type = schema.type as string;
-
-  if (!type || type === "None" || type === "null") {
-    return z.object({});
-  }
-
-  const properties = schema.properties as Record<string, unknown> | undefined;
-  const required = (schema.required as string[]) || [];
-
-  if (type === "object" && properties) {
-    const shape: Record<string, z.ZodType> = {};
-    for (const [key, prop] of Object.entries(properties)) {
-      const propSchema = prop as Record<string, unknown>;
-      let zodType = jsonSchemaToZod(propSchema);
-
-      if (propSchema.description) {
-        zodType = zodType.describe(propSchema.description as string);
-      }
-
-      if (!required.includes(key)) {
-        zodType = zodType.optional();
-      }
-
-      shape[key] = zodType;
-    }
-    return z.object(shape);
-  }
-
-  switch (type) {
-    case "string":
-      return z.string();
-    case "number":
-    case "integer":
-      return z.number();
-    case "boolean":
-      return z.boolean();
-    case "array":
-      return z.array(jsonSchemaToZod(schema.items as Record<string, unknown>));
-    case "object":
-      return z.object({});
-    default:
-      return z.object({});
-  }
-}
+// Empty JSON Schema for tools with no parameters
+const emptySchema: JSONSchema = { type: "object", properties: {} };
 
 function stripNullValues(obj: Record<string, unknown>): Record<string, unknown> {
   const result: Record<string, unknown> = {};
@@ -870,9 +775,10 @@ async function getArcadeTools(userId: string) {
   );
 
   return uniqueTools.map((tool) => {
-    const inputSchema = tool.input?.parameters
-      ? jsonSchemaToZod(tool.input.parameters as Record<string, unknown>)
-      : z.object({});
+    // Use Arcade's JSON Schema directly - TanStack AI accepts it natively
+    const params = tool.input?.parameters as JSONSchema | undefined;
+    const hasValidSchema = params && params.type && params.type !== "None";
+    const inputSchema = hasValidSchema ? params : emptySchema;
 
     return toolDefinition({
       name: tool.qualified_name.replace(".", "_"),
@@ -1168,7 +1074,7 @@ export const Route = createFileRoute("/")({
 });
 ```
 
-Last updated on February 10, 2026
+Last updated on February 12, 2026
 
 [Setup (TypeScript)](/en/get-started/agent-frameworks/openai-agents/setup-typescript.md)
 [Vercel AI SDK](/en/get-started/agent-frameworks/vercelai.md)
