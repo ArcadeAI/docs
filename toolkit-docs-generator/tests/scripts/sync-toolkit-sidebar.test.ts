@@ -7,7 +7,8 @@
 
 import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { getToolkitStaticParamsForCategory } from "../../../app/_lib/toolkit-static-params";
 import {
   buildToolkitInfoList,
   generateCategoryMeta,
@@ -17,30 +18,31 @@ import {
   getToolkitLabel,
   getToolkitLabelFromJson,
   groupByCategory,
+  parseBooleanCliFlag,
+  resolveRemoveEmptySections,
+  setToolkitsForTesting,
   syncToolkitSidebar,
   type ToolkitInfo,
 } from "../../scripts/sync-toolkit-sidebar";
 
-// Mock the design system
-vi.mock("@arcadeai/design-system", () => ({
-  TOOLKITS: [
-    { id: "Gmail", label: "Gmail", category: "productivity" },
-    { id: "Slack", label: "Slack", category: "social" },
-    { id: "Github", label: "GitHub", category: "development" },
-    { id: "Stripe", label: "Stripe", category: "payments" },
-    { id: "Zendesk", label: "Zendesk", category: "customer-support" },
-    { id: "GoogleSearch", label: "Google Search", category: "search" },
-    { id: "Hubspot", label: "HubSpot", category: "sales" },
-    { id: "Spotify", label: "Spotify", category: "entertainment" },
-    { id: "Postgres", label: "Postgres", category: "databases" },
-    {
-      id: "HiddenToolkit",
-      label: "Hidden",
-      category: "productivity",
-      isHidden: true,
-    },
-  ],
-}));
+setToolkitsForTesting([
+  { id: "Gmail", label: "Gmail", category: "productivity" },
+  { id: "Slack", label: "Slack", category: "social" },
+  { id: "Github", label: "GitHub", category: "development" },
+  { id: "Stripe", label: "Stripe", category: "payments" },
+  { id: "Zendesk", label: "Zendesk", category: "customer-support" },
+  { id: "GoogleSearch", label: "Google Search", category: "search" },
+  { id: "Hubspot", label: "HubSpot", category: "sales" },
+  { id: "Spotify", label: "Spotify", category: "entertainment" },
+  { id: "Postgres", label: "Postgres", category: "databases" },
+  { id: "WeaviateApi", label: "Weaviate API", category: "development" },
+  {
+    id: "HiddenToolkit",
+    label: "Hidden",
+    category: "productivity",
+    isHidden: true,
+  },
+]);
 
 // Test directory setup
 const TEST_DIR = join(process.cwd(), ".test-sync-sidebar");
@@ -292,6 +294,59 @@ describe("buildToolkitInfoList", () => {
     const matches = result.filter((item) => item.slug === "clickup-api");
     expect(matches).toHaveLength(1);
   });
+
+  it("keeps sidebar href categories consistent with static params", async () => {
+    createToolkitJson("weaviateapi", {
+      id: "WeaviateApi",
+      label: "Weaviate API",
+      metadata: {
+        category: "databases",
+        docsLink:
+          "https://docs.arcade.dev/en/mcp-servers/databases/weaviate-api",
+      },
+    });
+
+    const result = buildToolkitInfoList(TEST_DATA_DIR);
+    const weaviate = result.find((item) => item.id === "WeaviateApi");
+    expect(weaviate).toBeDefined();
+    if (!weaviate) {
+      throw new Error("Expected WeaviateApi toolkit in sidebar data");
+    }
+    expect(weaviate.category).toBe("databases");
+    expect(weaviate.slug).toBe("weaviate-api");
+
+    const sidebarMeta = generateCategoryMeta(
+      [weaviate],
+      weaviate.category,
+      "/en/resources/integrations"
+    );
+    expect(sidebarMeta).toContain(
+      'href: "/en/resources/integrations/databases/weaviate-api"'
+    );
+
+    const toolkitsCatalog = [
+      { id: "WeaviateApi", category: "development", docsLink: undefined },
+    ];
+    const databasesParams = await getToolkitStaticParamsForCategory(
+      "databases",
+      {
+        dataDir: TEST_DATA_DIR,
+        toolkitsCatalog,
+      }
+    );
+    const developmentParams = await getToolkitStaticParamsForCategory(
+      "development",
+      {
+        dataDir: TEST_DATA_DIR,
+        toolkitsCatalog,
+      }
+    );
+
+    expect(databasesParams).toContainEqual({ toolkitId: "weaviate-api" });
+    expect(developmentParams).not.toContainEqual({
+      toolkitId: "weaviate-api",
+    });
+  });
 });
 
 // ============================================================================
@@ -346,6 +401,60 @@ describe("groupByCategory", () => {
     const result = groupByCategory(toolkits);
     expect(result.has("others")).toBe(true);
     expect(result.get("others")).toHaveLength(1);
+  });
+});
+
+// ============================================================================
+// Unit Tests: remove empty section flags
+// ============================================================================
+
+describe("remove empty section flags", () => {
+  it("defaults to false when no flag is provided", () => {
+    expect(resolveRemoveEmptySections({})).toBe(false);
+  });
+
+  it("supports the explicit removeEmptySections option", () => {
+    expect(resolveRemoveEmptySections({ removeEmptySections: true })).toBe(
+      true
+    );
+    expect(resolveRemoveEmptySections({ removeEmptySections: false })).toBe(
+      false
+    );
+  });
+
+  it("supports prune as a backward-compatible alias", () => {
+    expect(resolveRemoveEmptySections({ prune: true })).toBe(true);
+    expect(resolveRemoveEmptySections({ prune: false })).toBe(false);
+  });
+
+  it("prefers removeEmptySections over prune when both are set", () => {
+    expect(
+      resolveRemoveEmptySections({ removeEmptySections: false, prune: true })
+    ).toBe(false);
+    expect(
+      resolveRemoveEmptySections({ removeEmptySections: true, prune: false })
+    ).toBe(true);
+  });
+
+  it("parses boolean CLI flags in value and shorthand formats", () => {
+    expect(
+      parseBooleanCliFlag(
+        ["--remove-empty-sections=true"],
+        "--remove-empty-sections"
+      )
+    ).toBe(true);
+    expect(
+      parseBooleanCliFlag(
+        ["--remove-empty-sections=false"],
+        "--remove-empty-sections"
+      )
+    ).toBe(false);
+    expect(
+      parseBooleanCliFlag(
+        ["--remove-empty-sections"],
+        "--remove-empty-sections"
+      )
+    ).toBe(true);
   });
 });
 

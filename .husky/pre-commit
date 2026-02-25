@@ -132,7 +132,7 @@ if git diff --cached --name-only | grep -q "next.config.ts"; then
 fi
 
 # --- Lint Staged (formatting) ---
-pnpm dlx lint-staged
+pnpm exec lint-staged
 
 # --- Stash + Format ---
 # Skip this block during merge/rebase: git stash --keep-index destroys
@@ -150,17 +150,43 @@ STAGED_HASH=$(git diff --cached | sha256sum | cut -d' ' -f1)
 STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACMR)
 PARTIALLY_STAGED=$(git diff --name-only)
 
+# If a file is both staged and unstaged, stash/pop can produce conflicts.
+# In that case rely on lint-staged only, which already ran above.
+if [ -n "$PARTIALLY_STAGED" ] && [ -n "$STAGED_FILES" ]; then
+  for file in $PARTIALLY_STAGED; do
+    if [ -f "$file" ] && echo "$STAGED_FILES" | grep -qxF "$file"; then
+      echo "⏭️  Skipping stash+format (partially staged files detected)"
+      exit 0
+    fi
+  done
+fi
+
 # Stash unstaged changes to preserve working directory
 # --keep-index keeps staged changes in working tree
-git stash push --quiet --keep-index --message "pre-commit-stash" || true
-STASHED=$?
+STASH_CREATED=false
+STASH_MESSAGE="pre-commit-stash-$$-$(date +%s)"
+if ! git diff --quiet; then
+  git stash push --quiet --keep-index --message "$STASH_MESSAGE"
+  TOP_STASH_SUBJECT="$(git stash list -1 --format='%s' || true)"
+  case "$TOP_STASH_SUBJECT" in
+    *"$STASH_MESSAGE")
+      STASH_CREATED=true
+      ;;
+  esac
+fi
 
 # Run formatter on the staged files
-pnpm dlx ultracite fix
-FORMAT_EXIT_CODE=$?
+if [ -n "$STAGED_FILES" ]; then
+  for file in $STAGED_FILES; do
+    if [ -f "$file" ]; then
+      pnpm exec ultracite fix "$file"
+    fi
+  done
+fi
+FORMAT_EXIT_CODE=0
 
 # Restore working directory state
-if [ $STASHED -eq 0 ]; then
+if [ "$STASH_CREATED" = true ]; then
   # Re-stage the formatted files
   if [ -n "$STAGED_FILES" ]; then
     echo "$STAGED_FILES" | while IFS= read -r file; do
@@ -171,17 +197,10 @@ if [ $STASHED -eq 0 ]; then
   fi
 
   # Restore unstaged changes
-  git stash pop --quiet || true
-
-  # Restore partial staging if files were partially staged
-  if [ -n "$PARTIALLY_STAGED" ]; then
-    for file in $PARTIALLY_STAGED; do
-      if [ -f "$file" ] && echo "$STAGED_FILES" | grep -q "^$file$"; then
-        # File was partially staged - need to unstage the unstaged parts
-        git restore --staged "$file" 2>/dev/null || true
-        git add -p "$file" < /dev/null 2>/dev/null || git add "$file"
-      fi
-    done
+  if ! git stash pop --quiet; then
+    echo "❌ Failed to restore stashed changes during pre-commit."
+    echo "   Resolve conflicts, then re-stage files and commit again."
+    exit 1
   fi
 else
   # No stash was created, just re-add the formatted files

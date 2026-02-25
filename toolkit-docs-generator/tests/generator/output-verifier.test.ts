@@ -235,4 +235,110 @@ describe("verifyOutputDir", () => {
       ).toBe(true);
     });
   });
+
+  it("can verify legacy toolkit files when legacy fallback is enabled", async () => {
+    await withTempDir(async (dir) => {
+      const [githubToolkit] = await Promise.all([
+        loadFixture("github-toolkit.json"),
+      ]);
+      const generator = createJsonGenerator({
+        outputDir: dir,
+        prettyPrint: false,
+        generateIndex: true,
+      });
+
+      await generator.generateAll([githubToolkit]);
+
+      const toolkitPath = join(dir, "github.json");
+      const legacyToolkit = JSON.parse(
+        await readFile(toolkitPath, "utf-8")
+      ) as Record<string, unknown>;
+      const chunks = legacyToolkit.documentationChunks as Record<
+        string,
+        unknown
+      >[];
+      if (Array.isArray(chunks) && chunks[0]) {
+        chunks[0].type = "legacy_note";
+        chunks[0].location = "overview";
+      }
+      legacyToolkit.subPages = [{ slug: "advanced" }];
+      await writeFile(
+        toolkitPath,
+        JSON.stringify(legacyToolkit, null, 2),
+        "utf-8"
+      );
+
+      const strictResult = await verifyOutputDir(dir);
+      expect(strictResult.valid).toBe(false);
+      expect(
+        strictResult.errors.some((error) =>
+          error.includes("Invalid toolkit schema in github.json")
+        )
+      ).toBe(true);
+
+      const fallbackResult = await verifyOutputDir(dir, undefined, {
+        allowLegacyFallback: true,
+      });
+      expect(fallbackResult.valid).toBe(true);
+      expect(fallbackResult.errors).toHaveLength(0);
+      expect(
+        fallbackResult.warnings.some((warning) =>
+          warning.includes("Loaded github.json with fallback parser")
+        )
+      ).toBe(true);
+    });
+  });
+
+  it("builds index from output when legacy files exist", async () => {
+    await withTempDir(async (dir) => {
+      const [githubToolkit, slackToolkit] = await Promise.all([
+        loadFixture("github-toolkit.json"),
+        loadFixture("slack-toolkit.json"),
+      ]);
+      const baselineGenerator = createJsonGenerator({
+        outputDir: dir,
+        prettyPrint: false,
+        generateIndex: true,
+      });
+      await baselineGenerator.generateAll([githubToolkit, slackToolkit]);
+
+      const toolkitPath = join(dir, "github.json");
+      const legacyToolkit = JSON.parse(
+        await readFile(toolkitPath, "utf-8")
+      ) as Record<string, unknown>;
+      const chunks = legacyToolkit.documentationChunks as Record<
+        string,
+        unknown
+      >[];
+      if (Array.isArray(chunks) && chunks[0]) {
+        chunks[0].type = "legacy_note";
+        chunks[0].location = "overview";
+      }
+      legacyToolkit.subPages = [{ slug: "advanced" }];
+      await writeFile(
+        toolkitPath,
+        JSON.stringify(legacyToolkit, null, 2),
+        "utf-8"
+      );
+
+      const generator = createJsonGenerator({
+        outputDir: dir,
+        prettyPrint: false,
+        generateIndex: true,
+        indexSource: "output",
+      });
+      const result = await generator.generateAll([slackToolkit]);
+
+      expect(result.errors).toHaveLength(0);
+
+      const index = JSON.parse(
+        await readFile(join(dir, "index.json"), "utf-8")
+      ) as {
+        toolkits: Array<{ id: string }>;
+      };
+      const ids = new Set(index.toolkits.map((entry) => entry.id));
+      expect(ids.has("Github")).toBe(true);
+      expect(ids.has("Slack")).toBe(true);
+    });
+  });
 });

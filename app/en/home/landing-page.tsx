@@ -28,6 +28,7 @@ const ANIMATION_DELAYS = {
   secondary: 0.4,
   buttons: 0.6,
 } as const;
+const INTEGRATIONS_PAGE_HREF = "/en/resources/integrations";
 
 // Popular integrations to showcase (row 1: productivity/work)
 const POPULAR_INTEGRATIONS_ROW1 = [
@@ -55,7 +56,7 @@ const POPULAR_INTEGRATIONS_ROW1 = [
   {
     name: "Slack",
     icon: "/images/icons/slack.png",
-    href: "/resources/integrations/social-communication/slack",
+    href: "/resources/integrations/social/slack",
   },
   {
     name: "Google Docs",
@@ -95,12 +96,12 @@ const POPULAR_INTEGRATIONS_ROW2 = [
   {
     name: "X",
     icon: "/images/icons/twitter.png",
-    href: "/resources/integrations/social-communication/x",
+    href: "/resources/integrations/social/x",
   },
   {
     name: "MS Teams",
     icon: "/images/icons/ms_teams.png",
-    href: "/resources/integrations/social-communication/microsoft-teams",
+    href: "/resources/integrations/social/microsoft-teams",
   },
   {
     name: "Outlook",
@@ -125,7 +126,7 @@ const POPULAR_INTEGRATIONS_ROW2 = [
   {
     name: "Reddit",
     icon: "/images/icons/reddit.png",
-    href: "/resources/integrations/social-communication/reddit",
+    href: "/resources/integrations/social/reddit",
   },
   {
     name: "YouTube",
@@ -269,10 +270,10 @@ export function LandingPage() {
                 variant="outline"
               >
                 <Link
-                  href="/resources/integrations"
+                  href={INTEGRATIONS_PAGE_HREF}
                   onClick={trackClick(
                     "hero_explore_tools_clicked",
-                    "/resources/integrations"
+                    INTEGRATIONS_PAGE_HREF
                   )}
                 >
                   <Puzzle className="mr-2 h-5 w-5" />
@@ -313,7 +314,7 @@ export function LandingPage() {
               <div className="space-y-4">
                 <QuickStartCard
                   description="Browse 100+ ready-to-use integrations for Gmail, Slack, GitHub, and more."
-                  href="/resources/integrations"
+                  href={INTEGRATIONS_PAGE_HREF}
                   icon={Puzzle}
                   logos={[
                     { src: "/images/icons/gmail.png", alt: "Gmail" },
@@ -432,10 +433,10 @@ export function LandingPage() {
               variant="outline"
             >
               <Link
-                href="/resources/integrations"
+                href={INTEGRATIONS_PAGE_HREF}
                 onClick={trackClick(
                   "view_all_integrations_clicked",
-                  "/resources/integrations"
+                  INTEGRATIONS_PAGE_HREF
                 )}
               >
                 See all 100+
@@ -566,7 +567,7 @@ export function LandingPage() {
             />
             <QuickStartCard
               description="Catalog of pre-built tools and integrations. Browse 100+ ready-to-use MCP servers."
-              href="/resources/integrations"
+              href={INTEGRATIONS_PAGE_HREF}
               icon={ToolCase}
               title="Tool Catalog"
             />

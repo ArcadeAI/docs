@@ -583,6 +583,15 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
         <h1 className="mb-6 font-bold text-4xl text-foreground tracking-tight">
           {data.label}
         </h1>
+        <ToolkitHeader
+          auth={data.auth}
+          description={data.description}
+          id={data.id}
+          label={data.label}
+          metadata={metadata}
+          toolStats={toolStats}
+          version={data.version}
+        />
         <DocumentationChunkRenderer
           chunks={documentationChunks}
           location="header"
@@ -592,15 +601,6 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
           chunks={documentationChunks}
           location="description"
           position="before"
-        />
-        <ToolkitHeader
-          auth={data.auth}
-          description={data.description}
-          id={data.id}
-          label={data.label}
-          metadata={metadata}
-          toolStats={toolStats}
-          version={data.version}
         />
         <DocumentationChunkRenderer
           chunks={documentationChunks}

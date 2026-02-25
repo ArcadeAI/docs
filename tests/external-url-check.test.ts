@@ -5,6 +5,19 @@ import { expect, test } from "vitest";
 const TIMEOUT = 120_000;
 const CONCURRENCY = 10;
 const REQUEST_TIMEOUT = 8000;
+const RETRY_ATTEMPTS = 2;
+const RETRY_DELAY_MS = 400;
+const TRANSIENT_ERROR_PATTERNS: readonly RegExp[] = [
+  /aborted/i,
+  /timeout/i,
+  /timed out/i,
+  /network/i,
+  /fetch failed/i,
+  /socket hang up/i,
+  /econnreset/i,
+  /eai_again/i,
+  /enotfound/i,
+];
 
 const SKIP_PATTERNS: RegExp[] = [
   // Placeholder / example domains
@@ -67,44 +80,68 @@ function extractExternalUrls(content: string): string[] {
   return urls;
 }
 
-async function checkUrl(
-  url: string
-): Promise<{ ok: boolean; status?: number; error?: string }> {
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isTransientError(message: string | undefined): boolean {
+  if (!message) {
+    return false;
+  }
+
+  return TRANSIENT_ERROR_PATTERNS.some((pattern) => pattern.test(message));
+}
+
+async function fetchWithTimeout(
+  url: string,
+  method: "HEAD" | "GET"
+): Promise<Response> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
-
   try {
-    let res = await fetch(url, {
-      method: "HEAD",
+    return await fetch(url, {
+      method,
       signal: controller.signal,
       redirect: "follow",
     });
-
-    if (res.status === 405 || res.status === 403) {
-      const controller2 = new AbortController();
-      const timer2 = setTimeout(() => controller2.abort(), REQUEST_TIMEOUT);
-      try {
-        res = await fetch(url, {
-          method: "GET",
-          signal: controller2.signal,
-          redirect: "follow",
-        });
-      } finally {
-        clearTimeout(timer2);
-      }
-    }
-
-    if (res.status === 429 || (res.status >= 200 && res.status < 400)) {
-      return { ok: true };
-    }
-
-    return { ok: false, status: res.status };
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    return { ok: false, error: message };
   } finally {
     clearTimeout(timer);
   }
+}
+
+async function checkUrl(
+  url: string
+): Promise<{ ok: boolean; status?: number; error?: string }> {
+  for (let attempt = 0; attempt <= RETRY_ATTEMPTS; attempt += 1) {
+    try {
+      let res = await fetchWithTimeout(url, "HEAD");
+
+      if (res.status === 405 || res.status === 403) {
+        res = await fetchWithTimeout(url, "GET");
+      }
+
+      if (res.status === 429 || (res.status >= 200 && res.status < 400)) {
+        return { ok: true };
+      }
+
+      // Retry transient upstream failures.
+      if (res.status >= 500 && attempt < RETRY_ATTEMPTS) {
+        await sleep(RETRY_DELAY_MS * (attempt + 1));
+        continue;
+      }
+
+      return { ok: false, status: res.status };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      if (isTransientError(message) && attempt < RETRY_ATTEMPTS) {
+        await sleep(RETRY_DELAY_MS * (attempt + 1));
+        continue;
+      }
+      return { ok: false, error: message };
+    }
+  }
+
+  return { ok: false, error: "Unknown link check failure" };
 }
 
 function pLimit(concurrency: number) {

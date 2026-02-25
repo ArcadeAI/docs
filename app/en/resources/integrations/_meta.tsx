@@ -36,6 +36,9 @@ const meta: MetaRecord = {
   sales: {
     title: "Sales",
   },
+  databases: {
+    title: "Databases",
+  },
   "customer-support": {
     title: "Customer Support",
   },

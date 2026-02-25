@@ -27,8 +27,8 @@ const ToolMetadataInputSchema = z.object({
 
 const ToolMetadataOutputSchema = z
   .object({
-    description: z.string().nullable(),
-    value_schema: ToolMetadataValueSchema.nullable(),
+    description: z.string().nullable().optional(),
+    value_schema: ToolMetadataValueSchema.nullable().optional(),
   })
   .nullable()
   .optional();
@@ -115,6 +115,9 @@ export type ToolMetadataSummary = {
   }>;
 };
 
+const normalizeEnum = (values: string[] | null | undefined): string[] | null =>
+  values && values.length > 0 ? values : null;
+
 const transformParameter = (
   apiParam: z.infer<typeof ToolMetadataParameterSchema>
 ): ToolParameter => ({
@@ -123,7 +126,7 @@ const transformParameter = (
   innerType: apiParam.value_schema.inner_val_type ?? undefined,
   required: apiParam.required,
   description: apiParam.description,
-  enum: apiParam.value_schema.enum ?? null,
+  enum: normalizeEnum(apiParam.value_schema.enum),
   inferrable: apiParam.inferrable,
 });
 
@@ -144,6 +147,7 @@ export const transformToolMetadataItem = (
 ): ToolDefinition => {
   // authorization is now an array; pick the first entry (most tools have 0 or 1)
   const authEntry = apiTool.requirements?.authorization?.[0] ?? null;
+  const providerType = authEntry?.provider_type ?? null;
 
   return {
     name: apiTool.name,
@@ -152,17 +156,19 @@ export const transformToolMetadataItem = (
     description: apiTool.description,
     toolkitDescription: apiTool.toolkit.description,
     parameters: apiTool.input.parameters.map(transformParameter),
-    auth: authEntry
-      ? {
-          providerId: authEntry.provider_id ?? null,
-          providerType: authEntry.provider_type ?? "unknown",
-          scopes: authEntry.scopes ?? [],
-        }
-      : null,
+    auth:
+      authEntry && providerType
+        ? {
+            providerId: authEntry.provider_id ?? null,
+            providerType,
+            scopes: authEntry.scopes ?? [],
+          }
+        : null,
     secrets: normalizeSecrets(apiTool.requirements?.secrets),
     output: apiTool.output
       ? {
-          type: apiTool.output.value_schema?.val_type ?? "unknown",
+          // Keep parity with /v1/tools normalization for source-agnostic diffs.
+          type: apiTool.output.value_schema?.val_type ?? "string",
           description: apiTool.output.description ?? null,
         }
       : null,

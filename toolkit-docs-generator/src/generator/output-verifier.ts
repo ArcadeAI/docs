@@ -1,5 +1,6 @@
 import { readdir, readFile } from "fs/promises";
 import { basename, join } from "path";
+import { parsePreviousToolkitForDiff } from "../diff/previous-output.js";
 import type { MergedToolkit, ToolkitIndex } from "../types/index.js";
 import { MergedToolkitSchema, ToolkitIndexSchema } from "../types/index.js";
 
@@ -12,6 +13,7 @@ export interface OutputVerificationResult {
 export interface ToolkitReadResult {
   toolkits: MergedToolkit[];
   errors: string[];
+  warnings: string[];
 }
 
 export interface VerificationProgress {
@@ -25,6 +27,14 @@ export type VerificationProgressCallback = (
   progress: VerificationProgress
 ) => void;
 
+export interface ReadToolkitsOptions {
+  allowLegacyFallback?: boolean;
+}
+
+export interface VerifyOutputOptions {
+  allowLegacyFallback?: boolean;
+}
+
 const isToolkitFile = (fileName: string): boolean =>
   fileName.endsWith(".json") && fileName !== "index.json";
 
@@ -34,10 +44,12 @@ const normalizeToolkitKey = (toolkitId: string): string =>
 type ReadToolkitFileResult = {
   toolkit: MergedToolkit | null;
   error?: string;
+  warning?: string;
 };
 
 const readToolkitFile = async (
-  filePath: string
+  filePath: string,
+  allowLegacyFallback: boolean
 ): Promise<ReadToolkitFileResult> => {
   const fileName = basename(filePath);
   let content: string;
@@ -63,22 +75,38 @@ const readToolkitFile = async (
   }
 
   const result = MergedToolkitSchema.safeParse(parsed);
-  if (!result.success) {
-    return {
-      toolkit: null,
-      error: `Invalid toolkit schema in ${fileName}: ${result.error.message}`,
-    };
+  if (result.success) {
+    return { toolkit: result.data };
   }
 
-  return { toolkit: result.data };
+  if (allowLegacyFallback) {
+    const fallback = parsePreviousToolkitForDiff(
+      parsed,
+      basename(fileName, ".json")
+    );
+    if (fallback.toolkit) {
+      return {
+        toolkit: fallback.toolkit,
+        warning: `Loaded ${fileName} with fallback parser (${fallback.reason ?? "schema mismatch"}).`,
+      };
+    }
+  }
+
+  return {
+    toolkit: null,
+    error: `Invalid toolkit schema in ${fileName}: ${result.error.message}`,
+  };
 };
 
 export const readToolkitsFromDir = async (
   dir: string,
-  onProgress?: VerificationProgressCallback
+  onProgress?: VerificationProgressCallback,
+  options: ReadToolkitsOptions = {}
 ): Promise<ToolkitReadResult> => {
   const toolkits: MergedToolkit[] = [];
   const errors: string[] = [];
+  const warnings: string[] = [];
+  const allowLegacyFallback = options.allowLegacyFallback ?? false;
 
   let entries: string[] = [];
   try {
@@ -87,6 +115,7 @@ export const readToolkitsFromDir = async (
     return {
       toolkits: [],
       errors: [`Failed to read output directory: ${error}`],
+      warnings: [],
     };
   }
 
@@ -105,15 +134,18 @@ export const readToolkitsFromDir = async (
     });
 
     const filePath = join(dir, fileName);
-    const result = await readToolkitFile(filePath);
+    const result = await readToolkitFile(filePath, allowLegacyFallback);
     if (!result.toolkit) {
       errors.push(result.error ?? `Invalid toolkit JSON: ${fileName}`);
       continue;
     }
+    if (result.warning) {
+      warnings.push(result.warning);
+    }
     toolkits.push(result.toolkit);
   }
 
-  return { toolkits, errors };
+  return { toolkits, errors, warnings };
 };
 
 const readIndexFile = async (dir: string): Promise<ToolkitIndex | null> => {
@@ -271,16 +303,22 @@ const validateFileNames = async (
 
 export const verifyOutputDir = async (
   dir: string,
-  onProgress?: VerificationProgressCallback
+  onProgress?: VerificationProgressCallback,
+  options: VerifyOutputOptions = {}
 ): Promise<OutputVerificationResult> => {
   const errors: string[] = [];
   const warnings: string[] = [];
+  const allowLegacyFallback = options.allowLegacyFallback ?? false;
 
-  const { toolkits, errors: toolkitErrors } = await readToolkitsFromDir(
-    dir,
-    onProgress
-  );
+  const {
+    toolkits,
+    errors: toolkitErrors,
+    warnings: toolkitWarnings,
+  } = await readToolkitsFromDir(dir, onProgress, {
+    allowLegacyFallback,
+  });
   errors.push(...toolkitErrors);
+  warnings.push(...toolkitWarnings);
 
   if (toolkits.length === 0) {
     errors.push("No toolkit JSON files found in output directory.");
