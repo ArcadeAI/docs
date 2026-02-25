@@ -137,7 +137,7 @@ async def call_tool_safely(call):
         raise MCPError(f"Tool failed: {e}")
 ```
 
-Last updated on January 30, 2026
+Last updated on February 10, 2026
 
 [Types](/en/references/mcp/python/types.md)
 [Settings](/en/references/mcp/python/settings.md)
