@@ -382,7 +382,7 @@ main().catch(console.error);
 -   Explore [creating custom tools](/guides/create-tools/tool-basics/build-mcp-server.md)
      with the Arcade  SDK
 
-Last updated on February 12, 2026
+Last updated on February 10, 2026
 
 [Setup (Python)](/en/get-started/agent-frameworks/openai-agents/setup-python.md)
 [TanStack AI](/en/get-started/agent-frameworks/tanstack-ai.md)
