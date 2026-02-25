@@ -537,7 +537,7 @@ if __name__ == "__main__":
 
 
 
-Last updated on January 30, 2026
+Last updated on February 10, 2026
 
 [Setup Arcade with your LLM (Python)](/en/get-started/agent-frameworks/setup-arcade-with-your-llm-python.md)
 [Overview](/en/get-started/agent-frameworks/google-adk/overview.md)
