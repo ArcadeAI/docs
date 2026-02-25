@@ -34,7 +34,7 @@ python3 --version
 command -v arcade || true
 ```
 
-If both `python` and `py` are missing, the pip-only instructions will fail until Python is installed and added to `PATH`.
+If both `python` and `py` are missing, the pip-only instructions will fail until you install Python and add it to `PATH`.
 
 ## Install `uv`
 
