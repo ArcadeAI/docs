@@ -74,6 +74,12 @@ export function AgentFrameworkTabs() {
             name="TanStack AI"
             type="Agent Framework"
           />
+          <PlatformCard
+            icon="https://upload.wikimedia.org/wikipedia/commons/4/4c/Typescript_logo_2020.svg"
+            link="/en/get-started/agent-frameworks/setup-arcade-with-your-llm-typescript"
+            name="Vanilla TypeScript"
+            type="MCP Client"
+          />
         </div>
       </Tabs.Tab>
     </Tabs>
