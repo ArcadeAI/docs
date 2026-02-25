@@ -81,11 +81,12 @@ jobs:
 
       - name: Create pull request
         if: steps.check-changes.outputs.has_changes == 'true'
+        id: cpr
         uses: peter-evans/create-pull-request@v7
         env:
           HUSKY: 0
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.DOCS_PUBLISHABLE_GH_TOKEN }}
           commit-message: "[AUTO] Adding MCP Servers docs update"
           title: "[AUTO] Adding MCP Servers docs update"
           body: |
@@ -97,3 +98,10 @@ jobs:
             - Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           branch: automation/toolkit-docs-${{ github.run_id }}
           delete-branch: true
+
+      - name: Request team review
+        if: steps.check-changes.outputs.has_changes == 'true' && steps.cpr.outputs.pull-request-number != ''
+        continue-on-error: true
+        run: gh pr edit ${{ steps.cpr.outputs.pull-request-number }} --add-reviewer ArcadeAI/engineering-tools-and-dx
+        env:
+          GH_TOKEN: ${{ secrets.DOCS_PUBLISHABLE_GH_TOKEN }}
