@@ -43,17 +43,33 @@ arcade evals . --only-failed
 
 Use OpenAI with default model (`gpt-4o`):
 
+### Bash
+
 ```bash
-# results.txtresults.mdresults.htmlresults.json
 export OPENAI_API_KEY=sk-...
+arcade evals .
+```
+
+### PowerShell
+
+```bash
+$env:OPENAI_API_KEY="sk-..."
 arcade evals .
 ```
 
 Use Anthropic with default model (`claude-sonnet-4-5-20250929`):
 
+### Bash
+
 ```bash
-# results.txtresults.mdresults.htmlresults.json
 export ANTHROPIC_API_KEY=sk-ant-...
+arcade evals . --use-provider anthropic
+```
+
+### PowerShell
+
+```bash
+$env:ANTHROPIC_API_KEY="sk-ant-..."
 arcade evals . --use-provider anthropic
 ```
 
@@ -629,7 +645,7 @@ Ensure your evaluation files:
 -   Learn about [comparative evaluations](/guides/create-tools/evaluate-tools/comparative-evaluations.md)
      for comparing  sources
 
-Last updated on January 30, 2026
+Last updated on February 24, 2026
 
 [Create an evaluation suite](/en/guides/create-tools/evaluate-tools/create-evaluation-suite.md)
 [Capture mode](/en/guides/create-tools/evaluate-tools/capture-mode.md)
