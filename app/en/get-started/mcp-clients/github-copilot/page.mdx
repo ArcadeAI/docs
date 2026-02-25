@@ -5,6 +5,18 @@ import Image from "next/image";
 export const IMAGE_SCALE_FACTOR = 2;
 export const JETBRAINS_START_WIDTH = 318;
 export const JETBRAINS_START_HEIGHT = 184;
+export const VISUAL_STUDIO_STEP_1_WIDTH = 276;
+export const VISUAL_STUDIO_STEP_1_HEIGHT = 120;
+export const VISUAL_STUDIO_STEP_2_WIDTH = 1606;
+export const VISUAL_STUDIO_STEP_2_HEIGHT = 270;
+export const VISUAL_STUDIO_STEP_3_WIDTH = 674;
+export const VISUAL_STUDIO_STEP_3_HEIGHT = 288;
+export const VISUAL_STUDIO_STEP_4_WIDTH = 1070;
+export const VISUAL_STUDIO_STEP_4_HEIGHT = 898;
+export const VISUAL_STUDIO_STEP_5_WIDTH = 660;
+export const VISUAL_STUDIO_STEP_5_HEIGHT = 362;
+export const VISUAL_STUDIO_STEP_6_WIDTH = 1632;
+export const VISUAL_STUDIO_STEP_6_HEIGHT = 360;
 
 # Use Arcade in GitHub Copilot
 
@@ -87,22 +99,106 @@ Connect GitHub Copilot to an Arcade MCP Gateway.
 
   </Tabs.Tab>
   <Tabs.Tab>
-    In VS Code, Github Copilot will automatically detect the configured MCP
-    servers. Read the [VS Code
-    instructions](/get-started/mcp-clients/visual-studio-code) to set both of
-    them up.
+    <Callout type="info">
+      The GitHub Copilot extension for Visual Studio does not currently support every remote MCP server with Dynamic Client Registration. To use an Arcade MCP Gateway with GitHub Copilot on Visual Studio, you must configure the MCP gateway as `Arcade Headers` in the dashboard.
+    </Callout>
+    In Visual Studio,
+
+    1. In the upper right corner, click the GitHub Copilot icon.
+
+       <Image
+         alt={"GitHub Copilot icon"}
+         className="max-w-full mt-4"
+         src={"/images/mcp-gateway/github-copilot/visual-studio/step-1.png"}
+         width={VISUAL_STUDIO_STEP_1_WIDTH / IMAGE_SCALE_FACTOR}
+         height={VISUAL_STUDIO_STEP_1_HEIGHT / IMAGE_SCALE_FACTOR}
+       />
+
+    2. On the bottom of the GitHub Copilot panel, click the tools icon (two wrenches).
+
+       <Image
+         alt={"GitHub Copilot tools icon"}
+         className="max-w-full mt-4"
+         src={"/images/mcp-gateway/github-copilot/visual-studio/step-2.png"}
+         width={VISUAL_STUDIO_STEP_2_WIDTH / IMAGE_SCALE_FACTOR}
+         height={VISUAL_STUDIO_STEP_2_HEIGHT / IMAGE_SCALE_FACTOR}
+       />
+
+    3. A dialog will open with a list of tools. On the top right corner of this dialog, click the "+" icon to add a new tool.
+
+       <Image
+         alt={"GitHub Copilot add tool icon"}
+         className="max-w-full mt-4"
+         src={"/images/mcp-gateway/github-copilot/visual-studio/step-3.png"}
+         width={VISUAL_STUDIO_STEP_3_WIDTH / IMAGE_SCALE_FACTOR}
+         height={VISUAL_STUDIO_STEP_3_HEIGHT / IMAGE_SCALE_FACTOR}
+       />
+
+    4. This will open another dialog. Fill in the information for your MCP server. You will need to choose:
+       - **Destination**: The path to the MCP configuration file, if you choose "Global", the MCP gateway will be added to all solutions. If you choose "Solution", the MCP gateway will be added to the current solution only.
+       - **Server ID**: The ID of the the MCP server you're adding, this is how it will be displayed in the list of servers.
+       - **Type**: For MCP gateways, you must select "HTTP".
+       - **URL**: The URL of the MCP gateway.
+       - **Headers**: The headers to pass to the MCP gateway.
+       - Click "Save" to add the MCP server.
+
+       <Image
+         alt={"GitHub Copilot add tool dialog"}
+         className="max-w-full mt-4"
+         src={"/images/mcp-gateway/github-copilot/visual-studio/step-4.png"}
+         width={VISUAL_STUDIO_STEP_4_WIDTH / IMAGE_SCALE_FACTOR}
+         height={VISUAL_STUDIO_STEP_4_HEIGHT / IMAGE_SCALE_FACTOR}
+       />
+
+    5. Once you save the MCP server, it will be added to the list of servers. It will be disabled by default. To enable it, click the checkbox next to the server name.
+
+       <Image
+         alt={"GitHub Copilot enable server checkbox"}
+         className="max-w-full mt-4"
+         src={"/images/mcp-gateway/github-copilot/visual-studio/step-5.png"}
+         width={VISUAL_STUDIO_STEP_5_WIDTH / IMAGE_SCALE_FACTOR}
+         height={VISUAL_STUDIO_STEP_5_HEIGHT / IMAGE_SCALE_FACTOR}
+       />
+
+    6. Once the server is enabled, it will be available in the list of tools. If tools are not available, you may need to open the `.mcp.json` file you picked as the destination. Visual Studio will display a "Configure" and "Reconnect" buttons on top of each entry. Clicking "Reconnect" should fix any issues.
+
+       <Image
+         alt={"GitHub Copilot enabled server"}
+         className="max-w-full mt-4"
+         src={"/images/mcp-gateway/github-copilot/visual-studio/step-6.png"}
+         width={VISUAL_STUDIO_STEP_6_WIDTH / IMAGE_SCALE_FACTOR}
+         height={VISUAL_STUDIO_STEP_6_HEIGHT / IMAGE_SCALE_FACTOR}
+       />
+
+    <Tabs items={["Arcade Headers", "Arcade Auth"]} storageKey="preferredMCPAuthMode">
+      <Tabs.Tab>
+
+      ```json
+      {
+        "servers": {
+          "mcp-arcade": {
+            "url": "https://api.arcade.dev/mcp/<YOUR-GATEWAY-SLUG>",
+            "headers": {
+              "Authorization": "Bearer {arcade_api_key}",
+              "Arcade-User-ID": "{arcade_user_id}"
+            }
+          }
+        }
+      }
+      ```
+
+      </Tabs.Tab>
+      <Tabs.Tab>
+        The GitHub Copilot extension for Visual Studio does not currently support every remote MCP server with Dynamic Client Registration. To use an Arcade MCP Gateway with GitHub Copilot on Visual Studio, you must configure the MCP gateway as `Arcade Headers` in the dashboard.
+      </Tabs.Tab>
+    </Tabs>
+
   </Tabs.Tab>
   <Tabs.Tab>
-    In VS Code, Github Copilot will automatically detect the configured MCP
-    servers. Read the [VS Code
-    instructions](/get-started/mcp-clients/visual-studio-code) to set both of
-    them up.
+    Coming soon...
   </Tabs.Tab>
   <Tabs.Tab>
-    In VS Code, Github Copilot will automatically detect the configured MCP
-    servers. Read the [VS Code
-    instructions](/get-started/mcp-clients/visual-studio-code) to set both of
-    them up.
+    Coming soon...
   </Tabs.Tab>
 </Tabs>
 
@@ -111,38 +207,3 @@ Connect GitHub Copilot to an Arcade MCP Gateway.
 1. Open the chat pane (typically command-l)
 1. Make sure you are in **Agent** mode
 1. Ask the agent to use a tool!
-
-<Tabs items={["Arcade Headers", "Arcade Auth"]} storageKey="preferredMCPAuthMode">
-  <Tabs.Tab>
-
-```json
-{
-  "servers": {
-    "mcp-arcade": {
-      "url": "https://api.arcade.dev/mcp/<YOUR-GATEWAY-SLUG>",
-      "headers": {
-        "Authorization": "Bearer {arcade_api_key}",
-        "Arcade-User-ID": "{arcade_user_id}"
-      }
-    }
-  }
-}
-```
-
-     </Tabs.Tab>
-
-  <Tabs.Tab>
-
-```json
-{
-  "mcpServers": {
-    "mcp-arcade": {
-      "url": "https://api.arcade.dev/mcp/<YOUR-GATEWAY-SLUG>"
-    }
-  }
-}
-```
-
-     </Tabs.Tab>
-
-</Tabs>
