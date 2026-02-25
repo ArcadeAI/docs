@@ -22,9 +22,6 @@ export const meta: MetaRecord = {
   "deployment-hosting": {
     title: "Deployment & hosting",
   },
-  security: {
-    title: "Security & Compliance",
-  },
 };
 
 export default meta;

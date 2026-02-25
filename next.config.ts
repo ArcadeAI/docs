@@ -24,6 +24,28 @@ const nextConfig: NextConfig = withLlmsTxt({
   withNextra({
     async redirects() {
       return [
+        // Dissolved guides/security section
+        {
+          source: "/:locale/guides/security/security-research-program",
+          destination: "/:locale/resources/security-research-program",
+          permanent: true,
+        },
+        {
+          source: "/:locale/guides/security/securing-arcade-mcp",
+          destination: "/:locale/guides/create-tools/secure-your-server",
+          permanent: true,
+        },
+        {
+          source: "/:locale/guides/security/secure-your-mcp-server",
+          destination:
+            "/:locale/guides/create-tools/secure-your-server/secure-your-mcp-server",
+          permanent: true,
+        },
+        {
+          source: "/:locale/guides/security",
+          destination: "/:locale/guides/create-tools/secure-your-server",
+          permanent: true,
+        },
         // Auto-added redirects for deleted pages
         {
           source: "/:locale/references/mcp/python/transports",
