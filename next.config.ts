@@ -419,7 +419,8 @@ const nextConfig: NextConfig = withLlmsTxt({
         },
         {
           source: "/:locale/home/build-tools/secure-your-mcp-server",
-          destination: "/:locale/guides/security/secure-your-mcp-server",
+          destination:
+            "/:locale/guides/create-tools/secure-your-server/secure-your-mcp-server",
           permanent: true,
         },
         {
