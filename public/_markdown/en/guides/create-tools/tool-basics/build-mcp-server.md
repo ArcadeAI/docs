@@ -163,16 +163,32 @@ Arcade automatically discovers `.env` files by traversing upward from the curren
 
 The generated  includes a `.env.example` file at the project root with the secret key name and example value. You can rename it to `.env` to start using it.
 
+### Bash/Zsh (macOS/Linux)
+
 ```bash
 mv ../../.env.example ../../.env
+```
+
+### PowerShell (Windows)
+
+```bash
+Copy-Item .env.example .env
 ```
 
 ### Environment Variable
 
 You can set the environment variable in your terminal directly with this command:
 
+### Bash/Zsh (macOS/Linux)
+
 ```bash
 export MY_SECRET_KEY="my-secret-value"
+```
+
+### PowerShell (Windows)
+
+```bash
+$env:MY_SECRET_KEY="my-secret-value"
 ```
 
 ## Connect to Arcade to unlock authorized tool calling
@@ -274,7 +290,7 @@ That’s it! Your  server is running and connected to your AI assistant.
 -   **Deploy your  server**: [Learn how to deploy your MCP server](/guides/deployment-hosting/arcade-deploy.md)
 
 
-Last updated on January 30, 2026
+Last updated on February 10, 2026
 
 [Compare MCP server types](/en/guides/create-tools/tool-basics/compare-server-types.md)
 [Create a tool with auth](/en/guides/create-tools/tool-basics/create-tool-auth.md)
