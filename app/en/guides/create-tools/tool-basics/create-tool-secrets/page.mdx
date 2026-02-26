@@ -7,6 +7,8 @@ import { Steps, Tabs, Callout } from "nextra/components";
 
 # Create an MCP tool with secrets
 
+Build an MCP tool that can read a secret from Context and return a masked confirmation string.
+
 <GuideOverview>
 <GuideOverview.Outcomes>
 
@@ -31,13 +33,15 @@ Build an MCP tool that can read a secret from Context and return a masked confir
 </GuideOverview.YouWillLearn>
 </GuideOverview>
 
+This page shows you how to create MCP tools that require secrets for runtime configuration and secure external service access. You'll learn to use Arcade's Context object to access secrets safely and configure them across different deployment environments.
+
 Secrets are sensitive strings like passwords, API keys, or other tokens that grant access to a protected resource or API. You can also use secrets to provide other static configuration values your tool needs, such as parameters for calling a remote API.
 
 ## Why use secrets in your tools?
 
-Secrets enable you to securely deploy a function that requires sensitive information at runtime. And while these can be consumed directly from the runtime environment inside your tool function, this becomes very inconvenient, expensive, hard to maintain, and insecure when deploying at scale.
+Secrets enable you to securely deploy a function that requires sensitive information at runtime. And while tools can consume these secrets directly from the runtime environment inside your tool function, this becomes inconvenient, expensive, hard to maintain, and insecure when deploying at scale.
 
-For example, if your tool requires an API key to use an external service, but only _after_ doing some computationally expensive work, you need to ensure that the API key is present _before_ the computationally expensive work is done. The function below would fail if the API key is not present.
+For example, if your tool requires an API key to use an external service, but only _after_ doing some computationally expensive work, you need to ensure that the API key is present _before_ the system performs the computationally expensive work. The function below would fail if the API key is not present.
 
 ```python
 import os
@@ -56,9 +60,9 @@ def my_tool(task: str) -> str:
         return "Failed to upload result"
 ```
 
-We can work around this by carefully checking for the API key before doing the computationally expensive work, of course, but this is error prone and difficult to maintain, and you may only become aware of the issue after deploying multiple instances of your server.
+You can work around this by carefully checking for the API key before doing the computationally expensive work, but this is error prone and difficult to maintain, and you may only become aware of the issue after deploying multiple instances of your server.
 
-Arcade provides a way to securely store and access secrets inside your tools in a way that is easy to manage across multiple instances of your servers, and that will prevent the tool from running if the secret is not provided. In this guide, you'll learn how to use secrets in your custom Arcade tools.
+Arcade provides a way to securely store and access secrets inside your tools in a way that allows straightforward management across multiple instances of your servers, and that will prevent the tool from running if the secret is not provided. In this guide, you'll learn how to use secrets in your custom Arcade tools.
 
 <Steps>
 
@@ -108,10 +112,10 @@ You can store your secret in the Arcade Dashboard by:
 - Entering the secret ID and value
 - Clicking the "Create" button
 
-This will make the secret available to your MCP server, when deployed to Arcade.
+This will make the secret available to your MCP server when you deploy to Arcade.
 
 <Callout type="info">
-  The Arcade Dashboard will make the secret available to your MCP server when it is deployed. Secrets set in the Arcade Dashboard are not available to your MCP server when it is running locally.
+  The system deploys the Arcade Dashboard secret to your MCP server. Secrets set in the Arcade Dashboard are not available to your MCP server when it is running locally.
 </Callout>
 
 </Tabs.Tab>
@@ -123,7 +127,7 @@ arcade secret set MY_SECRET_KEY="my-secret-value"
 ```
 
 <Callout type="info">
-  The Arcade CLI will make the secret available to your MCP server when it is deployed, because it upserts the secret into the Arcade Cloud. Secrets set in the Arcade CLI are not available to your MCP server when it is running locally.
+  The system deploys the Arcade CLI secret to your MCP server, because it upserts the secret into Arcade Cloud. Secrets set in the Arcade CLI are not available to your MCP server when it is running locally.
 </Callout>
 
 </Tabs.Tab>
@@ -166,7 +170,7 @@ To ensure your stdio MCP server has access to the secrets, you can either
     ```json
     {
       "mcpServers": {
-        "simple": {
+        "basic": {
           "command": "uv",
           "args": [
             "run",
@@ -190,12 +194,12 @@ Note that the specific key name may vary depending on the MCP client you are usi
 
 <Callout type="info">
   This is only an illustrative example of how Arcade will ensure that the secret
-  is present before the tool is executed. In a real world application, you would
+  is present before the tool executes. In a real world application, you would
   use this secret to store sensitive information like API keys, database
-  credentials, etc, and not to simply print a confirmation string.
+  credentials, etc, and not to print a confirmation string.
 </Callout>
 
-In your [MCP Server](/guides/create-tools/tool-basics/build-mcp-server), create a new tool that uses the secret:
+In your [MCP server](/guides/create-tools/tool-basics/build-mcp-server), create a new tool that uses the secret:
 
 - Use the `requires_secrets` parameter to declare which secrets your tool needs (`"SECRET_KEY"` in this example).
 - The tool's Context object has a `get_secret` method that you can use to access the secret value.
@@ -214,7 +218,7 @@ def use_secret(context: Context) -> str:
         return f"Error getting secret: {e}"
 ```
 
-When your tool is executed, it will return: `"Got SECRET_KEY of length..."`. In a real world application, you would use this secret to connect to a remote database, API, etc.
+When your tool executes, it will return: `"Got SECRET_KEY of length..."`. In a real world application, you would use this secret to connect to a remote database, API, etc.
 
 </Steps>
 
@@ -231,7 +235,7 @@ When your tool is executed, it will return: `"Got SECRET_KEY of length..."`. In 
 
 ## Key Concepts
 
-- **Secure Access:** Secrets are accessed through context, not imported directly
+- **Secure Access:** Systems access secrets through context, not imported directly
 - **Environment Integration:** Works with both environment variables and `.env` files
 - **Error Handling:** Always handle the case where a secret might be missing
 - **Masking:** Never expose full secret values in logs or return values
