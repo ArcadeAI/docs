@@ -1,0 +1,807 @@
+{
+  "id": "MicrosoftExcel",
+  "label": "Microsoft Excel",
+  "version": "0.2.0",
+  "description": "Arcade.dev LLM tools for Microsoft Excel",
+  "metadata": {
+    "category": "productivity",
+    "iconUrl": "https://design-system.arcade.dev/icons/microsoft-excel.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/productivity/microsoft-excel",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": "microsoft",
+    "allScopes": [
+      "Files.Read",
+      "Files.ReadWrite",
+      "User.Read"
+    ]
+  },
+  "tools": [
+    {
+      "name": "AddWorksheet",
+      "qualifiedName": "MicrosoftExcel.AddWorksheet",
+      "fullyQualifiedName": "MicrosoftExcel.AddWorksheet@0.2.0",
+      "description": "Add a new worksheet to the workbook.\n\nNote: The new worksheet name may not be immediately visible to other\ntools due to a brief Graph API propagation delay (up to ~10 s). Pass\nthe returned ``session_id`` to subsequent calls that reference the new\nworksheet to mitigate this.",
+      "parameters": [
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the Excel workbook.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "Name for the new worksheet. If omitted, Excel generates a default name.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": false,
+          "description": "Optional drive ID for shared items. If omitted, uses the user's default OneDrive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "session_id",
+          "type": "string",
+          "required": false,
+          "description": "Optional session ID from a previous operation for better performance.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Files.ReadWrite"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The created worksheet info."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftExcel.AddWorksheet",
+        "parameters": {
+          "item_id": {
+            "value": "01T5ABCDEF123456789!123",
+            "type": "string",
+            "required": true
+          },
+          "name": {
+            "value": "Quarterly Report Q2 2026",
+            "type": "string",
+            "required": false
+          },
+          "drive_id": {
+            "value": "b!a1B2c3D4e5F6g7H8I9J0",
+            "type": "string",
+            "required": false
+          },
+          "session_id": {
+            "value": "b4f5c6d7-89ab-4cde-0123-456789abcdef",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateWorkbook",
+      "qualifiedName": "MicrosoftExcel.CreateWorkbook",
+      "fullyQualifiedName": "MicrosoftExcel.CreateWorkbook@0.2.0",
+      "description": "Create a new Excel workbook (.xlsx) in OneDrive for Business.\n\nOnly .xlsx files are supported. OneDrive Consumer (personal accounts) is NOT supported.",
+      "parameters": [
+        {
+          "name": "filename",
+          "type": "string",
+          "required": true,
+          "description": "File name for the new workbook. The .xlsx extension is added automatically if not provided.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "parent_folder_id",
+          "type": "string",
+          "required": false,
+          "description": "Parent folder ID. If omitted, the workbook is created in the root of OneDrive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "initial_data",
+          "type": "string",
+          "required": false,
+          "description": "Optional JSON string for initial data in the first worksheet. Format: data[ROW][COL] = VALUE where ROW is a row number as string, COL is a column letter (uppercase), VALUE is string/number/boolean/null. Type: dict[str, dict[str, str | int | float | bool | None]].",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Files.ReadWrite"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The created Excel workbook metadata with session ID."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftExcel.CreateWorkbook",
+        "parameters": {
+          "filename": {
+            "value": "Q1_2026_Report",
+            "type": "string",
+            "required": true
+          },
+          "parent_folder_id": {
+            "value": "01ABCDXYZ123!456",
+            "type": "string",
+            "required": false
+          },
+          "initial_data": {
+            "value": "{\"1\":{\"A\":\"Region\",\"B\":\"Sales\",\"C\":\"Growth\"},\"2\":{\"A\":\"North\",\"B\":120000.5,\"C\":0.05},\"3\":{\"A\":\"South\",\"B\":95000,\"C\":-0.02},\"4\":{\"A\":\"Total\",\"B\":215000.5,\"C\":null}}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "DeleteWorksheet",
+      "qualifiedName": "MicrosoftExcel.DeleteWorksheet",
+      "fullyQualifiedName": "MicrosoftExcel.DeleteWorksheet@0.2.0",
+      "description": "Delete a worksheet from the workbook.\n\nCannot delete the last worksheet in a workbook.\n\nNote: If referencing a recently added or renamed worksheet, pass the\n``session_id`` from that operation. A brief Graph API propagation delay\n(up to ~10 s) may cause a WorksheetNotFoundError; retry with the\n``session_id`` if this occurs.",
+      "parameters": [
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the Excel workbook.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "worksheet",
+          "type": "string",
+          "required": true,
+          "description": "Name of the worksheet to delete.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": false,
+          "description": "Optional drive ID for shared items. If omitted, uses the user's default OneDrive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "session_id",
+          "type": "string",
+          "required": false,
+          "description": "Optional session ID from a previous operation for better performance.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Files.ReadWrite"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Confirmation of the worksheet deletion."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftExcel.DeleteWorksheet",
+        "parameters": {
+          "item_id": {
+            "value": "01ABCD2EFGHIJKL3456789!101",
+            "type": "string",
+            "required": true
+          },
+          "worksheet": {
+            "value": "Expenses 2026",
+            "type": "string",
+            "required": true
+          },
+          "drive_id": {
+            "value": "b!a1b2c3d4e5f6g7h8i9j0k",
+            "type": "string",
+            "required": false
+          },
+          "session_id": {
+            "value": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetWorkbookMetadata",
+      "qualifiedName": "MicrosoftExcel.GetWorkbookMetadata",
+      "fullyQualifiedName": "MicrosoftExcel.GetWorkbookMetadata@0.2.0",
+      "description": "Get metadata about an Excel workbook including worksheet list.\n\nReturns workbook name, URL, and all worksheets with their names, positions, and visibility.",
+      "parameters": [
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the Excel workbook.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": false,
+          "description": "Optional drive ID for shared items. If omitted, uses the user's default OneDrive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "session_id",
+          "type": "string",
+          "required": false,
+          "description": "Optional session ID from a previous operation for better performance.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Files.Read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Workbook metadata including worksheet list."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftExcel.GetWorkbookMetadata",
+        "parameters": {
+          "item_id": {
+            "value": "01A2B3C4D5E6F7G8!123",
+            "type": "string",
+            "required": true
+          },
+          "drive_id": {
+            "value": "b!xYzAbCdEfGhIjKlMnOp",
+            "type": "string",
+            "required": false
+          },
+          "session_id": {
+            "value": "session_9f8e7d6c5b4a3",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetWorksheetData",
+      "qualifiedName": "MicrosoftExcel.GetWorksheetData",
+      "fullyQualifiedName": "MicrosoftExcel.GetWorksheetData@0.2.0",
+      "description": "Read cell values from a worksheet.\n\nReturns data in sparse dict format where data[ROW][COL] has userEnteredValue\nand formattedValue for each non-empty cell. Includes pagination hints if more\ndata exists beyond the requested range.\n\nNote: If referencing a recently added or renamed worksheet, pass the\n``session_id`` from that operation. A brief Graph API propagation delay\n(up to ~10 s) may cause a WorksheetNotFoundError; retry with the\n``session_id`` if this occurs.",
+      "parameters": [
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the Excel workbook.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "worksheet",
+          "type": "string",
+          "required": false,
+          "description": "Worksheet name to read from. If omitted, reads from the first worksheet.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_row",
+          "type": "integer",
+          "required": false,
+          "description": "Starting row number (1-indexed). Defaults to 1.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_col",
+          "type": "string",
+          "required": false,
+          "description": "Starting column letter. Defaults to A.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_rows",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum rows to return. Defaults to 1000, maximum allowed is 1000.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "max_cols",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum columns to return. Defaults to 100, maximum allowed is 100.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": false,
+          "description": "Optional drive ID for shared items. If omitted, uses the user's default OneDrive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "session_id",
+          "type": "string",
+          "required": false,
+          "description": "Optional session ID from a previous operation for better performance.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Files.Read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Worksheet data in sparse dict format with pagination."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftExcel.GetWorksheetData",
+        "parameters": {
+          "item_id": {
+            "value": "01ABCDabcd2345EF!678",
+            "type": "string",
+            "required": true
+          },
+          "worksheet": {
+            "value": "Sales Q1",
+            "type": "string",
+            "required": false
+          },
+          "start_row": {
+            "value": 2,
+            "type": "integer",
+            "required": false
+          },
+          "start_col": {
+            "value": "B",
+            "type": "string",
+            "required": false
+          },
+          "max_rows": {
+            "value": 250,
+            "type": "integer",
+            "required": false
+          },
+          "max_cols": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "drive_id": {
+            "value": "b!2aB3cD4EfGhIjK",
+            "type": "string",
+            "required": false
+          },
+          "session_id": {
+            "value": "3f7a9b2c-4d1e-11ee-8c99-0242ac120002",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "RenameWorksheet",
+      "qualifiedName": "MicrosoftExcel.RenameWorksheet",
+      "fullyQualifiedName": "MicrosoftExcel.RenameWorksheet@0.2.0",
+      "description": "Rename an existing worksheet in the workbook.\n\nNote: The new name may not be immediately visible to other tools due\nto a brief Graph API propagation delay (up to ~10 s). Pass the returned\n``session_id`` to subsequent calls that reference the renamed worksheet\nto mitigate this. If referencing a recently added worksheet as the source,\nthe same delay applies; retry with the ``session_id`` if a\nWorksheetNotFoundError occurs.",
+      "parameters": [
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the Excel workbook.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "worksheet",
+          "type": "string",
+          "required": true,
+          "description": "Current name of the worksheet to rename.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "new_name",
+          "type": "string",
+          "required": true,
+          "description": "New name for the worksheet.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": false,
+          "description": "Optional drive ID for shared items. If omitted, uses the user's default OneDrive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "session_id",
+          "type": "string",
+          "required": false,
+          "description": "Optional session ID from a previous operation for better performance.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Files.ReadWrite"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "The renamed worksheet info."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftExcel.RenameWorksheet",
+        "parameters": {
+          "item_id": {
+            "value": "01234567-89ab-cdef-0123-456789abcdef",
+            "type": "string",
+            "required": true
+          },
+          "worksheet": {
+            "value": "Sheet1",
+            "type": "string",
+            "required": true
+          },
+          "new_name": {
+            "value": "Summary Q1 2026",
+            "type": "string",
+            "required": true
+          },
+          "drive_id": {
+            "value": "b!A1B2C3D4E5F6G7H8I9J0K",
+            "type": "string",
+            "required": false
+          },
+          "session_id": {
+            "value": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "UpdateCell",
+      "qualifiedName": "MicrosoftExcel.UpdateCell",
+      "fullyQualifiedName": "MicrosoftExcel.UpdateCell@0.2.0",
+      "description": "Update a single cell value in an Excel workbook.\n\nSupports strings, numbers, booleans, and formulas (values starting with '=').\n\nNote: If referencing a recently added or renamed worksheet, pass the\n``session_id`` from that operation. A brief Graph API propagation delay\n(up to ~10 s) may cause a WorksheetNotFoundError; retry with the\n``session_id`` if this occurs.",
+      "parameters": [
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the Excel workbook.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "column",
+          "type": "string",
+          "required": true,
+          "description": "Column letter or letters (e.g., 'A', 'BC').",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "row",
+          "type": "integer",
+          "required": true,
+          "description": "Row number (1-indexed).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "value",
+          "type": "string",
+          "required": true,
+          "description": "The value to set. Supports strings, numbers, booleans, and formulas (e.g., '=SUM(A1:A10)').",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "worksheet",
+          "type": "string",
+          "required": false,
+          "description": "Worksheet name to update. If omitted, updates the first worksheet.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": false,
+          "description": "Optional drive ID for shared items. If omitted, uses the user's default OneDrive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "session_id",
+          "type": "string",
+          "required": false,
+          "description": "Optional session ID from a previous operation for better performance.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Files.ReadWrite"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Confirmation of the cell update."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftExcel.UpdateCell",
+        "parameters": {
+          "item_id": {
+            "value": "01234567-89ab-cdef-0123-456789abcdef",
+            "type": "string",
+            "required": true
+          },
+          "column": {
+            "value": "C",
+            "type": "string",
+            "required": true
+          },
+          "row": {
+            "value": 5,
+            "type": "integer",
+            "required": true
+          },
+          "value": {
+            "value": "=SUM(C1:C10)",
+            "type": "string",
+            "required": true
+          },
+          "worksheet": {
+            "value": "Quarterly Budget",
+            "type": "string",
+            "required": false
+          },
+          "drive_id": {
+            "value": "b!a1B2c3D4e5F6g7H8",
+            "type": "string",
+            "required": false
+          },
+          "session_id": {
+            "value": "session-123e4567-e89b-12d3-a456-426614174000",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "UpdateRange",
+      "qualifiedName": "MicrosoftExcel.UpdateRange",
+      "fullyQualifiedName": "MicrosoftExcel.UpdateRange@0.2.0",
+      "description": "Update multiple cells in a worksheet using sparse dict format.\n\nOnly specified cells are updated; unspecified cells remain unchanged.\nThe data format is the same as Google Sheets update_cells.\n\nInternally, a single PATCH request is sent covering the bounding box\nof all specified cells.  Cells within the box that are not in the\ninput are sent as ``null``, which the Graph API treats as \"skip\".\n\nNote: If referencing a recently added or renamed worksheet, pass the\n``session_id`` from that operation. A brief Graph API propagation delay\n(up to ~10 s) may cause a WorksheetNotFoundError; retry with the\n``session_id`` if this occurs.",
+      "parameters": [
+        {
+          "name": "item_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the Excel workbook.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "data",
+          "type": "string",
+          "required": true,
+          "description": "JSON string where data[ROW][COL] = VALUE. ROW is a row number as string, COL is a column letter (uppercase), VALUE is string/number/boolean/null. Type: dict[str, dict[str, str | int | float | bool | None]].",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "worksheet",
+          "type": "string",
+          "required": false,
+          "description": "Worksheet name to update. If omitted, updates the first worksheet.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "drive_id",
+          "type": "string",
+          "required": false,
+          "description": "Optional drive ID for shared items. If omitted, uses the user's default OneDrive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "session_id",
+          "type": "string",
+          "required": false,
+          "description": "Optional session ID from a previous operation for better performance.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Files.ReadWrite"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Confirmation of the range update with cell count."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftExcel.UpdateRange",
+        "parameters": {
+          "item_id": {
+            "value": "01234567-89ab-cdef-0123-456789abcdef",
+            "type": "string",
+            "required": true
+          },
+          "data": {
+            "value": "{\"1\":{\"A\":\"Name\",\"B\":\"Amount\"},\"2\":{\"A\":\"Alice\",\"B\":1234.56,\"C\":true},\"3\":{\"A\":\"Bob\",\"B\":null,\"C\":false},\"10\":{\"D\":\"Note\"}}",
+            "type": "string",
+            "required": true
+          },
+          "worksheet": {
+            "value": "Expenses",
+            "type": "string",
+            "required": false
+          },
+          "drive_id": {
+            "value": "b!aBcD_ExampleDriveId123",
+            "type": "string",
+            "required": false
+          },
+          "session_id": {
+            "value": "session_01ab23",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "MicrosoftExcel.WhoAmI",
+      "fullyQualifiedName": "MicrosoftExcel.WhoAmI@0.2.0",
+      "description": "Get information about the current user and their Microsoft Excel environment.",
+      "parameters": [],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "User.Read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Get comprehensive user profile and Microsoft Excel environment information."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "MicrosoftExcel.WhoAmI",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-02-25T11:25:44.381Z",
+  "summary": "Microsoft Excel toolkit for Arcade.dev lets LLMs operate on Excel workbooks stored in OneDrive for Business via the Microsoft Graph API. It enables creating workbooks, managing worksheets, reading workbook and worksheet metadata, and reading/updating cells and ranges using sparse formats and pagination.\n\n**Capabilities**\n- Manage workbook and worksheet lifecycle (create, add, rename, delete) with session_id support to mitigate Graph propagation delays.\n- Inspect workbook metadata and worksheet lists including visibility and positions.\n- Read sparse cell data with pagination hints and update single cells or sparse ranges (strings, numbers, booleans, formulas).\n- Handle consistency and retry patterns around short propagation windows.\n\n**OAuth**\nProvider: microsoft\nScopes: Files.Read, Files.ReadWrite, User.Read"
+}

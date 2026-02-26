@@ -62,14 +62,14 @@ Depending on where you’re running your server, you can store your secret in a 
 
 ### .env file
 
-You can create a `.env` file in the same directory as your  (typically `server.py` by default) and add your secret:
+You can create a `.env` file in your  root directory and add your secret:
 
 ```bash
 # .env
 MY_SECRET_KEY="my-secret-value"
 ```
 
-The  includes a `.env.example` file with the secret key name and example value. You can rename it to `.env` to start using it.
+The  includes a `.env.example` file at the project root with the secret key name and example value. You can rename it to `.env` to start using it.
 
 ```bash
 mv .env.example .env
@@ -179,7 +179,7 @@ When your  is executed, it will return: `"Got SECRET_KEY of length..."`. In a re
 ## Key Concepts
 
 -   **Secure Access:** Secrets are accessed through , not imported directly
--   **Environment Integration:** Works with both environment variables and .env files
+-   **Environment Integration:** Works with both environment variables and `.env` files
 -   **Error Handling:** Always handle the case where a secret might be missing
 -   **Masking:** Never expose full secret values in logs or return values
 -   **Declaration:** Use `requires_secrets` to make dependencies explicit
@@ -193,7 +193,7 @@ When your  is executed, it will return: `"Got SECRET_KEY of length..."`. In a re
 SECRET_KEY="supersecret"
 ```
 
-For the code to work, you must define your environment variables locally or in a `.env` file.
+For the code to work, you must define your environment variables locally or in a `.env` file. Arcade will automatically search upward from the current directory to find your `.env` file.
 
 ```python
 # secrets.py
@@ -249,7 +249,7 @@ For HTTP transport, view your server’s API docs at [http://127.0.0.1:8000/docs
 
 For security reasons, Local HTTP servers do not currently support tool-level authorization and secrets. If you need to use tool-level authorization or secrets locally, you should use the stdio transport and configure the Arcade API key and secrets in your  connection settings. Otherwise, if you intend to expose your HTTP  to the public internet with \-level authorization and secrets, please follow the [deploying to the cloud with Arcade Deploy](/guides/deployment-hosting/arcade-deploy.md) guide or the [on-prem MCP server](/guides/deployment-hosting/on-prem.md) guide for secure remote deployment.
 
-Last updated on January 30, 2026
+Last updated on January 5, 2026
 
 [Create a tool with auth](/en/guides/create-tools/tool-basics/create-tool-auth.md)
 [Access runtime data](/en/guides/create-tools/tool-basics/runtime-data-access.md)
