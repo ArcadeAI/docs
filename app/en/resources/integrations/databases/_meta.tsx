@@ -1,13 +1,21 @@
 import type { MetaRecord } from "nextra";
 
 const meta: MetaRecord = {
-  "weaviate-api": {
-    title: "Weaviate API",
-    href: "/en/resources/integrations/databases/weaviate-api",
+  "-- Optimized": {
+    type: "separator",
+    title: "Optimized",
   },
   yugabytedb: {
     title: "YugabyteDB",
     href: "/en/resources/integrations/databases/yugabytedb",
+  },
+  "-- Starter": {
+    type: "separator",
+    title: "Starter",
+  },
+  "weaviate-api": {
+    title: "Weaviate API",
+    href: "/en/resources/integrations/databases/weaviate-api",
   },
 };
 
