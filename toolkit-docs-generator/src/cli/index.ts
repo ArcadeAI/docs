@@ -1219,19 +1219,37 @@ program
             );
             console.log(chalk.green("\n✓ Nothing to regenerate.\n"));
 
+            const noChangeCleanup = await cleanupExcludedToolkitOutput({
+              outputDir: options.output,
+              excludedToolkitIds,
+              generator,
+              verbose: options.verbose,
+            });
+            if (noChangeCleanup.deleted.length > 0 && options.verbose) {
+              console.log(
+                chalk.dim(
+                  `  Deleted ${noChangeCleanup.deleted.length} excluded toolkit file(s): ${noChangeCleanup.deleted.join(", ")}`
+                )
+              );
+            }
+            for (const warning of noChangeCleanup.warnings) {
+              spinner.warn(warning);
+            }
+
             await appendLogEntry(logPaths.runLogPath, {
               title: "generate --skip-unchanged (no changes)",
               details: [
                 `output=${resolve(options.output)}`,
                 `apiSource=${apiSource}`,
                 `summary=${formatChangeSummary(detectedChanges)}`,
+                `excludedFilesDeleted=${noChangeCleanup.deleted.length}`,
               ],
             });
             await appendLogEntry(logPaths.changeLogPath, {
               title: "changes (no-op)",
               details: [formatChangeSummary(detectedChanges)],
             });
-            process.exit(0);
+            return;
           }
 
           // Get IDs of changed toolkits
