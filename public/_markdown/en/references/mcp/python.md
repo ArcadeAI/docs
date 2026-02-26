@@ -1,0 +1,513 @@
+---
+title: "Arcade MCP Server - Python overview"
+description: "Overview of the arcade-mcp-server Python package and the MCPApp class"
+---
+Arcade MCPOverview
+
+# Arcade MCP Server - Python overview
+
+`arcade-mcp-server` is Arcade’s framework for building  servers. It provides a clean, minimal API to build  programmatically. The main entry point is `MCPApp`, which handles  collection, server configuration, and transport setup.
+
+## Quick start
+
+```python
+from typing import Annotated
+
+from arcade_mcp_server import MCPApp
+
+app = MCPApp(name="my_server", version="1.0.0")
+
+@app.tool
+def greet(name: Annotated[str, "The name of the person to greet"]) -> str:
+    """Greet a person by name."""
+    return f"Hello, {name}!"
+
+if __name__ == "__main__":
+    app.run(transport="stdio")
+```
+
+## `MCPApp`
+
+**`arcade_mcp_server.mcp_app.MCPApp`**
+
+A FastAPI-like interface for building  servers. The app collects  and configuration, then lazily creates the server and transport when `run()` is called.
+
+### `__init__`
+
+```python
+MCPApp(
+    name="ArcadeMCP",
+    version="0.1.0",
+    title=None,
+    instructions=None,
+    log_level="INFO",
+    transport="stdio",
+    host="127.0.0.1",
+    port=8000,
+    reload=False,
+    auth=None,
+    **kwargs,
+)
+```
+
+Initialize the  app.
+
+**Parameters:**
+
+Name
+
+Type
+
+Description
+
+Default
+
+`name`
+
+`str`
+
+Server name. Must be alphanumeric and underscores only, cannot start with `_`, cannot have consecutive underscores, must end with an alphanumeric character.
+
+`'ArcadeMCP'`
+
+`version`
+
+`str`
+
+Server version
+
+`'0.1.0'`
+
+`title`
+
+`str | None`
+
+Server title for display. Defaults to `name` if not provided.
+
+`None`
+
+`instructions`
+
+`str | None`
+
+Server instructions sent to clients during initialization
+
+`None`
+
+`log_level`
+
+`str`
+
+Logging level (`DEBUG`, `INFO`, `WARNING`, `ERROR`)
+
+`'INFO'`
+
+`transport`
+
+`TransportType`
+
+Transport type (`"stdio"` or `"http"`)
+
+`'stdio'`
+
+`host`
+
+`str`
+
+Host for HTTP transport
+
+`'127.0.0.1'`
+
+`port`
+
+`int`
+
+Port for HTTP transport
+
+`8000`
+
+`reload`
+
+`bool`
+
+Enable auto-reload for development (HTTP only)
+
+`False`
+
+`auth`
+
+`ResourceServerValidator | None`
+
+Resource Server validator for front-door authentication (HTTP only)
+
+`None`
+
+`**kwargs`
+
+`Any`
+
+Additional server configuration passed to the underlying `MCPServer`
+
+`{}`
+
+### Properties
+
+#### `tools`
+
+Runtime and build-time  API. Returns a `_ToolsAPI` object with async methods: `add()`, `update()`, `remove()`, `list()`.
+
+The runtime  API (`app.tools.add()`, etc.) requires a server to be bound via `app.server`. It is only available after the server has started. Use the `@app.tool` decorator or `app.add_tool()` for build-time tool registration.
+
+#### `prompts`
+
+Runtime prompts API. Returns a `_PromptsAPI` object with async methods: `add()`, `remove()`, `list()`.
+
+#### `resources`
+
+Runtime resources API. Returns a `_ResourcesAPI` object with async methods: `add()`, `remove()`, `list()`.
+
+### Methods
+
+#### `tool`
+
+```python
+@app.tool
+def my_tool(...) -> ...:
+    ...
+
+@app.tool(name="custom_name", desc="A custom description")
+def my_tool(...) -> ...:
+    ...
+```
+
+Decorator for registering . Can be used with or without arguments.
+
+**Parameters:**
+
+Name
+
+Type
+
+Description
+
+Default
+
+`func`
+
+`Callable | None`
+
+The function to register (set automatically when used without arguments)
+
+`None`
+
+`desc`
+
+`str | None`
+
+Tool description (overrides the function docstring)
+
+`None`
+
+`name`
+
+`str | None`
+
+Custom tool name (overrides the function name)
+
+`None`
+
+`requires_auth`
+
+`ToolAuthorization | None`
+
+Authorization requirements for the tool
+
+`None`
+
+`requires_secrets`
+
+`list[str] | None`
+
+List of secret keys the tool requires
+
+`None`
+
+`requires_metadata`
+
+`list[str] | None`
+
+List of metadata keys the tool requires
+
+`None`
+
+`adapters`
+
+`list[ErrorAdapter] | None`
+
+Error adapters for custom error handling
+
+`None`
+
+`metadata`
+
+`ToolMetadata | None`
+
+Additional tool metadata
+
+`None`
+
+#### `add_tool`
+
+```python
+app.add_tool(
+    func,
+    desc=None,
+    name=None,
+    requires_auth=None,
+    requires_secrets=None,
+    requires_metadata=None,
+    adapters=None,
+    metadata=None,
+)
+```
+
+Add a  for build-time materialization (before the server starts). Accepts the same parameters as the `@app.tool` decorator.
+
+#### `add_tools_from_module`
+
+```python
+app.add_tools_from_module(module)
+```
+
+Add all `@tool`\-decorated functions from a Python module to the catalog.
+
+**Parameters:**
+
+Name
+
+Type
+
+Description
+
+Default
+
+`module`
+
+`ModuleType`
+
+A Python module containing `@tool`\-decorated functions
+
+_required_
+
+**Example:**
+
+```python
+import my_tools
+app.add_tools_from_module(my_tools)
+```
+
+#### `run`
+
+```python
+app.run(
+    host="127.0.0.1",
+    port=8000,
+    reload=False,
+    transport="stdio",
+    **kwargs,
+)
+```
+
+Start the  server. This method blocks until the server shuts down. It exits with an error if no  have been registered.
+
+**Parameters:**
+
+Name
+
+Type
+
+Description
+
+Default
+
+`host`
+
+`str`
+
+Host to bind to (HTTP transport only)
+
+`'127.0.0.1'`
+
+`port`
+
+`int`
+
+Port to bind to (HTTP transport only)
+
+`8000`
+
+`reload`
+
+`bool`
+
+Enable file-watching auto-reload (HTTP transport only)
+
+`False`
+
+`transport`
+
+`TransportType`
+
+Transport type: `"stdio"` or `"http"`
+
+`'stdio'`
+
+`**kwargs`
+
+`Any`
+
+Additional configuration
+
+`{}`
+
+The `run()` method checks for environment variable overrides before starting. See [environment variable overrides](#environment-variable-overrides) below.
+
+## Transport modes
+
+ servers communicate with clients through different transport mechanisms. Select a transport by passing the `transport` argument to `run()`.
+
+### stdio
+
+The stdio transport communicates over standard input/output streams. It is the default transport, used by Claude Desktop and similar clients.
+
+-   Logs go to stderr to avoid interfering with JSON-RPC messages on stdout
+-   Single-session only
+-   No network exposure
+
+```python
+app.run(transport="stdio")
+```
+
+### HTTP (Streamable HTTP)
+
+The HTTP transport runs a FastAPI/Uvicorn server with  Streamable HTTP and Server-Sent Events (SSE) support. The server mounts it at the `/mcp` endpoint.
+
+-   Supports multiple concurrent sessions
+-   JSON-RPC over HTTP POST, SSE streaming over HTTP GET
+-   Optional front-door authentication via the `auth` parameter
+
+```python
+app.run(transport="http", host="0.0.0.0", port=8000)
+```
+
+When `reload=True`, the server watches for `.py` and `.env` file changes and automatically restarts.
+
+## Environment variable overrides
+
+The `run()` method checks the following environment variables, which override the corresponding parameters:
+
+Environment variable
+
+Overrides
+
+Notes
+
+`ARCADE_SERVER_TRANSPORT`
+
+`transport`
+
+Set to `"stdio"` or `"http"`
+
+`ARCADE_SERVER_HOST`
+
+`host`
+
+HTTP transport only
+
+`ARCADE_SERVER_PORT`
+
+`port`
+
+HTTP transport only
+
+`ARCADE_SERVER_RELOAD`
+
+`reload`
+
+`"0"` or `"1"`, HTTP transport only
+
+## Examples
+
+### stdio server with tools
+
+```python
+from typing import Annotated
+
+from arcade_mcp_server import MCPApp
+
+app = MCPApp(name="example_server", version="1.0.0")
+
+@app.tool
+def echo(text: Annotated[str, "The text to echo"]) -> str:
+    """Echo the text back."""
+    return f"Echo: {text}"
+
+if __name__ == "__main__":
+    app.run(transport="stdio")
+```
+
+### HTTP server with reload
+
+```python
+from typing import Annotated
+
+from arcade_mcp_server import MCPApp
+
+app = MCPApp(name="example_server", version="1.0.0")
+
+@app.tool
+def echo(text: Annotated[str, "The text to echo"]) -> str:
+    """Echo the text back."""
+    return f"Echo: {text}"
+
+if __name__ == "__main__":
+    app.run(transport="http", host="0.0.0.0", port=8000, reload=True)
+```
+
+### Choosing transport at runtime
+
+```python
+import sys
+from typing import Annotated
+
+from arcade_mcp_server import MCPApp
+
+app = MCPApp(name="my_server", version="1.0.0")
+
+@app.tool
+def greet(name: Annotated[str, "Name to greet"]) -> str:
+    """Greet someone."""
+    return f"Hello, {name}!"
+
+if __name__ == "__main__":
+    transport = sys.argv[1] if len(sys.argv) > 1 else "stdio"
+    app.run(transport=transport, host="127.0.0.1", port=8000)
+```
+
+### Adding tools from a module
+
+```python
+from arcade_mcp_server import MCPApp
+import my_tools
+
+app = MCPApp(name="my_server", version="1.0.0")
+app.add_tools_from_module(my_tools)
+
+if __name__ == "__main__":
+    app.run()
+```
+
+Last updated on February 10, 2026
+
+[API](/en/references/api.md)
+[Context](/en/references/mcp/python/context.md)

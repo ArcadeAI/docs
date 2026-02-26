@@ -1,0 +1,3488 @@
+{
+  "id": "Linear",
+  "label": "Linear",
+  "version": "3.3.0",
+  "description": "Arcade tools designed for LLMs to interact with Linear",
+  "metadata": {
+    "category": "productivity",
+    "iconUrl": "https://design-system.arcade.dev/icons/linear.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/productivity/linear",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": "linear",
+    "allScopes": [
+      "comments:create",
+      "issues:create",
+      "read",
+      "write"
+    ]
+  },
+  "tools": [
+    {
+      "name": "AddComment",
+      "qualifiedName": "Linear.AddComment",
+      "fullyQualifiedName": "Linear.AddComment@3.3.0",
+      "description": "Add a comment to an issue.",
+      "parameters": [
+        {
+          "name": "issue",
+          "type": "string",
+          "required": true,
+          "description": "Issue ID or identifier to comment on.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "required": true,
+          "description": "Comment body in Markdown format.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "comments:create"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Created comment details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.AddComment",
+        "parameters": {
+          "issue": {
+            "value": "ISSUE-123",
+            "type": "string",
+            "required": true
+          },
+          "body": {
+            "value": "Thanks for the update!\n\nI reproduced the issue and found it occurs when the user has no saved preferences. Steps to reproduce:\n1. Go to Settings\n2. Clear preferences\n3. Reload the app\n\nExpected: App loads with default preferences.\nActual: Crash with error `TypeError: null is not an object`.\n\nAssigning to @frontend for investigation. Please let me know if you need any logs or additional details.",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "AddProjectComment",
+      "qualifiedName": "Linear.AddProjectComment",
+      "fullyQualifiedName": "Linear.AddProjectComment@3.3.0",
+      "description": "Add a comment to a project's document content.\n\nIMPORTANT: Due to Linear API limitations, comments created via the API will NOT\nappear visually anchored inline in the document (no yellow highlight on text).\nThe comment will be stored and can be retrieved via list_project_comments, but\nit will appear in the comments panel rather than inline in the document.\n\nFor true inline comments that are visually anchored to text, users should create\nthem directly in the Linear UI by selecting text and adding a comment.\n\nThe quoted_text parameter stores metadata about what text the comment references,\nwhich is useful for context even though the comment won't be visually anchored.",
+      "parameters": [
+        {
+          "name": "project",
+          "type": "string",
+          "required": true,
+          "description": "Project ID, slug_id, or name. Prefer project ID for better performance.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "required": true,
+          "description": "Comment body in Markdown format.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "quoted_text",
+          "type": "string",
+          "required": false,
+          "description": "Text from the project document to reference. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "auto_accept_matches",
+          "type": "boolean",
+          "required": false,
+          "description": "Auto-accept fuzzy matches above 90% confidence. Default is False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "comments:create"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Created comment details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.AddProjectComment",
+        "parameters": {
+          "project": {
+            "value": "proj_01GZABCDEF",
+            "type": "string",
+            "required": true
+          },
+          "body": {
+            "value": "I've reviewed the document and added suggested edits to the timeline and scope.\n\nProposed changes:\n\n- Adjust milestone dates to reflect a 2-week buffer.\n- Clarify acceptance criteria for Feature X.\n\nPlease review and merge if acceptable.",
+            "type": "string",
+            "required": true
+          },
+          "quoted_text": {
+            "value": "Current timeline: Q2 - Design, Q3 - Development, Q4 - Launch.",
+            "type": "string",
+            "required": false
+          },
+          "auto_accept_matches": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "AddProjectToInitiative",
+      "qualifiedName": "Linear.AddProjectToInitiative",
+      "fullyQualifiedName": "Linear.AddProjectToInitiative@3.3.0",
+      "description": "Link a project to an initiative.\n\nBoth initiative and project can be specified by ID or name.\nIf a name is provided, fuzzy matching is used to resolve it.",
+      "parameters": [
+        {
+          "name": "initiative",
+          "type": "string",
+          "required": true,
+          "description": "Initiative ID or name to link the project to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project",
+          "type": "string",
+          "required": true,
+          "description": "Project ID or name to link.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "auto_accept_matches",
+          "type": "boolean",
+          "required": false,
+          "description": "Auto-accept fuzzy matches above 90% confidence. Default is False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Confirmation of project-initiative link"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.AddProjectToInitiative",
+        "parameters": {
+          "initiative": {
+            "value": "Q2 Product Launch",
+            "type": "string",
+            "required": true
+          },
+          "project": {
+            "value": "Mobile App Revamp",
+            "type": "string",
+            "required": true
+          },
+          "auto_accept_matches": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ArchiveInitiative",
+      "qualifiedName": "Linear.ArchiveInitiative",
+      "fullyQualifiedName": "Linear.ArchiveInitiative@3.3.0",
+      "description": "Archive an initiative.\n\nArchived initiatives are hidden from default views but can be restored.",
+      "parameters": [
+        {
+          "name": "initiative",
+          "type": "string",
+          "required": true,
+          "description": "Initiative ID or name to archive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "auto_accept_matches",
+          "type": "boolean",
+          "required": false,
+          "description": "Auto-accept fuzzy matches above 90% confidence. Default is False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Archive operation result"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.ArchiveInitiative",
+        "parameters": {
+          "initiative": {
+            "value": "Improve search relevance",
+            "type": "string",
+            "required": true
+          },
+          "auto_accept_matches": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ArchiveIssue",
+      "qualifiedName": "Linear.ArchiveIssue",
+      "fullyQualifiedName": "Linear.ArchiveIssue@3.3.0",
+      "description": "Archive an issue.\n\nArchived issues are hidden from default views but can be restored.",
+      "parameters": [
+        {
+          "name": "issue",
+          "type": "string",
+          "required": true,
+          "description": "Issue ID or identifier to archive.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Archive operation result"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.ArchiveIssue",
+        "parameters": {
+          "issue": {
+            "value": "ISSUE-123",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ArchiveProject",
+      "qualifiedName": "Linear.ArchiveProject",
+      "fullyQualifiedName": "Linear.ArchiveProject@3.3.0",
+      "description": "Archive a project.\n\nArchived projects are hidden from default views but can be restored.",
+      "parameters": [
+        {
+          "name": "project",
+          "type": "string",
+          "required": true,
+          "description": "Project ID, slug_id, or name to archive.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "auto_accept_matches",
+          "type": "boolean",
+          "required": false,
+          "description": "Auto-accept fuzzy matches above 90% confidence. Default is False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Archive operation result"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.ArchiveProject",
+        "parameters": {
+          "project": {
+            "value": "website-redesign",
+            "type": "string",
+            "required": true
+          },
+          "auto_accept_matches": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateInitiative",
+      "qualifiedName": "Linear.CreateInitiative",
+      "fullyQualifiedName": "Linear.CreateInitiative@3.3.0",
+      "description": "Create a new Linear initiative.\n\nInitiatives are high-level strategic goals that group related projects.",
+      "parameters": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "description": "Initiative name. Required.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "Initiative description in Markdown format. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "description": "Initial initiative status. Default is None (uses Linear default).",
+          "enum": [
+            "Backlog",
+            "Planned",
+            "Active",
+            "Paused",
+            "Completed",
+            "Canceled"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "target_date",
+          "type": "string",
+          "required": false,
+          "description": "Target completion date in YYYY-MM-DD format. Default is None.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Created initiative details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.CreateInitiative",
+        "parameters": {
+          "name": {
+            "value": "Improve onboarding experience",
+            "type": "string",
+            "required": true
+          },
+          "description": {
+            "value": "Revamp the user onboarding flow to reduce time-to-first-value and increase activation.\n\n- Redesign signup flow\n- Add interactive tutorials\n- Improve welcome emails and tooltips\n\nMeasure success by increasing 7-day retention by 15% and reducing average setup time to under 5 minutes.",
+            "type": "string",
+            "required": false
+          },
+          "status": {
+            "value": "planned",
+            "type": "string",
+            "required": false
+          },
+          "target_date": {
+            "value": "2026-12-31",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateIssue",
+      "qualifiedName": "Linear.CreateIssue",
+      "fullyQualifiedName": "Linear.CreateIssue@3.3.0",
+      "description": "Create a new Linear issue with validation.\n\nWhen assignee is None or '@me', the issue is assigned to the authenticated user.\nAll entity references (team, assignee, labels, state, project, cycle, parent)\nare validated before creation. If an entity is not found, suggestions are\nreturned to help correct the input.",
+      "parameters": [
+        {
+          "name": "team",
+          "type": "string",
+          "required": true,
+          "description": "Team name, key, or ID. Required.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "Issue title. Required.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "Issue description in Markdown format. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "assignee",
+          "type": "string",
+          "required": false,
+          "description": "Assignee name or email. Use '@me' for current user. Must be a team member. Default is '@me' (assigns to current user).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "labels_to_add",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Labels to add by name or ID. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "priority",
+          "type": "string",
+          "required": false,
+          "description": "Issue priority. Default is None (no priority).",
+          "enum": [
+            "none",
+            "urgent",
+            "high",
+            "medium",
+            "low"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "required": false,
+          "description": "Initial workflow state name. Default is team's default state.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project",
+          "type": "string",
+          "required": false,
+          "description": "Project name, slug, or ID to link. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cycle",
+          "type": "string",
+          "required": false,
+          "description": "Cycle name or number to link. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "parent_issue",
+          "type": "string",
+          "required": false,
+          "description": "Parent issue identifier to make this a sub-issue. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "estimate",
+          "type": "integer",
+          "required": false,
+          "description": "Effort estimate in points. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "due_date",
+          "type": "string",
+          "required": false,
+          "description": "Due date in YYYY-MM-DD format. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "attachment_url",
+          "type": "string",
+          "required": false,
+          "description": "URL to attach to the issue. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "attachment_title",
+          "type": "string",
+          "required": false,
+          "description": "Title for the attached URL. Default is None (URL used as title).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "auto_accept_matches",
+          "type": "boolean",
+          "required": false,
+          "description": "Auto-accept fuzzy matches above 90% confidence. Default is False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "issues:create"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Created issue details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.CreateIssue",
+        "parameters": {
+          "team": {
+            "value": "Frontend Team",
+            "type": "string",
+            "required": true
+          },
+          "title": {
+            "value": "Fix responsive header overflow on mobile",
+            "type": "string",
+            "required": true
+          },
+          "description": {
+            "value": "When viewing the site on mobile, the header overflows the viewport causing horizontal scroll.\nSteps to reproduce:\n1. Open homepage on mobile\n2. Observe header overflow\nExpected: header fits within viewport and no horizontal scrolling.\nProposed fix: update header CSS to ensure proper box-sizing and overflow handling; verify across breakpoints.",
+            "type": "string",
+            "required": false
+          },
+          "assignee": {
+            "value": "@me",
+            "type": "string",
+            "required": false
+          },
+          "labels_to_add": {
+            "value": [
+              "bug",
+              "ui",
+              "urgent"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "priority": {
+            "value": "P1",
+            "type": "string",
+            "required": false
+          },
+          "state": {
+            "value": "In Progress",
+            "type": "string",
+            "required": false
+          },
+          "project": {
+            "value": "Website Redesign",
+            "type": "string",
+            "required": false
+          },
+          "cycle": {
+            "value": "Sprint 24",
+            "type": "string",
+            "required": false
+          },
+          "parent_issue": {
+            "value": "ISSUE-1023",
+            "type": "string",
+            "required": false
+          },
+          "estimate": {
+            "value": 3,
+            "type": "integer",
+            "required": false
+          },
+          "due_date": {
+            "value": "2026-03-05",
+            "type": "string",
+            "required": false
+          },
+          "attachment_url": {
+            "value": "https://example.com/screenshots/header-overflow.png",
+            "type": "string",
+            "required": false
+          },
+          "attachment_title": {
+            "value": "Header overflow on iPhone 12",
+            "type": "string",
+            "required": false
+          },
+          "auto_accept_matches": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateIssueRelation",
+      "qualifiedName": "Linear.CreateIssueRelation",
+      "fullyQualifiedName": "Linear.CreateIssueRelation@3.3.0",
+      "description": "Create a relation between two issues.\n\nRelation types define the relationship from the source issue's perspective:\n- blocks: Source issue blocks the related issue\n- blockedBy: Source issue is blocked by the related issue\n- duplicate: Source issue is a duplicate of the related issue\n- related: Issues are related (bidirectional)",
+      "parameters": [
+        {
+          "name": "issue",
+          "type": "string",
+          "required": true,
+          "description": "Source issue ID or identifier.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "related_issue",
+          "type": "string",
+          "required": true,
+          "description": "Related issue ID or identifier.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "relation_type",
+          "type": "string",
+          "required": true,
+          "description": "Type of relation to create.",
+          "enum": [
+            "blocks",
+            "blockedBy",
+            "duplicate",
+            "related"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Created relation details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.CreateIssueRelation",
+        "parameters": {
+          "issue": {
+            "value": "ISSUE-123",
+            "type": "string",
+            "required": true
+          },
+          "related_issue": {
+            "value": "ISSUE-456",
+            "type": "string",
+            "required": true
+          },
+          "relation_type": {
+            "value": "blocks",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateProject",
+      "qualifiedName": "Linear.CreateProject",
+      "fullyQualifiedName": "Linear.CreateProject@3.3.0",
+      "description": "Create a new Linear project.\n\nTeam is validated before creation. If team is not found, suggestions are\nreturned to help correct the input. Lead is validated if provided.",
+      "parameters": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "description": "Project name. Required.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team",
+          "type": "string",
+          "required": true,
+          "description": "Team name, key, or ID to associate the project with. Required.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "Project summary (255 char limit). Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "content",
+          "type": "string",
+          "required": false,
+          "description": "Project document/spec content in Markdown (unlimited). Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "required": false,
+          "description": "Initial project state. Default is None (uses Linear default).",
+          "enum": [
+            "backlog",
+            "planned",
+            "started",
+            "paused",
+            "completed",
+            "canceled"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "lead",
+          "type": "string",
+          "required": false,
+          "description": "Project lead name or email. Must be a workspace member. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_date",
+          "type": "string",
+          "required": false,
+          "description": "Project start date in YYYY-MM-DD format. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "target_date",
+          "type": "string",
+          "required": false,
+          "description": "Target completion date in YYYY-MM-DD format. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "auto_accept_matches",
+          "type": "boolean",
+          "required": false,
+          "description": "Auto-accept fuzzy matches above 90% confidence. Default is False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Created project details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.CreateProject",
+        "parameters": {
+          "name": {
+            "value": "Website Redesign Q2",
+            "type": "string",
+            "required": true
+          },
+          "team": {
+            "value": "Frontend Team",
+            "type": "string",
+            "required": true
+          },
+          "description": {
+            "value": "Redesign the public-facing website to improve conversion rates, accessibility (WCAG 2.1), and performance. Focus on homepage, product pages, and mobile experience.",
+            "type": "string",
+            "required": false
+          },
+          "content": {
+            "value": "# Website Redesign\n\n## Objectives\n- Improve conversion funnel across key landing pages\n- Achieve WCAG 2.1 AA accessibility compliance\n- Reduce Largest Contentful Paint (LCP) by 30%\n\n## Scope\n- New homepage design\n- Updated product and pricing pages\n- Mobile responsive improvements\n- Accessibility audit and fixes\n\n## Deliverables\n1. Design mockups and component library\n2. Implementation and QA\n3. Post-launch monitoring plan\n",
+            "type": "string",
+            "required": false
+          },
+          "state": {
+            "value": "planned",
+            "type": "string",
+            "required": false
+          },
+          "lead": {
+            "value": "jane.doe@example.com",
+            "type": "string",
+            "required": false
+          },
+          "start_date": {
+            "value": "2026-03-01",
+            "type": "string",
+            "required": false
+          },
+          "target_date": {
+            "value": "2026-06-30",
+            "type": "string",
+            "required": false
+          },
+          "auto_accept_matches": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "CreateProjectUpdate",
+      "qualifiedName": "Linear.CreateProjectUpdate",
+      "fullyQualifiedName": "Linear.CreateProjectUpdate@3.3.0",
+      "description": "Create a project status update.\n\nProject updates are posts that communicate progress, blockers, or status\nchanges to stakeholders. They appear in the project's Updates tab and\ncan include a health status indicator.",
+      "parameters": [
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "The project ID to create an update for.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "required": true,
+          "description": "The update content in Markdown format.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "health",
+          "type": "string",
+          "required": false,
+          "description": "Project health status. Default is None (no change).",
+          "enum": [
+            "onTrack",
+            "atRisk",
+            "offTrack"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Created project update details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.CreateProjectUpdate",
+        "parameters": {
+          "project_id": {
+            "value": "proj_01G7KZ9Q5E8WF3X0P2Y6A4B",
+            "type": "string",
+            "required": true
+          },
+          "body": {
+            "value": "Weekly update – 2026-02-21\n\n**Progress:**\n- Completed API integration for the payment gateway and merged PRs #142 and #145.\n- Implemented backend retries and added monitoring dashboards for transaction throughput.\n\n**Blockers:**\n- Awaiting security review for vault access (security ticket SEC-78).\n- Deployment slot conflicts preventing canary rollout.\n\n**Next steps:**\n1. Resolve security review comments and re-run integration tests.\n2. Schedule canary deployment once slot conflict is resolved.\n\nIf you'd like more detail on any item, please reply or tag the relevant owner.",
+            "type": "string",
+            "required": true
+          },
+          "health": {
+            "value": "at_risk",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetCycle",
+      "qualifiedName": "Linear.GetCycle",
+      "fullyQualifiedName": "Linear.GetCycle@3.3.0",
+      "description": "Get detailed information about a specific Linear cycle.",
+      "parameters": [
+        {
+          "name": "cycle_id",
+          "type": "string",
+          "required": true,
+          "description": "The cycle ID. Required.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Cycle details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.GetCycle",
+        "parameters": {
+          "cycle_id": {
+            "value": "cycle_01H7Z5Y9KABCDE12345",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetInitiative",
+      "qualifiedName": "Linear.GetInitiative",
+      "fullyQualifiedName": "Linear.GetInitiative@3.3.0",
+      "description": "Get detailed information about a specific Linear initiative.\n\nSupports lookup by ID or name (with fuzzy matching for name).",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "string",
+          "required": true,
+          "description": "The value to look up (ID or name depending on lookup_by).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "lookup_by",
+          "type": "string",
+          "required": false,
+          "description": "How to look up the initiative. Default is id.",
+          "enum": [
+            "id",
+            "name"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "include_projects",
+          "type": "boolean",
+          "required": false,
+          "description": "Include linked projects in the response. Default is True.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "auto_accept_matches",
+          "type": "boolean",
+          "required": false,
+          "description": "Auto-accept fuzzy matches above 90% confidence. Only used when lookup_by is name. Default is False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Complete initiative details with linked projects"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.GetInitiative",
+        "parameters": {
+          "value": {
+            "value": "Website Redesign Initiative",
+            "type": "string",
+            "required": true
+          },
+          "lookup_by": {
+            "value": "name",
+            "type": "string",
+            "required": false
+          },
+          "include_projects": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "auto_accept_matches": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetInitiativeDescription",
+      "qualifiedName": "Linear.GetInitiativeDescription",
+      "fullyQualifiedName": "Linear.GetInitiativeDescription@3.3.0",
+      "description": "Get an initiative's full description with pagination support.\n\nUse this tool when you need the complete description of an initiative that\nwas truncated in the get_initiative response. Supports chunked reading for\nvery large descriptions.",
+      "parameters": [
+        {
+          "name": "initiative_id",
+          "type": "string",
+          "required": true,
+          "description": "The initiative ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Character offset to start reading from. Default is 0 (start).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum characters to return. Default is 2000.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Initiative description chunk with pagination info"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.GetInitiativeDescription",
+        "parameters": {
+          "initiative_id": {
+            "value": "init_01F4ABCDEF23456789",
+            "type": "string",
+            "required": true
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          },
+          "limit": {
+            "value": 1500,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetIssue",
+      "qualifiedName": "Linear.GetIssue",
+      "fullyQualifiedName": "Linear.GetIssue@3.3.0",
+      "description": "Get detailed information about a specific Linear issue.\n\nAccepts either the issue UUID or the human-readable identifier (like TOO-123).",
+      "parameters": [
+        {
+          "name": "issue_id",
+          "type": "string",
+          "required": true,
+          "description": "The Linear issue ID or identifier (like TOO-123).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_comments",
+          "type": "boolean",
+          "required": false,
+          "description": "Include comments in the response. Default is True.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_attachments",
+          "type": "boolean",
+          "required": false,
+          "description": "Include attachments in the response. Default is True.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_relations",
+          "type": "boolean",
+          "required": false,
+          "description": "Include issue relations (blocks, dependencies). Default is True.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_children",
+          "type": "boolean",
+          "required": false,
+          "description": "Include sub-issues in the response. Default is True.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Complete issue details with related data"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.GetIssue",
+        "parameters": {
+          "issue_id": {
+            "value": "TOO-123",
+            "type": "string",
+            "required": true
+          },
+          "include_comments": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "include_attachments": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "include_relations": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "include_children": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetNotifications",
+      "qualifiedName": "Linear.GetNotifications",
+      "fullyQualifiedName": "Linear.GetNotifications@3.3.0",
+      "description": "Get the authenticated user's notifications.\n\nReturns notifications including issue mentions, comments, assignments,\nand state changes.",
+      "parameters": [
+        {
+          "name": "unread_only",
+          "type": "boolean",
+          "required": false,
+          "description": "Only return unread notifications. Default is False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of notifications to return. Min 1, max 50. Default is 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_cursor",
+          "type": "string",
+          "required": false,
+          "description": "Cursor for pagination. Use 'end_cursor' from previous response. Default is None.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "User's notifications with pagination"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.GetNotifications",
+        "parameters": {
+          "unread_only": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          },
+          "end_cursor": {
+            "value": "eyJpZCI6IjEyMzQ1NiIsIm9mZnNldCI6MX0",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetProject",
+      "qualifiedName": "Linear.GetProject",
+      "fullyQualifiedName": "Linear.GetProject@3.3.0",
+      "description": "Get detailed information about a specific Linear project.\n\nSupports lookup by ID, slug_id, or name (with fuzzy matching for name).",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "string",
+          "required": true,
+          "description": "The value to look up (ID, slug_id, or name depending on lookup_by).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "lookup_by",
+          "type": "string",
+          "required": false,
+          "description": "How to look up the project. Default is id.",
+          "enum": [
+            "id",
+            "slug_id",
+            "name"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "include_issues",
+          "type": "boolean",
+          "required": false,
+          "description": "Include latest 10 issues (by updated_at) in the response. Default is True.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_comments",
+          "type": "boolean",
+          "required": false,
+          "description": "Include inline comments (comments with quoted_text) in the response. Comments include their replies. Default is False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "auto_accept_matches",
+          "type": "boolean",
+          "required": false,
+          "description": "Auto-accept fuzzy matches above 90% confidence. Only used when lookup_by is name. Default is False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Complete project details with teams and issues"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.GetProject",
+        "parameters": {
+          "value": {
+            "value": "Mobile App Redesign",
+            "type": "string",
+            "required": true
+          },
+          "lookup_by": {
+            "value": "name",
+            "type": "string",
+            "required": false
+          },
+          "include_issues": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "include_comments": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "auto_accept_matches": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetProjectDescription",
+      "qualifiedName": "Linear.GetProjectDescription",
+      "fullyQualifiedName": "Linear.GetProjectDescription@3.3.0",
+      "description": "Get a project's full description with pagination support.\n\nUse this tool when you need the complete description of a project that\nwas truncated in the get_project response. Supports chunked reading for\nvery large descriptions.",
+      "parameters": [
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "The project ID or slug_id.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Character offset to start reading from. Default is 0 (start).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum characters to return. Default is 2000.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Project description chunk with pagination info"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.GetProjectDescription",
+        "parameters": {
+          "project_id": {
+            "value": "marketing-website",
+            "type": "string",
+            "required": true
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          },
+          "limit": {
+            "value": 2000,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetRecentActivity",
+      "qualifiedName": "Linear.GetRecentActivity",
+      "fullyQualifiedName": "Linear.GetRecentActivity@3.3.0",
+      "description": "Get the authenticated user's recent issue activity.\n\nReturns issues the user has recently created or been assigned to\nwithin the specified time period.",
+      "parameters": [
+        {
+          "name": "days",
+          "type": "integer",
+          "required": false,
+          "description": "Number of days to look back for activity. Min 1, max 90. Default is 30.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of activities to return. Min 1, max 50. Default is 20.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "User's recent issue activity"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.GetRecentActivity",
+        "parameters": {
+          "days": {
+            "value": 14,
+            "type": "integer",
+            "required": false
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetTeam",
+      "qualifiedName": "Linear.GetTeam",
+      "fullyQualifiedName": "Linear.GetTeam@3.3.0",
+      "description": "Get detailed information about a specific Linear team.\n\nSupports lookup by ID, key (like TOO, ENG), or name (with fuzzy matching).",
+      "parameters": [
+        {
+          "name": "value",
+          "type": "string",
+          "required": true,
+          "description": "The value to look up (ID, key, or name depending on lookup_by).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "lookup_by",
+          "type": "string",
+          "required": false,
+          "description": "How to look up the team. Default is id.",
+          "enum": [
+            "id",
+            "key",
+            "name"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "auto_accept_matches",
+          "type": "boolean",
+          "required": false,
+          "description": "Auto-accept fuzzy matches above 90% confidence. Only used when lookup_by is name. Default is False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Team details with member information"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.GetTeam",
+        "parameters": {
+          "value": {
+            "value": "ENG",
+            "type": "string",
+            "required": true
+          },
+          "lookup_by": {
+            "value": "key",
+            "type": "string",
+            "required": false
+          },
+          "auto_accept_matches": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "LinkGithubToIssue",
+      "qualifiedName": "Linear.LinkGithubToIssue",
+      "fullyQualifiedName": "Linear.LinkGithubToIssue@3.3.0",
+      "description": "Link a GitHub PR, commit, or issue to a Linear issue.\n\nAutomatically detects the artifact type from the URL and generates\nan appropriate title if not provided.",
+      "parameters": [
+        {
+          "name": "issue",
+          "type": "string",
+          "required": true,
+          "description": "Issue ID or identifier to link to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "github_url",
+          "type": "string",
+          "required": true,
+          "description": "GitHub URL to link (PR, commit, or issue).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Custom title for the link. If not provided, auto-generated from URL.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Link result with attachment details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.LinkGithubToIssue",
+        "parameters": {
+          "issue": {
+            "value": "PROJ-123",
+            "type": "string",
+            "required": true
+          },
+          "github_url": {
+            "value": "https://github.com/example-org/example-repo/pull/78",
+            "type": "string",
+            "required": true
+          },
+          "title": {
+            "value": "PR #78: Fix login redirect issue",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListComments",
+      "qualifiedName": "Linear.ListComments",
+      "fullyQualifiedName": "Linear.ListComments@3.3.0",
+      "description": "List comments on an issue.\n\nReturns comments with user info, timestamps, and reply threading info.",
+      "parameters": [
+        {
+          "name": "issue",
+          "type": "string",
+          "required": true,
+          "description": "Issue ID or identifier.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of comments to return. Min 1, max 50. Default is 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_cursor",
+          "type": "string",
+          "required": false,
+          "description": "Cursor for pagination. Use 'end_cursor' from previous response. Default is None.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Comments on the issue with pagination"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.ListComments",
+        "parameters": {
+          "issue": {
+            "value": "ISSUE-12345",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "end_cursor": {
+            "value": "cursor_eyJpZCI6IjQ1NiJ9",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListCycles",
+      "qualifiedName": "Linear.ListCycles",
+      "fullyQualifiedName": "Linear.ListCycles@3.3.0",
+      "description": "List Linear cycles, optionally filtered by team and status.\n\nCycles are time-boxed iterations (like sprints) for organizing work.",
+      "parameters": [
+        {
+          "name": "team",
+          "type": "string",
+          "required": false,
+          "description": "Filter by team ID or key. Default is None (all teams).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "active_only",
+          "type": "boolean",
+          "required": false,
+          "description": "Only return currently active cycles. Default is False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_completed",
+          "type": "boolean",
+          "required": false,
+          "description": "Include completed cycles. Default is True.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of cycles to return. Min 1, max 50. Default is 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_cursor",
+          "type": "string",
+          "required": false,
+          "description": "Cursor for pagination. Use 'end_cursor' from previous response. Default is None.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Cycles matching the filters"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.ListCycles",
+        "parameters": {
+          "team": {
+            "value": "team_frontend",
+            "type": "string",
+            "required": false
+          },
+          "active_only": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "include_completed": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "end_cursor": {
+            "value": "cursor_abc123",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListInitiatives",
+      "qualifiedName": "Linear.ListInitiatives",
+      "fullyQualifiedName": "Linear.ListInitiatives@3.3.0",
+      "description": "List Linear initiatives, optionally filtered by keywords and other criteria.\n\nReturns all initiatives when no filters provided, or filtered results when\nkeywords or other filters are specified.",
+      "parameters": [
+        {
+          "name": "keywords",
+          "type": "string",
+          "required": false,
+          "description": "Search keywords to match in initiative names. Default is None (all initiatives).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "required": false,
+          "description": "Filter by initiative state. Default is None (all states).",
+          "enum": [
+            "Backlog",
+            "Planned",
+            "Active",
+            "Paused",
+            "Completed",
+            "Canceled"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of initiatives to return. Min 1, max 50. Default is 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_cursor",
+          "type": "string",
+          "required": false,
+          "description": "Cursor for pagination. Use 'end_cursor' from previous response. Default is None.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Initiatives matching the filters"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.ListInitiatives",
+        "parameters": {
+          "keywords": {
+            "value": "user authentication",
+            "type": "string",
+            "required": false
+          },
+          "state": {
+            "value": "active",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "end_cursor": {
+            "value": "YXJyYXljb25uZWN0aW9uOjIw",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListIssues",
+      "qualifiedName": "Linear.ListIssues",
+      "fullyQualifiedName": "Linear.ListIssues@3.3.0",
+      "description": "List Linear issues, optionally filtered by keywords and other criteria.\n\nReturns all issues when no filters provided, or filtered results when\nkeywords or other filters are specified.",
+      "parameters": [
+        {
+          "name": "keywords",
+          "type": "string",
+          "required": false,
+          "description": "Search keywords to match in issue titles and descriptions. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team",
+          "type": "string",
+          "required": false,
+          "description": "Filter by team name or key. Default is None (all teams).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "required": false,
+          "description": "Filter by workflow state name. Default is None (all states).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "assignee",
+          "type": "string",
+          "required": false,
+          "description": "Filter by assignee. Use '@me' for current user. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "priority",
+          "type": "string",
+          "required": false,
+          "description": "Filter by priority level. Default is None.",
+          "enum": [
+            "none",
+            "urgent",
+            "high",
+            "medium",
+            "low"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "label",
+          "type": "string",
+          "required": false,
+          "description": "Filter by label name. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project",
+          "type": "string",
+          "required": false,
+          "description": "Filter by project name. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "created_after",
+          "type": "string",
+          "required": false,
+          "description": "Filter issues created after this date in ISO format (YYYY-MM-DD). Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of issues to return. Min 1, max 50. Default is 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_cursor",
+          "type": "string",
+          "required": false,
+          "description": "Cursor for pagination. Use 'end_cursor' from previous response. Default is None.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Issues matching the filters"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.ListIssues",
+        "parameters": {
+          "keywords": {
+            "value": "login failure OR authentication error",
+            "type": "string",
+            "required": false
+          },
+          "team": {
+            "value": "frontend",
+            "type": "string",
+            "required": false
+          },
+          "state": {
+            "value": "In Progress",
+            "type": "string",
+            "required": false
+          },
+          "assignee": {
+            "value": "@me",
+            "type": "string",
+            "required": false
+          },
+          "priority": {
+            "value": "high",
+            "type": "string",
+            "required": false
+          },
+          "label": {
+            "value": "bug",
+            "type": "string",
+            "required": false
+          },
+          "project": {
+            "value": "Mobile App",
+            "type": "string",
+            "required": false
+          },
+          "created_after": {
+            "value": "2026-01-01",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "end_cursor": {
+            "value": "cursor_abc123def",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListLabels",
+      "qualifiedName": "Linear.ListLabels",
+      "fullyQualifiedName": "Linear.ListLabels@3.3.0",
+      "description": "List available issue labels in the workspace.\n\nReturns labels that can be applied to issues. Use label IDs or names\nwhen creating or updating issues.",
+      "parameters": [
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of labels to return. Min 1, max 100. Default is 50.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Available issue labels"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.ListLabels",
+        "parameters": {
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListProjectComments",
+      "qualifiedName": "Linear.ListProjectComments",
+      "fullyQualifiedName": "Linear.ListProjectComments@3.3.0",
+      "description": "List comments on a project's document content.\n\nReturns comments with user info, timestamps, quoted text for inline comments,\nand reply threading info. Replies are nested under their parent comments.\n\nUse comment_filter to control which comments are returned:\n- only_quoted (default): Only comments attached to a quote in the text\n- only_unquoted: Only comments not attached to a particular quote\n- all: All comments regardless of being attached to a quote or not",
+      "parameters": [
+        {
+          "name": "project",
+          "type": "string",
+          "required": true,
+          "description": "Project ID, slug_id, or name. Prefer project ID for better performance.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "comment_filter",
+          "type": "string",
+          "required": false,
+          "description": "Filter which comments to return. Default is only_quoted.",
+          "enum": [
+            "only_quoted",
+            "only_unquoted",
+            "all"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "include_resolved",
+          "type": "boolean",
+          "required": false,
+          "description": "Include resolved comments in the response. Default is True.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of comments to return. Min 1, max 50. Default is 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_cursor",
+          "type": "string",
+          "required": false,
+          "description": "Cursor for pagination. Use 'end_cursor' from previous response. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "auto_accept_matches",
+          "type": "boolean",
+          "required": false,
+          "description": "Auto-accept fuzzy matches above 90% confidence. Default is False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Comments on the project document"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.ListProjectComments",
+        "parameters": {
+          "project": {
+            "value": "proj_12345",
+            "type": "string",
+            "required": true
+          },
+          "comment_filter": {
+            "value": "all",
+            "type": "string",
+            "required": false
+          },
+          "include_resolved": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "end_cursor": {
+            "value": "endcursor_9f8b7a",
+            "type": "string",
+            "required": false
+          },
+          "auto_accept_matches": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListProjects",
+      "qualifiedName": "Linear.ListProjects",
+      "fullyQualifiedName": "Linear.ListProjects@3.3.0",
+      "description": "List Linear projects, optionally filtered by keywords and other criteria.\n\nReturns all projects when no filters provided, or filtered results when\nkeywords or other filters are specified.",
+      "parameters": [
+        {
+          "name": "keywords",
+          "type": "string",
+          "required": false,
+          "description": "Search keywords to match in project names. Default is None (all projects).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "required": false,
+          "description": "Filter by project state. Default is None (all states).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "team",
+          "type": "string",
+          "required": false,
+          "description": "Filter by team name. Default is None (all teams).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "created_after",
+          "type": "string",
+          "required": false,
+          "description": "Filter projects created after this date in ISO format (YYYY-MM-DD). Default is None (all time).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of projects to return. Min 1, max 50. Default is 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_cursor",
+          "type": "string",
+          "required": false,
+          "description": "Cursor for pagination. Use 'end_cursor' from previous response. Default is None.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Projects matching the filters"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.ListProjects",
+        "parameters": {
+          "keywords": {
+            "value": "release roadmap",
+            "type": "string",
+            "required": false
+          },
+          "state": {
+            "value": "active",
+            "type": "string",
+            "required": false
+          },
+          "team": {
+            "value": "Frontend",
+            "type": "string",
+            "required": false
+          },
+          "created_after": {
+            "value": "2023-01-01",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "end_cursor": {
+            "value": "cursor_abc123",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListTeams",
+      "qualifiedName": "Linear.ListTeams",
+      "fullyQualifiedName": "Linear.ListTeams@3.3.0",
+      "description": "List Linear teams, optionally filtered by keywords and other criteria.\n\nReturns all teams when no filters provided, or filtered results when\nkeywords or other filters are specified.",
+      "parameters": [
+        {
+          "name": "keywords",
+          "type": "string",
+          "required": false,
+          "description": "Search keywords to match in team names. Default is None (all teams).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_archived",
+          "type": "boolean",
+          "required": false,
+          "description": "Include archived teams in results. Default is False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "created_after",
+          "type": "string",
+          "required": false,
+          "description": "Filter teams created after this date in ISO format (YYYY-MM-DD). Default is None (all time).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of teams to return. Min 1, max 50. Default is 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_cursor",
+          "type": "string",
+          "required": false,
+          "description": "Cursor for pagination. Use 'end_cursor' from previous response. Default is None.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Teams matching the filters"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.ListTeams",
+        "parameters": {
+          "keywords": {
+            "value": "frontend team",
+            "type": "string",
+            "required": false
+          },
+          "include_archived": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "created_after": {
+            "value": "2024-01-01",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "end_cursor": {
+            "value": "cursor_abc123def456",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListWorkflowStates",
+      "qualifiedName": "Linear.ListWorkflowStates",
+      "fullyQualifiedName": "Linear.ListWorkflowStates@3.3.0",
+      "description": "List available workflow states in the workspace.\n\nReturns workflow states that can be used for issue transitions.\nStates are team-specific and have different types.",
+      "parameters": [
+        {
+          "name": "team",
+          "type": "string",
+          "required": false,
+          "description": "Filter by team name or key. Default is None (all teams).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "state_type",
+          "type": "string",
+          "required": false,
+          "description": "Filter by state type. Default is None (all types).",
+          "enum": [
+            "triage",
+            "backlog",
+            "unstarted",
+            "started",
+            "completed",
+            "canceled"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of states to return. Min 1, max 100. Default is 50.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Available workflow states"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.ListWorkflowStates",
+        "parameters": {
+          "team": {
+            "value": "Engineering",
+            "type": "string",
+            "required": false
+          },
+          "state_type": {
+            "value": "started",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ManageIssueSubscription",
+      "qualifiedName": "Linear.ManageIssueSubscription",
+      "fullyQualifiedName": "Linear.ManageIssueSubscription@3.3.0",
+      "description": "Subscribe to or unsubscribe from an issue's notifications.",
+      "parameters": [
+        {
+          "name": "issue",
+          "type": "string",
+          "required": true,
+          "description": "Issue ID or identifier.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "subscribe",
+          "type": "boolean",
+          "required": true,
+          "description": "True to subscribe, False to unsubscribe.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "issues:create"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Subscription action result"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.ManageIssueSubscription",
+        "parameters": {
+          "issue": {
+            "value": "ISSUE-123",
+            "type": "string",
+            "required": true
+          },
+          "subscribe": {
+            "value": true,
+            "type": "boolean",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ReplyToComment",
+      "qualifiedName": "Linear.ReplyToComment",
+      "fullyQualifiedName": "Linear.ReplyToComment@3.3.0",
+      "description": "Reply to an existing comment on an issue.\n\nCreates a threaded reply to the specified parent comment.",
+      "parameters": [
+        {
+          "name": "issue",
+          "type": "string",
+          "required": true,
+          "description": "Issue ID or identifier.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "parent_comment_id",
+          "type": "string",
+          "required": true,
+          "description": "ID of the comment to reply to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "required": true,
+          "description": "Reply body in Markdown format.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "comments:create"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Created reply details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.ReplyToComment",
+        "parameters": {
+          "issue": {
+            "value": "ISSUE-1234",
+            "type": "string",
+            "required": true
+          },
+          "parent_comment_id": {
+            "value": "comment_98765",
+            "type": "string",
+            "required": true
+          },
+          "body": {
+            "value": "Thanks for the detailed report — I was able to reproduce the issue.\n\nNext steps:\n- Investigate root cause\n- Add unit/integration tests\n- Prepare a patch for review\n\nI'll update this thread once I have a fix or need additional information. Please let me know if you can share any logs or steps that consistently trigger the problem.",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ReplyToProjectComment",
+      "qualifiedName": "Linear.ReplyToProjectComment",
+      "fullyQualifiedName": "Linear.ReplyToProjectComment@3.3.0",
+      "description": "Reply to an existing comment on a project document.\n\nCreates a threaded reply to the specified parent comment.",
+      "parameters": [
+        {
+          "name": "project",
+          "type": "string",
+          "required": true,
+          "description": "Project ID, slug_id, or name.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "parent_comment_id",
+          "type": "string",
+          "required": true,
+          "description": "ID of the comment to reply to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "required": true,
+          "description": "Reply body in Markdown format.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "auto_accept_matches",
+          "type": "boolean",
+          "required": false,
+          "description": "Auto-accept fuzzy matches above 90% confidence. Default is False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "comments:create"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Created reply details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.ReplyToProjectComment",
+        "parameters": {
+          "project": {
+            "value": "mobile-app",
+            "type": "string",
+            "required": true
+          },
+          "parent_comment_id": {
+            "value": "cmt_987654321",
+            "type": "string",
+            "required": true
+          },
+          "body": {
+            "value": "Thanks for the update — this looks great! I have a couple of suggestions:\n\n1. Add unit tests for the new parsing logic.\n2. Update the changelog with migration notes.\n\nOnce those are added, I'm happy to approve.",
+            "type": "string",
+            "required": true
+          },
+          "auto_accept_matches": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "TransitionIssueState",
+      "qualifiedName": "Linear.TransitionIssueState",
+      "fullyQualifiedName": "Linear.TransitionIssueState@3.3.0",
+      "description": "Transition a Linear issue to a new workflow state.\n\nThe target state is validated against the team's available states.",
+      "parameters": [
+        {
+          "name": "issue_id",
+          "type": "string",
+          "required": true,
+          "description": "Issue ID or identifier (like TOO-123). Required.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "target_state",
+          "type": "string",
+          "required": true,
+          "description": "Target workflow state name. Required.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "auto_accept_matches",
+          "type": "boolean",
+          "required": false,
+          "description": "Auto-accept fuzzy matches above 90% confidence. Default is False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Transition result with previous and new state"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.TransitionIssueState",
+        "parameters": {
+          "issue_id": {
+            "value": "TOO-123",
+            "type": "string",
+            "required": true
+          },
+          "target_state": {
+            "value": "In Review",
+            "type": "string",
+            "required": true
+          },
+          "auto_accept_matches": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "UpdateComment",
+      "qualifiedName": "Linear.UpdateComment",
+      "fullyQualifiedName": "Linear.UpdateComment@3.3.0",
+      "description": "Update an existing comment.",
+      "parameters": [
+        {
+          "name": "comment_id",
+          "type": "string",
+          "required": true,
+          "description": "Comment ID to update.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "required": true,
+          "description": "New comment body in Markdown format.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Updated comment details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.UpdateComment",
+        "parameters": {
+          "comment_id": {
+            "value": "cmt_01F2A3BCD4E5",
+            "type": "string",
+            "required": true
+          },
+          "body": {
+            "value": "Updated the implementation details:\n\n- Fixed edge case handling\n- Added unit tests\n\nPlease review and let me know if anything else is needed.",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "UpdateInitiative",
+      "qualifiedName": "Linear.UpdateInitiative",
+      "fullyQualifiedName": "Linear.UpdateInitiative@3.3.0",
+      "description": "Update a Linear initiative with partial updates.\n\nOnly fields that are explicitly provided will be updated.",
+      "parameters": [
+        {
+          "name": "initiative_id",
+          "type": "string",
+          "required": true,
+          "description": "Initiative ID. Required.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "New initiative name. Only updated if provided.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "New initiative description in Markdown format. Only updated if provided.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "description": "New initiative status. Only updated if provided.",
+          "enum": [
+            "Backlog",
+            "Planned",
+            "Active",
+            "Paused",
+            "Completed",
+            "Canceled"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "target_date",
+          "type": "string",
+          "required": false,
+          "description": "New target date in YYYY-MM-DD format. Only updated if provided.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Updated initiative details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.UpdateInitiative",
+        "parameters": {
+          "initiative_id": {
+            "value": "init_01FZ8Q2K3H4ABCDE",
+            "type": "string",
+            "required": true
+          },
+          "name": {
+            "value": "Improve onboarding flow",
+            "type": "string",
+            "required": false
+          },
+          "description": {
+            "value": "Revamp onboarding to increase new-user activation.\n- Redesign signup UI\n- Add interactive product tour\n- Implement email drip for retention\nMeasure success via activation and 7-day retention metrics.",
+            "type": "string",
+            "required": false
+          },
+          "status": {
+            "value": "in_progress",
+            "type": "string",
+            "required": false
+          },
+          "target_date": {
+            "value": "2026-06-30",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "UpdateIssue",
+      "qualifiedName": "Linear.UpdateIssue",
+      "fullyQualifiedName": "Linear.UpdateIssue@3.3.0",
+      "description": "Update a Linear issue with partial updates.\n\nOnly fields that are explicitly provided will be updated. All entity\nreferences are validated before update.",
+      "parameters": [
+        {
+          "name": "issue_id",
+          "type": "string",
+          "required": true,
+          "description": "Issue ID or identifier (like TOO-123). Required.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "New issue title. Only updated if provided.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "New description in Markdown. Only updated if provided.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "assignee",
+          "type": "string",
+          "required": false,
+          "description": "New assignee name or email. Use '@me' for current user. Must be a team member. Only updated if provided.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "labels_to_add",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Labels to add by name or ID. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "labels_to_remove",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Labels to remove by name or ID. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "priority",
+          "type": "string",
+          "required": false,
+          "description": "New priority. Only updated if provided.",
+          "enum": [
+            "none",
+            "urgent",
+            "high",
+            "medium",
+            "low"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "required": false,
+          "description": "New workflow state name. Only updated if provided.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project",
+          "type": "string",
+          "required": false,
+          "description": "Project to link (name, slug, or ID). Only updated if provided.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "cycle",
+          "type": "string",
+          "required": false,
+          "description": "Cycle to link (name or number). Only updated if provided.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "estimate",
+          "type": "integer",
+          "required": false,
+          "description": "New effort estimate in points. Only updated if provided.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "due_date",
+          "type": "string",
+          "required": false,
+          "description": "New due date in YYYY-MM-DD format. Only updated if provided.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "attachment_url",
+          "type": "string",
+          "required": false,
+          "description": "URL to attach to the issue. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "attachment_title",
+          "type": "string",
+          "required": false,
+          "description": "Title for the attached URL. Default is None (URL used as title).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "auto_accept_matches",
+          "type": "boolean",
+          "required": false,
+          "description": "Auto-accept fuzzy matches above 90% confidence. Default is False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "issues:create"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Updated issue details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.UpdateIssue",
+        "parameters": {
+          "issue_id": {
+            "value": "TOO-123",
+            "type": "string",
+            "required": true
+          },
+          "title": {
+            "value": "Fix login redirect bug",
+            "type": "string",
+            "required": false
+          },
+          "description": {
+            "value": "Users are redirected to the homepage after login instead of their dashboard.\n\nSteps to reproduce:\n1. Go to /login\n2. Enter credentials\n3. Observe redirect\n\nExpected: User should be redirected to /dashboard.",
+            "type": "string",
+            "required": false
+          },
+          "assignee": {
+            "value": "@me",
+            "type": "string",
+            "required": false
+          },
+          "labels_to_add": {
+            "value": [
+              "bug",
+              "high-priority"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "labels_to_remove": {
+            "value": [
+              "triage"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "priority": {
+            "value": "high",
+            "type": "string",
+            "required": false
+          },
+          "state": {
+            "value": "In Progress",
+            "type": "string",
+            "required": false
+          },
+          "project": {
+            "value": "Website Frontend",
+            "type": "string",
+            "required": false
+          },
+          "cycle": {
+            "value": "Sprint 42",
+            "type": "string",
+            "required": false
+          },
+          "estimate": {
+            "value": 3,
+            "type": "integer",
+            "required": false
+          },
+          "due_date": {
+            "value": "2026-03-15",
+            "type": "string",
+            "required": false
+          },
+          "attachment_url": {
+            "value": "https://example.com/screenshot.png",
+            "type": "string",
+            "required": false
+          },
+          "attachment_title": {
+            "value": "Login redirect screenshot",
+            "type": "string",
+            "required": false
+          },
+          "auto_accept_matches": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "UpdateProject",
+      "qualifiedName": "Linear.UpdateProject",
+      "fullyQualifiedName": "Linear.UpdateProject@3.3.0",
+      "description": "Update a Linear project with partial updates.\n\nOnly fields that are explicitly provided will be updated. All entity\nreferences are validated before update.\n\nIMPORTANT: Updating the 'content' field will break any existing inline\ncomment anchoring. The comments will still exist and be retrievable via\nlist_project_comments, but they will no longer appear visually anchored\nto text in the Linear UI. The 'description' field can be safely updated\nwithout affecting inline comments.",
+      "parameters": [
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "Project ID or slug_id. Required.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "New project name. Only updated if provided.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "New project summary (255 char limit). Only updated if provided.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "content",
+          "type": "string",
+          "required": false,
+          "description": "New project document/spec content in Markdown (unlimited). Only updated if provided.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "required": false,
+          "description": "New project state. Only updated if provided.",
+          "enum": [
+            "backlog",
+            "planned",
+            "started",
+            "paused",
+            "completed",
+            "canceled"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "lead",
+          "type": "string",
+          "required": false,
+          "description": "New project lead name or email. Only updated if provided.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_date",
+          "type": "string",
+          "required": false,
+          "description": "New start date in YYYY-MM-DD format. Only updated if provided.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "target_date",
+          "type": "string",
+          "required": false,
+          "description": "New target date in YYYY-MM-DD format. Only updated if provided.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "teams_to_add",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Team names, keys, or IDs to add to the project. Only updated if provided.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "teams_to_remove",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Team names, keys, or IDs to remove from the project. Only updated if provided.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "auto_accept_matches",
+          "type": "boolean",
+          "required": false,
+          "description": "Auto-accept fuzzy matches above 90% confidence. Default is False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "write"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Updated project details"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.UpdateProject",
+        "parameters": {
+          "project_id": {
+            "value": "proj_789abc",
+            "type": "string",
+            "required": true
+          },
+          "name": {
+            "value": "Q2 Marketing Launch",
+            "type": "string",
+            "required": false
+          },
+          "description": {
+            "value": "Project to coordinate Q2 marketing campaign: assets, content, and analytics (max 255 chars).",
+            "type": "string",
+            "required": false
+          },
+          "content": {
+            "value": "# Q2 Marketing Launch\n\nThis project covers the launch of the Q2 marketing campaign, including assets, content, and analytics setup.\n\n## Objectives\n- Increase leads by 25%\n- Improve conversion rate\n\n## Milestones\n1. Creative concepts\n2. Production\n3. Launch\n\nNotes: coordinate with Product and Sales teams.",
+            "type": "string",
+            "required": false
+          },
+          "state": {
+            "value": "active",
+            "type": "string",
+            "required": false
+          },
+          "lead": {
+            "value": "jane.doe@example.com",
+            "type": "string",
+            "required": false
+          },
+          "start_date": {
+            "value": "2026-03-01",
+            "type": "string",
+            "required": false
+          },
+          "target_date": {
+            "value": "2026-06-30",
+            "type": "string",
+            "required": false
+          },
+          "teams_to_add": {
+            "value": [
+              "marketing",
+              "design-team"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "teams_to_remove": {
+            "value": [
+              "legacy-ad-hoc"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "auto_accept_matches": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "Linear.WhoAmI",
+      "fullyQualifiedName": "Linear.WhoAmI@3.3.0",
+      "description": "Get the authenticated user's profile and team memberships.\n\nReturns the current user's information including their name, email,\norganization, and the teams they belong to.",
+      "parameters": [],
+      "auth": {
+        "providerId": "linear",
+        "providerType": "oauth2",
+        "scopes": [
+          "read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Authenticated user's profile and teams"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Linear.WhoAmI",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "linear",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-02-25T11:25:34.590Z",
+  "summary": "The Linear MCP Server provides a comprehensive set of tools for interacting with Linear's issue tracking, project management, and team collaboration features. With this MCP Server, you can:\n\n- **Issues**: Create, update, search, and manage issues with full support for labels, priorities, assignments, and workflow states\n- **Projects**: Create and manage projects, track milestones, and post status updates\n- **Initiatives**: Manage high-level strategic goals and link projects to initiatives\n- **Teams**: Access team information and member details\n- **Cycles**: Work with time-boxed iterations (sprints) for organizing work\n- **Comments**: Add, update, and reply to comments on issues\n- **GitHub Integration**: Link GitHub PRs, commits, and issues to Linear issues\n- **User Context**: Access notifications, recent activity, and authenticated user information"
+}

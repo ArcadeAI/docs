@@ -12,13 +12,47 @@ Then, run `pnpm dev` to start the development server and visit localhost:3000.
 
 ### Environment Variables
 
-Copy `.env.example` to `.env.local` and fill in the required values:
+Copy `.env.example` to `.env.local` and fill in the values:
 
 ```bash
 cp .env.example .env.local
 ```
 
-- `OPENAI_API_KEY` - Required for generating the llms.txt file with AI-powered summaries
+| Variable | Required | Purpose |
+|----------|----------|---------|
+| `OPENAI_API_KEY` | Yes | Generates llms.txt with AI-powered summaries |
+| `ANTHROPIC_API_KEY` | No | Enables AI-powered style fixes (local and CI) |
+
+## Style Guide & Linting
+
+We use [Vale](https://vale.sh/) to enforce documentation style standards based on the Google Developer Documentation Style Guide.
+
+### Automated PR Reviews
+
+When you open a PR with doc changes, two automated reviews happen:
+
+1. **Style Review** (on PR open/update): Posts line-level suggestions for Vale issues. Click "Apply suggestion" to accept fixes.
+
+2. **Editorial Review** (after merge): Analyzes docs against [STYLEGUIDE.md](./STYLEGUIDE.md) and creates a follow-up PR if structural improvements are needed.
+
+Both are powered by Vale + LLM and require `ANTHROPIC_API_KEY` (or `OPENAI_API_KEY`) in repository secrets.
+
+### Local Development
+
+First, [install the Vale CLI](https://vale.sh/docs/install) for your platform.
+
+```bash
+pnpm vale:check           # Check all docs for style issues
+pnpm vale app/en/path/    # Check specific path
+pnpm vale:fix <file>      # Interactive AI-powered fixes (optional)
+```
+
+The `vale:fix` command requires an API key in `.env.local`. Without one, you can fix issues manually using `vale <file>` to see detailed output.
+
+### Style resources
+
+- [STYLEGUIDE.md](./STYLEGUIDE.md) - Writing standards for voice, tone, and structure
+- [AGENTS.md](./AGENTS.md) - Instructions for AI assistants working on docs
 
 ## llms.txt Generation
 

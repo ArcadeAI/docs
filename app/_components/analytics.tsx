@@ -1,7 +1,7 @@
 "use client";
 import { cn } from "@arcadeai/design-system/lib/utils";
 import Link from "next/link";
-import { usePostHog } from "posthog-js/react";
+import posthog from "posthog-js";
 import { getDashboardUrl } from "./dashboard-link";
 
 export type LinkClickedProps = {
@@ -15,10 +15,8 @@ export const SignupLink = ({
   children,
   className,
 }: LinkClickedProps) => {
-  const posthog = usePostHog();
-
   const trackSignupClick = (source: string) => {
-    posthog?.capture("Signup clicked", {
+    posthog.capture("Signup clicked", {
       link_location: source,
     });
   };

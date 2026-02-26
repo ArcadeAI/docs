@@ -7,6 +7,7 @@ import {
   Github,
 } from "@arcadeai/design-system";
 import { HeartPulse, Mail, Shield, Users } from "lucide-react";
+import posthog from "posthog-js";
 import { useEffect, useRef, useState } from "react";
 import { QuickStartCard } from "../../../_components/quick-start-card";
 
@@ -25,6 +26,13 @@ export function ContactCards() {
     }
   }, []);
 
+  const handleContactSalesClick = () => {
+    posthog.capture("Contact sales modal opened", {
+      source: "contact_us_page",
+    });
+    setIsSalesModalOpen(true);
+  };
+
   return (
     <>
       <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -37,7 +45,7 @@ export function ContactCards() {
         <QuickStartCard
           description="Discuss enterprise plans, pricing, and how Arcade can help your organization build better, safer agents."
           icon={Users}
-          onClick={() => setIsSalesModalOpen(true)}
+          onClick={handleContactSalesClick}
           title="Contact Sales"
         />
         <QuickStartCard
@@ -54,7 +62,7 @@ export function ContactCards() {
         />
         <QuickStartCard
           description="Report security vulnerabilities responsibly. Learn about our security research program and disclosure process."
-          href="/resources/security"
+          href="/guides/security/security-research-program"
           icon={Shield}
           title="Security Research"
         />

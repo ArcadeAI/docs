@@ -8,7 +8,7 @@ import {
   DialogTitle,
   Input,
 } from "@arcadeai/design-system";
-import { usePostHog } from "posthog-js/react";
+import posthog from "posthog-js";
 import type React from "react";
 import { useState } from "react";
 import { useComingSoon } from "@/app/_components/coming-soon-context";
@@ -28,7 +28,6 @@ export function ComingSoonModal({
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const posthog = usePostHog();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +40,7 @@ export function ComingSoonModal({
     setError("");
 
     try {
-      posthog?.capture("Notify me clicked", {
+      posthog.capture("Notify me clicked", {
         toolkit_name: toolkitName,
         notify_email: email,
       });

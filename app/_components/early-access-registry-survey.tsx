@@ -1,21 +1,16 @@
 "use client";
 
-import type { Survey } from "posthog-js";
-import { usePostHog } from "posthog-js/react";
+import posthog, { type Survey } from "posthog-js";
 import { useEffect, useState } from "react";
 import DynamicSurvey from "./dynamic-survey";
 
 const SURVEY_ID = "019683f6-4fe2-0000-d182-6ef8f3982fc3";
 
 export const EarlyAccessRegistrySurvey = () => {
-  const posthog = usePostHog();
   const [surveyData, setSurveyData] = useState<Survey | null>(null);
   const [completed, setCompleted] = useState(false);
 
   useEffect(() => {
-    if (!posthog) {
-      return;
-    }
     posthog.onFeatureFlags(() => {
       posthog.getSurveys((surveys) => {
         const survey = surveys.find((s) => s.id === SURVEY_ID);
@@ -24,7 +19,7 @@ export const EarlyAccessRegistrySurvey = () => {
         }
       }, true);
     });
-  }, [posthog]);
+  }, []);
 
   const handleSurveyComplete = () => {
     setCompleted(true);

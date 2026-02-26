@@ -12,7 +12,7 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const pagesDirectory = path.normalize(
-  path.join(__dirname, "..", "..", "app", "en", "home"),
+  path.join(__dirname, "..", "..", "app", "en", "references"),
 );
 
 program.version(pkg.version).name(pkg.name).description(pkg.description);
@@ -65,12 +65,12 @@ program
   .argument(
     "[repos]",
     "A comma separated list of repositories to load the changelogs from",
-    "ArcadeAI/docs,ArcadeAI/arcade-mcp,ArcadeAI/Cloud,ArcadeAI/Engine,ArcadeAI/dashboard,ArcadeAI/toolkits",
+    "ArcadeAI/docs,ArcadeAI/arcade-mcp",
   )
   .argument(
     "[private_repos]",
     "A comma separated list of private repositories to load the changelogs from",
-    "ArcadeAI/Cloud,ArcadeAI/Engine,ArcadeAI/dashboard,ArcadeAI/toolkits",
+    "ArcadeAI/monorepo",
   )
   .action(
     async (

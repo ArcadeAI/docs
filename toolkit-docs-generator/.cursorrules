@@ -1,0 +1,157 @@
+# Toolkit Docs Generator - Agent Rules
+
+This document contains rules and guidelines for AI agents working on this project.
+
+## General Code Quality Rules
+
+### 1. Testing Philosophy
+
+**CRITICAL: Avoid mocks whenever possible.**
+
+- Prefer **real implementations** over mocks
+- Use **in-memory implementations** of interfaces for testing (e.g., `InMemoryToolDataSource`)
+- Use **test fixtures** with realistic data instead of mocked responses
+- Only use mocks when absolutely necessary (e.g., external HTTP calls that can't be avoided)
+- When mocks are unavoidable, document why in a comment
+
+**Good example:**
+```typescript
+// Use real implementation with test data
+const source = new InMemoryToolDataSource(testFixtures.tools);
+const result = await source.fetchToolsByToolkit('Github');
+expect(result).toHaveLength(5);
+```
+
+**Bad example:**
+```typescript
+// Avoid this - don't mock the interface
+const mockSource = vi.fn().mockResolvedValue(tools);
+```
+
+### 2. Functional Programming Principles
+
+- Prefer **pure functions** over classes with mutable state
+- Use **immutable data structures** (spread operator, Object.freeze)
+- Favor **composition** over inheritance
+- Use **pipeline/pipe** patterns for data transformations
+- Avoid side effects in core logic; isolate them at boundaries
+
+### 3. TypeScript Strict Mode
+
+- Enable all strict checks in tsconfig.json
+- Never use `any` type - use `unknown` and narrow properly
+- Always define explicit return types for public functions
+- Use `readonly` for arrays and objects that shouldn't be mutated
+
+### 4. Error Handling
+
+- Use typed error classes (extend `Error`)
+- Never throw generic errors - always provide context
+- Use `Result<T, E>` pattern for operations that can fail predictably
+- Log errors with sufficient context for debugging
+
+## Project-Specific Rules
+
+### 5. Data Source Abstraction
+
+When implementing data sources:
+- Always implement the interface completely
+- Provide an in-memory implementation for testing
+- Handle null/undefined gracefully with defaults
+- Normalize IDs for case-insensitive matching
+
+### 6. CLI Input Format
+
+The CLI accepts providers and versions as input:
+```bash
+# Single provider with version
+toolkit-docs-generator generate --providers "Github:1.0.0"
+
+# Multiple providers with versions
+toolkit-docs-generator generate --providers "Github:1.0.0,Slack:2.1.0,Linear:1.5.0"
+
+# All providers (latest versions)
+toolkit-docs-generator generate-all
+```
+
+### 7. Output JSON Schema
+
+Always validate output against Zod schemas before writing files.
+
+### 8. Verification Commands
+
+Before committing changes, ALWAYS run:
+```bash
+pnpm lint        # Check code style
+pnpm typecheck   # Verify types
+pnpm test        # Run all tests
+```
+
+Or use make commands from the root docs project:
+```bash
+make test        # Run tests
+```
+
+## Code Style
+
+### 9. Imports
+
+- Use `.js` extension for local imports (ES modules)
+- Group imports: external packages first, then local modules
+- Use named exports, avoid default exports
+
+### 10. Naming Conventions
+
+- **Files**: kebab-case (e.g., `engine-api.ts`)
+- **Types/Interfaces**: PascalCase (e.g., `ToolDefinition`)
+- **Functions**: camelCase (e.g., `fetchToolsByToolkit`)
+- **Constants**: SCREAMING_SNAKE_CASE (e.g., `DEFAULT_TIMEOUT`)
+
+### 11. Documentation
+
+- Add JSDoc comments to all public functions
+- Include `@param` and `@returns` for complex functions
+- Add `@example` blocks for non-obvious usage
+
+## Testing Rules
+
+### 12. Test Structure
+
+```typescript
+describe('ModuleName', () => {
+  describe('functionName', () => {
+    it('should handle normal case', () => { ... });
+    it('should handle edge case', () => { ... });
+    it('should throw on invalid input', () => { ... });
+  });
+});
+```
+
+### 13. Test Data
+
+- Store test fixtures in `tests/fixtures/`
+- Use realistic data that matches production schema
+- Include edge cases: empty arrays, null values, special characters
+
+### 14. Coverage Requirements
+
+- Aim for >80% code coverage
+- Focus on branch coverage for conditionals
+- Don't test implementation details, test behavior
+
+## LLM Integration Rules
+
+### 15. LLM Calls
+
+- Always implement retry logic with exponential backoff
+- Use concurrency limits to avoid rate limiting
+- Validate LLM output with Zod schemas
+- Provide fallback values when LLM fails
+- Log LLM failures for debugging
+
+### 16. Prompt Engineering
+
+- Keep system prompts concise and specific
+- Include examples in prompts for better results
+- Request JSON output explicitly
+- Validate and parse responses safely

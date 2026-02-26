@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@arcadeai/design-system";
 import { ChevronDown } from "lucide-react";
+import posthog from "posthog-js";
 import React, { useMemo, useState } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import {
@@ -104,11 +105,19 @@ const CodeTabSwitcher = ({ tabs }: CodeTabSwitcherProps) => {
     fileName
   );
 
+  const handleExpandExample = () => {
+    setIsExpanded(true);
+    posthog.capture("Code example expanded", {
+      tab_count: tabs.length,
+      initial_language: selectedLanguage,
+    });
+  };
+
   if (!isExpanded) {
     return (
       <Button
         className="mt-2"
-        onClick={() => setIsExpanded(true)}
+        onClick={handleExpandExample}
         size="sm"
         variant="outline"
       >

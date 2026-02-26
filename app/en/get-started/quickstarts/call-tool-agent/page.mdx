@@ -5,6 +5,7 @@ description: "Learn how to call tools in your agent"
 
 import { Steps, Tabs, Callout } from "nextra/components";
 import { SignupLink } from "@/app/_components/analytics";
+import { AgentFrameworkTabs } from "@/app/_components/agent-framework-tabs";
 
 # Calling tools in your agent with Arcade
 
@@ -29,7 +30,7 @@ Install and use the Arcade client to call Arcade Hosted Tools.
 <GuideOverview.YouWillLearn>
 
 - Install the Arcade client
-- Build a simple workflow that uses tools to:
+- Build a workflow that uses tools to:
   - search for news with Google News
   - Create a Google Doc with the news
   - Email a link to the Google Doc to the user
@@ -40,16 +41,33 @@ Install and use the Arcade client to call Arcade Hosted Tools.
 
 <Steps>
 
+
 ### Install the Arcade client
 
 <Tabs items={["Python", "TypeScript"]} storageKey="preferredLanguage">
 
   <Tabs.Tab>
-  In your terminal, run the following command to install the Python client package `arcadepy`:
+  In your terminal, run the following command to create a new `uv` project:
 
-```bash
-uv pip install arcadepy
-```
+  ```bash
+  mkdir arcade-quickstart
+  cd arcade-quickstart
+  uv init
+  ```
+
+  Then, run the following command to create and activate a new virtual environment, isolating the project dependencies from your system:
+
+
+  ```bash
+  uv venv
+  source .venv/bin/activate
+  ```
+
+  Then, run the following command to install the Python client package `arcadepy`:
+
+  ```bash
+  uv add arcadepy
+  ```
 
   </Tabs.Tab>
 
@@ -70,9 +88,9 @@ bun install @arcadeai/arcadejs
 
 <Tabs.Tab>
 
-Create a new script called `example.py`:
+Open the `main.py` file and replace the content with the following:
 
-```python filename="example.py"
+```python filename="main.py"
 from arcadepy import Arcade
 
 # You can also set the `ARCADE_API_KEY` environment variable instead of passing it as a parameter.
@@ -114,7 +132,7 @@ This helper function will check if a tool requires authorization and if so, it w
 
 <Tabs.Tab>
 
-```python filename="example.py"
+```python filename="main.py"
 # Helper function to authorize and run any tool
 def authorize_and_run_tool(tool_name, input, user_id):
     # Start the authorization process
@@ -126,7 +144,7 @@ def authorize_and_run_tool(tool_name, input, user_id):
     # If the authorization is not completed, print the authorization URL and wait for the user to authorize the app.
     # Tools that do not require authorization will have the status "completed" already.
     if auth_response.status != "completed":
-        print(f"Click this link to authorize {tool_name}: {auth_response.url}. The process will continue once you have authorized the app.")
+        print(f"Click this link to authorize {tool_name}:\n{auth_response.url}.\nThe process will continue once you have authorized the app.")
         client.auth.wait_for_completion(auth_response.id)
 
     # Run the tool
@@ -157,7 +175,7 @@ async function authorize_and_run_tool({
   // If the authorization is not completed, print the authorization URL and wait for the user to authorize the app. Tools that do not require authorization will have the status "completed" already.
   if (authResponse.status !== "completed") {
     console.log(
-      `Click this link to authorize ${tool_name}: \`${authResponse.url}\`. The process will continue once you have authorized the app.`
+      `Click this link to authorize ${tool_name}:\n${authResponse.url}.\nThe process will continue once you have authorized the app.`
     );
     // Wait for the user to authorize the app
     await client.auth.waitForCompletion(authResponse.id);
@@ -188,7 +206,7 @@ In this example workflow, we:
 
 <Tabs.Tab>
 
-```python filename="example.py"
+```python filename="main.py"
 # This tool does not require authorization, so it will return the results
 # without prompting the user to authorize the tool call.
 response_search = authorize_and_run_tool(
@@ -236,6 +254,7 @@ response_send_email = authorize_and_run_tool(
 )
 
 # Print the response from the tool call
+print(f"Success! Check your email at {user_id}\n\nYou just chained 3 tools together:\n  1. Searched Google News for stories about MCP URL mode elicitation\n  2. Created a Google Doc with the results\n  3. Sent yourself an email with the document link\n\nEmail metadata:")
 print(response_send_email.output.value)
 ```
 
@@ -293,6 +312,9 @@ const respose_send_email = await authorize_and_run_tool({
 });
 
 // Print the response from the tool call
+console.log(
+  `Success! Check your email at ${userId}\n\nYou just chained 3 tools together:\n  1. Searched Google News for stories about MCP URL mode elicitation\n  2. Created a Google Doc with the results\n  3. Sent yourself an email with the document link\n\nEmail metadata:`
+);
 console.log(respose_send_email.output?.value);
 ```
 
@@ -307,24 +329,19 @@ console.log(respose_send_email.output?.value);
   <Tabs.Tab>
 
     ```bash
-    uv run example.py
+    uv run main.py
     ```
-    ```text
-    latest news about MCP URL mode elicitation:
-    ----------------------------
-    InfoWorld - Visual Studio Code adds multi-agent orchestration
-    https://www.infoworld.com/article/4105879/visual-studio-code-adds-multi-agent-orchestration.html
-    ----------------------------
-    Visual Studio Magazine - VS Code 1.107 (November 2025 Update) Expands Multi-Agent Orchestration, Model Management
-    https://visualstudiomagazine.com/articles/2025/12/12/vs-code-1-107-november-2025-update-expands-multi-agent-orchestration-model-management.aspx
-    ----------------------------
-    SD Times - Several new updates make their way into the MCP specification
-    https://sdtimes.com/ai/several-new-updates-make-their-way-into-the-mcp-specification/
-    ----------------------------
-    AI News - How the MCP spec update boosts security as infrastructure scales
-    https://www.artificialintelligence-news.com/news/how-the-mcp-spec-update-boosts-security-as-infrastructure-scales/
 
-    {'body': '', 'cc': '', 'date': '', 'from': '', 'header_message_id': '', 'history_id': '', 'id': '19b....', 'in_reply_to': '', 'label_ids': ['UNREAD', 'SENT', 'INBOX'], 'references': '', 'reply_to': '', 'snippet': '', 'subject': '', 'thread_id': '19b....', 'to': '', 'url': 'https://mail.google.com/mail/u/0/#sent/19b....'}
+    ```text
+    Success! Check your email at {arcade_user_id}
+
+    You just chained 3 tools together:
+      1. Searched Google News for stories about MCP URL mode elicitation
+      2. Created a Google Doc with the results
+      3. Sent yourself an email with the document link
+
+    Email metadata:
+    {'id': '19ba...', 'label_ids': ['UNREAD', 'SENT', 'INBOX'], 'thread_id': '19ba...', 'url': 'https://mail.google.com/mail/u/0/#sent/19ba...'}
     ```
 
   </Tabs.Tab>
@@ -335,37 +352,19 @@ console.log(respose_send_email.output?.value);
     ```
 
     ```text
-    latest news about MCP URL mode elicitation:
-    --------------------------------
-    InfoWorld - Visual Studio Code adds multi-agent orchestration
-    https://www.infoworld.com/article/4105879/visual-studio-code-adds-multi-agent-orchestration.html
-    --------------------------------
-    Visual Studio Magazine - VS Code 1.107 (November 2025 Update) Expands Multi-Agent Orchestration, Model Management
-    https://visualstudiomagazine.com/articles/2025/12/12/vs-code-1-107-november-2025-update-expands-multi-agent-orchestration-model-management.aspx
-    --------------------------------
-    SD Times - Several new updates make their way into the MCP specification
-    https://sdtimes.com/ai/several-new-updates-make-their-way-into-the-mcp-specification/
-    --------------------------------
-    AI News - How the MCP spec update boosts security as infrastructure scales
-    https://www.artificialintelligence-news.com/news/how-the-mcp-spec-update-boosts-security-as-infrastructure-scales/
+    Success! Check your email at {arcade_user_id}
 
+    You just chained 3 tools together:
+      1. Searched Google News for stories about MCP URL mode elicitation
+      2. Created a Google Doc with the results
+      3. Sent yourself an email with the document link
+
+    Email metadata:
     {
-      body: "",
-      cc: "",
-      date: "",
-      from: "",
-      header_message_id: "",
-      history_id: "",
-      id: "19b...",
-      in_reply_to: "",
+      id: "19ba...",
       label_ids: [ "UNREAD", "SENT", "INBOX" ],
-      references: "",
-      reply_to: "",
-      snippet: "",
-      subject: "",
-      thread_id: "19b...",
-      to: "",
-      url: "https://mail.google.com/mail/u/0/#sent/19b...",
+      thread_id: "19ba...",
+      url: "https://mail.google.com/mail/u/0/#sent/19ba...",
     }
     ```
 
@@ -376,14 +375,18 @@ console.log(respose_send_email.output?.value);
 
 ## Next Steps
 
-In this simple example, we call the tool methods directly. In your real applications and agents, you'll likely be letting the LLM decide which tools to call. Learn more about using Arcade with Frameworks in the [Frameworks](/guides/agent-frameworks/langchain/python section, or [how to build your own tools](/guides/create-tools/tool-basics/build-mcp-server).
+In this example, we call the tool methods directly. In your real applications and agents, you'll likely be letting the LLM decide which tools to call. Learn more about using Arcade with Frameworks in the [Frameworks](/get-started/agent-frameworks) section, or [how to build your own tools](/guides/create-tools/tool-basics/build-mcp-server).
 
-## Example Code
+<AgentFrameworkTabs />
+
+## Full Example Code
 
 <Tabs items={["Python", "TypeScript"]} storageKey="preferredLanguage">
 
   <Tabs.Tab>
 
+<details>
+<summary>**main.py** (full file)</summary>
 ```python filename="example.py"
 from arcadepy import Arcade
 
@@ -406,7 +409,7 @@ def authorize_and_run_tool(tool_name, input, user_id):
     # If the authorization is not completed, print the authorization URL and wait for the user to authorize the app.
     # Tools that do not require authorization will have the status "completed" already.
     if auth_response.status != "completed":
-        print(f"Click this link to authorize {tool_name}: {auth_response.url}. The process will continue once you have authorized the app.")
+        print(f"Click this link to authorize {tool_name}:\n{auth_response.url}.\nThe process will continue once you have authorized the app.")
         client.auth.wait_for_completion(auth_response.id)
 
     # Run the tool
@@ -460,12 +463,16 @@ response_send_email = authorize_and_run_tool(
 )
 
 # Print the response from the tool call
+print(f"Success! Check your email at {user_id}\n\nYou just chained 3 tools together:\n  1. Searched Google News for stories about MCP URL mode elicitation\n  2. Created a Google Doc with the results\n  3. Sent yourself an email with the document link\n\nEmail metadata:")
 print(response_send_email.output.value)
 ```
+</details>
 
   </Tabs.Tab>
   <Tabs.Tab>
 
+<details>
+<summary>**example.ts** (full file)</summary>
 ```typescript filename="example.ts"
 import Arcade from "@arcadeai/arcadejs";
 
@@ -500,7 +507,7 @@ async function authorize_and_run_tool({
   // If the authorization is not completed, print the authorization URL and wait for the user to authorize the app. Tools that do not require authorization will have the status "completed" already.
   if (authResponse.status !== "completed") {
     console.log(
-      `Click this link to authorize ${tool_name}: \`${authResponse.url}\`. The process will continue once you have authorized the app.`
+      `Click this link to authorize ${tool_name}:\n${authResponse.url}.\nThe process will continue once you have authorized the app.`
     );
     // Wait for the user to authorize the app
     await client.auth.waitForCompletion(authResponse.id);
@@ -564,8 +571,12 @@ const respose_send_email = await authorize_and_run_tool({
 });
 
 // Print the response from the tool call
+console.log(
+  `Success! Check your email at ${userId}\n\nYou just chained 3 tools together:\n  1. Searched Google News for stories about MCP URL mode elicitation\n  2. Created a Google Doc with the results\n  3. Sent yourself an email with the document link\n\nEmail metadata:`
+);
 console.log(respose_send_email.output?.value);
 ```
+</details>
 
   </Tabs.Tab>
 </Tabs>

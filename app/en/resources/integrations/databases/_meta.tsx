@@ -1,21 +1,9 @@
 import type { MetaRecord } from "nextra";
 
 const meta: MetaRecord = {
-  "*": {
-    theme: {
-      breadcrumb: true,
-      toc: true,
-      copyPage: true,
-    },
-  },
-  postgres: {
-    title: "Postgres",
-  },
-  mongodb: {
-    title: "MongoDB",
-  },
-  clickhouse: {
-    title: "ClickHouse",
+  "weaviate-api": {
+    title: "Weaviate API",
+    href: "/en/resources/integrations/databases/weaviate-api",
   },
 };
 

@@ -1,0 +1,1049 @@
+{
+  "id": "CustomerioTrackApi",
+  "label": "Customer.io Track API",
+  "version": "1.0.0",
+  "description": "Tools that enable LLMs to interact directly with the Customer.io Track API",
+  "metadata": {
+    "category": "customer-support",
+    "iconUrl": "https://design-system.arcade.dev/icons/customerio.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade_starter",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/customer-support/customerio-track-api",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": null,
+  "tools": [
+    {
+      "name": "AddDeviceToCustomerProfile",
+      "qualifiedName": "CustomerioTrackApi.AddDeviceToCustomerProfile",
+      "fullyQualifiedName": "CustomerioTrackApi.AddDeviceToCustomerProfile@1.0.0",
+      "description": "Add or update a device for a customer profile.\n\n    Use this tool to add or update iOS and Android devices linked to a customer's profile. Ideal for managing multiple devices associated with a customer.\n\n    Note: Understanding the request schema is necessary to properly create\n    the stringified JSON input object for execution.\n\nThis operation also requires path parameters.\n\n    Modes:\n    - GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n      already have it. Do NOT call repeatedly if you already received\n      the schema.\n    - EXECUTE: Performs the operation with the provided request body\n      JSON.\n      Note: You must also provide the required path parameters when executing.\n\n    If you need the schema, call with mode='get_request_schema' ONCE, then execute.\n    ",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": ["get_request_schema", "execute"],
+          "inferrable": true
+        },
+        {
+          "name": "unique_person_identifier",
+          "type": "string",
+          "required": false,
+          "description": "A unique identifier for a person, such as `id`, `email`, or `cio_id` prefixed with `cio_`.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["CUSTOMERIO_SITE_ID", "CUSTOMERIO_API_KEY"],
+      "secretsInfo": [
+        {
+          "name": "CUSTOMERIO_SITE_ID",
+          "type": "unknown"
+        },
+        {
+          "name": "CUSTOMERIO_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'add_device'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "CustomerioTrackApi.AddDeviceToCustomerProfile",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "unique_person_identifier": {
+            "value": "cio_12345",
+            "type": "string",
+            "required": false
+          },
+          "request_body": {
+            "value": "{\"device_id\":\"abc123\",\"platform\":\"iOS\",\"status\":\"active\"}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "AddPeopleToSegment",
+      "qualifiedName": "CustomerioTrackApi.AddPeopleToSegment",
+      "fullyQualifiedName": "CustomerioTrackApi.AddPeopleToSegment@1.0.0",
+      "description": "Add people to a manual segment by ID.\n\n    This tool adds people to a pre-existing manual segment using customer identifiers. It supports up to 1000 customer IDs per request, using identifiers like `id`, `email`, or `cio_id` based on the `id_type` query parameter. Note that this is limited to manual segments, not data-driven ones.\n\n    Note: Understanding the request schema is necessary to properly create\n    the stringified JSON input object for execution.\n\nThis operation also requires path, query parameters.\n\n    Modes:\n    - GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n      already have it. Do NOT call repeatedly if you already received\n      the schema.\n    - EXECUTE: Performs the operation with the provided request body\n      JSON.\n      Note: You must also provide the required path, query parameters when executing.\n\n    If you need the schema, call with mode='get_request_schema' ONCE, then execute.\n    ",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": ["get_request_schema", "execute"],
+          "inferrable": true
+        },
+        {
+          "name": "segment_identifier",
+          "type": "integer",
+          "required": false,
+          "description": "The unique identifier for a manual segment. This can be found on its page in the dashboard or via the App API.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "identifier_type",
+          "type": "string",
+          "required": false,
+          "description": "Specifies the type of identifiers in the `ids` array, such as `id`, `email`, or `cio_id`. Defaults to `id`.  Only used when mode is 'execute'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["CUSTOMERIO_SITE_ID", "CUSTOMERIO_API_KEY"],
+      "secretsInfo": [
+        {
+          "name": "CUSTOMERIO_SITE_ID",
+          "type": "api_key"
+        },
+        {
+          "name": "CUSTOMERIO_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'add_to_segment'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "CustomerioTrackApi.AddPeopleToSegment",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "segment_identifier": {
+            "value": 12345,
+            "type": "integer",
+            "required": false
+          },
+          "identifier_type": {
+            "value": "email",
+            "type": "string",
+            "required": false
+          },
+          "request_body": {
+            "value": "{\"ids\":[\"user1@example.com\",\"user2@example.com\"]}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "BatchProcessRequests",
+      "qualifiedName": "CustomerioTrackApi.BatchProcessRequests",
+      "fullyQualifiedName": "CustomerioTrackApi.BatchProcessRequests@1.0.0",
+      "description": "Batch process requests for people and object entities.\n\nThis tool allows batching of multiple requests involving people and object entities into a single operation. Useful for applying changes to various entities simultaneously, such as associating objects with people. Ensure request size limits are observed.\n\nNote: Understanding the request schema is necessary to properly create\nthe stringified JSON input object for execution.\n\nModes:\n- GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n  already have it. Do NOT call repeatedly if you already received\n  the schema.\n- EXECUTE: Performs the operation with the provided request body\n  JSON.\n\nIf you need the schema, call with mode='get_request_schema' ONCE, then execute.",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": ["get_request_schema", "execute"],
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["CUSTOMERIO_SITE_ID", "CUSTOMERIO_API_KEY"],
+      "secretsInfo": [
+        {
+          "name": "CUSTOMERIO_SITE_ID",
+          "type": "unknown"
+        },
+        {
+          "name": "CUSTOMERIO_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'batch'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "CustomerioTrackApi.BatchProcessRequests",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "request_body": {
+            "value": "{\"people\":[{\"id\":\"123\",\"attributes\":{\"email\":\"example@example.com\",\"first_name\":\"John\",\"last_name\":\"Doe\"}}],\"objects\":[{\"id\":\"abc\",\"type\":\"subscription\",\"attributes\":{\"status\":\"active\",\"start_date\":\"2023-01-01\"}}]}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "DeleteCustomer",
+      "qualifiedName": "CustomerioTrackApi.DeleteCustomer",
+      "fullyQualifiedName": "CustomerioTrackApi.DeleteCustomer@1.0.0",
+      "description": "Delete a customer and all associated information.\n\nThis tool deletes a customer and their information from Customer.io. It should be called when you want to completely remove a customer from the database. Note: After deletion, customers may be accidentally recreated if new data is sent through other means.",
+      "parameters": [
+        {
+          "name": "customer_identifier",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier for a person, which can be an ID, email, or 'cio_id'. Use 'cio_' prefix for 'cio_id'.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["CUSTOMERIO_SITE_ID", "CUSTOMERIO_API_KEY"],
+      "secretsInfo": [
+        {
+          "name": "CUSTOMERIO_SITE_ID",
+          "type": "unknown"
+        },
+        {
+          "name": "CUSTOMERIO_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'delete'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "CustomerioTrackApi.DeleteCustomer",
+        "parameters": {
+          "customer_identifier": {
+            "value": "user@example.com",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GetTrackApiRegion",
+      "qualifiedName": "CustomerioTrackApi.GetTrackApiRegion",
+      "fullyQualifiedName": "CustomerioTrackApi.GetTrackApiRegion@1.0.0",
+      "description": "Retrieve the region and URL for Track API credentials.\n\nUse this tool to find the appropriate region and URL necessary for Track API requests. It also provides the environment ID representing the workspace for which the credentials are valid. This is essential for setting up correct API calls.",
+      "parameters": [],
+      "auth": null,
+      "secrets": ["CUSTOMERIO_SITE_ID", "CUSTOMERIO_API_KEY"],
+      "secretsInfo": [
+        {
+          "name": "CUSTOMERIO_SITE_ID",
+          "type": "unknown"
+        },
+        {
+          "name": "CUSTOMERIO_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'getRegion'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "CustomerioTrackApi.GetTrackApiRegion",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "GlobalUnsubscribeUser",
+      "qualifiedName": "CustomerioTrackApi.GlobalUnsubscribeUser",
+      "fullyQualifiedName": "CustomerioTrackApi.GlobalUnsubscribeUser@1.0.0",
+      "description": "Set a user's global unsubscribe status in Customer.io.\n\nUse this tool to set a person's global unsubscribe status to true in Customer.io, attributed to a specific email delivery. Ideal when managing unsubscribe actions outside the default subscription pathways. It helps in segmenting audiences based on unsubscribe actions. Note: For custom subscription centers, additional requests are needed to manage custom attributes.",
+      "parameters": [
+        {
+          "name": "delivery_id_for_unsubscription",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier of the delivery associated with the unsubscription request. This links the unsubscribe action to a specific email or message delivery.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "set_unsubscribed_attribute",
+          "type": "boolean",
+          "required": false,
+          "description": "If true, sets a person's `unsubscribed` attribute to true, associated with a specific delivery.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["CUSTOMERIO_SITE_ID", "CUSTOMERIO_API_KEY"],
+      "secretsInfo": [
+        {
+          "name": "CUSTOMERIO_SITE_ID",
+          "type": "unknown"
+        },
+        {
+          "name": "CUSTOMERIO_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'unsubscribe'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "CustomerioTrackApi.GlobalUnsubscribeUser",
+        "parameters": {
+          "delivery_id_for_unsubscription": {
+            "value": "1234567890",
+            "type": "string",
+            "required": true
+          },
+          "set_unsubscribed_attribute": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "ManageEntity",
+      "qualifiedName": "CustomerioTrackApi.ManageEntity",
+      "fullyQualifiedName": "CustomerioTrackApi.ManageEntity@1.0.0",
+      "description": "Create, update, or delete entities and manage relationships.\n\nUse this tool to manage people or objects, including associating them with other entities. Useful for handling companies, courses, products, and more.\n\nNote: Understanding the request schema is necessary to properly create\nthe stringified JSON input object for execution.\n\nModes:\n- GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n  already have it. Do NOT call repeatedly if you already received\n  the schema.\n- EXECUTE: Performs the operation with the provided request body\n  JSON.\n\nIf you need the schema, call with mode='get_request_schema' ONCE, then execute.",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": ["get_request_schema", "execute"],
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["CUSTOMERIO_SITE_ID", "CUSTOMERIO_API_KEY"],
+      "secretsInfo": [
+        {
+          "name": "CUSTOMERIO_SITE_ID",
+          "type": "unknown"
+        },
+        {
+          "name": "CUSTOMERIO_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'entity'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "CustomerioTrackApi.ManageEntity",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "request_body": {
+            "value": "{\"entity_type\":\"person\",\"id\":\"12345\",\"attributes\":{\"email\":\"example@example.com\",\"first_name\":\"John\",\"last_name\":\"Doe\"}}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "MergeCustomerProfiles",
+      "qualifiedName": "CustomerioTrackApi.MergeCustomerProfiles",
+      "fullyQualifiedName": "CustomerioTrackApi.MergeCustomerProfiles@1.0.0",
+      "description": "Merge two customer profiles into one primary profile.\n\nUse this tool to merge two customer profiles. The primary profile remains and the secondary is deleted. Ensure the primary profile exists in Customer.io before calling this tool. The merge includes unfilled attributes, recent events, segments, and campaign journeys from the secondary to the primary.\n\nNote: Understanding the request schema is necessary to properly create\nthe stringified JSON input object for execution.\n\nModes:\n- GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n  already have it. Do NOT call repeatedly if you already received\n  the schema.\n- EXECUTE: Performs the operation with the provided request body\n  JSON.\n\nIf you need the schema, call with mode='get_request_schema' ONCE, then execute.",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": ["get_request_schema", "execute"],
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["CUSTOMERIO_SITE_ID", "CUSTOMERIO_API_KEY"],
+      "secretsInfo": [
+        {
+          "name": "CUSTOMERIO_SITE_ID",
+          "type": "unknown"
+        },
+        {
+          "name": "CUSTOMERIO_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'merge'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "CustomerioTrackApi.MergeCustomerProfiles",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "request_body": {
+            "value": "{\"primary_profile_id\": \"primary123\", \"secondary_profile_id\": \"secondary456\"}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "RemoveCustomerDevice",
+      "qualifiedName": "CustomerioTrackApi.RemoveCustomerDevice",
+      "fullyQualifiedName": "CustomerioTrackApi.RemoveCustomerDevice@1.0.0",
+      "description": "Remove a device from a customer's profile.\n\nThis tool removes a specified device from a customer's profile in Customer.io. It should be called when you need to ensure a device is detached from a customer's profile to prevent re-adding it accidentally.",
+      "parameters": [
+        {
+          "name": "customer_identifier",
+          "type": "string",
+          "required": true,
+          "description": "Unique identifier for a person in the system. Can be `id`, `email`, or `cio_id` (prefixed with `cio_`).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "device_unique_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID representing the device to be removed from the customer's profile.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["CUSTOMERIO_SITE_ID", "CUSTOMERIO_API_KEY"],
+      "secretsInfo": [
+        {
+          "name": "CUSTOMERIO_SITE_ID",
+          "type": "unknown"
+        },
+        {
+          "name": "CUSTOMERIO_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'delete_device'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "CustomerioTrackApi.RemoveCustomerDevice",
+        "parameters": {
+          "customer_identifier": {
+            "value": "email@example.com",
+            "type": "string",
+            "required": true
+          },
+          "device_unique_id": {
+            "value": "device-12345",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "RemoveUserFromSegment",
+      "qualifiedName": "CustomerioTrackApi.RemoveUserFromSegment",
+      "fullyQualifiedName": "CustomerioTrackApi.RemoveUserFromSegment@1.0.0",
+      "description": "Remove users from a manual segment by ID.\n\n    Use this tool to remove users from a manual segment by specifying their IDs. Note that this functionality requires each user to have an 'id' attribute, and cannot be used for data-driven segments.\n\n    Note: Understanding the request schema is necessary to properly create\n    the stringified JSON input object for execution.\n\nThis operation also requires path, query parameters.\n\n    Modes:\n    - GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n      already have it. Do NOT call repeatedly if you already received\n      the schema.\n    - EXECUTE: Performs the operation with the provided request body\n      JSON.\n      Note: You must also provide the required path, query parameters when executing.\n\n    If you need the schema, call with mode='get_request_schema' ONCE, then execute.\n    ",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": ["get_request_schema", "execute"],
+          "inferrable": true
+        },
+        {
+          "name": "segment_identifier",
+          "type": "integer",
+          "required": false,
+          "description": "The unique identifier for the segment. Found on the segment's page in the dashboard under 'Usage'.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "identification_type",
+          "type": "string",
+          "required": false,
+          "description": "The type of identifiers used for the users to be removed. Options are 'id', 'email', or 'cio_id'. Defaults to 'id' if not specified.  Only used when mode is 'execute'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["CUSTOMERIO_SITE_ID", "CUSTOMERIO_API_KEY"],
+      "secretsInfo": [
+        {
+          "name": "CUSTOMERIO_SITE_ID",
+          "type": "unknown"
+        },
+        {
+          "name": "CUSTOMERIO_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'remove_from_segment'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "CustomerioTrackApi.RemoveUserFromSegment",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "segment_identifier": {
+            "value": 123,
+            "type": "integer",
+            "required": false
+          },
+          "identification_type": {
+            "value": "email",
+            "type": "string",
+            "required": false
+          },
+          "request_body": {
+            "value": "{\"user_ids\":[\"user@example.com\"]}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "ReportCustomMetrics",
+      "qualifiedName": "CustomerioTrackApi.ReportCustomMetrics",
+      "fullyQualifiedName": "CustomerioTrackApi.ReportCustomMetrics@1.0.0",
+      "description": "Report metrics from non-native Customer.io channels.\n\nUse this tool to report metrics from channels not supported natively by Customer.io or those not using their SDKs. It is useful for tracking user interactions like clicks or conversions using the CIO-Delivery-ID as a UTM parameter.\n\nNote: Understanding the request schema is necessary to properly create\nthe stringified JSON input object for execution.\n\nModes:\n- GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n  already have it. Do NOT call repeatedly if you already received\n  the schema.\n- EXECUTE: Performs the operation with the provided request body\n  JSON.\n\nIf you need the schema, call with mode='get_request_schema' ONCE, then execute.",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": ["get_request_schema", "execute"],
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["CUSTOMERIO_SITE_ID", "CUSTOMERIO_API_KEY"],
+      "secretsInfo": [
+        {
+          "name": "CUSTOMERIO_SITE_ID",
+          "type": "unknown"
+        },
+        {
+          "name": "CUSTOMERIO_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'metrics'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "CustomerioTrackApi.ReportCustomMetrics",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "request_body": {
+            "value": "{\"event\":\"user_clicked\",\"properties\":{\"user_id\":\"12345\",\"utm_source\":\"newsletter\",\"utm_medium\":\"email\",\"utm_campaign\":\"spring_sale\"}}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "SendCustomerEvent",
+      "qualifiedName": "CustomerioTrackApi.SendCustomerEvent",
+      "fullyQualifiedName": "CustomerioTrackApi.SendCustomerEvent@1.0.0",
+      "description": "Send an event associated with a customer by identifier.\n\n    This tool sends an event tied to a specific customer, identified by a unique identifier. Events can be page views, screen views, or custom events. Use this tool to track customer interactions on websites or apps, ensuring events are associated with the correct customer profile. Reserved properties can override campaign settings if included.\n\n    Note: Understanding the request schema is necessary to properly create\n    the stringified JSON input object for execution.\n\nThis operation also requires path parameters.\n\n    Modes:\n    - GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n      already have it. Do NOT call repeatedly if you already received\n      the schema.\n    - EXECUTE: Performs the operation with the provided request body\n      JSON.\n      Note: You must also provide the required path parameters when executing.\n\n    If you need the schema, call with mode='get_request_schema' ONCE, then execute.\n    ",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": ["get_request_schema", "execute"],
+          "inferrable": true
+        },
+        {
+          "name": "customer_identifier",
+          "type": "string",
+          "required": false,
+          "description": "A unique identifier for a person, such as `id`, `email`, or `cio_id`, depending on workspace settings.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["CUSTOMERIO_SITE_ID", "CUSTOMERIO_API_KEY"],
+      "secretsInfo": [
+        {
+          "name": "CUSTOMERIO_SITE_ID",
+          "type": "unknown"
+        },
+        {
+          "name": "CUSTOMERIO_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'track'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "CustomerioTrackApi.SendCustomerEvent",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "customer_identifier": {
+            "value": "customer@example.com",
+            "type": "string",
+            "required": false
+          },
+          "request_body": {
+            "value": "{\"event\":\"page_view\",\"properties\":{\"url\":\"https://example.com\",\"title\":\"Example Page\"}}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "SubmitFormResponse",
+      "qualifiedName": "CustomerioTrackApi.SubmitFormResponse",
+      "fullyQualifiedName": "CustomerioTrackApi.SubmitFormResponse@1.0.0",
+      "description": "Submit and record form responses with Customer.io.\n\n    Use this tool to submit form responses to Customer.io. It creates or updates a form connection if the `form_id` is unfamiliar. Ensure `data` includes identifiers like `id` or `email` to recognize the respondent. Additional data fields map directly to user attributes.\n\n    Note: Understanding the request schema is necessary to properly create\n    the stringified JSON input object for execution.\n\nThis operation also requires path parameters.\n\n    Modes:\n    - GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n      already have it. Do NOT call repeatedly if you already received\n      the schema.\n    - EXECUTE: Performs the operation with the provided request body\n      JSON.\n      Note: You must also provide the required path parameters when executing.\n\n    If you need the schema, call with mode='get_request_schema' ONCE, then execute.\n    ",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": ["get_request_schema", "execute"],
+          "inferrable": true
+        },
+        {
+          "name": "form_identifier",
+          "type": "string",
+          "required": false,
+          "description": "The unique identifier for the form. If unrecognized, a new form connection is created. Choose a meaningful or traceable value.  Required when mode is 'execute', ignored when mode is 'get_request_schema'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["CUSTOMERIO_SITE_ID", "CUSTOMERIO_API_KEY"],
+      "secretsInfo": [
+        {
+          "name": "CUSTOMERIO_SITE_ID",
+          "type": "unknown"
+        },
+        {
+          "name": "CUSTOMERIO_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'submitForm'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "CustomerioTrackApi.SubmitFormResponse",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "form_identifier": {
+            "value": "user_feedback_form",
+            "type": "string",
+            "required": false
+          },
+          "request_body": {
+            "value": "{\"id\":\"12345\",\"email\":\"user@example.com\",\"feedback\":\"Great service!\"}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "SuppressCustomerProfile",
+      "qualifiedName": "CustomerioTrackApi.SuppressCustomerProfile",
+      "fullyQualifiedName": "CustomerioTrackApi.SuppressCustomerProfile@1.0.0",
+      "description": "Permanently delete and suppress a customer profile.\n\nThis tool deletes a customer profile and suppresses the person's identifier(s) to prevent future re-addition. Use mainly for GDPR/CCPA compliance. Once suppressed, the profile cannot be recovered. If suppression is not necessary, consider other subscription preference attributes.",
+      "parameters": [
+        {
+          "name": "unique_person_identifier",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier for a customer, which can be an ID, email, or 'cio_id' (prefixed with 'cio_').",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["CUSTOMERIO_SITE_ID", "CUSTOMERIO_API_KEY"],
+      "secretsInfo": [
+        {
+          "name": "CUSTOMERIO_SITE_ID",
+          "type": "api_key"
+        },
+        {
+          "name": "CUSTOMERIO_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'suppress'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "CustomerioTrackApi.SuppressCustomerProfile",
+        "parameters": {
+          "unique_person_identifier": {
+            "value": "cio_12345",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "TrackAnonymousEvent",
+      "qualifiedName": "CustomerioTrackApi.TrackAnonymousEvent",
+      "fullyQualifiedName": "CustomerioTrackApi.TrackAnonymousEvent@1.0.0",
+      "description": "Log anonymous events for unidentified users.\n\nUse this tool to log anonymous events for individuals who have not been identified yet. Events can be of type `page`, `screen`, or `event` and are useful for tracking website page views, app screen views, or other activities. Helps in associating events with users for triggering campaigns if merged later.\n\nNote: Understanding the request schema is necessary to properly create\nthe stringified JSON input object for execution.\n\nModes:\n- GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n  already have it. Do NOT call repeatedly if you already received\n  the schema.\n- EXECUTE: Performs the operation with the provided request body\n  JSON.\n\nIf you need the schema, call with mode='get_request_schema' ONCE, then execute.",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": ["get_request_schema", "execute"],
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["CUSTOMERIO_SITE_ID", "CUSTOMERIO_API_KEY"],
+      "secretsInfo": [
+        {
+          "name": "CUSTOMERIO_SITE_ID",
+          "type": "unknown"
+        },
+        {
+          "name": "CUSTOMERIO_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'trackAnonymous'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "CustomerioTrackApi.TrackAnonymousEvent",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "request_body": {
+            "value": "{\"event\":\"page_view\",\"properties\":{\"url\":\"https://example.com/home\",\"title\":\"Home Page\"}}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "UnsuppressCustomerProfile",
+      "qualifiedName": "CustomerioTrackApi.UnsuppressCustomerProfile",
+      "fullyQualifiedName": "CustomerioTrackApi.UnsuppressCustomerProfile@1.0.0",
+      "description": "Unsuppress a customer profile in Customer.io.\n\nUse this tool to unsuppress a customer profile, making the identifier available again in Customer.io. This will not restore previous profile data, only make the identifier reusable.",
+      "parameters": [
+        {
+          "name": "customer_identifier",
+          "type": "string",
+          "required": true,
+          "description": "The unique identifier for a customer, which can be an ID, email, or prefixed cio_id, based on workspace settings.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["CUSTOMERIO_SITE_ID", "CUSTOMERIO_API_KEY"],
+      "secretsInfo": [
+        {
+          "name": "CUSTOMERIO_SITE_ID",
+          "type": "api_key"
+        },
+        {
+          "name": "CUSTOMERIO_API_KEY",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'unsuppress'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "CustomerioTrackApi.UnsuppressCustomerProfile",
+        "parameters": {
+          "customer_identifier": {
+            "value": "user123@example.com",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "UpdateOrAddPerson",
+      "qualifiedName": "CustomerioTrackApi.UpdateOrAddPerson",
+      "fullyQualifiedName": "CustomerioTrackApi.UpdateOrAddPerson@1.0.0",
+      "description": "Add or update a person's information in the database.\n\n    Use this tool to add a new person or update existing person details based on identifiers. If no individual is found with the given identifiers, a new person is added. If existing identifiers match, the person's information is updated. For identifier updates, use `cio_id`. If identifiers conflict, the request may result in an Attribute Update Failure warning.\n\n    Note: Understanding the request schema is necessary to properly create\n    the stringified JSON input object for execution.\n\nThis operation also requires path parameters.\n\n    Modes:\n    - GET_REQUEST_SCHEMA: Returns the schema. Only call if you don't\n      already have it. Do NOT call repeatedly if you already received\n      the schema.\n    - EXECUTE: Performs the operation with the provided request body\n      JSON.\n      Note: You must also provide the required path parameters when executing.\n\n    If you need the schema, call with mode='get_request_schema' ONCE, then execute.\n    ",
+      "parameters": [
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "description": "Operation mode: 'get_request_schema' returns the OpenAPI spec for the request body, 'execute' performs the actual operation",
+          "enum": ["get_request_schema", "execute"],
+          "inferrable": true
+        },
+        {
+          "name": "person_identifier",
+          "type": "string",
+          "required": false,
+          "description": "The unique value used to identify a person, such as an ID, email, or `cio_id` (with `cio_` prefix for updates).  Required when mode is 'execute', ignored when mode is 'get_request_schema'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "request_body",
+          "type": "string",
+          "required": false,
+          "description": "Stringified JSON representing the request body. Required when mode is 'execute', ignored when mode is 'get_request_schema'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["CUSTOMERIO_SITE_ID", "CUSTOMERIO_API_KEY"],
+      "secretsInfo": [
+        {
+          "name": "CUSTOMERIO_SITE_ID",
+          "type": "api_key"
+        },
+        {
+          "name": "CUSTOMERIO_API_KEY",
+          "type": "api_key"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Response from the API endpoint 'identify'."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "CustomerioTrackApi.UpdateOrAddPerson",
+        "parameters": {
+          "mode": {
+            "value": "execute",
+            "type": "string",
+            "required": true
+          },
+          "person_identifier": {
+            "value": "cio_123456",
+            "type": "string",
+            "required": false
+          },
+          "request_body": {
+            "value": "{\"first_name\":\"John\",\"last_name\":\"Doe\",\"email\":\"john.doe@example.com\",\"attributes\":{\"age\":30,\"country\":\"USA\"}}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [
+    "import StarterToolInfo from \"@/app/_components/starter-tool-info\";"
+  ],
+  "subPages": [],
+  "generatedAt": "2026-01-26T17:28:19.826Z",
+  "summary": "Arcade Toolkit provides comprehensive tools for integrating with the Customer.io Track API, enabling effective management of customer profiles and interactions. This toolkit facilitates operations such as updating profiles, segmenting users, and logging events.\n\n**Capabilities**  \n- Manage customer profiles, including updates, merges, and deletions.  \n- Add and remove devices linked to customer profiles.  \n- Batch process multiple requests for efficiency.  \n- Report custom metrics and log events for customer interactions.  \n- Handle anonymous event logging for unidentified users.  \n\n**Secrets**  \nUtilize the following secrets for API interactions:  \n- `CUSTOMERIO_SITE_ID`: Identifier for the Customer.io site.  \n- `CUSTOMERIO_API_KEY`: Key for authenticating API requests."
+}

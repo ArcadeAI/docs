@@ -30,7 +30,7 @@ export function remarkGlossary(options: RemarkGlossaryOptions) {
     }
 
     // don't process the many MCP tool pages
-    if (file.history?.[0]?.includes("/mcp-servers/")) {
+    if (file.history?.[0]?.includes("/resources/integrations/")) {
       return;
     }
 

@@ -1,6 +1,5 @@
 "use client";
-import type { Survey } from "posthog-js";
-import { usePostHog } from "posthog-js/react";
+import posthog, { type Survey } from "posthog-js";
 import { type FormEvent, useRef, useState } from "react";
 
 import {
@@ -20,7 +19,6 @@ export const useSurvey = ({ surveyData, onComplete }: UseSurveyProps) => {
   const [responses, setResponses] = useState<Record<number, unknown>>({});
   const [questionPath, setQuestionPath] = useState<number[]>([0]);
   const submitted = useRef(false);
-  const posthog = usePostHog();
 
   const handleSubmitQuestion = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -58,7 +56,7 @@ export const useSurvey = ({ surveyData, onComplete }: UseSurveyProps) => {
     if (nextIndex === "end") {
       const data = createSurveyEventProperties(updatedResponses, surveyData.id);
       if (!submitted.current) {
-        posthog?.capture("survey sent", data);
+        posthog.capture("survey sent", data);
         submitted.current = true;
       }
       onComplete(data);

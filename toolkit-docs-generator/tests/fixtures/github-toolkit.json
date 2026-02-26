@@ -1,0 +1,459 @@
+{
+  "id": "Github",
+  "label": "GitHub",
+  "version": "1.0.0",
+  "description": "GitHub repository and collaboration tools for managing repositories, issues, pull requests, and more.",
+  "summary": "The Arcade GitHub toolkit provides a comprehensive set of tools for interacting with GitHub. These tools make it easy to build agents and AI apps that can:\n\n- Create and manage repositories, issues, and pull requests\n- Star and unstar repositories\n- Search for code, issues, and repositories\n- Manage repository collaborators and permissions\n- Access user profile information",
+  "metadata": {
+    "category": "development",
+    "iconUrl": "https://design-system.arcade.dev/icons/github.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/development/github",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": "github",
+    "allScopes": ["repo", "user:email", "read:user", "public_repo"]
+  },
+  "tools": [
+    {
+      "name": "CreateIssue",
+      "qualifiedName": "Github.CreateIssue",
+      "fullyQualifiedName": "Github.CreateIssue@1.0.0",
+      "description": "Create a new issue in a GitHub repository. Optionally add the issue to a project by specifying the project number.",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "string",
+          "required": true,
+          "description": "The owner (user or organization) of the repository",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repo",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "description": "The title of the issue",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "required": false,
+          "description": "The body content of the issue (supports Markdown)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "labels",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Labels to add to the issue",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "assignees",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "GitHub usernames to assign to the issue",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_number",
+          "type": "integer",
+          "required": false,
+          "description": "Project number to add the issue to (if any)",
+          "enum": null,
+          "inferrable": false
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": ["repo"]
+      },
+      "secrets": [],
+      "output": {
+        "type": "object",
+        "description": "The created issue object with id, number, url, and other details"
+      },
+      "documentationChunks": [
+        {
+          "type": "info",
+          "location": "parameters",
+          "position": "after",
+          "content": "When adding an issue to a project, make sure the authenticated user has write access to the project.",
+          "title": "Project Access"
+        }
+      ],
+      "codeExample": {
+        "toolName": "Github.CreateIssue",
+        "parameters": {
+          "owner": {
+            "value": "arcadeai",
+            "type": "string",
+            "required": true
+          },
+          "repo": {
+            "value": "arcade-ai",
+            "type": "string",
+            "required": true
+          },
+          "title": {
+            "value": "Bug: Login button not working",
+            "type": "string",
+            "required": true
+          },
+          "body": {
+            "value": "## Description\nThe login button on the home page is unresponsive.\n\n## Steps to reproduce\n1. Go to home page\n2. Click login button\n3. Nothing happens",
+            "type": "string",
+            "required": false
+          },
+          "labels": {
+            "value": ["bug", "high-priority"],
+            "type": "array",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "SetStarred",
+      "qualifiedName": "Github.SetStarred",
+      "fullyQualifiedName": "Github.SetStarred@1.0.0",
+      "description": "Star or unstar a GitHub repository for the authenticated user.",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "string",
+          "required": true,
+          "description": "The owner of the repository to star/unstar",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repo",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository to star/unstar",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "starred",
+          "type": "boolean",
+          "required": true,
+          "description": "True to star the repository, false to unstar it",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": ["public_repo"]
+      },
+      "secrets": [],
+      "output": {
+        "type": "object",
+        "description": "Confirmation of the star/unstar action"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.SetStarred",
+        "parameters": {
+          "owner": {
+            "value": "arcadeai",
+            "type": "string",
+            "required": true
+          },
+          "repo": {
+            "value": "arcade-ai",
+            "type": "string",
+            "required": true
+          },
+          "starred": {
+            "value": true,
+            "type": "boolean",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "GetRepository",
+      "qualifiedName": "Github.GetRepository",
+      "fullyQualifiedName": "Github.GetRepository@1.0.0",
+      "description": "Get detailed information about a GitHub repository including stars, forks, open issues, and more.",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "string",
+          "required": true,
+          "description": "The owner of the repository",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repo",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": ["repo"]
+      },
+      "secrets": [],
+      "output": {
+        "type": "object",
+        "description": "Repository details including name, description, stars, forks, language, and more"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.GetRepository",
+        "parameters": {
+          "owner": {
+            "value": "arcadeai",
+            "type": "string",
+            "required": true
+          },
+          "repo": {
+            "value": "arcade-ai",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "ListPullRequests",
+      "qualifiedName": "Github.ListPullRequests",
+      "fullyQualifiedName": "Github.ListPullRequests@1.0.0",
+      "description": "List pull requests in a GitHub repository with optional filtering by state, head, base, and sort order.",
+      "parameters": [
+        {
+          "name": "owner",
+          "type": "string",
+          "required": true,
+          "description": "The owner of the repository",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repo",
+          "type": "string",
+          "required": true,
+          "description": "The name of the repository",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "state",
+          "type": "string",
+          "required": false,
+          "description": "Filter by pull request state",
+          "enum": ["open", "closed", "all"],
+          "inferrable": true
+        },
+        {
+          "name": "sort",
+          "type": "string",
+          "required": false,
+          "description": "What to sort results by",
+          "enum": ["created", "updated", "popularity", "long-running"],
+          "inferrable": true
+        },
+        {
+          "name": "direction",
+          "type": "string",
+          "required": false,
+          "description": "Sort direction",
+          "enum": ["asc", "desc"],
+          "inferrable": true
+        },
+        {
+          "name": "per_page",
+          "type": "integer",
+          "required": false,
+          "description": "Number of results per page (max 100)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": ["repo"]
+      },
+      "secrets": [],
+      "output": {
+        "type": "array",
+        "description": "List of pull request objects"
+      },
+      "documentationChunks": [
+        {
+          "type": "tip",
+          "location": "description",
+          "position": "after",
+          "content": "Use `state: 'all'` to retrieve both open and closed pull requests in a single request.",
+          "title": "Pro tip"
+        }
+      ],
+      "codeExample": {
+        "toolName": "Github.ListPullRequests",
+        "parameters": {
+          "owner": {
+            "value": "arcadeai",
+            "type": "string",
+            "required": true
+          },
+          "repo": {
+            "value": "arcade-ai",
+            "type": "string",
+            "required": true
+          },
+          "state": {
+            "value": "open",
+            "type": "string",
+            "required": false
+          },
+          "sort": {
+            "value": "updated",
+            "type": "string",
+            "required": false
+          },
+          "per_page": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    },
+    {
+      "name": "SearchCode",
+      "qualifiedName": "Github.SearchCode",
+      "fullyQualifiedName": "Github.SearchCode@1.0.0",
+      "description": "Search for code across all public repositories or within specific repositories using GitHub's code search.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": true,
+          "description": "The search query. Supports GitHub search syntax including qualifiers like `repo:`, `language:`, `path:`",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "per_page",
+          "type": "integer",
+          "required": false,
+          "description": "Number of results per page (max 100, default 30)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "page",
+          "type": "integer",
+          "required": false,
+          "description": "Page number for pagination",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": ["repo"]
+      },
+      "secrets": [],
+      "output": {
+        "type": "object",
+        "description": "Search results containing matched code snippets and file locations"
+      },
+      "documentationChunks": [
+        {
+          "type": "warning",
+          "location": "description",
+          "position": "before",
+          "content": "GitHub's code search API has rate limits. Authenticated requests allow 30 requests per minute. Consider implementing pagination and caching for large searches.",
+          "title": "Rate Limits",
+          "variant": "warning"
+        },
+        {
+          "type": "info",
+          "location": "parameters",
+          "position": "after",
+          "content": "Use qualifiers to narrow your search:\n- `repo:owner/name` - Search in a specific repository\n- `language:python` - Filter by programming language\n- `path:src/` - Search in specific directories\n- `extension:ts` - Filter by file extension",
+          "title": "Search Qualifiers"
+        }
+      ],
+      "codeExample": {
+        "toolName": "Github.SearchCode",
+        "parameters": {
+          "query": {
+            "value": "ToolDefinition language:typescript repo:arcadeai/arcade-ai",
+            "type": "string",
+            "required": true
+          },
+          "per_page": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      }
+    }
+  ],
+  "documentationChunks": [
+    {
+      "type": "callout",
+      "location": "header",
+      "position": "after",
+      "content": "The GitHub toolkit requires OAuth2 authentication. Users will be prompted to authorize access to their GitHub account when first using these tools.",
+      "title": "Authentication Required",
+      "variant": "info"
+    }
+  ],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-01-14T12:00:00Z"
+}

@@ -1,0 +1,63 @@
+name: Style Review
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "PR number to review"
+        required: true
+        type: number
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "app/en/**/*.md"
+      - "app/en/**/*.mdx"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  style-review:
+    name: Vale Style Review
+    runs-on: ubuntu-latest
+    # Skip editorial PRs to prevent automation loops
+    if: "!startsWith(github.head_ref, 'style/editorial-')"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # For pull_request events, checkout the PR head commit directly
+          ref: ${{ github.event.pull_request.head.sha || '' }}
+
+      - name: Checkout PR branch
+        if: github.event_name == 'workflow_dispatch'
+        run: gh pr checkout ${{ inputs.pr_number }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Install Vale
+        run: |
+          wget -qO- https://github.com/errata-ai/vale/releases/download/v3.9.5/vale_3.9.5_Linux_64-bit.tar.gz | tar xz -C /usr/local/bin vale
+
+      - name: Sync Vale styles
+        run: vale sync
+
+      - name: Run style review
+        run: pnpm vale:review --pr ${{ github.event.pull_request.number || inputs.pr_number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}

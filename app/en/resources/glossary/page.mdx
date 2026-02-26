@@ -15,7 +15,15 @@ graph TD
 
 ### Agent
 
-An 'agent' is the application you are building. It can be a chatbot, a web application, a mobile app, or any other type of application that happens to use an LLM as part of its functionality. Agents interact with the world by calling tools. Helping you build, test, authenticate, and deploy tools is what Arcade is all about.
+An 'agent' is the intelligent application you are building. It can be a chatbot, a web application, a mobile app, or any other type of application that happens to use an LLM as part of its functionality. Agents interact with the world by calling tools. Helping you build, test, authenticate, and deploy tools is what Arcade is all about.
+
+### Harness
+
+A 'harness' is the application that is running the agent. The agent determines the prompt, the tools, and the policies for every interaction. The harness is the software "glue" that determines _how_ all of these components work together. Are tools called over MCP? Is the OAuth URL opened in a browser? Is the agent able to access bash commands in the terminal? The harness is responsible for handling all of these details.
+
+### ReAct Agent
+
+This (Reason + Act) is the most common agentic pattern, where an LLM runs in a loop, with the option to call tools to perform actions or retrieve information into its context. The initial input is a system prompt together with a user prompt. The agent may then iteratively call tools and update its context until it generates a response that does not involve a tool call.
 
 ### Context
 
@@ -67,11 +75,11 @@ _Learn more about [tools](/guides/create-tools/tool-basics/build-mcp-server)._
 
 [Optimized tools](/guides/create-tools/improve/types-of-tools#optimized-tools) are designed from scratch to provide the best performance for LLMs in terms of speed, reliability, accuracy, and cost-effectiveness.
 
-#### Starter tools
+#### Unoptimized tools
 
-[Starter tools](/guides/create-tools/improve/types-of-tools#starter-tools) are designed to mirror the original HTTP API design of the upstream service. They are not optimized for LLM usage and are not subject to evaluation suites. We recommend thoroughly evaluating each Starter tool with your Agents or chatbots before using it in production.
+[Unoptimized tools](/guides/create-tools/improve/types-of-tools#unoptimized-tools) are designed to mirror the original HTTP API design of the upstream service. They are not optimized for LLM usage and are not subject to evaluation suites. We recommend thoroughly evaluating each Unoptimized tool with your Agents or chatbots before using it in production.
 
-Understand why [LLMs usually perform poorly](/guides/create-tools/improve/types-of-tools#why-llms-perform-poorly-when-calling-http-apis) when calling HTTP APIs.
+Understand why [LLMs perform poorly when](/guides/create-tools/improve/types-of-tools#why-llms-perform-poorly when-calling-http-apis) calling HTTP APIs.
 
 ### Tool Context
 
@@ -117,6 +125,10 @@ A 'tenant' is a collection of projects with unified billing details. It is the t
 ### Project
 
 A 'project' is a collection of agents and tools. It is smallest unit of organization and isolation in Arcade. You can have multiple projects, and each project can have multiple agents and tools. Accounts can be members of multiple projects, and each project will have different API keys.
+
+### Arcade API
+
+The 'Arcade API' is a set of endpoints that allow you to interact with the Arcade platform. You can use the API to call tools, get tool definitions, manage user auth, and more. See the [Arcade API Reference](/references/api) for more details.
 
 ### API Key
 
@@ -177,8 +189,8 @@ To set your own credentials, set the requisite secret within the Arcade Dashboar
 ```mermaid
 graph TD
     A[Agent] --> B[Arcade Client]
-    B --> C[Arcade Engine]
-    C --> D[MCP Gateway]
+    B --> C[MCP Gateway]
+    C --> D[Arcade Engine]
     D --> E[MCP Server]
 ```
 
@@ -196,7 +208,7 @@ The Arcade Engine is also responsible for the OAuth flow for your agent's users.
 
 ### MCP Gateway
 
-MCP gateways are a feature of the Arcade Engine that allows you to add and combine multiple MCP servers in your project. The MCP gateway is responsible for routing tool execution requests to the correct MCP server, and for enforcing security and authorization decisions. You can mix and match tools from different MCP servers in the same project, and not all tools from a MCP server need to be available to the same LLM.
+MCP Gateways are a feature of the Arcade Engine that allows you to add and combine multiple MCP servers in your project. It allows your clients to speak MCP directly to Arcade and get all the functionality you'd expect from the Arcade Engine. The MCP Gateway is responsible for routing tool execution requests to the correct MCP server, and for enforcing security and authorization decisions. You can mix and match tools from different MCP servers in the same project, and not all tools from a MCP server need to be available to the same agent or LLM.
 
 ### Arcade MCP (Server Development Kit)
 

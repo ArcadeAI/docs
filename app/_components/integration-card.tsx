@@ -2,6 +2,7 @@
 import { Card, CardContent } from "@arcadeai/design-system";
 import { cn } from "@arcadeai/design-system/lib/utils";
 import type { LucideIcon } from "lucide-react";
+import posthog from "posthog-js";
 
 type IntegrationCardProps = {
   id: string;
@@ -13,12 +14,22 @@ type IntegrationCardProps = {
 };
 
 export function IntegrationCard({
+  id,
   icon: Icon,
   title,
   description,
   isActive = false,
   onClick,
 }: IntegrationCardProps) {
+  const handleClick = () => {
+    posthog.capture("Integration card clicked", {
+      integration_id: id,
+      integration_title: title,
+      is_active: isActive,
+    });
+    onClick();
+  };
+
   return (
     <Card
       className={cn(
@@ -27,7 +38,7 @@ export function IntegrationCard({
           ? "border-primary/50 bg-primary/5"
           : "border-zinc-800 bg-zinc-900/50 hover:bg-zinc-900"
       )}
-      onClick={onClick}
+      onClick={handleClick}
     >
       <div
         className={cn(

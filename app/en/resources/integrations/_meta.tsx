@@ -18,7 +18,7 @@ const meta: MetaRecord = {
   productivity: {
     title: "Productivity & Docs",
   },
-  "social-communication": {
+  social: {
     title: "Social & Communication",
   },
   entertainment: {

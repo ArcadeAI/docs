@@ -9,7 +9,9 @@ import {
   type ToolkitType,
 } from "@arcadeai/design-system";
 import { cn } from "@arcadeai/design-system/lib/utils";
+import { Package } from "lucide-react";
 import Link from "next/link";
+import posthog from "posthog-js";
 import type React from "react";
 import { useState } from "react";
 import { ComingSoonModal } from "./coming-soon-modal";
@@ -17,7 +19,8 @@ import { TOOL_CARD_TYPE_CONFIG } from "./type-config";
 
 type ToolCardProps = {
   name: string;
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>> | null;
+  iconUrl?: string;
   link: string;
   type: ToolkitType;
   isComingSoon?: boolean;
@@ -28,6 +31,7 @@ type ToolCardProps = {
 export const ToolCard: React.FC<ToolCardProps> = ({
   name: toolName,
   icon: ToolkitIcon,
+  iconUrl,
   link,
   type,
   isComingSoon = false,
@@ -43,7 +47,19 @@ export const ToolCard: React.FC<ToolCardProps> = ({
   } = TOOL_CARD_TYPE_CONFIG[type];
   const showHeaderBadges = isByoc || isPro || isComingSoon;
 
+  const trackToolCardClick = () => {
+    posthog.capture("Tool card clicked", {
+      tool_name: toolName,
+      tool_type: type,
+      tool_link: link,
+      is_coming_soon: isComingSoon,
+      is_byoc: isByoc,
+      is_pro: isPro,
+    });
+  };
+
   const handleCardClick = (e: React.MouseEvent | React.KeyboardEvent) => {
+    trackToolCardClick();
     if (isComingSoon) {
       e.preventDefault();
       setIsModalOpen(true);
@@ -53,6 +69,23 @@ export const ToolCard: React.FC<ToolCardProps> = ({
   const handleModalClose = () => {
     setIsModalOpen(false);
   };
+
+  let iconNode: React.ReactNode;
+  if (ToolkitIcon) {
+    iconNode = <ToolkitIcon className="size-9" />;
+  } else if (iconUrl) {
+    iconNode = (
+      <img
+        alt={`${toolName} icon`}
+        className="size-9"
+        height={36}
+        src={iconUrl}
+        width={36}
+      />
+    );
+  } else {
+    iconNode = <Package className="size-9 text-gray-400 dark:text-gray-500" />;
+  }
 
   const cardContent = (
     <Card
@@ -66,7 +99,7 @@ export const ToolCard: React.FC<ToolCardProps> = ({
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div className="flex items-center space-x-5">
             <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg">
-              <ToolkitIcon className="size-9" />
+              {iconNode}
             </div>
             <div>
               <CardTitle className="mb-0.5 text-base text-gray-900 dark:text-gray-50">
@@ -123,7 +156,9 @@ export const ToolCard: React.FC<ToolCardProps> = ({
           {cardContent}
         </button>
       ) : (
-        <Link href={link}>{cardContent}</Link>
+        <Link href={link} onClick={trackToolCardClick}>
+          {cardContent}
+        </Link>
       )}
 
       {isComingSoon && (

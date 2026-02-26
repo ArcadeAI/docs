@@ -1,6 +1,16 @@
 import type { MetaRecord } from "nextra";
 
-export const meta: MetaRecord = {
+const meta: MetaRecord = {
+  "*": {
+    theme: {
+      breadcrumb: true,
+      toc: true,
+      copyPage: true,
+    },
+  },
+  index: {
+    title: "Overview",
+  },
   "compare-server-types": {
     title: "Compare MCP server types",
   },
@@ -21,6 +31,9 @@ export const meta: MetaRecord = {
   },
   "organize-mcp-tools": {
     title: "Organize your MCP server and tools",
+  },
+  "add-tool-metadata": {
+    title: "Add metadata to your tools",
   },
 };
 
