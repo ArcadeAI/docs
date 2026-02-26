@@ -63,7 +63,10 @@ import {
   writeFailedToolsReport,
 } from "../utils/run-logs.js";
 import { cleanupExcludedToolkitOutput } from "./exclusion-cleanup.js";
-import { computeProcessingStats } from "./generate-flow.js";
+import {
+  computeProcessingStats,
+  filterProvidersBySkipIds,
+} from "./generate-flow.js";
 
 /**
  * Supported API sources:
@@ -1470,12 +1473,21 @@ program
             );
           }
         } else {
-          allResults = await processProviders(
+          const { providersToProcess } = filterProvidersBySkipIds(
             providers ?? [],
-            merger,
-            spinner,
-            options.verbose
+            skipToolkitIds
           );
+          if (providersToProcess.length === 0) {
+            spinner.succeed("No providers to process after applying filters");
+            allResults = [];
+          } else {
+            allResults = await processProviders(
+              providersToProcess,
+              merger,
+              spinner,
+              options.verbose
+            );
+          }
         }
 
         // Generate output files (batch mode if not incremental)
