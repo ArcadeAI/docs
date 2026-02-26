@@ -60,13 +60,13 @@ source .venv/bin/activate
 
 Install the dependencies:
 
-```bash
+```powershell
 uv add arcadepy openai python-dotenv
 ```
 
 Your directory should now look like this:
 
-```bash
+```powershell
 arcade-llm-example/
 ├── .git/
 ├── .gitignore
@@ -473,7 +473,7 @@ if __name__ == "__main__":
     chat()
 ```
 
-Last updated on February 10, 2026
+Last updated on January 5, 2026
 
 [Overview](/en/get-started/agent-frameworks.md)
 [Setup Arcade tools with CrewAI](/en/get-started/agent-frameworks/crewai/use-arcade-tools.md)

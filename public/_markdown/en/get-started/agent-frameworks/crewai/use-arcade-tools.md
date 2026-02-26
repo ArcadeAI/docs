@@ -59,13 +59,13 @@ source .venv/bin/activate
 
 Install the necessary packages:
 
-```bash
+```powershell
 uv add 'crewai[tools]' arcadepy
 ```
 
 Create a new file called `.env` and add the following environment variables:
 
-```bash
+```powershell
 # .env
 # Arcade API key
 ARCADE_API_KEY=YOUR_ARCADE_API_KEY
@@ -537,7 +537,7 @@ if __name__ == "__main__":
 
 
 
-Last updated on February 10, 2026
+Last updated on January 5, 2026
 
 [Setup Arcade with your LLM (Python)](/en/get-started/agent-frameworks/setup-arcade-with-your-llm-python.md)
 [Overview](/en/get-started/agent-frameworks/google-adk/overview.md)

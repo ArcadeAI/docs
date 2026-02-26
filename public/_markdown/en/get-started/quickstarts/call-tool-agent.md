@@ -64,7 +64,7 @@ source .venv/bin/activate
 
 Then, run the following command to install the Python client package `arcadepy`:
 
-```bash
+```powershell
 uv add arcadepy
 ```
 
@@ -558,7 +558,7 @@ console.log(
 console.log(respose_send_email.output?.value);
 ```
 
-Last updated on February 10, 2026
+Last updated on January 5, 2026
 
 [Windows environment setup](/en/get-started/setup/windows-environment.md)
 [Call tools in IDE/MCP clients](/en/get-started/quickstarts/call-tool-client.md)

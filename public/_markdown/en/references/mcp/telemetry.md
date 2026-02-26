@@ -68,7 +68,7 @@ $env:ARCADE_USAGE_TRACKING=0
 
 To permanently opt out, set this environment variable in your shell configuration file (for example, `~/.zshrc`, `~/.bashrc`, or your PowerShell profile).
 
-Last updated on February 10, 2026
+Last updated on January 5, 2026
 
 [Errors](/en/references/mcp/python/errors.md)
 [Arcade CLI](/en/references/arcade-cli.md)

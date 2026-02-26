@@ -63,13 +63,13 @@ source .venv/bin/activate
 
 Install the necessary packages:
 
-```bash
+```powershell
 uv add openai-agents arcadepy
 ```
 
 Create a new file called `.env` and add the following environment variables:
 
-```bash
+```powershell
 # .env
 # Arcade API key
 ARCADE_API_KEY=YOUR_ARCADE_API_KEY
@@ -570,7 +570,7 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-Last updated on February 10, 2026
+Last updated on January 5, 2026
 
 [Overview](/en/get-started/agent-frameworks/openai-agents/overview.md)
 [Setup (TypeScript)](/en/get-started/agent-frameworks/openai-agents/setup-typescript.md)
