@@ -56,17 +56,17 @@ This generates a Python module with the following structure:
 
 ```bash
 my_server/
+├── .env.example
 ├── src/
 │   └── my_server/
 │       ├── __init__.py
-│       ├── .env.example
 │       └── server.py
 └── pyproject.toml
 ```
 
 1.  **server.py** Main server file with MCPApp and example . It creates an `MCPApp`, defines tools with `@app.tool`, and will start the server with `app.run()` when the file is executed directly.
 2.  **pyproject.toml** Dependencies and  configuration
-3.  **.env.example** Example `.env` file containing a secret required by one of the generated  in `server.py`. Environments are loaded on server start, so **if you update the `.env` file, you will need to restart your server.**
+3.  **.env.example** Example `.env` file at the  root containing a secret required by one of the generated  in `server.py`. Arcade automatically discovers `.env` files by traversing upward from the current directory, so placing it at the project root makes it accessible from any subdirectory. Environments are loaded on server start, so **if you update the `.env` file, you will need to restart your server.**
 
 ```python
 # server.py
@@ -152,17 +152,19 @@ Secrets are sensitive strings like passwords, , or other tokens that grant acces
 
 ### .env file
 
-You can create a `.env` file at the same directory as your  (`server.py`) and add your secret:
+You can create a `.env` file at your  root directory and add your secret:
 
 ```bash
 # .env
 MY_SECRET_KEY="my-secret-value"
 ```
 
-The generated  includes a `.env.example` file with the secret key name and example value. You can rename it to `.env` to start using it.
+Arcade automatically discovers `.env` files by traversing upward from the current directory through parent directories. This means you can place your `.env` file at the  root (`my_server/`), and it will be found even when running your server from a subdirectory like `src/my_server/`.
+
+The generated  includes a `.env.example` file at the project root with the secret key name and example value. You can rename it to `.env` to start using it.
 
 ```bash
-mv .env.example .env
+mv ../../.env.example ../../.env
 ```
 
 ### Environment Variable
@@ -272,7 +274,7 @@ That’s it! Your  server is running and connected to your AI assistant.
 -   **Deploy your  server**: [Learn how to deploy your MCP server](/guides/deployment-hosting/arcade-deploy.md)
 
 
-Last updated on January 30, 2026
+Last updated on January 5, 2026
 
 [Compare MCP server types](/en/guides/create-tools/tool-basics/compare-server-types.md)
 [Create a tool with auth](/en/guides/create-tools/tool-basics/create-tool-auth.md)
