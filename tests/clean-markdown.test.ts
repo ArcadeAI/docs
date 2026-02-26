@@ -12,6 +12,7 @@ const APP_PREFIX_PATTERN = /^app\//;
 const PAGE_MDX_SUFFIX_PATTERN = /\/page\.mdx$/;
 const MARKDOWN_HEADING_PATTERN = /^#{1,6}\s+/;
 const FENCE_PREFIX = "```";
+const MARKDOWN_CLOSING_FENCE_PATTERN = /^```\s*$/;
 
 const LEGACY_SHELL_HEADING_PATTERNS = [
   /^(#{2,6})\s+Bash\s*$/,
@@ -43,23 +44,39 @@ function mdxPathToRelativePath(mdxFile: string): string {
 }
 
 /**
- * Finds the language of the first fenced code block after a heading.
- * Stops at the next heading if no code block appears first.
+ * Finds the language of each fenced code block after a heading,
+ * stopping at the next heading.
  */
-function firstFenceLanguageAfterHeading(
+function fenceLanguagesAfterHeading(
   lines: string[],
   headingLineIndex: number
-): string | null {
+): Array<{ language: string; line: number }> {
+  const fenceLanguages: Array<{ language: string; line: number }> = [];
+  let insideCodeFence = false;
+
   for (let i = headingLineIndex + 1; i < lines.length; i += 1) {
     const trimmed = lines[i].trim();
-    if (trimmed.startsWith(FENCE_PREFIX)) {
-      return trimmed.slice(FENCE_PREFIX.length).trim().toLowerCase();
-    }
     if (MARKDOWN_HEADING_PATTERN.test(trimmed)) {
-      return null;
+      break;
     }
+    if (!trimmed.startsWith(FENCE_PREFIX)) {
+      continue;
+    }
+
+    if (insideCodeFence) {
+      if (MARKDOWN_CLOSING_FENCE_PATTERN.test(trimmed)) {
+        insideCodeFence = false;
+      }
+      continue;
+    }
+
+    fenceLanguages.push({
+      language: trimmed.slice(FENCE_PREFIX.length).trim().toLowerCase(),
+      line: i + 1,
+    });
+    insideCodeFence = true;
   }
-  return null;
+  return fenceLanguages;
 }
 
 // Patterns that indicate raw MDX syntax leaked into clean markdown
@@ -286,14 +303,27 @@ describe("Clean Markdown Files", () => {
             continue;
           }
 
-          const actual = firstFenceLanguageAfterHeading(lines, i);
-          if (!(actual && expected.has(actual))) {
+          const fences = fenceLanguagesAfterHeading(lines, i);
+
+          if (fences.length === 0) {
             errors.push({
               file,
               line: i + 1,
               heading,
-              actual,
+              actual: null,
             });
+            continue;
+          }
+
+          for (const { language, line } of fences) {
+            if (!expected.has(language)) {
+              errors.push({
+                file,
+                line,
+                heading,
+                actual: language,
+              });
+            }
           }
         }
       }

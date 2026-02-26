@@ -172,7 +172,7 @@ arcade -v
 
 Global  install:
 
-```python
+```powershell
 python -m pip install --user arcade-mcp
 arcade -v
 ```
