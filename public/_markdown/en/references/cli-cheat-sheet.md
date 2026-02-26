@@ -17,6 +17,13 @@ uv tool install arcade-mcp    # Recommended
 pip install arcade-mcp        # Alternative
 ```
 
+Upgrade to the latest version:
+
+```bash
+uv tool upgrade arcade-mcp    # Recommended
+pip install --upgrade arcade-mcp  # Alternative
+```
+
 Verify installation:
 
 ```bash
@@ -760,6 +767,20 @@ Check `arcade server logs <name> -f`
 ”No tools found”
 
 Verify `--tool-package` or `--discover-installed`
+
+”Command not found after upgrade”
+
+Re-authenticate: `arcade logout && arcade login`
+
+### After Upgrading
+
+If you encounter issues after upgrading the CLI:
+
+```bash
+arcade logout          # Clear old credentials
+arcade login           # Re-authenticate
+arcade whoami          # Verify login status
+```
 
 ### Debug Tips
 
