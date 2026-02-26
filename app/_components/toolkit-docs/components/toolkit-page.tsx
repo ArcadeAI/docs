@@ -1,13 +1,17 @@
 "use client";
 
-import { Button } from "@arcadeai/design-system";
+import { Badge, Button } from "@arcadeai/design-system";
 import { ArrowDown, ArrowUp, KeyRound } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 
 import ScopePicker from "../../scope-picker";
 import ToolFooter from "../../tool-footer";
-import { getPackageName } from "../constants";
+import {
+  getPackageName,
+  TOOL_METADATA_FALLBACK_STYLE,
+  TOOL_METADATA_SERVICE_DOMAIN_STYLES,
+} from "../constants";
 
 // Scroll detection thresholds
 const SCROLL_SHOW_BUTTONS_THRESHOLD = 300;
@@ -204,6 +208,45 @@ function inferToolkitType(toolkitId: string, type: ToolkitType): ToolkitType {
     return "arcade_starter";
   }
   return type;
+}
+
+export function getSharedServiceDomain(
+  tools: ReadonlyArray<{
+    metadata?: {
+      classification?: {
+        serviceDomains?: string[];
+      } | null;
+    } | null;
+  }>
+): string | null {
+  if (tools.length === 0) {
+    return null;
+  }
+
+  let sharedDomain: string | null = null;
+
+  for (const tool of tools) {
+    const serviceDomains = tool.metadata?.classification?.serviceDomains;
+    if (!serviceDomains || serviceDomains.length !== 1) {
+      return null;
+    }
+
+    const domain = serviceDomains[0];
+    if (!domain) {
+      return null;
+    }
+
+    if (sharedDomain === null) {
+      sharedDomain = domain;
+      continue;
+    }
+
+    if (sharedDomain !== domain) {
+      return null;
+    }
+  }
+
+  return sharedDomain;
 }
 
 function toTitleCaseCategory(category: ToolkitCategory): string {
@@ -557,6 +600,10 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
     }),
     [data.id, data.metadata]
   );
+  const sharedServiceDomain = useMemo(
+    () => getSharedServiceDomain(tools),
+    [tools]
+  );
 
   const handleScopeSelectionChange = (toolNames: string[]) => {
     setSelectedTools(new Set(toolNames));
@@ -583,6 +630,22 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
         <h1 className="mb-6 font-bold text-4xl text-foreground tracking-tight">
           {data.label}
         </h1>
+        {sharedServiceDomain && (
+          <div className="mb-5 flex flex-wrap items-center gap-2">
+            <span className="text-muted-foreground text-xs uppercase tracking-wider">
+              Service domain
+            </span>
+            <Badge
+              className={`font-mono text-xs uppercase tracking-wide ${
+                TOOL_METADATA_SERVICE_DOMAIN_STYLES[sharedServiceDomain] ??
+                TOOL_METADATA_FALLBACK_STYLE
+              }`}
+              variant="outline"
+            >
+              {sharedServiceDomain.replace(/_/g, " ").toUpperCase()}
+            </Badge>
+          </div>
+        )}
         <ToolkitHeader
           auth={data.auth}
           description={data.description}
@@ -694,6 +757,7 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
           secrets: tool.secrets,
           secretsInfo: tool.secretsInfo,
           scopes: tool.auth?.scopes ?? [],
+          metadata: tool.metadata,
         }))}
       />
 
