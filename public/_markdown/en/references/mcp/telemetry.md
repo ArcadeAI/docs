@@ -54,15 +54,15 @@ You may opt-out by setting the `ARCADE_USAGE_TRACKING` environment variable.
 
 For example, to opt out for the lifetime of your terminal session, you can enter
 
-### Bash
+### Bash/Zsh (macOS/Linux)
 
 ```bash
 export ARCADE_USAGE_TRACKING=0
 ```
 
-### PowerShell
+### PowerShell (Windows)
 
-```bash
+```powershell
 $env:ARCADE_USAGE_TRACKING=0
 ```
 

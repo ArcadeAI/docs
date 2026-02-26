@@ -92,16 +92,32 @@ MY_SECRET_KEY="my-secret-value"
 
 The generated  includes a `.env.example` file at the project root with the secret key name and example value. You can rename it to `.env` to start using it.
 
+### Bash/Zsh (macOS/Linux)
+
 ```bash
 mv ../../.env.example ../../.env
+```
+
+### PowerShell (Windows)
+
+```powershell
+Copy-Item .env.example .env
 ```
 
 ### Environment Variable
 
 You can set the environment variable in your terminal directly with this command:
 
+### Bash/Zsh (macOS/Linux)
+
 ```bash
 export MY_SECRET_KEY="my-secret-value"
+```
+
+### PowerShell (Windows)
+
+```powershell
+$env:MY_SECRET_KEY="my-secret-value"
 ```
 
 ## Connect to Arcade to unlock authorized tool calling
@@ -216,7 +232,7 @@ Ensure you have set the environment variable in your terminal or `.env` file, an
 -   **Learn how to deploy your  server**: [Deploy your MCP server](/guides/deployment-hosting/arcade-deploy.md)
 
 
-Last updated on January 5, 2026
+Last updated on February 10, 2026
 
 [Call tools in IDE/MCP clients](/en/get-started/quickstarts/call-tool-client.md)
 [Overview](/en/get-started/agent-frameworks.md)

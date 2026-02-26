@@ -189,7 +189,7 @@ When configuring your  client using the stdio transport, you need to ensure that
 
 Then, your  client’s configuration file should look like this:
 
-```json
+```bash
 {
   "mcpServers": {
     "my_server": {
@@ -215,15 +215,15 @@ When configuring your  client using the Streamable HTTP transport, ensure the  i
 
 Activate the virtual environment:
 
-### Bash
+### Bash/Zsh (macOS/Linux)
 
 ```bash
 source /path/to/your/project/.venv/bin/activate
 ```
 
-### PowerShell
+### PowerShell (Windows)
 
-```bash
+```powershell
 . "/path/to/your/project/.venv/Scripts/Activate.ps1"
 ```
 

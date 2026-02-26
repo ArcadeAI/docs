@@ -50,15 +50,15 @@ Then, run the following command to create and activate a new virtual environment
 uv venv
 ```
 
-### Bash
+### Bash/Zsh (macOS/Linux)
 
 ```bash
 source .venv/bin/activate
 ```
 
-### PowerShell
+### PowerShell (Windows)
 
-```bash
+```powershell
 . ".venv\Scripts\Activate.ps1"
 ```
 

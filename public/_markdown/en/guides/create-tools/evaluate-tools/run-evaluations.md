@@ -43,32 +43,32 @@ arcade evals . --only-failed
 
 Use OpenAI with default model (`gpt-4o`):
 
-### Bash
+### Bash/Zsh (macOS/Linux)
 
 ```bash
 export OPENAI_API_KEY=sk-...
 arcade evals .
 ```
 
-### PowerShell
+### PowerShell (Windows)
 
-```bash
+```powershell
 $env:OPENAI_API_KEY="sk-..."
 arcade evals .
 ```
 
 Use Anthropic with default model (`claude-sonnet-4-5-20250929`):
 
-### Bash
+### Bash/Zsh (macOS/Linux)
 
 ```bash
 export ANTHROPIC_API_KEY=sk-ant-...
 arcade evals . --use-provider anthropic
 ```
 
-### PowerShell
+### PowerShell (Windows)
 
-```bash
+```powershell
 $env:ANTHROPIC_API_KEY="sk-ant-..."
 arcade evals . --use-provider anthropic
 ```

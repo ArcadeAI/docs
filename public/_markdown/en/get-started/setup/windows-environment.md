@@ -17,21 +17,21 @@ Set up Arcade CLI on Windows using `uv` (recommended), with optional `pip` fallb
 
 Validate which commands exist on your machine:
 
-### PowerShell
-
-```python
-uv --version
-python --version
-py --version
-Get-Command arcade -ErrorAction SilentlyContinue
-```
-
-### Bash
+### Bash/Zsh (macOS/Linux)
 
 ```bash
 uv --version
 python3 --version
 command -v arcade || true
+```
+
+### PowerShell (Windows)
+
+```powershell
+uv --version
+python --version
+py --version
+Get-Command arcade -ErrorAction SilentlyContinue
 ```
 
 If both `python` and `py` are missing, the pip-only instructions will fail until you install Python and add it to `PATH`.
@@ -40,25 +40,25 @@ If both `python` and `py` are missing, the pip-only instructions will fail until
 
 Use one of the following methods.
 
-### PowerShell
+### Bash/Zsh (macOS/Linux)
 
 ```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+export PATH="$HOME/.local/bin:$PATH"
+uv --version
+```
+
+### PowerShell (Windows)
+
+```powershell
 irm https://astral.sh/uv/install.ps1 | iex
 uv --version
 ```
 
 If `uv` is still not found in the same shell session:
 
-```bash
+```powershell
 $env:Path = "$env:USERPROFILE\.local\bin;$env:Path"
-uv --version
-```
-
-### Bash
-
-```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh
-export PATH="$HOME/.local/bin:$PATH"
 uv --version
 ```
 
@@ -91,15 +91,7 @@ choco install uv
 
 ### Global install
 
-### PowerShell
-
-```bash
-uv tool install --upgrade arcade-mcp
-arcade -v
-Get-Command arcade
-```
-
-### Bash
+### Bash/Zsh (macOS/Linux)
 
 ```bash
 uv tool install --upgrade arcade-mcp
@@ -107,24 +99,17 @@ arcade -v
 command -v arcade
 ```
 
+### PowerShell (Windows)
+
+```powershell
+uv tool install --upgrade arcade-mcp
+arcade -v
+Get-Command arcade
+```
+
 ### Virtual environment install
 
-### PowerShell
-
-```python
-uv venv ".venv"
-uv pip install --python ".venv\Scripts\python.exe" arcade-mcp
-& ".venv\Scripts\arcade.exe" -v
-```
-
-Optional activation:
-
-```bash
-. ".venv\Scripts\Activate.ps1"
-arcade -v
-```
-
-### Bash
+### Bash/Zsh (macOS/Linux)
 
 ```bash
 uv venv .venv
@@ -139,30 +124,28 @@ source .venv/bin/activate
 arcade -v
 ```
 
+### PowerShell (Windows)
+
+```powershell
+uv venv ".venv"
+uv pip install --python ".venv\Scripts\python.exe" arcade-mcp
+& ".venv\Scripts\arcade.exe" -v
+```
+
+Optional activation:
+
+```powershell
+. ".venv\Scripts\Activate.ps1"
+arcade -v
+```
+
 ## Install without `uv` (pip fallback)
 
 Use this only if `uv` is unavailable.
 
-### PowerShell
+### Bash/Zsh (macOS/Linux)
 
-```python
-python -m venv ".venv"
-. ".venv\Scripts\Activate.ps1"
-python -m pip install --upgrade pip
-python -m pip install arcade-mcp
-arcade -v
-```
-
-Global  install:
-
-```python
-python -m pip install --user arcade-mcp
-arcade -v
-```
-
-### Bash
-
-```python
+```bash
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install --upgrade pip
@@ -177,25 +160,28 @@ python3 -m pip install --user arcade-mcp
 arcade -v
 ```
 
+### PowerShell (Windows)
+
+```powershell
+python -m venv ".venv"
+. ".venv\Scripts\Activate.ps1"
+python -m pip install --upgrade pip
+python -m pip install arcade-mcp
+arcade -v
+```
+
+Global  install:
+
+```python
+python -m pip install --user arcade-mcp
+arcade -v
+```
+
 ## Validate your installation
 
 Run these after install:
 
-### PowerShell
-
-```bash
-arcade -v
-arcade --help
-arcade mcp --help
-```
-
-If validating a venv without activation:
-
-```bash
-& ".venv\Scripts\arcade.exe" -v
-```
-
-### Bash
+### Bash/Zsh (macOS/Linux)
 
 ```bash
 arcade -v
@@ -209,18 +195,32 @@ If validating a venv without activation:
 .venv/bin/arcade -v
 ```
 
+### PowerShell (Windows)
+
+```powershell
+arcade -v
+arcade --help
+arcade mcp --help
+```
+
+If validating a venv without activation:
+
+```powershell
+& ".venv\Scripts\arcade.exe" -v
+```
+
 ## Troubleshoot Windows setup
 
 ### `uv` not found
 
-```bash
+```powershell
 $env:Path = "$env:USERPROFILE\.local\bin;$env:Path"
 uv --version
 ```
 
 ### `arcade` resolves to a venv instead of global install
 
-```bash
+```powershell
 Get-Command arcade
 ```
 
@@ -228,7 +228,7 @@ If this points to `.venv\Scripts\arcade.exe`, open a new shell or deactivate the
 
 ### Execution policy blocks `Activate.ps1`
 
-```bash
+```powershell
 Get-ExecutionPolicy -List | Format-Table -AutoSize
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 . ".venv\Scripts\Activate.ps1"

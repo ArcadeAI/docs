@@ -87,16 +87,16 @@ async def weather_eval_suite() -> EvalSuite:
 
 Set your OpenAI  and run the evaluation:
 
-### Bash
+### Bash/Zsh (macOS/Linux)
 
 ```bash
 export OPENAI_API_KEY=<your_api_key>
 arcade evals .
 ```
 
-### PowerShell
+### PowerShell (Windows)
 
-```bash
+```powershell
 $env:OPENAI_API_KEY="<your_api_key>"
 arcade evals .
 ```
@@ -105,7 +105,7 @@ The command discovers all `eval_*.py` files and executes them using OpenAI’s `
 
 **Using different providers:**
 
-### Bash
+### Bash/Zsh (macOS/Linux)
 
 ```bash
 # Anthropic
@@ -125,9 +125,9 @@ arcade evals . -p openai -p anthropic -k openai:sk-... -k anthropic:sk-ant-...
 arcade evals . --num-runs 3 --seed random --multi-run-pass-rule majority
 ```
 
-### PowerShell
+### PowerShell (Windows)
 
-```bash
+```powershell
 # Anthropic
 $env:ANTHROPIC_API_KEY="<your_api_key>"
 arcade evals . -p anthropic

@@ -65,16 +65,16 @@ arcade login
 
 Add the environment variables to your shell:
 
-### Bash
+### Bash/Zsh (macOS/Linux)
 
 ```bash
 export ARCADE_API_KEY=<your-api-key>
 export ARCADE_USER_ID=<your-user-id>
 ```
 
-### PowerShell
+### PowerShell (Windows)
 
-```bash
+```powershell
 $env:ARCADE_API_KEY="<your-api-key>"
 $env:ARCADE_USER_ID="<your-user-id>"
 ```

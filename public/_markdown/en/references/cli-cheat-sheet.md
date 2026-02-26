@@ -696,7 +696,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 PowerShell session example:
 
-```bash
+```powershell
 $env:OPENAI_API_KEY="sk-..."
 $env:ANTHROPIC_API_KEY="sk-ant-..."
 ```
