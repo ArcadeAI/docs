@@ -8,7 +8,9 @@ import { SignupLink } from "@/app/_components/analytics";
 
 # Connect Arcade to your LLM
 
-Arcade tools work alongside an LLM. To make that work, you need a small piece of glue code called a "harness." The harness orchestrates the back-and-forth between the user, the model, and the tools. In this guide, you'll build one so you can wire Arcade into your LLM-powered app.
+Build a harness to orchestrate communication between your user, an LLM, and Arcade tools in Python.
+
+Arcade tools work alongside an LLM. To make that work, you need a piece of glue code called a "harness." The harness orchestrates the back-and-forth between the user, the model, and the tools. In this guide, you'll build one so you can wire Arcade into your LLM-powered app.
 
 <GuideOverview>
 <GuideOverview.Outcomes>
@@ -198,11 +200,9 @@ def authorize_and_run_tool(tool_name: str, input: str):
     return json.dumps(result.output.value)
 ```
 
-This helper function adapts to any tool in the catalog and will make sure that the authorization requirements are met before executing the tool. For more complex agentic patterns, this is generally the best place to handle interruptions that may require user interaction, such as when the tool requires a user to approve a request, or to provide additional context.
+This helper function adapts to any tool in the catalog and makes sure that the authorization requirements meet authorization criteria before executing the tool. For more complex agentic patterns, this is generally the best place to handle interruptions that may require user interaction, such as when the tool requires a user to approve a request, or to provide additional context.
 
-### Write a helper function that handles the LLM's invocation
-
-There are many orchestration patterns that can be used to handle the LLM invocation. A common pattern is a ReAct architecture, where the user prompt will result in a loop of messages between the LLM and the tools, until the LLM provides a final response (no tool calls). This is the pattern we will implement in this example.
+Several options exist for orchestration patterns that can handle the LLM invocation. A common pattern is a ReAct architecture, where the user prompt will result in a loop of messages between the LLM and the tools, until the LLM provides a final response (no tool calls). This is the pattern implemented in this example.
 
 To avoid the risk of infinite loops, limit the number of turns (in this case, a maximum of 5). This is a parameter that you can tune to your needs. Set it to a value that is high enough to allow the LLM to complete its task but low enough to prevent infinite loops.
 
@@ -260,7 +260,7 @@ def invoke_llm(
     return history
 ```
 
-These two helper functions form the core of your agentic loop. Notice that authorization is handled outside the agentic context, and the tool execution is passed back to the LLM in every case. Depending on your needs, you may want to handle tool orchestration within the harness and pass only the final result of multiple tool calls to the LLM.
+These two helper functions form the core of your agentic loop. Notice that authorization occurs outside the agentic context, and the harness returns tool execution to the LLM in every case. Depending on your needs, you may want to handle tool orchestration within the harness and the harness returns only the final result of multiple tool calls to the LLM.
 
 ### Write the main agentic loop
 
@@ -327,10 +327,10 @@ With the selection of tools above, you should be able to get the agent to effect
 
 </Steps>
 
-## Next Steps
+## Next steps
 
 - Learn more about using Arcade with a [framework](/get-started/agent-frameworks) or [MCP client](/get-started/mcp-clients).
-- Learn more about how to [build your own MCP Servers](/guides/create-tools/tool-basics/build-mcp-server).
+- Learn more about how to [build your own MCP servers](/guides/create-tools/tool-basics/build-mcp-server).
 
 ## Example code
 
