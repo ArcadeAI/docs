@@ -8,8 +8,10 @@
 import {
   buildComparableToolSignature,
   extractVersion,
+  stableStringify,
 } from "../merger/data-merger.js";
 import type {
+  MergedTool,
   MergedToolkit,
   ToolDefinition,
   ToolkitMetadata,
@@ -29,6 +31,8 @@ export interface ToolChange {
   readonly changeType: ToolChangeType;
   /** Tool name (e.g., "CreateIssue") */
   readonly toolName: string;
+  /** True when only per-tool metadata changed (definition signature identical). */
+  readonly metadataOnly: boolean;
 }
 
 export interface ToolkitChange {
@@ -108,6 +112,50 @@ const isCurrentToolkitData = (
  */
 export const buildToolDefinitionSignature = (tool: ToolDefinition): string =>
   buildComparableToolSignature(tool);
+
+const normalizeToolMetadataForSignature = (
+  metadata: ToolDefinition["metadata"] | MergedTool["metadata"]
+) => {
+  if (!metadata) {
+    return null;
+  }
+
+  return {
+    ...metadata,
+    classification: {
+      ...metadata.classification,
+      serviceDomains: [...metadata.classification.serviceDomains].sort(),
+    },
+    behavior: {
+      ...metadata.behavior,
+      operations: [...metadata.behavior.operations].sort(),
+    },
+  };
+};
+
+const buildToolMetadataSignature = (
+  tool: ToolDefinition | MergedTool
+): string => stableStringify(normalizeToolMetadataForSignature(tool.metadata));
+
+const buildToolMetadataSignatureMap = (
+  tools: readonly (ToolDefinition | MergedTool)[]
+): ReadonlyMap<string, string> => {
+  const map = new Map<string, string>();
+  for (const tool of tools) {
+    map.set(tool.qualifiedName, buildToolMetadataSignature(tool));
+  }
+  return map;
+};
+
+const buildNameMap = (
+  tools: readonly { qualifiedName: string; name: string }[]
+): ReadonlyMap<string, string> => {
+  const map = new Map<string, string>();
+  for (const tool of tools) {
+    map.set(tool.qualifiedName, tool.name);
+  }
+  return map;
+};
 
 /**
  * Build a map of tool signatures for quick lookup
@@ -206,6 +254,24 @@ const hasRelevantMetadataChanges = (
 // Change Detection Functions
 // ============================================================================
 
+const classifyToolChange = (
+  currentSig: string,
+  previousSig: string | undefined,
+  currentMetaSig: string | undefined,
+  previousMetaSig: string | undefined
+): Pick<ToolChange, "changeType" | "metadataOnly"> | null => {
+  if (!previousSig) {
+    return { changeType: "added", metadataOnly: false };
+  }
+  if (currentSig !== previousSig) {
+    return { changeType: "modified", metadataOnly: false };
+  }
+  if (currentMetaSig !== previousMetaSig) {
+    return { changeType: "modified", metadataOnly: true };
+  }
+  return null;
+};
+
 /**
  * Compare tools within a toolkit to detect changes
  */
@@ -215,49 +281,32 @@ export const compareTools = (
 ): readonly ToolChange[] => {
   const changes: ToolChange[] = [];
 
-  // Build signature maps
   const currentSignatures = buildToolSignatureMap(currentTools);
   const previousSignatures = previousToolkit
     ? buildMergedToolSignatureMap(previousToolkit)
     : new Map<string, string>();
+  const currentMetadataSignatures = buildToolMetadataSignatureMap(currentTools);
+  const previousMetadataSignatures = previousToolkit
+    ? buildToolMetadataSignatureMap(previousToolkit.tools)
+    : new Map<string, string>();
+  const currentToolNames = buildNameMap(currentTools);
+  const previousToolNames = previousToolkit
+    ? buildNameMap(previousToolkit.tools)
+    : new Map<string, string>();
 
-  // Build name lookup for current tools
-  const currentToolNames = new Map<string, string>();
-  for (const tool of currentTools) {
-    currentToolNames.set(tool.qualifiedName, tool.name);
-  }
-
-  // Build name lookup for previous tools
-  const previousToolNames = new Map<string, string>();
-  if (previousToolkit) {
-    for (const tool of previousToolkit.tools) {
-      previousToolNames.set(tool.qualifiedName, tool.name);
-    }
-  }
-
-  // Check for added and modified tools
   for (const [qualifiedName, currentSig] of currentSignatures) {
-    const previousSig = previousSignatures.get(qualifiedName);
     const toolName = currentToolNames.get(qualifiedName) ?? qualifiedName;
-
-    if (!previousSig) {
-      // New tool
-      changes.push({
-        qualifiedName,
-        changeType: "added",
-        toolName,
-      });
-    } else if (currentSig !== previousSig) {
-      // Modified tool
-      changes.push({
-        qualifiedName,
-        changeType: "modified",
-        toolName,
-      });
+    const classification = classifyToolChange(
+      currentSig,
+      previousSignatures.get(qualifiedName),
+      currentMetadataSignatures.get(qualifiedName),
+      previousMetadataSignatures.get(qualifiedName)
+    );
+    if (classification) {
+      changes.push({ qualifiedName, toolName, ...classification });
     }
   }
 
-  // Check for removed tools
   for (const qualifiedName of previousSignatures.keys()) {
     if (!currentSignatures.has(qualifiedName)) {
       const toolName = previousToolNames.get(qualifiedName) ?? qualifiedName;
@@ -265,6 +314,7 @@ export const compareTools = (
         qualifiedName,
         changeType: "removed",
         toolName,
+        metadataOnly: false,
       });
     }
   }
@@ -380,6 +430,7 @@ export const detectChanges = (
           qualifiedName: tool.qualifiedName,
           changeType: "removed" as const,
           toolName: tool.name,
+          metadataOnly: false,
         })),
         currentVersion: "0.0.0",
         previousVersion: toolkit.version,
@@ -585,7 +636,11 @@ const appendToolChanges = (
   }
   for (const toolChange of toolkitChange.toolChanges) {
     const toolLabel = TOOL_CHANGE_LABELS[toolChange.changeType];
-    lines.push(`${toolLabel}${toolChange.toolName}`);
+    const metadataOnlySuffix =
+      toolChange.changeType === "modified" && toolChange.metadataOnly
+        ? " (metadata only)"
+        : "";
+    lines.push(`${toolLabel}${toolChange.toolName}${metadataOnlySuffix}`);
   }
 };
 

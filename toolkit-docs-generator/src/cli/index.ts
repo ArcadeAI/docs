@@ -50,6 +50,8 @@ import {
   type IToolkitDataSource,
   type ToolkitData,
 } from "../sources/toolkit-data-source.js";
+import { readExclusionList } from "../utils/exclusion-list.js";
+import { readIgnoreList } from "../utils/ignore-list.js";
 import {
   createProgressTracker,
   formatToolkitComplete,
@@ -60,6 +62,11 @@ import {
   readFailedToolsReport,
   writeFailedToolsReport,
 } from "../utils/run-logs.js";
+import { cleanupExcludedToolkitOutput } from "./exclusion-cleanup.js";
+import {
+  computeProcessingStats,
+  filterProvidersBySkipIds,
+} from "./generate-flow.js";
 
 /**
  * Supported API sources:
@@ -839,6 +846,14 @@ program
     "Require complete metadata. Only include toolkits with data in Engine and Design System.",
     false
   )
+  .option(
+    "--exclude-file <file>",
+    "Path to a .txt file with toolkit IDs to exclude from generation (one per line)"
+  )
+  .option(
+    "--ignore-file <file>",
+    "Path to a .txt file with toolkit IDs to skip during generation (one per line)"
+  )
   .option("--verbose", "Enable verbose logging", false)
   .action(
     async (options: {
@@ -878,12 +893,46 @@ program
       incremental: boolean;
       skipUnchanged: boolean;
       requireComplete: boolean;
+      excludeFile?: string;
+      ignoreFile?: string;
       verbose: boolean;
       // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: legacy CLI flow
     }) => {
       const spinner = ora("Parsing input...").start();
       const logPaths = buildLogPaths(resolve(options.logDir));
       const requireComplete = options.requireComplete;
+
+      let excludedToolkitIds = new Set<string>();
+      if (options.excludeFile) {
+        spinner.start(`Loading exclusion list from ${options.excludeFile}...`);
+        const loaded = await readExclusionList(options.excludeFile);
+        if (loaded === null) {
+          spinner.fail(`Exclusion file not found: ${options.excludeFile}`);
+          process.exit(1);
+        }
+        excludedToolkitIds = loaded;
+        spinner.succeed(
+          excludedToolkitIds.size > 0
+            ? `Excluding ${excludedToolkitIds.size} toolkit(s) from generation`
+            : "Exclusion file loaded (no toolkits excluded)"
+        );
+      }
+
+      let ignoredToolkitIds = new Set<string>();
+      if (options.ignoreFile) {
+        spinner.start(`Loading ignore list from ${options.ignoreFile}...`);
+        const loaded = await readIgnoreList(options.ignoreFile);
+        if (loaded === null) {
+          spinner.fail(`Ignore file not found: ${options.ignoreFile}`);
+          process.exit(1);
+        }
+        ignoredToolkitIds = loaded;
+        spinner.succeed(
+          ignoredToolkitIds.size > 0
+            ? `Ignoring ${ignoredToolkitIds.size} toolkit(s) during generation`
+            : "Ignore file loaded (no toolkits ignored)"
+        );
+      }
 
       try {
         const runAll = options.all;
@@ -1103,6 +1152,14 @@ program
           }
         }
 
+        for (const id of excludedToolkitIds) {
+          skipToolkitIds.add(id);
+        }
+
+        for (const id of ignoredToolkitIds) {
+          skipToolkitIds.add(id);
+        }
+
         // Handle --skip-unchanged: detect changes and only regenerate changed toolkits
         let changedToolkitIds: Set<string> | undefined;
         let changeResult: ReturnType<typeof detectChanges> | undefined;
@@ -1166,19 +1223,37 @@ program
             );
             console.log(chalk.green("\n✓ Nothing to regenerate.\n"));
 
+            const noChangeCleanup = await cleanupExcludedToolkitOutput({
+              outputDir: options.output,
+              excludedToolkitIds,
+              generator,
+              verbose: options.verbose,
+            });
+            if (noChangeCleanup.deleted.length > 0 && options.verbose) {
+              console.log(
+                chalk.dim(
+                  `  Deleted ${noChangeCleanup.deleted.length} excluded toolkit file(s): ${noChangeCleanup.deleted.join(", ")}`
+                )
+              );
+            }
+            for (const warning of noChangeCleanup.warnings) {
+              spinner.warn(warning);
+            }
+
             await appendLogEntry(logPaths.runLogPath, {
               title: "generate --skip-unchanged (no changes)",
               details: [
                 `output=${resolve(options.output)}`,
                 `apiSource=${apiSource}`,
                 `summary=${formatChangeSummary(detectedChanges)}`,
+                `excludedFilesDeleted=${noChangeCleanup.deleted.length}`,
               ],
             });
             await appendLogEntry(logPaths.changeLogPath, {
               title: "changes (no-op)",
               details: [formatChangeSummary(detectedChanges)],
             });
-            process.exit(0);
+            return;
           }
 
           // Get IDs of changed toolkits
@@ -1305,14 +1380,27 @@ program
             }
           }
 
-          const toProcess = totalToolkits - skipToolkitIds.size;
+          const processingStats = computeProcessingStats(
+            toolkitList,
+            skipToolkitIds
+          );
+          const { toProcess, effectiveSkipped, unknownSkipIds } =
+            processingStats;
+
+          if (options.verbose && unknownSkipIds.length > 0) {
+            console.log(
+              chalk.dim(
+                `  Skipping ${unknownSkipIds.length} unknown toolkit ID(s) not found in fetched list: ${unknownSkipIds.join(", ")}`
+              )
+            );
+          }
 
           if (toProcess === 0) {
             spinner.succeed("No toolkits to process after applying filters");
             allResults = [];
           } else {
             const skipReason =
-              skipToolkitIds.size > 0 ? `(${skipToolkitIds.size} skipped)` : "";
+              effectiveSkipped > 0 ? `(${effectiveSkipped} skipped)` : "";
             spinner.succeed(
               `Found ${totalToolkits} toolkit(s), ${toProcess} to process ${skipReason}`.trim()
             );
@@ -1385,12 +1473,21 @@ program
             );
           }
         } else {
-          allResults = await processProviders(
+          const { providersToProcess } = filterProvidersBySkipIds(
             providers ?? [],
-            merger,
-            spinner,
-            options.verbose
+            skipToolkitIds
           );
+          if (providersToProcess.length === 0) {
+            spinner.succeed("No providers to process after applying filters");
+            allResults = [];
+          } else {
+            allResults = await processProviders(
+              providersToProcess,
+              merger,
+              spinner,
+              options.verbose
+            );
+          }
         }
 
         // Generate output files (batch mode if not incremental)
@@ -1433,13 +1530,45 @@ program
               const indexFile = genResult.filesWritten.find((f) =>
                 f.endsWith("index.json")
               );
+              if (genResult.errors.length > 0) {
+                writeErrors.push(...genResult.errors);
+                spinner.warn(
+                  `Index generation completed with warnings: ${genResult.errors.join(", ")}`
+                );
+              }
               if (indexFile) {
                 filesWritten.push(indexFile);
+                if (genResult.errors.length === 0) {
+                  spinner.succeed("Index file generated");
+                }
+              } else if (genResult.errors.length === 0) {
+                spinner.warn(
+                  "Index generation completed, but index.json was not written."
+                );
               }
-              spinner.succeed("Index file generated");
             } catch (error) {
               spinner.warn(`Failed to generate index: ${error}`);
             }
+          }
+        }
+
+        const exclusionCleanup = await cleanupExcludedToolkitOutput({
+          outputDir: options.output,
+          excludedToolkitIds,
+          generator,
+          verbose: options.verbose,
+        });
+        if (exclusionCleanup.deleted.length > 0 && options.verbose) {
+          console.log(
+            chalk.dim(
+              `  Deleted ${exclusionCleanup.deleted.length} excluded toolkit file(s): ${exclusionCleanup.deleted.join(", ")}`
+            )
+          );
+        }
+        if (exclusionCleanup.warnings.length > 0) {
+          writeErrors.push(...exclusionCleanup.warnings);
+          for (const warning of exclusionCleanup.warnings) {
+            spinner.warn(warning);
           }
         }
 
@@ -1656,6 +1785,14 @@ program
     "Require complete metadata. Only include toolkits with data in Engine and Design System.",
     false
   )
+  .option(
+    "--exclude-file <file>",
+    "Path to a .txt file with toolkit IDs to exclude from generation (one per line)"
+  )
+  .option(
+    "--ignore-file <file>",
+    "Path to a .txt file with toolkit IDs to skip during generation (one per line)"
+  )
   .option("--verbose", "Enable verbose logging", false)
   .action(
     async (options: {
@@ -1689,12 +1826,46 @@ program
       customSections?: string;
       resume: boolean;
       incremental: boolean;
+      excludeFile?: string;
+      ignoreFile?: string;
       requireComplete: boolean;
       verbose: boolean;
       // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: legacy CLI flow
     }) => {
       const spinner = ora("Initializing...").start();
       const requireComplete = options.requireComplete;
+
+      let excludedToolkitIds = new Set<string>();
+      if (options.excludeFile) {
+        spinner.start(`Loading exclusion list from ${options.excludeFile}...`);
+        const loaded = await readExclusionList(options.excludeFile);
+        if (loaded === null) {
+          spinner.fail(`Exclusion file not found: ${options.excludeFile}`);
+          process.exit(1);
+        }
+        excludedToolkitIds = loaded;
+        spinner.succeed(
+          excludedToolkitIds.size > 0
+            ? `Excluding ${excludedToolkitIds.size} toolkit(s) from generation`
+            : "Exclusion file loaded (no toolkits excluded)"
+        );
+      }
+
+      let ignoredToolkitIds = new Set<string>();
+      if (options.ignoreFile) {
+        spinner.start(`Loading ignore list from ${options.ignoreFile}...`);
+        const loaded = await readIgnoreList(options.ignoreFile);
+        if (loaded === null) {
+          spinner.fail(`Ignore file not found: ${options.ignoreFile}`);
+          process.exit(1);
+        }
+        ignoredToolkitIds = loaded;
+        spinner.succeed(
+          ignoredToolkitIds.size > 0
+            ? `Ignoring ${ignoredToolkitIds.size} toolkit(s) during generation`
+            : "Ignore file loaded (no toolkits ignored)"
+        );
+      }
 
       try {
         const mockDataDir = options.mockDataDir ?? getDefaultMockDataDir();
@@ -1808,6 +1979,14 @@ program
           }
         }
 
+        for (const id of excludedToolkitIds) {
+          skipToolkitIds.add(id);
+        }
+
+        for (const id of ignoredToolkitIds) {
+          skipToolkitIds.add(id);
+        }
+
         if (options.overwriteOutput) {
           spinner.start("Clearing output directory...");
           await clearOutputDir(options.output, options.verbose);
@@ -1864,13 +2043,25 @@ program
           }
         }
 
-        const toProcess = totalToolkits - skipToolkitIds.size;
+        const processingStats = computeProcessingStats(
+          toolkitList,
+          skipToolkitIds
+        );
+        const { toProcess, effectiveSkipped, unknownSkipIds } = processingStats;
+
+        if (options.verbose && unknownSkipIds.length > 0) {
+          console.log(
+            chalk.dim(
+              `  Skipping ${unknownSkipIds.length} unknown toolkit ID(s) not found in fetched list: ${unknownSkipIds.join(", ")}`
+            )
+          );
+        }
 
         if (toProcess === 0) {
           spinner.succeed("No toolkits to process after applying filters");
         } else {
           spinner.succeed(
-            `Found ${totalToolkits} toolkit(s), ${toProcess} to process${skipToolkitIds.size > 0 ? ` (${skipToolkitIds.size} skipped)` : ""}`
+            `Found ${totalToolkits} toolkit(s), ${toProcess} to process${effectiveSkipped > 0 ? ` (${effectiveSkipped} skipped)` : ""}`
           );
           if (options.verbose) {
             console.log(
@@ -1979,13 +2170,45 @@ program
               const indexFile = genResult.filesWritten.find((f) =>
                 f.endsWith("index.json")
               );
+              if (genResult.errors.length > 0) {
+                writeErrors.push(...genResult.errors);
+                spinner.warn(
+                  `Index generation completed with warnings: ${genResult.errors.join(", ")}`
+                );
+              }
               if (indexFile) {
                 filesWritten.push(indexFile);
+                if (genResult.errors.length === 0) {
+                  spinner.succeed("Index file generated");
+                }
+              } else if (genResult.errors.length === 0) {
+                spinner.warn(
+                  "Index generation completed, but index.json was not written."
+                );
               }
-              spinner.succeed("Index file generated");
             } catch (error) {
               spinner.warn(`Failed to generate index: ${error}`);
             }
+          }
+        }
+
+        const exclusionCleanup = await cleanupExcludedToolkitOutput({
+          outputDir: options.output,
+          excludedToolkitIds,
+          generator,
+          verbose: options.verbose,
+        });
+        if (exclusionCleanup.deleted.length > 0 && options.verbose) {
+          console.log(
+            chalk.dim(
+              `  Deleted ${exclusionCleanup.deleted.length} excluded toolkit file(s): ${exclusionCleanup.deleted.join(", ")}`
+            )
+          );
+        }
+        if (exclusionCleanup.warnings.length > 0) {
+          writeErrors.push(...exclusionCleanup.warnings);
+          for (const warning of exclusionCleanup.warnings) {
+            spinner.warn(warning);
           }
         }
 
@@ -2018,6 +2241,12 @@ program
         console.log(chalk.green("\n✓ Generation complete\n"));
         if (filesWritten.length > 0) {
           console.log(chalk.dim(`Written ${filesWritten.length} file(s)`));
+        }
+        if (writeErrors.length > 0) {
+          console.log(chalk.yellow("\nWarnings:"));
+          for (const warning of writeErrors) {
+            console.log(chalk.yellow(`  ${warning}`));
+          }
         }
       } catch (error) {
         spinner.fail(

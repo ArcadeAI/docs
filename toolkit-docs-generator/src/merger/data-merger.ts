@@ -653,6 +653,7 @@ const transformTool = async (
       output: tool.output,
       documentationChunks,
       codeExample: previousTool.codeExample,
+      metadata: tool.metadata ?? null,
     };
   }
 
@@ -668,6 +669,7 @@ const transformTool = async (
       secretsInfo: [],
       output: tool.output,
       documentationChunks,
+      metadata: tool.metadata ?? null,
     };
   }
 
@@ -686,6 +688,7 @@ const transformTool = async (
       output: tool.output,
       documentationChunks,
       codeExample: exampleResult.codeExample,
+      metadata: tool.metadata ?? null,
     };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -710,6 +713,7 @@ const transformTool = async (
       secretsInfo: previousTool?.secretsInfo ?? [],
       output: tool.output,
       documentationChunks,
+      metadata: tool.metadata ?? null,
     };
   }
 };
