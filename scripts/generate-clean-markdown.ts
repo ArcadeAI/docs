@@ -34,6 +34,11 @@ const MAIN_PATTERN = /<main[^>]*>([\s\S]*?)<\/main>/i;
 const BODY_PATTERN = /<body[^>]*>([\s\S]*?)<\/body>/i;
 const PAGE_MDX_PATTERN = /\/page\.mdx$/;
 const MDX_PATTERN = /\.mdx$/;
+const POWERSHELL_CONTENT_PATTERN =
+  /\$env:|\bGet-Command\b|\bGet-ExecutionPolicy\b|\bSet-ExecutionPolicy\b|Activate\.ps1|\\Scripts\\|^\s*irm\b.*\|\s*iex\b|^\s*&\s*["'][^"']*\.exe["']/im;
+const BASH_CONTENT_PATTERN =
+  /^\s*export\s+[A-Za-z_][A-Za-z0-9_]*=|^\s*source\s+|^\s*command\s+-v\s+|\.venv\/bin\/|\/bin\/activate|\$HOME|curl\s+-LsSf.*\|\s*sh\b|\bbrew\b/im;
+const MARKDOWN_HEADING_PATTERN = /^#{1,6}\s+/;
 
 // Validation regex patterns
 const IMPORT_STATEMENT_PATTERN = /^import\s+/m;
@@ -191,6 +196,19 @@ function findElementWithText(node: Node, patterns: string[]): string | null {
     }
   }
   return null;
+}
+
+/**
+ * Infers shell language from command content when UI labels are ambiguous.
+ */
+function inferShellLanguageFromCode(code: string): "powershell" | "bash" | "" {
+  if (POWERSHELL_CONTENT_PATTERN.test(code)) {
+    return "powershell";
+  }
+  if (BASH_CONTENT_PATTERN.test(code)) {
+    return "bash";
+  }
+  return "";
 }
 
 /**
@@ -422,12 +440,18 @@ turndown.addRule("fencedCodeBlock", {
 
     // Try to extract language from various sources
     let language = "";
+    const inferredShellLanguage = inferShellLanguageFromCode(code);
 
     // 1. Check code element class (e.g., "language-typescript")
     const codeClassName = codeElement.getAttribute("class") || "";
     const langMatch = codeClassName.match(LANGUAGE_CLASS_PATTERN);
     if (langMatch) {
       language = langMatch[1];
+    }
+
+    // Prefer high-confidence shell inference when class metadata is missing.
+    if (!language && inferredShellLanguage) {
+      language = inferredShellLanguage;
     }
 
     // 2. Look for language label in parent structure
@@ -481,6 +505,16 @@ turndown.addRule("fencedCodeBlock", {
         parent = parent.parentElement;
         depth += 1;
       }
+    }
+
+    // Correct common misclassifications from surrounding labels.
+    if (inferredShellLanguage === "powershell") {
+      language = "powershell";
+    } else if (
+      inferredShellLanguage === "bash" &&
+      (language === "python" || !language)
+    ) {
+      language = "bash";
     }
 
     // 3. Try to find filename and add as comment
@@ -764,6 +798,47 @@ function cleanHtml(html: string): string {
  */
 function cleanMarkdown(markdown: string): string {
   let cleaned = markdown;
+
+  // Normalize shell headings derived from tab labels.
+  cleaned = cleaned
+    .replace(
+      /^(#{2,6})\s+Bash$/gm,
+      "$1 Bash/Zsh (macOS/Linux)"
+    )
+    .replace(
+      /^(#{2,6})\s+Zsh\/Bash$/gm,
+      "$1 Bash/Zsh (macOS/Linux)"
+    )
+    .replace(
+      /^(#{2,6})\s+PowerShell$/gm,
+      "$1 PowerShell (Windows)"
+    );
+
+  // Ensure the first code block after each shell heading has matching language.
+  const lines = cleaned.split("\n");
+  for (let i = 0; i < lines.length; i++) {
+    const heading = lines[i].trim();
+    let expectedLang = "";
+    if (heading === "### Bash/Zsh (macOS/Linux)") {
+      expectedLang = "bash";
+    } else if (heading === "### PowerShell (Windows)") {
+      expectedLang = "powershell";
+    } else {
+      continue;
+    }
+
+    for (let j = i + 1; j < lines.length; j++) {
+      const trimmed = lines[j].trim();
+      if (MARKDOWN_HEADING_PATTERN.test(trimmed)) {
+        break;
+      }
+      if (trimmed.startsWith("```")) {
+        lines[j] = `\`\`\`${expectedLang}`;
+        break;
+      }
+    }
+  }
+  cleaned = lines.join("\n");
 
   // Remove excessive blank lines (more than 2 consecutive)
   cleaned = cleaned.replace(/\n{4,}/g, "\n\n\n");

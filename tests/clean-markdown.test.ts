@@ -10,6 +10,19 @@ const MARKDOWN_DIR = "public/_markdown";
 const CODE_BLOCK_PATTERN = /```[\s\S]*?```/g;
 const APP_PREFIX_PATTERN = /^app\//;
 const PAGE_MDX_SUFFIX_PATTERN = /\/page\.mdx$/;
+const MARKDOWN_HEADING_PATTERN = /^#{1,6}\s+/;
+const FENCE_PREFIX = "```";
+
+const LEGACY_SHELL_HEADING_PATTERNS = [
+  /^(#{2,6})\s+Bash\s*$/,
+  /^(#{2,6})\s+PowerShell\s*$/,
+  /^(#{2,6})\s+Zsh\/Bash\s*$/,
+];
+
+const SHELL_HEADING_TO_LANG = {
+  "### Bash/Zsh (macOS/Linux)": new Set(["bash", "sh", "shell"]),
+  "### PowerShell (Windows)": new Set(["powershell", "pwsh"]),
+} as const;
 
 /**
  * Strips fenced code blocks from markdown content
@@ -27,6 +40,26 @@ function mdxPathToRelativePath(mdxFile: string): string {
   return mdxFile
     .replace(APP_PREFIX_PATTERN, "")
     .replace(PAGE_MDX_SUFFIX_PATTERN, "");
+}
+
+/**
+ * Finds the language of the first fenced code block after a heading.
+ * Stops at the next heading if no code block appears first.
+ */
+function firstFenceLanguageAfterHeading(
+  lines: string[],
+  headingLineIndex: number
+): string | null {
+  for (let i = headingLineIndex + 1; i < lines.length; i += 1) {
+    const trimmed = lines[i].trim();
+    if (trimmed.startsWith(FENCE_PREFIX)) {
+      return trimmed.slice(FENCE_PREFIX.length).trim().toLowerCase();
+    }
+    if (MARKDOWN_HEADING_PATTERN.test(trimmed)) {
+      return null;
+    }
+  }
+  return null;
 }
 
 // Patterns that indicate raw MDX syntax leaked into clean markdown
@@ -194,6 +227,91 @@ describe("Clean Markdown Files", () => {
       expect(
         stale.length,
         `${stale.length} clean markdown files are stale and need regeneration`
+      ).toBe(0);
+    },
+    TIMEOUT
+  );
+
+  test(
+    "clean markdown files use explicit shell headings",
+    async () => {
+      const markdownFiles = await fg(`${MARKDOWN_DIR}/**/*.md`);
+      const errors: Array<{ file: string; line: number; heading: string }> = [];
+
+      for (const file of markdownFiles) {
+        const lines = readFileSync(file, "utf-8").split("\n");
+        for (let i = 0; i < lines.length; i += 1) {
+          const line = lines[i].trim();
+          for (const pattern of LEGACY_SHELL_HEADING_PATTERNS) {
+            if (pattern.test(line)) {
+              errors.push({ file, line: i + 1, heading: line });
+            }
+          }
+        }
+      }
+
+      if (errors.length > 0) {
+        console.error("\nClean markdown files with legacy shell headings:");
+        for (const { file, line, heading } of errors) {
+          console.error(`  - ${file}:${line} -> ${heading}`);
+        }
+      }
+
+      expect(
+        errors.length,
+        `${errors.length} clean markdown headings still use legacy shell labels`
+      ).toBe(0);
+    },
+    TIMEOUT
+  );
+
+  test(
+    "explicit shell headings map to matching code fence languages",
+    async () => {
+      const markdownFiles = await fg(`${MARKDOWN_DIR}/**/*.md`);
+      const errors: Array<{
+        file: string;
+        line: number;
+        heading: string;
+        actual: string | null;
+      }> = [];
+
+      for (const file of markdownFiles) {
+        const lines = readFileSync(file, "utf-8").split("\n");
+
+        for (let i = 0; i < lines.length; i += 1) {
+          const heading = lines[i].trim() as keyof typeof SHELL_HEADING_TO_LANG;
+          const expected = SHELL_HEADING_TO_LANG[heading];
+          if (!expected) {
+            continue;
+          }
+
+          const actual = firstFenceLanguageAfterHeading(lines, i);
+          if (!(actual && expected.has(actual))) {
+            errors.push({
+              file,
+              line: i + 1,
+              heading,
+              actual,
+            });
+          }
+        }
+      }
+
+      if (errors.length > 0) {
+        console.error(
+          "\nClean markdown files with shell heading/code fence mismatches:"
+        );
+        for (const { file, line, heading, actual } of errors) {
+          console.error(
+            `  - ${file}:${line} -> ${heading} expected matching fence, found: ${actual ?? "none"}`
+          );
+        }
+      }
+
+      expect(
+        errors.length,
+        `${errors.length} shell heading sections have mismatched fence languages`
       ).toBe(0);
     },
     TIMEOUT
