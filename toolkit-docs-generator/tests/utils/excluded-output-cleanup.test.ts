@@ -60,4 +60,11 @@ describe("removeExcludedToolkitFiles", () => {
     const removed = await removeExcludedToolkitFiles(dir, new Set());
     expect(removed).toHaveLength(0);
   });
+
+  it("returns empty array and does not throw when output directory does not exist", async () => {
+    const nonExistentDir = join(tmpdir(), "cleanup-test-does-not-exist-xyz123");
+    await expect(
+      removeExcludedToolkitFiles(nonExistentDir, new Set(["github"]))
+    ).resolves.toEqual([]);
+  });
 });

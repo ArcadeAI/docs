@@ -16,7 +16,15 @@ export const removeExcludedToolkitFiles = async (
     return [];
   }
 
-  const files = await readdir(outputDir);
+  let files: string[];
+  try {
+    files = await readdir(outputDir);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+      return [];
+    }
+    throw error;
+  }
   const deleted: string[] = [];
 
   for (const file of files) {
