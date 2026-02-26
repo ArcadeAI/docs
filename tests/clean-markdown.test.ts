@@ -44,39 +44,23 @@ function mdxPathToRelativePath(mdxFile: string): string {
 }
 
 /**
- * Finds the language of each fenced code block after a heading,
- * stopping at the next heading.
+ * Finds the language of the first fenced code block after a heading.
+ * Stops at the next heading if no code block appears first.
  */
-function fenceLanguagesAfterHeading(
+function firstFenceLanguageAfterHeading(
   lines: string[],
   headingLineIndex: number
-): Array<{ language: string; line: number }> {
-  const fenceLanguages: Array<{ language: string; line: number }> = [];
-  let insideCodeFence = false;
-
+): string | null {
   for (let i = headingLineIndex + 1; i < lines.length; i += 1) {
     const trimmed = lines[i].trim();
+    if (trimmed.startsWith(FENCE_PREFIX)) {
+      return trimmed.slice(FENCE_PREFIX.length).trim().toLowerCase();
+    }
     if (MARKDOWN_HEADING_PATTERN.test(trimmed)) {
-      break;
+      return null;
     }
-    if (!trimmed.startsWith(FENCE_PREFIX)) {
-      continue;
-    }
-
-    if (insideCodeFence) {
-      if (MARKDOWN_CLOSING_FENCE_PATTERN.test(trimmed)) {
-        insideCodeFence = false;
-      }
-      continue;
-    }
-
-    fenceLanguages.push({
-      language: trimmed.slice(FENCE_PREFIX.length).trim().toLowerCase(),
-      line: i + 1,
-    });
-    insideCodeFence = true;
   }
-  return fenceLanguages;
+  return null;
 }
 
 // Patterns that indicate raw MDX syntax leaked into clean markdown
@@ -303,27 +287,14 @@ describe("Clean Markdown Files", () => {
             continue;
           }
 
-          const fences = fenceLanguagesAfterHeading(lines, i);
-
-          if (fences.length === 0) {
+          const actual = firstFenceLanguageAfterHeading(lines, i);
+          if (!(actual && expected.has(actual))) {
             errors.push({
               file,
               line: i + 1,
               heading,
-              actual: null,
+              actual,
             });
-            continue;
-          }
-
-          for (const { language, line } of fences) {
-            if (!expected.has(language)) {
-              errors.push({
-                file,
-                line,
-                heading,
-                actual: language,
-              });
-            }
           }
         }
       }
@@ -343,6 +314,61 @@ describe("Clean Markdown Files", () => {
         errors.length,
         `${errors.length} shell heading sections have mismatched fence languages`
       ).toBe(0);
+    },
+    TIMEOUT
+  );
+
+  test(
+    "windows environment install section keeps powershell fences for both install blocks",
+    () => {
+      const file = path.join(
+        MARKDOWN_DIR,
+        "en/get-started/setup/windows-environment.md"
+      );
+      const lines = readFileSync(file, "utf-8").split("\n");
+      const heading = "### PowerShell (Windows)";
+
+      const installHeadingIndex = lines.findIndex((line, index) => {
+        if (line.trim() !== heading) {
+          return false;
+        }
+        const sectionPreview = lines
+          .slice(index, Math.min(lines.length, index + 25))
+          .join("\n");
+        return sectionPreview.includes('python -m venv ".venv"');
+      });
+
+      expect(installHeadingIndex).toBeGreaterThan(-1);
+
+      const openingFences: Array<{ line: number; fence: string }> = [];
+      let insideCodeFence = false;
+
+      for (let i = installHeadingIndex + 1; i < lines.length; i += 1) {
+        const trimmed = lines[i].trim();
+        if (MARKDOWN_HEADING_PATTERN.test(trimmed)) {
+          break;
+        }
+        if (!trimmed.startsWith(FENCE_PREFIX)) {
+          continue;
+        }
+
+        if (insideCodeFence) {
+          if (MARKDOWN_CLOSING_FENCE_PATTERN.test(trimmed)) {
+            insideCodeFence = false;
+          }
+          continue;
+        }
+
+        openingFences.push({ line: i + 1, fence: trimmed });
+        insideCodeFence = true;
+      }
+
+      expect(openingFences.length).toBe(2);
+      for (const { line, fence } of openingFences) {
+        expect(fence, `Unexpected fence at ${file}:${line}`).toBe(
+          "```powershell"
+        );
+      }
     },
     TIMEOUT
   );
