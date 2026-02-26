@@ -7,7 +7,9 @@ import { Steps, Tabs, Callout } from "nextra/components";
 
 # Use Arcade tools with CrewAI
 
-[CrewAI](https://www.crewai.com/) is an agentic framework optimized for building task-oriented multi-agent systems. This guide explains how to integrate Arcade tools into your CrewAI applications.
+This guide explains how to integrate Arcade tools into your CrewAI applications.
+
+[CrewAI](https://www.crewai.com/) is an agentic framework optimized for building task-oriented multi-agent systems. You'll learn to retrieve Arcade tools, convert them to CrewAI format, and build an agent that uses Arcade tools for Gmail and Slack integration. This integration enables just-in-time tool authorization and provides a complete solution for CrewAI applications that need external service connectivity.
 
 <GuideOverview>
 <GuideOverview.Outcomes>
@@ -120,7 +122,7 @@ This includes many imports, here's a breakdown:
 
 ### Configure the agent
 
-The rest of the code uses these variables to customize the agent and manage the tools. Feel free to configure them to your liking. Here, the `EventListener` class is used to suppress CrewAI's rich panel output, which is useful for debugging but verbose for an interactive session like the one you're building.
+The rest of the code uses these variables to customize the agent and manage the tools. Feel free to configure them to your liking. Here, the `EventListener` class suppresses CrewAI's rich panel output, which is useful for debugging but verbose for an interactive session like the one you're building.
 
 ```python filename="main.py"
 # Load environment variables from the .env file
@@ -128,13 +130,13 @@ load_dotenv()
 
 # The Arcade User ID identifies who is authorizing each service.
 ARCADE_USER_ID = os.getenv("ARCADE_USER_ID")
-# This determines which MCP server is providing the tools, you can customize this to make a Notion agent. All tools from the MCP servers defined in the array will be used.
+# This determines which MCP server provides the tools, you can customize this to make a Notion agent. All tools from the MCP servers defined in the array will work.
 MCP_SERVERS = ["Slack"]
 # This determines individual tools. Useful to pick specific tools when you don't need all of them.
 TOOLS = ["Gmail_ListEmails", "Gmail_SendEmail", "Gmail_WhoAmI"]
 # This determines the maximum number of tool definitions Arcade will return per MCP server
 TOOL_LIMIT = 30
-# This determines which LLM model will be used inside the agent
+# This determines which LLM model will work inside the agent
 MODEL = "openai/gpt-5-mini"
 # The individual objective that guides the agent's decision-making
 AGENT_GOAL = "Help the user with all their requests"
@@ -186,7 +188,7 @@ def _build_args_model(tool_def: ToolDefinition) -> type[BaseModel]:
 
 ### Write a custom class that extends the CrewAI BaseTool class
 
-Here, you define the `ArcadeTool` class that extends the CrewAI `BaseTool` class to add the following capability:
+Here, you define the `ArcadeTool` class that extends the CrewAI `BaseTool` class to add the following feature:
 
 - Authorize the tool with the Arcade client with the `_auth_tool` helper function
 - Execute the tool with the Arcade client with the `_run` method
@@ -245,7 +247,7 @@ class ArcadeTool(BaseTool):
 
 ### Retrieve Arcade tools and transform them into CrewAI tools
 
-Here you get the Arcade tools you want the agent to utilize, and transform them into CrewAI tools. The first step is to initialize the Arcade client, and get the tools you want to work with.
+Here you get the Arcade tools you want the agent to use, and transform them into CrewAI tools. The first step involves initializing the Arcade client, and getting the tools you want to work with.
 
 Here's a breakdown of what it does for clarity:
 
@@ -352,7 +354,7 @@ You should see the agent responding to your prompts like any model, as well as h
 ## Tips for selecting tools
 
 - **Relevance**: Pick only the tools you need. Avoid using all tools at once.
-- **Avoid conflicts**: Be mindful of duplicate or overlapping functionality.
+- **Avoid conflicts**: Be mindful of duplicate or overlapping capability.
 
 ## Next steps
 
@@ -383,13 +385,13 @@ load_dotenv()
 
 # The Arcade User ID identifies who is authorizing each service.
 ARCADE_USER_ID = os.getenv("ARCADE_USER_ID")
-# This determines which MCP server is providing the tools, you can customize this to make a Notion agent. All tools from the MCP servers defined in the array will be used.
+# This determines which MCP server provides the tools, you can customize this to make a Notion agent. All tools from the MCP servers defined in the array will work.
 MCP_SERVERS = ["Slack"]
 # This determines individual tools. Useful to pick specific tools when you don't need all of them.
 TOOLS = ["Gmail_ListEmails", "Gmail_SendEmail", "Gmail_WhoAmI"]
 # This determines the maximum number of tool definitions Arcade will return per MCP server
 TOOL_LIMIT = 30
-# This determines which LLM model will be used inside the agent
+# This determines which LLM model will work inside the agent
 MODEL = "openai/gpt-5-mini"
 # The individual objective that guides the agent's decision-making
 AGENT_GOAL = "Help the user with all their requests"
