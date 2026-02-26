@@ -50,7 +50,6 @@ import {
   type IToolkitDataSource,
   type ToolkitData,
 } from "../sources/toolkit-data-source.js";
-import { removeExcludedToolkitFiles } from "../utils/excluded-output-cleanup.js";
 import { readExclusionList } from "../utils/exclusion-list.js";
 import { readIgnoreList } from "../utils/ignore-list.js";
 import {
@@ -63,6 +62,7 @@ import {
   readFailedToolsReport,
   writeFailedToolsReport,
 } from "../utils/run-logs.js";
+import { cleanupExcludedToolkitOutput } from "./exclusion-cleanup.js";
 
 /**
  * Supported API sources:
@@ -1486,30 +1486,45 @@ program
               const indexFile = genResult.filesWritten.find((f) =>
                 f.endsWith("index.json")
               );
+              if (genResult.errors.length > 0) {
+                writeErrors.push(...genResult.errors);
+                spinner.warn(
+                  `Index generation completed with warnings: ${genResult.errors.join(", ")}`
+                );
+              }
               if (indexFile) {
                 filesWritten.push(indexFile);
+                if (genResult.errors.length === 0) {
+                  spinner.succeed("Index file generated");
+                }
+              } else if (genResult.errors.length === 0) {
+                spinner.warn(
+                  "Index generation completed, but index.json was not written."
+                );
               }
-              spinner.succeed("Index file generated");
             } catch (error) {
               spinner.warn(`Failed to generate index: ${error}`);
             }
           }
         }
 
-        if (excludedToolkitIds.size > 0) {
-          const deleted = await removeExcludedToolkitFiles(
-            resolve(options.output),
-            excludedToolkitIds
+        const exclusionCleanup = await cleanupExcludedToolkitOutput({
+          outputDir: options.output,
+          excludedToolkitIds,
+          generator,
+          verbose: options.verbose,
+        });
+        if (exclusionCleanup.deleted.length > 0 && options.verbose) {
+          console.log(
+            chalk.dim(
+              `  Deleted ${exclusionCleanup.deleted.length} excluded toolkit file(s): ${exclusionCleanup.deleted.join(", ")}`
+            )
           );
-          if (deleted.length > 0) {
-            if (options.verbose) {
-              console.log(
-                chalk.dim(
-                  `  Deleted ${deleted.length} excluded toolkit file(s): ${deleted.join(", ")}`
-                )
-              );
-            }
-            await generator.rebuildIndexFromOutput();
+        }
+        if (exclusionCleanup.warnings.length > 0) {
+          writeErrors.push(...exclusionCleanup.warnings);
+          for (const warning of exclusionCleanup.warnings) {
+            spinner.warn(warning);
           }
         }
 
@@ -2099,30 +2114,45 @@ program
               const indexFile = genResult.filesWritten.find((f) =>
                 f.endsWith("index.json")
               );
+              if (genResult.errors.length > 0) {
+                writeErrors.push(...genResult.errors);
+                spinner.warn(
+                  `Index generation completed with warnings: ${genResult.errors.join(", ")}`
+                );
+              }
               if (indexFile) {
                 filesWritten.push(indexFile);
+                if (genResult.errors.length === 0) {
+                  spinner.succeed("Index file generated");
+                }
+              } else if (genResult.errors.length === 0) {
+                spinner.warn(
+                  "Index generation completed, but index.json was not written."
+                );
               }
-              spinner.succeed("Index file generated");
             } catch (error) {
               spinner.warn(`Failed to generate index: ${error}`);
             }
           }
         }
 
-        if (excludedToolkitIds.size > 0) {
-          const deleted = await removeExcludedToolkitFiles(
-            resolve(options.output),
-            excludedToolkitIds
+        const exclusionCleanup = await cleanupExcludedToolkitOutput({
+          outputDir: options.output,
+          excludedToolkitIds,
+          generator,
+          verbose: options.verbose,
+        });
+        if (exclusionCleanup.deleted.length > 0 && options.verbose) {
+          console.log(
+            chalk.dim(
+              `  Deleted ${exclusionCleanup.deleted.length} excluded toolkit file(s): ${exclusionCleanup.deleted.join(", ")}`
+            )
           );
-          if (deleted.length > 0) {
-            if (options.verbose) {
-              console.log(
-                chalk.dim(
-                  `  Deleted ${deleted.length} excluded toolkit file(s): ${deleted.join(", ")}`
-                )
-              );
-            }
-            await generator.rebuildIndexFromOutput();
+        }
+        if (exclusionCleanup.warnings.length > 0) {
+          writeErrors.push(...exclusionCleanup.warnings);
+          for (const warning of exclusionCleanup.warnings) {
+            spinner.warn(warning);
           }
         }
 
@@ -2155,6 +2185,12 @@ program
         console.log(chalk.green("\n✓ Generation complete\n"));
         if (filesWritten.length > 0) {
           console.log(chalk.dim(`Written ${filesWritten.length} file(s)`));
+        }
+        if (writeErrors.length > 0) {
+          console.log(chalk.yellow("\nWarnings:"));
+          for (const warning of writeErrors) {
+            console.log(chalk.yellow(`  ${warning}`));
+          }
         }
       } catch (error) {
         spinner.fail(
