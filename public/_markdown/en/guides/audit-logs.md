@@ -13,7 +13,7 @@ If you want audit events outside the dashboard, there’s a REST API. You can pu
 Fetch the 10 most recent audit logs for your organization, filtered to creation events:
 
 ```bash
-curl -s "https://api.arcade.dev/api/v1/orgs/{org_id}/audit_logs?action=AUDIT_ACTION_CREATED&limit=10" \
+curl -s "https://cloud.arcade.dev/api/v1/orgs/{org_id}/audit_logs?action=AUDIT_ACTION_CREATED&limit=10" \
   -H "Authorization: Bearer $ARCADE_API_KEY"
 ```
 
@@ -45,7 +45,7 @@ curl -s "https://api.arcade.dev/api/v1/orgs/{org_id}/audit_logs?action=AUDIT_ACT
 To fetch the next page, pass the cursor:
 
 ```bash
-curl -s "https://api.arcade.dev/api/v1/orgs/{org_id}/audit_logs?action=AUDIT_ACTION_CREATED&limit=10&cursor=MjAyNi0wMi0yNFQxMjo..." \
+curl -s "https://cloud.arcade.dev/api/v1/orgs/{org_id}/audit_logs?action=AUDIT_ACTION_CREATED&limit=10&cursor=MjAyNi0wMi0yNFQxMjo..." \
   -H "Authorization: Bearer $ARCADE_API_KEY"
 ```
 
@@ -608,7 +608,7 @@ When the record was persisted
 
 -   Standard error envelope with `code` and `msg` fields. Common failures are `401` (unauthenticated), `403` (not a member of the org/), and `429` (rate limited).
 
-Last updated on January 30, 2026
+Last updated on February 10, 2026
 
 [Arcade Registry Early Access](/en/resources/registry-early-access.md)
 [Contextual Access](/en/guides/contextual-access.md)
