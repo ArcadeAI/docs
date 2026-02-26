@@ -57,17 +57,17 @@ This generates a Python module with the following structure:
 
 ```bash
 my_server/
+├── .env.example
 ├── src/
 │   └── my_server/
 │       ├── __init__.py
-│       ├── .env.example
 │       └── server.py
 └── pyproject.toml
 ```
 
 -   **server.py**  with MCPApp and example
 -   **pyproject.toml** Dependencies and  configuration
--   **.env.example** Example `.env` file containing a secret required by one of the generated  in `server.py`
+-   **.env.example** Example `.env` file at the  root containing a secret required by one of the generated  in `server.py`. Arcade automatically discovers `.env` files by traversing upward from the current directory.
 
 `server.py` includes proper structure with command-line argument handling. It creates an `MCPApp` with three sample :
 
@@ -83,17 +83,17 @@ Secrets are sensitive strings like passwords, , or other tokens that grant acces
 
 ### .env file
 
-You can create a `.env` file at the same directory as your  (`server.py`) and add your secret:
+You can create a `.env` file at your  root directory and add your secret:
 
 ```bash
 # .env
 MY_SECRET_KEY="my-secret-value"
 ```
 
-The generated  includes a `.env.example` file with the secret key name and example value. You can rename it to `.env` to start using it.
+The generated  includes a `.env.example` file at the project root with the secret key name and example value. You can rename it to `.env` to start using it.
 
 ```bash
-mv .env.example .env
+mv ../../.env.example ../../.env
 ```
 
 ### Environment Variable
@@ -216,7 +216,7 @@ Ensure you have set the environment variable in your terminal or `.env` file, an
 -   **Learn how to deploy your  server**: [Deploy your MCP server](/guides/deployment-hosting/arcade-deploy.md)
 
 
-Last updated on January 30, 2026
+Last updated on February 10, 2026
 
 [Call tools in IDE/MCP clients](/en/get-started/quickstarts/call-tool-client.md)
 [Overview](/en/get-started/agent-frameworks.md)
