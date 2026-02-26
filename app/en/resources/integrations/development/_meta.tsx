@@ -13,6 +13,10 @@ const meta: MetaRecord = {
     title: "ComplexTools",
     href: "/en/resources/integrations/development/complextools",
   },
+  daytona: {
+    title: "Daytona",
+    href: "/en/resources/integrations/development/daytona",
+  },
   deepwiki: {
     title: "Deepwiki",
     href: "/en/resources/integrations/development/deepwiki",
