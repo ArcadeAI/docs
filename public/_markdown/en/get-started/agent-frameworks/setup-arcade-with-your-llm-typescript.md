@@ -1,0 +1,614 @@
+---
+title: "Connect Arcade to LLM (TypeScript)"
+description: "Learn how to connect Arcade to your LLM in TypeScript"
+---
+[Agent Frameworks](/en/get-started/agent-frameworks.md)
+Setup Arcade with your LLM (TypeScript)
+
+# Connect Arcade to your LLM with TypeScript
+
+Arcade tools work alongside an LLM. To make that work, you need a small piece of glue code called a “.” The harness orchestrates the back-and-forth between the user, the model, and the . In this guide, you’ll build one so you can wire Arcade into your LLM-powered app.
+
+## Outcomes
+
+Integrate Arcade’s \-calling capabilities into an application that uses an LLM in TypeScript.
+
+### You will Learn
+
+-   Setup an agentic loop
+-   Add Arcade  to your agentic loop
+-   Implement a multi-turn conversation loop
+
+### Prerequisites
+
+-   An [Arcade](https://app.arcade.dev/register)
+
+-   An [Arcade API key](/get-started/setup/api-keys.md)
+
+-   An [OpenAI API key](https://platform.openai.com/api-keys)
+     
+-   [Node.js](https://nodejs.org/)
+      v18 or later
+
+### Create a new project and install the dependencies
+
+In your terminal, run the following commands to create a new Node.js :
+
+### npm
+
+```bash
+mkdir arcade-llm-example
+cd arcade-llm-example
+npm init -y
+npm pkg set type=module
+```
+
+### pnpm
+
+```bash
+mkdir arcade-llm-example
+cd arcade-llm-example
+pnpm init
+pnpm pkg set type=module
+```
+
+### yarn
+
+```bash
+mkdir arcade-llm-example
+cd arcade-llm-example
+yarn init -y
+```
+
+Then add `"type": "module"` to your `package.json`:
+
+```json
+# package.json
+{
+  "name": "arcade-llm-example",
+  "type": "module",
+  ...
+}
+```
+
+### bun
+
+```bash
+mkdir arcade-llm-example
+cd arcade-llm-example
+bun init -y
+```
+
+Install the dependencies:
+
+### npm
+
+```typescript
+npm install @arcadeai/arcadejs openai dotenv readline
+npm install -D typescript @types/node tsx
+```
+
+### pnpm
+
+```typescript
+pnpm add @arcadeai/arcadejs openai dotenv readline
+pnpm add -D typescript @types/node tsx
+```
+
+### yarn
+
+```typescript
+yarn add @arcadeai/arcadejs openai dotenv readline
+yarn add -D typescript @types/node tsx
+```
+
+### bun
+
+```typescript
+bun add @arcadeai/arcadejs openai dotenv readline
+bun add -D typescript @types/node tsx
+```
+
+Initialize TypeScript:
+
+### npm
+
+```bash
+npx tsc --init
+```
+
+### pnpm
+
+```bash
+pnpm tsc --init
+```
+
+### yarn
+
+```bash
+yarn tsc --init
+```
+
+### bun
+
+```bash
+bunx tsc --init
+```
+
+Your directory should now look like this:
+
+```bash
+arcade-llm-example/
+├── node_modules/
+├── package.json
+├── package-lock.json
+└── tsconfig.json
+```
+
+### Instantiate and use the clients
+
+Create a new file called `.env` and add your :
+
+TEXT
+
+```
+# .env
+ARCADE_API_KEY=YOUR_ARCADE_API_KEY
+ARCADE_USER_ID=YOUR_ARCADE_USER_ID
+OPENAI_API_KEY=YOUR_OPENAI_API_KEY
+```
+
+The `ARCADE_USER_ID` is the email address you used to sign up for Arcade. When your app is ready for production, you can set this dynamically based on your app’s auth system. Learn more about how to achieve secure auth in production [here](/guides/user-facing-agents/secure-auth-production.md).
+
+Create a new file called `main.ts` and add the following code:
+
+```typescript
+// main.ts
+import Arcade from "@arcadeai/arcadejs";
+import OpenAI from "openai";
+import "dotenv/config";
+
+const arcadeClient = new Arcade();
+const arcadeUserId = process.env.ARCADE_USER_ID!;
+const llmClient = new OpenAI();
+```
+
+### Select and retrieve the tools from Arcade
+
+In this example, you’re implementing a multi-tool agent that can retrieve and send emails, as well as send messages to Slack. While a  can expose a broad catalog of  to the LLM, it’s best to limit that set to what’s relevant for the task to keep the model efficient.
+
+```typescript
+// main.ts
+// Define the tools for the agent to use
+const toolCatalog = [
+  "Gmail.ListEmails",
+  "Gmail.SendEmail",
+  "Slack.SendMessage",
+  "Slack.WhoAmI",
+];
+
+// Get the tool definitions from the Arcade API
+const toolDefinitions: OpenAI.Chat.Completions.ChatCompletionTool[] = [];
+for (const tool of toolCatalog) {
+  const definition = await arcadeClient.tools.formatted.get(tool, {
+    format: "openai",
+  });
+  toolDefinitions.push(definition as unknown as OpenAI.Chat.Completions.ChatCompletionTool);
+}
+```
+
+### Write a helper function that handles tool authorization and execution
+
+The model can use any  you give it, and some tools require permission before they work. When this happens, you can either involve the model in the permission step or handle it behind the scenes and continue as if the tool were already authorized. In this guide, authorization happens outside the model so it can act as if the tool is already available. It’s like ordering a coffee: after you place your order, the barista handles payment behind the counter instead of explaining every step of card verification and receipts. The customer (and the model) gets the result without having to think about any of the intermediate steps.
+
+```json
+# main.ts
+// Helper function to authorize and run any tool
+async function authorizeAndRunTool(
+  toolName: string,
+  input: string
+): Promise<string> {
+  // Start the authorization process
+  const authResponse = await arcadeClient.tools.authorize({
+    tool_name: toolName,
+    user_id: arcadeUserId,
+  });
+
+  // If the authorization is not completed, print the authorization URL and wait for the user to authorize the app.
+  // Tools that do not require authorization will have the status "completed" already.
+  if (authResponse.status !== "completed") {
+    console.log(
+      `Click this link to authorize ${toolName}: ${authResponse.url}. The process will continue once you have authorized the app.`
+    );
+    await arcadeClient.auth.waitForCompletion(authResponse);
+  }
+
+  // Parse the input
+  const inputJson = JSON.parse(input);
+
+  // Run the tool
+  const result = await arcadeClient.tools.execute({
+    tool_name: toolName,
+    input: inputJson,
+    user_id: arcadeUserId,
+  });
+
+  // Return the tool output to the caller as a JSON string
+  return JSON.stringify(result.output?.value);
+}
+```
+
+This helper function adapts to any tool in the catalog and will make sure that you meet the authorization requirements before executing the tool. For more complex agentic patterns, this is generally the best place to handle interruptions that may require user interaction, such as when the tool requires a user to approve a request, or to provide additional .
+
+### Write a helper function that handles the LLM’s invocation
+
+Many orchestration patterns can handle the LLM invocation. A common pattern is a ReAct architecture, where the user prompt will result in a loop of messages between the LLM and the tools, until the LLM provides a final response (no  calls). This is the pattern you will implement in this example.
+
+To avoid the risk of infinite loops, limit the number of turns (in this case, a maximum of 5). This is a parameter that you can tune to your needs. Set it to a value that is high enough to allow the LLM to complete its task but low enough to prevent infinite loops.
+
+```typescript
+// main.ts
+type ChatMessage = OpenAI.Chat.Completions.ChatCompletionMessageParam;
+
+async function invokeLLM(
+  history: ChatMessage[],
+  model: string = "gpt-4o-mini",
+  maxTurns: number = 5,
+  tools: OpenAI.Chat.Completions.ChatCompletionTool[] = []
+): Promise<ChatMessage[]> {
+  /**
+   * Multi-turn LLM invocation that processes the conversation until
+   * the assistant provides a final response (no tool calls).
+   *
+   * Returns the updated conversation history.
+   */
+  let turns = 0;
+
+  while (turns < maxTurns) {
+    turns += 1;
+
+    const response = await llmClient.chat.completions.create({
+      model,
+      messages: history,
+      tools: tools.length > 0 ? tools : undefined,
+      tool_choice: tools.length > 0 ? "auto" : undefined,
+    });
+
+    const assistantMessage = response.choices[0]?.message;
+    if (!assistantMessage) {
+      break;
+    }
+
+    if (assistantMessage.tool_calls && assistantMessage.tool_calls.length > 0) {
+      // Add the assistant message with tool calls to history
+      history.push(assistantMessage);
+
+      for (const toolCall of assistantMessage.tool_calls) {
+        if (!("function" in toolCall)) continue;
+        // Convert underscores back to dots (OpenAI converts dots to underscores in function names)
+        const toolName = toolCall.function.name.replace(/_/g, ".");
+        const toolArgs = toolCall.function.arguments;
+        console.log(`🛠️ Harness: Calling ${toolName} with input ${toolArgs}`);
+        const toolResult = await authorizeAndRunTool(toolName, toolArgs);
+        console.log(`🛠️ Harness: Tool call ${toolName} completed`);
+        history.push({
+          role: "tool",
+          tool_call_id: toolCall.id,
+          content: toolResult,
+        });
+      }
+
+      continue;
+    } else {
+      history.push({
+        role: "assistant",
+        content: assistantMessage.content,
+      });
+    }
+
+    break;
+  }
+
+  return history;
+}
+```
+
+These two helper functions form the core of your agentic loop. Notice that the system handles authorization outside the agentic context, and the system passes the  execution back to the LLM in every case. Depending on your needs, you may want to handle tool orchestration within the  and pass only the final result of multiple tool calls to the LLM.
+
+### Write the main agentic loop
+
+Now that you’ve written the helper functions, write an agentic loop that interacts with the . The core pieces of this loop are:
+
+1.  Initialize the conversation history with the system prompt
+2.  Get the  input and add it to the conversation history
+3.  Invoke the LLM with the conversation history, tools, and  choice
+4.  Repeat from step 2 until the  decides to stop the conversation
+
+```typescript
+// main.ts
+import * as readline from "readline";
+
+// ... previous code ...
+
+async function chat(): Promise<void> {
+  /**Interactive multi-turn chat session.*/
+  console.log("Chat started. Type 'quit' or 'exit' to end the session.\n");
+
+  // Initialize the conversation history with the system prompt
+  let history: ChatMessage[] = [
+    { role: "system", content: "You are a helpful assistant." },
+  ];
+
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
+  const askQuestion = (): void => {
+    rl.question("😎 You: ", async (userInput) => {
+      userInput = userInput.trim();
+
+      if (!userInput) {
+        askQuestion();
+        return;
+      }
+
+      if (userInput.toLowerCase() === "quit" || userInput.toLowerCase() === "exit") {
+        console.log("Goodbye!");
+        rl.close();
+        return;
+      }
+
+      // Add user message to history
+      history.push({ role: "user", content: userInput });
+
+      // Get LLM response
+      history = await invokeLLM(history, "gpt-4o-mini", 5, toolDefinitions);
+
+      // Print the latest assistant response
+      const lastMessage = history[history.length - 1];
+      if (lastMessage) {
+        const assistantResponse =
+          typeof lastMessage.content === "string" ? lastMessage.content : "";
+        console.log(`\n🤖 Assistant: ${assistantResponse}\n`);
+      }
+
+      askQuestion();
+    });
+  };
+
+  askQuestion();
+}
+
+chat();
+```
+
+### Run the code
+
+It’s time to run the code and see it in action. Run the following command to start the chat:
+
+### npm
+
+```bash
+npx tsx main.ts
+```
+
+### pnpm
+
+```bash
+pnpm tsx main.ts
+```
+
+### yarn
+
+```bash
+yarn tsx main.ts
+```
+
+### bun
+
+```bash
+bun run main.ts
+```
+
+With the selection of tools above, you should be able to get the  to effectively complete the following prompts:
+
+-   “Please send a message to the #general channel on Slack greeting everyone with a haiku about .”
+-   “Please write a poem about multi- orchestration and send it to the #general channel on Slack, also send it to me in an email.”
+-   “Please summarize my latest 5 emails, then send me a DM on Slack with the summary.”
+
+## Next Steps
+
+-   Learn more about using Arcade with a [framework](/get-started/agent-frameworks.md)
+     or [MCP client](/get-started/mcp-clients.md)
+    .
+-   Learn more about how to [build your own MCP Servers](/guides/create-tools/tool-basics/build-mcp-server.md)
+    .
+
+## Example code
+
+### **main.ts** (full file)
+
+```json
+# main.ts
+import Arcade from "@arcadeai/arcadejs";
+import OpenAI from "openai";
+import * as readline from "readline";
+import "dotenv/config";
+
+const arcadeClient = new Arcade();
+const arcadeUserId = process.env.ARCADE_USER_ID!;
+const llmClient = new OpenAI();
+
+// Define the tools for the agent to use
+const toolCatalog = [
+  "Gmail.ListEmails",
+  "Gmail.SendEmail",
+  "Slack.SendMessage",
+  "Slack.WhoAmI",
+];
+
+// Get the tool definitions from the Arcade API
+const toolDefinitions: OpenAI.Chat.Completions.ChatCompletionTool[] = [];
+for (const tool of toolCatalog) {
+  const definition = await arcadeClient.tools.formatted.get(tool, {
+    format: "openai",
+  });
+  toolDefinitions.push(definition as unknown as OpenAI.Chat.Completions.ChatCompletionTool);
+}
+
+// Helper function to authorize and run any tool
+async function authorizeAndRunTool(
+  toolName: string,
+  input: string
+): Promise<string> {
+  // Start the authorization process
+  const authResponse = await arcadeClient.tools.authorize({
+    tool_name: toolName,
+    user_id: arcadeUserId,
+  });
+
+  // If the authorization is not completed, print the authorization URL and wait for the user to authorize the app.
+  // Tools that do not require authorization will have the status "completed" already.
+  if (authResponse.status !== "completed") {
+    console.log(
+      `Click this link to authorize ${toolName}: ${authResponse.url}. The process will continue once you have authorized the app.`
+    );
+    await arcadeClient.auth.waitForCompletion(authResponse);
+  }
+
+  // Parse the input
+  const inputJson = JSON.parse(input);
+
+  // Run the tool
+  const result = await arcadeClient.tools.execute({
+    tool_name: toolName,
+    input: inputJson,
+    user_id: arcadeUserId,
+  });
+
+  // Return the tool output to the caller as a JSON string
+  return JSON.stringify(result.output?.value);
+}
+
+type ChatMessage = OpenAI.Chat.Completions.ChatCompletionMessageParam;
+
+async function invokeLLM(
+  history: ChatMessage[],
+  model: string = "gpt-4o-mini",
+  maxTurns: number = 5,
+  tools: OpenAI.Chat.Completions.ChatCompletionTool[] = []
+): Promise<ChatMessage[]> {
+  /**
+   * Multi-turn LLM invocation that processes the conversation until
+   * the assistant provides a final response (no tool calls).
+   *
+   * Returns the updated conversation history.
+   */
+  let turns = 0;
+
+  while (turns < maxTurns) {
+    turns += 1;
+
+    const response = await llmClient.chat.completions.create({
+      model,
+      messages: history,
+      tools: tools.length > 0 ? tools : undefined,
+      tool_choice: tools.length > 0 ? "auto" : undefined,
+    });
+
+    const assistantMessage = response.choices[0]?.message;
+    if (!assistantMessage) {
+      break;
+    }
+
+    if (assistantMessage.tool_calls && assistantMessage.tool_calls.length > 0) {
+      // Add the assistant message with tool calls to history
+      history.push(assistantMessage);
+
+      for (const toolCall of assistantMessage.tool_calls) {
+        if (!("function" in toolCall)) continue;
+        // Convert underscores back to dots (OpenAI converts dots to underscores in function names)
+        const toolName = toolCall.function.name.replace(/_/g, ".");
+        const toolArgs = toolCall.function.arguments;
+        console.log(`🛠️ Harness: Calling ${toolName} with input ${toolArgs}`);
+        const toolResult = await authorizeAndRunTool(toolName, toolArgs);
+        console.log(`🛠️ Harness: Tool call ${toolName} completed`);
+        history.push({
+          role: "tool",
+          tool_call_id: toolCall.id,
+          content: toolResult,
+        });
+      }
+
+      continue;
+    } else {
+      history.push({
+        role: "assistant",
+        content: assistantMessage.content,
+      });
+    }
+
+    break;
+  }
+
+  return history;
+}
+
+async function chat(): Promise<void> {
+  /**Interactive multi-turn chat session.*/
+  console.log("Chat started. Type 'quit' or 'exit' to end the session.\n");
+
+  // Initialize the conversation history with the system prompt
+  let history: ChatMessage[] = [
+    { role: "system", content: "You are a helpful assistant." },
+  ];
+
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
+  const askQuestion = (): void => {
+    rl.question("😎 You: ", async (userInput) => {
+      userInput = userInput.trim();
+
+      if (!userInput) {
+        askQuestion();
+        return;
+      }
+
+      if (userInput.toLowerCase() === "quit" || userInput.toLowerCase() === "exit") {
+        console.log("Goodbye!");
+        rl.close();
+        return;
+      }
+
+      // Add user message to history
+      history.push({ role: "user", content: userInput });
+
+      // Get LLM response
+      history = await invokeLLM(history, "gpt-4o-mini", 5, toolDefinitions);
+
+      // Print the latest assistant response
+      const lastMessage = history[history.length - 1];
+      if (lastMessage) {
+        const assistantResponse =
+          typeof lastMessage.content === "string" ? lastMessage.content : "";
+        console.log(`\n🤖 Assistant: ${assistantResponse}\n`);
+      }
+
+      askQuestion();
+    });
+  };
+
+  askQuestion();
+}
+
+chat();
+```
+
+Last updated on February 10, 2026
+
+[Setup Arcade with your LLM (Python)](/en/get-started/agent-frameworks/setup-arcade-with-your-llm-python.md)
+[Setup Arcade tools with CrewAI](/en/get-started/agent-frameworks/crewai/use-arcade-tools.md)
