@@ -63,6 +63,7 @@ import {
   writeFailedToolsReport,
 } from "../utils/run-logs.js";
 import { cleanupExcludedToolkitOutput } from "./exclusion-cleanup.js";
+import { computeProcessingStats } from "./generate-flow.js";
 
 /**
  * Supported API sources:
@@ -1376,14 +1377,27 @@ program
             }
           }
 
-          const toProcess = totalToolkits - skipToolkitIds.size;
+          const processingStats = computeProcessingStats(
+            toolkitList,
+            skipToolkitIds
+          );
+          const { toProcess, effectiveSkipped, unknownSkipIds } =
+            processingStats;
+
+          if (options.verbose && unknownSkipIds.length > 0) {
+            console.log(
+              chalk.dim(
+                `  Skipping ${unknownSkipIds.length} unknown toolkit ID(s) not found in fetched list: ${unknownSkipIds.join(", ")}`
+              )
+            );
+          }
 
           if (toProcess === 0) {
             spinner.succeed("No toolkits to process after applying filters");
             allResults = [];
           } else {
             const skipReason =
-              skipToolkitIds.size > 0 ? `(${skipToolkitIds.size} skipped)` : "";
+              effectiveSkipped > 0 ? `(${effectiveSkipped} skipped)` : "";
             spinner.succeed(
               `Found ${totalToolkits} toolkit(s), ${toProcess} to process ${skipReason}`.trim()
             );
@@ -2017,13 +2031,25 @@ program
           }
         }
 
-        const toProcess = totalToolkits - skipToolkitIds.size;
+        const processingStats = computeProcessingStats(
+          toolkitList,
+          skipToolkitIds
+        );
+        const { toProcess, effectiveSkipped, unknownSkipIds } = processingStats;
+
+        if (options.verbose && unknownSkipIds.length > 0) {
+          console.log(
+            chalk.dim(
+              `  Skipping ${unknownSkipIds.length} unknown toolkit ID(s) not found in fetched list: ${unknownSkipIds.join(", ")}`
+            )
+          );
+        }
 
         if (toProcess === 0) {
           spinner.succeed("No toolkits to process after applying filters");
         } else {
           spinner.succeed(
-            `Found ${totalToolkits} toolkit(s), ${toProcess} to process${skipToolkitIds.size > 0 ? ` (${skipToolkitIds.size} skipped)` : ""}`
+            `Found ${totalToolkits} toolkit(s), ${toProcess} to process${effectiveSkipped > 0 ? ` (${effectiveSkipped} skipped)` : ""}`
           );
           if (options.verbose) {
             console.log(
