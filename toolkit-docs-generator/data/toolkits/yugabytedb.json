@@ -1,0 +1,101 @@
+{
+  "id": "Yugabytedb",
+  "label": "YugabyteDB",
+  "version": "0.1.0",
+  "description": "Arcade tools for LLMs to query and explore YugabyteDB databases",
+  "metadata": {
+    "category": "development",
+    "iconUrl": "https://design-system.arcade.dev/icons/yugabytedb.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/mcp-servers/development/yugabytedb",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": null,
+  "tools": [
+    {
+      "name": "SummarizeDatabase",
+      "qualifiedName": "Yugabytedb.SummarizeDatabase",
+      "fullyQualifiedName": "Yugabytedb.SummarizeDatabase@0.1.0",
+      "description": "List all tables in a YugabyteDB database, including column schemas and row counts.\n\nCALL THIS FIRST to understand the database structure before writing queries. Returns every table in the given schema with: table name, column definitions (name and data type), and total row count.",
+      "parameters": [
+        {
+          "name": "db_schema",
+          "type": "string",
+          "required": false,
+          "description": "Database schema to summarize (e.g. 'public')",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["YUGABYTEDB_URL"],
+      "secretsInfo": [
+        {
+          "name": "YUGABYTEDB_URL",
+          "type": "connection_string"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Array of table objects with name, columns (name and data type), and row count."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Yugabytedb.SummarizeDatabase",
+        "parameters": {
+          "db_schema": {
+            "value": "public",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    },
+    {
+      "name": "RunReadOnlyQuery",
+      "qualifiedName": "Yugabytedb.RunReadOnlyQuery",
+      "fullyQualifiedName": "Yugabytedb.RunReadOnlyQuery@0.1.0",
+      "description": "Run a read-only SQL query against YugabyteDB and return results as JSON.\n\nThe query is executed inside a READ ONLY transaction so writes are rejected. Results are returned as a JSON array where each element is a row object with column names as keys.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": true,
+          "description": "SQL query to execute (must be read-only)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": ["YUGABYTEDB_URL"],
+      "secretsInfo": [
+        {
+          "name": "YUGABYTEDB_URL",
+          "type": "connection_string"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "JSON array of row objects with column names as keys."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Yugabytedb.RunReadOnlyQuery",
+        "parameters": {
+          "query": {
+            "value": "SELECT * FROM users LIMIT 10",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      }
+    }
+  ]
+}

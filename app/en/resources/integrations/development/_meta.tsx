@@ -69,6 +69,10 @@ const meta: MetaRecord = {
     title: "Web",
     href: "/en/resources/integrations/development/web",
   },
+  yugabytedb: {
+    title: "YugabyteDB",
+    href: "/en/resources/integrations/development/yugabytedb",
+  },
   "-- Starter": {
     type: "separator",
     title: "Starter",
