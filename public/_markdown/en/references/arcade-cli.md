@@ -10,7 +10,7 @@ The Arcade CLI is a command-line tool that allows you to manage your Arcade depl
 
 ## Install the Arcade CLI
 
-In your terminal, run the following command to install the `arcade-mcp` package - Arcade’s CLI:
+In your terminal, run the following command to install the published `arcade-mcp` package from PyPI:
 
 ### uv
 
@@ -25,6 +25,8 @@ This will install the Arcade CLI as a [uv tool](https://docs.astral.sh/uv/guides
 ```bash
 pip install arcade-mcp
 ```
+
+Using Windows and PowerShell? Follow the [Windows environment setup](/get-started/setup/windows-environment.md) guide for install options with and without `uv`.
 
 ## Upgrade the Arcade CLI
 
@@ -488,7 +490,7 @@ Usage: arcade secret [OPTIONS] COMMAND [ARGS]...
 ╰────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
-Last updated on January 30, 2026
+Last updated on February 10, 2026
 
 [Telemetry](/en/references/mcp/telemetry.md)
 [CLI Cheat Sheet](/en/references/cli-cheat-sheet.md)

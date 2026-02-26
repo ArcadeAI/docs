@@ -44,18 +44,29 @@ Create a new virtual environment and activate it:
 
 ```bash
 uv venv
+```
+
+### Bash/Zsh (macOS/Linux)
+
+```bash
 source .venv/bin/activate
+```
+
+### PowerShell (Windows)
+
+```powershell
+. ".venv\Scripts\Activate.ps1"
 ```
 
 Install the dependencies:
 
-```bash
+```powershell
 uv add arcadepy openai python-dotenv
 ```
 
 Your directory should now look like this:
 
-```bash
+```powershell
 arcade-llm-example/
 ├── .git/
 ├── .gitignore
@@ -462,7 +473,7 @@ if __name__ == "__main__":
     chat()
 ```
 
-Last updated on January 30, 2026
+Last updated on February 10, 2026
 
 [Overview](/en/get-started/agent-frameworks.md)
-[Using Arcade tools](/en/get-started/agent-frameworks/crewai/use-arcade-tools.md)
+[Setup Arcade tools with CrewAI](/en/get-started/agent-frameworks/crewai/use-arcade-tools.md)

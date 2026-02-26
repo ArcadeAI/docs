@@ -100,7 +100,7 @@ mv ../../.env.example ../../.env
 
 ### PowerShell (Windows)
 
-```bash
+```powershell
 Copy-Item .env.example .env
 ```
 
@@ -116,7 +116,7 @@ export MY_SECRET_KEY="my-secret-value"
 
 ### PowerShell (Windows)
 
-```bash
+```powershell
 $env:MY_SECRET_KEY="my-secret-value"
 ```
 
