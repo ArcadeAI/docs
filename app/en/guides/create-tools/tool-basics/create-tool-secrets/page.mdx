@@ -7,6 +7,8 @@ import { Steps, Tabs, Callout } from "nextra/components";
 
 # Create an MCP tool with secrets
 
+Learn how to build MCP tools that securely access secrets like API keys and passwords through Arcade's context system.
+
 <GuideOverview>
 <GuideOverview.Outcomes>
 
@@ -35,9 +37,9 @@ Secrets are sensitive strings like passwords, API keys, or other tokens that gra
 
 ## Why use secrets in your tools?
 
-Secrets enable you to securely deploy a function that requires sensitive information at runtime. And while these can be consumed directly from the runtime environment inside your tool function, this becomes very inconvenient, expensive, hard to maintain, and insecure when deploying at scale.
+Secrets enable you to securely deploy a function that requires sensitive information at runtime. And while these can consume directly from the runtime environment inside your tool function, this becomes inconvenient, expensive, hard to maintain, and insecure when deploying at scale.
 
-For example, if your tool requires an API key to use an external service, but only _after_ doing some computationally expensive work, you need to ensure that the API key is present _before_ the computationally expensive work is done. The function below would fail if the API key is not present.
+For example, if your tool requires an API key to use an external service, but only _after_ doing some computationally expensive work, you need to ensure that the API key is present _before_ the computationally expensive work occurs. The function below would fail if the API key is not present.
 
 ```python
 import os
@@ -56,9 +58,7 @@ def my_tool(task: str) -> str:
         return "Failed to upload result"
 ```
 
-We can work around this by carefully checking for the API key before doing the computationally expensive work, of course, but this is error prone and difficult to maintain, and you may only become aware of the issue after deploying multiple instances of your server.
-
-Arcade provides a way to securely store and access secrets inside your tools in a way that is easy to manage across multiple instances of your servers, and that will prevent the tool from running if the secret is not provided. In this guide, you'll learn how to use secrets in your custom Arcade tools.
+Arcade provides a way to securely store and access secrets inside your tools in a way that is manageable across multiple instances of your servers, and that will prevent the tool from running if the secret is not provided. In this guide, you'll learn how to use secrets in your custom Arcade tools.
 
 <Steps>
 
@@ -94,10 +94,10 @@ Copy-Item .env.example .env
 </Tabs.Tab>
 </Tabs>
 
-<Callout type="info">
+<Note>
   Using a `.env` file is okay for local development, but you should use
   the Arcade Dashboard or Arcade CLI for production deployments.
-</Callout>
+</Note>
 
 </Tabs.Tab>
 <Tabs.Tab>
@@ -108,11 +108,11 @@ You can store your secret in the Arcade Dashboard by:
 - Entering the secret ID and value
 - Clicking the "Create" button
 
-This will make the secret available to your MCP server, when deployed to Arcade.
+This will make the secret available to your MCP server, when you deploy it to Arcade.
 
-<Callout type="info">
-  The Arcade Dashboard will make the secret available to your MCP server when it is deployed. Secrets set in the Arcade Dashboard are not available to your MCP server when it is running locally.
-</Callout>
+<Note>
+  The Arcade Dashboard will make the secret available to your MCP server when you deploy it. Secrets set in the Arcade Dashboard are not available to your MCP server when it runs locally.
+</Note>
 
 </Tabs.Tab>
 <Tabs.Tab>
@@ -122,9 +122,9 @@ You can set the secret in your terminal directly with this command:
 arcade secret set MY_SECRET_KEY="my-secret-value"
 ```
 
-<Callout type="info">
-  The Arcade CLI will make the secret available to your MCP server when it is deployed, because it upserts the secret into the Arcade Cloud. Secrets set in the Arcade CLI are not available to your MCP server when it is running locally.
-</Callout>
+<Note>
+  The Arcade CLI will make the secret available to your MCP server when you deploy it, because it upserts the secret into Arcade Cloud. Secrets set in the Arcade CLI are not available to your MCP server when it runs locally.
+</Note>
 
 </Tabs.Tab>
 <Tabs.Tab>
@@ -147,10 +147,10 @@ $env:MY_SECRET_KEY="my-secret-value"
 </Tabs.Tab>
 </Tabs>
 
-<Callout type="info">
+<Note>
   Using environment variables is okay for local development, but you should use
   the Arcade Dashboard or Arcade CLI for production deployments.
-</Callout>
+</Note>
 
 </Tabs.Tab>
 </Tabs>
@@ -166,7 +166,7 @@ To ensure your stdio MCP server has access to the secrets, you can either
     ```json
     {
       "mcpServers": {
-        "simple": {
+        "basic": {
           "command": "uv",
           "args": [
             "run",
@@ -188,14 +188,14 @@ Note that the specific key name may vary depending on the MCP client you are usi
 
 ### Define your tool and access the secret
 
-<Callout type="info">
+<Note>
   This is only an illustrative example of how Arcade will ensure that the secret
-  is present before the tool is executed. In a real world application, you would
+  is present before the tool executes. In a real world application, you would
   use this secret to store sensitive information like API keys, database
-  credentials, etc, and not to simply print a confirmation string.
-</Callout>
+  credentials, etc, and not to print a confirmation string.
+</Note>
 
-In your [MCP Server](/guides/create-tools/tool-basics/build-mcp-server), create a new tool that uses the secret:
+In your [MCP server](/guides/create-tools/tool-basics/build-mcp-server), create a new tool that uses the secret:
 
 - Use the `requires_secrets` parameter to declare which secrets your tool needs (`"SECRET_KEY"` in this example).
 - The tool's Context object has a `get_secret` method that you can use to access the secret value.
@@ -214,24 +214,24 @@ def use_secret(context: Context) -> str:
         return f"Error getting secret: {e}"
 ```
 
-When your tool is executed, it will return: `"Got SECRET_KEY of length..."`. In a real world application, you would use this secret to connect to a remote database, API, etc.
+When the tool executes, it will return: `"Got SECRET_KEY of length..."`. In a real world application, you would use this secret to connect to a remote database, API, etc.
 
 </Steps>
 
-<Callout type="warning">
+<Warning>
 
 **Security Best Practices**
 
 - **Never log secret values:** Always mask or truncate when displaying
 - **Declare requirements:** Use `requires_secrets` to document dependencies
-- **Handle missing secrets:** Use try/except when accessing secrets
+- **Handle missing secrets:** Use try/except when tools access secrets
 - **Use descriptive names:** Make it clear what each secret is for
 
-</Callout>
+</Warning>
 
 ## Key Concepts
 
-- **Secure Access:** Secrets are accessed through context, not imported directly
+- **Secure Access:** Tools access secrets through context, not imported directly
 - **Environment Integration:** Works with both environment variables and `.env` files
 - **Error Handling:** Always handle the case where a secret might be missing
 - **Masking:** Never expose full secret values in logs or return values
@@ -245,11 +245,11 @@ When your tool is executed, it will return: `"Got SECRET_KEY of length..."`. In 
 SECRET_KEY="supersecret"
 ```
 
-<Callout type="warning">
+<Warning>
 
 For the code to work, you must define your environment variables locally or in a `.env` file. Arcade will automatically search upward from the current directory to find your `.env` file.
 
-</Callout>
+</Warning>
 
 ```python filename="secrets.py"
 #!/usr/bin/env python3
@@ -307,14 +307,14 @@ uv run secrets.py http
 
 For HTTP transport, view your server's API docs at [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs).
 
-<Callout type="info">
+<Note>
   For security reasons, Local HTTP servers do not currently support tool-level
   authorization and secrets. If you need to use tool-level authorization or secrets locally, you
   should use the stdio transport and configure the Arcade API key and secrets in
   your MCP connection settings. Otherwise, if you intend to expose your HTTP MCP server to
   the public internet with tool-level authorization and secrets, please follow the [deploying to the cloud with Arcade Deploy](/guides/deployment-hosting/arcade-deploy) guide or the [on-prem MCP
   server](/guides/deployment-hosting/on-prem) guide for secure remote deployment.
-</Callout>
+</Note>
 
 </Tabs.Tab>
 
