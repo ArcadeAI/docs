@@ -7,7 +7,7 @@ export interface ProcessingStats {
 
 export interface ProviderEntry {
   provider: string;
-  version?: string;
+  version?: string | undefined;
 }
 
 export interface FilteredProviders<T extends ProviderEntry> {
