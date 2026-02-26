@@ -52,6 +52,7 @@ import {
 } from "../sources/toolkit-data-source.js";
 import { removeExcludedToolkitFiles } from "../utils/excluded-output-cleanup.js";
 import { readExclusionList } from "../utils/exclusion-list.js";
+import { readIgnoreList } from "../utils/ignore-list.js";
 import {
   createProgressTracker,
   formatToolkitComplete,
@@ -845,6 +846,10 @@ program
     "--exclude-file <file>",
     "Path to a .txt file with toolkit IDs to exclude from generation (one per line)"
   )
+  .option(
+    "--ignore-file <file>",
+    "Path to a .txt file with toolkit IDs to skip during generation (one per line)"
+  )
   .option("--verbose", "Enable verbose logging", false)
   .action(
     async (options: {
@@ -885,6 +890,7 @@ program
       skipUnchanged: boolean;
       requireComplete: boolean;
       excludeFile?: string;
+      ignoreFile?: string;
       verbose: boolean;
       // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: legacy CLI flow
     }) => {
@@ -905,6 +911,22 @@ program
           excludedToolkitIds.size > 0
             ? `Excluding ${excludedToolkitIds.size} toolkit(s) from generation`
             : "Exclusion file loaded (no toolkits excluded)"
+        );
+      }
+
+      let ignoredToolkitIds = new Set<string>();
+      if (options.ignoreFile) {
+        spinner.start(`Loading ignore list from ${options.ignoreFile}...`);
+        const loaded = await readIgnoreList(options.ignoreFile);
+        if (loaded === null) {
+          spinner.fail(`Ignore file not found: ${options.ignoreFile}`);
+          process.exit(1);
+        }
+        ignoredToolkitIds = loaded;
+        spinner.succeed(
+          ignoredToolkitIds.size > 0
+            ? `Ignoring ${ignoredToolkitIds.size} toolkit(s) during generation`
+            : "Ignore file loaded (no toolkits ignored)"
         );
       }
 
@@ -1127,6 +1149,10 @@ program
         }
 
         for (const id of excludedToolkitIds) {
+          skipToolkitIds.add(id);
+        }
+
+        for (const id of ignoredToolkitIds) {
           skipToolkitIds.add(id);
         }
 
@@ -1704,6 +1730,10 @@ program
     "--exclude-file <file>",
     "Path to a .txt file with toolkit IDs to exclude from generation (one per line)"
   )
+  .option(
+    "--ignore-file <file>",
+    "Path to a .txt file with toolkit IDs to skip during generation (one per line)"
+  )
   .option("--verbose", "Enable verbose logging", false)
   .action(
     async (options: {
@@ -1738,6 +1768,7 @@ program
       resume: boolean;
       incremental: boolean;
       excludeFile?: string;
+      ignoreFile?: string;
       requireComplete: boolean;
       verbose: boolean;
       // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: legacy CLI flow
@@ -1758,6 +1789,22 @@ program
           excludedToolkitIds.size > 0
             ? `Excluding ${excludedToolkitIds.size} toolkit(s) from generation`
             : "Exclusion file loaded (no toolkits excluded)"
+        );
+      }
+
+      let ignoredToolkitIds = new Set<string>();
+      if (options.ignoreFile) {
+        spinner.start(`Loading ignore list from ${options.ignoreFile}...`);
+        const loaded = await readIgnoreList(options.ignoreFile);
+        if (loaded === null) {
+          spinner.fail(`Ignore file not found: ${options.ignoreFile}`);
+          process.exit(1);
+        }
+        ignoredToolkitIds = loaded;
+        spinner.succeed(
+          ignoredToolkitIds.size > 0
+            ? `Ignoring ${ignoredToolkitIds.size} toolkit(s) during generation`
+            : "Ignore file loaded (no toolkits ignored)"
         );
       }
 
@@ -1874,6 +1921,10 @@ program
         }
 
         for (const id of excludedToolkitIds) {
+          skipToolkitIds.add(id);
+        }
+
+        for (const id of ignoredToolkitIds) {
           skipToolkitIds.add(id);
         }
 

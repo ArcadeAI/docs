@@ -124,10 +124,34 @@ Sync sidebar navigation locally:
 pnpm dlx tsx .github/scripts/sync-toolkit-sidebar.ts
 ```
 
+## Ignoring toolkits
+
+Pass `--ignore-file <path>` to skip specific toolkits during generation. Existing
+output files for ignored toolkits are left unchanged — nothing is deleted.
+
+A default empty template ships at `ignored-toolkits.txt` in the generator root.
+Add one toolkit ID per line:
+
+```text
+# Toolkits to ignore during docs generation (skip-only, no file deletion)
+SomeInternalTool
+```
+
+```bash
+pnpm dlx tsx src/cli/index.ts generate --all \
+  --ignore-file ./ignored-toolkits.txt
+```
+
+The parser ignores blank lines and lines starting with `#`. IDs are case-insensitive.
+
+Works with both `generate` and `generate-all`. The ignore list is purely skip-only:
+no existing `.json` files are removed and `index.json` is not rebuilt for ignored
+toolkits.
+
 ## Excluding toolkits
 
-Pass `--exclude-file <path>` to skip specific toolkits during generation and
-remove their output files if they already exist.
+Pass `--exclude-file <path>` to skip toolkits **and** delete their existing output
+files if they already exist.
 
 Create a plain-text file with one toolkit ID per line:
 
