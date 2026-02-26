@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import glob from "fast-glob";
 import pc from "picocolors";
 import TurndownService from "turndown";
+import { resolveCleanMarkdownBuildMode } from "./clean-markdown-build-mode";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -60,9 +61,6 @@ const TITLE_SUFFIX_PATTERN = /\s*[|–-]\s*Arcade.*$/i;
 
 // Git diff base for comparing changes (default: origin/main)
 const GIT_DIFF_BASE = process.env.GIT_DIFF_BASE || "origin/main";
-
-// Check if running in full rebuild mode
-const FULL_REBUILD = process.env.FULL_REBUILD === "true";
 
 /**
  * Gets the list of changed/added MDX files from git diff
@@ -1049,9 +1047,16 @@ async function main() {
     }>;
     let deletedCount = 0;
     let deletedPaths: string[] = [];
+    const buildMode = await resolveCleanMarkdownBuildMode({
+      fullRebuildEnv: process.env.FULL_REBUILD,
+      ciEnv: process.env.CI,
+      vercelEnv: process.env.VERCEL,
+      outputDir: OUTPUT_DIR,
+    });
+    const fullRebuild = buildMode.fullRebuild;
 
-    if (FULL_REBUILD) {
-      console.log(pc.blue("📦 Full rebuild mode enabled\n"));
+    if (fullRebuild) {
+      console.log(pc.blue(`📦 Full rebuild mode enabled (${buildMode.reason})\n`));
       pagesToProcess = await discoverPages();
       console.log(pc.green(`✓ Found ${pagesToProcess.length} pages to process`));
     } else {
@@ -1128,7 +1133,7 @@ async function main() {
     console.log(pc.gray(`  📁 Output directory: ${OUTPUT_DIR}`));
 
     // Only run validation in full rebuild mode
-    if (FULL_REBUILD) {
+    if (fullRebuild) {
       const validation = await validateGeneratedContent();
       if (!validation.passed) {
         console.log(pc.bold(pc.red("\n⚠️  Validation errors:")));
