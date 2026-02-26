@@ -26,6 +26,39 @@ This will install the Arcade CLI as a [uv tool](https://docs.astral.sh/uv/guides
 pip install arcade-mcp
 ```
 
+## Upgrade the Arcade CLI
+
+To upgrade to the latest version of the Arcade CLI, run the appropriate command for your package manager:
+
+### uv
+
+```bash
+uv tool upgrade arcade-mcp
+```
+
+### pip
+
+```bash
+pip install --upgrade arcade-mcp
+```
+
+After upgrading, verify the installation:
+
+```bash
+arcade --version
+```
+
+If you previously had the `arcade-ai` package installed, you should uninstall it first. The old `arcade-ai` CLI has been replaced by `arcade-mcp`. See the [migration guide](/guides/create-tools/migrate-toolkits.md) for details on migrating from legacy toolkits.
+
+### Re-authenticate after upgrading
+
+After upgrading, you may need to refresh your credentials:
+
+```bash
+arcade logout
+arcade login
+```
+
 ## Usage
 
 ```bash
@@ -455,7 +488,7 @@ Usage: arcade secret [OPTIONS] COMMAND [ARGS]...
 ╰────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
-Last updated on January 30, 2026
+Last updated on February 10, 2026
 
 [Telemetry](/en/references/mcp/telemetry.md)
 [CLI Cheat Sheet](/en/references/cli-cheat-sheet.md)

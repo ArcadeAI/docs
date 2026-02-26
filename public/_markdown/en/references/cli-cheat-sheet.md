@@ -17,6 +17,13 @@ uv tool install arcade-mcp    # Recommended
 pip install arcade-mcp        # Alternative
 ```
 
+Upgrade to the latest version:
+
+```bash
+uv tool upgrade arcade-mcp    # Recommended
+pip install --upgrade arcade-mcp  # Alternative
+```
+
 Verify installation:
 
 ```bash
@@ -752,6 +759,20 @@ Check `arcade server logs <name> -f`
 
 Verify `--tool-package` or `--discover-installed`
 
+”Command not found after upgrade”
+
+Re-authenticate: `arcade logout && arcade login`
+
+### After Upgrading
+
+If you encounter issues after upgrading the CLI:
+
+```bash
+arcade logout          # Clear old credentials
+arcade login           # Re-authenticate
+arcade whoami          # Verify login status
+```
+
 ### Debug Tips
 
 ```bash
@@ -788,7 +809,7 @@ Standard development cycle for building  servers:
 9.  **`arcade deploy`** — Deploy to cloud (requires `server.py` entrypoint)
 10.  **`arcade server logs -f`** — Monitor logs
 
-Last updated on January 30, 2026
+Last updated on February 10, 2026
 
 [Arcade CLI](/en/references/arcade-cli.md)
 [Contextual Access Webhook API](/en/references/contextual-access-webhook-api.md)
