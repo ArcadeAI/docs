@@ -35,6 +35,13 @@ const MAIN_PATTERN = /<main[^>]*>([\s\S]*?)<\/main>/i;
 const BODY_PATTERN = /<body[^>]*>([\s\S]*?)<\/body>/i;
 const PAGE_MDX_PATTERN = /\/page\.mdx$/;
 const MDX_PATTERN = /\.mdx$/;
+const POWERSHELL_CONTENT_PATTERN =
+  /\$env:|\bGet-Command\b|\bGet-ExecutionPolicy\b|\bSet-ExecutionPolicy\b|Activate\.ps1|\\Scripts\\|^\s*irm\b.*\|\s*iex\b|^\s*&\s*["'][^"']*\.exe["']/im;
+const BASH_CONTENT_PATTERN =
+  /^\s*export\s+[A-Za-z_][A-Za-z0-9_]*=|^\s*source\s+|^\s*command\s+-v\s+|\.venv\/bin\/|\/bin\/activate|\$HOME|curl\s+-LsSf.*\|\s*sh\b|\bbrew\b/im;
+const MARKDOWN_HEADING_PATTERN = /^#{1,6}\s+/;
+const MARKDOWN_FENCE_PATTERN = /^```/;
+const MARKDOWN_CLOSING_FENCE_PATTERN = /^```\s*$/;
 
 // Validation regex patterns
 const IMPORT_STATEMENT_PATTERN = /^import\s+/m;
@@ -192,15 +199,35 @@ function findElementWithText(node: Node, patterns: string[]): string | null {
 }
 
 /**
+ * Infers shell language from command content when UI labels are ambiguous.
+ */
+function inferShellLanguageFromCode(code: string): "powershell" | "bash" | "" {
+  if (POWERSHELL_CONTENT_PATTERN.test(code)) {
+    return "powershell";
+  }
+  if (BASH_CONTENT_PATTERN.test(code)) {
+    return "bash";
+  }
+  return "";
+}
+
+/**
  * Maps label text to language identifier
  */
 function labelToLanguage(label: string): string {
   const map: Record<string, string> = {
     terminal: "bash",
     bash: "bash",
+    "bash/zsh": "bash",
+    "zsh/bash": "bash",
+    "bash/zsh (macos/linux)": "bash",
+    "zsh/bash (macos/linux)": "bash",
     shell: "bash",
     sh: "bash",
     zsh: "bash",
+    powershell: "powershell",
+    pwsh: "powershell",
+    "powershell (windows)": "powershell",
     python: "python",
     py: "python",
     typescript: "typescript",
@@ -242,9 +269,16 @@ function labelToLanguage(label: string): string {
 const LANGUAGE_LABELS = new Set([
   "terminal",
   "bash",
+  "bash/zsh",
+  "zsh/bash",
+  "bash/zsh (macos/linux)",
+  "zsh/bash (macos/linux)",
   "shell",
   "sh",
   "zsh",
+  "powershell",
+  "pwsh",
+  "powershell (windows)",
   "python",
   "py",
   "typescript",
@@ -406,6 +440,7 @@ turndown.addRule("fencedCodeBlock", {
 
     // Try to extract language from various sources
     let language = "";
+    const inferredShellLanguage = inferShellLanguageFromCode(code);
 
     // 1. Check code element class (e.g., "language-typescript")
     const codeClassName = codeElement.getAttribute("class") || "";
@@ -414,13 +449,25 @@ turndown.addRule("fencedCodeBlock", {
       language = langMatch[1];
     }
 
+    // Prefer high-confidence shell inference when class metadata is missing.
+    if (!language && inferredShellLanguage) {
+      language = inferredShellLanguage;
+    }
+
     // 2. Look for language label in parent structure
     // Nextra code blocks have labels like "Terminal", "Python", etc.
     if (!language) {
       const labels = [
         "Terminal",
         "Bash",
+        "Bash/Zsh",
+        "Zsh/Bash",
+        "Bash/Zsh (macOS/Linux)",
+        "Zsh/Bash (macOS/Linux)",
         "Shell",
+        "PowerShell",
+        "pwsh",
+        "PowerShell (Windows)",
         "Python",
         "TypeScript",
         "JavaScript",
@@ -458,6 +505,16 @@ turndown.addRule("fencedCodeBlock", {
         parent = parent.parentElement;
         depth += 1;
       }
+    }
+
+    // Correct common misclassifications from surrounding labels.
+    if (inferredShellLanguage === "powershell") {
+      language = "powershell";
+    } else if (
+      inferredShellLanguage === "bash" &&
+      (language === "python" || !language)
+    ) {
+      language = "bash";
     }
 
     // 3. Try to find filename and add as comment
@@ -741,6 +798,57 @@ function cleanHtml(html: string): string {
  */
 function cleanMarkdown(markdown: string): string {
   let cleaned = markdown;
+
+  // Normalize shell headings derived from tab labels.
+  cleaned = cleaned
+    .replace(
+      /^(#{2,6})\s+Bash$/gm,
+      "$1 Bash/Zsh (macOS/Linux)"
+    )
+    .replace(
+      /^(#{2,6})\s+Zsh\/Bash$/gm,
+      "$1 Bash/Zsh (macOS/Linux)"
+    )
+    .replace(
+      /^(#{2,6})\s+PowerShell$/gm,
+      "$1 PowerShell (Windows)"
+    );
+
+  // Ensure code blocks after each shell heading have matching language.
+  const lines = cleaned.split("\n");
+  for (let i = 0; i < lines.length; i++) {
+    const heading = lines[i].trim();
+    let expectedLang = "";
+    if (heading === "### Bash/Zsh (macOS/Linux)") {
+      expectedLang = "bash";
+    } else if (heading === "### PowerShell (Windows)") {
+      expectedLang = "powershell";
+    } else {
+      continue;
+    }
+
+    let insideCodeFence = false;
+    for (let j = i + 1; j < lines.length; j++) {
+      const trimmed = lines[j].trim();
+      if (MARKDOWN_HEADING_PATTERN.test(trimmed)) {
+        break;
+      }
+      if (!MARKDOWN_FENCE_PATTERN.test(trimmed)) {
+        continue;
+      }
+
+      if (insideCodeFence) {
+        if (MARKDOWN_CLOSING_FENCE_PATTERN.test(trimmed)) {
+          insideCodeFence = false;
+        }
+        continue;
+      }
+
+      lines[j] = `\`\`\`${expectedLang}`;
+      insideCodeFence = true;
+    }
+  }
+  cleaned = lines.join("\n");
 
   // Remove excessive blank lines (more than 2 consecutive)
   cleaned = cleaned.replace(/\n{4,}/g, "\n\n\n");
