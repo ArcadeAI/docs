@@ -161,6 +161,7 @@ describe("compareTools", () => {
       qualifiedName: "TestKit.Tool2",
       changeType: "added",
       toolName: "Tool2",
+      metadataOnly: false,
     });
   });
 
@@ -182,6 +183,7 @@ describe("compareTools", () => {
       qualifiedName: "TestKit.Tool2",
       changeType: "removed",
       toolName: "Tool2",
+      metadataOnly: false,
     });
   });
 
@@ -216,6 +218,7 @@ describe("compareTools", () => {
       qualifiedName: "TestKit.Tool1",
       changeType: "modified",
       toolName: "Tool1",
+      metadataOnly: false,
     });
   });
 
@@ -465,7 +468,133 @@ describe("compareTools", () => {
       qualifiedName: "TestKit.Tool1",
       changeType: "added",
       toolName: "Tool1",
+      metadataOnly: false,
     });
+  });
+
+  it("detects metadata-only change when definition is unchanged but metadata differs", () => {
+    const currentTools = [
+      createToolDefinition({
+        name: "Tool1",
+        qualifiedName: "TestKit.Tool1",
+        metadata: {
+          classification: { serviceDomains: ["github"] },
+          behavior: { operations: ["read"] },
+        },
+      }),
+    ];
+    const previousToolkit = createMergedToolkit({
+      tools: [
+        createMergedTool({
+          name: "Tool1",
+          qualifiedName: "TestKit.Tool1",
+          metadata: null,
+        }),
+      ],
+    });
+
+    const changes = compareTools(currentTools, previousToolkit);
+
+    expect(changes).toHaveLength(1);
+    expect(changes[0]).toEqual({
+      qualifiedName: "TestKit.Tool1",
+      changeType: "modified",
+      toolName: "Tool1",
+      metadataOnly: true,
+    });
+  });
+
+  it("does not flag metadataOnly when definition also changed", () => {
+    const currentTools = [
+      createToolDefinition({
+        name: "Tool1",
+        qualifiedName: "TestKit.Tool1",
+        parameters: [
+          {
+            name: "newParam",
+            type: "string",
+            required: true,
+            description: null,
+            enum: null,
+            inferrable: true,
+          },
+        ],
+        metadata: {
+          classification: { serviceDomains: ["github"] },
+          behavior: { operations: ["read"] },
+        },
+      }),
+    ];
+    const previousToolkit = createMergedToolkit({
+      tools: [
+        createMergedTool({
+          name: "Tool1",
+          qualifiedName: "TestKit.Tool1",
+          parameters: [],
+          metadata: null,
+        }),
+      ],
+    });
+
+    const changes = compareTools(currentTools, previousToolkit);
+
+    expect(changes).toHaveLength(1);
+    expect(changes[0]?.metadataOnly).toBe(false);
+  });
+
+  it("ignores metadata array order when values are equivalent", () => {
+    const currentTools = [
+      createToolDefinition({
+        name: "Tool1",
+        qualifiedName: "TestKit.Tool1",
+        metadata: {
+          classification: { serviceDomains: ["git", "github"] },
+          behavior: { operations: ["write", "read"] },
+        },
+      }),
+    ];
+    const previousToolkit = createMergedToolkit({
+      tools: [
+        createMergedTool({
+          name: "Tool1",
+          qualifiedName: "TestKit.Tool1",
+          metadata: {
+            classification: { serviceDomains: ["github", "git"] },
+            behavior: { operations: ["read", "write"] },
+          },
+        }),
+      ],
+    });
+
+    const changes = compareTools(currentTools, previousToolkit);
+    expect(changes).toHaveLength(0);
+  });
+
+  it("reports no change when both definition and metadata are identical", () => {
+    const sharedMetadata = {
+      classification: { serviceDomains: ["github"] },
+      behavior: { operations: ["read"], readOnly: true },
+    };
+    const currentTools = [
+      createToolDefinition({
+        name: "Tool1",
+        qualifiedName: "TestKit.Tool1",
+        metadata: sharedMetadata,
+      }),
+    ];
+    const previousToolkit = createMergedToolkit({
+      tools: [
+        createMergedTool({
+          name: "Tool1",
+          qualifiedName: "TestKit.Tool1",
+          metadata: sharedMetadata,
+        }),
+      ],
+    });
+
+    const changes = compareTools(currentTools, previousToolkit);
+
+    expect(changes).toHaveLength(0);
   });
 });
 
@@ -978,6 +1107,48 @@ describe("formatDetailedChanges", () => {
 
     const lines = formatDetailedChanges(result);
     expect(lines.some((l) => l.includes("metadata update only"))).toBe(true);
+  });
+
+  it("annotates metadata-only tool modifications in detailed output", () => {
+    const result = detectChanges(
+      new Map([
+        [
+          "TestKit",
+          {
+            tools: [
+              createToolDefinition({
+                name: "Tool1",
+                qualifiedName: "TestKit.Tool1",
+                metadata: {
+                  classification: { serviceDomains: ["github"] },
+                  behavior: { operations: ["read"] },
+                },
+              }),
+            ],
+            metadata: createToolkitMetadata(),
+          },
+        ],
+      ]),
+      new Map([
+        [
+          "TestKit",
+          createMergedToolkit({
+            tools: [
+              createMergedTool({
+                name: "Tool1",
+                qualifiedName: "TestKit.Tool1",
+                metadata: null,
+              }),
+            ],
+          }),
+        ],
+      ])
+    );
+
+    const lines = formatDetailedChanges(result);
+    expect(lines.some((line) => line.includes("Tool1 (metadata only)"))).toBe(
+      true
+    );
   });
 
   it("should skip unchanged toolkits", () => {

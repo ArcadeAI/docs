@@ -42,6 +42,19 @@ type ToolMetadataItem = {
     }>;
     secrets: Array<{ key: string }>;
   } | null;
+  metadata?: {
+    classification?: {
+      service_domains?: string[];
+    } | null;
+    behavior?: {
+      operations?: string[];
+      read_only?: boolean;
+      destructive?: boolean;
+      idempotent?: boolean;
+      open_world?: boolean;
+    } | null;
+    extras?: Record<string, unknown> | null;
+  } | null;
 };
 
 const createItems = (): ToolMetadataItem[] => [
@@ -411,5 +424,105 @@ describe("EngineApiSource", () => {
     await expect(source.fetchToolkitsSummary()).rejects.toThrow(
       "Engine API returned invalid JSON for tool metadata summary"
     );
+  });
+
+  it("parses per-tool metadata fields and maps snake_case to camelCase", async () => {
+    const items: ToolMetadataItem[] = [
+      {
+        fully_qualified_name: "Github.CreateIssue@1.0.0",
+        qualified_name: "Github.CreateIssue",
+        name: "CreateIssue",
+        description: "Create issue",
+        toolkit: {
+          name: "Github",
+          version: "1.0.0",
+          description: "GitHub toolkit",
+        },
+        input: { parameters: [] },
+        output: null,
+        requirements: { authorization: [], secrets: [] },
+        metadata: {
+          classification: { service_domains: ["github", "git"] },
+          behavior: {
+            operations: ["read", "write"],
+            read_only: false,
+            destructive: false,
+            idempotent: true,
+            open_world: false,
+          },
+          extras: { custom_key: "value" },
+        },
+      },
+    ];
+
+    const source = new EngineApiSource({
+      baseUrl: "https://api.arcade.dev",
+      apiKey: "test",
+      fetchFn: createFetchStub(items),
+    });
+
+    const tools = await source.fetchAllTools();
+
+    expect(tools).toHaveLength(1);
+    expect(tools[0]?.metadata).toEqual({
+      classification: { serviceDomains: ["github", "git"] },
+      behavior: {
+        operations: ["read", "write"],
+        readOnly: false,
+        destructive: false,
+        idempotent: true,
+        openWorld: false,
+      },
+      extras: { custom_key: "value" },
+    });
+  });
+
+  it("sets metadata to null when the API does not provide it", async () => {
+    const items = createItems();
+    const source = new EngineApiSource({
+      baseUrl: "https://api.arcade.dev",
+      apiKey: "test",
+      fetchFn: createFetchStub(items),
+    });
+
+    const tools = await source.fetchAllTools();
+
+    expect(tools[0]?.metadata).toBeNull();
+  });
+
+  it("handles partial metadata (behavior present, classification absent)", async () => {
+    const items: ToolMetadataItem[] = [
+      {
+        fully_qualified_name: "Github.CreateIssue@1.0.0",
+        qualified_name: "Github.CreateIssue",
+        name: "CreateIssue",
+        description: "Create issue",
+        toolkit: {
+          name: "Github",
+          version: "1.0.0",
+          description: "GitHub toolkit",
+        },
+        input: { parameters: [] },
+        output: null,
+        requirements: { authorization: [], secrets: [] },
+        metadata: {
+          classification: null,
+          behavior: { operations: ["read"] },
+          extras: null,
+        },
+      },
+    ];
+
+    const source = new EngineApiSource({
+      baseUrl: "https://api.arcade.dev",
+      apiKey: "test",
+      fetchFn: createFetchStub(items),
+    });
+
+    const tools = await source.fetchAllTools();
+
+    expect(tools[0]?.metadata?.classification.serviceDomains).toEqual([]);
+    expect(tools[0]?.metadata?.behavior.operations).toEqual(["read"]);
+    expect(tools[0]?.metadata?.extras).toBeNull();
   });
 });

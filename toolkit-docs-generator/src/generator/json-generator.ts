@@ -12,7 +12,10 @@ import type {
   ToolkitIndexEntry,
 } from "../types/index.js";
 import { MergedToolkitSchema } from "../types/index.js";
-import { readToolkitsFromDir } from "./output-verifier.js";
+import {
+  readToolkitsFromDir,
+  type ToolkitReadResult,
+} from "./output-verifier.js";
 
 // ============================================================================
 // Generator Configuration
@@ -36,6 +39,15 @@ export interface GeneratorResult {
   filesWritten: string[];
   /** List of errors that occurred */
   errors: string[];
+}
+
+export interface RebuildIndexResult {
+  /** Path to the rebuilt index file */
+  indexPath: string;
+  /** Read/parse errors encountered while loading toolkit files */
+  readErrors: string[];
+  /** Non-fatal read warnings (for example, legacy fallback usage) */
+  readWarnings: string[];
 }
 
 // ============================================================================
@@ -163,10 +175,14 @@ export class JsonGenerator {
     // Generate index file
     if (this.generateIndex && toolkits.length > 0) {
       try {
-        const indexToolkits =
-          this.indexSource === "output"
-            ? await this.getToolkitsFromOutputDir(errors)
-            : toolkits;
+        let indexToolkits = toolkits;
+        if (this.indexSource === "output") {
+          const readResult = await this.getToolkitsFromOutputDir();
+          indexToolkits = readResult.toolkits;
+          if (readResult.errors.length > 0) {
+            errors.push(...readResult.errors);
+          }
+        }
         const indexPath = await this.generateIndexFile(indexToolkits);
         filesWritten.push(indexPath);
       } catch (error) {
@@ -211,16 +227,23 @@ export class JsonGenerator {
     return filePath;
   }
 
-  private async getToolkitsFromOutputDir(
-    errors: string[]
-  ): Promise<MergedToolkit[]> {
-    const readResult = await readToolkitsFromDir(this.outputDir, undefined, {
+  private async getToolkitsFromOutputDir(): Promise<ToolkitReadResult> {
+    return readToolkitsFromDir(this.outputDir, undefined, {
       allowLegacyFallback: true,
     });
-    if (readResult.errors.length > 0) {
-      errors.push(...readResult.errors);
-    }
-    return readResult.toolkits;
+  }
+
+  /**
+   * Rebuild index.json from the toolkit files currently in the output directory.
+   */
+  async rebuildIndexFromOutput(): Promise<RebuildIndexResult> {
+    const readResult = await this.getToolkitsFromOutputDir();
+    const indexPath = await this.generateIndexFile(readResult.toolkits);
+    return {
+      indexPath,
+      readErrors: readResult.errors,
+      readWarnings: readResult.warnings,
+    };
   }
 }
 

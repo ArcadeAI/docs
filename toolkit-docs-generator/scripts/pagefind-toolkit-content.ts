@@ -4,6 +4,7 @@ import type {
   ToolDefinition,
   ToolkitAuth,
   ToolkitData,
+  ToolMetadata,
   ToolParameter,
   ToolSecret,
 } from "../../app/_components/toolkit-docs/types";
@@ -228,6 +229,61 @@ function formatCodeExample(
 }
 
 /**
+ * Format per-tool metadata section
+ */
+function formatToolMetadata(
+  metadata: ToolMetadata | null | undefined
+): string[] {
+  if (!metadata) return [];
+
+  const details: string[] = [];
+  if (metadata.classification.serviceDomains.length > 0) {
+    details.push(
+      `- Service domains: ${metadata.classification.serviceDomains.join(", ")}`
+    );
+  }
+  if (metadata.behavior.operations.length > 0) {
+    details.push(`- Operations: ${metadata.behavior.operations.join(", ")}`);
+  }
+  const flags: string[] = [];
+  if (metadata.behavior.readOnly === true) flags.push("read-only");
+  if (metadata.behavior.destructive === true) flags.push("destructive");
+  if (metadata.behavior.idempotent === true) flags.push("idempotent");
+  if (metadata.behavior.openWorld === true) flags.push("open-world");
+  if (flags.length > 0) {
+    details.push(`- Flags: ${flags.join(", ")}`);
+  }
+  if (metadata.extras && Object.keys(metadata.extras).length > 0) {
+    details.push(`- Extras: ${JSON.stringify(metadata.extras)}`);
+  }
+
+  return details.length > 0 ? ["", "**Tool Metadata:**", ...details] : [];
+}
+
+/**
+ * Format toolkit metadata section
+ */
+function buildToolkitMetadataSection(toolkit: ToolkitData): string[] {
+  const { metadata } = toolkit;
+  if (!metadata) return [];
+
+  const lines: string[] = ["", "## Toolkit Info", ""];
+  lines.push(`**Category:** ${metadata.category}`);
+  lines.push(`**Type:** ${metadata.type}`);
+  if (metadata.docsLink) {
+    lines.push(`**Documentation:** ${metadata.docsLink}`);
+  }
+  const flags: string[] = [];
+  if (metadata.isBYOC) flags.push("BYOC");
+  if (metadata.isPro) flags.push("Pro");
+  if (metadata.isHidden) flags.push("Hidden");
+  if (flags.length > 0) {
+    lines.push(`**Flags:** ${flags.join(", ")}`);
+  }
+  return lines;
+}
+
+/**
  * Format a complete tool definition with all details
  */
 function formatToolDefinition(tool: ToolDefinition): string[] {
@@ -266,6 +322,9 @@ function formatToolDefinition(tool: ToolDefinition): string[] {
   // Output
   lines.push(...formatOutput(tool.output));
 
+  // Tool metadata
+  lines.push(...formatToolMetadata(tool.metadata));
+
   // Code example with auth and secrets
   lines.push(
     ...formatCodeExample(
@@ -293,6 +352,7 @@ export function toolkitDataToSearchMarkdown(toolkit: ToolkitData): string {
   const title = toolkit.label || toolkit.id;
   const sections: string[] = buildToolkitHeaderSections(toolkit, title);
   sections.push(...formatToolkitAuth(toolkit.auth));
+  sections.push(...buildToolkitMetadataSection(toolkit));
   sections.push(...buildDocumentationChunkSections(toolkit));
 
   const toolsToInclude = toolkit.tools.slice(0, TOOL_LIMIT);
