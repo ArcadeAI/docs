@@ -1,6 +1,7 @@
 "use client";
 
 import { Badge } from "@arcadeai/design-system";
+import { Check, ChevronDown, Lightbulb, Minus, X } from "lucide-react";
 import {
   TOOL_METADATA_FALLBACK_STYLE,
   TOOL_METADATA_OPERATION_STYLES,
@@ -17,7 +18,14 @@ const BEHAVIOR_LABELS: Record<BehaviorFlagKey, string> = {
   openWorld: "Open world",
 };
 
-type BehaviorRow = {
+const BEHAVIOR_DESCRIPTIONS: Record<BehaviorFlagKey, string> = {
+  readOnly: "Does not modify remote state.",
+  destructive: "May delete or overwrite remote data.",
+  idempotent: "Safe to retry without extra side effects.",
+  openWorld: "Can call out to external systems.",
+};
+
+export type BehaviorRow = {
   key: BehaviorFlagKey;
   label: string;
   value: boolean | null;
@@ -34,7 +42,18 @@ export function buildBehaviorRows(
 }
 
 function formatEnumLabel(value: string): string {
-  return value.replaceAll("_", " ");
+  const words = value.split("_");
+  return words
+    .map((word, index) => {
+      if (word === "crm") {
+        return "CRM";
+      }
+      if (index === 0) {
+        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+      }
+      return word.toLowerCase();
+    })
+    .join(" ");
 }
 
 function EnumBadge({
@@ -46,7 +65,11 @@ function EnumBadge({
 }) {
   const styleClass = styles[value] ?? TOOL_METADATA_FALLBACK_STYLE;
   return (
-    <Badge className={styleClass} variant="outline">
+    <Badge
+      className={`${styleClass} gap-1.5 border-0 text-xs font-medium`}
+      variant="secondary"
+    >
+      <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-current/80" />
       {formatEnumLabel(value)}
     </Badge>
   );
@@ -56,27 +79,27 @@ function BooleanBadge({ value }: { value: boolean | null }) {
   if (value === null) {
     return (
       <Badge
-        className="border-muted/60 bg-muted/20 text-muted-foreground/70"
-        variant="outline"
+        className="border-0 bg-neutral-dark/40 text-muted-foreground/70"
+        variant="secondary"
       >
-        N/A
+        <Minus className="mr-1 h-3 w-3" /> Unknown
       </Badge>
     );
   }
 
   return value ? (
     <Badge
-      className="border-emerald-500/40 bg-emerald-500/10 text-emerald-300"
-      variant="outline"
+      className="border-0 bg-emerald-500/15 text-emerald-300"
+      variant="secondary"
     >
-      true
+      <Check className="mr-1 h-3 w-3" /> Yes
     </Badge>
   ) : (
     <Badge
-      className="border-zinc-500/40 bg-zinc-500/10 text-zinc-300"
-      variant="outline"
+      className="border-0 bg-neutral-500/15 text-neutral-300"
+      variant="secondary"
     >
-      false
+      <X className="mr-1 h-3 w-3" /> No
     </Badge>
   );
 }
@@ -104,58 +127,98 @@ export function ToolMetadataSection({
   }
 
   return (
-    <div className="mt-6 rounded-lg bg-neutral-dark/30 p-4">
-      <h4 className="mb-3 font-semibold text-muted-foreground text-sm uppercase tracking-wider">
-        Metadata
-      </h4>
-
-      <div className="space-y-4">
-        {hasOperations && (
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-muted-foreground text-xs">Operations:</span>
-            {metadata.behavior.operations.map((operation) => (
-              <EnumBadge
-                key={operation}
-                styles={TOOL_METADATA_OPERATION_STYLES}
-                value={operation}
-              />
-            ))}
-          </div>
-        )}
-
-        {hasServiceDomains && (
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-muted-foreground text-xs">
-              Service domains:
-            </span>
-            {metadata.classification.serviceDomains.map((domain) => (
-              <EnumBadge
-                key={domain}
-                styles={TOOL_METADATA_SERVICE_DOMAIN_STYLES}
-                value={domain}
-              />
-            ))}
-          </div>
-        )}
-
-        <div className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-4">
-          {behaviorRows.map((row) => (
-            <div className="flex flex-col gap-1" key={row.key}>
-              <span className="text-muted-foreground/70 text-xs">
-                {row.label}
-              </span>
-              <BooleanBadge value={row.value} />
-            </div>
-          ))}
+    <div className="mb-6 rounded-xl bg-neutral-dark/15 p-4">
+      <div className="mb-4 flex items-start gap-2.5">
+        <div className="mt-0.5 rounded-md bg-brand-accent/10 p-1.5 text-brand-accent">
+          <Lightbulb className="h-3.5 w-3.5" />
         </div>
+        <div>
+          <h4 className="font-semibold text-foreground text-sm">
+            Execution hints
+          </h4>
+          <p className="mt-1 text-muted-foreground/75 text-xs">
+            Signals for MCP clients and agents about how this tool behaves.
+          </p>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        {(hasOperations || hasServiceDomains) && (
+          <div className="grid gap-3 md:grid-cols-2">
+            {hasOperations && (
+              <div className="rounded-lg bg-neutral-dark/20 p-3">
+                <span className="mb-2 block text-muted-foreground/80 text-xs font-medium">
+                  Operations
+                </span>
+                <div className="flex flex-wrap items-center gap-2">
+                  {metadata.behavior.operations.map((operation) => (
+                    <EnumBadge
+                      key={operation}
+                      styles={TOOL_METADATA_OPERATION_STYLES}
+                      value={operation}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {hasServiceDomains && (
+              <div className="rounded-lg bg-neutral-dark/20 p-3">
+                <span className="mb-2 block text-muted-foreground/80 text-xs font-medium">
+                  Service domains
+                </span>
+                <div className="flex flex-wrap items-center gap-2">
+                  {metadata.classification.serviceDomains.map((domain) => (
+                    <EnumBadge
+                      key={domain}
+                      styles={TOOL_METADATA_SERVICE_DOMAIN_STYLES}
+                      value={domain}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {hasAnyBehaviorValue && (
+          <div className="rounded-lg bg-neutral-dark/20 p-3">
+            <span className="mb-2 block text-muted-foreground/80 text-xs font-medium">
+              MCP behavior
+            </span>
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+              {behaviorRows.map((row) => (
+                <div
+                  className="rounded-md bg-neutral-dark/25 p-2.5"
+                  key={row.key}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-medium text-foreground text-xs">
+                      {row.label}
+                    </span>
+                    <div className="flex shrink-0">
+                      <BooleanBadge value={row.value} />
+                    </div>
+                  </div>
+                  <p className="mt-1.5 text-[11px] text-muted-foreground/70 leading-relaxed">
+                    {BEHAVIOR_DESCRIPTIONS[row.key]}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {hasExtras && (
-          <div className="space-y-1">
-            <span className="text-muted-foreground text-xs">Extras:</span>
-            <pre className="overflow-auto rounded bg-neutral-dark/40 p-3 text-muted-foreground text-xs">
+          <details className="group mt-2 rounded-lg bg-neutral-dark/20">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-2.5 text-muted-foreground/85 text-xs font-medium">
+              Additional metadata
+              <ChevronDown className="h-3.5 w-3.5 transition-transform group-open:rotate-180" />
+            </summary>
+            <pre className="overflow-auto p-3 text-muted-foreground text-xs">
               {JSON.stringify(metadata.extras, null, 2)}
             </pre>
-          </div>
+          </details>
         )}
       </div>
     </div>

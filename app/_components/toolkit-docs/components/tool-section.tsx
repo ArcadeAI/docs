@@ -485,6 +485,7 @@ export function ToolSection({
         showSelection={showSelection}
         tool={tool}
       />
+      <ToolMetadataSection metadata={tool.metadata} />
       <ToolDescriptionSection showDescription={showDescription} tool={tool} />
       <ToolParametersSection showParameters={showParameters} tool={tool} />
       <ToolRequirementsSection
@@ -505,7 +506,6 @@ export function ToolSection({
         tool={tool}
       />
       <ToolOutputSection showOutput={showOutput} tool={tool} />
-      <ToolMetadataSection metadata={tool.metadata} />
       <ToolExampleSection tool={tool} />
     </section>
   );
