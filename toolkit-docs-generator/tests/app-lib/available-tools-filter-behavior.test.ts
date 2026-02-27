@@ -58,4 +58,13 @@ describe("filterTools — behavior flags", () => {
     });
     expect(result).toHaveLength(0);
   });
+
+  it("ignores behavior flags explicitly set to undefined", () => {
+    const result = filterTools(tools, "", "all", {
+      behaviorFlags: {
+        readOnly: undefined,
+      },
+    });
+    expect(result).toHaveLength(4);
+  });
 });

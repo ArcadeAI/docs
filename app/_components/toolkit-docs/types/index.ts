@@ -455,6 +455,7 @@ export type AvailableToolsTableProps = {
     secrets?: string[];
     secretsInfo?: ToolSecret[];
     scopes?: string[];
+    metadata?: ToolMetadata | null;
   }>;
   /** Optional label for the secrets column */
   secretsColumnLabel?: string;

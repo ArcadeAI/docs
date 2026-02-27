@@ -41,4 +41,22 @@ describe("getSharedServiceDomain", () => {
     const tools = [makeTool(["messaging", "email"]), makeTool(["messaging"])];
     expect(getSharedServiceDomain(tools)).toBeNull();
   });
+
+  it("returns null when domain is not a string", () => {
+    const tools = [
+      {
+        metadata: {
+          classification: { serviceDomains: [123] },
+          behavior: { operations: [] },
+          extras: null,
+        },
+      },
+      makeTool(["messaging"]),
+    ];
+    expect(
+      getSharedServiceDomain(
+        tools as Parameters<typeof getSharedServiceDomain>[0]
+      )
+    ).toBeNull();
+  });
 });
