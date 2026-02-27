@@ -2,7 +2,7 @@
 
 import { liteClient as algoliasearch } from "algoliasearch/lite";
 import { Search } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Highlight,
   Hits,
@@ -18,18 +18,28 @@ type HitRecord = {
   url?: string;
 };
 
-const FOCUS_DELAY_MS = 50;
+const appId = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID;
+const searchKey = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY;
+const indexName = process.env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME;
 
-const searchClient = algoliasearch(
-  process.env.NEXT_PUBLIC_ALGOLIA_APP_ID ?? "",
-  process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY ?? ""
-);
+const searchClient =
+  appId && searchKey ? algoliasearch(appId, searchKey) : null;
+
+function safeHref(url: string | undefined): string {
+  if (!url) {
+    return "/";
+  }
+  if (url.startsWith("/") || url.startsWith("https://")) {
+    return url;
+  }
+  return "/";
+}
 
 function SearchHit({ hit }: { hit: HitRecord }) {
   return (
     <a
       className="block rounded-lg px-4 py-3 hover:bg-neutral-100 dark:hover:bg-white/5"
-      href={hit.url}
+      href={safeHref(hit.url)}
     >
       <div className="truncate text-sm font-medium text-neutral-900 dark:text-white">
         <Highlight
@@ -76,9 +86,19 @@ function NoResults() {
   );
 }
 
+function SearchUnavailable() {
+  return (
+    <p className="px-4 py-8 text-center text-sm text-neutral-400 dark:text-neutral-500">
+      Add <code className="text-xs">NEXT_PUBLIC_ALGOLIA_APP_ID</code>,{" "}
+      <code className="text-xs">NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY</code>, and{" "}
+      <code className="text-xs">NEXT_PUBLIC_ALGOLIA_INDEX_NAME</code> to your
+      environment to enable search.
+    </p>
+  );
+}
+
 export function AlgoliaSearch() {
   const [isOpen, setIsOpen] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -93,12 +113,6 @@ export function AlgoliaSearch() {
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, []);
-
-  useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), FOCUS_DELAY_MS);
-    }
-  }, [isOpen]);
 
   return (
     <>
@@ -122,51 +136,50 @@ export function AlgoliaSearch() {
           className="fixed inset-0 z-50 flex items-start justify-center px-4 pt-[10vh]"
           role="dialog"
         >
-          {/* Backdrop */}
           <button
             aria-label="Close search"
             className="fixed inset-0 bg-black/30 backdrop-blur-sm dark:bg-black/50"
             onClick={() => setIsOpen(false)}
             type="button"
           />
-          {/* Modal panel */}
           <div className="relative z-10 w-full max-w-2xl overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-2xl dark:border-white/10 dark:bg-neutral-900">
-            <InstantSearch
-              indexName={process.env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME ?? ""}
-              searchClient={searchClient}
-            >
-              <div className="flex items-center border-b border-neutral-200 px-4 dark:border-white/10">
-                <Search className="size-4 shrink-0 text-neutral-400 dark:text-neutral-500" />
-                <SearchBox
-                  autoFocus
-                  classNames={{
-                    form: "flex flex-1",
-                    input:
-                      "w-full bg-transparent px-3 py-4 text-sm text-neutral-900 placeholder:text-neutral-400 outline-none dark:text-white dark:placeholder:text-neutral-500",
-                    loadingIndicator: "hidden",
-                    reset: "hidden",
-                    root: "flex-1",
-                    submit: "hidden",
-                  }}
-                  placeholder="Search docs…"
-                />
-              </div>
-              <div className="max-h-[60vh] overflow-y-auto p-2">
-                <EmptyQuery />
-                <NoResults />
-                <Hits
-                  classNames={{ item: "", list: "space-y-0.5", root: "" }}
-                  hitComponent={({ hit }) => (
-                    <SearchHit hit={hit as unknown as HitRecord} />
-                  )}
-                />
-              </div>
-              <div className="flex justify-end border-t border-neutral-200 px-4 py-2 dark:border-white/10">
-                <span className="text-xs text-neutral-400 dark:text-neutral-600">
-                  Search by Algolia
-                </span>
-              </div>
-            </InstantSearch>
+            {searchClient && indexName ? (
+              <InstantSearch indexName={indexName} searchClient={searchClient}>
+                <div className="flex items-center border-b border-neutral-200 px-4 dark:border-white/10">
+                  <Search className="size-4 shrink-0 text-neutral-400 dark:text-neutral-500" />
+                  <SearchBox
+                    autoFocus
+                    classNames={{
+                      form: "flex flex-1",
+                      input:
+                        "w-full bg-transparent px-3 py-4 text-sm text-neutral-900 placeholder:text-neutral-400 outline-none dark:text-white dark:placeholder:text-neutral-500",
+                      loadingIndicator: "hidden",
+                      reset: "hidden",
+                      root: "flex-1",
+                      submit: "hidden",
+                    }}
+                    placeholder="Search docs…"
+                  />
+                </div>
+                <div className="max-h-[60vh] overflow-y-auto p-2">
+                  <EmptyQuery />
+                  <NoResults />
+                  <Hits
+                    classNames={{ item: "", list: "space-y-0.5", root: "" }}
+                    hitComponent={({ hit }) => (
+                      <SearchHit hit={hit as unknown as HitRecord} />
+                    )}
+                  />
+                </div>
+                <div className="flex justify-end border-t border-neutral-200 px-4 py-2 dark:border-white/10">
+                  <span className="text-xs text-neutral-400 dark:text-neutral-600">
+                    Search by Algolia
+                  </span>
+                </div>
+              </InstantSearch>
+            ) : (
+              <SearchUnavailable />
+            )}
           </div>
         </div>
       )}
