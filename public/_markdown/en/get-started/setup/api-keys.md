@@ -61,7 +61,7 @@ arcade login
 The CLI will automatically:
 
 -   Print your  to the console
--   Save your credentials to `~/.arcade/credentials.yaml`
+-   Save your credentials to `~/.arcade/credentials.yaml` (or `%USERPROFILE%\.arcade\credentials.yaml` on Windows)
 
 API keys are administrator credentials. Anyone who has your  can make requests to Arcade as you. Always store your API keys in a safe place, such as system environment variables, and never commit them to version control, share them publicly, or use them in browser or frontend code.
 

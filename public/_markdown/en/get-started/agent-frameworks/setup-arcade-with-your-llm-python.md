@@ -44,18 +44,29 @@ Create a new virtual environment and activate it:
 
 ```bash
 uv venv
+```
+
+### Bash/Zsh (macOS/Linux)
+
+```bash
 source .venv/bin/activate
+```
+
+### PowerShell (Windows)
+
+```powershell
+. ".venv\Scripts\Activate.ps1"
 ```
 
 Install the dependencies:
 
-```bash
+```powershell
 uv add arcadepy openai python-dotenv
 ```
 
 Your directory should now look like this:
 
-```bash
+```powershell
 arcade-llm-example/
 ├── .git/
 ├── .gitignore
