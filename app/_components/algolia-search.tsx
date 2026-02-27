@@ -171,11 +171,6 @@ export function AlgoliaSearch() {
                     )}
                   />
                 </div>
-                <div className="flex justify-end border-t border-neutral-200 px-4 py-2 dark:border-white/10">
-                  <span className="text-xs text-neutral-400 dark:text-neutral-600">
-                    Search by Algolia
-                  </span>
-                </div>
               </InstantSearch>
             ) : (
               <SearchUnavailable />
