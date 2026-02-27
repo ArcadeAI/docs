@@ -240,6 +240,35 @@ export type AvailableToolsSort =
   | "secrets_first"
   | "selected_first";
 
+const BEHAVIOR_FILTER_LABELS: Record<BehaviorFlagKey, string> = {
+  readOnly: "Read only",
+  destructive: "Destructive",
+  idempotent: "Idempotent",
+  openWorld: "Open world",
+};
+
+const BEHAVIOR_FILTER_ORDER: BehaviorFlagKey[] = [
+  "readOnly",
+  "destructive",
+  "idempotent",
+  "openWorld",
+];
+
+function formatMetadataLabel(value: string): string {
+  const words = value.split("_");
+  return words
+    .map((word, index) => {
+      if (word === "crm") {
+        return "CRM";
+      }
+      if (index === 0) {
+        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+      }
+      return word.toLowerCase();
+    })
+    .join(" ");
+}
+
 type SecretDisplayItem = {
   label: string;
   href?: string;
@@ -599,13 +628,63 @@ export function AvailableToolsTable({
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<AvailableToolsFilter>(defaultFilter);
   const [sort, setSort] = useState<AvailableToolsSort>("name_asc");
+  const [activeOperations, setActiveOperations] = useState<Set<string>>(
+    () => new Set()
+  );
+  const [behaviorFlags, setBehaviorFlags] = useState<
+    Partial<Record<BehaviorFlagKey, boolean>>
+  >({});
   const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
   const [page, setPage] = useState<number>(1);
 
+  const operationOptions = useMemo(() => {
+    const values = new Set<string>();
+    for (const tool of safeTools) {
+      for (const operation of tool.metadata?.behavior?.operations ?? []) {
+        if (operation.trim().length > 0) {
+          values.add(operation);
+        }
+      }
+    }
+    return [...values].sort((a, b) => a.localeCompare(b));
+  }, [safeTools]);
+
+  const behaviorFilterKeys = useMemo(() => {
+    const available = new Set<BehaviorFlagKey>();
+    for (const tool of safeTools) {
+      const behavior = tool.metadata?.behavior;
+      if (!behavior) {
+        continue;
+      }
+      for (const key of BEHAVIOR_FILTER_ORDER) {
+        if (behavior[key] !== undefined) {
+          available.add(key);
+        }
+      }
+    }
+    return BEHAVIOR_FILTER_ORDER.filter((key) => available.has(key));
+  }, [safeTools]);
+
+  const hasMetadataFilters =
+    operationOptions.length > 0 || behaviorFilterKeys.length > 0;
+  const hasActiveMetadataFilters =
+    activeOperations.size > 0 || Object.keys(behaviorFlags).length > 0;
+
   const filteredTools = useMemo(() => {
-    const filtered = filterTools(safeTools, query, filter);
+    const filtered = filterTools(safeTools, query, filter, {
+      activeOperations,
+      behaviorFlags,
+    });
     return sortTools(filtered, sort, selectedTools);
-  }, [safeTools, query, filter, sort, selectedTools]);
+  }, [
+    safeTools,
+    query,
+    filter,
+    sort,
+    selectedTools,
+    activeOperations,
+    behaviorFlags,
+  ]);
 
   const pageCount = useMemo(
     () => Math.max(1, Math.ceil(filteredTools.length / pageSize)),
@@ -632,113 +711,210 @@ export function AvailableToolsTable({
   return (
     <div className="mt-6 space-y-4">
       {(enableSearch || enableFilters) && (
-        <div className="flex flex-wrap items-center gap-3 rounded-lg bg-neutral-dark/20 p-3">
-          {enableSearch && (
-            <div className="relative w-full flex-1 sm:min-w-[200px] sm:max-w-md">
-              <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                className="pr-9 pl-9"
-                onChange={(event) => {
-                  setQuery(event.target.value);
-                  setPage(1);
-                }}
-                placeholder={searchPlaceholder}
-                type="text"
-                value={query}
-              />
-              {query && (
-                <Button
-                  aria-label="Clear search"
-                  className="absolute top-1/2 right-3 h-auto -translate-y-1/2 p-0"
-                  onClick={() => setQuery("")}
-                  size="sm"
-                  variant="ghost"
+        <div className="space-y-3 rounded-lg bg-neutral-dark/20 p-3">
+          <div className="flex flex-wrap items-center gap-3">
+            {enableSearch && (
+              <div className="relative w-full flex-1 sm:min-w-[200px] sm:max-w-md">
+                <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  className="pr-9 pl-9"
+                  onChange={(event) => {
+                    setQuery(event.target.value);
+                    setPage(1);
+                  }}
+                  placeholder={searchPlaceholder}
+                  type="text"
+                  value={query}
+                />
+                {query && (
+                  <Button
+                    aria-label="Clear search"
+                    className="absolute top-1/2 right-3 h-auto -translate-y-1/2 p-0"
+                    onClick={() => setQuery("")}
+                    size="sm"
+                    variant="ghost"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            )}
+            {enableFilters && (
+              <>
+                <Select
+                  onValueChange={(value) => {
+                    setFilter(value as AvailableToolsFilter);
+                    setPage(1);
+                  }}
+                  value={filter}
                 >
-                  <X className="h-4 w-4" />
-                </Button>
-              )}
+                  <SelectTrigger
+                    aria-label={filterLabel}
+                    className="h-9 w-full sm:w-[180px] border-muted/60 text-sm hover:border-muted"
+                  >
+                    <SelectValue placeholder={filterLabel} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All tools</SelectItem>
+                    <SelectItem value="has_scopes">
+                      Requires OAuth scopes only
+                    </SelectItem>
+                    <SelectItem value="no_scopes">No OAuth scopes</SelectItem>
+                    <SelectItem value="has_secrets">
+                      Requires secrets only
+                    </SelectItem>
+                    <SelectItem value="no_secrets">
+                      No secrets required
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select
+                  onValueChange={(value) => {
+                    setPageSize(Number(value));
+                    setPage(1);
+                  }}
+                  value={String(pageSize)}
+                >
+                  <SelectTrigger
+                    aria-label="Rows per page"
+                    className="h-9 w-full sm:w-[140px] border-muted/60 text-sm hover:border-muted"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PAGE_SIZE_OPTIONS.map((size) => (
+                      <SelectItem key={size} value={String(size)}>
+                        {size} / page
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  onValueChange={(value) => {
+                    setSort(value as AvailableToolsSort);
+                    setPage(1);
+                  }}
+                  value={sort}
+                >
+                  <SelectTrigger
+                    aria-label="Sort by"
+                    className="h-9 w-full sm:w-[180px] border-muted/60 text-sm hover:border-muted"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="name_asc">Name A-Z</SelectItem>
+                    <SelectItem value="name_desc">Name Z-A</SelectItem>
+                    <SelectItem value="scopes_first">
+                      Requires OAuth scopes first
+                    </SelectItem>
+                    <SelectItem value="secrets_first">
+                      Requires secrets first
+                    </SelectItem>
+                    {showSelection && (
+                      <SelectItem value="selected_first">
+                        Selected first
+                      </SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
+              </>
+            )}
+            <span className="text-muted-foreground text-sm">
+              <span className="font-medium text-foreground">
+                {filteredTools.length}
+              </span>{" "}
+              of {safeTools.length}
+            </span>
+          </div>
+
+          {enableFilters && hasMetadataFilters && (
+            <div className="space-y-2 border-neutral-dark-high/20 border-t pt-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-muted-foreground text-xs">
+                  Metadata filters:
+                </span>
+                {operationOptions.map((operation) => (
+                  <Button
+                    className="h-7 px-2.5 text-xs"
+                    key={operation}
+                    onClick={() => {
+                      setActiveOperations((current) => {
+                        const next = new Set(current);
+                        if (next.has(operation)) {
+                          next.delete(operation);
+                        } else {
+                          next.add(operation);
+                        }
+                        return next;
+                      });
+                      setPage(1);
+                    }}
+                    size="sm"
+                    variant={
+                      activeOperations.has(operation) ? "default" : "outline"
+                    }
+                  >
+                    {formatMetadataLabel(operation)}
+                  </Button>
+                ))}
+                {behaviorFilterKeys.map((key) => (
+                  <Select
+                    key={key}
+                    onValueChange={(value) => {
+                      setBehaviorFlags((current) => {
+                        const next = { ...current };
+                        if (value === "any") {
+                          delete next[key];
+                        } else {
+                          next[key] = value === "true";
+                        }
+                        return next;
+                      });
+                      setPage(1);
+                    }}
+                    value={
+                      behaviorFlags[key] === undefined
+                        ? "any"
+                        : String(behaviorFlags[key])
+                    }
+                  >
+                    <SelectTrigger
+                      aria-label={`${BEHAVIOR_FILTER_LABELS[key]} filter`}
+                      className="h-7 w-[165px] border-muted/60 text-xs hover:border-muted"
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="any">
+                        {BEHAVIOR_FILTER_LABELS[key]}: Any
+                      </SelectItem>
+                      <SelectItem value="true">
+                        {BEHAVIOR_FILTER_LABELS[key]}: Yes
+                      </SelectItem>
+                      <SelectItem value="false">
+                        {BEHAVIOR_FILTER_LABELS[key]}: No
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                ))}
+                {hasActiveMetadataFilters && (
+                  <Button
+                    className="h-7 px-2.5 text-xs"
+                    onClick={() => {
+                      setActiveOperations(new Set());
+                      setBehaviorFlags({});
+                      setPage(1);
+                    }}
+                    size="sm"
+                    variant="ghost"
+                  >
+                    Clear metadata
+                  </Button>
+                )}
+              </div>
             </div>
           )}
-          {enableFilters && (
-            <>
-              <Select
-                onValueChange={(value) => {
-                  setFilter(value as AvailableToolsFilter);
-                  setPage(1);
-                }}
-                value={filter}
-              >
-                <SelectTrigger
-                  aria-label={filterLabel}
-                  className="h-9 w-full sm:w-[180px] border-muted/60 text-sm hover:border-muted"
-                >
-                  <SelectValue placeholder={filterLabel} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All tools</SelectItem>
-                  <SelectItem value="has_secrets">
-                    Requires secrets only
-                  </SelectItem>
-                  <SelectItem value="no_secrets">
-                    No secrets required
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              <Select
-                onValueChange={(value) => {
-                  setPageSize(Number(value));
-                  setPage(1);
-                }}
-                value={String(pageSize)}
-              >
-                <SelectTrigger
-                  aria-label="Rows per page"
-                  className="h-9 w-full sm:w-[140px] border-muted/60 text-sm hover:border-muted"
-                >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {PAGE_SIZE_OPTIONS.map((size) => (
-                    <SelectItem key={size} value={String(size)}>
-                      {size} / page
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select
-                onValueChange={(value) => {
-                  setSort(value as AvailableToolsSort);
-                  setPage(1);
-                }}
-                value={sort}
-              >
-                <SelectTrigger
-                  aria-label="Sort by"
-                  className="h-9 w-full sm:w-[180px] border-muted/60 text-sm hover:border-muted"
-                >
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="name_asc">Name A-Z</SelectItem>
-                  <SelectItem value="name_desc">Name Z-A</SelectItem>
-                  <SelectItem value="secrets_first">
-                    Requires secrets first
-                  </SelectItem>
-                  {showSelection && (
-                    <SelectItem value="selected_first">
-                      Selected first
-                    </SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
-            </>
-          )}
-          <span className="text-muted-foreground text-sm">
-            <span className="font-medium text-foreground">
-              {filteredTools.length}
-            </span>{" "}
-            of {safeTools.length}
-          </span>
         </div>
       )}
       {filteredTools.length === 0 ? (
