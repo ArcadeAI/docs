@@ -189,7 +189,7 @@ When configuring your  client using the stdio transport, you need to ensure that
 
 Then, your  client’s configuration file should look like this:
 
-```json
+```bash
 {
   "mcpServers": {
     "my_server": {
@@ -215,19 +215,27 @@ When configuring your  client using the Streamable HTTP transport, ensure the  i
 
 Activate the virtual environment:
 
+### Bash/Zsh (macOS/Linux)
+
 ```bash
 source /path/to/your/project/.venv/bin/activate
 ```
 
+### PowerShell (Windows)
+
+```powershell
+. "/path/to/your/project/.venv/Scripts/Activate.ps1"
+```
+
 run the  server using the http transport. The secrets will be loaded from the `.env` file that is located at the directory of your :
 
-```bash
+```powershell
 uv run server.py http
 ```
 
 Then, your  client’s configuration file should look like this:
 
-```json
+```powershell
 {
   "mcpServers": {
     "my_server": {

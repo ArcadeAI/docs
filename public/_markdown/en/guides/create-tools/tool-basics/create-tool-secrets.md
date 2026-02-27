@@ -62,17 +62,25 @@ Depending on where you’re running your server, you can store your secret in a 
 
 ### .env file
 
-You can create a `.env` file in the same directory as your  (typically `server.py` by default) and add your secret:
+You can create a `.env` file in your  root directory and add your secret:
 
 ```bash
 # .env
 MY_SECRET_KEY="my-secret-value"
 ```
 
-The  includes a `.env.example` file with the secret key name and example value. You can rename it to `.env` to start using it.
+The  includes a `.env.example` file at the project root with the secret key name and example value. You can rename it to `.env` to start using it.
+
+### Bash/Zsh (macOS/Linux)
 
 ```bash
 mv .env.example .env
+```
+
+### PowerShell (Windows)
+
+```powershell
+Copy-Item .env.example .env
 ```
 
 Using a `.env` file is okay for local development, but you should use the Arcade Dashboard or Arcade CLI for production deployments.
@@ -104,8 +112,16 @@ The Arcade CLI will make the secret available to your  server when it is deploye
 
 You can set the environment variable in your terminal directly with this command:
 
+### Bash/Zsh (macOS/Linux)
+
 ```bash
 export MY_SECRET_KEY="my-secret-value"
+```
+
+### PowerShell (Windows)
+
+```powershell
+$env:MY_SECRET_KEY="my-secret-value"
 ```
 
 Using environment variables is okay for local development, but you should use the Arcade Dashboard or Arcade CLI for production deployments.
@@ -179,7 +195,7 @@ When your  is executed, it will return: `"Got SECRET_KEY of length..."`. In a re
 ## Key Concepts
 
 -   **Secure Access:** Secrets are accessed through , not imported directly
--   **Environment Integration:** Works with both environment variables and .env files
+-   **Environment Integration:** Works with both environment variables and `.env` files
 -   **Error Handling:** Always handle the case where a secret might be missing
 -   **Masking:** Never expose full secret values in logs or return values
 -   **Declaration:** Use `requires_secrets` to make dependencies explicit
@@ -193,7 +209,7 @@ When your  is executed, it will return: `"Got SECRET_KEY of length..."`. In a re
 SECRET_KEY="supersecret"
 ```
 
-For the code to work, you must define your environment variables locally or in a `.env` file.
+For the code to work, you must define your environment variables locally or in a `.env` file. Arcade will automatically search upward from the current directory to find your `.env` file.
 
 ```python
 # secrets.py

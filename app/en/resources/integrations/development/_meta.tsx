@@ -37,17 +37,9 @@ const meta: MetaRecord = {
     title: "GitHub",
     href: "/en/resources/integrations/development/github",
   },
-  google: {
-    title: "Google",
-    href: "/en/resources/integrations/development/google",
-  },
   math: {
     title: "Math",
     href: "/en/resources/integrations/development/math",
-  },
-  microsoft: {
-    title: "Microsoft",
-    href: "/en/resources/integrations/development/microsoft",
   },
   pagerduty: {
     title: "Pagerduty",

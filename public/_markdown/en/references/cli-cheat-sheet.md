@@ -17,6 +17,13 @@ uv tool install arcade-mcp    # Recommended
 pip install arcade-mcp        # Alternative
 ```
 
+Upgrade to the latest version:
+
+```bash
+uv tool upgrade arcade-mcp    # Recommended
+pip install --upgrade arcade-mcp  # Alternative
+```
+
 Verify installation:
 
 ```bash
@@ -39,6 +46,8 @@ arcade <command> --help
 ```
 
 Use `uv` for faster installs and better dependency management
+
+Using Windows and PowerShell? See [Windows environment setup](/get-started/setup/windows-environment.md) for install options with and without `uv`.
 
 🔐Authentication
 
@@ -72,7 +81,7 @@ Open Arcade web UI in browser
 
 Open local dashboard
 
-Credentials are stored in `~/.arcade/credentials.yaml`
+Credentials are stored in `~/.arcade/credentials.yaml` (or `%USERPROFILE%\.arcade\credentials.yaml` on Windows).
 
 🏢Organizations & Projects
 
@@ -692,6 +701,13 @@ OPENAI_API_KEY=sk-...
 ANTHROPIC_API_KEY=sk-ant-...
 ```
 
+PowerShell session example:
+
+```powershell
+$env:OPENAI_API_KEY="sk-..."
+$env:ANTHROPIC_API_KEY="sk-ant-..."
+```
+
 📂Project Structure
 
 ### Minimal Template (`arcade new my_server`)
@@ -751,6 +767,20 @@ Check `arcade server logs <name> -f`
 ”No tools found”
 
 Verify `--tool-package` or `--discover-installed`
+
+”Command not found after upgrade”
+
+Re-authenticate: `arcade logout && arcade login`
+
+### After Upgrading
+
+If you encounter issues after upgrading the CLI:
+
+```bash
+arcade logout          # Clear old credentials
+arcade login           # Re-authenticate
+arcade whoami          # Verify login status
+```
 
 ### Debug Tips
 

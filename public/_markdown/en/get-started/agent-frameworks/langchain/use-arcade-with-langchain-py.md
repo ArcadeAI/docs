@@ -47,13 +47,27 @@ mkdir langchain-arcade-example
 cd langchain-arcade-example
 uv init
 uv venv
+```
+
+### Bash/Zsh (macOS/Linux)
+
+```bash
 source .venv/bin/activate
+```
+
+### PowerShell (Windows)
+
+```powershell
+. ".venv\Scripts\Activate.ps1"
+```
+
+```powershell
 uv add arcadepy langchain langchain-openai python-dotenv
 ```
 
 Create a new file called `.env` and add the following :
 
-```bash
+```powershell
 # .env
 ARCADE_API_KEY=YOUR_ARCADE_API_KEY
 OPENAI_API_KEY=YOUR_OPENAI_API_KEY

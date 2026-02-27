@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import type {
   ToolDefinition,
   ToolkitData,
+  ToolMetadata,
   ToolParameter,
 } from "../../../app/_components/toolkit-docs/types";
 import { toolkitDataToSearchMarkdown } from "../../scripts/pagefind-toolkit-content";
@@ -16,6 +17,7 @@ const makeTool = (
     secretsInfo?: ToolDefinition["secretsInfo"];
     output?: ToolDefinition["output"];
     codeExample?: ToolDefinition["codeExample"];
+    metadata?: ToolMetadata | null;
   }
 ): ToolDefinition => ({
   name: qualifiedName.split(".")[1] ?? qualifiedName,
@@ -29,6 +31,7 @@ const makeTool = (
   output: options?.output ?? null,
   documentationChunks: [],
   codeExample: options?.codeExample,
+  metadata: options?.metadata,
 });
 
 const makeToolkit = (
@@ -389,5 +392,108 @@ describe("toolkitDataToSearchMarkdown", () => {
 
     expect(markdown).toContain("## Tool Details");
     expect(markdown).toContain("### Github.CreateIssue");
+  });
+
+  it("includes toolkit metadata section with category, type, and docsLink", () => {
+    const markdown = toolkitDataToSearchMarkdown(
+      makeToolkit([makeTool("Github.CreateIssue")])
+    );
+
+    expect(markdown).toContain("## Toolkit Info");
+    expect(markdown).toContain("**Category:** development");
+    expect(markdown).toContain("**Type:** arcade");
+    expect(markdown).toContain("**Documentation:** https://docs.arcade.dev");
+  });
+
+  it("includes BYOC and Pro flags in toolkit metadata section", () => {
+    const toolkit: ToolkitData = {
+      ...makeToolkit([makeTool("Github.CreateIssue")]),
+      metadata: {
+        category: "development",
+        iconUrl: "https://example.com/icon.svg",
+        isBYOC: true,
+        isPro: true,
+        type: "verified",
+        docsLink: "https://docs.arcade.dev",
+        isComingSoon: false,
+        isHidden: false,
+      },
+    };
+    const markdown = toolkitDataToSearchMarkdown(toolkit);
+
+    expect(markdown).toContain("**Flags:** BYOC, Pro");
+  });
+
+  it("includes per-tool metadata when metadata is present", () => {
+    const metadata: ToolMetadata = {
+      classification: { serviceDomains: ["github", "git"] },
+      behavior: {
+        operations: ["read", "write"],
+        readOnly: false,
+        destructive: false,
+        idempotent: true,
+        openWorld: false,
+      },
+      extras: null,
+    };
+    const markdown = toolkitDataToSearchMarkdown(
+      makeToolkit([makeTool("Github.CreateIssue", { metadata })])
+    );
+
+    expect(markdown).toContain("**Tool Metadata:**");
+    expect(markdown).toContain("- Service domains: github, git");
+    expect(markdown).toContain("- Operations: read, write");
+    expect(markdown).toContain("- Flags: idempotent");
+  });
+
+  it("includes destructive and read-only flags in per-tool metadata", () => {
+    const metadata: ToolMetadata = {
+      classification: { serviceDomains: [] },
+      behavior: {
+        operations: [],
+        readOnly: true,
+        destructive: true,
+        openWorld: true,
+      },
+      extras: { custom_key: "custom_value" },
+    };
+    const markdown = toolkitDataToSearchMarkdown(
+      makeToolkit([makeTool("Github.DeleteRepo", { metadata })])
+    );
+
+    expect(markdown).toContain("**Tool Metadata:**");
+    expect(markdown).toContain("- Flags: read-only, destructive, open-world");
+    expect(markdown).toContain("- Extras:");
+    expect(markdown).toContain("custom_key");
+  });
+
+  it("omits per-tool metadata section when metadata contains no populated values", () => {
+    const metadata: ToolMetadata = {
+      classification: { serviceDomains: [] },
+      behavior: { operations: [] },
+      extras: null,
+    };
+
+    const markdown = toolkitDataToSearchMarkdown(
+      makeToolkit([makeTool("Github.CreateIssue", { metadata })])
+    );
+
+    expect(markdown).not.toContain("**Tool Metadata:**");
+  });
+
+  it("omits per-tool metadata section when metadata is null", () => {
+    const markdown = toolkitDataToSearchMarkdown(
+      makeToolkit([makeTool("Github.CreateIssue", { metadata: null })])
+    );
+
+    expect(markdown).not.toContain("**Tool Metadata:**");
+  });
+
+  it("omits per-tool metadata section when metadata is undefined", () => {
+    const markdown = toolkitDataToSearchMarkdown(
+      makeToolkit([makeTool("Github.CreateIssue")])
+    );
+
+    expect(markdown).not.toContain("**Tool Metadata:**");
   });
 });

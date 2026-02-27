@@ -48,12 +48,23 @@ Then, run the following command to create and activate a new virtual environment
 
 ```bash
 uv venv
+```
+
+### Bash/Zsh (macOS/Linux)
+
+```bash
 source .venv/bin/activate
+```
+
+### PowerShell (Windows)
+
+```powershell
+. ".venv\Scripts\Activate.ps1"
 ```
 
 Then, run the following command to install the Python client package `arcadepy`:
 
-```bash
+```powershell
 uv add arcadepy
 ```
 

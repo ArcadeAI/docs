@@ -41,12 +41,23 @@ mkdir google-adk-arcade-example
 cd google-adk-arcade-example
 uv init
 uv venv
+```
+
+### Bash/Zsh (macOS/Linux)
+
+```bash
 source .venv/bin/activate
+```
+
+### PowerShell (Windows)
+
+```powershell
+. ".venv\Scripts\Activate.ps1"
 ```
 
 Install the necessary packages:
 
-```bash
+```powershell
 uv add arcadepy google-adk
 ```
 

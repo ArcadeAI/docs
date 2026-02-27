@@ -5,6 +5,10 @@ const meta: MetaRecord = {
     title: "Weaviate API",
     href: "/en/resources/integrations/databases/weaviate-api",
   },
+  yugabytedb: {
+    title: "YugabyteDB",
+    href: "/en/resources/integrations/databases/yugabytedb",
+  },
 };
 
 export default meta;

@@ -91,6 +91,33 @@ export const ToolSecretSchema = z.object({
 export type ToolSecret = z.infer<typeof ToolSecretSchema>;
 
 // ============================================================================
+// Tool Metadata Schema (per-tool metadata from Engine API)
+// ============================================================================
+
+export const ToolMetadataClassificationSchema = z.object({
+  serviceDomains: z.array(z.string()).default([]),
+});
+export type ToolMetadataClassification = z.infer<
+  typeof ToolMetadataClassificationSchema
+>;
+
+export const ToolMetadataBehaviorSchema = z.object({
+  operations: z.array(z.string()).default([]),
+  readOnly: z.boolean().optional(),
+  destructive: z.boolean().optional(),
+  idempotent: z.boolean().optional(),
+  openWorld: z.boolean().optional(),
+});
+export type ToolMetadataBehavior = z.infer<typeof ToolMetadataBehaviorSchema>;
+
+export const ToolMetadataSchema = z.object({
+  classification: ToolMetadataClassificationSchema,
+  behavior: ToolMetadataBehaviorSchema,
+  extras: z.record(z.string(), z.unknown()).optional().nullable(),
+});
+export type ToolMetadata = z.infer<typeof ToolMetadataSchema>;
+
+// ============================================================================
 // Tool Definition Schema (from Engine API)
 // ============================================================================
 
@@ -104,6 +131,7 @@ export const ToolDefinitionSchema = z.object({
   auth: ToolAuthSchema.nullable(),
   secrets: z.array(z.string()),
   output: ToolOutputSchema.nullable(),
+  metadata: ToolMetadataSchema.nullable().optional(),
 });
 
 export type ToolDefinition = z.infer<typeof ToolDefinitionSchema>;
@@ -310,6 +338,7 @@ export const MergedToolSchema = z.object({
   documentationChunks: z.array(DocumentationChunkSchema).default([]),
   /** Generated code example configuration */
   codeExample: ToolCodeExampleSchema.optional(),
+  metadata: ToolMetadataSchema.nullable().optional(),
 });
 
 export type MergedTool = z.infer<typeof MergedToolSchema>;
