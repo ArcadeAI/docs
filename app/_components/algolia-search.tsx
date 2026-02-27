@@ -1,8 +1,9 @@
 "use client";
 
+import { useEventListener } from "@uidotdev/usehooks";
 import { liteClient as algoliasearch } from "algoliasearch/lite";
 import { Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Highlight,
   Hits,
@@ -100,19 +101,15 @@ function SearchUnavailable() {
 export function AlgoliaSearch() {
   const [isOpen, setIsOpen] = useState(false);
 
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        setIsOpen((prev) => !prev);
-      }
-      if (e.key === "Escape") {
-        setIsOpen(false);
-      }
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, []);
+  useEventListener("keydown", (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+      e.preventDefault();
+      setIsOpen((prev) => !prev);
+    }
+    if (e.key === "Escape") {
+      setIsOpen(false);
+    }
+  });
 
   return (
     <>
