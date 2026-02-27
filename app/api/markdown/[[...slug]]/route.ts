@@ -10,9 +10,6 @@ const MD_EXTENSION_REGEX = /\.md$/;
 const TOOLKIT_MARKDOWN_ROOT = join(process.cwd(), "public", "toolkit-markdown");
 const APP_ROOT = join(process.cwd(), "app");
 
-// Directory containing pre-generated clean markdown files
-const CLEAN_MARKDOWN_DIR = join(process.cwd(), "public", "_markdown");
-
 /**
  * Validates that a resolved path is within the allowed directory.
  * Prevents path traversal attacks (e.g., ../../../etc/passwd).
@@ -107,39 +104,6 @@ type ToolkitMarkdownTarget = {
   category: string;
   toolkitId: string;
 };
-
-/**
- * Try to serve clean pre-generated markdown.
- * Returns NextResponse if found, null otherwise.
- */
-async function tryServeCleanMarkdown(
-  request: NextRequest,
-  sanitizedPath: string
-): Promise<NextResponse | null> {
-  const cleanMarkdownPath = join(CLEAN_MARKDOWN_DIR, `${sanitizedPath}.md`);
-
-  try {
-    await access(cleanMarkdownPath);
-    if (!isPathWithinDirectory(cleanMarkdownPath, CLEAN_MARKDOWN_DIR)) {
-      return null;
-    }
-
-    const content = await readFile(cleanMarkdownPath, "utf-8");
-    await trackMarkdownRequest(request, sanitizedPath);
-
-    return new NextResponse(content, {
-      status: 200,
-      headers: {
-        "Content-Type": "text/markdown; charset=utf-8",
-        "Content-Disposition": "inline",
-        "Cache-Control": "public, max-age=3600",
-        Vary: "Accept, User-Agent",
-      },
-    });
-  } catch {
-    return null;
-  }
-}
 
 /**
  * Check if a path matches the toolkit documentation pattern.
@@ -248,13 +212,7 @@ export async function GET(
         filePath = join(APP_ROOT, `${sanitizedPath}/page.mdx`);
       }
     } else {
-      // Try clean markdown first (preferred)
-      const cleanResponse = await tryServeCleanMarkdown(request, sanitizedPath);
-      if (cleanResponse) {
-        return cleanResponse;
-      }
-
-      // Fallback: raw MDX file
+      // Serve raw MDX file.
       filePath = join(APP_ROOT, `${sanitizedPath}/page.mdx`);
     }
 

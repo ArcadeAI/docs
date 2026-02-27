@@ -101,15 +101,15 @@ function getLocaleFromPathname(pathname: string, request: NextRequest): string {
 
 function buildMarkdownPath(pathname: string, locale: string): string {
   if (pathname === "/" || pathname === "") {
-    return `/${locale}/home.md`;
+    return `/${locale}/home`;
   }
   if (pathnameIsMissingLocale(pathname)) {
-    return `/${locale}${pathname}.md`;
+    return `/${locale}${pathname}`;
   }
   if (SUPPORTED_LOCALES.some((loc) => pathname === `/${loc}`)) {
-    return `${pathname}/home.md`;
+    return `${pathname}/home`;
   }
-  return `${pathname}.md`;
+  return pathname;
 }
 
 function isToolkitDetailPath(pathname: string): boolean {

@@ -9,7 +9,6 @@ const TIMEOUT = 30_000;
 const APP_PREFIX_REGEX = /^app/;
 const PAGE_MDX_SUFFIX_REGEX = /\/page\.mdx$/;
 const PAGE_MD_SUFFIX_REGEX = /\/page\.md$/;
-const MD_SUFFIX_REGEX = /\.md$/;
 const MDX_SUFFIX_REGEX = /\.mdx$/;
 const LOCALE_REGEX = /^app\/([a-z]{2}(?:-[A-Z]{2})?)\//;
 
@@ -19,10 +18,10 @@ const LOCALE_REGEX = /^app\/([a-z]{2}(?:-[A-Z]{2})?)\//;
  */
 function getMarkdownAlternatePath(pathname: string): string {
   if (pathname === "/" || pathname === "") {
-    return "/index.md";
+    return "/";
   }
   const cleanPath = pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
-  return `${cleanPath}.md`;
+  return cleanPath;
 }
 
 /**
@@ -38,11 +37,10 @@ function filePathToUrlPath(filePath: string): string {
 
 /**
  * Converts a markdown alternate URL to the expected page file path.
- * e.g., "/en/guides/quickstart.md" -> "app/en/guides/quickstart/page.mdx"
+ * e.g., "/en/guides/quickstart" -> "app/en/guides/quickstart/page.mdx"
  */
 function markdownUrlToFilePath(mdUrl: string): string {
-  const pathWithoutMd = mdUrl.replace(MD_SUFFIX_REGEX, "");
-  return `app${pathWithoutMd}/page.mdx`;
+  return `app${mdUrl}/page.mdx`;
 }
 
 describe("Markdown alternate link", () => {
@@ -50,24 +48,24 @@ describe("Markdown alternate link", () => {
     "getMarkdownAlternatePath generates correct paths",
     () => {
       // Test root path
-      expect(getMarkdownAlternatePath("/")).toBe("/index.md");
-      expect(getMarkdownAlternatePath("")).toBe("/index.md");
+      expect(getMarkdownAlternatePath("/")).toBe("/");
+      expect(getMarkdownAlternatePath("")).toBe("/");
 
       // Test normal paths
-      expect(getMarkdownAlternatePath("/en/home")).toBe("/en/home.md");
+      expect(getMarkdownAlternatePath("/en/home")).toBe("/en/home");
       expect(getMarkdownAlternatePath("/en/guides/quickstart")).toBe(
-        "/en/guides/quickstart.md"
+        "/en/guides/quickstart"
       );
 
       // Test paths with trailing slash
-      expect(getMarkdownAlternatePath("/en/home/")).toBe("/en/home.md");
+      expect(getMarkdownAlternatePath("/en/home/")).toBe("/en/home");
 
       // Test deep nested paths
       expect(
         getMarkdownAlternatePath(
           "/en/guides/tool-calling/call-third-party-apis"
         )
-      ).toBe("/en/guides/tool-calling/call-third-party-apis.md");
+      ).toBe("/en/guides/tool-calling/call-third-party-apis");
     },
     TIMEOUT
   );
@@ -124,7 +122,7 @@ describe("Markdown alternate link", () => {
         }
       }
 
-      // Verify each locale has pages and they all get .md extensions
+      // Verify each locale has pages and they all get locale-prefixed paths.
       expect(locales.size).toBeGreaterThan(0);
 
       for (const locale of locales) {
@@ -133,13 +131,13 @@ describe("Markdown alternate link", () => {
         );
         expect(localePages.length).toBeGreaterThan(0);
 
-        // Verify all pages in this locale get correct .md paths
+        // Verify all pages in this locale get correct alternate paths.
         for (const page of localePages) {
           const urlPath = filePathToUrlPath(page);
           const mdPath = getMarkdownAlternatePath(urlPath);
 
-          expect(mdPath).toMatch(MD_SUFFIX_REGEX);
           expect(mdPath).toContain(`/${locale}/`);
+          expect(mdPath.endsWith(".md")).toBe(false);
         }
       }
     },

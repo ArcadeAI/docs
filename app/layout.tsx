@@ -22,15 +22,16 @@ import {
 } from "nextra-theme-docs";
 
 const REGEX_LOCALE = /^\/([a-z]{2}(?:-[A-Z]{2})?)(?:\/|$)/;
+const ENABLE_MARKDOWN_ALTERNATE = false;
 
 function getMarkdownAlternatePath(pathname: string): string {
   // Handle root paths
   if (pathname === "/" || pathname === "") {
-    return "/index.md";
+    return "/";
   }
-  // Remove trailing slash if present, then add .md extension
+  // Remove trailing slash if present.
   const cleanPath = pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
-  return `${cleanPath}.md`;
+  return cleanPath;
 }
 
 export async function generateMetadata() {
@@ -77,11 +78,13 @@ export async function generateMetadata() {
     appleWebApp: {
       title: "Arcade Documentation",
     },
-    alternates: {
-      types: {
-        "text/markdown": getMarkdownAlternatePath(pathname),
-      },
-    },
+    alternates: ENABLE_MARKDOWN_ALTERNATE
+      ? {
+          types: {
+            "text/markdown": getMarkdownAlternatePath(pathname),
+          },
+        }
+      : undefined,
     other: {
       "apple-mobile-web-app-title": "Arcade Documentation",
       "twitter:url": "https://docs.arcade.dev",
