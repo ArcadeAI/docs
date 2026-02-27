@@ -6,7 +6,7 @@ Arcade documentation site built with Next.js + Nextra (App Router), using pnpm a
 
 ```bash
 pnpm dev              # Local dev server (port 3000)
-pnpm build            # Full production build (next build → pagefind)
+pnpm build            # Full production build (toolkit-markdown → next build → pagefind)
 pnpm lint             # Lint with Ultracite (Biome-based)
 pnpm format           # Auto-format with Ultracite
 pnpm test             # Run all Vitest tests

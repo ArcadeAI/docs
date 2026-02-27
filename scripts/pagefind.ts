@@ -8,7 +8,7 @@ import { remark } from "remark";
 import remarkRehype from "remark-rehype";
 import { readToolkitData } from "@/app/_lib/toolkit-data";
 import { listToolkitRoutes } from "@/app/_lib/toolkit-static-params";
-import { toolkitDataToSearchMarkdown } from "@/app/_lib/toolkit-markdown";
+import { toolkitDataToSearchMarkdown } from "../toolkit-docs-generator/scripts/pagefind-toolkit-content";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
