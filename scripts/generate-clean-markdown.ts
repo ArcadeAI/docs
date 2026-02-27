@@ -5,7 +5,6 @@ import { fileURLToPath } from "node:url";
 import glob from "fast-glob";
 import pc from "picocolors";
 import TurndownService from "turndown";
-import { resolveCleanMarkdownBuildMode } from "./clean-markdown-build-mode";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -106,6 +105,15 @@ function getDeletedMdxFiles(): string[] {
   } catch (error) {
     console.warn(pc.yellow(`⚠ Could not get deleted files from git: ${error}`));
     return [];
+  }
+}
+
+async function hasGeneratedMarkdownOutput(): Promise<boolean> {
+  try {
+    const entries = await fs.readdir(OUTPUT_DIR);
+    return entries.length > 0;
+  } catch {
+    return false;
   }
 }
 
@@ -1155,16 +1163,27 @@ async function main() {
     }>;
     let deletedCount = 0;
     let deletedPaths: string[] = [];
-    const buildMode = await resolveCleanMarkdownBuildMode({
-      fullRebuildEnv: process.env.FULL_REBUILD,
-      ciEnv: process.env.CI,
-      vercelEnv: process.env.VERCEL,
-      outputDir: OUTPUT_DIR,
-    });
-    const fullRebuild = buildMode.fullRebuild;
+    const explicitFullRebuild = process.env.FULL_REBUILD?.trim().toLowerCase();
+    const hasExistingOutput = await hasGeneratedMarkdownOutput();
+    const fullRebuild =
+      explicitFullRebuild === "true" ||
+      (explicitFullRebuild !== "false" &&
+        (Boolean(process.env.CI) ||
+          Boolean(process.env.VERCEL) ||
+          !hasExistingOutput));
+    const fullRebuildReason =
+      explicitFullRebuild === "true"
+        ? "FULL_REBUILD=true"
+        : process.env.CI || process.env.VERCEL
+          ? "CI/VERCEL environment"
+          : !hasExistingOutput
+            ? "No existing clean markdown output"
+            : "FULL_REBUILD=false";
 
     if (fullRebuild) {
-      console.log(pc.blue(`📦 Full rebuild mode enabled (${buildMode.reason})\n`));
+      console.log(
+        pc.blue(`📦 Full rebuild mode enabled (${fullRebuildReason})\n`)
+      );
       pagesToProcess = await discoverPages();
       console.log(pc.green(`✓ Found ${pagesToProcess.length} pages to process`));
     } else {

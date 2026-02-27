@@ -36,6 +36,14 @@ jobs:
       - name: Install pnpm
         run: pnpm install
 
+      - name: Build docs (skip postbuild)
+        run: pnpm build
+        env:
+          SKIP_POSTBUILD: "true"
+
+      - name: Generate clean markdown
+        run: pnpm generate:markdown
+
       - name: generate LLMs.txt
         run: pnpm llmstxt
         env:
@@ -44,10 +52,10 @@ jobs:
       - name: Check for changes
         id: check-changes
         run: |
-          if [ -n "$(git status --porcelain)" ]; then
-            echo "has_changes=true" >> $GITHUB_OUTPUT
-          else
+          if git diff --quiet -- public/llms.txt && git diff --cached --quiet -- public/llms.txt; then
             echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
           fi
 
       - name: Commit changes to PR

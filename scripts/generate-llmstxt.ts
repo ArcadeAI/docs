@@ -7,6 +7,8 @@ import pc from "picocolors";
 
 type PageMetadata = {
   path: string;
+  sourcePath: string;
+  urlKey: string;
   url: string;
   content: string;
 };
@@ -33,6 +35,7 @@ const CLEAN_MARKDOWN_DIR = path.join(process.cwd(), "public", "_markdown");
 const APP_EN_PREFIX_REGEX = /^app\/en\//;
 const PAGE_MDX_SUFFIX_REGEX = /\/page\.mdx$/;
 const MDX_SUFFIX_REGEX = /\.mdx$/;
+const CLEAN_MARKDOWN_EN_PREFIX_REGEX = /^public\/_markdown\/en\//;
 const TITLE_H1_REGEX = /^#\s+(.+)$/m;
 const EN_LOCALE_PREFIX_REGEX = /^en\//;
 const MD_EXTENSION_REGEX = /\.md$/;
@@ -44,11 +47,66 @@ const LINK_REGEX = /- \[([^\]]+)\]\(([^)]+)\):\s*(.+)$/gm;
 const MAX_CONTENT_LENGTH = 4000;
 const BATCH_DELAY_MS = 1000;
 const SHA_SHORT_LENGTH = 7;
+const DOCS_SOURCE_PATH_REGEX = /^app\/en\/.+\.mdx$/;
+const GLOBAL_RESUMMARIZE_TRIGGER_FILES = new Set([
+  "scripts/generate-llmstxt.ts",
+  "scripts/generate-clean-markdown.ts",
+  "scripts/clean-markdown-build-mode.ts",
+]);
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+let openaiClient: OpenAI | null = null;
+
+function getOpenAIClient(): OpenAI {
+  if (openaiClient) {
+    return openaiClient;
+  }
+
+  openaiClient = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+  return openaiClient;
+}
+
+function normalizePathSeparators(filePath: string): string {
+  return filePath.replaceAll("\\", "/");
+}
+
+function isDocsSourcePath(filePath: string): boolean {
+  return DOCS_SOURCE_PATH_REGEX.test(filePath);
+}
+
+function isGlobalResummarizeTrigger(filePath: string): boolean {
+  return GLOBAL_RESUMMARIZE_TRIGGER_FILES.has(filePath);
+}
+
+function isRelevantChangedFile(filePath: string): boolean {
+  return isDocsSourcePath(filePath) || isGlobalResummarizeTrigger(filePath);
+}
+
+function toCanonicalSourcePath(filePath: string): string {
+  const normalizedPath = normalizePathSeparators(filePath);
+
+  if (
+    CLEAN_MARKDOWN_EN_PREFIX_REGEX.test(normalizedPath) &&
+    normalizedPath.endsWith(".md")
+  ) {
+    const relativePath = normalizedPath
+      .replace(CLEAN_MARKDOWN_EN_PREFIX_REGEX, "")
+      .replace(MD_EXTENSION_REGEX, "");
+    return `app/en/${relativePath}/page.mdx`;
+  }
+
+  if (normalizedPath.startsWith("app/en/")) {
+    if (normalizedPath.endsWith("/page.mdx")) {
+      return normalizedPath;
+    }
+    if (normalizedPath.endsWith(".mdx")) {
+      return normalizedPath.replace(MDX_SUFFIX_REGEX, "/page.mdx");
+    }
+  }
+
+  return normalizedPath;
+}
 
 /**
  * Gets the current git SHA
@@ -208,9 +266,12 @@ async function discoverCleanMarkdownPages(): Promise<PageMetadata[]> {
 
     // Add locale prefix and .md extension for raw markdown access
     const url = `${BASE_URL}/en/${relativePath}.md`;
+    const sourcePath = toCanonicalSourcePath(`public/_markdown/en/${filePath}`);
 
     pages.push({
       path: `public/_markdown/en/${filePath}`,
+      sourcePath,
+      urlKey: url,
       url,
       content,
     });
@@ -243,9 +304,12 @@ async function discoverMdxPages(): Promise<PageMetadata[]> {
 
     // Add locale prefix and .md extension for raw markdown access
     const url = `${BASE_URL}/en/${relativePath}.md`;
+    const sourcePath = toCanonicalSourcePath(filePath);
 
     pages.push({
       path: filePath,
+      sourcePath,
+      urlKey: url,
       url,
       content,
     });
@@ -289,7 +353,7 @@ async function summarizePage(
 
     contentForSummary = contentForSummary.slice(0, MAX_CONTENT_LENGTH);
 
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAIClient().chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {
@@ -469,10 +533,15 @@ function generateLlmsTxt(
 /**
  * Determines which pages need summarization based on changes
  */
+type DeterminePagesToSummarizeOptions = {
+  changedFiles?: Set<string>;
+};
+
 function determinePagesToSummarize(
   pages: PageMetadata[],
   previousMetadata: LlmsTxtMetadata | null,
-  existingSummaries: Map<string, { title: string; description: string }>
+  existingSummaries: Map<string, { title: string; description: string }>,
+  options: DeterminePagesToSummarizeOptions = {}
 ): {
   pagesToSummarize: PageMetadata[];
   pagesToKeep: Array<PageMetadata & { title: string; description: string }>;
@@ -486,15 +555,40 @@ function determinePagesToSummarize(
 
   if (previousMetadata && previousMetadata.gitSha !== "unknown") {
     // Get changed files since last generation
-    const changedFiles = getChangedFilesSince(previousMetadata.gitSha);
+    const changedFiles =
+      options.changedFiles ?? getChangedFilesSince(previousMetadata.gitSha);
+    const normalizedChangedFiles = new Set(
+      Array.from(changedFiles).map((filePath) =>
+        normalizePathSeparators(filePath)
+      )
+    );
+    const relevantChangedFiles = new Set(
+      Array.from(normalizedChangedFiles).filter((filePath) =>
+        isRelevantChangedFile(filePath)
+      )
+    );
+    const changedSourcePaths = new Set(
+      Array.from(relevantChangedFiles)
+        .filter((filePath) => isDocsSourcePath(filePath))
+        .map((filePath) => toCanonicalSourcePath(filePath))
+    );
+    const hasGlobalSummaryChanges = Array.from(relevantChangedFiles).some(
+      (filePath) => isGlobalResummarizeTrigger(filePath)
+    );
+
     console.log(
       pc.blue(
         `\n📊 Found ${changedFiles.size} changed files since last generation`
       )
     );
+    console.log(
+      pc.blue(
+        `   ${relevantChangedFiles.size} relevant changed files for llms.txt`
+      )
+    );
 
     // Create a set of current page URLs for quick lookup
-    const currentPageUrls = new Set(pages.map((page) => page.url));
+    const currentPageUrls = new Set(pages.map((page) => page.urlKey));
 
     // Identify deleted pages (pages that exist in previous llms.txt but not in current filesystem)
     const deletedPageUrls = Array.from(existingSummaries.keys()).filter(
@@ -512,11 +606,11 @@ function determinePagesToSummarize(
 
     // Filter pages based on changes
     for (const page of pages) {
-      const url = page.url;
-      const existingSummary = existingSummaries.get(url);
+      const existingSummary = existingSummaries.get(page.urlKey);
 
-      // Check if this page's file was changed
-      const isChanged = changedFiles.has(page.path);
+      // Check if this page's canonical source path was changed
+      const isChanged =
+        hasGlobalSummaryChanges || changedSourcePaths.has(page.sourcePath);
 
       if (isChanged || !existingSummary) {
         // Need to summarize this page
@@ -677,4 +771,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   main();
 }
 
-export { main as generateLlmsTxt };
+export {
+  determinePagesToSummarize,
+  main as generateLlmsTxt,
+  toCanonicalSourcePath,
+};
