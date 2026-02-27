@@ -535,8 +535,11 @@ function matchesBehaviorFlags(
 ): boolean {
   for (const [key, expected] of Object.entries(behaviorFlags) as [
     BehaviorFlagKey,
-    boolean,
+    boolean | undefined,
   ][]) {
+    if (expected === undefined) {
+      continue;
+    }
     if (tool.metadata?.behavior?.[key] !== expected) {
       return false;
     }

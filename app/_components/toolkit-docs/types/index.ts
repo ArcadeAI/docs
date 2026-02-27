@@ -197,6 +197,12 @@ export type ToolMetadataBehavior = {
   openWorld?: boolean;
 };
 
+export type BehaviorFlagKey =
+  | "readOnly"
+  | "destructive"
+  | "idempotent"
+  | "openWorld";
+
 export type ToolMetadata = {
   classification: ToolMetadataClassification;
   behavior: ToolMetadataBehavior;

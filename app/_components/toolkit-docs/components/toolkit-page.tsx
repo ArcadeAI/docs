@@ -232,7 +232,7 @@ export function getSharedServiceDomain(
     }
 
     const domain = serviceDomains[0];
-    if (!domain) {
+    if (!domain || typeof domain !== "string") {
       return null;
     }
 
