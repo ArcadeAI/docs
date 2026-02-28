@@ -1,0 +1,371 @@
+{
+  "id": "Postgres",
+  "label": "Postgres",
+  "version": "0.6.0",
+  "description": "Tools to query and explore a postgres database",
+  "metadata": {
+    "category": "databases",
+    "iconUrl": "https://design-system.arcade.dev/icons/postgres.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "community",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/databases/postgres",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": null,
+  "tools": [
+    {
+      "name": "DiscoverSchemas",
+      "qualifiedName": "Postgres.DiscoverSchemas",
+      "fullyQualifiedName": "Postgres.DiscoverSchemas@0.6.0",
+      "description": "Discover all the schemas in the postgres database.",
+      "parameters": [],
+      "auth": null,
+      "secrets": [
+        "POSTGRES_DATABASE_CONNECTION_STRING"
+      ],
+      "secretsInfo": [
+        {
+          "name": "POSTGRES_DATABASE_CONNECTION_STRING",
+          "type": "password"
+        }
+      ],
+      "output": {
+        "type": "array",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Postgres.DiscoverSchemas",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "DiscoverTables",
+      "qualifiedName": "Postgres.DiscoverTables",
+      "fullyQualifiedName": "Postgres.DiscoverTables@0.6.0",
+      "description": "Discover all the tables in the postgres database when the list of tables is not known.\n\nALWAYS use this tool before any other tool that requires a table name.",
+      "parameters": [
+        {
+          "name": "schema_name",
+          "type": "string",
+          "required": false,
+          "description": "The database schema to discover tables in (default value: 'public')",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTGRES_DATABASE_CONNECTION_STRING"
+      ],
+      "secretsInfo": [
+        {
+          "name": "POSTGRES_DATABASE_CONNECTION_STRING",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "array",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Postgres.DiscoverTables",
+        "parameters": {
+          "schema_name": {
+            "value": "public",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ExecuteSelectQuery",
+      "qualifiedName": "Postgres.ExecuteSelectQuery",
+      "fullyQualifiedName": "Postgres.ExecuteSelectQuery@0.6.0",
+      "description": "You have a connection to a postgres database.\nExecute a SELECT query and return the results against the postgres database.  No other queries (INSERT, UPDATE, DELETE, etc.) are allowed.\n\nONLY use this tool if you have already loaded the schema of the tables you need to query.  Use the <GetTableSchema> tool to load the schema if not already known.\n\nThe final query will be constructed as follows:\nSELECT {select_query_part} FROM {from_clause} JOIN {join_clause} WHERE {where_clause} HAVING {having_clause} ORDER BY {order_by_clause} LIMIT {limit} OFFSET {offset}\n\nWhen running queries, follow these rules which will help avoid errors:\n* Never \"select *\" from a table.  Always select the columns you need.\n* Always order your results by the most important columns first.  If you aren't sure, order by the primary key.\n* Always use case-insensitive queries to match strings in the query.\n* Always trim strings in the query.\n* Prefer LIKE queries over direct string matches or regex queries.\n* Only join on columns that are indexed or the primary key.  Do not join on arbitrary columns.",
+      "parameters": [
+        {
+          "name": "select_clause",
+          "type": "string",
+          "required": true,
+          "description": "This is the part of the SQL query that comes after the SELECT keyword wish a comma separated list of columns you wish to return.  Do not include the SELECT keyword.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "from_clause",
+          "type": "string",
+          "required": true,
+          "description": "This is the part of the SQL query that comes after the FROM keyword.  Do not include the FROM keyword.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of rows to return.  This is the LIMIT clause of the query.  Default: 100.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "The number of rows to skip.  This is the OFFSET clause of the query.  Default: 0.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "join_clause",
+          "type": "string",
+          "required": false,
+          "description": "This is the part of the SQL query that comes after the JOIN keyword.  Do not include the JOIN keyword.  If no join is needed, leave this blank.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "where_clause",
+          "type": "string",
+          "required": false,
+          "description": "This is the part of the SQL query that comes after the WHERE keyword.  Do not include the WHERE keyword.  If no where clause is needed, leave this blank.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "having_clause",
+          "type": "string",
+          "required": false,
+          "description": "This is the part of the SQL query that comes after the HAVING keyword.  Do not include the HAVING keyword.  If no having clause is needed, leave this blank.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "group_by_clause",
+          "type": "string",
+          "required": false,
+          "description": "This is the part of the SQL query that comes after the GROUP BY keyword.  Do not include the GROUP BY keyword.  If no group by clause is needed, leave this blank.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "order_by_clause",
+          "type": "string",
+          "required": false,
+          "description": "This is the part of the SQL query that comes after the ORDER BY keyword.  Do not include the ORDER BY keyword.  If no order by clause is needed, leave this blank.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "with_clause",
+          "type": "string",
+          "required": false,
+          "description": "This is the part of the SQL query that comes after the WITH keyword when basing the query on a virtual table.  If no WITH clause is needed, leave this blank.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTGRES_DATABASE_CONNECTION_STRING"
+      ],
+      "secretsInfo": [
+        {
+          "name": "POSTGRES_DATABASE_CONNECTION_STRING",
+          "type": "password"
+        }
+      ],
+      "output": {
+        "type": "array",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Postgres.ExecuteSelectQuery",
+        "parameters": {
+          "select_clause": {
+            "value": "id, name, email, created_at",
+            "type": "string",
+            "required": true
+          },
+          "from_clause": {
+            "value": "public.users",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          },
+          "join_clause": {
+            "value": "",
+            "type": "string",
+            "required": false
+          },
+          "where_clause": {
+            "value": "lower(trim(email)) LIKE '%@example.com'",
+            "type": "string",
+            "required": false
+          },
+          "having_clause": {
+            "value": "",
+            "type": "string",
+            "required": false
+          },
+          "group_by_clause": {
+            "value": "",
+            "type": "string",
+            "required": false
+          },
+          "order_by_clause": {
+            "value": "id ASC",
+            "type": "string",
+            "required": false
+          },
+          "with_clause": {
+            "value": "",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetTableSchema",
+      "qualifiedName": "Postgres.GetTableSchema",
+      "fullyQualifiedName": "Postgres.GetTableSchema@0.6.0",
+      "description": "Get the schema/structure of a postgres table in the postgres database when the schema is not known, and the name of the table is provided.\n\nThis tool should ALWAYS be used before executing any query.  All tables in the query must be discovered first using the <DiscoverTables> tool.",
+      "parameters": [
+        {
+          "name": "schema_name",
+          "type": "string",
+          "required": true,
+          "description": "The database schema to get the table schema of",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "table_name",
+          "type": "string",
+          "required": true,
+          "description": "The table to get the schema of",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTGRES_DATABASE_CONNECTION_STRING"
+      ],
+      "secretsInfo": [
+        {
+          "name": "POSTGRES_DATABASE_CONNECTION_STRING",
+          "type": "password"
+        }
+      ],
+      "output": {
+        "type": "array",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Postgres.GetTableSchema",
+        "parameters": {
+          "schema_name": {
+            "value": "public",
+            "type": "string",
+            "required": true
+          },
+          "table_name": {
+            "value": "customers",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-02-28T11:11:33.955Z",
+  "summary": "Arcade Postgres connects to a Postgres database and enables schema-driven exploration and safe read-only querying. It helps developers inspect schemas and table structures and execute constrained SELECT queries constructed from discovered metadata.\n\n**Capabilities**\n\n- Discover database schemas and enumerate tables to map structure; always discover tables before composing queries.\n- Load and use table schemas to drive query construction and validation so queries match actual column types and constraints.\n- Execute read-only SELECT queries only, with enforced best practices: never SELECT *, order by primary/important keys, use case-insensitive trimmed matching and LIKE, and join only on indexed/PK columns.\n- Support ordered, paginated result sets and explicit query fragment construction (select/from/join/where/having/order/limit/offset).\n\n**Secrets**\n\nThis toolkit expects connection secrets such as POSTGRES_DATABASE_CONNECTION_STRING. Secret types include password and unknown; example: a PostgreSQL connection string (postgres://user:password@host:port/dbname) stored securely."
+}
