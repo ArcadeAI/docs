@@ -269,6 +269,178 @@ function formatMetadataLabel(value: string): string {
     .join(" ");
 }
 
+type BehaviorFlagsState = Partial<Record<BehaviorFlagKey, boolean>>;
+
+function getBehaviorFilterStateLabel(value: boolean | undefined): string {
+  if (value === undefined) {
+    return "Any";
+  }
+  if (value) {
+    return "Yes";
+  }
+  return "No";
+}
+
+function getNextBehaviorFilterValue(
+  value: boolean | undefined
+): boolean | undefined {
+  if (value === undefined) {
+    return true;
+  }
+  if (value) {
+    return false;
+  }
+  return;
+}
+
+function getBehaviorFilterToneClass(value: boolean | undefined): string {
+  if (value === undefined) {
+    return "border-muted/60 bg-neutral-dark/20 text-muted-foreground hover:bg-neutral-dark/35";
+  }
+  if (value) {
+    return "border-emerald-500/45 bg-emerald-500/15 text-emerald-200 hover:bg-emerald-500/25";
+  }
+  return "border-rose-500/45 bg-rose-500/15 text-rose-200 hover:bg-rose-500/25";
+}
+
+function BehaviorFilterButtons({
+  behaviorFilterKeys,
+  behaviorFlags,
+  onBehaviorFlagsChange,
+  onFiltersChanged,
+}: {
+  behaviorFilterKeys: BehaviorFlagKey[];
+  behaviorFlags: BehaviorFlagsState;
+  onBehaviorFlagsChange: (
+    updater: (current: BehaviorFlagsState) => BehaviorFlagsState
+  ) => void;
+  onFiltersChanged: () => void;
+}) {
+  return behaviorFilterKeys.map((key) => {
+    const currentValue = behaviorFlags[key];
+    const stateLabel = getBehaviorFilterStateLabel(currentValue);
+
+    return (
+      <Button
+        aria-label={`${BEHAVIOR_FILTER_LABELS[key]} filter: ${stateLabel}`}
+        className={`h-7 px-2.5 text-xs ${getBehaviorFilterToneClass(
+          currentValue
+        )}`}
+        key={key}
+        onClick={() => {
+          onBehaviorFlagsChange((current) => {
+            const next = { ...current };
+            const nextValue = getNextBehaviorFilterValue(current[key]);
+
+            if (nextValue === undefined) {
+              delete next[key];
+            } else {
+              next[key] = nextValue;
+            }
+
+            return next;
+          });
+          onFiltersChanged();
+        }}
+        size="sm"
+        title={`${BEHAVIOR_FILTER_LABELS[key]} filter. Click to cycle Any, Yes, and No.`}
+        variant="outline"
+      >
+        {BEHAVIOR_FILTER_LABELS[key]}: {stateLabel}
+      </Button>
+    );
+  });
+}
+
+function MetadataFilterSection({
+  operationOptions,
+  activeOperations,
+  onActiveOperationsChange,
+  behaviorFilterKeys,
+  behaviorFlags,
+  onBehaviorFlagsChange,
+  hasActiveMetadataFilters,
+  onFiltersChanged,
+}: {
+  operationOptions: string[];
+  activeOperations: Set<string>;
+  onActiveOperationsChange: (
+    updater: (current: Set<string>) => Set<string>
+  ) => void;
+  behaviorFilterKeys: BehaviorFlagKey[];
+  behaviorFlags: BehaviorFlagsState;
+  onBehaviorFlagsChange: (
+    updater: (current: BehaviorFlagsState) => BehaviorFlagsState
+  ) => void;
+  hasActiveMetadataFilters: boolean;
+  onFiltersChanged: () => void;
+}) {
+  return (
+    <div className="rounded-lg bg-neutral-dark/15 p-3">
+      <div className="flex flex-wrap items-start gap-3">
+        {operationOptions.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-muted-foreground/85 text-xs uppercase tracking-wide">
+              Operations
+            </span>
+            {operationOptions.map((operation) => (
+              <Button
+                className="h-7 px-2.5 text-xs"
+                key={operation}
+                onClick={() => {
+                  onActiveOperationsChange((current) => {
+                    const next = new Set(current);
+                    if (next.has(operation)) {
+                      next.delete(operation);
+                    } else {
+                      next.add(operation);
+                    }
+                    return next;
+                  });
+                  onFiltersChanged();
+                }}
+                size="sm"
+                variant={
+                  activeOperations.has(operation) ? "default" : "outline"
+                }
+              >
+                {formatMetadataLabel(operation)}
+              </Button>
+            ))}
+          </div>
+        )}
+        {behaviorFilterKeys.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-muted-foreground/85 text-xs uppercase tracking-wide">
+              Behavior
+            </span>
+            <BehaviorFilterButtons
+              behaviorFilterKeys={behaviorFilterKeys}
+              behaviorFlags={behaviorFlags}
+              onBehaviorFlagsChange={onBehaviorFlagsChange}
+              onFiltersChanged={onFiltersChanged}
+            />
+          </div>
+        )}
+        {hasActiveMetadataFilters && (
+          <Button
+            className="h-7 px-2.5 text-xs"
+            onClick={() => {
+              onActiveOperationsChange(() => new Set());
+              onBehaviorFlagsChange(() => ({}));
+              onFiltersChanged();
+            }}
+            size="sm"
+            variant="ghost"
+          >
+            Clear filters
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 type SecretDisplayItem = {
   label: string;
   href?: string;
@@ -631,9 +803,7 @@ export function AvailableToolsTable({
   const [activeOperations, setActiveOperations] = useState<Set<string>>(
     () => new Set()
   );
-  const [behaviorFlags, setBehaviorFlags] = useState<
-    Partial<Record<BehaviorFlagKey, boolean>>
-  >({});
+  const [behaviorFlags, setBehaviorFlags] = useState<BehaviorFlagsState>({});
   const [pageSize, setPageSize] = useState<number>(DEFAULT_PAGE_SIZE);
   const [page, setPage] = useState<number>(1);
 
@@ -820,100 +990,25 @@ export function AvailableToolsTable({
                 </Select>
               </>
             )}
-            <span className="text-muted-foreground text-sm">
+            <span className="w-full text-muted-foreground text-sm tabular-nums sm:ml-auto sm:w-[220px] sm:flex-none sm:text-right">
               <span className="font-medium text-foreground">
                 {filteredTools.length}
               </span>{" "}
-              of {safeTools.length}
+              of {safeTools.length} tools
             </span>
           </div>
 
           {enableFilters && hasMetadataFilters && (
-            <div className="space-y-2 border-neutral-dark-high/20 border-t pt-3">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-muted-foreground text-xs">
-                  Metadata filters:
-                </span>
-                {operationOptions.map((operation) => (
-                  <Button
-                    className="h-7 px-2.5 text-xs"
-                    key={operation}
-                    onClick={() => {
-                      setActiveOperations((current) => {
-                        const next = new Set(current);
-                        if (next.has(operation)) {
-                          next.delete(operation);
-                        } else {
-                          next.add(operation);
-                        }
-                        return next;
-                      });
-                      setPage(1);
-                    }}
-                    size="sm"
-                    variant={
-                      activeOperations.has(operation) ? "default" : "outline"
-                    }
-                  >
-                    {formatMetadataLabel(operation)}
-                  </Button>
-                ))}
-                {behaviorFilterKeys.map((key) => (
-                  <Select
-                    key={key}
-                    onValueChange={(value) => {
-                      setBehaviorFlags((current) => {
-                        const next = { ...current };
-                        if (value === "any") {
-                          delete next[key];
-                        } else {
-                          next[key] = value === "true";
-                        }
-                        return next;
-                      });
-                      setPage(1);
-                    }}
-                    value={
-                      behaviorFlags[key] === undefined
-                        ? "any"
-                        : String(behaviorFlags[key])
-                    }
-                  >
-                    <SelectTrigger
-                      aria-label={`${BEHAVIOR_FILTER_LABELS[key]} filter`}
-                      className="h-7 w-[165px] border-muted/60 text-xs hover:border-muted"
-                    >
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="any">
-                        {BEHAVIOR_FILTER_LABELS[key]}: Any
-                      </SelectItem>
-                      <SelectItem value="true">
-                        {BEHAVIOR_FILTER_LABELS[key]}: Yes
-                      </SelectItem>
-                      <SelectItem value="false">
-                        {BEHAVIOR_FILTER_LABELS[key]}: No
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                ))}
-                {hasActiveMetadataFilters && (
-                  <Button
-                    className="h-7 px-2.5 text-xs"
-                    onClick={() => {
-                      setActiveOperations(new Set());
-                      setBehaviorFlags({});
-                      setPage(1);
-                    }}
-                    size="sm"
-                    variant="ghost"
-                  >
-                    Clear metadata
-                  </Button>
-                )}
-              </div>
-            </div>
+            <MetadataFilterSection
+              activeOperations={activeOperations}
+              behaviorFilterKeys={behaviorFilterKeys}
+              behaviorFlags={behaviorFlags}
+              hasActiveMetadataFilters={hasActiveMetadataFilters}
+              onActiveOperationsChange={setActiveOperations}
+              onBehaviorFlagsChange={setBehaviorFlags}
+              onFiltersChanged={() => setPage(1)}
+              operationOptions={operationOptions}
+            />
           )}
         </div>
       )}
