@@ -4,10 +4,12 @@ import { liteClient as algoliasearch } from "algoliasearch/lite";
 import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
+  Configure,
   Highlight,
   Hits,
   InstantSearch,
   SearchBox,
+  Snippet,
   useInstantSearch,
 } from "react-instantsearch";
 
@@ -15,6 +17,7 @@ type HitRecord = {
   objectID: string;
   title?: string;
   description?: string;
+  content?: string;
   url?: string;
 };
 
@@ -47,7 +50,15 @@ function SearchHit({ hit }: { hit: HitRecord }) {
           hit={hit as Parameters<typeof Highlight>[0]["hit"]}
         />
       </div>
-      {hit.description && (
+      {hit.content && (
+        <div className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
+          <Snippet
+            attribute="content"
+            hit={hit as Parameters<typeof Snippet>[0]["hit"]}
+          />
+        </div>
+      )}
+      {!hit.content && hit.description && (
         <div className="mt-0.5 truncate text-xs text-muted-foreground">
           <Highlight
             attribute="description"
@@ -143,6 +154,7 @@ export function AlgoliaSearch() {
           <div className="relative z-10 w-full max-w-2xl overflow-hidden rounded-xl border border-border bg-popover shadow-2xl">
             {searchClient && indexName ? (
               <InstantSearch indexName={indexName} searchClient={searchClient}>
+                <Configure attributesToSnippet={["content:30"]} />
                 <div className="flex items-center border-b border-border px-4">
                   <Search className="size-4 shrink-0 text-muted-foreground" />
                   <SearchBox
