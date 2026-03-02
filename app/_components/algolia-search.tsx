@@ -78,9 +78,8 @@ function Breadcrumb({ hit }: { hit: DocSearchRecord }) {
     hit.hierarchy.lvl5,
   ].filter(Boolean) as string[];
 
-  // For content-type hits, show full breadcrumb. For heading hits, show parent levels only.
-  const breadcrumbLevels =
-    hit.type === "content" ? levels : levels.slice(0, -1);
+  // Exclude the deepest level — it's already shown as the hit title
+  const breadcrumbLevels = levels.slice(0, -1);
 
   if (breadcrumbLevels.length === 0) {
     return null;
