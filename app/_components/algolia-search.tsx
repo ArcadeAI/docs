@@ -20,20 +20,11 @@ type DocSearchHierarchy = {
   lvl3: string | null;
   lvl4: string | null;
   lvl5: string | null;
-  lvl6: string | null;
 };
 
 type DocSearchRecord = {
   objectID: string;
-  type:
-    | "lvl0"
-    | "lvl1"
-    | "lvl2"
-    | "lvl3"
-    | "lvl4"
-    | "lvl5"
-    | "lvl6"
-    | "content";
+  type: "lvl0" | "lvl1" | "lvl2" | "lvl3" | "lvl4" | "lvl5" | "content";
   hierarchy: DocSearchHierarchy;
   content: string | null;
   url: string;
@@ -65,15 +56,12 @@ function safeHref(url: string | undefined): string {
 
 function getHitUrl(hit: DocSearchRecord): string {
   // DocSearch records include full URLs; make them relative for same-site nav
-  if (hit.url) {
-    try {
-      const parsed = new URL(hit.url);
-      return safeHref(parsed.pathname + parsed.hash);
-    } catch {
-      return safeHref(hit.url);
-    }
+  try {
+    const parsed = new URL(hit.url);
+    return safeHref(parsed.pathname + parsed.hash);
+  } catch {
+    return safeHref(hit.url);
   }
-  return "/";
 }
 
 function Breadcrumb({ hit }: { hit: DocSearchRecord }) {
@@ -101,7 +89,7 @@ function Breadcrumb({ hit }: { hit: DocSearchRecord }) {
   return (
     <div className="mb-0.5 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
       {breadcrumbLevels.map((level, i) => (
-        <span className="flex items-center gap-1" key={level}>
+        <span className="flex items-center gap-1" key={`${i}-${level}`}>
           {i > 0 && (
             <span aria-hidden="true" className="text-muted-foreground/50">
               ›
@@ -140,7 +128,7 @@ function HitTitle({ hit }: { hit: DocSearchRecord }) {
   }
 
   // For heading-type records, highlight the heading itself
-  if (hit.type?.startsWith("lvl") && hit.hierarchy) {
+  if (hit.type.startsWith("lvl") && hit.hierarchy) {
     return <Highlight attribute={["hierarchy", hit.type]} hit={castHit} />;
   }
 
@@ -265,7 +253,7 @@ export function AlgoliaSearch() {
               <InstantSearch indexName={indexName} searchClient={searchClient}>
                 <Configure
                   attributesToSnippet={["content:20"]}
-                  distinct
+                  distinct={true}
                   hitsPerPage={15}
                   snippetEllipsisText="…"
                 />
