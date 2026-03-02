@@ -3,34 +3,16 @@ import path, { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import glob from "fast-glob";
 import { createIndex } from "pagefind";
-import rehypeStringify from "rehype-stringify";
-import { remark } from "remark";
-import remarkRehype from "remark-rehype";
 import { readToolkitData } from "@/app/_lib/toolkit-data";
 import { listToolkitRoutes } from "@/app/_lib/toolkit-static-params";
 import { toolkitDataToSearchMarkdown } from "../toolkit-docs-generator/scripts/pagefind-toolkit-content";
+import {
+  extractFrontmatterTitle,
+  stripMdxSyntax,
+} from "./pagefind-helpers";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
-/**
- * Converts markdown to HTML for Pagefind indexing.
- */
-async function markdownToHtml(markdownContent: string): Promise<string> {
-  try {
-    const result = await remark()
-      .use(remarkRehype)
-      .use(rehypeStringify)
-      .process(markdownContent);
-
-    return String(result);
-  } catch (error) {
-    console.warn(
-      `Warning: Failed to convert markdown to HTML, using plain text: ${error}`
-    );
-    return markdownContent;
-  }
-}
 
 const { index } = await createIndex();
 if (!index) {
@@ -77,12 +59,15 @@ for (const language of languages) {
     const urlPath = entry.split("/page.mdx")[0];
     const url = `/${language}/${urlPath}`;
 
-    const markdownContent = await fs.readFile(filePath, "utf-8");
-    const htmlContent = await markdownToHtml(markdownContent);
+    const rawContent = await fs.readFile(filePath, "utf-8");
+    const title = extractFrontmatterTitle(rawContent);
+    const content = stripMdxSyntax(rawContent);
 
-    const { errors, file } = await index.addHTMLFile({
+    const { errors, file } = await index.addCustomRecord({
       url,
-      content: `<html lang='${language}'><body>${htmlContent}</body></html>`,
+      content,
+      language,
+      ...(title ? { meta: { title } } : {}),
     });
 
     const fileInfo = file
@@ -109,12 +94,12 @@ for (const language of languages) {
       }
 
       const url = `/en/resources/integrations/${route.category}/${route.toolkitId}`;
-      const markdown = toolkitDataToSearchMarkdown(toolkitData);
-      const htmlContent = await markdownToHtml(markdown);
+      const content = toolkitDataToSearchMarkdown(toolkitData);
 
-      const { errors, file } = await index.addHTMLFile({
+      const { errors, file } = await index.addCustomRecord({
         url,
-        content: `<html lang='en'><body>${htmlContent}</body></html>`,
+        content,
+        language: "en",
       });
 
       const fileInfo = file
