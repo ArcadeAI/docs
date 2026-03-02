@@ -624,8 +624,7 @@ Self-hosed Arcade developers cannot be grandfathered into the old (insecure) beh
 
 **Toolkits**
 
--   `[bugfix - 🐛]` patching  Server template generator for outside the main repo ([PR #460](https://github.com/ArcadeAI/arcade-ai/pull/460)
-     )
+-   `[bugfix - 🐛]` patching  Server template generator for outside the main repo
 -   `[bugfix - 🐛]` Filter out unneeded files/directories before deploying workers ([PR #464](https://github.com/ArcadeAI/arcade-ai/pull/464)
      )
 
@@ -683,7 +682,7 @@ Self-hosed Arcade developers cannot be grandfathered into the old (insecure) beh
 -   `[feature - 🚀]` Launched status.arcade.dev for monitoring platform status ([link](https://status.arcade.dev)
      )
 
-Last updated on February 10, 2026
+Last updated on February 12, 2026
 
 [Overview](/en/references.md)
 [API](/en/references/api.md)
