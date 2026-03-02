@@ -58,6 +58,27 @@ const ToolMetadataRequirementsSchema = z
   .nullable()
   .optional();
 
+const ToolItemMetadataClassificationSchema = z.object({
+  service_domains: z.array(z.string()).default([]),
+});
+
+const ToolItemMetadataBehaviorSchema = z.object({
+  operations: z.array(z.string()).default([]),
+  read_only: z.boolean().optional(),
+  destructive: z.boolean().optional(),
+  idempotent: z.boolean().optional(),
+  open_world: z.boolean().optional(),
+});
+
+const ToolItemMetadataSchema = z
+  .object({
+    classification: ToolItemMetadataClassificationSchema.optional().nullable(),
+    behavior: ToolItemMetadataBehaviorSchema.optional().nullable(),
+    extras: z.record(z.string(), z.unknown()).optional().nullable(),
+  })
+  .optional()
+  .nullable();
+
 const ToolMetadataItemSchema = z.object({
   fully_qualified_name: z.string(),
   qualified_name: z.string(),
@@ -67,6 +88,7 @@ const ToolMetadataItemSchema = z.object({
   input: ToolMetadataInputSchema,
   output: ToolMetadataOutputSchema,
   requirements: ToolMetadataRequirementsSchema,
+  metadata: ToolItemMetadataSchema,
 });
 
 export const ToolMetadataResponseSchema = z.object({
@@ -142,12 +164,41 @@ const normalizeSecrets = (
     .filter((secret) => secret.length > 0);
 };
 
+type RawBehavior = z.infer<typeof ToolItemMetadataBehaviorSchema>;
+
+import type { ToolMetadataBehavior } from "../types/index.js";
+
+const transformBehavior = (
+  raw: RawBehavior | null | undefined
+): ToolMetadataBehavior => {
+  const behavior: ToolMetadataBehavior = { operations: raw?.operations ?? [] };
+  if (raw?.read_only !== undefined) behavior.readOnly = raw.read_only;
+  if (raw?.destructive !== undefined) behavior.destructive = raw.destructive;
+  if (raw?.idempotent !== undefined) behavior.idempotent = raw.idempotent;
+  if (raw?.open_world !== undefined) behavior.openWorld = raw.open_world;
+  return behavior;
+};
+
+const transformItemMetadata = (
+  raw: z.infer<typeof ToolItemMetadataSchema>
+): ToolDefinition["metadata"] => {
+  if (raw == null) return null;
+  return {
+    classification: {
+      serviceDomains: raw.classification?.service_domains ?? [],
+    },
+    behavior: transformBehavior(raw.behavior),
+    extras: raw.extras ?? null,
+  };
+};
+
 export const transformToolMetadataItem = (
   apiTool: ToolMetadataItem
 ): ToolDefinition => {
   // authorization is now an array; pick the first entry (most tools have 0 or 1)
   const authEntry = apiTool.requirements?.authorization?.[0] ?? null;
   const providerType = authEntry?.provider_type ?? null;
+  const metadata = transformItemMetadata(apiTool.metadata);
 
   return {
     name: apiTool.name,
@@ -172,6 +223,7 @@ export const transformToolMetadataItem = (
           description: apiTool.output.description ?? null,
         }
       : null,
+    metadata,
   };
 };
 

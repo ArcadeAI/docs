@@ -1,5 +1,5 @@
 ---
-title: "Arcade MCP Telemtry"
+title: "Arcade MCP Telemetry"
 description: "Learn about what data we track when using arcade-mcp"
 ---
 [Arcade MCP](/en/references/mcp/python.md)
@@ -54,13 +54,21 @@ You may opt-out by setting the `ARCADE_USAGE_TRACKING` environment variable.
 
 For example, to opt out for the lifetime of your terminal session, you can enter
 
+### Bash/Zsh (macOS/Linux)
+
 ```bash
 export ARCADE_USAGE_TRACKING=0
 ```
 
-Or to permanently opt out, you can set this environment variable in your shell’s configuration file (for example, `~/.zshrc` for zsh or `~/.bashrc` for bash).
+### PowerShell (Windows)
 
-Last updated on January 30, 2026
+```powershell
+$env:ARCADE_USAGE_TRACKING=0
+```
 
-[Settings](/en/references/mcp/python/settings.md)
+To permanently opt out, set this environment variable in your shell configuration file (for example, `~/.zshrc`, `~/.bashrc`, or your PowerShell profile).
+
+Last updated on February 10, 2026
+
+[Errors](/en/references/mcp/python/errors.md)
 [Arcade CLI](/en/references/arcade-cli.md)

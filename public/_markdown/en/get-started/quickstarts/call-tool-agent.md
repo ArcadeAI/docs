@@ -48,12 +48,23 @@ Then, run the following command to create and activate a new virtual environment
 
 ```bash
 uv venv
+```
+
+### Bash/Zsh (macOS/Linux)
+
+```bash
 source .venv/bin/activate
+```
+
+### PowerShell (Windows)
+
+```powershell
+. ".venv\Scripts\Activate.ps1"
 ```
 
 Then, run the following command to install the Python client package `arcadepy`:
 
-```bash
+```powershell
 uv add arcadepy
 ```
 
@@ -339,16 +350,17 @@ Email metadata:
 
 In this example, we call the tool methods directly. In your real applications and , you’ll likely be letting the LLM decide which  to call. Learn more about using Arcade with Frameworks in the [Frameworks](/get-started/agent-frameworks.md) section, or [how to build your own tools](/guides/create-tools/tool-basics/build-mcp-server.md).
 
-[![Vanilla Python logo](/images/icons/python.svg) Vanilla Python MCP Client](/guides/agent-frameworks/setup-arcade-with-your-llm-python.md)
-[![LangChain logo](/images/icons/langchain.svg) LangChain Agent Framework](/guides/agent-frameworks/langchain/use-arcade-tools.md)
-[![CrewAI logo](https://avatars.githubusercontent.com/u/170677839?s=200&v=4) CrewAI Agent Framework](/guides/agent-frameworks/crewai/use-arcade-tools.md)
-[![OpenAI Agents logo](https://avatars.githubusercontent.com/u/14957082?s=200&v=4) OpenAI Agents Agent Framework](/guides/agent-frameworks/openai-agents/overview.md)
-[![Google ADK logo](https://avatars.githubusercontent.com/u/1342004?s=200&v=4) Google ADK Agent Framework](/guides/agent-frameworks/google-adk/overview.md)
+[![CrewAI logo](https://avatars.githubusercontent.com/u/170677839?s=200&v=4) CrewAI Agent Framework](/en/get-started/agent-frameworks/crewai/use-arcade-tools.md)
+[![Google ADK logo](https://avatars.githubusercontent.com/u/1342004?s=200&v=4) Google ADK Agent Framework](/en/get-started/agent-frameworks/google-adk/setup-python.md)
+[![LangChain logo](/images/icons/langchain.svg) LangChain Agent Framework](/en/get-started/agent-frameworks/langchain/use-arcade-with-langchain-py.md)
+[![OpenAI Agents logo](https://avatars.githubusercontent.com/u/14957082?s=200&v=4) OpenAI Agents Agent Framework](/en/get-started/agent-frameworks/openai-agents/setup-python.md)
+[![Vanilla Python logo](/images/icons/python.svg) Vanilla Python MCP Client](/en/get-started/agent-frameworks/setup-arcade-with-your-llm-python.md)
 
-[![LangChain logo](/images/icons/langchain.svg) LangChain Agent Framework](/guides/agent-frameworks/langchain/use-arcade-tools.md)
-[![Google ADK logo](https://avatars.githubusercontent.com/u/1342004?s=200&v=4) Google ADK Agent Framework](/guides/agent-frameworks/google-adk/overview.md)
-[![Mastra logo](/images/icons/mastra.svg) Mastra Agent Framework](/guides/agent-frameworks/mastra/overview.md)
-[![Vercel AI logo](/images/icons/vercel.svg) Vercel AI Agent Framework](/guides/agent-frameworks/vercelai.md)
+[![LangChain logo](/images/icons/langchain.svg) LangChain Agent Framework](/en/get-started/agent-frameworks/langchain/use-arcade-with-langchain-ts.md)
+[![Google ADK logo](https://avatars.githubusercontent.com/u/1342004?s=200&v=4) Google ADK Agent Framework](/en/get-started/agent-frameworks/google-adk/setup-typescript.md)
+[![Mastra logo](/images/icons/mastra.svg) Mastra Agent Framework](/en/get-started/agent-frameworks/mastra.md)
+[![Vercel AI logo](/images/icons/vercel.svg) Vercel AI Agent Framework](/en/get-started/agent-frameworks/vercelai.md)
+[![TanStack AI logo](https://avatars.githubusercontent.com/u/72518640?s=200&v=4) TanStack AI Agent Framework](/en/get-started/agent-frameworks/tanstack-ai.md)
 
 ## Full Example Code
 
@@ -546,7 +558,7 @@ console.log(
 console.log(respose_send_email.output?.value);
 ```
 
-Last updated on January 30, 2026
+Last updated on February 10, 2026
 
 [Windows environment setup](/en/get-started/setup/windows-environment.md)
 [Call tools in IDE/MCP clients](/en/get-started/quickstarts/call-tool-client.md)

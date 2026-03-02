@@ -61,7 +61,7 @@ arcade login
 The CLI will automatically:
 
 -   Print your  to the console
--   Save your credentials to `~/.arcade/credentials.yaml`
+-   Save your credentials to `~/.arcade/credentials.yaml` (or `%USERPROFILE%\.arcade\credentials.yaml` on Windows)
 
 API keys are administrator credentials. Anyone who has your  can make requests to Arcade as you. Always store your API keys in a safe place, such as system environment variables, and never commit them to version control, share them publicly, or use them in browser or frontend code.
 
@@ -74,7 +74,7 @@ Once you have your , you can:
 -   [Create custom tools](/guides/create-tools/tool-basics/build-mcp-server.md)
 
 
-Last updated on January 30, 2026
+Last updated on February 10, 2026
 
 [About Arcade](/en/get-started/about-arcade.md)
 [Connect Arcade docs to your IDE](/en/get-started/setup/connect-arcade-docs.md)

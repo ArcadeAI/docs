@@ -342,3 +342,71 @@ describe("verifyOutputDir", () => {
     });
   });
 });
+
+describe("JsonGenerator.rebuildIndexFromOutput", () => {
+  it("surfaces read errors while still rebuilding index", async () => {
+    await withTempDir(async (dir) => {
+      const [githubToolkit, slackToolkit] = await Promise.all([
+        loadFixture("github-toolkit.json"),
+        loadFixture("slack-toolkit.json"),
+      ]);
+      const generator = createJsonGenerator({
+        outputDir: dir,
+        prettyPrint: false,
+        generateIndex: true,
+      });
+      await generator.generateAll([githubToolkit, slackToolkit]);
+
+      await writeFile(join(dir, "bad.json"), "{not-json", "utf-8");
+
+      const rebuildResult = await generator.rebuildIndexFromOutput();
+
+      expect(rebuildResult.readErrors).toHaveLength(1);
+      expect(rebuildResult.readErrors[0]).toContain("bad.json");
+      expect(rebuildResult.readWarnings).toHaveLength(0);
+      expect(rebuildResult.indexPath).toBe(join(dir, "index.json"));
+    });
+  });
+
+  it("surfaces fallback warnings during rebuild", async () => {
+    await withTempDir(async (dir) => {
+      const [githubToolkit, slackToolkit] = await Promise.all([
+        loadFixture("github-toolkit.json"),
+        loadFixture("slack-toolkit.json"),
+      ]);
+      const generator = createJsonGenerator({
+        outputDir: dir,
+        prettyPrint: false,
+        generateIndex: true,
+      });
+      await generator.generateAll([githubToolkit, slackToolkit]);
+
+      const toolkitPath = join(dir, "github.json");
+      const legacyToolkit = JSON.parse(
+        await readFile(toolkitPath, "utf-8")
+      ) as Record<string, unknown>;
+      const chunks = legacyToolkit.documentationChunks as Record<
+        string,
+        unknown
+      >[];
+      if (Array.isArray(chunks) && chunks[0]) {
+        chunks[0].type = "legacy_note";
+        chunks[0].location = "overview";
+      }
+      legacyToolkit.subPages = [{ slug: "advanced" }];
+      await writeFile(
+        toolkitPath,
+        JSON.stringify(legacyToolkit, null, 2),
+        "utf-8"
+      );
+
+      const rebuildResult = await generator.rebuildIndexFromOutput();
+
+      expect(rebuildResult.readErrors).toHaveLength(0);
+      expect(rebuildResult.readWarnings).toHaveLength(1);
+      expect(rebuildResult.readWarnings[0]).toContain(
+        "Loaded github.json with fallback parser"
+      );
+    });
+  });
+});

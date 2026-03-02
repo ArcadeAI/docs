@@ -47,18 +47,29 @@ mkdir openai-agents-arcade-example
 cd openai-agents-arcade-example
 uv init
 uv venv
+```
+
+### Bash/Zsh (macOS/Linux)
+
+```bash
 source .venv/bin/activate
+```
+
+### PowerShell (Windows)
+
+```powershell
+. ".venv\Scripts\Activate.ps1"
 ```
 
 Install the necessary packages:
 
-```bash
+```powershell
 uv add openai-agents arcadepy
 ```
 
 Create a new file called `.env` and add the following environment variables:
 
-```bash
+```powershell
 # .env
 # Arcade API key
 ARCADE_API_KEY=YOUR_ARCADE_API_KEY

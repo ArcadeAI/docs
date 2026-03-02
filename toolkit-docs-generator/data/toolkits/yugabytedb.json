@@ -1,0 +1,140 @@
+{
+  "id": "Yugabytedb",
+  "label": "YugabyteDB",
+  "version": "0.1.0",
+  "description": "Arcade tools designed for LLMs to interact with YugabyteDB databases",
+  "metadata": {
+    "category": "databases",
+    "iconUrl": "https://design-system.arcade.dev/icons/yugabytedb.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade_starter",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/databases/yugabytedb",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": null,
+  "tools": [
+    {
+      "name": "RunReadOnlyQuery",
+      "qualifiedName": "Yugabytedb.RunReadOnlyQuery",
+      "fullyQualifiedName": "Yugabytedb.RunReadOnlyQuery@0.1.0",
+      "description": "Run a read-only SQL query against YugabyteDB and return results as JSON.\n\nThe query is executed inside a READ ONLY transaction so writes are rejected.\nResults are returned as a JSON array where each element is a row object\nwith column names as keys.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": true,
+          "description": "SQL query to execute (must be read-only)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "YUGABYTEDB_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "YUGABYTEDB_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "string",
+        "description": "Query results as a JSON array of objects"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Yugabytedb.RunReadOnlyQuery",
+        "parameters": {
+          "query": {
+            "value": "SELECT id, name, email, created_at FROM users WHERE active = TRUE ORDER BY created_at DESC LIMIT 10;",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SummarizeDatabase",
+      "qualifiedName": "Yugabytedb.SummarizeDatabase",
+      "fullyQualifiedName": "Yugabytedb.SummarizeDatabase@0.1.0",
+      "description": "List all tables in a YugabyteDB database, including column schemas and row counts.\n\nCALL THIS FIRST to understand the database structure before writing queries.\nReturns every table in the given schema with: table name, column definitions\n(name and data type), and total row count.",
+      "parameters": [
+        {
+          "name": "db_schema",
+          "type": "string",
+          "required": false,
+          "description": "Database schema to summarize (e.g. 'public')",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "YUGABYTEDB_URL"
+      ],
+      "secretsInfo": [
+        {
+          "name": "YUGABYTEDB_URL",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "array",
+        "description": "List of tables with column schemas and row counts"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Yugabytedb.SummarizeDatabase",
+        "parameters": {
+          "db_schema": {
+            "value": "public",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-02-26T20:45:17.213Z",
+  "summary": "YugabyteDB (Yugabytedb) Arcade toolkit lets LLMs inspect and query YugabyteDB instances in a safe, read-only manner. It enables schema discovery and executing SELECT-style queries with structured JSON output to support automated analysis and query generation.\n\n**Capabilities**\n\n- Discover database structure: list tables, columns, types, and row counts to inform query design.\n- Execute read-only SQL inside READ ONLY transactions to prevent accidental writes.\n- Return results as JSON arrays of row objects with column-name keys for straightforward parsing.\n- Support iterative query development by using schema summaries to craft accurate, safe queries.\n\n**Secrets**\n\nConnection secret: YUGABYTEDB_URL - a connection URL/DSN (e.g., postgresql://user:pass@host:port/dbname) or JDBC-style string stored as an environment secret; handle as sensitive credentials."
+}

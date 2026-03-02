@@ -65,14 +65,23 @@ arcade login
 
 Add the environment variables to your shell:
 
+### Bash/Zsh (macOS/Linux)
+
 ```bash
 export ARCADE_API_KEY=<your-api-key>
 export ARCADE_USER_ID=<your-user-id>
 ```
 
+### PowerShell (Windows)
+
+```powershell
+$env:ARCADE_API_KEY="<your-api-key>"
+$env:ARCADE_USER_ID="<your-user-id>"
+```
+
 or to a `.env` file:
 
-```bash
+```powershell
 # .env
 ARCADE_API_KEY=<your-api-key>
 ARCADE_USER_ID=<your-user-id>
@@ -115,6 +124,8 @@ Open a **separate terminal** and create a tunnel using one of these options:
     # Or download from https://ngrok.com/download
     ```
 
+    On Windows, install ngrok from [ngrok.com/download](https://ngrok.com/download) .
+
 2.  **Create a tunnel:**
 
     ```bash
@@ -156,6 +167,8 @@ Open a **separate terminal** and create a tunnel using one of these options:
     # Or download from https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/install-and-setup/
     ```
 
+    On Windows, install cloudflared from [Cloudflare Tunnel install docs](https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/install-and-setup/) .
+
 2.  **Create a tunnel:**
 
     ```bash
@@ -188,6 +201,8 @@ Open a **separate terminal** and create a tunnel using one of these options:
 
     # Or download from https://tailscale.com/download
     ```
+
+    On Windows, install Tailscale from [tailscale.com/download](https://tailscale.com/download) .
 
 2.  **Authenticate:**
 
@@ -304,7 +319,7 @@ You can now test your  Server by making requests using the Playground, or an MCP
 -   [Configure secrets](/guides/create-tools/tool-basics/create-tool-secrets.md)
      for your  Server
 
-Last updated on January 30, 2026
+Last updated on February 10, 2026
 
 [Arcade Cloud](/en/guides/deployment-hosting/arcade-cloud.md)
 [Configure Arcade's engine](/en/guides/deployment-hosting/configure-engine.md)

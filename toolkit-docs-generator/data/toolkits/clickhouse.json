@@ -1,0 +1,399 @@
+{
+  "id": "Clickhouse",
+  "label": "Clickhouse",
+  "version": "0.4.0",
+  "description": "Tools to query and explore a ClickHouse database",
+  "metadata": {
+    "category": "databases",
+    "iconUrl": "https://design-system.arcade.dev/icons/clickhouse.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "community",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/databases/clickhouse",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": null,
+  "tools": [
+    {
+      "name": "DiscoverDatabases",
+      "qualifiedName": "Clickhouse.DiscoverDatabases",
+      "fullyQualifiedName": "Clickhouse.DiscoverDatabases@0.4.0",
+      "description": "Discover all the databases in the ClickHouse database.",
+      "parameters": [],
+      "auth": null,
+      "secrets": [
+        "CLICKHOUSE_DATABASE_CONNECTION_STRING"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CLICKHOUSE_DATABASE_CONNECTION_STRING",
+          "type": "password"
+        }
+      ],
+      "output": {
+        "type": "array",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Clickhouse.DiscoverDatabases",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "DiscoverSchemas",
+      "qualifiedName": "Clickhouse.DiscoverSchemas",
+      "fullyQualifiedName": "Clickhouse.DiscoverSchemas@0.4.0",
+      "description": "Discover all the schemas in the ClickHouse database.\n\nNote: ClickHouse doesn't have schemas like PostgreSQL, so this returns a default schema name.",
+      "parameters": [],
+      "auth": null,
+      "secrets": [
+        "CLICKHOUSE_DATABASE_CONNECTION_STRING"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CLICKHOUSE_DATABASE_CONNECTION_STRING",
+          "type": "password"
+        }
+      ],
+      "output": {
+        "type": "array",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Clickhouse.DiscoverSchemas",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "DiscoverTables",
+      "qualifiedName": "Clickhouse.DiscoverTables",
+      "fullyQualifiedName": "Clickhouse.DiscoverTables@0.4.0",
+      "description": "Discover all the tables in the ClickHouse database when the list of tables is not known.\n\nALWAYS use this tool before any other tool that requires a table name.",
+      "parameters": [],
+      "auth": null,
+      "secrets": [
+        "CLICKHOUSE_DATABASE_CONNECTION_STRING"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CLICKHOUSE_DATABASE_CONNECTION_STRING",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "array",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Clickhouse.DiscoverTables",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ExecuteSelectQuery",
+      "qualifiedName": "Clickhouse.ExecuteSelectQuery",
+      "fullyQualifiedName": "Clickhouse.ExecuteSelectQuery@0.4.0",
+      "description": "You have a connection to a ClickHouse database.\nExecute a SELECT query and return the results against the ClickHouse database.  No other queries (INSERT, UPDATE, DELETE, etc.) are allowed.\n\nONLY use this tool if you have already loaded the schema of the tables you need to query.  Use the <GetTableSchema> tool to load the schema if not already known.\n\nThe final query will be constructed as follows:\nSELECT {select_query_part} FROM {from_clause} JOIN {join_clause} WHERE {where_clause} HAVING {having_clause} ORDER BY {order_by_clause} LIMIT {limit} OFFSET {offset}\n\nWhen running queries, follow these rules which will help avoid errors:\n* Never \"select *\" from a table.  Always select the columns you need.\n* Always order your results by the most important columns first.  If you aren't sure, order by the primary key.\n* Always use case-insensitive queries to match strings in the query.\n* Always trim strings in the query.\n* Prefer LIKE queries over direct string matches or regex queries.\n* Only join on columns that are indexed or the primary key.  Do not join on arbitrary columns.\n* ClickHouse is case-sensitive, so be careful with table and column names.",
+      "parameters": [
+        {
+          "name": "select_clause",
+          "type": "string",
+          "required": true,
+          "description": "This is the part of the SQL query that comes after the SELECT keyword wish a comma separated list of columns you wish to return.  Do not include the SELECT keyword.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "from_clause",
+          "type": "string",
+          "required": true,
+          "description": "This is the part of the SQL query that comes after the FROM keyword.  Do not include the FROM keyword.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of rows to return.  This is the LIMIT clause of the query.  Default: 100.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "The number of rows to skip.  This is the OFFSET clause of the query.  Default: 0.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "join_clause",
+          "type": "string",
+          "required": false,
+          "description": "This is the part of the SQL query that comes after the JOIN keyword.  Do not include the JOIN keyword.  If no join is needed, leave this blank.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "where_clause",
+          "type": "string",
+          "required": false,
+          "description": "This is the part of the SQL query that comes after the WHERE keyword.  Do not include the WHERE keyword.  If no where clause is needed, leave this blank.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "having_clause",
+          "type": "string",
+          "required": false,
+          "description": "This is the part of the SQL query that comes after the HAVING keyword.  Do not include the HAVING keyword.  If no having clause is needed, leave this blank.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "group_by_clause",
+          "type": "string",
+          "required": false,
+          "description": "This is the part of the SQL query that comes after the GROUP BY keyword.  Do not include the GROUP BY keyword.  If no group by clause is needed, leave this blank.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "order_by_clause",
+          "type": "string",
+          "required": false,
+          "description": "This is the part of the SQL query that comes after the ORDER BY keyword.  Do not include the ORDER BY keyword.  If no order by clause is needed, leave this blank.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "with_clause",
+          "type": "string",
+          "required": false,
+          "description": "This is the part of the SQL query that comes after the WITH keyword when basing the query on a virtual table.  If no WITH clause is needed, leave this blank.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "CLICKHOUSE_DATABASE_CONNECTION_STRING"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CLICKHOUSE_DATABASE_CONNECTION_STRING",
+          "type": "password"
+        }
+      ],
+      "output": {
+        "type": "array",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Clickhouse.ExecuteSelectQuery",
+        "parameters": {
+          "select_clause": {
+            "value": "users.id, users.email, orders.order_id, orders.total_amount, orders.created_at",
+            "type": "string",
+            "required": true
+          },
+          "from_clause": {
+            "value": "users",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          },
+          "join_clause": {
+            "value": "INNER JOIN orders ON users.id = orders.user_id",
+            "type": "string",
+            "required": false
+          },
+          "where_clause": {
+            "value": "lower(trim(users.email)) LIKE '%@example.com' AND orders.created_at >= '2025-01-01'",
+            "type": "string",
+            "required": false
+          },
+          "having_clause": {
+            "value": "",
+            "type": "string",
+            "required": false
+          },
+          "group_by_clause": {
+            "value": "",
+            "type": "string",
+            "required": false
+          },
+          "order_by_clause": {
+            "value": "users.id ASC, orders.created_at DESC",
+            "type": "string",
+            "required": false
+          },
+          "with_clause": {
+            "value": "",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetTableSchema",
+      "qualifiedName": "Clickhouse.GetTableSchema",
+      "fullyQualifiedName": "Clickhouse.GetTableSchema@0.4.0",
+      "description": "Get the schema/structure of a ClickHouse table in the ClickHouse database when the schema is not known, and the name of the table is provided.\n\nThis tool should ALWAYS be used before executing any query.  All tables in the query must be discovered first using the <DiscoverTables> tool.",
+      "parameters": [
+        {
+          "name": "schema_name",
+          "type": "string",
+          "required": true,
+          "description": "The schema to get the table schema of",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "table_name",
+          "type": "string",
+          "required": true,
+          "description": "The table to get the schema of",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "CLICKHOUSE_DATABASE_CONNECTION_STRING"
+      ],
+      "secretsInfo": [
+        {
+          "name": "CLICKHOUSE_DATABASE_CONNECTION_STRING",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "array",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Clickhouse.GetTableSchema",
+        "parameters": {
+          "schema_name": {
+            "value": "default",
+            "type": "string",
+            "required": true
+          },
+          "table_name": {
+            "value": "events",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-02-28T11:11:37.453Z",
+  "summary": "ClickHouse toolkit provides tools to explore and query a ClickHouse database, enabling safe schema discovery and read-only SELECT execution. It helps discover databases and tables, inspect table schemas, and run constrained SELECT queries that follow ClickHouse best practices.\n\n**Capabilities**\n- Discover database and table topology and surface a default schema name.\n- Retrieve precise table schemas to drive safe query construction.\n- Execute read-only SELECTs with enforced rules (explicit columns, ordering, indexed joins, case sensitivity).\n- Surface query guidance to avoid common ClickHouse pitfalls.\n\n**Secrets**\nSecret types: password, unknown. Example: CLICKHOUSE_DATABASE_CONNECTION_STRING — a connection string containing host, port, database and credentials (including password)."
+}

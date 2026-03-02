@@ -13,6 +13,10 @@ const meta: MetaRecord = {
     title: "ComplexTools",
     href: "/en/resources/integrations/development/complextools",
   },
+  daytona: {
+    title: "Daytona",
+    href: "/en/resources/integrations/development/daytona",
+  },
   deepwiki: {
     title: "Deepwiki",
     href: "/en/resources/integrations/development/deepwiki",
@@ -33,17 +37,9 @@ const meta: MetaRecord = {
     title: "GitHub",
     href: "/en/resources/integrations/development/github",
   },
-  google: {
-    title: "Google",
-    href: "/en/resources/integrations/development/google",
-  },
   math: {
     title: "Math",
     href: "/en/resources/integrations/development/math",
-  },
-  microsoft: {
-    title: "Microsoft",
-    href: "/en/resources/integrations/development/microsoft",
   },
   pagerduty: {
     title: "Pagerduty",
