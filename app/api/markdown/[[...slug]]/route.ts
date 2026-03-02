@@ -1,6 +1,7 @@
 import { access, readdir, readFile } from "node:fs/promises";
 import { join, normalize, resolve } from "node:path";
 import { type NextRequest, NextResponse } from "next/server";
+import { cleanMdxToMarkdown } from "@/app/_lib/clean-mdx";
 import { captureServerPageView } from "@/app/_lib/posthog-server";
 
 export const dynamic = "force-dynamic";
@@ -232,16 +233,14 @@ export async function GET(
       return new NextResponse("Markdown file not found", { status: 404 });
     }
 
-    const content = await readFile(filePath, "utf-8");
+    const rawContent = await readFile(filePath, "utf-8");
 
-    // Track server-side pageview for AI agent analytics
     await trackMarkdownRequest(request, sanitizedPath);
 
-    const contentSource = filePath.includes(TOOLKIT_MARKDOWN_ROOT)
-      ? "toolkit-markdown"
-      : "raw-mdx";
+    const isToolkitFile = filePath.includes(TOOLKIT_MARKDOWN_ROOT);
+    const contentSource = isToolkitFile ? "toolkit-markdown" : "clean-mdx";
+    const content = isToolkitFile ? rawContent : cleanMdxToMarkdown(rawContent);
 
-    // Return the raw markdown with proper headers
     return new NextResponse(content, {
       status: 200,
       headers: {
