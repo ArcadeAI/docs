@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   extractFrontmatterTitle,
+  markdownToHtml,
   stripMdxSyntax,
 } from "../scripts/pagefind-helpers";
 
@@ -73,5 +74,57 @@ describe("stripMdxSyntax", () => {
   it("strips both frontmatter and imports together", () => {
     const mdx = `---\ntitle: "Test"\n---\nimport Foo from './foo'\n\n# Hello`;
     expect(stripMdxSyntax(mdx)).toBe("# Hello");
+  });
+
+  it("removes self-closing JSX component tags", () => {
+    const mdx = "# Hello\n\n<Callout />\n\nSome text.";
+    expect(stripMdxSyntax(mdx)).toBe("# Hello\n\n\nSome text.");
+  });
+
+  it("removes opening and closing JSX component tags", () => {
+    const mdx = "# Hello\n\n<Steps>\n\nStep 1 content\n\n</Steps>";
+    expect(stripMdxSyntax(mdx)).toBe("# Hello\n\n\nStep 1 content");
+  });
+
+  it("removes JSX tags with props", () => {
+    const mdx = '<Callout type="warning">\n\nBe careful!\n\n</Callout>';
+    expect(stripMdxSyntax(mdx)).toBe("Be careful!");
+  });
+
+  it("preserves inline HTML-like elements (lowercase tags)", () => {
+    const mdx = "Use the <code>npm install</code> command.";
+    expect(stripMdxSyntax(mdx)).toBe(
+      "Use the <code>npm install</code> command."
+    );
+  });
+});
+
+describe("markdownToHtml", () => {
+  it("converts a heading to an h1 tag", async () => {
+    const html = await markdownToHtml("# Hello");
+    expect(html).toContain("<h1>Hello</h1>");
+  });
+
+  it("converts a markdown link to an anchor tag", async () => {
+    const html = await markdownToHtml("[Arcade](https://arcade.dev)");
+    expect(html).toContain('<a href="https://arcade.dev">Arcade</a>');
+  });
+
+  it("converts bold and italic", async () => {
+    const html = await markdownToHtml("**bold** and _italic_");
+    expect(html).toContain("<strong>bold</strong>");
+    expect(html).toContain("<em>italic</em>");
+  });
+
+  it("converts a list to HTML", async () => {
+    const html = await markdownToHtml("- item 1\n- item 2");
+    expect(html).toContain("<ul>");
+    expect(html).toContain("<li>item 1</li>");
+    expect(html).toContain("<li>item 2</li>");
+  });
+
+  it("returns raw content on failure", async () => {
+    const result = await markdownToHtml("");
+    expect(result).toBe("");
   });
 });

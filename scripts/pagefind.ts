@@ -8,6 +8,7 @@ import { listToolkitRoutes } from "@/app/_lib/toolkit-static-params";
 import { toolkitDataToSearchMarkdown } from "../toolkit-docs-generator/scripts/pagefind-toolkit-content";
 import {
   extractFrontmatterTitle,
+  markdownToHtml,
   stripMdxSyntax,
 } from "./pagefind-helpers";
 
@@ -61,13 +62,12 @@ for (const language of languages) {
 
     const rawContent = await fs.readFile(filePath, "utf-8");
     const title = extractFrontmatterTitle(rawContent);
-    const content = stripMdxSyntax(rawContent);
+    const cleaned = stripMdxSyntax(rawContent);
+    const html = await markdownToHtml(cleaned);
 
-    const { errors, file } = await index.addCustomRecord({
+    const { errors, file } = await index.addHTMLFile({
       url,
-      content,
-      language,
-      ...(title ? { meta: { title } } : {}),
+      content: `<html lang='${language}'><body>${title ? `<h1>${title}</h1>` : ""}${html}</body></html>`,
     });
 
     const fileInfo = file
@@ -94,12 +94,12 @@ for (const language of languages) {
       }
 
       const url = `/en/resources/integrations/${route.category}/${route.toolkitId}`;
-      const content = toolkitDataToSearchMarkdown(toolkitData);
+      const markdown = toolkitDataToSearchMarkdown(toolkitData);
+      const html = await markdownToHtml(markdown);
 
-      const { errors, file } = await index.addCustomRecord({
+      const { errors, file } = await index.addHTMLFile({
         url,
-        content,
-        language: "en",
+        content: `<html lang='en'><body>${html}</body></html>`,
       });
 
       const fileInfo = file
