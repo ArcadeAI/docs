@@ -239,6 +239,6 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico|manifest|_pagefind|public|.*.svg|.*.png|.*.jpg|.*.jpeg|.*.gif|.*.webp|.*.ico|.*.css|.*.js|.*.woff|.*.woff2|.*.ttf|.*.eot|.*.otf|.*.pdf|.*.txt|.*.xml|.*.json|.*.py|.*.mp4).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|manifest|public|.*.svg|.*.png|.*.jpg|.*.jpeg|.*.gif|.*.webp|.*.ico|.*.webmanifest|.*.css|.*.js|.*.woff|.*.woff2|.*.ttf|.*.eot|.*.otf|.*.pdf|.*.txt|.*.xml|.*.json|.*.py|.*.mp4).*)",
   ],
 };
