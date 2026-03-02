@@ -4,18 +4,34 @@ import { liteClient as algoliasearch } from "algoliasearch/lite";
 import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
+  Configure,
   Highlight,
   Hits,
   InstantSearch,
   SearchBox,
+  Snippet,
   useInstantSearch,
 } from "react-instantsearch";
 
-type HitRecord = {
+type DocSearchHierarchy = {
+  lvl0: string | null;
+  lvl1: string | null;
+  lvl2: string | null;
+  lvl3: string | null;
+  lvl4: string | null;
+  lvl5: string | null;
+};
+
+type DocSearchRecord = {
   objectID: string;
+  type?: "lvl0" | "lvl1" | "lvl2" | "lvl3" | "lvl4" | "lvl5" | "content";
+  hierarchy: DocSearchHierarchy;
+  content: string | null;
+  url: string;
+  anchor: string | null;
+  // Legacy flat fields from non-docsearch indexes
   title?: string;
   description?: string;
-  url?: string;
 };
 
 const appId = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID;
@@ -38,24 +54,112 @@ function safeHref(url: string | undefined): string {
   return "/";
 }
 
-function SearchHit({ hit }: { hit: HitRecord }) {
+function getHitUrl(hit: DocSearchRecord): string {
+  // DocSearch records include full URLs; make them relative for same-site nav
+  try {
+    const parsed = new URL(hit.url);
+    return safeHref(parsed.pathname + parsed.hash);
+  } catch {
+    return safeHref(hit.url);
+  }
+}
+
+function Breadcrumb({ hit }: { hit: DocSearchRecord }) {
+  if (!hit.hierarchy) {
+    return null;
+  }
+
+  const levels = [
+    hit.hierarchy.lvl0,
+    hit.hierarchy.lvl1,
+    hit.hierarchy.lvl2,
+    hit.hierarchy.lvl3,
+    hit.hierarchy.lvl4,
+    hit.hierarchy.lvl5,
+  ].filter(Boolean) as string[];
+
+  // Exclude the deepest level — it's already shown as the hit title
+  const breadcrumbLevels = levels.slice(0, -1);
+
+  if (breadcrumbLevels.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="mb-0.5 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
+      {breadcrumbLevels.map((level, i) => (
+        <span className="flex items-center gap-1" key={`${i}-${level}`}>
+          {i > 0 && (
+            <span aria-hidden="true" className="text-muted-foreground/50">
+              ›
+            </span>
+          )}
+          <span className="truncate">{level}</span>
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function HitTitle({ hit }: { hit: DocSearchRecord }) {
+  const castHit = hit as unknown as Parameters<typeof Highlight>[0]["hit"];
+
+  // For content-type records, the "title" is the nearest heading
+  if (hit.type === "content") {
+    // Find the deepest non-null heading level
+    const headingAttr = (
+      [
+        "hierarchy.lvl5",
+        "hierarchy.lvl4",
+        "hierarchy.lvl3",
+        "hierarchy.lvl2",
+        "hierarchy.lvl1",
+        "hierarchy.lvl0",
+      ] as const
+    ).find((attr) => {
+      const key = attr.split(".")[1] as keyof DocSearchHierarchy;
+      return hit.hierarchy?.[key];
+    });
+
+    if (headingAttr) {
+      return <Highlight attribute={headingAttr.split(".")} hit={castHit} />;
+    }
+  }
+
+  // For heading-type records, highlight the heading itself
+  if (hit.type?.startsWith("lvl") && hit.hierarchy) {
+    return <Highlight attribute={["hierarchy", hit.type]} hit={castHit} />;
+  }
+
+  // Fallback for legacy flat records
+  if (hit.title) {
+    return <Highlight attribute="title" hit={castHit} />;
+  }
+
+  return <span>{hit.hierarchy?.lvl0 ?? "Untitled"}</span>;
+}
+
+function SearchHit({ hit }: { hit: DocSearchRecord }) {
+  const castHit = hit as unknown as Parameters<typeof Snippet>[0]["hit"];
+  const isContentHit = hit.type === "content";
+
   return (
     <a
       className="block rounded-lg px-4 py-3 hover:bg-neutral-100 dark:hover:bg-white/5"
-      href={safeHref(hit.url)}
+      href={getHitUrl(hit)}
     >
+      <Breadcrumb hit={hit} />
       <div className="truncate text-sm font-medium text-foreground">
-        <Highlight
-          attribute="title"
-          hit={hit as Parameters<typeof Highlight>[0]["hit"]}
-        />
+        <HitTitle hit={hit} />
       </div>
-      {hit.description && (
+      {isContentHit && hit.content && (
+        <div className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">
+          <Snippet attribute="content" hit={castHit} />
+        </div>
+      )}
+      {!isContentHit && hit.description && (
         <div className="mt-0.5 truncate text-xs text-muted-foreground">
-          <Highlight
-            attribute="description"
-            hit={hit as Parameters<typeof Highlight>[0]["hit"]}
-          />
+          <Highlight attribute="description" hit={castHit} />
         </div>
       )}
     </a>
@@ -146,6 +250,12 @@ export function AlgoliaSearch() {
           <div className="relative z-10 w-full max-w-2xl overflow-hidden rounded-xl border border-border bg-popover shadow-2xl">
             {searchClient && indexName ? (
               <InstantSearch indexName={indexName} searchClient={searchClient}>
+                <Configure
+                  attributesToSnippet={["content:20"]}
+                  distinct={true}
+                  hitsPerPage={15}
+                  snippetEllipsisText="…"
+                />
                 <div className="flex items-center border-b border-border px-4">
                   <Search className="size-4 shrink-0 text-muted-foreground" />
                   <SearchBox
@@ -168,7 +278,7 @@ export function AlgoliaSearch() {
                   <Hits
                     classNames={{ item: "", list: "space-y-0.5", root: "" }}
                     hitComponent={({ hit }) => (
-                      <SearchHit hit={hit as unknown as HitRecord} />
+                      <SearchHit hit={hit as unknown as DocSearchRecord} />
                     )}
                   />
                 </div>
