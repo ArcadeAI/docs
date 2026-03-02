@@ -80,7 +80,7 @@
       "secretsInfo": [
         {
           "name": "POSTGRES_DATABASE_CONNECTION_STRING",
-          "type": "unknown"
+          "type": "password"
         }
       ],
       "output": {
@@ -222,7 +222,7 @@
         "toolName": "Postgres.ExecuteSelectQuery",
         "parameters": {
           "select_clause": {
-            "value": "id, name, email, created_at",
+            "value": "users.id, users.name, users.email",
             "type": "string",
             "required": true
           },
@@ -247,7 +247,7 @@
             "required": false
           },
           "where_clause": {
-            "value": "lower(trim(email)) LIKE '%@example.com'",
+            "value": "LOWER(TRIM(users.email)) LIKE '%@example.com' AND users.active = true",
             "type": "string",
             "required": false
           },
@@ -262,7 +262,7 @@
             "required": false
           },
           "order_by_clause": {
-            "value": "id ASC",
+            "value": "users.id DESC",
             "type": "string",
             "required": false
           },
@@ -338,7 +338,7 @@
             "required": true
           },
           "table_name": {
-            "value": "customers",
+            "value": "users",
             "type": "string",
             "required": true
           }
@@ -366,6 +366,6 @@
   "documentationChunks": [],
   "customImports": [],
   "subPages": [],
-  "generatedAt": "2026-02-28T11:11:33.955Z",
-  "summary": "Arcade Postgres connects to a Postgres database and enables schema-driven exploration and safe read-only querying. It helps developers inspect schemas and table structures and execute constrained SELECT queries constructed from discovered metadata.\n\n**Capabilities**\n\n- Discover database schemas and enumerate tables to map structure; always discover tables before composing queries.\n- Load and use table schemas to drive query construction and validation so queries match actual column types and constraints.\n- Execute read-only SELECT queries only, with enforced best practices: never SELECT *, order by primary/important keys, use case-insensitive trimmed matching and LIKE, and join only on indexed/PK columns.\n- Support ordered, paginated result sets and explicit query fragment construction (select/from/join/where/having/order/limit/offset).\n\n**Secrets**\n\nThis toolkit expects connection secrets such as POSTGRES_DATABASE_CONNECTION_STRING. Secret types include password and unknown; example: a PostgreSQL connection string (postgres://user:password@host:port/dbname) stored securely."
+  "generatedAt": "2026-03-01T11:12:15.524Z",
+  "summary": "Postgres provider enables read-only exploration and querying of a PostgreSQL database within the Arcade toolkit. It provides schema discovery, table inspection, and constrained SELECT execution to build reliable, safe queries.\n\n**Capabilities**\n- Discover database schemas and table structures to drive query composition rather than guessing table/column names.\n- Execute read-only SELECT queries with enforced construction rules (explicit columns, ORDER BY, LIMIT/OFFSET, JOIN/HAVING/WHERE clauses).\n- Require discovery of tables and schemas before executing queries to prevent errors and ensure correct joins.\n- Enforce safe query conventions: no SELECT *, case-insensitive and trimmed string matching, prefer LIKE, join only on indexed or primary-key columns.\n\n**Secrets**\n- Secret type: password. Example secret: POSTGRES_DATABASE_CONNECTION_STRING (e.g. postgres://user:password@host:5432/dbname) used to authenticate and connect; store and handle securely."
 }
