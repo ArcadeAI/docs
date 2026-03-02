@@ -29,7 +29,10 @@ function safeHref(url: string | undefined): string {
   if (!url) {
     return "/";
   }
-  if (url.startsWith("/") || url.startsWith("https://")) {
+  if (
+    url.startsWith("https://") ||
+    (url.startsWith("/") && !url.startsWith("//"))
+  ) {
     return url;
   }
   return "/";
