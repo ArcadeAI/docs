@@ -129,7 +129,7 @@ Coming soon…
 2.  Make sure you are in  mode
 3.  Ask the  to use a .
 
-Last updated on February 10, 2026
+Last updated on February 27, 2026
 
 [Microsoft Copilot Studio](/en/get-started/mcp-clients/copilot-studio.md)
 [Overview](/en/resources/integrations.md)
