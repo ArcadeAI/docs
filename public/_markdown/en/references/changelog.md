@@ -640,8 +640,7 @@ Self-hosed Arcade developers cannot be grandfathered into the old (insecure) beh
 
 **Toolkits**
 
--   `[bugfix - 🐛]` patching  Server template generator for outside the main repo ([PR #460](https://github.com/ArcadeAI/arcade-ai/pull/460)
-     )
+-   `[bugfix - 🐛]` patching  Server template generator for outside the main repo
 -   `[bugfix - 🐛]` Filter out unneeded files/directories before deploying workers ([PR #464](https://github.com/ArcadeAI/arcade-ai/pull/464)
      )
 
