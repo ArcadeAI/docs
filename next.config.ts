@@ -7,6 +7,7 @@ import { remarkGlossary } from "./lib/remark-glossary";
 const withNextra = nextra({
   defaultShowCopyCode: true,
   codeHighlight: true,
+  search: false,
   mdxOptions: {
     remarkPlugins: [
       [
