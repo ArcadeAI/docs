@@ -18,7 +18,9 @@ export function CopyPageOverride() {
   const fetchAndCopyMarkdown = useCallback(async (): Promise<boolean> => {
     try {
       const markdownUrl = `/api/markdown${pathname}`;
-      const response = await fetch(markdownUrl);
+      const response = await fetch(markdownUrl, {
+        headers: { Accept: "application/markdown" },
+      });
 
       if (!response.ok) {
         throw new Error(`Failed to fetch markdown: ${response.status}`);

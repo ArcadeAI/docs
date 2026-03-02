@@ -60,7 +60,9 @@ function CopyPageButton() {
 
     setLoading(true);
     try {
-      const response = await fetch(`/api/markdown${pathname}`);
+      const response = await fetch(`/api/markdown${pathname}`, {
+        headers: { Accept: "application/markdown" },
+      });
       if (!response.ok) {
         throw new Error("Failed to fetch markdown");
       }
