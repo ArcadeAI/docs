@@ -24,7 +24,7 @@ type DocSearchHierarchy = {
 
 type DocSearchRecord = {
   objectID: string;
-  type: "lvl0" | "lvl1" | "lvl2" | "lvl3" | "lvl4" | "lvl5" | "content";
+  type?: "lvl0" | "lvl1" | "lvl2" | "lvl3" | "lvl4" | "lvl5" | "content";
   hierarchy: DocSearchHierarchy;
   content: string | null;
   url: string;
@@ -128,7 +128,7 @@ function HitTitle({ hit }: { hit: DocSearchRecord }) {
   }
 
   // For heading-type records, highlight the heading itself
-  if (hit.type.startsWith("lvl") && hit.hierarchy) {
+  if (hit.type?.startsWith("lvl") && hit.hierarchy) {
     return <Highlight attribute={["hierarchy", hit.type]} hit={castHit} />;
   }
 
