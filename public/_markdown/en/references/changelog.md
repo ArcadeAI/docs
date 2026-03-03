@@ -8,6 +8,22 @@ Changelog
 
 _Here’s what’s new at Arcade.dev!_
 
+## 2026-02-27
+
+**Arcade  Servers**
+
+-   `[maintenance - 🔧]` Improve experience for developers on Windows
+-   `[feature - 🚀]` Improve `.env` discovery
+-   `[feature - 🚀]` Add `ToolMetadata` to OSS toolkits
+-   `[feature - 🚀]` Add YugabyteDB, MongoDB, Clickhouse, and Postgres toolkits
+-   `[documentation - 📝]` Fix Github API URL bug
+
+**Platform and Engine**
+
+-   `[bugfix - 🐛]` Fix connection for out of spec  servers
+-   `[bugfix - 🐛]` Fix Authorization Server Discovery
+-   `[bugfix - 🐛]` Fix changing redirect URI
+
 ## 2026-02-20
 
 Contextual Access for  Executions is Live! Learn more [here](/guides/contextual-access.md)
@@ -624,8 +640,7 @@ Self-hosed Arcade developers cannot be grandfathered into the old (insecure) beh
 
 **Toolkits**
 
--   `[bugfix - 🐛]` patching  Server template generator for outside the main repo ([PR #460](https://github.com/ArcadeAI/arcade-ai/pull/460)
-     )
+-   `[bugfix - 🐛]` patching  Server template generator for outside the main repo
 -   `[bugfix - 🐛]` Filter out unneeded files/directories before deploying workers ([PR #464](https://github.com/ArcadeAI/arcade-ai/pull/464)
      )
 
@@ -683,7 +698,7 @@ Self-hosed Arcade developers cannot be grandfathered into the old (insecure) beh
 -   `[feature - 🚀]` Launched status.arcade.dev for monitoring platform status ([link](https://status.arcade.dev)
      )
 
-Last updated on February 10, 2026
+Last updated on February 27, 2026
 
 [Overview](/en/references.md)
 [API](/en/references/api.md)

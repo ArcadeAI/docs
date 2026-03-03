@@ -197,6 +197,12 @@ export type ToolMetadataBehavior = {
   openWorld?: boolean;
 };
 
+export type BehaviorFlagKey =
+  | "readOnly"
+  | "destructive"
+  | "idempotent"
+  | "openWorld";
+
 export type ToolMetadata = {
   classification: ToolMetadataClassification;
   behavior: ToolMetadataBehavior;
@@ -449,6 +455,7 @@ export type AvailableToolsTableProps = {
     secrets?: string[];
     secretsInfo?: ToolSecret[];
     scopes?: string[];
+    metadata?: ToolMetadata | null;
   }>;
   /** Optional label for the secrets column */
   secretsColumnLabel?: string;

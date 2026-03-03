@@ -18,7 +18,7 @@ Without auth, AI  are severely limited in what they can do.
 
 Arcade provides an authorization system that handles OAuth 2.0, , and user tokens needed by AI  to access external services through . This means AI agents can now act on behalf of  securely and privately.
 
-![Arcade architecture overview](/images/overview-light.png)
+![Arcade architecture overview](/_next/image?url=%2Fimages%2Foverview-light.png&w=3840&q=75) ![Arcade architecture overview](/_next/image?url=%2Fimages%2Foverview-dark.png&w=3840&q=75)
 
 With Arcade, developers can now create  that can _act as the end  of their application_ to perform tasks like:
 
@@ -74,7 +74,7 @@ const response = await client.tools.execute({
 console.log(response.output.value);
 ```
 
-Last updated on February 10, 2026
+Last updated on February 27, 2026
 
 [Docs Home](/en/home.md)
 [Get an API key](/en/get-started/setup/api-keys.md)
