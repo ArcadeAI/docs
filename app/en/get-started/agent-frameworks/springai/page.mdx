@@ -1,0 +1,444 @@
+---
+title: "Build an AI Agent with Arcade and Spring AI"
+description: "Learn how to call Arcade tools from Spring AI."
+---
+
+import { Steps, Tabs, Callout } from "nextra/components";
+
+# Build an AI agent with Arcade and Spring AI
+
+[Spring AI](https://docs.spring.io/spring-ai/reference/) is a framework that brings AI capabilities to Spring Boot applications. It provides a unified API for interacting with large language models, including support for tool calling. This guide uses **Spring AI 1.1.x** with **Spring Boot 3.5**.
+
+In this guide, you'll build a Spring Boot web application that uses Arcade's Gmail and Slack tools through Spring AI's `ChatClient`. Your application exposes a REST endpoint that accepts natural language prompts, lets the LLM decide which tools to call, and handles Arcade's authorization flow when users need to connect their accounts.
+
+<GuideOverview>
+<GuideOverview.Outcomes>
+
+Build a Spring Boot web application that integrates Arcade tools with Spring AI for Gmail and Slack access
+
+</GuideOverview.Outcomes>
+
+<GuideOverview.Prerequisites>
+
+- <DashboardLink path="register" />
+- [Java 17+](https://adoptium.net/)
+- An [OpenAI API key](https://platform.openai.com/api-keys)
+- [Apache Maven](https://maven.apache.org/) or [Gradle](https://gradle.org/)
+
+</GuideOverview.Prerequisites>
+
+<GuideOverview.YouWillLearn>
+
+- How to configure the Arcade Spring Boot starter
+- How to expose Arcade tools to Spring AI using `@Tool` annotations
+- How to build a chat endpoint with tool calling
+- How to handle Arcade's authorization flow
+
+</GuideOverview.YouWillLearn>
+</GuideOverview>
+
+## Spring AI concepts
+
+Before diving into the code, here are the key Spring AI concepts used in this guide:
+
+- [ChatClient](https://docs.spring.io/spring-ai/reference/api/chatclient.html) -- A fluent API for interacting with AI models. It handles sending prompts, receiving responses, and coordinating tool calls.
+- [@Tool annotation](https://docs.spring.io/spring-ai/reference/api/tools.html) -- Marks a method as a tool that the AI model can call. Spring AI automatically generates the tool schema from the method signature and annotations.
+- [OpenAI integration](https://docs.spring.io/spring-ai/reference/api/chat/openai-chat.html) -- The `spring-ai-starter-model-openai` starter configures the OpenAI chat model with properties from `application.properties`.
+
+## Build the agent
+
+<Steps>
+
+### Create a new Spring Boot project
+
+Go to [start.spring.io](https://start.spring.io/#!type=maven-project&language=java&platformVersion=3.5.11&packaging=jar&jvmVersion=17&groupId=com.example&artifactId=arcade-agent&name=arcade-agent&packageName=com.example.arcadeagent&dependencies=web,spring-ai-openai) and configure the project with the following settings:
+
+| Setting | Value |
+|---------|-------|
+| **Project** | Maven (or Gradle) |
+| **Language** | Java |
+| **Spring Boot** | 3.5.x |
+| **Java** | 17 |
+| **Dependencies** | Spring Web, OpenAI |
+
+Click **Generate**, extract the archive, and open the project in your IDE.
+
+<Callout type="info">
+The Spring Initializr may default to Spring Boot 4.x. Make sure to select a **3.5.x** version from the dropdown.
+</Callout>
+
+### Add the Arcade dependency
+
+Add the `arcade-spring-boot-starter` to your project. This starter auto-configures an `ArcadeClient` bean that your application can inject.
+
+<Tabs items={["Maven", "Gradle"]} storageKey="buildTool">
+
+<Tabs.Tab>
+
+Add the dependency to your `pom.xml`:
+
+```xml filename="pom.xml"
+<dependency>
+  <groupId>dev.arcade</groupId>
+  <artifactId>arcade-spring-boot-starter</artifactId>
+  <version>${arcade-java-version}</version>
+</dependency>
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+Add the dependency to your `build.gradle`:
+
+```groovy filename="build.gradle"
+implementation 'dev.arcade:arcade-spring-boot-starter:${arcade-java-version}'
+```
+
+</Tabs.Tab>
+
+</Tabs>
+
+See the [Arcade Java SDK docs](https://github.com/ArcadeAI/arcade-java#installation) for the latest version.
+
+### Configure application properties
+
+Replace the contents of `src/main/resources/application.properties` with the following:
+
+```properties filename="application.properties"
+spring.application.name=arcade-agent
+
+# OpenAI
+spring.ai.openai.api-key=${OPENAI_API_KEY}
+spring.ai.openai.chat.options.model=gpt-4o
+
+# Arcade
+arcade.api-key=${ARCADE_API_KEY}
+arcade.user-id=${ARCADE_USER_ID}
+```
+
+Set these environment variables before running the application:
+
+```bash
+export OPENAI_API_KEY=your-openai-api-key
+export ARCADE_API_KEY=your-arcade-api-key
+export ARCADE_USER_ID=your-email@example.com
+```
+
+The `ARCADE_USER_ID` is your app's identifier for the current user (often the email you signed up with). Arcade uses this to track authorizations per user.
+
+<Callout type="warning">
+Do not commit API keys to version control. Use environment variables or a secrets manager.
+</Callout>
+
+### Create the Arcade tool provider
+
+Create `src/main/java/com/example/arcadeagent/ArcadeToolProvider.java`. This service wraps Arcade tool calls and exposes them to Spring AI using `@Tool` annotations:
+
+```java filename="src/main/java/com/example/arcadeagent/ArcadeToolProvider.java"
+package com.example.arcadeagent;
+
+import dev.arcade.client.ArcadeClient;
+import dev.arcade.models.AuthorizationResponse;
+import dev.arcade.models.tools.AuthorizeToolRequest;
+import dev.arcade.models.tools.ExecuteToolRequest;
+import dev.arcade.models.tools.ExecuteToolResponse;
+import java.util.Map;
+import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.ai.tool.annotation.ToolParam;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+// Mark as a Spring-managed bean so it can be injected
+// into the ChatController
+@Service
+public class ArcadeToolProvider {
+
+  private static final Logger log =
+    LoggerFactory.getLogger(ArcadeToolProvider.class);
+
+  // ArcadeClient is auto-configured by arcade-spring-boot-starter
+  private final ArcadeClient client;
+  // Identifies the current user for Arcade authorization tracking
+  private final String userId;
+
+  ArcadeToolProvider(ArcadeClient client, @Value("${arcade.user-id}") String userId) {
+    this.client = client;
+    this.userId = userId;
+  }
+
+  // --- Tool methods ------------------------------------------------
+  // Each @Tool method is exposed to the LLM by Spring AI.
+  // The LLM reads the name and description to decide
+  // when to call it.
+
+  @Tool(name = "list_emails",
+        description = "List recent emails from the user's Gmail inbox")
+  public String listEmails(
+      @ToolParam(description = "Search query, e.g. 'in:inbox'") String query) {
+    return executeTool(
+      "Gmail.ListEmails",
+      Map.of("query", query)
+    );
+  }
+
+  @Tool(name = "send_email", description = "Send an email using Gmail")
+  public String sendEmail(
+      @ToolParam(description = "Recipient email address") String recipient,
+      @ToolParam(description = "Email subject line") String subject,
+      @ToolParam(description = "Email body text") String body) {
+    return executeTool("Gmail.SendEmail", Map.of(
+      "recipient", recipient,
+      "subject", subject,
+      "body", body
+    ));
+  }
+
+  @Tool(name = "send_slack_message", description = "Send a message to a Slack channel")
+  public String sendSlackMessage(
+    @ToolParam(description = "The Slack channel name") String channelName,
+    @ToolParam(description = "The message text to send") String message) {
+    return executeTool(
+      "Slack.SendMessage",
+      Map.of("channel_name", channelName,
+        "message", message)
+    );
+  }
+
+  // --- Arcade API helpers ------------------------------------------
+
+  /**
+   * Calls an Arcade tool and returns the result as a String.
+   * If the tool requires OAuth authorization, returns an
+   * authorization URL instead.
+   */
+  private String executeTool(String toolName, Map<String, Object> input) {
+    // First, ensure the user has authorized this tool
+    String authResult = handleAuthorization(toolName);
+    if (authResult != null) {
+      return authResult;
+    }
+
+    log.debug("Executing tool {}, input: {}", toolName, input);
+    try {
+      // Build and send the execute request to Arcade
+      ExecuteToolResponse response = client.tools()
+        .execute(ExecuteToolRequest.builder()
+          .toolName(toolName)
+          .userId(userId)
+          .input(input)
+          .build());
+
+      // Happy path: tool executed successfully
+      if (response.success().orElse(false)) {
+        String result = response.output()
+          .map(o -> o._value().toString())
+          .orElse("{}");
+        log.debug("Tool {} returned: {}", toolName, result);
+        return result;
+      }
+
+      // Check for an error in the response
+      Optional<ExecuteToolResponse.Output.Error> error =
+        response.output()
+          .flatMap(ExecuteToolResponse.Output::error);
+
+      if (error.isPresent()) {
+        String msg = error.get().message();
+        log.warn("Tool {} error: {}", toolName, msg);
+        return "Error: " + msg;
+      }
+
+      return "Error: tool execution failed";
+    } catch (Exception e) {
+      log.error("Tool {} failed: {}",
+        toolName, e.getMessage());
+      return "Error: " + e.getMessage();
+    }
+  }
+
+  /**
+   * Checks whether the user has authorized the tool.
+   * If authorization is already COMPLETED, returns null
+   * (the caller can proceed). Otherwise, returns a message
+   * with the authorization URL for the user to visit.
+   */
+  private String handleAuthorization(String toolName) {
+    try {
+      // Start the authorization process
+      AuthorizationResponse authResponse = client.tools()
+        .authorize(AuthorizeToolRequest.builder()
+          .toolName(toolName)
+          .userId(userId)
+          .build());
+
+      // Tools that do not require authorization (or that
+      // the user has already authorized) return COMPLETED.
+      Optional<AuthorizationResponse.Status> status =
+        authResponse.status();
+      if (status.isPresent() && AuthorizationResponse
+        .Status.COMPLETED.equals(status.get())) {
+        return null; // authorized -- proceed with execution
+      }
+
+      // Not yet authorized -- return the URL for the user
+      Optional<String> url = authResponse.url();
+      if (url.isPresent()) {
+        log.debug("Tool {} requires authorization: {}",
+          toolName, url.get());
+        return String.format(
+          "Authorization required for '%s'. "
+            + "Open this URL to authorize: %s",
+          toolName, url.get()
+        );
+      }
+
+      return "Authorization not completed for: "
+        + toolName;
+    } catch (Exception e) {
+      log.error(
+        "Authorization request failed for {}: {}",
+        toolName, e.getMessage()
+      );
+      return "Error requesting authorization: "
+        + e.getMessage();
+    }
+  }
+}
+```
+
+**How this works:**
+
+- The `ArcadeClient` bean is auto-configured by the `arcade-spring-boot-starter` when `arcade.api-key` is set.
+- Each `@Tool` method wraps an Arcade tool call. Spring AI reads these annotations and makes the tools available to the LLM.
+- The `executeTool` method first checks authorization, then calls the Arcade API. If authorization status is `COMPLETED`, it proceeds with execution. Otherwise, it returns an authorization URL for the user to visit.
+
+### Create the chat controller
+
+Create `src/main/java/com/example/arcadeagent/ChatController.java`. This controller exposes a REST endpoint that accepts user prompts and returns AI responses:
+
+```java filename="src/main/java/com/example/arcadeagent/ChatController.java"
+package com.example.arcadeagent;
+
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class ChatController {
+
+  // System prompt that tells the LLM what tools it has
+  // and how to handle authorization URLs
+  private static final String SYSTEM_PROMPT = """
+    You are a helpful assistant with access to Gmail and
+    Slack tools. Use the available tools to fulfill user
+    requests. When a tool returns an authorization URL,
+    include it in your response so the user can authorize
+    access. After completing any action, confirm what you
+    did with specific details.""";
+
+  private final ChatClient chatClient;
+
+  ChatController(
+    ChatClient.Builder chatClientBuilder,
+    ArcadeToolProvider toolProvider
+  ) {
+    this.chatClient = chatClientBuilder
+      // Set the system prompt for every conversation
+      .defaultSystem(SYSTEM_PROMPT)
+      // Register all @Tool methods from ArcadeToolProvider
+      .defaultTools(toolProvider)
+      .build();
+  }
+
+  // POST /api/chat -- accepts a user message, returns
+  // the LLM response (which may include tool results)
+  @PostMapping("/api/chat")
+  public ChatResponse chat(@RequestBody ChatRequest request) {
+    String response = chatClient
+      .prompt()
+      .user(request.message())  // the user's message
+      .call()                   // send to the LLM
+      .content();               // extract the text reply
+
+    return new ChatResponse(response);
+  }
+
+  // Request and response records for the REST endpoint
+  public record ChatRequest(String message) {}
+  public record ChatResponse(String response) {}
+}
+```
+
+**How this works:**
+
+- The `ChatClient` is created with the system prompt and the `ArcadeToolProvider` registered as the default tools.
+- When a user sends a message to `POST /api/chat`, the LLM processes it and decides whether to call any tools.
+- If the LLM calls a tool (for example, `list_emails`), Spring AI invokes the corresponding `@Tool` method on `ArcadeToolProvider`, which delegates to the Arcade API.
+- The response is returned as JSON.
+
+### Run the application
+
+Make sure your environment variables are set, then start the application:
+
+<Tabs items={["Maven", "Gradle"]} storageKey="buildTool">
+
+<Tabs.Tab>
+
+```bash
+./mvnw spring-boot:run
+```
+
+</Tabs.Tab>
+
+<Tabs.Tab>
+
+```bash
+./gradlew bootRun
+```
+
+</Tabs.Tab>
+
+</Tabs>
+
+Test the endpoint with `curl`:
+
+```bash
+curl -X POST http://localhost:8080/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message": "List my recent emails"}'
+```
+
+On first use, the response will include an authorization URL because the user hasn't connected their Gmail account yet. Open the URL in a browser to authorize, then retry the request:
+
+```json
+{
+  "response": "It looks like I need access to your Gmail account. Please open this URL to authorize: https://accounts.google.com/o/oauth2/..."
+}
+```
+
+After authorization, subsequent requests will return results:
+
+```bash
+curl -X POST http://localhost:8080/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Send a Slack message to #general saying hello from my AI agent"}'
+```
+
+</Steps>
+
+## Key takeaways
+
+- **The Arcade Spring Boot starter auto-configures the client**: Add `arcade-spring-boot-starter` to your dependencies and set `arcade.api-key` in your configuration. The starter creates an `ArcadeClient` bean you can inject anywhere.
+- **`@Tool` annotations bridge Arcade and Spring AI**: Annotate methods on a `@Service` class and pass it to `ChatClient.Builder.defaultTools()`. Spring AI handles the tool schema generation and invocation lifecycle.
+- **Authorization is handled in the tool response**: When Arcade returns an "authorization required" error, the tool provider requests an OAuth URL and returns it as part of the response. The LLM includes this URL in its reply to the user.
+
+## Next steps
+
+1. **Add more tools**: Browse the [MCP server catalog](/resources/integrations) and add `@Tool` methods for GitHub, Google Docs, Notion, and more.
+2. **Add user authentication**: In production, resolve `userId` from your authentication system instead of a static configuration property. See [Security](/guides/security) for best practices.
+3. **Stream responses**: Replace `.call()` with `.stream()` on the `ChatClient` to stream responses using [Server-Sent Events](https://docs.spring.io/spring-ai/reference/api/chatclient.html#_streaming_responses).
