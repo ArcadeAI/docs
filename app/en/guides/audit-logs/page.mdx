@@ -1,11 +1,13 @@
 ---
 title: "Audit Logs"
-description: "Arcade.dev now captures every administrative action across the platform automatically — who did it, how, what changed, and when."
+description: "Arcade.dev now captures every administrative action across the platform automatically—who did it, how, what changed, and when."
 ---
 
 # Audit Logs for AI Agent Platforms
 
-TL;DR: Arcade.dev captures every administrative action across the runtime automatically — who did it, how, what changed, and when. There's nothing to enable. Audit logs are on by default, with a filterable dashboard and a REST API for pulling data into your own systems.
+Arcade captures every administrative action across the runtime automatically—who did it, how, what changed, and when.
+
+Audit logs are essential for compliance, security monitoring, and debugging administrative changes in production AI agent platforms. You'll use these logs to track API key creation, project modifications, user access changes, and other critical operations. The system enables the logs by default with a filterable dashboard and REST API for integration with external systems.
 
 ![Audit Log Dashboard](/images/screenshots/audit-log.png)
 
@@ -59,13 +61,13 @@ curl -s "https://cloud.arcade.dev/api/v1/orgs/{org_id}/audit_logs?action=AUDIT_A
 | `/api/v1/orgs/{org_id}/audit_logs` | GET | List audit logs for an organization | User (API key/JWT) |
 | `/api/v1/orgs/{org_id}/projects/{project_id}/audit_logs` | GET | List audit logs for a project | User (API key/JWT) |
 
-## List Organization Audit Logs
+## List organization audit logs
 
 ```
 GET /api/v1/orgs/{org_id}/audit_logs
 ```
 
-Returns a paginated, cursor-based list of audit log entries scoped to an organization. Results are ordered newest-first.
+Returns a paginated, cursor-based list of audit log entries scoped to an organization. Results order newest-first.
 
 ### Authentication
 
@@ -128,19 +130,35 @@ Requires a valid user identity (API key or bearer token). The authenticated prin
 }
 ```
 
-### Pagination
+### Cursor-based pagination
 
-Pagination is cursor-based. When `has_more` is `true`, pass the `next_cursor` value as the `cursor` query parameter in the next request. The cursor is an opaque base64-encoded string; do not construct or modify it.
+Use cursor-based pagination. When `has_more` is `true`, pass the `next_cursor` value as the `cursor` query parameter in the next request. The cursor is an opaque base64-encoded string; do not construct or modify it.
 
 ---
 
-## List Project Audit Logs
+## List project audit logs
 
 ```
 GET /api/v1/orgs/{org_id}/projects/{project_id}/audit_logs
 ```
 
 Identical to the organization endpoint, but additionally scoped to a single project. The authenticated principal must have access to both the organization and the project.
+
+| Parameter | Type | Required | Default | Constraints | Description |
+| -- | -- | -- | -- | -- | -- |
+| `action` | string | No | `null` | \-- | Filter by action (for example `AUDIT_ACTION_CREATED`) |
+| `source` | string | No | `null` | \-- | Filter by source (for example `AUDIT_SOURCE_API`) |
+| `resource_type` | string | No | `null` | \-- | Filter by resource type |
+| `cursor` | string | No | `null` | \-- | Pagination cursor from a previous response |
+| `limit` | int | No | `50` | `1` -- `100` | Number of results per page |
+
+| Parameter | Type | Required | Default | Constraints | Description |
+| -- | -- | -- | -- | -- | -- |
+| `action` | string | No | `null` | \-- | Filter by action (for example `AUDIT_ACTION_CREATED`) |
+| `source` | string | No | `null` | \-- | Filter by source (for example `AUDIT_SOURCE_API`) |
+| `resource_type` | string | No | `null` | \-- | Filter by resource type |
+| `cursor` | string | No | `null` | \-- | Pagination cursor from a previous response |
+| `limit` | int | No | `50` | `1` -- `100` | Number of results per page |
 
 ### Authentication
 
@@ -159,11 +177,11 @@ Requires a valid user identity (API key or bearer token). The principal must be 
 
 ### Query parameters
 
-Same as [List Organization Audit Logs](<#query-parameters>).
+Same as [List organization audit logs](<#query-parameters>).
 
 ### Response
 
-Same schema as [List Organization Audit Logs](<#response>). The `project_id` filter is applied automatically from the path.
+Same schema as [List organization audit logs](<#response>). The `project_id` filter applies automatically from the path.
 
 ---
 
@@ -174,10 +192,10 @@ Same schema as [List Organization Audit Logs](<#response>). The `project_id` fil
 | Value | Number | Description |
 | -- | -- | -- |
 | `AUDIT_ACTION_UNSPECIFIED` | 0 | Default / unknown |
-| `AUDIT_ACTION_CREATED` | 1 | Resource was created |
-| `AUDIT_ACTION_UPDATED` | 2 | Resource was updated |
-| `AUDIT_ACTION_DELETED` | 3 | Resource was deleted |
-| `AUDIT_ACTION_DISABLED` | 4 | Resource was disabled |
+| `AUDIT_ACTION_CREATED` | 1 | The user created the resource |
+| `AUDIT_ACTION_UPDATED` | 2 | The user updated the resource |
+| `AUDIT_ACTION_DELETED` | 3 | The user deleted the resource |
+| `AUDIT_ACTION_DISABLED` | 4 | The user disabled the resource |
 
 ### AuditSource
 
@@ -207,7 +225,7 @@ Same schema as [List Organization Audit Logs](<#response>). The `project_id` fil
 | `RESOURCE_TYPE_PLUGIN` | 10 | Plugin |
 | `RESOURCE_TYPE_HOOK` | 11 | Hook |
 | `RESOURCE_TYPE_MODEL` | 12 | Model |
-| `RESOURCE_TYPE_AUTH_PROVIDER` | 13 | Auth provider |
+| `RESOURCE_TYPE_AUTH_PROVIDER` | 13 | auth provider |
 | `RESOURCE_TYPE_SECRET` | 14 | Secret |
 | `RESOURCE_TYPE_USER_CONNECTION` | 15 | User connection |
 | `RESOURCE_TYPE_DEPLOYMENT` | 16 | Deployment |
@@ -238,7 +256,7 @@ Each item in the `items` array of a list response has the following shape:
 | `resource_id` | string / null | Resource identifier |
 | `resource_display` | string / null | Human-readable resource name |
 | `data` | object / null | Structured event payload |
-| `created_time` | datetime (ISO) | When the record was persisted |
+| `created_time` | datetime (ISO) | When the system persisted the record |
 
 ---
 
