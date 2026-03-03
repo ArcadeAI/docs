@@ -9,9 +9,11 @@ import {
   checkCoverage,
   normalizeId,
   parseSidebarEntries,
+  parseSkipFile,
   readIndexIds,
   readJsonFileStems,
   readSidebarEntries,
+  readSkipIds,
   type ToolkitSummaryEntry,
 } from "../../scripts/check-toolkit-coverage";
 
@@ -316,5 +318,110 @@ describe("checkCoverage — index.json drift", () => {
       expect.arrayContaining(["ComplexTools", "Deepwiki", "Test2"])
     );
     expect(report.indexOrphans).not.toContain("Github");
+  });
+});
+
+// ── parseSkipFile ─────────────────────────────────────────────────────────────
+
+describe("parseSkipFile", () => {
+  it("parses plain toolkit IDs", () => {
+    const result = parseSkipFile("Google\nMicrosoft\n");
+    expect(result).toEqual(["Google", "Microsoft"]);
+  });
+
+  it("strips comment lines", () => {
+    const result = parseSkipFile(
+      "# Toolkits to exclude\nGoogle\n# another comment\nMicrosoft"
+    );
+    expect(result).toEqual(["Google", "Microsoft"]);
+  });
+
+  it("strips blank lines", () => {
+    const result = parseSkipFile("Google\n\n\nMicrosoft\n");
+    expect(result).toEqual(["Google", "Microsoft"]);
+  });
+
+  it("returns empty array for empty content", () => {
+    expect(parseSkipFile("")).toEqual([]);
+    expect(parseSkipFile("# only comments\n")).toEqual([]);
+  });
+});
+
+// ── readSkipIds ───────────────────────────────────────────────────────────────
+
+describe("readSkipIds", () => {
+  it("returns empty set for a non-existent directory", () => {
+    expect(readSkipIds("/this/path/does/not/exist").size).toBe(0);
+  });
+});
+
+// ── skip list filtering via checkCoverage ─────────────────────────────────────
+
+describe("checkCoverage — skip list filtering", () => {
+  const skipIds = new Set([
+    "complextools",
+    "deepwiki",
+    "test2",
+    "myserver",
+    "mytest",
+  ]);
+
+  it("does not flag excluded toolkits as missing JSON", () => {
+    const apiToolkits = [
+      entry("ComplexTools"),
+      entry("Github"),
+      entry("Deepwiki"),
+    ];
+    const report = checkCoverage(
+      apiToolkits,
+      ["github"],
+      new Set(["github"]),
+      [],
+      skipIds
+    );
+    expect(report.missingJson).toHaveLength(0);
+  });
+
+  it("does not flag excluded toolkits as missing from sidebar", () => {
+    const apiToolkits = [entry("ComplexTools"), entry("Github")];
+    const report = checkCoverage(
+      apiToolkits,
+      ["github", "complextools"],
+      new Set(["github"]), // complextools not in sidebar
+      [],
+      skipIds
+    );
+    expect(report.missingFromSidebar).toHaveLength(0);
+  });
+
+  it("does not flag orphaned index entries for excluded toolkits", () => {
+    // ComplexTools is in index.json but its JSON file was deleted — expected, it's excluded
+    const report = checkCoverage(
+      [],
+      ["github"],
+      new Set(),
+      ["Github", "ComplexTools"],
+      skipIds
+    );
+    expect(report.indexOrphans).toHaveLength(0);
+  });
+
+  it("does not flag missing index entries for excluded toolkit files", () => {
+    // If somehow an excluded file exists on disk, don't warn about index missing
+    const report = checkCoverage(
+      [],
+      ["github", "complextools"],
+      new Set(),
+      ["Github"],
+      skipIds
+    );
+    expect(report.missingFromIndex).not.toContain("complextools");
+  });
+
+  it("still reports non-excluded toolkits normally", () => {
+    const apiToolkits = [entry("Attio"), entry("ComplexTools")];
+    const report = checkCoverage(apiToolkits, [], new Set(), [], skipIds);
+    expect(report.missingJson).toHaveLength(1);
+    expect(report.missingJson[0]?.name).toBe("Attio");
   });
 });

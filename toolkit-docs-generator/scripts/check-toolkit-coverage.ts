@@ -79,22 +79,26 @@ export function normalizeId(id: string): string {
  * @param jsonFileStems  Basenames (without .json) of files in data/toolkits/
  * @param sidebarEntries All sidebar keys collected from every _meta.tsx file
  * @param indexIds       Toolkit IDs listed in index.json
+ * @param skipIds        Toolkit IDs from ignored-toolkits.txt + excluded-toolkits.txt
  */
 export function checkCoverage(
   apiToolkits: ToolkitSummaryEntry[],
   jsonFileStems: string[],
   sidebarEntries: Set<string>,
-  indexIds: string[] = []
+  indexIds: string[] = [],
+  skipIds: Set<string> = new Set()
 ): CoverageReport {
   const jsonSet = new Set(jsonFileStems.map(normalizeId));
   const sidebarSet = new Set([...sidebarEntries].map(normalizeId));
   const indexSet = new Set(indexIds.map(normalizeId));
+  const skipSet = new Set([...skipIds].map(normalizeId));
 
   const missingJson: ToolkitSummaryEntry[] = [];
   const missingFromSidebar: ToolkitSummaryEntry[] = [];
 
   for (const toolkit of apiToolkits) {
     const key = normalizeId(toolkit.name);
+    if (skipSet.has(key)) continue; // intentionally excluded or ignored
     if (!jsonSet.has(key)) {
       missingJson.push(toolkit);
     } else if (!sidebarSet.has(key)) {
@@ -106,15 +110,19 @@ export function checkCoverage(
 
   const apiKeys = new Set(apiToolkits.map((t) => normalizeId(t.name)));
   const missingFromApi = jsonFileStems.filter(
-    (stem) => !apiKeys.has(normalizeId(stem))
+    (stem) =>
+      !(apiKeys.has(normalizeId(stem)) || skipSet.has(normalizeId(stem)))
   );
 
-  // index.json drift: entries in index with no individual file
-  const indexOrphans = indexIds.filter((id) => !jsonSet.has(normalizeId(id)));
+  // index.json drift: entries in index with no individual file (skip intentional exclusions)
+  const indexOrphans = indexIds.filter(
+    (id) => !(jsonSet.has(normalizeId(id)) || skipSet.has(normalizeId(id)))
+  );
 
   // index.json drift: individual files with no index entry
   const missingFromIndex = jsonFileStems.filter(
-    (stem) => !indexSet.has(normalizeId(stem))
+    (stem) =>
+      !(indexSet.has(normalizeId(stem)) || skipSet.has(normalizeId(stem)))
   );
 
   return {
@@ -224,6 +232,34 @@ export function readIndexIds(dataDir: string): string[] {
   }
 }
 
+/**
+ * Parse a plain-text toolkit list file (ignored-toolkits.txt or excluded-toolkits.txt).
+ * Lines starting with "#" and blank lines are ignored.
+ */
+export function parseSkipFile(content: string): string[] {
+  return content
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0 && !l.startsWith("#"));
+}
+
+/**
+ * Read and merge both skip-list files into one set of normalized IDs.
+ * Missing files are silently ignored.
+ */
+export function readSkipIds(generatorDir: string): Set<string> {
+  const files = ["excluded-toolkits.txt", "ignored-toolkits.txt"];
+  const ids = new Set<string>();
+  for (const file of files) {
+    const filePath = join(generatorDir, file);
+    if (!existsSync(filePath)) continue;
+    for (const id of parseSkipFile(readFileSync(filePath, "utf-8"))) {
+      ids.add(normalizeId(id));
+    }
+  }
+  return ids;
+}
+
 // ── API fetch ─────────────────────────────────────────────────────────────────
 
 type ApiSummaryResponse = {
@@ -323,12 +359,17 @@ export function printReport(report: CoverageReport): void {
 
 async function main(): Promise<void> {
   const skipApi = process.argv.includes("--skip-api");
-  const dataDir = join(PROJECT_ROOT, "toolkit-docs-generator/data/toolkits");
+  const generatorDir = join(PROJECT_ROOT, "toolkit-docs-generator");
+  const dataDir = join(generatorDir, "data/toolkits");
   const integrationsDir = join(PROJECT_ROOT, "app/en/resources/integrations");
 
   const jsonStems = readJsonFileStems(dataDir);
   const sidebarEntries = readSidebarEntries(integrationsDir);
   const indexIds = readIndexIds(dataDir);
+  const skipIds = readSkipIds(generatorDir);
+  console.log(
+    `ℹ️  Skipping ${skipIds.size} toolkits from exclude/ignore lists.`
+  );
 
   let apiToolkits: ToolkitSummaryEntry[] = [];
 
@@ -359,7 +400,8 @@ async function main(): Promise<void> {
     apiToolkits,
     jsonStems,
     sidebarEntries,
-    indexIds
+    indexIds,
+    skipIds
   );
   printReport(report);
 }
