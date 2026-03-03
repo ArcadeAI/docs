@@ -1,10 +1,14 @@
 ---
 title: "Audit Logs"
-description: "If you want audit events outside the dashboard, there&#x27;s a REST API. You can pull logs programmatically to feed into your existing SIEM, compliance tooling, or internal reporting."
+description: "Arcade.dev now captures every administrative action across the platform automatically — who did it, how, what changed, and when."
 ---
 Audit Logs
 
 # Audit Logs for AI Agent Platforms
+
+TL;DR: Arcade.dev captures every administrative action across the runtime automatically — who did it, how, what changed, and when. There’s nothing to enable. Audit logs are on by default, with a filterable dashboard and a REST API for pulling data into your own systems.
+
+![Audit Log Dashboard](/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Faudit-log.c34da40c.png&w=3840&q=75)
 
 If you want audit events outside the dashboard, there’s a REST API. You can pull logs programmatically to feed into your existing SIEM, compliance tooling, or internal reporting.
 
