@@ -12,6 +12,7 @@ import {
 import { DynamicCodeBlock } from "./dynamic-code-block";
 import { ParametersTable } from "./parameters-table";
 import { ScopesDisplay } from "./scopes-display";
+import { ToolMetadataSection } from "./tool-metadata-section";
 
 const COPY_FEEDBACK_MS = 2000;
 const JSON_PRETTY_PRINT_INDENT = 2;
@@ -484,6 +485,7 @@ export function ToolSection({
         showSelection={showSelection}
         tool={tool}
       />
+      <ToolMetadataSection metadata={tool.metadata} />
       <ToolDescriptionSection showDescription={showDescription} tool={tool} />
       <ToolParametersSection showParameters={showParameters} tool={tool} />
       <ToolRequirementsSection
