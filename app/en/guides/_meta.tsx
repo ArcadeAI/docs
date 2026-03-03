@@ -1,6 +1,9 @@
 import type { MetaRecord } from "nextra";
 
 export const meta: MetaRecord = {
+  "audit-logs": {
+    title: "Audit Logs",
+  },
   "contextual-access": {
     title: "Contextual Access",
   },
