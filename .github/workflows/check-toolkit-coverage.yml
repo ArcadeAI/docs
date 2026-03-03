@@ -1,0 +1,161 @@
+name: Check toolkit coverage
+# Runs on every PR to main. Never fails — surfaces gaps as GitHub warnings
+# and a PR comment so authors are informed without being blocked.
+#
+# Checks:
+#   1. API toolkits missing a JSON data file in toolkit-docs-generator/data/toolkits/
+#   2. JSON data files with no matching API toolkit (stale orphans)
+#   3. API toolkits present in JSON but absent from any sidebar _meta.tsx
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  coverage:
+    name: Toolkit coverage check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run toolkit coverage check
+        id: coverage
+        run: |
+          pnpm run check:toolkit-coverage 2>&1 | tee coverage-output.txt
+          if grep -q "⚠️  Toolkit coverage warnings" coverage-output.txt; then
+            echo "has_warnings=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_warnings=false" >> "$GITHUB_OUTPUT"
+          fi
+        env:
+          ENGINE_API_URL: ${{ secrets.ENGINE_API_URL }}
+          ENGINE_API_KEY: ${{ secrets.ENGINE_API_KEY }}
+
+      - name: Emit GitHub warning annotations
+        if: steps.coverage.outputs.has_warnings == 'true'
+        run: |
+          # Emit one ::warning:: annotation per gap category so GitHub surfaces
+          # a yellow warning badge on the check without marking it as failed.
+          if grep -q "📁  In API but missing JSON" coverage-output.txt; then
+            missing=$(grep -A 100 "📁  In API but missing JSON" coverage-output.txt \
+              | grep "^    [A-Z]" | sed 's/^    //' | paste -sd ', ')
+            echo "::warning::Toolkits in API with no JSON data file: ${missing}"
+          fi
+
+          if grep -q "🗑️   JSON files with no matching" coverage-output.txt; then
+            stale=$(grep -A 100 "🗑️   JSON files with no matching" coverage-output.txt \
+              | grep "^    [a-z]" | sed 's/^    //' | paste -sd ', ')
+            echo "::warning::Stale JSON files (no matching API toolkit): ${stale}"
+          fi
+
+          if grep -q "🗂️   In API + JSON but missing from sidebar" coverage-output.txt; then
+            sidebar=$(grep -A 100 "🗂️   In API + JSON but missing from sidebar" coverage-output.txt \
+              | grep "^    [A-Z]" | sed 's/^    //' | paste -sd ', ')
+            echo "::warning::Toolkits missing from sidebar _meta.tsx: ${sidebar}"
+          fi
+
+      - name: Write job summary
+        if: always()
+        run: |
+          if [ "$(cat coverage-output.txt | grep -c '⚠️  Toolkit coverage warnings')" -gt 0 ]; then
+            echo "## ⚠️ Toolkit coverage — gaps found" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "## ✅ Toolkit coverage — all clear" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          cat coverage-output.txt >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Post or update PR comment
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const output = fs.readFileSync('coverage-output.txt', 'utf8');
+            const hasWarnings = output.includes('⚠️  Toolkit coverage warnings');
+            const marker = '<!-- toolkit-coverage-check -->';
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existing = comments.find(c =>
+              c.user.type === 'Bot' && c.body.includes(marker)
+            );
+
+            if (!hasWarnings) {
+              if (existing) {
+                await github.rest.issues.deleteComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: existing.id,
+                });
+              }
+              return;
+            }
+
+            const body = `${marker}
+## ⚠️ Toolkit coverage gaps detected
+
+The coverage check found gaps between the Arcade API and the local toolkit data files. These are **warnings only** — this PR is not blocked from merging.
+
+<details>
+<summary>📋 Full report</summary>
+
+\`\`\`
+${output}
+\`\`\`
+
+</details>
+
+### What each warning means
+
+| Warning | Cause | Fix |
+|---|---|---|
+| **In API but missing JSON** | A toolkit is published in the API but has no docs data file | Run the toolkit docs generator for those toolkits |
+| **Stale JSON files** | A JSON data file exists locally but has no matching toolkit in the API | Delete the file or verify the toolkit is still published |
+| **Missing from sidebar** | A toolkit has JSON but isn't listed in any \`_meta.tsx\` | Run \`npx tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts\` |
+
+---
+*This comment updates automatically when the PR is pushed. It is removed when all gaps are resolved.*`;
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
