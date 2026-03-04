@@ -64,7 +64,7 @@ To integrate with PagerDuty’s API using OAuth 2.0, you’ll need to register a
 1.  After creating your app, you’ll receive your **Client ID** and **Client Secret**
 2.  **Important**: Copy and save these credentials immediately, as the Client Secret won’t be accessible again
 
-For detailed instructions, refer to PagerDuty’s [OAuth 2.0 guide](https://www.pagerduty.com/blog/insights/build-sophisticated-apps-for-your-pagerduty-environment-using-oauth-2-0-and-api-scopes/)  and [OAuth documentation](https://developer.pagerduty.com/docs/oauth-functionality) .
+For detailed instructions, refer to PagerDuty’s [OAuth 2.0 documentation](https://developer.pagerduty.com/docs/oauth-functionality) .
 
 Next, add the PagerDuty app to Arcade.
 
@@ -258,7 +258,7 @@ PagerDuty Classic apps use two permission levels:
 
 For more details about PagerDuty’s OAuth permissions, refer to the [PagerDuty OAuth functionality docs](https://developer.pagerduty.com/docs/oauth-functionality#scopes) .
 
-Last updated on January 30, 2026
+Last updated on February 27, 2026
 
 [Notion](/en/references/auth-providers/notion.md)
 [Reddit](/en/references/auth-providers/reddit.md)

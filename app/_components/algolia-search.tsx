@@ -1,7 +1,15 @@
 "use client";
 
 import { liteClient as algoliasearch } from "algoliasearch/lite";
-import { Search } from "lucide-react";
+import {
+  BookOpen,
+  Code,
+  Search,
+  Server,
+  Shield,
+  Wrench,
+  Zap,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   Configure,
@@ -166,15 +174,57 @@ function SearchHit({ hit }: { hit: DocSearchRecord }) {
   );
 }
 
+const QUICK_LINKS = [
+  { title: "Get started", href: "/en/get-started", icon: BookOpen },
+  { title: "Quickstarts", href: "/en/get-started/quickstarts", icon: Zap },
+  { title: "Tools", href: "/en/resources/tools", icon: Wrench },
+  {
+    title: "Auth providers",
+    href: "/en/references/auth-providers",
+    icon: Shield,
+  },
+  { title: "API reference", href: "/en/references/api", icon: Code },
+  { title: "MCP servers", href: "/en/references/mcp", icon: Server },
+];
+
 function EmptyQuery() {
   const { indexUiState } = useInstantSearch();
   if (indexUiState.query) {
     return null;
   }
   return (
-    <p className="px-4 py-8 text-center text-sm text-muted-foreground">
-      Start typing to search the docs…
-    </p>
+    <div className="px-4 py-4">
+      <p className="mb-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        Quick links
+      </p>
+      <div className="grid grid-cols-2 gap-1">
+        {QUICK_LINKS.map((link) => (
+          <a
+            className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-foreground hover:bg-neutral-100 dark:hover:bg-white/5"
+            href={link.href}
+            key={link.href}
+          >
+            <link.icon className="size-3.5 shrink-0 text-muted-foreground" />
+            {link.title}
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ConditionalHits() {
+  const { indexUiState } = useInstantSearch();
+  if (!indexUiState.query) {
+    return null;
+  }
+  return (
+    <Hits
+      classNames={{ item: "", list: "space-y-0.5", root: "" }}
+      hitComponent={({ hit }) => (
+        <SearchHit hit={hit as unknown as DocSearchRecord} />
+      )}
+    />
   );
 }
 
@@ -275,12 +325,7 @@ export function AlgoliaSearch() {
                 <div className="max-h-[60vh] overflow-y-auto p-2">
                   <EmptyQuery />
                   <NoResults />
-                  <Hits
-                    classNames={{ item: "", list: "space-y-0.5", root: "" }}
-                    hitComponent={({ hit }) => (
-                      <SearchHit hit={hit as unknown as DocSearchRecord} />
-                    )}
-                  />
+                  <ConditionalHits />
                 </div>
               </InstantSearch>
             ) : (
