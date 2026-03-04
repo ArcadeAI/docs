@@ -11,14 +11,8 @@ const meta: MetaRecord = {
   index: {
     title: "Overview",
   },
-  "securing-arcade-mcp": {
-    title: "Securing Arcade MCP",
-  },
   "secure-your-mcp-server": {
-    title: "Secure your MCP server",
-  },
-  "security-research-program": {
-    title: "Security research program",
+    title: "Add Resource Server auth",
   },
 };
 
