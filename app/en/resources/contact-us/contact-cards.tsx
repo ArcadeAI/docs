@@ -20,8 +20,8 @@ import {
   Users,
 } from "lucide-react";
 import posthog from "posthog-js";
-import type React from "react";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { QuickStartCard } from "../../../_components/quick-start-card";
 
 const WEBHOOK_URL = process.env.NEXT_PUBLIC_ATTIO_WEBHOOK_URL;
@@ -46,20 +46,32 @@ function getUtmParams(): Record<string, string> {
   return utms;
 }
 
-function collectFormFields(formData: FormData): Record<string, string> {
+function collectFields(data: FormValues): Record<string, string> {
   const fields: Record<string, string> = {};
-  for (const [key, value] of formData.entries()) {
-    if (key === "website") {
-      continue;
-    }
-    if (typeof value === "string" && value.trim()) {
+  for (const [key, value] of Object.entries(data)) {
+    if (key !== "website" && value.trim()) {
       fields[key] = value.trim();
     }
   }
   return fields;
 }
 
-async function submitForm(
+async function fireHoneypot(): Promise<void> {
+  if (!WEBHOOK_URL) {
+    return;
+  }
+  try {
+    await fetch(WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ _hp: true }),
+    });
+  } catch {
+    // Swallow errors for spam submissions
+  }
+}
+
+async function submitToAttio(
   fields: Record<string, string>
 ): Promise<{ success: boolean; error?: string }> {
   if (!WEBHOOK_URL) {
@@ -93,128 +105,138 @@ async function submitForm(
   };
 }
 
-async function submitHoneypot(): Promise<void> {
-  if (!WEBHOOK_URL) {
-    return;
-  }
-  try {
-    await fetch(WEBHOOK_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ _hp: true }),
-    });
-  } catch {
-    // Swallow errors for spam submissions
-  }
-}
+type FormValues = {
+  firstname: string;
+  lastname: string;
+  email: string;
+  company: string;
+  message: string;
+  website: string;
+};
 
 function ContactSalesForm({ onSuccess }: { onSuccess: () => void }) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState("");
+  const [submitError, setSubmitError] = useState("");
+  const {
+    register,
+    handleSubmit,
+    formState: { isSubmitting },
+  } = useForm<FormValues>();
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setError("");
+  const onSubmit = async (data: FormValues) => {
+    setSubmitError("");
 
-    const formData = new FormData(e.currentTarget);
-    const honeypot = formData.get("website") as string;
-
-    if (honeypot) {
-      await submitHoneypot();
+    // Honeypot — silently succeed for bots
+    if (data.website) {
+      await fireHoneypot();
       onSuccess();
       return;
     }
 
-    const fields = collectFormFields(formData);
+    const result = await submitToAttio(collectFields(data));
 
-    try {
-      const result = await submitForm(fields);
-
-      if (result.success) {
-        posthog.capture("contact_sales_form_submitted", {
-          form_type: "contact_sales",
-          page: "Contact Sales",
-          source: "contact_us_page",
-        });
-        onSuccess();
-      } else {
-        posthog.capture("contact_sales_form_submit_failed", {
-          form_type: "contact_sales",
-          page: "Contact Sales",
-          error: result.error,
-        });
-        setError("Oops! Something went wrong. Please try again.");
-      }
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Network error";
+    if (result.success) {
+      posthog.capture("contact_sales_form_submitted", {
+        form_type: "contact_sales",
+        page: "Contact Sales",
+        source: "contact_us_page",
+      });
+      onSuccess();
+    } else {
       posthog.capture("contact_sales_form_submit_failed", {
         form_type: "contact_sales",
         page: "Contact Sales",
-        error: errorMessage,
+        error: result.error,
       });
-      setError("Oops! Something went wrong. Please try again.");
-    } finally {
-      setIsSubmitting(false);
+      setSubmitError("Oops! Something went wrong. Please try again.");
     }
   };
 
   return (
-    <form className="flex flex-col gap-3" onSubmit={handleSubmit}>
-      <div className="flex gap-3 max-[767px]:flex-col">
+    <form className="flex flex-col gap-3" onSubmit={handleSubmit(onSubmit)}>
+      <div className="flex gap-3 max-md:flex-col">
+        <div className="flex flex-1 flex-col gap-1">
+          <label className="sr-only" htmlFor="firstname">
+            First Name
+          </label>
+          <Input
+            className="bg-gray-800/50 text-white"
+            id="firstname"
+            maxLength={256}
+            placeholder="First Name"
+            required
+            type="text"
+            {...register("firstname")}
+          />
+        </div>
+        <div className="flex flex-1 flex-col gap-1">
+          <label className="sr-only" htmlFor="lastname">
+            Last Name
+          </label>
+          <Input
+            className="bg-gray-800/50 text-white"
+            id="lastname"
+            maxLength={256}
+            placeholder="Last Name"
+            required
+            type="text"
+            {...register("lastname")}
+          />
+        </div>
+      </div>
+      <div className="flex flex-col gap-1">
+        <label className="sr-only" htmlFor="email">
+          Work Email
+        </label>
         <Input
-          aria-label="First Name"
-          className="flex-1 bg-gray-800/50 text-white"
+          className="bg-gray-800/50 text-white"
+          id="email"
           maxLength={256}
-          name="firstname"
-          placeholder="First Name"
+          placeholder="Work Email"
           required
-          type="text"
-        />
-        <Input
-          aria-label="Last Name"
-          className="flex-1 bg-gray-800/50 text-white"
-          maxLength={256}
-          name="lastname"
-          placeholder="Last Name"
-          required
-          type="text"
+          type="email"
+          {...register("email")}
         />
       </div>
-      <Input
-        aria-label="Work Email"
-        className="bg-gray-800/50 text-white"
-        maxLength={256}
-        name="email"
-        placeholder="Work Email"
-        required
-        type="email"
-      />
-      <Input
-        aria-label="Company"
-        className="bg-gray-800/50 text-white"
-        maxLength={256}
-        name="company"
-        placeholder="Company"
-        required
-        type="text"
-      />
-      <Textarea
-        aria-label="How can we help?"
-        className="min-h-[100px] resize-y bg-gray-800/50 text-white"
-        maxLength={5000}
-        name="message"
-        placeholder="How can we help?"
-        rows={4}
-      />
+      <div className="flex flex-col gap-1">
+        <label className="sr-only" htmlFor="company">
+          Company
+        </label>
+        <Input
+          className="bg-gray-800/50 text-white"
+          id="company"
+          maxLength={256}
+          placeholder="Company"
+          required
+          type="text"
+          {...register("company")}
+        />
+      </div>
+      <div className="flex flex-col gap-1">
+        <label className="sr-only" htmlFor="message">
+          How can we help?
+        </label>
+        <Textarea
+          className="min-h-[100px] resize-y bg-gray-800/50 text-white"
+          id="message"
+          maxLength={5000}
+          placeholder="How can we help?"
+          rows={4}
+          {...register("message")}
+        />
+      </div>
       {/* Honeypot field — hidden from real users */}
       <div aria-hidden="true" className="absolute -left-[9999px]">
-        <input autoComplete="off" name="website" tabIndex={-1} type="text" />
+        <input
+          autoComplete="off"
+          tabIndex={-1}
+          type="text"
+          {...register("website")}
+        />
       </div>
-      {error && (
+      {submitError && (
         <div className="flex items-center gap-3 rounded-lg bg-red-500/10 p-3 text-white">
           <AlertOctagon className="h-5 w-5 shrink-0" />
-          <span className="text-sm">{error}</span>
+          <span className="text-sm">{submitError}</span>
         </div>
       )}
       <Button className="w-full" disabled={isSubmitting} type="submit">
