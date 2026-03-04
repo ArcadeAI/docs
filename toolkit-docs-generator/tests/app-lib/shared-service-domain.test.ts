@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getSharedServiceDomain } from "../../../app/_components/toolkit-docs/components/toolkit-page";
+import { getSharedServiceDomain } from "../../../app/_components/toolkit-docs/components/toolkit-page-utils";
 
 const makeTool = (domains: string[]) => ({
   metadata: {
