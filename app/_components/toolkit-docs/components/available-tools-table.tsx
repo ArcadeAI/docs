@@ -27,7 +27,10 @@ import type {
   BehaviorFlagKey,
   SecretType,
 } from "../types";
-import { filterTools } from "./available-tools-filter";
+import {
+  type AvailableToolsFilter,
+  filterTools,
+} from "./available-tools-filter";
 import { normalizeScopes } from "./scopes-display";
 
 export {
