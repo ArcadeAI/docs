@@ -1,0 +1,509 @@
+{
+  "id": "Canva",
+  "label": "Canva",
+  "version": "0.1.0",
+  "description": "Arcade tools designed for LLMs to interact with Canva \u2014 create designs, export PDFs, autofill brand templates, and manage assets.",
+  "metadata": {
+    "category": "productivity",
+    "iconUrl": "https://design-system.arcade.dev/icons/canva.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/productivity/canva",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": "canva",
+    "allScopes": [
+      "asset:read",
+      "asset:write",
+      "brandtemplate:content:read",
+      "brandtemplate:meta:read",
+      "design:content:read",
+      "design:content:write",
+      "design:meta:read",
+      "folder:read",
+      "profile:read"
+    ]
+  },
+  "tools": [
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "Canva.WhoAmI",
+      "fullyQualifiedName": "Canva.WhoAmI@0.1.0",
+      "description": "Get the currently authenticated Canva user profile. Call this first to verify the connection.",
+      "parameters": [],
+      "auth": {
+        "type": "oauth2",
+        "providerId": "canva",
+        "scopes": [
+          "profile:read"
+        ]
+      },
+      "secrets": [],
+      "output": {
+        "description": "The authenticated user profile."
+      },
+      "documentationChunks": [],
+      "codeExample": "result = client.tools.execute(tool_name=\"Canva.WhoAmI\", user_id=\"user@example.com\")"
+    },
+    {
+      "name": "ListDesigns",
+      "qualifiedName": "Canva.ListDesigns",
+      "fullyQualifiedName": "Canva.ListDesigns@0.1.0",
+      "description": "List designs in your Canva account with optional search and filtering.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": false,
+          "description": "Search query to filter by name.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "ownership",
+          "type": "string",
+          "required": false,
+          "description": "Filter by ownership: owned, shared, or any.",
+          "enum": [
+            "owned",
+            "shared",
+            "any"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Max results (default 20, max 100).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "type": "oauth2",
+        "providerId": "canva",
+        "scopes": [
+          "design:meta:read"
+        ]
+      },
+      "secrets": [],
+      "output": {
+        "description": "List of Canva designs."
+      },
+      "documentationChunks": [],
+      "codeExample": "result = client.tools.execute(tool_name=\"Canva.ListDesigns\", user_id=\"user@example.com\", input={\"query\": \"proposal\"})"
+    },
+    {
+      "name": "GetDesign",
+      "qualifiedName": "Canva.GetDesign",
+      "fullyQualifiedName": "Canva.GetDesign@0.1.0",
+      "description": "Get details of a specific Canva design by ID.",
+      "parameters": [
+        {
+          "name": "design_id",
+          "type": "string",
+          "required": true,
+          "description": "The Canva design ID.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "type": "oauth2",
+        "providerId": "canva",
+        "scopes": [
+          "design:meta:read"
+        ]
+      },
+      "secrets": [],
+      "output": {
+        "description": "Design details including title, type, and URLs."
+      },
+      "documentationChunks": [],
+      "codeExample": "result = client.tools.execute(tool_name=\"Canva.GetDesign\", user_id=\"user@example.com\", input={\"design_id\": \"DAFxxxxx\"})"
+    },
+    {
+      "name": "CreateDesign",
+      "qualifiedName": "Canva.CreateDesign",
+      "fullyQualifiedName": "Canva.CreateDesign@0.1.0",
+      "description": "Create a new Canva design. Supports presentation, doc, whiteboard, and custom dimensions.",
+      "parameters": [
+        {
+          "name": "design_type",
+          "type": "string",
+          "required": false,
+          "description": "Type: presentation, doc, whiteboard, or custom.",
+          "enum": [
+            "presentation",
+            "doc",
+            "whiteboard",
+            "custom"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Title for the new design.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "width",
+          "type": "integer",
+          "required": false,
+          "description": "Width in pixels (custom type only).",
+          "enum": null,
+          "inferrable": false
+        },
+        {
+          "name": "height",
+          "type": "integer",
+          "required": false,
+          "description": "Height in pixels (custom type only).",
+          "enum": null,
+          "inferrable": false
+        }
+      ],
+      "auth": {
+        "type": "oauth2",
+        "providerId": "canva",
+        "scopes": [
+          "design:content:write"
+        ]
+      },
+      "secrets": [],
+      "output": {
+        "description": "The newly created design with ID and edit URL."
+      },
+      "documentationChunks": [],
+      "codeExample": "result = client.tools.execute(tool_name=\"Canva.CreateDesign\", user_id=\"user@example.com\", input={\"design_type\": \"presentation\", \"title\": \"Q4 Report\"})"
+    },
+    {
+      "name": "ExportDesign",
+      "qualifiedName": "Canva.ExportDesign",
+      "fullyQualifiedName": "Canva.ExportDesign@0.1.0",
+      "description": "Start an async export of a Canva design to PDF, PNG, JPG, SVG, PPTX, MP4, or GIF. Poll GetExportStatus for the download URL.",
+      "parameters": [
+        {
+          "name": "design_id",
+          "type": "string",
+          "required": true,
+          "description": "The Canva design ID to export.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "export_format",
+          "type": "string",
+          "required": true,
+          "description": "Export format: pdf, png, jpg, svg, pptx, mp4, or gif.",
+          "enum": [
+            "pdf",
+            "png",
+            "jpg",
+            "svg",
+            "pptx",
+            "mp4",
+            "gif"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "quality",
+          "type": "string",
+          "required": false,
+          "description": "Quality for jpg/png: regular or pro.",
+          "enum": [
+            "regular",
+            "pro"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "pages",
+          "type": "array",
+          "required": false,
+          "description": "Specific page numbers to export (1-indexed). All pages if omitted.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "type": "oauth2",
+        "providerId": "canva",
+        "scopes": [
+          "design:content:read"
+        ]
+      },
+      "secrets": [],
+      "output": {
+        "description": "Export job ID. Use GetExportStatus to poll for the download URL."
+      },
+      "documentationChunks": [],
+      "codeExample": "result = client.tools.execute(tool_name=\"Canva.ExportDesign\", user_id=\"user@example.com\", input={\"design_id\": \"DAFxxxxx\", \"export_format\": \"pdf\"})"
+    },
+    {
+      "name": "GetExportStatus",
+      "qualifiedName": "Canva.GetExportStatus",
+      "fullyQualifiedName": "Canva.GetExportStatus@0.1.0",
+      "description": "Check the status of a design export job. Returns download URLs when complete.",
+      "parameters": [
+        {
+          "name": "export_id",
+          "type": "string",
+          "required": true,
+          "description": "The export job ID from ExportDesign.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "type": "oauth2",
+        "providerId": "canva",
+        "scopes": [
+          "design:content:read"
+        ]
+      },
+      "secrets": [],
+      "output": {
+        "description": "Export status and download URLs."
+      },
+      "documentationChunks": [],
+      "codeExample": "result = client.tools.execute(tool_name=\"Canva.GetExportStatus\", user_id=\"user@example.com\", input={\"export_id\": \"exp_xxxxx\"})"
+    },
+    {
+      "name": "ListBrandTemplates",
+      "qualifiedName": "Canva.ListBrandTemplates",
+      "fullyQualifiedName": "Canva.ListBrandTemplates@0.1.0",
+      "description": "List brand templates available in your Canva team.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": false,
+          "description": "Search query to filter templates.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Max results (default 20, max 100).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "type": "oauth2",
+        "providerId": "canva",
+        "scopes": [
+          "brandtemplate:meta:read"
+        ]
+      },
+      "secrets": [],
+      "output": {
+        "description": "List of brand templates."
+      },
+      "documentationChunks": [],
+      "codeExample": "result = client.tools.execute(tool_name=\"Canva.ListBrandTemplates\", user_id=\"user@example.com\")"
+    },
+    {
+      "name": "GetBrandTemplateDataset",
+      "qualifiedName": "Canva.GetBrandTemplateDataset",
+      "fullyQualifiedName": "Canva.GetBrandTemplateDataset@0.1.0",
+      "description": "Get the autofill dataset fields for a brand template. Shows which fields can be populated.",
+      "parameters": [
+        {
+          "name": "brand_template_id",
+          "type": "string",
+          "required": true,
+          "description": "The brand template ID.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "type": "oauth2",
+        "providerId": "canva",
+        "scopes": [
+          "brandtemplate:content:read"
+        ]
+      },
+      "secrets": [],
+      "output": {
+        "description": "Dataset fields available for autofill."
+      },
+      "documentationChunks": [],
+      "codeExample": "result = client.tools.execute(tool_name=\"Canva.GetBrandTemplateDataset\", user_id=\"user@example.com\", input={\"brand_template_id\": \"tmpl_xxxxx\"})"
+    },
+    {
+      "name": "AutofillDesign",
+      "qualifiedName": "Canva.AutofillDesign",
+      "fullyQualifiedName": "Canva.AutofillDesign@0.1.0",
+      "description": "Create a new design by autofilling a brand template with custom data. Great for generating personalized documents at scale.",
+      "parameters": [
+        {
+          "name": "brand_template_id",
+          "type": "string",
+          "required": true,
+          "description": "The brand template ID to autofill.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "data",
+          "type": "object",
+          "required": true,
+          "description": "Key-value pairs mapping template field names to content.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Title for the new design.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "type": "oauth2",
+        "providerId": "canva",
+        "scopes": [
+          "design:content:write",
+          "brandtemplate:content:read"
+        ]
+      },
+      "secrets": [],
+      "output": {
+        "description": "The new design created from the autofilled template."
+      },
+      "documentationChunks": [],
+      "codeExample": "result = client.tools.execute(tool_name=\"Canva.AutofillDesign\", user_id=\"user@example.com\", input={\"brand_template_id\": \"tmpl_xxxxx\", \"data\": {\"client_name\": {\"type\": \"text\", \"text\": \"Acme Corp\"}}})"
+    },
+    {
+      "name": "ListFolderItems",
+      "qualifiedName": "Canva.ListFolderItems",
+      "fullyQualifiedName": "Canva.ListFolderItems@0.1.0",
+      "description": "List items in a Canva folder. Use folder_id=root to browse the top-level folder.",
+      "parameters": [
+        {
+          "name": "folder_id",
+          "type": "string",
+          "required": true,
+          "description": "The folder ID. Use root for top-level.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "item_types",
+          "type": "array",
+          "required": false,
+          "description": "Filter by item types: design, folder, image, etc.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Max results (default 20, max 100).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "type": "oauth2",
+        "providerId": "canva",
+        "scopes": [
+          "folder:read"
+        ]
+      },
+      "secrets": [],
+      "output": {
+        "description": "Items in the folder."
+      },
+      "documentationChunks": [],
+      "codeExample": "result = client.tools.execute(tool_name=\"Canva.ListFolderItems\", user_id=\"user@example.com\", input={\"folder_id\": \"root\"})"
+    },
+    {
+      "name": "UploadAsset",
+      "qualifiedName": "Canva.UploadAsset",
+      "fullyQualifiedName": "Canva.UploadAsset@0.1.0",
+      "description": "Upload an asset to Canva from a public URL. Poll GetAssetUploadStatus for the asset ID.",
+      "parameters": [
+        {
+          "name": "url",
+          "type": "string",
+          "required": true,
+          "description": "Public URL of the asset to upload.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "description": "Name for the uploaded asset.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "type": "oauth2",
+        "providerId": "canva",
+        "scopes": [
+          "asset:write"
+        ]
+      },
+      "secrets": [],
+      "output": {
+        "description": "Upload job ID."
+      },
+      "documentationChunks": [],
+      "codeExample": "result = client.tools.execute(tool_name=\"Canva.UploadAsset\", user_id=\"user@example.com\", input={\"url\": \"https://example.com/logo.png\", \"name\": \"Company Logo\"})"
+    },
+    {
+      "name": "GetAssetUploadStatus",
+      "qualifiedName": "Canva.GetAssetUploadStatus",
+      "fullyQualifiedName": "Canva.GetAssetUploadStatus@0.1.0",
+      "description": "Check the status of an asset upload job. Returns the asset ID when complete.",
+      "parameters": [
+        {
+          "name": "job_id",
+          "type": "string",
+          "required": true,
+          "description": "The upload job ID from UploadAsset.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "type": "oauth2",
+        "providerId": "canva",
+        "scopes": [
+          "asset:read"
+        ]
+      },
+      "secrets": [],
+      "output": {
+        "description": "Upload status and asset ID."
+      },
+      "documentationChunks": [],
+      "codeExample": "result = client.tools.execute(tool_name=\"Canva.GetAssetUploadStatus\", user_id=\"user@example.com\", input={\"job_id\": \"job_xxxxx\"})"
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "summary": "The Arcade Canva MCP Server lets AI agents create designs, export PDFs, autofill brand templates, upload assets, and browse folders on behalf of authenticated Canva users."
+}
