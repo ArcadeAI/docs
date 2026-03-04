@@ -10,15 +10,16 @@ const DROPDOWN_IDENTIFIER = "Markdown for LLMs";
 
 /**
  * This component overrides the default nextra-theme-docs "Copy page" button behavior
- * to fetch clean markdown from our API instead of copying raw MDX source.
+ * to fetch markdown from our API instead of copying raw MDX source.
  */
 export function CopyPageOverride() {
   const pathname = usePathname();
 
   const fetchAndCopyMarkdown = useCallback(async (): Promise<boolean> => {
     try {
-      const markdownUrl = `/api/markdown${pathname}.md`;
-      const response = await fetch(markdownUrl);
+      const response = await fetch(pathname, {
+        headers: { Accept: "text/markdown" },
+      });
 
       if (!response.ok) {
         throw new Error(`Failed to fetch markdown: ${response.status}`);
