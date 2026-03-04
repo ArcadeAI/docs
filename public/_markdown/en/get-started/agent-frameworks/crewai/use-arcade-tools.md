@@ -2,31 +2,31 @@
 title: "Setup Arcade tools with CrewAI"
 description: "Learn how to use Arcade tools in CrewAI applications"
 ---
+
 [Agent Frameworks](/en/get-started/agent-frameworks.md)
 CrewAISetup Arcade tools with CrewAI
 
 # Use Arcade tools with CrewAI
 
-[CrewAI](https://www.crewai.com/)  is an agentic framework optimized for building task-oriented multi- systems. This guide explains how to integrate Arcade  into your CrewAI applications.
+[CrewAI](https://www.crewai.com/)  is an agentic framework optimized for building task-oriented multi- systems. This guide explains how to integrate Arcade into your CrewAI applications.
 
 ## Outcomes
 
-You will build a CrewAI  that uses Arcade  to help  with Gmail and Slack.
+You will build a CrewAI that uses Arcade to help with Gmail and Slack.
 
 ### You will Learn
 
--   How to retrieve Arcade  and convert them to CrewAI format
--   How to build a CrewAI  with Arcade
--   How to implement “just in time” (JIT)  authorization using Arcade’s client
+- How to retrieve Arcade and convert them to CrewAI format
+- How to build a CrewAI with Arcade
+- How to implement “just in time” (JIT) authorization using Arcade’s client
 
 ### Prerequisites
 
--   [Arcade account](https://app.arcade.dev/register)
+- [Arcade account](https://app.arcade.dev/register)
 
--   [Obtain an Arcade API key](/get-started/setup/api-keys.md)
+- [Obtain an Arcade API key](/get-started/setup/api-keys.md)
 
--   The [`uv` package manager](https://docs.astral.sh/uv/)
-
+- The [`uv` package manager](https://docs.astral.sh/uv/)
 
 ## The agent architecture you will build in this guide
 
@@ -36,7 +36,7 @@ CrewAI provides a [Crew](https://docs.crewai.com/reference/crew)  class that im
 
 ### Create a new project
 
-Create a new directory for your  and initialize a new virtual environment:
+Create a new directory for your and initialize a new virtual environment:
 
 ```bash
 mkdir crewai-arcade-example
@@ -95,22 +95,22 @@ import os
 
 This includes many imports, here’s a breakdown:
 
--   Arcade imports:
-    -   `Arcade`: The , used to interact with the .
-    -   `ToolDefinition`: The  definition type, used to define the input and output of a tool.
--   CrewAI imports:
-    -   `BaseTool`: The base  class, used to create custom CrewAI tools.
-    -   `Agent`: The CrewAI  class, used to create an agent.
-    -   `EventListener`: The event listener class, used to suppress CrewAI’s rich panel output.
--   Other imports:
-    -   `pydantic` imports: Used for data validation and model creation when converting Arcade  to LangChain tools.
-    -   `typing.Any`: A type hint for the any type.
-    -   `load_dotenv`: Loads the environment variables from the `.env` file.
-    -   `os`: The operating system module, used to interact with the operating system.
+- Arcade imports:
+  - `Arcade`: The , used to interact with the .
+  - `ToolDefinition`: The definition type, used to define the input and output of a tool.
+- CrewAI imports:
+  - `BaseTool`: The base class, used to create custom CrewAI tools.
+  - `Agent`: The CrewAI class, used to create an agent.
+  - `EventListener`: The event listener class, used to suppress CrewAI’s rich panel output.
+- Other imports:
+  - `pydantic` imports: Used for data validation and model creation when converting Arcade to LangChain tools.
+  - `typing.Any`: A type hint for the any type.
+  - `load_dotenv`: Loads the environment variables from the `.env` file.
+  - `os`: The operating system module, used to interact with the operating system.
 
 ### Configure the agent
 
-The rest of the code uses these variables to customize the  and manage the . Feel free to configure them to your liking. Here, the `EventListener` class is used to suppress CrewAI’s rich panel output, which is useful for debugging but verbose for an interactive session like the one you’re building.
+The rest of the code uses these variables to customize the and manage the . Feel free to configure them to your liking. Here, the `EventListener` class is used to suppress CrewAI’s rich panel output, which is useful for debugging but verbose for an interactive session like the one you’re building.
 
 ```python
 # main.py
@@ -140,7 +140,7 @@ EventListener().formatter.verbose = False
 
 ### Write a utility function to transform Arcade tool definitions into Pydantic models
 
-In this utility function, you transform an Arcade  definition into a Pydantic model. Later, you will transform these models to construct tools in the format expected by CrewAI. The `_build_args_model` function extracts the tools’ parameters, name, and description, and maps them to a Pydantic model.
+In this utility function, you transform an Arcade definition into a Pydantic model. Later, you will transform these models to construct tools in the format expected by CrewAI. The `_build_args_model` function extracts the tools’ parameters, name, and description, and maps them to a Pydantic model.
 
 ```python
 # main.py
@@ -180,8 +180,8 @@ def _build_args_model(tool_def: ToolDefinition) -> type[BaseModel]:
 
 Here, you define the `ArcadeTool` class that extends the CrewAI `BaseTool` class to add the following capability:
 
--   Authorize the tool with the  with the `_auth_tool` helper function
--   Execute the tool with the  with the `_run` method
+- Authorize the tool with the with the `_auth_tool` helper function
+- Execute the tool with the with the `_run` method
 
 This class captures the authorization flow outside of the agent’s , which is a good practice for security and context engineering. By handling everything in the `ArcadeTool` class, you remove the risk of the LLM replacing the authorization URL or leaking it, and you keep the context free from any authorization-related traces, which reduces the risk of hallucinations, and reduces context bloat.
 
@@ -231,13 +231,13 @@ class ArcadeTool(BaseTool):
 
 ### Retrieve Arcade tools and transform them into CrewAI tools
 
-Here you get the Arcade tools you want the agent to utilize, and transform them into CrewAI tools. The first step is to initialize the , and get the  you want to work with.
+Here you get the Arcade tools you want the agent to utilize, and transform them into CrewAI tools. The first step is to initialize the , and get the you want to work with.
 
 Here’s a breakdown of what it does for clarity:
 
--   retrieve tools from all configured  servers (defined in the `MCP_SERVERS` variable)
--   retrieve individual  (defined in the `TOOLS` variable)
--   transform the Arcade  to CrewAI tools with the `ArcadeTool` class you defined earlier
+- retrieve tools from all configured servers (defined in the `MCP_SERVERS` variable)
+- retrieve individual (defined in the `TOOLS` variable)
+- transform the Arcade to CrewAI tools with the `ArcadeTool` class you defined earlier
 
 ```python
 # main.py
@@ -282,10 +282,10 @@ def get_arcade_tools(
 
 The main function is where you:
 
--   Get the Arcade tools from the configured  servers
--   Create an  with the Arcade
--   Initialize the conversation
--   Run the loop
+- Get the Arcade tools from the configured servers
+- Create an with the Arcade
+- Initialize the conversation
+- Run the loop
 
 ```python
 # main.py
@@ -330,23 +330,23 @@ if __name__ == "__main__":
 uv run main.py
 ```
 
-You should see the  responding to your prompts like any model, as well as handling any  calls and authorization requests. Here are some example prompts you can try:
+You should see the responding to your prompts like any model, as well as handling any calls and authorization requests. Here are some example prompts you can try:
 
--   “Send me an email with a random haiku about OpenAI ”
--   “Summarize my latest 3 emails”
+- “Send me an email with a random haiku about OpenAI ”
+- “Summarize my latest 3 emails”
 
 ## Tips for selecting tools
 
--   **Relevance**: Pick only the  you need. Avoid using all tools at once.
--   **Avoid conflicts**: Be mindful of duplicate or overlapping functionality.
+- **Relevance**: Pick only the you need. Avoid using all tools at once.
+- **Avoid conflicts**: Be mindful of duplicate or overlapping functionality.
 
 ## Next steps
 
-Now that you have integrated Arcade tools into your CrewAI  team, you can:
+Now that you have integrated Arcade tools into your CrewAI team, you can:
 
--   Experiment with different toolkits, such as “Math” or “Search.”
--   Customize the ’s prompts for specific tasks.
--   Customize the  authorization and execution flow to meet your application’s requirements.
+- Experiment with different toolkits, such as “Math” or “Search.”
+- Customize the ’s prompts for specific tasks.
+- Customize the authorization and execution flow to meet your application’s requirements.
 
 ## Example code
 
@@ -534,8 +534,6 @@ if __name__ == "__main__":
 
 
 ```
-
-
 
 Last updated on February 10, 2026
 

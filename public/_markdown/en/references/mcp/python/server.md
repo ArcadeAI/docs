@@ -2,28 +2,29 @@
 title: "Server"
 description: "Reference documentation for the low-level MCPServer class"
 ---
+
 Arcade MCP[Python](/en/references/mcp/python.md)
 Server
 
 # Server
 
-Most  should use [`MCPApp`](/references/mcp/python.md) instead of `MCPServer` directly. `MCPServer` is a low-level API for advanced use cases.
+Most should use [`MCPApp`](/references/mcp/python.md) instead of `MCPServer` directly. `MCPServer` is a low-level API for advanced use cases.
 
-The `MCPServer` class is the core server implementation that handles  protocol messages, middleware orchestration, and component management for , resources, and prompts.
+The `MCPServer` class is the core server implementation that handles protocol messages, middleware orchestration, and component management for , resources, and prompts.
 
 ## `MCPServer`
 
 **`arcade_mcp_server.server.MCPServer`**
 
- Server with middleware and  support.
+Server with middleware and support.
 
 This server provides:
 
--   Middleware chain for extensible request processing
--    injection for
--   Component managers for , resources, and prompts
--   Bidirectional communication with  clients
--   Authorization and secret management for  execution
+- Middleware chain for extensible request processing
+- injection for
+- Component managers for , resources, and prompts
+- Bidirectional communication with clients
+- Authorization and secret management for execution
 
 ### `__init__`
 
@@ -44,7 +45,7 @@ MCPServer(
 )
 ```
 
-Initialize the  server.
+Initialize the server.
 
 **Parameters:**
 
@@ -150,7 +151,7 @@ The server automatically adds `ErrorHandlingMiddleware` and (if enabled in setti
 
 #### `tools`
 
-Access the `ToolManager` for runtime  operations: `add_tool()`, `update_tool()`, `remove_tool()`, `list_tools()`, `get_tool()`.
+Access the `ToolManager` for runtime operations: `add_tool()`, `update_tool()`, `remove_tool()`, `list_tools()`, `get_tool()`.
 
 #### `resources`
 
@@ -168,7 +169,7 @@ Access the `PromptManager` for runtime prompt operations: `add_prompt()`, `remov
 async server.start()
 ```
 
-Start the server and all component managers. Loads  from the initial catalog, starts the lifespan manager, and checks for missing secrets. Safe to call multiple times (subsequent calls are no-ops).
+Start the server and all component managers. Loads from the initial catalog, starts the lifespan manager, and checks for missing secrets. Safe to call multiple times (subsequent calls are no-ops).
 
 #### `stop`
 
@@ -184,7 +185,7 @@ Stop the server and all component managers. Shuts down the lifespan manager and 
 async server.run_connection(read_stream, write_stream, init_options=None)
 ```
 
-Run a single  connection. Creates a `ServerSession`, registers it, and processes messages until the connection ends.
+Run a single connection. Creates a `ServerSession`, registers it, and processes messages until the connection ends.
 
 **Parameters:**
 
@@ -226,7 +227,7 @@ Connection initialization options (for example, `{"transport_type": "stdio"}`)
 async server.handle_message(message, session=None, resource_owner=None)
 ```
 
-Handle an incoming  message. Validates the message, applies middleware, dispatches to the appropriate handler, and returns a response.
+Handle an incoming message. Validates the message, applies middleware, dispatches to the appropriate handler, and returns a response.
 
 **Parameters:**
 
@@ -274,7 +275,7 @@ JSON-RPC response, error, or `None` for notifications
 
 ### Supported MCP methods
 
-The server handles the following  protocol methods:
+The server handles the following protocol methods:
 
 Method
 

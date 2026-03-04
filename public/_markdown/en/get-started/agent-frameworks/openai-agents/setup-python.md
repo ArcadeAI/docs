@@ -2,45 +2,45 @@
 title: "Setup Arcade with OpenAI Agents SDK"
 description: "Learn how to use Arcade tools in OpenAI Agents applications"
 ---
+
 [Agent Frameworks](/en/get-started/agent-frameworks.md)
 [OpenAI Agents](/en/get-started/agent-frameworks/openai-agents/overview.md)
 Setup (Python)
 
 # Setup Arcade with OpenAI Agents SDK
 
-Learn how to integrate Arcade tools using OpenAI  primitives.
+Learn how to integrate Arcade tools using OpenAI primitives.
 
 The [OpenAI Agents SDK](https://openai.github.io/openai-agents-python/)  is a popular Python library for building AI . It builds on top of the OpenAI API, and provides an interface for building agents.
 
 ## Outcomes
 
-You will implement a CLI agent that can use Arcade tools to help the user with their requests. The  handles  that require authorization automatically, so  don’t need to worry about it.
+You will implement a CLI agent that can use Arcade tools to help the user with their requests. The handles that require authorization automatically, so don’t need to worry about it.
 
 ### You will Learn
 
--   How to retrieve Arcade tools and transform them into OpenAI
--   How to build an OpenAI Agents
--   How to integrate Arcade tools into the OpenAI  flow
--   How to implement “just in time” (JIT)  authorization using Arcade’s client
+- How to retrieve Arcade tools and transform them into OpenAI
+- How to build an OpenAI Agents
+- How to integrate Arcade tools into the OpenAI flow
+- How to implement “just in time” (JIT) authorization using Arcade’s client
 
 ### Prerequisites
 
--   [Arcade account](https://app.arcade.dev/register)
+- [Arcade account](https://app.arcade.dev/register)
 
--   [Obtain an Arcade API key](/get-started/setup/api-keys.md)
+- [Obtain an Arcade API key](/get-started/setup/api-keys.md)
 
--   The [`uv` package manager](https://docs.astral.sh/uv/)
-
+- The [`uv` package manager](https://docs.astral.sh/uv/)
 
 ## The agent architecture you will build in this guide
 
-The OpenAI  SDK provides an [Agent](https://openai.github.io/openai-agents-python/ref/agent/#agents.agent.Agent)  class that implements a . It provides an interface for you to define the system prompt, the model, the , and possible sub-agents for handoffs. In this guide, you will manually keep track of the agent’s history and state, and use the `run` method to invoke the agent in an agentic loop.
+The OpenAI SDK provides an [Agent](https://openai.github.io/openai-agents-python/ref/agent/#agents.agent.Agent)  class that implements a . It provides an interface for you to define the system prompt, the model, the , and possible sub-agents for handoffs. In this guide, you will manually keep track of the agent’s history and state, and use the `run` method to invoke the agent in an agentic loop.
 
 ## Integrate Arcade tools into an OpenAI Agents agent
 
 ### Create a new project
 
-Create a new directory for your  and initialize a new virtual environment:
+Create a new directory for your and initialize a new virtual environment:
 
 ```bash
 mkdir openai-agents-arcade-example
@@ -101,27 +101,27 @@ import json
 
 This includes many imports, here’s a breakdown:
 
--   Arcade imports:
-    -   `AsyncArcade`: The , used to interact with the .
-    -   `ExecuteToolResponse`: The response type for the execute  response.
--   OpenAI  imports:
-    -   `Agent`: The OpenAI Agents , used to define an agent.
-    -   `Runner`: The OpenAI Agents runner, which runs the  in an agentic loop.
-    -   `TResponseInputItem`: The response input item type, determines the type of message in the conversation history.
-    -   `RunContextWrapper`: Wraps the run , providing information such as the user ID, the tool name, tool arguments, and other contextual information different parts of the  may need.
-    -   `FunctionTool`: OpenAI   definition format.
-    -   `AgentsException`: The OpenAI  exception, used to handle errors in the agentic loop.
--   Other imports:
-    -   `load_dotenv`: Loads the environment variables from the `.env` file.
-    -   `functools.partial`: Partially applies a function to a given set of arguments.
-    -   `typing.Any`: A type hint for the any type.
-    -   `os`: The operating system module, used to interact with the operating system.
-    -   `asyncio`: The asynchronous I/O module, used to interact with the asynchronous I/O.
-    -   `json`: The JSON module, used to interact with JSON data.
+- Arcade imports:
+  - `AsyncArcade`: The , used to interact with the .
+  - `ExecuteToolResponse`: The response type for the execute response.
+- OpenAI imports:
+  - `Agent`: The OpenAI Agents , used to define an agent.
+  - `Runner`: The OpenAI Agents runner, which runs the in an agentic loop.
+  - `TResponseInputItem`: The response input item type, determines the type of message in the conversation history.
+  - `RunContextWrapper`: Wraps the run , providing information such as the user ID, the tool name, tool arguments, and other contextual information different parts of the may need.
+  - `FunctionTool`: OpenAI definition format.
+  - `AgentsException`: The OpenAI exception, used to handle errors in the agentic loop.
+- Other imports:
+  - `load_dotenv`: Loads the environment variables from the `.env` file.
+  - `functools.partial`: Partially applies a function to a given set of arguments.
+  - `typing.Any`: A type hint for the any type.
+  - `os`: The operating system module, used to interact with the operating system.
+  - `asyncio`: The asynchronous I/O module, used to interact with the asynchronous I/O.
+  - `json`: The JSON module, used to interact with JSON data.
 
 ### Configure the agent
 
-These variables customize the  and manage the  in the rest of the code. Feel free to configure them to your liking.
+These variables customize the and manage the in the rest of the code. Feel free to configure them to your liking.
 
 ```python
 # main.py
@@ -146,7 +146,7 @@ MODEL = "gpt-4o-mini"
 
 Here, you define `ToolError` to handle errors from the Arcade . It wraps the `AgentsException` and provides an informative error message that the agentic loop can handle in case anything goes wrong.
 
-You also define `convert_output_to_json` to convert the output of the Arcade tools to a JSON string. This is useful because the output of the Arcade tools is not always a JSON object, and the OpenAI  SDK expects a JSON string.
+You also define `convert_output_to_json` to convert the output of the Arcade tools to a JSON string. This is useful because the output of the Arcade tools is not always a JSON object, and the OpenAI SDK expects a JSON string.
 
 ```python
 # main.py
@@ -176,9 +176,9 @@ def convert_output_to_json(output: Any) -> str:
 
 ### Write a helper function to authorize Arcade tools
 
-This helper function implements “just in time” (JIT) tool authorization using Arcade’s client. When the  tries to execute a  that requires authorization, the `result` object’s `status` will be `"pending"`, and you can use the `authorize` method to get an authorization URL. You then wait for the  to complete the authorization and retry the tool call. If the user has already authorized the tool, the `status` will be `"completed"`, and the OAuth dance skips silently, which improves the user experience.
+This helper function implements “just in time” (JIT) tool authorization using Arcade’s client. When the tries to execute a that requires authorization, the `result` object’s `status` will be `"pending"`, and you can use the `authorize` method to get an authorization URL. You then wait for the to complete the authorization and retry the tool call. If the user has already authorized the tool, the `status` will be `"completed"`, and the OAuth dance skips silently, which improves the user experience.
 
-This function captures the authorization flow outside of the agent’s context, which is a good practice for security and context engineering. By handling everything in the , you remove the risk of the LLM replacing the authorization URL or leaking it, and you keep the  free from any authorization-related traces, which reduces the risk of hallucinations.
+This function captures the authorization flow outside of the agent’s context, which is a good practice for security and context engineering. By handling everything in the , you remove the risk of the LLM replacing the authorization URL or leaking it, and you keep the free from any authorization-related traces, which reduces the risk of hallucinations.
 
 ```python
 # main.py
@@ -199,7 +199,7 @@ async def authorize_tool(client: AsyncArcade, context: RunContextWrapper, tool_n
 
 ### Write a helper function to execute Arcade tools
 
-This helper function shows how the OpenAI  framework invokes the Arcade tools. It handles the authorization flow, and then calls the  using the `execute` method. It handles the conversion of the arguments from JSON to a dictionary (expected by Arcade) and the conversion of the output from the Arcade tool to a JSON string (expected by the OpenAI Agents framework). Here is where you call the helper functions defined earlier to authorize the tool and convert the output to a JSON string.
+This helper function shows how the OpenAI framework invokes the Arcade tools. It handles the authorization flow, and then calls the using the `execute` method. It handles the conversion of the arguments from JSON to a dictionary (expected by Arcade) and the conversion of the output from the Arcade tool to a JSON string (expected by the OpenAI Agents framework). Here is where you call the helper functions defined earlier to authorize the tool and convert the output to a JSON string.
 
 ```python
 # main.py
@@ -228,14 +228,14 @@ async def invoke_arcade_tool(
 
 ### Retrieve Arcade tools and transform them into LangChain tools
 
-Here you get the Arcade tools you want the agent to use, and transform them into OpenAI Agents tools. The first step is to initialize the , and get the tools you want. Since OpenAI is itself an inference provider, the  provides a convenient endpoint to get the tools in the OpenAI format, which is also the format expected by the OpenAI  framework.
+Here you get the Arcade tools you want the agent to use, and transform them into OpenAI Agents tools. The first step is to initialize the , and get the tools you want. Since OpenAI is itself an inference provider, the provides a convenient endpoint to get the tools in the OpenAI format, which is also the format expected by the OpenAI framework.
 
 This helper function is long, here’s a breakdown of what it does for clarity:
 
--   retrieve tools from all configured  servers (defined in the `MCP_SERVERS` variable)
--   retrieve individual  (defined in the `TOOLS` variable)
--   get the Arcade  to OpenAI-formatted tools
--   create a list of FunctionTool objects, mapping each tool to a partial function that invokes the tool via the .
+- retrieve tools from all configured servers (defined in the `MCP_SERVERS` variable)
+- retrieve individual (defined in the `TOOLS` variable)
+- get the Arcade to OpenAI-formatted tools
+- create a list of FunctionTool objects, mapping each tool to a partial function that invokes the tool via the .
 
 ```python
 # main.py
@@ -305,14 +305,14 @@ async def get_arcade_tools(
 
 The main function is where you:
 
--   Get the tools from the configured  servers
--   Create an  with the configured
--   Initialize the conversation
--   Run the loop
+- Get the tools from the configured servers
+- Create an with the configured
+- Initialize the conversation
+- Run the loop
 
 The loop is a while loop that captures the user input, appends it to the conversation history, and then runs the . The agent’s response is then appended to the conversation history, and the loop continues.
 
-When a  interrupts the loop, the interruption handles via the helper function you wrote earlier.
+When a interrupts the loop, the interruption handles via the helper function you wrote earlier.
 
 ```python
 # main.py
@@ -361,20 +361,20 @@ if __name__ == "__main__":
 uv run main.py
 ```
 
-You should see the  responding to your prompts like any model, as well as handling any  calls and authorization requests. Here are some example prompts you can try:
+You should see the responding to your prompts like any model, as well as handling any calls and authorization requests. Here are some example prompts you can try:
 
--   “Send me an email with a random haiku about OpenAI ”
--   “Summarize my latest 3 emails”
+- “Send me an email with a random haiku about OpenAI ”
+- “Summarize my latest 3 emails”
 
 ## Key takeaways
 
--   You can integrate Arcade tools into any agentic framework like OpenAI , all you need is to transform the Arcade  into OpenAI Agents tools and handle the authorization flow.
--    isolation: By handling the authorization flow outside of the ’s context, you remove the risk of the LLM replacing the authorization URL or leaking it, and you keep the context free from any authorization-related traces, which reduces the risk of hallucinations.
+- You can integrate Arcade tools into any agentic framework like OpenAI , all you need is to transform the Arcade into OpenAI Agents tools and handle the authorization flow.
+- isolation: By handling the authorization flow outside of the ’s context, you remove the risk of the LLM replacing the authorization URL or leaking it, and you keep the context free from any authorization-related traces, which reduces the risk of hallucinations.
 
 ## Next steps
 
-1.  Try adding additional tools to the  or modifying the  in the catalog for a different use case by modifying the `MCP_SERVERS` and `TOOLS` variables.
-2.  Try implementing a fully deterministic flow before the agentic loop, you can use this deterministic phase to prepare the  for the , adding things like the current date, time, or any other information that is relevant to the task at hand.
+1.  Try adding additional tools to the or modifying the in the catalog for a different use case by modifying the `MCP_SERVERS` and `TOOLS` variables.
+2.  Try implementing a fully deterministic flow before the agentic loop, you can use this deterministic phase to prepare the for the , adding things like the current date, time, or any other information that is relevant to the task at hand.
 
 ## Example code
 

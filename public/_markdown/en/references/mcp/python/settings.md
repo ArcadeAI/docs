@@ -2,12 +2,13 @@
 title: "Settings"
 description: "Configuration and environment-driven settings for the Arcade MCP Server"
 ---
+
 Arcade MCP[Python](/en/references/mcp/python.md)
 Settings
 
 # Settings
 
-`MCPSettings` is the main configuration container for the Arcade  Server. All settings classes use [Pydantic Settings](https://docs.pydantic.dev/latest/concepts/pydantic_settings/)  with environment variable support.
+`MCPSettings` is the main configuration container for the Arcade Server. All settings classes use [Pydantic Settings](https://docs.pydantic.dev/latest/concepts/pydantic_settings/)  with environment variable support.
 
 ## `MCPSettings`
 
@@ -107,7 +108,7 @@ Create settings from environment variables. Automatically loads a `.env` file fr
 settings.tool_secrets()
 ```
 
-Returns a `dict[str, Any]` of  secrets collected from the environment.
+Returns a `dict[str, Any]` of secrets collected from the environment.
 
 #### `to_dict`
 
@@ -141,7 +142,7 @@ settings = MCPSettings(
 )
 ```
 
-* * *
+---
 
 ## Sub-settings
 
@@ -439,7 +440,7 @@ JSON array of authorization server configurations. Each entry must have `authori
 
 **Bases:** `BaseSettings`
 
-Collects environment variables as  secrets. Every environment variable that is **not** prefixed with `MCP_` or `_` is added to the tool environment and made available as a tool secret in the `ToolContext`.
+Collects environment variables as secrets. Every environment variable that is **not** prefixed with `MCP_` or `_` is added to the tool environment and made available as a tool secret in the `ToolContext`.
 
 Also loads variables from a `.env` file in the current working directory.
 
@@ -459,7 +460,7 @@ Collected tool secrets from environment
 
 `{}` (auto-populated)
 
-* * *
+---
 
 ## Environment variable reference
 

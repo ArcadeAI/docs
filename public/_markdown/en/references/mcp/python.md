@@ -2,11 +2,12 @@
 title: "Arcade MCP Server - Python overview"
 description: "Overview of the arcade-mcp-server Python package and the MCPApp class"
 ---
+
 Arcade MCPOverview
 
 # Arcade MCP Server - Python overview
 
-`arcade-mcp-server` is Arcade’s framework for building  servers. It provides a clean, minimal API to build  programmatically. The main entry point is `MCPApp`, which handles  collection, server configuration, and transport setup.
+`arcade-mcp-server` is Arcade’s framework for building servers. It provides a clean, minimal API to build programmatically. The main entry point is `MCPApp`, which handles collection, server configuration, and transport setup.
 
 ## Quick start
 
@@ -30,7 +31,7 @@ if __name__ == "__main__":
 
 **`arcade_mcp_server.mcp_app.MCPApp`**
 
-A FastAPI-like interface for building  servers. The app collects  and configuration, then lazily creates the server and transport when `run()` is called.
+A FastAPI-like interface for building servers. The app collects and configuration, then lazily creates the server and transport when `run()` is called.
 
 ### `__init__`
 
@@ -50,7 +51,7 @@ MCPApp(
 )
 ```
 
-Initialize the  app.
+Initialize the app.
 
 **Parameters:**
 
@@ -154,9 +155,9 @@ Additional server configuration passed to the underlying `MCPServer`
 
 #### `tools`
 
-Runtime and build-time  API. Returns a `_ToolsAPI` object with async methods: `add()`, `update()`, `remove()`, `list()`.
+Runtime and build-time API. Returns a `_ToolsAPI` object with async methods: `add()`, `update()`, `remove()`, `list()`.
 
-The runtime  API (`app.tools.add()`, etc.) requires a server to be bound via `app.server`. It is only available after the server has started. Use the `@app.tool` decorator or `app.add_tool()` for build-time tool registration.
+The runtime API (`app.tools.add()`, etc.) requires a server to be bound via `app.server`. It is only available after the server has started. Use the `@app.tool` decorator or `app.add_tool()` for build-time tool registration.
 
 #### `prompts`
 
@@ -271,7 +272,7 @@ app.add_tool(
 )
 ```
 
-Add a  for build-time materialization (before the server starts). Accepts the same parameters as the `@app.tool` decorator.
+Add a for build-time materialization (before the server starts). Accepts the same parameters as the `@app.tool` decorator.
 
 #### `add_tools_from_module`
 
@@ -318,7 +319,7 @@ app.run(
 )
 ```
 
-Start the  server. This method blocks until the server shuts down. It exits with an error if no  have been registered.
+Start the server. This method blocks until the server shuts down. It exits with an error if no have been registered.
 
 **Parameters:**
 
@@ -374,15 +375,15 @@ The `run()` method checks for environment variable overrides before starting. Se
 
 ## Transport modes
 
- servers communicate with clients through different transport mechanisms. Select a transport by passing the `transport` argument to `run()`.
+servers communicate with clients through different transport mechanisms. Select a transport by passing the `transport` argument to `run()`.
 
 ### stdio
 
 The stdio transport communicates over standard input/output streams. It is the default transport, used by Claude Desktop and similar clients.
 
--   Logs go to stderr to avoid interfering with JSON-RPC messages on stdout
--   Single-session only
--   No network exposure
+- Logs go to stderr to avoid interfering with JSON-RPC messages on stdout
+- Single-session only
+- No network exposure
 
 ```python
 app.run(transport="stdio")
@@ -390,11 +391,11 @@ app.run(transport="stdio")
 
 ### HTTP (Streamable HTTP)
 
-The HTTP transport runs a FastAPI/Uvicorn server with  Streamable HTTP and Server-Sent Events (SSE) support. The server mounts it at the `/mcp` endpoint.
+The HTTP transport runs a FastAPI/Uvicorn server with Streamable HTTP and Server-Sent Events (SSE) support. The server mounts it at the `/mcp` endpoint.
 
--   Supports multiple concurrent sessions
--   JSON-RPC over HTTP POST, SSE streaming over HTTP GET
--   Optional front-door authentication via the `auth` parameter
+- Supports multiple concurrent sessions
+- JSON-RPC over HTTP POST, SSE streaming over HTTP GET
+- Optional front-door authentication via the `auth` parameter
 
 ```python
 app.run(transport="http", host="0.0.0.0", port=8000)
