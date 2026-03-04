@@ -16,6 +16,9 @@ export const meta: MetaRecord = {
   faq: {
     title: "FAQ",
   },
+  "security-research-program": {
+    title: "Security research program",
+  },
   "contact-us": {
     title: "Contact",
   },

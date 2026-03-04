@@ -2,8 +2,19 @@ name: Generate LLMs.txt
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "app/en/**/*.mdx"
+      - "app/en/**/_meta.tsx"
+      - "scripts/generate-llmstxt.ts"
   pull_request:
     types: [opened, synchronize, reopened]
+    paths:
+      - "app/en/**/*.mdx"
+      - "app/en/**/_meta.tsx"
+      - "scripts/generate-llmstxt.ts"
 
 permissions:
   contents: write
@@ -73,6 +84,12 @@ jobs:
             evantahler
             torresmateo
 
+      - name: Request team review
+        if: steps.check-changes.outputs.has_changes == 'true' && steps.cpr.outputs.pull-request-number != ''
+        continue-on-error: true
+        run: gh pr edit ${{ steps.cpr.outputs.pull-request-number }} --add-reviewer ArcadeAI/engineering-tools-and-dx
+        env:
+          GH_TOKEN: ${{ secrets.DOCS_PUBLISHABLE_GH_TOKEN }}
       - name: Enable Pull Request Automerge
         if: steps.check-changes.outputs.has_changes == 'true' && github.event_name != 'pull_request'
         run: gh pr merge --squash --auto ${{ steps.cpr.outputs.pull-request-number }}
