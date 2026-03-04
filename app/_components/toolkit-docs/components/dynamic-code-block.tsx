@@ -351,26 +351,33 @@ export function DynamicCodeBlock({
   return (
     <div className="my-4">
       {isExpanded ? (
-        <div className="mt-3 space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-md bg-muted/20 p-3">
-            <LanguageTabs
-              currentLanguage={selectedLanguage}
-              languages={availableLanguages}
-              onSelect={setSelectedLanguage}
-            />
+        <div className="mt-3 overflow-hidden rounded-lg bg-neutral-dark/10">
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-neutral-dark/20 px-4 py-2.5">
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-medium text-foreground">
+                Example
+              </span>
+              <div className="h-4 w-px bg-neutral-dark-high/30" />
+              <LanguageTabs
+                currentLanguage={selectedLanguage}
+                languages={availableLanguages}
+                onSelect={setSelectedLanguage}
+              />
+            </div>
             <Button
-              className="text-muted-foreground hover:text-foreground"
+              aria-label="Hide example"
+              className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
               onClick={() => setIsExpanded(false)}
-              size="sm"
+              size="icon"
               variant="ghost"
             >
-              Close
+              <ChevronDown className="h-4 w-4 rotate-180 transition-transform" />
             </Button>
           </div>
 
-          <div className="relative rounded-md border border-muted/80">
-            <div className="flex items-center justify-between border-muted border-b bg-muted/5 px-3 py-2">
-              <span className="font-mono text-muted-foreground text-xs">
+          <div className="relative">
+            <div className="flex items-center justify-between border-b border-muted bg-muted/5 px-3 py-2">
+              <span className="font-mono text-xs text-muted-foreground">
                 {selectedLanguage.toLowerCase()}
               </span>
               <CopyButton
@@ -398,13 +405,18 @@ export function DynamicCodeBlock({
         </div>
       ) : (
         <Button
-          className="mt-2"
+          aria-expanded={false}
+          className="group mt-2 h-auto w-full justify-between rounded-lg bg-neutral-dark/10 px-4 py-3 text-left text-sm font-medium text-foreground hover:bg-neutral-dark/20"
           onClick={() => setIsExpanded(true)}
-          size="sm"
-          variant="outline"
+          variant="ghost"
         >
-          See example
-          <ChevronDown className="ml-1 h-3 w-3" />
+          <span className="flex flex-col items-start">
+            <span>See example</span>
+            <span className="text-muted-foreground/80 text-xs font-normal">
+              Expand Python and TypeScript snippets
+            </span>
+          </span>
+          <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-hover:text-foreground" />
         </Button>
       )}
     </div>
