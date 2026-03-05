@@ -64,6 +64,7 @@ import {
 } from "../utils/run-logs.js";
 import { cleanupExcludedToolkitOutput } from "./exclusion-cleanup.js";
 import {
+  collectRemovedToolkitIds,
   computeProcessingStats,
   filterProvidersBySkipIds,
 } from "./generate-flow.js";
@@ -1220,17 +1221,15 @@ program
           // Auto-delete toolkit JSON files for toolkits that no longer exist in the API.
           // Adding their IDs to excludedToolkitIds means cleanupExcludedToolkitOutput()
           // (called below) will delete the stale <id>.json and rebuild index.json.
-          const removedToolkitIds = detectedChanges.toolkitChanges
-            .filter((change) => change.changeType === "removed")
-            .map((change) => change.toolkitId.toLowerCase());
-          if (removedToolkitIds.length > 0) {
+          const removedToolkitIds = collectRemovedToolkitIds(detectedChanges);
+          if (removedToolkitIds.size > 0) {
             for (const id of removedToolkitIds) {
               excludedToolkitIds.add(id);
             }
             if (options.verbose) {
               console.log(
                 chalk.dim(
-                  `  Marking ${removedToolkitIds.length} removed toolkit(s) for cleanup: ${removedToolkitIds.join(", ")}`
+                  `  Marking ${removedToolkitIds.size} removed toolkit(s) for cleanup: ${[...removedToolkitIds].join(", ")}`
                 )
               );
             }

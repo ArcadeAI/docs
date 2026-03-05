@@ -1,20 +1,21 @@
 /**
  * Scenario Test: Removed toolkit JSON files are deleted during --skip-unchanged
  *
- * These tests verify the pipeline added in src/cli/index.ts:
- *   detectChanges() → extract removed IDs → add to excludedToolkitIds →
+ * Verifies the pipeline added in src/cli/index.ts:
+ *   detectChanges() → collectRemovedToolkitIds() → add to excludedToolkitIds →
  *   cleanupExcludedToolkitOutput() → files deleted + index.json rebuilt
  *
- * No mocks: uses real filesystem (temp dirs), real detectChanges(), real
- * JsonGenerator, and real removeExcludedToolkitFiles(). The only external
- * dependency is the Arcade/Engine API, which is replaced by in-memory data.
+ * No mocks: real filesystem (temp dirs), real detectChanges(),
+ * real collectRemovedToolkitIds(), real JsonGenerator throughout.
+ * The Engine API is replaced by in-memory tool data.
  */
 
-import { readdir, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readdir, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { cleanupExcludedToolkitOutput } from "../../src/cli/exclusion-cleanup.js";
+import { collectRemovedToolkitIds } from "../../src/cli/generate-flow.js";
 import { detectChanges } from "../../src/diff/index.js";
 import { createJsonGenerator } from "../../src/generator/index.js";
 import type { MergedToolkit, ToolDefinition } from "../../src/types/index.js";
@@ -68,7 +69,7 @@ const makeToolkit = (id: string): MergedToolkit => ({
   generatedAt: new Date().toISOString(),
 });
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// ── Setup helpers ─────────────────────────────────────────────────────────────
 
 let tmpDir: string | undefined;
 
@@ -81,42 +82,18 @@ afterEach(async () => {
 
 /**
  * Creates a temp output directory pre-populated with real MergedToolkit JSON
- * files (written via the real JsonGenerator so format is guaranteed valid).
- * Returns the dir path and a ready-to-use generator bound to it.
+ * files written by the real JsonGenerator (guarantees valid schema on disk).
  */
 const setupOutputDir = async (toolkitIds: string[]) => {
-  const { mkdtemp } = await import("node:fs/promises");
   tmpDir = await mkdtemp(join(tmpdir(), "removed-cleanup-test-"));
-
   const generator = createJsonGenerator({
     outputDir: tmpDir,
     prettyPrint: true,
     generateIndex: true,
     indexSource: "output",
   });
-
-  for (const id of toolkitIds) {
-    await generator.generateToolkitFile(makeToolkit(id));
-  }
-
-  // Write an initial index.json that includes all toolkits.
-  const initialToolkits = toolkitIds.map(makeToolkit);
-  await generator.generateAll(initialToolkits);
-
+  await generator.generateAll(toolkitIds.map(makeToolkit));
   return { dir: tmpDir, generator };
-};
-
-/**
- * Replicates the exact extraction logic from src/cli/index.ts so tests
- * stay aligned with the real code path.
- */
-const extractRemovedIds = (
-  result: ReturnType<typeof detectChanges>
-): Set<string> => {
-  const ids = result.toolkitChanges
-    .filter((change) => change.changeType === "removed")
-    .map((change) => change.toolkitId.toLowerCase());
-  return new Set(ids);
 };
 
 // ── Tests ─────────────────────────────────────────────────────────────────────
@@ -125,7 +102,6 @@ describe("Scenario: Removed toolkit files are deleted after change detection", (
   it("deletes the JSON file for a toolkit that disappeared from the API", async () => {
     const { dir, generator } = await setupOutputDir(["Github", "OldKit"]);
 
-    // OldKit is gone from API; Github remains.
     const currentTools = new Map([["Github", [makeTool("Github")]]]);
     const previousToolkits = new Map([
       ["Github", makeToolkit("Github")],
@@ -133,15 +109,16 @@ describe("Scenario: Removed toolkit files are deleted after change detection", (
     ]);
 
     const diff = detectChanges(currentTools, previousToolkits);
-    const removedIds = extractRemovedIds(diff);
+    const removedIds = collectRemovedToolkitIds(diff);
 
-    await cleanupExcludedToolkitOutput({
+    const result = await cleanupExcludedToolkitOutput({
       outputDir: dir,
       excludedToolkitIds: removedIds,
       generator,
       verbose: false,
     });
 
+    expect(result.deleted).toEqual(["oldkit.json"]);
     const remaining = await readdir(dir);
     expect(remaining).not.toContain("oldkit.json");
     expect(remaining).toContain("github.json");
@@ -154,7 +131,6 @@ describe("Scenario: Removed toolkit files are deleted after change detection", (
       "ComplexTools",
     ]);
 
-    // Both Deepwiki and ComplexTools are gone; Github stays.
     const currentTools = new Map([["Github", [makeTool("Github")]]]);
     const previousToolkits = new Map([
       ["Github", makeToolkit("Github")],
@@ -163,23 +139,22 @@ describe("Scenario: Removed toolkit files are deleted after change detection", (
     ]);
 
     const diff = detectChanges(currentTools, previousToolkits);
-    expect(diff.summary.removedToolkits).toBe(2);
+    const removedIds = collectRemovedToolkitIds(diff);
 
-    const removedIds = extractRemovedIds(diff);
-    expect(removedIds).toContain("deepwiki");
-    expect(removedIds).toContain("complextools");
-
-    await cleanupExcludedToolkitOutput({
+    const result = await cleanupExcludedToolkitOutput({
       outputDir: dir,
       excludedToolkitIds: removedIds,
       generator,
       verbose: false,
     });
 
+    expect(result.deleted.sort()).toEqual(
+      ["complextools.json", "deepwiki.json"].sort()
+    );
     const remaining = await readdir(dir);
+    expect(remaining).toContain("github.json");
     expect(remaining).not.toContain("deepwiki.json");
     expect(remaining).not.toContain("complextools.json");
-    expect(remaining).toContain("github.json");
   });
 
   it("never deletes unchanged or modified toolkits — only removed ones", async () => {
@@ -189,7 +164,7 @@ describe("Scenario: Removed toolkit files are deleted after change detection", (
       "GoneKit",
     ]);
 
-    // Github was modified (new tool added). Slack is unchanged. GoneKit is removed.
+    // Github modified (new tool), Slack unchanged, GoneKit removed from API.
     const currentTools = new Map([
       ["Github", [makeTool("Github"), makeTool("Github", "NewTool")]],
       ["Slack", [makeTool("Slack")]],
@@ -205,24 +180,24 @@ describe("Scenario: Removed toolkit files are deleted after change detection", (
     expect(diff.summary.unchangedToolkits).toBe(1);
     expect(diff.summary.removedToolkits).toBe(1);
 
-    const removedIds = extractRemovedIds(diff);
-    expect(removedIds.size).toBe(1);
-    expect(removedIds).toContain("gonekit");
+    const removedIds = collectRemovedToolkitIds(diff);
+    expect(removedIds).toEqual(new Set(["gonekit"]));
 
-    await cleanupExcludedToolkitOutput({
+    const result = await cleanupExcludedToolkitOutput({
       outputDir: dir,
       excludedToolkitIds: removedIds,
       generator,
       verbose: false,
     });
 
+    expect(result.deleted).toEqual(["gonekit.json"]);
     const remaining = await readdir(dir);
     expect(remaining).toContain("github.json");
     expect(remaining).toContain("slack.json");
     expect(remaining).not.toContain("gonekit.json");
   });
 
-  it("rebuilds index.json without the removed toolkit after cleanup", async () => {
+  it("rebuilds index.json that no longer lists the removed toolkit", async () => {
     const { dir, generator } = await setupOutputDir(["Github", "OldKit"]);
 
     const currentTools = new Map([["Github", [makeTool("Github")]]]);
@@ -232,27 +207,25 @@ describe("Scenario: Removed toolkit files are deleted after change detection", (
     ]);
 
     const diff = detectChanges(currentTools, previousToolkits);
-    const removedIds = extractRemovedIds(diff);
-
     await cleanupExcludedToolkitOutput({
       outputDir: dir,
-      excludedToolkitIds: removedIds,
+      excludedToolkitIds: collectRemovedToolkitIds(diff),
       generator,
       verbose: false,
     });
 
-    const indexRaw = await readFile(join(dir, "index.json"), "utf-8");
-    const index = JSON.parse(indexRaw) as {
+    const index = JSON.parse(
+      await readFile(join(dir, "index.json"), "utf-8")
+    ) as {
       toolkits: Array<{ id: string }>;
     };
-
     const ids = index.toolkits.map((t) => t.id.toLowerCase());
     expect(ids).toContain("github");
     expect(ids).not.toContain("oldkit");
   });
 
-  it("produces no removals when nothing disappeared from the API", async () => {
-    const { dir } = await setupOutputDir(["Github", "Slack"]);
+  it("is a no-op when nothing was removed from the API", async () => {
+    const { dir, generator } = await setupOutputDir(["Github", "Slack"]);
 
     const currentTools = new Map([
       ["Github", [makeTool("Github")]],
@@ -264,17 +237,88 @@ describe("Scenario: Removed toolkit files are deleted after change detection", (
     ]);
 
     const diff = detectChanges(currentTools, previousToolkits);
-    const removedIds = extractRemovedIds(diff);
-
+    const removedIds = collectRemovedToolkitIds(diff);
     expect(removedIds.size).toBe(0);
 
-    const remainingBefore = await readdir(dir);
-    // No cleanup needed when there are no removals — both files stay.
-    expect(remainingBefore).toContain("github.json");
-    expect(remainingBefore).toContain("slack.json");
+    const result = await cleanupExcludedToolkitOutput({
+      outputDir: dir,
+      excludedToolkitIds: removedIds,
+      generator,
+      verbose: false,
+    });
+
+    expect(result.deleted).toHaveLength(0);
+    const remaining = await readdir(dir);
+    expect(remaining).toContain("github.json");
+    expect(remaining).toContain("slack.json");
   });
 
-  it("handles toolkit already in the excluded set without double-deleting", async () => {
+  it("handles mixed-case toolkit IDs: diff returns CamelCase, file on disk is lowercase", async () => {
+    // Toolkit ID from the diff is "GoogleCalendar" (as the API returns it),
+    // but the file on disk is "googlecalendar.json" (generator lowercases IDs).
+    const { dir, generator } = await setupOutputDir([
+      "GoogleCalendar",
+      "Slack",
+    ]);
+
+    const currentTools = new Map([["Slack", [makeTool("Slack")]]]);
+    const previousToolkits = new Map([
+      ["GoogleCalendar", makeToolkit("GoogleCalendar")],
+      ["Slack", makeToolkit("Slack")],
+    ]);
+
+    const diff = detectChanges(currentTools, previousToolkits);
+    const removedIds = collectRemovedToolkitIds(diff);
+    expect(removedIds).toContain("googlecalendar");
+
+    const result = await cleanupExcludedToolkitOutput({
+      outputDir: dir,
+      excludedToolkitIds: removedIds,
+      generator,
+      verbose: false,
+    });
+
+    expect(result.deleted).toEqual(["googlecalendar.json"]);
+    const remaining = await readdir(dir);
+    expect(remaining).not.toContain("googlecalendar.json");
+    expect(remaining).toContain("slack.json");
+  });
+
+  it("treats a zero-tools API response as removed and deletes the stale file", async () => {
+    // Edge case in compareToolkit: toolkit is still in the API but returns
+    // zero tools while the previous file had tools → changeType = "removed".
+    const { dir, generator } = await setupOutputDir(["Github", "BrokenKit"]);
+
+    // BrokenKit is still in the API map but with an empty tools array.
+    const currentTools = new Map([
+      ["Github", [makeTool("Github")]],
+      ["BrokenKit", []], // zero tools
+    ]);
+    const previousToolkits = new Map([
+      ["Github", makeToolkit("Github")],
+      ["BrokenKit", makeToolkit("BrokenKit")], // had tools before
+    ]);
+
+    const diff = detectChanges(currentTools, previousToolkits);
+    const removedIds = collectRemovedToolkitIds(diff);
+    expect(removedIds).toContain("brokenkit");
+
+    const result = await cleanupExcludedToolkitOutput({
+      outputDir: dir,
+      excludedToolkitIds: removedIds,
+      generator,
+      verbose: false,
+    });
+
+    expect(result.deleted).toEqual(["brokenkit.json"]);
+    const remaining = await readdir(dir);
+    expect(remaining).not.toContain("brokenkit.json");
+    expect(remaining).toContain("github.json");
+  });
+
+  it("merging removed IDs with pre-existing exclusions deletes each file exactly once", async () => {
+    // OldKit is in excluded-toolkits.txt (static list) AND removed from the API.
+    // Set.add() is idempotent — the file must be deleted exactly once.
     const { dir, generator } = await setupOutputDir(["Github", "OldKit"]);
 
     const currentTools = new Map([["Github", [makeTool("Github")]]]);
@@ -284,26 +328,22 @@ describe("Scenario: Removed toolkit files are deleted after change detection", (
     ]);
 
     const diff = detectChanges(currentTools, previousToolkits);
-    const removedIds = extractRemovedIds(diff);
+    const removedIds = collectRemovedToolkitIds(diff);
 
-    // Simulate OldKit also being in the static excluded-toolkits.txt list.
-    // Adding it again to a Set is a no-op — the file must still be deleted once.
-    const baseExcludedIds = new Set(["oldkit"]);
+    const excludedIds = new Set(["oldkit"]); // pre-existing from --exclude-file
     for (const id of removedIds) {
-      baseExcludedIds.add(id);
+      excludedIds.add(id); // no-op — oldkit already present
     }
-    expect(baseExcludedIds.size).toBe(1);
+    expect(excludedIds.size).toBe(1);
 
     const result = await cleanupExcludedToolkitOutput({
       outputDir: dir,
-      excludedToolkitIds: baseExcludedIds,
+      excludedToolkitIds: excludedIds,
       generator,
       verbose: false,
     });
 
     expect(result.deleted).toEqual(["oldkit.json"]);
-
-    const remaining = await readdir(dir);
-    expect(remaining).not.toContain("oldkit.json");
+    expect(result.warnings).toHaveLength(0);
   });
 });

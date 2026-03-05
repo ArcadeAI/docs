@@ -14,6 +14,12 @@ export default createCategoryMeta([
     type: "arcade",
   },
   {
+    slug: "demo-remove-me",
+    title: "Demo Remove Me",
+    href: "/en/resources/integrations/development/demo-remove-me",
+    type: "arcade",
+  },
+  {
     slug: "e2b",
     title: "E2B",
     href: "/en/resources/integrations/development/e2b",
