@@ -165,7 +165,7 @@ function handleContentNegotiation(
   return NextResponse.rewrite(url);
 }
 
-export function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
   const englishLocaleRedirectPath = getEnglishLocaleRedirectPath(pathname);
