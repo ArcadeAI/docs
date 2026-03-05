@@ -12,6 +12,9 @@ import {
   TOOL_METADATA_FALLBACK_STYLE,
   TOOL_METADATA_SERVICE_DOMAIN_STYLES,
 } from "../constants";
+import { getSharedServiceDomain } from "./toolkit-page-utils";
+
+export { getSharedServiceDomain } from "./toolkit-page-utils";
 
 // Scroll detection thresholds
 const SCROLL_SHOW_BUTTONS_THRESHOLD = 300;
@@ -208,45 +211,6 @@ function inferToolkitType(toolkitId: string, type: ToolkitType): ToolkitType {
     return "arcade_starter";
   }
   return type;
-}
-
-export function getSharedServiceDomain(
-  tools: ReadonlyArray<{
-    metadata?: {
-      classification?: {
-        serviceDomains?: string[];
-      } | null;
-    } | null;
-  }>
-): string | null {
-  if (tools.length === 0) {
-    return null;
-  }
-
-  let sharedDomain: string | null = null;
-
-  for (const tool of tools) {
-    const serviceDomains = tool.metadata?.classification?.serviceDomains;
-    if (!serviceDomains || serviceDomains.length !== 1) {
-      return null;
-    }
-
-    const domain = serviceDomains[0];
-    if (!domain || typeof domain !== "string") {
-      return null;
-    }
-
-    if (sharedDomain === null) {
-      sharedDomain = domain;
-      continue;
-    }
-
-    if (sharedDomain !== domain) {
-      return null;
-    }
-  }
-
-  return sharedDomain;
 }
 
 function toTitleCaseCategory(category: ToolkitCategory): string {

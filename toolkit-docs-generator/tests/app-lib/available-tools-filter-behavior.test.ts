@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { filterTools } from "../../../app/_components/toolkit-docs/components/available-tools-table";
+import { filterTools } from "../../../app/_components/toolkit-docs/components/available-tools-filter";
 
 const makeTool = (
   name: string,

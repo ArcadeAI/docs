@@ -27,7 +27,17 @@ import type {
   BehaviorFlagKey,
   SecretType,
 } from "../types";
+import {
+  type AvailableToolsFilter,
+  filterTools,
+} from "./available-tools-filter";
 import { normalizeScopes } from "./scopes-display";
+
+export {
+  type AvailableToolsFilter,
+  type FilterToolsOptions,
+  filterTools,
+} from "./available-tools-filter";
 
 const DEFAULT_PAGE_SIZE = 25;
 const PAGE_SIZE_OPTIONS = [25, 50, 100, 200] as const;
@@ -225,13 +235,6 @@ function ScrollingCell({
 export function toToolAnchorId(value: string): string {
   return value.toLowerCase().replace(/\s+/g, "-").replace(/\./g, "");
 }
-
-export type AvailableToolsFilter =
-  | "all"
-  | "has_scopes"
-  | "no_scopes"
-  | "has_secrets"
-  | "no_secrets";
 
 export type AvailableToolsSort =
   | "name_asc"
@@ -690,88 +693,6 @@ export function sortTools(
     default:
       return sorted;
   }
-}
-
-export type FilterToolsOptions = {
-  activeOperations?: Set<string>;
-  behaviorFlags?: Partial<Record<BehaviorFlagKey, boolean>>;
-};
-
-function matchesFilterCategory(
-  tool: AvailableToolsTableProps["tools"][number],
-  filter: AvailableToolsFilter
-): boolean {
-  const hasScopes = buildScopeDisplayItems(tool.scopes ?? []).length > 0;
-  const hasSecrets =
-    (tool.secretsInfo?.length ?? 0) > 0 || (tool.secrets?.length ?? 0) > 0;
-
-  switch (filter) {
-    case "has_scopes":
-      return hasScopes;
-    case "no_scopes":
-      return !hasScopes;
-    case "has_secrets":
-      return hasSecrets;
-    case "no_secrets":
-      return !hasSecrets;
-    default:
-      return true;
-  }
-}
-
-function matchesOperations(
-  tool: AvailableToolsTableProps["tools"][number],
-  activeOperations: Set<string>
-): boolean {
-  if (activeOperations.size === 0) {
-    return true;
-  }
-  const toolOps = tool.metadata?.behavior?.operations ?? [];
-  return toolOps.some((op) => activeOperations.has(op));
-}
-
-function matchesBehaviorFlags(
-  tool: AvailableToolsTableProps["tools"][number],
-  behaviorFlags: Partial<Record<BehaviorFlagKey, boolean>>
-): boolean {
-  for (const [key, expected] of Object.entries(behaviorFlags) as [
-    BehaviorFlagKey,
-    boolean | undefined,
-  ][]) {
-    if (expected === undefined) {
-      continue;
-    }
-    if (tool.metadata?.behavior?.[key] !== expected) {
-      return false;
-    }
-  }
-  return true;
-}
-
-export function filterTools(
-  tools: AvailableToolsTableProps["tools"],
-  query: string,
-  filter: AvailableToolsFilter,
-  options: FilterToolsOptions = {}
-): AvailableToolsTableProps["tools"] {
-  const { activeOperations = new Set(), behaviorFlags = {} } = options;
-  const normalizedQuery = query.trim().toLowerCase();
-
-  return tools.filter((tool) => {
-    const haystack = [tool.name, tool.qualifiedName, tool.description ?? ""]
-      .join(" ")
-      .toLowerCase();
-    if (normalizedQuery.length > 0 && !haystack.includes(normalizedQuery)) {
-      return false;
-    }
-    if (!matchesFilterCategory(tool, filter)) {
-      return false;
-    }
-    if (!matchesOperations(tool, activeOperations)) {
-      return false;
-    }
-    return matchesBehaviorFlags(tool, behaviorFlags);
-  });
 }
 
 /**
