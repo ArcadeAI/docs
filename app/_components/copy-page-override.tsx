@@ -56,7 +56,7 @@ function getCopyButton(): HTMLButtonElement | null {
 export function CopyPageOverride() {
   const pathname = usePathname();
   const isFetchingRef = useRef(false);
-  const feedbackTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const feedbackTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const setButtonState = useCallback(
     (button: HTMLButtonElement, text: string) => {
