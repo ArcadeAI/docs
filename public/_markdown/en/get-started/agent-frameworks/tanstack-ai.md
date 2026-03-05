@@ -1074,7 +1074,7 @@ export const Route = createFileRoute("/")({
 });
 ```
 
-Last updated on January 5, 2026
+Last updated on February 27, 2026
 
 [Setup (TypeScript)](/en/get-started/agent-frameworks/openai-agents/setup-typescript.md)
 [Vercel AI SDK](/en/get-started/agent-frameworks/vercelai.md)

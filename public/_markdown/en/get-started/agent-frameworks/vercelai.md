@@ -943,7 +943,7 @@ export default function Chat() {
 }
 ```
 
-Last updated on January 5, 2026
+Last updated on February 27, 2026
 
 [TanStack AI](/en/get-started/agent-frameworks/tanstack-ai.md)
 [Overview](/en/get-started/mcp-clients.md)
