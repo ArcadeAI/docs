@@ -1,70 +1,58 @@
-import { createCategoryMeta } from "../create-category-meta";
+import type { MetaRecord } from "nextra";
 
-export default createCategoryMeta([
-  {
-    slug: "google_finance",
+const meta: MetaRecord = {
+  "-- Optimized": {
+    type: "separator",
+    title: "Optimized",
+  },
+  google_finance: {
     title: "Google Finance",
     href: "/en/resources/integrations/search/google_finance",
-    type: "arcade",
   },
-  {
-    slug: "google_flights",
+  google_flights: {
     title: "Google Flights",
     href: "/en/resources/integrations/search/google_flights",
-    type: "arcade",
   },
-  {
-    slug: "google_hotels",
+  google_hotels: {
     title: "Google Hotels",
     href: "/en/resources/integrations/search/google_hotels",
-    type: "arcade",
   },
-  {
-    slug: "google_jobs",
+  google_jobs: {
     title: "Google Jobs",
     href: "/en/resources/integrations/search/google_jobs",
-    type: "arcade",
   },
-  {
-    slug: "google_maps",
+  google_maps: {
     title: "Google Maps",
     href: "/en/resources/integrations/search/google_maps",
-    type: "arcade",
   },
-  {
-    slug: "google_news",
+  google_news: {
     title: "Google News",
     href: "/en/resources/integrations/search/google_news",
-    type: "arcade",
   },
-  {
-    slug: "google_search",
+  google_search: {
     title: "Google Search",
     href: "/en/resources/integrations/search/google_search",
-    type: "arcade",
   },
-  {
-    slug: "google_shopping",
+  google_shopping: {
     title: "Google Shopping",
     href: "/en/resources/integrations/search/google_shopping",
-    type: "arcade",
   },
-  {
-    slug: "walmart",
+  walmart: {
     title: "Walmart",
     href: "/en/resources/integrations/search/walmart",
-    type: "arcade",
   },
-  {
-    slug: "youtube",
+  youtube: {
     title: "Youtube",
     href: "/en/resources/integrations/search/youtube",
-    type: "arcade",
   },
-  {
-    slug: "exa-api",
+  "-- Starter": {
+    type: "separator",
+    title: "Starter",
+  },
+  "exa-api": {
     title: "Exa API",
     href: "/en/resources/integrations/search/exa-api",
-    type: "arcade_starter",
   },
-]);
+};
+
+export default meta;
