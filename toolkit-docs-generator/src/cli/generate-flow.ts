@@ -1,3 +1,20 @@
+import type { ChangeDetectionResult } from "../diff/index.js";
+
+/**
+ * Extract the lowercase toolkit IDs that were removed (present in previous
+ * output but absent from the current API response). The caller should add
+ * these IDs to its excludedToolkitIds set so the cleanup step deletes the
+ * stale JSON files and rebuilds index.json.
+ */
+export const collectRemovedToolkitIds = (
+  result: ChangeDetectionResult
+): Set<string> =>
+  new Set(
+    result.toolkitChanges
+      .filter((c) => c.changeType === "removed")
+      .map((c) => c.toolkitId.toLowerCase())
+  );
+
 export interface ProcessingStats {
   totalToolkits: number;
   effectiveSkipped: number;

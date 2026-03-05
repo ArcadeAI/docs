@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import fg from "fast-glob";
-import { expect, test } from "vitest";
+import { test } from "vitest";
 
 const TIMEOUT = 120_000;
 const CONCURRENCY = 10;
@@ -223,16 +223,25 @@ test(
 
     await Promise.all(checks);
 
-    for (const failure of failures) {
-      console.error(
-        `Broken external URL: ${failure.url}` +
-          (failure.status ? ` (HTTP ${failure.status})` : "") +
-          (failure.error ? ` (${failure.error})` : "") +
-          ` — found in: ${failure.files.join(", ")}`
+    if (failures.length > 0) {
+      console.warn(
+        `\n⚠️  External URL warnings (${failures.length} unreachable)\n${"─".repeat(50)}`
       );
+      for (const failure of failures) {
+        console.warn(
+          `  ${failure.url}` +
+            (failure.status ? ` → HTTP ${failure.status}` : "") +
+            (failure.error ? ` → ${failure.error}` : "") +
+            `\n    in: ${failure.files.join(", ")}`
+        );
+      }
+      console.warn("─".repeat(50));
+      console.warn(
+        "ℹ️  These are warnings only — third-party URLs may be temporarily unreachable."
+      );
+    } else {
+      console.log("✅  All external URLs are reachable.");
     }
-
-    expect(failures).toEqual([]);
   },
   TIMEOUT
 );

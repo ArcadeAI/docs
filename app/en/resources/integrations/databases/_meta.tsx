@@ -1,34 +1,34 @@
-import type { MetaRecord } from "nextra";
+import { createCategoryMeta } from "../create-category-meta";
 
-const meta: MetaRecord = {
-  "-- Optimized": {
-    type: "separator",
-    title: "Optimized",
-  },
-  clickhouse: {
+export default createCategoryMeta([
+  {
+    slug: "clickhouse",
     title: "Clickhouse",
     href: "/en/resources/integrations/databases/clickhouse",
+    type: "community",
   },
-  mongodb: {
+  {
+    slug: "mongodb",
     title: "MongoDB",
     href: "/en/resources/integrations/databases/mongodb",
+    type: "community",
   },
-  postgres: {
+  {
+    slug: "postgres",
     title: "Postgres",
     href: "/en/resources/integrations/databases/postgres",
+    type: "community",
   },
-  "-- Starter": {
-    type: "separator",
-    title: "Starter",
-  },
-  "weaviate-api": {
+  {
+    slug: "weaviate-api",
     title: "Weaviate API",
     href: "/en/resources/integrations/databases/weaviate-api",
+    type: "arcade_starter",
   },
-  yugabytedb: {
+  {
+    slug: "yugabytedb",
     title: "YugabyteDB",
     href: "/en/resources/integrations/databases/yugabytedb",
+    type: "arcade_starter",
   },
-};
-
-export default meta;
+]);

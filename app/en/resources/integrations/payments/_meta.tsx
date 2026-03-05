@@ -1,26 +1,22 @@
-import type { MetaRecord } from "nextra";
+import { createCategoryMeta } from "../create-category-meta";
 
-const meta: MetaRecord = {
-  "-- Optimized": {
-    type: "separator",
-    title: "Optimized",
-  },
-  stripe: {
+export default createCategoryMeta([
+  {
+    slug: "stripe",
     title: "Stripe",
     href: "/en/resources/integrations/payments/stripe",
+    type: "arcade",
   },
-  "-- Starter": {
-    type: "separator",
-    title: "Starter",
-  },
-  stripe_api: {
+  {
+    slug: "stripe_api",
     title: "Stripe API",
     href: "/en/resources/integrations/payments/stripe_api",
+    type: "arcade_starter",
   },
-  "zoho-books-api": {
+  {
+    slug: "zoho-books-api",
     title: "Zoho Books API",
     href: "/en/resources/integrations/payments/zoho-books-api",
+    type: "arcade_starter",
   },
-};
-
-export default meta;
+]);
