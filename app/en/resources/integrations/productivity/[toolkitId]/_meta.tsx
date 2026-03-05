@@ -1,12 +1,9 @@
 import type { MetaRecord } from "nextra";
+import { toolkitPageTheme } from "../../toolkit-page-theme";
 
 const meta: MetaRecord = {
   "*": {
-    theme: {
-      breadcrumb: false,
-      toc: false,
-      copyPage: false,
-    },
+    theme: toolkitPageTheme,
   },
 };
 
