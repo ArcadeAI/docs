@@ -1217,6 +1217,25 @@ program
             );
           }
 
+          // Auto-delete toolkit JSON files for toolkits that no longer exist in the API.
+          // Adding their IDs to excludedToolkitIds means cleanupExcludedToolkitOutput()
+          // (called below) will delete the stale <id>.json and rebuild index.json.
+          const removedToolkitIds = detectedChanges.toolkitChanges
+            .filter((change) => change.changeType === "removed")
+            .map((change) => change.toolkitId.toLowerCase());
+          if (removedToolkitIds.length > 0) {
+            for (const id of removedToolkitIds) {
+              excludedToolkitIds.add(id);
+            }
+            if (options.verbose) {
+              console.log(
+                chalk.dim(
+                  `  Marking ${removedToolkitIds.length} removed toolkit(s) for cleanup: ${removedToolkitIds.join(", ")}`
+                )
+              );
+            }
+          }
+
           if (!hasChanges(detectedChanges)) {
             spinner.succeed(
               "No changes detected. All toolkits are up to date."
