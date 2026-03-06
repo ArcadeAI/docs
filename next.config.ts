@@ -7,6 +7,7 @@ import { remarkGlossary } from "./lib/remark-glossary";
 const withNextra = nextra({
   defaultShowCopyCode: true,
   codeHighlight: true,
+  search: false,
   mdxOptions: {
     remarkPlugins: [
       [
@@ -23,6 +24,88 @@ const nextConfig: NextConfig = withLlmsTxt({
   withNextra({
     async redirects() {
       return [
+        // Dissolved guides/security section
+        {
+          source: "/:locale/guides/security/security-research-program",
+          destination: "/:locale/resources/security-research-program",
+          permanent: true,
+        },
+        {
+          source: "/:locale/guides/security/securing-arcade-mcp",
+          destination: "/:locale/guides/create-tools/secure-your-server",
+          permanent: true,
+        },
+        {
+          source: "/:locale/guides/security/secure-your-mcp-server",
+          destination:
+            "/:locale/guides/create-tools/secure-your-server/secure-your-mcp-server",
+          permanent: true,
+        },
+        {
+          source: "/:locale/guides/security",
+          destination: "/:locale/guides/create-tools/secure-your-server",
+          permanent: true,
+        },
+        // Auto-added redirects for deleted pages
+        {
+          source: "/:locale/references/mcp/python/transports",
+          destination: "/:locale/references/mcp/python",
+          permanent: true,
+        },
+        {
+          source: "/:locale/references/mcp/python/types",
+          destination: "/:locale/references/mcp/python",
+          permanent: true,
+        },
+        // CrewAI custom auth flow redirect to use-arcade-tools
+        {
+          source:
+            "/:locale/get-started/agent-frameworks/crewai/custom-auth-flow",
+          destination:
+            "/:locale/get-started/agent-frameworks/crewai/use-arcade-tools",
+          permanent: true,
+        },
+        // "others" category removed — toolkits moved to proper categories
+        {
+          source: "/:locale/resources/integrations/others/:path*",
+          destination: "/:locale/resources/integrations",
+          permanent: false,
+        },
+        // Google ADK tutorial consolidation - redirect old URL to new
+        {
+          source:
+            "/:locale/get-started/agent-frameworks/google-adk/use-arcade-tools",
+          destination:
+            "/:locale/get-started/agent-frameworks/google-adk/overview",
+          permanent: true,
+        },
+        // Auto-added redirects for deleted pages
+        {
+          source: "/:locale/references/logic-extensions-api",
+          destination: "/:locale/references/contextual-access-webhook-api",
+          permanent: true,
+        },
+        // Auto-added redirects for deleted pages
+        {
+          source: "/:locale/guides/logic-extensions",
+          destination: "/:locale/guides/contextual-access",
+          permanent: true,
+        },
+        {
+          source: "/:locale/guides/logic-extensions/build-your-own",
+          destination: "/:locale/guides/contextual-access/build-your-own",
+          permanent: true,
+        },
+        {
+          source: "/:locale/guides/logic-extensions/examples",
+          destination: "/:locale/guides/contextual-access/examples",
+          permanent: true,
+        },
+        {
+          source: "/:locale/guides/logic-extensions/how-hooks-work",
+          destination: "/:locale/guides/contextual-access/how-hooks-work",
+          permanent: true,
+        },
         // Auto-added redirects for deleted pages
         {
           source: "/:locale/resources/integrations/preview",
@@ -336,7 +419,8 @@ const nextConfig: NextConfig = withLlmsTxt({
         },
         {
           source: "/:locale/home/build-tools/secure-your-mcp-server",
-          destination: "/:locale/guides/security/secure-your-mcp-server",
+          destination:
+            "/:locale/guides/create-tools/secure-your-server/secure-your-mcp-server",
           permanent: true,
         },
         {
@@ -475,7 +559,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/home/crewai/custom-auth-flow",
           destination:
-            "/:locale/get-started/agent-frameworks/crewai/custom-auth-flow",
+            "/:locale/get-started/agent-frameworks/crewai/use-arcade-tools",
           permanent: true,
         },
         {
@@ -535,7 +619,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/home/google-adk/use-arcade-tools",
           destination:
-            "/:locale/get-started/agent-frameworks/google-adk/use-arcade-tools",
+            "/:locale/get-started/agent-frameworks/google-adk/setup-python",
           permanent: true,
         },
         {
@@ -636,14 +720,29 @@ const nextConfig: NextConfig = withLlmsTxt({
           destination: "/:locale/get-started/agent-frameworks/vercelai",
           permanent: true,
         },
-        // MCP servers to integrations
+        // Legacy /integrations path
+        // NOTE: :locale is constrained to actual locale values to prevent
+        // collisions with locale-less paths like /resources/integrations,
+        // which would otherwise match with :locale="resources" and redirect
+        // to /resources/resources/integrations (a 404).
         {
-          source: "/:locale/mcp-servers",
+          source: "/:locale(en|es|pt-BR)/integrations",
           destination: "/:locale/resources/integrations",
           permanent: true,
         },
         {
-          source: "/:locale/mcp-servers/:path*",
+          source: "/:locale(en|es|pt-BR)/integrations/:path*",
+          destination: "/:locale/resources/integrations/:path*",
+          permanent: true,
+        },
+        // MCP servers to integrations
+        {
+          source: "/:locale(en|es|pt-BR)/mcp-servers",
+          destination: "/:locale/resources/integrations",
+          permanent: true,
+        },
+        {
+          source: "/:locale(en|es|pt-BR)/mcp-servers/:path*",
           destination: "/:locale/resources/integrations/:path*",
           permanent: true,
         },
@@ -742,7 +841,7 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/guides/agent-frameworks/google-adk/python",
           destination:
-            "/:locale/get-started/agent-frameworks/google-adk/use-arcade-tools",
+            "/:locale/get-started/agent-frameworks/google-adk/setup-python",
           permanent: true,
         },
         {

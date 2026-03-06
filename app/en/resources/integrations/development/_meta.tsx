@@ -1,110 +1,118 @@
-import type { MetaRecord } from "nextra";
+import { createCategoryMeta } from "../create-category-meta";
 
-const meta: MetaRecord = {
-  "-- Optimized": {
-    type: "separator",
-    title: "Optimized",
-  },
-  brightdata: {
+export default createCategoryMeta([
+  {
+    slug: "brightdata",
     title: "Bright Data",
     href: "/en/resources/integrations/development/brightdata",
+    type: "community",
   },
-  complextools: {
-    title: "ComplexTools",
-    href: "/en/resources/integrations/development/complextools",
+  {
+    slug: "daytona",
+    title: "Daytona",
+    href: "/en/resources/integrations/development/daytona",
+    type: "arcade",
   },
-  deepwiki: {
-    title: "Deepwiki",
-    href: "/en/resources/integrations/development/deepwiki",
-  },
-  e2b: {
+  {
+    slug: "e2b",
     title: "E2B",
     href: "/en/resources/integrations/development/e2b",
+    type: "arcade",
   },
-  figma: {
+  {
+    slug: "figma",
     title: "Figma",
     href: "/en/resources/integrations/development/figma",
+    type: "arcade",
   },
-  firecrawl: {
+  {
+    slug: "firecrawl",
     title: "Firecrawl",
     href: "/en/resources/integrations/development/firecrawl",
+    type: "arcade",
   },
-  github: {
+  {
+    slug: "github",
     title: "GitHub",
     href: "/en/resources/integrations/development/github",
+    type: "arcade",
   },
-  google: {
-    title: "Google",
-    href: "/en/resources/integrations/development/google",
-  },
-  math: {
+  {
+    slug: "math",
     title: "Math",
     href: "/en/resources/integrations/development/math",
+    type: "arcade",
   },
-  microsoft: {
-    title: "Microsoft",
-    href: "/en/resources/integrations/development/microsoft",
-  },
-  pagerduty: {
+  {
+    slug: "pagerduty",
     title: "Pagerduty",
     href: "/en/resources/integrations/development/pagerduty",
+    type: "arcade",
   },
-  pylon: {
+  {
+    slug: "pylon",
     title: "Pylon",
     href: "/en/resources/integrations/development/pylon",
+    type: "arcade",
   },
-  search: {
+  {
+    slug: "search",
     title: "Search",
     href: "/en/resources/integrations/development/search",
+    type: "arcade",
   },
-  test2: {
-    title: "Test2",
-    href: "/en/resources/integrations/development/test2",
-  },
-  web: {
+  {
+    slug: "web",
     title: "Web",
     href: "/en/resources/integrations/development/web",
+    type: "arcade",
   },
-  "-- Starter": {
-    type: "separator",
-    title: "Starter",
-  },
-  "arcade-engine-api": {
+  {
+    slug: "arcade-engine-api",
     title: "Arcade Engine API",
     href: "/en/resources/integrations/development/arcade-engine-api",
+    type: "arcade_starter",
   },
-  "cursor-agents-api": {
+  {
+    slug: "cursor-agents-api",
     title: "Cursor Agents API",
     href: "/en/resources/integrations/development/cursor-agents-api",
+    type: "arcade_starter",
   },
-  "datadog-api": {
+  {
+    slug: "datadog-api",
     title: "Datadog API",
     href: "/en/resources/integrations/development/datadog-api",
+    type: "arcade_starter",
   },
-  "github-api": {
+  {
+    slug: "github-api",
     title: "GitHub API",
     href: "/en/resources/integrations/development/github-api",
+    type: "arcade_starter",
   },
-  "pagerduty-api": {
+  {
+    slug: "pagerduty-api",
     title: "PagerDuty API",
     href: "/en/resources/integrations/development/pagerduty-api",
+    type: "arcade_starter",
   },
-  "posthog-api": {
+  {
+    slug: "posthog-api",
     title: "PostHog API",
     href: "/en/resources/integrations/development/posthog-api",
+    type: "arcade_starter",
   },
-  pylonapi: {
+  {
+    slug: "pylonapi",
     title: "PylonApi",
     href: "/en/resources/integrations/development/pylonapi",
+    type: "arcade_starter",
   },
-  "vercel-api": {
+  {
+    slug: "vercel-api",
     title: "Vercel API",
     href: "/en/resources/integrations/development/vercel-api",
+    type: "arcade_starter",
   },
-  "weaviate-api": {
-    title: "Weaviate API",
-    href: "/en/resources/integrations/development/weaviate-api",
-  },
-};
-
-export default meta;
+]);

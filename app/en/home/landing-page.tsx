@@ -3,6 +3,7 @@ import { Button } from "@arcadeai/design-system";
 import {
   ArrowRight,
   BookOpen,
+  Bot,
   Code,
   Cog,
   FileText,
@@ -11,7 +12,6 @@ import {
   Puzzle,
   Rocket,
   Shield,
-  Sparkles,
   ToolCase,
   Wrench,
 } from "lucide-react";
@@ -28,6 +28,7 @@ const ANIMATION_DELAYS = {
   secondary: 0.4,
   buttons: 0.6,
 } as const;
+const INTEGRATIONS_PAGE_HREF = "/en/resources/integrations";
 
 // Popular integrations to showcase (row 1: productivity/work)
 const POPULAR_INTEGRATIONS_ROW1 = [
@@ -55,7 +56,7 @@ const POPULAR_INTEGRATIONS_ROW1 = [
   {
     name: "Slack",
     icon: "/images/icons/slack.png",
-    href: "/resources/integrations/social-communication/slack",
+    href: "/resources/integrations/social/slack",
   },
   {
     name: "Google Docs",
@@ -70,7 +71,7 @@ const POPULAR_INTEGRATIONS_ROW1 = [
   {
     name: "HubSpot",
     icon: "/images/icons/hubspot.png",
-    href: "/resources/integrations/crm/hubspot",
+    href: "/resources/integrations/sales/hubspot",
   },
   {
     name: "Linear",
@@ -95,12 +96,12 @@ const POPULAR_INTEGRATIONS_ROW2 = [
   {
     name: "X",
     icon: "/images/icons/twitter.png",
-    href: "/resources/integrations/social-communication/x",
+    href: "/resources/integrations/social/x",
   },
   {
     name: "MS Teams",
     icon: "/images/icons/ms_teams.png",
-    href: "/resources/integrations/social-communication/microsoft-teams",
+    href: "/resources/integrations/social/microsoft-teams",
   },
   {
     name: "Outlook",
@@ -125,7 +126,7 @@ const POPULAR_INTEGRATIONS_ROW2 = [
   {
     name: "Reddit",
     icon: "/images/icons/reddit.png",
-    href: "/resources/integrations/social-communication/reddit",
+    href: "/resources/integrations/social/reddit",
   },
   {
     name: "YouTube",
@@ -173,6 +174,11 @@ const FRAMEWORKS = [
     href: "/guides/agent-frameworks/mastra/use-arcade-tools",
     icon: "/images/icons/mastra.svg",
     invertInDark: true,
+  },
+  {
+    name: "TanStack AI",
+    href: "/get-started/agent-frameworks/tanstack-ai",
+    icon: "https://avatars.githubusercontent.com/u/72518640?s=200&v=4",
   },
 ];
 
@@ -269,10 +275,10 @@ export function LandingPage() {
                 variant="outline"
               >
                 <Link
-                  href="/resources/integrations"
+                  href={INTEGRATIONS_PAGE_HREF}
                   onClick={trackClick(
                     "hero_explore_tools_clicked",
-                    "/resources/integrations"
+                    INTEGRATIONS_PAGE_HREF
                   )}
                 >
                   <Puzzle className="mr-2 h-5 w-5" />
@@ -284,114 +290,139 @@ export function LandingPage() {
         </div>
       </section>
 
+      {/* LLM-friendly docs banner (desktop only) */}
+      <div className="flex justify-center px-4">
+        <Link
+          className="group inline-flex items-center gap-2.5 rounded-full border border-[#ee175e]/30 bg-gradient-to-r from-[#ee175e]/10 to-[#9089fc]/10 px-5 py-2 font-medium text-[#ee175e] text-sm shadow-sm transition-all hover:border-[#ee175e]/50 hover:shadow-md hover:shadow-[#ee175e]/10 dark:border-[#ee175e]/40 dark:from-[#ee175e]/15 dark:to-[#9089fc]/15 dark:text-[#ff6b8a]"
+          href="/get-started/setup/connect-arcade-docs"
+          onClick={trackClick(
+            "llm_banner_clicked",
+            "/get-started/setup/connect-arcade-docs"
+          )}
+        >
+          <Bot className="h-4 w-4" />
+          These docs are LLM-friendly — AI agents get clean markdown
+          automatically
+          <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+        </Link>
+      </div>
+
       {/* Choose Your Path Section */}
       <section className="py-16">
         <div className="container mx-auto px-4">
-          <div className="mx-auto grid max-w-4xl grid-cols-1 gap-8 min-[1062px]:grid-cols-2">
-            {/* Get Tools Column */}
-            <div>
-              <h2 className="mb-6 text-center font-bold text-2xl text-gray-900 tracking-tight md:text-3xl dark:text-white">
-                Get Tools
-              </h2>
-              <div className="space-y-4">
-                <QuickStartCard
-                  description="Browse 100+ ready-to-use integrations for Gmail, Slack, GitHub, and more."
-                  href="/resources/integrations"
-                  icon={Puzzle}
-                  logos={[
-                    { src: "/images/icons/gmail.png", alt: "Gmail" },
-                    { src: "/images/icons/slack.png", alt: "Slack" },
-                    {
-                      src: "/images/icons/github.png",
-                      alt: "GitHub",
-                      invertInLight: true,
-                    },
-                    {
-                      src: "/images/icons/google_sheets.svg",
-                      alt: "Google Sheets",
-                    },
-                    { src: "/images/icons/jira.svg", alt: "Jira" },
-                    { src: "/images/icons/notion.png", alt: "Notion" },
-                    { src: "/images/icons/linear.svg", alt: "Linear" },
-                    { src: "/images/icons/hubspot.png", alt: "HubSpot" },
-                    { src: "/images/icons/stripe.svg", alt: "Stripe" },
-                    {
-                      src: "/images/icons/google_drive.png",
-                      alt: "Google Drive",
-                    },
-                    { src: "/images/icons/dropbox.png", alt: "Dropbox" },
-                    {
-                      src: "/images/icons/confluence.svg",
-                      alt: "Confluence",
-                      invertInDark: true,
-                    },
-                    { src: "/images/icons/reddit.png", alt: "Reddit" },
-                  ]}
-                  title="Pre-built Integrations"
-                />
-                <QuickStartCard
-                  description="Create your own MCP servers and custom tools with our SDK."
-                  href="/guides/create-tools/tool-basics/build-mcp-server"
-                  icon={Wrench}
-                  title="Build Custom Tools"
-                />
-              </div>
+          <div className="mx-auto grid max-w-4xl grid-cols-1 gap-4 min-[1062px]:grid-cols-2 min-[1062px]:gap-x-8">
+            {/* Get Tools header — desktop: col 1 row 1; mobile: flows before its cards */}
+            <h2 className="mb-2 text-center font-bold text-2xl text-gray-900 tracking-tight md:text-3xl dark:text-white min-[1062px]:col-start-1 min-[1062px]:row-start-1">
+              Get Tools
+            </h2>
+            {/* Pre-built Integrations — desktop: col 1 row 2 */}
+            <div className="min-[1062px]:col-start-1 min-[1062px]:row-start-2">
+              <QuickStartCard
+                description="Browse 100+ ready-to-use integrations for Gmail, Slack, GitHub, and more."
+                href={INTEGRATIONS_PAGE_HREF}
+                icon={Puzzle}
+                logos={[
+                  { src: "/images/icons/gmail.png", alt: "Gmail" },
+                  { src: "/images/icons/slack.png", alt: "Slack" },
+                  {
+                    src: "/images/icons/github.png",
+                    alt: "GitHub",
+                    invertInLight: true,
+                  },
+                  {
+                    src: "/images/icons/google_sheets.svg",
+                    alt: "Google Sheets",
+                  },
+                  { src: "/images/icons/jira.svg", alt: "Jira" },
+                  { src: "/images/icons/notion.png", alt: "Notion" },
+                  { src: "/images/icons/linear.svg", alt: "Linear" },
+                  { src: "/images/icons/hubspot.png", alt: "HubSpot" },
+                  { src: "/images/icons/stripe.svg", alt: "Stripe" },
+                  {
+                    src: "/images/icons/google_drive.png",
+                    alt: "Google Drive",
+                  },
+                  { src: "/images/icons/dropbox.png", alt: "Dropbox" },
+                  {
+                    src: "/images/icons/confluence.svg",
+                    alt: "Confluence",
+                    invertInDark: true,
+                  },
+                  { src: "/images/icons/reddit.png", alt: "Reddit" },
+                ]}
+                title="Pre-built Integrations"
+              />
             </div>
-            {/* Use Tools Column */}
-            <div>
-              <h2 className="mb-6 text-center font-bold text-2xl text-gray-900 tracking-tight md:text-3xl dark:text-white">
-                Use Arcade
-              </h2>
-              <div className="space-y-4">
-                <QuickStartCard
-                  description="Add tools to Cursor, VS Code, Claude Desktop, or any MCP client."
-                  href="/get-started/mcp-clients"
-                  icon={Monitor}
-                  logos={[
-                    {
-                      src: "/images/icons/cursor.png",
-                      alt: "Cursor",
-                      invertInLight: true,
-                    },
-                    { src: "/images/icons/vscode.svg", alt: "VS Code" },
-                    {
-                      src: "/images/icons/claude.png",
-                      alt: "Claude Desktop",
-                      invertInLight: true,
-                    },
-                  ]}
-                  title="Connect to Your IDE"
-                />
-                <QuickStartCard
-                  description="Integrate with LangChain, OpenAI Agents, CrewAI, Vercel AI, and more."
-                  href="/get-started/agent-frameworks"
-                  icon={Code}
-                  logos={[
-                    {
-                      src: "/images/icons/langchain.svg",
-                      alt: "LangChain",
-                      invertInDark: true,
-                    },
-                    { src: "/images/icons/openai.png", alt: "OpenAI" },
-                    {
-                      src: "https://avatars.githubusercontent.com/u/170677839?s=200&v=4",
-                      alt: "CrewAI",
-                    },
-                    {
-                      src: "/images/icons/vercel.svg",
-                      alt: "Vercel AI",
-                      invertInDark: true,
-                    },
-                    { src: "/images/icons/google.png", alt: "Google ADK" },
-                    {
-                      src: "/images/icons/mastra.svg",
-                      alt: "Mastra",
-                      invertInDark: true,
-                    },
-                  ]}
-                  title="Power Your Agent"
-                />
-              </div>
+            {/* Build Custom Tools — desktop: col 1 row 3 */}
+            <div className="min-[1062px]:col-start-1 min-[1062px]:row-start-3">
+              <QuickStartCard
+                description="Create your own MCP servers and custom tools with our SDK."
+                href="/guides/create-tools/tool-basics/build-mcp-server"
+                icon={Wrench}
+                title="Build Custom Tools"
+              />
+            </div>
+            {/* Use Arcade header — desktop: col 2 row 1; mobile: flows before its cards */}
+            <h2 className="mb-2 text-center font-bold text-2xl text-gray-900 tracking-tight md:text-3xl dark:text-white min-[1062px]:col-start-2 min-[1062px]:row-start-1">
+              Use Arcade
+            </h2>
+            {/* Connect to Your IDE — desktop: col 2 row 2 */}
+            <div className="min-[1062px]:col-start-2 min-[1062px]:row-start-2">
+              <QuickStartCard
+                description="Add tools to Cursor, VS Code, Claude Desktop, or any MCP client."
+                href="/get-started/mcp-clients"
+                icon={Monitor}
+                logos={[
+                  {
+                    src: "/images/icons/cursor.png",
+                    alt: "Cursor",
+                    invertInLight: true,
+                  },
+                  { src: "/images/icons/vscode.svg", alt: "VS Code" },
+                  {
+                    src: "/images/icons/claude.png",
+                    alt: "Claude Desktop",
+                    invertInLight: true,
+                  },
+                ]}
+                title="Connect to Your IDE"
+              />
+            </div>
+            {/* Power Your Agent — desktop: col 2 row 3 */}
+            <div className="min-[1062px]:col-start-2 min-[1062px]:row-start-3">
+              <QuickStartCard
+                description="Integrate with LangChain, OpenAI Agents, CrewAI, Vercel AI, and more."
+                href="/get-started/agent-frameworks"
+                icon={Code}
+                logos={[
+                  {
+                    src: "/images/icons/langchain.svg",
+                    alt: "LangChain",
+                    invertInDark: true,
+                  },
+                  { src: "/images/icons/openai.png", alt: "OpenAI" },
+                  {
+                    src: "https://avatars.githubusercontent.com/u/170677839?s=200&v=4",
+                    alt: "CrewAI",
+                  },
+                  {
+                    src: "/images/icons/vercel.svg",
+                    alt: "Vercel AI",
+                    invertInDark: true,
+                  },
+                  { src: "/images/icons/google.png", alt: "Google ADK" },
+                  {
+                    src: "/images/icons/mastra.svg",
+                    alt: "Mastra",
+                    invertInDark: true,
+                  },
+                  {
+                    src: "https://avatars.githubusercontent.com/u/72518640?s=200&v=4",
+                    alt: "TanStack AI",
+                  },
+                ]}
+                title="Power Your Agent"
+              />
             </div>
           </div>
         </div>
@@ -415,10 +446,10 @@ export function LandingPage() {
               variant="outline"
             >
               <Link
-                href="/resources/integrations"
+                href={INTEGRATIONS_PAGE_HREF}
                 onClick={trackClick(
                   "view_all_integrations_clicked",
-                  "/resources/integrations"
+                  INTEGRATIONS_PAGE_HREF
                 )}
               >
                 See all 100+
@@ -499,7 +530,7 @@ export function LandingPage() {
               Arcade integrates with popular agent frameworks and LLM providers.
             </p>
           </div>
-          <div className="mx-auto mt-10 grid max-w-3xl grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-6">
+          <div className="mx-auto mt-10 grid max-w-4xl grid-cols-2 gap-4 sm:grid-cols-4 md:grid-cols-7">
             {FRAMEWORKS.map((framework) => (
               <Link
                 className="flex flex-col items-center gap-2 rounded-lg border border-none p-4 transition-all hover:shadow-md dark:hover:bg-gray-800"
@@ -549,7 +580,7 @@ export function LandingPage() {
             />
             <QuickStartCard
               description="Catalog of pre-built tools and integrations. Browse 100+ ready-to-use MCP servers."
-              href="/resources/integrations"
+              href={INTEGRATIONS_PAGE_HREF}
               icon={ToolCase}
               title="Tool Catalog"
             />
@@ -610,37 +641,6 @@ export function LandingPage() {
               title="YouTube Podcast Summarizer"
             />
           </div>
-        </div>
-      </section>
-
-      {/* Agentic Development Callout */}
-      <section className="py-12">
-        <div className="container mx-auto px-4">
-          <Link
-            className="mx-auto block max-w-2xl rounded-xl border border-[#ee175e]/20 bg-linear-to-r from-[#ee175e]/5 to-transparent p-6 transition-all hover:border-[#ee175e]/40 hover:shadow-lg"
-            href="/get-started/setup/connect-arcade-docs"
-            onClick={trackClick(
-              "agentic_development_clicked",
-              "/get-started/setup/connect-arcade-docs"
-            )}
-          >
-            <div className="flex items-start gap-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#ee175e]/10">
-                <Sparkles className="h-5 w-5 text-[#ee175e]" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900 text-lg dark:text-white">
-                  Connect Your IDE with Arcade&apos;s LLMs.txt
-                </h3>
-                <p className="mt-1 text-gray-600 text-sm dark:text-gray-400">
-                  Give Cursor, Claude Code, and other AI IDEs access to
-                  Arcade&apos;s documentation so they can write integration code
-                  for you.
-                </p>
-              </div>
-              <ArrowRight className="mt-1 h-5 w-5 shrink-0 text-[#ee175e]" />
-            </div>
-          </Link>
         </div>
       </section>
 

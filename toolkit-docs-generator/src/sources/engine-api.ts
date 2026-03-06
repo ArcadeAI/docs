@@ -87,11 +87,12 @@ export class EngineApiSource implements IToolDataSource {
     const url = new URL(this.endpoint);
     url.searchParams.set("limit", String(this.pageSize));
     url.searchParams.set("offset", String(offset));
+    // latest_only defaults to true on the server; set to false when we need all versions
     const includeAllVersions = options?.version
       ? true
       : this.includeAllVersions;
     if (includeAllVersions) {
-      url.searchParams.set("include_all_versions", "true");
+      url.searchParams.set("latest_only", "false");
     }
 
     if (options?.toolkitId) {
@@ -101,7 +102,7 @@ export class EngineApiSource implements IToolDataSource {
       url.searchParams.set("version", options.version);
     }
     if (options?.providerId) {
-      url.searchParams.set("provider_id", options.providerId);
+      url.searchParams.set("auth_provider", options.providerId);
     }
 
     const response = await this.fetchFn(url.toString(), {

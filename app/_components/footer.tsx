@@ -137,7 +137,7 @@ const Footer: React.FC = () => {
 
   const feedbackResources: Resource[] = [
     {
-      url: "/discord",
+      url: urlConfig.company.discord,
       title: "Discord",
       external: true,
     },

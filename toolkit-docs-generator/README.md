@@ -77,13 +77,15 @@ This step does not change JSON output. It only updates navigation files.
 
 ## Local usage
 
+Run these commands from the `toolkit-docs-generator` directory.
+
 Generate a single toolkit:
 
 ```bash
-pnpm start generate \
+pnpm dlx tsx src/cli/index.ts generate \
   --providers "Github:1.0.0" \
-  --engine-api-url "$ENGINE_API_URL" \
-  --engine-api-key "$ENGINE_API_KEY" \
+  --tool-metadata-url "$ENGINE_API_URL" \
+  --tool-metadata-key "$ENGINE_API_KEY" \
   --llm-provider openai \
   --llm-model gpt-4.1-mini \
   --llm-api-key "$OPENAI_API_KEY" \
@@ -93,11 +95,11 @@ pnpm start generate \
 Generate all toolkits:
 
 ```bash
-pnpm start generate \
+pnpm dlx tsx src/cli/index.ts generate \
   --all \
   --skip-unchanged \
-  --engine-api-url "$ENGINE_API_URL" \
-  --engine-api-key "$ENGINE_API_KEY" \
+  --tool-metadata-url "$ENGINE_API_URL" \
+  --tool-metadata-key "$ENGINE_API_KEY" \
   --llm-provider openai \
   --llm-model gpt-4.1-mini \
   --llm-api-key "$OPENAI_API_KEY" \
@@ -107,13 +109,12 @@ pnpm start generate \
 Generate without LLM output:
 
 ```bash
-pnpm start generate \
+pnpm dlx tsx src/cli/index.ts generate \
   --providers "Asana:0.1.3" \
-  --engine-api-url "$ENGINE_API_URL" \
-  --engine-api-key "$ENGINE_API_KEY" \
+  --tool-metadata-url "$ENGINE_API_URL" \
+  --tool-metadata-key "$ENGINE_API_KEY" \
   --skip-examples \
   --skip-summary \
-  --skip-overview \
   --output data/toolkits
 ```
 
@@ -122,6 +123,54 @@ Sync sidebar navigation locally:
 ```bash
 pnpm dlx tsx .github/scripts/sync-toolkit-sidebar.ts
 ```
+
+## Ignoring toolkits
+
+Pass `--ignore-file <path>` to skip specific toolkits during generation. Existing
+output files for ignored toolkits are left unchanged — nothing is deleted.
+
+A default empty template ships at `ignored-toolkits.txt` in the generator root.
+Add one toolkit ID per line:
+
+```text
+# Toolkits to ignore during docs generation (skip-only, no file deletion)
+SomeInternalTool
+```
+
+```bash
+pnpm dlx tsx src/cli/index.ts generate --all \
+  --ignore-file ./ignored-toolkits.txt
+```
+
+The parser ignores blank lines and lines starting with `#`. IDs are case-insensitive.
+
+Works with both `generate` and `generate-all`. The ignore list is purely skip-only:
+no existing `.json` files are removed and `index.json` is not rebuilt for ignored
+toolkits.
+
+## Excluding toolkits
+
+Pass `--exclude-file <path>` to skip toolkits **and** delete their existing output
+files if they already exist.
+
+Create a plain-text file with one toolkit ID per line:
+
+```text
+# toolkits to exclude from docs generation
+Jira
+Confluence
+SomeInternalTool
+```
+
+The parser ignores blank lines and lines starting with `#`. IDs are case-insensitive.
+
+```bash
+pnpm dlx tsx src/cli/index.ts generate --all \
+  --exclude-file ./excluded-toolkits.txt
+```
+
+If a toolkit in the file already has an output `.json` file, the generator
+deletes it and rebuilds `index.json`.
 
 ## Key CLI options
 
@@ -132,11 +181,11 @@ pnpm dlx tsx .github/scripts/sync-toolkit-sidebar.ts
   (only with the explicit flag), or `mock`
 - `--previous-output` compare against a previous output directory
 - `--custom-sections` load curated docs sections
-- `--skip-examples`, `--skip-summary`, `--skip-overview` disable LLM steps
+- `--skip-examples`, `--skip-summary` disable LLM steps
 - `--no-verify-output` skip output verification
 
 ## Troubleshooting
 
 - **Nothing regenerated**: `--skip-unchanged` exits early when tool definitions did not change.
 - **Missing metadata**: the generator falls back to the metadata JSON file when design system metadata is unavailable.
-- **Verify output fails**: run `pnpm start verify-output --output data/toolkits` and fix the reported mismatch.
+- **Verify output fails**: run `pnpm dlx tsx src/cli/index.ts verify-output --output data/toolkits` and fix the reported mismatch.

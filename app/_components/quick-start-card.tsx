@@ -143,6 +143,7 @@ export function QuickStartCard({
 
   return (
     <motion.div
+      className="h-full"
       whileHover={{
         scale: 1.02,
         boxShadow: "0 0 20px 0 rgba(238, 23, 94, 0.1)",

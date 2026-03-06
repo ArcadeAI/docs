@@ -182,6 +182,34 @@ export type ToolCodeExample = {
 };
 
 // ============================================================================
+// Tool Metadata Types
+// ============================================================================
+
+export type ToolMetadataClassification = {
+  serviceDomains: string[];
+};
+
+export type ToolMetadataBehavior = {
+  operations: string[];
+  readOnly?: boolean;
+  destructive?: boolean;
+  idempotent?: boolean;
+  openWorld?: boolean;
+};
+
+export type BehaviorFlagKey =
+  | "readOnly"
+  | "destructive"
+  | "idempotent"
+  | "openWorld";
+
+export type ToolMetadata = {
+  classification: ToolMetadataClassification;
+  behavior: ToolMetadataBehavior;
+  extras?: Record<string, unknown> | null;
+};
+
+// ============================================================================
 // Tool Definition Types
 // ============================================================================
 
@@ -207,6 +235,8 @@ export type ToolDefinition = {
   secretsInfo?: ToolSecret[];
   /** Tool output schema */
   output: ToolOutput | null;
+  /** Per-tool metadata from Engine API */
+  metadata?: ToolMetadata | null;
   /** Custom documentation chunks for this tool */
   documentationChunks: DocumentationChunk[];
   /** Generated code example configuration */
@@ -425,6 +455,7 @@ export type AvailableToolsTableProps = {
     secrets?: string[];
     secretsInfo?: ToolSecret[];
     scopes?: string[];
+    metadata?: ToolMetadata | null;
   }>;
   /** Optional label for the secrets column */
   secretsColumnLabel?: string;

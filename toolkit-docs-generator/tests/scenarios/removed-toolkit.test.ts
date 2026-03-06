@@ -2,9 +2,11 @@
  * Scenario Test: Toolkit not returned by API but exists in docs
  *
  * Verifies that when a toolkit is missing from API but exists in previous output:
- * - The toolkit is detected as removed
- * - It's logged but not deleted from output
- * - Change detection reports it correctly
+ * - The toolkit is detected as removed by detectChanges()
+ * - Change detection reports it correctly (removed toolkits are excluded from
+ *   getChangedToolkitIds so they're not regenerated)
+ *
+ * The file deletion behaviour is covered in removed-toolkit-cleanup.test.ts.
  */
 import { describe, expect, it } from "vitest";
 

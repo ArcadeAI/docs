@@ -22,6 +22,9 @@ export const meta: MetaRecord = {
   "openai-agents": {
     title: "OpenAI Agents",
   },
+  "tanstack-ai": {
+    title: "TanStack AI",
+  },
   vercelai: {
     title: "Vercel AI SDK",
   },

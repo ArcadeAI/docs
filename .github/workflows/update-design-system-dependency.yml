@@ -1,0 +1,80 @@
+name: Update design system dependency
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-design-system:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Update @arcadeai/design-system to latest
+        run: pnpm install @arcadeai/design-system@latest
+
+      - name: Check for changes
+        id: check-changes
+        run: |
+          if [ -n "$(git status --porcelain package.json pnpm-lock.yaml)" ]; then
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run design-system compatibility tests
+        if: steps.check-changes.outputs.has_changes == 'true'
+        run: |
+          pnpm vitest run toolkit-docs-generator/tests/scripts/sync-toolkit-sidebar.test.ts toolkit-docs-generator/tests/sources/oauth-provider-resolver.test.ts
+          pnpm run build
+
+      - name: Create pull request
+        if: steps.check-changes.outputs.has_changes == 'true'
+        id: cpr
+        uses: peter-evans/create-pull-request@v7
+        env:
+          HUSKY: 0
+          SKIP_HUSKY: 1
+        with:
+          token: ${{ secrets.DOCS_PUBLISHABLE_GH_TOKEN }}
+          commit-message: "chore: update @arcadeai/design-system to latest"
+          title: "chore: update @arcadeai/design-system to latest"
+          body: |
+            This PR updates `@arcadeai/design-system` to the latest published version.
+
+            It runs a design-system compatibility test gate before opening this PR.
+            If that gate fails, the workflow stops and no PR is created.
+
+            - Trigger: `${{ github.event_name }}`
+            - Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          add-paths: |
+            package.json
+            pnpm-lock.yaml
+          branch: automation/update-design-system-dependency
+          delete-branch: true
+
+      - name: Request team review
+        if: steps.check-changes.outputs.has_changes == 'true' && steps.cpr.outputs.pull-request-number != ''
+        continue-on-error: true
+        run: gh pr edit ${{ steps.cpr.outputs.pull-request-number }} --add-reviewer ArcadeAI/engineering-tools-and-dx
+        env:
+          GH_TOKEN: ${{ secrets.DOCS_PUBLISHABLE_GH_TOKEN }}

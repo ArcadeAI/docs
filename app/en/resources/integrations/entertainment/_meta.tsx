@@ -1,14 +1,16 @@
-import type { MetaRecord } from "nextra";
+import { createCategoryMeta } from "../create-category-meta";
 
-const meta: MetaRecord = {
-  imgflip: {
+export default createCategoryMeta([
+  {
+    slug: "imgflip",
     title: "Imgflip",
     href: "/en/resources/integrations/entertainment/imgflip",
+    type: "arcade",
   },
-  spotify: {
+  {
+    slug: "spotify",
     title: "Spotify",
     href: "/en/resources/integrations/entertainment/spotify",
+    type: "arcade",
   },
-};
-
-export default meta;
+]);

@@ -5,13 +5,17 @@
  */
 import { mkdir, readFile, stat, writeFile } from "fs/promises";
 import { dirname, join } from "path";
+import { parsePreviousToolkitForDiff } from "../diff/previous-output.js";
 import type {
   MergedToolkit,
   ToolkitIndex,
   ToolkitIndexEntry,
 } from "../types/index.js";
 import { MergedToolkitSchema } from "../types/index.js";
-import { readToolkitsFromDir } from "./output-verifier.js";
+import {
+  readToolkitsFromDir,
+  type ToolkitReadResult,
+} from "./output-verifier.js";
 
 // ============================================================================
 // Generator Configuration
@@ -35,6 +39,15 @@ export interface GeneratorResult {
   filesWritten: string[];
   /** List of errors that occurred */
   errors: string[];
+}
+
+export interface RebuildIndexResult {
+  /** Path to the rebuilt index file */
+  indexPath: string;
+  /** Read/parse errors encountered while loading toolkit files */
+  readErrors: string[];
+  /** Non-fatal read warnings (for example, legacy fallback usage) */
+  readWarnings: string[];
 }
 
 // ============================================================================
@@ -108,7 +121,9 @@ export class JsonGenerator {
   async getCompletedToolkitIds(): Promise<Set<string>> {
     const completedIds = new Set<string>();
     try {
-      const result = await readToolkitsFromDir(this.outputDir);
+      const result = await readToolkitsFromDir(this.outputDir, undefined, {
+        allowLegacyFallback: true,
+      });
       for (const toolkit of result.toolkits) {
         completedIds.add(toolkit.id.toLowerCase());
       }
@@ -131,7 +146,8 @@ export class JsonGenerator {
       if (result.success) {
         return result.data;
       }
-      return null;
+      const fallback = parsePreviousToolkitForDiff(parsed, toolkitId);
+      return fallback.toolkit;
     } catch {
       return null;
     }
@@ -159,10 +175,14 @@ export class JsonGenerator {
     // Generate index file
     if (this.generateIndex && toolkits.length > 0) {
       try {
-        const indexToolkits =
-          this.indexSource === "output"
-            ? await this.getToolkitsFromOutputDir(errors)
-            : toolkits;
+        let indexToolkits = toolkits;
+        if (this.indexSource === "output") {
+          const readResult = await this.getToolkitsFromOutputDir();
+          indexToolkits = readResult.toolkits;
+          if (readResult.errors.length > 0) {
+            errors.push(...readResult.errors);
+          }
+        }
         const indexPath = await this.generateIndexFile(indexToolkits);
         filesWritten.push(indexPath);
       } catch (error) {
@@ -207,14 +227,23 @@ export class JsonGenerator {
     return filePath;
   }
 
-  private async getToolkitsFromOutputDir(
-    errors: string[]
-  ): Promise<MergedToolkit[]> {
-    const readResult = await readToolkitsFromDir(this.outputDir);
-    if (readResult.errors.length > 0) {
-      errors.push(...readResult.errors);
-    }
-    return readResult.toolkits;
+  private async getToolkitsFromOutputDir(): Promise<ToolkitReadResult> {
+    return readToolkitsFromDir(this.outputDir, undefined, {
+      allowLegacyFallback: true,
+    });
+  }
+
+  /**
+   * Rebuild index.json from the toolkit files currently in the output directory.
+   */
+  async rebuildIndexFromOutput(): Promise<RebuildIndexResult> {
+    const readResult = await this.getToolkitsFromOutputDir();
+    const indexPath = await this.generateIndexFile(readResult.toolkits);
+    return {
+      indexPath,
+      readErrors: readResult.errors,
+      readWarnings: readResult.warnings,
+    };
   }
 }
 

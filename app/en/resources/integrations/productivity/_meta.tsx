@@ -1,134 +1,208 @@
-import type { MetaRecord } from "nextra";
+import { createCategoryMeta } from "../create-category-meta";
 
-const meta: MetaRecord = {
-  "-- Optimized": {
-    type: "separator",
-    title: "Optimized",
-  },
-  asana: {
+export default createCategoryMeta([
+  {
+    slug: "asana",
     title: "Asana",
     href: "/en/resources/integrations/productivity/asana",
+    type: "arcade",
   },
-  clickup: {
+  {
+    slug: "clickup",
     title: "ClickUp",
     href: "/en/resources/integrations/productivity/clickup",
+    type: "arcade",
   },
-  confluence: {
+  {
+    slug: "confluence",
     title: "Confluence",
     href: "/en/resources/integrations/productivity/confluence",
+    type: "arcade",
   },
-  dropbox: {
+  {
+    slug: "dropbox",
     title: "Dropbox",
     href: "/en/resources/integrations/productivity/dropbox",
+    type: "arcade",
   },
-  gmail: {
+  {
+    slug: "gmail",
     title: "Gmail",
     href: "/en/resources/integrations/productivity/gmail",
+    type: "arcade",
   },
-  "google-calendar": {
+  {
+    slug: "google-calendar",
     title: "Google Calendar",
     href: "/en/resources/integrations/productivity/google-calendar",
+    type: "arcade",
   },
-  "google-contacts": {
+  {
+    slug: "google-contacts",
     title: "Google Contacts",
     href: "/en/resources/integrations/productivity/google-contacts",
+    type: "arcade",
   },
-  "google-docs": {
+  {
+    slug: "google-docs",
     title: "Google Docs",
     href: "/en/resources/integrations/productivity/google-docs",
+    type: "arcade",
   },
-  "google-drive": {
+  {
+    slug: "google-drive",
     title: "Google Drive",
     href: "/en/resources/integrations/productivity/google-drive",
+    type: "arcade",
   },
-  "google-sheets": {
+  {
+    slug: "google-sheets",
     title: "Google Sheets",
     href: "/en/resources/integrations/productivity/google-sheets",
+    type: "arcade",
   },
-  "google-slides": {
+  {
+    slug: "google-slides",
     title: "Google Slides",
     href: "/en/resources/integrations/productivity/google-slides",
+    type: "arcade",
   },
-  jira: {
+  {
+    slug: "jira",
     title: "Jira",
     href: "/en/resources/integrations/productivity/jira",
+    type: "auth",
   },
-  linear: {
+  {
+    slug: "linear",
     title: "Linear",
     href: "/en/resources/integrations/productivity/linear",
+    type: "arcade",
   },
-  sharepoint: {
+  {
+    slug: "microsoft-excel",
+    title: "Microsoft Excel",
+    href: "/en/resources/integrations/productivity/microsoft-excel",
+    type: "arcade",
+  },
+  {
+    slug: "microsoft-onedrive",
+    title: "Microsoft OneDrive",
+    href: "/en/resources/integrations/productivity/microsoft-onedrive",
+    type: "arcade",
+  },
+  {
+    slug: "microsoft-powerpoint",
+    title: "Microsoft PowerPoint",
+    href: "/en/resources/integrations/productivity/microsoft-powerpoint",
+    type: "arcade",
+  },
+  {
+    slug: "sharepoint",
     title: "Microsoft SharePoint",
     href: "/en/resources/integrations/productivity/sharepoint",
+    type: "arcade",
   },
-  "outlook-calendar": {
+  {
+    slug: "microsoft-word",
+    title: "Microsoft Word",
+    href: "/en/resources/integrations/productivity/microsoft-word",
+    type: "arcade",
+  },
+  {
+    slug: "outlook-calendar",
     title: "Outlook Calendar",
     href: "/en/resources/integrations/productivity/outlook-calendar",
+    type: "arcade",
   },
-  "outlook-mail": {
+  {
+    slug: "outlook-mail",
     title: "Outlook Mail",
     href: "/en/resources/integrations/productivity/outlook-mail",
+    type: "arcade",
   },
-  "-- Starter": {
-    type: "separator",
-    title: "Starter",
-  },
-  "airtable-api": {
+  {
+    slug: "airtable-api",
     title: "Airtable API",
     href: "/en/resources/integrations/productivity/airtable-api",
+    type: "arcade_starter",
   },
-  "asana-api": {
+  {
+    slug: "asana-api",
     title: "Asana API",
     href: "/en/resources/integrations/productivity/asana-api",
+    type: "arcade_starter",
   },
-  "ashby-api": {
+  {
+    slug: "ashby-api",
     title: "Ashby API",
     href: "/en/resources/integrations/productivity/ashby-api",
+    type: "arcade_starter",
   },
-  "box-api": {
+  {
+    slug: "box-api",
     title: "Box API",
     href: "/en/resources/integrations/productivity/box-api",
+    type: "arcade_starter",
   },
-  "calendly-api": {
+  {
+    slug: "calendly-api",
     title: "Calendly API",
     href: "/en/resources/integrations/productivity/calendly-api",
+    type: "arcade_starter",
   },
-  "clickup-api": {
+  {
+    slug: "clickup-api",
     title: "ClickUp API",
     href: "/en/resources/integrations/productivity/clickup-api",
+    type: "arcade_starter",
   },
-  "figma-api": {
+  {
+    slug: "figma-api",
     title: "Figma API",
     href: "/en/resources/integrations/productivity/figma-api",
+    type: "arcade_starter",
   },
-  "luma-api": {
+  {
+    slug: "luma-api",
     title: "Luma API",
     href: "/en/resources/integrations/productivity/luma-api",
+    type: "arcade_starter",
   },
-  "mailchimp-api": {
+  {
+    slug: "mailchimp-api",
     title: "Mailchimp API",
     href: "/en/resources/integrations/productivity/mailchimp-api",
+    type: "arcade_starter",
   },
-  "miro-api": {
+  {
+    slug: "miro-api",
     title: "Miro API",
     href: "/en/resources/integrations/productivity/miro-api",
+    type: "arcade_starter",
   },
-  "squareup-api": {
+  {
+    slug: "squareup-api",
     title: "SquareUp API",
     href: "/en/resources/integrations/productivity/squareup-api",
+    type: "arcade_starter",
   },
-  "ticktick-api": {
+  {
+    slug: "ticktick-api",
     title: "TickTick API",
     href: "/en/resources/integrations/productivity/ticktick-api",
+    type: "arcade_starter",
   },
-  "trello-api": {
+  {
+    slug: "trello-api",
     title: "Trello API",
     href: "/en/resources/integrations/productivity/trello-api",
+    type: "arcade_starter",
   },
-  "xero-api": {
+  {
+    slug: "xero-api",
     title: "Xero API",
     href: "/en/resources/integrations/productivity/xero-api",
+    type: "arcade_starter",
   },
-};
-
-export default meta;
+]);
