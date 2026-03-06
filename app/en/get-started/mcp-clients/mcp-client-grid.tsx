@@ -17,6 +17,12 @@ const mcpClients = [
     invertInLight: true,
   },
   {
+    key: "claude-code",
+    name: "Claude Code",
+    description: "Anthropic's coding agent CLI with MCP support",
+    invertInLight: true,
+  },
+  {
     key: "visual-studio-code",
     name: "Visual Studio Code",
     description: "Microsoft's code editor with MCP extensions",
@@ -32,6 +38,7 @@ const mcpClients = [
 const logoSrc = {
   cursor: "/images/icons/cursor.png",
   "claude-desktop": "/images/icons/claude.png",
+  "claude-code": "/images/icons/claude.png",
   "visual-studio-code": "/images/icons/vscode.svg",
   "copilot-studio": "/images/icons/microsoft-copilot-studio.png",
 };

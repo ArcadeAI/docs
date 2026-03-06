@@ -17,6 +17,9 @@ const meta: MetaRecord = {
   "claude-desktop": {
     title: "Claude Desktop",
   },
+  "claude-code": {
+    title: "Claude Code",
+  },
   "visual-studio-code": {
     title: "Visual Studio Code",
   },
