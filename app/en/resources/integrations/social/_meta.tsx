@@ -1,46 +1,42 @@
-import { createCategoryMeta } from "../create-category-meta";
+import type { MetaRecord } from "nextra";
 
-export default createCategoryMeta([
-  {
-    slug: "linkedin",
+const meta: MetaRecord = {
+  "-- Optimized": {
+    type: "separator",
+    title: "Optimized",
+  },
+  linkedin: {
     title: "LinkedIn",
     href: "/en/resources/integrations/social/linkedin",
-    type: "arcade",
   },
-  {
-    slug: "microsoft-teams",
+  "microsoft-teams": {
     title: "Microsoft Teams",
     href: "/en/resources/integrations/social/microsoft-teams",
-    type: "arcade",
   },
-  {
-    slug: "reddit",
+  reddit: {
     title: "Reddit",
     href: "/en/resources/integrations/social/reddit",
-    type: "arcade",
   },
-  {
-    slug: "slack",
+  slack: {
     title: "Slack",
     href: "/en/resources/integrations/social/slack",
-    type: "arcade",
   },
-  {
-    slug: "x",
+  x: {
     title: "X",
     href: "/en/resources/integrations/social/x",
-    type: "arcade",
   },
-  {
-    slug: "zoom",
+  zoom: {
     title: "Zoom",
     href: "/en/resources/integrations/social/zoom",
-    type: "arcade",
   },
-  {
-    slug: "slack-api",
+  "-- Starter": {
+    type: "separator",
+    title: "Starter",
+  },
+  "slack-api": {
     title: "Slack API",
     href: "/en/resources/integrations/social/slack-api",
-    type: "arcade_starter",
   },
-]);
+};
+
+export default meta;
