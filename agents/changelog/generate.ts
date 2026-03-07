@@ -70,14 +70,14 @@ type FinalEntry = {
   sources: { repo: string; pr_number: number }[];
 };
 
-// --- Step 1: Compute upcoming Friday (or today if Friday) ---
+// --- Step 1: Compute most recent Friday (or today if Friday) ---
 
-function getUpcomingFriday(): string {
+function getMostRecentFriday(): string {
   const now = new Date();
   const day = now.getDay(); // 0=Sun, 1=Mon, ..., 5=Fri, 6=Sat
-  const daysUntilFriday = (5 - day + 7) % 7; // 0 if today is Friday
+  const daysSinceFriday = (day - 5 + 7) % 7; // 0 if today is Friday
   const friday = new Date(now);
-  friday.setDate(now.getDate() + daysUntilFriday);
+  friday.setDate(now.getDate() - daysSinceFriday);
   return friday.toISOString().split("T")[0];
 }
 
@@ -298,8 +298,7 @@ function formatEntry(date: string, entries: FinalEntry[]): string {
       const emoji = EMOJI[item.type] || EMOJI.maintenance;
       const sources = item.sources
         .map((s) => {
-          const prefix = privateRepos.has(s.repo) ? s.repo : s.repo;
-          return `${prefix} PR #${s.pr_number}`;
+          return privateRepos.has(s.repo) ? s.repo : `${s.repo} PR #${s.pr_number}`;
         })
         .join(", ");
 
@@ -330,7 +329,7 @@ async function main() {
   const openai = new OpenAI();
 
   // Step 1
-  const fridayDate = getUpcomingFriday();
+  const fridayDate = getMostRecentFriday();
   console.log(`Changelog date: ${fridayDate}`);
 
   // Step 2
