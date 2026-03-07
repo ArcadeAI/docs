@@ -1,208 +1,146 @@
-import { createCategoryMeta } from "../create-category-meta";
+import type { MetaRecord } from "nextra";
 
-export default createCategoryMeta([
-  {
-    slug: "asana",
+const meta: MetaRecord = {
+  "-- Optimized": {
+    type: "separator",
+    title: "Optimized",
+  },
+  asana: {
     title: "Asana",
     href: "/en/resources/integrations/productivity/asana",
-    type: "arcade",
   },
-  {
-    slug: "clickup",
+  clickup: {
     title: "ClickUp",
     href: "/en/resources/integrations/productivity/clickup",
-    type: "arcade",
   },
-  {
-    slug: "confluence",
+  confluence: {
     title: "Confluence",
     href: "/en/resources/integrations/productivity/confluence",
-    type: "arcade",
   },
-  {
-    slug: "dropbox",
+  dropbox: {
     title: "Dropbox",
     href: "/en/resources/integrations/productivity/dropbox",
-    type: "arcade",
   },
-  {
-    slug: "gmail",
+  gmail: {
     title: "Gmail",
     href: "/en/resources/integrations/productivity/gmail",
-    type: "arcade",
   },
-  {
-    slug: "google-calendar",
+  "google-calendar": {
     title: "Google Calendar",
     href: "/en/resources/integrations/productivity/google-calendar",
-    type: "arcade",
   },
-  {
-    slug: "google-contacts",
+  "google-contacts": {
     title: "Google Contacts",
     href: "/en/resources/integrations/productivity/google-contacts",
-    type: "arcade",
   },
-  {
-    slug: "google-docs",
+  "google-docs": {
     title: "Google Docs",
     href: "/en/resources/integrations/productivity/google-docs",
-    type: "arcade",
   },
-  {
-    slug: "google-drive",
+  "google-drive": {
     title: "Google Drive",
     href: "/en/resources/integrations/productivity/google-drive",
-    type: "arcade",
   },
-  {
-    slug: "google-sheets",
+  "google-sheets": {
     title: "Google Sheets",
     href: "/en/resources/integrations/productivity/google-sheets",
-    type: "arcade",
   },
-  {
-    slug: "google-slides",
+  "google-slides": {
     title: "Google Slides",
     href: "/en/resources/integrations/productivity/google-slides",
-    type: "arcade",
   },
-  {
-    slug: "jira",
+  jira: {
     title: "Jira",
     href: "/en/resources/integrations/productivity/jira",
-    type: "auth",
   },
-  {
-    slug: "linear",
+  linear: {
     title: "Linear",
     href: "/en/resources/integrations/productivity/linear",
-    type: "arcade",
   },
-  {
-    slug: "microsoft-excel",
+  "microsoft-excel": {
     title: "Microsoft Excel",
     href: "/en/resources/integrations/productivity/microsoft-excel",
-    type: "arcade",
   },
-  {
-    slug: "microsoft-onedrive",
+  "microsoft-onedrive": {
     title: "Microsoft OneDrive",
     href: "/en/resources/integrations/productivity/microsoft-onedrive",
-    type: "arcade",
   },
-  {
-    slug: "microsoft-powerpoint",
+  "microsoft-powerpoint": {
     title: "Microsoft PowerPoint",
     href: "/en/resources/integrations/productivity/microsoft-powerpoint",
-    type: "arcade",
   },
-  {
-    slug: "sharepoint",
+  sharepoint: {
     title: "Microsoft SharePoint",
     href: "/en/resources/integrations/productivity/sharepoint",
-    type: "arcade",
   },
-  {
-    slug: "microsoft-word",
+  "microsoft-word": {
     title: "Microsoft Word",
     href: "/en/resources/integrations/productivity/microsoft-word",
-    type: "arcade",
   },
-  {
-    slug: "outlook-calendar",
+  "outlook-calendar": {
     title: "Outlook Calendar",
     href: "/en/resources/integrations/productivity/outlook-calendar",
-    type: "arcade",
   },
-  {
-    slug: "outlook-mail",
+  "outlook-mail": {
     title: "Outlook Mail",
     href: "/en/resources/integrations/productivity/outlook-mail",
-    type: "arcade",
   },
-  {
-    slug: "airtable-api",
+  "-- Starter": {
+    type: "separator",
+    title: "Starter",
+  },
+  "airtable-api": {
     title: "Airtable API",
     href: "/en/resources/integrations/productivity/airtable-api",
-    type: "arcade_starter",
   },
-  {
-    slug: "asana-api",
+  "asana-api": {
     title: "Asana API",
     href: "/en/resources/integrations/productivity/asana-api",
-    type: "arcade_starter",
   },
-  {
-    slug: "ashby-api",
+  "ashby-api": {
     title: "Ashby API",
     href: "/en/resources/integrations/productivity/ashby-api",
-    type: "arcade_starter",
   },
-  {
-    slug: "box-api",
+  "box-api": {
     title: "Box API",
     href: "/en/resources/integrations/productivity/box-api",
-    type: "arcade_starter",
   },
-  {
-    slug: "calendly-api",
+  "calendly-api": {
     title: "Calendly API",
     href: "/en/resources/integrations/productivity/calendly-api",
-    type: "arcade_starter",
   },
-  {
-    slug: "clickup-api",
+  "clickup-api": {
     title: "ClickUp API",
     href: "/en/resources/integrations/productivity/clickup-api",
-    type: "arcade_starter",
   },
-  {
-    slug: "figma-api",
+  "figma-api": {
     title: "Figma API",
     href: "/en/resources/integrations/productivity/figma-api",
-    type: "arcade_starter",
   },
-  {
-    slug: "luma-api",
+  "luma-api": {
     title: "Luma API",
     href: "/en/resources/integrations/productivity/luma-api",
-    type: "arcade_starter",
   },
-  {
-    slug: "mailchimp-api",
-    title: "Mailchimp API",
-    href: "/en/resources/integrations/productivity/mailchimp-api",
-    type: "arcade_starter",
-  },
-  {
-    slug: "miro-api",
+  "miro-api": {
     title: "Miro API",
     href: "/en/resources/integrations/productivity/miro-api",
-    type: "arcade_starter",
   },
-  {
-    slug: "squareup-api",
+  "squareup-api": {
     title: "SquareUp API",
     href: "/en/resources/integrations/productivity/squareup-api",
-    type: "arcade_starter",
   },
-  {
-    slug: "ticktick-api",
+  "ticktick-api": {
     title: "TickTick API",
     href: "/en/resources/integrations/productivity/ticktick-api",
-    type: "arcade_starter",
   },
-  {
-    slug: "trello-api",
+  "trello-api": {
     title: "Trello API",
     href: "/en/resources/integrations/productivity/trello-api",
-    type: "arcade_starter",
   },
-  {
-    slug: "xero-api",
+  "xero-api": {
     title: "Xero API",
     href: "/en/resources/integrations/productivity/xero-api",
-    type: "arcade_starter",
   },
-]);
+};
+
+export default meta;
