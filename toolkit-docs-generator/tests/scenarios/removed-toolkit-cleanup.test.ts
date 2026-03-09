@@ -120,8 +120,7 @@ describe("Scenario: Removed toolkit files are deleted after change detection", (
 
     expect(result.deleted).toEqual(["oldkit.json"]);
     const remaining = await readdir(dir);
-    expect(remaining).not.toContain("oldkit.json");
-    expect(remaining).toContain("github.json");
+    expect(remaining.sort()).toEqual(["github.json", "index.json"].sort());
   });
 
   it("deletes all JSON files for multiple toolkits removed from the API", async () => {
@@ -152,9 +151,7 @@ describe("Scenario: Removed toolkit files are deleted after change detection", (
       ["complextools.json", "deepwiki.json"].sort()
     );
     const remaining = await readdir(dir);
-    expect(remaining).toContain("github.json");
-    expect(remaining).not.toContain("deepwiki.json");
-    expect(remaining).not.toContain("complextools.json");
+    expect(remaining.sort()).toEqual(["github.json", "index.json"].sort());
   });
 
   it("never deletes unchanged or modified toolkits — only removed ones", async () => {
@@ -192,9 +189,9 @@ describe("Scenario: Removed toolkit files are deleted after change detection", (
 
     expect(result.deleted).toEqual(["gonekit.json"]);
     const remaining = await readdir(dir);
-    expect(remaining).toContain("github.json");
-    expect(remaining).toContain("slack.json");
-    expect(remaining).not.toContain("gonekit.json");
+    expect(remaining.sort()).toEqual(
+      ["github.json", "slack.json", "index.json"].sort()
+    );
   });
 
   it("rebuilds index.json that no longer lists the removed toolkit", async () => {
@@ -249,8 +246,9 @@ describe("Scenario: Removed toolkit files are deleted after change detection", (
 
     expect(result.deleted).toHaveLength(0);
     const remaining = await readdir(dir);
-    expect(remaining).toContain("github.json");
-    expect(remaining).toContain("slack.json");
+    expect(remaining.sort()).toEqual(
+      ["github.json", "slack.json", "index.json"].sort()
+    );
   });
 
   it("handles mixed-case toolkit IDs: diff returns CamelCase, file on disk is lowercase", async () => {
@@ -280,8 +278,7 @@ describe("Scenario: Removed toolkit files are deleted after change detection", (
 
     expect(result.deleted).toEqual(["googlecalendar.json"]);
     const remaining = await readdir(dir);
-    expect(remaining).not.toContain("googlecalendar.json");
-    expect(remaining).toContain("slack.json");
+    expect(remaining.sort()).toEqual(["slack.json", "index.json"].sort());
   });
 
   it("treats a zero-tools API response as removed and deletes the stale file", async () => {
@@ -312,8 +309,7 @@ describe("Scenario: Removed toolkit files are deleted after change detection", (
 
     expect(result.deleted).toEqual(["brokenkit.json"]);
     const remaining = await readdir(dir);
-    expect(remaining).not.toContain("brokenkit.json");
-    expect(remaining).toContain("github.json");
+    expect(remaining.sort()).toEqual(["github.json", "index.json"].sort());
   });
 
   it("merging removed IDs with pre-existing exclusions deletes each file exactly once", async () => {
@@ -345,5 +341,7 @@ describe("Scenario: Removed toolkit files are deleted after change detection", (
 
     expect(result.deleted).toEqual(["oldkit.json"]);
     expect(result.warnings).toHaveLength(0);
+    const remaining = await readdir(dir);
+    expect(remaining.sort()).toEqual(["github.json", "index.json"].sort());
   });
 });
