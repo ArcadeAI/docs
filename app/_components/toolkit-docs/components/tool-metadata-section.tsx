@@ -2,6 +2,7 @@
 
 import { Badge } from "@arcadeai/design-system";
 import { Check, ChevronDown, Lightbulb, Minus, X } from "lucide-react";
+import { GlossaryTerm } from "../../glossary-term";
 import {
   TOOL_METADATA_FALLBACK_STYLE,
   TOOL_METADATA_OPERATION_STYLES,
@@ -19,10 +20,29 @@ const BEHAVIOR_LABELS: Record<BehaviorFlagKey, string> = {
 };
 
 const BEHAVIOR_DESCRIPTIONS: Record<BehaviorFlagKey, string> = {
-  readOnly: "Does not modify remote state.",
-  destructive: "May delete or overwrite remote data.",
-  idempotent: "Safe to retry without extra side effects.",
-  openWorld: "Can call out to external systems.",
+  readOnly: "Reads data without modifying any state in the target system.",
+  destructive: "May permanently delete or overwrite data in the target system.",
+  idempotent:
+    "Repeated calls with the same inputs produce no additional effect.",
+  openWorld: "Communicates with external APIs, databases, or other services.",
+};
+
+const BEHAVIOR_GLOSSARY: Record<BehaviorFlagKey, { definition: string }> = {
+  readOnly: {
+    definition: "If true, the tool does not modify its environment.",
+  },
+  destructive: {
+    definition:
+      "If true, the tool may perform destructive updates to its environment. If false, the tool performs only additive updates.",
+  },
+  idempotent: {
+    definition:
+      "If true, calling the tool repeatedly with the same arguments will have no additional effect on its environment.",
+  },
+  openWorld: {
+    definition:
+      "If true, this tool may interact with an open world of external entities. If false, the tool's domain of interaction is closed.",
+  },
 };
 
 export type BehaviorRow = {
@@ -194,7 +214,10 @@ export function ToolMetadataSection({
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-medium text-foreground text-xs">
-                      {row.label}
+                      <GlossaryTerm
+                        definition={BEHAVIOR_GLOSSARY[row.key].definition}
+                        term={row.label}
+                      />
                     </span>
                     <div className="flex shrink-0">
                       <BooleanBadge value={row.value} />
