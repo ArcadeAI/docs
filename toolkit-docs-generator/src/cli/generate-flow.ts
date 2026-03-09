@@ -15,6 +15,28 @@ export const collectRemovedToolkitIds = (
       .map((c) => c.toolkitId.toLowerCase())
   );
 
+/**
+ * Determine which removed toolkit IDs should be auto-deleted.
+ *
+ * Removed IDs that are present in ignoredToolkitIds are excluded — their JSON
+ * files should be preserved. This protects toolkits that exist in the Engine
+ * API but temporarily lack Design System entries (which causes them to appear
+ * "removed" when --require-complete is active), as well as toolkits whose API
+ * status is pending team confirmation.
+ */
+export const resolveAutoCleanupCandidates = (
+  result: ChangeDetectionResult,
+  ignoredToolkitIds: ReadonlySet<string>
+): Set<string> => {
+  const candidates = new Set<string>();
+  for (const id of collectRemovedToolkitIds(result)) {
+    if (!ignoredToolkitIds.has(id)) {
+      candidates.add(id);
+    }
+  }
+  return candidates;
+};
+
 export interface ProcessingStats {
   totalToolkits: number;
   effectiveSkipped: number;

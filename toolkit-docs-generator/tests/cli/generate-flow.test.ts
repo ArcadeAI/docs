@@ -3,6 +3,7 @@ import {
   collectRemovedToolkitIds,
   computeProcessingStats,
   filterProvidersBySkipIds,
+  resolveAutoCleanupCandidates,
 } from "../../src/cli/generate-flow.js";
 import type { ChangeDetectionResult } from "../../src/diff/index.js";
 
@@ -199,5 +200,62 @@ describe("filterProvidersBySkipIds", () => {
     const providerNames = providersToProcess.map((p) => p.provider);
     expect(providerNames).toContain("Slack");
     expect(providerNames).toContain("Jira");
+  });
+});
+
+// ── resolveAutoCleanupCandidates ──────────────────────────────────────────────
+
+describe("resolveAutoCleanupCandidates", () => {
+  it("returns removed toolkit IDs when none are ignored", () => {
+    const result = makeResult([
+      { toolkitId: "Github", changeType: "removed" },
+      { toolkitId: "Slack", changeType: "removed" },
+    ]);
+    const candidates = resolveAutoCleanupCandidates(result, new Set());
+    expect(candidates).toEqual(new Set(["github", "slack"]));
+  });
+
+  it("excludes toolkit IDs that are in the ignored set", () => {
+    const result = makeResult([
+      { toolkitId: "Figma", changeType: "removed" },
+      { toolkitId: "Github", changeType: "removed" },
+    ]);
+    const candidates = resolveAutoCleanupCandidates(result, new Set(["figma"]));
+    expect(candidates).toEqual(new Set(["github"]));
+    expect(candidates).not.toContain("figma");
+  });
+
+  it("returns empty set when all removed toolkits are ignored", () => {
+    const result = makeResult([
+      { toolkitId: "Figma", changeType: "removed" },
+      { toolkitId: "Math", changeType: "removed" },
+    ]);
+    const candidates = resolveAutoCleanupCandidates(
+      result,
+      new Set(["figma", "math"])
+    );
+    expect(candidates.size).toBe(0);
+  });
+
+  it("is case-insensitive when comparing against ignored IDs", () => {
+    const result = makeResult([
+      { toolkitId: "Pagerduty", changeType: "removed" },
+      { toolkitId: "Github", changeType: "removed" },
+    ]);
+    const candidates = resolveAutoCleanupCandidates(
+      result,
+      new Set(["pagerduty"])
+    );
+    expect(candidates).toEqual(new Set(["github"]));
+  });
+
+  it("does not include non-removed toolkits regardless of ignored set", () => {
+    const result = makeResult([
+      { toolkitId: "Modified", changeType: "modified" },
+      { toolkitId: "Added", changeType: "added" },
+      { toolkitId: "Unchanged", changeType: "unchanged" },
+    ]);
+    const candidates = resolveAutoCleanupCandidates(result, new Set());
+    expect(candidates.size).toBe(0);
   });
 });
