@@ -410,11 +410,15 @@ export function generateCategoryMeta(
   };
 
   const sections: string[] = [];
-  if (optimized.length > 0 && starter.length > 0) {
-    sections.push(renderSeparator("Optimized"));
-    sections.push(...optimized.map(renderEntry));
-    sections.push(renderSeparator("Starter"));
-    sections.push(...starter.map(renderEntry));
+  if (optimized.length > 0 || starter.length > 0) {
+    if (optimized.length > 0) {
+      sections.push(renderSeparator("Optimized"));
+      sections.push(...optimized.map(renderEntry));
+    }
+    if (starter.length > 0) {
+      sections.push(renderSeparator("Starter"));
+      sections.push(...starter.map(renderEntry));
+    }
   } else {
     const sortedToolkits = [...toolkits].sort(byLabel);
     sections.push(...sortedToolkits.map(renderEntry));
