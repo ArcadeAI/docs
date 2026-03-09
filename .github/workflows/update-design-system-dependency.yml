@@ -49,12 +49,13 @@ jobs:
 
       - name: Create pull request
         if: steps.check-changes.outputs.has_changes == 'true'
+        id: cpr
         uses: peter-evans/create-pull-request@v7
         env:
           HUSKY: 0
           SKIP_HUSKY: 1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.DOCS_PUBLISHABLE_GH_TOKEN }}
           commit-message: "chore: update @arcadeai/design-system to latest"
           title: "chore: update @arcadeai/design-system to latest"
           body: |
@@ -70,3 +71,10 @@ jobs:
             pnpm-lock.yaml
           branch: automation/update-design-system-dependency
           delete-branch: true
+
+      - name: Request team review
+        if: steps.check-changes.outputs.has_changes == 'true' && steps.cpr.outputs.pull-request-number != ''
+        continue-on-error: true
+        run: gh pr edit ${{ steps.cpr.outputs.pull-request-number }} --add-reviewer ArcadeAI/engineering-tools-and-dx
+        env:
+          GH_TOKEN: ${{ secrets.DOCS_PUBLISHABLE_GH_TOKEN }}

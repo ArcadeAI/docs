@@ -68,6 +68,12 @@ export function AgentFrameworkTabs() {
             name="Vercel AI"
             type="Agent Framework"
           />
+          <PlatformCard
+            icon="https://avatars.githubusercontent.com/u/72518640?s=200&v=4"
+            link="/en/get-started/agent-frameworks/tanstack-ai"
+            name="TanStack AI"
+            type="Agent Framework"
+          />
         </div>
       </Tabs.Tab>
     </Tabs>

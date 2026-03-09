@@ -1,0 +1,537 @@
+{
+  "id": "Mongodb",
+  "label": "MongoDB",
+  "version": "0.4.0",
+  "description": "Tools to query and explore a MongoDB database",
+  "metadata": {
+    "category": "databases",
+    "iconUrl": "https://design-system.arcade.dev/icons/mongodb.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "community",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/databases/mongodb",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": null,
+  "tools": [
+    {
+      "name": "AggregateDocuments",
+      "qualifiedName": "Mongodb.AggregateDocuments",
+      "fullyQualifiedName": "Mongodb.AggregateDocuments@0.4.0",
+      "description": "Execute a MongoDB aggregation pipeline on a collection.\n\nONLY use this tool if you have already loaded the schema of the collection you need to query.\nUse the <get_collection_schema> tool to load the schema if not already known.\n\nReturns a list of JSON strings, where each string represents a result document from the aggregation (tools cannot return complex types).\n\nAggregation pipelines allow for complex data processing including:\n* $match - filter documents\n* $group - group documents and perform calculations\n* $project - reshape documents\n* $sort - sort documents\n* $limit - limit results\n* $lookup - join with other collections\n* And many more stages",
+      "parameters": [
+        {
+          "name": "database_name",
+          "type": "string",
+          "required": true,
+          "description": "The database name to query",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "collection_name",
+          "type": "string",
+          "required": true,
+          "description": "The collection name to query",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "pipeline",
+          "type": "array",
+          "innerType": "string",
+          "required": true,
+          "description": "MongoDB aggregation pipeline as a list of JSON strings, each representing a stage. Example: ['{\"$match\": {\"status\": \"active\"}}', '{\"$group\": {\"_id\": \"$category\", \"count\": {\"$sum\": 1}}}']",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of results to return from the aggregation. Default: 1000.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "MONGODB_CONNECTION_STRING"
+      ],
+      "secretsInfo": [
+        {
+          "name": "MONGODB_CONNECTION_STRING",
+          "type": "password"
+        }
+      ],
+      "output": {
+        "type": "array",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Mongodb.AggregateDocuments",
+        "parameters": {
+          "database_name": {
+            "value": "shopDB",
+            "type": "string",
+            "required": true
+          },
+          "collection_name": {
+            "value": "orders",
+            "type": "string",
+            "required": true
+          },
+          "pipeline": {
+            "value": [
+              "{\"$match\": {\"status\": \"completed\"}}",
+              "{\"$unwind\": \"$items\"}",
+              "{\"$group\": {\"_id\": \"$items.productId\", \"totalQuantity\": {\"$sum\": \"$items.quantity\"}, \"totalSales\": {\"$sum\": {\"$multiply\": [\"$items.quantity\", \"$items.price\"]}}, \"productName\": {\"$first\": \"$items.name\"}}}",
+              "{\"$project\": {\"_id\": 0, \"productId\": \"$_id\", \"productName\": 1, \"totalQuantity\": 1, \"totalSales\": 1}}",
+              "{\"$sort\": {\"totalSales\": -1}}"
+            ],
+            "type": "array",
+            "required": true
+          },
+          "limit": {
+            "value": 10,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CountDocuments",
+      "qualifiedName": "Mongodb.CountDocuments",
+      "fullyQualifiedName": "Mongodb.CountDocuments@0.4.0",
+      "description": "Count documents in a MongoDB collection matching the given filter.",
+      "parameters": [
+        {
+          "name": "database_name",
+          "type": "string",
+          "required": true,
+          "description": "The database name to query",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "collection_name",
+          "type": "string",
+          "required": true,
+          "description": "The collection name to query",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "filter_dict",
+          "type": "string",
+          "required": false,
+          "description": "MongoDB filter/query as JSON string. Leave None for no filter (count all documents). Example: '{\"status\": \"active\"}'",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "MONGODB_CONNECTION_STRING"
+      ],
+      "secretsInfo": [
+        {
+          "name": "MONGODB_CONNECTION_STRING",
+          "type": "password"
+        }
+      ],
+      "output": {
+        "type": "integer",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Mongodb.CountDocuments",
+        "parameters": {
+          "database_name": {
+            "value": "app_db",
+            "type": "string",
+            "required": true
+          },
+          "collection_name": {
+            "value": "users",
+            "type": "string",
+            "required": true
+          },
+          "filter_dict": {
+            "value": "{\"status\": \"active\"}",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "DiscoverCollections",
+      "qualifiedName": "Mongodb.DiscoverCollections",
+      "fullyQualifiedName": "Mongodb.DiscoverCollections@0.4.0",
+      "description": "Discover all the collections in the MongoDB database when the list of collections is not known.\n\nALWAYS use this tool before any other tool that requires a collection name.",
+      "parameters": [
+        {
+          "name": "database_name",
+          "type": "string",
+          "required": true,
+          "description": "The database name to discover collections in",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "MONGODB_CONNECTION_STRING"
+      ],
+      "secretsInfo": [
+        {
+          "name": "MONGODB_CONNECTION_STRING",
+          "type": "password"
+        }
+      ],
+      "output": {
+        "type": "array",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Mongodb.DiscoverCollections",
+        "parameters": {
+          "database_name": {
+            "value": "example_database",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "DiscoverDatabases",
+      "qualifiedName": "Mongodb.DiscoverDatabases",
+      "fullyQualifiedName": "Mongodb.DiscoverDatabases@0.4.0",
+      "description": "Discover all the databases in the MongoDB instance.",
+      "parameters": [],
+      "auth": null,
+      "secrets": [
+        "MONGODB_CONNECTION_STRING"
+      ],
+      "secretsInfo": [
+        {
+          "name": "MONGODB_CONNECTION_STRING",
+          "type": "password"
+        }
+      ],
+      "output": {
+        "type": "array",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Mongodb.DiscoverDatabases",
+        "parameters": {},
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "FindDocuments",
+      "qualifiedName": "Mongodb.FindDocuments",
+      "fullyQualifiedName": "Mongodb.FindDocuments@0.4.0",
+      "description": "Find documents in a MongoDB collection.\n\nONLY use this tool if you have already loaded the schema of the collection you need to query.\nUse the <get_collection_schema> tool to load the schema if not already known.\n\nReturns a list of JSON strings, where each string represents a document from the collection (tools cannot return complex types).\n\nWhen running queries, follow these rules which will help avoid errors:\n* Always specify projection to limit fields returned if you don't need all data.\n* Always sort your results by the most important fields first. If you aren't sure, sort by '_id'.\n* Use appropriate MongoDB query operators for complex filtering ($gte, $lte, $in, $regex, etc.).\n* Be mindful of case sensitivity when querying string fields.\n* Use indexes when possible (typically on _id and commonly queried fields).",
+      "parameters": [
+        {
+          "name": "database_name",
+          "type": "string",
+          "required": true,
+          "description": "The database name to query",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "collection_name",
+          "type": "string",
+          "required": true,
+          "description": "The collection name to query",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "filter_dict",
+          "type": "string",
+          "required": false,
+          "description": "MongoDB filter/query as JSON string. Leave None for no filter (find all documents). Example: '{\"status\": \"active\", \"age\": {\"$gte\": 18}}'",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "projection",
+          "type": "string",
+          "required": false,
+          "description": "Fields to include/exclude as JSON string. Use 1 to include, 0 to exclude. Example: '{\"name\": 1, \"email\": 1, \"_id\": 0}'. Leave None to include all fields.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sort",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Sort criteria as list of JSON strings, each containing 'field' and 'direction' keys. Use 1 for ascending, -1 for descending. Example: ['{\"field\": \"name\", \"direction\": 1}', '{\"field\": \"created_at\", \"direction\": -1}']",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of documents to return. Default: 1000.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "skip",
+          "type": "integer",
+          "required": false,
+          "description": "The number of documents to skip. Default: 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "MONGODB_CONNECTION_STRING"
+      ],
+      "secretsInfo": [
+        {
+          "name": "MONGODB_CONNECTION_STRING",
+          "type": "password"
+        }
+      ],
+      "output": {
+        "type": "array",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Mongodb.FindDocuments",
+        "parameters": {
+          "database_name": {
+            "value": "ecommerce",
+            "type": "string",
+            "required": true
+          },
+          "collection_name": {
+            "value": "orders",
+            "type": "string",
+            "required": true
+          },
+          "filter_dict": {
+            "value": "{\"status\": \"shipped\", \"total\": {\"$gte\": 100}}",
+            "type": "string",
+            "required": false
+          },
+          "projection": {
+            "value": "{\"order_id\": 1, \"customer_id\": 1, \"total\": 1, \"status\": 1, \"created_at\": 1, \"_id\": 0}",
+            "type": "string",
+            "required": false
+          },
+          "sort": {
+            "value": [
+              "{\"field\": \"created_at\", \"direction\": -1}",
+              "{\"field\": \"total\", \"direction\": -1}"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "skip": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetCollectionSchema",
+      "qualifiedName": "Mongodb.GetCollectionSchema",
+      "fullyQualifiedName": "Mongodb.GetCollectionSchema@0.4.0",
+      "description": "Get the schema/structure of a MongoDB collection by sampling documents.\n\nSince MongoDB is schema-less, this tool samples a configurable number of documents\nto infer the schema structure and data types.\n\nThis tool should ALWAYS be used before executing any query. All collections in the query must be discovered first using the <discover_collections> tool.",
+      "parameters": [
+        {
+          "name": "database_name",
+          "type": "string",
+          "required": true,
+          "description": "The database name to get the collection schema of",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "collection_name",
+          "type": "string",
+          "required": true,
+          "description": "The collection to get the schema of",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sample_size",
+          "type": "integer",
+          "required": false,
+          "description": "The number of documents to sample for schema discovery (default: 1000)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "MONGODB_CONNECTION_STRING"
+      ],
+      "secretsInfo": [
+        {
+          "name": "MONGODB_CONNECTION_STRING",
+          "type": "password"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Mongodb.GetCollectionSchema",
+        "parameters": {
+          "database_name": {
+            "value": "sales_db",
+            "type": "string",
+            "required": true
+          },
+          "collection_name": {
+            "value": "orders",
+            "type": "string",
+            "required": true
+          },
+          "sample_size": {
+            "value": 500,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": false,
+        "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": []
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-03-01T11:12:23.245Z",
+  "summary": "Arcade's MongoDB toolkit provides tools to query and explore MongoDB instances. It enables schema sampling, collection discovery, filtered reads, counts, and aggregation pipelines for data exploration and analytics.\n\n**Capabilities**\n- Discover databases/collections and sample documents to infer schema structure before querying.\n- Perform efficient reads with projection, sorting and complex filtering to limit payloads and improve performance.\n- Execute aggregation pipelines for transformations, joins, grouping and analytics workflows.\n- Follow operational best practices: always discover collections first, fetch collection schema before queries, use indexes and limit returned fields.\n\n**Secrets**\n- password: MONGODB_CONNECTION_STRING — a connection string/credentials (e.g., mongodb+srv://user:password@cluster.example.com/db). Store securely and supply at runtime."
+}

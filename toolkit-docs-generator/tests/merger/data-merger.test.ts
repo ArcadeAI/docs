@@ -1488,5 +1488,45 @@ describe("DataMerger", () => {
 
       expect(results).toHaveLength(0);
     });
+
+    it("skips toolkits listed in skipToolkitIds without affecting others", async () => {
+      const googleTool = createTool({
+        name: "Search",
+        qualifiedName: "Google.Search",
+        fullyQualifiedName: "Google.Search@1.0.0",
+        auth: { providerId: "google", providerType: "oauth2", scopes: [] },
+      });
+      const googleMetadata = createMetadata({
+        id: "Google",
+        label: "Google",
+        category: "search",
+      });
+
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([googleTool, slackTool]),
+        metadataSource: new InMemoryMetadataSource([
+          googleMetadata,
+          slackMetadata,
+        ]),
+      });
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        skipToolkitIds: new Set(["google"]),
+      });
+
+      const count = await merger.getToolkitCount();
+      const results = await merger.mergeAllToolkits();
+
+      expect(count.total).toBe(2);
+      expect(count.skipped).toBe(1);
+      expect(count.toProcess).toBe(1);
+
+      expect(results).toHaveLength(1);
+      const ids = results.map((r) => r.toolkit.id);
+      expect(ids).not.toContain("Google");
+      expect(ids).toContain("Slack");
+    });
   });
 });

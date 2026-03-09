@@ -170,21 +170,12 @@ For tools with no external service and no resource effects, `operations` can be 
 
 These four booleans are projected directly to MCP tool annotations. Always specify all four for production metadata.
 
-**`read_only`** -- Does this tool only observe, with zero side effects?
-
-Set `True` when the tool never mutates any state in the target system. If there's any doubt, set it to `False`.
-
-**`destructive`** -- Can this tool cause irreversible data loss?
-
-Set `True` when the tool can delete or permanently destroy data. Be conservative -- when in doubt, mark it `True`. Even soft-deletes that auto-purge should be `destructive=True`. The exception: archive operations that are fully reversible should use `Operation.UPDATE` with `destructive=False`.
-
-**`idempotent`** -- If you call this tool twice with the same input, does the second call change anything?
-
-Set `True` when repeated calls with identical input produce no additional effect. A practical test: would an accidental retry cause a problem? If no, it's idempotent. If it would create a duplicate, it's not.
-
-**`open_world`** -- Does this tool talk to anything outside the process?
-
-Set `True` for any tool that calls an external API, queries a database, or accesses a file system. Set `False` only for pure computation with no network, disk, or OS calls.
+| Flag | Default | Description |
+| --- | --- | --- |
+| `read_only` | `False` | If true, the tool does not modify its environment. |
+| `destructive` | `True` | If true, the tool may perform destructive updates to its environment. If false, the tool performs only additive updates. Only meaningful when `read_only=False`. |
+| `idempotent` | `False` | If true, calling the tool repeatedly with the same arguments will have no additional effect on its environment. Only meaningful when `read_only=False`. |
+| `open_world` | `True` | If true, this tool may interact with an open world of external entities. If false, the tool's domain of interaction is closed. For example, the world of a web search tool is open, whereas that of a memory tool is not. |
 
 ### Flag-to-annotation mapping
 

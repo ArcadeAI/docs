@@ -1,7 +1,7 @@
 {
   "id": "Brightdata",
   "label": "Bright Data",
-  "version": "0.2.0",
+  "version": "0.5.0",
   "description": "Search, Crawl and Scrape any site, at scale, without getting blocked",
   "metadata": {
     "category": "development",
@@ -9,7 +9,7 @@
     "isBYOC": true,
     "isPro": false,
     "type": "community",
-    "docsLink": "https://docs.arcade.dev/en/mcp-servers/development/brightdata",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/development/brightdata",
     "isComingSoon": false,
     "isHidden": false
   },
@@ -18,7 +18,7 @@
     {
       "name": "ScrapeAsMarkdown",
       "qualifiedName": "Brightdata.ScrapeAsMarkdown",
-      "fullyQualifiedName": "Brightdata.ScrapeAsMarkdown@0.2.0",
+      "fullyQualifiedName": "Brightdata.ScrapeAsMarkdown@0.5.0",
       "description": "    Scrape a webpage and return content in Markdown format using Bright Data.\n\n    Examples:\n        scrape_as_markdown(\"https://example.com\") -> \"# Example Page\n\nContent...\"\n        scrape_as_markdown(\"https://news.ycombinator.com\") -> \"# Hacker News\n...\"\n    ",
       "parameters": [
         {
@@ -31,7 +31,10 @@
         }
       ],
       "auth": null,
-      "secrets": ["BRIGHTDATA_API_KEY", "BRIGHTDATA_ZONE"],
+      "secrets": [
+        "BRIGHTDATA_API_KEY",
+        "BRIGHTDATA_ZONE"
+      ],
       "secretsInfo": [
         {
           "name": "BRIGHTDATA_API_KEY",
@@ -39,7 +42,7 @@
         },
         {
           "name": "BRIGHTDATA_ZONE",
-          "type": "unknown"
+          "type": "token"
         }
       ],
       "output": {
@@ -51,19 +54,36 @@
         "toolName": "Brightdata.ScrapeAsMarkdown",
         "parameters": {
           "url": {
-            "value": "https://example.com",
+            "value": "https://news.ycombinator.com",
             "type": "string",
             "required": true
           }
         },
         "requiresAuth": false,
         "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "web_scraping"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
       }
     },
     {
       "name": "SearchEngine",
       "qualifiedName": "Brightdata.SearchEngine",
-      "fullyQualifiedName": "Brightdata.SearchEngine@0.2.0",
+      "fullyQualifiedName": "Brightdata.SearchEngine@0.5.0",
       "description": "    Search using Google, Bing, or Yandex with advanced parameters using Bright Data.\n\n    Examples:\n        search_engine(\"climate change\") -> \"# Search Results\n\n## Climate Change - Wikipedia\n...\"\n        search_engine(\"Python tutorials\", engine=\"bing\", num_results=5) -> \"# Bing Results\n...\"\n        search_engine(\"cats\", search_type=\"images\", country_code=\"us\") -> \"# Image Results\n...\"\n    ",
       "parameters": [
         {
@@ -79,7 +99,11 @@
           "type": "string",
           "required": false,
           "description": "Search engine to use",
-          "enum": ["google", "bing", "yandex"],
+          "enum": [
+            "google",
+            "bing",
+            "yandex"
+          ],
           "inferrable": true
         },
         {
@@ -103,7 +127,12 @@
           "type": "string",
           "required": false,
           "description": "Type of search",
-          "enum": ["images", "shopping", "news", "jobs"],
+          "enum": [
+            "images",
+            "shopping",
+            "news",
+            "jobs"
+          ],
           "inferrable": true
         },
         {
@@ -155,7 +184,10 @@
         }
       ],
       "auth": null,
-      "secrets": ["BRIGHTDATA_API_KEY", "BRIGHTDATA_ZONE"],
+      "secrets": [
+        "BRIGHTDATA_API_KEY",
+        "BRIGHTDATA_ZONE"
+      ],
       "secretsInfo": [
         {
           "name": "BRIGHTDATA_API_KEY",
@@ -163,7 +195,7 @@
         },
         {
           "name": "BRIGHTDATA_ZONE",
-          "type": "unknown"
+          "type": "token"
         }
       ],
       "output": {
@@ -175,7 +207,7 @@
         "toolName": "Brightdata.SearchEngine",
         "parameters": {
           "query": {
-            "value": "climate change",
+            "value": "climate change effects",
             "type": "string",
             "required": true
           },
@@ -210,7 +242,7 @@
             "required": false
           },
           "location": {
-            "value": "California",
+            "value": "San Francisco, CA",
             "type": "string",
             "required": false
           },
@@ -227,12 +259,29 @@
         },
         "requiresAuth": false,
         "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "web_scraping"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
       }
     },
     {
       "name": "WebDataFeed",
       "qualifiedName": "Brightdata.WebDataFeed",
-      "fullyQualifiedName": "Brightdata.WebDataFeed@0.2.0",
+      "fullyQualifiedName": "Brightdata.WebDataFeed@0.5.0",
       "description": "Extract structured data from various websites like LinkedIn, Amazon, Instagram, etc.\nNEVER MADE UP LINKS - IF LINKS ARE NEEDED, EXECUTE search_engine FIRST.\nSupported source types:\n- amazon_product, amazon_product_reviews\n- linkedin_person_profile, linkedin_company_profile\n- zoominfo_company_profile\n- instagram_profiles, instagram_posts, instagram_reels, instagram_comments\n- facebook_posts, facebook_marketplace_listings, facebook_company_reviews\n- x_posts\n- zillow_properties_listing\n- booking_hotel_listings\n- youtube_videos\n\nExamples:\n    web_data_feed(\"amazon_product\", \"https://amazon.com/dp/B08N5WRWNW\")\n        -> \"{\"title\": \"Product Name\", ...}\"\n    web_data_feed(\"linkedin_person_profile\", \"https://linkedin.com/in/johndoe\")\n        -> \"{\"name\": \"John Doe\", ...}\"\n    web_data_feed(\n        \"facebook_company_reviews\", \"https://facebook.com/company\", num_of_reviews=50\n    ) -> \"[{\"review\": \"...\", ...}]\"",
       "parameters": [
         {
@@ -294,7 +343,9 @@
         }
       ],
       "auth": null,
-      "secrets": ["BRIGHTDATA_API_KEY"],
+      "secrets": [
+        "BRIGHTDATA_API_KEY"
+      ],
       "secretsInfo": [
         {
           "name": "BRIGHTDATA_API_KEY",
@@ -310,22 +361,22 @@
         "toolName": "Brightdata.WebDataFeed",
         "parameters": {
           "source_type": {
-            "value": "amazon_product",
+            "value": "linkedin_person_profile",
             "type": "string",
             "required": true
           },
           "url": {
-            "value": "https://amazon.com/dp/B09G3HR42Z",
+            "value": "https://www.linkedin.com/in/{profile_id}",
             "type": "string",
             "required": true
           },
           "num_of_reviews": {
-            "value": 25,
+            "value": null,
             "type": "integer",
             "required": false
           },
           "timeout": {
-            "value": 30,
+            "value": 120,
             "type": "integer",
             "required": false
           },
@@ -337,19 +388,29 @@
         },
         "requiresAuth": false,
         "tabLabel": "Call the Tool"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "web_scraping"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
       }
     }
   ],
-  "documentationChunks": [
-    {
-      "type": "section",
-      "location": "custom_section",
-      "position": "after",
-      "content": "## Secrets\n\nThis tool requires the following secrets:\n\n- `BRIGHTDATA_API_KEY`\n- `BRIGHTDATA_ZONE`\n\n### Auth\n\nThe Arcade Bright Data MCP Server uses [Bright Data](https://brightdata.com/) to access proxy networks and web scraping infrastructure.\n\n**Global Environment Variables:**\n\n- `BRIGHTDATA_API_KEY`: Your Bright Data API key. You can generate this from your [Bright Data dashboard](https://brightdata.com/cp/zones) under Account Settings → API Access.\n\n- `BRIGHTDATA_ZONE`: Your Bright Data zone name (e.g., `residential_proxy1`). This is the zone identifier you created in your Bright Data dashboard under Proxies & Scraping Infrastructure → Zones.\n\n**How to get your credentials:**\n\n1. **API Key**: Navigate to your [Bright Data Control Panel](https://brightdata.com/cp) → Settings → API Access → Generate API Token\n2. **Zone**: Go to Zones section in your dashboard, find your zone name in the format shown in the zone username: `brd-customer-{customer_id}-zone-{zone_name}`\n\nFor more details, see the [Bright Data API Documentation](https://docs.brightdata.com/api-reference).",
-      "header": "## Secrets"
-    }
-  ],
+  "documentationChunks": [],
   "customImports": [],
   "subPages": [],
-  "generatedAt": "2026-01-26T17:26:59.556Z"
+  "generatedAt": "2026-03-01T11:12:08.063Z",
+  "summary": "Bright Data provides a developer toolkit for large-scale web search, crawling, and scraping, enabling reliable extraction of pages and structured data without getting blocked. It supports search queries, content-to-Markdown conversion, and configurable data feeds across many site types.\n\nDesigned for integration into data pipelines and analytics workflows with parameterized feeds and output formats.\n\n**Capabilities**\n- Scale-resistant crawling and scraping with anti-blocking behavior for sustained collection.\n- Flexible search engine queries with advanced parameters across major engines.\n- Transform pages into clean Markdown and emit structured JSON feeds for profiles, products, reviews, listings, and media.\n- Configurable extraction parameters for batching, pagination, and media handling.\n\n**Secrets**\n- API key (BRIGHTDATA_API_KEY) and zone token (BRIGHTDATA_ZONE). Example values: BRIGHTDATA_API_KEY=sk_..., BRIGHTDATA_ZONE=zone123."
 }

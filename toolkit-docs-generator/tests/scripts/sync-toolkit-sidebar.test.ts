@@ -524,6 +524,89 @@ describe("generateCategoryMeta", () => {
     expect(result).not.toContain(",\n,"); // No trailing comma issues
   });
 
+  it("adds Optimized separator even when no starter entries exist", () => {
+    const toolkits: ToolkitInfo[] = [
+      {
+        id: "imgflip",
+        slug: "imgflip",
+        label: "Imgflip",
+        category: "entertainment",
+        navGroup: "optimized",
+      },
+      {
+        id: "spotify",
+        slug: "spotify",
+        label: "Spotify",
+        category: "entertainment",
+        navGroup: "optimized",
+      },
+    ];
+
+    const result = generateCategoryMeta(
+      toolkits,
+      "entertainment",
+      "/en/resources/integrations"
+    );
+
+    expect(result).toContain('"-- Optimized"');
+    expect(result).not.toContain('"-- Starter"');
+    expect(result).toContain("imgflip:");
+    expect(result).toContain("spotify:");
+  });
+
+  it("adds Starter separator even when no optimized entries exist", () => {
+    const toolkits: ToolkitInfo[] = [
+      {
+        id: "my-api",
+        slug: "my-api",
+        label: "My API",
+        category: "productivity",
+        navGroup: "starter",
+      },
+    ];
+
+    const result = generateCategoryMeta(
+      toolkits,
+      "productivity",
+      "/en/resources/integrations"
+    );
+
+    expect(result).not.toContain('"-- Optimized"');
+    expect(result).toContain('"-- Starter"');
+    expect(result).toContain('"my-api":');
+  });
+
+  it("adds both separators when both optimized and starter entries exist", () => {
+    const toolkits: ToolkitInfo[] = [
+      {
+        id: "gmail",
+        slug: "gmail",
+        label: "Gmail",
+        category: "productivity",
+        navGroup: "optimized",
+      },
+      {
+        id: "airtable-api",
+        slug: "airtable-api",
+        label: "Airtable API",
+        category: "productivity",
+        navGroup: "starter",
+      },
+    ];
+
+    const result = generateCategoryMeta(
+      toolkits,
+      "productivity",
+      "/en/resources/integrations"
+    );
+
+    expect(result).toContain('"-- Optimized"');
+    expect(result).toContain('"-- Starter"');
+    const optimizedIndex = result.indexOf('"-- Optimized"');
+    const starterIndex = result.indexOf('"-- Starter"');
+    expect(optimizedIndex).toBeLessThan(starterIndex);
+  });
+
   it("does not mutate the input array", () => {
     const toolkits: ToolkitInfo[] = [
       {

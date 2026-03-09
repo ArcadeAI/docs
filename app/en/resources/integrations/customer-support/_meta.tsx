@@ -5,6 +5,10 @@ const meta: MetaRecord = {
     type: "separator",
     title: "Optimized",
   },
+  pylon: {
+    title: "Pylon",
+    href: "/en/resources/integrations/customer-support/pylon",
+  },
   zendesk: {
     title: "Zendesk",
     href: "/en/resources/integrations/customer-support/zendesk",
@@ -32,6 +36,14 @@ const meta: MetaRecord = {
   "intercom-api": {
     title: "Intercom API",
     href: "/en/resources/integrations/customer-support/intercom-api",
+  },
+  "pagerduty-api": {
+    title: "PagerDuty API",
+    href: "/en/resources/integrations/customer-support/pagerduty-api",
+  },
+  "pylon-api": {
+    title: "Pylon API",
+    href: "/en/resources/integrations/customer-support/pylon-api",
   },
 };
 

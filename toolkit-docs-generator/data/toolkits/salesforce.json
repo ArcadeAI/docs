@@ -1,7 +1,7 @@
 {
   "id": "Salesforce",
   "label": "Salesforce",
-  "version": "2.0.1",
+  "version": "2.2.0",
   "description": "Arcade tools designed for LLMs to interact with Salesforce",
   "metadata": {
     "category": "sales",
@@ -9,7 +9,7 @@
     "isBYOC": false,
     "isPro": false,
     "type": "arcade",
-    "docsLink": "https://docs.arcade.dev/en/mcp-servers/sales/salesforce",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/sales/salesforce",
     "isComingSoon": false,
     "isHidden": false
   },
@@ -23,14 +23,145 @@
       "read_note",
       "read_opportunity",
       "read_task",
-      "write_contact"
+      "read_user",
+      "write_contact",
+      "write_lead",
+      "write_opportunity",
+      "write_task"
     ]
   },
   "tools": [
     {
+      "name": "ConvertLead",
+      "qualifiedName": "Salesforce.ConvertLead",
+      "fullyQualifiedName": "Salesforce.ConvertLead@2.2.0",
+      "description": "Converts a lead into a Contact (and optionally Account + Opportunity).\n\nThis is the canonical lead-to-deal transition in Salesforce. The lead record\nis marked as converted and new Contact/Account/Opportunity records are created.",
+      "parameters": [
+        {
+          "name": "lead_id",
+          "type": "string",
+          "required": true,
+          "description": "The Salesforce ID of the lead to convert.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "account_id",
+          "type": "string",
+          "required": false,
+          "description": "Existing Account ID to link the converted lead to. If omitted, Salesforce creates a new Account from the lead's Company.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "opportunity_name",
+          "type": "string",
+          "required": false,
+          "description": "Name for the new opportunity created during conversion.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "converted_status",
+          "type": "string",
+          "required": false,
+          "description": "The lead status to set upon conversion. Auto-detected if not provided.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "skip_opportunity",
+          "type": "boolean",
+          "required": false,
+          "description": "If true, no opportunity is created during conversion. Defaults to False.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "salesforce",
+        "providerType": "oauth2",
+        "scopes": [
+          "write_lead",
+          "write_contact",
+          "write_opportunity"
+        ]
+      },
+      "secrets": [
+        "SALESFORCE_ORG_SUBDOMAIN",
+        "SALESFORCE_MAX_CONCURRENT_REQUESTS"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SALESFORCE_ORG_SUBDOMAIN",
+          "type": "unknown"
+        },
+        {
+          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Conversion result with new contact, account, and opportunity IDs."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Salesforce.ConvertLead",
+        "parameters": {
+          "lead_id": {
+            "value": "00Q3j00000XyZAbCDE0",
+            "type": "string",
+            "required": true
+          },
+          "account_id": {
+            "value": "0013j00000AbC123DE0",
+            "type": "string",
+            "required": false
+          },
+          "opportunity_name": {
+            "value": "Enterprise Expansion - Q2 2026",
+            "type": "string",
+            "required": false
+          },
+          "converted_status": {
+            "value": "Closed - Converted",
+            "type": "string",
+            "required": false
+          },
+          "skip_opportunity": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "salesforce",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update",
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "CreateContact",
       "qualifiedName": "Salesforce.CreateContact",
-      "fullyQualifiedName": "Salesforce.CreateContact@2.0.1",
+      "fullyQualifiedName": "Salesforce.CreateContact@2.2.0",
       "description": "Creates a contact in Salesforce.",
       "parameters": [
         {
@@ -109,7 +240,9 @@
       "auth": {
         "providerId": "salesforce",
         "providerType": "oauth2",
-        "scopes": ["write_contact"]
+        "scopes": [
+          "write_contact"
+        ]
       },
       "secrets": [
         "SALESFORCE_ORG_SUBDOMAIN",
@@ -181,12 +314,570 @@
         },
         "requiresAuth": true,
         "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CreateLead",
+      "qualifiedName": "Salesforce.CreateLead",
+      "fullyQualifiedName": "Salesforce.CreateLead@2.2.0",
+      "description": "Creates a new lead in Salesforce.\n\nUse this when someone is a potential customer but isn't yet associated with\nan existing account. For contacts under existing accounts, use create_contact.",
+      "parameters": [
+        {
+          "name": "last_name",
+          "type": "string",
+          "required": true,
+          "description": "The last name of the lead.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "company",
+          "type": "string",
+          "required": true,
+          "description": "The company the lead works for.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "first_name",
+          "type": "string",
+          "required": false,
+          "description": "The first name of the lead.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "required": false,
+          "description": "The lead's email address.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "phone",
+          "type": "string",
+          "required": false,
+          "description": "The lead's phone number.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "The lead's job title.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "description": "Initial lead status. Must match the org's configured values. Defaults to the org's default status if not provided.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "lead_source",
+          "type": "string",
+          "required": false,
+          "description": "How this lead originated. Must match the org's configured lead source values.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "industry",
+          "type": "string",
+          "required": false,
+          "description": "The lead's industry.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "Notes about the lead.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "website",
+          "type": "string",
+          "required": false,
+          "description": "The lead's company website.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "salesforce",
+        "providerType": "oauth2",
+        "scopes": [
+          "write_lead"
+        ]
+      },
+      "secrets": [
+        "SALESFORCE_ORG_SUBDOMAIN",
+        "SALESFORCE_MAX_CONCURRENT_REQUESTS"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SALESFORCE_ORG_SUBDOMAIN",
+          "type": "unknown"
+        },
+        {
+          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The created lead ID."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Salesforce.CreateLead",
+        "parameters": {
+          "last_name": {
+            "value": "Garcia",
+            "type": "string",
+            "required": true
+          },
+          "company": {
+            "value": "Greenfield Solutions",
+            "type": "string",
+            "required": true
+          },
+          "first_name": {
+            "value": "Ava",
+            "type": "string",
+            "required": false
+          },
+          "email": {
+            "value": "ava.garcia@greenfield.solutions",
+            "type": "string",
+            "required": false
+          },
+          "phone": {
+            "value": "+1-415-555-0123",
+            "type": "string",
+            "required": false
+          },
+          "title": {
+            "value": "Product Manager",
+            "type": "string",
+            "required": false
+          },
+          "status": {
+            "value": "New",
+            "type": "string",
+            "required": false
+          },
+          "lead_source": {
+            "value": "Website",
+            "type": "string",
+            "required": false
+          },
+          "industry": {
+            "value": "Software",
+            "type": "string",
+            "required": false
+          },
+          "description": {
+            "value": "Requested an enterprise demo and pricing. Interested in integrations with Salesforce and Slack.",
+            "type": "string",
+            "required": false
+          },
+          "website": {
+            "value": "https://www.greenfield.solutions",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "salesforce",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CreateOpportunity",
+      "qualifiedName": "Salesforce.CreateOpportunity",
+      "fullyQualifiedName": "Salesforce.CreateOpportunity@2.2.0",
+      "description": "Creates a new opportunity (deal) in Salesforce.\n\nRequires an account, name, stage, and close date. Validates stage, lead source,\nand type against the org's configured picklist values.",
+      "parameters": [
+        {
+          "name": "account_id",
+          "type": "string",
+          "required": true,
+          "description": "The Salesforce ID of the Account to associate with.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "description": "A descriptive name for the opportunity.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "stage",
+          "type": "string",
+          "required": true,
+          "description": "The initial pipeline stage. Must match one of the org's configured stage names.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "close_date",
+          "type": "string",
+          "required": true,
+          "description": "Expected close date in ISO format (YYYY-MM-DD).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "amount",
+          "type": "number",
+          "required": false,
+          "description": "Deal amount in the org's default currency.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "Free-text description or notes about the deal.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "next_step",
+          "type": "string",
+          "required": false,
+          "description": "The immediate next action to advance this deal.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "lead_source",
+          "type": "string",
+          "required": false,
+          "description": "How this opportunity originated. Must match the org's configured lead source values.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "required": false,
+          "description": "The opportunity type. Must match the org's configured opportunity type values.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "salesforce",
+        "providerType": "oauth2",
+        "scopes": [
+          "write_opportunity"
+        ]
+      },
+      "secrets": [
+        "SALESFORCE_ORG_SUBDOMAIN",
+        "SALESFORCE_MAX_CONCURRENT_REQUESTS"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SALESFORCE_ORG_SUBDOMAIN",
+          "type": "unknown"
+        },
+        {
+          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The created opportunity ID."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Salesforce.CreateOpportunity",
+        "parameters": {
+          "account_id": {
+            "value": "0015g00000ABCDefAA1",
+            "type": "string",
+            "required": true
+          },
+          "name": {
+            "value": "Enterprise Software Renewal Q3 2026",
+            "type": "string",
+            "required": true
+          },
+          "stage": {
+            "value": "Negotiation/Review",
+            "type": "string",
+            "required": true
+          },
+          "close_date": {
+            "value": "2026-06-30",
+            "type": "string",
+            "required": true
+          },
+          "amount": {
+            "value": 125000,
+            "type": "integer",
+            "required": false
+          },
+          "description": {
+            "value": "Renewal of enterprise license, includes expansion to additional seats and upgraded support package.",
+            "type": "string",
+            "required": false
+          },
+          "next_step": {
+            "value": "Schedule pricing review call with procurement",
+            "type": "string",
+            "required": false
+          },
+          "lead_source": {
+            "value": "Partner Referral",
+            "type": "string",
+            "required": false
+          },
+          "type": {
+            "value": "Renewal",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "salesforce",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CreateTask",
+      "qualifiedName": "Salesforce.CreateTask",
+      "fullyQualifiedName": "Salesforce.CreateTask@2.2.0",
+      "description": "Creates a task (follow-up, reminder, to-do) in Salesforce.\n\nUse this for future actions like reminders, follow-ups, or to-do items.\nFor logging a completed phone call, use LogACall instead.",
+      "parameters": [
+        {
+          "name": "subject",
+          "type": "string",
+          "required": true,
+          "description": "Short description of the task.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "due_date",
+          "type": "string",
+          "required": false,
+          "description": "When the task is due, in ISO format (YYYY-MM-DD).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "priority",
+          "type": "string",
+          "required": false,
+          "description": "Task priority. Allowed values: High, Normal, Low.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "description": "Initial task status. Valid values are org-specific. Defaults to the org's default.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "Detailed notes or context for the task.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "account_or_opportunity_id",
+          "type": "string",
+          "required": false,
+          "description": "Salesforce ID of the Account or Opportunity this task is related to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "contact_or_lead_id",
+          "type": "string",
+          "required": false,
+          "description": "Salesforce ID of the Contact or Lead this task is about.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "owner_user_id",
+          "type": "string",
+          "required": false,
+          "description": "Salesforce User ID to assign this task to. Defaults to the current user.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "salesforce",
+        "providerType": "oauth2",
+        "scopes": [
+          "write_task"
+        ]
+      },
+      "secrets": [
+        "SALESFORCE_ORG_SUBDOMAIN",
+        "SALESFORCE_MAX_CONCURRENT_REQUESTS"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SALESFORCE_ORG_SUBDOMAIN",
+          "type": "unknown"
+        },
+        {
+          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The created task ID."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Salesforce.CreateTask",
+        "parameters": {
+          "subject": {
+            "value": "Follow up on proposal",
+            "type": "string",
+            "required": true
+          },
+          "due_date": {
+            "value": "2026-03-11",
+            "type": "string",
+            "required": false
+          },
+          "priority": {
+            "value": "Normal",
+            "type": "string",
+            "required": false
+          },
+          "status": {
+            "value": "Not Started",
+            "type": "string",
+            "required": false
+          },
+          "description": {
+            "value": "Call to review the proposal, answer questions, and confirm next steps. Prepare updated pricing sheet before call.",
+            "type": "string",
+            "required": false
+          },
+          "account_or_opportunity_id": {
+            "value": "006A1B2C3D4E5F6G7H",
+            "type": "string",
+            "required": false
+          },
+          "contact_or_lead_id": {
+            "value": "003J1K2L3M4N5P6Q7R",
+            "type": "string",
+            "required": false
+          },
+          "owner_user_id": {
+            "value": "005S1T2U3V4W5X6Y7Z",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "salesforce",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
       }
     },
     {
       "name": "GetAccountDataById",
       "qualifiedName": "Salesforce.GetAccountDataById",
-      "fullyQualifiedName": "Salesforce.GetAccountDataById@2.0.1",
+      "fullyQualifiedName": "Salesforce.GetAccountDataById@2.2.0",
       "description": "Gets the account with related info: contacts, leads, notes, calls, opportunities, tasks,\nemails, and events (up to 10 items of each type).\n\nAn account is an organization (such as a customer, supplier, or partner, though more commonly\na customer). In some Salesforce account setups, an account can also represent a person.",
       "parameters": [
         {
@@ -240,12 +931,29 @@
         },
         "requiresAuth": true,
         "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
       }
     },
     {
       "name": "GetAccountDataByKeywords",
       "qualifiedName": "Salesforce.GetAccountDataByKeywords",
-      "fullyQualifiedName": "Salesforce.GetAccountDataByKeywords@2.0.1",
+      "fullyQualifiedName": "Salesforce.GetAccountDataByKeywords@2.2.0",
       "description": "Searches for accounts in Salesforce and returns them with related info: contacts, leads,\nnotes, calls, opportunities, tasks, emails, and events (up to 10 items of each type).\n\nAn account is an organization (such as a customer, supplier, or partner, though more commonly\na customer). In some Salesforce account setups, an account can also represent a person.",
       "parameters": [
         {
@@ -325,12 +1033,1407 @@
         },
         "requiresAuth": true,
         "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetOpportunityById",
+      "qualifiedName": "Salesforce.GetOpportunityById",
+      "fullyQualifiedName": "Salesforce.GetOpportunityById@2.2.0",
+      "description": "Gets a single opportunity with enriched related data: contact roles, line items,\nopen tasks, and recent notes.",
+      "parameters": [
+        {
+          "name": "opportunity_id",
+          "type": "string",
+          "required": true,
+          "description": "The Salesforce ID of the opportunity.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "salesforce",
+        "providerType": "oauth2",
+        "scopes": [
+          "read_opportunity",
+          "read_contact",
+          "read_task",
+          "read_note"
+        ]
+      },
+      "secrets": [
+        "SALESFORCE_ORG_SUBDOMAIN",
+        "SALESFORCE_MAX_CONCURRENT_REQUESTS"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SALESFORCE_ORG_SUBDOMAIN",
+          "type": "unknown"
+        },
+        {
+          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The opportunity with enriched related data."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Salesforce.GetOpportunityById",
+        "parameters": {
+          "opportunity_id": {
+            "value": "0061t00000A1b2C3D4E",
+            "type": "string",
+            "required": true
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "salesforce",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListMyTasks",
+      "qualifiedName": "Salesforce.ListMyTasks",
+      "fullyQualifiedName": "Salesforce.ListMyTasks@2.2.0",
+      "description": "Lists tasks assigned to you in Salesforce with optional filters.\n\nExcludes call logs and email activities — only shows actionable tasks.\nUse overdue_only=true to see just tasks past their due date.",
+      "parameters": [
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "description": "Filter by task status. Values are org-specific.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "due_date_from",
+          "type": "string",
+          "required": false,
+          "description": "Only return tasks due on or after this date (YYYY-MM-DD).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "due_date_to",
+          "type": "string",
+          "required": false,
+          "description": "Only return tasks due on or before this date (YYYY-MM-DD).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "overdue_only",
+          "type": "boolean",
+          "required": false,
+          "description": "If true, only return tasks that are past due and not yet completed. Defaults to False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "account_or_opportunity_id",
+          "type": "string",
+          "required": false,
+          "description": "Only return tasks linked to this Account or Opportunity.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum results to return (1-50). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "page",
+          "type": "integer",
+          "required": false,
+          "description": "Page number for pagination. Defaults to 1 (first page).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "salesforce",
+        "providerType": "oauth2",
+        "scopes": [
+          "read_task"
+        ]
+      },
+      "secrets": [
+        "SALESFORCE_ORG_SUBDOMAIN",
+        "SALESFORCE_MAX_CONCURRENT_REQUESTS"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SALESFORCE_ORG_SUBDOMAIN",
+          "type": "unknown"
+        },
+        {
+          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Paginated list of your tasks."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Salesforce.ListMyTasks",
+        "parameters": {
+          "status": {
+            "value": "Not Started",
+            "type": "string",
+            "required": false
+          },
+          "due_date_from": {
+            "value": "2026-02-01",
+            "type": "string",
+            "required": false
+          },
+          "due_date_to": {
+            "value": "2026-02-28",
+            "type": "string",
+            "required": false
+          },
+          "overdue_only": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "account_or_opportunity_id": {
+            "value": "0015g00000A1b2CDE3",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "page": {
+            "value": 1,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "salesforce",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "LogACall",
+      "qualifiedName": "Salesforce.LogACall",
+      "fullyQualifiedName": "Salesforce.LogACall@2.2.0",
+      "description": "Logs a completed phone call as an activity in Salesforce.\n\nUse this to record calls that already happened. For future follow-up actions,\nuse CreateTask instead.",
+      "parameters": [
+        {
+          "name": "subject",
+          "type": "string",
+          "required": true,
+          "description": "Short description of the call.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "Call notes, summary, or key takeaways.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "duration_minutes",
+          "type": "integer",
+          "required": false,
+          "description": "How long the call lasted, in minutes.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "account_or_opportunity_id",
+          "type": "string",
+          "required": false,
+          "description": "Salesforce ID of the Account or Opportunity this call was about.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "contact_or_lead_id",
+          "type": "string",
+          "required": false,
+          "description": "Salesforce ID of the Contact or Lead who was on the call.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "call_result",
+          "type": "string",
+          "required": false,
+          "description": "The outcome of the call.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "salesforce",
+        "providerType": "oauth2",
+        "scopes": [
+          "write_task"
+        ]
+      },
+      "secrets": [
+        "SALESFORCE_ORG_SUBDOMAIN",
+        "SALESFORCE_MAX_CONCURRENT_REQUESTS"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SALESFORCE_ORG_SUBDOMAIN",
+          "type": "unknown"
+        },
+        {
+          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "The logged call activity ID."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Salesforce.LogACall",
+        "parameters": {
+          "subject": {
+            "value": "Follow-up: pricing & timeline",
+            "type": "string",
+            "required": true
+          },
+          "description": {
+            "value": "Reviewed pricing tiers, delivery timeline, and next steps. Customer requested a formal proposal by Friday and a demo next week.",
+            "type": "string",
+            "required": false
+          },
+          "duration_minutes": {
+            "value": 37,
+            "type": "integer",
+            "required": false
+          },
+          "account_or_opportunity_id": {
+            "value": "0065g00000OpqR1ABC",
+            "type": "string",
+            "required": false
+          },
+          "contact_or_lead_id": {
+            "value": "0035g00000XyzAb123",
+            "type": "string",
+            "required": false
+          },
+          "call_result": {
+            "value": "Interested - requested proposal",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "salesforce",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchContacts",
+      "qualifiedName": "Salesforce.SearchContacts",
+      "fullyQualifiedName": "Salesforce.SearchContacts@2.2.0",
+      "description": "Searches for contacts in Salesforce with optional filters.\n\nAt least one filter (query, account_id, or title) must be provided.\nUse this to find people at specific accounts or with specific roles.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": false,
+          "description": "Keyword search against contact name, email, title, and account name.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "account_id",
+          "type": "string",
+          "required": false,
+          "description": "Only return contacts belonging to this Account.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Filter by job title (partial match).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum results to return (1-50). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "page",
+          "type": "integer",
+          "required": false,
+          "description": "Page number for pagination. Defaults to 1 (first page).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "salesforce",
+        "providerType": "oauth2",
+        "scopes": [
+          "read_contact"
+        ]
+      },
+      "secrets": [
+        "SALESFORCE_ORG_SUBDOMAIN",
+        "SALESFORCE_MAX_CONCURRENT_REQUESTS"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SALESFORCE_ORG_SUBDOMAIN",
+          "type": "unknown"
+        },
+        {
+          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Paginated list of contacts matching the search criteria."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Salesforce.SearchContacts",
+        "parameters": {
+          "query": {
+            "value": "marketing Acme",
+            "type": "string",
+            "required": false
+          },
+          "account_id": {
+            "value": "0015g00000N8AbCAAQ",
+            "type": "string",
+            "required": false
+          },
+          "title": {
+            "value": "Director",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "page": {
+            "value": 1,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "salesforce",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchLeads",
+      "qualifiedName": "Salesforce.SearchLeads",
+      "fullyQualifiedName": "Salesforce.SearchLeads@2.2.0",
+      "description": "Searches for leads in Salesforce with optional filters.\n\nAlways excludes already-converted leads. Use owner='me' (default) for your leads,\nor owner='all' for all leads in the org.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": false,
+          "description": "Keyword search against lead name, company, title, and email.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "description": "Filter by lead status. Must match one of the org's configured status values.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "owner",
+          "type": "string",
+          "required": false,
+          "description": "Filter by owner. Defaults to the current user. Pass 'all' to search across all owners.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "lead_source",
+          "type": "string",
+          "required": false,
+          "description": "Filter by lead source. Must match the org's configured lead source values.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "created_after",
+          "type": "string",
+          "required": false,
+          "description": "Only return leads created on or after this date (YYYY-MM-DD).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum results to return (1-50). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "page",
+          "type": "integer",
+          "required": false,
+          "description": "Page number for pagination. Defaults to 1 (first page).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "salesforce",
+        "providerType": "oauth2",
+        "scopes": [
+          "read_lead"
+        ]
+      },
+      "secrets": [
+        "SALESFORCE_ORG_SUBDOMAIN",
+        "SALESFORCE_MAX_CONCURRENT_REQUESTS"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SALESFORCE_ORG_SUBDOMAIN",
+          "type": "unknown"
+        },
+        {
+          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Paginated list of leads matching the search criteria."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Salesforce.SearchLeads",
+        "parameters": {
+          "query": {
+            "value": "Acme",
+            "type": "string",
+            "required": false
+          },
+          "status": {
+            "value": "Open - Not Contacted",
+            "type": "string",
+            "required": false
+          },
+          "owner": {
+            "value": "me",
+            "type": "string",
+            "required": false
+          },
+          "lead_source": {
+            "value": "Web",
+            "type": "string",
+            "required": false
+          },
+          "created_after": {
+            "value": "2026-01-01",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "page": {
+            "value": 1,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "salesforce",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchOpportunities",
+      "qualifiedName": "Salesforce.SearchOpportunities",
+      "fullyQualifiedName": "Salesforce.SearchOpportunities@2.2.0",
+      "description": "Searches for opportunities (deals) in Salesforce with optional filters.\n\nReturns a paginated list of opportunities with key fields like stage, amount,\nclose date, and associated account. Use owner='me' (default) to see your deals,\nor owner='all' for the whole pipeline.",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "string",
+          "required": false,
+          "description": "Keyword search against opportunity name.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "stage",
+          "type": "string",
+          "required": false,
+          "description": "Filter by pipeline stage. Must match one of the org's configured stage names.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "close_date_from",
+          "type": "string",
+          "required": false,
+          "description": "Only return opportunities closing on or after this date. ISO format (YYYY-MM-DD).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "close_date_to",
+          "type": "string",
+          "required": false,
+          "description": "Only return opportunities closing on or before this date. ISO format (YYYY-MM-DD).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "owner",
+          "type": "string",
+          "required": false,
+          "description": "Filter by owner. Defaults to the current user. Pass 'all' to search across all owners.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "min_amount",
+          "type": "number",
+          "required": false,
+          "description": "Minimum deal amount filter.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum results to return (1-50). Defaults to 20.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "page",
+          "type": "integer",
+          "required": false,
+          "description": "Page number for pagination. Defaults to 1 (first page).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "salesforce",
+        "providerType": "oauth2",
+        "scopes": [
+          "read_opportunity"
+        ]
+      },
+      "secrets": [
+        "SALESFORCE_ORG_SUBDOMAIN",
+        "SALESFORCE_MAX_CONCURRENT_REQUESTS"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SALESFORCE_ORG_SUBDOMAIN",
+          "type": "unknown"
+        },
+        {
+          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Paginated list of opportunities matching the search criteria."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Salesforce.SearchOpportunities",
+        "parameters": {
+          "query": {
+            "value": "Enterprise renewal",
+            "type": "string",
+            "required": false
+          },
+          "stage": {
+            "value": "Proposal/Price Quote",
+            "type": "string",
+            "required": false
+          },
+          "close_date_from": {
+            "value": "2026-03-01",
+            "type": "string",
+            "required": false
+          },
+          "close_date_to": {
+            "value": "2026-03-31",
+            "type": "string",
+            "required": false
+          },
+          "owner": {
+            "value": "all",
+            "type": "string",
+            "required": false
+          },
+          "min_amount": {
+            "value": 50000,
+            "type": "integer",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "page": {
+            "value": 1,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "salesforce",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "UpdateLead",
+      "qualifiedName": "Salesforce.UpdateLead",
+      "fullyQualifiedName": "Salesforce.UpdateLead@2.2.0",
+      "description": "Updates fields on an existing lead. Only provided fields are changed.\n\nIf the lead has already been converted, returns an error with the converted\nrecord IDs so the agent can redirect to the correct contact/account.",
+      "parameters": [
+        {
+          "name": "lead_id",
+          "type": "string",
+          "required": true,
+          "description": "The Salesforce ID of the lead to update.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "description": "New lead status. Must match the org's configured values.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "first_name",
+          "type": "string",
+          "required": false,
+          "description": "Updated first name.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "last_name",
+          "type": "string",
+          "required": false,
+          "description": "Updated last name.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "email",
+          "type": "string",
+          "required": false,
+          "description": "Updated email address.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "phone",
+          "type": "string",
+          "required": false,
+          "description": "Updated phone number.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "required": false,
+          "description": "Updated job title.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "company",
+          "type": "string",
+          "required": false,
+          "description": "Updated company name.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "Updated notes.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "lead_source",
+          "type": "string",
+          "required": false,
+          "description": "Updated lead source. Must match the org's configured lead source values.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "rating",
+          "type": "string",
+          "required": false,
+          "description": "Updated lead rating. Allowed values: Hot, Warm, Cold.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "salesforce",
+        "providerType": "oauth2",
+        "scopes": [
+          "write_lead"
+        ]
+      },
+      "secrets": [
+        "SALESFORCE_ORG_SUBDOMAIN",
+        "SALESFORCE_MAX_CONCURRENT_REQUESTS"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SALESFORCE_ORG_SUBDOMAIN",
+          "type": "unknown"
+        },
+        {
+          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Update result."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Salesforce.UpdateLead",
+        "parameters": {
+          "lead_id": {
+            "value": "00Q1t00000ABCdEFAZ",
+            "type": "string",
+            "required": true
+          },
+          "status": {
+            "value": "Working - Contacted",
+            "type": "string",
+            "required": false
+          },
+          "first_name": {
+            "value": "Jordan",
+            "type": "string",
+            "required": false
+          },
+          "last_name": {
+            "value": "Parker",
+            "type": "string",
+            "required": false
+          },
+          "email": {
+            "value": "jordan.parker@example.com",
+            "type": "string",
+            "required": false
+          },
+          "phone": {
+            "value": "+1-415-555-0132",
+            "type": "string",
+            "required": false
+          },
+          "title": {
+            "value": "Senior Product Manager",
+            "type": "string",
+            "required": false
+          },
+          "company": {
+            "value": "Acme Corp",
+            "type": "string",
+            "required": false
+          },
+          "description": {
+            "value": "Interested in product demo; follow up next week.",
+            "type": "string",
+            "required": false
+          },
+          "lead_source": {
+            "value": "Website",
+            "type": "string",
+            "required": false
+          },
+          "rating": {
+            "value": "Warm",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "salesforce",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "UpdateOpportunity",
+      "qualifiedName": "Salesforce.UpdateOpportunity",
+      "fullyQualifiedName": "Salesforce.UpdateOpportunity@2.2.0",
+      "description": "Updates fields on an existing opportunity. Only provided fields are changed.\n\nReturns a success indicator and any warnings (e.g., amount ignored due to line items).",
+      "parameters": [
+        {
+          "name": "opportunity_id",
+          "type": "string",
+          "required": true,
+          "description": "The Salesforce ID of the opportunity to update.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "stage",
+          "type": "string",
+          "required": false,
+          "description": "New pipeline stage. Must match one of the org's configured stage names.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "close_date",
+          "type": "string",
+          "required": false,
+          "description": "New expected close date (YYYY-MM-DD).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "amount",
+          "type": "number",
+          "required": false,
+          "description": "Updated deal amount. May be ignored if the opportunity has line items.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "next_step",
+          "type": "string",
+          "required": false,
+          "description": "Updated next action to advance the deal.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "Updated description or notes.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "Updated opportunity name.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "probability",
+          "type": "number",
+          "required": false,
+          "description": "Override win probability (0-100).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "forecast_category",
+          "type": "string",
+          "required": false,
+          "description": "Override forecast category.",
+          "enum": [
+            "Pipeline",
+            "Best Case",
+            "Commit",
+            "Most Likely",
+            "Omitted",
+            "Closed"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "salesforce",
+        "providerType": "oauth2",
+        "scopes": [
+          "write_opportunity"
+        ]
+      },
+      "secrets": [
+        "SALESFORCE_ORG_SUBDOMAIN",
+        "SALESFORCE_MAX_CONCURRENT_REQUESTS"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SALESFORCE_ORG_SUBDOMAIN",
+          "type": "unknown"
+        },
+        {
+          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Update result with any warnings."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Salesforce.UpdateOpportunity",
+        "parameters": {
+          "opportunity_id": {
+            "value": "0063j00000ABCDefG1X",
+            "type": "string",
+            "required": true
+          },
+          "stage": {
+            "value": "Negotiation/Review",
+            "type": "string",
+            "required": false
+          },
+          "close_date": {
+            "value": "2026-05-15",
+            "type": "string",
+            "required": false
+          },
+          "amount": {
+            "value": 125000,
+            "type": "integer",
+            "required": false
+          },
+          "next_step": {
+            "value": "Finalize pricing and send contract",
+            "type": "string",
+            "required": false
+          },
+          "description": {
+            "value": "Customer confirmed requirements; awaiting legal signoff.",
+            "type": "string",
+            "required": false
+          },
+          "name": {
+            "value": "Q2 Renewal - Acme Corp",
+            "type": "string",
+            "required": false
+          },
+          "probability": {
+            "value": 75,
+            "type": "integer",
+            "required": false
+          },
+          "forecast_category": {
+            "value": "Commit",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "salesforce",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "UpdateTask",
+      "qualifiedName": "Salesforce.UpdateTask",
+      "fullyQualifiedName": "Salesforce.UpdateTask@2.2.0",
+      "description": "Updates fields on an existing task. Only provided fields are changed.\n\nUse status='Completed' to mark a task as done.",
+      "parameters": [
+        {
+          "name": "task_id",
+          "type": "string",
+          "required": true,
+          "description": "The Salesforce ID of the task to update.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "description": "New task status. Valid values are org-specific.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "due_date",
+          "type": "string",
+          "required": false,
+          "description": "New due date (YYYY-MM-DD).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "priority",
+          "type": "string",
+          "required": false,
+          "description": "New priority. Allowed values: High, Normal, Low.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "subject",
+          "type": "string",
+          "required": false,
+          "description": "Updated task subject.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "Updated description.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "salesforce",
+        "providerType": "oauth2",
+        "scopes": [
+          "write_task"
+        ]
+      },
+      "secrets": [
+        "SALESFORCE_ORG_SUBDOMAIN",
+        "SALESFORCE_MAX_CONCURRENT_REQUESTS"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SALESFORCE_ORG_SUBDOMAIN",
+          "type": "unknown"
+        },
+        {
+          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Update result."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Salesforce.UpdateTask",
+        "parameters": {
+          "task_id": {
+            "value": "00T5f000004XyZ1EAA",
+            "type": "string",
+            "required": true
+          },
+          "status": {
+            "value": "Completed",
+            "type": "string",
+            "required": false
+          },
+          "due_date": {
+            "value": "2026-03-10",
+            "type": "string",
+            "required": false
+          },
+          "priority": {
+            "value": "High",
+            "type": "string",
+            "required": false
+          },
+          "subject": {
+            "value": "Follow up on contract review",
+            "type": "string",
+            "required": false
+          },
+          "description": {
+            "value": "Confirmed changes with legal; awaiting client signature. Call to confirm next steps.",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "salesforce",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "Salesforce.WhoAmI",
+      "fullyQualifiedName": "Salesforce.WhoAmI@2.2.0",
+      "description": "Get information about the currently authenticated Salesforce user.\n\nThis is typically the first tool called to establish user context.\nReturns the user's profile details and organization information.",
+      "parameters": [],
+      "auth": {
+        "providerId": "salesforce",
+        "providerType": "oauth2",
+        "scopes": [
+          "read_user"
+        ]
+      },
+      "secrets": [
+        "SALESFORCE_ORG_SUBDOMAIN",
+        "SALESFORCE_MAX_CONCURRENT_REQUESTS"
+      ],
+      "secretsInfo": [
+        {
+          "name": "SALESFORCE_ORG_SUBDOMAIN",
+          "type": "unknown"
+        },
+        {
+          "name": "SALESFORCE_MAX_CONCURRENT_REQUESTS",
+          "type": "unknown"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Current user profile and Salesforce organization information."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Salesforce.WhoAmI",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "salesforce",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "crm"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
       }
     }
   ],
   "documentationChunks": [],
   "customImports": [],
   "subPages": [],
-  "generatedAt": "2026-01-26T17:40:36.720Z",
-  "summary": "The Arcade toolkit for Salesforce empowers developers to harness the capabilities of LLMs for seamless interaction with Salesforce data. It enables efficient data retrieval and modification in a user-friendly manner.\n\n**Capabilities**\n- Create and manage contacts effortlessly.\n- Retrieve comprehensive account information, including related entities.\n- Perform keyword-based searches to find accounts quickly.\n- Facilitate reading and writing of various Salesforce objects.\n\n**OAuth**\n- Provider: Unknown\n- Scopes: read_account, read_contact, read_lead, read_note, read_opportunity, read_task, write_contact\n\n**Secrets**\n- Types: API Key, Unknown\n- Examples: SALESFORCE_ORG_SUBDOMAIN, SALESFORCE_MAX_CONCURRENT_REQUESTS"
+  "generatedAt": "2026-03-04T11:17:49.977Z",
+  "summary": "Salesforce provider: The Arcade toolkit enables LLMs to interact with Salesforce orgs to create, update, search, and convert CRM records, log activities, and fetch enriched relational data. It enforces org validation and returns contextual warnings and IDs to guide agent workflows.\n\n**Capabilities**\n- Unified CRUD and workflow actions for leads, contacts, opportunities, and tasks, including lead-to-deal conversion.\n- Rich retrieval and search across accounts, opportunities, related contacts, notes, activities, and paginated results.\n- Activity logging and task management to record calls and schedule follow-ups while preserving ownership and status semantics.\n- Org-aware validation: picklist checks, conversion guards, and contextual warnings/errors.\n\n**OAuth**\n- provider: salesforce\n- scopes: read_account, read_contact, read_lead, read_note, read_opportunity, read_task, read_user, write_contact, write_lead, write_opportunity, write_task\n\n**Secrets**\n- types: api_key, unknown. Examples: SALESFORCE_ORG_SUBDOMAIN (org subdomain), SALESFORCE_MAX_CONCURRENT_REQUESTS (concurrency limit)."
 }

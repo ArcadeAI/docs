@@ -21,6 +21,10 @@ const meta: MetaRecord = {
     title: "Dropbox",
     href: "/en/resources/integrations/productivity/dropbox",
   },
+  figma: {
+    title: "Figma",
+    href: "/en/resources/integrations/productivity/figma",
+  },
   gmail: {
     title: "Gmail",
     href: "/en/resources/integrations/productivity/gmail",
@@ -56,6 +60,10 @@ const meta: MetaRecord = {
   linear: {
     title: "Linear",
     href: "/en/resources/integrations/productivity/linear",
+  },
+  "microsoft-excel": {
+    title: "Microsoft Excel",
+    href: "/en/resources/integrations/productivity/microsoft-excel",
   },
   "microsoft-onedrive": {
     title: "Microsoft OneDrive",
@@ -117,9 +125,9 @@ const meta: MetaRecord = {
     title: "Luma API",
     href: "/en/resources/integrations/productivity/luma-api",
   },
-  "mailchimp-api": {
+  "mailchimp-marketing-api": {
     title: "Mailchimp API",
-    href: "/en/resources/integrations/productivity/mailchimp-api",
+    href: "/en/resources/integrations/productivity/mailchimp-marketing-api",
   },
   "miro-api": {
     title: "Miro API",

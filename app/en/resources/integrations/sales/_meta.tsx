@@ -5,6 +5,10 @@ const meta: MetaRecord = {
     type: "separator",
     title: "Optimized",
   },
+  attio: {
+    title: "Attio",
+    href: "/en/resources/integrations/sales/attio",
+  },
   hubspot: {
     title: "HubSpot",
     href: "/en/resources/integrations/sales/hubspot",
