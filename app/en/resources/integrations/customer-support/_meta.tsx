@@ -1,40 +1,50 @@
-import { createCategoryMeta } from "../create-category-meta";
+import type { MetaRecord } from "nextra";
 
-export default createCategoryMeta([
-  {
-    slug: "zendesk",
+const meta: MetaRecord = {
+  "-- Optimized": {
+    type: "separator",
+    title: "Optimized",
+  },
+  pylon: {
+    title: "Pylon",
+    href: "/en/resources/integrations/customer-support/pylon",
+  },
+  zendesk: {
     title: "Zendesk",
     href: "/en/resources/integrations/customer-support/zendesk",
-    type: "arcade",
   },
-  {
-    slug: "customerio-api",
+  "-- Starter": {
+    type: "separator",
+    title: "Starter",
+  },
+  "customerio-api": {
     title: "Customer.io API",
     href: "/en/resources/integrations/customer-support/customerio-api",
-    type: "arcade_starter",
   },
-  {
-    slug: "customerio-pipelines-api",
+  "customerio-pipelines-api": {
     title: "Customer.io Pipelines API",
     href: "/en/resources/integrations/customer-support/customerio-pipelines-api",
-    type: "arcade_starter",
   },
-  {
-    slug: "customerio-track-api",
+  "customerio-track-api": {
     title: "Customer.io Track API",
     href: "/en/resources/integrations/customer-support/customerio-track-api",
-    type: "arcade_starter",
   },
-  {
-    slug: "freshservice-api",
+  "freshservice-api": {
     title: "Freshservice API",
     href: "/en/resources/integrations/customer-support/freshservice-api",
-    type: "arcade_starter",
   },
-  {
-    slug: "intercom-api",
+  "intercom-api": {
     title: "Intercom API",
     href: "/en/resources/integrations/customer-support/intercom-api",
-    type: "arcade_starter",
   },
-]);
+  "pagerduty-api": {
+    title: "PagerDuty API",
+    href: "/en/resources/integrations/customer-support/pagerduty-api",
+  },
+  "pylon-api": {
+    title: "Pylon API",
+    href: "/en/resources/integrations/customer-support/pylon-api",
+  },
+};
+
+export default meta;
