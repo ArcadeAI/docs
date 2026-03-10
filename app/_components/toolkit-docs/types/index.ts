@@ -18,7 +18,8 @@ export type DocumentationChunkType =
   | "code"
   | "warning"
   | "info"
-  | "tip";
+  | "tip"
+  | "section";
 
 /**
  * Location where the chunk should be injected
@@ -343,8 +344,12 @@ export type ToolkitData = {
   documentationChunks?: DocumentationChunk[];
   /** Custom imports for MDX */
   customImports: string[];
-  /** Sub-pages that exist for this toolkit */
-  subPages: string[];
+  /**
+   * Sub-pages that exist for this toolkit.
+   * Each entry is either a string (legacy slug) or a rich object with
+   * { type, content, relativePath } for inline MDX sub-page content.
+   */
+  subPages: (string | Record<string, unknown>)[];
   /** Optional pip package name override */
   pipPackageName?: string;
   /** Generation timestamp */

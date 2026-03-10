@@ -1384,6 +1384,87 @@ describe("DataMerger", () => {
     });
   });
 
+  describe("error handling preserves previous custom sections", () => {
+    // buildMergeErrorResult is invoked by mergeToolkitEntry (called from
+    // mergeAllToolkits). We trigger it by making the customSectionsSource throw,
+    // which is caught by mergeToolkitEntry's try/catch.
+    const makeFailingCustomSectionsSource = () => ({
+      getCustomSections: async () => {
+        throw new Error("Custom sections source unavailable");
+      },
+    });
+
+    it("preserves documentationChunks and customImports from previous toolkit when merge throws", async () => {
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
+      });
+
+      const previousResult = await mergeToolkit(
+        "Github",
+        [githubTool1],
+        githubMetadata,
+        createCustomSections({
+          documentationChunks: [
+            {
+              type: "warning",
+              location: "description",
+              position: "after",
+              content: "Critical: GitHub Apps only.",
+            },
+          ],
+          customImports: ['import { Callout } from "nextra/components";'],
+          subPages: ["setup-guide"],
+        }),
+        createStubGenerator()
+      );
+
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: makeFailingCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        previousToolkits: new Map([["github", previousResult.toolkit]]),
+      });
+
+      const results = await merger.mergeAllToolkits();
+      const result = results[0];
+
+      // Error result must preserve previous custom sections, not return empty arrays
+      expect(result?.toolkit.documentationChunks).toHaveLength(1);
+      expect(result?.toolkit.documentationChunks[0]?.content).toBe(
+        "Critical: GitHub Apps only."
+      );
+      expect(result?.toolkit.customImports).toHaveLength(1);
+      expect(result?.toolkit.subPages).toEqual(["setup-guide"]);
+      expect(result?.warnings[0]).toContain(
+        "Custom sections source unavailable"
+      );
+    });
+
+    it("returns empty custom sections in error result when no previous toolkit exists", async () => {
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
+      });
+
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: makeFailingCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+      });
+
+      const results = await merger.mergeAllToolkits();
+      const result = results[0];
+
+      expect(result?.toolkit.documentationChunks).toHaveLength(0);
+      expect(result?.toolkit.customImports).toHaveLength(0);
+      expect(result?.toolkit.subPages).toHaveLength(0);
+      expect(result?.warnings[0]).toContain(
+        "Custom sections source unavailable"
+      );
+    });
+  });
+
   describe("mergeAllToolkits", () => {
     it("should merge all toolkits found in tools", async () => {
       const toolkitDataSource = createCombinedToolkitDataSource({
