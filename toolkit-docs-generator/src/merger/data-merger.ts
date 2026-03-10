@@ -880,7 +880,8 @@ export class DataMerger {
 
   private buildMergeErrorResult(
     toolkitId: string,
-    message: string
+    message: string,
+    previousToolkit?: MergedToolkit
   ): MergeResult {
     return {
       toolkit: {
@@ -900,9 +901,9 @@ export class DataMerger {
         },
         auth: null,
         tools: [],
-        documentationChunks: [],
-        customImports: [],
-        subPages: [],
+        documentationChunks: previousToolkit?.documentationChunks ?? [],
+        customImports: previousToolkit?.customImports ?? [],
+        subPages: previousToolkit?.subPages ?? [],
         generatedAt: new Date().toISOString(),
       },
       warnings: [`Error processing toolkit: ${message}`],
@@ -943,7 +944,8 @@ export class DataMerger {
       return result;
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      return this.buildMergeErrorResult(toolkitId, message);
+      const previousToolkit = this.getPreviousToolkit(toolkitId);
+      return this.buildMergeErrorResult(toolkitId, message, previousToolkit);
     }
   }
 
