@@ -1,7 +1,7 @@
 {
   "id": "OutlookMail",
   "label": "Outlook Mail",
-  "version": "2.4.2",
+  "version": "2.6.0",
   "description": "Arcade.dev LLM tools for Outlook Mail",
   "metadata": {
     "category": "productivity",
@@ -27,7 +27,7 @@
     {
       "name": "CreateAndSendEmail",
       "qualifiedName": "OutlookMail.CreateAndSendEmail",
-      "fullyQualifiedName": "OutlookMail.CreateAndSendEmail@2.4.2",
+      "fullyQualifiedName": "OutlookMail.CreateAndSendEmail@2.6.0",
       "description": "Create and immediately send a new email in Outlook to the specified recipients",
       "parameters": [
         {
@@ -165,7 +165,7 @@
     {
       "name": "CreateDraftEmail",
       "qualifiedName": "OutlookMail.CreateDraftEmail",
-      "fullyQualifiedName": "OutlookMail.CreateDraftEmail@2.4.2",
+      "fullyQualifiedName": "OutlookMail.CreateDraftEmail@2.6.0",
       "description": "Compose a new draft email in Outlook",
       "parameters": [
         {
@@ -301,16 +301,228 @@
       }
     },
     {
-      "name": "ListEmails",
-      "qualifiedName": "OutlookMail.ListEmails",
-      "fullyQualifiedName": "OutlookMail.ListEmails@2.4.2",
-      "description": "List emails in the user's mailbox across all folders.\n\nSince this tool lists email across all folders, it may return sent items, drafts,\nand other items that are not in the inbox.",
+      "name": "GetEmail",
+      "qualifiedName": "OutlookMail.GetEmail",
+      "fullyQualifiedName": "OutlookMail.GetEmail@2.6.0",
+      "description": "Retrieve a single email message by its ID.\n\nReturns email metadata and body content. By default, the body is returned\nas plain text (HTML tags stripped) and capped at 5000 characters. Set\nbody_format to HTML to get the original markup. Use body_offset to\ncontinue reading long emails, or set max_body_characters to None for the\nfull body.\n\nUse this tool to read the full content of an email after finding it via\nsearch_emails or any listing tool.",
       "parameters": [
+        {
+          "name": "message_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the email message to retrieve.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body_format",
+          "type": "string",
+          "required": false,
+          "description": "Format for the returned email body. PLAIN_TEXT strips HTML tags for clean reading. HTML returns the original markup. Defaults to PLAIN_TEXT.",
+          "enum": [
+            "plain_text",
+            "html"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "max_body_characters",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of characters to return from the email body. Defaults to 5000. Set to None to return the full body without a cap.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body_offset",
+          "type": "integer",
+          "required": false,
+          "description": "Character offset to start reading the body from. Use this to continue reading a long email body that was previously capped. Defaults to 0 (start of body).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Mail.Read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing the email message."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "OutlookMail.GetEmail",
+        "parameters": {
+          "message_id": {
+            "value": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "type": "string",
+            "required": true
+          },
+          "body_format": {
+            "value": "HTML",
+            "type": "string",
+            "required": false
+          },
+          "max_body_characters": {
+            "value": null,
+            "type": "integer",
+            "required": false
+          },
+          "body_offset": {
+            "value": 0,
+            "type": "integer",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "email"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListEmailAttachments",
+      "qualifiedName": "OutlookMail.ListEmailAttachments",
+      "fullyQualifiedName": "OutlookMail.ListEmailAttachments@2.6.0",
+      "description": "List attachment metadata for an email message.\n\nReturns metadata only (name, size, type, etc.). Attachment content is not included.\nUse this tool when the user wants to know what files are attached to an email.",
+      "parameters": [
+        {
+          "name": "message_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the email message to list attachments for.",
+          "enum": null,
+          "inferrable": true
+        },
         {
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "The number of messages to return. Max is 100. Defaults to 5.",
+          "description": "The maximum number of attachments to return. Max is 100. Defaults to 25.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "pagination_token",
+          "type": "string",
+          "required": false,
+          "description": "The pagination token to continue a previous request",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Mail.Read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing a list of attachment metadata objects."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "OutlookMail.ListEmailAttachments",
+        "parameters": {
+          "message_id": {
+            "value": "AAMkAGI5YmYxZTAwMDAwMDAwMDAwMDAwAAABbF0p",
+            "type": "string",
+            "required": true
+          },
+          "limit": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "pagination_token": {
+            "value": "eyJwYWdlIjo1LCJzZWNvbmQiOiJhdHRhY2htZW50In0=",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "email"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListEmails",
+      "qualifiedName": "OutlookMail.ListEmails",
+      "fullyQualifiedName": "OutlookMail.ListEmails@2.6.0",
+      "description": "List emails in the user's mailbox across all folders.\n\nResults are sorted by sort_by in the sort_order direction.\nDefaults to newest first (receivedDateTime descending).\n\nSince this tool lists email across all folders, it may return sent items,\ndrafts, and other items that are not in the inbox.",
+      "parameters": [
+        {
+          "name": "sort_by",
+          "type": "string",
+          "required": false,
+          "description": "Property to sort results by. Defaults to received date.",
+          "enum": [
+            "receivedDateTime",
+            "subject",
+            "sender_email_address",
+            "importance"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "sort_order",
+          "type": "string",
+          "required": false,
+          "description": "Sort direction. Defaults to descending.",
+          "enum": [
+            "ascending",
+            "descending"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The number of messages to return. Max is 100. Defaults to 10.",
           "enum": null,
           "inferrable": true
         },
@@ -340,13 +552,23 @@
       "codeExample": {
         "toolName": "OutlookMail.ListEmails",
         "parameters": {
+          "sort_by": {
+            "value": "receivedDateTime",
+            "type": "string",
+            "required": false
+          },
+          "sort_order": {
+            "value": "descending",
+            "type": "string",
+            "required": false
+          },
           "limit": {
-            "value": 10,
+            "value": 25,
             "type": "integer",
             "required": false
           },
           "pagination_token": {
-            "value": "abc123",
+            "value": "eyJwYWdlIjoiMg==",
             "type": "string",
             "required": false
           }
@@ -376,8 +598,8 @@
     {
       "name": "ListEmailsByProperty",
       "qualifiedName": "OutlookMail.ListEmailsByProperty",
-      "fullyQualifiedName": "OutlookMail.ListEmailsByProperty@2.4.2",
-      "description": "List emails in the user's mailbox across all folders filtering by a property.",
+      "fullyQualifiedName": "OutlookMail.ListEmailsByProperty@2.6.0",
+      "description": "List emails in the user's mailbox across all folders filtering by a property.\n\nResults are sorted by sort_by in the sort_order direction.\nDefaults to newest first (receivedDateTime descending).\n\nSorting by RECEIVED_DATE_TIME works with any filter property. Sorting by\na different property (SUBJECT, SENDER, IMPORTANCE) while filtering by an\nunrelated property may fail due to a Microsoft Graph API restriction. If\nthis happens, either sort by RECEIVED_DATE_TIME, or use list_emails (no\nfilter) with the desired sort_by.",
       "parameters": [
         {
           "name": "property",
@@ -388,7 +610,11 @@
             "subject",
             "conversationId",
             "receivedDateTime",
-            "sender/emailAddress/address"
+            "sender/emailAddress/address",
+            "isRead",
+            "hasAttachments",
+            "importance",
+            "flag/flagStatus"
           ],
           "inferrable": true
         },
@@ -419,10 +645,34 @@
           "inferrable": true
         },
         {
+          "name": "sort_by",
+          "type": "string",
+          "required": false,
+          "description": "Property to sort results by. Defaults to received date. Sorting by received date works with any filter property. Sorting by a different property while filtering by another may not be supported — if the combination fails, use sort_by=RECEIVED_DATE_TIME or use list_emails with the desired sort_by instead.",
+          "enum": [
+            "receivedDateTime",
+            "subject",
+            "sender_email_address",
+            "importance"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "sort_order",
+          "type": "string",
+          "required": false,
+          "description": "Sort direction. Defaults to descending.",
+          "enum": [
+            "ascending",
+            "descending"
+          ],
+          "inferrable": true
+        },
+        {
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "The number of messages to return. Max is 100. Defaults to 5.",
+          "description": "The number of messages to return. Max is 100. Defaults to 10.",
           "enum": null,
           "inferrable": true
         },
@@ -453,27 +703,37 @@
         "toolName": "OutlookMail.ListEmailsByProperty",
         "parameters": {
           "property": {
-            "value": "subject",
+            "value": "SUBJECT",
             "type": "string",
             "required": true
           },
           "operator": {
-            "value": "contains",
+            "value": "CONTAINS",
             "type": "string",
             "required": true
           },
           "value": {
-            "value": "meeting",
+            "value": "Invoice",
             "type": "string",
             "required": true
           },
+          "sort_by": {
+            "value": "RECEIVED_DATE_TIME",
+            "type": "string",
+            "required": false
+          },
+          "sort_order": {
+            "value": "DESC",
+            "type": "string",
+            "required": false
+          },
           "limit": {
-            "value": 10,
+            "value": 25,
             "type": "integer",
             "required": false
           },
           "pagination_token": {
-            "value": "abc123",
+            "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.example_token_123",
             "type": "string",
             "required": false
           }
@@ -503,8 +763,8 @@
     {
       "name": "ListEmailsInFolder",
       "qualifiedName": "OutlookMail.ListEmailsInFolder",
-      "fullyQualifiedName": "OutlookMail.ListEmailsInFolder@2.4.2",
-      "description": "List the user's emails in the specified folder.\n\nExactly one of `well_known_folder_name` or `folder_id` MUST be provided.",
+      "fullyQualifiedName": "OutlookMail.ListEmailsInFolder@2.6.0",
+      "description": "List the user's emails in the specified folder.\n\nExactly one of `well_known_folder_name` or `folder_id` MUST be provided.\n\nResults are sorted by sort_by in the sort_order direction.\nDefaults to newest first (receivedDateTime descending).",
       "parameters": [
         {
           "name": "well_known_folder_name",
@@ -531,10 +791,34 @@
           "inferrable": true
         },
         {
+          "name": "sort_by",
+          "type": "string",
+          "required": false,
+          "description": "Property to sort results by. Defaults to received date.",
+          "enum": [
+            "receivedDateTime",
+            "subject",
+            "sender_email_address",
+            "importance"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "sort_order",
+          "type": "string",
+          "required": false,
+          "description": "Sort direction. Defaults to descending.",
+          "enum": [
+            "ascending",
+            "descending"
+          ],
+          "inferrable": true
+        },
+        {
           "name": "limit",
           "type": "integer",
           "required": false,
-          "description": "The number of messages to return. Max is 100. Defaults to 5.",
+          "description": "The number of messages to return. Max is 100. Defaults to 10.",
           "enum": null,
           "inferrable": true
         },
@@ -574,13 +858,122 @@
             "type": "string",
             "required": false
           },
+          "sort_by": {
+            "value": "receivedDateTime",
+            "type": "string",
+            "required": false
+          },
+          "sort_order": {
+            "value": "descending",
+            "type": "string",
+            "required": false
+          },
           "limit": {
-            "value": 10,
+            "value": 25,
             "type": "integer",
             "required": false
           },
           "pagination_token": {
-            "value": null,
+            "value": "eyJwYWdlIjoiMiIsInRva2VuIjoiYWJjMTIzIn0=",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "email"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListMailFolders",
+      "qualifiedName": "OutlookMail.ListMailFolders",
+      "fullyQualifiedName": "OutlookMail.ListMailFolders@2.6.0",
+      "description": "List mail folders in the user's mailbox.\n\nReturns folder names, IDs, unread counts, and total item counts.\nUse the folder ID in follow-up calls to list_emails_in_folder.\nOmit parent_folder_id to list top-level folders, or provide a folder ID\nto list its child folders.",
+      "parameters": [
+        {
+          "name": "parent_folder_id",
+          "type": "string",
+          "required": false,
+          "description": "ID of a parent folder to list child folders of. When omitted, lists top-level mailbox folders.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_hidden",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to include hidden folders in the response. Defaults to False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of folders to return. Max is 100. Defaults to 25.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "pagination_token",
+          "type": "string",
+          "required": false,
+          "description": "The pagination token to continue a previous request.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Mail.Read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing a list of mail folders."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "OutlookMail.ListMailFolders",
+        "parameters": {
+          "parent_folder_id": {
+            "value": "AAMkAGI2M2Y4YzAtMDAwMS0wMDAwLTAwMDAw",
+            "type": "string",
+            "required": false
+          },
+          "include_hidden": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "limit": {
+            "value": 25,
+            "type": "integer",
+            "required": false
+          },
+          "pagination_token": {
+            "value": "eyJwYWdlIjoxLCJ0b2tlbiI6IkFIQkNfMTIzIn0=",
             "type": "string",
             "required": false
           }
@@ -610,7 +1003,7 @@
     {
       "name": "ReplyToEmail",
       "qualifiedName": "OutlookMail.ReplyToEmail",
-      "fullyQualifiedName": "OutlookMail.ReplyToEmail@2.4.2",
+      "fullyQualifiedName": "OutlookMail.ReplyToEmail@2.6.0",
       "description": "Reply to an existing email in Outlook.\n\nUse this tool to reply to the sender or all recipients of the email.\nSpecify the reply_type to determine the scope of the reply.",
       "parameters": [
         {
@@ -697,9 +1090,230 @@
       }
     },
     {
+      "name": "SearchEmails",
+      "qualifiedName": "OutlookMail.SearchEmails",
+      "fullyQualifiedName": "OutlookMail.SearchEmails@2.6.0",
+      "description": "Search emails across the user's entire mailbox.\n\nCombines full-text keyword search with structured filters for sender,\nread status, attachments, importance, and more. All provided parameters\nare combined with AND. Results are ordered by date sent (most recent first).\n\nEmail bodies are truncated to 255 characters for efficient skimming.\nUse get_email with the message_id to retrieve the full email content.\n\nUse this tool when the user wants to find emails by content, topic, sender,\nor a combination of criteria. For exact property filtering (e.g., by\nconversationId or flag status), use list_emails_by_property instead.",
+      "parameters": [
+        {
+          "name": "keywords",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Words or phrases to search for across email subject, body, and sender fields. All terms must match (AND operator). Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "sender",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Filter by sender email address, display name, or alias. When multiple values are provided, emails from any of the senders are returned (OR operator). Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "recipient",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Filter by To-recipient email address or display name. When multiple values are provided, emails to any of the recipients are returned (OR operator). Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "attachment_name",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Filter by attachment filename. When multiple values are provided, emails with any of the attachment names are returned (OR operator). Defaults to None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "has_attachments",
+          "type": "boolean",
+          "required": false,
+          "description": "Filter for emails with or without attachments. Defaults to None (no filter).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "importance",
+          "type": "string",
+          "required": false,
+          "description": "Filter by email importance level. Defaults to None (no filter).",
+          "enum": [
+            "low",
+            "normal",
+            "high"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "is_read",
+          "type": "boolean",
+          "required": false,
+          "description": "Filter by read status. True for read emails, False for unread. Defaults to None (no filter).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "category",
+          "type": "string",
+          "required": false,
+          "description": "Filter by email category name. Categories are user-defined. Defaults to None (no filter).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "received_after",
+          "type": "string",
+          "required": false,
+          "description": "Filter for emails received on or after this date (YYYY-MM-DD). Dates are interpreted in UTC. Defaults to None (no filter).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "received_before",
+          "type": "string",
+          "required": false,
+          "description": "Filter for emails received on or before this date (YYYY-MM-DD). Dates are interpreted in UTC. Defaults to None (no filter).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of search results to return. Max is 25. Defaults to 10.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "pagination_token",
+          "type": "string",
+          "required": false,
+          "description": "The pagination token to continue a previous request.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Mail.Read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing a list of matching emails."
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "OutlookMail.SearchEmails",
+        "parameters": {
+          "keywords": {
+            "value": [
+              "project update",
+              "Q1 budget"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "sender": {
+            "value": [
+              "alice@example.com",
+              "Alice Smith"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "recipient": {
+            "value": [
+              "bob@example.com"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "attachment_name": {
+            "value": [
+              "report.pdf"
+            ],
+            "type": "array",
+            "required": false
+          },
+          "has_attachments": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "importance": {
+            "value": "high",
+            "type": "string",
+            "required": false
+          },
+          "is_read": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "category": {
+            "value": "Finance",
+            "type": "string",
+            "required": false
+          },
+          "received_after": {
+            "value": "2026-01-01",
+            "type": "string",
+            "required": false
+          },
+          "received_before": {
+            "value": "2026-03-01",
+            "type": "string",
+            "required": false
+          },
+          "limit": {
+            "value": 15,
+            "type": "integer",
+            "required": false
+          },
+          "pagination_token": {
+            "value": "token_abc123",
+            "type": "string",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "microsoft",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "email"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
       "name": "SendDraftEmail",
       "qualifiedName": "OutlookMail.SendDraftEmail",
-      "fullyQualifiedName": "OutlookMail.SendDraftEmail@2.4.2",
+      "fullyQualifiedName": "OutlookMail.SendDraftEmail@2.6.0",
       "description": "Send an existing draft email in Outlook\n\nThis tool can send any un-sent email:\n    - draft\n    - reply-draft\n    - reply-all draft\n    - forward draft",
       "parameters": [
         {
@@ -759,7 +1373,7 @@
     {
       "name": "UpdateDraftEmail",
       "qualifiedName": "OutlookMail.UpdateDraftEmail",
-      "fullyQualifiedName": "OutlookMail.UpdateDraftEmail@2.4.2",
+      "fullyQualifiedName": "OutlookMail.UpdateDraftEmail@2.6.0",
       "description": "Update an existing draft email in Outlook.\n\nThis tool overwrites the subject and body of a draft email (if provided),\nand modifies its recipient lists by selectively adding or removing email addresses.\n\nThis tool can update any un-sent email:\n    - draft\n    - reply-draft\n    - reply-all draft\n    - forward draft",
       "parameters": [
         {
@@ -940,7 +1554,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "OutlookMail.WhoAmI",
-      "fullyQualifiedName": "OutlookMail.WhoAmI@2.4.2",
+      "fullyQualifiedName": "OutlookMail.WhoAmI@2.6.0",
       "description": "Get comprehensive user profile and Outlook Mail environment information.\n\nThis tool provides detailed information about the authenticated user including\ntheir name, email, mailbox settings, automatic replies configuration, and other\nimportant profile details from Outlook Mail services.",
       "parameters": [],
       "auth": {
@@ -994,6 +1608,6 @@
   ],
   "customImports": [],
   "subPages": [],
-  "generatedAt": "2026-02-26T20:45:10.428Z",
-  "summary": "**Outlook Mail Toolkit Overview**\\nThe Arcade.dev Outlook Mail toolkit provides powerful functionalities to integrate Outlook Mail capabilities into applications. It enables developers to manage email interactions seamlessly through a variety of tools and features.\\n\\n**Capabilities**\\n- Create, send, and draft emails with ease.\\n- List and filter emails across all mailbox folders.\\n- Reply to emails and manage draft updates effectively.\\n- Retrieve comprehensive user profile and configuration details.\\n\\n**OAuth**\\n- **Provider**: Microsoft\\n- **Scopes**: Mail.Read, Mail.ReadWrite, Mail.Send, User.Read\\n\\n**Secrets**\\nNo secrets are required for usage."
+  "generatedAt": "2026-03-17T11:25:02.127Z",
+  "summary": "Outlook Mail (OutlookMail) is an Arcade.dev toolkit that integrates with Microsoft Outlook to read, compose, send, and manage mailbox items. It enables programmatic searching, filtering, drafting, sending, replying, and folder management for an authenticated user's mailbox.\n\n**Capabilities**\n- Compose, update, store, and send emails and replies, including draft lifecycle management.\n- Search and list messages across folders with property filters, sorting, and paginated body retrieval.\n- Inspect message metadata, attachments, and fully retrieve or stream message bodies.\n- Enumerate and manage mail folders and access detailed user/mailbox environment info.\n\n**OAuth**\nProvider: Microsoft (oauth2)\nScopes: Mail.Read, Mail.ReadWrite, Mail.Send, User.Read"
 }

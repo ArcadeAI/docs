@@ -1653,6 +1653,45 @@
       }
     },
     {
+      "name": "GetNotificationSummary",
+      "qualifiedName": "Github.GetNotificationSummary",
+      "fullyQualifiedName": "Github.GetNotificationSummary@2.0.1",
+      "description": "Get a summary of GitHub notifications.\n\nReturns counts grouped by reason, repository, and type without full notification details.",
+      "parameters": [],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [
+        "GITHUB_SERVER_URL",
+        "GITHUB_CLASSIC_PERSONAL_ACCESS_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "unknown"
+        },
+        {
+          "name": "GITHUB_CLASSIC_PERSONAL_ACCESS_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Summary of user notifications"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.GetNotificationSummary",
+        "parameters": {},
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": null
+    },
+    {
       "name": "GetPullRequest",
       "qualifiedName": "Github.GetPullRequest",
       "fullyQualifiedName": "Github.GetPullRequest@3.1.3",
@@ -2219,6 +2258,135 @@
         },
         "extras": null
       }
+    },
+    {
+      "name": "ListNotifications",
+      "qualifiedName": "Github.ListNotifications",
+      "fullyQualifiedName": "Github.ListNotifications@2.0.1",
+      "description": "List GitHub notifications with pagination.\n\nReturns notifications sorted chronologically by most recent first.",
+      "parameters": [
+        {
+          "name": "page",
+          "type": "integer",
+          "required": false,
+          "description": "Page number to fetch. Default is 1.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "per_page",
+          "type": "integer",
+          "required": false,
+          "description": "Number of notifications per page (max 100). Default is 30.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "all_notifications",
+          "type": "boolean",
+          "required": false,
+          "description": "Include read notifications. Default is False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "participating",
+          "type": "boolean",
+          "required": false,
+          "description": "Only show notifications user is participating in. Default is False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "repository_full_name",
+          "type": "string",
+          "required": false,
+          "description": "Filter notifications to owner/name repository. Default is None.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "subject_types",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "List of notification subject types to include. Default is None (all types).",
+          "enum": [
+            "Issue",
+            "PullRequest",
+            "Release",
+            "Commit",
+            "Discussion"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "github",
+        "providerType": "oauth2",
+        "scopes": []
+      },
+      "secrets": [
+        "GITHUB_SERVER_URL",
+        "GITHUB_CLASSIC_PERSONAL_ACCESS_TOKEN"
+      ],
+      "secretsInfo": [
+        {
+          "name": "GITHUB_SERVER_URL",
+          "type": "unknown"
+        },
+        {
+          "name": "GITHUB_CLASSIC_PERSONAL_ACCESS_TOKEN",
+          "type": "token"
+        }
+      ],
+      "output": {
+        "type": "json",
+        "description": "Paginated list of notifications"
+      },
+      "documentationChunks": [],
+      "codeExample": {
+        "toolName": "Github.ListNotifications",
+        "parameters": {
+          "page": {
+            "value": 2,
+            "type": "integer",
+            "required": false
+          },
+          "per_page": {
+            "value": 50,
+            "type": "integer",
+            "required": false
+          },
+          "all_notifications": {
+            "value": true,
+            "type": "boolean",
+            "required": false
+          },
+          "participating": {
+            "value": false,
+            "type": "boolean",
+            "required": false
+          },
+          "repository_full_name": {
+            "value": "octocat/Hello-World",
+            "type": "string",
+            "required": false
+          },
+          "subject_types": {
+            "value": [
+              "Issue",
+              "PullRequest"
+            ],
+            "type": "array",
+            "required": false
+          }
+        },
+        "requiresAuth": true,
+        "authProvider": "github",
+        "tabLabel": "Call the Tool with User Authorization"
+      },
+      "metadata": null
     },
     {
       "name": "ListOrgRepositories",
@@ -5766,6 +5934,6 @@
     "import { Callout, Tabs } from \"nextra/components\";"
   ],
   "subPages": [],
-  "generatedAt": "2026-03-04T11:17:26.984Z",
-  "summary": "Arcade.dev's GitHub toolkit exposes programmatic access to repositories, pull requests, issues, reviews, and project data. It enables automated repo/file edits, PR lifecycle handling, issue/project workflows, and user/activity discovery.\n\n**Capabilities**\n- Repository and file management: create branches and files, update file blocks, and read file contents or ranges.\n- Pull request and review workflows: create/update/merge PRs, manage reviewers, post and resolve review comments, and check merge status.\n- Issue, label, and project automation: create/update issues and comments, manage labels, and list/search Project V2 items and fields.\n- Search, auditing, and user context: list collaborators, stargazers, recent activity, and search/repos accessible to the authenticated user.\n\n**OAuth**\nProvider: GitHub\nScopes: None (no predeclared scopes; runtime consent required)\n\n**Secrets**\nGITHUB_SERVER_URL — secret type unknown; typically a GitHub Enterprise base URL (e.g., https://github.example.com). Store endpoints and tokens in a secure secrets manager."
+  "generatedAt": "2026-03-17T11:25:01.701Z",
+  "summary": "Arcade.dev's Github toolkit exposes GitHub operations to LLMs, enabling repository, pull request, issue, review, and activity automation across user-accessible repos. It streamlines common workflows for branch and file manipulation, review and merge orchestration, issue/project management, notifications, and repository discovery.\n\n**Capabilities**\n- Manage PR and review workflows (create/update/assign, comment, review, merge) and related metadata.\n- Create and modify branches/files/issues and manipulate labels, reviewers, and project items.\n- Query repository, issue, PR, notification, and user activity metadata and perform fuzzy searches.\n- Batch and pagination-aware listing for scalable automation and auditing.\n\n**OAuth**\nProvider: github\nScopes: None\n\n**Secrets**\nSupports token and unknown secret types. Examples: GITHUB_CLASSIC_PERSONAL_ACCESS_TOKEN (classic PAT), GITHUB_SERVER_URL (self-hosted GitHub URL)."
 }
