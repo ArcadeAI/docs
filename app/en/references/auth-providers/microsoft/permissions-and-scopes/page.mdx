@@ -1,0 +1,111 @@
+import { Callout } from "nextra/components";
+
+# Microsoft MCP servers: permissions and scopes
+
+This page provides a per-tool reference of every Microsoft Graph API scope required by Arcade's Microsoft MCP servers, along with the API endpoints each tool calls. For auth configuration, see the [Microsoft auth provider overview](/references/auth-providers/microsoft).
+
+All four servers use the [Microsoft Graph API](https://learn.microsoft.com/en-us/graph/overview) with base URL `https://graph.microsoft.com/v1.0`, via the Microsoft Graph SDK for Python (`msgraph-sdk`).
+
+## Outlook Calendar
+
+| Tool | Scopes required | API endpoints | Description |
+| --- | --- | --- | --- |
+| `who_am_i` | `User.Read`, `Calendars.ReadBasic` | `/me`, `/me/mailboxSettings` | Get user profile and calendar info |
+| `create_event` | `MailboxSettings.Read`, `Calendars.ReadWrite` | `/me/events` (POST), `/me/mailboxSettings` | Create a calendar event |
+| `get_event` | `MailboxSettings.Read`, `Calendars.ReadBasic` | `/me/events/{id}` (GET), `/me/mailboxSettings` | Get a specific event |
+| `list_events_in_time_range` | `MailboxSettings.Read`, `Calendars.ReadBasic` | `/me/calendar/calendarView` (GET), `/me/mailboxSettings` | List events in a time range |
+
+**All unique scopes:** `User.Read`, `Calendars.ReadBasic`, `Calendars.ReadWrite`, `MailboxSettings.Read`
+
+## Outlook Mail
+
+| Tool | Scopes required | API endpoints | Description |
+| --- | --- | --- | --- |
+| `list_emails` | `Mail.Read` | `/me/messages` (GET) | List emails from mailbox |
+| `list_emails_by_property` | `Mail.Read` | `/me/messages` (GET with filters) | List emails filtered by property |
+| `list_emails_in_folder` | `Mail.Read` | `/me/mailFolders/{id}/messages` (GET) | List emails in a specific folder |
+| `create_draft_email` | `Mail.ReadWrite` | `/me/messages` (POST) | Create a draft email |
+| `update_draft_email` | `Mail.ReadWrite` | `/me/messages/{id}` (PATCH) | Update an existing draft |
+| `create_and_send_email` | `Mail.Send` | `/me/sendMail` (POST) | Create and send an email |
+| `send_draft_email` | `Mail.Send` | `/me/messages/{id}/send` (POST) | Send a draft email |
+| `reply_to_email` | `Mail.Send` | `/me/messages/{id}/reply` (POST) | Reply to an email |
+
+**All unique scopes:** `Mail.Read`, `Mail.ReadWrite`, `Mail.Send`
+
+## Microsoft Teams
+
+| Tool | Scopes required | API endpoints | Description |
+| --- | --- | --- | --- |
+| `who_am_i` | `User.Read` | `/me` | Get user profile information |
+| `get_signed_in_user` | `User.Read` | `/me` (GET) | Get signed-in user details |
+| `list_users` | `User.Read` | `/users` (GET) | List users in tenant |
+| `search_users` | `User.Read` | `/users` (GET with search) | Search for users |
+| `list_teams` | `Team.ReadBasic.All` | `/me/joinedTeams` (GET) | List teams user is member of |
+| `search_teams` | `Team.ReadBasic.All` | `/teams` (GET with filters) | Search for teams |
+| `get_team` | `Team.ReadBasic.All` | `/teams/{id}` (GET) | Get team details |
+| `list_team_members` | `TeamMember.Read.All` | `/teams/{id}/members` (GET) | List members of a team |
+| `search_team_members` | `TeamMember.Read.All` | `/teams/{id}/members` (GET with search) | Search team members |
+| `get_channel_metadata` | `Channel.ReadBasic.All`, `Team.ReadBasic.All` | `/teams/{id}/channels/{id}` (GET) | Get channel metadata |
+| `list_channels` | `Channel.ReadBasic.All`, `Team.ReadBasic.All` | `/teams/{id}/channels` (GET) | List channels in a team |
+| `search_channels` | `Channel.ReadBasic.All`, `Team.ReadBasic.All` | `/teams/{id}/channels` (GET with filters) | Search channels |
+| `get_channel_messages` | `ChannelMessage.Read.All`, `Team.ReadBasic.All` | `/teams/{id}/channels/{id}/messages` (GET) | Get messages from a channel |
+| `get_channel_message_replies` | `ChannelMessage.Read.All`, `Team.ReadBasic.All` | `/teams/{id}/channels/{id}/messages/{id}/replies` (GET) | Get replies to a channel message |
+| `send_message_to_channel` | `ChannelMessage.Send`, `Team.ReadBasic.All` | `/teams/{id}/channels/{id}/messages` (POST) | Send message to channel |
+| `reply_to_channel_message` | `ChannelMessage.Send`, `Team.ReadBasic.All` | `/teams/{id}/channels/{id}/messages/{id}/replies` (POST) | Reply to channel message |
+| `get_chat_message_by_id` | `Chat.Read` | `/me/chats/{id}/messages/{id}` (GET) | Get a chat message |
+| `create_or_get_chat_by_users` | `Chat.Read`, `Chat.Create` | `/me/chats` (GET/POST) | Create or get chat by users |
+| `list_chats` | `Chat.Read` | `/me/chats` (GET) | List user's chats |
+| `get_chat_metadata` | `Chat.Read` | `/me/chats/{id}` (GET) | Get chat metadata |
+| `send_message_to_chat` | `ChatMessage.Send` | `/me/chats/{id}/messages` (POST) | Send message to chat |
+| `reply_to_chat_message` | `ChatMessage.Send` | `/me/chats/{id}/messages/{id}/replies` (POST) | Reply to chat message |
+| `create_chat` | `Chat.Create` | `/chats` (POST) | Create a new chat |
+| `search_messages` | `Chat.Read`, `ChatMessage.Read`, `ChannelMessage.Read.All` | `/search/query` (POST) | Search messages across Teams |
+| `search_people` | `People.Read` | `/me/people` (GET) | Search for people |
+
+**All unique scopes:** `User.Read`, `Team.ReadBasic.All`, `TeamMember.Read.All`, `Channel.ReadBasic.All`, `ChannelMessage.Read.All`, `ChannelMessage.Send`, `Chat.Read`, `Chat.Create`, `ChatMessage.Read`, `ChatMessage.Send`, `People.Read`
+
+## SharePoint
+
+| Tool | Scopes required | API endpoints | Description |
+| --- | --- | --- | --- |
+| `who_am_i` | `User.Read` | `/me` | Get user profile information |
+| `get_site` | `Sites.Read.All` | `/sites/{id}` (GET) | Get SharePoint site details |
+| `list_sites` | `Sites.Read.All` | `/sites` (GET) | List SharePoint sites |
+| `search_sites` | `Sites.Read.All` | `/sites?search={query}` (GET) | Search for sites |
+| `get_page` | `Sites.Read.All` | `/sites/{id}/pages/{id}` (GET) | Get a SharePoint page |
+| `list_pages` | `Sites.Read.All` | `/sites/{id}/pages` (GET) | List pages from a site |
+| `get_lists_from_site` | `Sites.Read.All` | `/sites/{id}/lists` (GET) | Get lists from a site |
+| `get_items_from_list` | `Sites.Read.All` | `/sites/{id}/lists/{id}/items` (GET) | Get items from a list |
+| `get_drives_from_site` | `Sites.Read.All` | `/sites/{id}/drives` (GET) | Get drives from a site |
+| `list_root_items_in_drive` | `Sites.Read.All` | `/sites/{id}/drives/{id}/root/children` (GET) | List root items in drive |
+| `list_items_in_folder` | `Sites.Read.All` | `/sites/{id}/drives/{id}/items/{id}/children` (GET) | List items in folder |
+| `search_drive_items` | `Sites.Read.All` | `/sites/{id}/drives/{id}/root/search(q='{query}')` (GET) | Search drive items |
+
+**All unique scopes:** `User.Read`, `Sites.Read.All`
+
+## Scopes summary
+
+| Scope | Used in | Purpose |
+| --- | --- | --- |
+| `User.Read` | All Microsoft MCP servers | Read user profile information |
+| `Calendars.ReadBasic` | [Outlook Calendar](/resources/integrations/productivity/outlook-calendar) | Read basic calendar information |
+| `Calendars.ReadWrite` | [Outlook Calendar](/resources/integrations/productivity/outlook-calendar) | Read and write calendar events |
+| `MailboxSettings.Read` | [Outlook Calendar](/resources/integrations/productivity/outlook-calendar) | Read mailbox settings (timezone) |
+| `Mail.Read` | [Outlook Mail](/resources/integrations/productivity/outlook-mail) | Read email messages |
+| `Mail.ReadWrite` | [Outlook Mail](/resources/integrations/productivity/outlook-mail) | Read and write email drafts |
+| `Mail.Send` | [Outlook Mail](/resources/integrations/productivity/outlook-mail) | Send email messages |
+| `Team.ReadBasic.All` | [Microsoft Teams](/resources/integrations/social/microsoft-teams) | Read basic team information |
+| `TeamMember.Read.All` | [Microsoft Teams](/resources/integrations/social/microsoft-teams) | Read team members |
+| `Channel.ReadBasic.All` | [Microsoft Teams](/resources/integrations/social/microsoft-teams) | Read basic channel information |
+| `ChannelMessage.Read.All` | [Microsoft Teams](/resources/integrations/social/microsoft-teams) | Read channel messages |
+| `ChannelMessage.Send` | [Microsoft Teams](/resources/integrations/social/microsoft-teams) | Send channel messages |
+| `Chat.Read` | [Microsoft Teams](/resources/integrations/social/microsoft-teams) | Read chat messages |
+| `Chat.Create` | [Microsoft Teams](/resources/integrations/social/microsoft-teams) | Create chats |
+| `ChatMessage.Read` | [Microsoft Teams](/resources/integrations/social/microsoft-teams) | Read chat messages |
+| `ChatMessage.Send` | [Microsoft Teams](/resources/integrations/social/microsoft-teams) | Send chat messages |
+| `People.Read` | [Microsoft Teams](/resources/integrations/social/microsoft-teams) | Read people information |
+| `Sites.Read.All` | [SharePoint](/resources/integrations/productivity/sharepoint) | Read all site collections |
+
+<Callout type="info">
+  All Microsoft MCP servers use the default scope `https://graph.microsoft.com/.default`. When running locally or with custom deployments, update the base URL to your custom Microsoft Graph endpoint. API endpoints remain consistent across deployments.
+</Callout>
