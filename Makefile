@@ -12,6 +12,9 @@ install: ## Install the dependencies
 build: ## Build the docs site
 	@pnpm build
 
+lint: ## Lint the codebase
+	@pnpm run lint
+
 test: ## Run the tests
 	@pnpm test -- --run
 

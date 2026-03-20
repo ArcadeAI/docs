@@ -239,8 +239,8 @@ export function LandingPage() {
                 delay: ANIMATION_DELAYS.initial,
               }}
             >
-              Arcade handles OAuth, manages user tokens, and gives you
-              7,000+ pre-built integrations so your agents can take real action in
+              Arcade handles OAuth, manages user tokens, and gives you 7,000+
+              pre-built integrations so your agents can take real action in
               production.
             </motion.p>
             <motion.div
