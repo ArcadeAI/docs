@@ -240,7 +240,7 @@ export function LandingPage() {
               }}
             >
               Arcade handles OAuth, manages user tokens, and gives you
-              100+pre-built integrations so your agents can take real action in
+              7,000+ pre-built integrations so your agents can take real action in
               production.
             </motion.p>
             <motion.div
@@ -318,7 +318,7 @@ export function LandingPage() {
             {/* Pre-built Integrations — desktop: col 1 row 2 */}
             <div className="min-[1062px]:col-start-1 min-[1062px]:row-start-2">
               <QuickStartCard
-                description="Browse 100+ ready-to-use integrations for Gmail, Slack, GitHub, and more."
+                description="Browse 7,000+ ready-to-use integrations for Gmail, Slack, GitHub, and more."
                 href={INTEGRATIONS_PAGE_HREF}
                 icon={Puzzle}
                 logos={[
@@ -452,7 +452,7 @@ export function LandingPage() {
                   INTEGRATIONS_PAGE_HREF
                 )}
               >
-                See all 100+
+                See all 7,000+
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
@@ -579,7 +579,7 @@ export function LandingPage() {
               title="Runtime"
             />
             <QuickStartCard
-              description="Catalog of pre-built tools and integrations. Browse 100+ ready-to-use MCP servers."
+              description="Catalog of pre-built tools and integrations. Browse 7,000+ ready-to-use MCP servers."
               href={INTEGRATIONS_PAGE_HREF}
               icon={ToolCase}
               title="Tool Catalog"
