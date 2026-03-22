@@ -1,7 +1,7 @@
 {
   "id": "Figma",
   "label": "Figma",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "Arcade tools designed for LLMs to interact with Figma",
   "metadata": {
     "category": "productivity",
@@ -31,7 +31,7 @@
     {
       "name": "AddCommentOrReply",
       "qualifiedName": "Figma.AddCommentOrReply",
-      "fullyQualifiedName": "Figma.AddCommentOrReply@0.2.2",
+      "fullyQualifiedName": "Figma.AddCommentOrReply@0.3.0",
       "description": "Add a comment to a Figma file or reply to an existing comment.\n\nIf parent_comment_id is provided, creates a reply to that comment.\nOtherwise creates a new comment (optionally attached to a node).",
       "parameters": [
         {
@@ -156,7 +156,7 @@
     {
       "name": "ExportImage",
       "qualifiedName": "Figma.ExportImage",
-      "fullyQualifiedName": "Figma.ExportImage@0.2.2",
+      "fullyQualifiedName": "Figma.ExportImage@0.3.0",
       "description": "Export Figma frames/nodes as images.\n\nReturns temporary URLs to download images. URLs valid for approximately 14 days.",
       "parameters": [
         {
@@ -265,7 +265,7 @@
     {
       "name": "GetComments",
       "qualifiedName": "Figma.GetComments",
-      "fullyQualifiedName": "Figma.GetComments@0.2.2",
+      "fullyQualifiedName": "Figma.GetComments@0.3.0",
       "description": "Get comments on a Figma file.\n\nReturns comments with pagination support.",
       "parameters": [
         {
@@ -351,7 +351,7 @@
     {
       "name": "GetComponent",
       "qualifiedName": "Figma.GetComponent",
-      "fullyQualifiedName": "Figma.GetComponent@0.2.2",
+      "fullyQualifiedName": "Figma.GetComponent@0.3.0",
       "description": "Get metadata for a specific component by its key.",
       "parameters": [
         {
@@ -411,7 +411,7 @@
     {
       "name": "GetComponents",
       "qualifiedName": "Figma.GetComponents",
-      "fullyQualifiedName": "Figma.GetComponents@0.2.2",
+      "fullyQualifiedName": "Figma.GetComponents@0.3.0",
       "description": "Get published components from a file or team library.\n\nFor file: Returns all published components in the file.\nFor team: Returns paginated list of components across team library.",
       "parameters": [
         {
@@ -514,7 +514,7 @@
     {
       "name": "GetComponentSet",
       "qualifiedName": "Figma.GetComponentSet",
-      "fullyQualifiedName": "Figma.GetComponentSet@0.2.2",
+      "fullyQualifiedName": "Figma.GetComponentSet@0.3.0",
       "description": "Get metadata for a specific component set by its key.\n\nA component set is a group of related component variants.",
       "parameters": [
         {
@@ -574,7 +574,7 @@
     {
       "name": "GetComponentSets",
       "qualifiedName": "Figma.GetComponentSets",
-      "fullyQualifiedName": "Figma.GetComponentSets@0.2.2",
+      "fullyQualifiedName": "Figma.GetComponentSets@0.3.0",
       "description": "Get published component sets (groups of component variants) from a file or team library.\n\nComponent sets are groups of related component variants, like a Button\nwith states: default, hover, pressed, disabled.\n\nFor file: Returns all published component sets in the file.\nFor team: Returns paginated list of component sets across team library.",
       "parameters": [
         {
@@ -677,7 +677,7 @@
     {
       "name": "GetFile",
       "qualifiedName": "Figma.GetFile",
-      "fullyQualifiedName": "Figma.GetFile@0.2.2",
+      "fullyQualifiedName": "Figma.GetFile@0.3.0",
       "description": "Get a Figma file's structure including pages and metadata.\n\nReturns the file name, version, thumbnail, and list of pages.\nUse depth parameter to limit how much of the tree is returned for large files.",
       "parameters": [
         {
@@ -750,8 +750,8 @@
     {
       "name": "GetFileNodes",
       "qualifiedName": "Figma.GetFileNodes",
-      "fullyQualifiedName": "Figma.GetFileNodes@0.2.2",
-      "description": "Get specific nodes from a Figma file by their IDs.\n\nReturns the requested nodes with their properties and optionally their children.\nUse this to fetch specific parts of a file without loading the entire document.",
+      "fullyQualifiedName": "Figma.GetFileNodes@0.3.0",
+      "description": "Get specific nodes from a Figma file by their IDs.\n\nReturns the requested nodes with their properties and optionally their children.\nUse this to fetch specific parts of a file without loading the entire document.\n\nSet include_raw_data=True to get raw paint/style details including fills, effects,\nboundVariables, and other node properties needed for inspecting gradients, styles,\nand state tokens.",
       "parameters": [
         {
           "name": "file_key",
@@ -777,6 +777,14 @@
           "description": "How deep to traverse from each node. Use 1 for direct children only. Default returns all descendants.",
           "enum": null,
           "inferrable": true
+        },
+        {
+          "name": "include_raw_data",
+          "type": "boolean",
+          "required": false,
+          "description": "Include raw node payload (fills, strokes, effects, boundVariables, etc.) from Figma API. Default is False for concise output.",
+          "enum": null,
+          "inferrable": true
         }
       ],
       "auth": {
@@ -797,14 +805,15 @@
         "toolName": "Figma.GetFileNodes",
         "parameters": {
           "file_key": {
-            "value": "1234abcd5678efgh",
+            "value": "V0x1a2b3c4D5e6f7g",
             "type": "string",
             "required": true
           },
           "node_ids": {
             "value": [
               "0:1",
-              "1-2"
+              "12:34",
+              "45-67"
             ],
             "type": "array",
             "required": true
@@ -812,6 +821,11 @@
           "depth": {
             "value": 1,
             "type": "integer",
+            "required": false
+          },
+          "include_raw_data": {
+            "value": true,
+            "type": "boolean",
             "required": false
           }
         },
@@ -840,7 +854,7 @@
     {
       "name": "GetPages",
       "qualifiedName": "Figma.GetPages",
-      "fullyQualifiedName": "Figma.GetPages@0.2.2",
+      "fullyQualifiedName": "Figma.GetPages@0.3.0",
       "description": "Get a list of pages in a Figma file.\n\nReturns page IDs and names without the full node tree.",
       "parameters": [
         {
@@ -900,7 +914,7 @@
     {
       "name": "GetProjectFiles",
       "qualifiedName": "Figma.GetProjectFiles",
-      "fullyQualifiedName": "Figma.GetProjectFiles@0.2.2",
+      "fullyQualifiedName": "Figma.GetProjectFiles@0.3.0",
       "description": "Get all files in a Figma project.\n\nFiles are Figma design documents containing pages and frames.",
       "parameters": [
         {
@@ -960,7 +974,7 @@
     {
       "name": "GetStyle",
       "qualifiedName": "Figma.GetStyle",
-      "fullyQualifiedName": "Figma.GetStyle@0.2.2",
+      "fullyQualifiedName": "Figma.GetStyle@0.3.0",
       "description": "Get metadata for a specific style by its key.",
       "parameters": [
         {
@@ -1020,7 +1034,7 @@
     {
       "name": "GetStyles",
       "qualifiedName": "Figma.GetStyles",
-      "fullyQualifiedName": "Figma.GetStyles@0.2.2",
+      "fullyQualifiedName": "Figma.GetStyles@0.3.0",
       "description": "Get published styles from a file or team library.\n\nFor file: Returns all published styles in the file.\nFor team: Returns paginated list of styles across team library.",
       "parameters": [
         {
@@ -1123,7 +1137,7 @@
     {
       "name": "GetTeamProjects",
       "qualifiedName": "Figma.GetTeamProjects",
-      "fullyQualifiedName": "Figma.GetTeamProjects@0.2.2",
+      "fullyQualifiedName": "Figma.GetTeamProjects@0.3.0",
       "description": "Get all projects in a Figma team.\n\nProjects are containers within a team that group related design files.",
       "parameters": [
         {
@@ -1183,7 +1197,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "Figma.WhoAmI",
-      "fullyQualifiedName": "Figma.WhoAmI@0.2.2",
+      "fullyQualifiedName": "Figma.WhoAmI@0.3.0",
       "description": "Get the authenticated user's profile.",
       "parameters": [],
       "auth": {
@@ -1236,6 +1250,6 @@
   ],
   "customImports": [],
   "subPages": [],
-  "generatedAt": "2026-03-09T18:37:58.748Z",
-  "summary": "Arcade provides a toolkit for LLMs to seamlessly interact with Figma, enabling users to automate design tasks and extract valuable data from Figma files. \n\n**Capabilities**  \n- Interact with Figma files, including reading content and comments.  \n- Export images and retrieve component metadata efficiently.  \n- Manage and fetch styles, components, and team projects in an organized manner.  \n- Access user profiles and detailed file structures for enhanced design workflows.\n\n**OAuth**  \n- Provider: Figma  \n- Scopes: current_user:read, file_comments:read, file_comments:write, file_content:read, library_assets:read, library_content:read, projects:read, team_library_content:read  \n\n**Secrets**  \n- None."
+  "generatedAt": "2026-03-22T11:12:52.914Z",
+  "summary": "Figma Arcade toolkit enables LLMs to programmatically inspect and manipulate Figma files, components, styles, comments, projects, and export assets. It exposes read/write operations and paginated reads for large files, teams, and libraries.\n\n**Capabilities**\n- Inspect file structure and nodes with depth control and optional raw paint/style data.\n- Query and manage published components, component sets, and styles across files and team libraries with pagination.\n- Create, reply to, and list comments; access authenticated user, project, and file listings.\n- Export frames/nodes as temporary downloadable images and retrieve file metadata (thumbnails, versions).\n\n**OAuth**\nProvider: figma\nScopes: current_user:read, file_comments:read, file_comments:write, file_content:read, library_assets:read, library_content:read, projects:read, team_library_content:read"
 }
