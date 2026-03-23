@@ -31,6 +31,9 @@ export const meta: MetaRecord = {
   vercelai: {
     title: "Vercel AI SDK",
   },
+  springai: {
+    title: "Spring AI SDK",
+  },
 };
 
 export default meta;
