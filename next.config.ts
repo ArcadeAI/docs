@@ -894,6 +894,26 @@ const nextConfig: NextConfig = withLlmsTxt({
           destination: "/:locale/get-started/mcp-clients/:path*",
           permanent: true,
         },
+        // Deprecated toolkit renames (microsoft_* prefix, ArcadeAI/monorepo#601)
+        {
+          source:
+            "/:locale/resources/integrations/productivity/outlook-calendar",
+          destination:
+            "/:locale/resources/integrations/productivity/microsoft-outlook-calendar",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/productivity/outlook-mail",
+          destination:
+            "/:locale/resources/integrations/productivity/microsoft-outlook-mail",
+          permanent: true,
+        },
+        {
+          source: "/:locale/resources/integrations/productivity/sharepoint",
+          destination:
+            "/:locale/resources/integrations/productivity/microsoft-sharepoint",
+          permanent: true,
+        },
       ];
     },
     headers: async () => [
