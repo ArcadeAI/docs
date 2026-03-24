@@ -190,13 +190,6 @@ const nextConfig: NextConfig = withLlmsTxt({
           permanent: true,
         },
         {
-          source:
-            "/:locale/resources/integrations/productivity/outlook-mail/reference",
-          destination:
-            "/:locale/resources/integrations/productivity/outlook-mail",
-          permanent: true,
-        },
-        {
           source: "/:locale/resources/integrations/sales/hubspot/reference",
           destination: "/:locale/resources/integrations/sales/hubspot",
           permanent: true,
@@ -895,19 +888,6 @@ const nextConfig: NextConfig = withLlmsTxt({
           permanent: true,
         },
         // Deprecated toolkit renames (microsoft_* prefix, ArcadeAI/monorepo#601)
-        {
-          source:
-            "/:locale/resources/integrations/productivity/outlook-calendar",
-          destination:
-            "/:locale/resources/integrations/productivity/microsoft-outlook-calendar",
-          permanent: true,
-        },
-        {
-          source: "/:locale/resources/integrations/productivity/outlook-mail",
-          destination:
-            "/:locale/resources/integrations/productivity/microsoft-outlook-mail",
-          permanent: true,
-        },
         {
           source: "/:locale/resources/integrations/productivity/sharepoint",
           destination:
