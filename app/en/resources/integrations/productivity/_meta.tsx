@@ -81,14 +81,6 @@ const meta: MetaRecord = {
     title: "Microsoft Word",
     href: "/en/resources/integrations/productivity/microsoft-word",
   },
-  "outlook-calendar": {
-    title: "Outlook Calendar",
-    href: "/en/resources/integrations/productivity/outlook-calendar",
-  },
-  "outlook-mail": {
-    title: "Outlook Mail",
-    href: "/en/resources/integrations/productivity/outlook-mail",
-  },
   "-- Starter": {
     type: "separator",
     title: "Starter",
