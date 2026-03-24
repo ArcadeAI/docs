@@ -73,9 +73,9 @@ const meta: MetaRecord = {
     title: "Microsoft PowerPoint",
     href: "/en/resources/integrations/productivity/microsoft-powerpoint",
   },
-  sharepoint: {
+  "microsoft-sharepoint": {
     title: "Microsoft SharePoint",
-    href: "/en/resources/integrations/productivity/sharepoint",
+    href: "/en/resources/integrations/productivity/microsoft-sharepoint",
   },
   "microsoft-word": {
     title: "Microsoft Word",
