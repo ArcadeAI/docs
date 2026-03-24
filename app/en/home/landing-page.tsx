@@ -104,11 +104,6 @@ const POPULAR_INTEGRATIONS_ROW2 = [
     href: "/resources/integrations/social/microsoft-teams",
   },
   {
-    name: "Outlook",
-    icon: "/images/icons/outlook_mail.png",
-    href: "/resources/integrations/productivity/outlook-mail",
-  },
-  {
     name: "Stripe",
     icon: "/images/icons/stripe.svg",
     href: "/resources/integrations/payments/stripe",
