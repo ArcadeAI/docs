@@ -73,21 +73,13 @@ const meta: MetaRecord = {
     title: "Microsoft PowerPoint",
     href: "/en/resources/integrations/productivity/microsoft-powerpoint",
   },
-  sharepoint: {
+  "microsoft-sharepoint": {
     title: "Microsoft SharePoint",
-    href: "/en/resources/integrations/productivity/sharepoint",
+    href: "/en/resources/integrations/productivity/microsoft-sharepoint",
   },
   "microsoft-word": {
     title: "Microsoft Word",
     href: "/en/resources/integrations/productivity/microsoft-word",
-  },
-  "outlook-calendar": {
-    title: "Outlook Calendar",
-    href: "/en/resources/integrations/productivity/outlook-calendar",
-  },
-  "outlook-mail": {
-    title: "Outlook Mail",
-    href: "/en/resources/integrations/productivity/outlook-mail",
   },
   "-- Starter": {
     type: "separator",

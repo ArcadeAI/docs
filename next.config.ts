@@ -190,13 +190,6 @@ const nextConfig: NextConfig = withLlmsTxt({
           permanent: true,
         },
         {
-          source:
-            "/:locale/resources/integrations/productivity/outlook-mail/reference",
-          destination:
-            "/:locale/resources/integrations/productivity/outlook-mail",
-          permanent: true,
-        },
-        {
           source: "/:locale/resources/integrations/sales/hubspot/reference",
           destination: "/:locale/resources/integrations/sales/hubspot",
           permanent: true,
@@ -892,6 +885,13 @@ const nextConfig: NextConfig = withLlmsTxt({
         {
           source: "/:locale/guides/tool-calling/mcp-clients/:path*",
           destination: "/:locale/get-started/mcp-clients/:path*",
+          permanent: true,
+        },
+        // Deprecated toolkit renames (microsoft_* prefix, ArcadeAI/monorepo#601)
+        {
+          source: "/:locale/resources/integrations/productivity/sharepoint",
+          destination:
+            "/:locale/resources/integrations/productivity/microsoft-sharepoint",
           permanent: true,
         },
       ];
