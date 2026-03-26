@@ -119,7 +119,7 @@ The GitHub Copilot extension for Visual Studio does not currently support every 
 
 Coming soon…
 
-### XCode
+### Xcode
 
 Coming soon…
 
