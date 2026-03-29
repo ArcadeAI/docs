@@ -138,6 +138,12 @@ const POPULAR_INTEGRATIONS_ROW2 = [
 // Supported agent frameworks
 const FRAMEWORKS = [
   {
+    name: "AG2",
+    href: "/get-started/agent-frameworks/ag2/use-arcade-tools",
+    icon: "/images/icons/ag2.svg",
+    invertInDark: true,
+  },
+  {
     name: "LangChain",
     href: "/guides/agent-frameworks/langchain/use-arcade-tools",
     icon: "/images/icons/langchain.svg",
@@ -386,10 +392,15 @@ export function LandingPage() {
             {/* Power Your Agent — desktop: col 2 row 3 */}
             <div className="min-[1062px]:col-start-2 min-[1062px]:row-start-3">
               <QuickStartCard
-                description="Integrate with LangChain, OpenAI Agents, CrewAI, Vercel AI, and more."
+                description="Integrate with AG2, LangChain, OpenAI Agents, CrewAI, Vercel AI, and more."
                 href="/get-started/agent-frameworks"
                 icon={Code}
                 logos={[
+                  {
+                    src: "/images/icons/ag2.svg",
+                    alt: "AG2",
+                    invertInDark: true,
+                  },
                   {
                     src: "/images/icons/langchain.svg",
                     alt: "LangChain",
