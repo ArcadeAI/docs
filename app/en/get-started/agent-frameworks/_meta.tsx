@@ -7,6 +7,9 @@ export const meta: MetaRecord = {
   "setup-arcade-with-your-llm-python": {
     title: "Setup Arcade with your LLM (Python)",
   },
+  ag2: {
+    title: "AG2",
+  },
   crewai: {
     title: "CrewAI",
   },
