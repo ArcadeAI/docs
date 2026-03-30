@@ -12,7 +12,7 @@ import { Steps, Tabs, Callout } from "nextra/components";
 <GuideOverview>
 <GuideOverview.Outcomes>
 
-You will build an AG2 agent that uses Arcade tools to help users with Gmail.
+You will build an AG2 agent that uses Arcade tools to help users with Gmail and Slack.
 
 </GuideOverview.Outcomes>
 
@@ -26,7 +26,7 @@ You will build an AG2 agent that uses Arcade tools to help users with Gmail.
 
 <GuideOverview.YouWillLearn>
 
-- How to retrieve Arcade tools and register them with AG2 agents
+- How to dynamically retrieve Arcade tools and register them with AG2 agents
 - How to build an AG2 agent with Arcade tools
 - How to implement "just in time" (JIT) tool authorization using Arcade's client
 
@@ -35,7 +35,7 @@ You will build an AG2 agent that uses Arcade tools to help users with Gmail.
 
 ## The agent architecture you will build in this guide
 
-AG2 provides a [ConversableAgent](https://docs.ag2.ai/latest/docs/user-guide/basic-concepts/conversable-agent/) class that implements a conversational agent. In this guide, you will use an `AssistantAgent` (the LLM-backed agent) and a `ConversableAgent` (which executes tools on behalf of the user) to create an interactive Gmail assistant that can call Arcade tools.
+AG2 provides a [ConversableAgent](https://docs.ag2.ai/latest/docs/user-guide/basic-concepts/conversable-agent/) class that implements a conversational agent. In this guide, you will use an `AssistantAgent` (the LLM-backed agent) and a `ConversableAgent` (which executes tools on behalf of the user) to create an interactive assistant. Tools are dynamically retrieved from Arcade at runtime, so you can add or remove tools by changing a configuration variable.
 
 ## Integrate Arcade tools into an AG2 agent
 
@@ -91,13 +91,19 @@ OPENAI_API_KEY=YOUR_OPENAI_API_KEY
 Create a new file called `main.py` and add the following code:
 
 ```python filename="main.py"
+import inspect
 import os
+from typing import Any
+
 from arcadepy import Arcade
+from arcadepy.types import ToolDefinition
 from autogen import AssistantAgent, ConversableAgent
 from dotenv import load_dotenv
 ```
 
+- `inspect`: Used to dynamically build function signatures from Arcade tool definitions.
 - `Arcade`: The Arcade client for tool authorization and execution.
+- `ToolDefinition`: The type representing an Arcade tool definition.
 - `AssistantAgent`: The LLM-backed agent that decides which tools to call.
 - `ConversableAgent`: Executes tools on behalf of the user.
 
@@ -106,21 +112,45 @@ from dotenv import load_dotenv
   imports come from the `autogen` module.
 </Callout>
 
-### Configure the clients
+### Configure the agent
 
 ```python filename="main.py"
 load_dotenv()
 
-# Initialize Arcade client
-arcade = Arcade(api_key=os.environ["ARCADE_API_KEY"])
+# The Arcade user ID identifies who is authorizing each service
 ARCADE_USER_ID = os.environ["ARCADE_USER_ID"]
+# All tools from the MCP servers defined in the array will be retrieved
+MCP_SERVERS = ["Slack"]
+# Individual tools to retrieve, useful when you don't need all tools from an MCP server
+TOOLS = ["Gmail_ListEmails", "Gmail_SendEmail", "Gmail_WhoAmI"]
+# LLM model to use inside the agent
+MODEL = "gpt-4o"
+# System message that provides context and personality to the agent
+SYSTEM_MESSAGE = "You are a helpful assistant. Use the provided tools to help the user manage their email and Slack."
+# The agent's name
+AGENT_NAME = "Assistant"
+```
 
-# LLM configuration for AG2
-llm_config = {
-    "config_list": [
-        {"model": "gpt-4o", "api_key": os.environ["OPENAI_API_KEY"]}
-    ],
+### Map Arcade types to Python types
+
+This utility maps Arcade's type system to Python types, which AG2 uses to generate the function-calling schema for the LLM.
+
+```python filename="main.py"
+TYPE_MAP: dict[str, type] = {
+    "string": str,
+    "number": float,
+    "integer": int,
+    "boolean": bool,
+    "array": list,
+    "json": dict,
 }
+
+
+def _python_type(val_type: str) -> type:
+    t = TYPE_MAP.get(val_type)
+    if t is None:
+        raise ValueError(f"Unsupported Arcade value type: {val_type}")
+    return t
 ```
 
 ### Write a helper function to call Arcade tools
@@ -137,17 +167,21 @@ This function handles tool authorization and execution through the Arcade client
 </Callout>
 
 ```python filename="main.py"
-def call_arcade_tool(tool_name: str, inputs: dict) -> dict:
+def call_arcade_tool(
+    client: Arcade, tool_name: str, inputs: dict, user_id: str
+) -> dict:
     """Authorize (if needed) and execute an Arcade tool, returning the output."""
-    auth = arcade.tools.authorize(tool_name=tool_name, user_id=ARCADE_USER_ID)
+    auth = client.tools.authorize(tool_name=tool_name, user_id=user_id)
     if auth.status != "completed":
-        print(f"\n[Auth required] Visit this URL to authorize {tool_name}:\n  {auth.url}\n")
-        arcade.auth.wait_for_completion(auth.id)
+        print(
+            f"\n[Auth required] Visit this URL to authorize {tool_name}:\n  {auth.url}\n"
+        )
+        client.auth.wait_for_completion(auth)
 
-    result = arcade.tools.execute(
+    result = client.tools.execute(
         tool_name=tool_name,
         input=inputs,
-        user_id=ARCADE_USER_ID,
+        user_id=user_id,
     )
     if not result.output:
         return {}
@@ -155,54 +189,116 @@ def call_arcade_tool(tool_name: str, inputs: dict) -> dict:
     return data.get("value") or {}
 ```
 
-### Define tool wrapper functions
+### Dynamically generate Python functions from Arcade tool definitions
 
-AG2 registers tools as typed Python functions. Define a wrapper for each Arcade tool you want the agent to use. Each function calls the `call_arcade_tool` helper with the appropriate tool name and inputs.
+AG2 registers tools as typed Python functions. Since tools are retrieved dynamically from Arcade, you need to build these functions at runtime. This helper creates a function for each tool definition, using `inspect.Parameter` and `inspect.Signature` to set the correct parameter names, types, and defaults so that AG2 can generate the correct function-calling schema.
 
 ```python filename="main.py"
-def list_emails(max_results: int = 10, is_unread: bool = False) -> dict:
-    """List emails from Gmail inbox.
-    - max_results: maximum number of emails to return (default 10)
-    - is_unread: if True, return only unread emails
-    """
-    return call_arcade_tool(
-        "Gmail.ListEmails",
-        {"max_results": max_results, "is_unread": is_unread},
-    )
+def _build_tool_function(
+    tool_def: ToolDefinition,
+    client: Arcade,
+    user_id: str,
+) -> Any:
+    """Build a typed Python function from an Arcade tool definition."""
+    tool_name = tool_def.qualified_name
+    sanitized_name = tool_name.replace(".", "_")
 
+    # Build inspect.Parameter list from the Arcade definition
+    params = []
+    annotations: dict[str, Any] = {}
+    for p in tool_def.input.parameters or []:
+        p_type = _python_type(p.value_schema.val_type)
+        if p_type is list and p.value_schema.inner_val_type:
+            inner = _python_type(p.value_schema.inner_val_type)
+            p_type = list[inner]  # type: ignore[valid-type]
 
-def send_email(to: str, subject: str, body: str) -> dict:
-    """Send a new email.
-    - to: recipient email address
-    - subject: email subject line
-    - body: plain-text email body
-    """
-    return call_arcade_tool(
-        "Gmail.SendEmail",
-        {"recipient": to, "subject": subject, "body": body},
-    )
+        default = inspect.Parameter.empty if p.required else None
+        params.append(
+            inspect.Parameter(
+                p.name,
+                kind=inspect.Parameter.POSITIONAL_OR_KEYWORD,
+                default=default,
+                annotation=p_type,
+            )
+        )
+        annotations[p.name] = p_type
 
+    annotations["return"] = dict
 
-def reply_to_email(email_id: str, body: str) -> dict:
-    """Reply to an email by message ID.
-    - email_id: ID of the message to reply to
-    - body: plain-text reply body
-    """
-    return call_arcade_tool(
-        "Gmail.ReplyToEmail",
-        {"reply_to_message_id": email_id, "body": body, "reply_to_whom": "ONLY_THE_SENDER"},
-    )
+    # Create a closure that calls the Arcade tool
+    def tool_func(**kwargs) -> dict:
+        return call_arcade_tool(client, tool_name, kwargs, user_id)
+
+    # Set function metadata so AG2 can introspect it
+    tool_func.__name__ = sanitized_name
+    tool_func.__qualname__ = sanitized_name
+    tool_func.__doc__ = tool_def.description
+    tool_func.__signature__ = inspect.Signature(params)
+    tool_func.__annotations__ = annotations
+
+    return tool_func
+```
+
+### Retrieve Arcade tools
+
+This function retrieves tool definitions from the Arcade API and returns a list of dynamically-built Python functions ready to register with AG2.
+
+```python filename="main.py"
+def get_arcade_tools(
+    client: Arcade,
+    *,
+    tools: list[str] | None = None,
+    mcp_servers: list[str] | None = None,
+    user_id: str = "",
+) -> list[Any]:
+    """Retrieve Arcade tool definitions and return dynamically-built Python functions."""
+    if not tools and not mcp_servers:
+        raise ValueError("Provide at least one tool name or MCP server name")
+
+    definitions: list[ToolDefinition] = []
+
+    if tools:
+        for name in tools:
+            definitions.append(client.tools.get(name=name))
+
+    if mcp_servers:
+        for server in mcp_servers:
+            page = client.tools.list(toolkit=server)
+            definitions.extend(page.items)
+
+    return [
+        _build_tool_function(defn, client, user_id)
+        for defn in definitions
+    ]
 ```
 
 ### Create the agents and register the tools
 
-Create the `AssistantAgent` and `ConversableAgent`, then register each tool function using the `register_for_llm` and `register_for_execution` pattern. This tells the assistant which tools it can call and the user proxy how to execute them.
+Create the `AssistantAgent` and `ConversableAgent`, retrieve the Arcade tools, and register each dynamically-generated function. This tells the assistant which tools it can call and the user proxy how to execute them.
 
 ```python filename="main.py"
+# Initialize the Arcade client
+client = Arcade(api_key=os.environ["ARCADE_API_KEY"])
+
+# Retrieve tools dynamically from Arcade
+arcade_tools = get_arcade_tools(
+    client,
+    tools=TOOLS,
+    mcp_servers=MCP_SERVERS,
+    user_id=ARCADE_USER_ID,
+)
+
+# LLM configuration for AG2
+llm_config = {
+    "config_list": [
+        {"model": MODEL, "api_key": os.environ["OPENAI_API_KEY"]}
+    ],
+}
+
 assistant = AssistantAgent(
-    name="GmailAssistant",
+    name=AGENT_NAME,
     llm_config=llm_config,
-    system_message="You are a helpful Gmail assistant. Use the provided tools to help the user manage their email.",
+    system_message=SYSTEM_MESSAGE,
 )
 
 user_proxy = ConversableAgent(
@@ -211,21 +307,17 @@ user_proxy = ConversableAgent(
     is_termination_msg=lambda msg: "TERMINATE" in (msg.get("content") or ""),
 )
 
-# Register tools: each function is registered for both LLM (caller) and execution (executor)
-for func, description in [
-    (list_emails, "List emails from Gmail inbox. Filter by unread status and max results."),
-    (send_email, "Send a new email to a recipient with subject and body."),
-    (reply_to_email, "Reply to an email by message ID with a body."),
-]:
+# Register each dynamically-generated function with AG2
+for func in arcade_tools:
     user_proxy.register_for_execution()(func)
-    assistant.register_for_llm(description=description)(func)
+    assistant.register_for_llm(description=func.__doc__)(func)
 ```
 
 ### Start the conversation
 
 ```python filename="main.py"
 if __name__ == "__main__":
-    print("Gmail Assistant ready. Type your request (or 'exit' to quit).")
+    print("Assistant ready. Type your request (or 'exit' to quit).")
     while True:
         message = input("\nYou: ").strip()
         if not message or message.lower() in ("exit", "quit"):
@@ -248,6 +340,7 @@ You should see the agent responding to your prompts, handling tool calls and aut
 - "Show my unread emails"
 - "Send an email to someone@example.com about scheduling a demo"
 - "Summarize my latest 3 emails"
+- "Send a message in the #general Slack channel"
 
 </Steps>
 
@@ -260,7 +353,7 @@ You should see the agent responding to your prompts, handling tool calls and aut
 
 Now that you have integrated Arcade tools into your AG2 agent, you can:
 
-- Add more tools from different MCP servers, such as Slack or Notion.
+- Add more tools by modifying the `MCP_SERVERS` and `TOOLS` variables.
 - Explore [AG2's group chat](https://docs.ag2.ai/latest/docs/user-guide/advanced-concepts/groupchat/groupchat/) patterns to coordinate multiple agents.
 - Check out the [build-with-ag2 examples](https://github.com/ag2ai/build-with-ag2/tree/main/arcade) for more integration patterns.
 
@@ -270,36 +363,63 @@ Now that you have integrated Arcade tools into your AG2 agent, you can:
 <summary>**main.py** (full file)</summary>
 
 ```python filename="main.py"
+import inspect
 import os
+from typing import Any
+
 from arcadepy import Arcade
+from arcadepy.types import ToolDefinition
 from autogen import AssistantAgent, ConversableAgent
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# Initialize Arcade client
-arcade = Arcade(api_key=os.environ["ARCADE_API_KEY"])
+# The Arcade user ID identifies who is authorizing each service
 ARCADE_USER_ID = os.environ["ARCADE_USER_ID"]
+# All tools from the MCP servers defined in the array will be retrieved
+MCP_SERVERS = ["Slack"]
+# Individual tools to retrieve, useful when you don't need all tools from an MCP server
+TOOLS = ["Gmail_ListEmails", "Gmail_SendEmail", "Gmail_WhoAmI"]
+# LLM model to use inside the agent
+MODEL = "gpt-4o"
+# System message that provides context and personality to the agent
+SYSTEM_MESSAGE = "You are a helpful assistant. Use the provided tools to help the user manage their email and Slack."
+# The agent's name
+AGENT_NAME = "Assistant"
 
-# LLM configuration for AG2
-llm_config = {
-    "config_list": [
-        {"model": "gpt-4o", "api_key": os.environ["OPENAI_API_KEY"]}
-    ],
+# Mapping of Arcade value types to Python types
+TYPE_MAP: dict[str, type] = {
+    "string": str,
+    "number": float,
+    "integer": int,
+    "boolean": bool,
+    "array": list,
+    "json": dict,
 }
 
 
-def call_arcade_tool(tool_name: str, inputs: dict) -> dict:
-    """Authorize (if needed) and execute an Arcade tool, returning the output."""
-    auth = arcade.tools.authorize(tool_name=tool_name, user_id=ARCADE_USER_ID)
-    if auth.status != "completed":
-        print(f"\n[Auth required] Visit this URL to authorize {tool_name}:\n  {auth.url}\n")
-        arcade.auth.wait_for_completion(auth.id)
+def _python_type(val_type: str) -> type:
+    t = TYPE_MAP.get(val_type)
+    if t is None:
+        raise ValueError(f"Unsupported Arcade value type: {val_type}")
+    return t
 
-    result = arcade.tools.execute(
+
+def call_arcade_tool(
+    client: Arcade, tool_name: str, inputs: dict, user_id: str
+) -> dict:
+    """Authorize (if needed) and execute an Arcade tool, returning the output."""
+    auth = client.tools.authorize(tool_name=tool_name, user_id=user_id)
+    if auth.status != "completed":
+        print(
+            f"\n[Auth required] Visit this URL to authorize {tool_name}:\n  {auth.url}\n"
+        )
+        client.auth.wait_for_completion(auth)
+
+    result = client.tools.execute(
         tool_name=tool_name,
         input=inputs,
-        user_id=ARCADE_USER_ID,
+        user_id=user_id,
     )
     if not result.output:
         return {}
@@ -307,44 +427,101 @@ def call_arcade_tool(tool_name: str, inputs: dict) -> dict:
     return data.get("value") or {}
 
 
-def list_emails(max_results: int = 10, is_unread: bool = False) -> dict:
-    """List emails from Gmail inbox.
-    - max_results: maximum number of emails to return (default 10)
-    - is_unread: if True, return only unread emails
-    """
-    return call_arcade_tool(
-        "Gmail.ListEmails",
-        {"max_results": max_results, "is_unread": is_unread},
-    )
+def _build_tool_function(
+    tool_def: ToolDefinition,
+    client: Arcade,
+    user_id: str,
+) -> Any:
+    """Build a typed Python function from an Arcade tool definition."""
+    tool_name = tool_def.qualified_name
+    sanitized_name = tool_name.replace(".", "_")
+
+    # Build inspect.Parameter list from the Arcade definition
+    params = []
+    annotations: dict[str, Any] = {}
+    for p in tool_def.input.parameters or []:
+        p_type = _python_type(p.value_schema.val_type)
+        if p_type is list and p.value_schema.inner_val_type:
+            inner = _python_type(p.value_schema.inner_val_type)
+            p_type = list[inner]  # type: ignore[valid-type]
+
+        default = inspect.Parameter.empty if p.required else None
+        params.append(
+            inspect.Parameter(
+                p.name,
+                kind=inspect.Parameter.POSITIONAL_OR_KEYWORD,
+                default=default,
+                annotation=p_type,
+            )
+        )
+        annotations[p.name] = p_type
+
+    annotations["return"] = dict
+
+    # Create a closure that calls the Arcade tool
+    def tool_func(**kwargs) -> dict:
+        return call_arcade_tool(client, tool_name, kwargs, user_id)
+
+    # Set function metadata so AG2 can introspect it
+    tool_func.__name__ = sanitized_name
+    tool_func.__qualname__ = sanitized_name
+    tool_func.__doc__ = tool_def.description
+    tool_func.__signature__ = inspect.Signature(params)
+    tool_func.__annotations__ = annotations
+
+    return tool_func
 
 
-def send_email(to: str, subject: str, body: str) -> dict:
-    """Send a new email.
-    - to: recipient email address
-    - subject: email subject line
-    - body: plain-text email body
-    """
-    return call_arcade_tool(
-        "Gmail.SendEmail",
-        {"recipient": to, "subject": subject, "body": body},
-    )
+def get_arcade_tools(
+    client: Arcade,
+    *,
+    tools: list[str] | None = None,
+    mcp_servers: list[str] | None = None,
+    user_id: str = "",
+) -> list[Any]:
+    """Retrieve Arcade tool definitions and return dynamically-built Python functions."""
+    if not tools and not mcp_servers:
+        raise ValueError("Provide at least one tool name or MCP server name")
+
+    definitions: list[ToolDefinition] = []
+
+    if tools:
+        for name in tools:
+            definitions.append(client.tools.get(name=name))
+
+    if mcp_servers:
+        for server in mcp_servers:
+            page = client.tools.list(toolkit=server)
+            definitions.extend(page.items)
+
+    return [
+        _build_tool_function(defn, client, user_id)
+        for defn in definitions
+    ]
 
 
-def reply_to_email(email_id: str, body: str) -> dict:
-    """Reply to an email by message ID.
-    - email_id: ID of the message to reply to
-    - body: plain-text reply body
-    """
-    return call_arcade_tool(
-        "Gmail.ReplyToEmail",
-        {"reply_to_message_id": email_id, "body": body, "reply_to_whom": "ONLY_THE_SENDER"},
-    )
+# Initialize the Arcade client
+client = Arcade(api_key=os.environ["ARCADE_API_KEY"])
 
+# Retrieve tools dynamically from Arcade
+arcade_tools = get_arcade_tools(
+    client,
+    tools=TOOLS,
+    mcp_servers=MCP_SERVERS,
+    user_id=ARCADE_USER_ID,
+)
+
+# LLM configuration for AG2
+llm_config = {
+    "config_list": [
+        {"model": MODEL, "api_key": os.environ["OPENAI_API_KEY"]}
+    ],
+}
 
 assistant = AssistantAgent(
-    name="GmailAssistant",
+    name=AGENT_NAME,
     llm_config=llm_config,
-    system_message="You are a helpful Gmail assistant. Use the provided tools to help the user manage their email.",
+    system_message=SYSTEM_MESSAGE,
 )
 
 user_proxy = ConversableAgent(
@@ -353,17 +530,13 @@ user_proxy = ConversableAgent(
     is_termination_msg=lambda msg: "TERMINATE" in (msg.get("content") or ""),
 )
 
-# Register tools: each function is registered for both LLM (caller) and execution (executor)
-for func, description in [
-    (list_emails, "List emails from Gmail inbox. Filter by unread status and max results."),
-    (send_email, "Send a new email to a recipient with subject and body."),
-    (reply_to_email, "Reply to an email by message ID with a body."),
-]:
+# Register each dynamically-generated function with AG2
+for func in arcade_tools:
     user_proxy.register_for_execution()(func)
-    assistant.register_for_llm(description=description)(func)
+    assistant.register_for_llm(description=func.__doc__)(func)
 
 if __name__ == "__main__":
-    print("Gmail Assistant ready. Type your request (or 'exit' to quit).")
+    print("Assistant ready. Type your request (or 'exit' to quit).")
     while True:
         message = input("\nYou: ").strip()
         if not message or message.lower() in ("exit", "quit"):
