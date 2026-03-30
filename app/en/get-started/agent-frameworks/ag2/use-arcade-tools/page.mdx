@@ -1,0 +1,551 @@
+---
+title: "Use Arcade tools with AG2"
+description: "Learn how to use Arcade tools in AG2 multi-agent applications"
+---
+
+import { Steps, Tabs, Callout } from "nextra/components";
+
+# Use Arcade tools with AG2
+
+[AG2](https://ag2.ai/) (formerly AutoGen) is an open-source framework for building multi-agent AI systems. It provides conversable agents that can work together, use tools, and interact with humans. This guide explains how to integrate Arcade tools into your AG2 applications.
+
+<GuideOverview>
+<GuideOverview.Outcomes>
+
+You will build an AG2 agent that uses Arcade tools to help users with Gmail and Slack.
+
+</GuideOverview.Outcomes>
+
+<GuideOverview.Prerequisites>
+
+- <DashboardLink path="register" />
+- [Obtain an Arcade API key](/get-started/setup/api-keys)
+- The [`uv` package manager](https://docs.astral.sh/uv/)
+
+</GuideOverview.Prerequisites>
+
+<GuideOverview.YouWillLearn>
+
+- How to dynamically retrieve Arcade tools and register them with AG2 agents
+- How to build an AG2 agent with Arcade tools
+- How to implement "just in time" (JIT) tool authorization using Arcade's client
+
+</GuideOverview.YouWillLearn>
+</GuideOverview>
+
+## The agent architecture you will build in this guide
+
+AG2 provides a [ConversableAgent](https://docs.ag2.ai/latest/docs/user-guide/basic-concepts/conversable-agent/) class that implements a conversational agent. In this guide, you will use an `AssistantAgent` (the LLM-backed agent) and a `ConversableAgent` (which executes tools on behalf of the user) to create an interactive assistant. Tools are dynamically retrieved from Arcade at runtime, so you can add or remove tools by changing a configuration variable.
+
+## Integrate Arcade tools into an AG2 agent
+
+<Steps>
+
+### Create a new project
+
+Create a new directory and initialize a virtual environment:
+
+```bash
+mkdir ag2-arcade-example
+cd ag2-arcade-example
+uv init
+uv venv
+```
+
+<Tabs items={["Bash/Zsh (macOS/Linux)", "PowerShell (Windows)"]}>
+<Tabs.Tab>
+
+```bash
+source .venv/bin/activate
+```
+
+</Tabs.Tab>
+<Tabs.Tab>
+
+```powershell
+. ".venv\Scripts\Activate.ps1"
+```
+
+</Tabs.Tab>
+</Tabs>
+
+Install the necessary packages:
+
+```bash
+uv add "ag2[openai]" arcadepy
+```
+
+Create a new file called `.env` and add the following environment variables:
+
+```env filename=".env"
+# Arcade API key
+ARCADE_API_KEY=YOUR_ARCADE_API_KEY
+# Arcade user ID (this is the email address you used to login to Arcade)
+ARCADE_USER_ID={arcade_user_id}
+# OpenAI API key
+OPENAI_API_KEY=YOUR_OPENAI_API_KEY
+```
+
+### Import the necessary packages
+
+Create a new file called `main.py` and add the following code:
+
+```python filename="main.py"
+import inspect
+import os
+from typing import Any
+
+from arcadepy import Arcade
+from arcadepy.types import ToolDefinition
+from autogen import AssistantAgent, ConversableAgent
+from dotenv import load_dotenv
+```
+
+- `inspect`: Used to dynamically build function signatures from Arcade tool definitions.
+- `Arcade`: The Arcade client for tool authorization and execution.
+- `ToolDefinition`: The type representing an Arcade tool definition.
+- `AssistantAgent`: The LLM-backed agent that decides which tools to call.
+- `ConversableAgent`: Executes tools on behalf of the user.
+
+<Callout type="info">
+  AG2 uses the `autogen` package namespace. When you install `ag2[openai]`, the
+  imports come from the `autogen` module.
+</Callout>
+
+### Configure the agent
+
+```python filename="main.py"
+load_dotenv()
+
+# The Arcade user ID identifies who is authorizing each service
+ARCADE_USER_ID = os.environ["ARCADE_USER_ID"]
+# All tools from the MCP servers defined in the array will be retrieved
+MCP_SERVERS = ["Slack"]
+# Individual tools to retrieve, useful when you don't need all tools from an MCP server
+TOOLS = ["Gmail_ListEmails", "Gmail_SendEmail", "Gmail_WhoAmI"]
+# LLM model to use inside the agent
+MODEL = "gpt-4o"
+# System message that provides context and personality to the agent
+SYSTEM_MESSAGE = "You are a helpful assistant. Use the provided tools to help the user manage their email and Slack."
+# The agent's name
+AGENT_NAME = "Assistant"
+```
+
+### Map Arcade types to Python types
+
+This utility maps Arcade's type system to Python types, which AG2 uses to generate the function-calling schema for the LLM.
+
+```python filename="main.py"
+TYPE_MAP: dict[str, type] = {
+    "string": str,
+    "number": float,
+    "integer": int,
+    "boolean": bool,
+    "array": list,
+    "json": dict,
+}
+
+
+def _python_type(val_type: str) -> type:
+    t = TYPE_MAP.get(val_type)
+    if t is None:
+        raise ValueError(f"Unsupported Arcade value type: {val_type}")
+    return t
+```
+
+### Write a helper function to call Arcade tools
+
+This function handles tool authorization and execution through the Arcade client. It checks whether you have authorized access to the requested tool, prompts you to authorize if needed, and then executes the tool.
+
+<Callout type="info">
+  This function captures the authorization flow outside of the agent's context,
+  which is a good practice for security and context engineering. By handling
+  everything in the helper function, you remove the risk of the LLM replacing
+  the authorization URL or leaking it, and you keep the context free from any
+  authorization-related traces, which reduces the risk of hallucinations, and
+  reduces context bloat.
+</Callout>
+
+```python filename="main.py"
+def call_arcade_tool(
+    client: Arcade, tool_name: str, inputs: dict, user_id: str
+) -> dict:
+    """Authorize (if needed) and execute an Arcade tool, returning the output."""
+    auth = client.tools.authorize(tool_name=tool_name, user_id=user_id)
+    if auth.status != "completed":
+        print(
+            f"\n[Auth required] Visit this URL to authorize {tool_name}:\n  {auth.url}\n"
+        )
+        client.auth.wait_for_completion(auth)
+
+    result = client.tools.execute(
+        tool_name=tool_name,
+        input=inputs,
+        user_id=user_id,
+    )
+    if not result.output:
+        return {}
+    data = result.output.model_dump()
+    return data.get("value") or {}
+```
+
+### Dynamically generate Python functions from Arcade tool definitions
+
+AG2 registers tools as typed Python functions. Since tools are retrieved dynamically from Arcade, you need to build these functions at runtime. This helper creates a function for each tool definition, using `inspect.Parameter` and `inspect.Signature` to set the correct parameter names, types, and defaults so that AG2 can generate the correct function-calling schema.
+
+```python filename="main.py"
+def _build_tool_function(
+    tool_def: ToolDefinition,
+    client: Arcade,
+    user_id: str,
+) -> Any:
+    """Build a typed Python function from an Arcade tool definition."""
+    tool_name = tool_def.qualified_name
+    sanitized_name = tool_name.replace(".", "_")
+
+    # Build inspect.Parameter list from the Arcade definition
+    params = []
+    annotations: dict[str, Any] = {}
+    for p in tool_def.input.parameters or []:
+        p_type = _python_type(p.value_schema.val_type)
+        if p_type is list and p.value_schema.inner_val_type:
+            inner = _python_type(p.value_schema.inner_val_type)
+            p_type = list[inner]  # type: ignore[valid-type]
+
+        default = inspect.Parameter.empty if p.required else None
+        params.append(
+            inspect.Parameter(
+                p.name,
+                kind=inspect.Parameter.POSITIONAL_OR_KEYWORD,
+                default=default,
+                annotation=p_type,
+            )
+        )
+        annotations[p.name] = p_type
+
+    annotations["return"] = dict
+
+    # Create a closure that calls the Arcade tool
+    def tool_func(**kwargs) -> dict:
+        return call_arcade_tool(client, tool_name, kwargs, user_id)
+
+    # Set function metadata so AG2 can introspect it
+    tool_func.__name__ = sanitized_name
+    tool_func.__qualname__ = sanitized_name
+    tool_func.__doc__ = tool_def.description
+    tool_func.__signature__ = inspect.Signature(params)
+    tool_func.__annotations__ = annotations
+
+    return tool_func
+```
+
+### Retrieve Arcade tools
+
+This function retrieves tool definitions from the Arcade API and returns a list of dynamically-built Python functions ready to register with AG2.
+
+```python filename="main.py"
+def get_arcade_tools(
+    client: Arcade,
+    *,
+    tools: list[str] | None = None,
+    mcp_servers: list[str] | None = None,
+    user_id: str = "",
+) -> list[Any]:
+    """Retrieve Arcade tool definitions and return dynamically-built Python functions."""
+    if not tools and not mcp_servers:
+        raise ValueError("Provide at least one tool name or MCP server name")
+
+    definitions: list[ToolDefinition] = []
+
+    if tools:
+        for name in tools:
+            definitions.append(client.tools.get(name=name))
+
+    if mcp_servers:
+        for server in mcp_servers:
+            page = client.tools.list(toolkit=server)
+            definitions.extend(page.items)
+
+    return [
+        _build_tool_function(defn, client, user_id)
+        for defn in definitions
+    ]
+```
+
+### Create the agents and register the tools
+
+Create the `AssistantAgent` and `ConversableAgent`, retrieve the Arcade tools, and register each dynamically-generated function. This tells the assistant which tools it can call and the user proxy how to execute them.
+
+```python filename="main.py"
+# Initialize the Arcade client
+client = Arcade(api_key=os.environ["ARCADE_API_KEY"])
+
+# Retrieve tools dynamically from Arcade
+arcade_tools = get_arcade_tools(
+    client,
+    tools=TOOLS,
+    mcp_servers=MCP_SERVERS,
+    user_id=ARCADE_USER_ID,
+)
+
+# LLM configuration for AG2
+llm_config = {
+    "config_list": [
+        {"model": MODEL, "api_key": os.environ["OPENAI_API_KEY"]}
+    ],
+}
+
+assistant = AssistantAgent(
+    name=AGENT_NAME,
+    llm_config=llm_config,
+    system_message=SYSTEM_MESSAGE,
+)
+
+user_proxy = ConversableAgent(
+    name="User",
+    human_input_mode="ALWAYS",
+    is_termination_msg=lambda msg: "TERMINATE" in (msg.get("content") or ""),
+)
+
+# Register each dynamically-generated function with AG2
+for func in arcade_tools:
+    user_proxy.register_for_execution()(func)
+    assistant.register_for_llm(description=func.__doc__)(func)
+```
+
+### Start the conversation
+
+```python filename="main.py"
+if __name__ == "__main__":
+    print("Assistant ready. Type your request (or 'exit' to quit).")
+    while True:
+        message = input("\nYou: ").strip()
+        if not message or message.lower() in ("exit", "quit"):
+            break
+        user_proxy.run(
+            recipient=assistant,
+            message=message,
+            clear_history=False,
+        ).process()
+```
+
+### Run the agent
+
+```bash
+uv run main.py
+```
+
+You should see the agent responding to your prompts, handling tool calls and authorization requests. Here are some example prompts you can try:
+
+- "Show my unread emails"
+- "Send an email to someone@example.com about scheduling a demo"
+- "Summarize my latest 3 emails"
+- "Send a message in the #general Slack channel"
+
+</Steps>
+
+## Tips for selecting tools
+
+- **Relevance**: Pick only the tools you need. Avoid using all tools at once.
+- **Avoid conflicts**: Be mindful of duplicate or overlapping functionality.
+
+## Next steps
+
+Now that you have integrated Arcade tools into your AG2 agent, you can:
+
+- Add more tools by modifying the `MCP_SERVERS` and `TOOLS` variables.
+- Explore [AG2's group chat](https://docs.ag2.ai/latest/docs/user-guide/advanced-concepts/groupchat/groupchat/) patterns to coordinate multiple agents.
+- Check out the [build-with-ag2 examples](https://github.com/ag2ai/build-with-ag2/tree/main/arcade) for more integration patterns.
+
+## Example code
+
+<details>
+<summary>**main.py** (full file)</summary>
+
+```python filename="main.py"
+import inspect
+import os
+from typing import Any
+
+from arcadepy import Arcade
+from arcadepy.types import ToolDefinition
+from autogen import AssistantAgent, ConversableAgent
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# The Arcade user ID identifies who is authorizing each service
+ARCADE_USER_ID = os.environ["ARCADE_USER_ID"]
+# All tools from the MCP servers defined in the array will be retrieved
+MCP_SERVERS = ["Slack"]
+# Individual tools to retrieve, useful when you don't need all tools from an MCP server
+TOOLS = ["Gmail_ListEmails", "Gmail_SendEmail", "Gmail_WhoAmI"]
+# LLM model to use inside the agent
+MODEL = "gpt-4o"
+# System message that provides context and personality to the agent
+SYSTEM_MESSAGE = "You are a helpful assistant. Use the provided tools to help the user manage their email and Slack."
+# The agent's name
+AGENT_NAME = "Assistant"
+
+# Mapping of Arcade value types to Python types
+TYPE_MAP: dict[str, type] = {
+    "string": str,
+    "number": float,
+    "integer": int,
+    "boolean": bool,
+    "array": list,
+    "json": dict,
+}
+
+
+def _python_type(val_type: str) -> type:
+    t = TYPE_MAP.get(val_type)
+    if t is None:
+        raise ValueError(f"Unsupported Arcade value type: {val_type}")
+    return t
+
+
+def call_arcade_tool(
+    client: Arcade, tool_name: str, inputs: dict, user_id: str
+) -> dict:
+    """Authorize (if needed) and execute an Arcade tool, returning the output."""
+    auth = client.tools.authorize(tool_name=tool_name, user_id=user_id)
+    if auth.status != "completed":
+        print(
+            f"\n[Auth required] Visit this URL to authorize {tool_name}:\n  {auth.url}\n"
+        )
+        client.auth.wait_for_completion(auth)
+
+    result = client.tools.execute(
+        tool_name=tool_name,
+        input=inputs,
+        user_id=user_id,
+    )
+    if not result.output:
+        return {}
+    data = result.output.model_dump()
+    return data.get("value") or {}
+
+
+def _build_tool_function(
+    tool_def: ToolDefinition,
+    client: Arcade,
+    user_id: str,
+) -> Any:
+    """Build a typed Python function from an Arcade tool definition."""
+    tool_name = tool_def.qualified_name
+    sanitized_name = tool_name.replace(".", "_")
+
+    # Build inspect.Parameter list from the Arcade definition
+    params = []
+    annotations: dict[str, Any] = {}
+    for p in tool_def.input.parameters or []:
+        p_type = _python_type(p.value_schema.val_type)
+        if p_type is list and p.value_schema.inner_val_type:
+            inner = _python_type(p.value_schema.inner_val_type)
+            p_type = list[inner]  # type: ignore[valid-type]
+
+        default = inspect.Parameter.empty if p.required else None
+        params.append(
+            inspect.Parameter(
+                p.name,
+                kind=inspect.Parameter.POSITIONAL_OR_KEYWORD,
+                default=default,
+                annotation=p_type,
+            )
+        )
+        annotations[p.name] = p_type
+
+    annotations["return"] = dict
+
+    # Create a closure that calls the Arcade tool
+    def tool_func(**kwargs) -> dict:
+        return call_arcade_tool(client, tool_name, kwargs, user_id)
+
+    # Set function metadata so AG2 can introspect it
+    tool_func.__name__ = sanitized_name
+    tool_func.__qualname__ = sanitized_name
+    tool_func.__doc__ = tool_def.description
+    tool_func.__signature__ = inspect.Signature(params)
+    tool_func.__annotations__ = annotations
+
+    return tool_func
+
+
+def get_arcade_tools(
+    client: Arcade,
+    *,
+    tools: list[str] | None = None,
+    mcp_servers: list[str] | None = None,
+    user_id: str = "",
+) -> list[Any]:
+    """Retrieve Arcade tool definitions and return dynamically-built Python functions."""
+    if not tools and not mcp_servers:
+        raise ValueError("Provide at least one tool name or MCP server name")
+
+    definitions: list[ToolDefinition] = []
+
+    if tools:
+        for name in tools:
+            definitions.append(client.tools.get(name=name))
+
+    if mcp_servers:
+        for server in mcp_servers:
+            page = client.tools.list(toolkit=server)
+            definitions.extend(page.items)
+
+    return [
+        _build_tool_function(defn, client, user_id)
+        for defn in definitions
+    ]
+
+
+# Initialize the Arcade client
+client = Arcade(api_key=os.environ["ARCADE_API_KEY"])
+
+# Retrieve tools dynamically from Arcade
+arcade_tools = get_arcade_tools(
+    client,
+    tools=TOOLS,
+    mcp_servers=MCP_SERVERS,
+    user_id=ARCADE_USER_ID,
+)
+
+# LLM configuration for AG2
+llm_config = {
+    "config_list": [
+        {"model": MODEL, "api_key": os.environ["OPENAI_API_KEY"]}
+    ],
+}
+
+assistant = AssistantAgent(
+    name=AGENT_NAME,
+    llm_config=llm_config,
+    system_message=SYSTEM_MESSAGE,
+)
+
+user_proxy = ConversableAgent(
+    name="User",
+    human_input_mode="ALWAYS",
+    is_termination_msg=lambda msg: "TERMINATE" in (msg.get("content") or ""),
+)
+
+# Register each dynamically-generated function with AG2
+for func in arcade_tools:
+    user_proxy.register_for_execution()(func)
+    assistant.register_for_llm(description=func.__doc__)(func)
+
+if __name__ == "__main__":
+    print("Assistant ready. Type your request (or 'exit' to quit).")
+    while True:
+        message = input("\nYou: ").strip()
+        if not message or message.lower() in ("exit", "quit"):
+            break
+        user_proxy.run(
+            recipient=assistant,
+            message=message,
+            clear_history=False,
+        ).process()
+```
+
+</details>
