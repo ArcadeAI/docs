@@ -1,5 +1,5 @@
 import { Arcade } from "@arcadeai/design-system";
-import { ArcadeLogo } from "@arcadeai/design-system/assets/images/arcade-logo";
+import ArcadeLogo from "@arcadeai/design-system/assets/images/arcade-logo";
 
 export function Logo() {
   return (
