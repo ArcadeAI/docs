@@ -1,0 +1,549 @@
+{
+  "id": "MicrosoftOutlookCalendar",
+  "label": "Microsoft Outlook Calendar",
+  "version": "0.1.0",
+  "description": "Arcade.dev LLM tools for Outlook Calendar",
+  "metadata": {
+    "category": "productivity",
+    "iconUrl": "https://design-system.arcade.dev/icons/microsoft-outlook-calendar.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/productivity/microsoft-outlook-calendar",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": {
+    "type": "oauth2",
+    "providerId": "microsoft",
+    "allScopes": [
+      "Calendars.Read",
+      "Calendars.ReadBasic",
+      "Calendars.ReadWrite",
+      "MailboxSettings.Read",
+      "User.Read"
+    ]
+  },
+  "tools": [
+    {
+      "name": "CreateEvent",
+      "qualifiedName": "MicrosoftOutlookCalendar.CreateEvent",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.CreateEvent@0.1.0",
+      "description": "Create an event in the authenticated user's default calendar.\n\nIgnores timezone offsets provided in the start_date_time and end_date_time parameters.\nInstead, uses the user's default calendar timezone to filter events.\nIf the user has not set a timezone for their calendar, then the timezone will be UTC.",
+      "parameters": [
+        {
+          "name": "subject",
+          "type": "string",
+          "required": true,
+          "description": "The text of the event's subject (title) line.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "body",
+          "type": "string",
+          "required": true,
+          "description": "The body of the event",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_date_time",
+          "type": "string",
+          "required": true,
+          "description": "The datetime of the event's start, represented in ISO 8601 format. Timezone offset is ignored. For example, 2025-04-25T13:00:00",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_date_time",
+          "type": "string",
+          "required": true,
+          "description": "The datetime of the event's end, represented in ISO 8601 format. Timezone offset is ignored. For example, 2025-04-25T13:30:00",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "location",
+          "type": "string",
+          "required": false,
+          "description": "The location of the event",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "attendee_emails",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "The email addresses of the attendees of the event. Must be valid email addresses e.g., username@domain.com.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "is_online_meeting",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether the event is an online meeting. Defaults to False",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "custom_meeting_url",
+          "type": "string",
+          "required": false,
+          "description": "The URL of the online meeting. If not provided and is_online_meeting is True, then a url will be generated for you",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "MailboxSettings.Read",
+          "Calendars.ReadWrite"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing the created event details"
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "calendar"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetEvent",
+      "qualifiedName": "MicrosoftOutlookCalendar.GetEvent",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.GetEvent@0.1.0",
+      "description": "Get an event by its ID from the user's calendar.",
+      "parameters": [
+        {
+          "name": "event_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the event to get",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "MailboxSettings.Read",
+          "Calendars.ReadBasic"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing the event details"
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "calendar"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListCalendars",
+      "qualifiedName": "MicrosoftOutlookCalendar.ListCalendars",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListCalendars@0.1.0",
+      "description": "List all calendars the user has access to.\n\nReturns the user's own calendars plus any shared or delegated calendars.\nEach calendar includes its ID, name, owner, and permissions.\n\nUse a calendar_id from the results to target a specific calendar\nin other calendar tools.",
+      "parameters": [
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of calendars to return. Max is 200. Defaults to 50.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "pagination_token",
+          "type": "string",
+          "required": false,
+          "description": "The pagination token to continue a previous request.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Calendars.ReadBasic"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing a list of available calendars."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "calendar"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListEventAttachments",
+      "qualifiedName": "MicrosoftOutlookCalendar.ListEventAttachments",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListEventAttachments@0.1.0",
+      "description": "List attachment metadata for a calendar event.\n\nReturns metadata only (name, size, type, etc.). Attachment content is not included.\nUse this tool when the user wants to know what files are attached to a calendar event\nor meeting.\n\nPass a calendar_id to list attachments on events in shared or delegated calendars.",
+      "parameters": [
+        {
+          "name": "event_id",
+          "type": "string",
+          "required": true,
+          "description": "The ID of the calendar event to list attachments for.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "calendar_id",
+          "type": "string",
+          "required": false,
+          "description": "ID of a specific calendar containing the event, including shared and delegated ones. When omitted, searches the user's default calendar.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of attachments to return. Max is 100. Defaults to 25.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "pagination_token",
+          "type": "string",
+          "required": false,
+          "description": "The pagination token to continue a previous request.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "Calendars.Read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing a list of attachment metadata objects."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "calendar"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListEventsInTimeRange",
+      "qualifiedName": "MicrosoftOutlookCalendar.ListEventsInTimeRange",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.ListEventsInTimeRange@0.1.0",
+      "description": "List events in the user's calendar in a specific time range.\n\nIgnores timezone offsets provided in the start_date_time and end_date_time parameters.\nInstead, uses the user's default calendar timezone to filter events.\nIf the user has not set a timezone for their calendar, then the timezone will be UTC.",
+      "parameters": [
+        {
+          "name": "start_date_time",
+          "type": "string",
+          "required": true,
+          "description": "The start date and time of the time range, represented in ISO 8601 format. Timezone offset is ignored. For example, 2025-04-24T19:00:00",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_date_time",
+          "type": "string",
+          "required": true,
+          "description": "The end date and time of the time range, represented in ISO 8601 format. Timezone offset is ignored. For example, 2025-04-24T19:30:00",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "The maximum number of events to return. Max 1000. Defaults to 10",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "MailboxSettings.Read",
+          "Calendars.ReadBasic"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing a list of events"
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "calendar"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "SearchEvents",
+      "qualifiedName": "MicrosoftOutlookCalendar.SearchEvents",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.SearchEvents@0.1.0",
+      "description": "Search calendar events within a time range with optional filters.\n\nReturns events filtered by subject keyword, attendee, organizer,\nimportance, or online-meeting status. Results are in chronological order.\n\nBy default, searches the user's primary calendar. Pass a calendar_id\nto search a shared or delegated calendar.\n\nEvent bodies are truncated to 200 characters for efficient skimming.\nUse the event_id from the results to retrieve full event details.",
+      "parameters": [
+        {
+          "name": "subject",
+          "type": "string",
+          "required": false,
+          "description": "Filter events whose subject contains this text (case-insensitive). Defaults to None (no subject filter).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "attendee_emails",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Filter events that include these attendees by exact email address. Multiple emails are combined with AND (all must be attendees). Defaults to None (no attendee filter).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "organizer_name",
+          "type": "string",
+          "required": false,
+          "description": "Filter events organized by this person's display name. Note: filtering by organizer email address is not supported by the Microsoft Graph API. Use the organizer's display name instead. Defaults to None (no organizer filter).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "importance",
+          "type": "string",
+          "required": false,
+          "description": "Filter by event importance level. Defaults to None (no filter).",
+          "enum": [
+            "low",
+            "normal",
+            "high"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "is_online_meeting",
+          "type": "boolean",
+          "required": false,
+          "description": "Filter for online meetings (True) or in-person meetings (False). Defaults to None (no filter).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "start_date_time",
+          "type": "string",
+          "required": false,
+          "description": "The start of the time range, in ISO 8601 format. Timezone offset is ignored; the user's calendar timezone is used. Defaults to None (90 days before today).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "end_date_time",
+          "type": "string",
+          "required": false,
+          "description": "The end of the time range, in ISO 8601 format. Timezone offset is ignored; the user's calendar timezone is used. Defaults to None (90 days after today).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "calendar_id",
+          "type": "string",
+          "required": false,
+          "description": "ID of a specific calendar to search, including shared and delegated ones. When omitted, searches the user's default calendar.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "include_cancelled",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether to include cancelled events in the results. Defaults to False.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum number of events to return. Max is 200. Defaults to 25.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "pagination_token",
+          "type": "string",
+          "required": false,
+          "description": "The pagination token to continue a previous request.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "MailboxSettings.Read",
+          "Calendars.Read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "A dictionary containing a list of matching calendar events."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "calendar"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "MicrosoftOutlookCalendar.WhoAmI",
+      "fullyQualifiedName": "MicrosoftOutlookCalendar.WhoAmI@0.1.0",
+      "description": "Get information about the current user and their Outlook Calendar environment.",
+      "parameters": [],
+      "auth": {
+        "providerId": "microsoft",
+        "providerType": "oauth2",
+        "scopes": [
+          "User.Read",
+          "Calendars.ReadBasic",
+          "MailboxSettings.Read"
+        ]
+      },
+      "secrets": [],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "Get comprehensive user profile and Outlook Calendar information."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "calendar"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-03-31T11:26:37.497Z"
+}
