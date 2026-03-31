@@ -1,4 +1,7 @@
-import { Arcade, ArcadeLogo } from "@arcadeai/design-system";
+import {
+  Arcade,
+  ArcadeLogo,
+} from "@arcadeai/design-system/components/ui/atoms/icons";
 
 export function Logo() {
   return (
