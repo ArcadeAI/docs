@@ -613,7 +613,6 @@ export function ToolkitPage({ data }: ToolkitPageProps) {
         <ToolkitHeader
           auth={data.auth}
           description={data.description}
-          id={data.id}
           label={data.label}
           metadata={metadata}
           toolStats={toolStats}

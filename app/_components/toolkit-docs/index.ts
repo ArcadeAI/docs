@@ -14,7 +14,6 @@
  *   return (
  *     <>
  *       <ToolkitHeader
- *         id={toolkitData.id}
  *         label={toolkitData.label}
  *         description={toolkitData.description}
  *         metadata={toolkitData.metadata}

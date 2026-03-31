@@ -378,8 +378,6 @@ export type DocumentationChunkRendererProps = {
  * Props for ToolkitHeader component
  */
 export type ToolkitHeaderProps = {
-  /** Toolkit ID for icon lookup */
-  id: string;
   /** Display label */
   label: string;
   /** Toolkit description */

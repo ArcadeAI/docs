@@ -9,9 +9,6 @@ import {
   AUTH_TYPE_LABELS,
   DEFAULT_AUTHOR,
   getAuthProviderDocsUrl,
-  getPackageName,
-  LICENSE_BADGE,
-  PYPI_BADGES,
 } from "../constants";
 import type { ToolkitHeaderProps, ToolkitType } from "../types";
 
@@ -66,7 +63,6 @@ function ToolkitBadges({
  * @example
  * ```tsx
  * <ToolkitHeader
- *   id="Github"
  *   label="GitHub"
  *   description="GitHub repository and collaboration tools"
  *   metadata={toolkitData.metadata}
@@ -75,7 +71,6 @@ function ToolkitBadges({
  * ```
  */
 export function ToolkitHeader({
-  id,
   label,
   description,
   metadata,
@@ -86,7 +81,6 @@ export function ToolkitHeader({
 }: ToolkitHeaderProps): React.ReactElement {
   // Icon comes from the JSON metadata - the source of truth
   const iconUrl = metadata.iconUrl;
-  const packageName = getPackageName(id);
 
   // Determine auth display
   const authProviderName = auth?.providerId
@@ -220,59 +214,6 @@ export function ToolkitHeader({
           )}
         </div>
       </div>
-
-      {/* PyPI Badges */}
-      {id && (
-        <div className="bg-neutral-dark/20 px-6 py-3">
-          <div className="flex flex-wrap justify-center gap-2">
-            {PYPI_BADGES.map((badge) => (
-              <a
-                href={
-                  typeof badge.href === "function"
-                    ? badge.href(packageName)
-                    : badge.href
-                }
-                key={badge.alt}
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                <img
-                  alt={badge.alt}
-                  className="h-5 w-auto"
-                  height={20}
-                  src={
-                    typeof badge.src === "function"
-                      ? badge.src(packageName)
-                      : badge.src
-                  }
-                  width={80}
-                />
-              </a>
-            ))}
-            <a
-              href={
-                typeof LICENSE_BADGE.href === "function"
-                  ? LICENSE_BADGE.href(packageName)
-                  : LICENSE_BADGE.href
-              }
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              <img
-                alt={LICENSE_BADGE.alt}
-                className="h-5 w-auto"
-                height={20}
-                src={
-                  typeof LICENSE_BADGE.src === "function"
-                    ? LICENSE_BADGE.src(packageName)
-                    : LICENSE_BADGE.src
-                }
-                width={80}
-              />
-            </a>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

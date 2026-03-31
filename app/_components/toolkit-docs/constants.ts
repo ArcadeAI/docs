@@ -1,39 +1,6 @@
 /**
- * Toolkit documentation constants
- *
- * Centralized configuration for URLs, badges, labels, and other constants
- * used throughout the toolkit documentation components.
+ * Toolkit documentation constants shared across toolkit UI components.
  */
-
-// =============================================================================
-// External URLs
-// =============================================================================
-
-/**
- * GitHub organization URL
- */
-export const GITHUB_ORG_URL = "https://github.com/arcadeai";
-
-/**
- * GitHub repository URL pattern for toolkit code
- * Use: `${GITHUB_ORG_URL}/arcade_${toolkitId.toLowerCase()}`
- */
-export const GITHUB_REPO_PREFIX = "arcade_";
-
-/**
- * License file URL
- */
-export const LICENSE_URL = `${GITHUB_ORG_URL}/arcade-ai/blob/main/LICENSE`;
-
-/**
- * PyPI base URL
- */
-export const PYPI_BASE_URL = "https://pypi.org/project";
-
-/**
- * Shields.io base URL for badges
- */
-export const SHIELDS_IO_BASE_URL = "https://img.shields.io";
 
 // =============================================================================
 // Internal Routes
@@ -72,63 +39,11 @@ export function getPackageName(toolkitId: string): string {
 }
 
 /**
- * Generate PyPI project URL from package name
- */
-export function getPyPIUrl(packageName: string): string {
-  return `${PYPI_BASE_URL}/${packageName}/`;
-}
-
-/**
  * Generate auth provider docs URL from provider ID
  */
 export function getAuthProviderDocsUrl(providerId: string): string {
   return `${AUTH_PROVIDER_DOCS_PATH}/${providerId.toLowerCase()}`;
 }
-
-// =============================================================================
-// Badges Configuration
-// =============================================================================
-
-export type BadgeConfig = {
-  alt: string;
-  src: string | ((packageName: string) => string);
-  href: string | ((packageName: string) => string);
-};
-
-/**
- * PyPI badge configurations
- */
-export const PYPI_BADGES: BadgeConfig[] = [
-  {
-    alt: "PyPI Version",
-    src: (pkg) => `${SHIELDS_IO_BASE_URL}/pypi/v/${pkg}`,
-    href: (pkg) => getPyPIUrl(pkg),
-  },
-  {
-    alt: "Python Versions",
-    src: (pkg) => `${SHIELDS_IO_BASE_URL}/pypi/pyversions/${pkg}`,
-    href: (pkg) => getPyPIUrl(pkg),
-  },
-  {
-    alt: "Wheel Status",
-    src: (pkg) => `${SHIELDS_IO_BASE_URL}/pypi/wheel/${pkg}`,
-    href: (pkg) => getPyPIUrl(pkg),
-  },
-  {
-    alt: "Downloads",
-    src: (pkg) => `${SHIELDS_IO_BASE_URL}/pypi/dm/${pkg}`,
-    href: (pkg) => getPyPIUrl(pkg),
-  },
-];
-
-/**
- * License badge configuration
- */
-export const LICENSE_BADGE: BadgeConfig = {
-  alt: "License",
-  src: `${SHIELDS_IO_BASE_URL}/badge/License-MIT-yellow.svg`,
-  href: LICENSE_URL,
-};
 
 // =============================================================================
 // Default Values
