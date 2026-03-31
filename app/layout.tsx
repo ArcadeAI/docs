@@ -33,13 +33,14 @@ const REGEX_LOCALE = /^\/([a-z]{2}(?:-[A-Z]{2})?)(?:\/|$)/;
 function addRoutesToHrefItems(items: object[]): object[] {
   return items.map((item) => {
     const i = item as Record<string, unknown>;
-    if (i.href && !i.route) {
-      return { ...i, route: i.href };
+    const withRoute = i.href && !i.route ? { ...i, route: i.href } : i;
+    if (Array.isArray(withRoute.children)) {
+      return {
+        ...withRoute,
+        children: addRoutesToHrefItems(withRoute.children as object[]),
+      };
     }
-    if (Array.isArray(i.children)) {
-      return { ...i, children: addRoutesToHrefItems(i.children) };
-    }
-    return i;
+    return withRoute;
   });
 }
 
