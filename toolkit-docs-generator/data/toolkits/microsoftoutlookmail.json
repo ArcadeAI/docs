@@ -1,7 +1,7 @@
 {
   "id": "MicrosoftOutlookMail",
   "label": "Microsoft Outlook Mail",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Arcade.dev LLM tools for Outlook Mail",
   "metadata": {
     "category": "productivity",
@@ -20,6 +20,7 @@
       "Mail.Read",
       "Mail.ReadWrite",
       "Mail.Send",
+      "MailboxSettings.Read",
       "User.Read"
     ]
   },
@@ -27,7 +28,7 @@
     {
       "name": "CreateAndSendEmail",
       "qualifiedName": "MicrosoftOutlookMail.CreateAndSendEmail",
-      "fullyQualifiedName": "MicrosoftOutlookMail.CreateAndSendEmail@0.1.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.CreateAndSendEmail@0.2.0",
       "description": "Create and immediately send a new email in Outlook to the specified recipients",
       "parameters": [
         {
@@ -120,7 +121,7 @@
     {
       "name": "CreateDraftEmail",
       "qualifiedName": "MicrosoftOutlookMail.CreateDraftEmail",
-      "fullyQualifiedName": "MicrosoftOutlookMail.CreateDraftEmail@0.1.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.CreateDraftEmail@0.2.0",
       "description": "Compose a new draft email in Outlook",
       "parameters": [
         {
@@ -182,6 +183,7 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
+          "MailboxSettings.Read",
           "Mail.ReadWrite"
         ]
       },
@@ -213,7 +215,7 @@
     {
       "name": "GetEmail",
       "qualifiedName": "MicrosoftOutlookMail.GetEmail",
-      "fullyQualifiedName": "MicrosoftOutlookMail.GetEmail@0.1.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.GetEmail@0.2.0",
       "description": "Retrieve a single email message by its ID.\n\nReturns email metadata and body content. By default, the body is returned\nas plain text (HTML tags stripped) and capped at 5000 characters. Set\nbody_format to HTML to get the original markup. Use body_offset to\ncontinue reading long emails, or set max_body_characters to None for the\nfull body.\n\nUse this tool to read the full content of an email after finding it via\nsearch_emails or any listing tool.",
       "parameters": [
         {
@@ -256,6 +258,7 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
+          "MailboxSettings.Read",
           "Mail.Read"
         ]
       },
@@ -287,7 +290,7 @@
     {
       "name": "ListEmailAttachments",
       "qualifiedName": "MicrosoftOutlookMail.ListEmailAttachments",
-      "fullyQualifiedName": "MicrosoftOutlookMail.ListEmailAttachments@0.1.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.ListEmailAttachments@0.2.0",
       "description": "List attachment metadata for an email message.\n\nReturns metadata only (name, size, type, etc.). Attachment content is not included.\nUse this tool when the user wants to know what files are attached to an email.",
       "parameters": [
         {
@@ -319,6 +322,7 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
+          "MailboxSettings.Read",
           "Mail.Read"
         ]
       },
@@ -350,7 +354,7 @@
     {
       "name": "ListEmails",
       "qualifiedName": "MicrosoftOutlookMail.ListEmails",
-      "fullyQualifiedName": "MicrosoftOutlookMail.ListEmails@0.1.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.ListEmails@0.2.0",
       "description": "List emails in the user's mailbox across all folders.\n\nResults are sorted by sort_by in the sort_order direction.\nDefaults to newest first (receivedDateTime descending).\n\nSince this tool lists email across all folders, it may return sent items,\ndrafts, and other items that are not in the inbox.",
       "parameters": [
         {
@@ -398,6 +402,7 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
+          "MailboxSettings.Read",
           "Mail.Read"
         ]
       },
@@ -429,11 +434,11 @@
     {
       "name": "ListEmailsByProperty",
       "qualifiedName": "MicrosoftOutlookMail.ListEmailsByProperty",
-      "fullyQualifiedName": "MicrosoftOutlookMail.ListEmailsByProperty@0.1.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.ListEmailsByProperty@0.2.0",
       "description": "List emails in the user's mailbox across all folders filtering by a property.\n\nResults are sorted by sort_by in the sort_order direction.\nDefaults to newest first (receivedDateTime descending).\n\nSorting by RECEIVED_DATE_TIME works with any filter property. Sorting by\na different property (SUBJECT, SENDER, IMPORTANCE) while filtering by an\nunrelated property may fail due to a Microsoft Graph API restriction. If\nthis happens, either sort by RECEIVED_DATE_TIME, or use list_emails (no\nfilter) with the desired sort_by.",
       "parameters": [
         {
-          "name": "property",
+          "name": "mail_property",
           "type": "string",
           "required": true,
           "description": "The property to filter the emails by.",
@@ -520,6 +525,7 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
+          "MailboxSettings.Read",
           "Mail.Read"
         ]
       },
@@ -551,7 +557,7 @@
     {
       "name": "ListEmailsInFolder",
       "qualifiedName": "MicrosoftOutlookMail.ListEmailsInFolder",
-      "fullyQualifiedName": "MicrosoftOutlookMail.ListEmailsInFolder@0.1.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.ListEmailsInFolder@0.2.0",
       "description": "List the user's emails in the specified folder.\n\nExactly one of `well_known_folder_name` or `folder_id` MUST be provided.\n\nResults are sorted by sort_by in the sort_order direction.\nDefaults to newest first (receivedDateTime descending).",
       "parameters": [
         {
@@ -623,6 +629,7 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
+          "MailboxSettings.Read",
           "Mail.Read"
         ]
       },
@@ -654,7 +661,7 @@
     {
       "name": "ListMailFolders",
       "qualifiedName": "MicrosoftOutlookMail.ListMailFolders",
-      "fullyQualifiedName": "MicrosoftOutlookMail.ListMailFolders@0.1.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.ListMailFolders@0.2.0",
       "description": "List mail folders in the user's mailbox.\n\nReturns folder names, IDs, unread counts, and total item counts.\nUse the folder ID in follow-up calls to list_emails_in_folder.\nOmit parent_folder_id to list top-level folders, or provide a folder ID\nto list its child folders.",
       "parameters": [
         {
@@ -725,7 +732,7 @@
     {
       "name": "ReplyToEmail",
       "qualifiedName": "MicrosoftOutlookMail.ReplyToEmail",
-      "fullyQualifiedName": "MicrosoftOutlookMail.ReplyToEmail@0.1.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.ReplyToEmail@0.2.0",
       "description": "Reply to an existing email in Outlook.\n\nUse this tool to reply to the sender or all recipients of the email.\nSpecify the reply_type to determine the scope of the reply.",
       "parameters": [
         {
@@ -791,7 +798,7 @@
     {
       "name": "SearchEmails",
       "qualifiedName": "MicrosoftOutlookMail.SearchEmails",
-      "fullyQualifiedName": "MicrosoftOutlookMail.SearchEmails@0.1.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.SearchEmails@0.2.0",
       "description": "Search emails across the user's entire mailbox.\n\nCombines full-text keyword search with structured filters for sender,\nread status, attachments, importance, and more. All provided parameters\nare combined with AND. Results are ordered by date sent (most recent first).\n\nEmail bodies are truncated to 255 characters for efficient skimming.\nUse get_email with the message_id to retrieve the full email content.\n\nUse this tool when the user wants to find emails by content, topic, sender,\nor a combination of criteria. For exact property filtering (e.g., by\nconversationId or flag status), use list_emails_by_property instead.",
       "parameters": [
         {
@@ -903,6 +910,7 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
+          "MailboxSettings.Read",
           "Mail.Read"
         ]
       },
@@ -934,7 +942,7 @@
     {
       "name": "SendDraftEmail",
       "qualifiedName": "MicrosoftOutlookMail.SendDraftEmail",
-      "fullyQualifiedName": "MicrosoftOutlookMail.SendDraftEmail@0.1.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.SendDraftEmail@0.2.0",
       "description": "Send an existing draft email in Outlook\n\nThis tool can send any un-sent email:\n    - draft\n    - reply-draft\n    - reply-all draft\n    - forward draft",
       "parameters": [
         {
@@ -981,7 +989,7 @@
     {
       "name": "UpdateDraftEmail",
       "qualifiedName": "MicrosoftOutlookMail.UpdateDraftEmail",
-      "fullyQualifiedName": "MicrosoftOutlookMail.UpdateDraftEmail@0.1.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.UpdateDraftEmail@0.2.0",
       "description": "Update an existing draft email in Outlook.\n\nThis tool overwrites the subject and body of a draft email (if provided),\nand modifies its recipient lists by selectively adding or removing email addresses.\n\nThis tool can update any un-sent email:\n    - draft\n    - reply-draft\n    - reply-all draft\n    - forward draft",
       "parameters": [
         {
@@ -1067,6 +1075,7 @@
         "providerId": "microsoft",
         "providerType": "oauth2",
         "scopes": [
+          "MailboxSettings.Read",
           "Mail.ReadWrite"
         ]
       },
@@ -1098,7 +1107,7 @@
     {
       "name": "WhoAmI",
       "qualifiedName": "MicrosoftOutlookMail.WhoAmI",
-      "fullyQualifiedName": "MicrosoftOutlookMail.WhoAmI@0.1.0",
+      "fullyQualifiedName": "MicrosoftOutlookMail.WhoAmI@0.2.0",
       "description": "Get comprehensive user profile and Outlook Mail environment information.\n\nThis tool provides detailed information about the authenticated user including\ntheir name, email, mailbox settings, automatic replies configuration, and other\nimportant profile details from Outlook Mail services.",
       "parameters": [],
       "auth": {
@@ -1138,5 +1147,5 @@
   "documentationChunks": [],
   "customImports": [],
   "subPages": [],
-  "generatedAt": "2026-03-31T11:26:37.521Z"
+  "generatedAt": "2026-04-01T11:28:23.610Z"
 }
