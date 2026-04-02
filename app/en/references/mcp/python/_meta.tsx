@@ -15,6 +15,9 @@ const meta: MetaRecord = {
   context: {
     title: "Context",
   },
+  resources: {
+    title: "Resources",
+  },
   server: {
     title: "Server",
   },
