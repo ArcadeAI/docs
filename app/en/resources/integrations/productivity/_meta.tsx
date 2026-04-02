@@ -53,6 +53,10 @@ const meta: MetaRecord = {
     title: "Google Slides",
     href: "/en/resources/integrations/productivity/google-slides",
   },
+  granola: {
+    title: "Granola",
+    href: "/en/resources/integrations/productivity/granola",
+  },
   jira: {
     title: "Jira",
     href: "/en/resources/integrations/productivity/jira",
