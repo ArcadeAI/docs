@@ -25,14 +25,52 @@ This can be useful when you need to manage authorization flows in your applicati
 
 ### Install required libraries
 
-<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs items={["Python", "JavaScript", "Java"]} storageKey="preferredLanguage">
   <Tabs.Tab>```bash pip install arcadepy google-api-python-client google-auth-httplib2 google-auth-oauthlib ```</Tabs.Tab>
   <Tabs.Tab>```bash npm install @arcadeai/arcadejs googleapis ```</Tabs.Tab>
+  <Tabs.Tab>
+
+#### Gradle:
+
+```groovy
+implementation("dev.arcade:arcade-java:${arcade-java-version}")
+implementation("com.google.api-client:google-api-client:2.9.0")
+implementation("com.google.oauth-client:google-oauth-client-jetty:1.39.0")
+implementation("com.google.apis:google-api-services-gmail:v1-rev20260112-2.0.0")
+```
+
+#### Maven:
+
+```xml
+<dependency>
+    <groupId>dev.arcade</groupId>
+    <artifactId>arcade-java</artifactId>
+    <version>${arcade-java-version}</version>
+</dependency>
+<dependency>
+    <groupId>com.google.api-client</groupId>
+    <artifactId>google-api-client</artifactId>
+    <version>2.9.0</version>
+</dependency>
+<dependency>
+    <groupId>com.google.oauth-client</groupId>
+    <artifactId>google-oauth-client-jetty</artifactId>
+    <version>1.39.0</version>
+</dependency>
+<dependency>
+    <groupId>com.google.apis</groupId>
+    <artifactId>google-api-services-gmail</artifactId>
+    <version>v1-rev20260112-2.0.0</version>
+</dependency>
+```
+
+See the [Arcade Java SDK docs](https://github.com/ArcadeAI/arcade-java?tab=readme-ov-file#installation) for the latest version.
+  </Tabs.Tab>
 </Tabs>
 
 ### Start coding
 
-<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs items={["Python", "JavaScript", "Java"]} storageKey="preferredLanguage">
 <Tabs.Tab>
 Create a new file `direct_api_call.py` and import all libraries we're going to use:
 
@@ -52,13 +90,34 @@ import { google } from "googleapis";
 ```
 
 </Tabs.Tab>
+<Tabs.Tab>
+
+Create a new file `GmailExample.java` and import all packages we're going to use:
+
+```java
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.services.gmail.Gmail;
+import com.google.api.services.gmail.model.Message;
+import dev.arcade.client.ArcadeClient;
+import dev.arcade.client.okhttp.ArcadeOkHttpClient;
+import dev.arcade.models.AuthorizationContext;
+import dev.arcade.models.AuthorizationResponse;
+import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+```
+</Tabs.Tab>
 </Tabs>
 
 ### Initialize the Arcade client
 
 Create an instance of the Arcade client:
 
-<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs items={["Python", "JavaScript", "Java"]} storageKey="preferredLanguage">
 <Tabs.Tab>
 ```python
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
@@ -70,14 +129,20 @@ const client = new Arcade(); // Automatically finds the `ARCADE_API_KEY` env var
 ```
 
 </Tabs.Tab>
+<Tabs.Tab>
+```java
+// Automatically finds the `ARCADE_API_KEY` env variable
+ArcadeClient client = ArcadeOkHttpClient.fromEnv();
+```
+</Tabs.Tab>
 </Tabs>
 
 ### Initiate an authorization request
 
+<Tabs items={["Python", "JavaScript", "Java"]} storageKey="preferredLanguage">
+<Tabs.Tab>
 Use `client.auth.start()` to initiate the authorization process:
 
-<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
-<Tabs.Tab>
 ```python
 # This would be your app's internal ID for the user (an email, UUID, etc.)
 user_id = "{arcade_user_id}"
@@ -90,9 +155,11 @@ provider="google",
 scopes=["https://www.googleapis.com/auth/gmail.readonly"],
 )
 
-````
+```
 </Tabs.Tab>
 <Tabs.Tab>
+Use `client.auth.start()` to initiate the authorization process:
+
 ```javascript
 // Your app's internal ID for the user (an email, UUID, etc).
 // It's used internally to identify your user in Arcade, not to identify with the Gmail service.
@@ -103,8 +170,21 @@ const user_id = "{arcade_user_id}";
 let auth_response = await client.auth.start(user_id, "google", {
   scopes: ["https://www.googleapis.com/auth/gmail.readonly"],
 });
-````
+```
 
+</Tabs.Tab>
+<Tabs.Tab>
+Use `client.auth().start()` to initiate the authorization process:
+
+```java
+// Your app's internal ID for the user (an email, UUID, etc).
+// It's used internally to identify your user in Arcade, not to identify with the Gmail service.
+// Use your Arcade account email for testing:
+String userId = "{arcade_user_id}";
+
+AuthorizationResponse authResponse = client.auth().start( userId, "google", "oauth2",
+  List.of("https://www.googleapis.com/auth/gmail.readonly"));
+```
 </Tabs.Tab>
 </Tabs>
 
@@ -112,7 +192,7 @@ let auth_response = await client.auth.start(user_id, "google", {
 
 If authorization is not completed, prompt the user to visit the authorization URL:
 
-<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs items={["Python", "JavaScript", "Java"]} storageKey="preferredLanguage">
 <Tabs.Tab>
 ```python
 if auth_response.status != "completed":
@@ -129,11 +209,21 @@ if (auth_response.status !== "completed") {
 ```
 
 </Tabs.Tab>
+<Tabs.Tab>
+```java
+// check the response status
+authResponse
+    .status()
+    .filter(status -> status != AuthorizationResponse.Status.COMPLETED)
+    .flatMap(status -> authResponse.url())
+    .ifPresent(url -> logger.info("Click this link to authorize: {}", url));
+```
+</Tabs.Tab>
 </Tabs>
 
 ### Wait for the user to authorize the request
 
-<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs items={["Python", "JavaScript", "Java"]} storageKey="preferredLanguage">
 <Tabs.Tab>
 ```python
 # Wait for the authorization to complete
@@ -147,13 +237,18 @@ auth_response = await client.auth.waitForCompletion(auth_response);
 ```
 
 </Tabs.Tab>
+<Tabs.Tab>
+```java
+AuthorizationResponse completedAuthResponse = client.auth().waitForCompletion(authResponse);
+```
+</Tabs.Tab>
 </Tabs>
 
 ### Use the obtained token
 
 Once authorization is complete, you can use the obtained token to access the third-party service:
 
-<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs items={["Python", "JavaScript", "Java"]} storageKey="preferredLanguage">
 <Tabs.Tab>
 ```python
 credentials = Credentials(auth_response.context.token)
@@ -165,7 +260,7 @@ gmail.users().messages().list(userId="me").execute().get("messages", [])
 
 print(email_messages)
 
-````
+```
 </Tabs.Tab>
 <Tabs.Tab>
 ```javascript
@@ -180,16 +275,39 @@ const response = await gmail.users.messages.list({
 
 const email_messages = response.data.messages || [];
 console.log(email_messages);
-````
+```
 
+</Tabs.Tab>
+<Tabs.Tab>
+```java
+// Use the credential
+String token = completedAuthResponse.context().flatMap(AuthorizationContext::token).get();
+
+JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
+HttpTransport httpTransport = new NetHttpTransport();
+GoogleCredential credential = new GoogleCredential().setAccessToken(token);
+
+Gmail gmail = new Gmail.Builder(httpTransport, jsonFactory, credential)
+        .setApplicationName("Your Application Name")
+        .build();
+
+// List email messages
+List<Message> messages = gmail.users().messages().list("me").execute().getMessages();
+logger.info("Messages: {}", messages);
+```
 </Tabs.Tab>
 </Tabs>
 
 ### Execute the code
 
-<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs items={["Python", "JavaScript", "Java"]} storageKey="preferredLanguage">
   <Tabs.Tab>```python python3 direct_api_call.py ```</Tabs.Tab>
   <Tabs.Tab>```javascript node direct_api_call.js ```</Tabs.Tab>
+  <Tabs.Tab>
+  Run the `GmailExample.java` class.
+
+  See the [Arcade Java SDK Examples](https://github.com/ArcadeAI/arcade-java/tree/next/arcade-java-example/src/main/java/dev/arcade/example) for the full class.
+  </Tabs.Tab>
 </Tabs>
 
 You should see an output similar to this:, which is a list of the email messages returned by the Gmail API:

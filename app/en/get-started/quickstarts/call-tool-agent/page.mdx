@@ -24,6 +24,7 @@ Install and use the Arcade client to call Arcade Hosted Tools.
 - An [Arcade API key](/get-started/setup/api-keys)
 - The [`uv` package manager](https://docs.astral.sh/uv/getting-started/installation/) if you are using Python
 - The [`bun` runtime](https://bun.com/) if you are using TypeScript
+- [Apache Maven](https://maven.apache.org/) or [Gradle](https://gradle.org/) if you are using Java
 
 </GuideOverview.Prerequisites>
 
@@ -44,7 +45,7 @@ Install and use the Arcade client to call Arcade Hosted Tools.
 
 ### Install the Arcade client
 
-<Tabs items={["Python", "TypeScript"]} storageKey="preferredLanguage">
+<Tabs items={["Python", "TypeScript", "Java"]} storageKey="preferredLanguage">
 
   <Tabs.Tab>
   In your terminal, run the following command to create a new `uv` project:
@@ -95,12 +96,34 @@ bun install @arcadeai/arcadejs
 ```
 
   </Tabs.Tab>
+  <Tabs.Tab>
+Create a new Maven or Gradle project with the following dependency:
 
+
+#### Gradle:
+
+```groovy filename="build.gradle.kts"
+implementation("dev.arcade:arcade-java:${arcade-java-version}")
+```
+
+#### Maven:
+
+```xml filename="pom.xml"
+<dependency>
+    <groupId>dev.arcade</groupId>
+    <artifactId>arcade-java</artifactId>
+    <version>${arcade-java-version}</version>
+</dependency>
+```
+
+See the [Arcade Java SDK docs](https://github.com/ArcadeAI/arcade-java?tab=readme-ov-file#installation) for the latest version.
+
+  </Tabs.Tab>
 </Tabs>
 
 ### Setup the client
 
-<Tabs items={["Python", "TypeScript"]} storageKey="preferredLanguage">
+<Tabs items={["Python", "TypeScript", "Java"]} storageKey="preferredLanguage">
 
 <Tabs.Tab>
 
@@ -137,14 +160,24 @@ let userId = "{arcade_user_id}";
 ```
 
 </Tabs.Tab>
+<Tabs.Tab>
+```java
+// You can also set the `ARCADE_API_KEY` environment variable instead of passing it as a
+// parameter by using ArcadeOkHttpClient.fromEnv().
+ArcadeClient client = ArcadeOkHttpClient.builder().apiKey("{arcade_api_key}").build();
 
+// Arcade needs a unique identifier for your application user (this could be an email address, a UUID, etc).
+// In this example, use the email you used to sign up for Arcade.dev:
+String userId = "{arcade_user_id}";
+```
+</Tabs.Tab>
 </Tabs>
 
 ### Write a helper function to authorize and run tools
 
 This helper function will check if a tool requires authorization and if so, it will print the authorization URL and wait for the user to authorize the tool call. If the tool does not require authorization, it will run the tool directly without interrupting the flow.
 
-<Tabs items={["Python", "JavaScript"]} storageKey="preferredLanguage">
+<Tabs items={["Python", "JavaScript", "Java"]} storageKey="preferredLanguage">
 
 <Tabs.Tab>
 
@@ -208,6 +241,46 @@ async function authorize_and_run_tool({
 ```
 
 </Tabs.Tab>
+<Tabs.Tab>
+```java filename="App.java"
+    public static Map<String, JsonValue> authorizeAndRunTool(ArcadeClient client,
+                                                             String toolName,
+                                                             Map<String, Object> input,
+                                                             String userId) {
+    // Start the authorization process
+    AuthorizationResponse authResponse = client.tools().authorize(
+        AuthorizeToolRequest.builder()
+            .toolName(toolName)
+            .userId(userId)
+            .build());
+
+    // If the authorization is not completed, print the authorization URL and wait for the user to authorize the app.
+    // Tools that do not require authorization will have the status "completed" already.
+    authResponse
+        .status()
+        .filter(status -> status != AuthorizationResponse.Status.COMPLETED)
+        .flatMap(status -> authResponse.url())
+        .ifPresent(url -> logger.info(
+            """
+            Click this link to authorize {}:
+            {}.
+            The process will continue once you have authorized the app.
+            """, toolName, url));
+    client.auth().waitForCompletion(authResponse);
+
+    // Execute the tool and extract the output as a Map
+    return client.tools().execute(ExecuteToolRequest.builder()
+            .toolName(toolName)
+            .input(input)
+            .userId(userId)
+            .includeErrorStacktrace(true)
+            .build())
+        .output()
+        .flatMap(Output::valueAsObject)
+        .orElse(Map.of());
+}
+```
+</Tabs.Tab>
 </Tabs>
 
 ### Implement the workflow
@@ -218,7 +291,7 @@ In this example workflow, we:
 - Create a Google Doc with the news
 - Send a link to the Google Doc to the user
 
-<Tabs items={["Python", "TypeScript"]} storageKey="preferredLanguage">
+<Tabs items={["Python", "TypeScript", "Java"]} storageKey="preferredLanguage">
 
 <Tabs.Tab>
 
@@ -335,12 +408,70 @@ console.log(respose_send_email.output?.value);
 ```
 
 </Tabs.Tab>
+<Tabs.Tab>
+```java filename="App.java"
+Map<String, JsonValue> searchResult = authorizeAndRunTool(
+            client,
+            "GoogleNews.SearchNewsStories",
+            Map.of("keywords", "MCP URL mode elicitation"),
+            userId);
 
+// Extract the list of news results from the tool output
+List<JsonValue> news = searchResult
+    .getOrDefault("news_results", JsonValue.from(List.of()))
+    .toListOrEmpty();
+
+String output = "latest news about MCP URL mode elicitation:\n"
+    + news.stream()
+        .map(item -> {
+            Map<String, JsonValue> newsItem = item.toMapOrEmpty();
+            return newsItem.get("source").asStringOrThrow() + " - "
+                + newsItem.get("title").asStringOrThrow() + "\n"
+                + newsItem.get("link").asStringOrThrow() + "\n\n";
+        })
+        .collect(Collectors.joining("\n"));
+
+// Create a Google Doc with the news results
+// If the user has not previously authorized the Google Docs tool, they will be prompted to authorize the tool
+// call.
+Map<String, JsonValue> createDocResult = authorizeAndRunTool(
+    client,
+    "GoogleDocs.CreateDocumentFromText",
+    Map.of("title", "News about MCP URL mode elicitation", "text_content", output),
+    userId);
+
+String googleDocUrl = createDocResult.get("documentUrl").asStringOrThrow();
+
+String emailBody =
+    "You can find the news about MCP URL mode elicitation in the following Google Doc: " + googleDocUrl;
+
+Map<String, JsonValue> sendEmailResult = authorizeAndRunTool(
+    client,
+    "Gmail.SendEmail",
+    Map.of("recipient", userId, "subject", "News about MCP URL mode elicitation", "body", emailBody),
+    userId);
+
+// Print the response from the tool call
+logger.info(
+    """
+    Success! Check your email at {}
+
+    You just chained 3 tools together:
+      1. Searched Google News for stories about MCP URL mode elicitation
+      2. Created a Google Doc with the results
+      3. Sent yourself an email with the document link
+
+    Email metadata: {}
+    """,
+    userId,
+    sendEmailResult);
+```
+</Tabs.Tab>
 </Tabs>
 
 ### Run the code
 
-<Tabs items={["Python", "TypeScript"]} storageKey="preferredLanguage">
+<Tabs items={["Python", "TypeScript", "Java"]} storageKey="preferredLanguage">
 
   <Tabs.Tab>
 
@@ -385,6 +516,23 @@ console.log(respose_send_email.output?.value);
     ```
 
   </Tabs.Tab>
+  <Tabs.Tab>
+
+    Run your Java application, you should see output similar to:
+
+    ```text
+    Success! Check your email at brian.demers@gmail.com
+
+    You just chained 3 tools together:
+      1. Searched Google News for stories about MCP URL mode elicitation
+      2. Created a Google Doc with the results
+      3. Sent yourself an email with the document link
+
+    Email metadata: {id=19ba..., label_ids=[UNREAD, SENT, INBOX], thread_id=19ba..., url=https://mail.google.com/mail/u/0/#sent/19ba...}
+    ```
+
+    For a full example, see the [Arcade Java SDK project](https://github.com/ArcadeAI/arcade-java/tree/main/arcade-java-example);
+  </Tabs.Tab>
 </Tabs>
 
 </Steps>
@@ -397,7 +545,7 @@ In this example, we call the tool methods directly. In your real applications an
 
 ## Full Example Code
 
-<Tabs items={["Python", "TypeScript"]} storageKey="preferredLanguage">
+<Tabs items={["Python", "TypeScript", "Java"]} storageKey="preferredLanguage">
 
   <Tabs.Tab>
 
