@@ -55,7 +55,7 @@ describe("getMajorityVersion", () => {
     expect(getMajorityVersion(tools)).toBe("1.0.0");
   });
 
-  it("breaks ties by picking the lexicographically higher version", () => {
+  it("breaks ties by picking the numerically higher version", () => {
     const tools = [
       createTool("Github.CreateIssue@1.0.0"),
       createTool("Github.ListPullRequests@1.0.0"),
@@ -63,6 +63,16 @@ describe("getMajorityVersion", () => {
       createTool("Github.GetStar@2.0.0"),
     ];
     expect(getMajorityVersion(tools)).toBe("2.0.0");
+  });
+
+  it("handles multi-digit version components correctly in tie-break", () => {
+    const tools = [
+      createTool("Github.CreateIssue@9.0.0"),
+      createTool("Github.ListPullRequests@9.0.0"),
+      createTool("Github.SetStarred@10.0.0"),
+      createTool("Github.GetStar@10.0.0"),
+    ];
+    expect(getMajorityVersion(tools)).toBe("10.0.0");
   });
 });
 
@@ -109,7 +119,7 @@ describe("filterToolsByMajorityVersion", () => {
     expect(result).toHaveLength(1);
   });
 
-  it("breaks ties by keeping tools at the higher version", () => {
+  it("breaks ties by keeping tools at the numerically higher version", () => {
     const tools = [
       createTool("Github.CreateIssue@1.0.0"),
       createTool("Github.ListPullRequests@1.0.0"),

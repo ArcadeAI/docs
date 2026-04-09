@@ -1,17 +1,24 @@
 import type { ToolDefinition } from "../types/index.js";
+import { extractVersion } from "./fp.js";
 
 /**
- * Extract version from a fully qualified tool name.
- * "Github.CreateIssue@3.1.3" → "3.1.3"
+ * Compare two semver-like version strings numerically.
+ * Returns a positive number if a > b, negative if a < b, 0 if equal.
  */
-const extractVersion = (fullyQualifiedName: string): string => {
-  const parts = fullyQualifiedName.split("@");
-  return parts[1] ?? "0.0.0";
+const compareVersions = (a: string, b: string): number => {
+  const aParts = a.split(".").map(Number);
+  const bParts = b.split(".").map(Number);
+  const len = Math.max(aParts.length, bParts.length);
+  for (let i = 0; i < len; i++) {
+    const diff = (aParts[i] ?? 0) - (bParts[i] ?? 0);
+    if (diff !== 0) return diff;
+  }
+  return 0;
 };
 
 /**
  * Compute the version shared by the most tools in a toolkit.
- * Ties are broken by lexicographic comparison (highest version wins).
+ * Ties are broken by numeric semver comparison (highest version wins).
  */
 export const getMajorityVersion = (
   tools: readonly ToolDefinition[]
@@ -29,7 +36,10 @@ export const getMajorityVersion = (
   let bestVersion = "";
   let bestCount = 0;
   for (const [version, count] of counts) {
-    if (count > bestCount || (count === bestCount && version > bestVersion)) {
+    if (
+      count > bestCount ||
+      (count === bestCount && compareVersions(version, bestVersion) > 0)
+    ) {
       bestVersion = version;
       bestCount = count;
     }

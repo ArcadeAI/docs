@@ -174,7 +174,7 @@ export class CombinedToolkitDataSource implements IToolkitDataSource {
     for (const [toolkitId, tools] of toolkitGroups) {
       const filtered = filterToolsByMajorityVersion(tools);
       if (filtered !== tools) {
-        toolkitGroups.set(toolkitId, [...filtered]);
+        toolkitGroups.set(toolkitId, filtered as ToolDefinition[]);
       }
     }
 
