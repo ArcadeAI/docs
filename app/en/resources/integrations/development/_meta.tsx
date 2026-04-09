@@ -33,6 +33,10 @@ const meta: MetaRecord = {
     title: "PagerDuty",
     href: "/en/resources/integrations/development/pagerduty",
   },
+  posthog: {
+    title: "PostHog",
+    href: "/en/resources/integrations/development/posthog",
+  },
   "-- Starter": {
     type: "separator",
     title: "Starter",
