@@ -1185,6 +1185,47 @@ describe("DataMerger", () => {
       expect(result.toolkit.summary).toBeUndefined();
     });
 
+    it("preserves previous summary when signature changed but no LLM is available", async () => {
+      // Simulates what happens when the version filter removes stale tools:
+      // tool list changes → signature mismatch → no LLM → should keep old summary
+      const githubTool1v2 = createTool({
+        name: "CreateIssue",
+        qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@2.0.0",
+        auth: {
+          providerId: "github",
+          providerType: "oauth2",
+          scopes: ["repo"],
+        },
+      });
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([githubTool1v2]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
+      });
+
+      // Previous result had different tools (v1.0.0), with a summary
+      const previousResult = await mergeToolkit(
+        "Github",
+        [githubTool1],
+        githubMetadata,
+        null,
+        createStubGenerator()
+      );
+      previousResult.toolkit.summary = "Cached summary from previous run";
+
+      // No summary generator — simulates --skip-summary
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        previousToolkits: new Map([["github", previousResult.toolkit]]),
+      });
+
+      const result = await merger.mergeToolkit("Github");
+
+      expect(result.toolkit.summary).toBe("Cached summary from previous run");
+    });
+
     it("reuses previous examples when the tool is unchanged", async () => {
       const toolkitDataSource = createCombinedToolkitDataSource({
         toolSource: new InMemoryToolDataSource([githubTool1]),

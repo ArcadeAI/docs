@@ -967,6 +967,12 @@ export class DataMerger {
     }
 
     if (!this.toolkitSummaryGenerator) {
+      // Preserve previous summary when no LLM is available to regenerate.
+      // A slightly stale summary is better than losing it entirely (e.g.
+      // when the version filter drops old tools and changes the signature).
+      if (previousToolkit?.summary) {
+        result.toolkit.summary = previousToolkit.summary;
+      }
       return;
     }
 
