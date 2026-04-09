@@ -11,6 +11,6 @@ export * from "./logger.js";
 export * from "./progress.js";
 export * from "./retry.js";
 export {
-  filterToolsByMajorityVersion,
-  getMajorityVersion,
+  filterToolsByHighestVersion,
+  getHighestVersion,
 } from "./version-coherence.js";

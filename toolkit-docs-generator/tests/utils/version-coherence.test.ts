@@ -1,11 +1,11 @@
 /**
- * Tests for majority-version coherence filter
+ * Tests for highest-version coherence filter
  */
 import { describe, expect, it } from "vitest";
 import type { ToolDefinition } from "../../src/types/index.js";
 import {
-  filterToolsByMajorityVersion,
-  getMajorityVersion,
+  filterToolsByHighestVersion,
+  getHighestVersion,
 } from "../../src/utils/version-coherence.js";
 
 const createTool = (
@@ -23,9 +23,9 @@ const createTool = (
   ...overrides,
 });
 
-describe("getMajorityVersion", () => {
+describe("getHighestVersion", () => {
   it("returns null for empty array", () => {
-    expect(getMajorityVersion([])).toBeNull();
+    expect(getHighestVersion([])).toBeNull();
   });
 
   it("returns the version when all tools share the same version", () => {
@@ -34,10 +34,10 @@ describe("getMajorityVersion", () => {
       createTool("Github.ListPullRequests@3.1.3"),
       createTool("Github.SetStarred@3.1.3"),
     ];
-    expect(getMajorityVersion(tools)).toBe("3.1.3");
+    expect(getHighestVersion(tools)).toBe("3.1.3");
   });
 
-  it("returns the majority version when mixed", () => {
+  it("returns the highest version when mixed", () => {
     const tools = [
       createTool("Github.CreateIssue@3.1.3"),
       createTool("Github.ListPullRequests@3.1.3"),
@@ -47,78 +47,84 @@ describe("getMajorityVersion", () => {
       createTool("Github.GetNotificationSummary@2.0.1"),
       createTool("Github.ListNotifications@2.0.1"),
     ];
-    expect(getMajorityVersion(tools)).toBe("3.1.3");
+    expect(getHighestVersion(tools)).toBe("3.1.3");
   });
 
   it("returns the version for a single tool", () => {
     const tools = [createTool("Github.CreateIssue@1.0.0")];
-    expect(getMajorityVersion(tools)).toBe("1.0.0");
+    expect(getHighestVersion(tools)).toBe("1.0.0");
   });
 
-  it("breaks ties by picking the numerically higher version", () => {
+  it("picks the numerically higher version regardless of tool count", () => {
     const tools = [
       createTool("Github.CreateIssue@1.0.0"),
       createTool("Github.ListPullRequests@1.0.0"),
       createTool("Github.SetStarred@2.0.0"),
-      createTool("Github.GetStar@2.0.0"),
     ];
-    expect(getMajorityVersion(tools)).toBe("2.0.0");
+    expect(getHighestVersion(tools)).toBe("2.0.0");
   });
 
-  it("handles multi-digit version components correctly in tie-break", () => {
+  it("picks newer version even when it has fewer tools", () => {
+    // New release @4.0.0 consolidated tools — only 2 remain.
+    // Old stale tools @3.1.3 still outnumber it. Highest version wins.
+    const tools = [
+      createTool("Github.CreateIssue@3.1.3"),
+      createTool("Github.ListPullRequests@3.1.3"),
+      createTool("Github.SetStarred@3.1.3"),
+      createTool("Github.GetStar@3.1.3"),
+      createTool("Github.ListStars@3.1.3"),
+      createTool("Github.Search@4.0.0"),
+      createTool("Github.Advanced@4.0.0"),
+    ];
+    expect(getHighestVersion(tools)).toBe("4.0.0");
+  });
+
+  it("handles multi-digit version components correctly", () => {
     const tools = [
       createTool("Github.CreateIssue@9.0.0"),
-      createTool("Github.ListPullRequests@9.0.0"),
       createTool("Github.SetStarred@10.0.0"),
-      createTool("Github.GetStar@10.0.0"),
     ];
-    expect(getMajorityVersion(tools)).toBe("10.0.0");
+    expect(getHighestVersion(tools)).toBe("10.0.0");
   });
 
-  it("handles pre-release versions in tie-break comparison", () => {
+  it("handles pre-release versions", () => {
     const tools = [
       createTool("Github.CreateIssue@1.0.0-alpha.1"),
-      createTool("Github.ListPullRequests@1.0.0-alpha.1"),
       createTool("Github.SetStarred@2.0.0-beta.1"),
-      createTool("Github.GetStar@2.0.0-beta.1"),
     ];
-    expect(getMajorityVersion(tools)).toBe("2.0.0-beta.1");
+    expect(getHighestVersion(tools)).toBe("2.0.0-beta.1");
   });
 
-  it("handles build metadata versions in tie-break comparison", () => {
+  it("handles build metadata versions", () => {
     const tools = [
       createTool("Github.CreateIssue@1.0.0+build.456"),
-      createTool("Github.ListPullRequests@1.0.0+build.456"),
       createTool("Github.SetStarred@3.0.0+build.789"),
-      createTool("Github.GetStar@3.0.0+build.789"),
     ];
-    expect(getMajorityVersion(tools)).toBe("3.0.0+build.789");
+    expect(getHighestVersion(tools)).toBe("3.0.0+build.789");
   });
 
   it("handles pre-release + build metadata combined", () => {
     const tools = [
       createTool("Github.CreateIssue@1.2.3-rc.1+build.789"),
-      createTool("Github.ListPullRequests@1.2.3-rc.1+build.789"),
       createTool("Github.SetStarred@4.0.0-beta.1+build.123"),
-      createTool("Github.GetStar@4.0.0-beta.1+build.123"),
     ];
-    expect(getMajorityVersion(tools)).toBe("4.0.0-beta.1+build.123");
+    expect(getHighestVersion(tools)).toBe("4.0.0-beta.1+build.123");
   });
 });
 
-describe("filterToolsByMajorityVersion", () => {
+describe("filterToolsByHighestVersion", () => {
   it("returns the same array reference when all tools share the same version", () => {
     const tools = [
       createTool("Github.CreateIssue@3.1.3"),
       createTool("Github.ListPullRequests@3.1.3"),
       createTool("Github.SetStarred@3.1.3"),
     ];
-    const result = filterToolsByMajorityVersion(tools);
+    const result = filterToolsByHighestVersion(tools);
     expect(result).toBe(tools); // same reference
     expect(result).toHaveLength(3);
   });
 
-  it("filters out minority-version tools", () => {
+  it("filters out older-version tools", () => {
     const tools = [
       createTool("Github.CreateIssue@3.1.3"),
       createTool("Github.ListPullRequests@3.1.3"),
@@ -128,39 +134,42 @@ describe("filterToolsByMajorityVersion", () => {
       createTool("Github.GetNotificationSummary@2.0.1"),
       createTool("Github.ListNotifications@2.0.1"),
     ];
-    const result = filterToolsByMajorityVersion(tools);
+    const result = filterToolsByHighestVersion(tools);
     expect(result).toHaveLength(5);
     expect(result.every((t) => t.fullyQualifiedName.endsWith("@3.1.3"))).toBe(
       true
     );
   });
 
+  it("keeps newer version even when it has fewer tools", () => {
+    const tools = [
+      createTool("Github.CreateIssue@3.1.3"),
+      createTool("Github.ListPullRequests@3.1.3"),
+      createTool("Github.SetStarred@3.1.3"),
+      createTool("Github.GetStar@3.1.3"),
+      createTool("Github.ListStars@3.1.3"),
+      createTool("Github.Search@4.0.0"),
+      createTool("Github.Advanced@4.0.0"),
+    ];
+    const result = filterToolsByHighestVersion(tools);
+    expect(result).toHaveLength(2);
+    expect(result.every((t) => t.fullyQualifiedName.endsWith("@4.0.0"))).toBe(
+      true
+    );
+  });
+
   it("returns the original array for empty input", () => {
     const tools: ToolDefinition[] = [];
-    const result = filterToolsByMajorityVersion(tools);
+    const result = filterToolsByHighestVersion(tools);
     expect(result).toBe(tools);
     expect(result).toHaveLength(0);
   });
 
   it("returns a single tool unchanged", () => {
     const tools = [createTool("Github.CreateIssue@1.0.0")];
-    const result = filterToolsByMajorityVersion(tools);
+    const result = filterToolsByHighestVersion(tools);
     expect(result).toBe(tools);
     expect(result).toHaveLength(1);
-  });
-
-  it("breaks ties by keeping tools at the numerically higher version", () => {
-    const tools = [
-      createTool("Github.CreateIssue@1.0.0"),
-      createTool("Github.ListPullRequests@1.0.0"),
-      createTool("Github.SetStarred@2.0.0"),
-      createTool("Github.GetStar@2.0.0"),
-    ];
-    const result = filterToolsByMajorityVersion(tools);
-    expect(result).toHaveLength(2);
-    expect(result.every((t) => t.fullyQualifiedName.endsWith("@2.0.0"))).toBe(
-      true
-    );
   });
 
   it("handles tools with no @ version gracefully", () => {
@@ -172,7 +181,7 @@ describe("filterToolsByMajorityVersion", () => {
         fullyQualifiedName: "Github.Broken",
       },
     ];
-    const result = filterToolsByMajorityVersion(tools);
+    const result = filterToolsByHighestVersion(tools);
     expect(result).toHaveLength(2);
     expect(result.every((t) => t.fullyQualifiedName.endsWith("@3.1.3"))).toBe(
       true

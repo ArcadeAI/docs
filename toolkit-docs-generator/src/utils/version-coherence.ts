@@ -37,59 +37,51 @@ const compareVersions = (a: string, b: string): number => {
 };
 
 /**
- * Compute the version shared by the most tools in a toolkit.
- * Ties are broken by numeric semver comparison (highest version wins).
+ * Find the highest version among all tools in a toolkit.
+ * This is the version we keep — stale tools from older releases are dropped.
  */
-export const getMajorityVersion = (
+export const getHighestVersion = (
   tools: readonly ToolDefinition[]
 ): string | null => {
   if (tools.length === 0) {
     return null;
   }
 
-  const counts = new Map<string, number>();
+  let best = "";
   for (const tool of tools) {
     const version = extractVersion(tool.fullyQualifiedName);
-    counts.set(version, (counts.get(version) ?? 0) + 1);
-  }
-
-  let bestVersion = "";
-  let bestCount = 0;
-  for (const [version, count] of counts) {
-    if (
-      count > bestCount ||
-      (count === bestCount && compareVersions(version, bestVersion) > 0)
-    ) {
-      bestVersion = version;
-      bestCount = count;
+    if (best === "" || compareVersions(version, best) > 0) {
+      best = version;
     }
   }
 
-  return bestVersion || null;
+  return best || null;
 };
 
 /**
- * Keep only tools whose @version matches the majority version for
- * their toolkit.  If all tools share the same version (the common
+ * Keep only tools whose @version matches the highest version for
+ * their toolkit. If all tools share the same version (the common
  * case), returns the original array unchanged.
+ *
+ * This drops stale tools from older releases that Engine still serves,
+ * while always preserving the newest version — even if it has fewer tools
+ * (e.g. tools were removed/consolidated in the new release).
  */
-export const filterToolsByMajorityVersion = (
+export const filterToolsByHighestVersion = (
   tools: readonly ToolDefinition[]
 ): readonly ToolDefinition[] => {
-  const majorityVersion = getMajorityVersion(tools);
-  if (majorityVersion === null) {
+  const highest = getHighestVersion(tools);
+  if (highest === null) {
     return tools;
   }
 
-  // Fast path: if every tool is already at the majority version, skip filtering
+  // Fast path: if every tool is already at the highest version, skip filtering
   const allSame = tools.every(
-    (t) => extractVersion(t.fullyQualifiedName) === majorityVersion
+    (t) => extractVersion(t.fullyQualifiedName) === highest
   );
   if (allSame) {
     return tools;
   }
 
-  return tools.filter(
-    (t) => extractVersion(t.fullyQualifiedName) === majorityVersion
-  );
+  return tools.filter((t) => extractVersion(t.fullyQualifiedName) === highest);
 };

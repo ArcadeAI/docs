@@ -160,7 +160,7 @@ describe("CombinedToolkitDataSource", () => {
     expect(weaviate?.metadata?.label).toBe("Weaviate API");
   });
 
-  it("should filter out stale tools at non-majority versions in fetchAllToolkitsData", async () => {
+  it("should filter out stale tools at older versions in fetchAllToolkitsData", async () => {
     const toolSource = new InMemoryToolDataSource([
       createTool({
         name: "CreateIssue",
@@ -193,7 +193,7 @@ describe("CombinedToolkitDataSource", () => {
     ).toBe(true);
   });
 
-  it("should apply majority-version filter in fetchToolkitData when no version specified", async () => {
+  it("should apply highest-version filter in fetchToolkitData when no version specified", async () => {
     const toolSource = new InMemoryToolDataSource([
       createTool({
         name: "CreateIssue",
@@ -244,7 +244,7 @@ describe("CombinedToolkitDataSource", () => {
       metadataSource,
     });
 
-    // Explicit version bypasses majority filter
+    // Explicit version bypasses highest-version filter
     const result = await dataSource.fetchToolkitData("Github", "2.0.1");
 
     expect(result.tools).toHaveLength(1);

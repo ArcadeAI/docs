@@ -2,7 +2,7 @@
  * Scenario Test: Stale version tools are filtered out
  *
  * Verifies that when the Engine API returns tools at mixed versions for the
- * same toolkit, the majority-version coherence filter drops stale tools before
+ * same toolkit, the highest-version coherence filter drops stale tools before
  * they reach the diff or merger.
  */
 import { describe, expect, it } from "vitest";
@@ -71,8 +71,8 @@ const createMergedToolkit = (
   generatedAt: new Date().toISOString(),
 });
 
-describe("Scenario: Stale version tools filtered by majority-version coherence", () => {
-  it("fetchAllToolkitsData drops stale tools at non-majority versions", async () => {
+describe("Scenario: Stale version tools filtered by highest-version coherence", () => {
+  it("fetchAllToolkitsData drops stale tools at older versions", async () => {
     // Simulate Engine API returning mixed-version Github tools
     const toolSource = new InMemoryToolDataSource([
       createTool({
@@ -186,7 +186,7 @@ describe("Scenario: Stale version tools filtered by majority-version coherence",
       ],
     ]);
 
-    // Previous output already had only the majority-version tools
+    // Previous output already had only the highest-version tools
     const previousToolkits = new Map([
       [
         "Github",
