@@ -1,0 +1,2994 @@
+{
+  "id": "Posthog",
+  "label": "PostHog",
+  "version": "1.0.0",
+  "description": "Arcade.dev LLM tools for PostHog analytics",
+  "metadata": {
+    "category": "development",
+    "iconUrl": "https://design-system.arcade.dev/icons/posthog.svg",
+    "isBYOC": false,
+    "isPro": false,
+    "type": "arcade",
+    "docsLink": "https://docs.arcade.dev/en/resources/integrations/development/posthog",
+    "isComingSoon": false,
+    "isHidden": false
+  },
+  "auth": null,
+  "tools": [
+    {
+      "name": "AddInsightToDashboard",
+      "qualifiedName": "Posthog.AddInsightToDashboard",
+      "fullyQualifiedName": "Posthog.AddInsightToDashboard@1.0.0",
+      "description": "Pin an existing insight as a tile on a dashboard.",
+      "parameters": [
+        {
+          "name": "insight_id",
+          "type": "integer",
+          "required": true,
+          "description": "Numeric insight ID to add.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "dashboard_id",
+          "type": "integer",
+          "required": true,
+          "description": "Numeric dashboard ID to add the insight to.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ComparePeriods",
+      "qualifiedName": "Posthog.ComparePeriods",
+      "fullyQualifiedName": "Posthog.ComparePeriods@1.0.0",
+      "description": "Compare the same metric across two date ranges side-by-side.",
+      "parameters": [
+        {
+          "name": "event",
+          "type": "string",
+          "required": true,
+          "description": "Event name to compare.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "current_date_from",
+          "type": "string",
+          "required": true,
+          "description": "Start of current period in YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS format (UTC), or relative offset: -Nh (hours), -Nd (days), -Nw (weeks), -Nm (months).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "current_date_to",
+          "type": "string",
+          "required": false,
+          "description": "End of current period in YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS format (UTC), or relative offset. Defaults to now.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "previous_date_from",
+          "type": "string",
+          "required": false,
+          "description": "Start of comparison period in YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS format (UTC), or relative offset. Default auto-calculates same duration before current period.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "time_grouping",
+          "type": "string",
+          "required": false,
+          "description": "Time interval for grouping data points. Defaults to DAY.",
+          "enum": [
+            "day",
+            "week",
+            "month"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "math",
+          "type": "string",
+          "required": false,
+          "description": "Aggregation method. Defaults to TOTAL.",
+          "enum": [
+            "total",
+            "dau",
+            "weekly_active",
+            "monthly_active"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CreateDashboard",
+      "qualifiedName": "Posthog.CreateDashboard",
+      "fullyQualifiedName": "Posthog.CreateDashboard@1.0.0",
+      "description": "Create a new empty dashboard. Insights can be pinned to it as tiles afterward.",
+      "parameters": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "description": "Dashboard name.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "What this dashboard tracks",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "pinned",
+          "type": "boolean",
+          "required": false,
+          "description": "Pin to the top of the dashboards list. Defaults to false.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "tags",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Tags for organization.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CreateExperiment",
+      "qualifiedName": "Posthog.CreateExperiment",
+      "fullyQualifiedName": "Posthog.CreateExperiment@1.0.0",
+      "description": "Create an A/B test experiment.\n\nBefore creating, verify the feature_flag_key is not already in\nuse and confirm the event names for metrics are valid.\n\nNote: PostHog does not enforce unique feature_flag_key values\nacross experiments. Duplicate keys will not error but will cause\nunpredictable behavior.",
+      "parameters": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "description": "Experiment name describing the hypothesis.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "feature_flag_key",
+          "type": "string",
+          "required": true,
+          "description": "Feature flag key for this experiment. Lowercase letters, numbers, hyphens, and underscores only.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "Detailed hypothesis and expected outcome",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "experiment_type",
+          "type": "string",
+          "required": false,
+          "description": "Experiment type.",
+          "enum": [
+            "product",
+            "web"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "primary_metrics",
+          "type": "array",
+          "innerType": "json",
+          "required": false,
+          "description": "Primary success metrics to measure.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "secondary_metrics",
+          "type": "array",
+          "innerType": "json",
+          "required": false,
+          "description": "Secondary metrics to monitor for side effects",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "variants",
+          "type": "array",
+          "innerType": "json",
+          "required": false,
+          "description": "Variant definitions (default: 50/50 control/test)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "draft",
+          "type": "boolean",
+          "required": false,
+          "description": "Create as draft (true) or launch immediately (false). Defaults to true.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CreateExperimentWithFlag",
+      "qualifiedName": "Posthog.CreateExperimentWithFlag",
+      "fullyQualifiedName": "Posthog.CreateExperimentWithFlag@1.0.0",
+      "description": "Create a feature flag and an experiment in one step.\n\nThe flag is created with the specified rollout_percentage, then\nthe experiment is linked to it.\n\nNote: PostHog does not enforce unique feature_flag_key values\nacross experiments. Duplicate keys will not error but will cause\nunpredictable behavior.",
+      "parameters": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "description": "Experiment name describing the hypothesis.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "feature_flag_key",
+          "type": "string",
+          "required": true,
+          "description": "Feature flag key. Lowercase letters, numbers, hyphens, and underscores only.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "Detailed hypothesis and expected outcome",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "experiment_type",
+          "type": "string",
+          "required": false,
+          "description": "Experiment type.",
+          "enum": [
+            "product",
+            "web"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "primary_metrics",
+          "type": "array",
+          "innerType": "json",
+          "required": false,
+          "description": "Primary success metrics.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "secondary_metrics",
+          "type": "array",
+          "innerType": "json",
+          "required": false,
+          "description": "Secondary metrics to monitor for side effects",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "rollout_percentage",
+          "type": "integer",
+          "required": false,
+          "description": "Percentage of users who see the experiment (0-100). Default 100.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "draft",
+          "type": "boolean",
+          "required": false,
+          "description": "Create as draft (true) or launch immediately (false). Defaults to true.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CreateFeatureFlag",
+      "qualifiedName": "Posthog.CreateFeatureFlag",
+      "fullyQualifiedName": "Posthog.CreateFeatureFlag@1.0.0",
+      "description": "Create a new feature flag.\n\nVerify the key is not already in use to avoid duplicates. After\ncreation, consult PostHog SDK documentation for the user's\nlanguage/framework to integrate the flag.",
+      "parameters": [
+        {
+          "name": "key",
+          "type": "string",
+          "required": true,
+          "description": "Unique flag key using lowercase letters, numbers, hyphens, and underscores.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "Human-readable display name",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "What this flag controls and why",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "required": false,
+          "description": "Whether the flag is active. Defaults to true.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "filters",
+          "type": "json",
+          "required": false,
+          "description": "Rollout and targeting rules.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CreateInsightFromQuery",
+      "qualifiedName": "Posthog.CreateInsightFromQuery",
+      "fullyQualifiedName": "Posthog.CreateInsightFromQuery@1.0.0",
+      "description": "Save a tested query as a reusable insight.\n\nAlways verify the query produces expected results before saving\nit as an insight. The query_id is not validated by PostHog —\nensure it is a valid cache_key from a previously executed query.\nPassing an invalid query_id will create a broken insight.",
+      "parameters": [
+        {
+          "name": "query_id",
+          "type": "string",
+          "required": true,
+          "description": "Query identifier or cache_key from a previously executed query result. Not validated by PostHog — ensure it is a valid cache_key from a previously executed query. Passing an invalid query_id will create a broken insight.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "description": "Display name for the saved insight.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "What this insight measures",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "CreateSurvey",
+      "qualifiedName": "Posthog.CreateSurvey",
+      "fullyQualifiedName": "Posthog.CreateSurvey@1.0.0",
+      "description": "Create a new survey.\n\nVerify the name is not already in use to avoid duplicates. After\ncreation, consult PostHog SDK documentation to integrate the\nsurvey into the user's application.",
+      "parameters": [
+        {
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "description": "Survey name.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "Internal description of the survey's purpose",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "survey_type",
+          "type": "string",
+          "required": false,
+          "description": "Survey display type.",
+          "enum": [
+            "popover",
+            "api",
+            "widget",
+            "button"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "questions",
+          "type": "array",
+          "innerType": "json",
+          "required": false,
+          "description": "List of survey questions.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "create"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": false,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "DeleteDashboard",
+      "qualifiedName": "Posthog.DeleteDashboard",
+      "fullyQualifiedName": "Posthog.DeleteDashboard@1.0.0",
+      "description": "Soft-delete a dashboard by ID. The dashboard is marked as deleted but can be restored.",
+      "parameters": [
+        {
+          "name": "dashboard_id",
+          "type": "integer",
+          "required": true,
+          "description": "Numeric dashboard ID to delete",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "DeleteExperiment",
+      "qualifiedName": "Posthog.DeleteExperiment",
+      "fullyQualifiedName": "Posthog.DeleteExperiment@1.0.0",
+      "description": "Soft-delete an experiment by ID (marks as archived).\n\nImportant: archiving an experiment does NOT unlink its feature\nflag. PostHog still considers the flag as linked to an \"active\"\nexperiment, blocking flag deletion. To fully clean up, delete\nthe flag separately after the experiment is archived.",
+      "parameters": [
+        {
+          "name": "experiment_id",
+          "type": "integer",
+          "required": true,
+          "description": "Numeric experiment ID to delete",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "DeleteFeatureFlag",
+      "qualifiedName": "Posthog.DeleteFeatureFlag",
+      "fullyQualifiedName": "Posthog.DeleteFeatureFlag@1.0.0",
+      "description": "Soft-delete a feature flag by numeric ID or key. Provide one of flag_id or flag_key.\n\nNote: flags linked to an experiment cannot be deleted until the\nexperiment is concluded and deleted first. PostHog considers even\narchived experiments as \"active\" for flag linkage purposes.",
+      "parameters": [
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "flag_id",
+          "type": "integer",
+          "required": false,
+          "description": "Numeric flag ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "flag_key",
+          "type": "string",
+          "required": false,
+          "description": "Flag key string.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "DeleteInsight",
+      "qualifiedName": "Posthog.DeleteInsight",
+      "fullyQualifiedName": "Posthog.DeleteInsight@1.0.0",
+      "description": "Soft-delete an insight by ID.",
+      "parameters": [
+        {
+          "name": "insight_id",
+          "type": "integer",
+          "required": true,
+          "description": "Numeric insight ID to delete",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "delete"
+          ],
+          "readOnly": false,
+          "destructive": true,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "DeleteSurvey",
+      "qualifiedName": "Posthog.DeleteSurvey",
+      "fullyQualifiedName": "Posthog.DeleteSurvey@1.0.0",
+      "description": "Soft-delete a survey by ID (marks as archived).",
+      "parameters": [
+        {
+          "name": "survey_id",
+          "type": "string",
+          "required": true,
+          "description": "Survey ID (UUID string) to delete.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetAllSurveyActivity",
+      "qualifiedName": "Posthog.GetAllSurveyActivity",
+      "fullyQualifiedName": "Posthog.GetAllSurveyActivity@1.0.0",
+      "description": "Get the activity log across all surveys.\n\nReturns a chronological list of changes made to any survey\n(created, updated, archived, etc.), not response metrics.",
+      "parameters": [
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetDashboard",
+      "qualifiedName": "Posthog.GetDashboard",
+      "fullyQualifiedName": "Posthog.GetDashboard@1.0.0",
+      "description": "Get a dashboard's full configuration including all insight tiles.\n\nProvide dashboard_id or dashboard_name.",
+      "parameters": [
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "dashboard_id",
+          "type": "integer",
+          "required": false,
+          "description": "Numeric dashboard ID to retrieve",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "dashboard_name",
+          "type": "string",
+          "required": false,
+          "description": "Dashboard name (case-insensitive exact match).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetErrorDetails",
+      "qualifiedName": "Posthog.GetErrorDetails",
+      "fullyQualifiedName": "Posthog.GetErrorDetails@1.0.0",
+      "description": "Get stack trace, occurrence count, and affected users/sessions for a specific error.",
+      "parameters": [
+        {
+          "name": "issue_id",
+          "type": "string",
+          "required": true,
+          "description": "Error issue fingerprint (the 'fingerprint' field from list_errors results).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetExperiment",
+      "qualifiedName": "Posthog.GetExperiment",
+      "fullyQualifiedName": "Posthog.GetExperiment@1.0.0",
+      "description": "Get an experiment's full configuration.\n\nIncludes variants, metrics, and current status. Provide either\nthe numeric ID or the name.",
+      "parameters": [
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "experiment_id",
+          "type": "integer",
+          "required": false,
+          "description": "Numeric experiment ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "experiment_name",
+          "type": "string",
+          "required": false,
+          "description": "Experiment name (case-insensitive exact match).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetExperimentResults",
+      "qualifiedName": "Posthog.GetExperimentResults",
+      "fullyQualifiedName": "Posthog.GetExperimentResults@1.0.0",
+      "description": "Get experiment results including metric data and exposure counts.\n\nOnly available for launched experiments that have collected data.\nDraft, not-yet-launched, or legacy experiments return 404.",
+      "parameters": [
+        {
+          "name": "experiment_id",
+          "type": "integer",
+          "required": true,
+          "description": "Numeric experiment ID to get results for",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetFeatureFlag",
+      "qualifiedName": "Posthog.GetFeatureFlag",
+      "fullyQualifiedName": "Posthog.GetFeatureFlag@1.0.0",
+      "description": "Get a feature flag's full definition including rollout rules.\n\nProvide either the numeric ID or the flag key.",
+      "parameters": [
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "flag_id",
+          "type": "integer",
+          "required": false,
+          "description": "Numeric flag ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "flag_key",
+          "type": "string",
+          "required": false,
+          "description": "Flag key string.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetFunnel",
+      "qualifiedName": "Posthog.GetFunnel",
+      "fullyQualifiedName": "Posthog.GetFunnel@1.0.0",
+      "description": "Build a multi-step conversion funnel with optional property breakdowns.",
+      "parameters": [
+        {
+          "name": "steps",
+          "type": "array",
+          "innerType": "string",
+          "required": true,
+          "description": "Ordered list of event names for funnel steps.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "date_from",
+          "type": "string",
+          "required": false,
+          "description": "Start date in YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS format (UTC), or relative offset: -Nh (hours), -Nd (days), -Nw (weeks), -Nm (months). Defaults to '-7d'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "date_to",
+          "type": "string",
+          "required": false,
+          "description": "End date in YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS format (UTC), or relative offset: -Nh (hours), -Nd (days), -Nw (weeks), -Nm (months). Future dates are clamped to now. Defaults to now.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "breakdown_property",
+          "type": "string",
+          "required": false,
+          "description": "Property to break down funnel by (e.g., '$initial_utm_source'). Shows conversion per segment.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "breakdown_type",
+          "type": "string",
+          "required": false,
+          "description": "Breakdown type. Defaults to EVENT.",
+          "enum": [
+            "event",
+            "person",
+            "session"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "funnel_window_days",
+          "type": "integer",
+          "required": false,
+          "description": "Max days between first and last step. Defaults to 14.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "property_filters",
+          "type": "array",
+          "innerType": "json",
+          "required": false,
+          "description": "Property filters applied to all steps.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetInsight",
+      "qualifiedName": "Posthog.GetInsight",
+      "fullyQualifiedName": "Posthog.GetInsight@1.0.0",
+      "description": "Get an insight's full configuration and current query results.\n\nProvide either the numeric ID or the name.",
+      "parameters": [
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "insight_id",
+          "type": "integer",
+          "required": false,
+          "description": "Numeric insight ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "insight_name",
+          "type": "string",
+          "required": false,
+          "description": "Insight name (case-insensitive exact match).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetRetention",
+      "qualifiedName": "Posthog.GetRetention",
+      "fullyQualifiedName": "Posthog.GetRetention@1.0.0",
+      "description": "Get cohort retention data showing what percentage of users return.\n\nShows return rates after a user's initial event.",
+      "parameters": [
+        {
+          "name": "start_event",
+          "type": "string",
+          "required": true,
+          "description": "Event that defines the cohort entry.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "return_event",
+          "type": "string",
+          "required": false,
+          "description": "Event that counts as a return. Defaults to same as start_event.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "date_from",
+          "type": "string",
+          "required": false,
+          "description": "Start date in YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS format (UTC), or relative offset: -Nh (hours), -Nd (days), -Nw (weeks), -Nm (months). Defaults to '-30d'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "date_to",
+          "type": "string",
+          "required": false,
+          "description": "End date in YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS format (UTC), or relative offset: -Nh (hours), -Nd (days), -Nw (weeks), -Nm (months). Future dates are clamped to now. Defaults to now.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "retention_type",
+          "type": "string",
+          "required": false,
+          "description": "Retention type. Defaults to FIRST_TIME (first-time users only).",
+          "enum": [
+            "retention_first_time",
+            "retention_recurring"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "period",
+          "type": "string",
+          "required": false,
+          "description": "Retention period granularity. Defaults to WEEK.",
+          "enum": [
+            "day",
+            "week",
+            "month"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "total_intervals",
+          "type": "integer",
+          "required": false,
+          "description": "Number of intervals to show (e.g., 7 for D0-D7, 28 for D0-D28). Defaults to 8.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "property_filters",
+          "type": "array",
+          "innerType": "json",
+          "required": false,
+          "description": "Property filters for the cohort.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetSurvey",
+      "qualifiedName": "Posthog.GetSurvey",
+      "fullyQualifiedName": "Posthog.GetSurvey@1.0.0",
+      "description": "Get a survey's full configuration.\n\nIncludes questions, targeting rules, and scheduling. Provide\neither the numeric ID or the name.",
+      "parameters": [
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "survey_id",
+          "type": "string",
+          "required": false,
+          "description": "Survey ID (UUID string).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "survey_name",
+          "type": "string",
+          "required": false,
+          "description": "Survey name (case-insensitive exact match).",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetSurveyActivity",
+      "qualifiedName": "Posthog.GetSurveyActivity",
+      "fullyQualifiedName": "Posthog.GetSurveyActivity@1.0.0",
+      "description": "Get the activity log for a survey.\n\nReturns a chronological list of changes made to the survey\n(created, updated, archived, etc.), not response metrics.",
+      "parameters": [
+        {
+          "name": "survey_id",
+          "type": "string",
+          "required": true,
+          "description": "Survey ID (UUID string) to get activity for.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetTrend",
+      "qualifiedName": "Posthog.GetTrend",
+      "fullyQualifiedName": "Posthog.GetTrend@1.0.0",
+      "description": "Get a time-series trend for an event over a date range.\n\nOptionally broken down by a property.",
+      "parameters": [
+        {
+          "name": "event",
+          "type": "string",
+          "required": true,
+          "description": "Event name to trend.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "date_from",
+          "type": "string",
+          "required": false,
+          "description": "Start date in YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS format (UTC), or relative offset: -Nh (hours), -Nd (days), -Nw (weeks), -Nm (months). Defaults to '-8w'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "date_to",
+          "type": "string",
+          "required": false,
+          "description": "End date in YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS format (UTC), or relative offset: -Nh (hours), -Nd (days), -Nw (weeks), -Nm (months). Future dates are clamped to now. Defaults to now.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "time_grouping",
+          "type": "string",
+          "required": false,
+          "description": "Time interval for grouping data points. Defaults to WEEK.",
+          "enum": [
+            "day",
+            "week",
+            "month"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "breakdown_property",
+          "type": "string",
+          "required": false,
+          "description": "Property to break down by (e.g., '$initial_utm_source', '$browser'). Omit for a single series.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "breakdown_type",
+          "type": "string",
+          "required": false,
+          "description": "Breakdown type. Defaults to EVENT.",
+          "enum": [
+            "event",
+            "person",
+            "session"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "math",
+          "type": "string",
+          "required": false,
+          "description": "Aggregation method. Defaults to TOTAL (count).",
+          "enum": [
+            "total",
+            "dau",
+            "weekly_active",
+            "monthly_active"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "property_filters",
+          "type": "array",
+          "innerType": "json",
+          "required": false,
+          "description": "Property filters to narrow results.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "GetTrends",
+      "qualifiedName": "Posthog.GetTrends",
+      "fullyQualifiedName": "Posthog.GetTrends@1.0.0",
+      "description": "Batch trend query: get time-series data for multiple events.\n\nReturns a time-series for each event. Unknown event names return\nzero counts rather than errors.",
+      "parameters": [
+        {
+          "name": "events",
+          "type": "array",
+          "innerType": "string",
+          "required": true,
+          "description": "List of event names to trend.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "date_from",
+          "type": "string",
+          "required": false,
+          "description": "Start date in YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS format (UTC), or relative offset: -Nh (hours), -Nd (days), -Nw (weeks), -Nm (months). Defaults to '-8w'.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "date_to",
+          "type": "string",
+          "required": false,
+          "description": "End date in YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS format (UTC), or relative offset: -Nh (hours), -Nd (days), -Nw (weeks), -Nm (months). Future dates are clamped to now. Defaults to now.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "time_grouping",
+          "type": "string",
+          "required": false,
+          "description": "Time interval for grouping data points. Defaults to WEEK.",
+          "enum": [
+            "day",
+            "week",
+            "month"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "math",
+          "type": "string",
+          "required": false,
+          "description": "Aggregation method. Defaults to TOTAL (count).",
+          "enum": [
+            "total",
+            "dau",
+            "weekly_active",
+            "monthly_active"
+          ],
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListDashboards",
+      "qualifiedName": "Posthog.ListDashboards",
+      "fullyQualifiedName": "Posthog.ListDashboards@1.0.0",
+      "description": "List all dashboards in the project.\n\nReturns summaries (id, name, pinned, tags, created_at). Use a\ndashboard's ID to get its full configuration and insight tiles.",
+      "parameters": [
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum results to return (1-100). Defaults to 100.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Number of items to skip for pagination (zero-based). Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "search",
+          "type": "string",
+          "required": false,
+          "description": "Filter dashboards by name (case-insensitive substring match)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "pinned",
+          "type": "boolean",
+          "required": false,
+          "description": "Filter to only pinned (true) or unpinned (false) dashboards",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListErrors",
+      "qualifiedName": "Posthog.ListErrors",
+      "fullyQualifiedName": "Posthog.ListErrors@1.0.0",
+      "description": "List error tracking issues.\n\nReturns summaries (id, fingerprint, status, occurrences, users,\nfirst_seen, last_seen). Use an error's fingerprint with get_error_details\nto get full stack traces.",
+      "parameters": [
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum results to return (1-100). Defaults to 100.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Number of items to skip for pagination (zero-based). Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListEventDefinitions",
+      "qualifiedName": "Posthog.ListEventDefinitions",
+      "fullyQualifiedName": "Posthog.ListEventDefinitions@1.0.0",
+      "description": "List all tracked event names in the project.\n\nThis is the discovery starting point -- use it to find valid\nevent names, then look up an event's properties to discover\navailable filters and breakdowns.",
+      "parameters": [
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "search",
+          "type": "string",
+          "required": false,
+          "description": "Filter events by name (server-side, case-insensitive substring match).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum results to return (1-100). Defaults to 100.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Number of items to skip for pagination (zero-based). Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListExperiments",
+      "qualifiedName": "Posthog.ListExperiments",
+      "fullyQualifiedName": "Posthog.ListExperiments@1.0.0",
+      "description": "List all A/B test experiments.\n\nReturns summaries (id, name, feature_flag_key, start_date,\nend_date). Use an experiment's ID or name to get its full\nconfiguration.",
+      "parameters": [
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum results to return (1-100). Defaults to 100.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Number of items to skip for pagination (zero-based). Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListFeatureFlags",
+      "qualifiedName": "Posthog.ListFeatureFlags",
+      "fullyQualifiedName": "Posthog.ListFeatureFlags@1.0.0",
+      "description": "List all feature flags.\n\nReturns summaries (id, key, name, active). Use a flag's ID or\nkey to get its full rollout rules and targeting detail.",
+      "parameters": [
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum results to return (1-100). Defaults to 100.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Number of items to skip for pagination (zero-based). Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListInsights",
+      "qualifiedName": "Posthog.ListInsights",
+      "fullyQualifiedName": "Posthog.ListInsights@1.0.0",
+      "description": "List all saved insights.\n\nReturns summaries (id, name, description, last_modified_at).\nUse an insight's ID or name to get its full configuration and\nquery results.",
+      "parameters": [
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "search",
+          "type": "string",
+          "required": false,
+          "description": "Filter insights by name (case-insensitive substring match).",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum results to return (1-100). Defaults to 100.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Number of items to skip for pagination (zero-based). Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListProperties",
+      "qualifiedName": "Posthog.ListProperties",
+      "fullyQualifiedName": "Posthog.ListProperties@1.0.0",
+      "description": "List property definitions with names, types, and example values.\n\nUse this as a schema exploration step: after identifying tracked\nevent names, query with event_name to discover its properties\nfor use in filters and breakdowns.",
+      "parameters": [
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "event_name",
+          "type": "string",
+          "required": false,
+          "description": "Event name to get properties for (required when type is 'event').",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "property_type",
+          "type": "string",
+          "required": false,
+          "description": "Property type. When set to 'event', event_name is required.",
+          "enum": [
+            "event",
+            "person"
+          ],
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum results to return (1-100). Defaults to 100.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Number of items to skip for pagination (zero-based). Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "ListSurveys",
+      "qualifiedName": "Posthog.ListSurveys",
+      "fullyQualifiedName": "Posthog.ListSurveys@1.0.0",
+      "description": "List all surveys.\n\nReturns summaries (id, name, type, created_at). Use a survey's\nID or name to get its full configuration.",
+      "parameters": [
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "search",
+          "type": "string",
+          "required": false,
+          "description": "Filter surveys by name (case-insensitive substring match)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "required": false,
+          "description": "Maximum results to return (1-100). Defaults to 100.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "offset",
+          "type": "integer",
+          "required": false,
+          "description": "Number of items to skip for pagination (zero-based). Defaults to 0.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "RunQuery",
+      "qualifiedName": "Posthog.RunQuery",
+      "fullyQualifiedName": "Posthog.RunQuery@1.0.0",
+      "description": "Execute a raw PostHog query.\n\nFor common analytics patterns (trends, funnels, retention),\nprefer purpose-built tools if available. Use this for custom\nquery shapes. Discover valid event names before constructing\na query.\n\nFor the full query schema and supported kinds, see\nhttps://posthog.com/docs/api/queries",
+      "parameters": [
+        {
+          "name": "query",
+          "type": "json",
+          "required": true,
+          "description": "PostHog query object. Must include a 'kind' field that determines the query type (TrendsQuery, FunnelsQuery, RetentionQuery, EventsQuery, HogQLQuery, etc.). Common optional fields: 'dateRange' (object with 'date_from' and/or 'date_to' strings), 'series' (list of event node objects with 'event' and 'kind' fields), 'properties' (filter object). For HogQL queries, include a 'query' field with the SQL string. For common analytics patterns, prefer purpose-built tools instead.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "UpdateDashboard",
+      "qualifiedName": "Posthog.UpdateDashboard",
+      "fullyQualifiedName": "Posthog.UpdateDashboard@1.0.0",
+      "description": "Update a dashboard's name, description, pinned status, or tags.\n\nReview the dashboard's current values before updating.",
+      "parameters": [
+        {
+          "name": "dashboard_id",
+          "type": "integer",
+          "required": true,
+          "description": "Numeric dashboard ID to update",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "New dashboard name",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "New dashboard description",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "pinned",
+          "type": "boolean",
+          "required": false,
+          "description": "Pin or unpin the dashboard",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "tags",
+          "type": "array",
+          "innerType": "string",
+          "required": false,
+          "description": "Replace tags.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "UpdateExperiment",
+      "qualifiedName": "Posthog.UpdateExperiment",
+      "fullyQualifiedName": "Posthog.UpdateExperiment@1.0.0",
+      "description": "Update an experiment's properties or lifecycle state.\n\nReview the experiment's current state before updating.\nTo launch: set launch=true. To conclude: set\nconclude='winning_variant_name'. To restart: set restart=true.",
+      "parameters": [
+        {
+          "name": "experiment_id",
+          "type": "integer",
+          "required": true,
+          "description": "Numeric experiment ID to update",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "New experiment name",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "New experiment description",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "primary_metrics",
+          "type": "array",
+          "innerType": "json",
+          "required": false,
+          "description": "Replace primary metrics.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "secondary_metrics",
+          "type": "array",
+          "innerType": "json",
+          "required": false,
+          "description": "Replace secondary metrics",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "launch",
+          "type": "boolean",
+          "required": false,
+          "description": "Set true to launch a draft experiment. Defaults to false.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "conclude",
+          "type": "string",
+          "required": false,
+          "description": "Conclusion result string to end the experiment",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "restart",
+          "type": "boolean",
+          "required": false,
+          "description": "Set true to restart a concluded experiment. Defaults to false.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "UpdateFeatureFlag",
+      "qualifiedName": "Posthog.UpdateFeatureFlag",
+      "fullyQualifiedName": "Posthog.UpdateFeatureFlag@1.0.0",
+      "description": "Update a feature flag's properties or rollout rules.\n\nProvide one of flag_id or flag_key. Review the flag's current\nstate before updating. To enable: set active=true and\nrollout_percentage=100. To disable: set active=false.",
+      "parameters": [
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "flag_id",
+          "type": "integer",
+          "required": false,
+          "description": "Numeric flag ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "flag_key",
+          "type": "string",
+          "required": false,
+          "description": "Flag key string.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "New display name",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "New description",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "active",
+          "type": "boolean",
+          "required": false,
+          "description": "Set active (true) or inactive (false)",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "filters",
+          "type": "json",
+          "required": false,
+          "description": "New rollout and targeting rules for the flag.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "UpdateInsight",
+      "qualifiedName": "Posthog.UpdateInsight",
+      "fullyQualifiedName": "Posthog.UpdateInsight@1.0.0",
+      "description": "Update an insight's name, description, or query filters.\n\nReview the insight's current query structure first and only\nmodify the parts you need to change.",
+      "parameters": [
+        {
+          "name": "insight_id",
+          "type": "integer",
+          "required": true,
+          "description": "Numeric insight ID to update",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "New insight name",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "New insight description",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "filters",
+          "type": "json",
+          "required": false,
+          "description": "New query filters (overwrites existing). Review the insight's current structure before overwriting.",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "UpdateSurvey",
+      "qualifiedName": "Posthog.UpdateSurvey",
+      "fullyQualifiedName": "Posthog.UpdateSurvey@1.0.0",
+      "description": "Update a survey's name, description, or questions.\n\nReview the survey's current configuration before updating.",
+      "parameters": [
+        {
+          "name": "survey_id",
+          "type": "string",
+          "required": true,
+          "description": "Survey ID (UUID string) to update.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "project_id",
+          "type": "string",
+          "required": true,
+          "description": "PostHog project ID.",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "required": false,
+          "description": "New survey name",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "description",
+          "type": "string",
+          "required": false,
+          "description": "New survey description",
+          "enum": null,
+          "inferrable": true
+        },
+        {
+          "name": "questions",
+          "type": "array",
+          "innerType": "json",
+          "required": false,
+          "description": "Replacement question list (overwrites existing questions)",
+          "enum": null,
+          "inferrable": true
+        }
+      ],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "update"
+          ],
+          "readOnly": false,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    },
+    {
+      "name": "WhoAmI",
+      "qualifiedName": "Posthog.WhoAmI",
+      "fullyQualifiedName": "Posthog.WhoAmI@1.0.0",
+      "description": "Return the authenticated user's identity, organizations, and projects.\n\nCall this first to confirm credentials and discover available\norganization and project IDs.",
+      "parameters": [],
+      "auth": null,
+      "secrets": [
+        "POSTHOG_SERVER_URL",
+        "POSTHOG_PERSONAL_API_KEY"
+      ],
+      "secretsInfo": [],
+      "output": {
+        "type": "json",
+        "description": "No description provided."
+      },
+      "documentationChunks": [],
+      "metadata": {
+        "classification": {
+          "serviceDomains": [
+            "product_analytics"
+          ]
+        },
+        "behavior": {
+          "operations": [
+            "read"
+          ],
+          "readOnly": true,
+          "destructive": false,
+          "idempotent": true,
+          "openWorld": true
+        },
+        "extras": null
+      }
+    }
+  ],
+  "documentationChunks": [],
+  "customImports": [],
+  "subPages": [],
+  "generatedAt": "2026-04-09T22:29:50.675Z"
+}
