@@ -74,6 +74,36 @@ describe("getMajorityVersion", () => {
     ];
     expect(getMajorityVersion(tools)).toBe("10.0.0");
   });
+
+  it("handles pre-release versions in tie-break comparison", () => {
+    const tools = [
+      createTool("Github.CreateIssue@1.0.0-alpha.1"),
+      createTool("Github.ListPullRequests@1.0.0-alpha.1"),
+      createTool("Github.SetStarred@2.0.0-beta.1"),
+      createTool("Github.GetStar@2.0.0-beta.1"),
+    ];
+    expect(getMajorityVersion(tools)).toBe("2.0.0-beta.1");
+  });
+
+  it("handles build metadata versions in tie-break comparison", () => {
+    const tools = [
+      createTool("Github.CreateIssue@1.0.0+build.456"),
+      createTool("Github.ListPullRequests@1.0.0+build.456"),
+      createTool("Github.SetStarred@3.0.0+build.789"),
+      createTool("Github.GetStar@3.0.0+build.789"),
+    ];
+    expect(getMajorityVersion(tools)).toBe("3.0.0+build.789");
+  });
+
+  it("handles pre-release + build metadata combined", () => {
+    const tools = [
+      createTool("Github.CreateIssue@1.2.3-rc.1+build.789"),
+      createTool("Github.ListPullRequests@1.2.3-rc.1+build.789"),
+      createTool("Github.SetStarred@4.0.0-beta.1+build.123"),
+      createTool("Github.GetStar@4.0.0-beta.1+build.123"),
+    ];
+    expect(getMajorityVersion(tools)).toBe("4.0.0-beta.1+build.123");
+  });
 });
 
 describe("filterToolsByMajorityVersion", () => {
