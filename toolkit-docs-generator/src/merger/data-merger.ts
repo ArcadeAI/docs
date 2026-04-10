@@ -23,6 +23,7 @@ import type {
   ToolkitMetadata,
 } from "../types/index.js";
 import { mapWithConcurrency } from "../utils/concurrency.js";
+import { extractVersion } from "../utils/fp.js";
 import {
   detectMetadataChanges,
   formatFreshnessWarnings,
@@ -340,13 +341,6 @@ export const getProviderId = (
   return toolWithAuth?.auth?.providerId ?? null;
 };
 
-/**
- * Extract version from fully qualified name
- */
-export const extractVersion = (fullyQualifiedName: string): string => {
-  const parts = fullyQualifiedName.split("@");
-  return parts[1] ?? "0.0.0";
-};
 /**
  * Create default metadata for toolkits not found in Design System
  */

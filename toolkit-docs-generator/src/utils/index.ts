@@ -10,3 +10,7 @@ export { readIgnoreList } from "./ignore-list.js";
 export * from "./logger.js";
 export * from "./progress.js";
 export * from "./retry.js";
+export {
+  filterToolsByHighestVersion,
+  getHighestVersion,
+} from "./version-coherence.js";

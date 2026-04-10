@@ -9,6 +9,7 @@
 import { join } from "path";
 import type { ToolDefinition, ToolkitMetadata } from "../types/index.js";
 import { normalizeId } from "../utils/fp.js";
+import { filterToolsByHighestVersion } from "../utils/version-coherence.js";
 import {
   type ArcadeApiSourceConfig,
   createArcadeApiSource,
@@ -130,13 +131,14 @@ export class CombinedToolkitDataSource implements IToolkitDataSource {
       }
     }
 
-    // Filter tools by version if specified
+    // Filter tools by version if specified, otherwise keep only the highest
+    // version to drop stale tools from older releases that Engine still serves.
     const filteredTools = version
       ? tools.filter((tool) => {
           const toolVersion = tool.fullyQualifiedName.split("@")[1];
           return toolVersion === version;
         })
-      : tools;
+      : filterToolsByHighestVersion(tools);
 
     return {
       tools: filteredTools,
@@ -165,6 +167,15 @@ export class CombinedToolkitDataSource implements IToolkitDataSource {
     const metadataMap = new Map<string, ToolkitMetadata>();
     for (const metadata of allMetadata) {
       metadataMap.set(metadata.id, metadata);
+    }
+
+    // Filter each toolkit to its highest version to drop stale
+    // tools from older releases that Engine still serves.
+    for (const [toolkitId, tools] of toolkitGroups) {
+      const filtered = filterToolsByHighestVersion(tools);
+      if (filtered !== tools) {
+        toolkitGroups.set(toolkitId, filtered as ToolDefinition[]);
+      }
     }
 
     // Combine into ToolkitData map.

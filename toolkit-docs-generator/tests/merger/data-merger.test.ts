@@ -9,7 +9,6 @@ import {
   computeAllScopes,
   DataMerger,
   determineAuthType,
-  extractVersion,
   getProviderId,
   groupToolsByToolkit,
   mergeToolkit,
@@ -32,6 +31,7 @@ import type {
   ToolDefinition,
   ToolkitMetadata,
 } from "../../src/types/index.js";
+import { extractVersion } from "../../src/utils/index.js";
 
 // ============================================================================
 // Test Fixtures - Realistic data matching production schema

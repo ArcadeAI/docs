@@ -160,6 +160,15 @@ export const deepMerge = <T extends object>(
 };
 
 /**
+ * Extract version from a fully qualified tool name.
+ * "Github.CreateIssue@3.1.3" → "3.1.3"
+ */
+export const extractVersion = (fullyQualifiedName: string): string => {
+  const parts = fullyQualifiedName.split("@");
+  return parts[1] ?? "0.0.0";
+};
+
+/**
  * Normalize a string for comparison (lowercase, remove hyphens/underscores)
  */
 export const normalizeId = (id: string): string =>
