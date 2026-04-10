@@ -206,33 +206,42 @@ async function getUndeployedSHAs(
   const token = process.env.GITHUB_TOKEN;
   if (!token) throw new Error("GITHUB_TOKEN env var is required");
 
-  const url = `https://api.github.com/repos/${owner}/${repo}/compare/${productionBranch}...main`;
-  const res = await fetch(url, {
-    headers: {
-      Accept: "application/vnd.github+json",
-      Authorization: `Bearer ${token}`,
-      "X-GitHub-Api-Version": "2022-11-28",
-    },
-  });
-
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`GitHub compare API error for ${owner}/${repo}: ${res.status} ${body}`);
-  }
-
-  const data: any = await res.json();
   const shas = new Set<string>();
-  for (const commit of data.commits) {
-    shas.add(commit.sha);
+
+  const perPage = 100;
+  let page = 1;
+
+  while (true) {
+    const url = `https://api.github.com/repos/${owner}/${repo}/compare/${productionBranch}...main?per_page=${perPage}&page=${page}`;
+    const res = await fetch(url, {
+      headers: {
+        Accept: "application/vnd.github+json",
+        Authorization: `Bearer ${token}`,
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+    });
+
+    if (!res.ok) {
+      const body = await res.text();
+      throw new Error(`GitHub compare API error for ${owner}/${repo}: ${res.status} ${body}`);
+    }
+
+    const data: any = await res.json();
+    const commits = data.commits || [];
+    for (const commit of commits) {
+      shas.add(commit.sha);
+    }
+
+    if (commits.length < perPage) break;
+    page++;
   }
+
   return shas;
 }
 
 // --- Step 6: Format the entry ---
 
 function formatEntry(date: string, entries: CategorizedPR[]): string {
-  const privateRepos = new Set(REPOS.filter((r) => r.private).map((r) => r.repo));
-
   const sorted = [...entries].sort((a, b) => a.merged_at.localeCompare(b.merged_at));
 
   const grouped: Record<string, CategorizedPR[]> = {};
