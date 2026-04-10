@@ -341,10 +341,6 @@ export const getProviderId = (
   return toolWithAuth?.auth?.providerId ?? null;
 };
 
-// Re-export extractVersion so existing consumers (e.g. toolkit-diff.ts)
-// that import it from this module continue to work.
-export { extractVersion } from "../utils/fp.js";
-
 /**
  * Create default metadata for toolkits not found in Design System
  */
