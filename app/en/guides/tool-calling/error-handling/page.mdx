@@ -60,6 +60,11 @@ def handle_tool_error(error: OutputError) -> None:
     elif error_kind.startswith("UPSTREAM_"):
         # The tool encountered an error from an upstream service
         print(error.message)
+    elif error_kind.startswith("NETWORK_TRANSPORT_"):
+        # The HTTP request never received a complete response (timeout, DNS
+        # failure, TLS handshake, etc.). These are typically transient and
+        # safe to retry.
+        print(error.message)
 
 
 client = Arcade()  # Automatically finds the `ARCADE_API_KEY` env variable
@@ -123,6 +128,11 @@ function handleToolError(error) {
     console.log(`Wait for ${secondsToWait} seconds before retrying the tool call`);
   } else if (errorKind.startsWith("UPSTREAM_")) {
     // The tool encountered an error from an upstream service
+    console.log(error.message);
+  } else if (errorKind.startsWith("NETWORK_TRANSPORT_")) {
+    // The HTTP request never received a complete response (timeout, DNS
+    // failure, TLS handshake, etc.). These are typically transient and
+    // safe to retry.
     console.log(error.message);
   }
 }
@@ -202,6 +212,11 @@ import org.slf4j.LoggerFactory;
     logger.error("Wait for {} before retrying the tool call", timeToWait);
   } else if (errorKind.asString().startsWith("UPSTREAM_")) {
     // The tool encountered an error from an upstream service
+    logger.error(error.message());
+  } else if (errorKind.asString().startsWith("NETWORK_TRANSPORT_")) {
+    // The HTTP request never received a complete response (timeout, DNS
+    // failure, TLS handshake, etc.). These are typically transient and
+    // safe to retry.
     logger.error(error.message());
   }
 }

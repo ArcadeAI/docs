@@ -40,6 +40,12 @@ def fetch_data(
     return response.json()
 ```
 
+The HTTP error adapter routes exceptions from `httpx` and `requests` based on whether a complete response was received:
+
+- **Real HTTP responses** (4xx/5xx) → `UpstreamError` (with `status_code`). 429 becomes `UpstreamRateLimitError`.
+- **No response received** (connect/read timeouts, DNS failures, connection errors, TLS handshake failures, decoding errors, redirect-loop exhaustion) → `NetworkTransportError` with `status_code=None`. Classified by `ErrorKind` as `NETWORK_TRANSPORT_RUNTIME_TIMEOUT`, `NETWORK_TRANSPORT_RUNTIME_UNREACHABLE`, or `NETWORK_TRANSPORT_RUNTIME_UNMAPPED`.
+- **Client construction bugs** (`InvalidURL`, `UnsupportedProtocol`, `MissingSchema`, `InvalidSchema`, `InvalidHeader`, `InvalidProxyURL`, `URLRequired`, `SSLError`) → `FatalToolError`. These indicate a tool-authoring mistake or local TLS configuration issue and are not retryable.
+
 ### Explicit error adapters
 
 For tools using specific SDKs, you can specify error adapters explicitly:
