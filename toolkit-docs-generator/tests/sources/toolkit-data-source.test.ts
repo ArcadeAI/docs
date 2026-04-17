@@ -160,6 +160,97 @@ describe("CombinedToolkitDataSource", () => {
     expect(weaviate?.metadata?.label).toBe("Weaviate API");
   });
 
+  it("should filter out stale tools at older versions in fetchAllToolkitsData", async () => {
+    const toolSource = new InMemoryToolDataSource([
+      createTool({
+        name: "CreateIssue",
+        qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@3.1.3",
+      }),
+      createTool({
+        name: "ListPullRequests",
+        qualifiedName: "Github.ListPullRequests",
+        fullyQualifiedName: "Github.ListPullRequests@3.1.3",
+      }),
+      createTool({
+        name: "GetNotificationSummary",
+        qualifiedName: "Github.GetNotificationSummary",
+        fullyQualifiedName: "Github.GetNotificationSummary@2.0.1",
+      }),
+    ]);
+    const metadataSource = new InMemoryMetadataSource([createMetadata()]);
+    const dataSource = createCombinedToolkitDataSource({
+      toolSource,
+      metadataSource,
+    });
+
+    const result = await dataSource.fetchAllToolkitsData();
+    const github = result.get("Github");
+
+    expect(github?.tools).toHaveLength(2);
+    expect(
+      github?.tools.every((t) => t.fullyQualifiedName.endsWith("@3.1.3"))
+    ).toBe(true);
+  });
+
+  it("should apply highest-version filter in fetchToolkitData when no version specified", async () => {
+    const toolSource = new InMemoryToolDataSource([
+      createTool({
+        name: "CreateIssue",
+        qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@3.1.3",
+      }),
+      createTool({
+        name: "ListPullRequests",
+        qualifiedName: "Github.ListPullRequests",
+        fullyQualifiedName: "Github.ListPullRequests@3.1.3",
+      }),
+      createTool({
+        name: "GetNotificationSummary",
+        qualifiedName: "Github.GetNotificationSummary",
+        fullyQualifiedName: "Github.GetNotificationSummary@2.0.1",
+      }),
+    ]);
+    const metadataSource = new InMemoryMetadataSource([createMetadata()]);
+    const dataSource = createCombinedToolkitDataSource({
+      toolSource,
+      metadataSource,
+    });
+
+    const result = await dataSource.fetchToolkitData("Github");
+
+    expect(result.tools).toHaveLength(2);
+    expect(
+      result.tools.every((t) => t.fullyQualifiedName.endsWith("@3.1.3"))
+    ).toBe(true);
+  });
+
+  it("should still allow explicit version filter in fetchToolkitData", async () => {
+    const toolSource = new InMemoryToolDataSource([
+      createTool({
+        name: "CreateIssue",
+        qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@3.1.3",
+      }),
+      createTool({
+        name: "GetNotificationSummary",
+        qualifiedName: "Github.GetNotificationSummary",
+        fullyQualifiedName: "Github.GetNotificationSummary@2.0.1",
+      }),
+    ]);
+    const metadataSource = new InMemoryMetadataSource([createMetadata()]);
+    const dataSource = createCombinedToolkitDataSource({
+      toolSource,
+      metadataSource,
+    });
+
+    // Explicit version bypasses highest-version filter
+    const result = await dataSource.fetchToolkitData("Github", "2.0.1");
+
+    expect(result.tools).toHaveLength(1);
+    expect(result.tools[0]?.fullyQualifiedName).toContain("@2.0.1");
+  });
+
   it("should fall back to providerId metadata for *Api toolkits", async () => {
     const toolSource = new InMemoryToolDataSource([
       createTool({
