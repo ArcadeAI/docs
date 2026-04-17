@@ -963,6 +963,12 @@ export class DataMerger {
     }
 
     if (!this.toolkitSummaryGenerator) {
+      // Preserve previous summary when no LLM is available to regenerate.
+      // A slightly stale summary is better than silently wiping hand-authored
+      // or previously generated content on every run that disables the LLM.
+      if (previousToolkit?.summary) {
+        result.toolkit.summary = previousToolkit.summary;
+      }
       return;
     }
 
@@ -980,6 +986,13 @@ export class DataMerger {
       result.warnings.push(
         `Summary generation failed for ${result.toolkit.id}: ${message}`
       );
+      // Preserve previous summary on LLM failure. Losing the summary on a
+      // transient API error would require waiting for another run — and if
+      // the failure is persistent we keep showing the last known-good text
+      // instead of a blank overview.
+      if (previousToolkit?.summary) {
+        result.toolkit.summary = previousToolkit.summary;
+      }
     }
   }
 

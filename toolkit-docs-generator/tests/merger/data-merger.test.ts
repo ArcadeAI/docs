@@ -1185,6 +1185,71 @@ describe("DataMerger", () => {
       expect(result.toolkit.summary).toBeUndefined();
     });
 
+    it("preserves previous summary when no LLM generator is available and the signature changed", async () => {
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([githubTool1, githubTool2]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
+      });
+      const previousResult = await mergeToolkit(
+        "Github",
+        [githubTool1],
+        githubMetadata,
+        null,
+        createStubGenerator()
+      );
+      previousResult.toolkit.summary = "Hand-authored summary";
+
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        previousToolkits: new Map([["github", previousResult.toolkit]]),
+      });
+
+      const result = await merger.mergeToolkit("Github");
+
+      expect(result.toolkit.tools).toHaveLength(2);
+      expect(result.toolkit.summary).toBe("Hand-authored summary");
+    });
+
+    it("preserves previous summary when the LLM generator throws", async () => {
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([githubTool1, githubTool2]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
+      });
+      const previousResult = await mergeToolkit(
+        "Github",
+        [githubTool1],
+        githubMetadata,
+        null,
+        createStubGenerator()
+      );
+      previousResult.toolkit.summary = "Hand-authored summary";
+
+      const failingSummary: ToolkitSummaryGenerator = {
+        generate: async () => {
+          throw new Error("rate limited");
+        },
+      };
+
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        toolkitSummaryGenerator: failingSummary,
+        previousToolkits: new Map([["github", previousResult.toolkit]]),
+      });
+
+      const result = await merger.mergeToolkit("Github");
+
+      expect(result.toolkit.summary).toBe("Hand-authored summary");
+      expect(
+        result.warnings.some((warning) =>
+          warning.includes("Summary generation failed for Github")
+        )
+      ).toBe(true);
+    });
+
     it("reuses previous examples when the tool is unchanged", async () => {
       const toolkitDataSource = createCombinedToolkitDataSource({
         toolSource: new InMemoryToolDataSource([githubTool1]),
