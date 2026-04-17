@@ -108,30 +108,29 @@ export class CombinedToolkitDataSource implements IToolkitDataSource {
     this.metadataSource = config.metadataSource;
   }
 
-  private async resolveMetadata(
+  /**
+   * Apply the "*Api" provider-id fallback when the direct metadata lookup
+   * missed. Used by both `fetchToolkitData` and `fetchAllToolkitsData` so
+   * they resolve metadata the same way.
+   */
+  private async resolveProviderMetadata(
     toolkitId: string,
     tools: readonly ToolDefinition[],
-    directMetadata: ToolkitMetadata | null,
-    options?: { readonly allowToolkitIdLookup?: boolean }
+    directMetadata: ToolkitMetadata | null
   ): Promise<ToolkitMetadata | null> {
-    let metadata = directMetadata;
-    if (!metadata && options?.allowToolkitIdLookup) {
-      metadata = await this.metadataSource.getToolkitMetadata(toolkitId);
+    if (directMetadata || !normalizeId(toolkitId).endsWith("api")) {
+      return directMetadata;
     }
 
-    // If the toolkit isn't in the Design System under its exact ID, try to match
-    // by auth provider for "*Api" toolkits (e.g. MailchimpMarketingApi -> MailchimpApi).
-    if (!metadata && normalizeId(toolkitId).endsWith("api")) {
-      const providerId = tools.find((t) => t.auth?.providerId)?.auth
-        ?.providerId;
-      if (providerId) {
-        metadata =
-          (await this.metadataSource.getToolkitMetadata(`${providerId}Api`)) ??
-          (await this.metadataSource.getToolkitMetadata(providerId));
-      }
+    const providerId = tools.find((t) => t.auth?.providerId)?.auth?.providerId;
+    if (!providerId) {
+      return null;
     }
 
-    return metadata;
+    return (
+      (await this.metadataSource.getToolkitMetadata(`${providerId}Api`)) ??
+      (await this.metadataSource.getToolkitMetadata(providerId))
+    );
   }
 
   async fetchToolkitData(
@@ -143,11 +142,10 @@ export class CombinedToolkitDataSource implements IToolkitDataSource {
       this.toolSource.fetchToolsByToolkit(toolkitId),
       this.metadataSource.getToolkitMetadata(toolkitId),
     ]);
-    const metadata = await this.resolveMetadata(
+    const metadata = await this.resolveProviderMetadata(
       toolkitId,
       tools,
-      directMetadata,
-      { allowToolkitIdLookup: false }
+      directMetadata
     );
 
     // Filter tools by version if specified, otherwise keep only the highest
@@ -203,12 +201,15 @@ export class CombinedToolkitDataSource implements IToolkitDataSource {
     // matching the behaviour of fetchToolkitData.
     const result = new Map<string, ToolkitData>();
     for (const [toolkitId, tools] of toolkitGroups) {
-      const directMetadata = metadataMap.get(toolkitId) ?? null;
-      const metadata = await this.resolveMetadata(
+      // Prefer the batch lookup; only fall back to per-toolkit lookup
+      // (and then the provider-id fallback) when the map misses.
+      const directMetadata =
+        metadataMap.get(toolkitId) ??
+        (await this.metadataSource.getToolkitMetadata(toolkitId));
+      const metadata = await this.resolveProviderMetadata(
         toolkitId,
         tools,
-        directMetadata,
-        { allowToolkitIdLookup: true }
+        directMetadata
       );
       result.set(toolkitId, { tools, metadata });
     }
