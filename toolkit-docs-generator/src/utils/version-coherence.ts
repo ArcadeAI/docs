@@ -1,38 +1,92 @@
 import type { ToolDefinition } from "../types/index.js";
 import { extractVersion } from "./fp.js";
 
+interface ParsedSemver {
+  readonly core: readonly number[];
+  readonly prerelease: readonly (number | string)[] | null;
+}
+
 /**
- * Parse the numeric MAJOR.MINOR.PATCH tuple from a semver string,
- * stripping pre-release (`-alpha.1`) and build metadata (`+build.456`).
- *
- * Handles formats produced by arcade-mcp's normalize_version():
- *   "3.1.3", "1.2.3-beta.1", "1.2.3+build.456", "1.2.3-rc.1+build.789"
+ * Parse a semver-ish string into numeric core + optional pre-release parts.
+ * Build metadata (+...) is ignored for ordering.
  */
-const parseNumericVersion = (version: string): number[] => {
-  // Strip build metadata (after +) then pre-release (after -)
-  const core = version.split("+")[0]?.split("-")[0] ?? version;
-  return core.split(".").map((s) => {
-    const n = Number(s);
+const parseSemver = (version: string): ParsedSemver => {
+  const withoutBuild = version.split("+")[0] ?? version;
+  const prereleaseIndex = withoutBuild.indexOf("-");
+  const coreText =
+    prereleaseIndex >= 0
+      ? withoutBuild.slice(0, prereleaseIndex)
+      : withoutBuild;
+  const prereleaseText =
+    prereleaseIndex >= 0 ? withoutBuild.slice(prereleaseIndex + 1) : "";
+
+  const core = coreText.split(".").map((segment) => {
+    const n = Number(segment);
     return Number.isNaN(n) ? 0 : n;
   });
+
+  const prerelease =
+    prereleaseText.length > 0
+      ? prereleaseText.split(".").map((identifier) => {
+          const n = Number(identifier);
+          return Number.isNaN(n) ? identifier : n;
+        })
+      : null;
+
+  return { core, prerelease };
 };
 
 /**
- * Compare two semver version strings numerically by MAJOR.MINOR.PATCH.
- * Pre-release and build metadata are ignored for ordering purposes
- * (they are unlikely to appear in Engine API responses, but we handle
- * them defensively since arcade-mcp's semver allows them).
+ * Compare two semver version strings using semver precedence rules:
+ * - Compare MAJOR.MINOR.PATCH numerically
+ * - For equal core versions, stable release > pre-release
+ * - Numeric pre-release identifiers compare numerically
+ * - String pre-release identifiers compare lexicographically
+ * - Build metadata is ignored
  *
  * Returns a positive number if a > b, negative if a < b, 0 if equal.
  */
 const compareVersions = (a: string, b: string): number => {
-  const aParts = parseNumericVersion(a);
-  const bParts = parseNumericVersion(b);
-  const len = Math.max(aParts.length, bParts.length);
+  const aSemver = parseSemver(a);
+  const bSemver = parseSemver(b);
+  const len = Math.max(aSemver.core.length, bSemver.core.length);
   for (let i = 0; i < len; i++) {
-    const diff = (aParts[i] ?? 0) - (bParts[i] ?? 0);
+    const diff = (aSemver.core[i] ?? 0) - (bSemver.core[i] ?? 0);
     if (diff !== 0) return diff;
   }
+
+  const aPrerelease = aSemver.prerelease;
+  const bPrerelease = bSemver.prerelease;
+  if (!(aPrerelease || bPrerelease)) return 0;
+  if (!aPrerelease && bPrerelease) return 1;
+  if (aPrerelease && !bPrerelease) return -1;
+
+  const prereleaseLen = Math.max(
+    aPrerelease?.length ?? 0,
+    bPrerelease?.length ?? 0
+  );
+  for (let i = 0; i < prereleaseLen; i++) {
+    const aPart = aPrerelease?.[i];
+    const bPart = bPrerelease?.[i];
+
+    if (aPart === undefined && bPart !== undefined) return -1;
+    if (aPart !== undefined && bPart === undefined) return 1;
+    if (aPart === undefined && bPart === undefined) return 0;
+
+    const aIsNumber = typeof aPart === "number";
+    const bIsNumber = typeof bPart === "number";
+    if (aIsNumber && bIsNumber) {
+      const diff = (aPart as number) - (bPart as number);
+      if (diff !== 0) return diff;
+      continue;
+    }
+    if (aIsNumber && !bIsNumber) return -1;
+    if (!aIsNumber && bIsNumber) return 1;
+
+    const diff = String(aPart).localeCompare(String(bPart), "en");
+    if (diff !== 0) return diff;
+  }
+
   return 0;
 };
 

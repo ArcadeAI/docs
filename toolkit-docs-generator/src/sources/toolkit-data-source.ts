@@ -108,19 +108,17 @@ export class CombinedToolkitDataSource implements IToolkitDataSource {
     this.metadataSource = config.metadataSource;
   }
 
-  async fetchToolkitData(
+  private async resolveMetadata(
     toolkitId: string,
-    version?: string
-  ): Promise<ToolkitData> {
-    // Fetch tools and metadata in parallel
-    const [tools, fetchedMetadata] = await Promise.all([
-      this.toolSource.fetchToolsByToolkit(toolkitId),
-      this.metadataSource.getToolkitMetadata(toolkitId),
-    ]);
+    tools: readonly ToolDefinition[],
+    directMetadata: ToolkitMetadata | null
+  ): Promise<ToolkitMetadata | null> {
+    let metadata =
+      directMetadata ??
+      (await this.metadataSource.getToolkitMetadata(toolkitId));
 
     // If the toolkit isn't in the Design System under its exact ID, try to match
-    // based on the auth provider for "*Api" toolkits (e.g. MailchimpMarketingApi -> MailchimpApi).
-    let metadata = fetchedMetadata;
+    // by auth provider for "*Api" toolkits (e.g. MailchimpMarketingApi -> MailchimpApi).
     if (!metadata && normalizeId(toolkitId).endsWith("api")) {
       const providerId = tools.find((t) => t.auth?.providerId)?.auth
         ?.providerId;
@@ -130,6 +128,24 @@ export class CombinedToolkitDataSource implements IToolkitDataSource {
           (await this.metadataSource.getToolkitMetadata(providerId));
       }
     }
+
+    return metadata;
+  }
+
+  async fetchToolkitData(
+    toolkitId: string,
+    version?: string
+  ): Promise<ToolkitData> {
+    // Fetch tools and metadata in parallel
+    const [tools, directMetadata] = await Promise.all([
+      this.toolSource.fetchToolsByToolkit(toolkitId),
+      this.metadataSource.getToolkitMetadata(toolkitId),
+    ]);
+    const metadata = await this.resolveMetadata(
+      toolkitId,
+      tools,
+      directMetadata
+    );
 
     // Filter tools by version if specified, otherwise keep only the highest
     // version to drop stale tools from older releases that Engine still serves.
@@ -185,9 +201,11 @@ export class CombinedToolkitDataSource implements IToolkitDataSource {
     const result = new Map<string, ToolkitData>();
     for (const [toolkitId, tools] of toolkitGroups) {
       const directMetadata = metadataMap.get(toolkitId) ?? null;
-      const metadata =
-        directMetadata ??
-        (await this.metadataSource.getToolkitMetadata(toolkitId));
+      const metadata = await this.resolveMetadata(
+        toolkitId,
+        tools,
+        directMetadata
+      );
       result.set(toolkitId, { tools, metadata });
     }
 

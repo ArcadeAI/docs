@@ -110,6 +110,14 @@ describe("getHighestVersion", () => {
     ];
     expect(getHighestVersion(tools)).toBe("4.0.0-beta.1+build.123");
   });
+
+  it("prefers stable release over pre-release with same core version", () => {
+    const tools = [
+      createTool("Github.CreateIssue@1.23-rc.1"),
+      createTool("Github.SetStarred@1.23"),
+    ];
+    expect(getHighestVersion(tools)).toBe("1.23");
+  });
 });
 
 describe("filterToolsByHighestVersion", () => {
@@ -186,5 +194,15 @@ describe("filterToolsByHighestVersion", () => {
     expect(result.every((t) => t.fullyQualifiedName.endsWith("@3.1.3"))).toBe(
       true
     );
+  });
+
+  it("drops matching pre-release tools when stable release exists", () => {
+    const tools = [
+      createTool("Github.CreateIssue@1.23-rc.1"),
+      createTool("Github.SetStarred@1.23"),
+    ];
+    const result = filterToolsByHighestVersion(tools);
+    expect(result).toHaveLength(1);
+    expect(result[0]?.fullyQualifiedName).toBe("Github.SetStarred@1.23");
   });
 });

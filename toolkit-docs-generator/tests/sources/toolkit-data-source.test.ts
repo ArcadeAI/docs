@@ -277,4 +277,35 @@ describe("CombinedToolkitDataSource", () => {
     const result = await dataSource.fetchToolkitData("MailchimpMarketingApi");
     expect(result.metadata?.label).toBe("Mailchimp API");
   });
+
+  it("should use providerId fallback consistently in fetchAllToolkitsData", async () => {
+    const toolSource = new InMemoryToolDataSource([
+      createTool({
+        qualifiedName: "MailchimpMarketingApi.CreateCampaign",
+        fullyQualifiedName: "MailchimpMarketingApi.CreateCampaign@1.0.0",
+        auth: { providerId: "mailchimp", providerType: "oauth2", scopes: [] },
+      }),
+    ]);
+
+    const metadataSource = new InMemoryMetadataSource([
+      createMetadata({
+        id: "MailchimpApi",
+        label: "Mailchimp API",
+        category: "productivity",
+        type: "arcade_starter",
+      }),
+    ]);
+
+    const dataSource = createCombinedToolkitDataSource({
+      toolSource,
+      metadataSource,
+    });
+
+    const single = await dataSource.fetchToolkitData("MailchimpMarketingApi");
+    const all = await dataSource.fetchAllToolkitsData();
+    const listed = all.get("MailchimpMarketingApi");
+
+    expect(single.metadata?.label).toBe("Mailchimp API");
+    expect(listed?.metadata?.label).toBe("Mailchimp API");
+  });
 });
