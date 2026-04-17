@@ -32,6 +32,16 @@ const comparePrereleaseIdentifier = (
   return String(aPart).localeCompare(String(bPart), "en");
 };
 
+const compareOptionalPrereleasePart = (
+  aPart: number | string | undefined,
+  bPart: number | string | undefined
+): number => {
+  if (aPart === undefined && bPart === undefined) return 0;
+  if (aPart === undefined) return -1;
+  if (bPart === undefined) return 1;
+  return comparePrereleaseIdentifier(aPart, bPart);
+};
+
 const comparePrerelease = (
   aPrerelease: readonly (number | string)[] | null,
   bPrerelease: readonly (number | string)[] | null
@@ -45,14 +55,10 @@ const comparePrerelease = (
     bPrerelease?.length ?? 0
   );
   for (let i = 0; i < prereleaseLen; i++) {
-    const aPart = aPrerelease?.[i];
-    const bPart = bPrerelease?.[i];
-
-    if (aPart === undefined && bPart !== undefined) return -1;
-    if (aPart !== undefined && bPart === undefined) return 1;
-    if (aPart === undefined && bPart === undefined) return 0;
-
-    const diff = comparePrereleaseIdentifier(aPart, bPart);
+    const diff = compareOptionalPrereleasePart(
+      aPrerelease?.[i],
+      bPrerelease?.[i]
+    );
     if (diff !== 0) return diff;
   }
 
