@@ -65,6 +65,10 @@ const meta: MetaRecord = {
     title: "Vercel API",
     href: "/en/resources/integrations/development/vercel-api",
   },
+  "zoho-creator-api": {
+    title: "Zoho Creator API",
+    href: "/en/resources/integrations/development/zoho-creator-api",
+  },
 };
 
 export default meta;
