@@ -160,7 +160,7 @@ export default async function RootLayout({
               }
               projectLink="https://github.com/ArcadeAI/arcade-mcp"
             >
-              <SignupLink linkLocation="docs:navbar" utmMedium="docs-navbar">
+              <SignupLink linkLocation="docs:navbar" utmMedium="navbar">
                 <NavBarButton
                   hideOnPath={[
                     "/guides/create-tools/add-tools-to-arcade-catalog",

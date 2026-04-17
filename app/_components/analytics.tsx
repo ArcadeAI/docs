@@ -13,17 +13,18 @@ export type LinkClickedProps = {
 };
 
 const UTM_SOURCE = "docs";
-const DEFAULT_UTM_MEDIUM = "docs-cta";
 const DEFAULT_UTM_CAMPAIGN = "docs";
 
-const buildRegisterHref = (utmMedium: string, utmCampaign: string): string => {
+const buildRegisterHref = (utmCampaign: string, utmMedium?: string): string => {
   const base = getDashboardUrl("register");
   const separator = base.includes("?") ? "&" : "?";
   const params = new URLSearchParams({
     utm_source: UTM_SOURCE,
-    utm_medium: utmMedium,
     utm_campaign: utmCampaign,
   });
+  if (utmMedium) {
+    params.set("utm_medium", utmMedium);
+  }
   return `${base}${separator}${params.toString()}`;
 };
 
@@ -32,7 +33,7 @@ export const SignupLink = ({
   children,
   className,
   utmCampaign = DEFAULT_UTM_CAMPAIGN,
-  utmMedium = DEFAULT_UTM_MEDIUM,
+  utmMedium,
 }: LinkClickedProps) => {
   const trackSignupClick = (source: string) => {
     posthog.capture("Signup clicked", {
@@ -43,7 +44,7 @@ export const SignupLink = ({
   return (
     <Link
       className={cn("text-primary", className)}
-      href={buildRegisterHref(utmMedium, utmCampaign)}
+      href={buildRegisterHref(utmCampaign, utmMedium)}
       onClick={() => trackSignupClick(linkLocation)}
     >
       {children}
