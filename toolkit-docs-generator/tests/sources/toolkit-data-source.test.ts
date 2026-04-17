@@ -308,4 +308,72 @@ describe("CombinedToolkitDataSource", () => {
     expect(single.metadata?.label).toBe("Mailchimp API");
     expect(listed?.metadata?.label).toBe("Mailchimp API");
   });
+
+  it("fetchToolkitData does not re-fetch metadata when direct lookup is already null", async () => {
+    const toolSource = new InMemoryToolDataSource([
+      createTool({
+        qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@1.0.0",
+      }),
+    ]);
+
+    let metadataLookupCalls = 0;
+    const metadataSource = {
+      async getToolkitMetadata(
+        _toolkitId: string
+      ): Promise<ToolkitMetadata | null> {
+        metadataLookupCalls += 1;
+        return null;
+      },
+      async getAllToolkitsMetadata(): Promise<readonly ToolkitMetadata[]> {
+        return [];
+      },
+      async listToolkitIds(): Promise<readonly string[]> {
+        return [];
+      },
+    };
+
+    const dataSource = createCombinedToolkitDataSource({
+      toolSource,
+      metadataSource,
+    });
+
+    await dataSource.fetchToolkitData("Github");
+    expect(metadataLookupCalls).toBe(1);
+  });
+
+  it("fetchAllToolkitsData performs toolkit-id lookup when metadata map misses", async () => {
+    const toolSource = new InMemoryToolDataSource([
+      createTool({
+        qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@1.0.0",
+      }),
+    ]);
+
+    const lookedUpIds: string[] = [];
+    const metadataSource = {
+      async getToolkitMetadata(
+        toolkitId: string
+      ): Promise<ToolkitMetadata | null> {
+        lookedUpIds.push(toolkitId);
+        return null;
+      },
+      async getAllToolkitsMetadata(): Promise<readonly ToolkitMetadata[]> {
+        return [
+          createMetadata({ id: "Slack", label: "Slack", category: "social" }),
+        ];
+      },
+      async listToolkitIds(): Promise<readonly string[]> {
+        return ["Slack"];
+      },
+    };
+
+    const dataSource = createCombinedToolkitDataSource({
+      toolSource,
+      metadataSource,
+    });
+
+    await dataSource.fetchAllToolkitsData();
+    expect(lookedUpIds).toEqual(["Github"]);
+  });
 });

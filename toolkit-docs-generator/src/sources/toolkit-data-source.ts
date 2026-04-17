@@ -111,11 +111,13 @@ export class CombinedToolkitDataSource implements IToolkitDataSource {
   private async resolveMetadata(
     toolkitId: string,
     tools: readonly ToolDefinition[],
-    directMetadata: ToolkitMetadata | null
+    directMetadata: ToolkitMetadata | null,
+    options?: { readonly allowToolkitIdLookup?: boolean }
   ): Promise<ToolkitMetadata | null> {
-    let metadata =
-      directMetadata ??
-      (await this.metadataSource.getToolkitMetadata(toolkitId));
+    let metadata = directMetadata;
+    if (!metadata && options?.allowToolkitIdLookup) {
+      metadata = await this.metadataSource.getToolkitMetadata(toolkitId);
+    }
 
     // If the toolkit isn't in the Design System under its exact ID, try to match
     // by auth provider for "*Api" toolkits (e.g. MailchimpMarketingApi -> MailchimpApi).
@@ -144,7 +146,8 @@ export class CombinedToolkitDataSource implements IToolkitDataSource {
     const metadata = await this.resolveMetadata(
       toolkitId,
       tools,
-      directMetadata
+      directMetadata,
+      { allowToolkitIdLookup: false }
     );
 
     // Filter tools by version if specified, otherwise keep only the highest
@@ -204,7 +207,8 @@ export class CombinedToolkitDataSource implements IToolkitDataSource {
       const metadata = await this.resolveMetadata(
         toolkitId,
         tools,
-        directMetadata
+        directMetadata,
+        { allowToolkitIdLookup: true }
       );
       result.set(toolkitId, { tools, metadata });
     }

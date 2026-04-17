@@ -118,6 +118,30 @@ describe("getHighestVersion", () => {
     ];
     expect(getHighestVersion(tools)).toBe("1.23");
   });
+
+  it("orders numeric pre-release identifiers numerically", () => {
+    const tools = [
+      createTool("Github.CreateIssue@1.23-rc.2"),
+      createTool("Github.SetStarred@1.23-rc.10"),
+    ];
+    expect(getHighestVersion(tools)).toBe("1.23-rc.10");
+  });
+
+  it("treats non-numeric pre-release identifiers as higher than numeric ones", () => {
+    const tools = [
+      createTool("Github.CreateIssue@1.23-rc.1"),
+      createTool("Github.SetStarred@1.23-rc.beta"),
+    ];
+    expect(getHighestVersion(tools)).toBe("1.23-rc.beta");
+  });
+
+  it("treats longer pre-release identifier lists as newer when prefix matches", () => {
+    const tools = [
+      createTool("Github.CreateIssue@1.23-rc"),
+      createTool("Github.SetStarred@1.23-rc.1"),
+    ];
+    expect(getHighestVersion(tools)).toBe("1.23-rc.1");
+  });
 });
 
 describe("filterToolsByHighestVersion", () => {
@@ -204,5 +228,16 @@ describe("filterToolsByHighestVersion", () => {
     const result = filterToolsByHighestVersion(tools);
     expect(result).toHaveLength(1);
     expect(result[0]?.fullyQualifiedName).toBe("Github.SetStarred@1.23");
+  });
+
+  it("keeps only the highest numeric pre-release", () => {
+    const tools = [
+      createTool("Github.CreateIssue@1.23-rc.2"),
+      createTool("Github.SetStarred@1.23-rc.10"),
+      createTool("Github.ListPullRequests@1.23-rc.1"),
+    ];
+    const result = filterToolsByHighestVersion(tools);
+    expect(result).toHaveLength(1);
+    expect(result[0]?.fullyQualifiedName).toBe("Github.SetStarred@1.23-rc.10");
   });
 });
