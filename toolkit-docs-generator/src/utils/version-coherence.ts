@@ -6,6 +6,59 @@ interface ParsedSemver {
   readonly prerelease: readonly (number | string)[] | null;
 }
 
+const compareCoreVersions = (
+  aCore: readonly number[],
+  bCore: readonly number[]
+): number => {
+  const len = Math.max(aCore.length, bCore.length);
+  for (let i = 0; i < len; i++) {
+    const diff = (aCore[i] ?? 0) - (bCore[i] ?? 0);
+    if (diff !== 0) return diff;
+  }
+  return 0;
+};
+
+const comparePrereleaseIdentifier = (
+  aPart: number | string,
+  bPart: number | string
+): number => {
+  const aIsNumber = typeof aPart === "number";
+  const bIsNumber = typeof bPart === "number";
+  if (aIsNumber && bIsNumber) {
+    return aPart - bPart;
+  }
+  if (aIsNumber && !bIsNumber) return -1;
+  if (!aIsNumber && bIsNumber) return 1;
+  return String(aPart).localeCompare(String(bPart), "en");
+};
+
+const comparePrerelease = (
+  aPrerelease: readonly (number | string)[] | null,
+  bPrerelease: readonly (number | string)[] | null
+): number => {
+  if (!(aPrerelease || bPrerelease)) return 0;
+  if (!aPrerelease && bPrerelease) return 1;
+  if (aPrerelease && !bPrerelease) return -1;
+
+  const prereleaseLen = Math.max(
+    aPrerelease?.length ?? 0,
+    bPrerelease?.length ?? 0
+  );
+  for (let i = 0; i < prereleaseLen; i++) {
+    const aPart = aPrerelease?.[i];
+    const bPart = bPrerelease?.[i];
+
+    if (aPart === undefined && bPart !== undefined) return -1;
+    if (aPart !== undefined && bPart === undefined) return 1;
+    if (aPart === undefined && bPart === undefined) return 0;
+
+    const diff = comparePrereleaseIdentifier(aPart, bPart);
+    if (diff !== 0) return diff;
+  }
+
+  return 0;
+};
+
 /**
  * Parse a semver-ish string into numeric core + optional pre-release parts.
  * Build metadata (+...) is ignored for ordering.
@@ -49,45 +102,9 @@ const parseSemver = (version: string): ParsedSemver => {
 const compareVersions = (a: string, b: string): number => {
   const aSemver = parseSemver(a);
   const bSemver = parseSemver(b);
-  const len = Math.max(aSemver.core.length, bSemver.core.length);
-  for (let i = 0; i < len; i++) {
-    const diff = (aSemver.core[i] ?? 0) - (bSemver.core[i] ?? 0);
-    if (diff !== 0) return diff;
-  }
-
-  const aPrerelease = aSemver.prerelease;
-  const bPrerelease = bSemver.prerelease;
-  if (!(aPrerelease || bPrerelease)) return 0;
-  if (!aPrerelease && bPrerelease) return 1;
-  if (aPrerelease && !bPrerelease) return -1;
-
-  const prereleaseLen = Math.max(
-    aPrerelease?.length ?? 0,
-    bPrerelease?.length ?? 0
-  );
-  for (let i = 0; i < prereleaseLen; i++) {
-    const aPart = aPrerelease?.[i];
-    const bPart = bPrerelease?.[i];
-
-    if (aPart === undefined && bPart !== undefined) return -1;
-    if (aPart !== undefined && bPart === undefined) return 1;
-    if (aPart === undefined && bPart === undefined) return 0;
-
-    const aIsNumber = typeof aPart === "number";
-    const bIsNumber = typeof bPart === "number";
-    if (aIsNumber && bIsNumber) {
-      const diff = (aPart as number) - (bPart as number);
-      if (diff !== 0) return diff;
-      continue;
-    }
-    if (aIsNumber && !bIsNumber) return -1;
-    if (!aIsNumber && bIsNumber) return 1;
-
-    const diff = String(aPart).localeCompare(String(bPart), "en");
-    if (diff !== 0) return diff;
-  }
-
-  return 0;
+  const coreDiff = compareCoreVersions(aSemver.core, bSemver.core);
+  if (coreDiff !== 0) return coreDiff;
+  return comparePrerelease(aSemver.prerelease, bSemver.prerelease);
 };
 
 /**
