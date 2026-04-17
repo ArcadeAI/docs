@@ -110,6 +110,81 @@ describe("getHighestVersion", () => {
     ];
     expect(getHighestVersion(tools)).toBe("4.0.0-beta.1+build.123");
   });
+
+  it("prefers stable release over pre-release with same core version", () => {
+    const tools = [
+      createTool("Github.CreateIssue@1.23-rc.1"),
+      createTool("Github.SetStarred@1.23"),
+    ];
+    expect(getHighestVersion(tools)).toBe("1.23");
+  });
+
+  it("orders numeric pre-release identifiers numerically", () => {
+    const tools = [
+      createTool("Github.CreateIssue@1.23-rc.2"),
+      createTool("Github.SetStarred@1.23-rc.10"),
+    ];
+    expect(getHighestVersion(tools)).toBe("1.23-rc.10");
+  });
+
+  it("treats non-numeric pre-release identifiers as higher than numeric ones", () => {
+    const tools = [
+      createTool("Github.CreateIssue@1.23-rc.1"),
+      createTool("Github.SetStarred@1.23-rc.beta"),
+    ];
+    expect(getHighestVersion(tools)).toBe("1.23-rc.beta");
+  });
+
+  it("treats longer pre-release identifier lists as newer when prefix matches", () => {
+    const tools = [
+      createTool("Github.CreateIssue@1.23-rc"),
+      createTool("Github.SetStarred@1.23-rc.1"),
+    ];
+    expect(getHighestVersion(tools)).toBe("1.23-rc.1");
+  });
+
+  it("distinguishes versions that differ only in the patch component", () => {
+    const tools = [
+      createTool("Github.CreateIssue@1.2.3"),
+      createTool("Github.SetStarred@1.2.4"),
+    ];
+    expect(getHighestVersion(tools)).toBe("1.2.4");
+  });
+
+  it("orders alphanumeric pre-release identifiers by ASCII byte order", () => {
+    // SemVer §11.4.2: alphanumeric identifiers compare by ASCII, not locale.
+    // 'B' (66) < 'a' (97), so "1.0.0-Beta" < "1.0.0-alpha".
+    const tools = [
+      createTool("Github.CreateIssue@1.0.0-Beta"),
+      createTool("Github.SetStarred@1.0.0-alpha"),
+    ];
+    expect(getHighestVersion(tools)).toBe("1.0.0-alpha");
+  });
+
+  it("orders alphanumeric pre-release identifiers when both are non-numeric", () => {
+    const tools = [
+      createTool("Github.CreateIssue@1.0.0-alpha"),
+      createTool("Github.SetStarred@1.0.0-beta"),
+    ];
+    expect(getHighestVersion(tools)).toBe("1.0.0-beta");
+  });
+
+  it("returns null when every tool lacks an @version", () => {
+    const tools = [
+      {
+        ...createTool("X.A@0.0.0"),
+        fullyQualifiedName: "X.A",
+      },
+      {
+        ...createTool("X.B@0.0.0"),
+        fullyQualifiedName: "X.B",
+      },
+    ];
+    // extractVersion defaults missing "@" to "0.0.0", so "highest" is
+    // well-defined here. This test pins that contract so future changes
+    // to extractVersion surface in the coherence layer.
+    expect(getHighestVersion(tools)).toBe("0.0.0");
+  });
 });
 
 describe("filterToolsByHighestVersion", () => {
@@ -186,5 +261,42 @@ describe("filterToolsByHighestVersion", () => {
     expect(result.every((t) => t.fullyQualifiedName.endsWith("@3.1.3"))).toBe(
       true
     );
+  });
+
+  it("drops matching pre-release tools when stable release exists", () => {
+    const tools = [
+      createTool("Github.CreateIssue@1.23-rc.1"),
+      createTool("Github.SetStarred@1.23"),
+    ];
+    const result = filterToolsByHighestVersion(tools);
+    expect(result).toHaveLength(1);
+    expect(result[0]?.fullyQualifiedName).toBe("Github.SetStarred@1.23");
+  });
+
+  it("keeps only the highest numeric pre-release", () => {
+    const tools = [
+      createTool("Github.CreateIssue@1.23-rc.2"),
+      createTool("Github.SetStarred@1.23-rc.10"),
+      createTool("Github.ListPullRequests@1.23-rc.1"),
+    ];
+    const result = filterToolsByHighestVersion(tools);
+    expect(result).toHaveLength(1);
+    expect(result[0]?.fullyQualifiedName).toBe("Github.SetStarred@1.23-rc.10");
+  });
+
+  it("keeps tools with equivalent core versions even when build metadata differs", () => {
+    // Build metadata is ignored by semver precedence, so two tools tagged
+    // `@1.0.0` and `@1.0.0+build.1` are the same release and both survive.
+    const tools = [
+      createTool("Github.CreateIssue@1.0.0"),
+      createTool("Github.SetStarred@1.0.0+build.1"),
+      createTool("Github.ListPullRequests@0.9.0"),
+    ];
+    const result = filterToolsByHighestVersion(tools);
+    expect(result).toHaveLength(2);
+    expect(result.map((t) => t.fullyQualifiedName)).toEqual([
+      "Github.CreateIssue@1.0.0",
+      "Github.SetStarred@1.0.0+build.1",
+    ]);
   });
 });

@@ -10,6 +10,7 @@ import {
   InMemoryMetadataSource,
   InMemoryToolDataSource,
 } from "../../src/sources/in-memory.js";
+import type { IMetadataSource } from "../../src/sources/internal.js";
 import { createCombinedToolkitDataSource } from "../../src/sources/toolkit-data-source.js";
 import type { ToolDefinition, ToolkitMetadata } from "../../src/types/index.js";
 
@@ -276,5 +277,132 @@ describe("CombinedToolkitDataSource", () => {
 
     const result = await dataSource.fetchToolkitData("MailchimpMarketingApi");
     expect(result.metadata?.label).toBe("Mailchimp API");
+  });
+
+  it("should use providerId fallback consistently in fetchAllToolkitsData", async () => {
+    const toolSource = new InMemoryToolDataSource([
+      createTool({
+        qualifiedName: "MailchimpMarketingApi.CreateCampaign",
+        fullyQualifiedName: "MailchimpMarketingApi.CreateCampaign@1.0.0",
+        auth: { providerId: "mailchimp", providerType: "oauth2", scopes: [] },
+      }),
+    ]);
+
+    const metadataSource = new InMemoryMetadataSource([
+      createMetadata({
+        id: "MailchimpApi",
+        label: "Mailchimp API",
+        category: "productivity",
+        type: "arcade_starter",
+      }),
+    ]);
+
+    const dataSource = createCombinedToolkitDataSource({
+      toolSource,
+      metadataSource,
+    });
+
+    const single = await dataSource.fetchToolkitData("MailchimpMarketingApi");
+    const all = await dataSource.fetchAllToolkitsData();
+    const listed = all.get("MailchimpMarketingApi");
+
+    expect(single.metadata?.label).toBe("Mailchimp API");
+    expect(listed?.metadata?.label).toBe("Mailchimp API");
+  });
+
+  it("fetchToolkitData does not re-fetch metadata when direct lookup is already null", async () => {
+    const toolSource = new InMemoryToolDataSource([
+      createTool({
+        qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@1.0.0",
+      }),
+    ]);
+
+    let metadataLookupCalls = 0;
+    const metadataSource = {
+      async getToolkitMetadata(_toolkitId) {
+        metadataLookupCalls += 1;
+        return null;
+      },
+      async getAllToolkitsMetadata() {
+        return [];
+      },
+      async listToolkitIds() {
+        return [];
+      },
+    } satisfies IMetadataSource;
+
+    const dataSource = createCombinedToolkitDataSource({
+      toolSource,
+      metadataSource,
+    });
+
+    await dataSource.fetchToolkitData("Github");
+    expect(metadataLookupCalls).toBe(1);
+  });
+
+  it("fetchAllToolkitsData performs toolkit-id lookup when metadata map misses", async () => {
+    const toolSource = new InMemoryToolDataSource([
+      createTool({
+        qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@1.0.0",
+      }),
+    ]);
+
+    const lookedUpIds: string[] = [];
+    const metadataSource = {
+      async getToolkitMetadata(toolkitId) {
+        lookedUpIds.push(toolkitId);
+        return null;
+      },
+      async getAllToolkitsMetadata() {
+        return [
+          createMetadata({ id: "Slack", label: "Slack", category: "social" }),
+        ];
+      },
+      async listToolkitIds() {
+        return ["Slack"];
+      },
+    } satisfies IMetadataSource;
+
+    const dataSource = createCombinedToolkitDataSource({
+      toolSource,
+      metadataSource,
+    });
+
+    await dataSource.fetchAllToolkitsData();
+    expect(lookedUpIds).toEqual(["Github"]);
+  });
+
+  it("fetchAllToolkitsData does not re-lookup metadata when the map already has a direct hit", async () => {
+    const toolSource = new InMemoryToolDataSource([
+      createTool({
+        qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@1.0.0",
+      }),
+    ]);
+
+    const lookedUpIds: string[] = [];
+    const metadataSource = {
+      async getToolkitMetadata(toolkitId) {
+        lookedUpIds.push(toolkitId);
+        return null;
+      },
+      async getAllToolkitsMetadata() {
+        return [createMetadata()];
+      },
+      async listToolkitIds() {
+        return ["Github"];
+      },
+    } satisfies IMetadataSource;
+
+    const dataSource = createCombinedToolkitDataSource({
+      toolSource,
+      metadataSource,
+    });
+
+    const result = await dataSource.fetchAllToolkitsData();
+    expect(result.get("Github")?.metadata?.label).toBe("GitHub");
+    expect(lookedUpIds).toEqual([]);
   });
 });
