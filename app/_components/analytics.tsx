@@ -16,16 +16,13 @@ const UTM_SOURCE = "docs";
 const DEFAULT_UTM_CAMPAIGN = "docs";
 
 const buildRegisterHref = (utmCampaign: string, utmMedium?: string): string => {
-  const base = getDashboardUrl("register");
-  const separator = base.includes("?") ? "&" : "?";
-  const params = new URLSearchParams({
-    utm_source: UTM_SOURCE,
-    utm_campaign: utmCampaign,
-  });
+  const url = new URL(getDashboardUrl("register"));
+  url.searchParams.set("utm_source", UTM_SOURCE);
+  url.searchParams.set("utm_campaign", utmCampaign);
   if (utmMedium) {
-    params.set("utm_medium", utmMedium);
+    url.searchParams.set("utm_medium", utmMedium);
   }
-  return `${base}${separator}${params.toString()}`;
+  return url.toString();
 };
 
 export const SignupLink = ({
