@@ -19,8 +19,21 @@ test("sitemap lists expected URLs", async () => {
       true
     );
 
-    // Known page should be present
+    // Known static page should be present
     expect(urls).toContain("https://example.test/en/references/changelog");
+
+    // Generated toolkit pages should be present. These are backed by the
+    // dynamic [toolkitId] routes that the old filesystem walk skipped.
+    expect(urls).toContain(
+      "https://example.test/en/resources/integrations/development/firecrawl"
+    );
+    const toolkitUrls = urls.filter((url) =>
+      url.includes("/en/resources/integrations/")
+    );
+    expect(toolkitUrls.length).toBeGreaterThan(10);
+
+    // Dynamic-segment placeholders must never leak into sitemap URLs.
+    expect(urls.every((url) => !url.includes("["))).toBe(true);
 
     // No duplicates
     const duplicates = urls.filter(
