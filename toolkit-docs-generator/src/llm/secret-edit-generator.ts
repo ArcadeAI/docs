@@ -63,7 +63,11 @@ const DEFAULT_SYSTEM_PROMPT =
   "reorder existing sections. Preserve markdown syntax, backticks, tables, " +
   "and code exactly.";
 
-const FENCE_PATTERN = /```(?:markdown|md|text)?\s*([\s\S]*?)```/;
+// Anchored to the start/end of the full string and uses a greedy capture so
+// that inner fenced code blocks inside an edited documentation chunk are
+// preserved. A non-greedy capture would stop at the first inner ``` and
+// silently truncate the rest of the content.
+const FENCE_PATTERN = /^\s*```(?:markdown|md|text)?\s*([\s\S]*)```\s*$/;
 
 const stripOptionalFence = (text: string): string => {
   const match = text.match(FENCE_PATTERN);

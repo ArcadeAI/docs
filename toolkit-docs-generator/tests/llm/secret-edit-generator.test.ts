@@ -35,6 +35,51 @@ describe("LlmSecretEditGenerator.cleanupStaleReferences", () => {
     expect(out).toBe("edited content");
   });
 
+  it("preserves inner fenced code blocks when unwrapping the outer fence", async () => {
+    // The LLM may wrap an edited documentation chunk (which itself
+    // contains a fenced code block) inside an outer markdown fence. A
+    // non-greedy fence regex would stop at the first inner ``` and
+    // silently truncate the rest of the content.
+    const wrappedEdit = [
+      "```markdown",
+      "Setup steps:",
+      "",
+      "```python",
+      "arcade.run(tool='Github.CreateIssue')",
+      "```",
+      "",
+      "Further notes follow.",
+      "```",
+    ].join("\n");
+    const client = fakeClient(wrappedEdit);
+    const editor = new LlmSecretEditGenerator({ client, model: "test" });
+    const out = await editor.cleanupStaleReferences({
+      kind: "documentation_chunk",
+      content: "mentions OLD",
+      removedSecrets: ["OLD"],
+      currentSecrets: ["KEEP"],
+      toolkitLabel: "GitHub",
+    });
+    expect(out).toContain("```python");
+    expect(out).toContain("Further notes follow.");
+  });
+
+  it("leaves non-wrapped content untouched (no outer fence)", async () => {
+    // Response has inner fenced blocks but no outer fence — must pass
+    // through verbatim, not partially matched.
+    const response = "No wrapper.\n\n```js\nconsole.log(1);\n```\nTail text.";
+    const client = fakeClient(response);
+    const editor = new LlmSecretEditGenerator({ client, model: "test" });
+    const out = await editor.cleanupStaleReferences({
+      kind: "documentation_chunk",
+      content: "mentions OLD",
+      removedSecrets: ["OLD"],
+      currentSecrets: ["KEEP"],
+      toolkitLabel: "GitHub",
+    });
+    expect(out).toBe(response);
+  });
+
   it("passes the removed and current secrets into the prompt", async () => {
     const client = fakeClient("ok");
     const editor = new LlmSecretEditGenerator({ client, model: "test" });

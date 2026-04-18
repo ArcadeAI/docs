@@ -1088,8 +1088,16 @@ export class DataMerger {
       return;
     }
 
+    // Order matters: stale cleanup runs first, then coverage gaps are
+    // re-detected against the edited summary. If cleanup accidentally
+    // dropped a passage that incidentally mentioned a current secret,
+    // the fresh scan notices and the editor restores it.
     await this.applyStaleRefCleanup(result, issues);
-    await this.applyCoverageFill(result, issues);
+    const postCleanupIssues = detectSecretCoherenceIssues(
+      result.toolkit,
+      previousToolkit
+    );
+    await this.applyCoverageFill(result, postCleanupIssues);
   }
 
   private appendCoherenceWarnings(

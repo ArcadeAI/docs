@@ -1276,6 +1276,82 @@ describe("DataMerger", () => {
       ).toBe(true);
     });
 
+    it("passes the post-cleanup summary to the coverage editor, not the original", async () => {
+      // Ordering guarantee: applyStaleRefCleanup runs before the coverage
+      // scan is re-computed. We prove this by making cleanup mutate a
+      // chunk (unrelated to summary), then verifying the coverage editor
+      // receives the current-summary content rather than a pre-cleanup
+      // snapshot. This also demonstrates that re-detection uses the
+      // updated toolkit state.
+      const toolWithSecrets = createTool({
+        name: "CreateIssue",
+        qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@1.0.0",
+        auth: { providerId: "github", providerType: "oauth2", scopes: [] },
+        secrets: ["GITHUB_SERVER_URL"],
+      });
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([toolWithSecrets]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
+      });
+      const previous = await mergeToolkit(
+        "Github",
+        [
+          createTool({
+            ...toolWithSecrets,
+            secrets: ["GITHUB_SERVER_URL", "OLD_SECRET"],
+          }),
+        ],
+        githubMetadata,
+        null,
+        createStubGenerator()
+      );
+      previous.toolkit.documentationChunks = [
+        {
+          type: "markdown",
+          location: "header",
+          position: "after",
+          content: "Legacy note about OLD_SECRET.",
+        },
+      ];
+
+      const cleanupSpy = vi.fn(async () => "Edited chunk.");
+      const coverageSpy = vi.fn(
+        async (input: { content: string }) => `${input.content} [link]`
+      );
+      const secretEditGenerator: ISecretEditGenerator = {
+        cleanupStaleReferences: cleanupSpy,
+        fillCoverageGaps: coverageSpy,
+      };
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        toolkitSummaryGenerator: createStubSummaryGenerator("Stub summary"),
+        secretEditGenerator,
+        previousToolkits: new Map([["github", previous.toolkit]]),
+      });
+
+      const result = await merger.mergeToolkit("Github");
+
+      expect(cleanupSpy).toHaveBeenCalledTimes(1);
+      // Coverage editor runs because the stub summary does not mention
+      // GITHUB_SERVER_URL. It must see the current summary state — post-
+      // cleanup — not any snapshot taken before cleanup.
+      expect(coverageSpy).toHaveBeenCalledTimes(1);
+      const coverageCall = coverageSpy.mock.calls[0]?.[0] as {
+        content: string;
+        missingSecretNames: string[];
+      };
+      // The content passed in was the post-cleanup summary (unchanged by
+      // cleanup in this scenario, since the stale ref was in a chunk).
+      expect(coverageCall.content).toBe("Stub summary (Github)");
+      expect(coverageCall.missingSecretNames).toContain("GITHUB_SERVER_URL");
+      // After the coverage edit, the summary should reflect the editor's
+      // output built on top of the post-cleanup content.
+      expect(result.toolkit.summary).toBe("Stub summary (Github) [link]");
+    });
+
     it("emits warnings but no LLM calls when no editor is configured", async () => {
       const toolWithSecret = createTool({
         name: "CreateIssue",
