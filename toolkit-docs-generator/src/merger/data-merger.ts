@@ -963,6 +963,10 @@ export class DataMerger {
     }
 
     if (!this.toolkitSummaryGenerator) {
+      // Preserve previous summary when no LLM generator is available
+      if (previousToolkit?.summary) {
+        result.toolkit.summary = previousToolkit.summary;
+      }
       return;
     }
 
@@ -980,6 +984,10 @@ export class DataMerger {
       result.warnings.push(
         `Summary generation failed for ${result.toolkit.id}: ${message}`
       );
+      // Preserve previous summary when LLM generation fails
+      if (previousToolkit?.summary) {
+        result.toolkit.summary = previousToolkit.summary;
+      }
     }
   }
 
