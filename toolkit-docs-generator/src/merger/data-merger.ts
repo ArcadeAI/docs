@@ -467,6 +467,31 @@ const getToolDocumentationChunks = (
   return fromPrevious;
 };
 
+/**
+ * Mark the toolkit's summary as stale — the summary is being carried forward
+ * from a previous run even though the toolkit signature changed (regen was
+ * skipped or failed). The CI check in tests/stale-summaries.test.ts surfaces
+ * these toolkits so a human rerun or fix can follow.
+ */
+export const STALE_SUMMARY_WARNING_PREFIX = "Summary is stale for";
+
+const markSummaryStale = (
+  toolkit: MergedToolkit,
+  reason: string,
+  warnings: string[]
+): void => {
+  toolkit.summaryStale = true;
+  toolkit.summaryStaleReason = reason;
+  warnings.push(
+    `${STALE_SUMMARY_WARNING_PREFIX} ${toolkit.id}: ${reason}. Previous summary carried forward.`
+  );
+};
+
+const clearStaleSummaryFlags = (toolkit: MergedToolkit): void => {
+  toolkit.summaryStale = undefined;
+  toolkit.summaryStaleReason = undefined;
+};
+
 const isOverviewChunk = (chunk: DocumentationChunk): boolean =>
   chunk.location === "header" &&
   chunk.position === "before" &&
@@ -950,6 +975,7 @@ export class DataMerger {
     if (hasToolkitOverviewChunk(result.toolkit)) {
       // Keep overview as the canonical toolkit-level narrative.
       result.toolkit.summary = undefined;
+      clearStaleSummaryFlags(result.toolkit);
       return;
     }
 
@@ -957,7 +983,12 @@ export class DataMerger {
       const currentSignature = buildToolkitSummarySignature(result.toolkit);
       const previousSignature = buildToolkitSummarySignature(previousToolkit);
       if (currentSignature === previousSignature) {
+        // Signature matches — the previous summary still accurately describes
+        // the toolkit, so reuse it verbatim and treat it as fresh regardless
+        // of the previous staleness flag (the signature itself is proof of
+        // freshness here).
         result.toolkit.summary = previousToolkit.summary;
+        clearStaleSummaryFlags(result.toolkit);
         return;
       }
     }
@@ -968,11 +999,17 @@ export class DataMerger {
       // or previously generated content on every run that disables the LLM.
       if (previousToolkit?.summary) {
         result.toolkit.summary = previousToolkit.summary;
+        markSummaryStale(
+          result.toolkit,
+          "llm_generator_unavailable",
+          result.warnings
+        );
       }
       return;
     }
 
     if (result.toolkit.summary) {
+      clearStaleSummaryFlags(result.toolkit);
       return;
     }
 
@@ -981,6 +1018,7 @@ export class DataMerger {
         result.toolkit
       );
       result.toolkit.summary = summary;
+      clearStaleSummaryFlags(result.toolkit);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       result.warnings.push(
@@ -992,6 +1030,11 @@ export class DataMerger {
       // instead of a blank overview.
       if (previousToolkit?.summary) {
         result.toolkit.summary = previousToolkit.summary;
+        markSummaryStale(
+          result.toolkit,
+          "llm_generation_failed",
+          result.warnings
+        );
       }
     }
   }
