@@ -33,6 +33,7 @@ import {
   createLlmClient,
   type LlmClient,
   type LlmProvider,
+  LlmSecretEditGenerator,
   LlmToolExampleGenerator,
   LlmToolkitSummaryGenerator,
 } from "../llm/index.js";
@@ -361,6 +362,104 @@ const resolveLlmConfig = (
       ? { systemPrompt: options.llmSystemPrompt }
       : {}),
   };
+};
+
+interface SecretEditorCliOptions {
+  llmEditorProvider?: string;
+  llmEditorModel?: string;
+  llmEditorApiKey?: string;
+  llmEditorBaseUrl?: string;
+  llmEditorTemperature?: number;
+  llmEditorMaxTokens?: number;
+  llmEditorMaxRetries?: number;
+  skipSecretCoherence?: boolean;
+}
+
+const DEFAULT_EDITOR_MAX_TOKENS = 4096;
+
+const resolveEditorApiKey = (
+  provider: LlmProvider,
+  explicit: string | undefined
+): string | undefined => {
+  if (explicit) return explicit;
+  if (process.env.LLM_EDITOR_API_KEY) return process.env.LLM_EDITOR_API_KEY;
+  if (provider === "anthropic") {
+    return process.env.ANTHROPIC_API_KEY;
+  }
+  return process.env.OPENAI_API_KEY;
+};
+
+/**
+ * Build an LLM secret-edit generator from CLI options + env. Returns
+ * undefined when the editor is disabled or unconfigured; callers fall back
+ * to scanner-only warnings in that case.
+ */
+const resolveSecretEditGenerator = (
+  options: SecretEditorCliOptions,
+  verbose: boolean
+): LlmSecretEditGenerator | undefined => {
+  if (options.skipSecretCoherence) {
+    return;
+  }
+
+  const providerRaw =
+    options.llmEditorProvider ?? process.env.LLM_EDITOR_PROVIDER;
+  const model = options.llmEditorModel ?? process.env.LLM_EDITOR_MODEL;
+
+  // Editor stays opt-in: both provider and model must be explicitly set.
+  if (!(providerRaw && model)) {
+    return;
+  }
+
+  const provider = resolveLlmProvider(providerRaw);
+  const apiKey = resolveEditorApiKey(provider, options.llmEditorApiKey);
+  if (!apiKey) {
+    // Fail open: unconfigured editor degrades to scanner-only warnings
+    // instead of crashing the whole generation run. CI and local scripts
+    // often point at the same flag set and shouldn't break when the
+    // editor's API key is simply absent.
+    if (verbose) {
+      console.log(
+        chalk.yellow(
+          `⚠ Secret-coherence editor skipped: no API key found for provider ${provider}.`
+        )
+      );
+    }
+    return;
+  }
+
+  const onRetry = verbose
+    ? (attempt: number, error: Error, delayMs: number) => {
+        console.log(
+          chalk.yellow(
+            `  ⚠️  Secret editor call failed (attempt ${attempt}), retrying in ${delayMs}ms: ${error.message}`
+          )
+        );
+      }
+    : undefined;
+
+  const client = createLlmClient({
+    provider,
+    config: {
+      apiKey,
+      ...(options.llmEditorBaseUrl
+        ? { baseUrl: options.llmEditorBaseUrl }
+        : {}),
+      retry: {
+        maxRetries: options.llmEditorMaxRetries ?? 3,
+        onRetry,
+      },
+    },
+  });
+
+  return new LlmSecretEditGenerator({
+    client,
+    model,
+    ...(options.llmEditorTemperature !== undefined
+      ? { temperature: options.llmEditorTemperature }
+      : {}),
+    maxTokens: options.llmEditorMaxTokens ?? DEFAULT_EDITOR_MAX_TOKENS,
+  });
 };
 
 const resolveApiSource = (options: {
@@ -856,6 +955,39 @@ program
     "Path to a .txt file with toolkit IDs to skip during generation (one per line)"
   )
   .option("--verbose", "Enable verbose logging", false)
+  .option(
+    "--llm-editor-provider <provider>",
+    "Secret-coherence editor LLM provider (openai|anthropic). Defaults to LLM_EDITOR_PROVIDER env."
+  )
+  .option(
+    "--llm-editor-model <model>",
+    "Secret-coherence editor LLM model (e.g. claude-sonnet-4-6). Defaults to LLM_EDITOR_MODEL env."
+  )
+  .option(
+    "--llm-editor-api-key <key>",
+    "Secret-coherence editor API key. Falls back to LLM_EDITOR_API_KEY or the provider-specific env var."
+  )
+  .option("--llm-editor-base-url <url>", "Secret-coherence editor LLM base URL")
+  .option(
+    "--llm-editor-temperature <number>",
+    "Secret-coherence editor temperature",
+    (value) => Number.parseFloat(value)
+  )
+  .option(
+    "--llm-editor-max-tokens <number>",
+    "Secret-coherence editor max tokens (default: 4096)",
+    (value) => Number.parseInt(value, 10)
+  )
+  .option(
+    "--llm-editor-max-retries <number>",
+    "Secret-coherence editor max retry attempts (default: 3)",
+    (value) => Number.parseInt(value, 10)
+  )
+  .option(
+    "--skip-secret-coherence",
+    "Disable the secret-coherence scan and edit step",
+    false
+  )
   .action(
     async (options: {
       providers?: string;
@@ -897,6 +1029,14 @@ program
       excludeFile?: string;
       ignoreFile?: string;
       verbose: boolean;
+      llmEditorProvider?: string;
+      llmEditorModel?: string;
+      llmEditorApiKey?: string;
+      llmEditorBaseUrl?: string;
+      llmEditorTemperature?: number;
+      llmEditorMaxTokens?: number;
+      llmEditorMaxRetries?: number;
+      skipSecretCoherence?: boolean;
       // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: legacy CLI flow
     }) => {
       const spinner = ora("Parsing input...").start();
@@ -1078,6 +1218,27 @@ program
           }
           toolkitSummaryGenerator = new LlmToolkitSummaryGenerator(llmConfig);
         }
+
+        const secretEditGenerator = resolveSecretEditGenerator(
+          options,
+          options.verbose
+        );
+        if (options.verbose) {
+          if (secretEditGenerator) {
+            console.log(
+              chalk.dim(
+                `Secret-coherence editor enabled (model: ${options.llmEditorModel ?? process.env.LLM_EDITOR_MODEL})`
+              )
+            );
+          } else if (!options.skipSecretCoherence) {
+            console.log(
+              chalk.dim(
+                "Secret-coherence editor not configured; scanners will still emit warnings."
+              )
+            );
+          }
+        }
+
         const previousOutputDir = options.forceRegenerate
           ? undefined
           : (options.previousOutput ??
@@ -1340,6 +1501,7 @@ program
           customSectionsSource,
           ...(toolExampleGenerator ? { toolExampleGenerator } : {}),
           ...(toolkitSummaryGenerator ? { toolkitSummaryGenerator } : {}),
+          ...(secretEditGenerator ? { secretEditGenerator } : {}),
           ...(previousToolkits ? { previousToolkits } : {}),
           ...(options.llmConcurrency
             ? { llmConcurrency: options.llmConcurrency }
@@ -1468,6 +1630,7 @@ program
               customSectionsSource,
               ...(toolExampleGenerator ? { toolExampleGenerator } : {}),
               ...(toolkitSummaryGenerator ? { toolkitSummaryGenerator } : {}),
+              ...(secretEditGenerator ? { secretEditGenerator } : {}),
               ...(previousToolkits ? { previousToolkits } : {}),
               ...(options.llmConcurrency
                 ? { llmConcurrency: options.llmConcurrency }
@@ -1812,6 +1975,39 @@ program
     "Path to a .txt file with toolkit IDs to skip during generation (one per line)"
   )
   .option("--verbose", "Enable verbose logging", false)
+  .option(
+    "--llm-editor-provider <provider>",
+    "Secret-coherence editor LLM provider (openai|anthropic). Defaults to LLM_EDITOR_PROVIDER env."
+  )
+  .option(
+    "--llm-editor-model <model>",
+    "Secret-coherence editor LLM model (e.g. claude-sonnet-4-6). Defaults to LLM_EDITOR_MODEL env."
+  )
+  .option(
+    "--llm-editor-api-key <key>",
+    "Secret-coherence editor API key. Falls back to LLM_EDITOR_API_KEY or the provider-specific env var."
+  )
+  .option("--llm-editor-base-url <url>", "Secret-coherence editor LLM base URL")
+  .option(
+    "--llm-editor-temperature <number>",
+    "Secret-coherence editor temperature",
+    (value) => Number.parseFloat(value)
+  )
+  .option(
+    "--llm-editor-max-tokens <number>",
+    "Secret-coherence editor max tokens (default: 4096)",
+    (value) => Number.parseInt(value, 10)
+  )
+  .option(
+    "--llm-editor-max-retries <number>",
+    "Secret-coherence editor max retry attempts (default: 3)",
+    (value) => Number.parseInt(value, 10)
+  )
+  .option(
+    "--skip-secret-coherence",
+    "Disable the secret-coherence scan and edit step",
+    false
+  )
   .action(
     async (options: {
       output: string;
@@ -1848,6 +2044,14 @@ program
       ignoreFile?: string;
       requireComplete: boolean;
       verbose: boolean;
+      llmEditorProvider?: string;
+      llmEditorModel?: string;
+      llmEditorApiKey?: string;
+      llmEditorBaseUrl?: string;
+      llmEditorTemperature?: number;
+      llmEditorMaxTokens?: number;
+      llmEditorMaxRetries?: number;
+      skipSecretCoherence?: boolean;
       // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: legacy CLI flow
     }) => {
       const spinner = ora("Initializing...").start();
@@ -1929,6 +2133,27 @@ program
           }
           toolkitSummaryGenerator = new LlmToolkitSummaryGenerator(llmConfig);
         }
+
+        const secretEditGenerator = resolveSecretEditGenerator(
+          options,
+          options.verbose
+        );
+        if (options.verbose) {
+          if (secretEditGenerator) {
+            console.log(
+              chalk.dim(
+                `Secret-coherence editor enabled (model: ${options.llmEditorModel ?? process.env.LLM_EDITOR_MODEL})`
+              )
+            );
+          } else if (!options.skipSecretCoherence) {
+            console.log(
+              chalk.dim(
+                "Secret-coherence editor not configured; scanners will still emit warnings."
+              )
+            );
+          }
+        }
+
         const previousOutputDir = options.forceRegenerate
           ? undefined
           : (options.previousOutput ??
@@ -2127,6 +2352,7 @@ program
             customSectionsSource,
             ...(toolExampleGenerator ? { toolExampleGenerator } : {}),
             ...(toolkitSummaryGenerator ? { toolkitSummaryGenerator } : {}),
+            ...(secretEditGenerator ? { secretEditGenerator } : {}),
             ...(previousToolkits ? { previousToolkits } : {}),
             ...(options.llmConcurrency
               ? { llmConcurrency: options.llmConcurrency }

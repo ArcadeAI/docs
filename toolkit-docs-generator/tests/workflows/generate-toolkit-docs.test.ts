@@ -36,3 +36,11 @@ test("porter workflow generates docs and opens a PR", () => {
   expect(workflowContents).toContain("[AUTO] Adding MCP Servers docs update");
   expect(workflowContents).toContain("pull-requests: write");
 });
+
+test("porter workflow wires the secret-coherence editor", () => {
+  expect(workflowContents).toContain("--llm-editor-provider anthropic");
+  expect(workflowContents).toContain("--llm-editor-model");
+  expect(workflowContents).toContain("--llm-editor-api-key");
+  expect(workflowContents).toContain("ANTHROPIC_API_KEY");
+  expect(workflowContents).toContain("claude-sonnet-4-6");
+});

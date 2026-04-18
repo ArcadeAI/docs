@@ -4,7 +4,8 @@
  * These tests use in-memory implementations (NOT mocks) to verify
  * the merge logic works correctly.
  */
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import type { ISecretEditGenerator } from "../../src/llm/secret-edit-generator.js";
 import {
   computeAllScopes,
   DataMerger,
@@ -1183,6 +1184,148 @@ describe("DataMerger", () => {
       ).toBe(true);
       expect(countingSummary.getCalls()).toBe(0);
       expect(result.toolkit.summary).toBeUndefined();
+    });
+
+    it("runs the secret-coherence editor when a removed secret still appears in a toolkit documentation chunk", async () => {
+      const toolWithSecret = createTool({
+        name: "CreateIssue",
+        qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@1.0.0",
+        auth: { providerId: "github", providerType: "oauth2", scopes: [] },
+        secrets: ["GITHUB_SERVER_URL"],
+      });
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([toolWithSecret]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
+      });
+
+      const previousWithOldSecret = await mergeToolkit(
+        "Github",
+        [
+          createTool({
+            ...toolWithSecret,
+            secrets: [
+              "GITHUB_SERVER_URL",
+              "GITHUB_CLASSIC_PERSONAL_ACCESS_TOKEN",
+            ],
+          }),
+        ],
+        githubMetadata,
+        null,
+        createStubGenerator()
+      );
+      // Put the stale reference inside a toolkit-level doc chunk — chunks
+      // persist verbatim across runs, unlike the summary which gets
+      // regenerated when the signature changes.
+      previousWithOldSecret.toolkit.documentationChunks = [
+        {
+          type: "section",
+          location: "before_available_tools",
+          position: "after",
+          content:
+            "| Secret | Required For |\n| `GITHUB_CLASSIC_PERSONAL_ACCESS_TOKEN` | Notifications |",
+        },
+      ];
+
+      const cleanupSpy = vi.fn(
+        async () =>
+          "| Secret | Required For |\n| `GITHUB_SERVER_URL` | All tools |"
+      );
+      const coverageSpy = vi.fn(
+        async (input: { content: string }) =>
+          `${input.content}\n\n[config link]`
+      );
+      const secretEditGenerator: ISecretEditGenerator = {
+        cleanupStaleReferences: cleanupSpy,
+        fillCoverageGaps: coverageSpy,
+      };
+
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        toolkitSummaryGenerator: createStubSummaryGenerator("Stub summary"),
+        secretEditGenerator,
+        previousToolkits: new Map([["github", previousWithOldSecret.toolkit]]),
+      });
+
+      const result = await merger.mergeToolkit("Github");
+
+      expect(cleanupSpy).toHaveBeenCalledTimes(1);
+      const cleanupCall = cleanupSpy.mock.calls[0]?.[0] as {
+        removedSecrets: string[];
+        kind: string;
+      };
+      expect(cleanupCall.removedSecrets).toEqual([
+        "GITHUB_CLASSIC_PERSONAL_ACCESS_TOKEN",
+      ]);
+      expect(cleanupCall.kind).toBe("documentation_chunk");
+      // The chunk content in the result reflects the editor output.
+      expect(
+        result.toolkit.documentationChunks[0]?.content.includes(
+          "GITHUB_CLASSIC_PERSONAL_ACCESS_TOKEN"
+        )
+      ).toBe(false);
+      expect(result.toolkit.documentationChunks[0]?.content).toContain(
+        "GITHUB_SERVER_URL"
+      );
+      expect(
+        result.warnings.some((warning) =>
+          warning.includes("Stale secret reference")
+        )
+      ).toBe(true);
+    });
+
+    it("emits warnings but no LLM calls when no editor is configured", async () => {
+      const toolWithSecret = createTool({
+        name: "CreateIssue",
+        qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@1.0.0",
+        auth: { providerId: "github", providerType: "oauth2", scopes: [] },
+        secrets: ["GITHUB_SERVER_URL"],
+      });
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([toolWithSecret]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
+      });
+      const previousWithOldSecret = await mergeToolkit(
+        "Github",
+        [
+          createTool({
+            ...toolWithSecret,
+            secrets: ["GITHUB_SERVER_URL", "OLD_SECRET"],
+          }),
+        ],
+        githubMetadata,
+        null,
+        createStubGenerator()
+      );
+      previousWithOldSecret.toolkit.documentationChunks = [
+        {
+          type: "markdown",
+          location: "header",
+          position: "after",
+          content: "Still references OLD_SECRET for legacy flows.",
+        },
+      ];
+
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        toolkitSummaryGenerator: createStubSummaryGenerator("Stub summary"),
+        previousToolkits: new Map([["github", previousWithOldSecret.toolkit]]),
+      });
+
+      const result = await merger.mergeToolkit("Github");
+
+      expect(
+        result.warnings.some(
+          (warning) =>
+            warning.includes("Stale secret reference") &&
+            warning.includes("OLD_SECRET")
+        )
+      ).toBe(true);
     });
 
     it("reuses previous examples when the tool is unchanged", async () => {

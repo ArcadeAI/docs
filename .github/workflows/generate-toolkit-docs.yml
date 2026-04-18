@@ -57,6 +57,9 @@ jobs:
             --llm-provider openai \
             --llm-model "$OPENAI_MODEL" \
             --llm-api-key "$OPENAI_API_KEY" \
+            --llm-editor-provider anthropic \
+            --llm-editor-model "$ANTHROPIC_EDITOR_MODEL" \
+            --llm-editor-api-key "$ANTHROPIC_API_KEY" \
             --toolkit-concurrency 8 \
             --llm-concurrency 15 \
             --exclude-file ./excluded-toolkits.txt \
@@ -68,6 +71,11 @@ jobs:
           ENGINE_API_KEY: ${{ secrets.ENGINE_API_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENAI_MODEL: ${{ secrets.OPENAI_MODEL || 'gpt-4o-mini' }}
+          # Stronger model for the secret-coherence editor. Keeps
+          # stale-secret cleanup precise instead of re-summarizing the whole
+          # artifact (which gpt-4o-mini tends to do).
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_EDITOR_MODEL: ${{ secrets.ANTHROPIC_EDITOR_MODEL || 'claude-sonnet-4-6' }}
 
       - name: Sync toolkit sidebar navigation
         run: pnpm dlx tsx toolkit-docs-generator/scripts/sync-toolkit-sidebar.ts --remove-empty-sections=false --verbose
