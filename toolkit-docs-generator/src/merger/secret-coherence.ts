@@ -20,6 +20,15 @@ export const ARCADE_SECRETS_DOC_URL =
 export const ARCADE_SECRETS_DASHBOARD_URL =
   "https://api.arcade.dev/dashboard/auth/secrets";
 
+/**
+ * Base URL for Arcade's per-provider OAuth docs. Specific provider pages
+ * live at `${base}/<providerId>` — e.g. `/github`, `/google`, `/atlassian`.
+ * Used by the summary prompt so OAuth sections can link out instead of
+ * repeating scope lists that would drift from the provider page.
+ */
+export const ARCADE_AUTH_PROVIDERS_BASE_URL =
+  "https://docs.arcade.dev/en/references/auth-providers";
+
 const SECRET_REFERENCE_URLS: readonly string[] = [
   ARCADE_SECRETS_DOC_URL,
   ARCADE_SECRETS_DASHBOARD_URL,

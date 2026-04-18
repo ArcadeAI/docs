@@ -1,5 +1,6 @@
 import type { ToolkitSummaryGenerator } from "../merger/data-merger.js";
 import {
+  ARCADE_AUTH_PROVIDERS_BASE_URL,
   ARCADE_SECRETS_DASHBOARD_URL,
   ARCADE_SECRETS_DOC_URL,
 } from "../merger/secret-coherence.js";
@@ -35,13 +36,12 @@ const formatAuth = (toolkit: MergedToolkit): string => {
     return "none";
   }
 
-  const scopes =
-    toolkit.auth.allScopes.length > 0
-      ? toolkit.auth.allScopes.join(", ")
-      : "None";
   const provider = toolkit.auth.providerId ?? "unknown";
 
-  return `${toolkit.auth.type}; provider: ${provider}; scopes: ${scopes}`;
+  // Scopes are intentionally omitted from the prompt: the summary should
+  // not re-list them — it points readers at the per-provider Arcade docs
+  // page where scopes live and stay in sync with the source of truth.
+  return `${toolkit.auth.type}; provider: ${provider}`;
 };
 
 const collectSecrets = (tools: MergedTool[]) => {
@@ -76,7 +76,7 @@ const buildPrompt = (toolkit: MergedToolkit): string => {
     "Requirements:",
     "- Start with 1 to 2 sentences that explain the provider and what the toolkit enables.",
     "- Add a **Capabilities** section with 3 to 6 bullets summarizing shared capabilities (group tools by theme; do not list tools one by one).",
-    "- If auth type is oauth2 or mixed, add an **OAuth** section with provider and representative scopes.",
+    `- If auth type is oauth2 or mixed, add an **OAuth** section that names the provider and links to the Arcade provider docs at ${ARCADE_AUTH_PROVIDERS_BASE_URL}/<providerId> (use the OAuth provider ID supplied in the Auth line below as the slug). Do NOT list scopes — the provider page already documents them and repeating scopes here drifts.`,
     "- If auth type is api_key or mixed, mention API key usage under **OAuth** or a dedicated heading.",
     `- If any secrets exist, add a **Secrets** section. List every secret by its exact name in backticks. For each secret, give a factual explanation of what it is and how a developer obtains it from the provider — use as much detail as the secret actually needs (a short URL override may be one line; a scoped API key may need several sentences naming the provider dashboard page, required scopes/permissions, and any account tier). When possible include an inline markdown link to the provider's own documentation page that tells the reader how to create/retrieve that specific secret. If you do not know the provider's docs URL, omit the link rather than inventing one. End the section with the Arcade config docs link: ${ARCADE_SECRETS_DOC_URL} (and optionally mention ${ARCADE_SECRETS_DASHBOARD_URL}).`,
     "- Use Markdown. Developer-focused. Say 'Arcade' (never 'Arcade AI').",
