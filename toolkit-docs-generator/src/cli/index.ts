@@ -397,6 +397,19 @@ const resolveEditorApiKey = (
 };
 
 /**
+ * Resolve the editor model from CLI options, then from env vars in
+ * documented precedence order. Kept as a shared helper so the verbose
+ * log in each `generate` action displays the same model that
+ * resolveSecretEditGenerator will actually use.
+ */
+const resolveEditorModel = (options: {
+  llmEditorModel?: string;
+}): string | undefined =>
+  options.llmEditorModel ??
+  process.env.LLM_EDITOR_MODEL ??
+  process.env.ANTHROPIC_EDITOR_MODEL;
+
+/**
  * Build an LLM secret-edit generator from CLI options + env. Returns
  * undefined when the editor is disabled or unconfigured; callers fall back
  * to scanner-only warnings in that case.
@@ -411,7 +424,7 @@ const resolveSecretEditGenerator = (
 
   const providerRaw =
     options.llmEditorProvider ?? process.env.LLM_EDITOR_PROVIDER;
-  const model = options.llmEditorModel ?? process.env.LLM_EDITOR_MODEL;
+  const model = resolveEditorModel(options);
 
   // Editor stays opt-in: both provider and model must be explicitly set.
   if (!(providerRaw && model)) {
@@ -968,7 +981,7 @@ program
   )
   .option(
     "--llm-editor-model <model>",
-    "Secret-coherence editor LLM model (e.g. claude-sonnet-4-6). Defaults to LLM_EDITOR_MODEL env."
+    "Secret-coherence editor LLM model (e.g. claude-sonnet-4-6). Defaults to LLM_EDITOR_MODEL or ANTHROPIC_EDITOR_MODEL env."
   )
   .option(
     "--llm-editor-api-key <key>",
@@ -1234,7 +1247,7 @@ program
           if (secretEditGenerator) {
             console.log(
               chalk.dim(
-                `Secret-coherence editor enabled (model: ${options.llmEditorModel ?? process.env.LLM_EDITOR_MODEL})`
+                `Secret-coherence editor enabled (model: ${resolveEditorModel(options)})`
               )
             );
           } else if (!options.skipSecretCoherence) {
@@ -1509,6 +1522,7 @@ program
           ...(toolExampleGenerator ? { toolExampleGenerator } : {}),
           ...(toolkitSummaryGenerator ? { toolkitSummaryGenerator } : {}),
           ...(secretEditGenerator ? { secretEditGenerator } : {}),
+          ...(options.skipSecretCoherence ? { skipSecretCoherence: true } : {}),
           ...(previousToolkits ? { previousToolkits } : {}),
           ...(options.llmConcurrency
             ? { llmConcurrency: options.llmConcurrency }
@@ -1638,6 +1652,9 @@ program
               ...(toolExampleGenerator ? { toolExampleGenerator } : {}),
               ...(toolkitSummaryGenerator ? { toolkitSummaryGenerator } : {}),
               ...(secretEditGenerator ? { secretEditGenerator } : {}),
+              ...(options.skipSecretCoherence
+                ? { skipSecretCoherence: true }
+                : {}),
               ...(previousToolkits ? { previousToolkits } : {}),
               ...(options.llmConcurrency
                 ? { llmConcurrency: options.llmConcurrency }
@@ -1988,7 +2005,7 @@ program
   )
   .option(
     "--llm-editor-model <model>",
-    "Secret-coherence editor LLM model (e.g. claude-sonnet-4-6). Defaults to LLM_EDITOR_MODEL env."
+    "Secret-coherence editor LLM model (e.g. claude-sonnet-4-6). Defaults to LLM_EDITOR_MODEL or ANTHROPIC_EDITOR_MODEL env."
   )
   .option(
     "--llm-editor-api-key <key>",
@@ -2149,7 +2166,7 @@ program
           if (secretEditGenerator) {
             console.log(
               chalk.dim(
-                `Secret-coherence editor enabled (model: ${options.llmEditorModel ?? process.env.LLM_EDITOR_MODEL})`
+                `Secret-coherence editor enabled (model: ${resolveEditorModel(options)})`
               )
             );
           } else if (!options.skipSecretCoherence) {
@@ -2360,6 +2377,9 @@ program
             ...(toolExampleGenerator ? { toolExampleGenerator } : {}),
             ...(toolkitSummaryGenerator ? { toolkitSummaryGenerator } : {}),
             ...(secretEditGenerator ? { secretEditGenerator } : {}),
+            ...(options.skipSecretCoherence
+              ? { skipSecretCoherence: true }
+              : {}),
             ...(previousToolkits ? { previousToolkits } : {}),
             ...(options.llmConcurrency
               ? { llmConcurrency: options.llmConcurrency }

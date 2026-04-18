@@ -1404,6 +1404,71 @@ describe("DataMerger", () => {
       ).toBe(true);
     });
 
+    it("skipSecretCoherence suppresses both the edit step and the scan warnings", async () => {
+      // --skip-secret-coherence is documented to disable the entire
+      // step. That means no LLM edits AND no coherence warnings in the
+      // run log. A stale secret reference in a chunk must pass through
+      // without any signal to the run log.
+      const toolWithSecret = createTool({
+        name: "CreateIssue",
+        qualifiedName: "Github.CreateIssue",
+        fullyQualifiedName: "Github.CreateIssue@1.0.0",
+        auth: { providerId: "github", providerType: "oauth2", scopes: [] },
+        secrets: ["GITHUB_SERVER_URL"],
+      });
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([toolWithSecret]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
+      });
+      const previous = await mergeToolkit(
+        "Github",
+        [
+          createTool({
+            ...toolWithSecret,
+            secrets: ["GITHUB_SERVER_URL", "OLD_SECRET"],
+          }),
+        ],
+        githubMetadata,
+        null,
+        createStubGenerator()
+      );
+      previous.toolkit.documentationChunks = [
+        {
+          type: "markdown",
+          location: "header",
+          position: "after",
+          content: "Still references OLD_SECRET for legacy flows.",
+        },
+      ];
+
+      const cleanupSpy = vi.fn(async () => "unreached");
+      const coverageSpy = vi.fn(
+        async (input: { content: string }) => input.content
+      );
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        toolkitSummaryGenerator: createStubSummaryGenerator("Stub"),
+        secretEditGenerator: {
+          cleanupStaleReferences: cleanupSpy,
+          fillCoverageGaps: coverageSpy,
+        },
+        skipSecretCoherence: true,
+        previousToolkits: new Map([["github", previous.toolkit]]),
+      });
+
+      const result = await merger.mergeToolkit("Github");
+
+      expect(cleanupSpy).not.toHaveBeenCalled();
+      expect(coverageSpy).not.toHaveBeenCalled();
+      expect(
+        result.warnings.some((warning) =>
+          warning.includes("Stale secret reference")
+        )
+      ).toBe(false);
+    });
+
     it("reuses previous examples when the tool is unchanged", async () => {
       const toolkitDataSource = createCombinedToolkitDataSource({
         toolSource: new InMemoryToolDataSource([githubTool1]),

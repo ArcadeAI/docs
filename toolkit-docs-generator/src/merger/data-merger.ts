@@ -52,6 +52,12 @@ export interface DataMergerConfig {
    * scanners still run and emit warnings, but no content is rewritten.
    */
   secretEditGenerator?: ISecretEditGenerator;
+  /**
+   * When true, the secret-coherence step is disabled entirely — neither
+   * the scan nor the LLM edit runs, and no warnings are emitted. Wired
+   * from the CLI's `--skip-secret-coherence` flag.
+   */
+  skipSecretCoherence?: boolean;
   previousToolkits?: ReadonlyMap<string, MergedToolkit>;
   /** Maximum concurrent LLM calls for tool examples (default: 5) */
   llmConcurrency?: number;
@@ -913,6 +919,7 @@ export class DataMerger {
   private readonly toolExampleGenerator: ToolExampleGenerator | undefined;
   private readonly toolkitSummaryGenerator: ToolkitSummaryGenerator | undefined;
   private readonly secretEditGenerator: ISecretEditGenerator | undefined;
+  private readonly skipSecretCoherence: boolean;
   private readonly previousToolkits:
     | ReadonlyMap<string, MergedToolkit>
     | undefined;
@@ -940,6 +947,7 @@ export class DataMerger {
     this.toolExampleGenerator = config.toolExampleGenerator;
     this.toolkitSummaryGenerator = config.toolkitSummaryGenerator;
     this.secretEditGenerator = config.secretEditGenerator;
+    this.skipSecretCoherence = config.skipSecretCoherence ?? false;
     this.previousToolkits = config.previousToolkits;
     this.llmConcurrency = config.llmConcurrency ?? 10;
     this.toolkitConcurrency = config.toolkitConcurrency ?? 5;
@@ -1077,6 +1085,13 @@ export class DataMerger {
     result: MergeResult,
     previousToolkit?: MergedToolkit
   ): Promise<void> {
+    if (this.skipSecretCoherence) {
+      // --skip-secret-coherence disables the entire step: no scan, no
+      // warnings, no edits. Callers who want warnings without edits
+      // should leave the flag off and simply not configure a
+      // secretEditGenerator.
+      return;
+    }
     const issues = detectSecretCoherenceIssues(result.toolkit, previousToolkit);
     if (!hasCoherenceIssues(issues)) {
       return;

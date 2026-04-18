@@ -80,6 +80,37 @@ describe("LlmSecretEditGenerator.cleanupStaleReferences", () => {
     expect(out).toBe(response);
   });
 
+  it("does not strip a non-markdown language fence (e.g. ```python)", async () => {
+    // A documentation chunk that IS a code block must survive the fence
+    // strip. Only plain ``` or ```markdown/md/text qualifies as a
+    // wrapper; a ```python block is the content itself.
+    const response = "```python\nimport arcade\narcade.run()\n```";
+    const client = fakeClient(response);
+    const editor = new LlmSecretEditGenerator({ client, model: "test" });
+    const out = await editor.cleanupStaleReferences({
+      kind: "documentation_chunk",
+      content: "mentions OLD",
+      removedSecrets: ["OLD"],
+      currentSecrets: ["KEEP"],
+      toolkitLabel: "GitHub",
+    });
+    expect(out).toBe(response);
+  });
+
+  it("does not strip a bash fence either", async () => {
+    const response = "```bash\narcade deploy --env prod\n```";
+    const client = fakeClient(response);
+    const editor = new LlmSecretEditGenerator({ client, model: "test" });
+    const out = await editor.cleanupStaleReferences({
+      kind: "documentation_chunk",
+      content: "mentions OLD",
+      removedSecrets: ["OLD"],
+      currentSecrets: ["KEEP"],
+      toolkitLabel: "GitHub",
+    });
+    expect(out).toBe(response);
+  });
+
   it("passes the removed and current secrets into the prompt", async () => {
     const client = fakeClient("ok");
     const editor = new LlmSecretEditGenerator({ client, model: "test" });

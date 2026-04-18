@@ -63,11 +63,16 @@ const DEFAULT_SYSTEM_PROMPT =
   "reorder existing sections. Preserve markdown syntax, backticks, tables, " +
   "and code exactly.";
 
-// Anchored to the start/end of the full string and uses a greedy capture so
-// that inner fenced code blocks inside an edited documentation chunk are
-// preserved. A non-greedy capture would stop at the first inner ``` and
-// silently truncate the rest of the content.
-const FENCE_PATTERN = /^\s*```(?:markdown|md|text)?\s*([\s\S]*)```\s*$/;
+// Anchored to the start/end of the full string, with a required newline
+// between the opening fence (optionally followed by `markdown`/`md`/`text`
+// plus horizontal whitespace) and the captured content. A bare
+// ```python / ```bash / ```json at the start means the LLM returned a
+// code block that *is* the content — not a wrapper — so the pattern must
+// not match and stripOptionalFence will return the text unchanged.
+// Greedy capture extends to the last closing fence so inner fenced
+// blocks survive.
+const FENCE_PATTERN =
+  /^\s*```(?:markdown|md|text)?[ \t]*\r?\n([\s\S]*)\r?\n```\s*$/;
 
 const stripOptionalFence = (text: string): string => {
   const match = text.match(FENCE_PATTERN);
