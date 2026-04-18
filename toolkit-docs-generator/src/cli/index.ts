@@ -1676,6 +1676,22 @@ program
             spinner.succeed(
               `Processed ${summary.completed} toolkit(s) with ${summary.totalTools} tools in ${summary.elapsed}`
             );
+
+            // Surface per-toolkit warnings to stdout so CI logs show what
+            // the merger saw. Without this, stale-secret / coverage /
+            // summary-generation warnings only land in the run log file
+            // on disk — which isn't visible in GitHub Actions output.
+            for (const mergeResult of allResults) {
+              if (mergeResult.warnings.length === 0) continue;
+              console.log(
+                chalk.yellow(
+                  `⚠ ${mergeResult.toolkit.id}: ${mergeResult.warnings.length} warning(s)`
+                )
+              );
+              for (const warning of mergeResult.warnings) {
+                console.log(chalk.dim(`  - ${warning}`));
+              }
+            }
           }
         } else {
           const { providersToProcess } = filterProvidersBySkipIds(
@@ -2400,6 +2416,22 @@ program
           spinner.succeed(
             `Processed ${summary.completed} toolkit(s) with ${summary.totalTools} tools in ${summary.elapsed}`
           );
+
+          // Surface per-toolkit warnings to stdout (stale-secret scan,
+          // coverage gaps, summary-gen failures) so CI logs show what
+          // the merger saw — otherwise they only land in the run log
+          // file on disk.
+          for (const mergeResult of results) {
+            if (mergeResult.warnings.length === 0) continue;
+            console.log(
+              chalk.yellow(
+                `⚠ ${mergeResult.toolkit.id}: ${mergeResult.warnings.length} warning(s)`
+              )
+            );
+            for (const warning of mergeResult.warnings) {
+              console.log(chalk.dim(`  - ${warning}`));
+            }
+          }
 
           // Generate output (batch mode if not incremental)
           if (!useIncremental && results.length > 0) {
