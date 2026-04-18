@@ -44,3 +44,18 @@ test("porter workflow wires the secret-coherence editor", () => {
   expect(workflowContents).toContain("ANTHROPIC_API_KEY");
   expect(workflowContents).toContain("claude-sonnet-4-6");
 });
+
+test("porter workflow opts JS actions into Node 24 to unblock the 2026-06-02 deprecation", () => {
+  expect(workflowContents).toContain(
+    'FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"'
+  );
+});
+
+test("workflow_dispatch accepts a providers input for focused manual runs", () => {
+  expect(workflowContents).toContain("providers:");
+  expect(workflowContents).toContain("inputs.providers");
+  // A non-empty providers input must bypass --skip-unchanged so the
+  // secret-coherence scan actually re-evaluates the chosen toolkits.
+  expect(workflowContents).toContain("PROVIDERS_INPUT=");
+  expect(workflowContents).toContain("--all --skip-unchanged");
+});
