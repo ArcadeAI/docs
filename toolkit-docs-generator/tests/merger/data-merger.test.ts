@@ -1295,10 +1295,10 @@ describe("DataMerger", () => {
       expect(result.toolkit.summaryStaleReason).toBeUndefined();
     });
 
-    it("does not flag stale when the signature matches and the previous summary is reused", async () => {
-      // Signature-match reuse is not stale — the summary still accurately
-      // describes the toolkit. Importantly, a previously-stale flag must
-      // be cleared by the reuse path.
+    it("does not flag stale when the signature matches a fresh previous summary", async () => {
+      // Baseline: if previous.summaryStale is falsy, signature match is a
+      // valid proof of freshness and the reuse path should keep the
+      // summary and stay clean.
       const toolkitDataSource = createCombinedToolkitDataSource({
         toolSource: new InMemoryToolDataSource([githubTool1]),
         metadataSource: new InMemoryMetadataSource([githubMetadata]),
@@ -1311,14 +1311,13 @@ describe("DataMerger", () => {
         createStubGenerator()
       );
       previousResult.toolkit.summary = "Cached summary";
-      previousResult.toolkit.summaryStale = true;
-      previousResult.toolkit.summaryStaleReason = "llm_generation_failed";
 
+      const countingSummary = createCountingSummaryGenerator();
       const merger = new DataMerger({
         toolkitDataSource,
         customSectionsSource: new EmptyCustomSectionsSource(),
         toolExampleGenerator: createStubGenerator(),
-        toolkitSummaryGenerator: createStubSummaryGenerator("Unused"),
+        toolkitSummaryGenerator: countingSummary.generator,
         previousToolkits: new Map([["github", previousResult.toolkit]]),
       });
 
@@ -1327,6 +1326,78 @@ describe("DataMerger", () => {
       expect(result.toolkit.summary).toBe("Cached summary");
       expect(result.toolkit.summaryStale).toBeUndefined();
       expect(result.toolkit.summaryStaleReason).toBeUndefined();
+      expect(countingSummary.getCalls()).toBe(0);
+    });
+
+    it("regenerates when signature matches but the previous summary was already stale", async () => {
+      // If the previous summary was already flagged stale, a matching
+      // signature does NOT prove freshness — the stale summary was
+      // carried forward from an earlier toolset. The reuse fast path
+      // must skip, and the LLM must actually regenerate.
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
+      });
+      const previousResult = await mergeToolkit(
+        "Github",
+        [githubTool1],
+        githubMetadata,
+        null,
+        createStubGenerator()
+      );
+      previousResult.toolkit.summary = "Stale carried-forward summary";
+      previousResult.toolkit.summaryStale = true;
+      previousResult.toolkit.summaryStaleReason = "llm_generation_failed";
+
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        toolkitSummaryGenerator: createStubSummaryGenerator("Fresh"),
+        previousToolkits: new Map([["github", previousResult.toolkit]]),
+      });
+
+      const result = await merger.mergeToolkit("Github");
+
+      expect(result.toolkit.summary).toBe("Fresh (Github)");
+      expect(result.toolkit.summaryStale).toBeUndefined();
+      expect(result.toolkit.summaryStaleReason).toBeUndefined();
+    });
+
+    it("keeps the stale flag when previous was stale, signature matches, and no generator is available", async () => {
+      // Same as above, but the regen attempt is not possible. The carried-
+      // forward summary remains, and the stale flag must persist so CI
+      // keeps flagging the toolkit until a working LLM run produces a
+      // fresh one.
+      const toolkitDataSource = createCombinedToolkitDataSource({
+        toolSource: new InMemoryToolDataSource([githubTool1]),
+        metadataSource: new InMemoryMetadataSource([githubMetadata]),
+      });
+      const previousResult = await mergeToolkit(
+        "Github",
+        [githubTool1],
+        githubMetadata,
+        null,
+        createStubGenerator()
+      );
+      previousResult.toolkit.summary = "Stale carried-forward summary";
+      previousResult.toolkit.summaryStale = true;
+      previousResult.toolkit.summaryStaleReason = "llm_generation_failed";
+
+      const merger = new DataMerger({
+        toolkitDataSource,
+        customSectionsSource: new EmptyCustomSectionsSource(),
+        toolExampleGenerator: createStubGenerator(),
+        previousToolkits: new Map([["github", previousResult.toolkit]]),
+      });
+
+      const result = await merger.mergeToolkit("Github");
+
+      expect(result.toolkit.summary).toBe("Stale carried-forward summary");
+      expect(result.toolkit.summaryStale).toBe(true);
+      expect(result.toolkit.summaryStaleReason).toBe(
+        "llm_generator_unavailable"
+      );
     });
 
     it("reuses previous examples when the tool is unchanged", async () => {

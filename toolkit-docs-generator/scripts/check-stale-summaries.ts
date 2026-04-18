@@ -26,16 +26,32 @@ type ToolkitShape = {
   summaryStaleReason?: unknown;
 };
 
-const listToolkitFiles = (): string[] =>
-  readdirSync(TOOLKITS_DIR).filter(
-    (name) => name.endsWith(".json") && name !== "index.json"
-  );
+const listToolkitFiles = (): string[] => {
+  try {
+    return readdirSync(TOOLKITS_DIR).filter(
+      (name) => name.endsWith(".json") && name !== "index.json"
+    );
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error(
+      `✗ Cannot read toolkit directory ${TOOLKITS_DIR}: ${message}`
+    );
+    process.exit(1);
+  }
+};
 
 const main = (): number => {
   const stale: Array<{ file: string; id: string; reason: string }> = [];
   for (const file of listToolkitFiles()) {
-    const raw = readFileSync(join(TOOLKITS_DIR, file), "utf8");
-    const toolkit = JSON.parse(raw) as ToolkitShape;
+    let toolkit: ToolkitShape;
+    try {
+      const raw = readFileSync(join(TOOLKITS_DIR, file), "utf8");
+      toolkit = JSON.parse(raw) as ToolkitShape;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error(`✗ Cannot parse ${file}: ${message}`);
+      return 1;
+    }
     if (toolkit.summaryStale === true) {
       stale.push({
         file,

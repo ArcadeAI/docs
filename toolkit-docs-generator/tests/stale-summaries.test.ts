@@ -1,5 +1,6 @@
 import { readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 
 /**
@@ -18,12 +19,12 @@ import { describe, expect, it } from "vitest";
  * either rerun generation with a working LLM or manually refresh the
  * affected summary.
  */
-const TOOLKITS_DIR = join(
-  process.cwd(),
-  "toolkit-docs-generator",
-  "data",
-  "toolkits"
-);
+// Resolve from the test file's own location so the test works whether
+// vitest is invoked from the repo root or from inside
+// toolkit-docs-generator/. Falls back to process.cwd() only if
+// import.meta.url is unavailable (it is in the vitest esm runtime).
+const here = dirname(fileURLToPath(import.meta.url));
+const TOOLKITS_DIR = join(here, "..", "data", "toolkits");
 
 type ToolkitSummaryShape = {
   id?: unknown;

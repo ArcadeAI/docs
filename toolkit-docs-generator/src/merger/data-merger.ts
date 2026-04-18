@@ -979,14 +979,27 @@ export class DataMerger {
       return;
     }
 
+    // Defensive guard: if something upstream already set a summary on
+    // `result.toolkit`, respect it. buildMergedToolkit does not set one
+    // today, but we don't want the reuse / fallback paths below to
+    // silently replace a pre-populated value.
+    if (result.toolkit.summary) {
+      clearStaleSummaryFlags(result.toolkit);
+      return;
+    }
+
     if (previousToolkit?.summary) {
       const currentSignature = buildToolkitSummarySignature(result.toolkit);
       const previousSignature = buildToolkitSummarySignature(previousToolkit);
-      if (currentSignature === previousSignature) {
-        // Signature matches — the previous summary still accurately describes
-        // the toolkit, so reuse it verbatim and treat it as fresh regardless
-        // of the previous staleness flag (the signature itself is proof of
-        // freshness here).
+      // Signature-match reuse is only safe when the PREVIOUS summary itself
+      // was fresh. If the previous run already flagged the summary stale,
+      // a matching signature does not prove freshness — the stale summary
+      // was carried forward from an even earlier toolset and will stay
+      // wrong until an LLM actually regenerates it.
+      if (
+        currentSignature === previousSignature &&
+        !previousToolkit.summaryStale
+      ) {
         result.toolkit.summary = previousToolkit.summary;
         clearStaleSummaryFlags(result.toolkit);
         return;
@@ -1005,11 +1018,6 @@ export class DataMerger {
           result.warnings
         );
       }
-      return;
-    }
-
-    if (result.toolkit.summary) {
-      clearStaleSummaryFlags(result.toolkit);
       return;
     }
 

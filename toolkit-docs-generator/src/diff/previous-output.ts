@@ -306,7 +306,7 @@ const buildFallbackToolkit = (
       description,
       ...(summary ? { summary } : {}),
       ...(summaryStale !== undefined ? { summaryStale } : {}),
-      ...(summaryStaleReason ? { summaryStaleReason } : {}),
+      ...(summaryStaleReason !== undefined ? { summaryStaleReason } : {}),
       metadata: metadataResult.success
         ? metadataResult.data
         : DEFAULT_PREVIOUS_TOOLKIT_METADATA,
