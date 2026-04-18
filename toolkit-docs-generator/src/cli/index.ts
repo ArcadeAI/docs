@@ -375,7 +375,14 @@ interface SecretEditorCliOptions {
   skipSecretCoherence?: boolean;
 }
 
-const DEFAULT_EDITOR_MAX_TOKENS = 4096;
+// Headroom is calibrated against the largest single artifact the editor
+// might receive: a long documentation chunk that must be reproduced
+// verbatim minus a removed secret (worst-case output size ≈ input size).
+// Largest chunk in current data is ~6K chars (~1.5K tokens); a summary
+// with no word cap for a 40+ tool toolkit with several secrets can land
+// in the 2–3K output-token range. 8K keeps a safe margin without any
+// meaningful cost or latency penalty on Sonnet 4.6.
+const DEFAULT_EDITOR_MAX_TOKENS = 8192;
 
 const resolveEditorApiKey = (
   provider: LlmProvider,
@@ -975,7 +982,7 @@ program
   )
   .option(
     "--llm-editor-max-tokens <number>",
-    "Secret-coherence editor max tokens (default: 4096)",
+    "Secret-coherence editor max tokens (default: 8192)",
     (value) => Number.parseInt(value, 10)
   )
   .option(
@@ -1995,7 +2002,7 @@ program
   )
   .option(
     "--llm-editor-max-tokens <number>",
-    "Secret-coherence editor max tokens (default: 4096)",
+    "Secret-coherence editor max tokens (default: 8192)",
     (value) => Number.parseInt(value, 10)
   )
   .option(
