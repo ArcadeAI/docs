@@ -399,6 +399,20 @@ export const MergedToolkitSchema = z.object({
   description: z.string().nullable(),
   /** LLM-generated summary (optional) */
   summary: z.string().optional(),
+  /**
+   * True when the current `summary` is known to be out of date with the
+   * toolkit's current tools (the signature changed but regeneration was
+   * skipped or failed, so the previous summary was carried forward as a
+   * fallback). Cleared whenever a fresh summary is successfully generated
+   * or when the summary is verified against an unchanged signature.
+   */
+  summaryStale: z.boolean().optional(),
+  /**
+   * Machine-readable reason the summary is stale (e.g.
+   * "llm_generator_unavailable", "llm_generation_failed"). Always set
+   * together with `summaryStale: true`. Cleared together with it.
+   */
+  summaryStaleReason: z.string().optional(),
   /** Metadata from Design System */
   metadata: MergedToolkitMetadataSchema,
   /** Authentication requirements */
